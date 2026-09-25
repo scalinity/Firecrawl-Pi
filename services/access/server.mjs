@@ -90,18 +90,21 @@ function targetPermitted(body) {
 }
 
 // Every outcome logs exactly once. A failure before the upstream's headers is answered
-// with 502; after them the client response can only be cut, so it is destroyed rather
-// than left open (pipe() does not end the destination when the source is torn down).
-function forward(req, res, body, log) {
+// with 502 (504 when the upstream went silent); after them the client response can only
+// be cut, so it is destroyed rather than left open (pipe() does not end the destination
+// when the source is torn down). Only the matched path is forwarded, never a query string.
+function forward(req, res, body, log, path) {
   let settled = false;
+  let timedOut = false;
   const finish = (status) => { if (!settled) { settled = true; log(status); } };
   const fail = () => {
     if (settled) return;
-    if (res.headersSent) res.destroy(); else send(res, 502, { error: "upstream_unavailable" });
-    finish(502);
+    const status = timedOut ? 504 : 502;
+    if (res.headersSent) res.destroy(); else send(res, status, { error: timedOut ? "upstream_timeout" : "upstream_unavailable" });
+    finish(status);
   };
   const up = httpRequest({
-    host: cfg.upstream.hostname, port: cfg.upstream.port || 80, method: req.method, path: req.url,
+    host: cfg.upstream.hostname, port: cfg.upstream.port || 80, method: req.method, path,
     headers: { "content-type": "application/json", "content-length": body.length, accept: "application/json" },
     timeout: cfg.upstreamTimeoutMs,
   }, (ur) => {
@@ -113,7 +116,7 @@ function forward(req, res, body, log) {
     ur.on("error", fail);
     ur.on("close", () => { if (!ur.complete) fail(); });
   });
-  up.on("timeout", () => up.destroy(new Error("upstream timeout")));
+  up.on("timeout", () => { timedOut = true; up.destroy(new Error("upstream timeout")); });
   up.on("error", fail);
   // A client that goes away cancels the upstream request instead of leaving it running.
   res.on("close", () => { if (!res.writableFinished && !settled) { up.destroy(); finish(499); } });
@@ -133,7 +136,7 @@ const server = createServer(async (req, res) => {
   let body;
   try { body = await readBody(req); } catch (e) { send(res, e.status ?? 400, { error: e.status === 413 ? "body_too_large" : "bad_request" }, { connection: "close" }); return log(e.status ?? 400); }
   if (!targetPermitted(body)) { send(res, 403, { error: "target_not_permitted", detail: "M1 permits only the configured fixture origins" }); return log(403); }
-  forward(req, res, body, log);
+  forward(req, res, body, log, path);
 });
 server.headersTimeout = 10000;
 server.requestTimeout = cfg.upstreamTimeoutMs + 10000;

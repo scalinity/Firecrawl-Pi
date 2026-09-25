@@ -45,6 +45,7 @@ before(async () => {
       seen.push({ method: req.method, url: req.url, headers: req.headers, body });
       let mode = null;
       try { mode = JSON.parse(body).fakeUpstream ?? null; } catch { /* not JSON */ }
+      if (mode === "never-respond") return; // a silent core: the gateway must time out
       res.writeHead(200, { "content-type": "application/json", "www-authenticate": 'Bearer resource_metadata="https://www.firecrawl.dev/.well-known/oauth-protected-resource"' });
       // The core dying mid-response: headers and part of a body, then the socket drops.
       if (mode === "abort-after-headers") { res.write('{"partial":'); setTimeout(() => res.socket.destroy(), 50); return; }
@@ -171,6 +172,66 @@ test("an upstream that dies after its headers ends the client response instead o
     req.end(data);
   });
   assert.equal(outcome, "cut");
+});
+
+// Sends raw bytes (the request carries connection: close) and resolves with everything the
+// gateway returned before it closed. It writes without half-closing: a client that sends
+// FIN has gone away, and the gateway then rightly cancels the request (logged 499).
+function raw(port, text) {
+  return new Promise((resolve) => {
+    const s = connect(port, "127.0.0.1");
+    const got = [];
+    s.on("data", (d) => got.push(d));
+    s.on("error", () => {});
+    s.on("close", () => resolve(Buffer.concat(got).toString()));
+    s.write(text);
+  });
+}
+const fixtureBody = (extra = {}) => JSON.stringify({ url: `${FIXTURE}/static.html`, ...extra });
+
+test("an unreachable upstream gets the gateway's own 502", { timeout: 15000 }, async () => {
+  const { proc, port } = await startGateway({ PI_CORE_URL: "http://127.0.0.1:1" });
+  try {
+    const body = fixtureBody();
+    const reply = await raw(port, `POST /v2/scrape HTTP/1.1\r\nhost: gw\r\nconnection: close\r\nauthorization: Bearer ${TOKEN}\r\ncontent-type: application/json\r\ncontent-length: ${body.length}\r\n\r\n${body}`);
+    assert.match(reply, /^HTTP\/1\.1 502 /);
+    assert.match(reply, /"error":"upstream_unavailable"/);
+  } finally { proc.kill(); }
+});
+
+test("a silent upstream gets 504 once the upstream timeout passes", { timeout: 15000 }, async () => {
+  const { proc, port } = await startGateway({ PI_CORE_URL: `http://127.0.0.1:${upstream.address().port}`, PI_CORE_TIMEOUT_MS: "300" });
+  try {
+    const body = fixtureBody({ fakeUpstream: "never-respond" });
+    const reply = await raw(port, `POST /v2/scrape HTTP/1.1\r\nhost: gw\r\nconnection: close\r\nauthorization: Bearer ${TOKEN}\r\ncontent-type: application/json\r\ncontent-length: ${body.length}\r\n\r\n${body}`);
+    assert.match(reply, /^HTTP\/1\.1 504 /);
+    assert.match(reply, /"error":"upstream_timeout"/);
+  } finally { proc.kill(); }
+});
+
+test("a query string is never forwarded upstream", async () => {
+  const n = seen.length;
+  const r = await call("POST", "/v2/scrape?url=https://api.firecrawl.dev/&x=1", { token: TOKEN, body: { url: `${FIXTURE}/static.html` } });
+  assert.equal(r.status, 200);
+  assert.equal(seen.length, n + 1);
+  assert.equal(seen.at(-1).url, "/v2/scrape");
+});
+
+test("an absolute-form request target is not routed", async () => {
+  const n = seen.length;
+  const body = fixtureBody();
+  const reply = await raw(gwPort, `POST http://gw/v2/scrape HTTP/1.1\r\nhost: gw\r\nconnection: close\r\nauthorization: Bearer ${TOKEN}\r\ncontent-type: application/json\r\ncontent-length: ${body.length}\r\n\r\n${body}`);
+  assert.match(reply, /^HTTP\/1\.1 404 /);
+  assert.equal(seen.length, n);
+});
+
+test("Content-Length together with Transfer-Encoding is rejected and never forwarded", async () => {
+  const n = seen.length;
+  const body = fixtureBody();
+  const chunked = `${body.length.toString(16)}\r\n${body}\r\n0\r\n\r\n`;
+  const reply = await raw(gwPort, `POST /v2/scrape HTTP/1.1\r\nhost: gw\r\nconnection: close\r\nauthorization: Bearer ${TOKEN}\r\ncontent-type: application/json\r\ncontent-length: ${body.length}\r\ntransfer-encoding: chunked\r\n\r\n${chunked}`);
+  assert.match(reply, /^HTTP\/1\.1 400 /);
+  assert.equal(seen.length, n);
 });
 
 test("unknown PI_* configuration keys stop startup", async () => {
