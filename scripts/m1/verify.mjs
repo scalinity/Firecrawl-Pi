@@ -887,11 +887,26 @@ const checks = {
       const ok = only(a, b).length === 0 && only(b, a).length === 0 && NET.every((sec) => net[sec] > 0) && !!boot(`${EV}snapshot-before.txt`) && boot(`${EV}snapshot-before.txt`) === boot("evidence/M1/snapshot-after.txt");
       return { ok, actual: `lines only in M1 AFTER=${only(a, b).length}${only(a, b).length ? " [" + only(a, b).slice(0, 4).join("; ") + "]" : ""}, only in close-out BEFORE=${only(b, a).length}${only(b, a).length ? " [" + only(b, a).slice(0, 4).join("; ") + "]" : ""}; new sections recorded ${JSON.stringify(net)}; boot_id_equal=${boot(`${EV}snapshot-before.txt`) === boot("evidence/M1/snapshot-after.txt")}` };
     } },
+  V26: { name: "fresh-install-paths-create-the-narrowed-credentials", inputs: [`${RAW}fresh-init-proof.txt`, "deploy/nuq-postgres/initdb/020-fcpi-core-role.sh", "deploy/nuq-postgres/fcpi-core-role.psql", "deploy/rabbitmq/30-fcpi.conf"],
+    expected: "a throwaway container of the pinned NuQ image initialising empty data runs 010-nuq.sql and 020-fcpi-core-role.sh, ignores the .psql beside them and logs no error; fcpi_core then exists with a password and no special rights, owns nothing, and holds exactly SELECT, INSERT, UPDATE and DELETE on every NuQ table, while the superuser has no password and keeps the cron jobs; a throwaway broker of the pinned image, first booting with 30-fcpi.conf, creates user fcpi with no tags; nothing is left behind (R11)",
+    run() {
+      const s = sections(`${RAW}fresh-init-proof.txt`);
+      const p = kv((s.postgres_initdb ?? []).join(" ")), r = s.rabbitmq_first_boot ?? [], c = kv((s.cleanup ?? []).join(" "));
+      const scripts = (lineOf(s.postgres_initdb, "initdb_scripts=") ?? "").slice(15);
+      const initOk = /running \/docker-entrypoint-initdb\.d\/010-nuq\.sql;/.test(scripts) && /running \/docker-entrypoint-initdb\.d\/020-fcpi-core-role\.sh;/.test(scripts) &&
+        /ignoring \/docker-entrypoint-initdb\.d\/fcpi-core-role\.psql;/.test(scripts) && p.init_errors === "0";
+      const pgOk = p.role === "fcpi_core" && ["super", "createrole", "createdb", "replication", "bypassrls"].every((k) => p[k] === "false") &&
+        p.superuser_has_password === "f" && p.fcpi_core_has_password === "t" && p.nuq_owner === "postgres" && p.fcpi_core_owned_objects === "0" &&
+        p.fcpi_core_privileges === "DELETE,INSERT,SELECT,UPDATE" && Number(p.nuq_tables) > 0 && p.fcpi_core_tables_with_dml === p.nuq_tables && /^postgres:\d+$/.test((lineOf(s.postgres_initdb, "cron_job_owners=") ?? "").slice(16));
+      const rmqOk = (lineOf(r, "users=") ?? "").slice(6).trim() === "fcpi[]" && (lineOf(r, "default_user_tags_env=") ?? "").includes("{ok,[]}");
+      const ok = initOk && pgOk && rmqOk && c.leftover_transient_containers === "0" && c.leftover_secret_dir === "no";
+      return { ok, actual: `initdb: ${scripts} errors=${p.init_errors}; role ${(lineOf(s.postgres_initdb, "role=") ?? "").slice(5)}, password set=${p.fcpi_core_has_password}; superuser password set=${p.superuser_has_password}; nuq owner=${p.nuq_owner}; fcpi_core owns ${p.fcpi_core_owned_objects}, holds ${p.fcpi_core_privileges} on ${p.fcpi_core_tables_with_dml}/${p.nuq_tables} tables; cron ${(lineOf(s.postgres_initdb, "cron_job_owners=") ?? "").slice(16)}; broker first boot: ${(lineOf(r, "users=") ?? "").trim()} ${(lineOf(r, "default_user_tags_env=") ?? "").trim()}; leftovers: containers=${c.leftover_transient_containers} secrets=${c.leftover_secret_dir}` };
+    } },
 };
 
 // ---------------------------------------------------------------------------
 // The close-out checks read evidence only the close-out collects; M1's own record lists M1's checks.
-const CLOSEOUT_ONLY = new Set(["V19", "V20", "V21", "V22", "V23", "V24", "V25"]);
+const CLOSEOUT_ONLY = new Set(["V19", "V20", "V21", "V22", "V23", "V24", "V25", "V26"]);
 const listed = Object.keys(checks).filter((id) => CLOSEOUT || !CLOSEOUT_ONLY.has(id));
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : listed;
 const prior = has(OUT) ? json(OUT) : { results: [] };
