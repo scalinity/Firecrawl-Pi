@@ -16,7 +16,10 @@ export function git(...args) {
   return execFileSync("git", ["-C", ROOT, ...args], { encoding: "utf8" }).trim();
 }
 export function repoState() {
-  return { repository_sha: git("rev-parse", "HEAD"), worktree_dirty: git("status", "--porcelain").length > 0 };
+  // code_dirty ignores evidence/, which is written while a verification window is open (the
+  // exclusion scripts/m1/deploy.sh makes), so it shows whether the code that ran is HEAD's.
+  return { repository_sha: git("rev-parse", "HEAD"), worktree_dirty: git("status", "--porcelain").length > 0,
+    code_dirty: git("status", "--porcelain", "--", ".", ":(exclude)evidence").length > 0 };
 }
 
 // Split a probe transcript into { sectionName: [lines] } on "### name" headers.
