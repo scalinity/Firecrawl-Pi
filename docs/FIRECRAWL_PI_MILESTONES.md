@@ -3,7 +3,7 @@
 **Canonical document:** `FIRECRAWL_PI_MILESTONES.md`  
 **Architecture authority:** `FIRECRAWL_PI_SPEC.md`, version 1.0, 2026-09-22  
 **Target:** Raspberry Pi 5, ARM64, 8 GB RAM  
-**Current state:** M0 read-only audit performed; M0 is `BLOCKED` (see the status and blocker register). Every later milestone is `NOT_STARTED`. No deployment, purchase or live provider validation has been performed.
+**Current state:** recorded only in the status and blocker register at the end of this document.
 
 ## Execution contract
 
