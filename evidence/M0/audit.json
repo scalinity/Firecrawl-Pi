@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m0.audit/v1",
-  "generated_utc": "2026-09-25T04:06:40Z",
-  "repository_sha": "0fa32e93ded9acf45a97637a47fd13120b6fd5a6",
+  "generated_utc": "2026-09-25T04:07:08Z",
+  "repository_sha": "b93d84f69ce82d16c05c1181ac3d8c345e3d598a",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores this file is a later one on main.",
   "upstream": {
@@ -1279,6 +1279,6 @@
   },
   "sha256": {
     "source_review": "71d22ef1f2b767cca7b76941cdd6c78432ca91abdd688e5d4af41485d3131a56",
-    "network_exposure": "6d75cb853403c9019e6c11e6e60b176d09798282422bef26db8b8384637ff5cf"
+    "network_exposure": "1b02461e0ddaec970cbdb5714e6cd6452837ece6e3290f0472a144cfb13f91a1"
   }
 }

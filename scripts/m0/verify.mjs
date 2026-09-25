@@ -284,5 +284,5 @@ for (const id of wanted) {
 }
 
 const ordered = Object.keys(checks).map((id) => results[`M0-${id}`] ?? { test_id: `M0-${id}`, name: checks[id].name, state: "NOT_RUN", actual: "never run", evidence_path: OUT });
-writeFileSync(resolve(ROOT, OUT), JSON.stringify({ schema: "fcpi.m0.verification/v1", runner: "scripts/m0/verify.mjs", firecrawl_lock_commit: lockCommit, results: ordered }, null, 2) + "\n");
+writeFileSync(resolve(ROOT, OUT), JSON.stringify({ schema: "fcpi.m0.verification/v1", runner: "scripts/m0/verify.mjs", repository_sha_note: "Each result records the commit checked out when it ran, with worktree_dirty; the commit that stores this file is a later one on main.", firecrawl_lock_commit: lockCommit, results: ordered }, null, 2) + "\n");
 process.exitCode = ordered.every((r) => r.state === "PASS") ? 0 : 1;

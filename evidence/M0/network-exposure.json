@@ -1,25 +1,68 @@
 {
   "schema": "fcpi.m0.network-exposure/v1",
-  "assessed_utc": "2026-09-25T03:25:00Z",
+  "assessed_utc": "2026-09-25T04:10:00Z",
   "question": "Is 158.205.34.18 reachable from the Internet, making every 0.0.0.0-bound port on the Pi public?",
   "finding": "NOT_DIRECTLY_INTERNET_REACHABLE",
-  "summary": "158.205.34.0/24 is a LAN numbered from a public block that belongs to someone else. It sits behind NAT, and the Pi's Internet egress address differs from its interface address, so 158.205.34.18 is not the Pi's Internet-facing address. Listeners bound to 0.0.0.0 are reachable from the whole LAN, not directly from the Internet. Port forwards on the NAT router can only be seen from outside, which M0 does not probe; the journal shows no connection from outside the /24.",
+  "summary": "158.205.34.0/24 is a LAN numbered from a public block that belongs to someone else. It sits behind NAT, and the Pi's Internet egress address differs from its interface address, so 158.205.34.18 is not the Pi's Internet-facing address. Listeners bound to 0.0.0.0 are reachable from the whole LAN, not directly from the Internet. Port forwards on the NAT router can only be seen from outside, which M0 does not probe; the retained journal window (about two hours) shows no connection from outside the subnet.",
   "evidence": [
-    { "fact": "wlan0 is 158.205.34.18/24 via DHCP; default route via 158.205.34.1; no global IPv6 address (link-local only)", "source": "evidence/M0/raw/pi-audit.txt#network" },
-    { "fact": "The Mac is 158.205.34.183/24 on en0 with gateway 158.205.34.1: same LAN", "source": "Mac route/ifconfig, this session" },
-    { "fact": "RDAP: 158.205.34.18 lies in 158.198.0.0-158.215.255.255, JPNIC-NET-JP-ERX, ALLOCATED PORTABLE, country JP. The host is on America/New_York time with a US Wi-Fi regulatory domain.", "source": "https://rdap.org/ip/158.205.34.18 (retrieved 2026-09-25); evidence/M0/raw/pi-audit.txt#os; #cmdline" },
-    { "fact": "One credential-free GET from the Pi to https://api.ipify.org returned an egress address that differs from 158.205.34.18 (recorded as SHA-256 994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d; raw value withheld)", "source": "evidence/M0/raw/pi-audit-extra.txt#ip_echo" },
-    { "fact": "sshd journal: 36 connection sources on the local /24, 0 from outside it; fail2ban sshd: 0 failed, 0 banned. Journal window starts 2026-09-24T21:19:34-04:00.", "source": "evidence/M0/raw/pi-audit-extra.txt#inbound_evidence" },
-    { "fact": "No packet filter is loaded (no nf_tables or ip_tables module; nft and iptables binaries absent)", "source": "evidence/M0/raw/pi-audit.txt#firewall" }
+    {
+      "fact": "wlan0 is 158.205.34.18/24 via DHCP; default route via 158.205.34.1; no global IPv6 address (link-local only)",
+      "source": "evidence/M0/raw/pi-audit.txt#network"
+    },
+    {
+      "fact": "The workstation is on the same /24 behind the same gateway 158.205.34.1 (its address is omitted as a non-functional identifier)",
+      "source": "workstation route table, this session"
+    },
+    {
+      "fact": "RDAP: 158.205.34.18 lies in 158.198.0.0-158.215.255.255, JPNIC-NET-JP-ERX, ALLOCATED PORTABLE, country JP. The host is on America/New_York time with a US Wi-Fi regulatory domain.",
+      "source": "https://rdap.org/ip/158.205.34.18 (retrieved 2026-09-25); evidence/M0/raw/pi-audit.txt#os; #cmdline"
+    },
+    {
+      "fact": "One credential-free GET from the Pi to https://api.ipify.org returned an egress address that differs from 158.205.34.18 (recorded as SHA-256 994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d; raw value withheld)",
+      "source": "evidence/M0/raw/pi-audit-extra-ipecho.txt#ip_echo"
+    },
+    {
+      "fact": "sshd journal, within the retained window starting 2026-09-24T22:06:08-04:00 (the journal is size-limited to roughly two hours): 43 connection sources inside the interface subnet 158.205.34.18/24, 0 outside it; fail2ban sshd: 0 failed, 0 banned",
+      "source": "evidence/M0/raw/pi-audit-extra.txt#inbound_evidence"
+    },
+    {
+      "fact": "No packet filter is loaded: no nf_tables or ip_tables module. The nft binary is installed (nftables 1.1.3, service disabled, /etc/nftables.conf not loaded); iptables and ufw are not installed",
+      "source": "evidence/M0/raw/pi-audit.txt#firewall; evidence/M0/raw/pi-audit-paths.txt#packages"
+    }
   ],
   "lan_exposed_existing_listeners": [
-    { "port": "22/tcp", "service": "sshd", "note": "password auth off, pubkey only, root without-password" },
-    { "port": "53/tcp+udp", "service": "pihole-FTL", "note": "listeningMode=ALL (changed from default LOCAL), interface=wlan0" },
-    { "port": "80/tcp, 443/tcp", "service": "pihole-FTL web", "note": "also on [::]" },
-    { "port": "123/udp", "service": "pihole-FTL NTP" },
-    { "port": "1883/tcp, 9001/tcp (websockets)", "service": "mosquitto", "note": "allow_anonymous true" },
-    { "port": "8080/tcp", "service": "airdb.service (python)" },
-    { "port": "5353/udp and ephemeral udp", "service": "avahi-daemon" }
+    {
+      "port": "22/tcp",
+      "service": "sshd",
+      "note": "password auth off, pubkey only, root without-password"
+    },
+    {
+      "port": "53/tcp+udp",
+      "service": "pihole-FTL",
+      "note": "listeningMode=ALL (changed from default LOCAL), interface=wlan0"
+    },
+    {
+      "port": "80/tcp, 443/tcp",
+      "service": "pihole-FTL web",
+      "note": "also on [::]"
+    },
+    {
+      "port": "123/udp",
+      "service": "pihole-FTL NTP"
+    },
+    {
+      "port": "1883/tcp, 9001/tcp (websockets)",
+      "service": "mosquitto",
+      "note": "allow_anonymous true"
+    },
+    {
+      "port": "8080/tcp",
+      "service": "airdb.service (python)"
+    },
+    {
+      "port": "5353/udp and ephemeral udp",
+      "service": "avahi-daemon"
+    }
   ],
   "residual_uncertainty": "Router port forwards from the egress address to the Pi cannot be observed from inside and were not probed from outside. The project design does not depend on the answer, because every project host publication is loopback-only.",
   "consequences_for_project": [
