@@ -71,8 +71,11 @@ const checks = {
       const availB = Number(rootDf[4]);
       const rootInodes = s.df_inodes.map((l) => l.trim().split(/\s+/)).find((f) => f[5] === "/");
       const e2 = (k) => (s.ext4_superblock.find((l) => l.startsWith(k + ":")) || "").split(/:\s+/)[1];
-      const uuidFindmnt = s.storage_root[0].trim().split(/\s+/)[4];
-      const uuidLsblk = s.lsblk.find((l) => /mmcblk0p2/.test(l) && /ext4/.test(l)).trim().split(/\s+/).find((t) => /^[0-9a-f]{8}-/.test(t));
+      // lsblk is KEY="value" pairs; pick the row of the device findmnt says is mounted at /.
+      const rootFindmnt = s.storage_root[0].trim().split(/\s+/);
+      const lsblkRoot = Object.fromEntries([...(s.lsblk.find((l) => l.startsWith(`NAME="${rootFindmnt[1].replace("/dev/", "")}"`)) ?? "").matchAll(/(\w+)="([^"]*)"/g)].map((m) => [m[1], m[2]]));
+      const uuidLsblk = lsblkRoot.UUID;
+      const uuidFindmnt = rootFindmnt[4];
       const uuidE2 = e2("Filesystem UUID");
       const r2 = (x) => Math.round(x * 100) / 100;
       const d = audit.derived;
@@ -85,10 +88,11 @@ const checks = {
         meets_20gib: [availB >= 20 * 1024 ** 3, d.free_space.meets_threshold],
         inodes_free_df_vs_dumpe2fs: [Number(rootInodes[3]), Number(e2("Free inodes"))],
         uuid: [uuidFindmnt, uuidLsblk, uuidE2, audit.plans.storage.data_filesystem_uuid],
+        partuuid: [rootFindmnt[5], lsblkRoot.PARTUUID, audit.plans.storage.data_filesystem_partuuid],
         root_source: rootDf[0],
       };
       const eq = (a) => a.every((x) => x === a[0]);
-      const ok = cmp.memtotal_proc_vs_free && eq(cmp.existing_usage_mib) && eq(cmp.headroom_mib) && eq(cmp.fits) && eq(cmp.root_avail_bytes) && eq(cmp.meets_20gib) && eq(cmp.inodes_free_df_vs_dumpe2fs) && eq(cmp.uuid);
+      const ok = cmp.memtotal_proc_vs_free && eq(cmp.existing_usage_mib) && eq(cmp.headroom_mib) && eq(cmp.fits) && eq(cmp.root_avail_bytes) && eq(cmp.meets_20gib) && eq(cmp.inodes_free_df_vs_dumpe2fs) && eq(cmp.uuid) && eq(cmp.partuuid) && /^[0-9a-f]{8}-/.test(uuidFindmnt ?? "");
       return { ok, actual: `MemTotal=${memTotal} kB (${r2(fitMiB.total)} MiB), MemAvailable=${memAvail} kB (${r2(fitMiB.avail)} MiB), existing usage=${r2(usage)} MiB, caps+reserve=${required} MiB, headroom=${r2(headroom)} MiB, fits=${headroom >= 0}; root avail=${availB} B (${r2(availB / 1024 ** 3)} GiB) vs 20 GiB; free inodes=${rootInodes[3]}; comparisons=${JSON.stringify(cmp)}` };
     } },
 

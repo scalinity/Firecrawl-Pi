@@ -1,5 +1,5 @@
 ### probe_time
-2026-09-25T03:21:03Z
+2026-09-25T03:55:29Z
 ### proc_sys
 vm.swappiness=60
 vm.overcommit_memory=0
@@ -18,7 +18,7 @@ net.ipv4.conf.all.rp_filter=0
 fs.inotify.max_user_watches=65080
 ### boot_config
 --- /boot/firmware/cmdline.txt (as configured, before firmware additions)
-console=serial0,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-1783604012859 cfg80211.ieee80211_regdom=US--- /boot/firmware/config.txt (non-comment lines)
+console=serial0,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-<id> cfg80211.ieee80211_regdom=US--- /boot/firmware/config.txt (non-comment lines)
 dtparam=audio=on
 camera_auto_detect=1
 display_auto_detect=1
@@ -60,14 +60,15 @@ auto default
 ### wifi_link
 iw unavailable
 ### inbound_evidence
+local_cidr=158.205.34.18/24
 |  |- Currently failed:	0
 |  |- Total failed:	0
    |- Currently banned:	0
    |- Total banned:	0
-sshd_journal_sources local_subnet=36 outside_subnet=0
+sshd_journal_sources local_subnet=43 outside_subnet=0
 distinct_outside_sources=0
-journal_first_entry=2026-09-24T21:19:34-04:00
-preauth_or_invalid_user_lines=1
+journal_first_entry=2026-09-24T22:06:08-04:00
+preauth_or_invalid_user_lines=0
 ### ip_echo
-api.ipify.org => EGRESS_IP_SHA256:994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d (raw value withheld; differs from 158.205.34.18: yes)
+api.ipify.org => SKIPPED (FCPI_SKIP_IP_ECHO=1; no request sent)
 end

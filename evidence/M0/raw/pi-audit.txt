@@ -1,5 +1,5 @@
 ### probe_time
-2026-09-25T03:18:44Z
+2026-09-25T03:55:27Z
 ### proc_modules_load_order
 1 tcp_diag
 2 inet_diag
@@ -90,54 +90,54 @@ Model name:                              Cortex-A76
 Thread(s) per core:                      1
 Core(s) per cluster:                     4
 Socket(s):                               -
-CPU(s) scaling MHz:                      75%
+CPU(s) scaling MHz:                      71%
 CPU max MHz:                             2400.0000
 CPU min MHz:                             1500.0000
 Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor: ondemand
-/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: 1800000
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: 1700000
 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: 2400000
 /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq: 2400000
-loadavg=0.05 0.09 0.03 1/189 420961
-uptime_s=200757.08
+loadavg=0.07 0.08 0.03 1/187 431943
+uptime_s=202960.57
 ### meminfo
 MemTotal:        8255888 kB
-MemFree:         7557152 kB
-MemAvailable:    7925904 kB
-Buffers:           89328 kB
-Cached:           337840 kB
+MemFree:         7543424 kB
+MemAvailable:    7922912 kB
+Buffers:           93072 kB
+Cached:           343568 kB
 SwapCached:            0 kB
-Active:           363808 kB
-Inactive:         168656 kB
-Active(anon):     113744 kB
+Active:           368288 kB
+Inactive:         173920 kB
+Active(anon):     113568 kB
 Inactive(anon):        0 kB
-Active(file):     250064 kB
-Inactive(file):   168656 kB
+Active(file):     254720 kB
+Inactive(file):   173920 kB
 Unevictable:           0 kB
 Mlocked:               0 kB
 SwapTotal:       2097136 kB
 SwapFree:        2097136 kB
 Zswap:                 0 kB
 Zswapped:              0 kB
-Dirty:              1968 kB
+Dirty:               192 kB
 Writeback:             0 kB
-AnonPages:        106768 kB
-Mapped:            71888 kB
-Shmem:              8288 kB
-KReclaimable:      22704 kB
-Slab:              69056 kB
-SReclaimable:      22704 kB
-SUnreclaim:        46352 kB
-KernelStack:        3104 kB
-PageTables:         6736 kB
+AnonPages:        105664 kB
+Mapped:            71648 kB
+Shmem:              8256 kB
+KReclaimable:      24336 kB
+Slab:              71200 kB
+SReclaimable:      24336 kB
+SUnreclaim:        46864 kB
+KernelStack:        3072 kB
+PageTables:        10112 kB
 SecPageTables:       112 kB
 NFS_Unstable:          0 kB
 Bounce:                0 kB
 WritebackTmp:          0 kB
 CommitLimit:     6225072 kB
-Committed_AS:     385040 kB
+Committed_AS:     384672 kB
 VmallocTotal:   68447887360 kB
-VmallocUsed:       50416 kB
+VmallocUsed:       50432 kB
 VmallocChunk:          0 kB
 Percpu:              960 kB
 CmaTotal:          65536 kB
@@ -145,21 +145,21 @@ CmaFree:           56320 kB
 Balloon:               0 kB
 ### free
                total        used        free      shared  buff/cache   available
-Mem:      8454029312   338313216  7738114048     8486912   460668928  8115716096
+Mem:      8454029312   341377024  7724056576     8454144   472039424  8112652288
 Swap:     2147467264           0  2147467264
 ### vm_sysctl
-vm.swappiness=UNAVAILABLE
-vm.overcommit_memory=UNAVAILABLE
-vm.min_free_kbytes=UNAVAILABLE
-vm.dirty_ratio=UNAVAILABLE
-vm.dirty_background_ratio=UNAVAILABLE
+vm.swappiness=60
+vm.overcommit_memory=0
+vm.min_free_kbytes=16384
+vm.dirty_ratio=20
+vm.dirty_background_ratio=10
 kernel.unprivileged_userns_clone=UNAVAILABLE
-user.max_user_namespaces=UNAVAILABLE
+user.max_user_namespaces=32088
 kernel.apparmor_restrict_unprivileged_userns=UNAVAILABLE
-net.ipv4.ip_forward=UNAVAILABLE
-net.ipv4.ip_local_port_range=UNAVAILABLE
-net.ipv6.conf.all.disable_ipv6=UNAVAILABLE
-net.ipv6.conf.all.forwarding=UNAVAILABLE
+net.ipv4.ip_forward=0
+net.ipv4.ip_local_port_range=32768	60999
+net.ipv6.conf.all.disable_ipv6=0
+net.ipv6.conf.all.forwarding=0
 ### pressure
 cpu UNAVAILABLE
 memory UNAVAILABLE
@@ -182,7 +182,7 @@ perf_event	0	48	1
 net_prio	0	48	1
 pids	0	48	1
 ### cmdline
-reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=32  numa=fake=8 system_heap.max_order=0 iommu_dma_numa_policy=interleave smsc95xx.macaddr=MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-1783604012859 cfg80211.ieee80211_regdom=US
+reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=32  numa=fake=8 system_heap.max_order=0 iommu_dma_numa_policy=interleave smsc95xx.macaddr=MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-<id> cfg80211.ieee80211_regdom=US
 
 ### unit_memory
 system.slice current=NA peak=NA anon=NA file=NA
@@ -208,34 +208,34 @@ system.slice/wpa_supplicant.service current=NA peak=NA anon=NA file=NA
 user.slice/user-1000.slice current=NA peak=NA anon=NA file=NA
 ### processes_top_rss
     PID    PPID USER       RSS    VSZ %CPU COMMAND
+    937       1 root     30720 430480  0.0 fail2ban-server
     983       1 danny    29888 270560  0.2 python
-    937       1 root     29760 430480  0.0 fail2ban-server
     981       1 danny    25360  36400  0.0 python
-    648       1 root     21424 342864  0.0 NetworkManager
+    648       1 root     21456 342864  0.0 NetworkManager
     982       1 danny    19136  32544  0.0 python
-    936       1 _dnscry+ 18272 1903984 0.0 dnscrypt-proxy
+    936       1 _dnscry+ 18256 1903984 0.0 dnscrypt-proxy
       1       0 root     15632  25712  0.1 systemd
-    282       1 root     14464  57936  0.0 systemd-journal
+    282       1 root     14576  57936  0.0 systemd-journal
     969       1 pihole   13696 143056  0.0 pihole-FTL
- 420808       1 danny    12864  23232  1.4 systemd
+ 431745       1 danny    12720  23360  0.5 systemd
     651       1 root     12336  18848  0.0 wpa_supplicant
- 420847     977 root     11616  21840  0.9 sshd-session
+ 431828     977 root     11632  21840  3.3 sshd-session
     959       1 mosquit+ 11504  16336  0.0 mosquitto
     325       1 root     10816  35680  0.0 systemd-udevd
     599       1 root      9440  19648  0.0 systemd-logind
- 420855  420847 danny     8752  22736  0.0 sshd-session
+ 431836  431828 danny     8368  22224  0.0 sshd-session
     303       1 systemd+  8016  92448  0.0 systemd-timesyn
     977       1 root      7888  11696  0.0 sshd
-    597       1 message+  4896   8656  0.0 dbus-daemon
- 420810  420808 danny     4720  24496  0.0 (sd-pam)
+    597       1 message+  5040   8656  0.0 dbus-daemon
+ 431747  431745 danny     4720  24496  0.0 (sd-pam)
     595       1 avahi     3728   6064  0.0 avahi-daemon
- 420856  420855 danny     3648   7520  2.5 bash
- 421166  420857 danny     3536   6224  0.0 ps
+ 431837  431836 danny     3632   7520  3.8 bash
+ 432148  431838 danny     3536   6224  0.0 ps
     596       1 root      2960   7184  0.0 cron
- 420857  420856 danny     2864   7520  5.7 bash
+ 431838  431837 danny     2880   7520 13.0 bash
     954       1 root      2608   7888  0.0 agetty
     615     595 avahi     1888   5888  0.0 avahi-daemon
- 421167  420857 danny     1360   2464  0.0 head
+ 432149  431838 danny     1344   2464  0.0 head
       2       0 root         0      0  0.0 kthreadd
 ### services_all
 airdb.service loaded active running
@@ -384,12 +384,11 @@ pid=982 comm=python cgroup=0::/system.slice/airdb.service
 / /dev/mmcblk0p2 ext4 rw,noatime 15f4c6be-1102-4331-9904-f78e78afd1fd 29680333-02
 /boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro B2F0-82D2
 ### lsblk
-NAME        KNAME     TYPE        SIZE ROTA RM TRAN MODEL FSTYPE FSVER LABEL  UUID                                 PARTUUID                             MOUNTPOINTS
-loop0       loop0     loop  2147483648    0  0            swap   1                                                                                      
-mmcblk0     mmcblk0   disk 63864569856    0  0 mmc                                                                                                      
-|-mmcblk0p1 mmcblk0p1 part   536870912    0  0 mmc        vfat   FAT32 bootfs B2F0-82D2                            29680333-01                          /boot/firmware
-`-mmcblk0p2 mmcblk0p2 part 63319310336    0  0 mmc        ext4   1.0   rootfs 15f4c6be-1102-4331-9904-f78e78afd1fd 29680333-02                          /
-zram0       zram0     disk  2147483648    0  0            swap   1     zram0  6c7c905d-0372-413a-bf7f-21869c79f87c                                      [SWAP]
+NAME="loop0" KNAME="loop0" TYPE="loop" SIZE="2147483648" ROTA="0" RM="0" TRAN="" MODEL="" FSTYPE="swap" FSVER="1" LABEL="" UUID="" PARTUUID="" MOUNTPOINT=""
+NAME="mmcblk0" KNAME="mmcblk0" TYPE="disk" SIZE="63864569856" ROTA="0" RM="0" TRAN="mmc" MODEL="" FSTYPE="" FSVER="" LABEL="" UUID="" PARTUUID="" MOUNTPOINT=""
+NAME="mmcblk0p1" KNAME="mmcblk0p1" TYPE="part" SIZE="536870912" ROTA="0" RM="0" TRAN="mmc" MODEL="" FSTYPE="vfat" FSVER="FAT32" LABEL="bootfs" UUID="B2F0-82D2" PARTUUID="29680333-01" MOUNTPOINT="/boot/firmware"
+NAME="mmcblk0p2" KNAME="mmcblk0p2" TYPE="part" SIZE="63319310336" ROTA="0" RM="0" TRAN="mmc" MODEL="" FSTYPE="ext4" FSVER="1.0" LABEL="rootfs" UUID="15f4c6be-1102-4331-9904-f78e78afd1fd" PARTUUID="29680333-02" MOUNTPOINT="/"
+NAME="zram0" KNAME="zram0" TYPE="disk" SIZE="2147483648" ROTA="0" RM="0" TRAN="" MODEL="" FSTYPE="swap" FSVER="1" LABEL="zram0" UUID="6c7c905d-0372-413a-bf7f-21869c79f87c" PARTUUID="" MOUNTPOINT="[SWAP]"
 ### block_devices_sys
 mmcblk0 size_512=124735488 rotational=0 removable=0
   type=SD
@@ -403,7 +402,7 @@ usb_storage=0 uas=0
 ### df_bytes
 Filesystem     Type    1B-blocks       Used   Available Use% Mounted on
 tmpfs          tmpfs  1690812416    4505600  1686306816   1% /run
-/dev/mmcblk0p2 ext4  62295171072 4898033664 54828019712   9% /
+/dev/mmcblk0p2 ext4  62295171072 4898029568 54828023808   9% /
 tmpfs          tmpfs  4227006464    3899392  4223107072   1% /dev/shm
 tmpfs          tmpfs     5242880      49152     5193728   1% /run/lock
 tmpfs          tmpfs     1048576          0     1048576   0% /run/credentials/systemd-journald.service
@@ -436,7 +435,7 @@ Free inodes:              3648813
 Block size:               4096
 Filesystem created:       Wed Jun 17 20:26:23 2026
 Last mount time:          Tue Sep 22 15:29:40 2026
-Last write time:          Thu Sep 24 22:43:56 2026
+Last write time:          Thu Sep 24 23:43:59 2026
 Mount count:              189
 Maximum mount count:      -1
 Last checked:             Wed Jun 17 20:26:23 2026
@@ -447,9 +446,11 @@ proc            /proc           proc    defaults          0       0
 PARTUUID=29680333-01  /boot/firmware  vfat    defaults          0       2
 PARTUUID=29680333-02  /               ext4    defaults,noatime  0       1
 ### kernel_log_storage_power
-boots_recorded=2
+boots_recorded=1
+journal_first_entry_utc=2026-09-25T01:42:08+00:0
+journal_kernel_first_entry_utc=2026-09-25T03:18:44+00:0
 IDX ID FIRST ENTRY LAST ENTRY 
-0 Thu 2026-09-24 21:03:49 EDT Thu 2026-09-24
+0 Thu 2026-09-24 21:42:08 EDT Thu 2026-09-24
 --- current boot kernel warnings (storage/fs/power/thermal/oom)
 --- previous boot kernel warnings
 --- oom kills in journal (all boots)
@@ -457,6 +458,8 @@ IDX ID FIRST ENTRY LAST ENTRY
 ### swap_zram
 Filename				Type		Size		Used		Priority
 /dev/zram0                              partition	2097136		0		100
+NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
+/dev/zram0 zstd            2G  16K    0B    0B         [SWAP]
 --- /etc/rpi/swap.conf
 [Main]
 [File]
@@ -503,7 +506,7 @@ wlan0            UP             MAC_SHA256:320fe7aa877ada1c0485adbb589c7b88b999a
 ---
 lo               UNKNOWN        127.0.0.1/8 ::1/128 
 eth0             DOWN           
-wlan0            UP             158.205.34.18/24 fe80::aad2:397b:3edb:784d/64 
+wlan0            UP             158.205.34.18/24 fe80::<link-local>/64 
 --- routes
 default via 158.205.34.1 dev wlan0 proto dhcp src 158.205.34.18 metric 600 
 158.205.34.0/24 dev wlan0 proto kernel scope link src 158.205.34.18 metric 600 
@@ -543,7 +546,7 @@ tcp LISTEN 0      32          [::]:53       [::]:* users:(("pihole-FTL",pid=969,
 tcp LISTEN 0      200         [::]:443      [::]:* users:(("pihole-FTL",pid=969,fd=38))                            
 ### firewall
 no netfilter table modules loaded
-nft=absent
+nft=/usr/sbin/nft
 iptables=absent
 iptables-legacy=absent
 iptables-nft=absent
@@ -592,49 +595,49 @@ protocol websockets
 allow_anonymous true
 sshd_password_auth=permitrootlogin without-password pubkeyauthentication yes passwordauthentication no 
 ### thermal_power
-vcgencmd measure_temp => temp=48.3'C 
+vcgencmd measure_temp => temp=47.7'C 
 vcgencmd get_throttled => throttled=0x0 
 vcgencmd measure_volts core => volt=0.8695V 
-vcgencmd measure_clock arm => frequency(0)=2400033792 
+vcgencmd measure_clock arm => frequency(0)=2400020480 
 vcgencmd get_config usb_max_current_enable => usb_max_current_enable=1 
 vcgencmd get_config total_mem => total_mem=8192 
 vcgencmd version => 2025/12/08 19:29:54  Copyright (c) 2012 Broadcom version 2226a853 (release) (embedded) 
 vcgencmd bootloader_version => 2025/12/08 19:29:54 version 2226a853bb9f5fd80392e3a4a89e457aeca88008 (release) timestamp 1765222194 update-time 1765538232 capabilities 0x0000007f  
 --- pmic_read_adc
- 3V7_WL_SW_A current(0)=0.09661707A
-   3V3_SYS_A current(1)=0.12491900A
-   1V8_SYS_A current(2)=0.17176370A
-  DDR_VDD2_A current(3)=0.00292779A
+ 3V7_WL_SW_A current(0)=0.09368929A
+   3V3_SYS_A current(1)=0.12296720A
+   1V8_SYS_A current(2)=0.17371550A
+  DDR_VDD2_A current(3)=0.00683151A
   DDR_VDDQ_A current(4)=0.00000000A
-   1V1_SYS_A current(5)=0.19225820A
+   1V1_SYS_A current(5)=0.20299340A
     0V8_SW_A current(6)=0.27033260A
   VDD_CORE_A current(7)=0.68761000A
-   3V3_DAC_A current(17)=0.00000000A
-   3V3_ADC_A current(18)=0.00006105A
-   0V8_AON_A current(16)=0.00238095A
-      HDMI_A current(22)=0.01978020A
- 3V7_WL_SW_V volt(8)=3.70534400V
+   3V3_DAC_A current(17)=0.00006105A
+   3V3_ADC_A current(18)=0.00012210A
+   0V8_AON_A current(16)=0.00262515A
+      HDMI_A current(22)=0.02014650A
+ 3V7_WL_SW_V volt(8)=3.71184000V
    3V3_SYS_V volt(9)=3.31096100V
-   1V8_SYS_V volt(10)=1.79682400V
-  DDR_VDD2_V volt(11)=1.10695900V
-  DDR_VDDQ_V volt(12)=0.61208730V
-   1V1_SYS_V volt(13)=1.10109800V
-    0V8_SW_V volt(14)=0.79890030V
+   1V8_SYS_V volt(10)=1.81294100V
+  DDR_VDD2_V volt(11)=1.11208700V
+  DDR_VDDQ_V volt(12)=0.60695910V
+   1V1_SYS_V volt(13)=1.10402800V
+    0V8_SW_V volt(14)=0.79963290V
   VDD_CORE_V volt(15)=0.87140330V
-   3V3_DAC_V volt(20)=3.31135200V
-   3V3_ADC_V volt(21)=3.30677300V
-   0V8_AON_V volt(19)=0.79912020V
-      HDMI_V volt(23)=5.16436000V
-     EXT5V_V volt(24)=5.16838000V
+   3V3_DAC_V volt(20)=3.31043600V
+   3V3_ADC_V volt(21)=3.30952000V
+   0V8_AON_V volt(19)=0.79941320V
+      HDMI_V volt(23)=5.18044000V
+     EXT5V_V volt(24)=5.17642000V
       BATT_V volt(25)=0.00000000V
 --- bootloader_config (PSU/power keys)
 [all]
 BOOT_ORDER=0xf461
-thermal_zone0 type=cpu-thermal temp_mC=47950
-cooling_device0 type=pwm-fan cur=1 max=4
-hwmon0 name=cpu_thermal temp1_input=48500
-hwmon1 name=rp1_adc temp1_input=49661
-hwmon2 name=pwmfan fan1_input=0 pwm1=75 pwm1_enable=1
+thermal_zone0 type=cpu-thermal temp_mC=46850
+cooling_device0 type=pwm-fan cur=0 max=4
+hwmon0 name=cpu_thermal temp1_input=46850
+hwmon1 name=rp1_adc temp1_input=48499
+hwmon2 name=pwmfan fan1_input=0 pwm1=0 pwm1_enable=1
 hwmon3 name=rpi_volt in0_lcrit_alarm=0
 cooling_fan_platform=present
 ### apparmor
@@ -643,7 +646,7 @@ lsm=capability
 ### updates
 unattended-upgrades not installed
 ### tools
-missing_utilities=wget node npm zramctl nft iptables docker tailscale smartctl nvme sensors dumpe2fs sqlite3
+missing_utilities=wget node npm iptables docker tailscale smartctl nvme sensors sqlite3
 ### identity_hashes
 board_serial_sha256=e916415218d7f92cd357797b67f17760f87d6e4cf0b50e3cf6222574fbb42c3c
 machine_id_sha256=ec98e9910f7ca9f467ebe340f7fd3d59a6198d7a17482330f862b3cf7113f86a

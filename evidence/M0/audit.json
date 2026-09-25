@@ -1,8 +1,9 @@
 {
   "schema": "fcpi.m0.audit/v1",
-  "generated_utc": "2026-09-25T03:53:27Z",
-  "repository_sha": "220eaa2b341d9817e3d9383fb10f0aa655188ff9",
+  "generated_utc": "2026-09-25T04:00:55Z",
+  "repository_sha": "bc8b64eb614a63bc326f9e57af9f089981f0dec6",
   "worktree_dirty": true,
+  "repository_sha_note": "The commit checked out when this file was generated. The commit that stores this file is a later one on main.",
   "upstream": {
     "repository": "https://github.com/firecrawl/firecrawl",
     "tag": "v2.11.162",
@@ -16,50 +17,80 @@
     {
       "id": "P0-before",
       "script": "scripts/m0/pi-snapshot.sh",
+      "script_commit": "6333fe9",
       "script_sha256": "61d4288a5dc29f81106672b01e0e299e6f509a8f5af3c9167fb37230773cf602",
       "output": "evidence/M0/snapshot-before.txt",
-      "output_sha256": "f3aa859d5a0bc600826cc14cc9c404459052996eb3ddcc29304c2c8dda2214a1"
+      "output_sha256": "f3aa859d5a0bc600826cc14cc9c404459052996eb3ddcc29304c2c8dda2214a1",
+      "utc": "2026-09-25T03:15:30Z",
+      "note": "Taken with the pre-review snapshot script, which read lsmod after ss. snapshot-diff compares section-keyed lines, so the reordered AFTER script remains comparable."
     },
     {
       "id": "P1-audit",
       "script": "scripts/m0/pi-audit.sh",
-      "script_sha256": "5f9fd6f8ccf7ec6434fa2d94f04324740820f6f13e24f78432117f3bff9ba6aa",
+      "script_commit": "99ad509",
+      "script_sha256": "843acf16e842c990757379a577bdc612e5a4ea8ea5439c31c4c8ff1d0a17fa6f",
       "output": "evidence/M0/raw/pi-audit.txt",
-      "output_sha256": "1abe4470ffc0438ad4c02547bc68381da0b50b438e3415a03e996705480dca0f",
-      "utc": "2026-09-25T03:18:44Z"
+      "output_sha256": "c8b64073a34240dfbe590ec5ac497076dd1d63b584f8f58241a08ef1b00a80fb",
+      "utc": "2026-09-25T03:55:27Z",
+      "note": "Re-run after review. The superseded first run is in git at 6333fe9."
     },
     {
       "id": "P2-audit-extra",
       "script": "scripts/m0/pi-audit-extra.sh",
+      "script_commit": "c75affb",
       "script_sha256": "cd20227c87efe52251d3f2861be4d836cd561899dbae3be73a2f9f48aff15332",
       "output": "evidence/M0/raw/pi-audit-extra.txt",
-      "output_sha256": "055ce746b96e27979b6530295d50719a61a1436590878752796774372121d7f9",
+      "output_sha256": "a639a0c9369539c74514cf085c4b2fb3b7afc2344cd9084788ffbf525397abcf",
+      "utc": "2026-09-25T03:55:29Z",
+      "note": "Re-run after review with FCPI_SKIP_IP_ECHO=1; no IP-echo request was sent."
+    },
+    {
+      "id": "P2e-ip-echo",
+      "script": "scripts/m0/pi-audit-extra.sh",
+      "script_commit": "6333fe9",
+      "script_sha256": "2cac76b3c97d26c49dd9d3a30214560301ffe776d8afeb6f3941c88e5498d450",
+      "output": "evidence/M0/raw/pi-audit-extra-ipecho.txt",
+      "output_sha256": "504ff9ee1c3ded4b44149fee5dc71ae8b849283268562a02d56009fa3595937d",
       "utc": "2026-09-25T03:21:03Z",
-      "note": "Contains the single permitted IP-echo GET; the returned egress address is stored only as a SHA-256."
+      "note": "The single permitted IP-echo GET. That script version printed the raw answer; the line was replaced with its SHA-256 on the workstation before any commit (post-capture redaction, stated in the file)."
     },
     {
       "id": "P3-audit-paths",
       "script": "scripts/m0/pi-audit-paths.sh",
+      "script_commit": "6333fe9",
       "script_sha256": "8eb9a959822e4f0ceca397fef94cca55878dd1c250f3aad3e2e153f7080465a0",
       "output": "evidence/M0/raw/pi-audit-paths.txt",
       "output_sha256": "c9c680b56db084a9c76ae689f753ee4097d6893689f4516ffad5c4836ab995fa",
       "utc": "2026-09-25T03:30:38Z",
-      "note": "Supersedes P1's tool-presence results: P1 used a PATH without /usr/sbin, so nft, zramctl, dumpe2fs, sshd, losetup, iw and sysctl were wrongly reported absent."
+      "note": "Tool presence with an explicit PATH; P1 now sets PATH itself, so P3 and P1 agree."
     },
     {
       "id": "P4-audit-layout",
       "script": "scripts/m0/pi-audit-layout.sh",
+      "script_commit": "6333fe9",
       "script_sha256": "7f17b0dc30a9741559e88c9c18dcf31768c446c0ed9ff7e81f029f6605788278",
       "output": "evidence/M0/raw/pi-audit-layout.txt",
       "output_sha256": "af7540b23ac171c690f53948f0ed61ff8f0030fd37e1f2992c45ee6add9d5f00",
       "utc": "2026-09-25T03:36:11Z"
     },
     {
+      "id": "P6-kernel-log",
+      "script": "scripts/m0/pi-audit-kernel-log.sh",
+      "script_commit": "bc8b64e",
+      "script_sha256": "3c60e106ee9879cc8c18ddf3cd59b52d165a6b723b6cbbe60fc9bbd77617328c",
+      "output": "evidence/M0/raw/pi-audit-kernel-log.txt",
+      "output_sha256": "03085583351e32ea8338275e1655b3ac920532efbca367ee3e2339d7b6459713",
+      "utc": "2026-09-25T03:56:23Z",
+      "note": "Retained kernel log; attributes the audit's only kernel-log line (the /proc/cgroups notice at the first P1 run)."
+    },
+    {
       "id": "P5-after",
       "script": "scripts/m0/pi-snapshot.sh",
-      "script_sha256": "61d4288a5dc29f81106672b01e0e299e6f509a8f5af3c9167fb37230773cf602",
+      "script_commit": "0506971",
+      "script_sha256": "927ed88b1c73c57797026aa17c98099dd086ded2e6f35954a58d2a5533665e54",
       "output": "evidence/M0/snapshot-after.txt",
-      "output_sha256": "f8bcfac25fde8e0db8823a1348cf4ad8fb2ac6c146b836d421a2fe3811830faf",
+      "output_sha256": "d9b00672ac758ee9a3aa2ef987d0624b695ddfe543dd48bb4a325c8f052c9872",
+      "utc": "2026-09-25T04:00:17Z",
       "note": "Last Pi probe of the session; compared with P0 by scripts/m0/snapshot-diff.sh."
     }
   ],
@@ -89,7 +120,8 @@
     ],
     "kernel_images_present": [
       "kernel_2712.img"
-    ]
+    ],
+    "binfmt_entries": "python3.13 register status"
   },
   "section4": {
     "distribution_version": {
@@ -116,7 +148,8 @@
       "status": "observed",
       "sources": [
         "evidence/M0/raw/pi-audit.txt#architecture",
-        "evidence/M0/raw/pi-audit.txt#kernel_config"
+        "evidence/M0/raw/pi-audit.txt#kernel_config",
+        "evidence/M0/raw/pi-audit-extra.txt#boot_config"
       ],
       "value": {
         "release": "6.18.34+rpt-rpi-2712",
@@ -124,14 +157,18 @@
         "config_16k_pages": true,
         "user_ns": true,
         "seccomp_filter": true,
-        "overlayfs": "CONFIG_OVERLAY_FS=m"
+        "overlayfs": "CONFIG_OVERLAY_FS=m",
+        "kernel_images_present": [
+          "kernel_2712.img"
+        ]
       }
     },
     "cpu_ram": {
       "status": "observed",
       "sources": [
         "evidence/M0/raw/pi-audit.txt#cpu",
-        "evidence/M0/raw/pi-audit.txt#meminfo"
+        "evidence/M0/raw/pi-audit.txt#meminfo",
+        "evidence/M0/raw/pi-audit.txt#thermal_power"
       ],
       "value": {
         "cpus": 4,
@@ -140,12 +177,12 @@
         "governor": "ondemand",
         "meminfo_kib": {
           "MemTotal": 8255888,
-          "MemAvailable": 7925904,
-          "MemFree": 7557152,
-          "Buffers": 89328,
-          "Cached": 337840,
-          "Shmem": 8288,
-          "AnonPages": 106768,
+          "MemAvailable": 7922912,
+          "MemFree": 7543424,
+          "Buffers": 93072,
+          "Cached": 343568,
+          "Shmem": 8256,
+          "AnonPages": 105664,
           "SwapTotal": 2097136,
           "CmaTotal": 65536
         },
@@ -157,7 +194,8 @@
       "sources": [
         "evidence/M0/raw/pi-audit.txt#cgroup",
         "evidence/M0/raw/pi-audit.txt#cmdline",
-        "evidence/M0/raw/pi-audit-extra.txt#boot_config"
+        "evidence/M0/raw/pi-audit-extra.txt#boot_config",
+        "evidence/M0/raw/pi-audit.txt#pressure"
       ],
       "value": {
         "hierarchy": "cgroup2fs",
@@ -171,13 +209,15 @@
         "kernel_cmdline_has_cgroup_disable_memory": true,
         "cmdline_txt_has_cgroup_disable_memory": false,
         "config_memcg": true,
-        "psi": "unavailable (no /proc/pressure)"
+        "psi_available": false
       }
     },
     "swap_zram": {
       "status": "observed",
       "sources": [
         "evidence/M0/raw/pi-audit.txt#swap_zram",
+        "evidence/M0/raw/pi-audit-paths.txt#zramctl",
+        "evidence/M0/raw/pi-audit-paths.txt#losetup",
         "evidence/M0/raw/pi-audit-extra.txt#zram_writeback",
         "evidence/M0/raw/pi-audit-extra.txt#proc_sys"
       ],
@@ -192,10 +232,18 @@
           }
         ],
         "zram_algorithm": "zstd",
+        "zram_disksize": "2G",
         "zram_writeback_backing_dev": "/dev/loop0",
-        "zram_writeback_file": "/var/swap (2 GiB, on the microSD root filesystem)",
-        "zram_writeback_timer": "rpi-zram-writeback.timer OnBootSec=180min OnUnitActiveSec=24h",
-        "zram_bd_stat": "4        0        4",
+        "zram_writeback_backing_file": "/var/swap",
+        "zram_writeback_bd_stat": [
+          4,
+          0,
+          4
+        ],
+        "zram_writeback_timer": {
+          "OnBootSec": "180min",
+          "OnUnitActiveSec": "24h"
+        },
         "swappiness": 60
       }
     },
@@ -203,11 +251,21 @@
       "status": "observed",
       "sources": [
         "evidence/M0/raw/pi-audit.txt#storage_root",
+        "evidence/M0/raw/pi-audit.txt#fstab",
         "evidence/M0/snapshot-before.txt#findmnt"
       ],
       "value": {
-        "root": "/ /dev/mmcblk0p2 ext4 rw,noatime 15f4c6be-1102-4331-9904-f78e78afd1fd 29680333-02",
-        "boot_firmware": "/boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro B2F0-82D2",
+        "root": {
+          "target": "/",
+          "source": "/dev/mmcblk0p2",
+          "fstype": "ext4",
+          "options": "rw,noatime"
+        },
+        "boot_firmware": {
+          "target": "/boot/firmware",
+          "source": "/dev/mmcblk0p1",
+          "fstype": "vfat"
+        },
         "tmp_tmpfs_bytes": 4227022848,
         "dev_shm_tmpfs_bytes": 4227006464,
         "fstab": [
@@ -230,35 +288,45 @@
             "type": "loop",
             "size_bytes": 2147483648,
             "rota": false,
-            "rm": false
+            "rm": false,
+            "tran": null,
+            "fstype": "swap"
           },
           {
             "name": "mmcblk0",
             "type": "disk",
             "size_bytes": 63864569856,
             "rota": false,
-            "rm": false
+            "rm": false,
+            "tran": "mmc",
+            "fstype": null
           },
           {
             "name": "mmcblk0p1",
             "type": "part",
             "size_bytes": 536870912,
             "rota": false,
-            "rm": false
+            "rm": false,
+            "tran": "mmc",
+            "fstype": "vfat"
           },
           {
             "name": "mmcblk0p2",
             "type": "part",
             "size_bytes": 63319310336,
             "rota": false,
-            "rm": false
+            "rm": false,
+            "tran": "mmc",
+            "fstype": "ext4"
           },
           {
             "name": "zram0",
             "type": "disk",
             "size_bytes": 2147483648,
             "rota": false,
-            "rm": false
+            "rm": false,
+            "tran": null,
+            "fstype": "swap"
           }
         ],
         "boot_medium": "microSD (mmcblk0, type=SD)",
@@ -269,7 +337,7 @@
           "oemid": "0x5344",
           "date": "04/2025"
         },
-        "nvme_present": "",
+        "nvme_present": false,
         "usb_storage_devices": 0
       }
     },
@@ -284,29 +352,31 @@
           "fstype": "ext4",
           "uuid": "15f4c6be-1102-4331-9904-f78e78afd1fd",
           "partuuid": "29680333-02",
+          "label": "rootfs",
           "state": "clean",
           "errors_behavior": "Continue",
-          "fs_error_count_line_present": false,
+          "fs_error_count_recorded": false,
           "lifetime_writes": "137 GB",
           "created": "Wed Jun 17 20:26:23 2026",
           "mount_count": 189
         },
         "boot_firmware": {
           "fstype": "vfat",
-          "uuid": "B2F0-82D2"
+          "uuid": "B2F0-82D2",
+          "partuuid": "29680333-01"
         }
       }
     },
     "docker_root_data_dirs": {
       "status": "observed",
       "sources": [
-        "evidence/M0/raw/pi-audit.txt#container_runtime"
+        "evidence/M0/raw/pi-audit.txt#container_runtime",
+        "evidence/M0/raw/pi-audit-layout.txt#planned_paths"
       ],
       "value": {
         "docker_installed": false,
         "var_lib_docker": "absent",
-        "etc_docker_daemon_json": "absent",
-        "note": "Docker is not installed, so no Docker root directory exists yet. M1 sets data-root deliberately (see storage plan)."
+        "etc_docker_daemon_json": "absent"
       }
     },
     "available_disk_inodes": {
@@ -318,8 +388,8 @@
       "value": {
         "root": {
           "size_bytes": 62295171072,
-          "used_bytes": 4898033664,
-          "avail_bytes": 54828019712,
+          "used_bytes": 4898029568,
+          "avail_bytes": 54828023808,
           "inodes": 3692928,
           "inodes_used": 44115,
           "inodes_free": 3648813
@@ -337,14 +407,25 @@
         "compose_plugin": "absent",
         "podman": "absent",
         "services": {
-          "docker.service": "not-found",
-          "docker.socket": "not-found",
-          "containerd.service": "not-found"
+          "docker.service": {
+            "active": "inactive",
+            "enabled": "not-found"
+          },
+          "docker.socket": {
+            "active": "inactive",
+            "enabled": "not-found"
+          },
+          "containerd.service": {
+            "active": "inactive",
+            "enabled": "not-found"
+          }
         },
-        "debian_candidate_docker_io": "26.1.5+dfsg1-9+deb13u1",
-        "debian_candidate_podman": "5.4.2+ds1-2+b2",
-        "docker_ce_repo_configured": false,
-        "docker_ce_trixie_arm64_available": "see evidence/M0/runtime-candidates.json"
+        "apt_candidates": {
+          "docker.io": "26.1.5+dfsg1-9+deb13u1",
+          "docker-ce": "(none)",
+          "podman": "5.4.2+ds1-2+b2"
+        },
+        "docker_ce_repository": "evidence/M0/runtime-candidates.json"
       }
     },
     "running_containers_services": {
@@ -355,7 +436,7 @@
         "evidence/M0/snapshot-before.txt#docker_ps"
       ],
       "value": {
-        "containers": "none (no container runtime installed)",
+        "containers": "none: no container runtime installed",
         "running_services": [
           "airdb.service",
           "airlogger.service",
@@ -550,31 +631,46 @@
     "hostname": {
       "status": "observed",
       "sources": [
-        "evidence/M0/raw/pi-audit.txt#identity"
+        "evidence/M0/raw/pi-audit.txt#identity",
+        "evidence/M0/raw/pi-audit.txt#services_all"
       ],
       "value": {
         "hostname": "pi",
-        "mdns": "avahi-daemon running (pi.local)"
+        "avahi_daemon_running": true
       }
     },
     "dns": {
       "status": "observed",
       "sources": [
-        "evidence/M0/raw/pi-audit.txt#network"
+        "evidence/M0/raw/pi-audit.txt#network",
+        "evidence/M0/raw/pi-audit.txt#listening",
+        "evidence/M0/raw/pi-audit.txt#existing_service_exposure"
       ],
       "value": {
         "resolv_conf_nameservers": [
           "158.205.34.1"
         ],
-        "local_dns_services": "pihole-FTL on :53 (listeningMode=ALL, interface=wlan0), dnscrypt-proxy on 127.0.0.1:5053",
-        "host_resolver_uses_pihole": false
+        "port53_listeners": [
+          "udp 0.0.0.0 pihole-FTL",
+          "udp * pihole-FTL",
+          "tcp 0.0.0.0 pihole-FTL",
+          "tcp [::] pihole-FTL"
+        ],
+        "pihole_config": [
+          "interface = \"wlan0\" ### CHANGED, default = \"\"",
+          "listeningMode = \"ALL\" ### CHANGED, default = \"LOCAL\""
+        ],
+        "local_resolver_listeners": [
+          "udp 127.0.0.1 dnscrypt-proxy",
+          "tcp 127.0.0.1 dnscrypt-proxy"
+        ],
+        "host_resolver_uses_local_dns": false
       }
     },
     "firewall_backend_rules": {
       "status": "observed",
       "sources": [
         "evidence/M0/raw/pi-audit.txt#firewall",
-        "evidence/M0/raw/pi-audit-paths.txt#sbin_tools",
         "evidence/M0/raw/pi-audit-paths.txt#packages",
         "evidence/M0/snapshot-before.txt#firewall"
       ],
@@ -585,16 +681,17 @@
         "iptables_binary": "absent",
         "ufw": "absent",
         "firewalld": "absent",
-        "nftables_service": "inactive/disabled",
-        "etc_nftables_conf": "present (not loaded)",
-        "active_ruleset": "none: no nf_tables/ip_tables module is loaded, so no packet filtering is in effect",
+        "nftables_service": {
+          "active": "inactive",
+          "enabled": "disabled"
+        },
+        "etc_nftables_conf": "present",
+        "active_ruleset": "none: no nf_tables or ip_tables module is loaded",
         "fail2ban": {
-          "running": true,
+          "banaction": "nftables",
           "jails": [
             "sshd"
-          ],
-          "banaction": "nftables",
-          "note": "A first ban would load nf_tables through fail2ban; zero bans recorded (see network exposure)."
+          ]
         }
       }
     },
@@ -604,8 +701,14 @@
         "evidence/M0/raw/pi-audit.txt#tailscale"
       ],
       "value": {
-        "installed": false,
-        "service": "not-found"
+        "binaries": {
+          "tailscale": "absent",
+          "tailscaled": "absent"
+        },
+        "service": {
+          "active": "inactive",
+          "enabled": "not-found"
+        }
       }
     },
     "reverse_proxies": {
@@ -615,8 +718,21 @@
         "evidence/M0/raw/pi-audit.txt#listening"
       ],
       "value": {
-        "dedicated_reverse_proxy": "none (nginx, caddy, apache2, haproxy, lighttpd, traefik, cloudflared all absent)",
-        "web_listeners": "pihole-FTL embedded web server on 0.0.0.0:80 and :443 (also [::])"
+        "binaries": {
+          "nginx": "absent",
+          "caddy": "absent",
+          "apache2": "absent",
+          "haproxy": "absent",
+          "lighttpd": "absent",
+          "traefik": "absent",
+          "cloudflared": "absent"
+        },
+        "web_listeners": [
+          "0.0.0.0:80 pihole-FTL",
+          "0.0.0.0:443 pihole-FTL",
+          "[::]:80 pihole-FTL",
+          "[::]:443 pihole-FTL"
+        ]
       }
     },
     "thermal_sensors": {
@@ -625,13 +741,17 @@
         "evidence/M0/raw/pi-audit.txt#thermal_power"
       ],
       "value": {
-        "vcgencmd_temp": "temp=48.3'C",
-        "thermal_zone0_mC": 47950,
-        "rp1_adc_temp_mC": 49661,
-        "cooling_device": "pwm-fan (cur 1 of 4)",
-        "fan_pwm": 75,
+        "vcgencmd_temp": "temp=47.7'C",
+        "thermal_zone0_mC": 46850,
+        "rp1_adc_temp_mC": 48499,
+        "cooling_device": {
+          "type": "pwm-fan",
+          "cur_state": 0,
+          "max_state": 4
+        },
+        "fan_pwm": 0,
         "fan_tach_rpm": 0,
-        "fan_interpretation": "pwm1=75 with fan1_input=0: either a fan without a tachometer signal or no fan fitted. Not distinguishable programmatically."
+        "fan_interpretation": "fan not commanded at this temperature; presence cannot be read from this sample"
       }
     },
     "power_throttling": {
@@ -641,8 +761,9 @@
       ],
       "value": {
         "get_throttled": "throttled=0x0",
-        "throttled_decoded": "no under-voltage, frequency capping, throttling or soft temperature limit now or since boot",
-        "ext5v_volts": 5.16838,
+        "throttled_bits": 0,
+        "throttled_decoded": "no under-voltage, frequency capping, throttling or soft temperature limit, now or since boot",
+        "ext5v_volts": 5.17642,
         "usb_max_current_enable": "usb_max_current_enable=1",
         "core_volts": "volt=0.8695V",
         "bootloader": "2226a853bb9f5fd80392e3a4a89e457aeca88008"
@@ -654,22 +775,23 @@
         "evidence/M0/raw/pi-audit.txt#meminfo",
         "evidence/M0/raw/pi-audit.txt#processes_top_rss",
         "evidence/M0/raw/pi-audit.txt#cpu",
-        "evidence/M0/raw/pi-audit.txt#unit_memory"
+        "evidence/M0/raw/pi-audit.txt#unit_memory",
+        "evidence/M0/raw/pi-audit.txt#kernel_log_storage_power"
       ],
       "value": {
-        "loadavg": "0.05 0.09 0.03 1/189 420961",
-        "uptime_s": 200757.08,
-        "existing_usage_mib": 322.25,
+        "loadavg": "0.07 0.08 0.03 1/187 431943",
+        "uptime_s": 202960.57,
+        "existing_usage_mib": 325.17,
         "top_rss_kib": [
+          {
+            "comm": "fail2ban-server",
+            "user": "root",
+            "rss_kib": 30720
+          },
           {
             "comm": "python",
             "user": "danny",
             "rss_kib": 29888
-          },
-          {
-            "comm": "fail2ban-server",
-            "user": "root",
-            "rss_kib": 29760
           },
           {
             "comm": "python",
@@ -679,7 +801,7 @@
           {
             "comm": "NetworkManager",
             "user": "root",
-            "rss_kib": 21424
+            "rss_kib": 21456
           },
           {
             "comm": "python",
@@ -689,7 +811,7 @@
           {
             "comm": "dnscrypt-proxy",
             "user": "_dnscry+",
-            "rss_kib": 18272
+            "rss_kib": 18256
           },
           {
             "comm": "systemd",
@@ -699,7 +821,7 @@
           {
             "comm": "systemd-journal",
             "user": "root",
-            "rss_kib": 14464
+            "rss_kib": 14576
           },
           {
             "comm": "pihole-FTL",
@@ -709,7 +831,7 @@
           {
             "comm": "systemd",
             "user": "danny",
-            "rss_kib": 12864
+            "rss_kib": 12720
           },
           {
             "comm": "wpa_supplicant",
@@ -719,7 +841,7 @@
           {
             "comm": "sshd-session",
             "user": "root",
-            "rss_kib": 11616
+            "rss_kib": 11632
           },
           {
             "comm": "mosquitto",
@@ -737,8 +859,14 @@
             "rss_kib": 9440
           }
         ],
-        "per_unit_cgroup_memory": "unavailable: the memory controller is disabled, so memory.current/memory.peak do not exist",
-        "oom_kills_in_journal": 0
+        "per_unit_cgroup_memory_available": false,
+        "oom_kills_in_retained_journal": 0,
+        "journal_window": {
+          "boots_recorded": 1,
+          "first_entry_utc": "2026-09-25T01:42:08Z",
+          "first_entry_note": "the probe cut the timestamp one character short (+00:0); the offset is UTC",
+          "note": "The persistent journal is size-limited: it retains roughly the last two hours, not the whole boot."
+        }
       }
     }
   },
@@ -753,17 +881,17 @@
       "reason": "/proc/pressure absent on this kernel boot"
     },
     {
-      "field": "previous-boot kernel log",
-      "reason": "the persistent journal holds only the current boot (journalctl --list-boots)"
+      "field": "kernel and service logs older than the retained journal window",
+      "reason": "the persistent journal is size-limited and holds about two hours; the kernel ring buffer holds boot messages only"
     },
     {
       "field": "microSD wear/health (SMART)",
       "reason": "SD cards expose no SMART; smartctl/nvme absent and not installed during M0",
-      "substitute": "ext4 state clean, no FS error record, Lifetime writes 137 GB baseline, no mmc/ext4 errors in the current boot"
+      "substitute": "ext4 state clean, no FS error record, Lifetime writes baseline, no mmc/ext4 errors in the retained kernel log"
     },
     {
       "field": "fan presence",
-      "reason": "tachometer reads 0 rpm at pwm 75; a tach-less fan and an absent fan look identical"
+      "reason": "a tachometer reading of 0 rpm is identical for a tach-less fan and an absent fan (first P1 run: pwm 75, 0 rpm; see git 6333fe9)"
     },
     {
       "field": "sustained-load thermal behaviour",
@@ -799,25 +927,45 @@
   "missing_utilities_source": "evidence/M0/raw/pi-audit-paths.txt#sbin_tools",
   "network": {
     "interfaces": {
-      "wlan0": "UP 158.205.34.18/24 (Wi-Fi, DHCP)",
-      "eth0": "DOWN, no carrier"
+      "lo": {
+        "state": "UNKNOWN",
+        "addresses": [
+          "127.0.0.1/8",
+          "::1/128"
+        ]
+      },
+      "eth0": {
+        "state": "DOWN",
+        "addresses": []
+      },
+      "wlan0": {
+        "state": "UP",
+        "addresses": [
+          "158.205.34.18/24",
+          "fe80::<link-local>/64"
+        ]
+      }
     },
-    "default_route": "default via 158.205.34.1 dev wlan0 proto dhcp src 158.205.34.18 metric 600 ",
+    "default_route": "default via 158.205.34.1 dev wlan0 proto dhcp src 158.205.34.18 metric 600",
+    "link_route": "158.205.34.0/24 dev wlan0 proto kernel scope link src 158.205.34.18 metric 600",
     "global_ipv6": false,
     "lan_block": {
       "cidr": "158.205.34.0/24",
       "rfc1918": false,
-      "rdap": "158.198.0.0-158.215.255.255 JPNIC-NET-JP-ERX, ALLOCATED PORTABLE, JP (evidence/M0/network-exposure.json)"
+      "rdap": "RDAP: 158.205.34.18 lies in 158.198.0.0-158.215.255.255, JPNIC-NET-JP-ERX, ALLOCATED PORTABLE, country JP. The host is on America/New_York time with a US Wi-Fi regulatory domain.",
+      "rdap_source": "evidence/M0/network-exposure.json"
     },
     "egress_ip_sha256": "994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d",
     "egress_ip_source": "evidence/M0/raw/pi-audit-extra-ipecho.txt#ip_echo",
     "egress_ip_differs_from_interface": true,
     "inbound_evidence": {
-      "local_subnet": "36",
+      "local_cidr": "158.205.34.18/24",
+      "local_subnet": "43",
       "outside_subnet": "0",
       "distinct_outside_sources": "0",
-      "journal_first_entry": "2026-09-24T21:19:34-04:00",
-      "preauth_or_invalid_user_lines": "1"
+      "journal_first_entry": "2026-09-24T22:06:08-04:00",
+      "preauth_or_invalid_user_lines": "0",
+      "source": "evidence/M0/raw/pi-audit-extra.txt#inbound_evidence"
     },
     "fail2ban_sshd": [
       "Currently failed:\t0",
@@ -829,16 +977,16 @@
   "derived": {
     "resource_fit": {
       "mem_total_mib": 8062.39,
-      "mem_available_mib": 7740.14,
-      "existing_usage_mib": 322.25,
+      "mem_available_mib": 7737.22,
+      "existing_usage_mib": 325.17,
       "cap_sum_mib": 6432,
       "reserve_mib": 1024,
       "required_mib": 7456,
-      "headroom_mib": 284.14,
+      "headroom_mib": 281.22,
       "fits": true
     },
     "free_space": {
-      "root_avail_bytes": 54828019712,
+      "root_avail_bytes": 54828023808,
       "root_avail_gib": 51.06,
       "threshold_gib": 20,
       "meets_threshold": true
@@ -941,7 +1089,7 @@
       "data_filesystem_uuid": "15f4c6be-1102-4331-9904-f78e78afd1fd",
       "data_filesystem_partuuid": "29680333-02",
       "data_directory": "/srv/firecrawl-pi/data",
-      "medium": "microSD (the only storage device present)",
+      "medium": "microSD (mmcblk0), the only storage device present",
       "planned_paths_present": {
         "/opt/firecrawl-pi": "absent",
         "/srv/firecrawl-pi": "absent",
@@ -1130,6 +1278,7 @@
     ]
   },
   "sha256": {
-    "source_review": "71d22ef1f2b767cca7b76941cdd6c78432ca91abdd688e5d4af41485d3131a56"
+    "source_review": "71d22ef1f2b767cca7b76941cdd6c78432ca91abdd688e5d4af41485d3131a56",
+    "network_exposure": "6d75cb853403c9019e6c11e6e60b176d09798282422bef26db8b8384637ff5cf"
   }
 }
