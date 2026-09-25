@@ -833,7 +833,8 @@ const checks = {
     expected: "before the file, NetworkManager handles Docker's interfaces (the positive control); once pi-init.sh installs it as in the repository and reloads NM's configuration, every veth, fcpi-* bridge and docker0 is unmanaged and wlan0 stays connected; across the verification window (containers recreated, dockerd restarted) NM starts no activation or DHCP transaction on a Docker interface and wlan0 never changes state (R14)",
     run() {
       const s = sections(`${RAW}nm.txt`);
-      const dev = (p) => (s[`${p}_devices`] ?? []).filter(Boolean).map((l) => { const f = l.split(" "); return { d: f[0], state: f.slice(2).join(" ") }; });
+      // Device lines only: the section also ends with the collector's "end" line.
+      const dev = (p) => (s[`${p}_devices`] ?? []).filter((l) => /^(wlan0|veth[0-9a-f]+|fcpi-[a-z]+|docker0) \S+ \S/.test(l)).map((l) => { const f = l.split(" "); return { d: f[0], state: f.slice(2).join(" ") }; });
       const docker = (p) => dev(p).filter((x) => x.d !== "wlan0");
       const wlan = (p) => dev(p).find((x) => x.d === "wlan0")?.state;
       const repoHash = sha256(read("deploy/host/NetworkManager/90-fcpi-unmanaged.conf"));
@@ -844,7 +845,7 @@ const checks = {
         ["before", "after", "window"].every((p) => wlan(p) === "connected") &&
         j.docker_interface_activations === "0" && j.docker_interface_dhcp_transactions === "0" && j.wlan0_state_changes === "0";
       const tally = (p) => Object.entries(docker(p).reduce((m, x) => ({ ...m, [x.state]: (m[x.state] ?? 0) + 1 }), {})).map(([k, v]) => `${k}:${v}`).join(",");
-      return { ok, actual: `before: Docker interfaces ${tally("before")}, wlan0 ${wlan("before")}; after reload: ${tally("after")}, wlan0 ${wlan("after")}; window end: ${tally("window")}, wlan0 ${wlan("window")}; since ${j.since ?? "?"}: activations=${j.docker_interface_activations} dhcp=${j.docker_interface_dhcp_transactions} wlan0 state changes=${j.wlan0_state_changes}; conf deployed=${kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash}` };
+      return { ok, actual: `before: Docker interfaces ${tally("before")}, wlan0 ${wlan("before")}; after reload: ${tally("after")}, wlan0 ${wlan("after")}; window end: ${tally("window")}, wlan0 ${wlan("window")}; since ${(lineOf(s.window_journal, "since=") ?? "?").slice(6)} UTC: activations=${j.docker_interface_activations} dhcp=${j.docker_interface_dhcp_transactions} wlan0 state changes=${j.wlan0_state_changes}; conf deployed=${kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash}` };
     } },
 
   V24: { name: "deploy-removes-files-dropped-from-git", inputs: [`${RAW}deploy-prune.txt`, "scripts/m1/deploy.sh"],
