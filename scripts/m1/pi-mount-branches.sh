@@ -43,17 +43,20 @@ sudo -n sh -c "awk 'done != 1 && /bind: \\{ create_host_path: false \\}/ {done =
 sudo -n sh -c "sed 's#source: /srv/firecrawl-pi/data/redis\$#source: $ABSENT_BIND#' $REPO/deploy/compose.yaml > $T/compose-absent-source.yaml"
 mkcfg bind_creates_host_path "s#^PI_COMPOSE_FILE=.*#PI_COMPOSE_FILE=$T/compose-creates-path.yaml#"
 mkcfg bind_source_absent "s#^PI_COMPOSE_FILE=.*#PI_COMPOSE_FILE=$T/compose-absent-source.yaml#"
-echo "compose_creates_path_diff_lines=$(diff $REPO/deploy/compose.yaml $T/compose-creates-path.yaml | grep -c '^[<>]')"
-echo "compose_absent_source_diff_lines=$(diff $REPO/deploy/compose.yaml $T/compose-absent-source.yaml | grep -c '^[<>]')"
+echo "compose_creates_path_diff_lines=$(sudo -n diff $REPO/deploy/compose.yaml $T/compose-creates-path.yaml | grep -c '^[<>]')"
+echo "compose_absent_source_diff_lines=$(sudo -n diff $REPO/deploy/compose.yaml $T/compose-absent-source.yaml | grep -c '^[<>]')"
 
 for b in uuid_mismatch data_id_mismatch data_dir_absent bind_creates_host_path bind_source_absent; do
   sec "branch_$b"
   sudo -n systemctl set-environment FCPI_CONFIG=$T/$b.env
-  since=$(date '+%Y-%m-%d %H:%M:%S')
   sudo -n systemctl start fcpi-stack.service 2>&1 | head -2
   echo "stack_start_exit=${PIPESTATUS[0]}"
   echo "data_check_result=$(systemctl show -p Result --value fcpi-data-check.service) stack_active=$(systemctl is-active fcpi-stack.service)"
-  echo "check_message=$(sudo -n journalctl -u fcpi-data-check.service --since "$since" --no-pager -o cat | grep -m1 'fcpi-data-check: FAIL')"
+  # The message of exactly this run of the check, by its systemd invocation ID.
+  inv=$(systemctl show -p InvocationID --value fcpi-data-check.service)
+  echo "check_message=$(sudo -n journalctl _SYSTEMD_INVOCATION_ID=$inv --no-pager -o cat | grep -m1 'fcpi-data-check: FAIL')"
+  # The same config through the check directly, as a cross-check of the reason.
+  direct=$(sudo -n env FCPI_CONFIG=$T/$b.env $REPO/deploy/host/fcpi-data-check.sh 2>&1); echo "direct_check_exit=$? direct_message=$direct"
   echo "running_containers=$(running)"
   M=$(manifest); echo "manifest_unchanged=$([ "$M" = "$M0" ] && echo yes || echo NO)"
   echo "absent_dir_created=$(test -e $ABSENT_DIR && echo YES || echo no) absent_bind_created=$(sudo -n test -e $ABSENT_BIND && echo YES || echo no)"
