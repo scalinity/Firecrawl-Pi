@@ -1,5 +1,5 @@
 ### probe_time
-2026-09-25T03:30:38Z
+2026-09-25T06:28:35Z
 ### sbin_tools
 nft=/usr/sbin/nft
 iptables=absent
@@ -36,7 +36,7 @@ ufw  un
 util-linux 2.41-5 ii 
 ### zramctl
 NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
-/dev/zram0 zstd            2G  16K    0B    0B         [SWAP]
+/dev/zram0 zstd            2G  16K   69B   48K         [SWAP]
 ### losetup
 /dev/loop0 /var/swap     0 0
 end

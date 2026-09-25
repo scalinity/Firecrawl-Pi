@@ -574,8 +574,8 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 
 | Milestone | Current status | Evidence |
 |---|---|---|
-| M0 | BLOCKED | `evidence/M0/INTERPRETATION.md`, `evidence/M0/audit.json`, `evidence/M0/verification.json` (V01–V08 PASS, BEFORE/AFTER diff empty), `deploy/versions.lock.json`. B1's remedy is applied (`evidence/M0/b1/APPLIED.md`) and awaits the M0 re-check; decisions D1–D6 await the separate review. |
-| M1 | NOT_STARTED | Not eligible: M0 is not accepted |
+| M0 | ACCEPTED | `evidence/M0/INTERPRETATION.md`, `evidence/M0/audit.json`, `evidence/M0/verification.json` (V01–V08 PASS on evidence captured after the B1 reboot, BEFORE/AFTER diff empty), `evidence/M0/b1/APPLIED.md`, `evidence/M0/review/DECISIONS.md`, `deploy/versions.lock.json` |
+| M1 | NOT_STARTED | Eligible: M0 accepted |
 | M2 | NOT_STARTED | No retrieval/browser implementation performed |
 | M3 | NOT_STARTED | No live REST/private gateway configured |
 | M4 | NOT_STARTED | No project MCP endpoint/client test performed |
@@ -589,7 +589,7 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 
 | ID | Gate | Kind | Smallest input that clears it | Blocks |
 |---|---|---|---|---|
-| B1 | The memory cgroup controller is disabled (the firmware adds `cgroup_disable=memory` to the kernel command line; the controllers are `cpuset cpu io pids`). No container memory cap can be enforced. | OS blocker; owner-approved remedy applied 2026-09-25 (`cgroup_enable=memory` appended, one reboot; `evidence/M0/b1/APPLIED.md`) | None from the owner. The M0 re-check confirms `memory` in `/sys/fs/cgroup/cgroup.controllers` and re-runs V01–V08. | M0 acceptance, M1 |
+| B1 | Memory cgroup controller: enabled. The firmware adds `cgroup_disable=memory`; the owner-approved `cgroup_enable=memory` in `cmdline.txt` overrides it, and the controllers are `cpuset cpu io memory pids` (`evidence/M0/b1/APPLIED.md`). | Cleared 2026-09-25: confirmed by the M0 re-check | None | — |
 | B2 | Fan presence: the owner states a fan is fitted (2026-09-25). M0 read 0 rpm while the fan was commanded at PWM 75, so rpm is not a trusted health signal; thermal checks rely on temperature and `get_throttled`. | Cleared: owner-stated physical fact | None | — |
 | D1 | M2 pins the newest stable Playwright whose bundled Chromium contains the fix for every Chromium bug exploited in the wild at build time (today 1.63.0 qualifies by fix commits; the 1.64 line with Chromium 155 qualifies by version); if none qualifies, browser rendering stays fixture-only. | Decided by the separate review (2026-09-25) | None | M2 |
 | D2 | Keep the 16 KiB-page kernel; M1 proves its images natively as its first step and M2 proves Chromium first; the 4K kernel is proposed only after a reproduced page-size failure that no same-version build clears. | Decided by the separate review (2026-09-25) | None. If the fallback triggers: owner approval of the 4K kernel and one reboot. | M1/M2 |
@@ -600,4 +600,4 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 
 The separate review, a fresh Opus 5.5 session at xhigh effort that read the evidence and both canonical documents rather than the M0 transcript, decided D1–D6 on 2026-09-25; the decisions, their evidence, the rejected alternatives and what each one obliges are in `evidence/M0/review/DECISIONS.md`. Expected later gates, not current failures: provider credentials and explicit budget or free-credit permission (M5–M7); Tailscale installation and account association (M3); an off-device backup destination and recovery-key custody (M8). The microSD-only storage permits the spec §21.1 pilot; whether the card meets final unattended acceptance is an M8 question.
 
-**Next authorized implementation action:** the M0 re-check (memory controller present, V01–V08). M1 stays ineligible until M0 is ACCEPTED.
+**Next authorized implementation action:** M1 (durable, private Firecrawl core), applying the D1–D6 decisions and the M1 deltas in `evidence/M0/review/DECISIONS.md`.

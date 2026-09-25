@@ -1,0 +1,59 @@
+# B1 attribution: M0 AFTER (pre-B1, 2026-09-25T04:32:07Z b1 copy) vs re-check BEFORE (2026-09-25T06:22:35Z)
+# boot_id: changed (B1 reboot)
+13c13
+< findmnt	/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=37,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=4541
+---
+> findmnt	/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=37,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=2585
+80d79
+< lsmod	tcp_diag 49152
+92,96c91,95
+< ss_listen	tcp 0.0.0.0:22 users:(("sshd",pid=977,fd=6))
+< ss_listen	tcp 0.0.0.0:443 users:(("pihole-FTL",pid=969,fd=36))
+< ss_listen	tcp 0.0.0.0:53 users:(("pihole-FTL",pid=969,fd=22))
+< ss_listen	tcp 0.0.0.0:80 users:(("pihole-FTL",pid=969,fd=35))
+< ss_listen	tcp 0.0.0.0:8080 users:(("python",pid=982,fd=3))
+---
+> ss_listen	tcp 0.0.0.0:22 users:(("sshd",pid=973,fd=6))
+> ss_listen	tcp 0.0.0.0:443 users:(("pihole-FTL",pid=966,fd=36))
+> ss_listen	tcp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=22))
+> ss_listen	tcp 0.0.0.0:80 users:(("pihole-FTL",pid=966,fd=35))
+> ss_listen	tcp 0.0.0.0:8080 users:(("python",pid=978,fd=3))
+98,111c97,112
+< ss_listen	tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=936,fd=7),("systemd",pid=1,fd=167))
+< ss_listen	tcp [::]:22 users:(("sshd",pid=977,fd=7))
+< ss_listen	tcp [::]:443 users:(("pihole-FTL",pid=969,fd=38))
+< ss_listen	tcp [::]:53 users:(("pihole-FTL",pid=969,fd=24))
+< ss_listen	tcp [::]:80 users:(("pihole-FTL",pid=969,fd=37))
+< ss_listen	udp *:123 users:(("pihole-FTL",pid=969,fd=42))
+< ss_listen	udp *:42606 users:(("avahi-daemon",pid=595,fd=15))
+< ss_listen	udp *:53 users:(("pihole-FTL",pid=969,fd=23))
+< ss_listen	udp *:5353 users:(("avahi-daemon",pid=595,fd=13))
+< ss_listen	udp 0.0.0.0:123 users:(("pihole-FTL",pid=969,fd=41))
+< ss_listen	udp 0.0.0.0:34632 users:(("avahi-daemon",pid=595,fd=14))
+< ss_listen	udp 0.0.0.0:53 users:(("pihole-FTL",pid=969,fd=21))
+< ss_listen	udp 0.0.0.0:5353 users:(("avahi-daemon",pid=595,fd=12))
+< ss_listen	udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=936,fd=8),("systemd",pid=1,fd=168))
+---
+> ss_listen	tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=7),("systemd",pid=1,fd=150))
+> ss_listen	tcp [::]:22 users:(("sshd",pid=973,fd=7))
+> ss_listen	tcp [::]:443 users:(("pihole-FTL",pid=966,fd=38))
+> ss_listen	tcp [::]:53 users:(("pihole-FTL",pid=966,fd=24))
+> ss_listen	tcp [::]:80 users:(("pihole-FTL",pid=966,fd=37))
+> ss_listen	udp *:123 users:(("pihole-FTL",pid=966,fd=44))
+> ss_listen	udp *:33469 users:(("avahi-daemon",pid=592,fd=15))
+> ss_listen	udp *:53 users:(("pihole-FTL",pid=966,fd=23))
+> ss_listen	udp *:5353 users:(("avahi-daemon",pid=592,fd=13))
+> ss_listen	udp 0.0.0.0:123 users:(("pihole-FTL",pid=966,fd=43))
+> ss_listen	udp 0.0.0.0:35401 users:(("pihole-FTL",pid=966,fd=41))
+> ss_listen	udp 0.0.0.0:37382 users:(("avahi-daemon",pid=592,fd=14))
+> ss_listen	udp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=21))
+> ss_listen	udp 0.0.0.0:5353 users:(("avahi-daemon",pid=592,fd=12))
+> ss_listen	udp 0.0.0.0:59635 users:(("pihole-FTL",pid=966,fd=42))
+> ss_listen	udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=8),("systemd",pid=1,fd=151))
+157a159
+> systemd_running	polkit.service
+# Attribution of every line above:
+#   ss_listen pids, fds and avahi/pihole-FTL high UDP ports; binfmt_misc pipe_ino: new process and socket identities after the B1 reboot.
+#   lsmod tcp_diag absent: not yet loaded in the new boot. The first re-check BEFORE snapshot's `ss` loaded it (M0 INTERPRETATION §7); that snapshot was retaken so the re-check window starts with it loaded.
+#   systemd_running polkit.service: D-Bus-activated at 2026-09-25T05:20:56Z during the Wi-Fi recovery (NetworkManager authorisation for nmcli profile changes); stays resident.
+# No unit, mount, firewall, swap or listening service was added or removed apart from polkit.

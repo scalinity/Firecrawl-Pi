@@ -1,6 +1,6 @@
 # M0 interpretation — read-only audit and frozen baseline
 
-Audit window 2026-09-25 03:15Z–04:00Z (UTC). Target `danny@pi.local` (158.205.34.18). Upstream `firecrawl/firecrawl` v2.11.162 → `7666c1f9ae8720a6bba271e0f60b6a217f8a5210`.
+Audit window 2026-09-25 03:15Z–04:00Z (UTC); re-check window after the B1 reboot 06:23Z–06:34Z. Target `danny@pi.local` (158.205.34.18). Upstream `firecrawl/firecrawl` v2.11.162 → `7666c1f9ae8720a6bba271e0f60b6a217f8a5210`.
 
 - **Machine-readable record:** `audit.json`.
 - **Checks:** `verification.json`.
@@ -8,30 +8,29 @@ Audit window 2026-09-25 03:15Z–04:00Z (UTC). Target `danny@pi.local` (158.205.
 - **Stored only as SHA-256 values:** the board serial, machine-id, MAC addresses and the home egress IP.
 - **Where state lives:** the milestone state and the owner-input register are held in `docs/FIRECRAWL_PI_MILESTONES.md`. This file carries the evidence and reasoning behind them.
 
-**State: BLOCKED.** The host fits the proposed budget on paper, but it cannot enforce any container memory cap, because the kernel runs with the memory cgroup controller disabled (blocker B1). Six baseline decisions (D1–D6) await the separate review. M0 is not ACCEPTED until B1 is cleared and D1–D6 are decided.
+**State: ACCEPTED.** The host fits the proposed budget, and the memory cgroup controller is active after the owner-approved B1 change, so container memory caps are enforceable. The separate review decided D1–D6 (`review/DECISIONS.md`). V01–V08 pass on evidence captured after the B1 reboot.
 
 ## 1. Host-fit verdict
 
 | Measure (raw source: P1 `pi-audit.txt`) | Value |
 |---|---|
 | MemTotal | 8,255,888 kB = **8,062.39 MiB** |
-| MemAvailable | 7,922,912 kB = 7,737.22 MiB |
-| Existing usage (MemTotal − MemAvailable) | **325.17 MiB** |
+| MemAvailable | 7,901,136 kB = 7,715.95 MiB |
+| Existing usage (MemTotal − MemAvailable) | **346.44 MiB** |
 | Container caps (spec §22) + host reserve | 6,432 + 1,024 = **7,456 MiB** |
-| Headroom | **+281.22 MiB → fits** |
-| Root free space vs 20 GiB | 54,828,023,808 B = **51.06 GiB ≥ 20 GiB** |
-| Free inodes (root) | 3,648,813 of 3,692,928 |
+| Headroom | **+259.95 MiB → fits** |
+| Root free space vs 20 GiB | 54,830,821,376 B = **51.06 GiB ≥ 20 GiB** |
+| Free inodes (root) | 3,648,806 of 3,692,928 |
 
-- **Existing workload:** Pi-hole FTL, Mosquitto, dnscrypt-proxy, fail2ban, three owner air-quality services (`airdb`, `airlogger`, `airmonitor`), avahi, NetworkManager/wpa_supplicant. Load 0.07.
-- **OOM kills:** none in the retained journal. That journal is size-limited to about two hours, from 2026-09-25T01:42:08Z, so it cannot speak for the whole 2.3-day uptime.
-- **Limits of the fit figure:** it is arithmetic from idle samples (a first run and a re-run agree within 3 MiB), with a thin margin. Existing services' peaks cannot be measured without the memory controller. `/tmp` and `/dev/shm` are RAM-backed tmpfs of up to 4 GiB each. M2 and M8 replace this estimate with measurement.
+- **Existing workload:** Pi-hole FTL, Mosquitto, dnscrypt-proxy, fail2ban, three owner air-quality services (`airdb`, `airlogger`, `airmonitor`), avahi, NetworkManager/wpa_supplicant, and polkit (started on demand during the Wi-Fi recovery). Load 0.00.
+- **OOM kills:** none in the retained journal, which starts 2026-09-25T03:07:37Z and covers four boots. It is size-limited, so it cannot speak for earlier uptime.
+- **Limits of the fit figure:** it is arithmetic from idle samples with a thin margin. The pre-reboot figure was 21 MiB lower (325.17 MiB usage, 281.22 MiB headroom), which is the scale of normal idle variation. Per-unit memory is now readable: `system.slice` measured 350.7 MB current and 360.7 MB peak (P1 `unit_memory`). `/tmp` and `/dev/shm` are RAM-backed tmpfs of up to 4 GiB each. M2 and M8 replace this estimate with measurement.
 - **If a shortfall appears later:** spec §22's first remedy is to reduce overlapping work, and the second is to reduce optional resident services. M0 rebalanced no cap.
 
-**B1 — memory controller disabled (OS blocker).** The kernel command line carries `cgroup_disable=memory`. The cgroup v2 controllers are `cpuset cpu io pids`; `CONFIG_MEMCG=y` is built in. `/boot/firmware/cmdline.txt` does not contain the flag: the firmware adds it to the boot arguments. Without the controller, Docker cannot enforce `mem_limit`. That makes three requirements impossible: the spec §22 caps, the browser-crash isolation of CLAUDE.md §14, and M1's "effective cgroup caps" check.
+**B1 — memory controller (resolved).** The firmware adds `cgroup_disable=memory` to the kernel command line; `/boot/firmware/cmdline.txt` does not contain it. With the owner's approval, `cgroup_enable=memory` was appended to `cmdline.txt` and the host rebooted once (`b1/APPLIED.md`). The kernel applies the later token, so `/proc/cmdline` now carries both, enable last. The cgroup v2 controllers are `cpuset cpu io memory pids`, and the root delegates `cpu memory pids` to its children. `CONFIG_MEMCG=y` is built in. Docker can therefore enforce `mem_limit` for the spec §22 caps, the browser-crash isolation of CLAUDE.md §14, and M1's "effective cgroup caps" check.
 
-- **Proposed remedy:** append `cgroup_enable=memory` to `/boot/firmware/cmdline.txt` and reboot once. That is the conventional Raspberry Pi kernel override; confirm it worked by checking that `memory` appears in `/sys/fs/cgroup/cgroup.controllers`.
-- **Rollback:** remove the token and reboot.
-- **Why it needs the owner:** it edits the boot configuration and reboots a host that serves household DNS through Pi-hole. That is outside M0's read-only scope and outside project-owned state.
+- **Rollback:** `sudo cp -p /boot/firmware/cmdline.txt.pre-B1 /boot/firmware/cmdline.txt` and reboot.
+- **Reboot side effects:** new process and socket identities; `polkit.service` resident. `b1/reboot-diff.txt` attributes every line. The host stayed off the LAN for 53 minutes because its stored Wi-Fi key no longer matched the owner's network; that is unrelated to B1 (`b1/APPLIED.md`).
 
 ## 2. Storage plan
 
@@ -102,9 +101,9 @@ Reproducibility gaps any source build must close:
 
 The NuQ image is a small layer (`postgres:17.11-trixie` plus pg_cron `1.6.8-1.pgdg13+2` from PGDG), so it builds acceptably on either machine.
 
-## 5. Decisions awaiting the separate review
+## 5. Baseline decisions
 
-Each decision below is a change to the pinned baseline or a native-build uncertainty that later milestones inherit. M0 changed neither canonical document.
+The separate review decided D1–D6 in `review/DECISIONS.md`, which governs and records the canonical edits it made. The evidence and proposals below are M0's input to that review.
 
 - **D1 — Browser version (security).**
   - *Evidence:* pinned Playwright 1.58.1 bundles Chromium 145.0.7632.6 (rev 1208), and its arm64 archives exist. Since 2026-07-30, Chrome stable has shipped 829 security fixes. Two V8 bugs were exploited in the wild: CVE-2026-85046 (fixed in 152.0.7977.82) and CVE-2026-87491 (fixed in 153.0.8010.36). Playwright 1.63.0 bundles 153.0.8010.12, which is still below that last fix.
@@ -135,14 +134,17 @@ Each decision below is a change to the pinned baseline or a native-build uncerta
   - redirect-to-blocklist fix `58d0c8ebb6`;
   - the unauthenticated `/admin/integration/*` proxy to `integrations.firecrawl.dev`. The gateway must never route `/admin/*`.
 
-## 6. Owner input registered
+## 6. Owner input
 
-- **B1:** approve adding `cgroup_enable=memory` to `/boot/firmware/cmdline.txt` and one reboot, and name a time when a short DNS/MQTT outage is acceptable.
-- **B2:** is a fan fitted to the Pi (for example, the Active Cooler)? The software cannot tell. In the first P1 run the fan was commanded (PWM 75/255) and read 0 rpm; a fan without a tachometer and an absent fan give the same reading (git `m0-first-run:evidence/M0/raw/pi-audit.txt`). The re-run caught the fan idle at 47.7 °C (PWM 0). Other readings: `get_throttled=0x0` since boot; EXT5V 5.18 V; `usb_max_current_enable=1`.
+- **B1:** approved 2026-09-25 and applied (§1).
+- **B2:** the owner states a fan is fitted. The probe cannot see it: in the first P1 run the fan was commanded (PWM 75/255) and read 0 rpm (git `m0-first-run:evidence/M0/raw/pi-audit.txt`), and the re-check caught it idle at 43.3 °C (PWM 0). Thermal checks therefore rely on temperature and `get_throttled` (`0x0` since boot), not rpm.
+- **Still open, from the review:** yes or no to a Linux arm64 container runtime on the Mac, before M2's first build (D6).
 
 ## 7. Integrity, side effects and corrections
 
-- **BEFORE vs AFTER:** BEFORE (03:15:30Z, pre-review snapshot script) and AFTER (04:00:17Z, the revised script, taken after the last Pi probe) match. They are compared as section-keyed sorted lines, so the reordered AFTER script remains comparable. Only `session-<n>.scope` lines are excluded, and the boot ID is unchanged (V08).
+- **BEFORE vs AFTER:** the re-check pair, BEFORE (06:23:00Z) and AFTER (06:33:56Z, after the last Pi probe), match. They are compared as section-keyed sorted lines. Only `session-<n>.scope` lines are excluded, and the boot ID is unchanged (V08). The original audit pair (03:15:30Z / 04:00:17Z) also matched; it is in git history, and its AFTER is kept as `b1/snapshot-before.txt`.
+- **Re-check window:** the first BEFORE attempt (06:22:35Z) loaded `tcp_diag` through its own `ss` query, as in the original audit, so BEFORE was retaken with it loaded. The window's only kernel log line is the once-per-boot `/proc/cgroups` notice at 06:28:32Z, from P1's first read of that file (P6).
+- **Imager-id near-miss:** after the reboot, the retained kernel log reaches back to boot time, where the kernel prints the imager instance id. The first re-check P6 transcript carried it unmasked; it was overwritten before any commit, P6 now masks it on the Pi as P1 does, and P6 and AFTER were re-run. V07 gained an `imager-instance-id` rule, with a matching positive-control line.
 - **Side effects of the audit's own access:**
   - SSH and sudo entries in the journal and auth log.
   - `user@1000.service` and `/run/user/1000` running for each login; both are present in both snapshots.
@@ -169,5 +171,7 @@ Each decision below is a change to the pinned baseline or a native-build uncerta
 - **Snapshots:** `snapshot-{before,after,diff}.txt`
 - **Raw transcripts:** `raw/pi-audit{,-extra,-extra-ipecho,-paths,-layout,-kernel-log}.txt`
 - **Findings:** `network-exposure.json` · `runtime-candidates.json` · `source-review.json` · `security-review.md`
+- **B1 record:** `b1/APPLIED.md` · `b1/snapshot-before.txt` (pre-change) · `b1/reboot-diff.txt` (attributed reboot changes)
+- **Separate review:** `review/DECISIONS.md` · `review/sources/`
 - **Saved retrievals:** `sources/` (lockfile backing) · `upstream/` (source findings, raw extracts) · `registry/` (index and arm64 manifest bytes, `digests.jsonl`)
 - **Lockfile:** `../../deploy/versions.lock.json`

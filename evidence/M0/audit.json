@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m0.audit/v1",
-  "generated_utc": "2026-09-25T04:16:31Z",
-  "repository_sha": "433eda001bb91adf27d0711d52d07ea28da48b08",
+  "generated_utc": "2026-09-25T06:34:06Z",
+  "repository_sha": "774e722a0929d33cf53dc73e73f29c133dc2e0b5",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores this file is a later one on main.",
   "upstream": {
@@ -17,12 +17,12 @@
     {
       "id": "P0-before",
       "script": "scripts/m0/pi-snapshot.sh",
-      "script_commit": "4197069",
-      "script_sha256": "61d4288a5dc29f81106672b01e0e299e6f509a8f5af3c9167fb37230773cf602",
+      "script_commit": "a1f15eb",
+      "script_sha256": "927ed88b1c73c57797026aa17c98099dd086ded2e6f35954a58d2a5533665e54",
       "output": "evidence/M0/snapshot-before.txt",
-      "output_sha256": "f3aa859d5a0bc600826cc14cc9c404459052996eb3ddcc29304c2c8dda2214a1",
-      "utc": "2026-09-25T03:15:30Z",
-      "note": "Taken with the pre-review snapshot script, which read lsmod after ss. snapshot-diff compares section-keyed lines, so the reordered AFTER script remains comparable."
+      "output_sha256": "b85aa6db3846ceb46b1ad090fb8e35e29f048323dfbf369062c70ef9a84136b3",
+      "utc": "2026-09-25T06:23:00Z",
+      "note": "Opens the M0 re-check window after the B1 reboot. Taken a second time, once the first attempt's ss had loaded tcp_diag in the new boot, so the window starts from a settled module list (evidence/M0/b1/reboot-diff.txt)."
     },
     {
       "id": "P1-audit",
@@ -30,9 +30,9 @@
       "script_commit": "4ff781f",
       "script_sha256": "843acf16e842c990757379a577bdc612e5a4ea8ea5439c31c4c8ff1d0a17fa6f",
       "output": "evidence/M0/raw/pi-audit.txt",
-      "output_sha256": "c8b64073a34240dfbe590ec5ac497076dd1d63b584f8f58241a08ef1b00a80fb",
-      "utc": "2026-09-25T03:55:27Z",
-      "note": "Re-run after review. The superseded first run is in git at tag m0-first-run."
+      "output_sha256": "f0389fe3631f1510dd2bd7042f6d2f4910cbaeb43008c1cf10b9398580a0d0cd",
+      "utc": "2026-09-25T06:28:32Z",
+      "note": "Re-run in the M0 re-check after the B1 reboot. Superseded runs are in git: the first at tag m0-first-run, the post-review run at commit 6018582."
     },
     {
       "id": "P2-audit-extra",
@@ -40,9 +40,9 @@
       "script_commit": "27f1136",
       "script_sha256": "cd20227c87efe52251d3f2861be4d836cd561899dbae3be73a2f9f48aff15332",
       "output": "evidence/M0/raw/pi-audit-extra.txt",
-      "output_sha256": "a639a0c9369539c74514cf085c4b2fb3b7afc2344cd9084788ffbf525397abcf",
-      "utc": "2026-09-25T03:55:29Z",
-      "note": "Re-run after review with FCPI_SKIP_IP_ECHO=1; no IP-echo request was sent."
+      "output_sha256": "05ae77497a5467719528e2123107e50cf63fe012e8854b4fc2aeedc51d049cd7",
+      "utc": "2026-09-25T06:28:35Z",
+      "note": "Re-run in the M0 re-check with FCPI_SKIP_IP_ECHO=1; no IP-echo request was sent."
     },
     {
       "id": "P2e-ip-echo",
@@ -60,8 +60,8 @@
       "script_commit": "4197069",
       "script_sha256": "8eb9a959822e4f0ceca397fef94cca55878dd1c250f3aad3e2e153f7080465a0",
       "output": "evidence/M0/raw/pi-audit-paths.txt",
-      "output_sha256": "c9c680b56db084a9c76ae689f753ee4097d6893689f4516ffad5c4836ab995fa",
-      "utc": "2026-09-25T03:30:38Z",
+      "output_sha256": "9128839f27d00fa7baef5c6d99a80acbd33b462e1e4844d9f60fe3a2e64cd31a",
+      "utc": "2026-09-25T06:28:35Z",
       "note": "Tool presence with an explicit PATH; P1 now sets PATH itself, so P3 and P1 agree."
     },
     {
@@ -70,18 +70,18 @@
       "script_commit": "4197069",
       "script_sha256": "7f17b0dc30a9741559e88c9c18dcf31768c446c0ed9ff7e81f029f6605788278",
       "output": "evidence/M0/raw/pi-audit-layout.txt",
-      "output_sha256": "af7540b23ac171c690f53948f0ed61ff8f0030fd37e1f2992c45ee6add9d5f00",
-      "utc": "2026-09-25T03:36:11Z"
+      "output_sha256": "3f8862dcd4c21cce45f62c4bc92e3984833a4de5fbc01129d60fe15e5b8911c8",
+      "utc": "2026-09-25T06:28:36Z"
     },
     {
       "id": "P6-kernel-log",
       "script": "scripts/m0/pi-audit-kernel-log.sh",
-      "script_commit": "621b782",
-      "script_sha256": "3c60e106ee9879cc8c18ddf3cd59b52d165a6b723b6cbbe60fc9bbd77617328c",
+      "script_commit": "774e722",
+      "script_sha256": "8f84fbea3b3e3d55e8203b61effce3ad4db4a6490a259e999f8fe6fea514808e",
       "output": "evidence/M0/raw/pi-audit-kernel-log.txt",
-      "output_sha256": "03085583351e32ea8338275e1655b3ac920532efbca367ee3e2339d7b6459713",
-      "utc": "2026-09-25T03:56:23Z",
-      "note": "Retained kernel log; attributes the audit's only kernel-log line (the /proc/cgroups notice at the first P1 run)."
+      "output_sha256": "a67703b8d62282a3655d1fdf2cb18333df6aaa0bc01103be94d782b5b72db00e",
+      "utc": "2026-09-25T06:33:55Z",
+      "note": "Retained kernel log; attributes the re-check's only kernel-log line (the /proc/cgroups notice, printed once per boot at P1's first read of that file)."
     },
     {
       "id": "P5-after",
@@ -89,8 +89,8 @@
       "script_commit": "a1f15eb",
       "script_sha256": "927ed88b1c73c57797026aa17c98099dd086ded2e6f35954a58d2a5533665e54",
       "output": "evidence/M0/snapshot-after.txt",
-      "output_sha256": "d9b00672ac758ee9a3aa2ef987d0624b695ddfe543dd48bb4a325c8f052c9872",
-      "utc": "2026-09-25T04:00:17Z",
+      "output_sha256": "d2f4bb409e1fc5984c25ac9402de7d5c9f77502c6f87810a24d0551f7aba378a",
+      "utc": "2026-09-25T06:33:56Z",
       "note": "Last Pi probe of the session; compared with P0 by scripts/m0/snapshot-diff.sh."
     }
   ],
@@ -177,12 +177,12 @@
         "governor": "ondemand",
         "meminfo_kib": {
           "MemTotal": 8255888,
-          "MemAvailable": 7922912,
-          "MemFree": 7543424,
-          "Buffers": 93072,
-          "Cached": 343568,
-          "Shmem": 8256,
-          "AnonPages": 105664,
+          "MemAvailable": 7901136,
+          "MemFree": 7664320,
+          "Buffers": 38016,
+          "Cached": 257712,
+          "Shmem": 8400,
+          "AnonPages": 125392,
           "SwapTotal": 2097136,
           "CmaTotal": 65536
         },
@@ -203,10 +203,12 @@
           "cpuset",
           "cpu",
           "io",
+          "memory",
           "pids"
         ],
-        "memory_controller_available": false,
+        "memory_controller_available": true,
         "kernel_cmdline_has_cgroup_disable_memory": true,
+        "kernel_cmdline_cgroup_enable_memory_after_disable": true,
         "cmdline_txt_has_cgroup_disable_memory": false,
         "config_memcg": true,
         "psi_available": false
@@ -236,9 +238,9 @@
         "zram_writeback_backing_dev": "/dev/loop0",
         "zram_writeback_backing_file": "/var/swap",
         "zram_writeback_bd_stat": [
-          4,
           0,
-          4
+          0,
+          0
         ],
         "zram_writeback_timer": {
           "OnBootSec": "180min",
@@ -358,7 +360,7 @@
           "fs_error_count_recorded": false,
           "lifetime_writes": "137 GB",
           "created": "Wed Jun 17 20:26:23 2026",
-          "mount_count": 189
+          "mount_count": 192
         },
         "boot_firmware": {
           "fstype": "vfat",
@@ -388,13 +390,13 @@
       "value": {
         "root": {
           "size_bytes": 62295171072,
-          "used_bytes": 4898029568,
-          "avail_bytes": 54828023808,
+          "used_bytes": 4895232000,
+          "avail_bytes": 54830821376,
           "inodes": 3692928,
-          "inodes_used": 44115,
-          "inodes_free": 3648813
+          "inodes_used": 44122,
+          "inodes_free": 3648806
         },
-        "boot_firmware_avail_bytes": 476956672
+        "boot_firmware_avail_bytes": 476956160
       }
     },
     "docker_compose_versions": {
@@ -450,6 +452,7 @@
           "mosquitto.service",
           "NetworkManager.service",
           "pihole-FTL.service",
+          "polkit.service",
           "ssh.service",
           "systemd-journald.service",
           "systemd-logind.service",
@@ -483,6 +486,20 @@
           "proto": "udp",
           "state": "UNCONN",
           "address": "0.0.0.0",
+          "port": 59635,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "0.0.0.0",
+          "port": 35401,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "0.0.0.0",
           "port": 53,
           "process": "pihole-FTL"
         },
@@ -492,6 +509,13 @@
           "address": "0.0.0.0",
           "port": 123,
           "process": "pihole-FTL"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "0.0.0.0",
+          "port": 37382,
+          "process": "avahi-daemon"
         },
         {
           "proto": "udp",
@@ -510,13 +534,6 @@
         {
           "proto": "udp",
           "state": "UNCONN",
-          "address": "0.0.0.0",
-          "port": 34632,
-          "process": "avahi-daemon"
-        },
-        {
-          "proto": "udp",
-          "state": "UNCONN",
           "address": "*",
           "port": 53,
           "process": "pihole-FTL"
@@ -532,22 +549,29 @@
           "proto": "udp",
           "state": "UNCONN",
           "address": "*",
-          "port": 5353,
+          "port": 33469,
           "process": "avahi-daemon"
         },
         {
           "proto": "udp",
           "state": "UNCONN",
           "address": "*",
-          "port": 42606,
+          "port": 5353,
           "process": "avahi-daemon"
         },
         {
           "proto": "tcp",
           "state": "LISTEN",
           "address": "0.0.0.0",
-          "port": 80,
-          "process": "pihole-FTL"
+          "port": 1883,
+          "process": "mosquitto"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 9001,
+          "process": "mosquitto"
         },
         {
           "proto": "tcp",
@@ -561,6 +585,13 @@
           "state": "LISTEN",
           "address": "0.0.0.0",
           "port": 53,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 80,
           "process": "pihole-FTL"
         },
         {
@@ -574,15 +605,8 @@
           "proto": "tcp",
           "state": "LISTEN",
           "address": "0.0.0.0",
-          "port": 9001,
-          "process": "mosquitto"
-        },
-        {
-          "proto": "tcp",
-          "state": "LISTEN",
-          "address": "0.0.0.0",
-          "port": 1883,
-          "process": "mosquitto"
+          "port": 8080,
+          "process": "python"
         },
         {
           "proto": "tcp",
@@ -590,20 +614,6 @@
           "address": "127.0.0.1",
           "port": 5053,
           "process": "dnscrypt-proxy"
-        },
-        {
-          "proto": "tcp",
-          "state": "LISTEN",
-          "address": "0.0.0.0",
-          "port": 8080,
-          "process": "python"
-        },
-        {
-          "proto": "tcp",
-          "state": "LISTEN",
-          "address": "[::]",
-          "port": 80,
-          "process": "pihole-FTL"
         },
         {
           "proto": "tcp",
@@ -617,6 +627,13 @@
           "state": "LISTEN",
           "address": "[::]",
           "port": 53,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "[::]",
+          "port": 80,
           "process": "pihole-FTL"
         },
         {
@@ -741,9 +758,9 @@
         "evidence/M0/raw/pi-audit.txt#thermal_power"
       ],
       "value": {
-        "vcgencmd_temp": "temp=47.7'C",
-        "thermal_zone0_mC": 46850,
-        "rp1_adc_temp_mC": 48499,
+        "vcgencmd_temp": "temp=43.3'C",
+        "thermal_zone0_mC": 43550,
+        "rp1_adc_temp_mC": 47337,
         "cooling_device": {
           "type": "pwm-fan",
           "cur_state": 0,
@@ -763,7 +780,7 @@
         "get_throttled": "throttled=0x0",
         "throttled_bits": 0,
         "throttled_decoded": "no under-voltage, frequency capping, throttling or soft temperature limit, now or since boot",
-        "ext5v_volts": 5.17642,
+        "ext5v_volts": 5.1925,
         "usb_max_current_enable": "usb_max_current_enable=1",
         "core_volts": "volt=0.8695V",
         "bootloader": "2226a853bb9f5fd80392e3a4a89e457aeca88008"
@@ -779,91 +796,91 @@
         "evidence/M0/raw/pi-audit.txt#kernel_log_storage_power"
       ],
       "value": {
-        "loadavg": "0.07 0.08 0.03 1/187 431943",
-        "uptime_s": 202960.57,
-        "existing_usage_mib": 325.17,
+        "loadavg": "0.00 0.02 0.00 1/201 14156",
+        "uptime_s": 5549.32,
+        "existing_usage_mib": 346.44,
         "top_rss_kib": [
           {
             "comm": "fail2ban-server",
             "user": "root",
-            "rss_kib": 30720
+            "rss_kib": 30848
           },
           {
             "comm": "python",
             "user": "danny",
-            "rss_kib": 29888
+            "rss_kib": 29968
           },
           {
             "comm": "python",
             "user": "danny",
-            "rss_kib": 25360
+            "rss_kib": 25104
           },
           {
             "comm": "NetworkManager",
             "user": "root",
-            "rss_kib": 21456
+            "rss_kib": 21968
           },
           {
             "comm": "python",
             "user": "danny",
-            "rss_kib": 19136
+            "rss_kib": 19120
           },
           {
             "comm": "dnscrypt-proxy",
             "user": "_dnscry+",
-            "rss_kib": 18256
+            "rss_kib": 18224
           },
           {
             "comm": "systemd",
             "user": "root",
-            "rss_kib": 15632
-          },
-          {
-            "comm": "systemd-journal",
-            "user": "root",
-            "rss_kib": 14576
+            "rss_kib": 15488
           },
           {
             "comm": "pihole-FTL",
             "user": "pihole",
-            "rss_kib": 13696
-          },
-          {
-            "comm": "systemd",
-            "user": "danny",
-            "rss_kib": 12720
-          },
-          {
-            "comm": "wpa_supplicant",
-            "user": "root",
-            "rss_kib": 12336
+            "rss_kib": 14672
           },
           {
             "comm": "sshd-session",
             "user": "root",
-            "rss_kib": 11632
+            "rss_kib": 12848
           },
           {
-            "comm": "mosquitto",
-            "user": "mosquit+",
-            "rss_kib": 11504
-          },
-          {
-            "comm": "systemd-udevd",
+            "comm": "sshd-session",
             "user": "root",
-            "rss_kib": 10816
+            "rss_kib": 12832
           },
           {
-            "comm": "systemd-logind",
+            "comm": "wpa_supplicant",
             "user": "root",
-            "rss_kib": 9440
+            "rss_kib": 12736
+          },
+          {
+            "comm": "systemd",
+            "user": "danny",
+            "rss_kib": 12672
+          },
+          {
+            "comm": "sshd-session",
+            "user": "root",
+            "rss_kib": 12512
+          },
+          {
+            "comm": "systemd-journal",
+            "user": "root",
+            "rss_kib": 11920
+          },
+          {
+            "comm": "sshd-session",
+            "user": "root",
+            "rss_kib": 11648
           }
         ],
-        "per_unit_cgroup_memory_available": false,
+        "per_unit_cgroup_memory_available": true,
         "oom_kills_in_retained_journal": 0,
         "journal_window": {
-          "boots_recorded": 1,
-          "first_entry_utc": "2026-09-25T01:42:08Z",
+          "boots_recorded": 4,
+          "first_entry_utc": "2026-09-25T03:07:37Z",
           "first_entry_note": "the probe cut the timestamp one character short (+00:0); the offset is UTC",
           "note": "The persistent journal is size-limited: it retains roughly the last two hours, not the whole boot."
         }
@@ -871,11 +888,6 @@
     }
   },
   "unavailable": [
-    {
-      "field": "per-unit memory usage and peaks",
-      "reason": "memory cgroup controller disabled (cgroup_disable=memory); memory.current/memory.peak absent",
-      "substitute": "host MemTotal-MemAvailable plus per-process RSS"
-    },
     {
       "field": "pressure stall information",
       "reason": "/proc/pressure absent on this kernel boot"
@@ -890,8 +902,9 @@
       "substitute": "ext4 state clean, no FS error record, Lifetime writes baseline, no mmc/ext4 errors in the retained kernel log"
     },
     {
-      "field": "fan presence",
-      "reason": "a tachometer reading of 0 rpm is identical for a tach-less fan and an absent fan (first P1 run: pwm 75, 0 rpm; see git tag m0-first-run)"
+      "field": "fan presence (by probe)",
+      "reason": "a tachometer reading of 0 rpm is identical for a tach-less fan and an absent fan (first P1 run: pwm 75, 0 rpm; see git tag m0-first-run)",
+      "substitute": "the owner states a fan is fitted (register B2, 2026-09-25); thermal checks use temperature and get_throttled, not rpm"
     },
     {
       "field": "sustained-load thermal behaviour",
@@ -960,11 +973,11 @@
     "egress_ip_differs_from_interface": true,
     "inbound_evidence": {
       "local_cidr": "158.205.34.18/24",
-      "local_subnet": "43",
-      "outside_subnet": "0",
-      "distinct_outside_sources": "0",
-      "journal_first_entry": "2026-09-24T22:06:08-04:00",
-      "preauth_or_invalid_user_lines": "0",
+      "local_subnet": "47",
+      "outside_subnet": "182",
+      "distinct_outside_sources": "1",
+      "journal_first_entry": "2026-09-24T23:11:22-04:00",
+      "preauth_or_invalid_user_lines": "1",
       "source": "evidence/M0/raw/pi-audit-extra.txt#inbound_evidence"
     },
     "fail2ban_sshd": [
@@ -977,17 +990,17 @@
   "derived": {
     "resource_fit": {
       "mem_total_mib": 8062.39,
-      "mem_available_mib": 7737.22,
-      "existing_usage_mib": 325.17,
+      "mem_available_mib": 7715.95,
+      "existing_usage_mib": 346.44,
       "cap_sum_mib": 6432,
       "reserve_mib": 1024,
       "required_mib": 7456,
-      "headroom_mib": 281.22,
+      "headroom_mib": 259.95,
       "fits": true
     },
     "free_space": {
-      "root_avail_bytes": 54828023808,
-      "root_avail_gib": 51.06,
+      "root_avail_bytes": 54830821376,
+      "root_avail_gib": 51.07,
       "threshold_gib": 20,
       "meets_threshold": true
     }

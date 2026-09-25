@@ -31,6 +31,7 @@ const PATTERN_RULES = [
   ["url-credentials", /[a-z][a-z0-9+.-]*:\/\/[^\s/:@<]+:[^\s/@]+@/i],
   ["local-path", /\/(private\/tmp|Users\/[^\/\s]+|home\/[^\/\s]+)\//],
   ["mac-address", /(?<![0-9A-Fa-f:])(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}(?![0-9A-Fa-f:])/],
+  ["imager-instance-id", /rpi-imager-\d{6,}/],
 ];
 // By-hash rules compare candidate tokens with the identities recorded (as hashes) on the Pi,
 // whatever surrounds them, e.g. the machine-id inside a journald directory path.

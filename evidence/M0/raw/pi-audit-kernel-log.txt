@@ -1,46 +1,245 @@
 ### probe_time
-2026-09-25T03:56:23Z
+2026-09-25T06:33:55Z
 ### kernel_log_current_boot
-2026-09-25T03:18:44+00:00 pi kernel: /proc/cgroups lists only v1 controllers, use cgroup.controllers of root cgroup for v2 info
+2026-09-25T04:55:24+00:00 pi kernel: hub 3-0:1.0: 2 ports detected
+2026-09-25T04:55:24+00:00 pi kernel: usb usb4: New USB device found, idVendor=1d6b, idProduct=0003, bcdDevice= 6.18
+2026-09-25T04:55:24+00:00 pi kernel: usb usb4: New USB device strings: Mfr=3, Product=2, SerialNumber=1
+2026-09-25T04:55:24+00:00 pi kernel: usb usb4: Product: xHCI Host Controller
+2026-09-25T04:55:24+00:00 pi kernel: usb usb4: Manufacturer: Linux 6.18.34+rpt-rpi-2712 xhci-hcd
+2026-09-25T04:55:24+00:00 pi kernel: usb usb4: SerialNumber: xhci-hcd.1
+2026-09-25T04:55:24+00:00 pi kernel: hub 4-0:1.0: USB hub found
+2026-09-25T04:55:24+00:00 pi kernel: hub 4-0:1.0: 1 port detected
+2026-09-25T04:55:24+00:00 pi kernel: of_cfs_init
+2026-09-25T04:55:24+00:00 pi kernel: of_cfs_init: OK
+2026-09-25T04:55:24+00:00 pi kernel: clk: Disabling unused clocks
+2026-09-25T04:55:24+00:00 pi kernel: PM: genpd: Disabling unused power domains
+2026-09-25T04:55:24+00:00 pi kernel: mmc0: SDHCI controller on 1000fff000.mmc [1000fff000.mmc] using ADMA 64-bit
+2026-09-25T04:55:24+00:00 pi kernel: mmc0: new UHS-I speed SDR104 SDXC card at address aaaa
+2026-09-25T04:55:24+00:00 pi kernel: mmcblk0: mmc0:aaaa SD64G 59.5 GiB
+2026-09-25T04:55:24+00:00 pi kernel:  mmcblk0: p1 p2
+2026-09-25T04:55:24+00:00 pi kernel: mmcblk0: mmc0:aaaa SD64G 59.5 GiB (quirks 0x00004000)
+2026-09-25T04:55:24+00:00 pi kernel: mmc1: SDHCI controller on 1001100000.mmc [1001100000.mmc] using ADMA 64-bit
+2026-09-25T04:55:24+00:00 pi kernel: Freeing unused kernel memory: 2240K
+2026-09-25T04:55:24+00:00 pi kernel: Run /init as init process
+2026-09-25T04:55:24+00:00 pi kernel:   with arguments:
+2026-09-25T04:55:24+00:00 pi kernel:     /init
+2026-09-25T04:55:24+00:00 pi kernel:   with environment:
+2026-09-25T04:55:24+00:00 pi kernel:     HOME=/
+2026-09-25T04:55:24+00:00 pi kernel:     TERM=linux
+2026-09-25T04:55:24+00:00 pi kernel:     ds=nocloud;i=rpi-imager-<id>
+2026-09-25T04:55:24+00:00 pi kernel: mmc1: new UHS-I speed DDR50 SDIO card at address 0001
+2026-09-25T04:55:24+00:00 pi kernel: usb 1-1: new full-speed USB device number 2 using xhci-hcd
+2026-09-25T04:55:24+00:00 pi kernel: usb 3-1: new full-speed USB device number 2 using xhci-hcd
+2026-09-25T04:55:24+00:00 pi kernel: brcmstb-i2c 107d508200.i2c:  @97500hz registered in interrupt mode
+2026-09-25T04:55:24+00:00 pi kernel: brcmstb-i2c 107d508280.i2c:  @97500hz registered in interrupt mode
+2026-09-25T04:55:24+00:00 pi kernel: input: pwr_button as /devices/platform/pwr_button/input/input0
+2026-09-25T04:55:24+00:00 pi kernel: usb 1-1: New USB device found, idVendor=1a86, idProduct=7523, bcdDevice= 2.64
+2026-09-25T04:55:24+00:00 pi kernel: usb 1-1: New USB device strings: Mfr=0, Product=2, SerialNumber=0
+2026-09-25T04:55:24+00:00 pi kernel: usb 1-1: Product: USB Serial
+2026-09-25T04:55:24+00:00 pi kernel: usb 3-1: New USB device found, idVendor=1a86, idProduct=7523, bcdDevice= 2.64
+2026-09-25T04:55:24+00:00 pi kernel: usb 3-1: New USB device strings: Mfr=0, Product=2, SerialNumber=0
+2026-09-25T04:55:24+00:00 pi kernel: usb 3-1: Product: USB Serial
+2026-09-25T04:55:24+00:00 pi kernel: EXT4-fs (mmcblk0p2): orphan cleanup on readonly fs
+2026-09-25T04:55:24+00:00 pi kernel: EXT4-fs (mmcblk0p2): mounted filesystem 15f4c6be-1102-4331-9904-f78e78afd1fd ro with ordered data mode. Quota mode: none.
+2026-09-25T04:55:24+00:00 pi systemd[1]: System time advanced to timestamp on /var/lib/systemd/timesync/clock: Fri 2026-09-25 00:55:23 EDT
+2026-09-25T04:55:24+00:00 pi kernel: NET: Registered PF_INET6 protocol family
+2026-09-25T04:55:24+00:00 pi kernel: Segment Routing with IPv6
+2026-09-25T04:55:24+00:00 pi kernel: In-situ OAM (IOAM) with IPv6
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd 257.13-1~deb13u1 running in system mode (+PAM +AUDIT +SELINUX +APPARMOR +IMA +IPE +SMACK +SECCOMP +GCRYPT -GNUTLS +OPENSSL +ACL +BLKID +CURL +ELFUTILS +FIDO2 +IDN2 -IDN +IPTC +KMOD +LIBCRYPTSETUP +LIBCRYPTSETUP_PLUGINS +LIBFDISK +PCRE2 +PWQUALITY +P11KIT +QRENCODE +TPM2 +BZIP2 +LZ4 +XZ +ZLIB +ZSTD +BPF_FRAMEWORK +BTF -XKBCOMMON -UTMP +SYSVINIT +LIBARCHIVE)
+2026-09-25T04:55:24+00:00 pi systemd[1]: Detected architecture arm64.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Hostname set to <pi>.
+2026-09-25T04:55:24+00:00 pi systemd[1]: bpf-restrict-fs: BPF LSM hook not enabled in the kernel, BPF LSM not supported.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Using hardware watchdog 'Broadcom BCM2835 Watchdog timer', version 0, device /dev/watchdog0
+2026-09-25T04:55:24+00:00 pi systemd[1]: Watchdog running with a hardware timeout of 1min.
+2026-09-25T04:55:24+00:00 pi zram_generator::config[217]: zram0: system has too much memory (8062MB), limit is 0MB, ignoring.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Queued start job for default target multi-user.target.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Created slice system-getty.slice - Slice /system/getty.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Created slice system-modprobe.slice - Slice /system/modprobe.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Created slice system-rpi\x2dsetup\x2dloop.slice - Slice /system/rpi-setup-loop.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Created slice system-systemd\x2dfsck.slice - Slice /system/systemd-fsck.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Created slice system-systemd\x2dzram\x2dsetup.slice - Slice /system/systemd-zram-setup.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Created slice user.slice - User and Session Slice.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Started systemd-ask-password-console.path - Dispatch Password Requests to Console Directory Watch.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Started systemd-ask-password-wall.path - Forward Password Requests to Wall Directory Watch.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Set up automount proc-sys-fs-binfmt_misc.automount - Arbitrary Executable File Formats File System Automount Point.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Expecting device dev-disk-by\x2dpartuuid-29680333\x2d01.device - /dev/disk/by-partuuid/29680333-01...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Expecting device dev-zram0.device - /dev/zram0...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Reached target paths.target - Path Units.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Reached target remote-fs.target - Remote File Systems.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Reached target slices.target - Slice Units.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Listening on systemd-creds.socket - Credential Encryption/Decryption.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Listening on systemd-initctl.socket - initctl Compatibility Named Pipe.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Listening on systemd-journald-dev-log.socket - Journal Socket (/dev/log).
+2026-09-25T04:55:24+00:00 pi systemd[1]: Listening on systemd-journald.socket - Journal Sockets.
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-pcrextend.socket - TPM PCR Measurements skipped, unmet condition check ConditionSecurity=measured-uki
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-pcrlock.socket - Make TPM PCR Policy skipped, unmet condition check ConditionSecurity=measured-uki
+2026-09-25T04:55:24+00:00 pi systemd[1]: Listening on systemd-udevd-control.socket - udev Control Socket.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Listening on systemd-udevd-kernel.socket - udev Kernel Socket.
+2026-09-25T04:55:24+00:00 pi systemd[1]: dev-hugepages.mount - Huge Pages File System skipped, unmet condition check ConditionPathExists=/sys/kernel/mm/hugepages
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounting dev-mqueue.mount - POSIX Message Queue File System...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounting run-lock.mount - Legacy Locks Directory /run/lock...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounting sys-kernel-debug.mount - Kernel Debug File System...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounting sys-kernel-tracing.mount - Kernel Trace File System...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting kmod-static-nodes.service - Create List of Static Device Nodes...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting modprobe@configfs.service - Load Kernel Module configfs...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting modprobe@drm.service - Load Kernel Module drm...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting modprobe@efi_pstore.service - Load Kernel Module efi_pstore...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting modprobe@fuse.service - Load Kernel Module fuse...
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-fsck-root.service - File System Check on Root Device skipped, unmet condition check ConditionPathExists=!/run/initramfs/fsck-root
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-hibernate-clear.service - Clear Stale Hibernate Storage Info skipped, unmet condition check ConditionPathExists=/sys/firmware/efi/efivars/HibernateLocation-8cf2644b-4b0b-428f-9387-6d876050dc67
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-journald.service - Journal Service...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-modules-load.service - Load Kernel Modules...
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-pcrmachine.service - TPM PCR Machine ID Measurement skipped, unmet condition check ConditionSecurity=measured-uki
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-remount-fs.service - Remount Root and Kernel File Systems...
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-tpm2-setup-early.service - Early TPM SRK Setup skipped, unmet condition check ConditionSecurity=measured-uki
+2026-09-25T04:55:24+00:00 pi kernel: fuse: init (API version 7.45)
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-udev-load-credentials.service - Load udev Rules from Credentials...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-udev-trigger.service - Coldplug All udev Devices...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounted dev-mqueue.mount - POSIX Message Queue File System.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounted run-lock.mount - Legacy Locks Directory /run/lock.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounted sys-kernel-debug.mount - Kernel Debug File System.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounted sys-kernel-tracing.mount - Kernel Trace File System.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished kmod-static-nodes.service - Create List of Static Device Nodes.
+2026-09-25T04:55:24+00:00 pi systemd[1]: modprobe@configfs.service: Deactivated successfully.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished modprobe@configfs.service - Load Kernel Module configfs.
+2026-09-25T04:55:24+00:00 pi systemd[1]: modprobe@efi_pstore.service: Deactivated successfully.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished modprobe@efi_pstore.service - Load Kernel Module efi_pstore.
+2026-09-25T04:55:24+00:00 pi systemd[1]: modprobe@fuse.service: Deactivated successfully.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished modprobe@fuse.service - Load Kernel Module fuse.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounting sys-fs-fuse-connections.mount - FUSE Control File System...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounting sys-kernel-config.mount - Kernel Configuration File System...
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-tmpfiles-setup-dev-early.service - Create Static Device Nodes in /dev gracefully...
+2026-09-25T04:55:24+00:00 pi kernel: EXT4-fs (mmcblk0p2): re-mounted 15f4c6be-1102-4331-9904-f78e78afd1fd r/w.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished systemd-udev-load-credentials.service - Load udev Rules from Credentials.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished systemd-remount-fs.service - Remount Root and Kernel File Systems.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounted sys-fs-fuse-connections.mount - FUSE Control File System.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Mounted sys-kernel-config.mount - Kernel Configuration File System.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting rpi-resize-swap-file.service - rpi-resize-var-swap-service - resize swapfile...
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-hwdb-update.service - Rebuild Hardware Database skipped, unmet condition check ConditionNeedsUpdate=/etc
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-pstore.service - Platform Persistent Storage Archival skipped, unmet condition check ConditionDirectoryNotEmpty=/sys/fs/pstore
+2026-09-25T04:55:24+00:00 pi kernel: zram: Added device: zram0
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-random-seed.service - Load/Save OS Random Seed...
+2026-09-25T04:55:24+00:00 pi systemd[1]: systemd-tpm2-setup.service - TPM SRK Setup skipped, unmet condition check ConditionSecurity=measured-uki
+2026-09-25T04:55:24+00:00 pi systemd[1]: modprobe@drm.service: Deactivated successfully.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished modprobe@drm.service - Load Kernel Module drm.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished systemd-modules-load.service - Load Kernel Modules.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Starting systemd-sysctl.service - Apply Kernel Variables...
+2026-09-25T04:55:24+00:00 pi systemd-journald[276]: Collecting audit messages is disabled.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Finished systemd-random-seed.service - Load/Save OS Random Seed.
+2026-09-25T04:55:24+00:00 pi systemd[1]: Started systemd-journald.service - Journal Service.
+2026-09-25T04:55:24+00:00 pi systemd-journald[276]: Received client request to flush runtime journal.
+2026-09-25T04:55:24+00:00 pi kernel: loop0: detected capacity change from 0 to 4194304
+2026-09-25T04:55:24+00:00 pi kernel: zram: setup backing device /dev/disk/by-backingfile/var-swap
+2026-09-25T04:55:24+00:00 pi kernel: zram0: detected capacity change from 0 to 4194304
+2026-09-25T04:55:24+00:00 pi kernel: Adding 2097136k swap on /dev/zram0.  Priority:100 extents:1 across:2097136k SS
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d508500.gpiomem: window base 0x107d508500 size 0x00000040
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d508500.gpiomem: initialised 1 regions as /dev/gpiomem1
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d517c00.gpiomem: window base 0x107d517c00 size 0x00000040
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d517c00.gpiomem: initialised 1 regions as /dev/gpiomem2
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d504100.gpiomem: window base 0x107d504100 size 0x00000020
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d504100.gpiomem: initialised 1 regions as /dev/gpiomem3
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d510700.gpiomem: window base 0x107d510700 size 0x00000020
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 107d510700.gpiomem: initialised 1 regions as /dev/gpiomem4
+2026-09-25T04:55:24+00:00 pi kernel: rp1-firmware rp1_firmware: RP1 Firmware version 23fca1cd776798b50bd3e640ecb242215778e7f8
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 1f000d0000.gpiomem: window base 0x1f000d0000 size 0x00030000
+2026-09-25T04:55:24+00:00 pi kernel: rpi-gpiomem 1f000d0000.gpiomem: initialised 1 regions as /dev/gpiomem0
+2026-09-25T04:55:24+00:00 pi kernel: rp1-pio 1f00178000.pio: Created instance as pio0
+2026-09-25T04:55:24+00:00 pi kernel: mc: Linux media interface: v0.10
+2026-09-25T04:55:24+00:00 pi kernel: v3d 1002000000.v3d: [drm] Transparent Hugepage support is recommended for optimal performance on this platform!
+2026-09-25T04:55:25+00:00 pi kernel: [drm] Initialized v3d 1.0.0 for 1002000000.v3d on minor 0
+2026-09-25T04:55:25+00:00 pi kernel: cfg80211: Loading compiled-in X.509 certificates for regulatory database
+2026-09-25T04:55:25+00:00 pi kernel: Loaded X.509 cert 'benh@debian.org: 577e021cb980e0e820821ba7b54b4961b8b4fadf'
+2026-09-25T04:55:25+00:00 pi kernel: Loaded X.509 cert 'romain.perier@gmail.com: 3abbc6ec146e09d1b6016ab9d6cf71dd233f0328'
+2026-09-25T04:55:25+00:00 pi kernel: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+2026-09-25T04:55:25+00:00 pi kernel: Loaded X.509 cert 'wens: 61c038651aabdcf94bd0ac7ff06c7248db18c600'
+2026-09-25T04:55:25+00:00 pi kernel: videodev: Linux video capture interface: v2.00
+2026-09-25T04:55:25+00:00 pi kernel: usbcore: registered new interface driver usbserial_generic
+2026-09-25T04:55:25+00:00 pi kernel: usbserial: USB Serial support registered for generic
+2026-09-25T04:55:25+00:00 pi kernel: usbcore: registered new interface driver ch341
+2026-09-25T04:55:25+00:00 pi kernel: usbserial: USB Serial support registered for ch341-uart
+2026-09-25T04:55:25+00:00 pi kernel: ch341 1-1:1.0: ch341-uart converter detected
+2026-09-25T04:55:25+00:00 pi kernel: brcmfmac: F1 signature read @0x18000000=0x15264345
+2026-09-25T04:55:25+00:00 pi kernel: brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43455-sdio for chip BCM4345/6
+2026-09-25T04:55:25+00:00 pi kernel: usbcore: registered new interface driver brcmfmac
+2026-09-25T04:55:25+00:00 pi kernel: rpi-hevc-dec 1000800000.codec: Device registered as /dev/video19
+2026-09-25T04:55:25+00:00 pi kernel: usb 1-1: ch341-uart converter now attached to ttyUSB0
+2026-09-25T04:55:25+00:00 pi kernel: ch341 3-1:1.0: ch341-uart converter detected
+2026-09-25T04:55:25+00:00 pi kernel: usb 3-1: ch341-uart converter now attached to ttyUSB1
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: bound 107c580000.hvs (ops vc4_hvs_ops [vc4])
+2026-09-25T04:55:25+00:00 pi kernel: Registered IR keymap rc-cec
+2026-09-25T04:55:25+00:00 pi kernel: rc rc0: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0
+2026-09-25T04:55:25+00:00 pi kernel: input: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0/input1
+2026-09-25T04:55:25+00:00 pi kernel: input: vc4-hdmi-0 HDMI Jack as /devices/platform/soc@107c000000/107c701400.hdmi/sound/card0/input2
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: bound 107c701400.hdmi (ops vc4_hdmi_ops [vc4])
+2026-09-25T04:55:25+00:00 pi kernel: Registered IR keymap rc-cec
+2026-09-25T04:55:25+00:00 pi kernel: rc rc1: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1
+2026-09-25T04:55:25+00:00 pi kernel: input: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1/input3
+2026-09-25T04:55:25+00:00 pi kernel: input: vc4-hdmi-1 HDMI Jack as /devices/platform/soc@107c000000/107c706400.hdmi/sound/card1/input4
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: bound 107c706400.hdmi (ops vc4_hdmi_ops [vc4])
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: bound 107c500000.mop (ops vc4_txp_ops [vc4])
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: bound 107c501000.moplet (ops vc4_txp_ops [vc4])
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: bound 107c410000.pixelvalve (ops vc4_crtc_ops [vc4])
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: bound 107c411000.pixelvalve (ops vc4_crtc_ops [vc4])
+2026-09-25T04:55:25+00:00 pi kernel: [drm] Initialized vc4 0.0.0 for axi:gpu on minor 1
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-25T04:55:25+00:00 pi kernel: vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-25T04:55:25+00:00 pi kernel: brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+2026-09-25T04:55:25+00:00 pi kernel: brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4345/6 wl0: Aug 29 2023 01:47:08 version 7.45.265 (28bca26 CY) FWID 01-b677b91b
+2026-09-25T04:55:25+00:00 pi kernel: raspberrypi-firmware soc@107c000000:firmware: Request 0x00030097 returned status 0x80000001
+2026-09-25T04:55:27+00:00 pi kernel: macb 1f00100000.ethernet eth0: PHY [1f00100000.ethernet-ffffffff:01] driver [Broadcom BCM54213PE] (irq=POLL)
+2026-09-25T04:55:27+00:00 pi kernel: macb 1f00100000.ethernet eth0: configuring for phy/rgmii-id link mode
+2026-09-25T04:55:27+00:00 pi kernel: macb 1f00100000.ethernet: gem-ptp-timer ptp clock registered.
+2026-09-25T04:55:27+00:00 pi kernel: brcmfmac: brcmf_cfg80211_set_power_mgmt: power save enabled
+2026-09-25T04:55:30+00:00 pi kernel: brcmfmac: brcmf_cfg80211_set_power_mgmt: power save disabled
+2026-09-25T04:58:12+00:00 pi kernel: macb 1f00100000.ethernet eth0: Link is Up - 1Gbps/Full - flow control tx
+2026-09-25T05:08:23+00:00 pi kernel: ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T05:08:46+00:00 pi kernel: ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T05:09:09+00:00 pi kernel: ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T05:09:11+00:00 pi kernel: ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T05:09:35+00:00 pi kernel: ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T05:26:40+00:00 pi kernel: warning: `cat' uses wireless extensions which will stop working for Wi-Fi 7 hardware; use nl80211
+2026-09-25T05:29:02+00:00 pi kernel: macb 1f00100000.ethernet eth0: Link is Down
+2026-09-25T06:28:32+00:00 pi kernel: /proc/cgroups lists only v1 controllers, use cgroup.controllers of root cgroup for v2 info
 ### dmesg_tail
-2026-09-22T15:32:50,958114-04:00 usbcore: registered new interface driver usbserial_generic
-2026-09-22T15:32:50,958587-04:00 usbserial: USB Serial support registered for generic
-2026-09-22T15:32:50,962321-04:00 usbcore: registered new interface driver ch341
-2026-09-22T15:32:50,962373-04:00 usbserial: USB Serial support registered for ch341-uart
-2026-09-22T15:32:50,962405-04:00 ch341 1-1:1.0: ch341-uart converter detected
-2026-09-22T15:32:50,970963-04:00 brcmfmac: F1 signature read @0x18000000=0x15264345
-2026-09-22T15:32:50,972284-04:00 brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43455-sdio for chip BCM4345/6
-2026-09-22T15:32:50,972433-04:00 usbcore: registered new interface driver brcmfmac
-2026-09-22T15:32:50,975252-04:00 usb 1-1: ch341-uart converter now attached to ttyUSB0
-2026-09-22T15:32:50,975303-04:00 ch341 3-1:1.0: ch341-uart converter detected
-2026-09-22T15:32:50,988364-04:00 usb 3-1: ch341-uart converter now attached to ttyUSB1
-2026-09-22T15:32:50,990343-04:00 vc4-drm axi:gpu: bound 107c580000.hvs (ops vc4_hvs_ops [vc4])
-2026-09-22T15:32:50,996044-04:00 Registered IR keymap rc-cec
-2026-09-22T15:32:50,996079-04:00 rc rc0: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0
-2026-09-22T15:32:50,996121-04:00 input: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0/input1
-2026-09-22T15:32:50,998012-04:00 input: vc4-hdmi-0 HDMI Jack as /devices/platform/soc@107c000000/107c701400.hdmi/sound/card0/input2
-2026-09-22T15:32:51,001633-04:00 vc4-drm axi:gpu: bound 107c701400.hdmi (ops vc4_hdmi_ops [vc4])
-2026-09-22T15:32:51,006308-04:00 Registered IR keymap rc-cec
-2026-09-22T15:32:51,006348-04:00 rc rc1: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1
-2026-09-22T15:32:51,006390-04:00 input: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1/input3
-2026-09-22T15:32:51,008326-04:00 input: vc4-hdmi-1 HDMI Jack as /devices/platform/soc@107c000000/107c706400.hdmi/sound/card1/input4
-2026-09-22T15:32:51,012331-04:00 vc4-drm axi:gpu: bound 107c706400.hdmi (ops vc4_hdmi_ops [vc4])
-2026-09-22T15:32:51,012482-04:00 vc4-drm axi:gpu: bound 107c500000.mop (ops vc4_txp_ops [vc4])
-2026-09-22T15:32:51,012548-04:00 vc4-drm axi:gpu: bound 107c501000.moplet (ops vc4_txp_ops [vc4])
-2026-09-22T15:32:51,012605-04:00 vc4-drm axi:gpu: bound 107c410000.pixelvalve (ops vc4_crtc_ops [vc4])
-2026-09-22T15:32:51,012654-04:00 vc4-drm axi:gpu: bound 107c411000.pixelvalve (ops vc4_crtc_ops [vc4])
-2026-09-22T15:32:51,013354-04:00 [drm] Initialized vc4 0.0.0 for axi:gpu on minor 1
-2026-09-22T15:32:51,016030-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
-2026-09-22T15:32:51,022836-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
-2026-09-22T15:32:51,028965-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
-2026-09-22T15:32:51,141583-04:00 brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
-2026-09-22T15:32:51,141827-04:00 brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4345/6 wl0: Aug 29 2023 01:47:08 version 7.45.265 (28bca26 CY) FWID 01-b677b91b
-2026-09-22T15:32:51,344641-04:00 raspberrypi-firmware soc@107c000000:firmware: Request 0x00030097 returned status 0x80000001
-2026-09-22T15:32:53,332082-04:00 macb 1f00100000.ethernet eth0: PHY [1f00100000.ethernet-ffffffff:01] driver [Broadcom BCM54213PE] (irq=POLL)
-2026-09-22T15:32:53,332965-04:00 macb 1f00100000.ethernet eth0: configuring for phy/rgmii-id link mode
-2026-09-22T15:32:53,335989-04:00 macb 1f00100000.ethernet: gem-ptp-timer ptp clock registered.
-2026-09-22T15:32:53,363508-04:00 brcmfmac: brcmf_cfg80211_set_power_mgmt: power save enabled
-2026-09-22T15:32:54,450427-04:00 systemd-journald[282]: File /var/log/journal/MACHINE_ID_SHA256:ec98e9910f7ca9f467ebe340f7fd3d59a6198d7a17482330f862b3cf7113f86a/user-1000.journal corrupted or uncleanly shut down, renaming and replacing.
-2026-09-22T15:32:56,454699-04:00 brcmfmac: brcmf_cfg80211_set_power_mgmt: power save disabled
-2026-09-24T23:18:45,469886-04:00 /proc/cgroups lists only v1 controllers, use cgroup.controllers of root cgroup for v2 info
+2026-09-25T00:56:06,419399-04:00 rpi-hevc-dec 1000800000.codec: Device registered as /dev/video19
+2026-09-25T00:56:06,422949-04:00 usb 1-1: ch341-uart converter now attached to ttyUSB0
+2026-09-25T00:56:06,423060-04:00 ch341 3-1:1.0: ch341-uart converter detected
+2026-09-25T00:56:06,437109-04:00 usb 3-1: ch341-uart converter now attached to ttyUSB1
+2026-09-25T00:56:06,490182-04:00 vc4-drm axi:gpu: bound 107c580000.hvs (ops vc4_hvs_ops [vc4])
+2026-09-25T00:56:06,493174-04:00 Registered IR keymap rc-cec
+2026-09-25T00:56:06,493207-04:00 rc rc0: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0
+2026-09-25T00:56:06,493247-04:00 input: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0/input1
+2026-09-25T00:56:06,493847-04:00 input: vc4-hdmi-0 HDMI Jack as /devices/platform/soc@107c000000/107c701400.hdmi/sound/card0/input2
+2026-09-25T00:56:06,499043-04:00 vc4-drm axi:gpu: bound 107c701400.hdmi (ops vc4_hdmi_ops [vc4])
+2026-09-25T00:56:06,502064-04:00 Registered IR keymap rc-cec
+2026-09-25T00:56:06,502096-04:00 rc rc1: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1
+2026-09-25T00:56:06,502134-04:00 input: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1/input3
+2026-09-25T00:56:06,503372-04:00 input: vc4-hdmi-1 HDMI Jack as /devices/platform/soc@107c000000/107c706400.hdmi/sound/card1/input4
+2026-09-25T00:56:06,507163-04:00 vc4-drm axi:gpu: bound 107c706400.hdmi (ops vc4_hdmi_ops [vc4])
+2026-09-25T00:56:06,507299-04:00 vc4-drm axi:gpu: bound 107c500000.mop (ops vc4_txp_ops [vc4])
+2026-09-25T00:56:06,507360-04:00 vc4-drm axi:gpu: bound 107c501000.moplet (ops vc4_txp_ops [vc4])
+2026-09-25T00:56:06,507413-04:00 vc4-drm axi:gpu: bound 107c410000.pixelvalve (ops vc4_crtc_ops [vc4])
+2026-09-25T00:56:06,507464-04:00 vc4-drm axi:gpu: bound 107c411000.pixelvalve (ops vc4_crtc_ops [vc4])
+2026-09-25T00:56:06,508325-04:00 [drm] Initialized vc4 0.0.0 for axi:gpu on minor 1
+2026-09-25T00:56:06,512708-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-25T00:56:06,522393-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-25T00:56:06,536535-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-25T00:56:06,594096-04:00 brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+2026-09-25T00:56:06,594334-04:00 brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4345/6 wl0: Aug 29 2023 01:47:08 version 7.45.265 (28bca26 CY) FWID 01-b677b91b
+2026-09-25T00:56:06,743301-04:00 raspberrypi-firmware soc@107c000000:firmware: Request 0x00030097 returned status 0x80000001
+2026-09-25T00:56:08,793007-04:00 macb 1f00100000.ethernet eth0: PHY [1f00100000.ethernet-ffffffff:01] driver [Broadcom BCM54213PE] (irq=POLL)
+2026-09-25T00:56:08,793891-04:00 macb 1f00100000.ethernet eth0: configuring for phy/rgmii-id link mode
+2026-09-25T00:56:08,796907-04:00 macb 1f00100000.ethernet: gem-ptp-timer ptp clock registered.
+2026-09-25T00:56:08,824492-04:00 brcmfmac: brcmf_cfg80211_set_power_mgmt: power save enabled
+2026-09-25T00:56:11,916994-04:00 brcmfmac: brcmf_cfg80211_set_power_mgmt: power save disabled
+2026-09-25T00:58:53,670196-04:00 macb 1f00100000.ethernet eth0: Link is Up - 1Gbps/Full - flow control tx
+2026-09-25T01:08:23,827113-04:00 ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T01:08:46,545076-04:00 ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T01:09:09,386773-04:00 ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T01:09:11,240001-04:00 ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T01:09:35,122365-04:00 ieee80211 phy0: brcmf_cyw_mgmt_tx: TX Auth frame operation is failed: status=10)
+2026-09-25T01:26:40,080256-04:00 warning: `cat' uses wireless extensions which will stop working for Wi-Fi 7 hardware; use nl80211
+2026-09-25T01:29:02,100507-04:00 macb 1f00100000.ethernet eth0: Link is Down
+2026-09-25T02:28:32,500286-04:00 /proc/cgroups lists only v1 controllers, use cgroup.controllers of root cgroup for v2 info
 end

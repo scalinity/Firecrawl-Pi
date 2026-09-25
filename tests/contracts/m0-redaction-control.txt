@@ -13,6 +13,7 @@ credential-assignment: password=fixture-not-a-secret
 url-credentials: https://fixtureuser:fixturepass@example.invalid/
 local-path: /home/fixture-user/project
 mac-address: 02:00:00:00:00:02
+imager-instance-id: ds=nocloud;i=rpi-imager-1000000000000
 raw-egress-ip: 192.0.2.77
 raw-board-serial: 0123456789abcdef
 raw-machine-id: /var/log/journal/0123456789abcdef0123456789abcdef/system.journal

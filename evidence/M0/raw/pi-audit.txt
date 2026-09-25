@@ -1,18 +1,18 @@
 ### probe_time
-2026-09-25T03:55:27Z
+2026-09-25T06:28:32Z
 ### proc_modules_load_order
 1 tcp_diag
 2 inet_diag
 3 binfmt_misc
 4 brcmfmac_cyw
 5 vc4
-6 brcmfmac
-7 snd_soc_hdmi_codec
-8 drm_exec
-9 drm_display_helper
-10 ch341
-11 cec
-12 usbserial
+6 snd_soc_hdmi_codec
+7 drm_exec
+8 drm_display_helper
+9 cec
+10 drm_dma_helper
+11 drm_client_lib
+12 rpi_hevc_dec
 module inet_diag loaded=yes module_file=/lib/modules/6.18.34+rpt-rpi-2712/kernel/net/ipv4/inet_diag.ko.xz builtin=0
 module tcp_diag loaded=yes module_file=/lib/modules/6.18.34+rpt-rpi-2712/kernel/net/ipv4/tcp_diag.ko.xz builtin=0
 module udp_diag loaded=no module_file=none builtin=0
@@ -90,62 +90,62 @@ Model name:                              Cortex-A76
 Thread(s) per core:                      1
 Core(s) per cluster:                     4
 Socket(s):                               -
-CPU(s) scaling MHz:                      71%
+CPU(s) scaling MHz:                      67%
 CPU max MHz:                             2400.0000
 CPU min MHz:                             1500.0000
 Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
 /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor: ondemand
-/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: 1700000
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: 1600000
 /sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: 2400000
 /sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq: 2400000
-loadavg=0.07 0.08 0.03 1/187 431943
-uptime_s=202960.57
+loadavg=0.00 0.02 0.00 1/201 14156
+uptime_s=5549.32
 ### meminfo
 MemTotal:        8255888 kB
-MemFree:         7543424 kB
-MemAvailable:    7922912 kB
-Buffers:           93072 kB
-Cached:           343568 kB
+MemFree:         7664320 kB
+MemAvailable:    7901136 kB
+Buffers:           38016 kB
+Cached:           257712 kB
 SwapCached:            0 kB
-Active:           368288 kB
-Inactive:         173920 kB
-Active(anon):     113568 kB
+Active:           310432 kB
+Inactive:         110624 kB
+Active(anon):     133472 kB
 Inactive(anon):        0 kB
-Active(file):     254720 kB
-Inactive(file):   173920 kB
+Active(file):     176960 kB
+Inactive(file):   110624 kB
 Unevictable:           0 kB
 Mlocked:               0 kB
 SwapTotal:       2097136 kB
 SwapFree:        2097136 kB
 Zswap:                 0 kB
 Zswapped:              0 kB
-Dirty:               192 kB
+Dirty:               928 kB
 Writeback:             0 kB
-AnonPages:        105664 kB
-Mapped:            71648 kB
-Shmem:              8256 kB
-KReclaimable:      24336 kB
-Slab:              71200 kB
-SReclaimable:      24336 kB
-SUnreclaim:        46864 kB
-KernelStack:        3072 kB
-PageTables:        10112 kB
+AnonPages:        125392 kB
+Mapped:            75216 kB
+Shmem:              8400 kB
+KReclaimable:      21104 kB
+Slab:              67264 kB
+SReclaimable:      21104 kB
+SUnreclaim:        46160 kB
+KernelStack:        3328 kB
+PageTables:         7840 kB
 SecPageTables:       112 kB
 NFS_Unstable:          0 kB
 Bounce:                0 kB
 WritebackTmp:          0 kB
 CommitLimit:     6225072 kB
-Committed_AS:     384672 kB
+Committed_AS:     463200 kB
 VmallocTotal:   68447887360 kB
-VmallocUsed:       50432 kB
+VmallocUsed:       52160 kB
 VmallocChunk:          0 kB
-Percpu:              960 kB
+Percpu:             2688 kB
 CmaTotal:          65536 kB
 CmaFree:           56320 kB
 Balloon:               0 kB
 ### free
                total        used        free      shared  buff/cache   available
-Mem:      8454029312   341377024  7724056576     8454144   472039424  8112652288
+Mem:      8454029312   363266048  7848263680     8601600   324435968  8090763264
 Swap:     2147467264           0  2147467264
 ### vm_sysctl
 vm.swappiness=60
@@ -166,77 +166,78 @@ memory UNAVAILABLE
 io UNAVAILABLE
 ### cgroup
 fstype=cgroup2fs
-controllers=cpuset cpu io pids
-subtree_control=cpu pids
-system_slice_subtree_control=pids
+controllers=cpuset cpu io memory pids
+subtree_control=cpu memory pids
+system_slice_subtree_control=memory pids
 --- /proc/cgroups
 #subsys_name	hierarchy	num_cgroups	enabled
-cpuset	0	48	1
-cpu	0	48	1
-cpuacct	0	48	1
-blkio	0	48	1
-devices	0	48	1
-freezer	0	48	1
-net_cls	0	48	1
-perf_event	0	48	1
-net_prio	0	48	1
-pids	0	48	1
+cpuset	0	89	1
+cpu	0	89	1
+cpuacct	0	89	1
+blkio	0	89	1
+devices	0	89	1
+freezer	0	89	1
+net_cls	0	89	1
+perf_event	0	89	1
+net_prio	0	89	1
+pids	0	89	1
 ### cmdline
-reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=32  numa=fake=8 system_heap.max_order=0 iommu_dma_numa_policy=interleave smsc95xx.macaddr=MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-<id> cfg80211.ieee80211_regdom=US
+reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=32  numa=fake=8 system_heap.max_order=0 iommu_dma_numa_policy=interleave smsc95xx.macaddr=MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-<id> cfg80211.ieee80211_regdom=US cgroup_enable=memory
 
 ### unit_memory
-system.slice current=NA peak=NA anon=NA file=NA
-user.slice current=NA peak=NA anon=NA file=NA
-init.scope current=NA peak=NA anon=NA file=NA
-system.slice/NetworkManager.service current=NA peak=NA anon=NA file=NA
-system.slice/airdb.service current=NA peak=NA anon=NA file=NA
-system.slice/airlogger.service current=NA peak=NA anon=NA file=NA
-system.slice/airmonitor.service current=NA peak=NA anon=NA file=NA
-system.slice/avahi-daemon.service current=NA peak=NA anon=NA file=NA
-system.slice/cron.service current=NA peak=NA anon=NA file=NA
-system.slice/dbus.service current=NA peak=NA anon=NA file=NA
-system.slice/dnscrypt-proxy.service current=NA peak=NA anon=NA file=NA
-system.slice/fail2ban.service current=NA peak=NA anon=NA file=NA
-system.slice/mosquitto.service current=NA peak=NA anon=NA file=NA
-system.slice/pihole-FTL.service current=NA peak=NA anon=NA file=NA
-system.slice/ssh.service current=NA peak=NA anon=NA file=NA
-system.slice/systemd-journald.service current=NA peak=NA anon=NA file=NA
-system.slice/systemd-logind.service current=NA peak=NA anon=NA file=NA
-system.slice/systemd-timesyncd.service current=NA peak=NA anon=NA file=NA
-system.slice/systemd-udevd.service current=NA peak=NA anon=NA file=NA
-system.slice/wpa_supplicant.service current=NA peak=NA anon=NA file=NA
-user.slice/user-1000.slice current=NA peak=NA anon=NA file=NA
+system.slice current=350732288 peak=360726528 anon=100614144 file=217055232
+user.slice current=58589184 peak=60686336 anon=21512192 file=21200896
+init.scope current=8404992 peak=32964608 anon=2703360 file=2228224
+system.slice/NetworkManager.service current=31571968 peak=50200576 anon=5324800 file=23920640
+system.slice/airdb.service current=11436032 peak=14254080 anon=9846784 file=1327104
+system.slice/airlogger.service current=15286272 peak=18317312 anon=12828672 file=2195456
+system.slice/airmonitor.service current=21872640 peak=24018944 anon=17334272 file=3866624
+system.slice/avahi-daemon.service current=2752512 peak=6422528 anon=868352 file=1441792
+system.slice/cron.service current=19628032 peak=31096832 anon=475136 file=18710528
+system.slice/dbus.service current=4685824 peak=7880704 anon=1654784 file=1769472
+system.slice/dnscrypt-proxy.service current=23101440 peak=27295744 anon=6619136 file=15056896
+system.slice/fail2ban.service current=23396352 peak=25116672 anon=13582336 file=5996544
+system.slice/mosquitto.service current=5259264 peak=7553024 anon=2801664 file=2244608
+system.slice/pihole-FTL.service current=87638016 peak=89833472 anon=3866624 file=81199104
+system.slice/polkit.service current=6356992 peak=8437760 anon=1933312 file=1310720
+system.slice/ssh.service current=20709376 peak=29327360 anon=11747328 file=5619712
+system.slice/systemd-journald.service current=15581184 peak=18726912 anon=2080768 file=11436032
+system.slice/systemd-logind.service current=5095424 peak=7274496 anon=1835008 file=507904
+system.slice/systemd-timesyncd.service current=2654208 peak=5586944 anon=1703936 file=180224
+system.slice/systemd-udevd.service current=25853952 peak=63995904 anon=3244032 file=19841024
+system.slice/wpa_supplicant.service current=9486336 peak=11583488 anon=2441216 file=5734400
+user.slice/user-1000.slice current=57851904 peak=64208896 anon=21528576 file=21200896
 ### processes_top_rss
     PID    PPID USER       RSS    VSZ %CPU COMMAND
-    937       1 root     30720 430480  0.0 fail2ban-server
-    983       1 danny    29888 270560  0.2 python
-    981       1 danny    25360  36400  0.0 python
-    648       1 root     21456 342864  0.0 NetworkManager
-    982       1 danny    19136  32544  0.0 python
-    936       1 _dnscry+ 18256 1903984 0.0 dnscrypt-proxy
-      1       0 root     15632  25712  0.1 systemd
-    282       1 root     14576  57936  0.0 systemd-journal
-    969       1 pihole   13696 143056  0.0 pihole-FTL
- 431745       1 danny    12720  23360  0.5 systemd
-    651       1 root     12336  18848  0.0 wpa_supplicant
- 431828     977 root     11632  21840  3.3 sshd-session
-    959       1 mosquit+ 11504  16336  0.0 mosquitto
-    325       1 root     10816  35680  0.0 systemd-udevd
-    599       1 root      9440  19648  0.0 systemd-logind
- 431836  431828 danny     8368  22224  0.0 sshd-session
-    303       1 systemd+  8016  92448  0.0 systemd-timesyn
-    977       1 root      7888  11696  0.0 sshd
-    597       1 message+  5040   8656  0.0 dbus-daemon
- 431747  431745 danny     4720  24496  0.0 (sd-pam)
-    595       1 avahi     3728   6064  0.0 avahi-daemon
- 431837  431836 danny     3632   7520  3.8 bash
- 432148  431838 danny     3536   6224  0.0 ps
-    596       1 root      2960   7184  0.0 cron
- 431838  431837 danny     2880   7520 13.0 bash
-    954       1 root      2608   7888  0.0 agetty
-    615     595 avahi     1888   5888  0.0 avahi-daemon
- 432149  431838 danny     1344   2464  0.0 head
-      2       0 root         0      0  0.0 kthreadd
+    934       1 root     30848 442768  0.0 fail2ban-server
+    979       1 danny    29968 270560  0.2 python
+    977       1 danny    25104  36400  0.0 python
+    649       1 root     21968 343184  0.0 NetworkManager
+    978       1 danny    19120  32544  0.0 python
+    933       1 _dnscry+ 18224 1903728 0.0 dnscrypt-proxy
+      1       0 root     15488  25520  0.0 systemd
+    966       1 pihole   14672 143056  0.1 pihole-FTL
+   3678     973 root     12848  22000  0.0 sshd-session
+   1624     973 root     12832  22000  0.0 sshd-session
+    650       1 root     12736  18912  0.0 wpa_supplicant
+   1085       1 danny    12672  23360  0.0 systemd
+   1077     973 root     12512  22000  0.0 sshd-session
+    276       1 root     11920  56048  0.0 systemd-journal
+  14041     973 root     11648  21840  2.1 sshd-session
+    959       1 mosquit+ 10832  16336  0.0 mosquitto
+    352       1 root     10704  35648  0.0 systemd-udevd
+    596       1 root      8992  19248  0.0 systemd-logind
+   4212       1 polkitd   8912 382176  0.0 polkitd
+  14049   14041 danny     8384  22224  0.0 sshd-session
+   1115    1077 danny     8256  22208  0.0 sshd-session
+   1632    1624 danny     8256  22208  0.0 sshd-session
+   3687    3678 danny     8256  22208  0.0 sshd-session
+    335       1 systemd+  8080 166240  0.0 systemd-timesyn
+    973       1 root      7872  11696  0.0 sshd
+   3905    1633 danny     7792  21408  0.0 journalctl
+   1633    1632 danny     5872   9120  0.0 bash
+   1119    1115 danny     5808   9120  0.0 bash
+   3688    3687 danny     5808   9120  0.0 bash
 ### services_all
 airdb.service loaded active running
 airlogger.service loaded active running
@@ -283,6 +284,7 @@ ovsdb-server.service not-found inactive dead
 pihole-FTL.service loaded active running
 plymouth-quit-wait.service not-found inactive dead
 plymouth-start.service not-found inactive dead
+polkit.service loaded active running
 rc-local.service loaded inactive dead
 rescue.service loaded inactive dead
 rpi-eeprom-update.service loaded active exited
@@ -355,12 +357,12 @@ wpa_supplicant.service loaded active running
 --- failed
 --- timers
 net-watchdog.timer net-watchdog.service
+rpi-zram-writeback.timer rpi-zram-writeback.service
+apt-daily-upgrade.timer apt-daily-upgrade.service
+apt-daily.timer apt-daily.service
 dpkg-db-backup.timer dpkg-db-backup.service
 logrotate.timer logrotate.service
-apt-daily.timer apt-daily.service
-apt-daily-upgrade.timer apt-daily-upgrade.service
 systemd-tmpfiles-clean.timer systemd-tmpfiles-clean.service
-rpi-zram-writeback.timer rpi-zram-writeback.service
 fstrim.timer fstrim.service
 ### service_descriptions
 airdb.service | AirMonitor DB Snapshot Server | active=active enabled=enabled
@@ -374,12 +376,12 @@ dnscrypt-proxy.service | DNSCrypt client proxy | active=active enabled=enabled
 fail2ban.service | Fail2Ban Service | active=active enabled=enabled
 ### listener_units
 pid=1 comm=systemd cgroup=0::/init.scope 
-pid=595 comm=avahi-daemon cgroup=0::/system.slice/avahi-daemon.service 
-pid=936 comm=dnscrypt-proxy cgroup=0::/system.slice/dnscrypt-proxy.service 
+pid=592 comm=avahi-daemon cgroup=0::/system.slice/avahi-daemon.service 
+pid=933 comm=dnscrypt-proxy cgroup=0::/system.slice/dnscrypt-proxy.service 
 pid=959 comm=mosquitto cgroup=0::/system.slice/mosquitto.service 
-pid=969 comm=pihole-FTL cgroup=0::/system.slice/pihole-FTL.service 
-pid=977 comm=sshd cgroup=0::/system.slice/ssh.service 
-pid=982 comm=python cgroup=0::/system.slice/airdb.service 
+pid=966 comm=pihole-FTL cgroup=0::/system.slice/pihole-FTL.service 
+pid=973 comm=sshd cgroup=0::/system.slice/ssh.service 
+pid=978 comm=python cgroup=0::/system.slice/airdb.service 
 ### storage_root
 / /dev/mmcblk0p2 ext4 rw,noatime 15f4c6be-1102-4331-9904-f78e78afd1fd 29680333-02
 /boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro B2F0-82D2
@@ -388,7 +390,7 @@ NAME="loop0" KNAME="loop0" TYPE="loop" SIZE="2147483648" ROTA="0" RM="0" TRAN=""
 NAME="mmcblk0" KNAME="mmcblk0" TYPE="disk" SIZE="63864569856" ROTA="0" RM="0" TRAN="mmc" MODEL="" FSTYPE="" FSVER="" LABEL="" UUID="" PARTUUID="" MOUNTPOINT=""
 NAME="mmcblk0p1" KNAME="mmcblk0p1" TYPE="part" SIZE="536870912" ROTA="0" RM="0" TRAN="mmc" MODEL="" FSTYPE="vfat" FSVER="FAT32" LABEL="bootfs" UUID="B2F0-82D2" PARTUUID="29680333-01" MOUNTPOINT="/boot/firmware"
 NAME="mmcblk0p2" KNAME="mmcblk0p2" TYPE="part" SIZE="63319310336" ROTA="0" RM="0" TRAN="mmc" MODEL="" FSTYPE="ext4" FSVER="1.0" LABEL="rootfs" UUID="15f4c6be-1102-4331-9904-f78e78afd1fd" PARTUUID="29680333-02" MOUNTPOINT="/"
-NAME="zram0" KNAME="zram0" TYPE="disk" SIZE="2147483648" ROTA="0" RM="0" TRAN="" MODEL="" FSTYPE="swap" FSVER="1" LABEL="zram0" UUID="6c7c905d-0372-413a-bf7f-21869c79f87c" PARTUUID="" MOUNTPOINT="[SWAP]"
+NAME="zram0" KNAME="zram0" TYPE="disk" SIZE="2147483648" ROTA="0" RM="0" TRAN="" MODEL="" FSTYPE="swap" FSVER="1" LABEL="zram0" UUID="36c6c803-2e09-4c22-b574-0ed59c9ddda0" PARTUUID="" MOUNTPOINT="[SWAP]"
 ### block_devices_sys
 mmcblk0 size_512=124735488 rotational=0 removable=0
   type=SD
@@ -401,23 +403,23 @@ nvme_present=
 usb_storage=0 uas=0
 ### df_bytes
 Filesystem     Type    1B-blocks       Used   Available Use% Mounted on
-tmpfs          tmpfs  1690812416    4505600  1686306816   1% /run
-/dev/mmcblk0p2 ext4  62295171072 4898029568 54828023808   9% /
+tmpfs          tmpfs  1690812416    4620288  1686192128   1% /run
+/dev/mmcblk0p2 ext4  62295171072 4895232000 54830821376   9% /
 tmpfs          tmpfs  4227006464    3899392  4223107072   1% /dev/shm
 tmpfs          tmpfs     5242880      49152     5193728   1% /run/lock
 tmpfs          tmpfs     1048576          0     1048576   0% /run/credentials/systemd-journald.service
 tmpfs          tmpfs  4227022848          0  4227022848   0% /tmp
-/dev/mmcblk0p1 vfat    528592896   51636224   476956672  10% /boot/firmware
+/dev/mmcblk0p1 vfat    528592896   51636736   476956160  10% /boot/firmware
 tmpfs          tmpfs     1048576          0     1048576   0% /run/credentials/getty@tty1.service
 tmpfs          tmpfs   845398016      32768   845365248   1% /run/user/1000
 ### df_inodes
 Filesystem      Inodes IUsed   IFree IUse% Mounted on
-tmpfs           257996   887  257109    1% /run
-/dev/mmcblk0p2 3692928 44115 3648813    2% /
+tmpfs           257996   901  257095    1% /run
+/dev/mmcblk0p2 3692928 44122 3648806    2% /
 tmpfs           257996    18  257978    1% /dev/shm
 tmpfs           257996     5  257991    1% /run/lock
 tmpfs             1024     1    1023    1% /run/credentials/systemd-journald.service
-tmpfs          1048576     7 1048569    1% /tmp
+tmpfs          1048576     9 1048567    1% /tmp
 /dev/mmcblk0p1       0     0       0     - /boot/firmware
 tmpfs             1024     1    1023    1% /run/credentials/getty@tty1.service
 tmpfs           206396    31  206365    1% /run/user/1000
@@ -430,13 +432,13 @@ Errors behavior:          Continue
 Inode count:              3692928
 Block count:              15458816
 Reserved block count:     623130
-Free blocks:              14012975
-Free inodes:              3648813
+Free blocks:              14013603
+Free inodes:              3648806
 Block size:               4096
 Filesystem created:       Wed Jun 17 20:26:23 2026
-Last mount time:          Tue Sep 22 15:29:40 2026
-Last write time:          Thu Sep 24 23:43:59 2026
-Mount count:              189
+Last mount time:          Fri Sep 25 00:55:24 2026
+Last write time:          Fri Sep 25 02:03:00 2026
+Mount count:              192
 Maximum mount count:      -1
 Last checked:             Wed Jun 17 20:26:23 2026
 Check interval:           0 (<none>)
@@ -446,20 +448,53 @@ proc            /proc           proc    defaults          0       0
 PARTUUID=29680333-01  /boot/firmware  vfat    defaults          0       2
 PARTUUID=29680333-02  /               ext4    defaults,noatime  0       1
 ### kernel_log_storage_power
-boots_recorded=1
-journal_first_entry_utc=2026-09-25T01:42:08+00:0
-journal_kernel_first_entry_utc=2026-09-25T03:18:44+00:0
+boots_recorded=4
+journal_first_entry_utc=2026-09-25T03:07:37+00:0
+journal_kernel_first_entry_utc=2026-09-25T04:55:24+00:0
 IDX ID FIRST ENTRY LAST ENTRY 
-0 Thu 2026-09-24 21:42:08 EDT Thu 2026-09-24
+-3 Thu 2026-09-24 23:07:37 EDT Fri 2026-09-25
+-2 Fri 2026-09-25 00:33:16 EDT Fri 2026-09-25
+-1 Fri 2026-09-25 00:38:25 EDT Fri 2026-09-25
+0 Fri 2026-09-25 00:55:24 EDT Fri 2026-09-25
 --- current boot kernel warnings (storage/fs/power/thermal/oom)
+2026-09-25T00:55:24-04:00 pi kernel: Kernel command line: reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=32  numa=fake=8 system_heap.max_order=0 iommu_dma_numa_policy=interleave smsc95xx.macaddr=MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-<id> cfg80211.ieee80211_regdom=US cgroup_enable=memory
+2026-09-25T00:55:24-04:00 pi kernel: thermal_sys: Registered thermal governor 'step_wise'
+2026-09-25T00:55:24-04:00 pi kernel: sdhci-brcmstb 1000fff000.mmc: Got CD GPIO
+2026-09-25T00:55:24-04:00 pi kernel: mmc1: CQHCI version 5.10
+2026-09-25T00:55:24-04:00 pi kernel: mmc0: CQHCI version 5.10
+2026-09-25T00:55:24-04:00 pi kernel: mmc0: SDHCI controller on 1000fff000.mmc [1000fff000.mmc] using ADMA 64-bit
+2026-09-25T00:55:24-04:00 pi kernel: mmc0: new UHS-I speed SDR104 SDXC card at address aaaa
+2026-09-25T00:55:24-04:00 pi kernel: mmcblk0: mmc0:aaaa SD64G 59.5 GiB
+2026-09-25T00:55:24-04:00 pi kernel:  mmcblk0: p1 p2
+2026-09-25T00:55:24-04:00 pi kernel: mmcblk0: mmc0:aaaa SD64G 59.5 GiB (quirks 0x00004000)
+2026-09-25T00:55:24-04:00 pi kernel: mmc1: SDHCI controller on 1001100000.mmc [1001100000.mmc] using ADMA 64-bit
+2026-09-25T00:55:24-04:00 pi kernel: mmc1: new UHS-I speed DDR50 SDIO card at address 0001
+2026-09-25T00:55:24-04:00 pi kernel: EXT4-fs (mmcblk0p2): orphan cleanup on readonly fs
+2026-09-25T00:55:24-04:00 pi kernel: EXT4-fs (mmcblk0p2): mounted filesystem 15f4c6be-1102-4331-9904-f78e78afd1fd ro with ordered data mode. Quota mode: none.
+2026-09-25T00:55:24-04:00 pi kernel: EXT4-fs (mmcblk0p2): re-mounted 15f4c6be-1102-4331-9904-f78e78afd1fd r/w.
 --- previous boot kernel warnings
+2026-09-25T00:38:25-04:00 pi kernel: Kernel command line: reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=32  numa=fake=8 system_heap.max_order=0 iommu_dma_numa_policy=interleave smsc95xx.macaddr=MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-<id> cfg80211.ieee80211_regdom=US cgroup_enable=memory
+2026-09-25T00:38:25-04:00 pi kernel: thermal_sys: Registered thermal governor 'step_wise'
+2026-09-25T00:38:25-04:00 pi kernel: sdhci-brcmstb 1000fff000.mmc: Got CD GPIO
+2026-09-25T00:38:25-04:00 pi kernel: mmc1: CQHCI version 5.10
+2026-09-25T00:38:25-04:00 pi kernel: mmc0: CQHCI version 5.10
+2026-09-25T00:38:25-04:00 pi kernel: mmc0: SDHCI controller on 1000fff000.mmc [1000fff000.mmc] using ADMA 64-bit
+2026-09-25T00:38:25-04:00 pi kernel: mmc1: SDHCI controller on 1001100000.mmc [1001100000.mmc] using ADMA 64-bit
+2026-09-25T00:38:25-04:00 pi kernel: mmc0: new UHS-I speed SDR104 SDXC card at address aaaa
+2026-09-25T00:38:25-04:00 pi kernel: mmcblk0: mmc0:aaaa SD64G 59.5 GiB
+2026-09-25T00:38:25-04:00 pi kernel:  mmcblk0: p1 p2
+2026-09-25T00:38:25-04:00 pi kernel: mmcblk0: mmc0:aaaa SD64G 59.5 GiB (quirks 0x00004000)
+2026-09-25T00:38:25-04:00 pi kernel: mmc1: new UHS-I speed DDR50 SDIO card at address 0001
+2026-09-25T00:38:25-04:00 pi kernel: EXT4-fs (mmcblk0p2): orphan cleanup on readonly fs
+2026-09-25T00:38:25-04:00 pi kernel: EXT4-fs (mmcblk0p2): mounted filesystem 15f4c6be-1102-4331-9904-f78e78afd1fd ro with ordered data mode. Quota mode: none.
+2026-09-25T00:38:25-04:00 pi kernel: EXT4-fs (mmcblk0p2): re-mounted 15f4c6be-1102-4331-9904-f78e78afd1fd r/w.
 --- oom kills in journal (all boots)
 0
 ### swap_zram
 Filename				Type		Size		Used		Priority
 /dev/zram0                              partition	2097136		0		100
 NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
-/dev/zram0 zstd            2G  16K    0B    0B         [SWAP]
+/dev/zram0 zstd            2G  16K   69B   48K         [SWAP]
 --- /etc/rpi/swap.conf
 [Main]
 [File]
@@ -523,27 +558,29 @@ p2p-dev-wlan0:wifi-p2p:disconnected
 eth0:ethernet:unavailable
 --- nm ipv6 addr-gen / method (no connection names)
 ### listening
-udp UNCONN 0      0        0.0.0.0:53    0.0.0.0:* users:(("pihole-FTL",pid=969,fd=21))                            
-udp UNCONN 0      0        0.0.0.0:123   0.0.0.0:* users:(("pihole-FTL",pid=969,fd=41))                            
-udp UNCONN 0      0      127.0.0.1:5053  0.0.0.0:* users:(("dnscrypt-proxy",pid=936,fd=8),("systemd",pid=1,fd=168))
-udp UNCONN 0      0        0.0.0.0:5353  0.0.0.0:* users:(("avahi-daemon",pid=595,fd=12))                          
-udp UNCONN 0      0        0.0.0.0:34632 0.0.0.0:* users:(("avahi-daemon",pid=595,fd=14))                          
-udp UNCONN 0      0              *:53          *:* users:(("pihole-FTL",pid=969,fd=23))                            
-udp UNCONN 0      0              *:123         *:* users:(("pihole-FTL",pid=969,fd=42))                            
-udp UNCONN 0      0              *:5353        *:* users:(("avahi-daemon",pid=595,fd=13))                          
-udp UNCONN 0      0              *:42606       *:* users:(("avahi-daemon",pid=595,fd=15))                          
-tcp LISTEN 0      200      0.0.0.0:80    0.0.0.0:* users:(("pihole-FTL",pid=969,fd=35))                            
-tcp LISTEN 0      128      0.0.0.0:22    0.0.0.0:* users:(("sshd",pid=977,fd=6))                                   
-tcp LISTEN 0      32       0.0.0.0:53    0.0.0.0:* users:(("pihole-FTL",pid=969,fd=22))                            
-tcp LISTEN 0      200      0.0.0.0:443   0.0.0.0:* users:(("pihole-FTL",pid=969,fd=36))                            
-tcp LISTEN 0      4096     0.0.0.0:9001  0.0.0.0:* users:(("mosquitto",pid=959,fd=9))                              
+udp UNCONN 0      0        0.0.0.0:59635 0.0.0.0:* users:(("pihole-FTL",pid=966,fd=42))                            
+udp UNCONN 0      0        0.0.0.0:35401 0.0.0.0:* users:(("pihole-FTL",pid=966,fd=41))                            
+udp UNCONN 0      0        0.0.0.0:53    0.0.0.0:* users:(("pihole-FTL",pid=966,fd=21))                            
+udp UNCONN 0      0        0.0.0.0:123   0.0.0.0:* users:(("pihole-FTL",pid=966,fd=43))                            
+udp UNCONN 0      0        0.0.0.0:37382 0.0.0.0:* users:(("avahi-daemon",pid=592,fd=14))                          
+udp UNCONN 0      0      127.0.0.1:5053  0.0.0.0:* users:(("dnscrypt-proxy",pid=933,fd=8),("systemd",pid=1,fd=151))
+udp UNCONN 0      0        0.0.0.0:5353  0.0.0.0:* users:(("avahi-daemon",pid=592,fd=12))                          
+udp UNCONN 0      0              *:53          *:* users:(("pihole-FTL",pid=966,fd=23))                            
+udp UNCONN 0      0              *:123         *:* users:(("pihole-FTL",pid=966,fd=44))                            
+udp UNCONN 0      0              *:33469       *:* users:(("avahi-daemon",pid=592,fd=15))                          
+udp UNCONN 0      0              *:5353        *:* users:(("avahi-daemon",pid=592,fd=13))                          
 tcp LISTEN 0      100      0.0.0.0:1883  0.0.0.0:* users:(("mosquitto",pid=959,fd=5))                              
-tcp LISTEN 0      4096   127.0.0.1:5053  0.0.0.0:* users:(("dnscrypt-proxy",pid=936,fd=7),("systemd",pid=1,fd=167))
-tcp LISTEN 0      5        0.0.0.0:8080  0.0.0.0:* users:(("python",pid=982,fd=3))                                 
-tcp LISTEN 0      200         [::]:80       [::]:* users:(("pihole-FTL",pid=969,fd=37))                            
-tcp LISTEN 0      128         [::]:22       [::]:* users:(("sshd",pid=977,fd=7))                                   
-tcp LISTEN 0      32          [::]:53       [::]:* users:(("pihole-FTL",pid=969,fd=24))                            
-tcp LISTEN 0      200         [::]:443      [::]:* users:(("pihole-FTL",pid=969,fd=38))                            
+tcp LISTEN 0      4096     0.0.0.0:9001  0.0.0.0:* users:(("mosquitto",pid=959,fd=9))                              
+tcp LISTEN 0      128      0.0.0.0:22    0.0.0.0:* users:(("sshd",pid=973,fd=6))                                   
+tcp LISTEN 0      32       0.0.0.0:53    0.0.0.0:* users:(("pihole-FTL",pid=966,fd=22))                            
+tcp LISTEN 0      200      0.0.0.0:80    0.0.0.0:* users:(("pihole-FTL",pid=966,fd=35))                            
+tcp LISTEN 0      200      0.0.0.0:443   0.0.0.0:* users:(("pihole-FTL",pid=966,fd=36))                            
+tcp LISTEN 0      5        0.0.0.0:8080  0.0.0.0:* users:(("python",pid=978,fd=3))                                 
+tcp LISTEN 0      4096   127.0.0.1:5053  0.0.0.0:* users:(("dnscrypt-proxy",pid=933,fd=7),("systemd",pid=1,fd=150))
+tcp LISTEN 0      128         [::]:22       [::]:* users:(("sshd",pid=973,fd=7))                                   
+tcp LISTEN 0      32          [::]:53       [::]:* users:(("pihole-FTL",pid=966,fd=24))                            
+tcp LISTEN 0      200         [::]:80       [::]:* users:(("pihole-FTL",pid=966,fd=37))                            
+tcp LISTEN 0      200         [::]:443      [::]:* users:(("pihole-FTL",pid=966,fd=38))                            
 ### firewall
 no netfilter table modules loaded
 nft=/usr/sbin/nft
@@ -595,48 +632,48 @@ protocol websockets
 allow_anonymous true
 sshd_password_auth=permitrootlogin without-password pubkeyauthentication yes passwordauthentication no 
 ### thermal_power
-vcgencmd measure_temp => temp=47.7'C 
+vcgencmd measure_temp => temp=43.3'C 
 vcgencmd get_throttled => throttled=0x0 
 vcgencmd measure_volts core => volt=0.8695V 
-vcgencmd measure_clock arm => frequency(0)=2400020480 
+vcgencmd measure_clock arm => frequency(0)=2400023808 
 vcgencmd get_config usb_max_current_enable => usb_max_current_enable=1 
 vcgencmd get_config total_mem => total_mem=8192 
 vcgencmd version => 2025/12/08 19:29:54  Copyright (c) 2012 Broadcom version 2226a853 (release) (embedded) 
 vcgencmd bootloader_version => 2025/12/08 19:29:54 version 2226a853bb9f5fd80392e3a4a89e457aeca88008 (release) timestamp 1765222194 update-time 1765538232 capabilities 0x0000007f  
 --- pmic_read_adc
- 3V7_WL_SW_A current(0)=0.09368929A
-   3V3_SYS_A current(1)=0.12296720A
-   1V8_SYS_A current(2)=0.17371550A
-  DDR_VDD2_A current(3)=0.00683151A
+ 3V7_WL_SW_A current(0)=0.09173742A
+   3V3_SYS_A current(1)=0.16395620A
+   1V8_SYS_A current(2)=0.12296720A
+  DDR_VDD2_A current(3)=0.00780744A
   DDR_VDDQ_A current(4)=0.00000000A
-   1V1_SYS_A current(5)=0.20299340A
-    0V8_SW_A current(6)=0.27033260A
-  VDD_CORE_A current(7)=0.68761000A
-   3V3_DAC_A current(17)=0.00006105A
+   1V1_SYS_A current(5)=0.35035890A
+    0V8_SW_A current(6)=0.27326040A
+  VDD_CORE_A current(7)=0.66975000A
+   3V3_DAC_A current(17)=0.00000000A
    3V3_ADC_A current(18)=0.00012210A
    0V8_AON_A current(16)=0.00262515A
-      HDMI_A current(22)=0.02014650A
- 3V7_WL_SW_V volt(8)=3.71184000V
-   3V3_SYS_V volt(9)=3.31096100V
-   1V8_SYS_V volt(10)=1.81294100V
-  DDR_VDD2_V volt(11)=1.11208700V
-  DDR_VDDQ_V volt(12)=0.60695910V
+      HDMI_A current(22)=0.02026860A
+ 3V7_WL_SW_V volt(8)=3.70720000V
+   3V3_SYS_V volt(9)=3.30724900V
+   1V8_SYS_V volt(10)=1.80024200V
+  DDR_VDD2_V volt(11)=1.10292900V
+  DDR_VDDQ_V volt(12)=0.60109830V
    1V1_SYS_V volt(13)=1.10402800V
-    0V8_SW_V volt(14)=0.79963290V
-  VDD_CORE_V volt(15)=0.87140330V
-   3V3_DAC_V volt(20)=3.31043600V
-   3V3_ADC_V volt(21)=3.30952000V
-   0V8_AON_V volt(19)=0.79941320V
-      HDMI_V volt(23)=5.18044000V
-     EXT5V_V volt(24)=5.17642000V
+    0V8_SW_V volt(14)=0.80109810V
+  VDD_CORE_V volt(15)=0.87167190V
+   3V3_DAC_V volt(20)=3.31226800V
+   3V3_ADC_V volt(21)=3.30768900V
+   0V8_AON_V volt(19)=0.79912020V
+      HDMI_V volt(23)=5.14828000V
+     EXT5V_V volt(24)=5.19250000V
       BATT_V volt(25)=0.00000000V
 --- bootloader_config (PSU/power keys)
 [all]
 BOOT_ORDER=0xf461
-thermal_zone0 type=cpu-thermal temp_mC=46850
+thermal_zone0 type=cpu-thermal temp_mC=43550
 cooling_device0 type=pwm-fan cur=0 max=4
-hwmon0 name=cpu_thermal temp1_input=46850
-hwmon1 name=rp1_adc temp1_input=48499
+hwmon0 name=cpu_thermal temp1_input=43550
+hwmon1 name=rp1_adc temp1_input=47337
 hwmon2 name=pwmfan fan1_input=0 pwm1=0 pwm1_enable=1
 hwmon3 name=rpi_volt in0_lcrit_alarm=0
 cooling_fan_platform=present

@@ -1,6 +1,6 @@
 ### meta
-2026-09-25T03:15:30Z
-boot_id_sha256=fb6e627964373f3fa2f34c4fddfc23144c0f7d4b9935aca3ee77100c484696fa
+2026-09-25T06:23:00Z
+boot_id_sha256=54a9acdff6a286e4c17c12dd682e946792c0509d39ce5a30bde1abf66db07ffe
 ### systemd_running
 NetworkManager.service
 airdb.service
@@ -18,8 +18,12 @@ getty@tty1.service
 init.scope
 mosquitto.service
 pihole-FTL.service
+polkit.service
 proc-sys-fs-binfmt_misc.automount
-session-14619.scope
+session-115.scope
+session-27.scope
+session-4.scope
+session-521.scope
 ssh.service
 systemd-journald-dev-log.socket
 systemd-journald.service
@@ -65,53 +69,6 @@ docker.socket=inactive
 containerd.service=inactive
 ### docker_ps
 SKIPPED docker.service not active; no docker command run
-### ss_listen
-tcp 0.0.0.0:1883 users:(("mosquitto",pid=959,fd=5))
-tcp 0.0.0.0:22 users:(("sshd",pid=977,fd=6))
-tcp 0.0.0.0:443 users:(("pihole-FTL",pid=969,fd=36))
-tcp 0.0.0.0:53 users:(("pihole-FTL",pid=969,fd=22))
-tcp 0.0.0.0:80 users:(("pihole-FTL",pid=969,fd=35))
-tcp 0.0.0.0:8080 users:(("python",pid=982,fd=3))
-tcp 0.0.0.0:9001 users:(("mosquitto",pid=959,fd=9))
-tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=936,fd=7),("systemd",pid=1,fd=167))
-tcp [::]:22 users:(("sshd",pid=977,fd=7))
-tcp [::]:443 users:(("pihole-FTL",pid=969,fd=38))
-tcp [::]:53 users:(("pihole-FTL",pid=969,fd=24))
-tcp [::]:80 users:(("pihole-FTL",pid=969,fd=37))
-udp *:123 users:(("pihole-FTL",pid=969,fd=42))
-udp *:42606 users:(("avahi-daemon",pid=595,fd=15))
-udp *:53 users:(("pihole-FTL",pid=969,fd=23))
-udp *:5353 users:(("avahi-daemon",pid=595,fd=13))
-udp 0.0.0.0:123 users:(("pihole-FTL",pid=969,fd=41))
-udp 0.0.0.0:34632 users:(("avahi-daemon",pid=595,fd=14))
-udp 0.0.0.0:53 users:(("pihole-FTL",pid=969,fd=21))
-udp 0.0.0.0:5353 users:(("avahi-daemon",pid=595,fd=12))
-udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=936,fd=8),("systemd",pid=1,fd=168))
-### findmnt
-/ /dev/mmcblk0p2 ext4 rw,noatime
-/boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro
-/dev udev devtmpfs rw,nosuid,relatime,size=4086080k,nr_inodes=255380,mode=755
-/dev/mqueue mqueue mqueue rw,nosuid,nodev,noexec,relatime
-/dev/pts devpts devpts rw,nosuid,noexec,relatime,gid=5,mode=600,ptmxmode=000
-/dev/shm tmpfs tmpfs rw,nosuid,nodev
-/proc proc proc rw,relatime
-/proc/sys/fs/binfmt_misc binfmt_misc binfmt_misc rw,nosuid,nodev,noexec,relatime
-/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=37,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=4541
-/run tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=1651184k,mode=755
-/run/credentials/getty@tty1.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
-/run/credentials/systemd-journald.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
-/run/lock tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=5120k
-/run/user/1000 tmpfs tmpfs rw,nosuid,nodev,relatime,size=825584k,nr_inodes=206396,mode=700,uid=1000,gid=1000
-/sys sysfs sysfs rw,nosuid,nodev,noexec,relatime
-/sys/fs/bpf bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700
-/sys/fs/cgroup cgroup2 cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot
-/sys/fs/fuse/connections fusectl fusectl rw,nosuid,nodev,noexec,relatime
-/sys/fs/pstore none pstore rw,nosuid,nodev,noexec,relatime
-/sys/kernel/config configfs configfs rw,nosuid,nodev,noexec,relatime
-/sys/kernel/debug debugfs debugfs rw,nosuid,nodev,noexec,relatime
-/sys/kernel/security securityfs securityfs rw,nosuid,nodev,noexec,relatime
-/sys/kernel/tracing tracefs tracefs rw,nosuid,nodev,noexec,relatime
-/tmp tmpfs tmpfs rw,nosuid,nodev,size=4127952k,nr_inodes=1048576
 ### lsmod
 aes_ce_blk 49152
 aes_ce_cipher 49152
@@ -173,6 +130,55 @@ videobuf2_memops 49152
 videobuf2_v4l2 49152
 videodev 344064
 zram 65536
+### ss_listen
+tcp 0.0.0.0:1883 users:(("mosquitto",pid=959,fd=5))
+tcp 0.0.0.0:22 users:(("sshd",pid=973,fd=6))
+tcp 0.0.0.0:443 users:(("pihole-FTL",pid=966,fd=36))
+tcp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=22))
+tcp 0.0.0.0:80 users:(("pihole-FTL",pid=966,fd=35))
+tcp 0.0.0.0:8080 users:(("python",pid=978,fd=3))
+tcp 0.0.0.0:9001 users:(("mosquitto",pid=959,fd=9))
+tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=7),("systemd",pid=1,fd=150))
+tcp [::]:22 users:(("sshd",pid=973,fd=7))
+tcp [::]:443 users:(("pihole-FTL",pid=966,fd=38))
+tcp [::]:53 users:(("pihole-FTL",pid=966,fd=24))
+tcp [::]:80 users:(("pihole-FTL",pid=966,fd=37))
+udp *:123 users:(("pihole-FTL",pid=966,fd=44))
+udp *:33469 users:(("avahi-daemon",pid=592,fd=15))
+udp *:53 users:(("pihole-FTL",pid=966,fd=23))
+udp *:5353 users:(("avahi-daemon",pid=592,fd=13))
+udp 0.0.0.0:123 users:(("pihole-FTL",pid=966,fd=43))
+udp 0.0.0.0:35401 users:(("pihole-FTL",pid=966,fd=41))
+udp 0.0.0.0:37382 users:(("avahi-daemon",pid=592,fd=14))
+udp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=21))
+udp 0.0.0.0:5353 users:(("avahi-daemon",pid=592,fd=12))
+udp 0.0.0.0:59635 users:(("pihole-FTL",pid=966,fd=42))
+udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=8),("systemd",pid=1,fd=151))
+### findmnt
+/ /dev/mmcblk0p2 ext4 rw,noatime
+/boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro
+/dev udev devtmpfs rw,nosuid,relatime,size=4086080k,nr_inodes=255380,mode=755
+/dev/mqueue mqueue mqueue rw,nosuid,nodev,noexec,relatime
+/dev/pts devpts devpts rw,nosuid,noexec,relatime,gid=5,mode=600,ptmxmode=000
+/dev/shm tmpfs tmpfs rw,nosuid,nodev
+/proc proc proc rw,relatime
+/proc/sys/fs/binfmt_misc binfmt_misc binfmt_misc rw,nosuid,nodev,noexec,relatime
+/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=37,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=2585
+/run tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=1651184k,mode=755
+/run/credentials/getty@tty1.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
+/run/credentials/systemd-journald.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
+/run/lock tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=5120k
+/run/user/1000 tmpfs tmpfs rw,nosuid,nodev,relatime,size=825584k,nr_inodes=206396,mode=700,uid=1000,gid=1000
+/sys sysfs sysfs rw,nosuid,nodev,noexec,relatime
+/sys/fs/bpf bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700
+/sys/fs/cgroup cgroup2 cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot
+/sys/fs/fuse/connections fusectl fusectl rw,nosuid,nodev,noexec,relatime
+/sys/fs/pstore none pstore rw,nosuid,nodev,noexec,relatime
+/sys/kernel/config configfs configfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/debug debugfs debugfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/security securityfs securityfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/tracing tracefs tracefs rw,nosuid,nodev,noexec,relatime
+/tmp tmpfs tmpfs rw,nosuid,nodev,size=4127952k,nr_inodes=1048576
 ### firewall
 nft_ruleset_sha256=SKIPPED nf_tables module not loaded
 iptables_legacy_sha256=SKIPPED ip_tables module not loaded or iptables-legacy-save absent
