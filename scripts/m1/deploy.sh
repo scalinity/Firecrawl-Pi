@@ -17,7 +17,10 @@ PI=$PI_SSH_TARGET
 DEST=/opt/firecrawl-pi
 
 cd "$root"
-git diff --quiet HEAD -- || { echo "tracked files differ from HEAD; commit first" >&2; exit 1; }
+# Code must be committed: the copy is `git archive HEAD`, so an uncommitted change would
+# silently not be deployed. Evidence transcripts are excluded, because they are rewritten
+# while a verification window is open and never affect what the Pi runs.
+git diff --quiet HEAD -- . ':(exclude)evidence' || { echo "tracked files outside evidence/ differ from HEAD; commit first" >&2; exit 1; }
 sha=$(git rev-parse HEAD)
 sums=$(mktemp)
 trap 'rm -f "$sums"' EXIT
