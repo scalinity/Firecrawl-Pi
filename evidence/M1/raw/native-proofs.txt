@@ -1,0 +1,127 @@
+### meta
+2026-09-25T07:16:03Z
+host_page_size=16384 kernel=6.18.34+rpt-rpi-2712
+### containers_platform
+fcpi-proof-pg image=sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180 platform=linux/arm64 uname_m=aarch64 state=running restarts=0
+fcpi-proof-redis image=sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44 platform=linux/arm64 uname_m=aarch64 state=running restarts=0
+fcpi-proof-rabbitmq image=sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8 platform=linux/arm64 uname_m=aarch64 state=running restarts=0
+fcpi-proof-fixture image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 uname_m=aarch64 state=running restarts=0
+fcpi-proof-core image=sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af platform=linux/arm64 uname_m=aarch64 state=running restarts=0
+fcpi-proof-gateway image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 uname_m=aarch64 state=running restarts=0
+### postgres
+version=PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+pg_cron_launcher_backends=1
+cron_jobs=36
+extensions=pg_cron 1.6, pgcrypto 1.3, plpgsql 1.0
+nuq_tables=group_crawl,queue_crawl_finished,queue_scrape,queue_scrape_backlog
+cron_runs_succeeded=58
+cron_runs_failed=0
+cron.database_name=postgres source=configuration file
+fsync=on source=default
+full_page_writes=on source=default
+max_connections=32 source=command line
+max_wal_size=1GB source=command line
+min_wal_size=80MB source=command line
+shared_buffers=128MB source=command line
+shared_preload_libraries=pg_cron source=configuration file
+synchronous_commit=on source=default
+wal_buffers=64MB source=configuration file
+work_mem=4MB source=command line
+### redis
+ping=PONG
+redis_version:8.10.2
+os:Linux 6.18.34+rpt-rpi-2712 aarch64
+arch_bits:64
+multiplexing_api:epoll
+used_memory_human:1.40M
+maxmemory_human:192.00M
+maxmemory_policy:noeviction
+mem_allocator:jemalloc-5.3.0
+### rabbitmq
+ping=Ping succeeded 
+server_version=4.3.6
+erlang_emu_flavor=jit
+erlang_otp_release="27"
+check_running=ok
+check_local_alarms=ok
+memory_high_watermark=268435456
+enabled_plugins=rabbitmq_management_agent rabbitmq_prometheus rabbitmq_web_dispatch 
+users=user fcpi 
+probe=rabbitmq-diagnostics\ -q\ ping exit=0 duration_ms=1760 baseline_bytes=133087232 peak_bytes=213352448 delta_mib=76.5
+probe=bash\ -c\ \'\</dev/tcp/127.0.0.1/5672\' exit=0 duration_ms=104 baseline_bytes=130629632 peak_bytes=133758976 delta_mib=3.0
+### core_health
+ready=1 after_probe_attempts=1
+{"utc":"2026-09-25T07:16:44.527Z","api_liveness":{"status":200,"body":"{\"status\":\"ok\"}"},"api_readiness":{"status":200,"body":"{\"status\":\"ok\"}"},"queue_worker":{"status":200,"body":"{\"ok\":true}"},"extract_worker":{"status":200,"body":"{\"ok\":true}"},"nuq_reconciler":{"status":200,"body":"OK"},"nuq_prefetch_worker":{"status":200,"body":"OK"},"nuq_worker_0":{"status":200,"body":"OK"}}
+### core_processes
+1 0 root 60752 node dist/src/harness.js --start-docker
+14 1 root 1504 sh -c node dist/src/index.js
+15 14 root 390800 node dist/src/index.js
+16 1 root 1488 sh -c node dist/src/services/queue-worker.js
+17 16 root 366752 node dist/src/services/queue-worker.js
+18 1 root 1488 sh -c node dist/src/services/extract-worker.js
+21 18 root 352176 node dist/src/services/extract-worker.js
+25 1 root 1488 sh -c node dist/src/services/worker/nuq-worker.js
+31 25 root 359760 node dist/src/services/worker/nuq-worker.js
+32 1 root 1472 sh -c node dist/src/services/worker/nuq-prefetch-worker.js
+38 32 root 89776 node dist/src/services/worker/nuq-prefetch-worker.js
+39 1 root 1488 sh -c node dist/src/services/worker/nuq-reconciler-worker.js
+40 39 root 356608 node dist/src/services/worker/nuq-reconciler-worker.js
+399 0 root 4192 ps -eo pid,ppid,user,rss,args --no-headers
+### core_env_flags
+USE_GO_MARKDOWN_PARSER=UNSET
+NUQ_WORKER_COUNT=1
+USE_DB_AUTHENTICATION=false
+ALLOW_LOCAL_WEBHOOKS=true
+DISABLE_WEBHOOK_DELIVERY=true
+SCRAPE_MAX_ATTEMPTS=1
+NODE_OPTIONS=--max-old-space-size=256
+### elf_alignment
+{"path":"/app/native/firecrawl-rs.linux-arm64-gnu.node","machine":"aarch64","load_segments":2,"min_load_align_hex":"0x10000","page_16k_compatible":true}
+{"path":"/app/sharedLibs/go-html-to-md/libhtml-to-markdown.so","machine":"aarch64","load_segments":2,"min_load_align_hex":"0x10000","page_16k_compatible":true}
+{"path":"/usr/local/bin/node","machine":"aarch64","load_segments":2,"min_load_align_hex":"0x10000","page_16k_compatible":true}
+### scrape_direct
+{"utc_start":"2026-09-25T07:16:45.361Z","endpoint":"v2","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d76c-78f9-7708-98e8-e9fc37af4285","source_status":200,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":101}
+### native_module_mappings
+rust_module_mapped_by pid=15 cmd=node dist/src/index.js 
+rust_module_mapped_by pid=17 cmd=node dist/src/services/queue-worker.js 
+rust_module_mapped_by pid=21 cmd=node dist/src/services/extract-worker.js 
+rust_module_mapped_by pid=31 cmd=node dist/src/services/worker/nuq-worker.js 
+rust_module_mapped_by pid=40 cmd=node dist/src/services/worker/nuq-reconciler-worker.js 
+scan_done
+### gateway
+contract_tests_node=v22.23.3
+ok 1 - missing token: 401 with the gateway's own challenge, nothing forwarded
+ok 2 - wrong token and malformed schemes: 401, never the upstream challenge
+ok 3 - authenticated fixture scrape is forwarded without the client's token or extra headers
+ok 4 - /admin/* is never routed, even authenticated
+ok 5 - routes outside the allowlist are 404 and not forwarded
+ok 6 - non-fixture targets are refused before forwarding
+ok 7 - bodies over 1 MiB are refused with 413
+ok 8 - unknown FCPI_* configuration keys stop startup
+# tests 8
+# pass 8
+# fail 0
+authenticated:
+{"utc_start":"2026-09-25T07:16:47.699Z","endpoint":"v2","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d76c-821b-756a-a864-423e287383a0","source_status":200,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":98}
+unauthenticated:
+{"utc_start":"2026-09-25T07:16:48.774Z","endpoint":"v2","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":401,"success":null,"scrape_id":null,"source_status":null,"title":null,"markdown_b64":null,"error":"unauthorized","www_authenticate":"Bearer realm=\"fcpi\"","elapsed_ms":60}
+### fixture_requests
+{"utc":"2026-09-25T07:12:45.221Z","listening":8080}
+{"utc":"2026-09-25T07:13:41.964Z","method":"GET","path":"/static.html","status":200,"from":"10.231.250.6","ua":"undici"}
+{"utc":"2026-09-25T07:13:44.022Z","method":"GET","path":"/static.html","status":200,"from":"10.231.250.6","ua":"undici"}
+{"utc":"2026-09-25T07:16:45.442Z","method":"GET","path":"/static.html","status":200,"from":"10.231.250.6","ua":"undici"}
+{"utc":"2026-09-25T07:16:47.779Z","method":"GET","path":"/static.html","status":200,"from":"10.231.250.6","ua":"undici"}
+### rabbitmq_queues
+name	type	durable	auto_delete	exclusive	messages	consumers
+extract.dlq	quorum	true	false		0	1
+extract.jobs	quorum	true	false		0	1
+nuq.queue_scrape.prefetch	quorum	true	false		0	0
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0
+### cgroups
+fcpi-proof-pg memory.max=671088640 memory.current=145899520 memory.peak=161005568 anon=15089664 file=125173760 shmem=125157376 memory.swap.max=0 cpu.max=75000/100000 pids.current=10
+fcpi-proof-redis memory.max=335544320 memory.current=7684096 memory.peak=14696448 anon=5963776 file=0 shmem=0 memory.swap.max=0 cpu.max=35000/100000 pids.current=6
+fcpi-proof-rabbitmq memory.max=536870912 memory.current=130514944 memory.peak=219676672 anon=98287616 file=14598144 shmem=14008320 memory.swap.max=0 cpu.max=50000/100000 pids.current=29
+fcpi-proof-fixture memory.max=67108864 memory.current=15433728 memory.peak=23986176 anon=12288000 file=0 shmem=0 memory.swap.max=0 cpu.max=10000/100000 pids.current=11
+fcpi-proof-core memory.max=2415919104 memory.current=1782136832 memory.peak=1897775104 anon=1640464384 file=524288 shmem=0 memory.swap.max=0 cpu.max=225000/100000 pids.current=94
+fcpi-proof-gateway memory.max=167772160 memory.current=15269888 memory.peak=23838720 anon=13058048 file=0 shmem=0 memory.swap.max=0 cpu.max=30000/100000 pids.current=11
+end

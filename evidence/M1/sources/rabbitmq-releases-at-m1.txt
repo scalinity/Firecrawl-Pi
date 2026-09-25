@@ -1,0 +1,33 @@
+# url=https://api.github.com/repos/rabbitmq/rabbitmq-server/releases?per_page=30 (tag, prerelease, published_at)
+# retrieved_utc=2026-09-25T08:09:32Z
+v4.3.6 prerelease=false draft=false published=2026-09-14T07:24:14Z
+v4.3.5 prerelease=false draft=false published=2026-08-17T21:41:39Z
+v4.3.4 prerelease=false draft=false published=2026-07-23T14:46:25Z
+v4.2.9 prerelease=false draft=false published=2026-07-20T14:43:28Z
+v4.3.3 prerelease=false draft=false published=2026-07-20T14:55:46Z
+v4.2.8 prerelease=false draft=false published=2026-06-15T15:08:29Z
+v4.3.2 prerelease=false draft=false published=2026-06-15T15:34:09Z
+v4.3.1 prerelease=false draft=false published=2026-05-20T01:21:53Z
+v4.2.7 prerelease=false draft=false published=2026-05-19T23:48:35Z
+v4.3.0 prerelease=false draft=false published=2026-04-23T01:18:14Z
+v4.2.6 prerelease=false draft=false published=2026-04-23T00:54:49Z
+v4.3.0-rc.1 prerelease=true draft=false published=2026-04-20T18:19:14Z
+v4.3.0-rc.0 prerelease=true draft=false published=2026-03-26T03:47:43Z
+v4.2.5 prerelease=false draft=false published=2026-03-17T00:29:33Z
+v4.2.4 prerelease=false draft=false published=2026-02-17T01:44:57Z
+v4.2.3 prerelease=false draft=false published=2026-01-22T03:57:50Z
+v4.1.8 prerelease=false draft=false published=2026-01-22T03:48:39Z
+v4.2.2 prerelease=false draft=false published=2025-12-15T18:25:36Z
+v4.1.7 prerelease=false draft=false published=2025-12-15T18:10:15Z
+v4.2.1 prerelease=false draft=false published=2025-11-17T02:47:15Z
+v4.1.6 prerelease=false draft=false published=2025-11-17T02:23:37Z
+v4.2.0 prerelease=false draft=false published=2025-10-27T16:56:40Z
+v4.1.5 prerelease=false draft=false published=2025-10-27T16:23:02Z
+v4.2.0-rc.1 prerelease=true draft=false published=2025-10-08T21:42:33Z
+v4.2.0-beta.4 prerelease=true draft=false published=2025-09-25T02:35:29Z
+v4.2.0-beta.3 prerelease=true draft=false published=2025-09-15T19:30:58Z
+v4.1.4 prerelease=false draft=false published=2025-09-02T14:26:24Z
+v4.2.0-beta.2 prerelease=true draft=false published=2025-08-28T00:43:32Z
+v4.2.0-beta.1 prerelease=true draft=false published=2025-08-07T16:10:02Z
+v4.1.3 prerelease=false draft=false published=2025-08-04T12:13:45Z
+# 4.4 tags (git ls-remote refs/tags/v4.4*):

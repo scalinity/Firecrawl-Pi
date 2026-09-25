@@ -1,0 +1,6 @@
+### meta
+2026-09-25T07:41:41Z
+event=an M1 diagnostic fallback ran modprobe configs (loads /proc/config.gz); reversing it
+modprobe -r configs: ok
+configs not loaded
+ls: cannot access '/proc/config.gz': No such file or directory

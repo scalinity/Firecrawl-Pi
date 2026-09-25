@@ -149,7 +149,14 @@ const M1_RULES = [
 ];
 const M0_HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash"];
 const M1_HASH_RULES = ["live-secret-by-hash-hex", "live-secret-by-hash-cookie"];
-const SYNTHETIC_ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00:02", "02:00:00:00:00:99"]);
+// Exact literal strings allowed outside the controls, each classified under the publishing
+// rule; a real value of the same shape still fires. M0's synthetic MACs, plus:
+//   amqp://fcpi:%s@          code: pi-init.sh builds the broker URL from a format string
+//   amqp://fcpi:$rmqpw@      code: pi-native-proofs.sh builds the proof URL from a shell variable
+//   amqp://fcpi:\\(.*\\)@    code: this file's sed pattern that extracts the password on the Pi
+//   http://user:pw@          test fixture: m1-gateway.test.mjs checks userinfo URLs are refused
+const SYNTHETIC_ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00:02", "02:00:00:00:00:99",
+  "amqp://fcpi:%s@", "amqp://fcpi:$rmqpw@", String.raw`amqp://fcpi:\\(.*\\)@`, "http://user:pw@"]);
 function scanFiles(files, ids, rules, allow = new Set()) {
   const hits = [];
   for (const f of files) {

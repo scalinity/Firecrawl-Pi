@@ -1,0 +1,95 @@
+### meta
+2026-09-25T06:58:05Z
+### build
+#0 building with "default" instance using docker driver
+
+#1 [internal] load remote build context
+#1 DONE 0.1s
+
+#2 copy /context /
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/postgres:17.11-trixie@sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761
+#3 DONE 0.7s
+
+#4 [1/4] FROM docker.io/library/postgres:17.11-trixie@sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761
+#4 resolve docker.io/library/postgres:17.11-trixie@sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761 0.0s done
+#4 DONE 0.9s
+
+#5 [2/4] RUN set -eux;     apt-get update;     apt-get install -y --no-install-recommends         postgresql-17-cron=1.6.8-1.pgdg13+2;     rm -rf /var/lib/apt/lists/*
+#5 0.240 + apt-get update
+#5 0.451 Get:1 http://deb.debian.org/debian trixie InRelease [140 kB]
+#5 0.465 Get:2 http://apt.postgresql.org/pub/repos/apt trixie-pgdg InRelease [241 kB]
+#5 0.522 Get:3 http://deb.debian.org/debian trixie-updates InRelease [47.3 kB]
+#5 0.549 Get:4 http://deb.debian.org/debian-security trixie-security InRelease [43.4 kB]
+#5 0.578 Get:5 http://deb.debian.org/debian trixie/main arm64 Packages [9,614 kB]
+#5 0.582 Get:6 http://apt.postgresql.org/pub/repos/apt trixie-pgdg/17 arm64 Packages [6,762 B]
+#5 0.617 Get:7 http://apt.postgresql.org/pub/repos/apt trixie-pgdg/main arm64 Packages [900 kB]
+#5 2.103 Get:8 http://deb.debian.org/debian trixie-updates/main arm64 Packages [4,424 B]
+#5 2.171 Get:9 http://deb.debian.org/debian-security trixie-security/main arm64 Packages [264 kB]
+#5 3.162 Fetched 11.3 MB in 3s (3,881 kB/s)
+#5 3.162 Reading package lists...
+#5 3.922 + apt-get install -y --no-install-recommends postgresql-17-cron=1.6.8-1.pgdg13+2
+#5 3.929 Reading package lists...
+#5 4.684 Building dependency tree...
+#5 4.907 Reading state information...
+#5 5.461 The following NEW packages will be installed:
+#5 5.461   postgresql-17-cron
+#5 5.772 0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.
+#5 5.772 Need to get 92.0 kB of archives.
+#5 5.772 After this operation, 228 kB of additional disk space will be used.
+#5 5.772 Get:1 http://apt.postgresql.org/pub/repos/apt trixie-pgdg/main arm64 postgresql-17-cron arm64 1.6.8-1.pgdg13+2 [92.0 kB]
+#5 6.032 debconf: unable to initialize frontend: Dialog
+#5 6.032 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#5 6.032 debconf: falling back to frontend: Readline
+#5 6.038 debconf: unable to initialize frontend: Readline
+#5 6.038 debconf: (This frontend requires a controlling tty.)
+#5 6.038 debconf: falling back to frontend: Teletype
+#5 6.041 debconf: unable to initialize frontend: Teletype
+#5 6.041 debconf: (This frontend requires a controlling tty.)
+#5 6.041 debconf: falling back to frontend: Noninteractive
+#5 6.838 Fetched 92.0 kB in 0s (289 kB/s)
+#5 6.880 Selecting previously unselected package postgresql-17-cron.
+#5 6.880 (Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 11468 files and directories currently installed.)
+#5 6.888 Preparing to unpack .../postgresql-17-cron_1.6.8-1.pgdg13+2_arm64.deb ...
+#5 6.901 Unpacking postgresql-17-cron (1.6.8-1.pgdg13+2) ...
+#5 6.989 Setting up postgresql-17-cron (1.6.8-1.pgdg13+2) ...
+#5 7.005 Processing triggers for postgresql-common (293.pgdg13+1) ...
+#5 7.079 debconf: unable to initialize frontend: Dialog
+#5 7.079 debconf: (TERM is not set, so the dialog frontend is not usable.)
+#5 7.079 debconf: falling back to frontend: Readline
+#5 7.085 debconf: unable to initialize frontend: Readline
+#5 7.085 debconf: (This frontend requires a controlling tty.)
+#5 7.085 debconf: falling back to frontend: Teletype
+#5 7.087 debconf: unable to initialize frontend: Teletype
+#5 7.087 debconf: (This frontend requires a controlling tty.)
+#5 7.087 debconf: falling back to frontend: Noninteractive
+#5 7.121 Building PostgreSQL dictionaries from installed myspell/hunspell packages...
+#5 7.121 Removing obsolete dictionary files:
+#5 7.174 + rm -rf /var/lib/apt/lists/apt.postgresql.org_pub_repos_apt_dists_trixie-pgdg_17_binary-arm64_Packages.lz4 /var/lib/apt/lists/apt.postgresql.org_pub_repos_apt_dists_trixie-pgdg_InRelease /var/lib/apt/lists/apt.postgresql.org_pub_repos_apt_dists_trixie-pgdg_main_binary-arm64_Packages.lz4 /var/lib/apt/lists/auxfiles /var/lib/apt/lists/deb.debian.org_debian-security_dists_trixie-security_InRelease /var/lib/apt/lists/deb.debian.org_debian-security_dists_trixie-security_main_binary-arm64_Packages.lz4 /var/lib/apt/lists/deb.debian.org_debian_dists_trixie-updates_InRelease /var/lib/apt/lists/deb.debian.org_debian_dists_trixie-updates_main_binary-arm64_Packages.lz4 /var/lib/apt/lists/deb.debian.org_debian_dists_trixie_InRelease /var/lib/apt/lists/deb.debian.org_debian_dists_trixie_main_binary-arm64_Packages.lz4 /var/lib/apt/lists/lock /var/lib/apt/lists/partial
+#5 DONE 7.3s
+
+#6 [3/4] RUN set -eux;     conf_sample="/usr/share/postgresql/17/postgresql.conf.sample";     sed -ri "s/^#?shared_preload_libraries\s*=.*/shared_preload_libraries = 'pg_cron'/" "$conf_sample";     printf "\n# Added for pg_cron\ncron.database_name = 'postgres'\n" >> "$conf_sample"
+#6 0.243 + conf_sample=/usr/share/postgresql/17/postgresql.conf.sample
+#6 0.243 + sed -ri s/^#?shared_preload_libraries\s*=.*/shared_preload_libraries = 'pg_cron'/ /usr/share/postgresql/17/postgresql.conf.sample
+#6 0.245 + printf \n# Added for pg_cron\ncron.database_name = 'postgres'\n
+#6 DONE 0.3s
+
+#7 [4/4] COPY nuq.sql /docker-entrypoint-initdb.d/010-nuq.sql
+#7 DONE 0.2s
+
+#8 exporting to image
+#8 exporting layers
+#8 exporting layers 1.4s done
+#8 exporting manifest sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180 0.0s done
+#8 exporting config sha256:290dc9b072682dad6a9095fc586cbd4523a9b3dadd07f0c88bad0497ed854a13 0.0s done
+#8 naming to docker.io/fcpi/nuq-postgres:m1 done
+#8 unpacking to docker.io/fcpi/nuq-postgres:m1 0.1s done
+#8 DONE 1.6s
+build_exit=0
+### result
+2026-09-25T06:58:17Z
+{"id":"sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180","repo_digests":["fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180"],"os":"linux","arch":"arm64","variant":null,"created":"2026-09-25T02:58:15.328732368-04:00"}
+postgresql-17 17.11-1.pgdg13+2
+postgresql-17-cron 1.6.8-1.pgdg13+2
+end

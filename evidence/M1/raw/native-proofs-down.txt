@@ -1,0 +1,13 @@
+### meta
+2026-09-25T07:21:47Z
+removed fcpi-proof-pg
+removed fcpi-proof-redis
+removed fcpi-proof-rabbitmq
+removed fcpi-proof-fixture
+removed fcpi-proof-core
+removed fcpi-proof-gateway
+removed volume fcpi-proof-rabbitmq-data
+removed network fcpi-proof
+removed /run/fcpi-proof
+remaining_proof_resources=0
+end

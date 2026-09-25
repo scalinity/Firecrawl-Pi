@@ -1,0 +1,53 @@
+### meta
+2026-09-25T08:03:36Z
+source_commit=bff090efd4ae9bc1deab5ff902ebceb1b649776a
+sentinel=m1-sentinel-add0ab38-2f5b-42c3-ad54-4d33058fde0a
+### write
+CREATE SCHEMA
+CREATE TABLE
+postgres_written=m1-sentinel-add0ab38-2f5b-42c3-ad54-4d33058fde0a
+INSERT 0 1
+redis_set=OK
+rabbitmq_write={"utc":"2026-09-25T08:03:37.634Z","queue":"fcpi.m1.sentinel","messages_before":0,"published":"m1-sentinel-add0ab38-2f5b-42c3-ad54-4d33058fde0a","confirmed":true}
+### before
+nuq-postgres a44c68a2204f9e3e5ee5bce9897b35662762e6ad1d81fdb84fdc9fd2a01510e3
+redis 875add0a1217d358b79049c9a53c43e268f05343321baff3067ebb25af4d475f
+rabbitmq cbaf5e44e4104e7a4552733b18d17707c070f1ad475abb378ee24e375347f48d
+firecrawl-core fd3dfe3cf679ec9fab9e8e38f17708c7656db35d5f1daa7bced50e8f7b67213a
+access-gateway a8b0b4c7c99341ee960cbd9531b44f4cb58c77bfb5da812bd6ce767e9f443bc5
+fixture a772680b1ece2c2181c84d4acf41c841cafd02fc6e337ddcba84b42957ae2d7e
+rabbitmq_node=rabbit@rabbitmq
+### recreate
+ Container fcpi-redis-1 Waiting 
+ Container fcpi-rabbitmq-1 Waiting 
+ Container fcpi-redis-1 Healthy 
+ Container fcpi-nuq-postgres-1 Healthy 
+ Container fcpi-rabbitmq-1 Healthy 
+ Container fcpi-fixture-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+recreate_exit=0 elapsed_s=84
+volume_or_data_deletion_commands_run=0
+### after
+nuq-postgres 22dc015a2115c59c124d036585c09567f37374f00ef113f2caf70e1c795f2a2e
+redis 4293b9abba861fd67ef41021120e1d0e3c614377811e5df2cf8d91c693d1822e
+rabbitmq 86bd3761c2d5a9a8e1d472289370d0f0b19e91c325076e377aa08e3b44e986cd
+firecrawl-core df10aca7e8fe29882edb46b6aae9d57d9d7f7d68f5e851cbf3fb42a79f0d55a7
+access-gateway 00555340c6235d71442ed9cf73722dffe25939807b1f2e14a89cd247e7fecd5a
+fixture 7be11392734d3baa1ae1d94c813514891ca85a7698698133872364b57e729d29
+rabbitmq_node=rabbit@rabbitmq
+access-gateway running healthy
+firecrawl-core running healthy
+fixture running healthy
+nuq-postgres running healthy
+rabbitmq running healthy
+redis running healthy
+### read
+postgres_read=m1-sentinel-add0ab38-2f5b-42c3-ad54-4d33058fde0a
+redis_read=m1-sentinel-add0ab38-2f5b-42c3-ad54-4d33058fde0a
+rabbitmq_read={"utc":"2026-09-25T08:05:09.670Z","queue":"fcpi.m1.sentinel","messages_before":1,"head_message":"m1-sentinel-add0ab38-2f5b-42c3-ad54-4d33058fde0a","redelivered":false}
+0:0 700 /srv/firecrawl-pi/data
+5432:5432 700 /srv/firecrawl-pi/data/postgres
+6379:6379 700 /srv/firecrawl-pi/data/redis
+5672:5672 700 /srv/firecrawl-pi/data/rabbitmq
+end

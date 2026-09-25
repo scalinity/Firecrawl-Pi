@@ -1,0 +1,56 @@
+### meta
+2026-09-25T06:50:58Z
+mode=plan
+### signing_key
+fingerprint=9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+fingerprint=D3306A018370199E527AE7997EA0A9C3F273FCD8
+unchanged /etc/apt/keyrings/docker.asc
+keyring_sha256=1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570
+### apt_source
+unchanged /etc/apt/sources.list.d/docker.sources
+Types: deb
+URIs: https://download.docker.com/linux/debian
+Suites: trixie
+Components: stable
+Architectures: arm64
+Signed-By: /etc/apt/keyrings/docker.asc
+### apt_update_docker_only
+Hit:1 https://download.docker.com/linux/debian trixie InRelease
+Reading package lists...
+### candidates
+docker-ce:
+  Installed: (none)
+  Candidate: 5:29.8.1-1~debian.13~trixie
+docker-ce-cli:
+  Installed: (none)
+  Candidate: 5:29.8.1-1~debian.13~trixie
+containerd.io:
+  Installed: (none)
+  Candidate: 2.3.5-1~debian.13~trixie
+docker-compose-plugin:
+  Installed: (none)
+  Candidate: 5.5.1-1~debian.13~trixie
+docker-buildx-plugin:
+  Installed: (none)
+  Candidate: 0.37.1-1~debian.13~trixie
+iptables:
+  Installed: (none)
+  Candidate: 1.8.11-2
+### simulate
+Inst containerd.io (2.3.5-1~debian.13~trixie Docker CE:trixie [arm64])
+Inst docker-ce-cli (5:29.8.1-1~debian.13~trixie Docker CE:trixie [arm64])
+Inst libip4tc2 (1.8.11-2 Debian:13.6/stable [arm64])
+Inst libip6tc2 (1.8.11-2 Debian:13.6/stable [arm64])
+Inst iptables (1.8.11-2 Debian:13.6/stable [arm64])
+Inst docker-ce (5:29.8.1-1~debian.13~trixie Docker CE:trixie [arm64])
+Inst docker-buildx-plugin (0.37.1-1~debian.13~trixie Docker CE:trixie [arm64])
+Inst docker-compose-plugin (5.5.1-1~debian.13~trixie Docker CE:trixie [arm64])
+Conf containerd.io (2.3.5-1~debian.13~trixie Docker CE:trixie [arm64])
+Conf docker-ce-cli (5:29.8.1-1~debian.13~trixie Docker CE:trixie [arm64])
+Conf libip4tc2 (1.8.11-2 Debian:13.6/stable [arm64])
+Conf libip6tc2 (1.8.11-2 Debian:13.6/stable [arm64])
+Conf iptables (1.8.11-2 Debian:13.6/stable [arm64])
+Conf docker-ce (5:29.8.1-1~debian.13~trixie Docker CE:trixie [arm64])
+Conf docker-buildx-plugin (0.37.1-1~debian.13~trixie Docker CE:trixie [arm64])
+Conf docker-compose-plugin (5.5.1-1~debian.13~trixie Docker CE:trixie [arm64])
+end

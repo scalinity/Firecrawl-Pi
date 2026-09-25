@@ -1,0 +1,19 @@
+### meta
+2026-09-25T07:33:26Z
+reason=image default uid 999 is the host pihole account; services move to dedicated uids before first start
+### precondition
+containers_in_project=0
+data_entries=0 rabbitmq_entries=1
+### changes
+chown 5432:5432 /srv/firecrawl-pi/data/postgres
+chown 6379:6379 /srv/firecrawl-pi/data/redis
+chown 5672:5672 /srv/firecrawl-pi/data/rabbitmq /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+chmod 0700 /srv/firecrawl-pi/data
+copy postgres_password -> core_postgres_password (root 0600)
+chown 5432:5432 postgres_password
+create rabbitmq_default_user_conf from rabbitmq_password (5672 0600)
+chown 6379:6379 redis_users_acl
+### consistency
+postgres pair equal=yes
+rabbitmq pair equal=yes
+removed obsolete /etc/firecrawl-pi/secrets/rabbitmq_password (superseded by rabbitmq_default_user_conf)

@@ -1,0 +1,21 @@
+### meta
+2026-09-25T08:07:39Z
+vantage=workstation on the Pi's LAN; target=158.205.34.18
+### project_ports
+port=3380 closed
+port=3300 closed
+port=3002 closed
+port=3004 closed
+port=3005 closed
+port=3006 closed
+port=3007 closed
+port=3008 closed
+port=5432 closed
+port=6379 closed
+port=5672 closed
+port=4369 closed
+port=25672 closed
+port=15692 closed
+### control
+port=22 open
+end

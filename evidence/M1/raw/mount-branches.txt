@@ -1,0 +1,75 @@
+### meta
+2026-09-25T08:06:25Z
+source_commit=f3efc3ac695c7a74d4416b2dde7d2e509e2aadac
+### positive_control
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=8 create_host_path=false
+check_exit=0
+### stop
+stop_exit=0 running_containers=0
+manifest=1998cc034c2d76e41b25cc709cbf641a4786f32f4166b6d9503ae7530c6e5ab5 entries=1138
+compose_creates_path_diff_lines=1
+compose_absent_source_diff_lines=2
+### branch_uuid_mismatch
+A dependency job for fcpi-stack.service failed. See 'journalctl -xe' for details.
+stack_start_exit=1
+data_check_result=exit-code stack_active=inactive
+check_message=fcpi-data-check: FAIL: filesystem UUID of /srv/firecrawl-pi/data is '15f4c6be-1102-4331-9904-f78e78afd1fd', expected '00000000-0000-4000-8000-000000000000'
+direct_check_exit=1 direct_message=fcpi-data-check: FAIL: filesystem UUID of /srv/firecrawl-pi/data is '15f4c6be-1102-4331-9904-f78e78afd1fd', expected '00000000-0000-4000-8000-000000000000'
+running_containers=0
+manifest_unchanged=yes
+absent_dir_created=no absent_bind_created=no
+### branch_data_id_mismatch
+A dependency job for fcpi-stack.service failed. See 'journalctl -xe' for details.
+stack_start_exit=1
+data_check_result=exit-code stack_active=inactive
+check_message=fcpi-data-check: FAIL: data ID in /srv/firecrawl-pi/data/.fcpi-data-id does not match PI_DATA_ID
+direct_check_exit=1 direct_message=fcpi-data-check: FAIL: data ID in /srv/firecrawl-pi/data/.fcpi-data-id does not match PI_DATA_ID
+running_containers=0
+manifest_unchanged=yes
+absent_dir_created=no absent_bind_created=no
+### branch_data_dir_absent
+A dependency job for fcpi-stack.service failed. See 'journalctl -xe' for details.
+stack_start_exit=1
+data_check_result=exit-code stack_active=inactive
+check_message=fcpi-data-check: FAIL: data directory /srv/firecrawl-pi/data-absent-m1-test is absent
+direct_check_exit=1 direct_message=fcpi-data-check: FAIL: data directory /srv/firecrawl-pi/data-absent-m1-test is absent
+running_containers=0
+manifest_unchanged=yes
+absent_dir_created=no absent_bind_created=no
+### branch_bind_creates_host_path
+A dependency job for fcpi-stack.service failed. See 'journalctl -xe' for details.
+stack_start_exit=1
+data_check_result=exit-code stack_active=inactive
+check_message=fcpi-data-check: FAIL: bind /srv/firecrawl-pi/data/postgres does not set create_host_path: false
+direct_check_exit=1 direct_message=fcpi-data-check: FAIL: bind /srv/firecrawl-pi/data/postgres does not set create_host_path: false
+running_containers=0
+manifest_unchanged=yes
+absent_dir_created=no absent_bind_created=no
+### branch_bind_source_absent
+A dependency job for fcpi-stack.service failed. See 'journalctl -xe' for details.
+stack_start_exit=1
+data_check_result=exit-code stack_active=inactive
+check_message=fcpi-data-check: FAIL: bind source /srv/firecrawl-pi/data/absent-m1-test is absent
+direct_check_exit=1 direct_message=fcpi-data-check: FAIL: bind source /srv/firecrawl-pi/data/absent-m1-test is absent
+running_containers=0
+manifest_unchanged=yes
+absent_dir_created=no absent_bind_created=no
+### compose_refuses_missing_bind
+ service:probe:1 Error response from daemon: invalid mount config for type "bind": bind source path does not exist: /srv/firecrawl-pi/data/absent-m1-test 
+Error response from daemon: invalid mount config for type "bind": bind source path does not exist: /srv/firecrawl-pi/data/absent-m1-test
+probe_up_exit=1
+absent_bind_created=no
+manifest_unchanged=yes
+time="2026-09-25T04:06:30-04:00" level=warning msg="Warning: No resource found to remove for project \"fcpi-m1probe\"."
+probe_resources_left=0
+removed /run/fcpi-branch-test
+### restart
+start_exit=0 stack_active=active data_check_result=success
+access-gateway running healthy
+firecrawl-core running healthy
+fixture running healthy
+nuq-postgres running healthy
+rabbitmq running healthy
+redis running healthy
+manager_env_FCPI_CONFIG=0
+end

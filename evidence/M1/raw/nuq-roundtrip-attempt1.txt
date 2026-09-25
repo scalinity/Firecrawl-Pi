@@ -1,0 +1,345 @@
+### meta
+2026-09-25T07:44:33Z
+source_commit=9e486442a47cbe90fdc728e4b72b5a1448afe9d4
+core=fcpi-firecrawl-core-1 rabbitmq=fcpi-rabbitmq-1 postgres=fcpi-nuq-postgres-1 fixture=http://m1.fixture.fcpi.test:8080/static.html
+restart_count=0 started_at=2026-09-25T07:34:32.952831221Z status=running
+### case1_counters_before
+### case1_scrape
+{"utc_start":"2026-09-25T07:44:33.910Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d785-eebe-733d-bba8-a0a3bc4c32ce","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":1055}
+### case1_queues
+name	type	durable	auto_delete	exclusive	messages_ready	messages	consumers
+extract.dlq	quorum	true	false		0	0	1
+extract.jobs	quorum	true	false		0	0	1
+nuq.queue_scrape.prefetch	quorum	true	false		0	0	0
+nuq.queue_scrape.listen.api-8fb98992-5e5e-4ef0-8482-3811f4adea96	classic	false	true	true	0	0	1
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0	0
+### case1_counters_after
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 1.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 1.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 2.0
+### case1_core_log
+nuq-prefetch-worker 2026-09-25 07:44:34 info [nuq/rabbitmq:]: NuQ job prefetch sent 
+nuq-worker-0   2026-09-25 07:44:34 info [queue-worker:processJob]: 🐂 Worker taking job 01a0d785-eebe-733d-bba8-a0a3bc4c32ce 
+nuq-worker-0   2026-09-25 07:44:34 info [queue-worker:processJob]: 🐂 Job done 01a0d785-eebe-733d-bba8-a0a3bc4c32ce 
+nuq-worker-0   2026-09-25 07:44:34 info [nuq/rabbitmq:]: NuQ job sent 
+api            2026-09-25 07:44:34 info [nuq/rabbitmq:]: NuQ job received 
+### case2_counters_before
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 1.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 1.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 2.0
+### case2_timeline
+nuq_worker_pid=37
+kill: (37): Operation not permitted
+t+2 ready=0 job=none
+t+5 ready=0 job=none
+t+8 ready=0 job=none
+t+10 ready=0 job=none
+t+13 ready=0 job=none
+t+16 ready=0 job=none
+t+19 ready=0 job=none
+t+22 ready=0 job=none
+t+25 ready=0 job=none
+t+28 ready=0 job=none
+t+30 ready=0 job=none
+t+33 ready=0 job=none
+t+36 ready=0 job=none
+t+39 ready=0 job=none
+t+42 ready=0 job=none
+t+45 ready=0 job=none
+t+47 ready=0 job=none
+t+50 ready=0 job=none
+t+53 ready=0 job=none
+t+56 ready=0 job=none
+t+59 ready=0 job=none
+t+62 ready=0 job=none
+t+65 ready=0 job=none
+t+68 ready=0 job=none
+t+71 ready=0 job=none
+t+74 ready=0 job=none
+t+76 ready=0 job=none
+t+79 ready=0 job=none
+t+82 ready=0 job=none
+t+85 ready=0 job=none
+t+88 ready=0 job=none
+t+91 ready=0 job=none
+t+94 ready=0 job=none
+t+96 ready=0 job=none
+t+99 ready=0 job=none
+t+102 ready=0 job=none
+t+105 ready=0 job=none
+t+108 ready=0 job=none
+t+111 ready=0 job=none
+t+114 ready=0 job=none
+t+116 ready=0 job=none
+t+120 ready=0 job=none
+kill: (37): Operation not permitted
+t+122 ready=0 job=none
+kill: (37): Operation not permitted
+t+126 ready=0 job=none
+kill: (37): Operation not permitted
+t+129 ready=0 job=none
+kill: (37): Operation not permitted
+t+132 ready=0 job=none
+kill: (37): Operation not permitted
+t+135 ready=0 job=none
+kill: (37): Operation not permitted
+t+137 ready=0 job=none
+kill: (37): Operation not permitted
+t+140 ready=0 job=none
+kill: (37): Operation not permitted
+t+143 ready=0 job=none
+kill: (37): Operation not permitted
+t+146 ready=0 job=none
+kill: (37): Operation not permitted
+t+149 ready=0 job=none
+kill: (37): Operation not permitted
+t+152 ready=0 job=none
+kill: (37): Operation not permitted
+t+155 ready=0 job=none
+kill: (37): Operation not permitted
+t+158 ready=0 job=none
+kill: (37): Operation not permitted
+t+161 ready=0 job=none
+kill: (37): Operation not permitted
+t+164 ready=0 job=none
+kill: (37): Operation not permitted
+t+167 ready=0 job=none
+kill: (37): Operation not permitted
+t+170 ready=0 job=none
+kill: (37): Operation not permitted
+t+173 ready=0 job=none
+kill: (37): Operation not permitted
+t+176 ready=0 job=none
+kill: (37): Operation not permitted
+t+179 ready=0 job=none
+kill: (37): Operation not permitted
+t+182 ready=0 job=none
+kill: (37): Operation not permitted
+t+185 ready=0 job=none
+kill: (37): Operation not permitted
+t+187 ready=0 job=none
+kill: (37): Operation not permitted
+t+191 ready=0 job=none
+kill: (37): Operation not permitted
+t+193 ready=0 job=none
+kill: (37): Operation not permitted
+t+196 ready=0 job=none
+kill: (37): Operation not permitted
+t+199 ready=0 job=none
+kill: (37): Operation not permitted
+t+202 ready=0 job=none
+kill: (37): Operation not permitted
+t+205 ready=0 job=none
+kill: (37): Operation not permitted
+t+208 ready=0 job=none
+kill: (37): Operation not permitted
+t+211 ready=0 job=none
+kill: (37): Operation not permitted
+t+214 ready=0 job=none
+kill: (37): Operation not permitted
+t+217 ready=0 job=none
+kill: (37): Operation not permitted
+t+220 ready=0 job=none
+kill: (37): Operation not permitted
+t+223 ready=0 job=none
+kill: (37): Operation not permitted
+t+226 ready=0 job=none
+kill: (37): Operation not permitted
+t+229 ready=0 job=none
+kill: (37): Operation not permitted
+t+232 ready=0 job=none
+kill: (37): Operation not permitted
+t+235 ready=0 job=none
+kill: (37): Operation not permitted
+t+238 ready=0 job=none
+kill: (37): Operation not permitted
+t+241 ready=0 job=none
+kill: (37): Operation not permitted
+t+244 ready=0 job=none
+kill: (37): Operation not permitted
+t+247 ready=0 job=none
+kill: (37): Operation not permitted
+t+250 ready=0 job=none
+kill: (37): Operation not permitted
+t+252 ready=0 job=none
+kill: (37): Operation not permitted
+t+255 ready=0 job=none
+kill: (37): Operation not permitted
+t+258 ready=0 job=none
+kill: (37): Operation not permitted
+t+261 ready=0 job=none
+kill: (37): Operation not permitted
+t+264 ready=0 job=none
+kill: (37): Operation not permitted
+t+267 ready=0 job=none
+kill: (37): Operation not permitted
+t+270 ready=0 job=none
+kill: (37): Operation not permitted
+t+273 ready=0 job=none
+kill: (37): Operation not permitted
+t+277 ready=0 job=none
+kill: (37): Operation not permitted
+t+279 ready=0 job=none
+kill: (37): Operation not permitted
+t+282 ready=0 job=none
+kill: (37): Operation not permitted
+t+285 ready=0 job=none
+kill: (37): Operation not permitted
+t+288 ready=0 job=none
+kill: (37): Operation not permitted
+t+291 ready=0 job=none
+kill: (37): Operation not permitted
+t+294 ready=0 job=none
+kill: (37): Operation not permitted
+t+297 ready=0 job=none
+kill: (37): Operation not permitted
+t+300 ready=0 job=none
+kill: (37): Operation not permitted
+t+303 ready=0 job=none
+kill: (37): Operation not permitted
+t+306 ready=0 job=none
+kill: (37): Operation not permitted
+t+309 ready=0 job=none
+kill: (37): Operation not permitted
+t+312 ready=0 job=none
+kill: (37): Operation not permitted
+t+315 ready=0 job=none
+kill: (37): Operation not permitted
+t+318 ready=0 job=none
+kill: (37): Operation not permitted
+t+321 ready=0 job=none
+kill: (37): Operation not permitted
+t+324 ready=0 job=none
+kill: (37): Operation not permitted
+t+326 ready=0 job=none
+kill: (37): Operation not permitted
+t+329 ready=0 job=none
+kill: (37): Operation not permitted
+t+332 ready=0 job=none
+kill: (37): Operation not permitted
+t+335 ready=0 job=none
+kill: (37): Operation not permitted
+t+338 ready=0 job=none
+kill: (37): Operation not permitted
+t+341 ready=0 job=none
+kill: (37): Operation not permitted
+t+344 ready=0 job=none
+kill: (37): Operation not permitted
+t+347 ready=0 job=none
+kill: (37): Operation not permitted
+t+350 ready=0 job=none
+kill: (37): Operation not permitted
+t+353 ready=0 job=none
+kill: (37): Operation not permitted
+t+356 ready=0 job=none
+kill: (37): Operation not permitted
+t+359 ready=0 job=none
+kill: (37): Operation not permitted
+t+362 ready=0 job=none
+kill: (37): Operation not permitted
+t+365 ready=0 job=none
+kill: (37): Operation not permitted
+t+368 ready=0 job=none
+kill: (37): Operation not permitted
+t+371 ready=0 job=none
+kill: (37): Operation not permitted
+t+374 ready=0 job=none
+kill: (37): Operation not permitted
+t+376 ready=0 job=none
+kill: (37): Operation not permitted
+t+380 ready=0 job=none
+kill: (37): Operation not permitted
+t+382 ready=0 job=none
+kill: (37): Operation not permitted
+t+386 ready=0 job=none
+kill: (37): Operation not permitted
+t+389 ready=0 job=none
+kill: (37): Operation not permitted
+t+391 ready=0 job=none
+kill: (37): Operation not permitted
+t+395 ready=0 job=none
+kill: (37): Operation not permitted
+t+397 ready=0 job=none
+kill: (37): Operation not permitted
+t+401 ready=0 job=none
+kill: (37): Operation not permitted
+t+403 ready=0 job=none
+kill: (37): Operation not permitted
+t+406 ready=0 job=none
+kill: (37): Operation not permitted
+t+409 ready=0 job=none
+kill: (37): Operation not permitted
+t+412 ready=0 job=none
+kill: (37): Operation not permitted
+t+415 ready=0 job=none
+kill: (37): Operation not permitted
+t+418 ready=0 job=none
+kill: (37): Operation not permitted
+t+421 ready=0 job=none
+kill: (37): Operation not permitted
+t+424 ready=0 job=none
+kill: (37): Operation not permitted
+t+427 ready=0 job=none
+kill: (37): Operation not permitted
+t+430 ready=0 job=none
+kill: (37): Operation not permitted
+t+433 ready=0 job=none
+kill: (37): Operation not permitted
+t+436 ready=0 job=none
+kill: (37): Operation not permitted
+t+439 ready=0 job=none
+kill: (37): Operation not permitted
+### case2_scrape
+kill: (37): Operation not permitted
+{"utc_start":"2026-09-25T07:44:37.628Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d785-fd48-757f-b0a3-b80abcc98c89","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":448}
+### case2_counters_after
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 2.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 2.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 4.0
+### case2_core_log
+nuq-prefetch-worker 2026-09-25 07:44:37 info [nuq/rabbitmq:]: NuQ job prefetch sent 
+nuq-worker-0   2026-09-25 07:44:38 info [queue-worker:processJob]: 🐂 Worker taking job 01a0d785-fd48-757f-b0a3-b80abcc98c89 
+nuq-worker-0   2026-09-25 07:44:38 info [queue-worker:processJob]: 🐂 Job done 01a0d785-fd48-757f-b0a3-b80abcc98c89 
+nuq-worker-0   2026-09-25 07:44:38 info [nuq/rabbitmq:]: NuQ job sent 
+api            2026-09-25 07:44:38 info [nuq/rabbitmq:]: NuQ job received 
+### case3_restart
+restart_count=0 started_at=2026-09-25T07:34:32.952831221Z status=running
+restart_begin=2026-09-25T07:51:57Z
+broker_ping_ok_after_s=12
+core_ready_after_s=24
+restart_count=1 started_at=2026-09-25T07:51:58.726019575Z status=running
+### case3_scrape
+{"utc_start":"2026-09-25T07:52:21.337Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d78d-10ac-72c9-b53c-7621ce1b581a","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":1115}
+### case3_queues
+name	type	durable	auto_delete	exclusive	messages_ready	messages	consumers
+extract.dlq	quorum	true	false		0	0	1
+extract.jobs	quorum	true	false		0	0	1
+nuq.queue_scrape.prefetch	quorum	true	false		0	0	0
+nuq.queue_scrape.listen.api-a4905e41-9857-476a-b988-d1ccf2f2fc36	classic	false	true	true	0	0	1
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0	0
+### case3_core_log
+nuq-prefetch-worker 2026-09-25 07:52:21 info [nuq/rabbitmq:]: NuQ job prefetch sent 
+nuq-worker-0   2026-09-25 07:52:22 info [queue-worker:processJob]: 🐂 Worker taking job 01a0d78d-10ac-72c9-b53c-7621ce1b581a 
+nuq-worker-0   2026-09-25 07:52:22 info [queue-worker:processJob]: 🐂 Job done 01a0d78d-10ac-72c9-b53c-7621ce1b581a 
+nuq-worker-0   2026-09-25 07:52:22 info [nuq/rabbitmq:]: NuQ job sent 
+api            2026-09-25 07:52:22 info [nuq/rabbitmq:]: NuQ job received 
+### case3_core_log_since_restart
+nuq-prefetch-worker 2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ sender channel closed 
+worker         2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ sender connection closed 
+nuq-worker-0   2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-worker-0   2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ sender connection closed 
+worker         2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ sender connection closed 
+api            2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ listener channel closed 
+api            2026-09-25 07:51:57 info [nuq/rabbitmq:]: NuQ listener channel closed 
+api            2026-09-25 07:51:58 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.2","port":5672,"name":"Erro
+worker         Error: connect ECONNREFUSED 10.231.1.2:5672
+worker           code: 'ECONNREFUSED',
+✗ A service has terminated unexpectedly Error: worker failed with exit code 1
+── Shutting down ──
+extract-worker 2026-09-25 07:51:58 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-25 07:51:58 info [:]: Shutting down extract worker... 
+nuq-reconciler 2026-09-25 07:51:58 info [:]: NuQ reconciler worker shutting down 
+nuq-worker-0   2026-09-25 07:51:58 info [nuq-worker:]: NuQ worker shutting down 
+── Starting services ──
+end

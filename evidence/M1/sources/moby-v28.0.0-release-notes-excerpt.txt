@@ -1,0 +1,16 @@
+# url=https://api.github.com/repos/moby/moby/releases/tags/v28.0.0 (body excerpt: lines mentioning direct routing, loopback, raw, published)
+# retrieved_utc=2026-09-25T06:49:06Z
+47:    - If you were previously running with the iptables filter-FORWARD policy set to `ACCEPT` and need to restore access to unpublished ports, also delete per-bridge-network rules from the `DOCKER` chains. For example, `iptables -D DOCKER ! -i docker0 -o docker0 -j DROP`.
+48:- Fix a security issue that was allowing remote hosts to connect directly to a container on its published ports. [moby/moby#49325](https://github.com/moby/moby/pull/49325)
+49:- Fix a security issue that was allowing neighbor hosts to connect to ports mapped on a loopback address. [moby/moby#49325](https://github.com/moby/moby/pull/49325)
+54:- Direct routed access to container ports that are not exposed using `p`/`-publish` is now blocked in the `DOCKER` iptables chain. [moby/moby#48724](https://github.com/moby/moby/pull/48724)
+55:    - If the default iptables filter-FORWARD policy was previously left at `ACCEPT` on your host, and direct routed access to a container's unpublished ports from a remote host is still required, options are:
+57:      - Use the new `gateway_mode_ipv[46]=nat-unprotected`, described below.
+60:- Networks created with `gateway_mode_ipv[46]=routed` are now accessible from other bridge networks running on the same Docker host, as well as from outside the host. [moby/moby#48596](https://github.com/moby/moby/pull/48596)
+61:- Bridge driver options `com.docker.network.bridge.gateway_mode_ipv4` and `com.docker.network.bridge.gateway_mode_ipv6` now accept mode `nat-unprotected`. [moby/moby#48597](https://github.com/moby/moby/pull/48597)
+62:    - `nat-unprotected` is similar to the default `nat` mode, but no per port/protocol rules are set up. This means any port on a container can be accessed by direct-routing from a remote host.
+63:- Bridge driver options `com.docker.network.bridge.gateway_mode_ipv4` and `com.docker.network.bridge.gateway_mode_ipv6` now accept mode `isolated`, when the network is also `internal`. [moby/moby#49262](https://github.com/moby/moby/pull/49262)
+66:- When a port mapping includes a host IP address or port number that cannot be used because NAT from the host is disabled using `--gateway_mode_ipv[46]`, container creation will no longer fail. The unused fields may be needed if the gateway endpoint changes when networks are connected or disconnected. A message about the unused fields will be logged. [moby/moby#48575](https://github.com/moby/moby/pull/48575)
+67:- Do not create iptables nat-POSTROUTING masquerade rules for a container's own published ports, when the userland proxy is enabled. [moby/moby#48854](https://github.com/moby/moby/pull/48854)
+83:- Add IPv6 loopback address as an insecure registry by default. [moby/moby#48540](https://github.com/moby/moby/pull/48540)
+220:- Deprecate `client.ImageInspectWithRaw` function in favor of the new `client.ImageInspect`. [moby/moby#48264](https://github.com/moby/moby/pull/48264)

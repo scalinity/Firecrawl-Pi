@@ -1,0 +1,85 @@
+### meta
+2026-09-25T07:17:36Z
+core=fcpi-proof-core rabbitmq=fcpi-proof-rabbitmq postgres=fcpi-proof-pg fixture=http://m1.fixture.fcpi.test:8080/static.html
+### case1_counters_before
+### case1_scrape
+{"utc_start":"2026-09-25T07:17:37.129Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d76d-4337-721e-b2d1-40955cc87053","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":1731}
+### case1_job_row
+### case1_queues
+name	type	durable	auto_delete	exclusive	messages_ready	messages	consumers
+extract.dlq	quorum	true	false		0	0	1
+extract.jobs	quorum	true	false		0	0	1
+nuq.queue_scrape.prefetch	quorum	true	false		0	0	0
+nuq.queue_scrape.listen.api-49442b58-07b6-4bc4-ad57-20690522a771	classic	false	true	true	0	0	1
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0	0
+### case1_counters_after
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 1.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 1.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 2.0
+### case2_counters_before
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 1.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 1.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 2.0
+### case2_timeline
+nuq_worker_pid=31
+t+0 SIGSTOP nuq-worker-0 at 2026-09-25T07:17:41Z
+t+2 ready=0 job=active stalls=0
+t+5 ready=1 job=active stalls=0
+t+5 EVENT prefetch_message_ready
+t+8 ready=1 job=active stalls=0
+t+11 ready=1 job=active stalls=0
+t+13 ready=1 job=active stalls=0
+t+17 ready=1 job=active stalls=0
+t+19 ready=1 job=active stalls=0
+t+22 ready=1 job=active stalls=0
+t+25 ready=1 job=active stalls=0
+t+28 ready=1 job=active stalls=0
+t+31 ready=1 job=active stalls=0
+t+34 ready=1 job=active stalls=0
+t+37 ready=1 job=active stalls=0
+t+39 ready=1 job=active stalls=0
+t+42 ready=1 job=active stalls=0
+t+45 ready=1 job=active stalls=0
+t+48 ready=1 job=active stalls=0
+t+51 ready=1 job=active stalls=0
+t+53 ready=1 job=active stalls=0
+t+57 ready=0 job=active stalls=0
+t+57 EVENT prefetch_message_gone_unconsumed
+t+59 ready=0 job=active stalls=0
+t+62 ready=0 job=active stalls=0
+t+65 ready=1 job=active stalls=1
+t+65 SIGCONT nuq-worker-0 at 2026-09-25T07:18:46Z
+t+68 ready=1 job=none
+### case2_scrape
+{"utc_start":"2026-09-25T07:17:41.565Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d76d-548a-76c0-9f47-edf1e0159211","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":65494}
+### case2_job_row
+### case2_counters_after
+rabbitmq_global_messages_dead_lettered_expired_total{queue_type="rabbit_quorum_queue",dead_letter_strategy="disabled"} 1.0
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 2.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 2.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 5.0
+### case3_restart
+restart_begin=2026-09-25T07:18:50Z
+broker_ping_ok_after_s=12
+### case3_scrape
+
+Error response from daemon: container 18c3f32d0e7ab874b948b79e806daecbef4d28a1412a92218ba2344588bacb59 is not running
+### case3_job_row
+### case3_queues
+name	type	durable	auto_delete	exclusive	messages_ready	messages	consumers
+extract.dlq	quorum	true	false		0	0	0
+extract.jobs	quorum	true	false		0	0	0
+nuq.queue_scrape.prefetch	quorum	true	false		0	0	0
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0	0
+### case3_core_log_lines
+[36m[1mnuq-prefetch-worker[0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ sender channel closed 
+[36m[1mnuq-worker-0  [0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ sender channel closed 
+[34m[1mworker        [0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ sender channel closed 
+[34m[1mworker        [0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ sender connection closed 
+[36m[1mnuq-worker-0  [0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ sender connection closed 
+[36m[1mnuq-prefetch-worker[0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ sender connection closed 
+[32m[1mapi           [0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ listener channel closed 
+[32m[1mapi           [0m 2026-09-25 07:18:50 [32minfo[39m [nuq/rabbitmq:]: NuQ listener channel closed 
+[32m[1mapi           [0m 2026-09-25 07:18:50 [32minfo[39m [webhook-queue:]: Webhook RabbitMQ closed 
+[32m[1mapi           [0m 2026-09-25 07:18:50 [32minfo[39m [indexer-queue:]: Indexer RabbitMQ closed 
+end

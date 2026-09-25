@@ -1,0 +1,45 @@
+### meta
+2026-09-25T07:33:44Z
+source_commit=d4930f228256a48c89e32154d7d03c8501f66cda
+### directories
+kept    /etc/firecrawl-pi/
+kept    /etc/firecrawl-pi/secrets/
+kept    /etc/firecrawl-pi/secrets/clients/
+kept    /srv/firecrawl-pi/
+kept    /srv/firecrawl-pi/data/
+kept    /srv/firecrawl-pi/data/postgres/
+kept    /srv/firecrawl-pi/data/redis/
+kept    /srv/firecrawl-pi/data/rabbitmq/
+### data_identity
+kept    /srv/firecrawl-pi/data/.fcpi-data-id and /etc/firecrawl-pi/config.env
+### secrets
+kept    /etc/firecrawl-pi/secrets/postgres_password and /etc/firecrawl-pi/secrets/core_postgres_password
+kept    /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf and /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
+kept    /etc/firecrawl-pi/secrets/redis_users_acl and /etc/firecrawl-pi/secrets/core_redis_url
+kept    /etc/firecrawl-pi/secrets/gateway_token_hashes and /etc/firecrawl-pi/secrets/clients/m1-verify.token
+kept    /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+### systemd_units
+kept    /etc/systemd/system/fcpi-data-check.service
+kept    /etc/systemd/system/fcpi-stack.service
+fcpi-stack enabled=enabled
+### inventory
+root:root 755 4096 /etc/firecrawl-pi
+root:root 600 221 /etc/firecrawl-pi/config.env
+root:root 700 4096 /etc/firecrawl-pi/secrets
+root:root 700 4096 /etc/firecrawl-pi/secrets/clients
+root:root 600 90 /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
+root:root 600 64 /etc/firecrawl-pi/secrets/core_postgres_password
+root:root 600 84 /etc/firecrawl-pi/secrets/core_redis_url
+UNKNOWN:UNKNOWN 600 82 /etc/firecrawl-pi/secrets/gateway_token_hashes
+UNKNOWN:UNKNOWN 600 64 /etc/firecrawl-pi/secrets/postgres_password
+UNKNOWN:UNKNOWN 600 100 /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf
+UNKNOWN:UNKNOWN 600 128 /etc/firecrawl-pi/secrets/redis_users_acl
+root:root 700 4096 /etc/firecrawl-pi/secrets/clients
+root:root 600 73 /etc/firecrawl-pi/secrets/clients/m1-verify.token
+root:root 700 4096 /srv/firecrawl-pi/data
+root:root 644 37 /srv/firecrawl-pi/data/.fcpi-data-id
+UNKNOWN:UNKNOWN 700 4096 /srv/firecrawl-pi/data/postgres
+UNKNOWN:UNKNOWN 700 4096 /srv/firecrawl-pi/data/redis
+UNKNOWN:UNKNOWN 700 4096 /srv/firecrawl-pi/data/rabbitmq
+UNKNOWN:UNKNOWN 400 64 /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+end

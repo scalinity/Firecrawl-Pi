@@ -1,0 +1,49 @@
+### meta
+2026-09-25T07:27:50Z
+source_commit=a93f2a4f832687925f4f3b14f028f01f2e814228
+### directories
+created /etc/firecrawl-pi/
+created /etc/firecrawl-pi/secrets/
+created /etc/firecrawl-pi/secrets/clients/
+created /srv/firecrawl-pi/
+created /srv/firecrawl-pi/data/
+created /srv/firecrawl-pi/data/postgres/
+created /srv/firecrawl-pi/data/redis/
+created /srv/firecrawl-pi/data/rabbitmq/
+### data_identity
+created /srv/firecrawl-pi/data/.fcpi-data-id
+created /etc/firecrawl-pi/config.env
+### secrets
+created /etc/firecrawl-pi/secrets/postgres_password
+created /etc/firecrawl-pi/secrets/rabbitmq_password
+created /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
+created /etc/firecrawl-pi/secrets/core_redis_url
+created /etc/firecrawl-pi/secrets/redis_users_acl
+created /etc/firecrawl-pi/secrets/clients/m1-verify.token
+created /etc/firecrawl-pi/secrets/gateway_token_hashes
+created /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+### systemd_units
+installed /etc/systemd/system/fcpi-data-check.service
+installed /etc/systemd/system/fcpi-stack.service
+systemctl: Created symlink '/etc/systemd/system/multi-user.target.wants/fcpi-stack.service' -> '/etc/systemd/system/fcpi-stack.service'.
+fcpi-stack enabled=enabled
+### inventory
+root:root 755 4096 /etc/firecrawl-pi
+root:root 600 221 /etc/firecrawl-pi/config.env
+root:root 700 4096 /etc/firecrawl-pi/secrets
+root:root 700 4096 /etc/firecrawl-pi/secrets/clients
+root:root 600 90 /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
+root:root 600 84 /etc/firecrawl-pi/secrets/core_redis_url
+UNKNOWN:UNKNOWN 600 82 /etc/firecrawl-pi/secrets/gateway_token_hashes
+root:root 600 64 /etc/firecrawl-pi/secrets/postgres_password
+pihole:systemd-journal 600 64 /etc/firecrawl-pi/secrets/rabbitmq_password
+pihole:danny 600 128 /etc/firecrawl-pi/secrets/redis_users_acl
+root:root 700 4096 /etc/firecrawl-pi/secrets/clients
+root:root 600 73 /etc/firecrawl-pi/secrets/clients/m1-verify.token
+root:root 755 4096 /srv/firecrawl-pi/data
+root:root 644 37 /srv/firecrawl-pi/data/.fcpi-data-id
+pihole:systemd-journal 700 4096 /srv/firecrawl-pi/data/postgres
+pihole:danny 700 4096 /srv/firecrawl-pi/data/redis
+pihole:systemd-journal 700 4096 /srv/firecrawl-pi/data/rabbitmq
+pihole:systemd-journal 400 64 /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+end

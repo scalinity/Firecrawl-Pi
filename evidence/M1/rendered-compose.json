@@ -1,0 +1,595 @@
+{
+  "name": "fcpi",
+  "networks": {
+    "access": {
+      "name": "fcpi_access",
+      "driver": "bridge",
+      "driver_opts": {
+        "com.docker.network.bridge.name": "fcpi-access"
+      },
+      "ipam": {
+        "config": [
+          {
+            "subnet": "10.231.0.0/24"
+          }
+        ]
+      }
+    },
+    "core": {
+      "name": "fcpi_core",
+      "driver": "bridge",
+      "driver_opts": {
+        "com.docker.network.bridge.gateway_mode_ipv4": "isolated",
+        "com.docker.network.bridge.name": "fcpi-core"
+      },
+      "ipam": {
+        "config": [
+          {
+            "subnet": "10.231.1.0/24"
+          }
+        ]
+      },
+      "internal": true
+    },
+    "fixture": {
+      "name": "fcpi_fixture",
+      "driver": "bridge",
+      "driver_opts": {
+        "com.docker.network.bridge.gateway_mode_ipv4": "isolated",
+        "com.docker.network.bridge.name": "fcpi-fixture"
+      },
+      "ipam": {
+        "config": [
+          {
+            "subnet": "10.231.3.0/24"
+          }
+        ]
+      },
+      "internal": true
+    }
+  },
+  "secrets": {
+    "core_nuq_rabbitmq_url": {
+      "name": "fcpi_core_nuq_rabbitmq_url",
+      "file": "/etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url"
+    },
+    "core_postgres_password": {
+      "name": "fcpi_core_postgres_password",
+      "file": "/etc/firecrawl-pi/secrets/core_postgres_password"
+    },
+    "core_redis_url": {
+      "name": "fcpi_core_redis_url",
+      "file": "/etc/firecrawl-pi/secrets/core_redis_url"
+    },
+    "gateway_token_hashes": {
+      "name": "fcpi_gateway_token_hashes",
+      "file": "/etc/firecrawl-pi/secrets/gateway_token_hashes"
+    },
+    "postgres_password": {
+      "name": "fcpi_postgres_password",
+      "file": "/etc/firecrawl-pi/secrets/postgres_password"
+    },
+    "rabbitmq_default_user_conf": {
+      "name": "fcpi_rabbitmq_default_user_conf",
+      "file": "/etc/firecrawl-pi/secrets/rabbitmq_default_user_conf"
+    },
+    "redis_users_acl": {
+      "name": "fcpi_redis_users_acl",
+      "file": "/etc/firecrawl-pi/secrets/redis_users_acl"
+    }
+  },
+  "services": {
+    "access-gateway": {
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpus": 0.3,
+      "command": [
+        "node",
+        "/srv/access/server.mjs"
+      ],
+      "depends_on": {
+        "firecrawl-core": {
+          "condition": "service_started",
+          "required": true
+        }
+      },
+      "entrypoint": null,
+      "environment": {
+        "FCPI_ALLOWED_TARGET_ORIGINS": "http://m1.fixture.fcpi.test:8080",
+        "FCPI_LISTEN_PORT": "3300",
+        "FCPI_TOKEN_HASHES_FILE": "/run/secrets/gateway_token_hashes",
+        "FCPI_UPSTREAM": "http://firecrawl-core:3002"
+      },
+      "hostname": "access-gateway",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "require('net').connect(3300,'127.0.0.1').on('connect',()=\u003eprocess.exit(0)).on('error',()=\u003eprocess.exit(1))"
+        ],
+        "timeout": "5s",
+        "interval": "30s",
+        "retries": 3,
+        "start_period": "20s"
+      },
+      "image": "node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "3",
+          "max-size": "10m"
+        }
+      },
+      "mem_limit": "167772160",
+      "memswap_limit": "167772160",
+      "networks": {
+        "access": null,
+        "core": null
+      },
+      "pids_limit": 64,
+      "platform": "linux/arm64",
+      "ports": [
+        {
+          "mode": "ingress",
+          "host_ip": "127.0.0.1",
+          "target": 3300,
+          "published": "3380",
+          "protocol": "tcp"
+        }
+      ],
+      "pull_policy": "missing",
+      "read_only": true,
+      "restart": "unless-stopped",
+      "secrets": [
+        {
+          "source": "gateway_token_hashes",
+          "target": "/run/secrets/gateway_token_hashes"
+        }
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "user": "3380:3380",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/opt/firecrawl-pi/services/access",
+          "target": "/srv/access",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        }
+      ]
+    },
+    "firecrawl-core": {
+      "cap_add": [
+        "SETGID",
+        "SETUID"
+      ],
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpus": 2.25,
+      "command": [
+        "node",
+        "dist/src/harness.js",
+        "--start-docker"
+      ],
+      "depends_on": {
+        "nuq-postgres": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "rabbitmq": {
+          "condition": "service_healthy",
+          "required": true
+        },
+        "redis": {
+          "condition": "service_healthy",
+          "required": true
+        }
+      },
+      "entrypoint": [
+        "/fcpi/entrypoint.sh"
+      ],
+      "environment": {
+        "ALLOW_LOCAL_WEBHOOKS": "true",
+        "DISABLE_WEBHOOK_DELIVERY": "true",
+        "HOST": "0.0.0.0",
+        "NODE_OPTIONS": "--max-old-space-size=256",
+        "NUQ_WORKER_COUNT": "1",
+        "PORT": "3002",
+        "POSTGRES_DB": "postgres",
+        "POSTGRES_HOST": "nuq-postgres",
+        "POSTGRES_PORT": "5432",
+        "POSTGRES_USER": "postgres",
+        "SCRAPE_MAX_ATTEMPTS": "1",
+        "USE_DB_AUTHENTICATION": "false"
+      },
+      "hostname": "firecrawl-core",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "Promise.all(['http://127.0.0.1:3002/v0/health/liveness','http://127.0.0.1:3006/health'].map(u=\u003efetch(u,{signal:AbortSignal.timeout(5000)}).then(r=\u003e{if(!r.ok)throw new Error(u)}))).then(()=\u003eprocess.exit(0),()=\u003eprocess.exit(1))"
+        ],
+        "timeout": "15s",
+        "interval": "30s",
+        "retries": 3,
+        "start_period": "3m0s"
+      },
+      "image": "ghcr.io/firecrawl/firecrawl@sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "3",
+          "max-size": "10m"
+        }
+      },
+      "mem_limit": "2415919104",
+      "memswap_limit": "2415919104",
+      "networks": {
+        "core": null,
+        "fixture": null
+      },
+      "pids_limit": 512,
+      "platform": "linux/arm64",
+      "pull_policy": "missing",
+      "read_only": true,
+      "restart": "unless-stopped",
+      "secrets": [
+        {
+          "source": "core_postgres_password",
+          "target": "/run/secrets/core_postgres_password"
+        },
+        {
+          "source": "core_redis_url",
+          "target": "/run/secrets/core_redis_url"
+        },
+        {
+          "source": "core_nuq_rabbitmq_url",
+          "target": "/run/secrets/core_nuq_rabbitmq_url"
+        }
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "stop_grace_period": "45s",
+      "tmpfs": [
+        "/tmp:size=256m"
+      ],
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/opt/firecrawl-pi/deploy/firecrawl-core/entrypoint.sh",
+          "target": "/fcpi/entrypoint.sh",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        }
+      ]
+    },
+    "fixture": {
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpus": 0.1,
+      "command": [
+        "node",
+        "/fixture/server.mjs"
+      ],
+      "entrypoint": null,
+      "hostname": "fixture",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/static.html',{signal:AbortSignal.timeout(3000)}).then(r=\u003eprocess.exit(r.ok?0:1),()=\u003eprocess.exit(1))"
+        ],
+        "timeout": "5s",
+        "interval": "1m0s",
+        "retries": 3,
+        "start_period": "10s"
+      },
+      "image": "node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "mem_limit": "67108864",
+      "memswap_limit": "67108864",
+      "networks": {
+        "fixture": {
+          "aliases": [
+            "m1.fixture.fcpi.test"
+          ]
+        }
+      },
+      "pids_limit": 32,
+      "platform": "linux/arm64",
+      "pull_policy": "missing",
+      "read_only": true,
+      "restart": "unless-stopped",
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "user": "8080:8080",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/opt/firecrawl-pi/tests/fixtures/m1",
+          "target": "/fixture",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        }
+      ]
+    },
+    "nuq-postgres": {
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpus": 0.75,
+      "command": [
+        "postgres",
+        "-c",
+        "shared_buffers=128MB",
+        "-c",
+        "work_mem=4MB",
+        "-c",
+        "max_connections=32",
+        "-c",
+        "max_wal_size=1GB",
+        "-c",
+        "min_wal_size=80MB",
+        "-c",
+        "fsync=on",
+        "-c",
+        "full_page_writes=on",
+        "-c",
+        "synchronous_commit=on"
+      ],
+      "entrypoint": null,
+      "environment": {
+        "POSTGRES_DB": "postgres",
+        "POSTGRES_PASSWORD_FILE": "/run/secrets/postgres_password",
+        "POSTGRES_USER": "postgres"
+      },
+      "hostname": "nuq-postgres",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "pg_isready",
+          "-h",
+          "127.0.0.1",
+          "-p",
+          "5432",
+          "-U",
+          "postgres"
+        ],
+        "timeout": "5s",
+        "interval": "30s",
+        "retries": 3,
+        "start_period": "2m0s"
+      },
+      "image": "fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "mem_limit": "671088640",
+      "memswap_limit": "671088640",
+      "networks": {
+        "core": null
+      },
+      "pids_limit": 128,
+      "platform": "linux/arm64",
+      "pull_policy": "never",
+      "read_only": true,
+      "restart": "unless-stopped",
+      "secrets": [
+        {
+          "source": "postgres_password",
+          "target": "/run/secrets/postgres_password"
+        }
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "stop_grace_period": "1m0s",
+      "tmpfs": [
+        "/var/run/postgresql:mode=1777,size=4m",
+        "/tmp:size=64m"
+      ],
+      "user": "5432:5432",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/srv/firecrawl-pi/data/postgres",
+          "target": "/var/lib/postgresql/data",
+          "bind": {
+            "create_host_path": false
+          }
+        }
+      ]
+    },
+    "rabbitmq": {
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpus": 0.5,
+      "command": null,
+      "entrypoint": null,
+      "environment": {
+        "RABBITMQ_NODENAME": "rabbit@rabbitmq"
+      },
+      "hostname": "rabbitmq",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "bash",
+          "-c",
+          "exec 3\u003c\u003e/dev/tcp/127.0.0.1/5672"
+        ],
+        "timeout": "5s",
+        "interval": "30s",
+        "retries": 3,
+        "start_period": "2m0s"
+      },
+      "image": "rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "mem_limit": "536870912",
+      "memswap_limit": "536870912",
+      "networks": {
+        "core": null
+      },
+      "pids_limit": 256,
+      "platform": "linux/arm64",
+      "pull_policy": "missing",
+      "read_only": true,
+      "restart": "unless-stopped",
+      "secrets": [
+        {
+          "source": "rabbitmq_default_user_conf",
+          "target": "/etc/rabbitmq/conf.d/40-fcpi-default-user.conf"
+        }
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "stop_grace_period": "1m0s",
+      "tmpfs": [
+        "/tmp:size=16m"
+      ],
+      "user": "5672:5672",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/srv/firecrawl-pi/data/rabbitmq",
+          "target": "/var/lib/rabbitmq",
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/opt/firecrawl-pi/deploy/rabbitmq/30-fcpi.conf",
+          "target": "/etc/rabbitmq/conf.d/30-fcpi.conf",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        }
+      ]
+    },
+    "redis": {
+      "cap_drop": [
+        "ALL"
+      ],
+      "cpus": 0.35,
+      "command": null,
+      "entrypoint": [
+        "redis-server",
+        "/usr/local/etc/redis/redis.conf"
+      ],
+      "hostname": "redis",
+      "healthcheck": {
+        "test": [
+          "CMD",
+          "redis-cli",
+          "--no-auth-warning",
+          "--user",
+          "health",
+          "--pass",
+          "-",
+          "PING"
+        ],
+        "timeout": "5s",
+        "interval": "30s",
+        "retries": 3,
+        "start_period": "30s"
+      },
+      "image": "redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44",
+      "logging": {
+        "driver": "json-file",
+        "options": {
+          "max-file": "2",
+          "max-size": "5m"
+        }
+      },
+      "mem_limit": "335544320",
+      "memswap_limit": "335544320",
+      "networks": {
+        "core": null
+      },
+      "pids_limit": 64,
+      "platform": "linux/arm64",
+      "pull_policy": "missing",
+      "read_only": true,
+      "restart": "unless-stopped",
+      "secrets": [
+        {
+          "source": "redis_users_acl",
+          "target": "/run/secrets/redis_users_acl"
+        }
+      ],
+      "security_opt": [
+        "no-new-privileges:true"
+      ],
+      "stop_grace_period": "30s",
+      "user": "6379:6379",
+      "volumes": [
+        {
+          "type": "bind",
+          "source": "/srv/firecrawl-pi/data/redis",
+          "target": "/data",
+          "bind": {
+            "create_host_path": false
+          }
+        },
+        {
+          "type": "bind",
+          "source": "/opt/firecrawl-pi/deploy/redis/redis.conf",
+          "target": "/usr/local/etc/redis/redis.conf",
+          "read_only": true,
+          "bind": {
+            "create_host_path": false
+          }
+        }
+      ]
+    }
+  },
+  "x-logging-app": {
+    "driver": "json-file",
+    "options": {
+      "max-file": "3",
+      "max-size": "10m"
+    }
+  },
+  "x-logging-dep": {
+    "driver": "json-file",
+    "options": {
+      "max-file": "2",
+      "max-size": "5m"
+    }
+  }
+}

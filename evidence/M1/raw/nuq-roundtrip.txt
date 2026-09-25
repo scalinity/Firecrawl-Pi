@@ -1,0 +1,120 @@
+### meta
+2026-09-25T08:01:43Z
+source_commit=bff090efd4ae9bc1deab5ff902ebceb1b649776a
+core=fcpi-firecrawl-core-1 rabbitmq=fcpi-rabbitmq-1 postgres=fcpi-nuq-postgres-1 fixture=http://m1.fixture.fcpi.test:8080/static.html
+restart_count=0 started_at=2026-09-25T07:58:23.933884589Z status=running
+### case1_counters_before
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 1.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 1.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 2.0
+### case1_scrape
+{"utc_start":"2026-09-25T08:01:44.484Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d795-a86d-76fe-889b-b795a8b60b62","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":1467}
+### case1_queues
+name	type	durable	auto_delete	exclusive	messages_ready	messages	consumers
+extract.dlq	quorum	true	false		0	0	1
+extract.jobs	quorum	true	false		0	0	1
+nuq.queue_scrape.prefetch	quorum	true	false		0	0	0
+nuq.queue_scrape.listen.api-d2fdd160-56e5-444b-8122-cd2a7dfa3dfe	classic	false	true	true	0	0	1
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0	0
+### case1_counters_after
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 2.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 2.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 4.0
+### case1_core_log
+nuq-prefetch-worker 2026-09-25 08:01:44 info [nuq/rabbitmq:]: NuQ job prefetch sent 
+nuq-worker-0   2026-09-25 08:01:45 info [queue-worker:processJob]: 🐂 Worker taking job 01a0d795-a86d-76fe-889b-b795a8b60b62 
+nuq-worker-0   2026-09-25 08:01:45 info [queue-worker:processJob]: 🐂 Job done 01a0d795-a86d-76fe-889b-b795a8b60b62 
+nuq-worker-0   2026-09-25 08:01:45 info [nuq/rabbitmq:]: NuQ job sent 
+api            2026-09-25 08:01:45 info [nuq/rabbitmq:]: NuQ job received 
+### case2_counters_before
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 2.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 2.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 4.0
+### case2_timeline
+nuq_worker_pid=37 uid=3002
+t+0 SIGSTOP nuq-worker-0 at 2026-09-25T08:01:48Z state=T
+t+2 ready=0 job=active stalls=0
+t+5 ready=1 job=active stalls=0
+t+5 EVENT prefetch_message_ready
+t+8 ready=1 job=active stalls=0
+t+11 ready=1 job=active stalls=0
+t+14 ready=1 job=active stalls=0
+t+16 ready=1 job=active stalls=0
+t+20 ready=1 job=active stalls=0
+t+22 ready=1 job=active stalls=0
+t+25 ready=1 job=active stalls=0
+t+28 ready=1 job=active stalls=0
+t+31 ready=1 job=active stalls=0
+t+34 ready=1 job=active stalls=0
+t+37 ready=1 job=active stalls=0
+t+40 ready=1 job=active stalls=0
+t+43 ready=1 job=active stalls=0
+t+46 ready=1 job=active stalls=0
+t+49 ready=1 job=active stalls=0
+t+52 ready=1 job=active stalls=0
+t+54 ready=1 job=active stalls=0
+t+57 ready=0 job=active stalls=0
+t+57 EVENT prefetch_message_gone_unconsumed
+t+60 ready=0 job=active stalls=0
+t+63 ready=0 job=active stalls=0
+t+66 ready=0 job=active stalls=0
+t+69 ready=0 job=active stalls=0
+t+72 ready=1 job=active stalls=1
+t+72 SIGCONT nuq-worker-0 at 2026-09-25T08:03:00Z
+t+75 ready=0 job=none
+### case2_scrape
+{"utc_start":"2026-09-25T08:01:48.717Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d795-b8fa-75c5-92ff-dcb29a9772cd","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":72257}
+### case2_counters_after
+rabbitmq_global_messages_dead_lettered_expired_total{queue_type="rabbit_quorum_queue",dead_letter_strategy="disabled"} 1.0
+rabbitmq_global_messages_delivered_consume_manual_ack_total{protocol="amqp091",queue_type="rabbit_classic_queue"} 3.0
+rabbitmq_global_messages_delivered_get_auto_ack_total{protocol="amqp091",queue_type="rabbit_quorum_queue"} 3.0
+rabbitmq_global_messages_routed_total{protocol="amqp091"} 7.0
+### case2_core_log
+nuq-prefetch-worker 2026-09-25 08:01:48 info [nuq/rabbitmq:]: NuQ job prefetch sent 
+nuq-prefetch-worker 2026-09-25 08:02:57 info [nuq/rabbitmq:]: NuQ job prefetch sent 
+nuq-worker-0   2026-09-25 08:03:00 info [queue-worker:processJob]: 🐂 Worker taking job 01a0d795-b8fa-75c5-92ff-dcb29a9772cd 
+nuq-worker-0   2026-09-25 08:03:00 info [queue-worker:processJob]: 🐂 Job done 01a0d795-b8fa-75c5-92ff-dcb29a9772cd 
+nuq-worker-0   2026-09-25 08:03:00 info [nuq/rabbitmq:]: NuQ job sent 
+api            2026-09-25 08:03:00 info [nuq/rabbitmq:]: NuQ job received 
+### case3_restart
+restart_count=0 started_at=2026-09-25T07:58:23.933884589Z status=running
+restart_begin=2026-09-25T08:03:04Z
+broker_ping_ok_after_s=15
+core_ready_after_s=24
+restart_count=1 started_at=2026-09-25T08:03:07.760854886Z status=running
+### case3_scrape
+{"utc_start":"2026-09-25T08:03:28.800Z","endpoint":"v0","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0d797-3ff2-736c-b97e-6be8f40a1063","source_status":null,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":861}
+### case3_queues
+name	type	durable	auto_delete	exclusive	messages_ready	messages	consumers
+extract.dlq	quorum	true	false		0	0	1
+extract.jobs	quorum	true	false		0	0	1
+nuq.queue_scrape.prefetch	quorum	true	false		0	0	0
+nuq.queue_scrape.listen.api-11e27ea2-0006-4b95-b813-48832f095947	classic	false	true	true	0	0	1
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0	0
+### case3_core_log
+nuq-prefetch-worker 2026-09-25 08:03:29 info [nuq/rabbitmq:]: NuQ job prefetch sent 
+nuq-worker-0   2026-09-25 08:03:29 info [queue-worker:processJob]: 🐂 Worker taking job 01a0d797-3ff2-736c-b97e-6be8f40a1063 
+nuq-worker-0   2026-09-25 08:03:29 info [queue-worker:processJob]: 🐂 Job done 01a0d797-3ff2-736c-b97e-6be8f40a1063 
+nuq-worker-0   2026-09-25 08:03:29 info [nuq/rabbitmq:]: NuQ job sent 
+api            2026-09-25 08:03:29 info [nuq/rabbitmq:]: NuQ job received 
+### case3_core_log_since_restart
+nuq-prefetch-worker 2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-worker-0   2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ sender connection closed 
+nuq-worker-0   2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ sender connection closed 
+worker         2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ sender channel closed 
+worker         2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ sender connection closed 
+api            2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ listener channel closed 
+api            2026-09-25 08:03:04 info [nuq/rabbitmq:]: NuQ listener channel closed 
+api            2026-09-25 08:03:04 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.2","port":5672,"name":"Erro
+nuq-worker-0   Error: connect ECONNREFUSED 10.231.1.2:5672
+nuq-worker-0     code: 'ECONNREFUSED',
+✗ A service has terminated unexpectedly Error: nuq-worker-0 failed with exit code 1
+── Shutting down ──
+worker         2026-09-25 08:03:04 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-25 08:03:04 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-25 08:03:04 info [:]: Shutting down extract worker... 
+nuq-reconciler 2026-09-25 08:03:04 info [:]: NuQ reconciler worker shutting down 
+worker         2026-09-25 08:03:07 info [:]: All jobs finished. Shutting down... 
+── Starting services ──
+end
