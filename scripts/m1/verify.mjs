@@ -575,6 +575,22 @@ const checks = {
       return { ok, actual: `drop-in deployed=${di.drop_in_sha256 === repoHash}; before: ${b.running_containers} running (${(lineOf(s.before, "restart_policies=") ?? "").slice(17).trim()}); dockerd stopped alone: fcpi-stack=${st.fcpi_stack}; gated start: exit=${g.start_exit} state=${g.docker} dockerd_processes=${g.dockerd_processes} check_failures=${g.check_failures} writers=${g.writers} manifest_unchanged=${g.manifest_unchanged}; restored: revived_healthy=${r.revived_healthy}` };
     } },
 
+  V18: { name: "allow-local-webhooks-contained", inputs: ["evidence/M1/rendered-compose.json", "docs/FIRECRAWL_PI_SPEC.md"],
+    expected: "if the core sets ALLOW_LOCAL_WEBHOOKS=true (spec §29's M1 fixture-only exception), then webhook delivery is disabled, every network the core joins is internal, and every origin the gateway permits names a host that exists only as an alias on the fixture network; the spec records the exception",
+    run() {
+      const R = json("evidence/M1/rendered-compose.json");
+      const core = R.services["firecrawl-core"], gw = R.services["access-gateway"];
+      const allow = core.environment?.ALLOW_LOCAL_WEBHOOKS === "true";
+      const coreNets = Object.keys(core.networks ?? {});
+      const internal = coreNets.every((n) => R.networks[n]?.internal === true);
+      const fixtureAliases = new Set(Object.values(R.services).flatMap((s) => s.networks?.fixture?.aliases ?? []));
+      const origins = (gw.environment?.PI_PERMITTED_TARGET_ORIGINS ?? "").split(",").filter(Boolean);
+      const originsOk = origins.length > 0 && origins.every((o) => { try { return fixtureAliases.has(new URL(o).hostname); } catch { return false; } });
+      const specRecords = /The M1 fixture-only profile sets it true/.test(read("docs/FIRECRAWL_PI_SPEC.md"));
+      const ok = !allow || (core.environment?.DISABLE_WEBHOOK_DELIVERY === "true" && coreNets.length > 0 && internal && originsOk && specRecords);
+      return { ok, actual: `ALLOW_LOCAL_WEBHOOKS=${core.environment?.ALLOW_LOCAL_WEBHOOKS ?? "unset"}; DISABLE_WEBHOOK_DELIVERY=${core.environment?.DISABLE_WEBHOOK_DELIVERY ?? "unset"}; core networks ${coreNets.join(",")} all internal=${internal}; permitted origins ${origins.join(",")} all fixture-network aliases=${originsOk}; spec §29 records the exception=${specRecords}` };
+    } },
+
   V13: { name: "persistence-sentinels-survive-force-recreate", inputs: [`${RAW}persistence.txt`],
     expected: "sentinels written to PostgreSQL, Redis (AOF) and RabbitMQ (durable quorum queue, confirmed publish) read back identically after `docker compose up -d --force-recreate`, with every container replaced, no volume or data deletion, the RabbitMQ node name unchanged and data ownership intact",
     run() {

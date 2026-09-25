@@ -363,6 +363,21 @@
       "evidence_path": "evidence/M1/verification.json"
     },
     {
+      "test_id": "M1-V18",
+      "name": "allow-local-webhooks-contained",
+      "utc": "2026-09-25T08:55:55Z",
+      "repository_sha": "e9fd9c1211b82fab1c9d583fd65a981795e219b2",
+      "worktree_dirty": true,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series": "none (patches begin in M2)",
+      "config_or_fixture_hash": "720e9be84b9e16e8951cccedbfe214c85e3fed5c0f434196e2a42faa3bc55ebc",
+      "expected": "if the core sets ALLOW_LOCAL_WEBHOOKS=true (spec §29's M1 fixture-only exception), then webhook delivery is disabled, every network the core joins is internal, and every origin the gateway permits names a host that exists only as an alias on the fixture network; the spec records the exception",
+      "state": "PASS",
+      "actual": "ALLOW_LOCAL_WEBHOOKS=true; DISABLE_WEBHOOK_DELIVERY=true; core networks api,core,fixture all internal=true; permitted origins http://m1.fixture.fcpi.test:8080 all fixture-network aliases=true; spec §29 records the exception=true",
+      "exit_code": 0,
+      "evidence_path": "evidence/M1/verification.json"
+    },
+    {
       "test_id": "M1-V13",
       "name": "persistence-sentinels-survive-force-recreate",
       "utc": "2026-09-25T08:17:25Z",
@@ -411,12 +426,12 @@
     {
       "test_id": "M1-V16",
       "name": "lock-compose-digest-and-provenance-consistency",
-      "utc": "2026-09-25T08:17:26Z",
-      "repository_sha": "2739545178b72d154334772baec28b7eb0584bc0",
+      "utc": "2026-09-25T08:55:55Z",
+      "repository_sha": "e9fd9c1211b82fab1c9d583fd65a981795e219b2",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
-      "config_or_fixture_hash": "8edd10bda6c982b61ffdd6a62e7f185fb4bb3fbe8de118975dd6e09b7414e1ae",
+      "config_or_fixture_hash": "d55408c1f5d1f31a7472124085ced2b8c33fc434a161fb1e9678ab9ca8565e7d",
       "expected": "every Compose image is referenced by the digest the lock selects, with platform linux/arm64; the lock records the API image's build SHA and upstream run 30579949775 without attestation, the NuQ base digest, measured pg_cron and built digest, the container runtime and the RabbitMQ series actually run",
       "state": "PASS",
       "actual": "services not matching the lock=none; compose text pins=true; api build_sha=7666c1f9; nuq built=ef257b914120; pg_cron=1.6.8-1.pgdg13+2; runtime=29.8.1 api=1.56 os/arch=linux/arm64; rabbitmq=4.3.6",

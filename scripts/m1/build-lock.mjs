@@ -49,7 +49,7 @@ Object.assign(lock, {
 const api = lock.images.firecrawl_api_prebuilt;
 api.selected = { ...api.candidate, status: "selected", decision: "D6 (evidence/M0/review/DECISIONS.md)", referenced_by: "arm64 manifest digest, never by tag",
   config_firecrawl_build_sha: buildSha, build_sha_equals_pinned_commit: buildSha === lock.firecrawl.commit, node_version_in_image: "22.23.2", ...onPi(API),
-  runtime_configuration: { NUQ_WORKER_COUNT: "1", USE_DB_AUTHENTICATION: "false", SCRAPE_MAX_ATTEMPTS: "1", ALLOW_LOCAL_WEBHOOKS: "true (fixture-only profile; see evidence/M1/INTERPRETATION.md)", DISABLE_WEBHOOK_DELIVERY: "true", USE_GO_MARKDOWN_PARSER: "unset (Go library inert; upstream default)", BULL_AUTH_KEY: "unset", NODE_OPTIONS: "--max-old-space-size=256",
+  runtime_configuration: { NUQ_WORKER_COUNT: "1", USE_DB_AUTHENTICATION: "false", SCRAPE_MAX_ATTEMPTS: "1", ALLOW_LOCAL_WEBHOOKS: "true (the M1 fixture-only exception in spec §29; contained as recorded in evidence/M1/INTERPRETATION.md and checked by V18)", DISABLE_WEBHOOK_DELIVERY: "true", USE_GO_MARKDOWN_PARSER: "unset (Go library inert; upstream default)", BULL_AUTH_KEY: "unset", NODE_OPTIONS: "--max-old-space-size=256",
     not_consumed_at_pin: ["NUM_WORKERS_PER_QUEUE", "CRAWL_CONCURRENT_REQUESTS", "MAX_CONCURRENT_JOBS", "BROWSER_POOL_SIZE"] } };
 delete api.candidate;
 api.status = "selected";
