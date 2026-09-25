@@ -3,7 +3,7 @@
 **Canonical document:** `FIRECRAWL_PI_MILESTONES.md`  
 **Architecture authority:** `FIRECRAWL_PI_SPEC.md`, version 1.0, 2026-09-22  
 **Target:** Raspberry Pi 5, ARM64, 8 GB RAM  
-**Current state:** Specification only. Every milestone is `NOT_STARTED`. No Pi audit, deployment, purchase, live provider validation, or hardware benchmark has been performed by this authoring session.
+**Current state:** M0 read-only audit performed; M0 is `BLOCKED` (see the status and blocker register). Every later milestone is `NOT_STARTED`. No deployment, purchase or live provider validation has been performed.
 
 ## Execution contract
 
@@ -570,12 +570,12 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 | AC24 Cloud independence | Every milestone | M9 final zero-attempt audit |
 | AC25 egress/security/budgets | M2/M3/M6 | M5, M7–M9 |
 
-## Initial status and blocker register
+## Status and blocker register
 
 | Milestone | Current status | Evidence |
 |---|---|---|
-| M0 | NOT_STARTED | No Pi audit performed |
-| M1 | NOT_STARTED | No runtime/build verification performed |
+| M0 | BLOCKED | `evidence/M0/INTERPRETATION.md`, `evidence/M0/audit.json`, `evidence/M0/verification.json` (V01–V08 PASS, BEFORE/AFTER diff empty), `deploy/versions.lock.json`. Blocked by B1 (OS); decisions D1–D6 await the separate review. |
+| M1 | NOT_STARTED | Not eligible: M0 is not accepted |
 | M2 | NOT_STARTED | No retrieval/browser implementation performed |
 | M3 | NOT_STARTED | No live REST/private gateway configured |
 | M4 | NOT_STARTED | No project MCP endpoint/client test performed |
@@ -585,8 +585,19 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 | M8 | NOT_STARTED | No project host soak/backup/restore/rollback performed |
 | M9 | NOT_STARTED | No deployment acceptance performed |
 
-**Specification-authoring blockers:** None. The architecture and execution contracts are supplied.
+**Credential and blocker register.** This is the single register. Each entry names the smallest input that clears it. Evidence for every entry is in `evidence/M0/INTERPRETATION.md`.
 
-**Expected implementation gates, not assumed current failures:** actual Pi access/OS/storage/capacity; provider credentials and explicit budget/free-credit permission; usable off-device backup destination and recovery-key custody; private network/account association where absent. Optional hosted access has a separate product/account capability gate. Image digests, ports, installed versions and observable hardware facts are implementation discoveries, not questions to ask the user in advance.
+| ID | Gate | Kind | Smallest input that clears it | Blocks |
+|---|---|---|---|---|
+| B1 | The memory cgroup controller is disabled (the firmware adds `cgroup_disable=memory` to the kernel command line; the controllers are `cpuset cpu io pids`). No container memory cap can be enforced. | OS blocker; owner approval | Approve appending `cgroup_enable=memory` to `/boot/firmware/cmdline.txt` and one reboot, with a time when a short Pi-hole DNS / MQTT outage is acceptable. After the reboot, re-run the M0 cgroup probe and V01–V08. | M0 acceptance, M1 |
+| B2 | Fan presence is unobservable: the fan read 0 rpm while commanded at PWM 75, and a tach-less fan looks the same as no fan. | Unobservable physical fact | Yes or no: is a fan (e.g. the Active Cooler) fitted? | Thermal assumptions for M2/M8 |
+| D1 | Browser version: pinned Playwright 1.58.1 bundles Chromium 145; two V8 bugs exploited in the wild are fixed only in 152/153. | Decision for the separate review | Review decision on the M2 browser pair | M2 |
+| D2 | 16 KiB-page kernel (`kernel_2712.img` only); native Chromium launch unproven. | Decision for the separate review | Review decision: keep 16K with per-image launch proofs, or plan the 4K fallback | M1/M2 |
+| D3 | RabbitMQ series: upstream `3-management` (3.13, community support ended) versus 4.3.6. | Decision for the separate review | Review decision on the series | M1 |
+| D4 | Go build stage 1.24 is out of support. | Decision for the separate review | Review decision on the Go line for source builds | M1/M2 source builds |
+| D5 | MCP SDK 2.0.0 versus 2.1.0 (request-body caps; rejects modern requests without the version header). | Decision for the separate review | Review decision; adopting 2.1.0 changes the baseline row in both canonical documents | M4 |
+| D6 | M1 image source: acquire upstream's arm64 `2.11.162` image versus build from source. | Decision for the separate review | Review decision on the build plan | M1 |
 
-**Next authorized implementation action:** M0 read-only audit. Do not skip to a Compose quickstart, purchase providers, or expose public ports merely because the documents now exist.
+The separate review is a fresh Opus 5.5 session at xhigh effort that reads the evidence and both canonical documents, not the M0 transcript. Expected later gates, not current failures: provider credentials and explicit budget or free-credit permission (M5–M7); Tailscale installation and account association (M3); an off-device backup destination and recovery-key custody (M8). The microSD-only storage permits the spec §21.1 pilot; whether the card meets final unattended acceptance is an M8 question.
+
+**Next authorized implementation action:** the separate review of D1–D6, and the owner's answers to B1 and B2. M1 stays ineligible until M0 is ACCEPTED.
