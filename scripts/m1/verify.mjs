@@ -633,10 +633,10 @@ const checks = {
       const owners = (s.read ?? []).filter((l) => /^\d+:\d+ 700 \/srv\/firecrawl-pi\/data/.test(l));
       const ok = /^m1-sentinel-[0-9a-f-]{36}$/.test(v ?? "") && (s.write ?? []).includes(`postgres_written=${v}`) && (s.write ?? []).includes("redis_set=OK") && w.confirmed === true &&
         replaced && kv(lineOf(s.recreate, "recreate_exit")).recreate_exit === "0" && (s.recreate ?? []).includes("volume_or_data_deletion_commands_run=0") &&
-        (s.read ?? []).includes(`postgres_read=${v}`) && (s.read ?? []).includes(`redis_read=${v}`) && rq.head_message === v &&
+        (s.read ?? []).includes(`postgres_read=${v}`) && (s.read ?? []).includes(`redis_read=${v}`) && Array.isArray(rq.messages) && rq.messages.length === 1 && rq.messages[0] === v &&
         (s.before ?? []).includes("rabbitmq_node=rabbit@rabbitmq") && (s.after ?? []).includes("rabbitmq_node=rabbit@rabbitmq") &&
         owners.join("|") === "0:0 700 /srv/firecrawl-pi/data|5432:5432 700 /srv/firecrawl-pi/data/postgres|6379:6379 700 /srv/firecrawl-pi/data/redis|5672:5672 700 /srv/firecrawl-pi/data/rabbitmq";
-      return { ok, actual: `sentinel=${v}; all 6 containers replaced=${replaced}; postgres=${(s.read ?? []).includes(`postgres_read=${v}`)} redis=${(s.read ?? []).includes(`redis_read=${v}`)} rabbitmq=${rq.head_message === v}; recreate ${kv(lineOf(s.recreate, "recreate_exit")).elapsed_s} s; node name stable=${(s.after ?? []).includes("rabbitmq_node=rabbit@rabbitmq")}` };
+      return { ok, actual: `sentinel=${v}; all 6 containers replaced=${replaced}; postgres=${(s.read ?? []).includes(`postgres_read=${v}`)} redis=${(s.read ?? []).includes(`redis_read=${v}`)} rabbitmq=${JSON.stringify(rq.messages) === JSON.stringify([v])} (messages held: ${rq.messages?.length ?? "none"}); recreate ${kv(lineOf(s.recreate, "recreate_exit")).elapsed_s} s; node name stable=${(s.after ?? []).includes("rabbitmq_node=rabbit@rabbitmq")}` };
     } },
 
   V14: { name: "unrelated-state-unchanged", inputs: ["evidence/M1/snapshot-before.txt", "evidence/M1/snapshot-after.txt", `${RAW}stack-final.txt`],
