@@ -24,6 +24,8 @@ IMG_REDIS=redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb
 IMG_RMQ=rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8
 IMG_NUQ=fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180
 IMG_NODE=node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+# These literals record exactly what the proof ran; verify.mjs N02 checks each running proof
+# container against the digest the lock selects, so they cannot silently drift from it.
 FIXTURE_URL=http://m1.fixture.fcpi.test:8080/static.html
 CONTAINERS=(fcpi-proof-pg fcpi-proof-redis fcpi-proof-rabbitmq fcpi-proof-fixture fcpi-proof-core fcpi-proof-gateway)
 

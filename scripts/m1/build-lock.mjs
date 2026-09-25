@@ -34,9 +34,14 @@ const nuqPkgs = Object.fromEntries(inspect.nuq_image_packages.filter(Boolean).ma
 const nuqBuild = sections("evidence/M1/raw/nuq-build.txt");
 const nuqResult = JSON.parse(need(nuqBuild.result.find((l) => l.startsWith("{")), "NuQ build result"));
 
-const API = "ghcr.io/firecrawl/firecrawl@sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af";
-const NUQ = "fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180";
-const PG_BASE = "postgres@sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761";
+// Image references come from the rendered Compose (what the Pi runs) and the base digest
+// from the NuQ Dockerfile's FROM line, so the lock cannot drift from either.
+const rendered = JSON.parse(read("evidence/M1/rendered-compose.json")).services;
+const ref = (svc) => need(rendered[svc]?.image, `${svc} image in the rendered Compose`);
+const API = ref("firecrawl-core"), NUQ = ref("nuq-postgres"), RMQ = ref("rabbitmq"), REDIS = ref("redis"), NODE = ref("access-gateway");
+if (ref("fixture") !== NODE) throw new Error("fixture and access-gateway images differ");
+const PG_BASE = `postgres@${need(read("deploy/nuq-postgres/Dockerfile").match(/^FROM postgres:[^@\s]+@(sha256:[0-9a-f]{64})$/m)?.[1], "NuQ base digest")}`;
+const nodeVersion = need(inspect.api_image_build_sha_assertion.find((l) => l.startsWith("node_version=NODE_VERSION=")), "API image Node version").split("=").pop();
 const onPi = (ref) => ({ image_id_on_pi: need(img[ref]?.id, `${ref} id`), platform_on_pi: `${img[ref].os}/${img[ref].arch}`, verified_utc: sections("evidence/M1/raw/image-inspect.txt").meta[0], evidence: "evidence/M1/raw/image-inspect.txt" });
 
 // ---- M1 resolutions --------------------------------------------------------------
@@ -48,7 +53,7 @@ Object.assign(lock, {
 
 const api = lock.images.firecrawl_api_prebuilt;
 api.selected = { ...api.candidate, status: "selected", decision: "D6 (evidence/M0/review/DECISIONS.md)", referenced_by: "arm64 manifest digest, never by tag",
-  config_firecrawl_build_sha: buildSha, build_sha_equals_pinned_commit: buildSha === lock.firecrawl.commit, node_version_in_image: "22.23.2", ...onPi(API),
+  config_firecrawl_build_sha: buildSha, build_sha_equals_pinned_commit: buildSha === lock.firecrawl.commit, node_version_in_image: nodeVersion, ...onPi(API),
   runtime_configuration: { NUQ_WORKER_COUNT: "1", USE_DB_AUTHENTICATION: "false", SCRAPE_MAX_ATTEMPTS: "1", ALLOW_LOCAL_WEBHOOKS: "true (the M1 fixture-only exception in spec §29; contained as recorded in evidence/M1/INTERPRETATION.md and checked by V18)", DISABLE_WEBHOOK_DELIVERY: "true", USE_GO_MARKDOWN_PARSER: "unset (Go library inert; upstream default)", BULL_AUTH_KEY: "unset", NODE_OPTIONS: "--max-old-space-size=256",
     not_consumed_at_pin: ["NUM_WORKERS_PER_QUEUE", "CRAWL_CONCURRENT_REQUESTS", "MAX_CONCURRENT_JOBS", "BROWSER_POOL_SIZE"] } };
 delete api.candidate;
@@ -68,15 +73,15 @@ lock.images.nuq_postgres = {
 
 const rmq = lock.images.rabbitmq;
 const c436 = rmq.candidates.find((c) => c.tag === "4.3.6");
-rmq.selected = { ...c436, status: "selected", decision: "D3", accepted_after: "M1 NuQ round trip (evidence/M1/raw/nuq-roundtrip.txt)", ...onPi("rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8"),
+rmq.selected = { ...c436, status: "selected", decision: "D3", accepted_after: "M1 NuQ round trip (evidence/M1/raw/nuq-roundtrip.txt)", ...onPi(RMQ),
   series_check: { newer_series_ga: "none: no 4.4 release or tag", retrieved: "evidence/M1/sources/rabbitmq-releases-at-m1.txt" },
   community_support_ends: "2026-11-30 (series move: M8)" };
 rmq.candidates = rmq.candidates.filter((c) => c.tag !== "4.3.6").map((c) => ({ ...c, role: c.tag === "3.13.7" ? "recorded fallback if 4.x fails for a 4.x-specific reason (D3); not used" : c.role }));
 delete rmq.selected.why;
 
-lock.images.redis.selected = { ...lock.images.redis.selected, ...onPi("redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44"),
+lock.images.redis.selected = { ...lock.images.redis.selected, ...onPi(REDIS),
   note: "redis-server runs directly as uid 6379; bundled Redis 8 modules are not loaded (upstream issues no module command)." };
-lock.images.node_base.selected = { ...lock.images.node_base.selected, ...onPi("node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"),
+lock.images.node_base.selected = { ...lock.images.node_base.selected, ...onPi(NODE),
   used_by: ["access-gateway (services/access)", "fixture (tests/fixtures/m1)"] };
 
 lock.host_runtime.container_runtime = {

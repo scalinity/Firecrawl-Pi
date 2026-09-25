@@ -67,11 +67,14 @@ done
 sec compose_refuses_missing_bind
 # Bypass the check: Compose itself must refuse to start a service whose bind source is
 # absent, and must not create the path. Project fcpi-m1probe, removed by name afterwards.
+# The probe reuses the fixture's image from the deployed Compose file (already present).
+PROBE_IMAGE=$(D compose -f $REPO/deploy/compose.yaml config --format json | jq -r .services.fixture.image)
+echo "probe_image=$PROBE_IMAGE"
 cat <<EOF | sudo -n tee $T/probe.yaml >/dev/null
 name: fcpi-m1probe
 services:
   probe:
-    image: node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+    image: $PROBE_IMAGE
     pull_policy: never
     network_mode: none
     command: ["node", "-e", "0"]
