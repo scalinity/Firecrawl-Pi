@@ -527,7 +527,7 @@ const checks = {
       const rq = s.rabbitmq_health ?? [];
       const g = (p) => (lineOf(rq, p) ?? "").slice(p.length);
       const rqOk = /Ping succeeded/.test(g("ping=")) && g("check_running=") === "ok" && g("check_local_alarms=") === "ok" && g("node=") === "rabbit@rabbitmq" && g("memory_high_watermark_bytes=") === "268435456" &&
-        /^fcpi\[(administrator)?\]$/.test(g("users=").trim()) && g("cookie=") === "5672:5672 400" && !/rabbitmq_management /.test(g("enabled_plugins=") + " ") && g("process_uid=") === "5672";
+        (CLOSEOUT ? /^fcpi\[\]$/ : /^fcpi\[(administrator)?\]$/).test(g("users=").trim()) && g("cookie=") === "5672:5672 400" && !/rabbitmq_management /.test(g("enabled_plugins=") + " ") && g("process_uid=") === "5672";
       const ok = health.length === 6 && health.every((h) => h === "healthy") && coreOk && pgOk && rdOk && rqOk;
       return { ok, actual: `container health=${health.join(",")}; core endpoints all 200=${coreOk}; postgres=${pgOk} (cron runs 10 min: ${pgk.cron_runs_last_10min_succeeded} ok/${pgk.cron_runs_last_10min_failed} failed, connections ${pgk.connections}/${pgk.max_connections}); redis=${rdOk}; rabbitmq=${rqOk} (plugins: ${g("enabled_plugins=").trim()})` };
     } },
@@ -760,8 +760,8 @@ const checks = {
 
   // ===================================================================== close-out (evidence/M1/review/REVIEW.md)
   // Each reads evidence only the close-out collects, so it is NOT_RUN against M1's own record.
-  V19: { name: "dockerd-gate-holds-through-the-restart-limit", inputs: [`${RAW}docker-gate.txt`, "deploy/host/docker.service.d/20-fcpi-guard.conf"],
-    expected: "with a failing data check, dockerd is observed, sampling every second, until systemd stops restarting it (StartLimitBurst) or for at least 120 s: no dockerd process and no project process at any sample, NRestarts and Result recorded, the data manifest unchanged; the guard drop-in is deployed as in the repository and runs after the data check; after the restore the guard table is loaded with its 4 rules (R13)",
+  V19: { name: "dockerd-stays-down-while-the-data-check-fails", inputs: [`${RAW}docker-gate.txt`, "deploy/host/docker.service.d/20-fcpi-guard.conf"],
+    expected: "with a failing data check, dockerd is observed, sampling every second and logging each change of docker's and fcpi-stack's states and the job queue, until systemd stops restarting it (StartLimitBurst) or for at least 400 s: no dockerd process and no project process at any sample, NRestarts and Result recorded, the data manifest unchanged; the guard drop-in is deployed as in the repository and runs after the data check; after the restore the guard table is loaded with its 4 rules (R13)",
     run() {
       const s = sections(`${RAW}docker-gate.txt`);
       if (!s.start_limit) return { notRun: true, actual: "this transcript predates the restart-limit observation (REVIEW.md R13)" };
@@ -769,15 +769,16 @@ const checks = {
       const l = k("start_limit"), g = k("gated_start"), r = k("restored_start"), di = k("drop_in");
       const guardHash = sha256(read("deploy/host/docker.service.d/20-fcpi-guard.conf"));
       const order = /path=\/opt\/firecrawl-pi\/deploy\/host\/fcpi-data-check\.sh path=\/usr\/sbin\/nft/.test((s.drop_in ?? []).join(" "));
-      const long = l.reached_failed === "yes" || Number(l.observed_s) >= 120;
+      const long = l.reached_failed === "yes" || Number(l.observed_s) >= 400;
+      const tl = (s.start_limit_timeline ?? []).filter((x) => /^t\+\d+ /.test(x));
       const ok = long && l.max_dockerd_processes === "0" && l.max_writers === "0" && l.active_state !== "active" && /^\d+$/.test(l.nrestarts ?? "") && !!l.result &&
-        g.manifest_unchanged === "yes" && di.guard_drop_in_sha256 === guardHash && di.guard_repo_sha256 === guardHash && order &&
+        tl.length > 0 && Number(l.check_failures_total) >= 1 && g.manifest_unchanged === "yes" && di.guard_drop_in_sha256 === guardHash && di.guard_repo_sha256 === guardHash && order &&
         r.revived_healthy === "6" && r.guard_table === "present" && r.guard_rules === "4";
-      return { ok, actual: `observed ${l.observed_s} s, reached failed=${l.reached_failed} (active=${l.active_state} sub=${l.sub_state} result=${l.result} NRestarts=${l.nrestarts}; states seen: ${(lineOf(s.start_limit, "states_seen=") ?? "").slice(12)}); max dockerd processes=${l.max_dockerd_processes}, max project processes=${l.max_writers}; manifest unchanged=${g.manifest_unchanged}; policy ${(lineOf(s.drop_in, "restart=") ?? "").trim()}; guard drop-in deployed=${di.guard_drop_in_sha256 === guardHash}, runs after the data check=${order}; after restore: revived healthy=${r.revived_healthy}, guard table=${r.guard_table} with ${r.guard_rules} rules` };
+      return { ok, actual: `observed ${l.observed_s} s, reached failed=${l.reached_failed} (active=${l.active_state} sub=${l.sub_state} result=${l.result} NRestarts=${l.nrestarts}; states seen: ${(lineOf(s.start_limit, "states_seen=") ?? "").slice(12)}); max dockerd processes=${l.max_dockerd_processes}, max project processes=${l.max_writers}; data-check failures=${l.check_failures_total}; timeline (${tl.length} changes): ${tl.join(" | ").slice(0, 1400)}; manifest unchanged=${g.manifest_unchanged}; policy ${(lineOf(s.drop_in, "restart=") ?? "").trim()}; guard drop-in deployed=${di.guard_drop_in_sha256 === guardHash}, runs after the data check=${order}; after restore: revived healthy=${r.revived_healthy}, guard table=${r.guard_table} with ${r.guard_rules} rules` };
     } },
 
-  V20: { name: "access-bridge-guard-drops-everything-but-replies", inputs: [`${RAW}guard.txt`, "deploy/host/fcpi-guard.nft", `${RAW}stack-final.txt`],
-    expected: "without the guard, the gateway container reaches the host through the bridge address and the LAN address and reaches the Internet through the bridge's NAT (the positive control); with the guard loaded from the repository's file, all three are dropped and counted; no drop is counted between the probe and the dockerd gate test, or from the gate's reload to the end of the window; the gateway still serves the fixture through 127.0.0.1:3380 (R5)",
+  V20: { name: "access-bridge-guard-drops-everything-but-replies", inputs: [`${RAW}guard.txt`, "deploy/host/fcpi-guard.nft", `${RAW}stack-final.txt`, `${EV}rendered-compose.json`],
+    expected: "without the guard, the gateway container reaches the host through the bridge address and the LAN address and reaches the Internet through the bridge's NAT (the positive control); with the guard loaded from its installed copy, identical to the repository's file and naming the bridge Compose names, all three are dropped and counted; no drop is counted between the probe and the dockerd gate test, or from the gate's reload to the end of the window; the gateway still serves the fixture through 127.0.0.1:3380 (R5)",
     run() {
       const s = sections(`${RAW}guard.txt`);
       const meta = (p) => kv((s[`${p}_meta`] ?? []).join(" "));
@@ -787,15 +788,19 @@ const checks = {
       const b = probe("before"), a = probe("after");
       const fileHash = sha256(read("deploy/host/fcpi-guard.nft"));
       const beforeOk = meta("before").guard_table === "absent" && !!b && Object.keys(b.tcp).length === 3 && Object.values(b.tcp).every((t) => t.connected === true);
-      const afterOk = meta("after").guard_table === "present" && meta("after").guard_file_sha256 === fileHash && !!a && Object.keys(a.tcp).length === 3 && Object.values(a.tcp).every((t) => t.connected === false);
+      // The guard matches the bridge by name, so the rendered Compose network must carry that name.
+      const bridge = json(`${EV}rendered-compose.json`).networks?.access?.driver_opts?.["com.docker.network.bridge.name"];
+      const coupled = bridge === "fcpi-access" && read("deploy/host/fcpi-guard.nft").includes(`iifname "${bridge}"`);
+      const afterOk = meta("after").guard_table === "present" && meta("after").guard_file_sha256 === fileHash && coupled && !!a && Object.keys(a.tcp).length === 3 && Object.values(a.tcp).every((t) => t.connected === false);
       const ca = cnt("after"), cp = cnt("pregate"), ce = cnt("end");
       const counted = ca.access_input_new_dropped >= 2 && ca.access_forward_out_dropped >= 1;
       const quiet = KEYS.every((k) => Number.isFinite(ca[k]) && cp[k] === ca[k] && ce[k] === 0) && meta("end").guard_table === "present";
       const gw = (sections(`${RAW}stack-final.txt`).gateway_tests ?? []).find((l) => l.startsWith("valid_token_fixture_scrape "));
       const served = !!gw && kv(gw).status === "200";
       const ok = beforeOk && afterOk && counted && quiet && served;
+      const dns = a?.dns_example_com ? (a.dns_example_com.resolved ? "resolves" : a.dns_example_com.error) : "not probed";
       const fmt = (p) => (p ? Object.entries(p.tcp).map(([k, v]) => `${k}=${v.connected ? "connected" : v.error}`).join(",") : "missing");
-      return { ok, actual: `without guard: ${fmt(b)}; with guard: ${fmt(a)}; counters after probe ${JSON.stringify(ca)}, before the gate ${JSON.stringify(cp)}, at window end (after the gate's reload) ${JSON.stringify(ce)}; guard file deployed=${meta("after").guard_file_sha256 === fileHash}; gateway fixture scrape=${gw ? kv(gw).status : "missing"}` };
+      return { ok, actual: `without guard: ${fmt(b)}; with guard: ${fmt(a)}; counters after probe ${JSON.stringify(ca)}, before the gate ${JSON.stringify(cp)}, at window end (after the gate's reload) ${JSON.stringify(ce)}; installed guard equals the repository file=${meta("after").guard_file_sha256 === fileHash}; rendered bridge name=${bridge}, matched by the guard=${coupled}; a public name from the gateway with the guard loaded: ${dns} (observed, not asserted); gateway fixture scrape=${gw ? kv(gw).status : "missing"}` };
     } },
 
   V21: { name: "gateway-contract-tests-on-the-pinned-node", inputs: [`${RAW}gateway-tests-pinned-node.txt`, "tests/contracts/m1-gateway.test.mjs", "deploy/versions.lock.json"],
@@ -836,7 +841,7 @@ const checks = {
     } },
 
   V23: { name: "networkmanager-leaves-docker-interfaces-alone", inputs: [`${RAW}nm.txt`, "deploy/host/NetworkManager/90-fcpi-unmanaged.conf"],
-    expected: "before the file, NetworkManager handles Docker's interfaces (the positive control); once pi-init.sh installs it as in the repository and reloads NM's configuration, every veth, fcpi-* bridge and docker0 is unmanaged and wlan0 stays connected; across the verification window (containers recreated, dockerd restarted) NM starts no activation or DHCP transaction on a Docker interface and wlan0 never changes state (R14)",
+    expected: "before the file, NetworkManager handles Docker's interfaces (the positive control); once pi-init.sh installs it as in the repository and reloads NM's configuration, every veth, fcpi-* bridge and docker0 is unmanaged and wlan0 stays connected; NetworkManager's merged configuration carries the file's value; from the reload to the end of the verification window (containers recreated, dockerd restarted), a non-empty NM journal that logs Docker's interfaces (the positive control) shows no activation or DHCP transaction on them and no wlan0 state change (R14)",
     run() {
       const s = sections(`${RAW}nm.txt`);
       // Device lines only: the section also ends with the collector's "end" line.
@@ -847,11 +852,13 @@ const checks = {
       const j = kv((s.window_journal ?? []).join(" "));
       const beforeHandled = docker("before").some((x) => x.state !== "unmanaged");
       const unmanaged = (p) => docker(p).length > 0 && docker(p).every((x) => x.state === "unmanaged");
-      const ok = beforeHandled && kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash && unmanaged("after") && unmanaged("window") &&
+      const effective = kv((s.after_meta ?? []).join(" ")).effective_unmanaged_devices;
+      const ok = beforeHandled && kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash && effective === "interface-name:veth*,interface-name:fcpi-*,interface-name:docker0" && unmanaged("after") && unmanaged("window") &&
+        Number(j.journal_lines) > 0 && Number(j.docker_interface_lines) > 0 &&
         ["before", "after", "window"].every((p) => wlan(p) === "connected") &&
         j.docker_interface_activations === "0" && j.docker_interface_dhcp_transactions === "0" && j.wlan0_state_changes === "0";
       const tally = (p) => Object.entries(docker(p).reduce((m, x) => ({ ...m, [x.state]: (m[x.state] ?? 0) + 1 }), {})).map(([k, v]) => `${k}:${v}`).join(",");
-      return { ok, actual: `before: Docker interfaces ${tally("before")}, wlan0 ${wlan("before")}; after reload: ${tally("after")}, wlan0 ${wlan("after")}; window end: ${tally("window")}, wlan0 ${wlan("window")}; since ${(lineOf(s.window_journal, "since=") ?? "?").slice(6)} UTC: activations=${j.docker_interface_activations} dhcp=${j.docker_interface_dhcp_transactions} wlan0 state changes=${j.wlan0_state_changes}; conf deployed=${kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash}` };
+      return { ok, actual: `before: Docker interfaces ${tally("before")}, wlan0 ${wlan("before")}; after reload: ${tally("after")}, wlan0 ${wlan("after")}; window end: ${tally("window")}, wlan0 ${wlan("window")}; since ${(lineOf(s.window_journal, "since=") ?? "?").slice(6)} UTC: journal lines=${j.journal_lines}, lines about Docker interfaces=${j.docker_interface_lines}, activations=${j.docker_interface_activations} dhcp=${j.docker_interface_dhcp_transactions} wlan0 state changes=${j.wlan0_state_changes}; conf deployed=${kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash}, effective unmanaged-devices=${effective}` };
     } },
 
   V24: { name: "deploy-removes-files-dropped-from-git", inputs: [`${RAW}deploy-prune.txt`, "scripts/m1/deploy.sh"],
@@ -883,7 +890,10 @@ const checks = {
 };
 
 // ---------------------------------------------------------------------------
-const wanted = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(checks);
+// The close-out checks read evidence only the close-out collects; M1's own record lists M1's checks.
+const CLOSEOUT_ONLY = new Set(["V19", "V20", "V21", "V22", "V23", "V24", "V25"]);
+const listed = Object.keys(checks).filter((id) => CLOSEOUT || !CLOSEOUT_ONLY.has(id));
+const wanted = process.argv.slice(2).length ? process.argv.slice(2) : listed;
 const prior = has(OUT) ? json(OUT) : { results: [] };
 const results = Object.fromEntries(prior.results.map((r) => [r.test_id, r]));
 const repo = repoState();
@@ -912,7 +922,7 @@ for (const id of wanted) {
   results[rec.test_id] = rec;
   console.log(`${rec.test_id} ${rec.state.padEnd(8)} ${c.name}`);
 }
-const ordered = Object.keys(checks).map((id) => results[`M1-${id}`] ?? { test_id: `M1-${id}`, name: checks[id].name, state: "NOT_RUN", actual: "never run", evidence_path: OUT });
+const ordered = listed.map((id) => results[`M1-${id}`] ?? { test_id: `M1-${id}`, name: checks[id].name, state: "NOT_RUN", actual: "never run", evidence_path: OUT });
 writeFileSync(resolve(ROOT, OUT), JSON.stringify({ schema: "fcpi.m1.verification/v1", runner: "scripts/m1/verify.mjs",
   repository_sha_note: "Each result records the commit checked out when it ran, with worktree_dirty; the commit that stores this file is a later one on main.",
   firecrawl_lock_commit: json("deploy/versions.lock.json").firecrawl.commit, results: ordered }, null, 2) + "\n");

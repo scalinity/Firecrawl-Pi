@@ -57,17 +57,22 @@ sudo -n systemctl set-environment PI_CONFIG_FILE=$T/bad.env
 since=$(date '+%Y-%m-%d %H:%M:%S')
 sudo -n systemctl start --job-mode=ignore-dependencies docker.service 2>&1 | head -1
 echo "start_exit=${PIPESTATUS[0]}"
-# Restart=always retries; observe until systemd gives up (StartLimitBurst) or 180 s pass,
-# sampling every second, so a late or brief dockerd start could not be missed.
-t0=$(date +%s); max_dockerd=0; max_writers=0; states=""
+# Restart=always retries; observe until systemd gives up (StartLimitBurst) or 420 s pass,
+# sampling every second, so a late or brief dockerd start could not be missed. Each change
+# of docker's state, its restart count, fcpi-stack's state or the job queue is logged, to
+# show what a queued restart is waiting for (fcpi-stack Requires docker.service, so a
+# restart of docker is carried to it, and its ExecStop runs `docker compose stop`).
+t0=$(date +%s); max_dockerd=0; max_writers=0; states=""; last=""; timeline=()
 while :; do
   n=$(pgrep -xc dockerd); w=$(writers)
   [ "$n" -gt "$max_dockerd" ] && max_dockerd=$n
   [ "$w" -gt "$max_writers" ] && max_writers=$w
   st="$(systemctl show -p ActiveState --value docker.service)/$(systemctl show -p SubState --value docker.service)"
   case " $states " in *" $st "*) ;; *) states="$states $st" ;; esac
+  now="docker=$st nrestarts=$(systemctl show -p NRestarts --value docker.service) fcpi_stack=$(systemctl show -p ActiveState --value fcpi-stack.service)/$(systemctl show -p SubState --value fcpi-stack.service) compose_processes=$(pgrep -fc 'docker compose' || true) jobs=$(systemctl list-jobs --no-legend --plain 2>/dev/null | awk '{printf "%s:%s:%s,", $2, $3, $4}')"
+  [ "$now" != "$last" ] && timeline+=("t+$(( $(date +%s) - t0 )) $now") && last=$now
   [ "${st%%/*}" = failed ] && break
-  [ $(( $(date +%s) - t0 )) -ge 180 ] && break
+  [ $(( $(date +%s) - t0 )) -ge 420 ] && break
   sleep 1
 done
 observed=$(( $(date +%s) - t0 ))
@@ -80,6 +85,9 @@ sec start_limit
 echo "observed_s=$observed reached_failed=$([ "$(systemctl show -p ActiveState --value docker.service)" = failed ] && echo yes || echo no) active_state=$(systemctl show -p ActiveState --value docker.service) sub_state=$(systemctl show -p SubState --value docker.service) result=$(systemctl show -p Result --value docker.service) nrestarts=$(systemctl show -p NRestarts --value docker.service)"
 echo "states_seen=${states# }"
 echo "max_dockerd_processes=$max_dockerd max_writers=$max_writers"
+echo "check_failures_total=$(sudo -n journalctl -u docker.service --since "$since" --no-pager -o cat | grep -c 'fcpi-data-check: FAIL: filesystem UUID')"
+sec start_limit_timeline
+printf '%s\n' "${timeline[@]}"
 
 sec restored_start
 sudo -n systemctl unset-environment PI_CONFIG_FILE
