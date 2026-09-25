@@ -1,7 +1,7 @@
 # Upstream Firecrawl source findings: v2.11.162 / 7666c1f9
 
-Tree: `/private/tmp/claude-501/-Users-danny-Documents-Tools-Firecrawl/74a88f1b-951a-444a-9071-c412aa6b8f03/scratchpad/upstream`
-Raw outputs: `.../scratchpad/upstream-raw/`
+Tree: shallow checkout of 7666c1f9 in a session scratchpad outside the repository (read-only; not retained)
+Raw outputs: copied to `evidence/M0/upstream/raw/`
 
 ## 0. Tree identity
 

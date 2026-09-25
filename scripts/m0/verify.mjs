@@ -173,6 +173,7 @@ const checks = {
         ["bearer", /Bearer\s+[A-Za-z0-9._~+/-]{20,}/],
         ["credential-assignment", /\b(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token)\b\s*[:=]\s*["']?(?!REDACTED|<|\$\{|null|false|true|none|string|undefined)[A-Za-z0-9+/_\-.]{8,}/i],
         ["url-credentials", /[a-z][a-z0-9+.-]*:\/\/[^\s/:@]+:[^\s/@]+@/i],
+        ["local-path", /\/(private\/tmp|Users\/[^\/\s]+|home\/[^\/\s]+)\//],
         ["mac-address", /(?<![0-9A-Fa-f:])(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}(?![0-9A-Fa-f:])/],
         ["hex16-serial-shaped", /(?<![0-9A-Za-z_:.\/-])[0-9a-f]{16}(?![0-9A-Za-z_])/],
         ["hex32-machine-id-shaped", /(?<![0-9A-Za-z_:.\/-])[0-9a-f]{32}(?![0-9A-Za-z_])/],
