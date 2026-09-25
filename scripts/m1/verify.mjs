@@ -198,6 +198,11 @@ function scanFiles(files, ids, rules, allow = new Set()) {
 }
 
 // ---- snapshot attribution (V14) ---------------------------------------------------------
+// The snapshot records the ruleset only as a hash, so the firewall line is attributed from the
+// ruleset listing instead: it must hold exactly Docker's tables and the project's counting tables.
+// Before M1 nf_tables was not loaded, so no other ruleset existed for M1 to change.
+const NFT_TABLES = ["bridge fcpi_audit", "inet fcpi_audit", "ip filter", "ip nat", "ip raw", "ip6 filter", "ip6 nat"];
+const nftTables = () => [...read(`${RAW}nft-ruleset.txt`).matchAll(/^table (\S+ \S+) \{$/gm)].map((m) => m[1]).sort();
 const MODULE_ALLOW = /^(bridge|stp|llc|veth|overlay|br_netfilter|ip_set|xt_[a-z_]+|xt_[A-Z]+|x_tables|nf_[a-z0-9_]+|nft_[a-z0-9_]+|ip6?_tables|ip6?table_[a-z]+|iptable_[a-z]+|ipt_[A-Z]+|xfrm_algo|xfrm_user|nf_tables|nfnetlink)$/;
 function keyedSnapshot(file) {
   const out = [];
@@ -230,7 +235,7 @@ function attribute(sec, line, containerIds) {
     if (m && containerIds.has(m[1])) return "fcpi container root filesystem";
   }
   if (sec === "lsmod" && MODULE_ALLOW.test(line.split(" ")[0])) return "kernel module loaded by the container runtime";
-  if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) return "nftables: Docker's tables and the project's fcpi_audit tables (evidence/M1/raw/nft-ruleset.txt)";
+  if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) return JSON.stringify(nftTables()) === JSON.stringify(NFT_TABLES) ? "nftables: Docker's tables and the project's fcpi_audit tables (evidence/M1/raw/nft-ruleset.txt)" : null;
   if (sec === "ss_listen" && /^tcp 127\.0\.0\.1:3380 users:\(\("docker-proxy",/.test(line)) return "the gateway's only host publication";
   return null;
 }
@@ -644,7 +649,7 @@ const checks = {
       return { ok, actual: `sentinel=${v}; all 6 containers replaced=${replaced}; postgres=${(s.read ?? []).includes(`postgres_read=${v}`)} redis=${(s.read ?? []).includes(`redis_read=${v}`)} rabbitmq=${JSON.stringify(rq.messages) === JSON.stringify([v])} (messages held: ${rq.messages?.length ?? "none"}); recreate ${kv(lineOf(s.recreate, "recreate_exit")).elapsed_s} s; node name stable=${(s.after ?? []).includes("rabbitmq_node=rabbit@rabbitmq")}` };
     } },
 
-  V14: { name: "unrelated-state-unchanged", inputs: ["evidence/M1/snapshot-before.txt", "evidence/M1/snapshot-after.txt", `${RAW}stack-final.txt`],
+  V14: { name: "unrelated-state-unchanged", inputs: ["evidence/M1/snapshot-before.txt", "evidence/M1/snapshot-after.txt", `${RAW}stack-final.txt`, `${RAW}nft-ruleset.txt`],
     expected: "every difference between BEFORE and AFTER is attributed to a project addition (runtime, its modules and firewall tables, fcpi containers and their scopes, mounts and namespaces, the 127.0.0.1:3380 publication, fcpi-stack.service) or is the audit's own SSH session; no unrelated line is removed or changed; boot ID unchanged",
     run() {
       if (!has("evidence/M1/snapshot-after.txt")) return { notRun: true, actual: "AFTER snapshot not yet taken" };
