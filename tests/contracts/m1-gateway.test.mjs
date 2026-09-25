@@ -50,8 +50,8 @@ before(async () => {
   writeFileSync(join(dir, "hashes"), `# test\nm1-test sha256:${createHash("sha256").update(TOKEN).digest("hex")}\n`);
   gwPort = 20000 + Math.floor(Math.random() * 20000);
   gw = spawn(process.execPath, [GATEWAY], { env: {
-    FCPI_LISTEN_PORT: String(gwPort), FCPI_UPSTREAM: `http://127.0.0.1:${upstream.address().port}`,
-    FCPI_TOKEN_HASHES_FILE: join(dir, "hashes"), FCPI_ALLOWED_TARGET_ORIGINS: FIXTURE,
+    PI_GATEWAY_LISTEN_PORT: String(gwPort), PI_CORE_URL: `http://127.0.0.1:${upstream.address().port}`,
+    PI_GATEWAY_TOKEN_HASHES_FILE: join(dir, "hashes"), PI_PERMITTED_TARGET_ORIGINS: FIXTURE,
   }, stdio: ["ignore", "pipe", "inherit"] });
   await new Promise((resolve, reject) => {
     gw.stdout.on("data", (d) => { if (String(d).includes('"listening"')) resolve(); });
@@ -125,9 +125,9 @@ test("bodies over 1 MiB are refused with 413", async () => {
   assert.equal(seen.length, n);
 });
 
-test("unknown FCPI_* configuration keys stop startup", async () => {
+test("unknown PI_* configuration keys stop startup", async () => {
   const code = await new Promise((resolve) => {
-    const p = spawn(process.execPath, [GATEWAY], { env: { FCPI_UPSTREAM: "http://127.0.0.1:1", FCPI_TOKEN_HASHES_FILE: join(dir, "hashes"), FCPI_ALLOWED_TARGET_ORIGINS: FIXTURE, FCPI_TYPO: "1" }, stdio: "ignore" });
+    const p = spawn(process.execPath, [GATEWAY], { env: { PI_CORE_URL: "http://127.0.0.1:1", PI_GATEWAY_TOKEN_HASHES_FILE: join(dir, "hashes"), PI_PERMITTED_TARGET_ORIGINS: FIXTURE, PI_TYPO: "1" }, stdio: "ignore" });
     p.on("exit", resolve);
   });
   assert.notEqual(code, 0);

@@ -6,10 +6,10 @@
 #   2. PI_DATA_DIR/.fcpi-data-id equals PI_DATA_ID;
 #   3. every bind mount in the rendered Compose file sets create_host_path: false,
 #      and every bind source already exists.
-# FCPI_CONFIG overrides the config path, so the failure branches can be tested.
+# PI_CONFIG_FILE overrides the config path, so the failure branches can be tested.
 set -eu
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-CONFIG=${FCPI_CONFIG:-/etc/firecrawl-pi/config.env}
+CONFIG=${PI_CONFIG_FILE:-/etc/firecrawl-pi/config.env}
 fail() { echo "fcpi-data-check: FAIL: $*" >&2; exit 1; }
 
 [ -r "$CONFIG" ] || fail "config $CONFIG unreadable"

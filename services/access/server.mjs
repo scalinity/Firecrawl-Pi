@@ -13,26 +13,26 @@ import { createServer, request as httpRequest } from "node:http";
 import { createHash, timingSafeEqual } from "node:crypto";
 import { readFileSync } from "node:fs";
 
-const KNOWN = new Set(["FCPI_LISTEN_PORT", "FCPI_UPSTREAM", "FCPI_TOKEN_HASHES_FILE", "FCPI_ALLOWED_TARGET_ORIGINS", "FCPI_UPSTREAM_TIMEOUT_MS"]);
+const KNOWN = new Set(["PI_GATEWAY_LISTEN_PORT", "PI_CORE_URL", "PI_GATEWAY_TOKEN_HASHES_FILE", "PI_PERMITTED_TARGET_ORIGINS", "PI_CORE_TIMEOUT_MS"]);
 function loadConfig(env) {
-  const unknown = Object.keys(env).filter((k) => k.startsWith("FCPI_") && !KNOWN.has(k));
+  const unknown = Object.keys(env).filter((k) => k.startsWith("PI_") && !KNOWN.has(k));
   if (unknown.length) throw new Error(`unknown configuration keys: ${unknown.join(", ")}`);
-  const upstream = new URL(env.FCPI_UPSTREAM ?? "");
-  if (upstream.protocol !== "http:" || upstream.pathname !== "/") throw new Error("FCPI_UPSTREAM must be an http origin");
-  const origins = (env.FCPI_ALLOWED_TARGET_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (!origins.length || origins.some((o) => new URL(o).origin !== o)) throw new Error("FCPI_ALLOWED_TARGET_ORIGINS must list exact origins");
-  const hashes = readFileSync(env.FCPI_TOKEN_HASHES_FILE, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map((l) => {
+  const upstream = new URL(env.PI_CORE_URL ?? "");
+  if (upstream.protocol !== "http:" || upstream.pathname !== "/") throw new Error("PI_CORE_URL must be an http origin");
+  const origins = (env.PI_PERMITTED_TARGET_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  if (!origins.length || origins.some((o) => new URL(o).origin !== o)) throw new Error("PI_PERMITTED_TARGET_ORIGINS must list exact origins");
+  const hashes = readFileSync(env.PI_GATEWAY_TOKEN_HASHES_FILE, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map((l) => {
     const m = l.match(/^([A-Za-z0-9._-]{1,64})\s+sha256:([0-9a-f]{64})$/);
     if (!m) throw new Error("token hash file: each line must be '<label> sha256:<64 hex>'");
     return { label: m[1], digest: Buffer.from(m[2], "hex") };
   });
   if (!hashes.length) throw new Error("token hash file holds no hashes");
   return {
-    port: Number(env.FCPI_LISTEN_PORT ?? 3300),
+    port: Number(env.PI_GATEWAY_LISTEN_PORT ?? 3300),
     upstream,
     origins: new Set(origins),
     hashes,
-    upstreamTimeoutMs: Number(env.FCPI_UPSTREAM_TIMEOUT_MS ?? 120000),
+    upstreamTimeoutMs: Number(env.PI_CORE_TIMEOUT_MS ?? 120000),
   };
 }
 const cfg = loadConfig(process.env);

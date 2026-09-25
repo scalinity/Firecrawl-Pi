@@ -551,8 +551,8 @@ const checks = {
       const composeOk = probe.probe_up_exit === "1" && probe.absent_bind_created === "no" && probe.manifest_unchanged === "yes" && probe.probe_resources_left === "0";
       const restart = kv(lineOf(s.restart, "start_exit") ?? "");
       const healthy = (s.restart ?? []).filter((l) => / running healthy$/.test(l)).length;
-      ok &&= composeOk && restart.start_exit === "0" && restart.stack_active === "active" && healthy === 6 && (s.restart ?? []).includes("manager_env_FCPI_CONFIG=0");
-      return { ok, actual: `branches ${JSON.stringify(res)}; compose refuses missing bind=${composeOk}; restart ok=${restart.start_exit === "0"} healthy=${healthy}/6; manager env restored=${(s.restart ?? []).includes("manager_env_FCPI_CONFIG=0")}` };
+      ok &&= composeOk && restart.start_exit === "0" && restart.stack_active === "active" && healthy === 6 && (s.restart ?? []).includes("manager_env_PI_CONFIG_FILE=0");
+      return { ok, actual: `branches ${JSON.stringify(res)}; compose refuses missing bind=${composeOk}; restart ok=${restart.start_exit === "0"} healthy=${healthy}/6; manager env restored=${(s.restart ?? []).includes("manager_env_PI_CONFIG_FILE=0")}` };
     } },
 
   V13: { name: "persistence-sentinels-survive-force-recreate", inputs: [`${RAW}persistence.txt`],

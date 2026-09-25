@@ -225,10 +225,10 @@ services:
     user: "3380:3380"
     command: ["node", "/srv/access/server.mjs"]
     environment:
-      FCPI_LISTEN_PORT: "3300"
-      FCPI_UPSTREAM: http://firecrawl-core:3002
-      FCPI_TOKEN_HASHES_FILE: /run/secrets/gateway_token_hashes
-      FCPI_ALLOWED_TARGET_ORIGINS: http://m1.fixture.fcpi.test:8080
+      PI_GATEWAY_LISTEN_PORT: "3300"
+      PI_CORE_URL: http://firecrawl-core:3002
+      PI_GATEWAY_TOKEN_HASHES_FILE: /run/secrets/gateway_token_hashes
+      PI_PERMITTED_TARGET_ORIGINS: http://m1.fixture.fcpi.test:8080
     secrets: [gateway_token_hashes]
     volumes:
       - type: bind

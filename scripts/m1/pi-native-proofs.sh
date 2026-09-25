@@ -82,8 +82,8 @@ up)
   D run -d --name fcpi-proof-gateway "${LBL[@]}" --network "$NET" \
     --memory 160m --memory-swap 160m --cpus 0.3 --user 3380:3380 --read-only \
     -v "$REPO/services/access":/srv/access:ro -v "$SEC/gw-hashes":/run/secrets/gateway_token_hashes:ro \
-    -e FCPI_UPSTREAM=http://firecrawl-core:3002 -e FCPI_TOKEN_HASHES_FILE=/run/secrets/gateway_token_hashes \
-    -e FCPI_ALLOWED_TARGET_ORIGINS=http://m1.fixture.fcpi.test:8080 "$IMG_NODE" node /srv/access/server.mjs >/dev/null
+    -e PI_CORE_URL=http://firecrawl-core:3002 -e PI_GATEWAY_TOKEN_HASHES_FILE=/run/secrets/gateway_token_hashes \
+    -e PI_PERMITTED_TARGET_ORIGINS=http://m1.fixture.fcpi.test:8080 "$IMG_NODE" node /srv/access/server.mjs >/dev/null
   sec started; ts
   D ps -a --filter label=fcpi.proof=m1 --format '{{.Names}} {{.State}} {{.Status}}' | sort
   echo end

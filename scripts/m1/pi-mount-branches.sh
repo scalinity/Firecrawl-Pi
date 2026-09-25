@@ -3,7 +3,7 @@
 # Runs ON the Pi:  ssh ... 'bash /opt/firecrawl-pi/scripts/m1/pi-mount-branches.sh'
 #
 # With the stack stopped, each branch points the check at a deliberately wrong config
-# through the systemd manager environment (FCPI_CONFIG; no unit file is edited), then
+# through the systemd manager environment (PI_CONFIG_FILE; no unit file is edited), then
 # `systemctl start fcpi-stack` must fail, no project container may run, and a metadata
 # manifest of /srv/firecrawl-pi (path, type, size, mtime, owner, mode) must be unchanged.
 # A last case bypasses the check and shows Compose itself refuses to create a missing
@@ -48,7 +48,7 @@ echo "compose_absent_source_diff_lines=$(sudo -n diff $REPO/deploy/compose.yaml 
 
 for b in uuid_mismatch data_id_mismatch data_dir_absent bind_creates_host_path bind_source_absent; do
   sec "branch_$b"
-  sudo -n systemctl set-environment FCPI_CONFIG=$T/$b.env
+  sudo -n systemctl set-environment PI_CONFIG_FILE=$T/$b.env
   sudo -n systemctl start fcpi-stack.service 2>&1 | head -2
   echo "stack_start_exit=${PIPESTATUS[0]}"
   echo "data_check_result=$(systemctl show -p Result --value fcpi-data-check.service) stack_active=$(systemctl is-active fcpi-stack.service)"
@@ -56,11 +56,11 @@ for b in uuid_mismatch data_id_mismatch data_dir_absent bind_creates_host_path b
   inv=$(systemctl show -p InvocationID --value fcpi-data-check.service)
   echo "check_message=$(sudo -n journalctl _SYSTEMD_INVOCATION_ID=$inv --no-pager -o cat | grep -m1 'fcpi-data-check: FAIL')"
   # The same config through the check directly, as a cross-check of the reason.
-  direct=$(sudo -n env FCPI_CONFIG=$T/$b.env $REPO/deploy/host/fcpi-data-check.sh 2>&1); echo "direct_check_exit=$? direct_message=$direct"
+  direct=$(sudo -n env PI_CONFIG_FILE=$T/$b.env $REPO/deploy/host/fcpi-data-check.sh 2>&1); echo "direct_check_exit=$? direct_message=$direct"
   echo "running_containers=$(running)"
   M=$(manifest); echo "manifest_unchanged=$([ "$M" = "$M0" ] && echo yes || echo NO)"
   echo "absent_dir_created=$(test -e $ABSENT_DIR && echo YES || echo no) absent_bind_created=$(sudo -n test -e $ABSENT_BIND && echo YES || echo no)"
-  sudo -n systemctl unset-environment FCPI_CONFIG
+  sudo -n systemctl unset-environment PI_CONFIG_FILE
   sudo -n systemctl reset-failed fcpi-stack.service fcpi-data-check.service 2>/dev/null
 done
 
@@ -92,5 +92,5 @@ sudo -n rm -rf -- $T && echo "removed $T"
 sec restart
 sudo -n systemctl start fcpi-stack.service; echo "start_exit=$? stack_active=$(systemctl is-active fcpi-stack.service) data_check_result=$(systemctl show -p Result --value fcpi-data-check.service)"
 D compose -p fcpi ps -a --format '{{.Service}} {{.State}} {{.Health}}'
-echo "manager_env_FCPI_CONFIG=$(systemctl show-environment | grep -c '^FCPI_CONFIG=')"
+echo "manager_env_PI_CONFIG_FILE=$(systemctl show-environment | grep -c '^PI_CONFIG_FILE=')"
 echo end
