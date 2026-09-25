@@ -165,11 +165,11 @@ For the active milestone:
 3. implement the complete milestone scope;
 4. automate its verification;
 5. run the required tests;
-6. run `/review-2`;
-7. after the review report is available, run `/address`;
+6. run `/review-2`, with every review agent on Opus 5.5 (§5);
+7. after the review report is available, save it under `evidence/<milestone>/review/` and run `/address`;
 8. rerun every test affected by remediation;
 9. record evidence and milestone status honestly;
-10. stop at the milestone boundary unless progression was explicitly authorized.
+10. print the next milestone's kickoff prompt (§5), then stop at the milestone boundary unless progression was explicitly authorized.
 
 Do not declare a milestone accepted because the implementation “looks good.”
 
@@ -183,13 +183,17 @@ After implementation of **every milestone**, run:
 /review-2
 ```
 
-Then, after the review report exists, run:
+Run every agent it spawns on **Opus 5.5** (the Agent tool's `opus` model), whatever model the session itself runs on. This review is the last independent check before the next milestone builds on the work.
+
+Then, after the review report exists, save it as `evidence/<milestone>/review/REVIEW.md` and run:
 
 ```text
 /address
 ```
 
-Then rerun affected tests.
+Then rerun affected tests, and record each finding's outcome in the saved report: fixed, with its commit; or deferred, with the later milestone that owns it and the reason. `/address` commits each fix; skip its push step, because the repository has no remote and a first push needs a full-history scan.
+
+This is the milestone's review of record. No separate review session runs between milestones unless the owner asks for one: once a milestone is ACCEPTED with its review saved, the next milestone starts from its kickoff prompt, reads the saved report, and takes every finding deferred to it as its own scope.
 
 Do not skip these because the milestone seems small.
 
@@ -211,6 +215,13 @@ A review is not independent merely because the same execution log was reread. Th
 - missing persistence;
 - unsupported capability claims;
 - and discrepancies between implementation and the canonical documents.
+
+**Kickoff prompts.** A milestone's close-out ends by printing the next milestone's kickoff prompt, written to the "Prompts Written for a Future Session" section of `~/.claude/CLAUDE.md` and carrying this milestone's evidence as fact. M9 has no successor and prints none. Every kickoff prompt instructs its session to:
+
+- treat the predecessor's ACCEPTED state and saved review as the whole entry gate;
+- run `/review-2` with Opus 5.5 agents after implementation, save the report, and run `/address` once the report exists;
+- rerun every affected test;
+- end its own close-out by printing the following milestone's kickoff prompt with these same instructions.
 
 ---
 
@@ -923,8 +934,8 @@ A milestone is complete only when:
 - required artifacts exist;
 - automated verification has run;
 - acceptance criteria pass or honest blockers are recorded;
-- `/review-2` has run;
-- `/address` has remediated review findings;
+- `/review-2` has run with Opus 5.5 agents, and its report is saved under `evidence/<milestone>/review/`;
+- `/address` has remediated review findings, and each finding's outcome is recorded in that report;
 - affected tests have been rerun;
 - evidence is stored and redacted;
 - milestone status is updated accurately;
