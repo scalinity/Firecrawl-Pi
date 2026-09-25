@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m0.audit/v1",
-  "generated_utc": "2026-09-25T04:07:08Z",
-  "repository_sha": "b93d84f69ce82d16c05c1181ac3d8c345e3d598a",
+  "generated_utc": "2026-09-25T04:16:31Z",
+  "repository_sha": "433eda001bb91adf27d0711d52d07ea28da48b08",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores this file is a later one on main.",
   "upstream": {
@@ -17,7 +17,7 @@
     {
       "id": "P0-before",
       "script": "scripts/m0/pi-snapshot.sh",
-      "script_commit": "6333fe9",
+      "script_commit": "4197069",
       "script_sha256": "61d4288a5dc29f81106672b01e0e299e6f509a8f5af3c9167fb37230773cf602",
       "output": "evidence/M0/snapshot-before.txt",
       "output_sha256": "f3aa859d5a0bc600826cc14cc9c404459052996eb3ddcc29304c2c8dda2214a1",
@@ -27,17 +27,17 @@
     {
       "id": "P1-audit",
       "script": "scripts/m0/pi-audit.sh",
-      "script_commit": "99ad509",
+      "script_commit": "4ff781f",
       "script_sha256": "843acf16e842c990757379a577bdc612e5a4ea8ea5439c31c4c8ff1d0a17fa6f",
       "output": "evidence/M0/raw/pi-audit.txt",
       "output_sha256": "c8b64073a34240dfbe590ec5ac497076dd1d63b584f8f58241a08ef1b00a80fb",
       "utc": "2026-09-25T03:55:27Z",
-      "note": "Re-run after review. The superseded first run is in git at 6333fe9."
+      "note": "Re-run after review. The superseded first run is in git at tag m0-first-run."
     },
     {
       "id": "P2-audit-extra",
       "script": "scripts/m0/pi-audit-extra.sh",
-      "script_commit": "c75affb",
+      "script_commit": "27f1136",
       "script_sha256": "cd20227c87efe52251d3f2861be4d836cd561899dbae3be73a2f9f48aff15332",
       "output": "evidence/M0/raw/pi-audit-extra.txt",
       "output_sha256": "a639a0c9369539c74514cf085c4b2fb3b7afc2344cd9084788ffbf525397abcf",
@@ -47,17 +47,17 @@
     {
       "id": "P2e-ip-echo",
       "script": "scripts/m0/pi-audit-extra.sh",
-      "script_commit": "6333fe9",
+      "script_commit": "4197069",
       "script_sha256": "2cac76b3c97d26c49dd9d3a30214560301ffe776d8afeb6f3941c88e5498d450",
       "output": "evidence/M0/raw/pi-audit-extra-ipecho.txt",
-      "output_sha256": "504ff9ee1c3ded4b44149fee5dc71ae8b849283268562a02d56009fa3595937d",
+      "output_sha256": "f812803f90394df64979018ddadc7fa0fc44c0628663d413ebae0058615e6038",
       "utc": "2026-09-25T03:21:03Z",
       "note": "The single permitted IP-echo GET. That script version printed the raw answer; the line was replaced with its SHA-256 on the workstation before any commit (post-capture redaction, stated in the file)."
     },
     {
       "id": "P3-audit-paths",
       "script": "scripts/m0/pi-audit-paths.sh",
-      "script_commit": "6333fe9",
+      "script_commit": "4197069",
       "script_sha256": "8eb9a959822e4f0ceca397fef94cca55878dd1c250f3aad3e2e153f7080465a0",
       "output": "evidence/M0/raw/pi-audit-paths.txt",
       "output_sha256": "c9c680b56db084a9c76ae689f753ee4097d6893689f4516ffad5c4836ab995fa",
@@ -67,7 +67,7 @@
     {
       "id": "P4-audit-layout",
       "script": "scripts/m0/pi-audit-layout.sh",
-      "script_commit": "6333fe9",
+      "script_commit": "4197069",
       "script_sha256": "7f17b0dc30a9741559e88c9c18dcf31768c446c0ed9ff7e81f029f6605788278",
       "output": "evidence/M0/raw/pi-audit-layout.txt",
       "output_sha256": "af7540b23ac171c690f53948f0ed61ff8f0030fd37e1f2992c45ee6add9d5f00",
@@ -76,7 +76,7 @@
     {
       "id": "P6-kernel-log",
       "script": "scripts/m0/pi-audit-kernel-log.sh",
-      "script_commit": "bc8b64e",
+      "script_commit": "621b782",
       "script_sha256": "3c60e106ee9879cc8c18ddf3cd59b52d165a6b723b6cbbe60fc9bbd77617328c",
       "output": "evidence/M0/raw/pi-audit-kernel-log.txt",
       "output_sha256": "03085583351e32ea8338275e1655b3ac920532efbca367ee3e2339d7b6459713",
@@ -86,7 +86,7 @@
     {
       "id": "P5-after",
       "script": "scripts/m0/pi-snapshot.sh",
-      "script_commit": "0506971",
+      "script_commit": "a1f15eb",
       "script_sha256": "927ed88b1c73c57797026aa17c98099dd086ded2e6f35954a58d2a5533665e54",
       "output": "evidence/M0/snapshot-after.txt",
       "output_sha256": "d9b00672ac758ee9a3aa2ef987d0624b695ddfe543dd48bb4a325c8f052c9872",
@@ -891,7 +891,7 @@
     },
     {
       "field": "fan presence",
-      "reason": "a tachometer reading of 0 rpm is identical for a tach-less fan and an absent fan (first P1 run: pwm 75, 0 rpm; see git 6333fe9)"
+      "reason": "a tachometer reading of 0 rpm is identical for a tach-less fan and an absent fan (first P1 run: pwm 75, 0 rpm; see git tag m0-first-run)"
     },
     {
       "field": "sustained-load thermal behaviour",

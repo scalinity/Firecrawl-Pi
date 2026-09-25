@@ -138,7 +138,7 @@ Each decision below is a change to the pinned baseline or a native-build uncerta
 ## 6. Owner input registered
 
 - **B1:** approve adding `cgroup_enable=memory` to `/boot/firmware/cmdline.txt` and one reboot, and name a time when a short DNS/MQTT outage is acceptable.
-- **B2:** is a fan fitted to the Pi (for example, the Active Cooler)? The software cannot tell. In the first P1 run the fan was commanded (PWM 75/255) and read 0 rpm; a fan without a tachometer and an absent fan give the same reading (git `6333fe9:evidence/M0/raw/pi-audit.txt`). The re-run caught the fan idle at 47.7 °C (PWM 0). Other readings: `get_throttled=0x0` since boot; EXT5V 5.18 V; `usb_max_current_enable=1`.
+- **B2:** is a fan fitted to the Pi (for example, the Active Cooler)? The software cannot tell. In the first P1 run the fan was commanded (PWM 75/255) and read 0 rpm; a fan without a tachometer and an absent fan give the same reading (git `m0-first-run:evidence/M0/raw/pi-audit.txt`). The re-run caught the fan idle at 47.7 °C (PWM 0). Other readings: `get_throttled=0x0` since boot; EXT5V 5.18 V; `usb_max_current_enable=1`.
 
 ## 7. Integrity, side effects and corrections
 
@@ -155,13 +155,13 @@ Each decision below is a change to the pinned baseline or a native-build uncerta
 - **Probe re-runs after review:**
   - P1 re-ran with the hardened `pi-audit.sh`: explicit PATH, a binfmt_misc mount check, `lsblk -P`, and on-Pi masking of link-local interface IDs and the imager instance id.
   - P2 re-ran without the echo.
-  - The superseded first transcripts remain in git at `6333fe9`.
+  - The superseded first transcripts remain in git at tag `m0-first-run`.
   - `audit.json` records, per probe, the commit and SHA-256 of the script version that ran.
 - **Machine-id near-miss:** the first run of the kernel-log probe captured the raw machine-id inside a journald directory path. That file was deleted before any commit, and the probe was re-run with the machine-id hashed on the Pi. V07 now checks every standalone 16- and 32-hex token against the recorded serial and machine-id hashes, so an identifier inside a path can no longer pass.
 - **Identifiers deliberately retained:**
   - 158.205.34.18 and the /24 are functional: they are the target address and the SSRF deny-list input.
   - The time zone and US Wi-Fi regulatory domain carry the NAT inference.
-  - Git history before `220eaa2`/`3f7fcc8` still holds a session scratchpad path, a link-local address, the imager instance id and the workstation's LAN address. No remote exists; the full-history scan required before any first push must remove them in a clone.
+  - File contents in git history before the commits "remove session scratchpad path from upstream findings" and "drop the workstation address and correct stale exposure facts" still hold a session scratchpad path, a link-local address, the imager instance id and the workstation's LAN address. No remote exists; the full-history scan required before any first push must remove them in a clone.
 
 ## Evidence index
 
