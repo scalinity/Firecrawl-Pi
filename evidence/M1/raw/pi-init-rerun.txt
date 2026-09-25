@@ -1,6 +1,6 @@
 ### meta
-2026-09-25T07:33:44Z
-source_commit=d4930f228256a48c89e32154d7d03c8501f66cda
+2026-09-25T09:02:08Z
+source_commit=bf8dd964581d101a90cad81a69415a3f8ebc7e9c
 ### directories
 kept    /etc/firecrawl-pi/
 kept    /etc/firecrawl-pi/secrets/
@@ -21,25 +21,27 @@ kept    /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
 ### systemd_units
 kept    /etc/systemd/system/fcpi-data-check.service
 kept    /etc/systemd/system/fcpi-stack.service
+kept    /etc/systemd/system/docker.service.d/10-fcpi-data-check.conf
+docker ExecStartPre=path=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh 
 fcpi-stack enabled=enabled
 ### inventory
-root:root 755 4096 /etc/firecrawl-pi
-root:root 600 221 /etc/firecrawl-pi/config.env
-root:root 700 4096 /etc/firecrawl-pi/secrets
-root:root 700 4096 /etc/firecrawl-pi/secrets/clients
-root:root 600 90 /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
-root:root 600 64 /etc/firecrawl-pi/secrets/core_postgres_password
-root:root 600 84 /etc/firecrawl-pi/secrets/core_redis_url
-UNKNOWN:UNKNOWN 600 82 /etc/firecrawl-pi/secrets/gateway_token_hashes
-UNKNOWN:UNKNOWN 600 64 /etc/firecrawl-pi/secrets/postgres_password
-UNKNOWN:UNKNOWN 600 100 /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf
-UNKNOWN:UNKNOWN 600 128 /etc/firecrawl-pi/secrets/redis_users_acl
-root:root 700 4096 /etc/firecrawl-pi/secrets/clients
-root:root 600 73 /etc/firecrawl-pi/secrets/clients/m1-verify.token
-root:root 700 4096 /srv/firecrawl-pi/data
-root:root 644 37 /srv/firecrawl-pi/data/.fcpi-data-id
-UNKNOWN:UNKNOWN 700 4096 /srv/firecrawl-pi/data/postgres
-UNKNOWN:UNKNOWN 700 4096 /srv/firecrawl-pi/data/redis
-UNKNOWN:UNKNOWN 700 4096 /srv/firecrawl-pi/data/rabbitmq
-UNKNOWN:UNKNOWN 400 64 /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+0:0 755 4096 /etc/firecrawl-pi
+0:0 600 221 /etc/firecrawl-pi/config.env
+0:0 700 4096 /etc/firecrawl-pi/secrets
+0:0 700 4096 /etc/firecrawl-pi/secrets/clients
+0:0 600 90 /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
+0:0 600 64 /etc/firecrawl-pi/secrets/core_postgres_password
+0:0 600 84 /etc/firecrawl-pi/secrets/core_redis_url
+3380:3380 600 82 /etc/firecrawl-pi/secrets/gateway_token_hashes
+5432:5432 600 64 /etc/firecrawl-pi/secrets/postgres_password
+5672:5672 600 100 /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf
+6379:6379 600 128 /etc/firecrawl-pi/secrets/redis_users_acl
+0:0 700 4096 /etc/firecrawl-pi/secrets/clients
+0:0 600 73 /etc/firecrawl-pi/secrets/clients/m1-verify.token
+0:0 700 4096 /srv/firecrawl-pi/data
+0:0 644 37 /srv/firecrawl-pi/data/.fcpi-data-id
+5432:5432 700 4096 /srv/firecrawl-pi/data/postgres
+6379:6379 700 4096 /srv/firecrawl-pi/data/redis
+5672:5672 700 4096 /srv/firecrawl-pi/data/rabbitmq
+5672:5672 400 64 /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
 end

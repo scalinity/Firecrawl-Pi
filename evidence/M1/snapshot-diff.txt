@@ -1,0 +1,74 @@
+# M1 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m1/verify.mjs V14)
+# before: 2026-09-25T06:46:19Z  after: 2026-09-25T09:16:53Z
+# boot_id: unchanged (no reboot)
+## changes to unrelated state (0)
+## project additions and the audit's own SSH sessions (69)
+- systemd_running	session-115.scope	# own SSH session scope (excluded, as in M0)
+- systemd_running	session-27.scope	# own SSH session scope (excluded, as in M0)
+- systemd_running	session-4.scope	# own SSH session scope (excluded, as in M0)
+- systemd_running	session-667.scope	# own SSH session scope (excluded, as in M0)
+- docker_activation	docker.service=inactive	# container runtime installed by M1
+- docker_activation	docker.socket=inactive	# container runtime installed by M1
+- docker_activation	containerd.service=inactive	# container runtime installed by M1
+- docker_ps	SKIPPED docker.service not active; no docker command run	# container runtime installed by M1
+- firewall	nft_ruleset_sha256=SKIPPED nf_tables module not loaded	# nftables: Docker's tables and the project's fcpi_audit tables (evidence/M1/raw/nft-ruleset.txt)
++ systemd_running	containerd.service	# container runtime installed by M1
++ systemd_running	docker-116264174cd96add1cacf3ee32be77d163c27b29a9517a8f2da4fc521ffd7b4e.scope	# scope of a running fcpi container
++ systemd_running	docker-516d6905e8cd6ac476a7f658e3892d048f69f714a888cbd5513f3a2d19b33bd0.scope	# scope of a running fcpi container
++ systemd_running	docker-7bf26089fb5ed8b3463275f33eb655e12d7599aeb17d016e6514499960ca913f.scope	# scope of a running fcpi container
++ systemd_running	docker-9d8c7b15aaef273b33d713bbf489cc44ad030821b3d2fe1c9b729e80a2d85e91.scope	# scope of a running fcpi container
++ systemd_running	docker-ad38382aab129e4d26f5f76da4b39f45fac9877e9e606b1ba2b78606d54d60d4.scope	# scope of a running fcpi container
++ systemd_running	docker-ba59d2bc1460169150acfaf611252b5006452fd204bbb29ff38287e5fb608e0e.scope	# scope of a running fcpi container
++ systemd_running	docker.service	# container runtime installed by M1
++ systemd_running	docker.socket	# container runtime installed by M1
++ systemd_running	session-1957.scope	# own SSH session scope (excluded, as in M0)
++ systemd_enabled	containerd.service	# container runtime installed by M1
++ systemd_enabled	docker.service	# container runtime installed by M1
++ systemd_enabled	docker.socket	# container runtime installed by M1
++ systemd_enabled	fcpi-stack.service	# project unit (enabled by pi-init.sh)
++ docker_activation	docker.service=active	# container runtime installed by M1
++ docker_activation	docker.socket=active	# container runtime installed by M1
++ docker_activation	containerd.service=active	# container runtime installed by M1
++ docker_ps	116264174cd96add1cacf3ee32be77d163c27b29a9517a8f2da4fc521ffd7b4e	fcpi-nuq-postgres-1	fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180	running	# fcpi container
++ docker_ps	516d6905e8cd6ac476a7f658e3892d048f69f714a888cbd5513f3a2d19b33bd0	fcpi-fixture-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running	# fcpi container
++ docker_ps	7bf26089fb5ed8b3463275f33eb655e12d7599aeb17d016e6514499960ca913f	fcpi-firecrawl-core-1	ghcr.io/firecrawl/firecrawl@sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af	running	# fcpi container
++ docker_ps	9d8c7b15aaef273b33d713bbf489cc44ad030821b3d2fe1c9b729e80a2d85e91	fcpi-rabbitmq-1	rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8	running	# fcpi container
++ docker_ps	ad38382aab129e4d26f5f76da4b39f45fac9877e9e606b1ba2b78606d54d60d4	fcpi-redis-1	redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44	running	# fcpi container
++ docker_ps	ba59d2bc1460169150acfaf611252b5006452fd204bbb29ff38287e5fb608e0e	fcpi-access-gateway-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running	# fcpi container
++ lsmod	bridge 344064	# kernel module loaded by the container runtime
++ lsmod	ip_set 65536	# kernel module loaded by the container runtime
++ lsmod	llc 49152	# kernel module loaded by the container runtime
++ lsmod	nf_conntrack 180224	# kernel module loaded by the container runtime
++ lsmod	nf_conntrack_netlink 81920	# kernel module loaded by the container runtime
++ lsmod	nf_defrag_ipv4 49152	# kernel module loaded by the container runtime
++ lsmod	nf_defrag_ipv6 49152	# kernel module loaded by the container runtime
++ lsmod	nf_nat 98304	# kernel module loaded by the container runtime
++ lsmod	nf_tables 327680	# kernel module loaded by the container runtime
++ lsmod	nft_chain_nat 49152	# kernel module loaded by the container runtime
++ lsmod	nft_compat 49152	# kernel module loaded by the container runtime
++ lsmod	overlay 180224	# kernel module loaded by the container runtime
++ lsmod	stp 49152	# kernel module loaded by the container runtime
++ lsmod	veth 81920	# kernel module loaded by the container runtime
++ lsmod	x_tables 65536	# kernel module loaded by the container runtime
++ lsmod	xfrm_algo 49152	# kernel module loaded by the container runtime
++ lsmod	xfrm_user 65536	# kernel module loaded by the container runtime
++ lsmod	xt_MASQUERADE 49152	# kernel module loaded by the container runtime
++ lsmod	xt_addrtype 49152	# kernel module loaded by the container runtime
++ lsmod	xt_conntrack 49152	# kernel module loaded by the container runtime
++ lsmod	xt_nat 49152	# kernel module loaded by the container runtime
++ lsmod	xt_set 49152	# kernel module loaded by the container runtime
++ lsmod	xt_tcpudp 49152	# kernel module loaded by the container runtime
++ ss_listen	tcp 127.0.0.1:3380 users:(("docker-proxy",pid,fd))	# the gateway's only host publication
++ findmnt	/run/docker/netns/01321c1b598a nsfs[net:[4026532602]] nsfs rw	# container network namespace
++ findmnt	/run/docker/netns/63a8abd4bc31 nsfs[net:[4026532845]] nsfs rw	# container network namespace
++ findmnt	/run/docker/netns/6da7252d1062 nsfs[net:[4026532764]] nsfs rw	# container network namespace
++ findmnt	/run/docker/netns/700660b52542 nsfs[net:[4026532683]] nsfs rw	# container network namespace
++ findmnt	/run/docker/netns/791b4aa92a8f nsfs[net:[4026532926]] nsfs rw	# container network namespace
++ findmnt	/run/docker/netns/d71fd6bf32dc nsfs[net:[4026533011]] nsfs rw	# container network namespace
++ findmnt	/var/lib/docker/rootfs/overlayfs/116264174cd96add1cacf3ee32be77d163c27b29a9517a8f2da4fc521ffd7b4e overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/175/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/64/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/63/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/62/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/45/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/44/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/43/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/42/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/41/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/40/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/39/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/38/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/37/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/36/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/35/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/34/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/33/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/32/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/179/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/179/work	# fcpi container root filesystem
++ findmnt	/var/lib/docker/rootfs/overlayfs/516d6905e8cd6ac476a7f658e3892d048f69f714a888cbd5513f3a2d19b33bd0 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/173/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/177/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/177/work	# fcpi container root filesystem
++ findmnt	/var/lib/docker/rootfs/overlayfs/7bf26089fb5ed8b3463275f33eb655e12d7599aeb17d016e6514499960ca913f overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/181/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/15/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/14/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/13/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/12/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/11/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/10/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/9/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/8/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/7/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/6/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/5/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/2/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/182/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/182/work	# fcpi container root filesystem
++ findmnt	/var/lib/docker/rootfs/overlayfs/9d8c7b15aaef273b33d713bbf489cc44ad030821b3d2fe1c9b729e80a2d85e91 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/176/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/31/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/30/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/29/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/28/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/27/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/26/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/25/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/24/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/23/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/180/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/180/work	# fcpi container root filesystem
++ findmnt	/var/lib/docker/rootfs/overlayfs/ad38382aab129e4d26f5f76da4b39f45fac9877e9e606b1ba2b78606d54d60d4 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/174/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/22/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/21/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/20/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/19/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/18/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/17/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/16/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/178/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/178/work	# fcpi container root filesystem
++ findmnt	/var/lib/docker/rootfs/overlayfs/ba59d2bc1460169150acfaf611252b5006452fd204bbb29ff38287e5fb608e0e overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/183/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/184/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/184/work	# fcpi container root filesystem
++ firewall	nft_ruleset_sha256=7cbab04ef08e6e391c30ff0acbc1bff952049920420e303dd99923c0db61ecd7	# nftables: Docker's tables and the project's fcpi_audit tables (evidence/M1/raw/nft-ruleset.txt)

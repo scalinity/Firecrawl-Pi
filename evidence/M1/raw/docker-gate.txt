@@ -1,6 +1,6 @@
 ### meta
-2026-09-25T08:47:25Z
-source_commit=0ae2b1c63f15434b10a47a220f7259d5cb6f096e
+2026-09-25T09:05:14Z
+source_commit=bf8dd964581d101a90cad81a69415a3f8ebc7e9c
 ### drop_in
 exec_start_pre=path=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh 
 drop_in_sha256=8ae20be1cd61fb13b7c676e6fad6ba9d24699ea392e5aad010dad492f2143694 repo_sha256=8ae20be1cd61fb13b7c676e6fad6ba9d24699ea392e5aad010dad492f2143694
@@ -9,7 +9,7 @@ running_containers=6 writers=31
 restart_policies=unless-stopped 
 ### stop_dockerd_alone
 docker=inactive fcpi_stack=active writers=0
-manifest=2c3ce373286e1347f69833bbdabf5973dfa973ef717179cef52940ae1278798c
+manifest=c8569da05f21125e1bde7d9877e02e85b6ddaa5a7397d138aba1f8bced9a0127
 ### gated_start
 Job for docker.service failed because the control process exited with error code.
 start_exit=1

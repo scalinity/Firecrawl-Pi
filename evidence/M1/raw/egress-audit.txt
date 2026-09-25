@@ -1,84 +1,117 @@
-read 2026-09-25T08:17:25Z
-ipv4_from_internal_subnets family=bridge packets=30678 bytes=9394618
+read 2026-09-25T09:14:33Z
+ipv4_from_internal_subnets family=bridge packets=15186 bytes=4924472
 ipv4_from_internal_to_off_subnet family=bridge packets=0 bytes=0
 ipv6_beyond_link_scope_on_any_bridge family=bridge packets=0 bytes=0
-info_ipv6_link_scope_on_any_bridge family=bridge packets=11 bytes=1032
+info_ipv6_link_scope_on_any_bridge family=bridge packets=10 bytes=960
 routed_out_of_internal_bridges family=inet packets=0 bytes=0
-ipv4_to_host_from_internal_bridges family=inet packets=11 bytes=3388
+routed_out_of_access_bridge family=inet packets=0 bytes=0
+routed_out_of_access_bridge_ipv6 family=inet packets=0 bytes=0
+ipv4_to_host_from_internal_bridges family=inet packets=21 bytes=6468
 ipv6_beyond_link_scope_to_host family=inet packets=0 bytes=0
 info_ipv6_link_scope_to_host family=inet packets=0 bytes=0
 flow set=bridge:fcpi_audit:seen_v6 src=:: dst=ff02::16 l4proto=ipv6-icmp
-flow set=bridge:fcpi_audit:seen_v6 src=:: dst=ff02::1:ff21:6a33 l4proto=ipv6-icmp
 flow set=inet:fcpi_audit:seen_in_v4 src=0.0.0.0 dst=255.255.255.255 l4proto=udp
-nm 2026-09-25T04:03:05-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:03:05-04:00 dhcp4 (veth04a1452): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:03:05-04:00 dhcp4 (veth04a1452): canceled DHCP transaction
-nm 2026-09-25T04:03:05-04:00 dhcp4 (veth04a1452): state changed no lease
-nm 2026-09-25T04:03:07-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:03:07-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:03:07-04:00 dhcp4 (veth5311cad): activation: beginning transaction (timeout in 45 seconds)
-2026-09-25T04:03:07-04:00 pi NetworkManager[649]: <error> [1790323387.3036] dhcp4 (veth5311cad): error -19 dispatching events
-nm 2026-09-25T04:03:07-04:00 dhcp4 (veth5311cad): state changed no lease
-nm 2026-09-25T04:03:07-04:00 dhcp4 (veth5311cad): canceled DHCP transaction
-nm 2026-09-25T04:03:07-04:00 dhcp4 (veth5311cad): state changed no lease
-nm 2026-09-25T04:03:43-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:03:43-04:00 dhcp4 (veth3a76204): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:03:43-04:00 dhcp4 (veth3a76204): canceled DHCP transaction
-nm 2026-09-25T04:03:43-04:00 dhcp4 (veth3a76204): state changed no lease
-nm 2026-09-25T04:03:44-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:03:44-04:00 dhcp4 (veth41766a5): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:03:44-04:00 dhcp4 (veth41766a5): canceled DHCP transaction
-nm 2026-09-25T04:03:44-04:00 dhcp4 (veth41766a5): state changed no lease
-nm 2026-09-25T04:03:44-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:03:44-04:00 dhcp4 (vethe547f77): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:03:44-04:00 dhcp4 (vethe547f77): canceled DHCP transaction
-nm 2026-09-25T04:03:44-04:00 dhcp4 (vethe547f77): state changed no lease
-nm 2026-09-25T04:04:31-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:04:31-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:04:31-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:04:31-04:00 dhcp4 (veth49e22ae): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:04:31-04:00 dhcp4 (veth49e22ae): canceled DHCP transaction
-nm 2026-09-25T04:04:31-04:00 dhcp4 (veth49e22ae): state changed no lease
-nm 2026-09-25T04:05:16-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vetheb97873): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vetheb97873): canceled DHCP transaction
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vetheb97873): state changed no lease
-nm 2026-09-25T04:05:16-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vetheb7c04b): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vetheb7c04b): canceled DHCP transaction
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vetheb7c04b): state changed no lease
-nm 2026-09-25T04:05:16-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vethc1f223e): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vethc1f223e): canceled DHCP transaction
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vethc1f223e): state changed no lease
-nm 2026-09-25T04:05:16-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vethdde8866): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vethdde8866): canceled DHCP transaction
-nm 2026-09-25T04:05:16-04:00 dhcp4 (vethdde8866): state changed no lease
-nm 2026-09-25T04:05:16-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (veth67e8eb9): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:05:16-04:00 dhcp4 (veth67e8eb9): canceled DHCP transaction
-nm 2026-09-25T04:05:16-04:00 dhcp4 (veth67e8eb9): state changed no lease
-nm 2026-09-25T04:05:17-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:06:26-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:06:26-04:00 dhcp4 (veth50ac630): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:06:26-04:00 dhcp4 (veth50ac630): canceled DHCP transaction
-nm 2026-09-25T04:06:26-04:00 dhcp4 (veth50ac630): state changed no lease
-nm 2026-09-25T04:06:26-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:06:26-04:00 dhcp4 (veth6b51e31): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:06:26-04:00 dhcp4 (veth6b51e31): canceled DHCP transaction
-nm 2026-09-25T04:06:26-04:00 dhcp4 (veth6b51e31): state changed no lease
-nm 2026-09-25T04:06:26-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:06:26-04:00 dhcp4 (vethbcbaac5): activation: beginning transaction (timeout in 45 seconds)
-2026-09-25T04:06:26-04:00 pi NetworkManager[649]: <error> [1790323586.7436] dhcp4 (vethbcbaac5): error -19 dispatching events
-nm 2026-09-25T04:06:26-04:00 dhcp4 (vethbcbaac5): state changed no lease
-nm 2026-09-25T04:06:26-04:00 dhcp4 (vethbcbaac5): canceled DHCP transaction
-nm 2026-09-25T04:06:26-04:00 dhcp4 (vethbcbaac5): state changed no lease
-nm 2026-09-25T04:06:27-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:06:27-04:00 dhcp4 (veth04f45a7): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:06:27-04:00 dhcp4 (veth04f45a7): canceled DHCP transaction
-nm 2026-09-25T04:06:27-04:00 dhcp4 (veth04f45a7): state changed no lease
-nm 2026-09-25T04:06:28-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
-nm 2026-09-25T04:06:28-04:00 dhcp4 (veth67551be): activation: beginning transaction (timeout in 45 seconds)
-nm 2026-09-25T04:06:28-04:00 dhcp4 (veth67551be): canceled DHCP transaction
-nm 2026-09-25T04:06:28-04:00 dhcp4 (veth67551be): state changed no lease
+nm 2026-09-25T05:04:40-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:04:40-04:00 dhcp4 (veth9846471): activation: beginning transaction (timeout in 45 seconds)
+2026-09-25T05:04:40-04:00 pi NetworkManager[649]: <error> [1790327080.6636] dhcp4 (veth9846471): error -19 dispatching events
+nm 2026-09-25T05:04:40-04:00 dhcp4 (veth9846471): state changed no lease
+nm 2026-09-25T05:04:40-04:00 dhcp4 (veth9846471): canceled DHCP transaction
+nm 2026-09-25T05:04:40-04:00 dhcp4 (veth9846471): state changed no lease
+nm 2026-09-25T05:04:40-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:04:40-04:00 dhcp4 (veth9dd8633): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:04:40-04:00 dhcp4 (veth9dd8633): canceled DHCP transaction
+nm 2026-09-25T05:04:40-04:00 dhcp4 (veth9dd8633): state changed no lease
+nm 2026-09-25T05:04:41-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:04:41-04:00 dhcp4 (vethe9bcc36): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:04:41-04:00 dhcp4 (vethe9bcc36): canceled DHCP transaction
+nm 2026-09-25T05:04:41-04:00 dhcp4 (vethe9bcc36): state changed no lease
+nm 2026-09-25T05:05:15-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:05:15-04:00 dhcp4 (veth70282a5): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:05:15-04:00 dhcp4 (veth70282a5): canceled DHCP transaction
+nm 2026-09-25T05:05:15-04:00 dhcp4 (veth70282a5): state changed no lease
+nm 2026-09-25T05:05:15-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:05:15-04:00 dhcp4 (veth70b16e8): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:05:15-04:00 dhcp4 (veth70b16e8): canceled DHCP transaction
+nm 2026-09-25T05:05:15-04:00 dhcp4 (veth70b16e8): state changed no lease
+nm 2026-09-25T05:05:15-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:05:15-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:05:15-04:00 dhcp4 (vethe5d7d64): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:05:15-04:00 dhcp4 (vethe5d7d64): canceled DHCP transaction
+nm 2026-09-25T05:05:15-04:00 dhcp4 (vethe5d7d64): state changed no lease
+nm 2026-09-25T05:05:16-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:05:16-04:00 dhcp4 (vethd8bd700): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:05:16-04:00 dhcp4 (vethd8bd700): canceled DHCP transaction
+nm 2026-09-25T05:05:16-04:00 dhcp4 (vethd8bd700): state changed no lease
+nm 2026-09-25T05:08:52-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:08:52-04:00 dhcp4 (veth3464b4a): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:08:52-04:00 dhcp4 (veth3464b4a): canceled DHCP transaction
+nm 2026-09-25T05:08:52-04:00 dhcp4 (veth3464b4a): state changed no lease
+nm 2026-09-25T05:08:52-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:08:52-04:00 dhcp4 (veth0d1fd0a): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:08:52-04:00 dhcp4 (veth0d1fd0a): canceled DHCP transaction
+nm 2026-09-25T05:08:52-04:00 dhcp4 (veth0d1fd0a): state changed no lease
+nm 2026-09-25T05:08:53-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:08:53-04:00 dhcp4 (veth8dfd66c): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:08:53-04:00 dhcp4 (veth8dfd66c): canceled DHCP transaction
+nm 2026-09-25T05:08:53-04:00 dhcp4 (veth8dfd66c): state changed no lease
+nm 2026-09-25T05:08:54-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:08:54-04:00 dhcp4 (vethbc8129e): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:08:54-04:00 dhcp4 (vethbc8129e): canceled DHCP transaction
+nm 2026-09-25T05:08:54-04:00 dhcp4 (vethbc8129e): state changed no lease
+nm 2026-09-25T05:09:39-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:09:39-04:00 dhcp4 (veth1086abd): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:09:39-04:00 dhcp4 (veth1086abd): canceled DHCP transaction
+nm 2026-09-25T05:09:39-04:00 dhcp4 (veth1086abd): state changed no lease
+nm 2026-09-25T05:09:39-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:09:40-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:09:40-04:00 dhcp4 (veth1e28283): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:09:40-04:00 dhcp4 (veth1e28283): canceled DHCP transaction
+nm 2026-09-25T05:09:40-04:00 dhcp4 (veth1e28283): state changed no lease
+nm 2026-09-25T05:11:52-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:11:52-04:00 dhcp4 (veth2046a13): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:11:52-04:00 dhcp4 (veth2046a13): canceled DHCP transaction
+nm 2026-09-25T05:11:52-04:00 dhcp4 (veth2046a13): state changed no lease
+nm 2026-09-25T05:11:52-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:11:52-04:00 dhcp4 (veth4be0f0f): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:11:52-04:00 dhcp4 (veth4be0f0f): canceled DHCP transaction
+nm 2026-09-25T05:11:52-04:00 dhcp4 (veth4be0f0f): state changed no lease
+nm 2026-09-25T05:11:53-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:11:53-04:00 dhcp4 (vethe8b6ecf): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:11:54-04:00 dhcp4 (vethe8b6ecf): canceled DHCP transaction
+nm 2026-09-25T05:11:54-04:00 dhcp4 (vethe8b6ecf): state changed no lease
+nm 2026-09-25T05:12:40-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:12:40-04:00 dhcp4 (veth0951274): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:12:40-04:00 dhcp4 (veth0951274): canceled DHCP transaction
+nm 2026-09-25T05:12:40-04:00 dhcp4 (veth0951274): state changed no lease
+nm 2026-09-25T05:12:40-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:12:40-04:00 dhcp4 (veth5b7ea72): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:12:40-04:00 dhcp4 (veth5b7ea72): canceled DHCP transaction
+nm 2026-09-25T05:12:40-04:00 dhcp4 (veth5b7ea72): state changed no lease
+nm 2026-09-25T05:13:18-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:13:18-04:00 dhcp4 (veth4e2b2b1): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:13:18-04:00 dhcp4 (veth4e2b2b1): canceled DHCP transaction
+nm 2026-09-25T05:13:18-04:00 dhcp4 (veth4e2b2b1): state changed no lease
+nm 2026-09-25T05:13:19-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (vethdb69562): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (vethdb69562): canceled DHCP transaction
+nm 2026-09-25T05:13:19-04:00 dhcp4 (vethdb69562): state changed no lease
+nm 2026-09-25T05:13:19-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth90de801): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth90de801): canceled DHCP transaction
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth90de801): state changed no lease
+nm 2026-09-25T05:13:19-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth6b654e7): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth6b654e7): canceled DHCP transaction
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth6b654e7): state changed no lease
+nm 2026-09-25T05:13:19-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth9eb1dc0): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth9eb1dc0): canceled DHCP transaction
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth9eb1dc0): state changed no lease
+nm 2026-09-25T05:13:19-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth211407e): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth211407e): canceled DHCP transaction
+nm 2026-09-25T05:13:19-04:00 dhcp4 (veth211407e): state changed no lease
+nm 2026-09-25T05:13:20-04:00 policy: auto-activating connection 'netplan-eth0' (75a1216a-9d1a-30cd-8aca-ace5526ec021)
+nm 2026-09-25T05:13:20-04:00 dhcp4 (vethfa71295): activation: beginning transaction (timeout in 45 seconds)
+nm 2026-09-25T05:13:20-04:00 dhcp4 (vethfa71295): canceled DHCP transaction
+nm 2026-09-25T05:13:20-04:00 dhcp4 (vethfa71295): state changed no lease
