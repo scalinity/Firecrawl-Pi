@@ -1,0 +1,11 @@
+# retrieved_utc=2026-09-25T04:04:43Z
+# command=bash -c curl -fsS --max-time 60 https://apt.postgresql.org/pub/repos/apt/dists/trixie-pgdg/main/binary-arm64/Packages.gz | gunzip | awk '$1=="Package:"{c=($2=="postgresql-17-cron")} c&&($1=="Package:"||$1=="Version:"||$1=="SHA256:")'
+Package: postgresql-17-cron
+Version: 1.6.8-1.pgdg13+2
+SHA256: be615d3a5ac2e271db9c536093253ce28bf608dd6b802d9795016873089a9621
+Package: postgresql-17-cron
+Version: 1.6.8-1.pgdg13+1
+SHA256: ccf5457f4fb48e1361fd83ae3f41c57df9d7a32af066f885180967d94cdbaa6d
+Package: postgresql-17-cron
+Version: 1.6.7-3.pgdg13+1
+SHA256: 433ee86f4720e180ff3f0c0be1532538703547a519480b1fbed8ca17d4e2e394

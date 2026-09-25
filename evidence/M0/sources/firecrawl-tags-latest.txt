@@ -1,0 +1,7 @@
+# retrieved_utc=2026-09-25T04:04:44Z
+# command=gh api repos/firecrawl/firecrawl/tags?per_page=5 --jq .[].name
+v2.11.402
+v2.11.401
+v2.11.400
+v2.11.399
+v2.11.398

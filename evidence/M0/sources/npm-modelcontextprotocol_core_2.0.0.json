@@ -1,0 +1,14 @@
+# retrieved_utc=2026-09-25T04:04:40Z
+# command=npm view @modelcontextprotocol/core@2.0.0 name version engines dependencies peerDependencies dist.integrity time.modified --json
+{
+  "name": "@modelcontextprotocol/core",
+  "version": "2.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "zod": "^4.2.0"
+  },
+  "dist.integrity": "sha512-pJCEwGG7Lfr/+PQp9ZTwKXNeO5wzbfKL7H3MYpCorM4oFBoQrdjnBgEoqG+RjhsvS1FKrDbKux+M1HhlnGWqcA==",
+  "time.modified": "2026-09-23T15:44:32.570Z"
+}

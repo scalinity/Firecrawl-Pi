@@ -62,11 +62,11 @@
     {
       "test_id": "M0-V05",
       "name": "source-sha-chain",
-      "utc": "2026-09-25T04:03:34Z",
-      "repository_sha": "89eb9db89b65bf618b81c52bf211efa4c010995d",
+      "utc": "2026-09-25T04:05:55Z",
+      "repository_sha": "84349924425385774f513e431ef38d2f46b29f3c",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "config_or_fixture_hash": "9e96f7cf5c6228bc0360f8ef318031782e833ed11600626bf4e4e98770bbe536",
+      "config_or_fixture_hash": "7e93f0fb76f37441c06423e0418c3cbedce0404433ad13bc1b45f01365d46b5e",
       "expected": "live GitHub: refs/tags/v2.11.162 -> annotated tag object ebfe595c... -> commit 7666c1f9...; docker-compose.yaml blob at that commit = e2ade010...; all equal to the lockfile",
       "state": "PASS",
       "actual": "{\"ref_object\":\"ebfe595c3e218266c627f8651ccbcbe38f4ecfdd\",\"peeled_commit\":\"7666c1f9ae8720a6bba271e0f60b6a217f8a5210\",\"tag_object_type\":\"commit\",\"tag_object_target\":\"7666c1f9ae8720a6bba271e0f60b6a217f8a5210\",\"tag_name\":\"v2.11.162\",\"compose_blob\":\"e2ade0104390caf31cdcae04faa619c2674dc693\"}",
@@ -77,11 +77,11 @@
     {
       "test_id": "M0-V06",
       "name": "digest-platform-consistency",
-      "utc": "2026-09-25T04:03:35Z",
-      "repository_sha": "89eb9db89b65bf618b81c52bf211efa4c010995d",
+      "utc": "2026-09-25T04:06:08Z",
+      "repository_sha": "84349924425385774f513e431ef38d2f46b29f3c",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "config_or_fixture_hash": "6a82be87aa138664e7a6371c8414783e20a2593faac835f5ea167c8063a729ff",
+      "config_or_fixture_hash": "04a51c3038a2aefab13c86e49b223a22d3a2c511e8aa1e8f0dedc2b9d2c5f5dc",
       "expected": "for every image in the lockfile and every resolved registry row: sha256(saved index bytes)=index_digest=registry-reported digest; the index lists arm64_manifest_digest under linux/arm64; sha256(saved arm64 manifest bytes)=arm64_manifest_digest; single-platform rows: sha256(saved manifest bytes)=manifest_digest",
       "state": "PASS",
       "actual": "image references checked=18; failures=0",
@@ -89,21 +89,21 @@
       "image_digests_platform": {
         "platform": "linux/arm64",
         "checked": 18,
-        "lockfile_sha256": "901c738ad484c99e7a534d2e3e306816f316fee16cf9dc835a792908e5e891ee"
+        "lockfile_sha256": "f606b29f23de4da751b08480580e8c900e1819948b28e157a84bfb495e7459ef"
       },
       "evidence_path": "evidence/M0/verification.json"
     },
     {
       "test_id": "M0-V07",
       "name": "secret-and-identifier-redaction-scan",
-      "utc": "2026-09-25T04:03:35Z",
-      "repository_sha": "89eb9db89b65bf618b81c52bf211efa4c010995d",
+      "utc": "2026-09-25T04:06:08Z",
+      "repository_sha": "84349924425385774f513e431ef38d2f46b29f3c",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "config_or_fixture_hash": "b4705f6d184e6c7c19944090a00c4c808c901ac565146e916905e2f5e3a386f3",
+      "config_or_fixture_hash": "21bed52ad22bbb1fa9805cc848b53afdd80494a3f62882c7f2f6a27f6c85d130",
       "expected": "control fixture fires every rule; then no private key, token, credential assignment, URL credential, absolute local path, raw MAC, raw board serial or machine-id (by hash), raw egress IP (by hash) or unexplained MAC_SHA256 marker in any tracked or new repository file",
       "state": "PASS",
-      "actual": "positive control fired all 15 rules; files scanned=94; findings=0",
+      "actual": "positive control fired all 15 rules; files scanned=113; findings=0",
       "exit_code": 0,
       "evidence_path": "evidence/M0/verification.json"
     },

@@ -1,0 +1,4 @@
+# retrieved_utc=2026-09-25T04:04:45Z
+# command=bash -c curl -fsSL --max-time 30 https://www.rabbitmq.com/release-information | sed 's/<[^>]*>/ /g' | tr -s ' \n' ' ' | grep -oE '(4\.3|4\.2) (4\.[0-9]+\.[0-9]+ Release Notes Release Notes [0-9]+ [A-Z][a-z]+ 20[0-9]{2} [0-9]+ [A-Z][a-z]+ 20[0-9]{2} [0-9]+ [A-Z][a-z]+ 20[0-9]{2})' | head -2
+4.3 4.3.6 Release Notes Release Notes 16 Sept 2026 30 Nov 2026 30 Apr 2028
+4.2 4.2.10 Release Notes Release Notes 17 Aug 2026 31 Jul 2026 30 Jun 2030

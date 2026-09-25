@@ -1,0 +1,7 @@
+# retrieved_utc=2026-09-25T04:04:46Z
+# command=bash -c curl -sIL --max-time 30 https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-linux-arm64.zip | grep -iE '^(HTTP|content-length|last-modified)' | tr -d '\r'
+HTTP/2 307 
+content-length: 0
+HTTP/1.1 200 OK
+Content-Length: 188304613
+Last-Modified: Tue, 20 Jan 2026 13:29:30 GMT

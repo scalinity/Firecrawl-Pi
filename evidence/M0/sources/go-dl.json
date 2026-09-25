@@ -1,0 +1,12 @@
+# retrieved_utc=2026-09-25T04:04:42Z
+# command=bash -c curl -fsS --max-time 30 'https://go.dev/dl/?mode=json' | jq 'map({version,stable})'
+[
+  {
+    "version": "go1.27.1",
+    "stable": true
+  },
+  {
+    "version": "go1.26.8",
+    "stable": true
+  }
+]

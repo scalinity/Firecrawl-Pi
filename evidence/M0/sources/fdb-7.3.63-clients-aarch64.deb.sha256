@@ -1,0 +1,3 @@
+# retrieved_utc=2026-09-25T04:04:43Z
+# command=curl -fsSL --max-time 30 https://github.com/apple/foundationdb/releases/download/7.3.63/foundationdb-clients_7.3.63-1_aarch64.deb.sha256
+a3c451ddb8242cc2396ba3419e1f3c9b283a64ea2eaff555377f4503bf9c3a64  foundationdb-clients_7.3.63-1_aarch64.deb

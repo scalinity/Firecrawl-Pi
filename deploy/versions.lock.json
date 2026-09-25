@@ -1,9 +1,10 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-25T03:36:28Z",
+  "generated_utc": "2026-09-25T04:06:08Z",
   "generated_by": "scripts/m0/build-lock.mjs (M0)",
-  "repository_sha": "80ef9c75180322441336e4b710b9a913c7ca98ba",
+  "repository_sha": "84349924425385774f513e431ef38d2f46b29f3c",
   "worktree_dirty": true,
+  "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
   "firecrawl": {
     "repository": "https://github.com/firecrawl/firecrawl",
@@ -20,23 +21,28 @@
       "evidence/M0/upstream/raw/gh-ref.json",
       "evidence/M0/upstream/raw/gh-tag-object.json"
     ],
+    "verified_by": "scripts/m0/verify.mjs V05 (live)",
     "formal_release_latest": {
       "tag": "v2.11.0",
       "published_utc": "2026-06-19T15:09:30Z",
       "tag_type": "lightweight (git ls-remote returned no peeled ^{} ref)",
       "commit": "ef12eb36b2f3382838dfe0a0c1a5add3d5df7fe5",
-      "relation": "separate channel; not the pinned snapshot"
+      "relation": "separate channel; not the pinned snapshot",
+      "source": "evidence/M0/sources/firecrawl-release-latest.json",
+      "retrieved_utc": "2026-09-25T04:04:44Z"
     },
     "newer_api_image_tags": {
       "latest_observed": "v2.11.402",
-      "observed_utc": "2026-09-25T03:12:00Z",
+      "source": "evidence/M0/sources/firecrawl-tags-latest.txt",
+      "retrieved_utc": "2026-09-25T04:04:44Z",
       "status": "candidate",
       "reason": "No post-2026-07-30 Firecrawl advisory affects self-hosted v2.11.162 (evidence/M0/security-review.md §C); the self-host guide still pins v2.11.162. Not adopted."
     },
     "known_open_issues_at_pin": [
       "Transitive ip-address@6.4.0 (GHSA-mwp4-54f8-5fhr / CVE-2026-69192): octal/leading-zero IP SSRF forms; deferred upstream at every tag. Handled by the project SSRF layer (M2).",
       "Redirect-to-blocklisted-domain gap in single/batch scrape fixed after the pin in 58d0c8ebb6 (PR #4581): cherry-pick candidate for the M2 patch series.",
-      "CVE-2026-32857 redirect SSRF in the upstream Playwright service: that service is replaced by the project browser worker (M2)."
+      "CVE-2026-32857 redirect SSRF in the upstream Playwright service: that service is replaced by the project browser worker (M2).",
+      "POST /admin/integration/* proxies to integrations.firecrawl.dev without auth (evidence/M0/source-review.json S15): the gateway must never route /admin/* to the native API."
     ]
   },
   "mcp": {
@@ -44,7 +50,8 @@
       "selected": "2026-07-28",
       "verified_current_stable_utc": "2026-09-25T03:14:49Z",
       "newer_revision": "none (only the rolling draft)",
-      "compatibility_revision": "2025-11-25"
+      "compatibility_revision": "2025-11-25",
+      "source": "evidence/M0/security-review.md §A"
     },
     "packages": {
       "@modelcontextprotocol/server": {
@@ -54,12 +61,19 @@
         "dependencies": {
           "zod": "^4.2.0",
           "@modelcontextprotocol/core": "2.0.0"
-        }
+        },
+        "source": "evidence/M0/sources/npm-modelcontextprotocol_server_2.0.0.json",
+        "retrieved_utc": "2026-09-25T04:04:39Z"
       },
       "@modelcontextprotocol/core": {
         "selected": "2.0.0",
         "engines_node": ">=20",
-        "integrity": "sha512-pJCEwGG7Lfr/+PQp9ZTwKXNeO5wzbfKL7H3MYpCorM4oFBoQrdjnBgEoqG+RjhsvS1FKrDbKux+M1HhlnGWqcA=="
+        "integrity": "sha512-pJCEwGG7Lfr/+PQp9ZTwKXNeO5wzbfKL7H3MYpCorM4oFBoQrdjnBgEoqG+RjhsvS1FKrDbKux+M1HhlnGWqcA==",
+        "dependencies": {
+          "zod": "^4.2.0"
+        },
+        "source": "evidence/M0/sources/npm-modelcontextprotocol_core_2.0.0.json",
+        "retrieved_utc": "2026-09-25T04:04:40Z"
       },
       "@modelcontextprotocol/node": {
         "selected": "2.0.0",
@@ -71,8 +85,15 @@
         "peerDependencies": {
           "hono": "^4.11.4",
           "@modelcontextprotocol/server": "^2.0.0"
-        }
+        },
+        "source": "evidence/M0/sources/npm-modelcontextprotocol_node_2.0.0.json",
+        "retrieved_utc": "2026-09-25T04:04:41Z"
       }
+    },
+    "dist_tags": {
+      "latest": "2.1.0",
+      "source": "evidence/M0/sources/npm-mcp-server-dist-tags.json",
+      "retrieved_utc": "2026-09-25T04:04:41Z"
     },
     "transitive_exact_versions": {
       "status": "unresolved",
@@ -80,32 +101,37 @@
     },
     "candidate": {
       "version": "2.1.0",
-      "published": "2026-09-23",
       "server_integrity": "sha512-FdvwZU5N03O77Suh35JqjAqq5R1ZTEPFtwu6N4BgBq28qrQtrCnpbLL5U2pwYCuE194jAw0xnlOVmIqhfoYuUQ==",
+      "source": "evidence/M0/sources/npm-modelcontextprotocol_server_2.1.0.json",
+      "retrieved_utc": "2026-09-25T04:04:40Z",
       "status": "candidate",
       "reason": "2.1.0 adds a 4 MiB request-body cap and 100-message batch cap (#2698) and rejects modern requests missing MCP-Protocol-Version (#2590); 2.0.0 has neither. No GHSA exists for v2 packages. Decision D5 (separate review)."
-    },
-    "evidence": "evidence/M0/security-review.md §A-B"
+    }
   },
   "runtimes": {
     "node": {
       "selected": "22.23.3",
       "lts": "Jod",
       "released": "2026-09-23",
-      "minimum_security_patch": "22.23.2 (security release 2026-07-28)",
+      "minimum_security_patch": "22.23.2",
+      "minimum_security_patch_released": "2026-07-28",
       "image": "node:22.23.3-bookworm-slim",
-      "note": "node:22-slim resolves to the same index digest: true"
+      "same_index_digest_as": "library/node:22-slim",
+      "source": "evidence/M0/sources/nodejs-v22.json",
+      "retrieved_utc": "2026-09-25T04:04:42Z"
     },
     "go_build_stage": {
       "upstream": "golang:1.24",
       "resolves_to": "1.24.13",
-      "same_digest": true,
+      "same_index_digest_as": "library/golang:1.24",
       "supported_go_lines_observed": [
         "go1.27.1",
         "go1.26.8"
       ],
+      "source": "evidence/M0/sources/go-dl.json",
+      "retrieved_utc": "2026-09-25T04:04:42Z",
       "status": "candidate",
-      "reason": "Go 1.24 is out of upstream support; used only to build libhtml-to-markdown.so. Relevant only if the API image is built from source (decision D6); moving the build stage is decision D4."
+      "reason": "Go 1.24 is not among the supported releases go.dev lists; it builds only libhtml-to-markdown.so. Relevant only if the API image is built from source (decision D6); moving the build stage is decision D4."
     },
     "rust_toolchain": {
       "status": "unresolved",
@@ -113,7 +139,7 @@
     },
     "pnpm": {
       "upstream": "11.4.0",
-      "source": "apps/api/Dockerfile"
+      "source": "evidence/M0/upstream/findings.md (apps/api/Dockerfile)"
     }
   },
   "images": {
@@ -126,6 +152,7 @@
         "resolved_utc": "2026-09-25T03:24:25Z",
         "status": "resolved",
         "index_digest": "sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
+        "registry_reported_digest": "sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c",
         "arm64_manifest_digest": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_node_22.23.3-bookworm-slim.index.json",
@@ -141,15 +168,23 @@
         "resolved_utc": "2026-09-25T03:24:29Z",
         "status": "resolved",
         "index_digest": "sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f",
+        "registry_reported_digest": "sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f",
         "arm64_manifest_digest": "sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_postgres_17.11-trixie.index.json",
         "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_postgres_17.11-trixie.arm64.json"
       },
-      "note": "postgres:17 resolves to the same index digest: true. 17.11 (2026-08-13) fixed 28 CVEs; do not go below it.",
+      "same_index_digest_as": "library/postgres:17",
+      "note": "17.11 (2026-08-13) fixed 28 CVEs; do not go below it.",
       "pg_cron_package": {
         "name": "postgresql-17-cron",
-        "pgdg_trixie_arm64_version_observed": "1.6.8-1.pgdg13+2",
+        "pgdg_trixie_arm64_versions_observed": [
+          "1.6.8-1.pgdg13+2",
+          "1.6.8-1.pgdg13+1",
+          "1.6.7-3.pgdg13+1"
+        ],
+        "source": "evidence/M0/sources/pgdg-trixie-arm64-postgresql-17-cron.txt",
+        "retrieved_utc": "2026-09-25T04:04:43Z",
         "status": "unresolved",
         "reason": "Upstream installs it unpinned; the exact version is fixed when the M1 image is built and must be recorded then."
       }
@@ -163,18 +198,26 @@
         "resolved_utc": "2026-09-25T03:24:56Z",
         "status": "resolved",
         "index_digest": "sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0",
+        "registry_reported_digest": "sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0",
         "arm64_manifest_digest": "sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_redis_8.10.2-alpine.index.json",
         "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_redis_8.10.2-alpine.arm64.json"
       },
-      "note": "Upstream uses floating redis:alpine, which resolves to this index digest: true. 8.10.2 includes the 2026-08-17 and 2026-09-17 security releases. Bundled jemalloc is built with --with-lg-page=16 on arm64, compatible with the 16 KiB-page kernel. License: RSALv2/SSPLv1/AGPLv3 (personal use)."
+      "same_index_digest_as": "library/redis:alpine",
+      "note": "Upstream uses the floating redis:alpine tag, which resolves to this digest. 8.10.2 includes the 2026-08-17 and 2026-09-17 security releases. License: RSALv2/SSPLv1/AGPLv3 (personal use).",
+      "jemalloc_page_size": {
+        "lg_page": 16,
+        "meaning": "supports pages up to 64 KiB, including this host's 16 KiB",
+        "source": "evidence/M0/sources/redis-jemalloc-lg-page.txt",
+        "retrieved_utc": "2026-09-25T04:04:46Z"
+      }
     },
     "rabbitmq": {
       "role": "RabbitMQ (NuQ messaging)",
       "selected": {
         "status": "unresolved",
-        "reason": "Decision D3 (separate review): upstream compose pins rabbitmq:3-management (3.13.7, community support ended); 4.3.6 is the only community-supported series (until 2026-11-30). NuQ declares only quorum queues and one exclusive classic reply queue, both valid on 4.x."
+        "reason": "Decision D3 (separate review): upstream compose pins rabbitmq:3-management (3.13.7, community support ended); 4.3.6 is the only community-supported series (evidence/M0/sources/rabbitmq-release-information.txt). NuQ declares only quorum queues and one exclusive classic reply queue, both valid on 4.x."
       },
       "candidates": [
         {
@@ -184,6 +227,7 @@
           "resolved_utc": "2026-09-25T03:24:32Z",
           "status": "resolved",
           "index_digest": "sha256:87178a0ee3e2f52980ba356d38646ed1056705ff2d5ff281f8965456eaa0c1e3",
+          "registry_reported_digest": "sha256:87178a0ee3e2f52980ba356d38646ed1056705ff2d5ff281f8965456eaa0c1e3",
           "arm64_manifest_digest": "sha256:47c388129d4fc820f399d60d4e358c03a91617a657be024be7321be3387de819",
           "platform": "linux/arm64",
           "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3.13.7.index.json",
@@ -197,6 +241,7 @@
           "resolved_utc": "2026-09-25T03:31:29Z",
           "status": "resolved",
           "index_digest": "sha256:d0bffe70e755f348625415f32b0a090662e5f06b3ba3f82a4c7aaa18621b1279",
+          "registry_reported_digest": "sha256:d0bffe70e755f348625415f32b0a090662e5f06b3ba3f82a4c7aaa18621b1279",
           "arm64_manifest_digest": "sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8",
           "platform": "linux/arm64",
           "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_4.3.6.index.json",
@@ -211,10 +256,15 @@
         "resolved_utc": "2026-09-25T03:24:31Z",
         "status": "resolved",
         "index_digest": "sha256:e582c0bc7766f3342496d8485efb5a1df782b5ce3886ad017e2eaae442311f69",
+        "registry_reported_digest": "sha256:e582c0bc7766f3342496d8485efb5a1df782b5ce3886ad017e2eaae442311f69",
         "arm64_manifest_digest": "sha256:8689ddfceca1ff1ecfeaa6619cb9cfc73570cf5fa022d3d904cdb065da1f925d",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3-management.index.json",
         "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3-management.arm64.json"
+      },
+      "support_dates": {
+        "source": "evidence/M0/sources/rabbitmq-release-information.txt",
+        "retrieved_utc": "2026-09-25T04:04:45Z"
       }
     },
     "searxng": {
@@ -226,12 +276,14 @@
         "resolved_utc": "2026-09-25T03:24:35Z",
         "status": "resolved",
         "index_digest": "sha256:bcfaed4091d59f7ce85670bd701a2d0295872196dc19908a3965a8353b149f83",
+        "registry_reported_digest": "sha256:bcfaed4091d59f7ce85670bd701a2d0295872196dc19908a3965a8353b149f83",
         "arm64_manifest_digest": "sha256:0c7b839d2050617618f151c0919260c156c701a812dc6404f1114fe43a0f0710",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_searxng_searxng_2026.9.23-3cd69d30e.index.json",
         "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_searxng_searxng_2026.9.23-3cd69d30e.arm64.json"
       },
-      "note": "latest resolved to the same index digest at M0: true. Tags are date+commit; M5 may re-resolve."
+      "same_index_digest_as_at_m0": "searxng/searxng:latest",
+      "note": "Tags are date+commit; M5 may re-resolve."
     },
     "firecrawl_api_prebuilt": {
       "role": "Upstream-built API image for the pinned commit (config FIRECRAWL_BUILD_SHA=7666c1f9...)",
@@ -242,6 +294,7 @@
         "resolved_utc": "2026-09-25T03:24:36Z",
         "status": "resolved",
         "index_digest": "sha256:1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63",
+        "registry_reported_digest": "sha256:1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63",
         "arm64_manifest_digest": "sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/ghcr.io_firecrawl_firecrawl_2.11.162.index.json",
@@ -259,6 +312,7 @@
         "resolved_utc": "2026-09-25T03:24:27Z",
         "status": "resolved",
         "index_digest": "sha256:d2d2bc1c84f7e60d7d2438a3836ae7d0c847f4888464e7ec9ba3a1339a1ee804",
+        "registry_reported_digest": "sha256:d2d2bc1c84f7e60d7d2438a3836ae7d0c847f4888464e7ec9ba3a1339a1ee804",
         "arm64_manifest_digest": "sha256:ffe598dd4ba5883dba7ae18a1dfd86a508792b37d960eaae23465597b6c40346",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_golang_1.24.13.index.json",
@@ -274,6 +328,7 @@
         "resolved_utc": "2026-09-25T03:24:38Z",
         "status": "resolved",
         "index_digest": "sha256:feae0b1581609d3dc2ba22567b4703dd6a3e7a219984bb86a19ed35007148a91",
+        "registry_reported_digest": "sha256:feae0b1581609d3dc2ba22567b4703dd6a3e7a219984bb86a19ed35007148a91",
         "arm64_manifest_digest": "sha256:998ddc7cbb53705906f725ad820e0ec1b19ef3cca6506d2375dfd817817f2751",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/mcr.microsoft.com_playwright_v1.58.1-noble.index.json",
@@ -290,6 +345,7 @@
         "resolved_utc": "2026-09-25T03:24:36Z",
         "status": "resolved",
         "index_digest": "sha256:df1a393ce8bfc3801570a826a9b0dcc400ae48789adb4a0ad9d6cbf0229b059b",
+        "registry_reported_digest": "sha256:df1a393ce8bfc3801570a826a9b0dcc400ae48789adb4a0ad9d6cbf0229b059b",
         "arm64_manifest_digest": "sha256:4e2a086f8ccc33a3acc0cd2ad3ea9f6173c441c9380581aa00aae4643e4c85f3",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/ghcr.io_firecrawl_playwright-service_latest.index.json",
@@ -302,6 +358,7 @@
         "resolved_utc": "2026-09-25T03:24:37Z",
         "status": "resolved",
         "index_digest": "sha256:9b638af78d99873bc0ba2b57c9cbcd01df6ce96efeaa72d36cfbe0f76521e8fc",
+        "registry_reported_digest": "sha256:9b638af78d99873bc0ba2b57c9cbcd01df6ce96efeaa72d36cfbe0f76521e8fc",
         "arm64_manifest_digest": "sha256:13891995cfa96bcf7913177708cab7f789f3fce3f98373e8b3bd4f58708557c6",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/ghcr.io_firecrawl_nuq-postgres_latest.index.json",
@@ -316,16 +373,21 @@
     "playwright": "1.58.1",
     "chromium_revision": "1208",
     "chromium_version": "145.0.7632.6",
+    "version_source": "evidence/M0/upstream/raw/playwright-core-1.58.1-browsers.json",
     "arm64_archives": [
       {
         "name": "chromium-linux-arm64.zip",
         "bytes": 188304613,
-        "url": "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-linux-arm64.zip"
+        "url": "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-linux-arm64.zip",
+        "source": "evidence/M0/sources/playwright-chromium-1208-chromium-linux-arm64.zip.head.txt",
+        "retrieved_utc": "2026-09-25T04:04:46Z"
       },
       {
         "name": "chromium-headless-shell-linux-arm64.zip",
         "bytes": 111562127,
-        "url": "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip"
+        "url": "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip",
+        "source": "evidence/M0/sources/playwright-chromium-1208-chromium-headless-shell-linux-arm64.zip.head.txt",
+        "retrieved_utc": "2026-09-25T04:04:46Z"
       }
     ],
     "archive_sha256": {
@@ -339,6 +401,7 @@
     "candidate": {
       "playwright": "1.63.0",
       "chromium_version": "153.0.8010.12",
+      "source": "evidence/M0/security-review.md §H",
       "status": "candidate",
       "reason": "Chrome stable shipped 829 security fixes after 2026-07-30, two exploited in the wild (CVE-2026-85046 fixed in 152.0.7977.82; CVE-2026-87491 fixed in 153.0.8010.36). Even 1.63.0's build number is below 153.0.8010.36. Decision D1 (separate review)."
     }
@@ -350,27 +413,36 @@
       "bytes": 62603072,
       "sha256_published": "a3c451ddb8242cc2396ba3419e1f3c9b283a64ea2eaff555377f4503bf9c3a64",
       "sha256_source": "https://github.com/apple/foundationdb/releases/download/7.3.63/foundationdb-clients_7.3.63-1_aarch64.deb.sha256",
+      "evidence": [
+        {
+          "source": "evidence/M0/sources/fdb-7.3.63-clients-aarch64.deb.sha256",
+          "retrieved_utc": "2026-09-25T04:04:43Z"
+        },
+        {
+          "source": "evidence/M0/sources/fdb-7.3.63-clients-aarch64-asset.json",
+          "retrieved_utc": "2026-09-25T04:04:43Z"
+        }
+      ],
       "note": "Upstream downloads it without verification; a project build must check this hash. Needed at build time only; not loaded on the PostgreSQL backend."
     },
     "foundationdb_npm_addon": {
       "version": "2.0.1",
       "linux_arm64_prebuild": false,
+      "source": "evidence/M0/upstream/findings.md",
       "note": "Compiles with node-gyp on arm64; lazily required only by the fdb backend."
     }
   },
   "host_runtime": {
     "container_runtime": {
       "status": "unresolved",
-      "reason": "Nothing is installed. M1 chooses between docker-ce 5:29.8.1 / compose-plugin 5.5.1 (Docker repo) and docker.io 26.1.5 (Debian); see evidence/M0/runtime-candidates.json."
+      "reason": "Nothing is installed. M1 chooses between docker-ce 5:29.8.1-1~debian.13~trixie / compose-plugin 5.5.1-1~debian.13~trixie (Docker repository, evidence/M0/sources/docker-ce-trixie-arm64-versions.txt) and docker.io from Debian (candidate recorded in evidence/M0/audit.json section4.docker_compose_versions)."
     },
     "kernel": {
-      "release": "6.18.34+rpt-rpi-2712",
-      "page_size_bytes": 16384,
-      "images_present": [
-        "kernel_2712.img"
-      ]
+      "source": "evidence/M0/audit.json architecture"
     },
-    "os": "Debian GNU/Linux 13 (trixie) 13.5, Raspberry Pi reference 2026-06-18"
+    "os": {
+      "source": "evidence/M0/audit.json section4.distribution_version"
+    }
   },
   "patches": {
     "series": [],

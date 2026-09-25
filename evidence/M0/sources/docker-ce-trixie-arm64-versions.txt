@@ -1,0 +1,6 @@
+# retrieved_utc=2026-09-25T04:04:44Z
+# command=bash -c curl -fsS --max-time 60 https://download.docker.com/linux/debian/dists/trixie/stable/binary-arm64/Packages | awk '$1=="Package:"{p=$2} $1=="Version:"&&(p=="docker-ce"||p=="containerd.io"||p=="docker-compose-plugin"||p=="docker-buildx-plugin"){print p, $2}' | sort -V | awk '{last[$1]=$2} END{for(k in last) print k, last[k]}' | sort
+containerd.io 2.3.5-1~debian.13~trixie
+docker-buildx-plugin 0.37.1-1~debian.13~trixie
+docker-ce 5:29.8.1-1~debian.13~trixie
+docker-compose-plugin 5.5.1-1~debian.13~trixie

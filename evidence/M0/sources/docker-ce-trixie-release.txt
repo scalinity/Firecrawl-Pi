@@ -1,0 +1,5 @@
+# retrieved_utc=2026-09-25T04:04:44Z
+# command=bash -c curl -fsS --max-time 30 https://download.docker.com/linux/debian/dists/trixie/Release | grep -E '^(Suite|Codename|Date|Architectures):'
+Architectures: amd64 arm64 armhf s390x ppc64el
+Date: Wed, 23 Sep 2026 16:21:14 +0000
+Suite: trixie

@@ -1,0 +1,3 @@
+# retrieved_utc=2026-09-25T04:04:44Z
+# command=gh api repos/firecrawl/firecrawl/releases/latest --jq {tag_name,published_at}
+{"published_at":"2026-06-19T15:09:30Z","tag_name":"v2.11.0"}

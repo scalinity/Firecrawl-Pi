@@ -1,0 +1,18 @@
+# retrieved_utc=2026-09-25T04:04:41Z
+# command=npm view @modelcontextprotocol/node@2.0.0 name version engines dependencies peerDependencies dist.integrity time.modified --json
+{
+  "name": "@modelcontextprotocol/node",
+  "version": "2.0.0",
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.9"
+  },
+  "peerDependencies": {
+    "hono": "^4.11.4",
+    "@modelcontextprotocol/server": "^2.0.0"
+  },
+  "dist.integrity": "sha512-Y4hAC2XdGDUdDOCbLDOCA4+aL3NUldjsOWlDL/YwpAxrPhRm1xHd7lZ+mLacvZ9t3PaH28wgNoaLQGrIk1P2pg==",
+  "time.modified": "2026-09-23T15:45:29.521Z"
+}

@@ -1,0 +1,5 @@
+# retrieved_utc=2026-09-25T04:04:41Z
+# command=npm view @modelcontextprotocol/server dist-tags --json
+{
+  "latest": "2.1.0"
+}

@@ -1,0 +1,6 @@
+# retrieved_utc=2026-09-25T04:04:46Z
+# command=bash -c gh api repos/docker-library/redis/contents/Dockerfile.template --jq .content | base64 -D | grep -n -- '--with-lg-page'; gh api 'repos/redis/docker-library-redis/contents/alpine/Dockerfile?ref=release/8.10' --jq .content | base64 -D | grep -n -- '--with-lg-page'
+178:		amd64 | i386 | x32) extraJemallocConfigureFlags="$extraJemallocConfigureFlags --with-lg-page=12" ;; \
+179:		*) extraJemallocConfigureFlags="$extraJemallocConfigureFlags --with-lg-page=16" ;; \
+99:		amd64 | i386 | x32) extraJemallocConfigureFlags="$extraJemallocConfigureFlags --with-lg-page=12" ;; \
+100:		*) extraJemallocConfigureFlags="$extraJemallocConfigureFlags --with-lg-page=16" ;; \
