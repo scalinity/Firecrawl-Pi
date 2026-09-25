@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "fcpi.m0.audit/v1",
+  "title": "M0 read-only environment audit",
+  "description": "Every spec §4 field must be present, either observed (with value and sources) or unavailable (with a reason). Validated by scripts/m0/schema-lite.mjs, which implements only the keywords used here and rejects any other keyword.",
+  "type": "object",
+  "required": ["schema", "generated_utc", "repository_sha", "worktree_dirty", "upstream", "target", "probes", "identity", "architecture", "section4", "unavailable", "missing_utilities", "network", "derived", "plans", "source_review"],
+  "properties": {
+    "schema": { "const": "fcpi.m0.audit/v1" },
+    "generated_utc": { "$ref": "#/$defs/utc" },
+    "repository_sha": { "$ref": "#/$defs/gitsha" },
+    "worktree_dirty": { "type": "boolean" },
+    "upstream": {
+      "type": "object",
+      "required": ["repository", "tag", "commit"],
+      "properties": { "commit": { "$ref": "#/$defs/gitsha" }, "tag": { "type": "string", "minLength": 1 } }
+    },
+    "target": { "type": "object", "required": ["ssh", "resolved_address"] },
+    "probes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "script", "script_sha256", "output", "output_sha256"],
+        "properties": { "script_sha256": { "$ref": "#/$defs/sha256" }, "output_sha256": { "$ref": "#/$defs/sha256" } }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "required": ["model", "hostname", "ssh_user", "docker_group_member", "sudo_passwordless", "board_serial_sha256", "machine_id_sha256", "mac_sha256"],
+      "properties": {
+        "model": { "type": "string", "pattern": "^Raspberry Pi 5 " },
+        "board_serial_sha256": { "$ref": "#/$defs/sha256" },
+        "machine_id_sha256": { "$ref": "#/$defs/sha256" },
+        "mac_sha256": { "type": "object", "minProperties": 1, "additionalProperties": { "$ref": "#/$defs/sha256" } }
+      }
+    },
+    "architecture": {
+      "type": "object",
+      "required": ["uname_m", "dpkg_architecture", "long_bit", "page_size_bytes", "kernel_release"],
+      "properties": {
+        "uname_m": { "type": "string" },
+        "dpkg_architecture": { "type": "string" },
+        "long_bit": { "type": "integer" },
+        "page_size_bytes": { "type": "integer", "minimum": 4096 }
+      }
+    },
+    "section4": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["distribution_version", "uname_m", "kernel", "cpu_ram", "cgroup_support", "swap_zram", "mounts", "block_devices", "filesystem_types", "docker_root_data_dirs", "available_disk_inodes", "docker_compose_versions", "running_containers_services", "listening_ports", "hostname", "dns", "firewall_backend_rules", "tailscale_state", "reverse_proxies", "thermal_sensors", "power_throttling", "current_workload_usage"],
+      "properties": {
+        "distribution_version": { "$ref": "#/$defs/field" },
+        "uname_m": { "$ref": "#/$defs/field" },
+        "kernel": { "$ref": "#/$defs/field" },
+        "cpu_ram": { "$ref": "#/$defs/field" },
+        "cgroup_support": { "$ref": "#/$defs/field" },
+        "swap_zram": { "$ref": "#/$defs/field" },
+        "mounts": { "$ref": "#/$defs/field" },
+        "block_devices": { "$ref": "#/$defs/field" },
+        "filesystem_types": { "$ref": "#/$defs/field" },
+        "docker_root_data_dirs": { "$ref": "#/$defs/field" },
+        "available_disk_inodes": { "$ref": "#/$defs/field" },
+        "docker_compose_versions": { "$ref": "#/$defs/field" },
+        "running_containers_services": { "$ref": "#/$defs/field" },
+        "listening_ports": { "$ref": "#/$defs/field" },
+        "hostname": { "$ref": "#/$defs/field" },
+        "dns": { "$ref": "#/$defs/field" },
+        "firewall_backend_rules": { "$ref": "#/$defs/field" },
+        "tailscale_state": { "$ref": "#/$defs/field" },
+        "reverse_proxies": { "$ref": "#/$defs/field" },
+        "thermal_sensors": { "$ref": "#/$defs/field" },
+        "power_throttling": { "$ref": "#/$defs/field" },
+        "current_workload_usage": { "$ref": "#/$defs/field" }
+      }
+    },
+    "unavailable": {
+      "type": "array",
+      "items": { "type": "object", "required": ["field", "reason"], "properties": { "reason": { "type": "string", "minLength": 1 } } }
+    },
+    "missing_utilities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
+    "network": { "type": "object", "required": ["default_route", "lan_block", "egress_ip_differs_from_interface"] },
+    "derived": {
+      "type": "object",
+      "required": ["resource_fit", "free_space"],
+      "properties": {
+        "resource_fit": { "type": "object", "required": ["mem_total_mib", "mem_available_mib", "existing_usage_mib", "cap_sum_mib", "reserve_mib", "required_mib", "headroom_mib", "fits"] },
+        "free_space": { "type": "object", "required": ["root_avail_bytes", "root_avail_gib", "threshold_gib", "meets_threshold"] }
+      }
+    },
+    "plans": {
+      "type": "object",
+      "required": ["ports", "storage"],
+      "properties": {
+        "ports": {
+          "type": "object",
+          "required": ["host_published", "container_internal_not_published", "docker_networks"],
+          "properties": {
+            "host_published": {
+              "type": "array",
+              "minItems": 1,
+              "items": { "type": "object", "required": ["service", "bind", "port", "proto", "chosen_by"], "properties": { "port": { "type": "integer", "minimum": 1 }, "proto": { "enum": ["tcp", "udp"] } } }
+            }
+          }
+        },
+        "storage": { "type": "object", "required": ["data_filesystem_uuid", "data_directory"], "properties": { "data_filesystem_uuid": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" } } }
+      }
+    },
+    "source_review": { "type": "object", "required": ["schema", "tree", "facts"] }
+  },
+  "$defs": {
+    "utc": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$" },
+    "gitsha": { "type": "string", "pattern": "^[0-9a-f]{40}$" },
+    "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "field": {
+      "anyOf": [
+        {
+          "type": "object",
+          "required": ["status", "sources", "value"],
+          "properties": {
+            "status": { "const": "observed" },
+            "sources": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
+            "value": { "type": ["object", "array", "string", "number", "boolean"] }
+          }
+        },
+        {
+          "type": "object",
+          "required": ["status", "sources", "reason"],
+          "properties": {
+            "status": { "const": "unavailable" },
+            "sources": { "type": "array", "items": { "type": "string" } },
+            "reason": { "type": "string", "minLength": 1 }
+          }
+        }
+      ]
+    }
+  }
+}

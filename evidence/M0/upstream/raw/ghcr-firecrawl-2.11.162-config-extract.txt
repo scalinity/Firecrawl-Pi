@@ -1,0 +1,32 @@
+manifest sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af config sha256:ca1ddd43f6a9791d9f8720a2a9fecfedf34f70079986d1ecc4913ae159054684
+{
+  "architecture": "arm64",
+  "os": "linux",
+  "created": "2026-07-30T20:43:18.027095098Z",
+  "labels": null,
+  "env": [
+    "NODE_VERSION=22.23.2",
+    "FIRECRAWL_BUILD_SHA=7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
+  ],
+  "cmd": [
+    "node",
+    "dist/src/harness.js",
+    "--start-docker"
+  ]
+}
+manifest sha256:cc27dadc6eb259b077fcd478df794cd2d41c51616599c0ca161055a587bcc95c config sha256:c77d00ff71309c14c118b235d371f41a700346a44d34df3d92071a91c2afc529
+{
+  "architecture": "amd64",
+  "os": "linux",
+  "created": "2026-07-30T20:41:18.560928766Z",
+  "labels": null,
+  "env": [
+    "NODE_VERSION=22.23.2",
+    "FIRECRAWL_BUILD_SHA=7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
+  ],
+  "cmd": [
+    "node",
+    "dist/src/harness.js",
+    "--start-docker"
+  ]
+}

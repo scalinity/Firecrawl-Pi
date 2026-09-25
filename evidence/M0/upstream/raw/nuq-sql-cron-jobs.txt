@@ -1,0 +1,36 @@
+123:SELECT cron.schedule('nuq_queue_scrape_clean_completed', '*/5 * * * *', $$
+127:SELECT cron.schedule('nuq_queue_scrape_clean_failed', '*/5 * * * *', $$
+131:SELECT cron.schedule('nuq_queue_scrape_lock_reaper', '15 seconds', $$
+137:SELECT cron.schedule('nuq_queue_scrape_backlog_reaper', '* * * * *', $$
+151:SELECT cron.schedule('nuq_reindex_queue_scrape_pkey',                   '0 2 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.queue_scrape_pkey;$$);
+152:SELECT cron.schedule('nuq_reindex_queue_scrape_active_locked_at',       '20 2 * * *', $$REINDEX INDEX CONCURRENTLY nuq.queue_scrape_active_locked_at_idx;$$);
+153:SELECT cron.schedule('nuq_reindex_queue_scrape_queued_optimal_2',       '40 2 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_queued_optimal_2_idx;$$);
+154:SELECT cron.schedule('nuq_reindex_queue_scrape_failed_created_at',      '0 3 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_failed_created_at_idx;$$);
+155:SELECT cron.schedule('nuq_reindex_queue_scrape_group_owner_mode',       '40 3 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_group_owner_mode_idx;$$);
+156:SELECT cron.schedule('nuq_reindex_queue_scrape_group_mode_status',      '0 4 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_group_mode_status_idx;$$);
+157:SELECT cron.schedule('nuq_reindex_queue_scrape_group_completed_listing','20 4 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_group_completed_listing_idx;$$);
+158:SELECT cron.schedule('nuq_reindex_queue_scrape_group_status',           '40 4 * * *', $$REINDEX INDEX CONCURRENTLY nuq.idx_queue_scrape_group_status;$$);
+160:SELECT cron.schedule('nuq_reindex_queue_scrape_backlog_pkey',           '0 5 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.queue_scrape_backlog_pkey;$$);
+161:SELECT cron.schedule('nuq_reindex_queue_scrape_backlog_owner_id',       '20 5 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_backlog_owner_id_idx;$$);
+162:SELECT cron.schedule('nuq_reindex_queue_scrape_backlog_group_mode',     '40 5 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_backlog_group_mode_idx;$$);
+163:SELECT cron.schedule('nuq_reindex_queue_scrape_backlog_group_id',       '0 6 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.idx_queue_scrape_backlog_group_id;$$);
+164:SELECT cron.schedule('nuq_reindex_queue_scrape_backlog_times_out_at',   '20 6 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_backlog_times_out_at_idx;$$);
+166:SELECT cron.schedule('nuq_reindex_queue_scrape_completed_standalone',   '40 6 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_completed_standalone_created_at_idx;$$);
+167:SELECT cron.schedule('nuq_reindex_queue_scrape_failed_standalone',      '40 8 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_failed_standalone_created_at_idx;$$);
+168:SELECT cron.schedule('nuq_reindex_queue_scrape_group_id',               '40 9 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_scrape_group_id_idx;$$);
+176:SELECT cron.schedule('nuq_maintenance_watchdog', '* * * * *', $$
+222:SELECT cron.schedule('nuq_queue_crawl_finished_clean_completed', '*/5 * * * *', $$
+226:SELECT cron.schedule('nuq_queue_crawl_finished_clean_failed', '*/5 * * * *', $$
+230:SELECT cron.schedule('nuq_queue_crawl_finished_lock_reaper', '15 seconds', $$
+238:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_pkey',                 '0 7 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.queue_crawl_finished_pkey;$$);
+239:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_active_locked_at',     '20 7 * * *', $$REINDEX INDEX CONCURRENTLY nuq.queue_crawl_finished_active_locked_at_idx;$$);
+240:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_queued_optimal_2',     '40 7 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_crawl_finished_queued_optimal_2_idx;$$);
+241:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_failed_created_at',    '0 8 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_crawl_finished_failed_created_at_idx;$$);
+242:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_completed_created_at', '20 8 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_crawl_finished_completed_created_at_idx;$$);
+244:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_completed_standalone', '0 9 * * *',   $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_crawl_finished_completed_standalone_created_at_idx;$$);
+245:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_failed_standalone',    '20 9 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_crawl_finished_failed_standalone_created_at_idx;$$);
+246:SELECT cron.schedule('nuq_reindex_queue_crawl_finished_group_id',             '0 10 * * *',  $$REINDEX INDEX CONCURRENTLY nuq.nuq_queue_crawl_finished_group_id_idx;$$);
+247:SELECT cron.schedule('nuq_reindex_group_crawl_completed_expires_at',          '20 10 * * *', $$REINDEX INDEX CONCURRENTLY nuq.nuq_group_crawl_completed_expires_at_idx;$$);
+270:SELECT cron.schedule('nuq_group_crawl_finished', '15 seconds', $$
+301:SELECT cron.schedule('nuq_group_crawl_clean', '* * * * *', $$
+329:SELECT cron.schedule('cron_job_run_details_prune', '0 * * * *', $$

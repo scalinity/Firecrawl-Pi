@@ -1,0 +1,108 @@
+{
+  "schema": "fcpi.m0.source-review/v1",
+  "reviewed_utc": "2026-09-25T03:40:00Z",
+  "tree": {
+    "repository": "https://github.com/firecrawl/firecrawl",
+    "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+    "method": "shallow fetch of the pinned commit into a session scratchpad (not the repository); read-only",
+    "detail": "evidence/M0/upstream/findings.md"
+  },
+  "facts": [
+    {
+      "id": "S01-nuq-postgres",
+      "claim": "NuQ PostgreSQL is postgres:${PG_MAJOR} with PG_MAJOR=17, pg_cron from the unpinned Debian package postgresql-17-cron, shared_preload_libraries='pg_cron' and cron.database_name='postgres' written into postgresql.conf.sample, and nuq.sql copied to /docker-entrypoint-initdb.d/010-nuq.sql.",
+      "cite": ["apps/nuq-postgres/Dockerfile:3-4", "apps/nuq-postgres/Dockerfile:10", "apps/nuq-postgres/Dockerfile:15-18", "apps/nuq-postgres/Dockerfile:21"],
+      "verified_by": "direct read in this session"
+    },
+    {
+      "id": "S02-postgres-db",
+      "claim": "POSTGRES_DB must remain 'postgres': nuq.sql runs CREATE EXTENSION pg_cron in $POSTGRES_DB, and pg_cron can only be created in cron.database_name='postgres'. Upstream SELF_HOST.md suggests POSTGRES_DB=firecrawl, which conflicts.",
+      "cite": ["apps/nuq-postgres/nuq.sql:2", "SELF_HOST.md:104", "docker-compose.yaml:30", "apps/api/src/config.ts:136"],
+      "verified_by": "subagent read; pg_cron database rule from pg_cron documentation, not executed"
+    },
+    {
+      "id": "S03-nuq-schema",
+      "claim": "nuq.sql creates extensions pgcrypto and pg_cron, schema nuq with tables queue_scrape, queue_scrape_backlog, queue_crawl_finished, group_crawl, and 36 pg_cron jobs (15-second lock reapers and group finisher, 5-minute cleaners, nightly REINDEX CONCURRENTLY, hourly job_run_details prune). Group rows expire with ttl default 86400000 ms, so NuQ is not durable result storage.",
+      "cite": ["apps/nuq-postgres/nuq.sql", "evidence/M0/upstream/raw/nuq-sql-cron-jobs.txt"],
+      "verified_by": "subagent read"
+    },
+    {
+      "id": "S04-nuq-wal",
+      "claim": "nuq.sql applies ALTER SYSTEM max_wal_size=16GB, min_wal_size=4GB, checkpoint_timeout=15min, wal_buffers=64MB. On a 64 GB microSD this pre-allocates up to 4 GB of WAL and permits 16 GB; M1 must override WAL sizing in project configuration.",
+      "cite": ["apps/nuq-postgres/nuq.sql:8-32"],
+      "verified_by": "direct read in this session (lines 8-14)"
+    },
+    {
+      "id": "S05-harness-worker-count",
+      "claim": "harness.ts reads NUQ_WORKER_COUNT from config (default 5, not set in Compose) and spawns that many nuq-worker children.",
+      "cite": ["apps/api/src/harness.ts:118", "apps/api/src/harness.ts:865", "apps/api/src/config.ts:231"],
+      "verified_by": "direct read in this session"
+    },
+    {
+      "id": "S06-harness-processes",
+      "claim": "With NUQ_WORKER_COUNT=1, the PostgreSQL backend and USE_DB_AUTHENTICATION=false, the harness spawns api, worker (queue-worker), extract-worker, nuq-worker-0, nuq-prefetch-worker and nuq-reconciler: 7 Node processes including the harness. Each child is started via spawn('sh', ['-c', cmd]); whether the sh wrappers stay resident (up to 13 processes) is measured in M1. index-worker is added only when USE_DB_AUTHENTICATION is true.",
+      "cite": ["apps/api/src/harness.ts:264", "apps/api/src/harness.ts:865", "apps/api/src/harness.ts:910"],
+      "verified_by": "subagent read; process count to be measured in M1"
+    },
+    {
+      "id": "S07-scrape-max-attempts",
+      "claim": "SCRAPE_MAX_ATTEMPTS exists with default 6 and is consumed in scrapeURL.",
+      "cite": ["apps/api/src/config.ts:213", "apps/api/src/scraper/scrapeURL/index.ts:1223"],
+      "verified_by": "config.ts line read directly; consumer line from subagent"
+    },
+    {
+      "id": "S08-agent-auth-metadata",
+      "claim": "AGENT_AUTH_RESOURCE_METADATA_URL defaults to https://www.firecrawl.dev/.well-known/oauth-protected-resource and is sent to clients in 401 WWW-Authenticate headers (not fetched server-side).",
+      "cite": ["apps/api/src/config.ts:129-131"],
+      "verified_by": "direct read of the definition line; usage from subagent"
+    },
+    {
+      "id": "S09-api-image-build",
+      "claim": "apps/api/Dockerfile stages: node:22-slim AS base, golang:1.24 AS go-build (libhtml-to-markdown.so, c-shared), base AS build (rustup default stable toolchain builds native/ crate firecrawl_rs during pnpm install; no Cargo.lock, git dependencies on branches), base AS runtime. The FoundationDB client 7.3.63 .deb is downloaded without a checksum, with arm64 mapped to aarch64; the aarch64 asset exists in the apple/foundationdb 7.3.63 release. The foundationdb npm addon has no linux-arm64 prebuild and compiles with node-gyp; it is only required lazily by the fdb backend.",
+      "cite": ["apps/api/Dockerfile:2", "apps/api/Dockerfile:11", "apps/api/Dockerfile:19", "apps/api/Dockerfile:30-37", "apps/api/Dockerfile:73", "apps/api/Dockerfile:82-88", "apps/api/src/services/nuq-fdb/client.ts:5-13", "evidence/M0/upstream/raw/fdb-7.3.63-release-assets.txt"],
+      "verified_by": "FROM and FDB lines read directly; remainder from subagent"
+    },
+    {
+      "id": "S10-prebuilt-api-image",
+      "claim": "ghcr.io/firecrawl/firecrawl:2.11.162 is published for linux/amd64 and linux/arm64; the arm64 image config records FIRECRAWL_BUILD_SHA=7666c1f9ae8720a6bba271e0f60b6a217f8a5210 and NODE_VERSION=22.23.2, created 2026-07-30T20:43:18Z.",
+      "cite": ["evidence/M0/registry/digests.jsonl", "evidence/M0/upstream/raw/ghcr-firecrawl-2.11.162-config-extract.txt"],
+      "verified_by": "digest resolved in this session; config extract from subagent"
+    },
+    {
+      "id": "S11-playwright-chromium",
+      "claim": "apps/playwright-service-ts resolves playwright and playwright-core 1.58.1, whose browsers.json pins chromium and chromium-headless-shell revision 1208 (browserVersion 145.0.7632.6). Playwright's registry maps debian11/12/13 and ubuntu arm64 hosts to builds/chromium/1208/chromium-linux-arm64.zip; both arm64 archives exist on cdn.playwright.dev (188304613 and 111562127 bytes).",
+      "cite": ["apps/playwright-service-ts/Dockerfile:1", "apps/playwright-service-ts/Dockerfile:18", "evidence/M0/upstream/raw/playwright-core-1.58.1-browsers.json", "evidence/M0/upstream/raw/playwright-core-1.58.1-chromium-downloadpaths.txt"],
+      "verified_by": "browsers.json read directly from the npm tarball; CDN HEAD checks in this session"
+    },
+    {
+      "id": "S12-upstream-browser-flags",
+      "claim": "The upstream Playwright service launches Chromium with --no-sandbox --disable-setuid-sandbox --no-zygote and MAX_CONCURRENT_PAGES default 10. The project browser worker must not inherit either (CLAUDE.md section 14).",
+      "cite": ["apps/playwright-service-ts/api.ts:190-201"],
+      "verified_by": "subagent read"
+    },
+    {
+      "id": "S13-compose-baseline",
+      "claim": "Root docker-compose.yaml (blob e2ade0104390caf31cdcae04faa619c2674dc693): api and playwright-service built from source; redis:alpine with --bind 0.0.0.0; rabbitmq:3-management; nuq-postgres built from source; foundationdb and foundationdb-init (foundationdb/foundationdb:7.3.63) always start; the API port is published on all interfaces; postgres, redis and rabbitmq have no named volumes; NUQ_WORKER_COUNT is not set.",
+      "cite": ["docker-compose.yaml"],
+      "verified_by": "blob hash verified in this session; service detail from subagent"
+    },
+    {
+      "id": "S14-rabbitmq-declarations",
+      "claim": "Core RabbitMQ declarations use durable quorum queues (extract-queue, monitoring queue, nuq prefetch) and one exclusive, auto-delete, non-durable classic reply queue in nuq.ts. None is a transient non-exclusive queue, the queue type RabbitMQ 4.x deprecates.",
+      "cite": ["apps/api/src/services/extract-queue.ts:36-48", "apps/api/src/services/monitoring/queue.ts:63-73", "apps/api/src/services/worker/nuq.ts:133-140", "apps/api/src/services/worker/nuq.ts:334-337"],
+      "verified_by": "direct read in this session"
+    },
+    {
+      "id": "S15-cloud-destinations",
+      "claim": "Reachable Firecrawl Cloud call: POST /admin/integration/{create-user,validate-api-key,rotate-api-key} proxies to https://integrations.firecrawl.dev and is mounted without the BULL_AUTH_KEY guard, so any client of the native API port can make the self-host call Firecrawl Cloud. Other Firecrawl hosts in apps/api/src are defaults or strings not fetched in the selected configuration (FIRECRAWL_DASHBOARD_URL, AGENT_AUTH_RESOURCE_METADATA_URL, OAuth audience api.firecrawl.dev, mcp.firecrawl.dev allow-list, parse.firecrawl.dev label). Search silently falls back to DuckDuckGo when SearXNG is unset or empty. The gateway must never route /admin/* to the native API, and the egress policy must deny *.firecrawl.dev.",
+      "cite": ["apps/api/src/lib/admin-integration-integrations-proxy.ts:26", "apps/api/src/routes/admin.ts:103-116", "apps/api/src/search/v2/index.ts:69-77", "evidence/M0/upstream/raw/cloud-destinations-grep.txt"],
+      "verified_by": "admin routes read directly; remainder from subagent"
+    },
+    {
+      "id": "S16-jemalloc",
+      "claim": "No jemalloc/mimalloc/tikv-jemallocator reference exists anywhere in the pinned tree, lockfiles included. The Redis 7.x and 8.10 official image builds configure bundled jemalloc with --with-lg-page=16 on every non-x86 architecture, which supports this host's 16 KiB pages.",
+      "cite": ["git grep -i jemalloc (no matches)", "https://github.com/docker-library/redis/blob/master/Dockerfile.template#L171-L184", "https://github.com/redis/docker-library-redis/blob/release/8.10/alpine/Dockerfile#L92-L104"],
+      "verified_by": "direct grep and gh api reads in this session"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+./apps/api/Dockerfile:2:FROM node:22-slim AS base
+./apps/api/Dockerfile:11:FROM golang:1.24 AS go-build
+./apps/api/Dockerfile:19:FROM base AS build
+./apps/api/Dockerfile:32:ARG FDB_VERSION=7.3.63
+./apps/api/Dockerfile:64:ARG GIT_SHA=unknown
+./apps/api/Dockerfile:73:FROM base AS runtime
+./apps/api/Dockerfile:83:ARG FDB_VERSION=7.3.63
+./apps/api/Dockerfile:92:ARG GIT_SHA=unknown
+./apps/redis/Dockerfile:1:ARG REDIS_VERSION=8.0.3
+./apps/redis/Dockerfile:2:FROM bitnami/redis:${REDIS_VERSION}
+./apps/playwright-service-ts/Dockerfile:1:FROM node:22-slim
+./apps/playwright-service-ts/Dockerfile:25:ARG PORT
+./apps/nuq-postgres/Dockerfile:3:ARG PG_MAJOR=17
+./apps/nuq-postgres/Dockerfile:4:FROM postgres:${PG_MAJOR}
+./apps/go-html-to-md-service/Dockerfile:2:FROM golang:1.23-alpine AS builder
+./apps/go-html-to-md-service/Dockerfile:23:FROM alpine:latest

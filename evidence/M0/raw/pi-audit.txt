@@ -1,0 +1,652 @@
+### probe_time
+2026-09-25T03:18:44Z
+### proc_modules_load_order
+1 tcp_diag
+2 inet_diag
+3 binfmt_misc
+4 brcmfmac_cyw
+5 vc4
+6 brcmfmac
+7 snd_soc_hdmi_codec
+8 drm_exec
+9 drm_display_helper
+10 ch341
+11 cec
+12 usbserial
+module inet_diag loaded=yes module_file=/lib/modules/6.18.34+rpt-rpi-2712/kernel/net/ipv4/inet_diag.ko.xz builtin=0
+module tcp_diag loaded=yes module_file=/lib/modules/6.18.34+rpt-rpi-2712/kernel/net/ipv4/tcp_diag.ko.xz builtin=0
+module udp_diag loaded=no module_file=none builtin=0
+module raw_diag loaded=no module_file=none builtin=0
+module unix_diag loaded=no module_file=none builtin=0
+### identity
+model=Raspberry Pi 5 Model B Rev 1.1
+Model		: Raspberry Pi 5 Model B Rev 1.1
+Revision	: d04171
+hostname=pi
+etc_hostname=pi
+user=danny
+id=uid=1000(danny) gid=1000(danny) groups=1000(danny),4(adm),20(dialout),24(cdrom),27(sudo),29(audio),44(video),46(plugdev),60(games),100(users),102(netdev),986(gpio),988(i2c),989(spi),992(render),996(input),1001(lpadmin)
+sudo_passwordless=yes
+linger=no
+### architecture
+uname_m=aarch64
+uname_a=Linux pi 6.18.34+rpt-rpi-2712 #1 SMP PREEMPT Debian 1:6.18.34-1+rpt1 (2026-06-09) aarch64 GNU/Linux
+uname_r=6.18.34+rpt-rpi-2712
+dpkg_arch=arm64
+dpkg_foreign=armhf 
+long_bit=64
+page_size=16384
+binfmt_entries=python3.13 register status 
+### os
+PRETTY_NAME="Debian GNU/Linux 13 (trixie)"
+NAME="Debian GNU/Linux"
+VERSION_ID="13"
+VERSION="13 (trixie)"
+VERSION_CODENAME=trixie
+DEBIAN_VERSION_FULL=13.5
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+debian_version=13.5
+rpi_issue: Raspberry Pi reference 2026-06-18
+rpi_issue: Generated using pi-gen, https://github.com/RPi-Distro/pi-gen, ca8aeed0ae300c2a89f55ce9617d5f96a27e99e5, stage2
+timezone=America/New_York
+timesync_synchronized_flag=present
+### kernel_config
+source=/boot/config-6.18.34+rpt-rpi-2712
+CONFIG_PSI=y
+CONFIG_CGROUPS=y
+CONFIG_MEMCG=y
+CONFIG_BLK_CGROUP=y
+CONFIG_CGROUP_SCHED=y
+CONFIG_CFS_BANDWIDTH=y
+CONFIG_CGROUP_PIDS=y
+CONFIG_CGROUP_FREEZER=y
+CONFIG_CPUSETS=y
+CONFIG_CGROUP_DEVICE=y
+CONFIG_CGROUP_CPUACCT=y
+CONFIG_CGROUP_BPF=y
+CONFIG_USER_NS=y
+CONFIG_PID_NS=y
+CONFIG_NET_NS=y
+CONFIG_ARM64_16K_PAGES=y
+CONFIG_ARM64_VA_BITS=47
+CONFIG_SECCOMP=y
+CONFIG_SECCOMP_FILTER=y
+CONFIG_NF_NAT=m
+CONFIG_NF_TABLES=m
+CONFIG_NETFILTER_XT_MATCH_ADDRTYPE=m
+CONFIG_IP_NF_IPTABLES=m
+CONFIG_BRIDGE=m
+CONFIG_VETH=m
+CONFIG_OVERLAY_FS=m
+### cpu
+nproc=4
+Architecture:                            aarch64
+CPU(s):                                  4
+Vendor ID:                               ARM
+Model name:                              Cortex-A76
+Thread(s) per core:                      1
+Core(s) per cluster:                     4
+Socket(s):                               -
+CPU(s) scaling MHz:                      75%
+CPU max MHz:                             2400.0000
+CPU min MHz:                             1500.0000
+Flags:                                   fp asimd evtstrm aes pmull sha1 sha2 crc32 atomics fphp asimdhp cpuid asimdrdm lrcpc dcpop asimddp
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor: ondemand
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq: 1800000
+/sys/devices/system/cpu/cpu0/cpufreq/scaling_max_freq: 2400000
+/sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_max_freq: 2400000
+loadavg=0.05 0.09 0.03 1/189 420961
+uptime_s=200757.08
+### meminfo
+MemTotal:        8255888 kB
+MemFree:         7557152 kB
+MemAvailable:    7925904 kB
+Buffers:           89328 kB
+Cached:           337840 kB
+SwapCached:            0 kB
+Active:           363808 kB
+Inactive:         168656 kB
+Active(anon):     113744 kB
+Inactive(anon):        0 kB
+Active(file):     250064 kB
+Inactive(file):   168656 kB
+Unevictable:           0 kB
+Mlocked:               0 kB
+SwapTotal:       2097136 kB
+SwapFree:        2097136 kB
+Zswap:                 0 kB
+Zswapped:              0 kB
+Dirty:              1968 kB
+Writeback:             0 kB
+AnonPages:        106768 kB
+Mapped:            71888 kB
+Shmem:              8288 kB
+KReclaimable:      22704 kB
+Slab:              69056 kB
+SReclaimable:      22704 kB
+SUnreclaim:        46352 kB
+KernelStack:        3104 kB
+PageTables:         6736 kB
+SecPageTables:       112 kB
+NFS_Unstable:          0 kB
+Bounce:                0 kB
+WritebackTmp:          0 kB
+CommitLimit:     6225072 kB
+Committed_AS:     385040 kB
+VmallocTotal:   68447887360 kB
+VmallocUsed:       50416 kB
+VmallocChunk:          0 kB
+Percpu:              960 kB
+CmaTotal:          65536 kB
+CmaFree:           56320 kB
+Balloon:               0 kB
+### free
+               total        used        free      shared  buff/cache   available
+Mem:      8454029312   338313216  7738114048     8486912   460668928  8115716096
+Swap:     2147467264           0  2147467264
+### vm_sysctl
+vm.swappiness=UNAVAILABLE
+vm.overcommit_memory=UNAVAILABLE
+vm.min_free_kbytes=UNAVAILABLE
+vm.dirty_ratio=UNAVAILABLE
+vm.dirty_background_ratio=UNAVAILABLE
+kernel.unprivileged_userns_clone=UNAVAILABLE
+user.max_user_namespaces=UNAVAILABLE
+kernel.apparmor_restrict_unprivileged_userns=UNAVAILABLE
+net.ipv4.ip_forward=UNAVAILABLE
+net.ipv4.ip_local_port_range=UNAVAILABLE
+net.ipv6.conf.all.disable_ipv6=UNAVAILABLE
+net.ipv6.conf.all.forwarding=UNAVAILABLE
+### pressure
+cpu UNAVAILABLE
+memory UNAVAILABLE
+io UNAVAILABLE
+### cgroup
+fstype=cgroup2fs
+controllers=cpuset cpu io pids
+subtree_control=cpu pids
+system_slice_subtree_control=pids
+--- /proc/cgroups
+#subsys_name	hierarchy	num_cgroups	enabled
+cpuset	0	48	1
+cpu	0	48	1
+cpuacct	0	48	1
+blkio	0	48	1
+devices	0	48	1
+freezer	0	48	1
+net_cls	0	48	1
+perf_event	0	48	1
+net_prio	0	48	1
+pids	0	48	1
+### cmdline
+reboot=w coherent_pool=1M 8250.nr_uarts=1 pci=pcie_bus_safe cgroup_disable=memory numa_policy=interleave nvme.max_host_mem_size_mb=32  numa=fake=8 system_heap.max_order=0 iommu_dma_numa_policy=interleave smsc95xx.macaddr=MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e vc_mem.mem_base=0x3fc00000 vc_mem.mem_size=0x40000000  console=ttyAMA10,115200 console=tty1 root=PARTUUID=29680333-02 rootfstype=ext4 fsck.repair=yes rootwait ds=nocloud;i=rpi-imager-1783604012859 cfg80211.ieee80211_regdom=US
+
+### unit_memory
+system.slice current=NA peak=NA anon=NA file=NA
+user.slice current=NA peak=NA anon=NA file=NA
+init.scope current=NA peak=NA anon=NA file=NA
+system.slice/NetworkManager.service current=NA peak=NA anon=NA file=NA
+system.slice/airdb.service current=NA peak=NA anon=NA file=NA
+system.slice/airlogger.service current=NA peak=NA anon=NA file=NA
+system.slice/airmonitor.service current=NA peak=NA anon=NA file=NA
+system.slice/avahi-daemon.service current=NA peak=NA anon=NA file=NA
+system.slice/cron.service current=NA peak=NA anon=NA file=NA
+system.slice/dbus.service current=NA peak=NA anon=NA file=NA
+system.slice/dnscrypt-proxy.service current=NA peak=NA anon=NA file=NA
+system.slice/fail2ban.service current=NA peak=NA anon=NA file=NA
+system.slice/mosquitto.service current=NA peak=NA anon=NA file=NA
+system.slice/pihole-FTL.service current=NA peak=NA anon=NA file=NA
+system.slice/ssh.service current=NA peak=NA anon=NA file=NA
+system.slice/systemd-journald.service current=NA peak=NA anon=NA file=NA
+system.slice/systemd-logind.service current=NA peak=NA anon=NA file=NA
+system.slice/systemd-timesyncd.service current=NA peak=NA anon=NA file=NA
+system.slice/systemd-udevd.service current=NA peak=NA anon=NA file=NA
+system.slice/wpa_supplicant.service current=NA peak=NA anon=NA file=NA
+user.slice/user-1000.slice current=NA peak=NA anon=NA file=NA
+### processes_top_rss
+    PID    PPID USER       RSS    VSZ %CPU COMMAND
+    983       1 danny    29888 270560  0.2 python
+    937       1 root     29760 430480  0.0 fail2ban-server
+    981       1 danny    25360  36400  0.0 python
+    648       1 root     21424 342864  0.0 NetworkManager
+    982       1 danny    19136  32544  0.0 python
+    936       1 _dnscry+ 18272 1903984 0.0 dnscrypt-proxy
+      1       0 root     15632  25712  0.1 systemd
+    282       1 root     14464  57936  0.0 systemd-journal
+    969       1 pihole   13696 143056  0.0 pihole-FTL
+ 420808       1 danny    12864  23232  1.4 systemd
+    651       1 root     12336  18848  0.0 wpa_supplicant
+ 420847     977 root     11616  21840  0.9 sshd-session
+    959       1 mosquit+ 11504  16336  0.0 mosquitto
+    325       1 root     10816  35680  0.0 systemd-udevd
+    599       1 root      9440  19648  0.0 systemd-logind
+ 420855  420847 danny     8752  22736  0.0 sshd-session
+    303       1 systemd+  8016  92448  0.0 systemd-timesyn
+    977       1 root      7888  11696  0.0 sshd
+    597       1 message+  4896   8656  0.0 dbus-daemon
+ 420810  420808 danny     4720  24496  0.0 (sd-pam)
+    595       1 avahi     3728   6064  0.0 avahi-daemon
+ 420856  420855 danny     3648   7520  2.5 bash
+ 421166  420857 danny     3536   6224  0.0 ps
+    596       1 root      2960   7184  0.0 cron
+ 420857  420856 danny     2864   7520  5.7 bash
+    954       1 root      2608   7888  0.0 agetty
+    615     595 avahi     1888   5888  0.0 avahi-daemon
+ 421167  420857 danny     1360   2464  0.0 head
+      2       0 root         0      0  0.0 kthreadd
+### services_all
+airdb.service loaded active running
+airlogger.service loaded active running
+airmonitor.service loaded active running
+alsa-restore.service loaded active exited
+alsa-state.service loaded inactive dead
+apparmor.service loaded inactive dead
+apt-daily-upgrade.service loaded inactive dead
+apt-daily.service loaded inactive dead
+auditd.service not-found inactive dead
+avahi-daemon.service loaded active running
+connman.service not-found inactive dead
+cron.service loaded active running
+dbus.service loaded active running
+dnscrypt-proxy-resolvconf.service loaded inactive dead
+dnscrypt-proxy.service loaded active running
+dpkg-db-backup.service loaded inactive dead
+emergency.service loaded inactive dead
+fail2ban.service loaded active running
+firewalld.service not-found inactive dead
+fstrim.service loaded inactive dead
+getty-static.service loaded inactive dead
+getty@tty1.service loaded active running
+initrd-cleanup.service loaded inactive dead
+initrd-parse-etc.service loaded inactive dead
+initrd-switch-root.service loaded inactive dead
+initrd-udevadm-cleanup-db.service loaded inactive dead
+ip6tables.service not-found inactive dead
+ipset.service not-found inactive dead
+iptables.service not-found inactive dead
+kmod-static-nodes.service loaded active exited
+ldconfig.service loaded inactive dead
+logrotate.service loaded inactive dead
+modprobe@configfs.service loaded inactive dead
+modprobe@drm.service loaded inactive dead
+modprobe@efi_pstore.service loaded inactive dead
+modprobe@fuse.service loaded inactive dead
+mosquitto.service loaded active running
+net-watchdog.service loaded inactive dead
+netplan-ovs-cleanup.service loaded inactive dead
+NetworkManager.service loaded active running
+nftables.service loaded inactive dead
+ovsdb-server.service not-found inactive dead
+pihole-FTL.service loaded active running
+plymouth-quit-wait.service not-found inactive dead
+plymouth-start.service not-found inactive dead
+rc-local.service loaded inactive dead
+rescue.service loaded inactive dead
+rpi-eeprom-update.service loaded active exited
+rpi-remove-swap-file@var-swap.service loaded inactive dead
+rpi-resize-swap-file.service loaded inactive dead
+rpi-setup-loop@var-swap.service loaded active exited
+rpi-zram-writeback.service loaded inactive dead
+serial-getty@ttyAMA10.service masked inactive dead
+ssh.service loaded active running
+syslog.service not-found inactive dead
+systemd-ask-password-console.service loaded inactive dead
+systemd-ask-password-wall.service loaded inactive dead
+systemd-battery-check.service loaded inactive dead
+systemd-binfmt.service loaded active exited
+systemd-bsod.service loaded inactive dead
+systemd-confext.service loaded inactive dead
+systemd-firstboot.service loaded inactive dead
+systemd-fsck-root.service loaded inactive dead
+systemd-fsck@dev-disk-by\x2dpartuuid-29680333\x2d01.service loaded active exited
+systemd-halt.service loaded inactive dead
+systemd-hibernate-clear.service loaded inactive dead
+systemd-hibernate-resume.service loaded inactive dead
+systemd-hostnamed.service loaded inactive dead
+systemd-hwdb-update.service loaded inactive dead
+systemd-initctl.service loaded inactive dead
+systemd-journal-catalog-update.service loaded inactive dead
+systemd-journal-flush.service loaded active exited
+systemd-journald.service loaded active running
+systemd-kexec.service loaded inactive dead
+systemd-logind.service loaded active running
+systemd-machine-id-commit.service loaded inactive dead
+systemd-modules-load.service loaded active exited
+systemd-networkd-persistent-storage.service loaded inactive dead
+systemd-networkd.service loaded inactive dead
+systemd-oomd.service not-found inactive dead
+systemd-pcrmachine.service loaded inactive dead
+systemd-pcrphase-initrd.service loaded inactive dead
+systemd-pcrphase-sysinit.service loaded inactive dead
+systemd-pcrphase.service loaded inactive dead
+systemd-poweroff.service loaded inactive dead
+systemd-pstore.service loaded inactive dead
+systemd-quotacheck-root.service loaded inactive dead
+systemd-quotacheck.service not-found inactive dead
+systemd-random-seed.service loaded active exited
+systemd-reboot.service loaded inactive dead
+systemd-remount-fs.service loaded active exited
+systemd-rfkill.service loaded inactive dead
+systemd-soft-reboot.service loaded inactive dead
+systemd-sysctl.service loaded active exited
+systemd-sysext.service loaded inactive dead
+systemd-sysusers.service loaded inactive dead
+systemd-timesyncd.service loaded active running
+systemd-tmpfiles-clean.service loaded inactive dead
+systemd-tmpfiles-setup-dev-early.service loaded active exited
+systemd-tmpfiles-setup-dev.service loaded active exited
+systemd-tmpfiles-setup.service loaded active exited
+systemd-tpm2-setup-early.service loaded inactive dead
+systemd-tpm2-setup.service loaded inactive dead
+systemd-udev-load-credentials.service loaded active exited
+systemd-udev-settle.service loaded inactive dead
+systemd-udev-trigger.service loaded active exited
+systemd-udevd.service loaded active running
+systemd-update-done.service loaded inactive dead
+systemd-user-sessions.service loaded active exited
+systemd-vconsole-setup.service not-found inactive dead
+systemd-zram-setup@zram0.service loaded active exited
+user-runtime-dir@1000.service loaded active exited
+user@1000.service loaded active running
+wpa_supplicant.service loaded active running
+--- failed
+--- timers
+net-watchdog.timer net-watchdog.service
+dpkg-db-backup.timer dpkg-db-backup.service
+logrotate.timer logrotate.service
+apt-daily.timer apt-daily.service
+apt-daily-upgrade.timer apt-daily-upgrade.service
+systemd-tmpfiles-clean.timer systemd-tmpfiles-clean.service
+rpi-zram-writeback.timer rpi-zram-writeback.service
+fstrim.timer fstrim.service
+### service_descriptions
+airdb.service | AirMonitor DB Snapshot Server | active=active enabled=enabled
+airlogger.service | AirMonitor MQTT Logger | active=active enabled=enabled
+airmonitor.service | AirMonitor SDS011 MQTT Publisher | active=active enabled=enabled
+net-watchdog.service | Network watchdog (recover wedged Wi-Fi) | active=inactive enabled=static
+net-watchdog.timer | Run network watchdog every 2 minutes | active=active enabled=enabled
+mosquitto.service | Mosquitto MQTT Broker | active=active enabled=enabled
+pihole-FTL.service | Pi-hole FTL | active=active enabled=enabled
+dnscrypt-proxy.service | DNSCrypt client proxy | active=active enabled=enabled
+fail2ban.service | Fail2Ban Service | active=active enabled=enabled
+### listener_units
+pid=1 comm=systemd cgroup=0::/init.scope 
+pid=595 comm=avahi-daemon cgroup=0::/system.slice/avahi-daemon.service 
+pid=936 comm=dnscrypt-proxy cgroup=0::/system.slice/dnscrypt-proxy.service 
+pid=959 comm=mosquitto cgroup=0::/system.slice/mosquitto.service 
+pid=969 comm=pihole-FTL cgroup=0::/system.slice/pihole-FTL.service 
+pid=977 comm=sshd cgroup=0::/system.slice/ssh.service 
+pid=982 comm=python cgroup=0::/system.slice/airdb.service 
+### storage_root
+/ /dev/mmcblk0p2 ext4 rw,noatime 15f4c6be-1102-4331-9904-f78e78afd1fd 29680333-02
+/boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro B2F0-82D2
+### lsblk
+NAME        KNAME     TYPE        SIZE ROTA RM TRAN MODEL FSTYPE FSVER LABEL  UUID                                 PARTUUID                             MOUNTPOINTS
+loop0       loop0     loop  2147483648    0  0            swap   1                                                                                      
+mmcblk0     mmcblk0   disk 63864569856    0  0 mmc                                                                                                      
+|-mmcblk0p1 mmcblk0p1 part   536870912    0  0 mmc        vfat   FAT32 bootfs B2F0-82D2                            29680333-01                          /boot/firmware
+`-mmcblk0p2 mmcblk0p2 part 63319310336    0  0 mmc        ext4   1.0   rootfs 15f4c6be-1102-4331-9904-f78e78afd1fd 29680333-02                          /
+zram0       zram0     disk  2147483648    0  0            swap   1     zram0  6c7c905d-0372-413a-bf7f-21869c79f87c                                      [SWAP]
+### block_devices_sys
+mmcblk0 size_512=124735488 rotational=0 removable=0
+  type=SD
+  name=SD64G
+  manfid=0x000003
+  oemid=0x5344
+  date=04/2025
+zram0 size_512=4194304 rotational=0 removable=0
+nvme_present=
+usb_storage=0 uas=0
+### df_bytes
+Filesystem     Type    1B-blocks       Used   Available Use% Mounted on
+tmpfs          tmpfs  1690812416    4505600  1686306816   1% /run
+/dev/mmcblk0p2 ext4  62295171072 4898033664 54828019712   9% /
+tmpfs          tmpfs  4227006464    3899392  4223107072   1% /dev/shm
+tmpfs          tmpfs     5242880      49152     5193728   1% /run/lock
+tmpfs          tmpfs     1048576          0     1048576   0% /run/credentials/systemd-journald.service
+tmpfs          tmpfs  4227022848          0  4227022848   0% /tmp
+/dev/mmcblk0p1 vfat    528592896   51636224   476956672  10% /boot/firmware
+tmpfs          tmpfs     1048576          0     1048576   0% /run/credentials/getty@tty1.service
+tmpfs          tmpfs   845398016      32768   845365248   1% /run/user/1000
+### df_inodes
+Filesystem      Inodes IUsed   IFree IUse% Mounted on
+tmpfs           257996   887  257109    1% /run
+/dev/mmcblk0p2 3692928 44115 3648813    2% /
+tmpfs           257996    18  257978    1% /dev/shm
+tmpfs           257996     5  257991    1% /run/lock
+tmpfs             1024     1    1023    1% /run/credentials/systemd-journald.service
+tmpfs          1048576     7 1048569    1% /tmp
+/dev/mmcblk0p1       0     0       0     - /boot/firmware
+tmpfs             1024     1    1023    1% /run/credentials/getty@tty1.service
+tmpfs           206396    31  206365    1% /run/user/1000
+### ext4_superblock
+Filesystem volume name:   rootfs
+Filesystem UUID:          15f4c6be-1102-4331-9904-f78e78afd1fd
+Filesystem features:      has_journal ext_attr resize_inode dir_index orphan_file filetype needs_recovery extent flex_bg metadata_csum_seed sparse_super large_file dir_nlink extra_isize metadata_csum orphan_present
+Filesystem state:         clean
+Errors behavior:          Continue
+Inode count:              3692928
+Block count:              15458816
+Reserved block count:     623130
+Free blocks:              14012975
+Free inodes:              3648813
+Block size:               4096
+Filesystem created:       Wed Jun 17 20:26:23 2026
+Last mount time:          Tue Sep 22 15:29:40 2026
+Last write time:          Thu Sep 24 22:43:56 2026
+Mount count:              189
+Maximum mount count:      -1
+Last checked:             Wed Jun 17 20:26:23 2026
+Check interval:           0 (<none>)
+Lifetime writes:          137 GB
+### fstab
+proc            /proc           proc    defaults          0       0
+PARTUUID=29680333-01  /boot/firmware  vfat    defaults          0       2
+PARTUUID=29680333-02  /               ext4    defaults,noatime  0       1
+### kernel_log_storage_power
+boots_recorded=2
+IDX ID FIRST ENTRY LAST ENTRY 
+0 Thu 2026-09-24 21:03:49 EDT Thu 2026-09-24
+--- current boot kernel warnings (storage/fs/power/thermal/oom)
+--- previous boot kernel warnings
+--- oom kills in journal (all boots)
+0
+### swap_zram
+Filename				Type		Size		Used		Priority
+/dev/zram0                              partition	2097136		0		100
+--- /etc/rpi/swap.conf
+[Main]
+[File]
+[Zram]
+rpi-remove-swap-file@.service static
+rpi-resize-swap-file.service static
+rpi-zram-writeback.service static
+systemd-zram-setup@.service static
+dev-zram0.swap generated
+swap.target static
+rpi-zram-writeback.timer generated
+### container_runtime
+docker=absent
+dockerd=absent
+containerd=absent
+runc=absent
+podman=absent
+nerdctl=absent
+ctr=absent
+docker.service active=inactive enabled=not-found
+docker.socket active=inactive enabled=not-found
+containerd.service active=inactive enabled=not-found
+podman.socket active=inactive enabled=not-found
+var_lib_docker=absent var_lib_containerd=absent
+etc_docker_daemon_json=absent
+compose_plugin=
+apt_sources=debian.sources raspi.sources 
+http://archive.raspberrypi.com/debian/
+http://deb.debian.org/debian-security/
+http://deb.debian.org/debian/
+docker.io:
+  Installed: (none)
+  Candidate: 26.1.5+dfsg1-9+deb13u1
+docker-ce:
+  Installed: (none)
+  Candidate: (none)
+podman:
+  Installed: (none)
+  Candidate: 5.4.2+ds1-2+b2
+### network
+lo               UNKNOWN        MAC_SHA256:38fbdde984330e50c02382e647c576b71f41cc5c45b193d4f3177e6ee8f22a78 <LOOPBACK,UP,LOWER_UP> 
+eth0             DOWN           MAC_SHA256:2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e <NO-CARRIER,BROADCAST,MULTICAST,UP> 
+wlan0            UP             MAC_SHA256:320fe7aa877ada1c0485adbb589c7b88b999a8ba6079e143011ad3c8f764ca2a <BROADCAST,MULTICAST,UP,LOWER_UP> 
+---
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+eth0             DOWN           
+wlan0            UP             158.205.34.18/24 fe80::aad2:397b:3edb:784d/64 
+--- routes
+default via 158.205.34.1 dev wlan0 proto dhcp src 158.205.34.18 metric 600 
+158.205.34.0/24 dev wlan0 proto kernel scope link src 158.205.34.18 metric 600 
+fe80::/64 dev wlan0 proto kernel metric 1024 pref medium
+--- global_ipv6
+--- hostname_I
+158.205.34.18 
+--- resolv.conf
+nameserver 158.205.34.1
+--- nmcli devices
+wlan0:wifi:connected
+lo:loopback:connected (externally)
+p2p-dev-wlan0:wifi-p2p:disconnected
+eth0:ethernet:unavailable
+--- nm ipv6 addr-gen / method (no connection names)
+### listening
+udp UNCONN 0      0        0.0.0.0:53    0.0.0.0:* users:(("pihole-FTL",pid=969,fd=21))                            
+udp UNCONN 0      0        0.0.0.0:123   0.0.0.0:* users:(("pihole-FTL",pid=969,fd=41))                            
+udp UNCONN 0      0      127.0.0.1:5053  0.0.0.0:* users:(("dnscrypt-proxy",pid=936,fd=8),("systemd",pid=1,fd=168))
+udp UNCONN 0      0        0.0.0.0:5353  0.0.0.0:* users:(("avahi-daemon",pid=595,fd=12))                          
+udp UNCONN 0      0        0.0.0.0:34632 0.0.0.0:* users:(("avahi-daemon",pid=595,fd=14))                          
+udp UNCONN 0      0              *:53          *:* users:(("pihole-FTL",pid=969,fd=23))                            
+udp UNCONN 0      0              *:123         *:* users:(("pihole-FTL",pid=969,fd=42))                            
+udp UNCONN 0      0              *:5353        *:* users:(("avahi-daemon",pid=595,fd=13))                          
+udp UNCONN 0      0              *:42606       *:* users:(("avahi-daemon",pid=595,fd=15))                          
+tcp LISTEN 0      200      0.0.0.0:80    0.0.0.0:* users:(("pihole-FTL",pid=969,fd=35))                            
+tcp LISTEN 0      128      0.0.0.0:22    0.0.0.0:* users:(("sshd",pid=977,fd=6))                                   
+tcp LISTEN 0      32       0.0.0.0:53    0.0.0.0:* users:(("pihole-FTL",pid=969,fd=22))                            
+tcp LISTEN 0      200      0.0.0.0:443   0.0.0.0:* users:(("pihole-FTL",pid=969,fd=36))                            
+tcp LISTEN 0      4096     0.0.0.0:9001  0.0.0.0:* users:(("mosquitto",pid=959,fd=9))                              
+tcp LISTEN 0      100      0.0.0.0:1883  0.0.0.0:* users:(("mosquitto",pid=959,fd=5))                              
+tcp LISTEN 0      4096   127.0.0.1:5053  0.0.0.0:* users:(("dnscrypt-proxy",pid=936,fd=7),("systemd",pid=1,fd=167))
+tcp LISTEN 0      5        0.0.0.0:8080  0.0.0.0:* users:(("python",pid=982,fd=3))                                 
+tcp LISTEN 0      200         [::]:80       [::]:* users:(("pihole-FTL",pid=969,fd=37))                            
+tcp LISTEN 0      128         [::]:22       [::]:* users:(("sshd",pid=977,fd=7))                                   
+tcp LISTEN 0      32          [::]:53       [::]:* users:(("pihole-FTL",pid=969,fd=24))                            
+tcp LISTEN 0      200         [::]:443      [::]:* users:(("pihole-FTL",pid=969,fd=38))                            
+### firewall
+no netfilter table modules loaded
+nft=absent
+iptables=absent
+iptables-legacy=absent
+iptables-nft=absent
+ufw=absent
+firewall-cmd=absent
+iptables_alternative=/etc/alternatives/iptables
+nftables.service active=inactive enabled=disabled
+ufw.service active=inactive enabled=not-found
+firewalld.service active=inactive enabled=not-found
+netfilter-persistent.service active=inactive enabled=not-found
+etc_nftables_conf=present
+--- fail2ban action config
+[DEFAULT]
+backend = systemd
+[sshd]
+enabled = true
+backend = systemd
+[DEFAULT]
+banaction = nftables
+banaction_allports = nftables[type=allports]
+[sshd]
+backend = systemd
+enabled = true
+Status
+|- Number of jail:	1
+`- Jail list:	sshd
+### tailscale
+tailscale=absent tailscaled=absent
+tailscaled.service active=inactive enabled=not-found
+### reverse_proxies
+nginx=absent
+caddy=absent
+apache2=absent
+haproxy=absent
+lighttpd=absent
+traefik=absent
+cloudflared=absent
+### existing_service_exposure
+  interface = "wlan0" ### CHANGED, default = ""
+  listeningMode = "ALL" ### CHANGED, default = "LOCAL"
+  port = 53
+  port = "80o,443os,[::]:80o,[::]:443os"
+listener 1883 0.0.0.0
+listener 9001 0.0.0.0
+protocol websockets
+allow_anonymous true
+sshd_password_auth=permitrootlogin without-password pubkeyauthentication yes passwordauthentication no 
+### thermal_power
+vcgencmd measure_temp => temp=48.3'C 
+vcgencmd get_throttled => throttled=0x0 
+vcgencmd measure_volts core => volt=0.8695V 
+vcgencmd measure_clock arm => frequency(0)=2400033792 
+vcgencmd get_config usb_max_current_enable => usb_max_current_enable=1 
+vcgencmd get_config total_mem => total_mem=8192 
+vcgencmd version => 2025/12/08 19:29:54  Copyright (c) 2012 Broadcom version 2226a853 (release) (embedded) 
+vcgencmd bootloader_version => 2025/12/08 19:29:54 version 2226a853bb9f5fd80392e3a4a89e457aeca88008 (release) timestamp 1765222194 update-time 1765538232 capabilities 0x0000007f  
+--- pmic_read_adc
+ 3V7_WL_SW_A current(0)=0.09661707A
+   3V3_SYS_A current(1)=0.12491900A
+   1V8_SYS_A current(2)=0.17176370A
+  DDR_VDD2_A current(3)=0.00292779A
+  DDR_VDDQ_A current(4)=0.00000000A
+   1V1_SYS_A current(5)=0.19225820A
+    0V8_SW_A current(6)=0.27033260A
+  VDD_CORE_A current(7)=0.68761000A
+   3V3_DAC_A current(17)=0.00000000A
+   3V3_ADC_A current(18)=0.00006105A
+   0V8_AON_A current(16)=0.00238095A
+      HDMI_A current(22)=0.01978020A
+ 3V7_WL_SW_V volt(8)=3.70534400V
+   3V3_SYS_V volt(9)=3.31096100V
+   1V8_SYS_V volt(10)=1.79682400V
+  DDR_VDD2_V volt(11)=1.10695900V
+  DDR_VDDQ_V volt(12)=0.61208730V
+   1V1_SYS_V volt(13)=1.10109800V
+    0V8_SW_V volt(14)=0.79890030V
+  VDD_CORE_V volt(15)=0.87140330V
+   3V3_DAC_V volt(20)=3.31135200V
+   3V3_ADC_V volt(21)=3.30677300V
+   0V8_AON_V volt(19)=0.79912020V
+      HDMI_V volt(23)=5.16436000V
+     EXT5V_V volt(24)=5.16838000V
+      BATT_V volt(25)=0.00000000V
+--- bootloader_config (PSU/power keys)
+[all]
+BOOT_ORDER=0xf461
+thermal_zone0 type=cpu-thermal temp_mC=47950
+cooling_device0 type=pwm-fan cur=1 max=4
+hwmon0 name=cpu_thermal temp1_input=48500
+hwmon1 name=rp1_adc temp1_input=49661
+hwmon2 name=pwmfan fan1_input=0 pwm1=75 pwm1_enable=1
+hwmon3 name=rpi_volt in0_lcrit_alarm=0
+cooling_fan_platform=present
+### apparmor
+apparmor_enabled=N
+lsm=capability
+### updates
+unattended-upgrades not installed
+### tools
+missing_utilities=wget node npm zramctl nft iptables docker tailscale smartctl nvme sensors dumpe2fs sqlite3
+### identity_hashes
+board_serial_sha256=e916415218d7f92cd357797b67f17760f87d6e4cf0b50e3cf6222574fbb42c3c
+machine_id_sha256=ec98e9910f7ca9f467ebe340f7fd3d59a6198d7a17482330f862b3cf7113f86a
+mac_sha256 eth0=2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e
+mac_sha256 wlan0=320fe7aa877ada1c0485adbb589c7b88b999a8ba6079e143011ad3c8f764ca2a
+end

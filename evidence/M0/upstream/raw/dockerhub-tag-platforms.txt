@@ -1,0 +1,87 @@
+== library/postgres:17
+digest=sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f last_updated=2026-09-24T16:08:06.918724Z
+  linux/amd64
+  linux/ppc64le
+  linux/386
+  linux/s390x
+  linux/arm/v7
+  linux/arm64/v8
+  linux/arm/v5
+  linux/riscv64
+== library/node:22-slim
+digest=sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c last_updated=2026-09-23T23:39:16.271141Z
+  linux/amd64
+  linux/ppc64le
+  linux/arm/v7
+  linux/arm64/v8
+== library/golang:1.24
+digest=sha256:d2d2bc1c84f7e60d7d2438a3836ae7d0c847f4888464e7ec9ba3a1339a1ee804 last_updated=2026-02-08T03:22:29.648058Z
+  linux/amd64
+  linux/ppc64le
+  linux/386
+  linux/s390x
+  linux/arm/v7
+  linux/arm64/v8
+  linux/riscv64
+  windows/amd64
+  windows/amd64
+== library/redis:alpine
+digest=sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0 last_updated=2026-09-24T21:06:03.99094Z
+  linux/amd64
+  linux/ppc64le
+  linux/386
+  linux/s390x
+  linux/arm/v7
+  linux/arm64/v8
+  linux/arm/v6
+  linux/riscv64
+== library/rabbitmq:3-management
+digest=sha256:e582c0bc7766f3342496d8485efb5a1df782b5ce3886ad017e2eaae442311f69 last_updated=2025-12-02T19:52:16.412701Z
+  linux/amd64
+  linux/ppc64le
+  linux/s390x
+  linux/arm/v7
+  linux/arm64/v8
+  linux/riscv64
+== foundationdb/foundationdb:7.3.63
+digest=sha256:df1a2310c6dbe0d56def526b73606cc8fd414ecc42c50fba2588f13292f82d48 last_updated=2025-10-16T08:50:02.952284Z
+  linux/amd64
+  linux/arm64
+== bitnami/redis:8.0.3
+== library/alpine:latest
+digest=sha256:294b683cb724975bec92580e1e685676bd4b50bda910ddb8c51d4cabeaec77e6 last_updated=2026-09-18T17:24:47.819064Z
+  linux/amd64
+  linux/ppc64le
+  linux/386
+  linux/s390x
+  linux/arm/v7
+  linux/arm64/v8
+  linux/arm/v6
+  linux/riscv64
+== library/golang:1.23-alpine
+digest=sha256:383395b794dffa5b53012a212365d40c8e37109a626ca30d6151c8348d380b5f last_updated=2025-08-06T21:49:58.73399Z
+  linux/amd64
+  linux/ppc64le
+  linux/386
+  linux/s390x
+  linux/arm/v7
+  linux/arm64/v8
+  linux/arm/v6
+  linux/riscv64
+library/node:22-trixie-slim sha256:b26b04c123d9ff8ab646ceb18b9d75a1173acf64b9a401094b906d27b29338d4
+library/node:22-bookworm-slim sha256:43ac6c60b8f89723f746e8a92ce91abd5017e627ce1ddfe4238355d3a30b772c
+library/postgres:17-trixie sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f
+library/postgres:17-bookworm sha256:639ab7ceb90e13123085b741fb31ef493fba25463002f6da665352e7b534b652
+library/node:22 sha256:363e1587494626837fa7f9a23bdb453d13b0ff3c67c705c2805cfc69c2d2fad7
+bitnamilegacy/redis:8.0.3 sha256:5927ff3702df7106bbb7dcc0f8e3d053d979253c3aecce53f07f40db990f823b
+jod-slim
+jod-bookworm-slim
+22.23.3-slim
+22.23.3-bookworm-slim
+22.23-slim
+22.23-bookworm-slim
+22-slim
+22-bookworm-slim
+17.11-trixie
+17.11
+1.24.13

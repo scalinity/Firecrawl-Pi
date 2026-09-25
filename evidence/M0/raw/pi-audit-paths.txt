@@ -1,0 +1,42 @@
+### probe_time
+2026-09-25T03:30:38Z
+### sbin_tools
+nft=/usr/sbin/nft
+iptables=absent
+iptables-legacy=absent
+iptables-nft=absent
+ip6tables=absent
+ufw=absent
+firewall-cmd=absent
+zramctl=/usr/sbin/zramctl
+dumpe2fs=/usr/sbin/dumpe2fs
+tailscale=absent
+tailscaled=absent
+sshd=/usr/sbin/sshd
+losetup=/usr/sbin/losetup
+iw=/usr/sbin/iw
+sysctl=/usr/sbin/sysctl
+smartctl=absent
+nvme=absent
+sensors=absent
+sqlite3=absent
+wget=absent
+curl=/usr/bin/curl
+jq=/usr/bin/jq
+git=/usr/bin/git
+node=absent
+npm=absent
+docker=absent
+### packages
+e2fsprogs 1.47.2-3+b11 ii 
+fail2ban 1.1.0-8 ii 
+iptables  un 
+nftables 1.1.3-1 ii 
+ufw  un 
+util-linux 2.41-5 ii 
+### zramctl
+NAME       ALGORITHM DISKSIZE DATA COMPR TOTAL STREAMS MOUNTPOINT
+/dev/zram0 zstd            2G  16K    0B    0B         [SWAP]
+### losetup
+/dev/loop0 /var/swap     0 0
+end

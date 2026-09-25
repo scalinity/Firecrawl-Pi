@@ -1,0 +1,1134 @@
+{
+  "schema": "fcpi.m0.audit/v1",
+  "generated_utc": "2026-09-25T03:37:14Z",
+  "repository_sha": "80ef9c75180322441336e4b710b9a913c7ca98ba",
+  "worktree_dirty": true,
+  "upstream": {
+    "repository": "https://github.com/firecrawl/firecrawl",
+    "tag": "v2.11.162",
+    "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
+  },
+  "target": {
+    "ssh": "danny@pi.local",
+    "resolved_address": "158.205.34.18"
+  },
+  "probes": [
+    {
+      "id": "P0-before",
+      "script": "scripts/m0/pi-snapshot.sh",
+      "script_sha256": "61d4288a5dc29f81106672b01e0e299e6f509a8f5af3c9167fb37230773cf602",
+      "output": "evidence/M0/snapshot-before.txt",
+      "output_sha256": "f3aa859d5a0bc600826cc14cc9c404459052996eb3ddcc29304c2c8dda2214a1"
+    },
+    {
+      "id": "P1-audit",
+      "script": "scripts/m0/pi-audit.sh",
+      "script_sha256": "5f9fd6f8ccf7ec6434fa2d94f04324740820f6f13e24f78432117f3bff9ba6aa",
+      "output": "evidence/M0/raw/pi-audit.txt",
+      "output_sha256": "1abe4470ffc0438ad4c02547bc68381da0b50b438e3415a03e996705480dca0f",
+      "utc": "2026-09-25T03:18:44Z"
+    },
+    {
+      "id": "P2-audit-extra",
+      "script": "scripts/m0/pi-audit-extra.sh",
+      "script_sha256": "2cac76b3c97d26c49dd9d3a30214560301ffe776d8afeb6f3941c88e5498d450",
+      "output": "evidence/M0/raw/pi-audit-extra.txt",
+      "output_sha256": "055ce746b96e27979b6530295d50719a61a1436590878752796774372121d7f9",
+      "utc": "2026-09-25T03:21:03Z",
+      "note": "Contains the single permitted IP-echo GET; the returned egress address is stored only as a SHA-256."
+    },
+    {
+      "id": "P3-audit-paths",
+      "script": "scripts/m0/pi-audit-paths.sh",
+      "script_sha256": "8eb9a959822e4f0ceca397fef94cca55878dd1c250f3aad3e2e153f7080465a0",
+      "output": "evidence/M0/raw/pi-audit-paths.txt",
+      "output_sha256": "c9c680b56db084a9c76ae689f753ee4097d6893689f4516ffad5c4836ab995fa",
+      "utc": "2026-09-25T03:30:38Z",
+      "note": "Supersedes P1's tool-presence results: P1 used a PATH without /usr/sbin, so nft, zramctl, dumpe2fs, sshd, losetup, iw and sysctl were wrongly reported absent."
+    },
+    {
+      "id": "P4-audit-layout",
+      "script": "scripts/m0/pi-audit-layout.sh",
+      "script_sha256": "7f17b0dc30a9741559e88c9c18dcf31768c446c0ed9ff7e81f029f6605788278",
+      "output": "evidence/M0/raw/pi-audit-layout.txt",
+      "output_sha256": "af7540b23ac171c690f53948f0ed61ff8f0030fd37e1f2992c45ee6add9d5f00",
+      "utc": "2026-09-25T03:36:11Z"
+    },
+    {
+      "id": "P5-after",
+      "script": "scripts/m0/pi-snapshot.sh",
+      "script_sha256": "61d4288a5dc29f81106672b01e0e299e6f509a8f5af3c9167fb37230773cf602",
+      "output": "evidence/M0/snapshot-after.txt",
+      "output_sha256": "f8bcfac25fde8e0db8823a1348cf4ad8fb2ac6c146b836d421a2fe3811830faf",
+      "note": "Last Pi probe of the session; compared with P0 by scripts/m0/snapshot-diff.sh."
+    }
+  ],
+  "identity": {
+    "model": "Raspberry Pi 5 Model B Rev 1.1",
+    "revision_code": "d04171",
+    "hostname": "pi",
+    "ssh_user": "danny",
+    "groups": "1000(danny),4(adm),20(dialout),24(cdrom),27(sudo),29(audio),44(video),46(plugdev),60(games),100(users),102(netdev),986(gpio),988(i2c),989(spi),992(render),996(input),1001(lpadmin)",
+    "docker_group_member": false,
+    "sudo_passwordless": true,
+    "board_serial_sha256": "e916415218d7f92cd357797b67f17760f87d6e4cf0b50e3cf6222574fbb42c3c",
+    "machine_id_sha256": "ec98e9910f7ca9f467ebe340f7fd3d59a6198d7a17482330f862b3cf7113f86a",
+    "mac_sha256": {
+      "eth0": "2184ef4947bfb99dd6ba8a32e5623453cdd1ef90b1b78b3f1af75d3688a9115e",
+      "wlan0": "320fe7aa877ada1c0485adbb589c7b88b999a8ba6079e143011ad3c8f764ca2a"
+    }
+  },
+  "architecture": {
+    "uname_m": "aarch64",
+    "dpkg_architecture": "arm64",
+    "long_bit": 64,
+    "page_size_bytes": 16384,
+    "kernel_release": "6.18.34+rpt-rpi-2712",
+    "foreign_architectures": [
+      "armhf"
+    ],
+    "kernel_images_present": [
+      "kernel_2712.img"
+    ]
+  },
+  "section4": {
+    "distribution_version": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#os"
+      ],
+      "value": {
+        "pretty_name": "Debian GNU/Linux 13 (trixie)",
+        "version_id": "13",
+        "codename": "trixie",
+        "debian_version": "13.5",
+        "rpi_reference": "Raspberry Pi reference 2026-06-18"
+      }
+    },
+    "uname_m": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#architecture"
+      ],
+      "value": "aarch64"
+    },
+    "kernel": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#architecture",
+        "evidence/M0/raw/pi-audit.txt#kernel_config"
+      ],
+      "value": {
+        "release": "6.18.34+rpt-rpi-2712",
+        "page_size_bytes": 16384,
+        "config_16k_pages": true,
+        "user_ns": true,
+        "seccomp_filter": true,
+        "overlayfs": "CONFIG_OVERLAY_FS=m"
+      }
+    },
+    "cpu_ram": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#cpu",
+        "evidence/M0/raw/pi-audit.txt#meminfo"
+      ],
+      "value": {
+        "cpus": 4,
+        "model": "Cortex-A76",
+        "max_mhz": 2400,
+        "governor": "ondemand",
+        "meminfo_kib": {
+          "MemTotal": 8255888,
+          "MemAvailable": 7925904,
+          "MemFree": 7557152,
+          "Buffers": 89328,
+          "Cached": 337840,
+          "Shmem": 8288,
+          "AnonPages": 106768,
+          "SwapTotal": 2097136,
+          "CmaTotal": 65536
+        },
+        "firmware_total_mem_mib": 8192
+      }
+    },
+    "cgroup_support": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#cgroup",
+        "evidence/M0/raw/pi-audit.txt#cmdline",
+        "evidence/M0/raw/pi-audit-extra.txt#boot_config"
+      ],
+      "value": {
+        "hierarchy": "cgroup2fs",
+        "controllers": [
+          "cpuset",
+          "cpu",
+          "io",
+          "pids"
+        ],
+        "memory_controller_available": false,
+        "kernel_cmdline_has_cgroup_disable_memory": true,
+        "cmdline_txt_has_cgroup_disable_memory": false,
+        "config_memcg": true,
+        "psi": "unavailable (no /proc/pressure)"
+      }
+    },
+    "swap_zram": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#swap_zram",
+        "evidence/M0/raw/pi-audit-extra.txt#zram_writeback",
+        "evidence/M0/raw/pi-audit-extra.txt#proc_sys"
+      ],
+      "value": {
+        "swaps": [
+          {
+            "device": "/dev/zram0",
+            "type": "partition",
+            "size_kib": 2097136,
+            "used_kib": 0,
+            "priority": 100
+          }
+        ],
+        "zram_algorithm": "zstd",
+        "zram_writeback_backing_dev": "/dev/loop0",
+        "zram_writeback_file": "/var/swap (2 GiB, on the microSD root filesystem)",
+        "zram_writeback_timer": "rpi-zram-writeback.timer OnBootSec=180min OnUnitActiveSec=24h",
+        "zram_bd_stat": "4        0        4",
+        "swappiness": 60
+      }
+    },
+    "mounts": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#storage_root",
+        "evidence/M0/snapshot-before.txt#findmnt"
+      ],
+      "value": {
+        "root": "/ /dev/mmcblk0p2 ext4 rw,noatime 15f4c6be-1102-4331-9904-f78e78afd1fd 29680333-02",
+        "boot_firmware": "/boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro B2F0-82D2",
+        "tmp_tmpfs_bytes": 4227022848,
+        "dev_shm_tmpfs_bytes": 4227006464,
+        "fstab": [
+          "proc            /proc           proc    defaults          0       0",
+          "PARTUUID=29680333-01  /boot/firmware  vfat    defaults          0       2",
+          "PARTUUID=29680333-02  /               ext4    defaults,noatime  0       1"
+        ]
+      }
+    },
+    "block_devices": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#lsblk",
+        "evidence/M0/raw/pi-audit.txt#block_devices_sys"
+      ],
+      "value": {
+        "devices": [
+          {
+            "name": "loop0",
+            "type": "loop",
+            "size_bytes": 2147483648,
+            "rota": false,
+            "rm": false
+          },
+          {
+            "name": "mmcblk0",
+            "type": "disk",
+            "size_bytes": 63864569856,
+            "rota": false,
+            "rm": false
+          },
+          {
+            "name": "mmcblk0p1",
+            "type": "part",
+            "size_bytes": 536870912,
+            "rota": false,
+            "rm": false
+          },
+          {
+            "name": "mmcblk0p2",
+            "type": "part",
+            "size_bytes": 63319310336,
+            "rota": false,
+            "rm": false
+          },
+          {
+            "name": "zram0",
+            "type": "disk",
+            "size_bytes": 2147483648,
+            "rota": false,
+            "rm": false
+          }
+        ],
+        "boot_medium": "microSD (mmcblk0, type=SD)",
+        "sd_card": {
+          "type": "SD",
+          "name": "SD64G",
+          "manfid": "0x000003",
+          "oemid": "0x5344",
+          "date": "04/2025"
+        },
+        "nvme_present": "",
+        "usb_storage_devices": 0
+      }
+    },
+    "filesystem_types": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#lsblk",
+        "evidence/M0/raw/pi-audit.txt#ext4_superblock"
+      ],
+      "value": {
+        "root": {
+          "fstype": "ext4",
+          "uuid": "15f4c6be-1102-4331-9904-f78e78afd1fd",
+          "partuuid": "29680333-02",
+          "state": "clean",
+          "errors_behavior": "Continue",
+          "fs_error_count_line_present": false,
+          "lifetime_writes": "137 GB",
+          "created": "Wed Jun 17 20:26:23 2026",
+          "mount_count": 189
+        },
+        "boot_firmware": {
+          "fstype": "vfat",
+          "uuid": "B2F0-82D2"
+        }
+      }
+    },
+    "docker_root_data_dirs": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#container_runtime"
+      ],
+      "value": {
+        "docker_installed": false,
+        "var_lib_docker": "absent",
+        "etc_docker_daemon_json": "absent",
+        "note": "Docker is not installed, so no Docker root directory exists yet. M1 sets data-root deliberately (see storage plan)."
+      }
+    },
+    "available_disk_inodes": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#df_bytes",
+        "evidence/M0/raw/pi-audit.txt#df_inodes"
+      ],
+      "value": {
+        "root": {
+          "size_bytes": 62295171072,
+          "used_bytes": 4898033664,
+          "avail_bytes": 54828019712,
+          "inodes": 3692928,
+          "inodes_used": 44115,
+          "inodes_free": 3648813
+        },
+        "boot_firmware_avail_bytes": 476956672
+      }
+    },
+    "docker_compose_versions": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#container_runtime"
+      ],
+      "value": {
+        "docker": "absent",
+        "compose_plugin": "absent",
+        "podman": "absent",
+        "services": {
+          "docker.service": "not-found",
+          "docker.socket": "not-found",
+          "containerd.service": "not-found"
+        },
+        "debian_candidate_docker_io": "26.1.5+dfsg1-9+deb13u1",
+        "debian_candidate_podman": "5.4.2+ds1-2+b2",
+        "docker_ce_repo_configured": false,
+        "docker_ce_trixie_arm64_available": "see evidence/M0/runtime-candidates.json"
+      }
+    },
+    "running_containers_services": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#services_all",
+        "evidence/M0/raw/pi-audit.txt#service_descriptions",
+        "evidence/M0/snapshot-before.txt#docker_ps"
+      ],
+      "value": {
+        "containers": "none (no container runtime installed)",
+        "running_services": [
+          "airdb.service",
+          "airlogger.service",
+          "airmonitor.service",
+          "avahi-daemon.service",
+          "cron.service",
+          "dbus.service",
+          "dnscrypt-proxy.service",
+          "fail2ban.service",
+          "getty@tty1.service",
+          "mosquitto.service",
+          "NetworkManager.service",
+          "pihole-FTL.service",
+          "ssh.service",
+          "systemd-journald.service",
+          "systemd-logind.service",
+          "systemd-timesyncd.service",
+          "systemd-udevd.service",
+          "user@1000.service",
+          "wpa_supplicant.service"
+        ],
+        "failed_units": [],
+        "owner_services": [
+          "airdb.service | AirMonitor DB Snapshot Server | active=active enabled=enabled",
+          "airlogger.service | AirMonitor MQTT Logger | active=active enabled=enabled",
+          "airmonitor.service | AirMonitor SDS011 MQTT Publisher | active=active enabled=enabled",
+          "net-watchdog.service | Network watchdog (recover wedged Wi-Fi) | active=inactive enabled=static",
+          "net-watchdog.timer | Run network watchdog every 2 minutes | active=active enabled=enabled",
+          "mosquitto.service | Mosquitto MQTT Broker | active=active enabled=enabled",
+          "pihole-FTL.service | Pi-hole FTL | active=active enabled=enabled",
+          "dnscrypt-proxy.service | DNSCrypt client proxy | active=active enabled=enabled",
+          "fail2ban.service | Fail2Ban Service | active=active enabled=enabled"
+        ]
+      }
+    },
+    "listening_ports": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#listening",
+        "evidence/M0/raw/pi-audit.txt#listener_units"
+      ],
+      "value": [
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "0.0.0.0",
+          "port": 53,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "0.0.0.0",
+          "port": 123,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "127.0.0.1",
+          "port": 5053,
+          "process": "dnscrypt-proxy"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "0.0.0.0",
+          "port": 5353,
+          "process": "avahi-daemon"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "0.0.0.0",
+          "port": 34632,
+          "process": "avahi-daemon"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "*",
+          "port": 53,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "*",
+          "port": 123,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "*",
+          "port": 5353,
+          "process": "avahi-daemon"
+        },
+        {
+          "proto": "udp",
+          "state": "UNCONN",
+          "address": "*",
+          "port": 42606,
+          "process": "avahi-daemon"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 80,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 22,
+          "process": "sshd"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 53,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 443,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 9001,
+          "process": "mosquitto"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 1883,
+          "process": "mosquitto"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "127.0.0.1",
+          "port": 5053,
+          "process": "dnscrypt-proxy"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "0.0.0.0",
+          "port": 8080,
+          "process": "python"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "[::]",
+          "port": 80,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "[::]",
+          "port": 22,
+          "process": "sshd"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "[::]",
+          "port": 53,
+          "process": "pihole-FTL"
+        },
+        {
+          "proto": "tcp",
+          "state": "LISTEN",
+          "address": "[::]",
+          "port": 443,
+          "process": "pihole-FTL"
+        }
+      ]
+    },
+    "hostname": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#identity"
+      ],
+      "value": {
+        "hostname": "pi",
+        "mdns": "avahi-daemon running (pi.local)"
+      }
+    },
+    "dns": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#network"
+      ],
+      "value": {
+        "resolv_conf_nameservers": [
+          "158.205.34.1"
+        ],
+        "local_dns_services": "pihole-FTL on :53 (listeningMode=ALL, interface=wlan0), dnscrypt-proxy on 127.0.0.1:5053",
+        "host_resolver_uses_pihole": false
+      }
+    },
+    "firewall_backend_rules": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#firewall",
+        "evidence/M0/raw/pi-audit-paths.txt#sbin_tools",
+        "evidence/M0/raw/pi-audit-paths.txt#packages",
+        "evidence/M0/snapshot-before.txt#firewall"
+      ],
+      "value": {
+        "netfilter_modules_loaded": [],
+        "nft_binary": "/usr/sbin/nft",
+        "nftables_package": "nftables 1.1.3-1 ii",
+        "iptables_binary": "absent",
+        "ufw": "absent",
+        "firewalld": "absent",
+        "nftables_service": "inactive/disabled",
+        "etc_nftables_conf": "present (not loaded)",
+        "active_ruleset": "none: no nf_tables/ip_tables module is loaded, so no packet filtering is in effect",
+        "fail2ban": {
+          "running": true,
+          "jails": [
+            "sshd"
+          ],
+          "banaction": "nftables",
+          "note": "A first ban would load nf_tables through fail2ban; zero bans recorded (see network exposure)."
+        }
+      }
+    },
+    "tailscale_state": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#tailscale"
+      ],
+      "value": {
+        "installed": false,
+        "service": "not-found"
+      }
+    },
+    "reverse_proxies": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#reverse_proxies",
+        "evidence/M0/raw/pi-audit.txt#listening"
+      ],
+      "value": {
+        "dedicated_reverse_proxy": "none (nginx, caddy, apache2, haproxy, lighttpd, traefik, cloudflared all absent)",
+        "web_listeners": "pihole-FTL embedded web server on 0.0.0.0:80 and :443 (also [::])"
+      }
+    },
+    "thermal_sensors": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#thermal_power"
+      ],
+      "value": {
+        "vcgencmd_temp": "temp=48.3'C",
+        "thermal_zone0_mC": 47950,
+        "rp1_adc_temp_mC": 49661,
+        "cooling_device": "pwm-fan (cur 1 of 4)",
+        "fan_pwm": 75,
+        "fan_tach_rpm": 0,
+        "fan_interpretation": "pwm1=75 with fan1_input=0: either a fan without a tachometer signal or no fan fitted. Not distinguishable programmatically."
+      }
+    },
+    "power_throttling": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#thermal_power"
+      ],
+      "value": {
+        "get_throttled": "throttled=0x0",
+        "throttled_decoded": "no under-voltage, frequency capping, throttling or soft temperature limit now or since boot",
+        "ext5v_volts": 5.16838,
+        "usb_max_current_enable": "usb_max_current_enable=1",
+        "core_volts": "volt=0.8695V",
+        "bootloader": "2226a853bb9f5fd80392e3a4a89e457aeca88008"
+      }
+    },
+    "current_workload_usage": {
+      "status": "observed",
+      "sources": [
+        "evidence/M0/raw/pi-audit.txt#meminfo",
+        "evidence/M0/raw/pi-audit.txt#processes_top_rss",
+        "evidence/M0/raw/pi-audit.txt#cpu",
+        "evidence/M0/raw/pi-audit.txt#unit_memory"
+      ],
+      "value": {
+        "loadavg": "0.05 0.09 0.03 1/189 420961",
+        "uptime_s": 200757.08,
+        "existing_usage_mib": 322.25,
+        "top_rss_kib": [
+          {
+            "comm": "python",
+            "user": "danny",
+            "rss_kib": 29888
+          },
+          {
+            "comm": "fail2ban-server",
+            "user": "root",
+            "rss_kib": 29760
+          },
+          {
+            "comm": "python",
+            "user": "danny",
+            "rss_kib": 25360
+          },
+          {
+            "comm": "NetworkManager",
+            "user": "root",
+            "rss_kib": 21424
+          },
+          {
+            "comm": "python",
+            "user": "danny",
+            "rss_kib": 19136
+          },
+          {
+            "comm": "dnscrypt-proxy",
+            "user": "_dnscry+",
+            "rss_kib": 18272
+          },
+          {
+            "comm": "systemd",
+            "user": "root",
+            "rss_kib": 15632
+          },
+          {
+            "comm": "systemd-journal",
+            "user": "root",
+            "rss_kib": 14464
+          },
+          {
+            "comm": "pihole-FTL",
+            "user": "pihole",
+            "rss_kib": 13696
+          },
+          {
+            "comm": "systemd",
+            "user": "danny",
+            "rss_kib": 12864
+          },
+          {
+            "comm": "wpa_supplicant",
+            "user": "root",
+            "rss_kib": 12336
+          },
+          {
+            "comm": "sshd-session",
+            "user": "root",
+            "rss_kib": 11616
+          },
+          {
+            "comm": "mosquitto",
+            "user": "mosquit+",
+            "rss_kib": 11504
+          },
+          {
+            "comm": "systemd-udevd",
+            "user": "root",
+            "rss_kib": 10816
+          },
+          {
+            "comm": "systemd-logind",
+            "user": "root",
+            "rss_kib": 9440
+          }
+        ],
+        "per_unit_cgroup_memory": "unavailable: the memory controller is disabled, so memory.current/memory.peak do not exist",
+        "oom_kills_in_journal": 0
+      }
+    }
+  },
+  "unavailable": [
+    {
+      "field": "per-unit memory usage and peaks",
+      "reason": "memory cgroup controller disabled (cgroup_disable=memory); memory.current/memory.peak absent",
+      "substitute": "host MemTotal-MemAvailable plus per-process RSS"
+    },
+    {
+      "field": "pressure stall information",
+      "reason": "/proc/pressure absent on this kernel boot"
+    },
+    {
+      "field": "previous-boot kernel log",
+      "reason": "the persistent journal holds only the current boot (journalctl --list-boots)"
+    },
+    {
+      "field": "microSD wear/health (SMART)",
+      "reason": "SD cards expose no SMART; smartctl/nvme absent and not installed during M0",
+      "substitute": "ext4 state clean, no FS error record, Lifetime writes 137 GB baseline, no mmc/ext4 errors in the current boot"
+    },
+    {
+      "field": "fan presence",
+      "reason": "tachometer reads 0 rpm at pwm 75; a tach-less fan and an absent fan look identical"
+    },
+    {
+      "field": "sustained-load thermal behaviour",
+      "reason": "measuring it needs a load test, which is not a read-only probe; M2/M8 measure it"
+    },
+    {
+      "field": "inbound reachability from the Internet",
+      "reason": "requires an external probe, which M0 forbids; inferred from NAT evidence instead (see network)"
+    },
+    {
+      "field": "docker info / compose version",
+      "reason": "Docker is not installed"
+    }
+  ],
+  "missing_utilities": [
+    "iptables",
+    "iptables-legacy",
+    "iptables-nft",
+    "ip6tables",
+    "ufw",
+    "firewall-cmd",
+    "tailscale",
+    "tailscaled",
+    "smartctl",
+    "nvme",
+    "sensors",
+    "sqlite3",
+    "wget",
+    "node",
+    "npm",
+    "docker"
+  ],
+  "missing_utilities_source": "evidence/M0/raw/pi-audit-paths.txt#sbin_tools",
+  "network": {
+    "interfaces": {
+      "wlan0": "UP 158.205.34.18/24 (Wi-Fi, DHCP)",
+      "eth0": "DOWN, no carrier"
+    },
+    "default_route": "default via 158.205.34.1 dev wlan0 proto dhcp src 158.205.34.18 metric 600 ",
+    "global_ipv6": false,
+    "lan_block": {
+      "cidr": "158.205.34.0/24",
+      "rfc1918": false,
+      "rdap": "158.198.0.0-158.215.255.255 JPNIC-NET-JP-ERX, ALLOCATED PORTABLE, JP (evidence/M0/network-exposure.json)"
+    },
+    "egress_ip_sha256": "994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d",
+    "egress_ip_differs_from_interface": true,
+    "inbound_evidence": {
+      "local_subnet": "36",
+      "outside_subnet": "0",
+      "distinct_outside_sources": "0",
+      "journal_first_entry": "2026-09-24T21:19:34-04:00",
+      "preauth_or_invalid_user_lines": "1"
+    },
+    "fail2ban_sshd": [
+      "Currently failed:\t0",
+      "Total failed:\t0",
+      "Currently banned:\t0",
+      "Total banned:\t0"
+    ]
+  },
+  "derived": {
+    "resource_fit": {
+      "mem_total_mib": 8062.39,
+      "mem_available_mib": 7740.14,
+      "existing_usage_mib": 322.25,
+      "cap_sum_mib": 6432,
+      "reserve_mib": 1024,
+      "required_mib": 7456,
+      "headroom_mib": 284.14,
+      "fits": true
+    },
+    "free_space": {
+      "root_avail_bytes": 54828019712,
+      "root_avail_gib": 51.06,
+      "threshold_gib": 20,
+      "meets_threshold": true
+    }
+  },
+  "plans": {
+    "ports": {
+      "host_published": [
+        {
+          "service": "access-gateway",
+          "bind": "127.0.0.1",
+          "port": 3380,
+          "proto": "tcp",
+          "milestone": "M1",
+          "chosen_by": "project",
+          "note": "Only host publication of the project; loopback-bound. Tailscale Serve forwards to it from M3."
+        },
+        {
+          "service": "tailscaled (WireGuard)",
+          "bind": "0.0.0.0",
+          "port": 41641,
+          "proto": "udp",
+          "milestone": "M3",
+          "chosen_by": "tailscale default",
+          "note": "Tailscale's own default; host package, not a container publication. Falls back to another port if occupied."
+        }
+      ],
+      "tailnet_only": [
+        {
+          "service": "tailscale serve",
+          "port": 443,
+          "proto": "tcp",
+          "target": "http://127.0.0.1:3380",
+          "milestone": "M3",
+          "alternative_port": 8443,
+          "note": "pihole-FTL listens on 0.0.0.0:443 and [::]:443. Whether Serve on the tailnet address coexists with that wildcard listener is verified in M3; 8443 is the fallback, which changes no existing service."
+        }
+      ],
+      "container_internal_not_published": [
+        {
+          "service": "firecrawl-core api",
+          "port": 3002
+        },
+        {
+          "service": "firecrawl-core nuq workers",
+          "port": 3006,
+          "note": "3006+i per NuQ worker, inside the container"
+        },
+        {
+          "service": "nuq-postgres",
+          "port": 5432
+        },
+        {
+          "service": "redis",
+          "port": 6379
+        },
+        {
+          "service": "rabbitmq",
+          "port": 5672
+        },
+        {
+          "service": "searxng",
+          "port": 8080
+        },
+        {
+          "service": "browser-worker",
+          "port": 3000
+        },
+        {
+          "service": "retrieval-service",
+          "port": 3100
+        },
+        {
+          "service": "mcp-gateway",
+          "port": 3200
+        },
+        {
+          "service": "access-gateway (container side)",
+          "port": 3300
+        }
+      ],
+      "docker_networks": [
+        {
+          "name": "fcpi_access",
+          "subnet": "10.231.0.0/24"
+        },
+        {
+          "name": "fcpi_core",
+          "subnet": "10.231.1.0/24",
+          "internal": true
+        },
+        {
+          "name": "fcpi_browser",
+          "subnet": "10.231.2.0/24"
+        }
+      ],
+      "ephemeral_port_range": "32768 60999"
+    },
+    "storage": {
+      "data_filesystem_uuid": "15f4c6be-1102-4331-9904-f78e78afd1fd",
+      "data_filesystem_partuuid": "29680333-02",
+      "data_directory": "/srv/firecrawl-pi/data",
+      "medium": "microSD (the only storage device present)",
+      "planned_paths_present": {
+        "/opt/firecrawl-pi": "absent",
+        "/srv/firecrawl-pi": "absent",
+        "/etc/firecrawl-pi": "absent",
+        "/var/log/firecrawl-pi": "absent",
+        "/var/lib/docker": "absent"
+      },
+      "planned_parents_filesystem_uuid": {
+        "/opt": "15f4c6be-1102-4331-9904-f78e78afd1fd",
+        "/srv": "15f4c6be-1102-4331-9904-f78e78afd1fd",
+        "/etc": "15f4c6be-1102-4331-9904-f78e78afd1fd",
+        "/var/lib": "15f4c6be-1102-4331-9904-f78e78afd1fd"
+      },
+      "planned_paths_source": "evidence/M0/raw/pi-audit-layout.txt#planned_paths"
+    }
+  },
+  "source_review": {
+    "schema": "fcpi.m0.source-review/v1",
+    "reviewed_utc": "2026-09-25T03:40:00Z",
+    "tree": {
+      "repository": "https://github.com/firecrawl/firecrawl",
+      "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "method": "shallow fetch of the pinned commit into a session scratchpad (not the repository); read-only",
+      "detail": "evidence/M0/upstream/findings.md"
+    },
+    "facts": [
+      {
+        "id": "S01-nuq-postgres",
+        "claim": "NuQ PostgreSQL is postgres:${PG_MAJOR} with PG_MAJOR=17, pg_cron from the unpinned Debian package postgresql-17-cron, shared_preload_libraries='pg_cron' and cron.database_name='postgres' written into postgresql.conf.sample, and nuq.sql copied to /docker-entrypoint-initdb.d/010-nuq.sql.",
+        "cite": [
+          "apps/nuq-postgres/Dockerfile:3-4",
+          "apps/nuq-postgres/Dockerfile:10",
+          "apps/nuq-postgres/Dockerfile:15-18",
+          "apps/nuq-postgres/Dockerfile:21"
+        ],
+        "verified_by": "direct read in this session"
+      },
+      {
+        "id": "S02-postgres-db",
+        "claim": "POSTGRES_DB must remain 'postgres': nuq.sql runs CREATE EXTENSION pg_cron in $POSTGRES_DB, and pg_cron can only be created in cron.database_name='postgres'. Upstream SELF_HOST.md suggests POSTGRES_DB=firecrawl, which conflicts.",
+        "cite": [
+          "apps/nuq-postgres/nuq.sql:2",
+          "SELF_HOST.md:104",
+          "docker-compose.yaml:30",
+          "apps/api/src/config.ts:136"
+        ],
+        "verified_by": "subagent read; pg_cron database rule from pg_cron documentation, not executed"
+      },
+      {
+        "id": "S03-nuq-schema",
+        "claim": "nuq.sql creates extensions pgcrypto and pg_cron, schema nuq with tables queue_scrape, queue_scrape_backlog, queue_crawl_finished, group_crawl, and 36 pg_cron jobs (15-second lock reapers and group finisher, 5-minute cleaners, nightly REINDEX CONCURRENTLY, hourly job_run_details prune). Group rows expire with ttl default 86400000 ms, so NuQ is not durable result storage.",
+        "cite": [
+          "apps/nuq-postgres/nuq.sql",
+          "evidence/M0/upstream/raw/nuq-sql-cron-jobs.txt"
+        ],
+        "verified_by": "subagent read"
+      },
+      {
+        "id": "S04-nuq-wal",
+        "claim": "nuq.sql applies ALTER SYSTEM max_wal_size=16GB, min_wal_size=4GB, checkpoint_timeout=15min, wal_buffers=64MB. On a 64 GB microSD this pre-allocates up to 4 GB of WAL and permits 16 GB; M1 must override WAL sizing in project configuration.",
+        "cite": [
+          "apps/nuq-postgres/nuq.sql:8-32"
+        ],
+        "verified_by": "direct read in this session (lines 8-14)"
+      },
+      {
+        "id": "S05-harness-worker-count",
+        "claim": "harness.ts reads NUQ_WORKER_COUNT from config (default 5, not set in Compose) and spawns that many nuq-worker children.",
+        "cite": [
+          "apps/api/src/harness.ts:118",
+          "apps/api/src/harness.ts:865",
+          "apps/api/src/config.ts:231"
+        ],
+        "verified_by": "direct read in this session"
+      },
+      {
+        "id": "S06-harness-processes",
+        "claim": "With NUQ_WORKER_COUNT=1, the PostgreSQL backend and USE_DB_AUTHENTICATION=false, the harness spawns api, worker (queue-worker), extract-worker, nuq-worker-0, nuq-prefetch-worker and nuq-reconciler: 7 Node processes including the harness. Each child is started via spawn('sh', ['-c', cmd]); whether the sh wrappers stay resident (up to 13 processes) is measured in M1. index-worker is added only when USE_DB_AUTHENTICATION is true.",
+        "cite": [
+          "apps/api/src/harness.ts:264",
+          "apps/api/src/harness.ts:865",
+          "apps/api/src/harness.ts:910"
+        ],
+        "verified_by": "subagent read; process count to be measured in M1"
+      },
+      {
+        "id": "S07-scrape-max-attempts",
+        "claim": "SCRAPE_MAX_ATTEMPTS exists with default 6 and is consumed in scrapeURL.",
+        "cite": [
+          "apps/api/src/config.ts:213",
+          "apps/api/src/scraper/scrapeURL/index.ts:1223"
+        ],
+        "verified_by": "config.ts line read directly; consumer line from subagent"
+      },
+      {
+        "id": "S08-agent-auth-metadata",
+        "claim": "AGENT_AUTH_RESOURCE_METADATA_URL defaults to https://www.firecrawl.dev/.well-known/oauth-protected-resource and is sent to clients in 401 WWW-Authenticate headers (not fetched server-side).",
+        "cite": [
+          "apps/api/src/config.ts:129-131"
+        ],
+        "verified_by": "direct read of the definition line; usage from subagent"
+      },
+      {
+        "id": "S09-api-image-build",
+        "claim": "apps/api/Dockerfile stages: node:22-slim AS base, golang:1.24 AS go-build (libhtml-to-markdown.so, c-shared), base AS build (rustup default stable toolchain builds native/ crate firecrawl_rs during pnpm install; no Cargo.lock, git dependencies on branches), base AS runtime. The FoundationDB client 7.3.63 .deb is downloaded without a checksum, with arm64 mapped to aarch64; the aarch64 asset exists in the apple/foundationdb 7.3.63 release. The foundationdb npm addon has no linux-arm64 prebuild and compiles with node-gyp; it is only required lazily by the fdb backend.",
+        "cite": [
+          "apps/api/Dockerfile:2",
+          "apps/api/Dockerfile:11",
+          "apps/api/Dockerfile:19",
+          "apps/api/Dockerfile:30-37",
+          "apps/api/Dockerfile:73",
+          "apps/api/Dockerfile:82-88",
+          "apps/api/src/services/nuq-fdb/client.ts:5-13",
+          "evidence/M0/upstream/raw/fdb-7.3.63-release-assets.txt"
+        ],
+        "verified_by": "FROM and FDB lines read directly; remainder from subagent"
+      },
+      {
+        "id": "S10-prebuilt-api-image",
+        "claim": "ghcr.io/firecrawl/firecrawl:2.11.162 is published for linux/amd64 and linux/arm64; the arm64 image config records FIRECRAWL_BUILD_SHA=7666c1f9ae8720a6bba271e0f60b6a217f8a5210 and NODE_VERSION=22.23.2, created 2026-07-30T20:43:18Z.",
+        "cite": [
+          "evidence/M0/registry/digests.jsonl",
+          "evidence/M0/upstream/raw/ghcr-firecrawl-2.11.162-config-extract.txt"
+        ],
+        "verified_by": "digest resolved in this session; config extract from subagent"
+      },
+      {
+        "id": "S11-playwright-chromium",
+        "claim": "apps/playwright-service-ts resolves playwright and playwright-core 1.58.1, whose browsers.json pins chromium and chromium-headless-shell revision 1208 (browserVersion 145.0.7632.6). Playwright's registry maps debian11/12/13 and ubuntu arm64 hosts to builds/chromium/1208/chromium-linux-arm64.zip; both arm64 archives exist on cdn.playwright.dev (188304613 and 111562127 bytes).",
+        "cite": [
+          "apps/playwright-service-ts/Dockerfile:1",
+          "apps/playwright-service-ts/Dockerfile:18",
+          "evidence/M0/upstream/raw/playwright-core-1.58.1-browsers.json",
+          "evidence/M0/upstream/raw/playwright-core-1.58.1-chromium-downloadpaths.txt"
+        ],
+        "verified_by": "browsers.json read directly from the npm tarball; CDN HEAD checks in this session"
+      },
+      {
+        "id": "S12-upstream-browser-flags",
+        "claim": "The upstream Playwright service launches Chromium with --no-sandbox --disable-setuid-sandbox --no-zygote and MAX_CONCURRENT_PAGES default 10. The project browser worker must not inherit either (CLAUDE.md section 14).",
+        "cite": [
+          "apps/playwright-service-ts/api.ts:190-201"
+        ],
+        "verified_by": "subagent read"
+      },
+      {
+        "id": "S13-compose-baseline",
+        "claim": "Root docker-compose.yaml (blob e2ade0104390caf31cdcae04faa619c2674dc693): api and playwright-service built from source; redis:alpine with --bind 0.0.0.0; rabbitmq:3-management; nuq-postgres built from source; foundationdb and foundationdb-init (foundationdb/foundationdb:7.3.63) always start; the API port is published on all interfaces; postgres, redis and rabbitmq have no named volumes; NUQ_WORKER_COUNT is not set.",
+        "cite": [
+          "docker-compose.yaml"
+        ],
+        "verified_by": "blob hash verified in this session; service detail from subagent"
+      },
+      {
+        "id": "S14-rabbitmq-declarations",
+        "claim": "Core RabbitMQ declarations use durable quorum queues (extract-queue, monitoring queue, nuq prefetch) and one exclusive, auto-delete, non-durable classic reply queue in nuq.ts. None is a transient non-exclusive queue, the queue type RabbitMQ 4.x deprecates.",
+        "cite": [
+          "apps/api/src/services/extract-queue.ts:36-48",
+          "apps/api/src/services/monitoring/queue.ts:63-73",
+          "apps/api/src/services/worker/nuq.ts:133-140",
+          "apps/api/src/services/worker/nuq.ts:334-337"
+        ],
+        "verified_by": "direct read in this session"
+      },
+      {
+        "id": "S15-cloud-destinations",
+        "claim": "Reachable Firecrawl Cloud call: POST /admin/integration/{create-user,validate-api-key,rotate-api-key} proxies to https://integrations.firecrawl.dev and is mounted without the BULL_AUTH_KEY guard, so any client of the native API port can make the self-host call Firecrawl Cloud. Other Firecrawl hosts in apps/api/src are defaults or strings not fetched in the selected configuration (FIRECRAWL_DASHBOARD_URL, AGENT_AUTH_RESOURCE_METADATA_URL, OAuth audience api.firecrawl.dev, mcp.firecrawl.dev allow-list, parse.firecrawl.dev label). Search silently falls back to DuckDuckGo when SearXNG is unset or empty. The gateway must never route /admin/* to the native API, and the egress policy must deny *.firecrawl.dev.",
+        "cite": [
+          "apps/api/src/lib/admin-integration-integrations-proxy.ts:26",
+          "apps/api/src/routes/admin.ts:103-116",
+          "apps/api/src/search/v2/index.ts:69-77",
+          "evidence/M0/upstream/raw/cloud-destinations-grep.txt"
+        ],
+        "verified_by": "admin routes read directly; remainder from subagent"
+      },
+      {
+        "id": "S16-jemalloc",
+        "claim": "No jemalloc/mimalloc/tikv-jemallocator reference exists anywhere in the pinned tree, lockfiles included. The Redis 7.x and 8.10 official image builds configure bundled jemalloc with --with-lg-page=16 on every non-x86 architecture, which supports this host's 16 KiB pages.",
+        "cite": [
+          "git grep -i jemalloc (no matches)",
+          "https://github.com/docker-library/redis/blob/master/Dockerfile.template#L171-L184",
+          "https://github.com/redis/docker-library-redis/blob/release/8.10/alpine/Dockerfile#L92-L104"
+        ],
+        "verified_by": "direct grep and gh api reads in this session"
+      }
+    ]
+  },
+  "sha256": {
+    "source_review": "71d22ef1f2b767cca7b76941cdd6c78432ca91abdd688e5d4af41485d3131a56"
+  }
+}

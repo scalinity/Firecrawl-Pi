@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.image.config.v1+json",
+    "digest": "sha256:42d70f51e47dfac7ac706823c8a3826c19f7e3c35a5467f7e307d6e291c7eb3d",
+    "size": 7085
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:ace1621be7ff15b54252f68393ac33181df7f3e095e36a5d9a9892031b357d31",
+      "size": 4186056
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:d59ee6ee9b8f19e89bb4f76c0f48a1104c8a3e789203de374446b0cd799a26b4",
+      "size": 947
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:91d7f0eb5d834b499d66988b589c587efe494185fa79c24c78f3b5207d883112",
+      "size": 202959
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:8edb419afcb4f3c873bf8f8a92ee8476d05a93a9669f17c419ca2fb37588b512",
+      "size": 33131828
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:d3103ec7e32e6b2eaede414d1835e23f8ffec76fb1cd5cd4dff698eb9ad022fb",
+      "size": 101
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:4f4fb700ef54461cfa02571ae0db9a0dc1e0cdb5577484a6d75e68dc38e8acc1",
+      "size": 32
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:38422debd9b4c50a5f1d1bc776c2193bb7f7423c27fd24b059bfe1ab15060bc1",
+      "size": 2102
+    }
+  ],
+  "annotations": {
+    "com.docker.official-images.bashbrew.arch": "arm64v8",
+    "org.opencontainers.image.base.digest": "sha256:ae959799024a09da597284763c417a6e820e020fad0634c5267cf4f125e682bf",
+    "org.opencontainers.image.base.name": "alpine:3.23",
+    "org.opencontainers.image.created": "2026-09-21T17:27:27Z",
+    "org.opencontainers.image.revision": "19668eeec647317654725705506aaf25e1c08ac1",
+    "org.opencontainers.image.source": "https://github.com/redis/docker-library-redis.git#19668eeec647317654725705506aaf25e1c08ac1:alpine",
+    "org.opencontainers.image.url": "https://hub.docker.com/_/redis",
+    "org.opencontainers.image.version": "8.8.3-alpine"
+  }
+}

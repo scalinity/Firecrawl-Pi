@@ -1,0 +1,27 @@
+{
+  "schema": "fcpi.m0.runtime-candidates/v1",
+  "observed_utc": "2026-09-25T03:30:00Z",
+  "host_state": "No container runtime installed: docker, dockerd, containerd, runc, podman absent; docker.service/docker.socket not-found (evidence/M0/raw/pi-audit.txt#container_runtime).",
+  "candidates": [
+    {
+      "id": "docker-ce",
+      "source": "https://download.docker.com/linux/debian dists/trixie (Release dated 2026-09-23T16:21:14Z; Architectures include arm64)",
+      "arm64_versions": { "docker-ce": "5:29.8.1-1~debian.13~trixie", "containerd.io": "2.3.5-1~debian.13~trixie", "docker-compose-plugin": "5.5.1-1~debian.13~trixie", "docker-buildx-plugin": "0.37.1-1~debian.13~trixie" },
+      "requires": "Adding Docker's apt repository and signing key (M1 install decision)."
+    },
+    {
+      "id": "debian-docker.io",
+      "source": "apt-cache policy on the Pi (local package lists, not refreshed during M0)",
+      "arm64_versions": { "docker.io": "26.1.5+dfsg1-9+deb13u1" },
+      "requires": "No new repository. Compose v2 plugin packaging to be confirmed at M1."
+    },
+    {
+      "id": "debian-podman",
+      "source": "apt-cache policy on the Pi",
+      "arm64_versions": { "podman": "5.4.2+ds1-2+b2" },
+      "note": "Spec selects Docker Compose; listed only as an observed alternative."
+    }
+  ],
+  "supported_runtime_path": "Debian 13 (trixie) arm64 has a supported Docker path through both the distribution package and Docker's own repository. The choice between them belongs to M1.",
+  "privileges_for_m1": "danny has passwordless sudo and is not in the docker group. docker group membership is root-equivalent; project scripts should call `sudo -n docker` instead of adding the group (M1 decision)."
+}

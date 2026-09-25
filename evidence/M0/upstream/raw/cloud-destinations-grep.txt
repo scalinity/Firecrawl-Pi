@@ -1,0 +1,174 @@
+index.ts:122:    documentation_url: "https://docs.firecrawl.dev",
+config.ts:31:  FIRECRAWL_DASHBOARD_URL: z.url().default("https://www.firecrawl.dev"),
+config.ts:131:    .default("https://www.firecrawl.dev/.well-known/oauth-protected-resource"),
+config.ts:309:  // https://api.firecrawl.dev/v2/slack/oauth/callback).
+scraper/crawler/sitemap.ts:59:          "fire-engine;tlsclient" as const,
+scraper/crawler/sitemap.ts:60:          "fire-engine;tlsclient;stealth" as const,
+scraper/crawler/sitemap.ts:62:          "fire-engine;chrome-cdp" as const,
+scraper/crawler/sitemap.ts:63:          "fire-engine;chrome-cdp;stealth" as const,
+scraper/crawler/sitemap.ts:69:          "fire-engine;tlsclient" as const,
+scraper/crawler/sitemap.ts:70:          "fire-engine;tlsclient;stealth" as const,
+scraper/crawler/sitemap.ts:72:          "fire-engine;chrome-cdp" as const,
+scraper/crawler/sitemap.ts:73:          "fire-engine;chrome-cdp;stealth" as const,
+scraper/WebScraper/crawler.ts:843:          mode: "fire-engine",
+scraper/WebScraper/crawler.ts:902:                mode: "fire-engine",
+scraper/WebScraper/crawler.ts:946:            mode: "fire-engine",
+scraper/WebScraper/crawler.ts:974:                mode: "fire-engine",
+scraper/WebScraper/sitemap.ts:40:    mode?: "axios" | "fire-engine";
+scraper/WebScraper/sitemap.ts:84:          location && mode === "fire-engine" && useFireEngine;
+scraper/WebScraper/sitemap.ts:90:                "fire-engine;tlsclient" as const,
+scraper/WebScraper/sitemap.ts:91:                "fire-engine;tlsclient;stealth" as const,
+scraper/WebScraper/sitemap.ts:96:          mode === "fire-engine" &&
+scraper/WebScraper/sitemap.ts:99:                "fire-engine;tlsclient" as const,
+scraper/WebScraper/sitemap.ts:100:                "fire-engine;tlsclient;stealth" as const,
+scraper/WebScraper/utils/engine-forcing.ts:18: * Example: {"example.com": "playwright", "*.google.com": ["fire-engine;chrome-cdp", "playwright"]}
+scraper/scrapeURL/index.ts:479:  priority?: number; // Passed along to fire-engine
+scraper/scrapeURL/index.ts:485:  disableSmartWaitCache?: boolean; // Passed along to fire-engine
+scraper/scrapeURL/index.ts:491:  saveScrapeResultToGCS?: boolean; // Passed along to fire-engine
+scraper/scrapeURL/index.ts:702:          "Actions are not supported by any available engines. Actions require Fire Engine (fire-engine) to be enabled.",
+scraper/scrapeURL/error.ts:498:      "This page is not available in Firecrawl's index. Your API key was provisioned by an agent and the account has not yet been confirmed by the account holder. Until the account is confirmed, only pages already in Firecrawl's index can be served. Please ask the account holder to check their email and confirm the account to unlock full scraping capabilities, or visit https://firecrawl.dev/signin to claim the account.",
+scraper/scrapeURL/transformers/llmExtract.ts:1544:- includePaths: string[] - URL pathname regex patterns that include matching URLs in the crawl. Only the paths that match the specified patterns will be included in the response. For example, if you set "includePaths": ["blog/.*"] for the base URL firecrawl.dev, only results matching that pattern will be included, such as https://www.firecrawl.dev/blog/firecrawl-launch-week-1-recap.
+scraper/scrapeURL/transformers/llmExtract.ts:1545:- excludePaths: string[] - URL pathname regex patterns that exclude matching URLs from the crawl. For example, if you set "excludePaths": ["blog/.*"] for the base URL firecrawl.dev, any results matching that pattern will be excluded, such as https://www.firecrawl.dev/blog/firecrawl-launch-week-1-recap.
+scraper/scrapeURL/transformers/index.ts:297:   * @see src/scraper/scrapeURL/engines/fire-engine/scripts/branding.js
+scraper/scrapeURL/engines/index.ts:9:} from "./fire-engine";
+scraper/scrapeURL/engines/index.ts:42:  | "fire-engine;chrome-cdp"
+scraper/scrapeURL/engines/index.ts:43:  | "fire-engine(retry);chrome-cdp"
+scraper/scrapeURL/engines/index.ts:44:  | "fire-engine;chrome-cdp;stealth"
+scraper/scrapeURL/engines/index.ts:45:  | "fire-engine(retry);chrome-cdp;stealth"
+scraper/scrapeURL/engines/index.ts:46:  | "fire-engine;tlsclient"
+scraper/scrapeURL/engines/index.ts:47:  | "fire-engine;tlsclient;stealth"
+scraper/scrapeURL/engines/index.ts:78:        "fire-engine;chrome-cdp" as const,
+scraper/scrapeURL/engines/index.ts:79:        "fire-engine;chrome-cdp;stealth" as const,
+scraper/scrapeURL/engines/index.ts:80:        "fire-engine(retry);chrome-cdp" as const,
+scraper/scrapeURL/engines/index.ts:81:        "fire-engine(retry);chrome-cdp;stealth" as const,
+scraper/scrapeURL/engines/index.ts:82:        "fire-engine;tlsclient" as const,
+scraper/scrapeURL/engines/index.ts:83:        "fire-engine;tlsclient;stealth" as const,
+scraper/scrapeURL/engines/index.ts:181:  "fire-engine;chrome-cdp": scrapeURLWithFireEngineChromeCDP,
+scraper/scrapeURL/engines/index.ts:182:  "fire-engine(retry);chrome-cdp": scrapeURLWithFireEngineChromeCDP,
+scraper/scrapeURL/engines/index.ts:183:  "fire-engine;chrome-cdp;stealth": scrapeURLWithFireEngineChromeCDP,
+scraper/scrapeURL/engines/index.ts:184:  "fire-engine(retry);chrome-cdp;stealth": scrapeURLWithFireEngineChromeCDP,
+scraper/scrapeURL/engines/index.ts:185:  "fire-engine;tlsclient": scrapeURLWithFireEngineTLSClient,
+scraper/scrapeURL/engines/index.ts:186:  "fire-engine;tlsclient;stealth": scrapeURLWithFireEngineTLSClient,
+scraper/scrapeURL/engines/index.ts:201:  "fire-engine;chrome-cdp": meta =>
+scraper/scrapeURL/engines/index.ts:203:  "fire-engine(retry);chrome-cdp": meta =>
+scraper/scrapeURL/engines/index.ts:205:  "fire-engine;chrome-cdp;stealth": meta =>
+scraper/scrapeURL/engines/index.ts:207:  "fire-engine(retry);chrome-cdp;stealth": meta =>
+scraper/scrapeURL/engines/index.ts:209:  "fire-engine;tlsclient": meta =>
+scraper/scrapeURL/engines/index.ts:211:  "fire-engine;tlsclient;stealth": meta =>
+scraper/scrapeURL/engines/index.ts:273:  "fire-engine;chrome-cdp": {
+scraper/scrapeURL/engines/index.ts:294:  "fire-engine(retry);chrome-cdp": {
+scraper/scrapeURL/engines/index.ts:336:  "fire-engine;chrome-cdp;stealth": {
+scraper/scrapeURL/engines/index.ts:357:  "fire-engine(retry);chrome-cdp;stealth": {
+scraper/scrapeURL/engines/index.ts:399:  "fire-engine;tlsclient": {
+scraper/scrapeURL/engines/index.ts:420:  "fire-engine;tlsclient;stealth": {
+scraper/scrapeURL/engines/index.ts:523:    quality: 500, // below index (1000) so cache is tried first, above fire-engine (50)
+scraper/scrapeURL/engines/index.ts:657:    // enable fire-engine in self-hosted testing environment when mocks are supplied
+scraper/scrapeURL/engines/index.ts:660:          "fire-engine;chrome-cdp",
+scraper/scrapeURL/engines/index.ts:661:          "fire-engine(retry);chrome-cdp",
+scraper/scrapeURL/engines/index.ts:662:          "fire-engine;chrome-cdp;stealth",
+scraper/scrapeURL/engines/index.ts:663:          "fire-engine(retry);chrome-cdp;stealth",
+scraper/scrapeURL/engines/index.ts:664:          // "fire-engine;tlsclient",
+scraper/scrapeURL/engines/index.ts:665:          // "fire-engine;tlsclient;stealth",
+scraper/scrapeURL/engines/index.ts:691:  // When fire-engine is available, drop tlsclient and fetch from the general
+scraper/scrapeURL/engines/index.ts:706:    for (const engine of ["fire-engine;tlsclient", "fetch"] as Engine[]) {
+scraper/scrapeURL/engines/index.ts:780:  // (e.g. self-hosted without fire-engine) so scrapes don't break entirely.
+scraper/scrapeURL/engines/index.ts:807:        if (engine === "fire-engine;tlsclient") {
+scraper/scrapeURL/engines/index.ts:809:        } else if (engine === "fire-engine;tlsclient;stealth") {
+scraper/scrapeURL/engines/index.ts:842:        "Branding extraction requires Chrome CDP (fire-engine).",
+scraper/scrapeURL/engines/utils/specialtyHandler.ts:3:import { FireEngineCheckStatusSuccess } from "../fire-engine/checkStatus";
+scraper/scrapeURL/engines/fire-engine/index.ts:64:  return withSpan("engine.fire-engine.perform_scrape", async span => {
+scraper/scrapeURL/engines/fire-engine/index.ts:76:      "fire-engine.url": request.url,
+scraper/scrapeURL/engines/fire-engine/index.ts:77:      "fire-engine.priority": request.priority,
+scraper/scrapeURL/engines/fire-engine/index.ts:78:      "fire-engine.wait": (request as any).wait,
+scraper/scrapeURL/engines/fire-engine/index.ts:79:      "fire-engine.screenshot": (request as any).screenshot,
+scraper/scrapeURL/engines/fire-engine/index.ts:80:      "fire-engine.fullpage": (request as any).fullPage,
+scraper/scrapeURL/engines/fire-engine/index.ts:81:      "fire-engine.proxy": (request as any).proxy,
+scraper/scrapeURL/engines/fire-engine/index.ts:82:      "fire-engine.mobile": (request as any).mobile,
+scraper/scrapeURL/engines/fire-engine/index.ts:83:      "fire-engine.skip_tls": (request as any).skipTlsVerification,
+scraper/scrapeURL/engines/fire-engine/index.ts:84:      "fire-engine.production": production,
+scraper/scrapeURL/engines/fire-engine/index.ts:85:      "fire-engine.ab_mode": abTest.mode,
+scraper/scrapeURL/engines/fire-engine/index.ts:261:      "fire-engine.poll_count": pollCount,
+scraper/scrapeURL/engines/fire-engine/index.ts:262:      "fire-engine.duration_ms": Date.now() - startTime,
+scraper/scrapeURL/engines/fire-engine/index.ts:263:      "fire-engine.status_code": status.pageStatusCode,
+scraper/scrapeURL/engines/fire-engine/index.ts:264:      "fire-engine.content_length": status.content?.length,
+scraper/scrapeURL/engines/fire-engine/index.ts:265:      "fire-engine.has_screenshot": !!(
+scraper/scrapeURL/engines/fire-engine/index.ts:268:      "fire-engine.has_pdf": !!(status as any).pdf,
+scraper/scrapeURL/engines/fire-engine/index.ts:269:      "fire-engine.job_id": (scrape as any).jobId,
+scraper/scrapeURL/engines/fire-engine/index.ts:315:  return withSpan("engine.fire-engine.chrome-cdp", async span => {
+scraper/scrapeURL/engines/fire-engine/index.ts:317:      "engine.type": "fire-engine-chrome-cdp",
+scraper/scrapeURL/engines/fire-engine/index.ts:546:  return withSpan("engine.fire-engine.tlsclient", async span => {
+scraper/scrapeURL/engines/fire-engine/index.ts:548:      "engine.type": "fire-engine-tlsclient",
+scraper/scrapeURL/engines/index/index.ts:70:      (meta.winnerEngine !== "fire-engine;tlsclient" &&
+scraper/scrapeURL/engines/index/index.ts:71:        meta.winnerEngine !== "fire-engine;tlsclient;stealth" &&
+scraper/scrapeURL/engines/fire-engine/scrape.ts:182:  config.FIRE_ENGINE_BETA_URL ?? "<mock-fire-engine-url>";
+scraper/scrapeURL/engines/fire-engine/scrape.ts:184:  config.FIRE_ENGINE_STAGING_URL ?? "<mock-fire-engine-url>";
+scraper/scrapeURL/lib/fetch.ts:5:import { fireEngineURL } from "../engines/fire-engine/scrape";
+scraper/scrapeURL/lib/fetch.ts:190:        ? request.url.replace(fireEngineURL, "<fire-engine>")
+scraper/scrapeURL/lib/fetch.ts:194:      if (trueUrl.startsWith("<fire-engine>") && request.method === "POST") {
+scraper/scrapeURL/lib/urlSpecificParams.ts:26:  //     defaultScraper: "fire-engine",
+scraper/scrapeURL/lib/urlSpecificParams.ts:37:    internalOptions: { forceEngine: "fire-engine;tlsclient" },
+scraper/scrapeURL/lib/urlSpecificParams.ts:41:    internalOptions: { forceEngine: "fire-engine;tlsclient" },
+lib/robots-txt.ts:49:          "fire-engine;tlsclient" as const,
+lib/robots-txt.ts:50:          "fire-engine;tlsclient;stealth" as const,
+lib/robots-txt.ts:52:          "fire-engine;chrome-cdp" as const,
+lib/robots-txt.ts:53:          "fire-engine;chrome-cdp;stealth" as const,
+lib/robots-txt.ts:59:          "fire-engine;tlsclient" as const,
+lib/robots-txt.ts:60:          "fire-engine;tlsclient;stealth" as const,
+lib/robots-txt.ts:62:          "fire-engine;chrome-cdp" as const,
+lib/robots-txt.ts:63:          "fire-engine;chrome-cdp;stealth" as const,
+lib/ip-restriction.ts:158:    error: `Request blocked: IP address ${clientIp ? normalizeIp(clientIp) : "unknown"} is not on this team's allowed IP list. Team admins can manage allowed IPs at https://www.firecrawl.dev/app/enterprise-controls?tab=ip-restriction`,
+lib/engpicker.ts:215:          "fire-engine;chrome-cdp",
+lib/engpicker.ts:219:            engine: "fire-engine;chrome-cdp",
+lib/engpicker.ts:226:          "fire-engine;chrome-cdp;stealth",
+lib/engpicker.ts:230:            engine: "fire-engine;chrome-cdp;stealth",
+lib/engpicker.ts:237:          "fire-engine;tlsclient",
+lib/engpicker.ts:241:            engine: "fire-engine;tlsclient",
+lib/engpicker.ts:248:          "fire-engine;tlsclient;stealth",
+lib/engpicker.ts:252:            engine: "fire-engine;tlsclient;stealth",
+lib/engpicker.ts:263:      r => r.engine === "fire-engine;chrome-cdp",
+lib/engpicker.ts:266:      r => r.engine === "fire-engine;chrome-cdp;stealth",
+lib/engpicker.ts:269:      r => r.engine === "fire-engine;tlsclient",
+lib/engpicker.ts:272:      r => r.engine === "fire-engine;tlsclient;stealth",
+lib/key-restriction.ts:11:const MANAGE_RESTRICTIONS_URL = "https://www.firecrawl.dev/app/api-keys";
+controllers/auth.ts:387:const KEYLESS_ENDPOINT_NOT_AVAILABLE_MESSAGE = `This endpoint is not supported by the keyless free tier. Sign up for a free API key at https://www.firecrawl.dev/signin for more endpoints, more usage, and higher rate limits.
+controllers/auth.ts:392:const KEYLESS_SUSPICIOUS_IP_MESSAGE = `Unfortunately, your IP address looks suspicious, so Firecrawl can't be used without an API key from here. Sign up for a free API key at https://firecrawl.dev for 1000 credits and higher rate limits for free. (If you're an agent, you can also use https://firecrawl.dev/auth.md)`;
+controllers/auth.ts:831:      error: `Rate limit exceeded. Consumed (req/min): ${rateLimiterRes.consumedPoints}, Remaining (req/min): ${rateLimiterRes.remainingPoints}. Upgrade your plan at https://firecrawl.dev/pricing for increased rate limits or please retry after ${secs}s, resets at ${retryDate}`,
+controllers/auth.ts:853:    // check the origin of the request and make sure its from firecrawl.dev
+controllers/auth.ts:855:    // if (origin && origin.includes("firecrawl.dev")){
+controllers/v1/scrape.ts:285:          login_url: "https://firecrawl.dev/signin",
+lib/keyless.ts:21:export const KEYLESS_FREE_TIER_LIMIT_MESSAGE = `You've hit Firecrawl's keyless free tier rate limit. To continue now, create a free API key at https://www.firecrawl.dev/signin.
+lib/queue-full-error.ts:9:      `Queue limit reached: your team has ${queueSize} jobs queued (limit: ${queueLimit}). Please wait for existing jobs to complete before adding more, or upgrade your plan for a higher limit. For more info, see https://docs.firecrawl.dev/rate-limits#concurrent-browser-limits`,
+controllers/v0/scrape.ts:285:            "Insufficient credits. For more credits, you can upgrade your plan at https://firecrawl.dev/pricing",
+controllers/v0/admin/crawl-monitor.ts:52:    target_hint: "https://firecrawl.dev",
+controllers/v0/admin/crawl-monitor.ts:58:    originUrl: "https://firecrawl.dev",
+controllers/v0/admin/crawl-monitor.ts:102:      url: "https://firecrawl.dev",
+controllers/v2/scrape.ts:434:              login_url: "https://firecrawl.dev/signin",
+lib/admin-integration-integrations-proxy.ts:26:  const url = `https://integrations.firecrawl.dev${upstreamPath}`;
+controllers/v2/browser.ts:255:      error: `Insufficient credits for a ${ttl}s browser session (requires ~${estimatedCredits} credits). For more credits, you can upgrade your plan at https://firecrawl.dev/pricing.`,
+controllers/v2/scrape-browser.ts:586:        error: `Insufficient credits for a ${ttl}s browser session (requires ~${estimatedCredits} credits). For more credits, you can upgrade your plan at https://firecrawl.dev/pricing.`,
+routes/admin.ts:9:import { checkFireEngine } from "../controllers/v0/admin/check-fire-engine";
+services/oauth-token-introspection.ts:8:export const FIRECRAWL_REST_RESOURCE = "https://api.firecrawl.dev/";
+routes/shared.ts:73:              login_url: "https://firecrawl.dev/signin",
+routes/shared.ts:105:              login_url: "https://firecrawl.dev/signin",
+routes/shared.ts:106:              upgrade_url: "https://firecrawl.dev/pricing",
+routes/shared.ts:208:                ? "https://firecrawl.dev/pricing or try changing the request limit to a lower value"
+routes/shared.ts:209:                : "https://www.firecrawl.dev/extract#pricing") +
+services/notification/monitoring_email.ts:20:const FROM_ADDRESS = "Firecrawl <notifications@notifications.firecrawl.dev>";
+services/mcp/action-logs.ts:9:  "https://mcp.firecrawl.dev/v2/mcp",
+services/mcp/action-logs.ts:10:  "https://mcp.firecrawl.dev/v2/mcp-oauth",
+services/notification/email_notification.ts:27:    html: "Hey there,<br/><p>You've hit one of the Firecrawl endpoint's rate limit! Take a breather and try again in a few moments. If you need higher rate limits, consider upgrading your plan. Check out our <a href='https://firecrawl.dev/pricing'>pricing page</a> for more info.</p><p>If you have any questions, feel free to reach out to us at <a href='mailto:help@firecrawl.com'>help@firecrawl.com</a></p><br/>Thanks,<br/>Firecrawl Team<br/><br/>Ps. this email is only sent once every 7 days if you reach a rate limit.",
+services/notification/email_notification.ts:36:      return `Hey there,<br/><p>Your account was successfully recharged with ${creditsText} because your remaining credits were below the threshold. Consider upgrading your plan at <a href='https://firecrawl.dev/pricing'>firecrawl.dev/pricing</a> to avoid hitting the limit.</p><br/>Thanks,<br/>Firecrawl Team<br/>`;
+services/notification/email_notification.ts:45:    html: "Hey there,<br/><p>We've noticed frequent auto-recharges on your account. To optimize your costs and get better features, we recommend upgrading to a higher tier plan with:</p><ul><li>More included credits</li><li>Better pricing per credit</li><li>Higher rate limits</li></ul><p>View our plans at <a href='https://firecrawl.dev/pricing'>firecrawl.dev/pricing</a>. If none fit your needs, email us at <a href='mailto:help@firecrawl.com'>help@firecrawl.com</a> with 'Scale pricing' in the subject and we'll quickly help you move to a scale plan.</p><br/>Thanks,<br/>Firecrawl Team<br/>",
+services/notification/email_notification.ts:53:    <p>This is just to let you know that you could be scraping faster by having more concurrent browsers. Consider upgrading your plan at <a href='https://firecrawl.dev/pricing'>firecrawl.dev/pricing</a>.</p>
+services/notification/email_notification.ts:54:    <p>You can modify your notification settings anytime at <a href='https://www.firecrawl.dev/app/account-settings'>firecrawl.dev/app/account-settings</a>.</p>
+services/notification/email_notification.ts:169:      from: "Firecrawl <notifications@notifications.firecrawl.dev>",
+controllers/v0/crawl.ts:152:          : "Insufficient credits. You may be requesting with a higher limit than the amount of credits you have left. If not, upgrade your plan at https://firecrawl.dev/pricing or contact us at help@firecrawl.com",
+controllers/v0/admin/check-fire-engine.ts:61:    logger.error("An error occurred while checking fire-engine", {
+controllers/v2/parse.ts:483:            const syntheticUrl = `https://parse.firecrawl.dev/uploads/${encodeURIComponent(syntheticFilename)}`;
+controllers/v2/parse.ts:597:              login_url: "https://firecrawl.dev/signin",
+services/ab-test.ts:9:} from "../scraper/scrapeURL/engines/fire-engine/scrape";
+services/ab-test.ts:113:      abLogger.info("A/B-testing fire-engine to staging", {
+services/ab-test.ts:138:      abLogger.info("A/B-testing fire-engine (staging) request completed", {
+services/ab-test.ts:159:      abLogger.warn("A/B-testing fire-engine (staging) failed", {
+services/ab-test.ts:179:          abLogger.warn("Failed to delete AB test job from fire-engine", {
+services/worker/scrape-worker.ts:1029:              "Something went wrong... Contact help@mendable.ai"),

@@ -1,0 +1,20 @@
+### probe_time
+2026-09-25T03:36:11Z
+### planned_paths
+/opt/firecrawl-pi=absent
+/srv/firecrawl-pi=absent
+/etc/firecrawl-pi=absent
+/var/log/firecrawl-pi=absent
+/var/lib/docker=absent
+### parent_dirs
+/opt entries=1
+/srv entries=0
+/etc entries=169
+opt_names=pihole 
+srv_names=
+### filesystem_of_planned_parents
+/opt uuid=15f4c6be-1102-4331-9904-f78e78afd1fd
+/srv uuid=15f4c6be-1102-4331-9904-f78e78afd1fd
+/etc uuid=15f4c6be-1102-4331-9904-f78e78afd1fd
+/var/lib uuid=15f4c6be-1102-4331-9904-f78e78afd1fd
+end

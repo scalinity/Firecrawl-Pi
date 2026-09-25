@@ -1,0 +1,4 @@
+# M0 BEFORE/AFTER snapshot diff
+# before: 2026-09-25T03:15:30Z  after: 2026-09-25T03:36:18Z
+# excluded: meta section, session-<n>.scope units (the audit's own SSH logins)
+# boot_id: unchanged (no reboot)

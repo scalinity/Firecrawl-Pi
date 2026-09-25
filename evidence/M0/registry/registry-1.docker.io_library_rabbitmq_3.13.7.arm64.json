@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.image.config.v1+json",
+    "digest": "sha256:ea8913ef88566946a591f1d39d716f5ddb66f174034bd04d852b5b67f9e82f85",
+    "size": 9169
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:97dd3f0ce510a30a2868ff104e9ff286ffc0ef01284aebe383ea81e85e26a415",
+      "size": 28861957
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:4a669bc3e1dd595cac776afbcb9e1747eff54ec02148a30cbc32d931cf90fdc6",
+      "size": 41509079
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:908453a3b3f17a4227bdc5f64bb4f189bcccc21710a81539ee1f1b762dae7da7",
+      "size": 7148033
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:dee3d7bda3a274ffec0689a217ea9e5c75b7656c7263b33aa6e48414c5ec8088",
+      "size": 9410
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:b0dce9f9a25e21af6fa87597fc88c2b6cfd18699fde7f413a962aa83282d2a1e",
+      "size": 21222009
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:4d707a369044b78c77de976dbcbe5f389e591fcd358c5c6f408740b7d9d58028",
+      "size": 189
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:ba58438a193ece3b6896a2f2ba1e0ff978fc3d2ea6ad09b8f4237b488b4c0f99",
+      "size": 109
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:2b6c30257d7d3440b4cca1b0f765536fbd30e3c143d1c1c2322449918c7bf156",
+      "size": 619
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:c64be2c4c916bd5097029af195c6a2e81d9043fd43d894900ad749dad11663cc",
+      "size": 832
+    }
+  ],
+  "annotations": {
+    "com.docker.official-images.bashbrew.arch": "arm64v8",
+    "org.opencontainers.image.base.digest": "sha256:955364933d0d91afa6e10fb045948c16d2b191114aa54bed3ab5430d8bbc58cc",
+    "org.opencontainers.image.base.name": "ubuntu:24.04",
+    "org.opencontainers.image.created": "2025-12-02T02:38:51Z",
+    "org.opencontainers.image.revision": "72351b5bcd09512d263e92f2ca97a85d8d8a040b",
+    "org.opencontainers.image.source": "https://github.com/docker-library/rabbitmq.git#72351b5bcd09512d263e92f2ca97a85d8d8a040b:3.13/ubuntu",
+    "org.opencontainers.image.url": "https://hub.docker.com/_/rabbitmq",
+    "org.opencontainers.image.version": "3.13.7"
+  }
+}
