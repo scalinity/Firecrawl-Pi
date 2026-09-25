@@ -1,0 +1,19 @@
+# url=https://raw.githubusercontent.com/firecrawl/firecrawl/7666c1f9ae8720a6bba271e0f60b6a217f8a5210/apps/api/src/services/worker/nuq.ts
+# retrieved_utc=2026-09-25T05:46:37Z
+# sha256=d84017ecfb21fc043905a0aeea61a2d677e68a12298117dcd37fb7bda486bfb8 lines=1750
+# RabbitMQ calls (grep -n assertQueue|sendToQueue|consume|x-queue-type|exclusive|durable|autoDelete|prefetch):
+132:        await channel.prefetch(5);
+133:        const queue = await channel.assertQueue(
+136:            exclusive: true,
+137:            autoDelete: true,
+138:            durable: false,
+140:              "x-queue-type": "classic",
+182:      await this.listener.channel.consume(
+334:        await channel.assertQueue(this.queueName + ".prefetch", {
+335:          durable: true,
+337:            "x-queue-type": "quorum",
+391:      this.sender.channel.sendToQueue(
+411:      this.sender.channel.sendToQueue(
+417:          expiration: "50000", // must be less than lock reaper timeout (1 min) to minimize dead zone where jobs are expired from RabbitMQ but still "active" in DB
+1298:            const job = await this.sender.channel.get(
+# payloads: sendJobEnd sends Buffer.from(status) ('completed'|'failed') with correlationId; sendJobPrefetch sends Buffer.from(JSON.stringify(job)) persistent, expiration '50000', to the quorum queue <queue>.prefetch; getJobToProcess uses channel.get(<queue>.prefetch, {noAck:true}) and falls back to PostgreSQL on error. Results are stored in PostgreSQL, not carried over RabbitMQ.

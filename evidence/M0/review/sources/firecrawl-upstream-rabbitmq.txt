@@ -1,0 +1,13 @@
+# retrieved_utc=2026-09-25T05:46:37Z
+# 1) RabbitMQ image in upstream compose: curl -fsSL https://raw.githubusercontent.com/firecrawl/firecrawl/<ref>/docker-compose.yaml | grep 'image: *rabbitmq'
+#    v2.11.162: 143:    image: rabbitmq:3-management
+#    v2.11.402: 148:    image: rabbitmq:3-management
+#    main: 148:    image: rabbitmq:3-management
+# 2) https://api.github.com/search/issues?q=repo:firecrawl/firecrawl+rabbitmq (unauthenticated): total_count=76; no title mentions RabbitMQ 4.x. Items relevant to M1:
+#    #4750 [open] 2026-09-24 [Self-Host] rabbitmq healthcheck times out before RabbitMQ boots, api never starts
+#    #4751 [open] 2026-09-24 fix(self-host): give RabbitMQ time to boot before healthchecks count
+#    #4263 [open] 2026-08-07 fix(api): register NuQ RabbitMQ consumer before setting listener
+#    #4244 [open] 2026-08-06 api: NuQ channel.consume() outside try/finally permanently breaks the RabbitMQ listener — all waitForJob calls hang after one consume() failure
+# 3) search 'rabbitmq:4' OR 'rabbitmq 4' OR 'RabbitMQ 4.' in issues/PRs: 3 hits (#4, #4751, #3447), none about running RabbitMQ 4.x.
+# 4) #4244 body (excerpt): In NuQ.startListener() (services/worker/nuq.ts) this.listener is assigned inside the try block, but await this.listener.channel.consume(...) runs after the try/finally. If consume() throws, every later startListener() returns early; the channel has no consumer, completion messages pile up, and every waitForJob() hangs until its timeout.
+# 5) #4750 body (excerpt): upstream healthcheck allows ~20s (start_period 5s + 3 x 5s); RabbitMQ logs 'Server startup complete' 19-21s after start on a 16-CPU host; api (depends_on service_healthy) never starts on 2 of 3 cold starts. Image rabbitmq:3-management.

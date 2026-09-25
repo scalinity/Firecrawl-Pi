@@ -1,0 +1,46 @@
+# retrieved_utc=2026-09-25T05:58:49Z
+# sources (raw, pinned commit): https://raw.githubusercontent.com/firecrawl/firecrawl/7666c1f9ae8720a6bba271e0f60b6a217f8a5210/apps/api/src/lib/html-to-markdown.ts (sha256 63eafa745507bbc15433902c81ae17bedd4c999aa74b206c0449c36152ac63a5); .../apps/api/src/config.ts; .../apps/api/src/natives.ts; .../docker-compose.yaml; .../apps/api/Dockerfile
+## html-to-markdown.ts imports (lines 1-10):
+import koffi from "koffi";
+import { config } from "../config";
+import "../services/sentry";
+import * as Sentry from "@sentry/node";
+import { logger } from "./logger";
+import type { Logger } from "winston";
+import { stat } from "fs/promises";
+import { HTML_TO_MARKDOWN_PATH } from "../natives";
+import { convertHTMLToMarkdownWithHttpService } from "./html-to-markdown-client";
+import { postProcessMarkdown } from "@mendable/firecrawl-rs";
+## Go library: loaded lazily by a singleton, only when USE_GO_MARKDOWN_PARSER is true (lines 19-21, 29-37, 94-99):
+  private constructor() {
+    const lib = koffi.load(HTML_TO_MARKDOWN_PATH);
+    this.free = lib.func("FreeCString", "void", ["string"]);
+  public static async getInstance(): Promise<GoMarkdownConverter> {
+    if (!GoMarkdownConverter.instance) {
+      try {
+        await stat(HTML_TO_MARKDOWN_PATH);
+      } catch (_) {
+        throw Error("Go shared library not found");
+      }
+      GoMarkdownConverter.instance = new GoMarkdownConverter();
+    }
+  try {
+    if (config.USE_GO_MARKDOWN_PARSER) {
+      const converter = await GoMarkdownConverter.getInstance();
+      let markdownContent = await converter.convertHTMLToMarkdown(html);
+      markdownContent = await postProcessMarkdown(markdownContent);
+      return markdownContent;
+## failure handling: any Go-path error, including a load failure, is logged and falls through to Turndown (line 122 onward):
+122:  // Fallback to TurndownService if Go parser fails or is not enabled
+## Turndown path ends in postProcessMarkdown (Rust, @mendable/firecrawl-rs) and returns '' on error:
+78:      markdownContent = await postProcessMarkdown(markdownContent);
+98:      markdownContent = await postProcessMarkdown(markdownContent);
+145:    let markdownContent = await turndownService.turndown(html);
+146:    markdownContent = await postProcessMarkdown(markdownContent);
+151:    return ""; // Optionally return an empty string or handle the error as needed
+## config.ts:
+256:  HTML_TO_MARKDOWN_SERVICE_URL: z.string().optional(),
+358:  USE_GO_MARKDOWN_PARSER: z.stringbool().optional(),
+## docker-compose.yaml and apps/api/Dockerfile mentions of USE_GO_MARKDOWN_PARSER: 0
+## natives.ts: HTML_TO_MARKDOWN_PATH = join(process.cwd(), 'sharedLibs', 'go-html-to-md', 'libhtml-to-markdown.so')
+# Reading: with upstream defaults the Go library is on disk but never loaded; Markdown comes from Turndown plus the Rust post-processor. If USE_GO_MARKDOWN_PARSER is enabled, a Go load failure is masked by the Turndown fallback, so only a check that the process maps libhtml-to-markdown.so proves the Go path ran.

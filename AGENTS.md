@@ -105,7 +105,7 @@ Unless M0 evidence or a deliberate canonical update requires otherwise, preserve
 - Canonical transport: **stateless Streamable HTTP**
 - Canonical endpoint: `/mcp`
 - Official TypeScript MCP SDK v2
-- Selected server package baseline: `@modelcontextprotocol/server@2.0.0`
+- Selected server package baseline: `@modelcontextprotocol/server@2.1.0`
 - Modern implementation must use the modern request-factory/stateless architecture.
 - Support SDK-provided stateless compatibility for `2025-11-25`.
 - Do not introduce hidden protocol sessions, `Mcp-Session-Id`, or deprecated HTTP+SSE as the primary architecture.

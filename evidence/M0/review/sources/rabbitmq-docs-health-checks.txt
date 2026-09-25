@@ -1,0 +1,51 @@
+# url=https://raw.githubusercontent.com/rabbitmq/rabbitmq-website/main/docs/monitoring/index.md (source of https://www.rabbitmq.com/docs/monitoring; the site itself answered curl with HTTP 403)
+# retrieved_utc=2026-09-25T05:47:27Z
+# excerpts (verbatim lines):
+#### Stage 1
+
+The most basic check ensures that the [runtime](./runtime) is running
+and (indirectly) that CLI tools can [authenticate](./cli#erlang-cookie) with it.
+
+Except for the CLI tool authentication
+part, the probability of false positives can be considered approaching `0`
+except for upgrades and maintenance windows.
+
+[`rabbitmq-diagnostics ping`](./man/rabbitmq-diagnostics.8) performs this check:
+
+```bash
+rabbitmq-diagnostics -q ping
+# => Ping succeeded if exit code is 0
+```
+#### Stage 3
+
+Includes previous checks and also verifies that the RabbitMQ application is running
+(not stopped with [`rabbitmqctl stop_app`](./man/rabbitmqctl.8#stop_app)
+or the [Pause Minority partition handling strategy](./partitions))
+and there are no resource alarms.
+
+```bash
+# lists alarms in effect across the cluster, if any
+rabbitmq-diagnostics -q alarms
+```
+
+[`rabbitmq-diagnostics check_running`](./man/rabbitmq-diagnostics.8) is a check that makes sure that the runtime is running
+and the RabbitMQ application on it is not stopped or paused.
+
+[`rabbitmq-diagnostics check_local_alarms`](./man/rabbitmq-diagnostics.8) checks that there are no local alarms in effect
+on the node. If there are any, it will exit with a non-zero status.
+
+The two commands in combination deliver the stage 3 check:
+
+```bash
+rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms
+# if both checks succeed, the exit code will be 0
+```
+...
+Moreover, most CLI commands (such as `rabbitmq-diagnostics`) has a performance impact because the CLI joins the [Erlang
+distribution](https://www.erlang.org/doc/reference_manual/./distributed) (the same mechanism used for clustering RabbitMQ nodes).
+Joining and leaving this cluster on every probe execution has unnecessary overhead.
+
+[RabbitMQ Kubernetes Operator](/kubernetes/operator/operator-overview) configures a TCP port check on the AMQP port
+as the `readinessProbe` and defines no `livenessProbe` at all. This should be considered the best practice.
+
+## Monitoring of Clusters {#clusters}

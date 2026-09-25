@@ -1,0 +1,12 @@
+# url=https://asahilinux.org/docs/sw/broken-software/
+# retrieved_utc=2026-09-25T05:45:18Z
+# command=curl -fsSL <url>; HTML stripped; excerpts around each keyword
+[page size] t for 16K pages. Packages are sometimes built assuming a 4K page size, or are otherwise incompatible with large pages. This has not been a serious issue for desktop Linux software, as x86/amd64 supports only 4K pages and PowerPC supports only 4K or 64K pages. 
+[jemalloc]  https://github.com/sharkdp/fd/issues/1085 Fixed since 10.1 jemalloc https://github.com/jemalloc/jemalloc/pull/2864 Fixed since 5.3.1. k3s-io https://github.com/k3s-io/k3s/issues/7335 Fixed since 1.27.2 KiCad https://gitlab.com/kicad/code/kicad/-/issues/16008 
+[Chromium] 52.git.dsterba@suse.com/ Fixed since Linux 5.19 ( caveats ) Chromium https://bugs.chromium.org/p/chromium/issues/detail?id=1301788 Includes Electron apps. Fixed since 102. Emacs https://lists.gnu.org/archive/html/bug-gnu-emacs/2021-03/msg01260.html Fixed since
+[Redis] webview but not for QtPdf. Fixed in downstream ArchLinuxARM Redis https://bugzilla.redhat.com/show_bug.cgi?id=2240293 https://bodhi.fedoraproject.org/updates/FEDORA-2023-bdb1515542 Fixed in fedora since redis-7.0.13-2.fc38 and redis-7.2.1-2.fc39) rr https://gi
+[aligned to 4K] ions aligned to 64K for compatibility with all AArch64 machines, tooling bugs (such as binaries manipulated by old versions of patchelf ) or customized compiler flags (such as many Google programs, including older versions of Chrome (and Electron) and most current Android programs) may result in a binary whose sections are only aligned to 4K. Are there any available workarounds? Fedora Linux Asahi Remix's muvm package is, by default, configured to virtualize a 4K kernel (along with setting FEX as the x86_64 binfmt handler so
+[Erlang] (not mentioned)
+[PostgreSQL] (not mentioned)
+[Node] (not mentioned)
+[RabbitMQ] (not mentioned)

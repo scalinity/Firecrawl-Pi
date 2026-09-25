@@ -1,0 +1,10 @@
+# retrieved_utc=2026-09-25T05:42:42Z (V8 logs); DEPS read at about the same time
+# 1) https://chromium.googlesource.com/chromium/src/+/refs/tags/153.0.8010.12/DEPS?format=TEXT -> 'v8_revision': '0b60d2b01800d7ba2c6eeb5e51ecd95f6dab44c7' (commit message 'Version 15.3.76.4', 2026-08-24)
+#    The same read for tag 153.0.8010.36 failed (HTTP 503 / timeout, three attempts); not needed for the conclusion.
+# 2) https://chromium.googlesource.com/v8/v8/+log/0b60d2b01800d7ba2c6eeb5e51ecd95f6dab44c7?format=JSON&n=400 (ancestors of that revision, 2026-07-27..2026-08-24); commits whose message names 543557673 or 542403045:
+{"commit":"36079c36283aaf3d0cee0797e46ddc278988f7f2","committed":"Tue Aug 11 19:43:17 2026","subject":"[wasm][sandbox] Fix side effects of WasmGetOwnProperty builtin","fixed_line":"Fixed: 543557673"}
+{"commit":"e0562d87ad9c17042b581582c99237d798572e67","committed":"Fri Aug 07 08:23:45 2026","subject":"[compiler] Don't inline Array.prototype.sort on mixed elements kinds","fixed_line":"Fixed: 542403045"}
+# 3) https://chromium.googlesource.com/v8/v8/+log/refs/branch-heads/15.3?format=JSON&n=120 (2026-08-12..2026-09-24, head 'Version 15.3.76.19'):
+{"commits":120,"newest":"Thu Sep 24 13:05:36 2026","oldest":"Wed Aug 12 11:08:27 2026","position_of_0b60d2b0":33,"commits_naming_either_bug":0}
+# Reading: both fix commits are ancestors of the V8 revision in Chromium 153.0.8010.12, and no later commit on the 15.3 branch names either bug. The advisory's 'fixed in 153.0.8010.36' is the first stable build, not the first build containing the fix.
+# Limit: a follow-up fix filed under a different bug id would not be found by this search.

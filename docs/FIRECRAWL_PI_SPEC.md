@@ -43,7 +43,7 @@ Build a **private, centrally accessible web-acquisition service**, not a public 
 
 **Selected core:** Firecrawl API-image release tag `v2.11.162`, dereferenced source commit `7666c1f9ae8720a6bba271e0f60b6a217f8a5210`; PostgreSQL/NuQ, Redis, and RabbitMQ; Docker Compose; one NuQ worker initially. The tag is the exact snapshot used by the current official self-hosting guide. It is not being represented as the latest formal GitHub Release: the Releases page inspected during research identifies `v2.11.0` separately. [V: F01–F05]
 
-**Selected MCP:** stable **`2026-07-28`**, stateless Streamable HTTP at `/mcp`, official TypeScript SDK v2 with `@modelcontextprotocol/server@2.0.0`; SDK-provided stateless compatibility for `2025-11-25`. The modern request factory, not an old transport with its session option turned off, is the implementation model. [V: M01–M07]
+**Selected MCP:** stable **`2026-07-28`**, stateless Streamable HTTP at `/mcp`, official TypeScript SDK v2 with `@modelcontextprotocol/server@2.1.0`; SDK-provided stateless compatibility for `2025-11-25`. The modern request factory, not an old transport with its session option turned off, is the implementation model. [V: M01–M07]
 
 **Selected gap closures:** SearXNG on the Pi; Decodo residential HTTP proxies; Zyte API pay-as-you-go enhanced retrieval; a replaceable, budgeted remote OpenAI-compatible extraction provider; native document parsing with LlamaParse as an optional-account, bounded complex-document fallback; local artifact storage; automated encrypted off-device backups. Bright Data is the alternate raw-proxy supplier, and ScrapingBee is the alternate enhanced provider. [D, with E sources in §§10–15]
 
@@ -80,15 +80,15 @@ Use these states consistently: **DESIGNED**, **IMPLEMENTED_UNVERIFIED**, **VERIF
 | Formal GitHub Release observed | `v2.11.0` | Distinct from later API-image tags. Do not conflate release channels. [F02] |
 | Firecrawl Compose blob | `e2ade0104390caf31cdcae04faa619c2674dc693` | Baseline for service inventory, not the final deployment file. [F04] |
 | MCP protocol | `2026-07-28` | Current stable revision verified, not an RC/draft. [M01–M03] |
-| MCP server package | `@modelcontextprotocol/server@2.0.0` | Exact package version verified at its tag; pin matching official Node/core packages and lockfile in M0/M4. [M06] |
+| MCP server package | `@modelcontextprotocol/server@2.1.0` | Exact package version verified at its tag. It caps SDK-read request bodies and batch length, and rejects a modern request without `MCP-Protocol-Version`. Pin the matching official `core` and `node` 2.1.0 packages and the lockfile in M4. [M06] |
 | Runtime family | Supported Node 22.x for Firecrawl-derived services | Upstream Dockerfiles use Node 22; resolve supported patch and immutable ARM64 image digest in M0. [F09–F10] |
 | PostgreSQL | Major 17 plus `pg_cron` | Upstream NuQ Dockerfile; retain `POSTGRES_DB=postgres`. [F11] |
-| Browser | Chromium shipped with the pinned Playwright package | Resolve package/browser/base-image combination together, prove native ARM64 launch; never independently float Chromium. [F10, O01–O02] |
+| Browser | Chromium bundled with the browser worker's pinned Playwright package | The browser worker is project-owned, so the project chooses its Playwright pin; upstream's `playwright-service` pin does not bind it. Pin the newest stable Playwright whose bundled Chromium contains the fix for every Chromium bug known to be exploited in the wild at build time. Resolve package/browser/base-image combination together, prove native ARM64 launch; never independently float Chromium. [F10, O01–O02] |
 | Other service images | Exact compatible patch tags and ARM64 digests recorded by M0 | Registry manifests have not been executed/inspected on the Pi. No invented digest or unchecked architecture claim. |
 
 ### 3.2 Controlled upgrades
 
-The implementation repository must contain a machine-readable `versions.lock.json` with source SHA, image registry, tag, digest, platform, package versions, browser revision, and build provenance. It is an implementation artifact, not another canonical design document. Build our images from the pinned source plus an ordered patch series. Record patch hashes separately from upstream SHA.
+The implementation repository must contain a machine-readable `versions.lock.json` with source SHA, image registry, tag, digest, platform, package versions, browser revision, and build provenance. It is an implementation artifact, not another canonical design document. Build our images from the pinned source plus an ordered patch series. Until the first patch exists, the unpatched Firecrawl API image may instead be acquired from upstream by digest when its recorded build SHA equals the pinned commit; its provenance is that SHA and upstream's publishing run, not a reproducible build. Record patch hashes separately from upstream SHA.
 
 M0 must recheck stable releases, security fixes, and image availability. A newer release is a candidate, not permission to silently change this baseline. Prefer a maintained security-fixed version when the pinned baseline has a relevant unresolved vulnerability; update both canonical documents and rerun affected tests before adoption. Exact runtime digests and environment inventory are discovery outputs, not user questions.
 
@@ -509,7 +509,7 @@ Tool annotations must be honest: acquiring public information is read-oriented t
 | Python v2 | Current stable line supports 2026-07-28 and earlier revisions | Valid alternative, especially for a Python-heavy host. No benefit here sufficient to offset another application dependency stack. |
 | Go | Official SDK supports the current revision, with migration/compatibility guidance | Attractive small-runtime alternative; no measured Pi footprint comparison was performed. Additional REST/schema integration work outweighs an unmeasured efficiency advantage initially. |
 
-All three were evaluated as maintained official choices, not rejected on language preference alone. [V: M05–M07] Pin `@modelcontextprotocol/server@2.0.0`, compatible official core/Node packages, and their resolved integrity hashes. M0/M4 must check security-maintained patches and API compatibility before freezing the implementation lockfile.
+All three were evaluated as maintained official choices, not rejected on language preference alone. [V: M05–M07] Pin `@modelcontextprotocol/server@2.1.0` with `@modelcontextprotocol/core@2.1.0` and `@modelcontextprotocol/node@2.1.0`, and their resolved integrity hashes. M0/M4 must check security-maintained patches and API compatibility before freezing the implementation lockfile.
 
 ### 17.2 Request lifecycle
 
@@ -1181,7 +1181,7 @@ Research date: **2026-09-22**. Public vendor documentation describes products; p
 | M03 | https://modelcontextprotocol.io/specification/2026-07-28/basic/transports/streamable-http | Current POST/JSON/SSE/header/cancellation semantics |
 | M04 | https://modelcontextprotocol.io/specification/2026-07-28/basic/versioning | Version selection and compatibility requirements |
 | M05 | https://modelcontextprotocol.io/docs/2026-07-28/sdk ; https://github.com/modelcontextprotocol/python-sdk ; https://github.com/modelcontextprotocol/go-sdk | Official SDK tiers and current Python/Go compatibility guidance |
-| M06 | https://github.com/modelcontextprotocol/typescript-sdk/blob/@modelcontextprotocol/server@2.0.0/packages/server/package.json | Exact selected server package and runtime requirement |
+| M06 | https://github.com/modelcontextprotocol/typescript-sdk/blob/@modelcontextprotocol/server@2.1.0/packages/server/package.json | Exact selected server package and runtime requirement |
 | M07 | https://ts.sdk.modelcontextprotocol.io/v2/migration/support-2026-07-28 and https://ts.sdk.modelcontextprotocol.io/v2/serving/http | Modern factory entry, legacy stateless behavior, explicit client era selection, auth/Host/Origin responsibility |
 | M08 | https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization | OAuth resource-server/security/discovery and current registration model |
 

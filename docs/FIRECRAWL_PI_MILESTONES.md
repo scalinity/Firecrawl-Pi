@@ -33,7 +33,7 @@ For every verification retain: command/test ID, timestamp in UTC, source and pat
 |---|---|
 | Firecrawl | `v2.11.162`, source `7666c1f9ae8720a6bba271e0f60b6a217f8a5210`; guide-pinned API-image snapshot, distinct from observed formal Release `v2.11.0` |
 | MCP | Stable `2026-07-28`, modern stateless Streamable HTTP `/mcp` |
-| SDK | Official TypeScript v2; verified `@modelcontextprotocol/server@2.0.0`, compatible packages frozen in lockfile |
+| SDK | Official TypeScript v2; verified `@modelcontextprotocol/server@2.1.0`, compatible packages frozen in lockfile |
 | Legacy interoperability | SDK-provided stateless `2025-11-25` support, not a custom session store |
 | Core | Curated Compose; PostgreSQL 17/NuQ + Redis + RabbitMQ; no FoundationDB server/init |
 | Retrieval | Small pinned engine integration; local bounded browser; per-request egress/budget/quality policy |
@@ -136,7 +136,7 @@ Cloud-parity claims, enhanced scraping, large LLMs, full MCP, production public 
 
 ### Implementation Work
 
-Build or acquire immutable native ARM64 images using the verified release plus project-owned packaging changes. Exclude FoundationDB server/init explicitly. Keep PostgreSQL 17 with pg_cron's intended database. Give PostgreSQL, Redis, and RabbitMQ proper persistent mounts and stable identities. Configure safe credentials and permissions; remove example/default passwords and queue-admin exposure.
+Build or acquire immutable native ARM64 images using the verified release plus project-owned packaging changes; the Firecrawl API image is acquired only under spec §3.2's build-SHA rule, and every image is referenced by digest. Exclude FoundationDB server/init explicitly. Keep PostgreSQL 17 with pg_cron's intended database. Give PostgreSQL, Redis, and RabbitMQ proper persistent mounts and stable identities. Configure safe credentials and permissions; remove example/default passwords and queue-admin exposure.
 
 Set actual `NUQ_WORKER_COUNT=1`, inspect the harness's child processes, and establish the initial memory/CPU controls. Add private internal networks and a minimal authenticated gateway before publishing any host route. Core data services remain unexposed. Mount checks fail closed when the planned data device is absent.
 
@@ -591,13 +591,13 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 |---|---|---|---|---|
 | B1 | The memory cgroup controller is disabled (the firmware adds `cgroup_disable=memory` to the kernel command line; the controllers are `cpuset cpu io pids`). No container memory cap can be enforced. | OS blocker; owner-approved remedy applied 2026-09-25 (`cgroup_enable=memory` appended, one reboot; `evidence/M0/b1/APPLIED.md`) | None from the owner. The M0 re-check confirms `memory` in `/sys/fs/cgroup/cgroup.controllers` and re-runs V01–V08. | M0 acceptance, M1 |
 | B2 | Fan presence: the owner states a fan is fitted (2026-09-25). M0 read 0 rpm while the fan was commanded at PWM 75, so rpm is not a trusted health signal; thermal checks rely on temperature and `get_throttled`. | Cleared: owner-stated physical fact | None | — |
-| D1 | Browser version: pinned Playwright 1.58.1 bundles Chromium 145; two V8 bugs exploited in the wild are fixed only in 152/153. | Decision for the separate review | Review decision on the M2 browser pair | M2 |
-| D2 | 16 KiB-page kernel (`kernel_2712.img` only); native Chromium launch unproven. | Decision for the separate review | Review decision: keep 16K with per-image launch proofs, or plan the 4K fallback | M1/M2 |
-| D3 | RabbitMQ series: upstream `3-management` (3.13, community support ended) versus 4.3.6. | Decision for the separate review | Review decision on the series | M1 |
-| D4 | Go build stage 1.24 is out of support. | Decision for the separate review | Review decision on the Go line for source builds | M1/M2 source builds |
-| D5 | MCP SDK 2.0.0 versus 2.1.0 (request-body caps; rejects modern requests without the version header). | Decision for the separate review | Review decision; adopting 2.1.0 changes the baseline row in both canonical documents | M4 |
-| D6 | M1 image source: acquire upstream's arm64 `2.11.162` image versus build from source. | Decision for the separate review | Review decision on the build plan | M1 |
+| D1 | M2 pins the newest stable Playwright whose bundled Chromium contains the fix for every Chromium bug exploited in the wild at build time (today 1.63.0 qualifies by fix commits; the 1.64 line with Chromium 155 qualifies by version); if none qualifies, browser rendering stays fixture-only. | Decided by the separate review (2026-09-25) | None | M2 |
+| D2 | Keep the 16 KiB-page kernel; M1 proves its images natively as its first step and M2 proves Chromium first; the 4K kernel is proposed only after a reproduced page-size failure that no same-version build clears. | Decided by the separate review (2026-09-25) | None. If the fallback triggers: owner approval of the 4K kernel and one reboot. | M1/M2 |
+| D3 | `rabbitmq:4.3.6`, plain image without the management plugin, by digest, accepted after an M1 NuQ round trip; the move off 4.3 (community support ends 2026-11-30) belongs to M8. | Decided by the separate review (2026-09-25) | None | M1 (series move: M8) |
+| D4 | Source builds use Go 1.27.x (newest patch, image pinned by digest); go.mod needs no change. | Decided by the separate review (2026-09-25) | None | M2 (M1 only if it must build from source) |
+| D5 | `@modelcontextprotocol/server`, `core` and `node` 2.1.0, with `client` 2.1.0 for tests; the baseline rows name 2.1.0. | Decided by the separate review (2026-09-25) | None | M4 |
+| D6 | M1 acquires `ghcr.io/firecrawl/firecrawl:2.11.162` by arm64 digest and builds NuQ on the Pi; M2 builds its patched image on the Mac if the owner approves a container runtime there, otherwise on the Pi with the project stack stopped. | Decided by the separate review (2026-09-25) | Owner: yes or no to installing a Linux arm64 container runtime on the Mac, before M2's first build | M1 (build host: M2) |
 
-The separate review is a fresh Opus 5.5 session at xhigh effort that reads the evidence and both canonical documents, not the M0 transcript. Expected later gates, not current failures: provider credentials and explicit budget or free-credit permission (M5–M7); Tailscale installation and account association (M3); an off-device backup destination and recovery-key custody (M8). The microSD-only storage permits the spec §21.1 pilot; whether the card meets final unattended acceptance is an M8 question.
+The separate review, a fresh Opus 5.5 session at xhigh effort that read the evidence and both canonical documents rather than the M0 transcript, decided D1–D6 on 2026-09-25; the decisions, their evidence, the rejected alternatives and what each one obliges are in `evidence/M0/review/DECISIONS.md`. Expected later gates, not current failures: provider credentials and explicit budget or free-credit permission (M5–M7); Tailscale installation and account association (M3); an off-device backup destination and recovery-key custody (M8). The microSD-only storage permits the spec §21.1 pilot; whether the card meets final unattended acceptance is an M8 question.
 
-**Next authorized implementation action:** the separate review of D1–D6, then the M0 re-check (memory controller present, V01–V08). M1 stays ineligible until M0 is ACCEPTED.
+**Next authorized implementation action:** the M0 re-check (memory controller present, V01–V08). M1 stays ineligible until M0 is ACCEPTED.

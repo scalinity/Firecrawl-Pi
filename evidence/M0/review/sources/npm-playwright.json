@@ -1,0 +1,19 @@
+# url=https://registry.npmjs.org/playwright
+# retrieved_utc=2026-09-25T05:38:43Z
+# command=curl -fsS https://registry.npmjs.org/playwright | jq '{dist_tags, stable_1_6x_times}'
+{
+  "dist-tags": {
+    "rc": "1.18.0-rc1",
+    "latest": "1.63.0",
+    "beta": "1.63.0-beta-1789413634000",
+    "next": "1.64.0-alpha-2026-09-25"
+  },
+  "stable_1_6x_times": {
+    "1.60.0": "2026-05-11T19:09:33.114Z",
+    "1.61.0": "2026-06-15T10:06:22.269Z",
+    "1.61.1": "2026-06-23T19:49:00.061Z",
+    "1.62.0": "2026-07-24T21:56:48.823Z",
+    "1.62.1": "2026-07-30T16:38:49.134Z",
+    "1.63.0": "2026-09-04T22:45:21.732Z"
+  }
+}

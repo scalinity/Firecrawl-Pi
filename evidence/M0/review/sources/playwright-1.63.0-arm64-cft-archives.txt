@@ -1,0 +1,16 @@
+# retrieved_utc=2026-09-25T05:39:53Z
+# what: Playwright 1.63.0 linux-arm64 Chromium source, from package/lib/coreBundle.js in the tarball recorded in playwright-core-1.63.0-browsers.json
+# coreBundle.js: "debian13-arm64": cftUrl("linux-arm64/chrome-linux-arm64.zip"); headless shell: cftUrl("linux-arm64/chrome-headless-shell-linux-arm64.zip")
+# coreBundle.js: function cftUrl(suffix) -> path builds/cft/${browserVersion}/${suffix}, mirrors ["https://cdn.playwright.dev"]
+## HEAD https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux-arm64/chrome-linux-arm64.zip
+HTTP/2 307 
+content-length: 0
+HTTP/2 200 
+last-modified: Tue, 25 Aug 2026 21:55:50 GMT
+content-length: 195926016
+## HEAD https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux-arm64/chrome-headless-shell-linux-arm64.zip
+HTTP/2 307 
+content-length: 0
+HTTP/2 200 
+last-modified: Tue, 25 Aug 2026 21:56:23 GMT
+content-length: 120278638

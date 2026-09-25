@@ -1,0 +1,14 @@
+# retrieved_utc=2026-09-25T05:52:49Z
+# 1) https://api.github.com/advisories?ecosystem=npm&affects=@modelcontextprotocol/<pkg>&per_page=100 (unauthenticated)
+#    server: []
+#    core: []
+#    node: []
+#    client: []
+#    hono: []
+#    sdk: [{"ghsa_id":"GHSA-345p-7cg4-v4c7","published_at":"2026-02-04","severity":"high"},{"ghsa_id":"GHSA-8r9q-7v3j-jr4g","published_at":"2026-01-05","severity":"high"},{"ghsa_id":"GHSA-w48q-cv73-mx4w","published_at":"2025-12-02","severity":"high"}]
+# 2) POST https://api.osv.dev/v1/query {package:{name,ecosystem:npm},version}
+#    server:2.1.0: {}
+#    core:2.1.0: {}
+#    node:2.1.0: {}
+#    server:2.0.0: {}
+# Reading: no advisory exists for any v2 package; the three advisories are for the v1 package @modelcontextprotocol/sdk.

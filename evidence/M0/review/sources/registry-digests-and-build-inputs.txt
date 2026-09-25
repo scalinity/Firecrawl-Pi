@@ -1,0 +1,19 @@
+# retrieved_utc=2026-09-25T06:00:19Z (1) and 2026-09-25T06:00:29Z (2-4)
+## 1) Docker Hub re-resolution: anonymous token from https://auth.docker.io/token?service=registry.docker.io&scope=repository:<repo>:pull (not stored), then GET https://registry-1.docker.io/v2/<repo>/manifests/<tag> (index), arm64 entry from .manifests[]
+library/rabbitmq:4.3.6 index=sha256:d0bffe70e755f348625415f32b0a090662e5f06b3ba3f82a4c7aaa18621b1279 arm64=sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8
+library/rabbitmq:3.13.7 index=sha256:87178a0ee3e2f52980ba356d38646ed1056705ff2d5ff281f8965456eaa0c1e3 arm64=sha256:47c388129d4fc820f399d60d4e358c03a91617a657be024be7321be3387de819
+library/postgres:17.11-trixie index=sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f arm64=sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761
+library/redis:8.10.2-alpine index=sha256:3811787313eba226a2ef38658c6ccb91cd5e110edc89c37767de373120a0e5a0 arm64=sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44
+#    all four equal the M0 records in evidence/M0/registry/digests.jsonl
+#    note: rabbitmq:3-management arm64 is sha256:8689ddfceca1ff1ecfeaa6619cb9cfc73570cf5fa022d3d904cdb065da1f925d (version 3.13.7-management); its base annotation names sha256:47c388… = rabbitmq:3.13.7 (evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3-management.arm64.json)
+## 2) Redis jemalloc page size at the revision that built the selected image (annotation org.opencontainers.image.source = https://github.com/redis/docker-library-redis.git#8104e63b5910fda751bf7c038fa297b6fb19ff43:alpine, evidence/M0/registry/registry-1.docker.io_library_redis_8.10.2-alpine.arm64.json)
+#    https://raw.githubusercontent.com/redis/docker-library-redis/8104e63b5910fda751bf7c038fa297b6fb19ff43/alpine/Dockerfile | grep -n -- --with-lg-page
+99:		amd64 | i386 | x32) extraJemallocConfigureFlags="$extraJemallocConfigureFlags --with-lg-page=12" ;; \
+100:		*) extraJemallocConfigureFlags="$extraJemallocConfigureFlags --with-lg-page=16" ;; \
+## 3) https://apt.postgresql.org/pub/repos/apt/dists/trixie-pgdg/main/binary-arm64/Packages.gz, postgresql-17-cron (first two entries)
+Version: 1.6.8-1.pgdg13+2
+SHA256: be615d3a5ac2e271db9c536093253ce28bf608dd6b802d9795016873089a9621
+Version: 1.6.8-1.pgdg13+1
+SHA256: ccf5457f4fb48e1361fd83ae3f41c57df9d7a32af066f885180967d94cdbaa6d
+## 4) https://github.com/apple/foundationdb/releases/download/7.3.63/foundationdb-clients_7.3.63-1_aarch64.deb.sha256
+a3c451ddb8242cc2396ba3419e1f3c9b283a64ea2eaff555377f4503bf9c3a64  foundationdb-clients_7.3.63-1_aarch64.deb

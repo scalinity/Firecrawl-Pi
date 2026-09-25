@@ -1,0 +1,40 @@
+# retrieved_utc=2026-09-25T05:50:54Z (all items below within a few minutes)
+## 1) https://go.dev/dl/?mode=json  (supported releases)
+[{"version":"go1.27.1","stable":true},{"version":"go1.26.8","stable":true}]
+## 2) https://go.dev/dl/?mode=json&include=all  (1.24/1.26/1.27 versions present)
+go1.27.1 go1.27.0 go1.26.8 go1.26.7 go1.26.6 go1.26.5 go1.26.4 go1.26.3 go1.26.2 go1.26.1 go1.26.0 go1.24.13 go1.24.12 go1.24.11 go1.24.10 go1.24.9 go1.24.8 go1.24.7 go1.24.6 go1.24.5 go1.24.4 go1.24.3 go1.24.2 go1.24.1 go1.24.0
+## 3) https://go.dev/doc/devel/release
+go1.27.0 (released 2026-08-19)
+go1.27.1 (released 2026-09-01)
+go1.26.0 (released 2026-02-10)
+go1.26.8 (released 2026-09-01)
+go1.24.13 (released 2026-02-04
+Each major Go release is supported until there are two newer major releases. For example, Go 1.5 was supported until the Go 1.7 re
+## 4) https://raw.githubusercontent.com/firecrawl/firecrawl/7666c1f9ae8720a6bba271e0f60b6a217f8a5210/apps/api/sharedLibs/go-html-to-md/go.mod
+module html-to-markdown.go
+
+go 1.23.0
+
+toolchain go1.24.0
+
+require github.com/firecrawl/html-to-markdown v0.0.0-20260312013131-1af9901a5d61
+
+## 5) https://raw.githubusercontent.com/firecrawl/firecrawl/7666c1f9ae8720a6bba271e0f60b6a217f8a5210/apps/api/Dockerfile lines 11-17
+FROM golang:1.24 AS go-build
+WORKDIR /app
+COPY sharedLibs/go-html-to-md ./sharedLibs/go-html-to-md
+
+RUN cd sharedLibs/go-html-to-md && \
+    go mod download && \
+    go build -o libhtml-to-markdown.so -buildmode=c-shared html-to-markdown.go
+## 6) https://raw.githubusercontent.com/docker-library/golang/master/{1.27/bookworm,1.27/trixie,1.26/bookworm}/Dockerfile
+1.27_bookworm: ENV GOLANG_VERSION 1.27.1 ENV GOTOOLCHAIN=local 
+1.27_trixie: ENV GOLANG_VERSION 1.27.1 ENV GOTOOLCHAIN=local 
+1.26_bookworm: ENV GOLANG_VERSION 1.26.8 ENV GOTOOLCHAIN=local 
+## 7) https://go.dev/doc/toolchain (verbatim)
+The go line declares the minimum required Go version for using the module or workspace. For compatibility reasons, if the go line is omitted from a go.
+The toolchain line declares a suggested toolchain to use with the module or workspace. As described in “ Go toolchain selection ” below, the go command may run this specific toolchain when operating in that module or workspace if the default toolchain s version is less than the suggested toolchain s version.
+When GOTOOLCHAIN is set to local , the go command always runs the bundled Go toolchain. When GOTOOLCHAIN is set to name (for example, GOTOOLCHAIN=go1.
+## 8) https://go.dev/doc/godebug (verbatim)
+When compiling a work module or workspace that declares an older Go version, the Go toolchain amends its defaults to match that older Go version as closely as possible.
+As an exception, GODEBUGs introduced for security releases will have the new behavior apply to all versions.

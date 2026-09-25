@@ -1,0 +1,41 @@
+# url=https://api.github.com/repos/rabbitmq/rabbitmq-server/releases?per_page=100 and .../tags?per_page=100 (unauthenticated)
+# retrieved_utc=2026-09-25T05:46:10Z
+# command=curl -fsS <url> | jq: 4.x .0 releases and prereleases, 4.3.x patches, any v4.4 tag
+v4.0.0-beta.1	2024-07-16T20:40:32Z	prerelease=true
+v4.0.0-beta.2	2024-07-21T15:29:39Z	prerelease=true
+v4.0.0-beta.3	2024-07-24T03:01:58Z	prerelease=true
+v4.0.0-beta.4	2024-08-13T03:39:13Z	prerelease=true
+v4.0.0-beta.5	2024-08-17T04:03:10Z	prerelease=true
+v4.0.0-beta.6	2024-08-29T02:07:14Z	prerelease=true
+v4.0.0-rc.1	2024-09-11T02:23:26Z	prerelease=true
+v4.0.0-rc.2	2024-09-17T07:00:26Z	prerelease=true
+v4.1.0	2025-04-15T16:18:29Z	prerelease=false
+v4.1.0-beta.1	2024-11-14T17:06:39Z	prerelease=true
+v4.1.0-beta.2	2024-11-23T23:37:22Z	prerelease=true
+v4.1.0-beta.3	2024-12-11T01:15:06Z	prerelease=true
+v4.1.0-beta.4	2025-02-10T15:45:14Z	prerelease=true
+v4.1.0-beta.5	2025-03-20T03:57:17Z	prerelease=true
+v4.1.0-rc.1	2025-04-02T02:17:47Z	prerelease=true
+v4.1.0-rc.2	2025-04-11T18:57:20Z	prerelease=true
+v4.2.0	2025-10-27T16:56:40Z	prerelease=false
+v4.2.0-beta.1	2025-08-07T16:10:02Z	prerelease=true
+v4.2.0-beta.2	2025-08-28T00:43:32Z	prerelease=true
+v4.2.0-beta.3	2025-09-15T19:30:58Z	prerelease=true
+v4.2.0-beta.4	2025-09-25T02:35:29Z	prerelease=true
+v4.2.0-rc.1	2025-10-08T21:42:33Z	prerelease=true
+v4.3.0	2026-04-23T01:18:14Z	prerelease=false
+v4.3.0-rc.0	2026-03-26T03:47:43Z	prerelease=true
+v4.3.0-rc.1	2026-04-20T18:19:14Z	prerelease=true
+v4.3.1	2026-05-20T01:21:53Z	prerelease=false
+v4.3.2	2026-06-15T15:34:09Z	prerelease=false
+v4.3.3	2026-07-20T14:55:46Z	prerelease=false
+v4.3.4	2026-07-23T14:46:25Z	prerelease=false
+v4.3.5	2026-08-17T21:41:39Z	prerelease=false
+v4.3.6	2026-09-14T07:24:14Z	prerelease=false
+v4.4 tags among the 100 newest tags: 0
+# series GA vs previous series' end of community support (support dates from rabbitmq-release-information.txt):
+#   4.1.0 GA 2025-04-15 -> 4.0 community support ended 2025-04-30
+#   4.2.0 GA 2025-10-27 -> 4.1 community support ended 2026-01-31
+#   4.3.0 GA 2026-04-23 -> 4.2 community support ended 2026-07-31
+#   4.4: no tag, beta or rc published; 4.3 community support ends 2026-11-30
+# also: https://api.github.com/repos/rabbitmq/rabbitmq-server/git/matching-refs/tags/v4.4 -> 0 refs (2026-09-25T05:48:24Z); the tags list starts at v4.3.6, so the 100-tag window covers the newest tags.

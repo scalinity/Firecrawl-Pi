@@ -1,0 +1,52 @@
+# url=https://api.github.com/repos/raspberrypi/bookworm-feedback/issues/107 and .../issues/107/comments?per_page=100 (unauthenticated)
+# retrieved_utc=2026-09-25T05:43:52Z
+# command=curl -fsS <url> | jq; comments filtered for redis|postgres|erlang|rabbit|beam|node|v8|docker|container|chrom|playwright|puppeteer|electron|jemalloc|golang
+# issue: Pi5 16K PageSize Kernel Incompatible Software | state=closed comments=39 created=2023-10-21T14:25:15Z updated=2025-07-05T22:28:57Z
+## issue body (verbatim)
+This issue will be a public tracker for 16K pagesize incompatible software. I made a similar post in the bookworm beta forum thread but that is still not public.
+
+Feel free to add your own incompatible software as a comment and I will add it to this post.
+
+Much of this list is thanks to Asahi linux wiki https://github.com/AsahiLinux/docs/wiki/Broken-Software
+
+Broken software:
+- f2fs
+- FEX
+- hardened_malloc
+- jemalloc
+  - Geekbench 6 (< 6.2.2)
+  - Minecraft Java (on versions and launchers without the <3.3.2 lwjgl native jemalloc patch)
+  - rust
+- fd
+- Wine ARM64
+- Wine x86_64 through Box64
+- Box86
+- Zig
+- All Chromium based applications (pre-102)
+  - qt5-webengine
+  - qt6-webengine (QtPdf)
+- libvirt/QEMU/KVM (fixed in versions newer than bookworm has)
+- All Android applications (only 4k header compatible, https://reviews.llvm.org/D55029)
+  - Minecraft Bedrock Launcher
+- Most armv6/armv7 software
+  - [Minecraft Pi Reborn](https://github.com/Botspot/pi-apps/pull/2493#issuecomment-1836200199)
+- Scratch3
+- [Flycast](https://github.com/flyinghead/flycast/issues/1288)
+- [DOSBox](https://github.com/realnc/dosbox-core/issues/57)
+- [btrfs](https://github.com/raspberrypi/bookworm-feedback/issues/136) (should be fixed in newer linux kernels or with newly generated btrfs storage I think.. https://www.spinics.net/lists/linux-btrfs/msg120249.html)
+- [Musescore](https://github.com/musescore/MuseScore/issues/20342) - (< 4.2.0)
+
+## matching comments (date :: first 300 chars)
+2023-12-18 :: jemalloc - bitnami/redis docker image
+2023-12-19 :: Polars (python module) because it uses jemalloc. ghollingworth's suggestion of using kernel8.img fixed it for me. I have read elsewhere that ubuntu uses a different page size and does not have the jemalloc issue, but I have not verified it.
+2024-05-27 :: OvenMediaEngine, because it uses jemalloc (and the RaspberryPi 5 even with 8GB RAM doesn't have enough RAM to fully recomplie it and test if the jemallow configure option fixes all issues).
+2024-05-27 :: > OvenMediaEngine, because it uses jemalloc (and the RaspberryPi 5 even with 8GB RAM doesn't have enough RAM to fully recomplie it and test if the jemallow configure option fixes all issues).  Maybe try fewer threads, if possible. Also ZRAM should fix that for you. https://forums.raspberrypi.com/vie
+2024-12-05 :: Running fluent-bit containerized (have tested standalone) also
+2024-12-20 ::     > jemalloc - bitnami/redis docker image  As well as any "internal" redis installation in images. I install redis in my own image like this: ``` RUN	curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg &&\ 		echo "deb [signed-by=/usr/share/keyr
+2025-01-09 :: Are affected too:  - Google Native Client (virtual machine):   https://www.chromium.org/nativeclient/ - Daemon (game engine, it uses Native Client to virtualise the game code):   https://github.com/DaemonEngine/Daemon - Unvanquished (game, it uses the Dæmon game engine):   https://unvanquished.net/ 
+## case-insensitive counts over body and all comments (postgres, erlang, rabbit, playwright; node checked separately below)
+postgres mentions: 0
+erlang mentions: 0
+rabbit mentions: 0
+playwright mentions: 0
+node mentions: 2, both inside one ceph-volume podman command trace (a container environment variable), not Node.js; v8: 0

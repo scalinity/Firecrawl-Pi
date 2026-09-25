@@ -1,0 +1,11 @@
+# url=https://raw.githubusercontent.com/docker-library/rabbitmq/76efb370838e36e4b120e252e75cf0dac70a7d55/4.3/ubuntu/Dockerfile (revision named in the rabbitmq:4.3.6 arm64 manifest annotation org.opencontainers.image.revision, evidence/M0/registry/registry-1.docker.io_library_rabbitmq_4.3.6.arm64.json) and .../4.3/ubuntu/management/Dockerfile
+# retrieved_utc=2026-09-25T05:47:27Z
+## 4.3/ubuntu/Dockerfile
+40:ENV OTP_VERSION=27.3.4.18
+146:		amd64 | arm64) jitFlag='--enable-jit' ;; \
+236:ENV RABBITMQ_VERSION=4.3.6
+302:RUN gosu rabbitmq rabbitmq-plugins enable --offline rabbitmq_prometheus
+325:EXPOSE 4369 5671 5672 15691 15692 25672
+## 4.3/ubuntu/management/Dockerfile
+14:	rabbitmq-plugins enable --offline rabbitmq_management; \
+41:EXPOSE 15671 15672

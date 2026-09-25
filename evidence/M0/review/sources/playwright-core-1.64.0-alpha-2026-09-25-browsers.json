@@ -1,0 +1,18 @@
+# url=https://registry.npmjs.org/playwright-core/-/playwright-core-1.64.0-alpha-2026-09-25.tgz
+# retrieved_utc=2026-09-25T05:38:55Z
+# tarball_sha256=fad35658e15006e96e342d5b7ccefefc0dd983c16376f444e8a0459f6421b83b
+# command=curl -fsSL <url> | tar -xzO package/browsers.json | jq '[.browsers[] | select(.name|test("^chromium")) | {name,revision,browserVersion,title}]'
+[
+  {
+    "name": "chromium",
+    "revision": "1247",
+    "browserVersion": "155.0.8059.12",
+    "title": "Chrome for Testing"
+  },
+  {
+    "name": "chromium-headless-shell",
+    "revision": "1247",
+    "browserVersion": "155.0.8059.12",
+    "title": "Chrome Headless Shell"
+  }
+]

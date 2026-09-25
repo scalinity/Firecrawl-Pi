@@ -1,0 +1,9 @@
+# url=https://www.rabbitmq.com/release-information
+# retrieved_utc=2026-09-25T05:45:50Z
+# command=curl -fsSL <url> | strip tags | extract rows: series, latest patch, release date, end of community support, end of commercial support (indicative)
+4.3 4.3.6 Release Notes Release Notes 16 Sept 2026 30 Nov 2026 30 Apr 2028
+4.2 4.2.10 Release Notes Release Notes 17 Aug 2026 31 Jul 2026 30 Jun 2030
+4.1 4.1.8 Release Notes Release Notes 22 Jan 2026 31 Jan 2026 30 Apr 2027
+4.0 4.0.9 Release Notes Release Notes 14 Apr 2025 30 Apr 2025 30 Sept 2026
+3.13 3.13.7 Release Notes Release Notes 26 Aug 2024 30 Sept 2024 31 Dec 2029
+# page legend: 'Older releases not listed in the table above are unsupported.' 'Long term support is available to the users who hold a valid commercial support license.' No 4.4 row.

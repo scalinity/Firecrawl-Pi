@@ -1,0 +1,94 @@
+# retrieved_utc=2026-09-25T05:53:49Z (items 1-4 within a few minutes)
+## 1) ghcr.io/firecrawl/firecrawl:2.11.162 re-resolved: anonymous pull token from https://ghcr.io/token?scope=repository:firecrawl/firecrawl:pull (not stored), then GET https://ghcr.io/v2/firecrawl/firecrawl/manifests/2.11.162
+#    docker-content-digest: sha256:1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63 (unchanged from evidence/M0/registry/digests.jsonl)
+#    manifests: linux/amd64 sha256:cc27dadc6eb259b077fcd478df794cd2d41c51616599c0ca161055a587bcc95c; linux/arm64 sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af; no attestation manifests
+## 2) https://api.github.com/repos/firecrawl/firecrawl/attestations/sha256:<arm64 digest> and /sha256:<index digest> (unauthenticated): HTTP 404 for both (no attestation found; not distinguishable here from one visible only with authentication)
+## 3) https://raw.githubusercontent.com/firecrawl/firecrawl/7666c1f9ae8720a6bba271e0f60b6a217f8a5210/.github/workflows/deploy-image.yml (194 lines), verbatim excerpts:
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/api/**
+      - .github/workflows/deploy-image.yml
+      - .github/scripts/resolve_api_image_version.py
+  workflow_dispatch:
+  build:
+    needs: version
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        include:
+          - platform: linux/amd64
+            platform_suffix: linux-amd64
+            runner: blacksmith-4vcpu-ubuntu-2404
+          - platform: linux/arm64
+            platform_suffix: linux-arm64
+            runner: blacksmith-4vcpu-ubuntu-2404-arm
+        uses: useblacksmith/build-push-action@30c71162f16ea2c27c3e21523255d209b8b538c1 # v2
+        with:
+          context: ./apps/api
+          push: true
+          tags: ${{ needs.version.outputs.image }}:sha-${{ needs.version.outputs.short_sha }}-${{ matrix.platform_suffix }}
+          platforms: ${{ matrix.platform }}
+          provenance: false
+          build-args: |
+            GIT_SHA=${{ github.sha }}
+          cache-from: type=registry,ref=${{ needs.version.outputs.image }}:buildcache-${{ matrix.platform_suffix }}
+          cache-to: type=registry,ref=${{ needs.version.outputs.image }}:buildcache-${{ matrix.platform_suffix }},mode=max
+
+      - name: Verify pushed image contents
+        env:
+          IMAGE_TAG: ${{ needs.version.outputs.image }}:sha-${{ needs.version.outputs.short_sha }}-${{ matrix.platform_suffix }}
+          EXPECTED_SHA: ${{ github.sha }}
+        run: |
+          docker pull "${IMAGE_TAG}"
+          actual_sha="$(docker run --rm --entrypoint node "${IMAGE_TAG}" -p 'process.env.FIRECRAWL_BUILD_SHA')"
+          if [ "${actual_sha}" != "${EXPECTED_SHA}" ]; then
+            echo "::error::Image build SHA mismatch: expected ${EXPECTED_SHA}, got ${actual_sha}"
+            exit 1
+          fi
+
+
+      - name: Create Git tag
+        env:
+          RELEASE_TAG: ${{ needs.version.outputs.tag }}
+        run: |
+          git fetch --force --tags origin
+
+          if git rev-parse -q --verify "refs/tags/${RELEASE_TAG}" >/dev/null; then
+            tag_commit="$(git rev-list -n 1 "${RELEASE_TAG}")"
+            if [ "${tag_commit}" != "${GITHUB_SHA}" ]; then
+              echo "::error::${RELEASE_TAG} already points at ${tag_commit}, not ${GITHUB_SHA}"
+              exit 1
+            fi
+
+            echo "${RELEASE_TAG} already exists on this commit; reusing it."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "${RELEASE_TAG}" "${GITHUB_SHA}" -m "Release API image ${RELEASE_TAG}"
+          set -euo pipefail
+
+          amd64_image="${IMAGE}:sha-${SHORT_SHA}-linux-amd64"
+          arm64_image="${IMAGE}:sha-${SHORT_SHA}-linux-arm64"
+          manifest_tags=(
+            "${IMAGE}:${VERSION}"
+            "${IMAGE}:${VERSION}-production"
+            "${IMAGE}:${MAJOR_MINOR}"
+            "${IMAGE}:${MAJOR}"
+            "${IMAGE}:latest"
+          )
+
+          for target in "${manifest_tags[@]}"; do
+            echo "Publishing multi-arch manifest ${target}"
+            docker buildx imagetools create \
+              --tag "${target}" \
+              "${amd64_image}" \
+              "${arm64_image}"
+          done
+## 4) https://api.github.com/repos/firecrawl/firecrawl/actions/runs?head_sha=7666c1f9ae8720a6bba271e0f60b6a217f8a5210 (unauthenticated), deploy-image.yml runs:
+{"id":30579949775,"name":"Deploy Images to GHCR","event":"push","status":"completed","conclusion":"success","created_at":"2026-07-30T20:37:06Z","updated_at":"2026-07-30T20:47:54Z","head_sha":"7666c1f9ae8720a6bba271e0f60b6a217f8a5210"}
+## 5) cross-check with M0 records: arm64 config created 2026-07-30T20:43:18Z (evidence/M0/upstream/raw/ghcr-firecrawl-2.11.162-config-extract.txt); tag v2.11.162 message 'Release API image v2.11.162', tagger 2026-07-30T20:47:43Z, object 7666c1f9… (evidence/M0/upstream/raw/gh-tag-object.json). Both fall inside run 30579949775 (20:37:06Z-20:47:54Z).

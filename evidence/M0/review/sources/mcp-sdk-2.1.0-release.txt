@@ -1,0 +1,53 @@
+# url=https://api.github.com/repos/modelcontextprotocol/typescript-sdk/releases?per_page=30 (unauthenticated); release @modelcontextprotocol/server@2.1.0
+# retrieved_utc=2026-09-25T05:53:05Z
+# releases (tag, published):
+#   1.30.1	2026-09-23T15:59:38Z
+#   @modelcontextprotocol/server@2.1.0	2026-09-23T15:43:11Z
+#   @modelcontextprotocol/server-legacy@2.1.0	2026-09-23T15:43:20Z
+#   @modelcontextprotocol/node@2.1.0	2026-09-23T15:43:17Z
+#   @modelcontextprotocol/hono@2.0.1	2026-09-23T15:42:59Z
+#   @modelcontextprotocol/express@2.0.1	2026-09-23T15:43:02Z
+#   @modelcontextprotocol/core@2.1.0	2026-09-23T15:43:08Z
+#   @modelcontextprotocol/codemod@2.1.0	2026-09-23T15:43:14Z
+#   @modelcontextprotocol/client@2.1.0	2026-09-23T15:43:05Z
+# server@2.1.0 notes: section headings and one line per entry (full text in the release body):
+1:### Minor Changes
+21:### Patch Changes
+- [#1624] Add request-time OAuth scope challenges for tools, resources, resource templates,
+- [#2726] `SdkError` and `SdkHttpError` accept standard `ErrorOptions` as an optional fourth constructor argument and forward it to `Error`, so a wrapped error is reachable through the standard `Error.cause` chain. Version-negotiation probe
+- [#2654] Treat request id `0` as a real id. Two guards tested a `RequestId` for truthiness, so the legal JSON-RPC ids `0` and `''` were read as absent. Id `0` is not a corner case: the outbound request counter is zero-based, so it is the f
+- [#2668] Stop sending `notifications/cancelled` for the `initialize` handshake. The spec is explicit that a client MUST NOT attempt to cancel its `initialize` request, but the outbound cancel path fired for any in-flight request: aborting 
+- [#2698] Read Streamable HTTP request bodies with a size limit. Every SDK-owned body read —
+- [#2590] Reject a modern (2026-07-28) POST that omits the required `MCP-Protocol-Version` header.
+- [#2494] `StdioServerTransport` now closes itself and fires `onclose` when its stdin ends or closes. The stdio binding says servers "SHOULD exit promptly when their standard input is closed" — stdin EOF is the primary graceful-shutdown sig
+- [#2613] Emit and validate the `Mcp-Name` header for tasks requests per SEP-2663's Streamable HTTP binding: the client transport now mirrors `params.taskId` into `Mcp-Name` on `tasks/get` / `tasks/update` / `tasks/cancel` (previously omitt
+# #2698 and #2590 full entries (verbatim):
+- [#2698](https://github.com/modelcontextprotocol/typescript-sdk/pull/2698) [`7b781ed`](https://github.com/modelcontextprotocol/typescript-sdk/commit/7b781ed4e25355a25d15974f3c76de81299694ed) Thanks [@maxisbey](https://github.com/maxisbey)! - Read Streamable HTTP request bodies with a size limit. Every SDK-owned body read —
+  `WebStandardStreamableHTTPServerTransport` (and the Node transport built on it),
+  `createMcpHandler`, `toNodeHandler`, and `createMcpHonoApp`'s JSON pre-parse — now stops at
+  4 MiB by default (the limit the legacy SSE transport already uses; the Express adapter and stdio
+  bound their reads too) and answers `413 Payload Too Large` before anything is parsed.
+  `toWebRequest` (when it reads the Node stream itself) now rejects once the body exceeds the
+  limit with an error whose `name` is `'RequestBodyTooLargeError'` and `status` is `413`, and
+  `toNodeHandler` answers that with `413`; hand-wired callers of `toWebRequest` should handle the
+  rejection or pass a pre-parsed body, and `isLegacyRequest` reports such a request as non-legacy
+  so the modern handler answers it. JSON-RPC batch arrays are limited to 100 messages; a longer
+  batch is answered `400` / `-32600` and none of it is dispatched.
+- [#2590](https://github.com/modelcontextprotocol/typescript-sdk/pull/2590) [`75dc7ea`](https://github.com/modelcontextprotocol/typescript-sdk/commit/75dc7ea6e2913e1ac37d4f06eec62cd5cfac9e7a) Thanks [@davidpavlovschi](https://github.com/davidpavlovschi)! - Reject a modern (2026-07-28) POST that omits the required `MCP-Protocol-Version` header.
+
+    `createMcpHandler` accepted a request whose body carried a valid per-request `_meta`
+    envelope but whose `MCP-Protocol-Version` header was absent: the request was classified
+    modern, dispatched, and answered `200` — tool handlers ran. Only the _mismatch_ case
+    (header present, disagreeing with the body) was rejected, so of the standard headers
+    SEP-2243 requires on a modern POST, presence was enforced for `Mcp-Method` (and for
+    `Mcp-Name` on the methods that mirror `params.name` / `params.uri`) but not for
+    `MCP-Protocol-Version`.
+
+    Such a request is now refused with `400 Bad Request` and JSON-RPC `-32020`
+# also https://modelcontextprotocol.io/specification/versioning: 'The current protocol version is 2026-07-28 .'
+# also https://raw.githubusercontent.com/modelcontextprotocol/typescript-sdk/@modelcontextprotocol/server@2.1.0/packages/server/package.json -> HTTP 200, version 2.1.0
+
+# --- appended 2026-09-25T06:05:02Z
+# https://registry.npmjs.org/@modelcontextprotocol/server/-/server-2.1.0.tgz: computed integrity sha512-FdvwZU5N03O77Suh35JqjAqq5R1ZTEPFtwu6N4BgBq28qrQtrCnpbLL5U2pwYCuE194jAw0xnlOVmIqhfoYuUQ== (matches the registry)
+# package/dist/createMcpHandler-*.d.mts (verbatim fragment): "Under {@linkcode createMcpHandler} a `legacy` instance serves one request through the stateless legacy fallback (the default — `legacy: 'reject'` endpoints are strict and never construct one)"
+# Reading: 2025-era stateless compatibility is part of @modelcontextprotocol/server; @modelcontextprotocol/server-legacy is not needed for it.

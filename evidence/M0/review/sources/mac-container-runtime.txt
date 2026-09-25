@@ -1,0 +1,11 @@
+# retrieved_utc=2026-09-25T05:38:43Z
+# command=for c in docker podman container colima orb limactl nerdctl; do command -v $c; done; ls -d /Applications/Docker.app /Applications/OrbStack.app (on the owner's Mac, read-only)
+docker: absent
+podman: absent
+container: absent
+colima: absent
+orb: absent
+limactl: absent
+nerdctl: absent
+Docker.app: absent
+OrbStack.app: absent
