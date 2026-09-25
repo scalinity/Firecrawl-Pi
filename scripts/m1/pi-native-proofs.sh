@@ -4,9 +4,13 @@
 # Runs ON the Pi:  ssh ... 'bash -s -- up|probe|down' < scripts/m1/pi-native-proofs.sh
 #
 # The proof stack is deliberately minimal and disposable: plain `docker run` on an
-# internal proof network, tmpfs or a labelled proof volume for data, throwaway
-# credentials held only in /run/fcpi-proof (tmpfs). It tests native execution, not
-# the final configuration; the Compose stack is verified separately.
+# internal proof network, tmpfs or a labelled proof volume for data. Its credentials are
+# throwaway: the RabbitMQ config and the gateway token and hash sit in /run/fcpi-proof
+# (tmpfs, 0700), but the proof PostgreSQL and RabbitMQ passwords are passed as docker run
+# environment, so they show in `docker inspect` of the proof containers while those exist
+# (never in evidence; `down` removes the containers). It tests native execution, not the
+# final configuration; the Compose stack is verified separately. The recorded proof ran
+# Redis as 999:1000, before the dedicated-uid rule; 999 is the pihole account on this host.
 # Every resource carries the label fcpi.proof=m1; `down` removes them by exact name.
 set -uo pipefail
 export LC_ALL=C
@@ -61,7 +65,7 @@ up)
     -e POSTGRES_PASSWORD="$pgpw" -e POSTGRES_DB=postgres "$IMG_NUQ" \
     postgres -c shared_buffers=128MB -c work_mem=4MB -c max_connections=32 -c max_wal_size=1GB -c min_wal_size=80MB >/dev/null
   D run -d --name fcpi-proof-redis "${LBL[@]}" --network "$NET" --network-alias redis \
-    --memory 320m --memory-swap 320m --cpus 0.35 --user 999:1000 --read-only --entrypoint redis-server "$IMG_REDIS" \
+    --memory 320m --memory-swap 320m --cpus 0.35 --user 6379:6379 --read-only --entrypoint redis-server "$IMG_REDIS" \
     --save '' --appendonly no --maxmemory 192mb --maxmemory-policy noeviction --protected-mode no >/dev/null
   D run -d --name fcpi-proof-rabbitmq "${LBL[@]}" --hostname rabbitmq --network "$NET" --network-alias rabbitmq \
     --memory 512m --memory-swap 512m --cpus 0.5 -v "$RMQ_VOL":/var/lib/rabbitmq \
