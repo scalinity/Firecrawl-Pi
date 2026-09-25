@@ -193,7 +193,7 @@ Then, after the review report exists, save it as `evidence/<milestone>/review/RE
 
 Then rerun affected tests, and record each finding's outcome in the saved report: fixed, with its commit; or deferred, with the later milestone that owns it and the reason. `/address` commits each fix; skip its push step, because the repository has no remote and a first push needs a full-history scan.
 
-This is the milestone's review of record. No separate review session runs between milestones unless the owner asks for one: each milestone takes its entry gate from its own Dependencies section in `FIRECRAWL_PI_MILESTONES.md`, starts from its kickoff prompt, reads the saved report, and takes every finding deferred to it as its own scope.
+This is the milestone's review of record. No separate review session runs between milestones unless the owner asks for one: each milestone takes its entry gate from its own Dependencies section in `FIRECRAWL_PI_MILESTONES.md`, starts from its kickoff prompt, reads every saved report under `evidence/*/review/`, and takes every finding deferred to it as its own scope.
 
 Do not skip these because the milestone seems small.
 
@@ -219,6 +219,7 @@ A review is not independent merely because the same execution log was reread. Th
 **Kickoff prompts.** A milestone's close-out ends by printing the next milestone's kickoff prompt, written to the "Prompts Written for a Future Session" section of `~/.claude/CLAUDE.md` and carrying this milestone's evidence as fact. M9 has no successor and prints none. Every kickoff prompt instructs its session to:
 
 - take its entry gate from its own Dependencies section in `FIRECRAWL_PI_MILESTONES.md`;
+- read every saved report under `evidence/*/review/` and take each finding deferred to this milestone as scope;
 - run `/review-2` with Opus 5.5 agents after implementation, save the report, and run `/address` once the report exists;
 - rerun every affected test;
 - end its own close-out by printing the following milestone's kickoff prompt with these same instructions.
@@ -936,6 +937,7 @@ A milestone is complete only when:
 - acceptance criteria pass or honest blockers are recorded;
 - `/review-2` has run with Opus 5.5 agents, and its report is saved under `evidence/<milestone>/review/`;
 - `/address` has remediated review findings, and each finding's outcome is recorded in that report;
+- every finding an earlier saved review deferred to this milestone has an outcome recorded in this milestone's report;
 - affected tests have been rerun;
 - evidence is stored and redacted;
 - milestone status is updated accurately;
