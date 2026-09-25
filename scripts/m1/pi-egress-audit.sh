@@ -84,7 +84,9 @@ read)
   # a DHCP transaction (0.0.0.0 -> 255.255.255.255 udp) that reaches the project bridge.
   # These lines attribute such host-originated broadcasts.
   since=$(sudo -n cat /run/fcpi-egress-audit.start 2>/dev/null || echo 0)
+  # With Docker's interfaces unmanaged (deploy/host/NetworkManager/90-fcpi-unmanaged.conf)
+  # there are normally none, and grep's "no match" status 1 is the expected outcome.
   sudo -n journalctl -u NetworkManager --since "@$since" --no-pager -o short-iso 2>/dev/null \
-    | grep -E 'auto-activating connection|dhcp4 \(veth' | sed -E 's/^([^ ]+) [^ ]+ NetworkManager\[[0-9]+\]: <info> +\[[0-9.]+\] /nm \1 /'
+    | { grep -E 'auto-activating connection|dhcp4 \(veth' || [ $? -eq 1 ]; } | sed -E 's/^([^ ]+) [^ ]+ NetworkManager\[[0-9]+\]: <info> +\[[0-9.]+\] /nm \1 /'
   ;;
 esac
