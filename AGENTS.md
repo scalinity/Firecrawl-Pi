@@ -225,7 +225,7 @@ A review is not independent merely because the same execution log was reread. Th
 - unsupported capability claims;
 - and discrepancies between implementation and the canonical documents.
 
-**Kickoff prompts.** A milestone's close-out ends by printing the next milestone's kickoff prompt: one self-contained, copy-ready code block with absolute paths, carrying this milestone's evidence as fact, and shaped by the "Prompts Written for a Future Session" section of `~/.claude/CLAUDE.md` where that file exists. The prompt is printed, never saved into that file. M9 has no successor and prints none. Every kickoff prompt instructs its session to:
+**Kickoff prompts.** A milestone's close-out ends by printing the next milestone's kickoff prompt: one self-contained, copy-ready code block with absolute paths, carrying this milestone's evidence as fact, and shaped by the "Prompts Written for a Future Session" section of `~/.claude/CLAUDE.md` where that file exists. The prompt is printed, never saved into that file. M9 has no successor and prints none. Every kickoff prompt tells its session that this section, as CLAUDE.md states it when that session runs, is the rule, and names its essentials:
 
 - take its entry gate from its own Dependencies section in `FIRECRAWL_PI_MILESTONES.md`;
 - read every saved report under `evidence/*/review/` and take each finding deferred to this milestone as scope;
