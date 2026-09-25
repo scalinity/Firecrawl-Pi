@@ -3,7 +3,8 @@
 # establish whether any audit probe produced a kernel event (for example a
 # module request). Runs ON the Pi through `ssh ... bash -s`; writes nothing on
 # the Pi. MAC addresses and the machine-id (journald names its directory after it)
-# are hashed before output leaves the Pi.
+# are hashed, and link-local IDs and the imager instance id masked, before output
+# leaves the Pi.
 set -u
 export LC_ALL=C
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
@@ -22,5 +23,6 @@ if [ -n "$serial" ]; then out=${out//$serial/SERIAL_SHA256:$(h "$serial")}; fi
 for mac in $(printf '%s\n' "$out" | grep -oiE '([0-9a-f]{2}[:-]){5}[0-9a-f]{2}' | sort -u); do
   out=${out//$mac/MAC_SHA256:$(h "$(printf '%s' "$mac" | tr 'A-F-' 'a-f:')")}
 done
-printf '%s\n' "$out" | sed -E -e 's/fe80::[0-9a-fA-F:]+/fe80::<link-local>/g'
+# Same non-functional identifiers as pi-audit.sh: boot-time kernel lines print the imager instance id.
+printf '%s\n' "$out" | sed -E -e 's/fe80::[0-9a-fA-F:]+/fe80::<link-local>/g' -e 's/rpi-imager-[0-9]+/rpi-imager-<id>/g'
 echo end
