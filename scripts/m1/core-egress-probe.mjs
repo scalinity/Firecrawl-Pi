@@ -10,7 +10,7 @@ const targets = [
   ["1.1.1.1", 443, "public address"],
   ["158.205.34.18", 22, "host LAN address (sshd)"],
   ["158.205.34.18", 53, "host LAN address (Pi-hole DNS)"],
-  ["10.231.1.1", 53, "would-be bridge gateway (isolated mode: absent)"],
+  ["10.231.0.1", 53, "host address on the fcpi-access bridge (not a core network)"],
 ];
 const out = { utc: new Date().toISOString(), dns: {}, tcp: {} };
 for (const n of names) {
