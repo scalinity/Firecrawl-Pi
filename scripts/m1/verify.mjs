@@ -406,7 +406,7 @@ const checks = {
     } },
 
   V04: { name: "published-ports-and-exposure", inputs: [`${RAW}stack-final.txt`, `${RAW}lan-probe.txt`, `${RAW}nft-ruleset.txt`, "evidence/M1/snapshot-before.txt"],
-    expected: "the only publication is access-gateway 3300/tcp on 127.0.0.1:3380; the only new host listener is docker-proxy on 127.0.0.1:3380; from a LAN neighbour every project port is closed while sshd (control) answers; Engine's rule dropping non-loopback packets to 127.0.0.1:3380 is present",
+    expected: "the only publication is access-gateway 3300/tcp on 127.0.0.1:3380; the only new host listener is docker-proxy on 127.0.0.1:3380; from a LAN neighbour every project port is closed while sshd (control) answers; Engine's rule dropping non-loopback packets to 127.0.0.1:3380 is present; the networks are segmented as designed: fcpi_access (NAT, publication) holds only the gateway; fcpi_api holds only the gateway and the core; fcpi_core holds the core and the three data services, never the gateway; fcpi_fixture holds the core and the fixture; the last three are internal, isolated and have no host address",
     run() {
       const s = sections(`${RAW}stack-final.txt`);
       const pubs = (s.published ?? []).filter((l) => / -> /.test(l));
@@ -417,10 +417,15 @@ const checks = {
       const lan = sections(`${RAW}lan-probe.txt`);
       const open = (lan.project_ports ?? []).filter((l) => / open$/.test(l));
       const ruleset = read(`${RAW}nft-ruleset.txt`);
-      const ok = pubs.length === 1 && pubs[0] === "access-gateway 3300/tcp -> 127.0.0.1:3380" && added.length === 1 && /^tcp 127\.0\.0\.1:3380 users:\(\("docker-proxy"/.test(added[0]) &&
+      const nets = Object.fromEntries((s.networks ?? []).filter((l) => /^fcpi_\w+ internal=/.test(l)).map((l) => [l.split(" ")[0], kv(l)]));
+      const want = { fcpi_access: ["false", "nat", "fcpi-access-gateway-1"], fcpi_api: ["true", "isolated", "fcpi-access-gateway-1,fcpi-firecrawl-core-1"],
+        fcpi_core: ["true", "isolated", "fcpi-firecrawl-core-1,fcpi-nuq-postgres-1,fcpi-rabbitmq-1,fcpi-redis-1"], fcpi_fixture: ["true", "isolated", "fcpi-firecrawl-core-1,fcpi-fixture-1"] };
+      const netBad = Object.entries(want).filter(([n, [internal, mode, members]]) => nets[n]?.internal !== internal || nets[n]?.gateway_mode_ipv4 !== mode || nets[n]?.members !== members).map(([n]) => n);
+      const hostAddr = (s.networks ?? []).filter((l) => /^bridge fcpi-(api|core|fixture) addresses=\S/.test(l));
+      const ok = Object.keys(nets).length === 4 && netBad.length === 0 && hostAddr.length === 0 && pubs.length === 1 && pubs[0] === "access-gateway 3300/tcp -> 127.0.0.1:3380" && added.length === 1 && /^tcp 127\.0\.0\.1:3380 users:\(\("docker-proxy"/.test(added[0]) &&
         (lan.project_ports ?? []).length === 14 && open.length === 0 && (lan.control ?? []).includes("port=22 open") &&
         /ip daddr 127\.0\.0\.1 iifname != "lo" tcp dport 3380 counter drop/.test(ruleset);
-      return { ok, actual: `publications=${pubs.join(";")}; new host listeners=${added.join(";") || "none"}; LAN probe: ${(lan.project_ports ?? []).length} project ports, open=${open.length}, control 22 open=${(lan.control ?? []).includes("port=22 open")}; loopback-protection rule present=${/tcp dport 3380 counter drop/.test(ruleset)}` };
+      return { ok, actual: `publications=${pubs.join(";")}; new host listeners=${added.join(";") || "none"}; LAN probe: ${(lan.project_ports ?? []).length} project ports, open=${open.length}, control 22 open=${(lan.control ?? []).includes("port=22 open")}; loopback-protection rule present=${/tcp dport 3380 counter drop/.test(ruleset)}; networks mis-segmented=${netBad.join(",") || "none"}; internal bridges with a host address=${hostAddr.length}` };
     } },
 
   V05: { name: "gateway-token-rejection-and-routing", inputs: [`${RAW}stack.txt`, "tests/contracts/m1-gateway.test.mjs", "services/access/server.mjs"],
@@ -502,7 +507,7 @@ const checks = {
       const c = Object.fromEntries(a.filter((l) => / family=/.test(l)).map((l) => [l.split(" ")[0], Number(kv(l).packets)]));
       const flows = a.filter((l) => l.startsWith("flow ")).map((l) => kv(l));
       const nmDhcp = a.filter((l) => /^nm .* dhcp4 \(veth[0-9a-f]+\): activation: beginning transaction/.test(l)).length;
-      const mustZero = ["ipv4_from_internal_to_off_subnet", "ipv6_beyond_link_scope_on_any_bridge", "routed_out_of_internal_bridges", "ipv6_beyond_link_scope_to_host"];
+      const mustZero = ["ipv4_from_internal_to_off_subnet", "ipv6_beyond_link_scope_on_any_bridge", "routed_out_of_internal_bridges", "ipv6_beyond_link_scope_to_host", "routed_out_of_access_bridge", "routed_out_of_access_bridge_ipv6"];
       const hostV4 = flows.filter((f) => f.set === "inet:fcpi_audit:seen_in_v4");
       const hostV4Ok = hostV4.every((f) => f.src === "0.0.0.0" && f.dst === "255.255.255.255" && f.l4proto === "udp") && (c.ipv4_to_host_from_internal_bridges === 0 || nmDhcp > 0);
       const v6 = flows.filter((f) => f.set === "bridge:fcpi_audit:seen_v6");

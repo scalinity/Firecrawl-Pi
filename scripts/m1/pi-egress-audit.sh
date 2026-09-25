@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Egress instrument for the internal project bridges (fcpi-core, fcpi-fixture).
+# Egress instrument for the internal project bridges (fcpi-core, fcpi-fixture, fcpi-api)
+# and for routing out of the gateway's NAT bridge (fcpi-access).
 #   start: (re)create the counting-only nft tables `bridge fcpi_audit` and `inet fcpi_audit`;
 #          they never drop or accept anything themselves, and are runtime-only (gone after
 #          a reboot)
@@ -23,8 +24,8 @@ set -euo pipefail
 export LC_ALL=C
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 mode=${1:?usage: pi-egress-audit.sh start|read}
-BR='{ "fcpi-core", "fcpi-fixture" }'   # inet rules only
-NETS='{ 10.231.1.0/24, 10.231.3.0/24 }'
+BR='{ "fcpi-core", "fcpi-fixture", "fcpi-api" }'   # inet rules only
+NETS='{ 10.231.1.0/24, 10.231.3.0/24, 10.231.4.0/24 }'
 LINK6='{ fe80::/10, ff02::/16 }'
 
 case "$mode" in
@@ -48,9 +49,14 @@ delete table inet fcpi_audit
 table inet fcpi_audit {
   set seen_in_v4 { type ipv4_addr . ipv4_addr . inet_proto; flags dynamic; size 4096; }
   set seen_in_v6 { type ipv6_addr . ipv6_addr . inet_proto; flags dynamic; size 4096; }
+  set seen_fwd_access { type ipv4_addr . ipv4_addr . inet_proto; flags dynamic; size 4096; }
   chain audit_fwd {
     type filter hook forward priority -300; policy accept;
     iifname $BR counter comment "routed_out_of_internal_bridges"
+    # The gateway's own bridge is a NAT bridge (publication needs one); the gateway only
+    # ever answers the host's docker-proxy, so nothing from it may be routed anywhere.
+    iifname "fcpi-access" meta nfproto ipv4 add @seen_fwd_access { ip saddr . ip daddr . meta l4proto } counter comment "routed_out_of_access_bridge"
+    iifname "fcpi-access" meta nfproto ipv6 counter comment "routed_out_of_access_bridge_ipv6"
   }
   chain audit_in {
     type filter hook input priority -300; policy accept;
@@ -69,7 +75,7 @@ read)
     sudo -n nft -j list table $fam fcpi_audit | jq -r --arg fam "$fam" '.nftables[] | select(.rule) | .rule
       | "\(.comment) family=\($fam) packets=\([.expr[] | select(.counter) | .counter.packets][0]) bytes=\([.expr[] | select(.counter) | .counter.bytes][0])"'
   done
-  for s in "bridge fcpi_audit seen_v4_off" "bridge fcpi_audit seen_v6" "inet fcpi_audit seen_in_v4" "inet fcpi_audit seen_in_v6"; do
+  for s in "bridge fcpi_audit seen_v4_off" "bridge fcpi_audit seen_v6" "inet fcpi_audit seen_in_v4" "inet fcpi_audit seen_in_v6" "inet fcpi_audit seen_fwd_access"; do
     sudo -n nft -j list set $s | jq -r --arg s "$s" '.nftables[] | select(.set) | .set.elem // [] | .[] | (.elem.val // .) | .concat
       | "flow set=\($s | gsub(" "; ":")) src=\(.[0]) dst=\(.[1]) l4proto=\(.[2])"'
   done

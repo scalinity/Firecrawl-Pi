@@ -70,10 +70,10 @@ echo "--- host listeners (ss -Hltnup)"
 sudo -n ss -Hltnup | awk '{print $1, $5, $7}' | sort
 
 sec networks
-for n in fcpi_access fcpi_core fcpi_fixture; do
+for n in fcpi_access fcpi_api fcpi_core fcpi_fixture; do
   D network inspect "$n" | jq -r '.[0] | "\(.Name) internal=\(.Internal) subnet=\(.IPAM.Config[0].Subnet) gateway_mode_ipv4=\(.Options["com.docker.network.bridge.gateway_mode_ipv4"] // "nat") bridge=\(.Options["com.docker.network.bridge.name"]) ipv6=\(.EnableIPv6) members=\([.Containers[].Name] | sort | join(","))"'
 done
-for b in fcpi-access fcpi-core fcpi-fixture; do echo "bridge $b addresses=$(ip -4 -br addr show dev $b 2>/dev/null | awk '{print $3}')"; done
+for b in fcpi-access fcpi-api fcpi-core fcpi-fixture; do echo "bridge $b addresses=$(ip -4 -br addr show dev $b 2>/dev/null | awk '{print $3}')"; done
 
 sec core_health
 D exec -i "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-probe.mjs"
