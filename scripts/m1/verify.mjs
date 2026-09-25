@@ -99,8 +99,10 @@ function roundTripCases(file) {
   const firstReady = obs.findIndex((o) => o.ready >= 1);
   const gone = firstReady >= 0 ? obs.findIndex((o, i) => i > firstReady && o.ready === 0) : -1;
   let expiry = null;
-  if (firstReady > 0 && gone > 0) {
-    const lastZeroBefore = obs[firstReady - 1].t, firstSeen = obs[firstReady].t, lastSeen = obs[gone - 1].t, goneSeen = obs[gone].t;
+  if (firstReady >= 0 && gone > 0) {
+    // Before the first observation the bound is t+0: the job is submitted only after the
+    // worker is paused, so no prefetch message can exist earlier.
+    const lastZeroBefore = firstReady > 0 ? obs[firstReady - 1].t : 0, firstSeen = obs[firstReady].t, lastSeen = obs[gone - 1].t, goneSeen = obs[gone].t;
     expiry = { min_s: lastSeen - firstSeen, max_s: goneSeen - lastZeroBefore }; // bounds on (vanish - publish)
   }
   const jobPresentUntilGone = gone > 0 && obs.slice(0, gone + 1).every((o) => o.job.startsWith("active"));
@@ -108,12 +110,15 @@ function roundTripCases(file) {
   // The resume must come after the message vanished, not from the 120 s fallback before it.
   const sigcontT = Number((tl.find((l) => /^t\+\d+ SIGCONT nuq-worker-0/.test(l)) ?? "").match(/^t\+(\d+)/)?.[1] ?? NaN);
   const resumedAfterExpiry = gone > 0 && sigcontT >= obs[gone].t;
+  // Tolerance of 5 s either side of the 50 s expiration: polls take ~3 s, each is stamped
+  // after its queries finish, and rabbitmqctl's quorum-queue statistics lag; the broker's
+  // dead_lettered_expired counter corroborates the expiry independently.
   const case2 = {
     worker_stopped: stopped, expiry_window_s: expiry, job_active_in_postgres_until_gone: jobPresentUntilGone, requeued_by_lock_reaper: requeued, resumed: resumedAfterExpiry,
     dead_lettered_expired_delta: counter("case2_counters_after", "dead_lettered_expired", "rabbit_quorum_queue") - counter("case2_counters_before", "dead_lettered_expired", "rabbit_quorum_queue"),
     scrape_success: c2?.success === true,
   };
-  case2.pass = case2.worker_stopped && expiry !== null && expiry.min_s < 50 && expiry.max_s >= 50 && expiry.max_s <= 70 && case2.job_active_in_postgres_until_gone &&
+  case2.pass = case2.worker_stopped && expiry !== null && expiry.min_s <= 55 && expiry.max_s >= 45 && expiry.max_s <= 70 && case2.job_active_in_postgres_until_gone &&
     case2.requeued_by_lock_reaper && case2.resumed && case2.dead_lettered_expired_delta >= 1 && case2.scrape_success;
   // Case 3
   const r3 = s.case3_restart ?? [];
