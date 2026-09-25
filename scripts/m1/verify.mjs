@@ -229,7 +229,8 @@ const checks = {
       const b = keyedSnapshot("evidence/M1/snapshot-before.txt").map((x) => x.join("\t")).filter((l) => !/\tsession-\d+\.scope$/.test(l)).sort();
       const only = (x, y) => x.filter((l) => !y.includes(l));
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
-      const ok = only(a, b).length === 0 && only(b, a).length === 0 && boot("evidence/M0/snapshot-after.txt") === boot("evidence/M1/snapshot-before.txt");
+      // Both boot IDs must be real 64-hex hashes: two missing lines must not compare equal.
+      const ok = only(a, b).length === 0 && only(b, a).length === 0 && !!boot("evidence/M0/snapshot-after.txt") && boot("evidence/M0/snapshot-after.txt") === boot("evidence/M1/snapshot-before.txt");
       return { ok, actual: `lines only in M0 AFTER=${only(a, b).length}, only in M1 BEFORE=${only(b, a).length}, boot_id_equal=${boot("evidence/M0/snapshot-after.txt") === boot("evidence/M1/snapshot-before.txt")}` };
     } },
 
@@ -514,8 +515,19 @@ const checks = {
       const v6LinkOnly = v6.every((f) => /^(ff02:|fe80:)/.test(f.dst));
       const probes = [];
       let structOk = true, logOk = true;
+      const counts = [];
       for (const f of [`${RAW}stack.txt`, `${RAW}stack-final.txt`]) {
         const s = sections(f);
+        // Cardinality first: every expected row must be present, so an empty section or a
+        // failed docker exec / docker logs cannot pass by absence.
+        const rows = (s.egress_structure ?? []).filter((l) => /^fcpi-[\w-]+-1 default_route=/.test(l)).length;
+        const probeRows = (s.egress_probes ?? []).filter((x) => /^(core|fixture) \{/.test(x)).length;
+        const patterns = (s.core_log_scan ?? []).filter((l) => /^pattern=\S+ count=\d+$/.test(l)).length;
+        const control = Number(kv(lineOf(s.core_log_scan, "control=") ?? "").count ?? 0);
+        const logLines = Number(kv(lineOf(s.core_log_scan, "log_lines=") ?? "").log_lines ?? 0);
+        counts.push(`${f.split("/").pop()}: structure=${rows}/6 probes=${probeRows}/2 patterns=${patterns}/9 control=${control} log_lines=${logLines}`);
+        if (rows !== 6 || probeRows !== 2) structOk = false;
+        if (patterns !== 9 || control < 1 || logLines < 20) logOk = false;
         for (const l of s.egress_structure ?? []) {
           const name = l.split(" ")[0], k = kv(l);
           if (/fcpi-(firecrawl-core|fixture|nuq-postgres|redis|rabbitmq)-1/.test(name) && (k.default_route !== "no" || k.nameserver !== "127.0.0.11,")) structOk = false;
@@ -531,7 +543,7 @@ const checks = {
         for (const l of s.core_log_scan ?? []) if (/^pattern=/.test(l) && kv(l).count !== "0") logOk = false;
       }
       const ok = c.ipv4_from_internal_subnets > 0 && mustZero.every((k) => c[k] === 0) && hostV4Ok && v6LinkOnly && structOk && logOk;
-      return { ok, actual: `window ${(lineOf(read(`${RAW}egress-audit-start.txt`).split("\n"), "started") ?? "").slice(8)} to ${(lineOf(a, "read ") ?? "").slice(5)}; counters ${JSON.stringify(c)}; host-delivered IPv4 flows=${hostV4.map((f) => `${f.src}->${f.dst}/${f.l4proto}`).join(",") || "none"} with ${nmDhcp} NetworkManager DHCP transactions on transient veths; link-scope IPv6 flows=${v6.map((f) => `${f.src}->${f.dst}`).join(",") || "none"}; ${probes.join("; ")}; core log Cloud/DNS lines=${logOk ? 0 : "PRESENT"}` };
+      return { ok, actual: `evidence rows [${counts.join("; ")}]; window ${(lineOf(read(`${RAW}egress-audit-start.txt`).split("\n"), "started") ?? "").slice(8)} to ${(lineOf(a, "read ") ?? "").slice(5)}; counters ${JSON.stringify(c)}; host-delivered IPv4 flows=${hostV4.map((f) => `${f.src}->${f.dst}/${f.l4proto}`).join(",") || "none"} with ${nmDhcp} NetworkManager DHCP transactions on transient veths; link-scope IPv6 flows=${v6.map((f) => `${f.src}->${f.dst}`).join(",") || "none"}; ${probes.join("; ")}; core log Cloud/DNS lines=${logOk ? 0 : "PRESENT"}` };
     } },
 
   V12: { name: "mount-check-failure-branches", inputs: [`${RAW}mount-branches.txt`, "deploy/host/fcpi-data-check.sh", "deploy/host/fcpi-stack.service", "deploy/host/fcpi-data-check.service"],
@@ -629,7 +641,7 @@ const checks = {
         if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else byReason[why] = (byReason[why] ?? 0) + 1;
       }
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
-      const ok = unexplained.length === 0 && boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt");
+      const ok = unexplained.length === 0 && !!boot("evidence/M1/snapshot-before.txt") && boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt");
       return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(byReason)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt")}` };
     } },
 

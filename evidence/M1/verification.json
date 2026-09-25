@@ -7,8 +7,8 @@
     {
       "test_id": "M1-N00",
       "name": "baseline-matches-m0-after",
-      "utc": "2026-09-25T08:17:25Z",
-      "repository_sha": "2739545178b72d154334772baec28b7eb0584bc0",
+      "utc": "2026-09-25T08:56:39Z",
+      "repository_sha": "21d323a713f3afd6064adbb231461a0407ccffa1",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
@@ -320,16 +320,16 @@
     {
       "test_id": "M1-V11",
       "name": "no-cloud-or-internet-egress-from-the-core",
-      "utc": "2026-09-25T08:17:25Z",
-      "repository_sha": "2739545178b72d154334772baec28b7eb0584bc0",
+      "utc": "2026-09-25T08:56:39Z",
+      "repository_sha": "21d323a713f3afd6064adbb231461a0407ccffa1",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
       "config_or_fixture_hash": "551c5206e59673aa8c84540802b46f3318475333f53907e0b8ac9f3b7dbefc45",
       "expected": "across the whole window (stack checks, NuQ round trip with broker and core restarts, recreation, mount branches): the positive control counts internal traffic; zero IPv4 from the internal subnets to anywhere else, zero IPv6 beyond link scope, zero packets routed out, zero IPv6 to the host; every IPv4 packet delivered to the host is a 0.0.0.0->255.255.255.255 UDP broadcast attributed to NetworkManager DHCP on a transient veth; the core and fixture have no default route, cannot resolve any external name and get ENETUNREACH for public and host addresses; the core logs show no Cloud, DuckDuckGo or DNS-failure lines",
-      "state": "PASS",
-      "actual": "window 2026-09-25T08:01:18Z to 2026-09-25T08:17:25Z; counters {\"ipv4_from_internal_subnets\":30678,\"ipv4_from_internal_to_off_subnet\":0,\"ipv6_beyond_link_scope_on_any_bridge\":0,\"info_ipv6_link_scope_on_any_bridge\":11,\"routed_out_of_internal_bridges\":0,\"ipv4_to_host_from_internal_bridges\":11,\"ipv6_beyond_link_scope_to_host\":0,\"info_ipv6_link_scope_to_host\":0}; host-delivered IPv4 flows=0.0.0.0->255.255.255.255/udp with 16 NetworkManager DHCP transactions on transient veths; link-scope IPv6 flows=::->ff02::16,::->ff02::1:ff21:6a33; stack.txt:core dns_all_fail=true tcp_all_ENETUNREACH=true; stack.txt:fixture dns_all_fail=true tcp_all_ENETUNREACH=true; stack-final.txt:core dns_all_fail=true tcp_all_ENETUNREACH=true; stack-final.txt:fixture dns_all_fail=true tcp_all_ENETUNREACH=true; core log Cloud/DNS lines=0",
-      "exit_code": 0,
+      "state": "FAIL",
+      "actual": "evidence rows [stack.txt: structure=6/6 probes=2/2 patterns=9/9 control=0 log_lines=665; stack-final.txt: structure=6/6 probes=2/2 patterns=9/9 control=0 log_lines=239]; window 2026-09-25T08:01:18Z to 2026-09-25T08:17:25Z; counters {\"ipv4_from_internal_subnets\":30678,\"ipv4_from_internal_to_off_subnet\":0,\"ipv6_beyond_link_scope_on_any_bridge\":0,\"info_ipv6_link_scope_on_any_bridge\":11,\"routed_out_of_internal_bridges\":0,\"ipv4_to_host_from_internal_bridges\":11,\"ipv6_beyond_link_scope_to_host\":0,\"info_ipv6_link_scope_to_host\":0}; host-delivered IPv4 flows=0.0.0.0->255.255.255.255/udp with 16 NetworkManager DHCP transactions on transient veths; link-scope IPv6 flows=::->ff02::16,::->ff02::1:ff21:6a33; stack.txt:core dns_all_fail=true tcp_all_ENETUNREACH=true; stack.txt:fixture dns_all_fail=true tcp_all_ENETUNREACH=true; stack-final.txt:core dns_all_fail=true tcp_all_ENETUNREACH=true; stack-final.txt:fixture dns_all_fail=true tcp_all_ENETUNREACH=true; core log Cloud/DNS lines=PRESENT",
+      "exit_code": 1,
       "evidence_path": "evidence/M1/verification.json"
     },
     {

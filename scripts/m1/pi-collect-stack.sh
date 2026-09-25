@@ -155,5 +155,8 @@ logs=$(D logs "$CORE" 2>&1 | sed -E 's/\x1b\[[0-9;]*m//g')
 for pat in 'firecrawl\.dev' 'duckduckgo' 'getaddrinfo' 'EAI_AGAIN' 'ENOTFOUND' 'posthog' 'sentry\.io' 'ENETUNREACH' 'integrations\.'; do
   echo "pattern=$pat count=$(grep -ciE "$pat" <<<"$logs")"
 done
+# Positive control: a line every harness start prints, so a failed `docker logs` (whose
+# output would match no pattern) cannot pass as "no Cloud lines".
+echo "control=Starting services count=$(grep -c 'Starting services' <<<"$logs")"
 echo "log_lines=$(wc -l <<<"$logs") since=$(D inspect -f '{{.State.StartedAt}}' "$CORE")"
 echo end
