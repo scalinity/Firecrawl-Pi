@@ -1,0 +1,10 @@
+[Unit]
+Description=FCPI fail-closed data check (mount UUID, data ID, bind mounts)
+Documentation=file:///opt/firecrawl-pi/deploy/host/fcpi-data-check.sh
+After=local-fs.target
+RequiresMountsFor=/srv/firecrawl-pi
+
+[Service]
+Type=oneshot
+# Not RemainAfterExit: every start of fcpi-stack.service runs the check again.
+ExecStart=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh

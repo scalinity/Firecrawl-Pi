@@ -1,0 +1,21 @@
+[Unit]
+Description=FCPI Compose stack (project fcpi)
+Documentation=file:///opt/firecrawl-pi/deploy/compose.yaml
+Requires=fcpi-data-check.service docker.service
+After=fcpi-data-check.service docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# `up --wait` returns once every service is healthy; a failed health wait fails the start.
+ExecStart=/usr/bin/docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml up -d --wait --wait-timeout 900
+# `stop` (not `down`): containers and networks stay, and restart policies do not revive
+# explicitly stopped containers at the next daemon start, so a boot always goes through
+# fcpi-data-check first.
+ExecStop=/usr/bin/docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml stop
+TimeoutStartSec=1000
+TimeoutStopSec=180
+
+[Install]
+WantedBy=multi-user.target

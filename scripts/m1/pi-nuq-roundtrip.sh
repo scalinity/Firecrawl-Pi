@@ -5,8 +5,14 @@
 #   2. a prefetched message that is never consumed expires after 50 s, and the job
 #      is still served from PostgreSQL (lock reaper re-queues it, prefetch re-sends it);
 #   3. the broker restarts, and a new job completes (upstream #4244 would hang here).
-# Runs ON the Pi:  ssh ... 'bash -s -- <core> <rabbitmq> <postgres>' < scripts/m1/pi-nuq-roundtrip.sh
+# Runs ON the Pi from the deployed copy:
+#   ssh ... 'bash /opt/firecrawl-pi/scripts/m1/pi-nuq-roundtrip.sh <core> <rabbitmq> <postgres>'
 # Prints a sectioned transcript; scripts/m1/verify.mjs decides PASS/FAIL from it.
+#
+# Jobs are submitted with /v0/scrape: at the pinned commit it is the route that enqueues a
+# listenable NuQ job and waits on the reply queue (/v1 and /v2 scrape run in-process).
+# The v0 controller deletes the NuQ row once it has read the result, so job state is
+# observed while the job is in flight, and each case's core log lines are kept by scrape id.
 #
 # Case 2 pauses the nuq-worker-0 node process with SIGSTOP so nothing consumes the
 # prefetch queue. The harness only reacts to a child exiting, so a paused child
@@ -27,34 +33,39 @@ psq() { D exec "$PG" psql -U postgres -Atc "$1" 2>&1; }
 queues() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name type durable auto_delete exclusive messages_ready messages consumers 2>&1; }
 ready() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name messages_ready 2>/dev/null | awk -v q="$PREFETCH" '$1==q {print $2}'; }
 counters() { # non-zero broker-wide counters from rabbitmq_prometheus, read from inside the core network.
-  # No `-i` and stdin from /dev/null: this script itself arrives on stdin through `bash -s`.
+  # No `-i` and stdin from /dev/null, so no command here can consume a caller's stdin.
   D exec "$CORE" node --input-type=module -e '
     const t = await (await fetch("http://rabbitmq:15692/metrics", { signal: AbortSignal.timeout(5000) })).text();
     const want = /^rabbitmq_global_messages_(delivered_get_auto_ack|delivered_consume_manual_ack|routed|dead_lettered_expired)_total\{/;
     for (const l of t.split("\n")) if (want.test(l) && Number(l.split(" ").pop()) !== 0) console.log(l);' </dev/null 2>&1
 }
-scrape() { # scrape [api_timeout_ms]: /v0/scrape, the route that enqueues a listenable NuQ job
+scrape() { # scrape [api_timeout_ms]
   D exec -i -e SCRAPE_ENDPOINT=v0 -e SCRAPE_URL="$FIXTURE_URL" -e SCRAPE_TIMEOUT_MS="${1:-60000}" "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-scrape.mjs"
 }
-newest_job() { # newest_job <epoch>: the newest fixture job created after <epoch>
-  psq "select id from nuq.queue_scrape where data->>'url' = '$FIXTURE_URL' and created_at > to_timestamp($1) order by created_at desc limit 1"
+joblog() { # joblog <since-epoch> <scrape_id>: the core's NuQ log lines for one job
+  [ -n "$2" ] || { echo "no scrape id"; return; }
+  D logs --since "$(date -u -d "@$1" +%Y-%m-%dT%H:%M:%SZ)" "$CORE" 2>&1 | sed -E 's/\x1b\[[0-9;]*m//g' \
+    | grep -E "$2|NuQ job (prefetch sent|sent|received)" | grep -E "NuQ job|Acquired job|taking job|Job done|$2" | cut -c1-200 | head -20
 }
-jobrow() { # jobrow <scrape_id>
-  psq "select id || ' status=' || status || ' stalls=' || coalesce(stalls, 0) || ' listen_channel_id=' || coalesce(listen_channel_id, 'null') || ' group_id=' || coalesce(group_id::text, 'null') from nuq.queue_scrape where id = '$1'"
+core_state() { D inspect "$CORE" | jq -r '.[0] | "restart_count=\(.RestartCount) started_at=\(.State.StartedAt) status=\(.State.Status)"'; }
+core_ready() { # all harness children answer their own health endpoints
+  D exec -i "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-probe.mjs" 2>/dev/null \
+    | jq -e '[.api_liveness, .extract_worker, .queue_worker, .nuq_worker_0, .nuq_prefetch_worker, .nuq_reconciler] | all(.status == 200)' >/dev/null 2>&1
 }
 
 sec meta
 ts
+echo "source_commit=$(cat /opt/firecrawl-pi/.fcpi-source-commit 2>/dev/null)"
 echo "core=$CORE rabbitmq=$RMQ postgres=$PG fixture=$FIXTURE_URL"
+core_state
 
 # ---------------------------------------------------------------- case 1
 sec case1_counters_before; counters
 sec case1_scrape
 t1=$(now); c1=$(scrape 60000); echo "$c1"
-id1=$(newest_job $t1)
-sec case1_job_row; [ -n "$id1" ] && jobrow "$id1"
 sec case1_queues; queues
 sec case1_counters_after; counters
+sec case1_core_log; joblog "$t1" "$(echo "$c1" | jq -r '.scrape_id // empty')"
 
 # ---------------------------------------------------------------- case 2
 sec case2_counters_before; counters
@@ -82,24 +93,32 @@ for i in $(seq 1 150); do
 done
 [ $resumed = 0 ] && D exec -u 0 "$CORE" kill -CONT "$wpid" && echo "SIGCONT (loop end)"
 wait $spid
-sec case2_scrape; cat "$out2"; rm -f "$out2"
-sec case2_job_row
-id2=$(psq "select id from nuq.queue_scrape where data->>'url' = '$FIXTURE_URL' and created_at > to_timestamp($t0) order by created_at desc limit 1")
-[ -n "$id2" ] && jobrow "$id2"
+c2=$(cat "$out2"); rm -f "$out2"
+sec case2_scrape; echo "$c2"
 sec case2_counters_after; counters
+sec case2_core_log; joblog "$t0" "$(echo "$c2" | jq -r '.scrape_id // empty' 2>/dev/null)"
 
 # ---------------------------------------------------------------- case 3
 sec case3_restart
+core_state
 t3=$(now); echo "restart_begin=$(ts)"
 D restart "$RMQ" >/dev/null
 for i in $(seq 1 120); do D exec -u rabbitmq "$RMQ" rabbitmq-diagnostics -q ping >/dev/null 2>&1 && break; sleep 1; done
 echo "broker_ping_ok_after_s=$(( $(now) - t3 ))"
 sleep 5
+# The core may have restarted (upstream lets amqp.connect ECONNREFUSED escape the NuQ
+# polling loops); wait for it to be running and healthy before submitting.
+for i in $(seq 1 90); do
+  [ "$(D inspect -f '{{.State.Status}}' "$CORE" 2>/dev/null)" = running ] && core_ready && break
+  sleep 2
+done
+echo "core_ready_after_s=$(( $(now) - t3 ))"
+core_state
 sec case3_scrape
 t3s=$(now); c3=$(scrape 60000); echo "$c3"
-id3=$(newest_job $t3s)
-sec case3_job_row; [ -n "$id3" ] && jobrow "$id3"
 sec case3_queues; queues
-sec case3_core_log_lines
-D logs --since "$(date -u -d "@$t3" +%Y-%m-%dT%H:%M:%SZ)" "$CORE" 2>&1 | grep -iE 'listener|sender|rabbit|amqp' | tail -30
+sec case3_core_log; joblog "$t3s" "$(echo "$c3" | jq -r '.scrape_id // empty')"
+sec case3_core_log_since_restart
+D logs --since "$(date -u -d "@$t3" +%Y-%m-%dT%H:%M:%SZ)" "$CORE" 2>&1 | sed -E 's/\x1b\[[0-9;]*m//g' \
+  | grep -iE 'listener|sender|ECONNREFUSED|terminated unexpectedly|failed with exit code|Shutting down|Starting services' | cut -c1-200 | head -30
 echo end

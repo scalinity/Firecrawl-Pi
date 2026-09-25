@@ -91,6 +91,7 @@ up)
 
 probe)
   sec meta; ts
+  echo "source_commit=$(cat /opt/firecrawl-pi/.fcpi-source-commit 2>/dev/null)"
   printf 'host_page_size=%s kernel=%s\n' "$(getconf PAGESIZE)" "$(uname -r)"
 
   sec containers_platform
