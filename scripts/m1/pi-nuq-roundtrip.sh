@@ -26,11 +26,12 @@ now() { date +%s; }
 psq() { D exec "$PG" psql -U postgres -Atc "$1" 2>&1; }
 queues() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name type durable auto_delete exclusive messages_ready messages consumers 2>&1; }
 ready() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name messages_ready 2>/dev/null | awk -v q="$PREFETCH" '$1==q {print $2}'; }
-counters() { # broker-wide counters from rabbitmq_prometheus, read from inside the core network
-  D exec -i "$CORE" node --input-type=module -e '
+counters() { # non-zero broker-wide counters from rabbitmq_prometheus, read from inside the core network.
+  # No `-i` and stdin from /dev/null: this script itself arrives on stdin through `bash -s`.
+  D exec "$CORE" node --input-type=module -e '
     const t = await (await fetch("http://rabbitmq:15692/metrics", { signal: AbortSignal.timeout(5000) })).text();
     const want = /^rabbitmq_global_messages_(delivered_get_auto_ack|delivered_consume_manual_ack|routed|dead_lettered_expired)_total\{/;
-    for (const l of t.split("\n")) if (want.test(l)) console.log(l);' 2>&1
+    for (const l of t.split("\n")) if (want.test(l) && Number(l.split(" ").pop()) !== 0) console.log(l);' </dev/null 2>&1
 }
 scrape() { # scrape [api_timeout_ms]: /v0/scrape, the route that enqueues a listenable NuQ job
   D exec -i -e SCRAPE_ENDPOINT=v0 -e SCRAPE_URL="$FIXTURE_URL" -e SCRAPE_TIMEOUT_MS="${1:-60000}" "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-scrape.mjs"
