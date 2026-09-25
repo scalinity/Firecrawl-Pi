@@ -189,7 +189,7 @@ services:
       USE_DB_AUTHENTICATION: "false"    # private core behind the authenticated gateway
       POSTGRES_HOST: nuq-postgres
       POSTGRES_PORT: "5432"
-      POSTGRES_USER: fcpi_core          # owns the NuQ schema only; not a superuser (deploy/nuq-postgres/fcpi-core-role.psql)
+      POSTGRES_USER: fcpi_core          # DML on NuQ's tables only; not a superuser (deploy/nuq-postgres/fcpi-core-role.psql)
       POSTGRES_DB: postgres
       SCRAPE_MAX_ATTEMPTS: "1"          # spec §29; M2's adapter owns retries
       # The fetch engine refuses private addresses unless this is true; the only private

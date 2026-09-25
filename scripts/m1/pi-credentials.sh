@@ -19,11 +19,26 @@ echo "source_commit=$(cat $REPO/.fcpi-source-commit)"
 sec postgres
 echo "role=$(q "select rolname||' super='||rolsuper||' createrole='||rolcreaterole||' createdb='||rolcreatedb||' replication='||rolreplication||' bypassrls='||rolbypassrls from pg_roles where rolname='fcpi_core'")"
 echo "superusers=$(q "select string_agg(rolname, ',' order by rolname) from pg_roles where rolsuper")"
+echo "superuser_has_password=$(q "select rolpassword is not null from pg_authid where rolname='postgres'")"
 echo "nuq_owner=$(q "select pg_get_userbyid(nspowner) from pg_namespace where nspname='nuq'")"
-echo "nuq_relations=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='nuq' and c.relkind in ('r','p','v','m','S')")"
-echo "nuq_relations_not_owned=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='nuq' and c.relkind in ('r','p','v','m','S') and pg_get_userbyid(c.relowner)<>'fcpi_core'")"
-echo "nuq_types_not_owned=$(q "select count(*) from pg_type t join pg_namespace n on n.oid=t.typnamespace where n.nspname='nuq' and t.typtype in ('e','d') and pg_get_userbyid(t.typowner)<>'fcpi_core'")"
-echo "tcp_sessions=$(q "select coalesce(string_agg(u, ' ' order by u), 'none') from (select usename||':'||count(*) u from pg_stat_activity where client_addr is not null group by usename) s")"
+echo "nuq_tables=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='nuq' and c.relkind in ('r','p')")"
+# fcpi_core owns nothing anywhere in this database: no relation, type, function or schema.
+echo "fcpi_core_owned_objects=$(q "select (select count(*) from pg_class where relowner=r.oid)+(select count(*) from pg_type where typowner=r.oid)+(select count(*) from pg_proc where proowner=r.oid)+(select count(*) from pg_namespace where nspowner=r.oid) from pg_roles r where rolname='fcpi_core'")"
+echo "fcpi_core_privileges=$(q "select string_agg(distinct privilege_type, ',' order by privilege_type) from information_schema.table_privileges where grantee='fcpi_core' and table_schema='nuq'")"
+echo "fcpi_core_tables_with_dml=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='nuq' and c.relkind in ('r','p') and has_table_privilege('fcpi_core', c.oid, 'SELECT,INSERT,UPDATE,DELETE')")"
+echo "fcpi_core_schema_create=$(q "select has_schema_privilege('fcpi_core','nuq','CREATE')")"
+echo "cron_job_owners=$(q "select string_agg(username||':'||n, ' ' order by username) from (select username, count(*) n from cron.job group by 1) s")"
+# Sessions from other containers; pg_cron's own connections come over loopback.
+echo "tcp_sessions=$(q "select coalesce(string_agg(u, ' ' order by u), 'none') from (select usename||':'||count(*) u from pg_stat_activity where client_addr is not null and host(client_addr) not in ('127.0.0.1','::1') group by usename) s")"
+
+sec fcpi_core_probe
+# As fcpi_core (local socket, trusted inside the container), each in a transaction that is
+# rolled back: a DML statement must succeed (the positive control); creating a function in
+# the NuQ schema and attaching a trigger to a NuQ table must both be refused.
+fq() { printf '%s\n' "$1" | sudo -n docker exec -i "$PG" psql -U fcpi_core -d postgres -X -At -v ON_ERROR_STOP=1 2>&1 | tr '\n' ' '; }
+echo "dml=$(fq "begin; update nuq.queue_scrape set status = status where false; select 'ok'; rollback;")"
+echo "create_function_in_nuq=$(fq "begin; create function nuq.fcpi_probe() returns trigger language plpgsql as \$\$begin return null; end\$\$; rollback;")"
+echo "create_trigger_on_nuq=$(fq "begin; create function pg_temp.fcpi_probe() returns trigger language plpgsql as \$\$begin return null; end\$\$; create trigger fcpi_probe after update on nuq.queue_scrape for each statement execute function pg_temp.fcpi_probe(); rollback;")"
 
 sec secrets
 echo "core_equals_superuser=$(sudo -n cmp -s $S/core_postgres_password $S/postgres_password && echo yes || echo no)"

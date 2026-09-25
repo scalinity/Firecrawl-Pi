@@ -1,25 +1,30 @@
--- FCPI: the core's own PostgreSQL role. It owns the NuQ schema and every object in it, so
--- it can do whatever NuQ does there, but it is not a superuser: no COPY ... PROGRAM, no
--- extension, role or cron management, and no access to schemas it does not own.
--- pg_cron's jobs stay the superuser's and keep working on the tables they maintain.
--- Run by the superuser through psql with the variable pw set from a secret file over
--- stdin (never on a command line). Idempotent: a rerun resets the password and
--- re-asserts ownership. Callers: initdb/020-fcpi-core-role.sh (a new data directory) and
--- scripts/m1/pi-narrow-credentials.sh (the existing one).
+-- FCPI: the core's own PostgreSQL role, fcpi_core. It may read and write NuQ's tables and
+-- nothing more. The tables, their schema and NuQ's pg_cron jobs stay the superuser's, so
+-- fcpi_core cannot create triggers, rules or views on the tables, alter them, or create
+-- anything in the schema. That matters because the cron jobs change these tables as the
+-- superuser every 15 s: a trigger their owner attached would run with superuser rights.
+-- The pinned core sends NuQ only DML and pg_notify() (no DDL, TRUNCATE or LISTEN in its
+-- dist/src/services/worker/nuq.js).
+-- The superuser keeps no password: local and loopback connections are trusted (pg_cron,
+-- the healthcheck and the collectors use them), and nothing else logs in as it.
+-- Run by the superuser through psql with the variable pw set from a secret file over stdin
+-- (never on a command line). Idempotent. Callers: initdb/020-fcpi-core-role.sh (a new data
+-- directory) and scripts/m1/pi-narrow-credentials.sh (the existing one).
 \set ON_ERROR_STOP on
+-- Neither the statement nor an error about it may reach the server log with the password.
+SET log_statement = 'none';
+SET log_min_error_statement = panic;
 SELECT 'CREATE ROLE fcpi_core LOGIN' WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'fcpi_core') \gexec
-ALTER ROLE fcpi_core WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD :'pw';
-ALTER SCHEMA nuq OWNER TO fcpi_core;
--- Tables, views and standalone sequences; indexes, TOAST tables, row types and sequences
--- owned by a column follow their table.
-SELECT format('ALTER %s nuq.%I OWNER TO fcpi_core',
-         CASE c.relkind WHEN 'S' THEN 'SEQUENCE' WHEN 'v' THEN 'VIEW' WHEN 'm' THEN 'MATERIALIZED VIEW' ELSE 'TABLE' END, c.relname)
-  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
- WHERE n.nspname = 'nuq' AND c.relkind IN ('r', 'p', 'v', 'm', 'S')
-   AND NOT (c.relkind = 'S' AND EXISTS (SELECT FROM pg_depend d WHERE d.objid = c.oid AND d.deptype IN ('a', 'i'))) \gexec
-SELECT format('ALTER TYPE nuq.%I OWNER TO fcpi_core', t.typname)
-  FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
- WHERE n.nspname = 'nuq' AND t.typtype IN ('e', 'd') \gexec
-SELECT format('ALTER ROUTINE nuq.%I(%s) OWNER TO fcpi_core', p.proname, pg_get_function_identity_arguments(p.oid))
-  FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
- WHERE n.nspname = 'nuq' \gexec
+ALTER ROLE fcpi_core WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS NOINHERIT PASSWORD :'pw';
+-- An install where fcpi_core owned the schema hands every object back to the superuser.
+REASSIGN OWNED BY fcpi_core TO postgres;
+REVOKE ALL ON SCHEMA nuq FROM fcpi_core;
+REVOKE ALL ON ALL TABLES IN SCHEMA nuq FROM fcpi_core;
+REVOKE ALL ON ALL SEQUENCES IN SCHEMA nuq FROM fcpi_core;
+GRANT USAGE ON SCHEMA nuq TO fcpi_core;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA nuq TO fcpi_core;
+GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA nuq TO fcpi_core;
+-- Tables and sequences a later nuq.sql adds get the same, and no more.
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA nuq GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO fcpi_core;
+ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA nuq GRANT USAGE, SELECT, UPDATE ON SEQUENCES TO fcpi_core;
+ALTER ROLE postgres PASSWORD NULL;

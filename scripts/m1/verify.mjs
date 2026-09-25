@@ -811,13 +811,17 @@ const checks = {
     } },
 
   V22: { name: "core-credentials-narrowed", inputs: [`${RAW}credentials.txt`, `${EV}rendered-compose.json`],
-    expected: "the core connects to PostgreSQL as fcpi_core: not a superuser, no role, database, replication or RLS-bypass rights, owner of the NuQ schema and of every NuQ relation and enum, with a password different from the superuser's; its container receives neither superuser secret; the only TCP sessions are fcpi_core's; RabbitMQ user fcpi has no tags and keeps its vhost permissions; Redis is unchanged, deferred to M8 (R11)",
+    expected: "the core connects to PostgreSQL as fcpi_core: not a superuser, no role, database, replication or RLS-bypass rights, owner of nothing, with exactly SELECT, INSERT, UPDATE and DELETE on every NuQ table and no CREATE on the schema, so it cannot attach code the superuser's pg_cron jobs would run; as fcpi_core a DML statement succeeds while creating a function in nuq and a trigger on a NuQ table are refused; the superuser has no password; the core's password differs from the superuser's and its container receives neither superuser secret; the only non-loopback sessions are fcpi_core's; RabbitMQ user fcpi has no tags and keeps its vhost permissions; Redis is unchanged, deferred to M8 (R11)",
     run() {
       const s = sections(`${RAW}credentials.txt`);
       const p = kv((s.postgres ?? []).join(" ")), sc = kv((s.secrets ?? []).join(" "));
+      const probe = (k) => (lineOf(s.fcpi_core_probe, `${k}=`) ?? "").slice(k.length + 1).trim();
       const sessions = (lineOf(s.postgres, "tcp_sessions=") ?? "").slice(13).trim().split(" ").filter(Boolean);
       const roleOk = p.role === "fcpi_core" && ["super", "createrole", "createdb", "replication", "bypassrls"].every((k) => p[k] === "false");
-      const ownOk = p.superusers === "postgres" && p.nuq_owner === "fcpi_core" && Number(p.nuq_relations) > 0 && p.nuq_relations_not_owned === "0" && p.nuq_types_not_owned === "0";
+      const privOk = p.superusers === "postgres" && p.superuser_has_password === "f" && p.nuq_owner === "postgres" && p.fcpi_core_owned_objects === "0" &&
+        p.fcpi_core_privileges === "DELETE,INSERT,SELECT,UPDATE" && Number(p.nuq_tables) > 0 && p.fcpi_core_tables_with_dml === p.nuq_tables && p.fcpi_core_schema_create === "f";
+      const probeOk = probe("dml") === "ok" && /permission denied for schema nuq/.test(probe("create_function_in_nuq")) && /must be owner of (table|relation) queue_scrape/.test(probe("create_trigger_on_nuq"));
+      const ownOk = privOk && probeOk;
       const sessOk = sessions.length > 0 && sessions.every((x) => /^fcpi_core:\d+$/.test(x));
       const files = ["postgres_password 5432:5432 600", "core_postgres_password 0:0 600", "postgres_core_role_password 5432:5432 600"];
       const secOk = sc.core_equals_superuser === "no" && sc.core_role_pair_equal === "yes" && files.every((f) => (s.secrets ?? []).includes(f));
@@ -828,7 +832,7 @@ const checks = {
       const composeOk = R.services["firecrawl-core"]?.environment?.POSTGRES_USER === "fcpi_core" && !secretsOf("firecrawl-core").some((x) => /^postgres_/.test(x)) &&
         secretsOf("nuq-postgres").includes("postgres_core_role_password");
       const ok = roleOk && ownOk && sessOk && secOk && rqOk && composeOk;
-      return { ok, actual: `role ${lineOf(s.postgres, "role=")?.slice(5)}; superusers=${p.superusers}; nuq owner=${p.nuq_owner}, relations=${p.nuq_relations} (not owned ${p.nuq_relations_not_owned}), enums not owned=${p.nuq_types_not_owned}; TCP sessions ${sessions.join(" ") || "none"}; core password equals superuser's=${sc.core_equals_superuser}, core pair equal=${sc.core_role_pair_equal}, file modes ok=${files.every((f) => (s.secrets ?? []).includes(f))}; rabbitmq ${(lineOf(rq, "users=") ?? "").trim()} ${(lineOf(rq, "permissions=") ?? "").trim()}; core POSTGRES_USER=${R.services["firecrawl-core"]?.environment?.POSTGRES_USER}, core secrets=${secretsOf("firecrawl-core").join(",")}; redis default user unchanged (M8)` };
+      return { ok, actual: `role ${lineOf(s.postgres, "role=")?.slice(5)}; superusers=${p.superusers} (password set=${p.superuser_has_password}); nuq owner=${p.nuq_owner}; fcpi_core owns ${p.fcpi_core_owned_objects} objects, holds ${p.fcpi_core_privileges} on ${p.fcpi_core_tables_with_dml}/${p.nuq_tables} NuQ tables, schema CREATE=${p.fcpi_core_schema_create}; as fcpi_core: DML=${probe("dml")}, create function in nuq -> ${probe("create_function_in_nuq").replace(/^ERROR:\s*/, "")}, create trigger on queue_scrape -> ${probe("create_trigger_on_nuq").replace(/^ERROR:\s*/, "")}; cron jobs ${p.cron_job_owners ?? (lineOf(s.postgres, "cron_job_owners=") ?? "").slice(16)}; TCP sessions ${sessions.join(" ") || "none"}; core password equals superuser's=${sc.core_equals_superuser}, core pair equal=${sc.core_role_pair_equal}, file modes ok=${files.every((f) => (s.secrets ?? []).includes(f))}; rabbitmq ${(lineOf(rq, "users=") ?? "").trim()} ${(lineOf(rq, "permissions=") ?? "").trim()}; core POSTGRES_USER=${R.services["firecrawl-core"]?.environment?.POSTGRES_USER}, core secrets=${secretsOf("firecrawl-core").join(",")}; redis default user unchanged (M8)` };
     } },
 
   V23: { name: "networkmanager-leaves-docker-interfaces-alone", inputs: [`${RAW}nm.txt`, "deploy/host/NetworkManager/90-fcpi-unmanaged.conf"],
