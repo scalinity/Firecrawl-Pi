@@ -13,6 +13,8 @@
 # Wi-Fi or docker Env/Config data is read.
 set -u
 export LC_ALL=C
+# Explicit PATH: a non-login ssh shell omits /usr/sbin, which hides nft, sysctl, zramctl, dumpe2fs.
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 sec() { printf '### %s\n' "$1"; }
 have() { command -v "$1" >/dev/null 2>&1; }
 missing=()
@@ -54,7 +56,12 @@ probes() {
   printf 'dpkg_foreign=%s\n' "$(dpkg --print-foreign-architectures 2>/dev/null | tr '\n' ' ')"
   printf 'long_bit=%s\n' "$(getconf LONG_BIT)"
   printf 'page_size=%s\n' "$(getconf PAGESIZE)"
-  printf 'binfmt_entries=%s\n' "$(ls /proc/sys/fs/binfmt_misc 2>/dev/null | tr '\n' ' ')"
+  # /proc/sys/fs/binfmt_misc is an automount point: listing it when unmounted would mount it.
+  if awk '$2=="/proc/sys/fs/binfmt_misc" && $3=="binfmt_misc"{f=1} END{exit !f}' /proc/mounts; then
+    printf 'binfmt_entries=%s\n' "$(ls /proc/sys/fs/binfmt_misc | tr '\n' ' ')"
+  else
+    echo "binfmt_entries=SKIPPED (not mounted; listing would trigger the automount)"
+  fi
 
   sec os
   cat /etc/os-release
@@ -146,7 +153,8 @@ probes() {
   findmnt -n -o TARGET,SOURCE,FSTYPE,OPTIONS,UUID /boot/firmware
 
   sec lsblk
-  lsblk -b -o NAME,KNAME,TYPE,SIZE,ROTA,RM,TRAN,MODEL,FSTYPE,FSVER,LABEL,UUID,PARTUUID,MOUNTPOINTS
+  # -P (KEY="value" pairs): blank columns must not shift field positions.
+  lsblk -b -P -o NAME,KNAME,TYPE,SIZE,ROTA,RM,TRAN,MODEL,FSTYPE,FSVER,LABEL,UUID,PARTUUID,MOUNTPOINT
 
   sec block_devices_sys
   for b in /sys/block/*; do
@@ -171,7 +179,9 @@ probes() {
   sed -E 's/(password|pass|credentials|username|user)=[^,[:space:]]*/\1=REDACTED/g' /etc/fstab
 
   sec kernel_log_storage_power
-  echo "boots_recorded=$(sudo -n journalctl --list-boots --no-pager 2>/dev/null | wc -l)"
+  echo "boots_recorded=$(sudo -n journalctl --list-boots --no-pager 2>/dev/null | tail -n +2 | wc -l)"
+  echo "journal_first_entry_utc=$(sudo -n journalctl --no-pager -o short-iso --utc 2>/dev/null | head -1 | cut -c1-24)"
+  echo "journal_kernel_first_entry_utc=$(sudo -n journalctl -k -b 0 --no-pager -o short-iso --utc 2>/dev/null | head -1 | cut -c1-24)"
   sudo -n journalctl --list-boots --no-pager 2>/dev/null | tail -5 | awk '{print $1, $3, $4, $5, $6, $7, $8}'
   echo "--- current boot kernel warnings (storage/fs/power/thermal/oom)"
   sudo -n journalctl -k -b 0 --no-pager -o short-iso 2>/dev/null | grep -iE 'mmc|ext4|i/o error|blk_update|voltage|undervolt|thermal|throttl|oom|out of memory|hung task' | tail -40
@@ -196,7 +206,7 @@ probes() {
   echo "etc_docker_daemon_json=$( [ -e /etc/docker/daemon.json ] && echo present || echo absent)"
   echo "compose_plugin=$(ls /usr/libexec/docker/cli-plugins/docker-compose /usr/lib/docker/cli-plugins/docker-compose /usr/local/lib/docker/cli-plugins/docker-compose 2>/dev/null | tr '\n' ' ')"
   echo "apt_sources=$(ls /etc/apt/sources.list.d/ 2>/dev/null | tr '\n' ' ')"
-  grep -rhoE 'https?://[^ ]+' /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null | sort -u
+  grep -rhoE 'https?://[^ ]+' /etc/apt/sources.list /etc/apt/sources.list.d/ 2>/dev/null | sed -E 's#://[^/@]+@#://<userinfo>@#' | sort -u
   apt-cache policy docker.io docker-ce containerd.io podman 2>/dev/null | grep -E '^[a-z]|Candidate|Installed'
 
   sec network
@@ -289,8 +299,10 @@ serial=$(tr -d '\0' </proc/device-tree/serial-number 2>/dev/null)
 cpuserial=$(awk -F': ' '/^Serial/{print $2}' /proc/cpuinfo)
 mid=$(cat /etc/machine-id 2>/dev/null)
 if [ -n "$serial" ]; then out=${out//$serial/SERIAL_SHA256:$(h "$serial")}; fi
-if [ -n "$cpuserial" ] && [ "$cpuserial" != "$serial" ]; then out=${out//$cpuserial/SERIAL_SHA256:$(h "$serial")}; fi
+if [ -n "$cpuserial" ] && [ "$cpuserial" != "$serial" ]; then out=${out//$cpuserial/CPU_SERIAL_SHA256:$(h "$cpuserial")}; fi
 if [ -n "$mid" ]; then out=${out//$mid/MACHINE_ID_SHA256:$(h "$mid")}; fi
+# Non-functional identifiers: link-local interface IDs (RFC 7217 stable) and the imager instance id.
+out=$(printf '%s\n' "$out" | sed -E -e 's/fe80::[0-9a-fA-F:]+/fe80::<link-local>/g' -e 's/rpi-imager-[0-9]+/rpi-imager-<id>/g')
 for mac in $(printf '%s\n' "$out" | grep -oiE '([0-9a-f]{2}[:-]){5}[0-9a-f]{2}' | sort -u); do
   out=${out//$mac/MAC_SHA256:$(h "$(printf '%s' "$mac" | tr 'A-F-' 'a-f:')")}
 done
