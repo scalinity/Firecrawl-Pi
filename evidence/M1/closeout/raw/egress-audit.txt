@@ -1,0 +1,11 @@
+read 2026-09-25T23:17:38Z
+ipv4_from_internal_subnets family=bridge packets=12811 bytes=3953178
+ipv4_from_internal_to_off_subnet family=bridge packets=0 bytes=0
+ipv6_beyond_link_scope_on_any_bridge family=bridge packets=0 bytes=0
+info_ipv6_link_scope_on_any_bridge family=bridge packets=0 bytes=0
+routed_out_of_internal_bridges family=inet packets=0 bytes=0
+routed_out_of_access_bridge family=inet packets=0 bytes=0
+routed_out_of_access_bridge_ipv6 family=inet packets=0 bytes=0
+ipv4_to_host_from_internal_bridges family=inet packets=0 bytes=0
+ipv6_beyond_link_scope_to_host family=inet packets=0 bytes=0
+info_ipv6_link_scope_to_host family=inet packets=0 bytes=0

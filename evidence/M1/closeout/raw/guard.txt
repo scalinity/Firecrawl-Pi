@@ -1,0 +1,41 @@
+### before_meta
+2026-09-25T23:06:30Z
+source_commit=0c454c509eee6ad33e4114ae5a9e18a51675f9d4
+guard_table=absent
+guard_file_sha256=db0440ddbbcd215565dcf4ea75870ea6a192719996063cc89bfd4ae6214941b3
+### before_probe
+gateway {"utc":"2026-09-25T23:06:30.431Z","tcp":{"host_bridge_53":{"connected":true},"host_lan_22":{"connected":true},"public_443":{"connected":true}}}
+### before_counters
+end
+### after_meta
+2026-09-25T23:07:48Z
+source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+guard_table=present
+guard_file_sha256=db0440ddbbcd215565dcf4ea75870ea6a192719996063cc89bfd4ae6214941b3
+### after_probe
+gateway {"utc":"2026-09-25T23:07:48.340Z","tcp":{"host_bridge_53":{"connected":false,"error":"timeout"},"host_lan_22":{"connected":false,"error":"timeout"},"public_443":{"connected":false,"error":"timeout"}}}
+### after_counters
+access_forward_out_dropped packets=3
+access_forward_in_dropped packets=0
+access_input_new_dropped packets=6
+end
+### pregate_meta
+2026-09-25T23:12:51Z
+source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+guard_table=present
+guard_file_sha256=db0440ddbbcd215565dcf4ea75870ea6a192719996063cc89bfd4ae6214941b3
+### pregate_counters
+access_forward_out_dropped packets=3
+access_forward_in_dropped packets=0
+access_input_new_dropped packets=6
+end
+### end_meta
+2026-09-25T23:17:28Z
+source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+guard_table=present
+guard_file_sha256=db0440ddbbcd215565dcf4ea75870ea6a192719996063cc89bfd4ae6214941b3
+### end_counters
+access_forward_out_dropped packets=0
+access_forward_in_dropped packets=0
+access_input_new_dropped packets=0
+end

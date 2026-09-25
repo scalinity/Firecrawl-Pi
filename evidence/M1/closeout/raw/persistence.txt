@@ -1,0 +1,54 @@
+### meta
+2026-09-25T23:10:58Z
+source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+sentinel=m1-sentinel-f936ddc2-51c8-4f46-96d4-720f1c4682b3
+### write
+NOTICE:  schema "fcpi_m1_sentinel" already exists, skipping
+NOTICE:  relation "sentinel" already exists, skipping
+CREATE SCHEMA
+CREATE TABLE
+postgres_written=m1-sentinel-f936ddc2-51c8-4f46-96d4-720f1c4682b3
+INSERT 0 1
+redis_set=OK
+rabbitmq_write={"utc":"2026-09-25T23:10:59.333Z","queue":"fcpi.m1.sentinel","messages_before":1,"purged":1,"published":"m1-sentinel-f936ddc2-51c8-4f46-96d4-720f1c4682b3","confirmed":true}
+### before
+nuq-postgres d5b9c79262963f0e196eeba1ae09b01d3f00e17d1e5c79247e1757519cd6d6ea
+redis ad38382aab129e4d26f5f76da4b39f45fac9877e9e606b1ba2b78606d54d60d4
+rabbitmq 9d8c7b15aaef273b33d713bbf489cc44ad030821b3d2fe1c9b729e80a2d85e91
+firecrawl-core cafdc0e5323a29c364eee12aa5ce4c42ad0696f6d1773595ed80a207afefe6dc
+access-gateway ba59d2bc1460169150acfaf611252b5006452fd204bbb29ff38287e5fb608e0e
+fixture 516d6905e8cd6ac476a7f658e3892d048f69f714a888cbd5513f3a2d19b33bd0
+rabbitmq_node=rabbit@rabbitmq
+### recreate
+ Container fcpi-firecrawl-core-1 Waiting 
+ Container fcpi-access-gateway-1 Waiting 
+ Container fcpi-redis-1 Healthy 
+ Container fcpi-nuq-postgres-1 Healthy 
+ Container fcpi-fixture-1 Healthy 
+ Container fcpi-rabbitmq-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+recreate_exit=0 elapsed_s=85
+### after
+nuq-postgres d631130e254baf2480b6eb1bcd97fa57bcc7fcee2da7a0f162276c9d9c0d5584
+redis 44292fb9f02770c41fff3a1de7478282768d264274e65f62c593647f48d4acee
+rabbitmq 311027cd39a448a704d833db9381b0884a94fdfcc271b9fab66470429e01660d
+firecrawl-core 2e534f0674e99c5847529096b4508fa639f752e565e28d5ff3d4d4c3d4f3d9ad
+access-gateway 03293883a6d4e3ba4dc71bf50203caa6a7bfc55e8b0143f30865dd6daf950f2c
+fixture a2702e21d11e31656f6bc991ce8c980b14211a012064371f3892e0bee805b4aa
+rabbitmq_node=rabbit@rabbitmq
+access-gateway running healthy
+firecrawl-core running healthy
+fixture running healthy
+nuq-postgres running healthy
+rabbitmq running healthy
+redis running healthy
+### read
+postgres_read=m1-sentinel-f936ddc2-51c8-4f46-96d4-720f1c4682b3
+redis_read=m1-sentinel-f936ddc2-51c8-4f46-96d4-720f1c4682b3
+rabbitmq_read={"utc":"2026-09-25T23:12:32.820Z","queue":"fcpi.m1.sentinel","messages_before":1,"messages":["m1-sentinel-f936ddc2-51c8-4f46-96d4-720f1c4682b3"]}
+0:0 700 /srv/firecrawl-pi/data
+5432:5432 700 /srv/firecrawl-pi/data/postgres
+6379:6379 700 /srv/firecrawl-pi/data/redis
+5672:5672 700 /srv/firecrawl-pi/data/rabbitmq
+end

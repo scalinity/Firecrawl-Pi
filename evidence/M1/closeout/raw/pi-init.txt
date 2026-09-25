@@ -1,0 +1,53 @@
+### meta
+2026-09-25T23:07:38Z
+source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+### directories
+kept    /etc/firecrawl-pi/
+kept    /etc/firecrawl-pi/secrets/
+kept    /etc/firecrawl-pi/secrets/clients/
+kept    /srv/firecrawl-pi/
+kept    /srv/firecrawl-pi/data/
+kept    /srv/firecrawl-pi/data/postgres/
+kept    /srv/firecrawl-pi/data/redis/
+kept    /srv/firecrawl-pi/data/rabbitmq/
+### data_identity
+kept    /srv/firecrawl-pi/data/.fcpi-data-id and /etc/firecrawl-pi/config.env
+### secrets
+kept    /etc/firecrawl-pi/secrets/postgres_password
+kept    /etc/firecrawl-pi/secrets/core_postgres_password and /etc/firecrawl-pi/secrets/postgres_core_role_password
+kept    /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf and /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
+kept    /etc/firecrawl-pi/secrets/redis_users_acl and /etc/firecrawl-pi/secrets/core_redis_url
+kept    /etc/firecrawl-pi/secrets/gateway_token_hashes and /etc/firecrawl-pi/secrets/clients/m1-verify.token
+kept    /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+### systemd_units
+kept    /etc/systemd/system/fcpi-data-check.service
+kept    /etc/systemd/system/fcpi-stack.service
+kept    /etc/systemd/system/docker.service.d/10-fcpi-data-check.conf
+installed /etc/systemd/system/docker.service.d/20-fcpi-guard.conf
+loaded  inet fcpi_guard
+installed /etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf
+reloaded NetworkManager configuration
+docker ExecStartPre=path=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh path=/usr/sbin/nft 
+fcpi-stack enabled=enabled
+### inventory
+0:0 755 4096 /etc/firecrawl-pi
+0:0 600 221 /etc/firecrawl-pi/config.env
+0:0 700 4096 /etc/firecrawl-pi/secrets
+0:0 700 4096 /etc/firecrawl-pi/secrets/clients
+0:0 600 90 /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url
+0:0 600 64 /etc/firecrawl-pi/secrets/core_postgres_password
+0:0 600 84 /etc/firecrawl-pi/secrets/core_redis_url
+3380:3380 600 82 /etc/firecrawl-pi/secrets/gateway_token_hashes
+5432:5432 600 64 /etc/firecrawl-pi/secrets/postgres_core_role_password
+5432:5432 600 64 /etc/firecrawl-pi/secrets/postgres_password
+5672:5672 600 100 /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf
+6379:6379 600 128 /etc/firecrawl-pi/secrets/redis_users_acl
+0:0 700 4096 /etc/firecrawl-pi/secrets/clients
+0:0 600 73 /etc/firecrawl-pi/secrets/clients/m1-verify.token
+0:0 700 4096 /srv/firecrawl-pi/data
+0:0 644 37 /srv/firecrawl-pi/data/.fcpi-data-id
+5432:5432 700 4096 /srv/firecrawl-pi/data/postgres
+6379:6379 700 4096 /srv/firecrawl-pi/data/redis
+5672:5672 700 4096 /srv/firecrawl-pi/data/rabbitmq
+5672:5672 400 64 /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
+end
