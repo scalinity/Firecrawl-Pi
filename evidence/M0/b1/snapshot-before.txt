@@ -1,0 +1,182 @@
+### meta
+2026-09-25T04:32:07Z
+boot_id_sha256=fb6e627964373f3fa2f34c4fddfc23144c0f7d4b9935aca3ee77100c484696fa
+### systemd_running
+NetworkManager.service
+airdb.service
+airlogger.service
+airmonitor.service
+avahi-daemon.service
+avahi-daemon.socket
+cron.service
+dbus.service
+dbus.socket
+dnscrypt-proxy.service
+dnscrypt-proxy.socket
+fail2ban.service
+getty@tty1.service
+init.scope
+mosquitto.service
+pihole-FTL.service
+proc-sys-fs-binfmt_misc.automount
+session-15356.scope
+ssh.service
+systemd-journald-dev-log.socket
+systemd-journald.service
+systemd-journald.socket
+systemd-logind.service
+systemd-timesyncd.service
+systemd-udevd-control.socket
+systemd-udevd-kernel.socket
+systemd-udevd.service
+user@1000.service
+wpa_supplicant.service
+### systemd_enabled
+NetworkManager-dispatcher.service
+NetworkManager.service
+airdb.service
+airlogger.service
+airmonitor.service
+apparmor.service
+apt-daily-upgrade.timer
+apt-daily.timer
+avahi-daemon.service
+avahi-daemon.socket
+cron.service
+dnscrypt-proxy.service
+dnscrypt-proxy.socket
+dpkg-db-backup.timer
+fail2ban.service
+fstrim.timer
+getty@.service
+logrotate.timer
+mosquitto.service
+net-watchdog.timer
+pihole-FTL.service
+remote-fs.target
+rpi-eeprom-update.service
+ssh.service
+systemd-pstore.service
+systemd-timesyncd.service
+wpa_supplicant.service
+### docker_activation
+docker.service=inactive
+docker.socket=inactive
+containerd.service=inactive
+### docker_ps
+SKIPPED docker.service not active; no docker command run
+### lsmod
+aes_ce_blk 49152
+aes_ce_cipher 49152
+backlight 49152
+binfmt_misc 49152
+brcmfmac 393216
+brcmfmac_cyw 49152
+brcmutil 49152
+cec 65536
+cfg80211 1114112
+ch341 49152
+drm 737280
+drm_client_lib 49152
+drm_display_helper 49152
+drm_dma_helper 49152
+drm_exec 49152
+drm_kms_helper 245760
+drm_panel_orientation_quirks 65536
+drm_shmem_helper 49152
+fuse 229376
+gf128mul 49152
+ghash_ce 49152
+gpio_keys 49152
+gpu_sched 98304
+i2c_brcmstb 49152
+inet_diag 49152
+ipv6 622592
+libsha1 65536
+lz4_compress 49152
+mc 81920
+nfnetlink 49152
+nvmem_rmem 49152
+pisp_be 49152
+pwm_fan 49152
+raspberrypi_gpiomem 49152
+raspberrypi_hwmon 49152
+rfkill 49152
+rp1_adc 49152
+rp1_fw 49152
+rp1_mailbox 49152
+rp1_pio 65536
+rpi_hevc_dec 65536
+sch_fq_codel 49152
+snd 163840
+snd_compress 49152
+snd_pcm 180224
+snd_pcm_dmaengine 49152
+snd_soc_core 327680
+snd_soc_hdmi_codec 49152
+snd_timer 81920
+tcp_diag 49152
+usbserial 81920
+v3d 212992
+v4l2_mem2mem 65536
+vc4 442368
+videobuf2_common 98304
+videobuf2_dma_contig 49152
+videobuf2_memops 49152
+videobuf2_v4l2 49152
+videodev 344064
+zram 65536
+### ss_listen
+tcp 0.0.0.0:1883 users:(("mosquitto",pid=959,fd=5))
+tcp 0.0.0.0:22 users:(("sshd",pid=977,fd=6))
+tcp 0.0.0.0:443 users:(("pihole-FTL",pid=969,fd=36))
+tcp 0.0.0.0:53 users:(("pihole-FTL",pid=969,fd=22))
+tcp 0.0.0.0:80 users:(("pihole-FTL",pid=969,fd=35))
+tcp 0.0.0.0:8080 users:(("python",pid=982,fd=3))
+tcp 0.0.0.0:9001 users:(("mosquitto",pid=959,fd=9))
+tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=936,fd=7),("systemd",pid=1,fd=167))
+tcp [::]:22 users:(("sshd",pid=977,fd=7))
+tcp [::]:443 users:(("pihole-FTL",pid=969,fd=38))
+tcp [::]:53 users:(("pihole-FTL",pid=969,fd=24))
+tcp [::]:80 users:(("pihole-FTL",pid=969,fd=37))
+udp *:123 users:(("pihole-FTL",pid=969,fd=42))
+udp *:42606 users:(("avahi-daemon",pid=595,fd=15))
+udp *:53 users:(("pihole-FTL",pid=969,fd=23))
+udp *:5353 users:(("avahi-daemon",pid=595,fd=13))
+udp 0.0.0.0:123 users:(("pihole-FTL",pid=969,fd=41))
+udp 0.0.0.0:34632 users:(("avahi-daemon",pid=595,fd=14))
+udp 0.0.0.0:53 users:(("pihole-FTL",pid=969,fd=21))
+udp 0.0.0.0:5353 users:(("avahi-daemon",pid=595,fd=12))
+udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=936,fd=8),("systemd",pid=1,fd=168))
+### findmnt
+/ /dev/mmcblk0p2 ext4 rw,noatime
+/boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro
+/dev udev devtmpfs rw,nosuid,relatime,size=4086080k,nr_inodes=255380,mode=755
+/dev/mqueue mqueue mqueue rw,nosuid,nodev,noexec,relatime
+/dev/pts devpts devpts rw,nosuid,noexec,relatime,gid=5,mode=600,ptmxmode=000
+/dev/shm tmpfs tmpfs rw,nosuid,nodev
+/proc proc proc rw,relatime
+/proc/sys/fs/binfmt_misc binfmt_misc binfmt_misc rw,nosuid,nodev,noexec,relatime
+/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=37,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=4541
+/run tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=1651184k,mode=755
+/run/credentials/getty@tty1.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
+/run/credentials/systemd-journald.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
+/run/lock tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=5120k
+/run/user/1000 tmpfs tmpfs rw,nosuid,nodev,relatime,size=825584k,nr_inodes=206396,mode=700,uid=1000,gid=1000
+/sys sysfs sysfs rw,nosuid,nodev,noexec,relatime
+/sys/fs/bpf bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700
+/sys/fs/cgroup cgroup2 cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot
+/sys/fs/fuse/connections fusectl fusectl rw,nosuid,nodev,noexec,relatime
+/sys/fs/pstore none pstore rw,nosuid,nodev,noexec,relatime
+/sys/kernel/config configfs configfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/debug debugfs debugfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/security securityfs securityfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/tracing tracefs tracefs rw,nosuid,nodev,noexec,relatime
+/tmp tmpfs tmpfs rw,nosuid,nodev,size=4127952k,nr_inodes=1048576
+### firewall
+nft_ruleset_sha256=SKIPPED nf_tables module not loaded
+iptables_legacy_sha256=SKIPPED ip_tables module not loaded or iptables-legacy-save absent
+### swap_zram
+swap /dev/zram0 partition 2097136 100
+zram zram0 disksize=2147483648 algo=lzo-rle lzo lz4 [zstd] 
+end

@@ -574,7 +574,7 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 
 | Milestone | Current status | Evidence |
 |---|---|---|
-| M0 | BLOCKED | `evidence/M0/INTERPRETATION.md`, `evidence/M0/audit.json`, `evidence/M0/verification.json` (V01–V08 PASS, BEFORE/AFTER diff empty), `deploy/versions.lock.json`. Blocked by B1 (OS); decisions D1–D6 await the separate review. |
+| M0 | BLOCKED | `evidence/M0/INTERPRETATION.md`, `evidence/M0/audit.json`, `evidence/M0/verification.json` (V01–V08 PASS, BEFORE/AFTER diff empty), `deploy/versions.lock.json`. B1's remedy is applied (`evidence/M0/b1/APPLIED.md`) and awaits the M0 re-check; decisions D1–D6 await the separate review. |
 | M1 | NOT_STARTED | Not eligible: M0 is not accepted |
 | M2 | NOT_STARTED | No retrieval/browser implementation performed |
 | M3 | NOT_STARTED | No live REST/private gateway configured |
@@ -589,8 +589,8 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 
 | ID | Gate | Kind | Smallest input that clears it | Blocks |
 |---|---|---|---|---|
-| B1 | The memory cgroup controller is disabled (the firmware adds `cgroup_disable=memory` to the kernel command line; the controllers are `cpuset cpu io pids`). No container memory cap can be enforced. | OS blocker; owner approval | Approve appending `cgroup_enable=memory` to `/boot/firmware/cmdline.txt` and one reboot, with a time when a short Pi-hole DNS / MQTT outage is acceptable. After the reboot, re-run the M0 cgroup probe and V01–V08. | M0 acceptance, M1 |
-| B2 | Fan presence is unobservable: the fan read 0 rpm while commanded at PWM 75, and a tach-less fan looks the same as no fan. | Unobservable physical fact | Yes or no: is a fan (e.g. the Active Cooler) fitted? | Thermal assumptions for M2/M8 |
+| B1 | The memory cgroup controller is disabled (the firmware adds `cgroup_disable=memory` to the kernel command line; the controllers are `cpuset cpu io pids`). No container memory cap can be enforced. | OS blocker; owner-approved remedy applied 2026-09-25 (`cgroup_enable=memory` appended, one reboot; `evidence/M0/b1/APPLIED.md`) | None from the owner. The M0 re-check confirms `memory` in `/sys/fs/cgroup/cgroup.controllers` and re-runs V01–V08. | M0 acceptance, M1 |
+| B2 | Fan presence: the owner states a fan is fitted (2026-09-25). M0 read 0 rpm while the fan was commanded at PWM 75, so rpm is not a trusted health signal; thermal checks rely on temperature and `get_throttled`. | Cleared: owner-stated physical fact | None | — |
 | D1 | Browser version: pinned Playwright 1.58.1 bundles Chromium 145; two V8 bugs exploited in the wild are fixed only in 152/153. | Decision for the separate review | Review decision on the M2 browser pair | M2 |
 | D2 | 16 KiB-page kernel (`kernel_2712.img` only); native Chromium launch unproven. | Decision for the separate review | Review decision: keep 16K with per-image launch proofs, or plan the 4K fallback | M1/M2 |
 | D3 | RabbitMQ series: upstream `3-management` (3.13, community support ended) versus 4.3.6. | Decision for the separate review | Review decision on the series | M1 |
@@ -600,4 +600,4 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 
 The separate review is a fresh Opus 5.5 session at xhigh effort that reads the evidence and both canonical documents, not the M0 transcript. Expected later gates, not current failures: provider credentials and explicit budget or free-credit permission (M5–M7); Tailscale installation and account association (M3); an off-device backup destination and recovery-key custody (M8). The microSD-only storage permits the spec §21.1 pilot; whether the card meets final unattended acceptance is an M8 question.
 
-**Next authorized implementation action:** the separate review of D1–D6, and the owner's answers to B1 and B2. M1 stays ineligible until M0 is ACCEPTED.
+**Next authorized implementation action:** the separate review of D1–D6, then the M0 re-check (memory controller present, V01–V08). M1 stays ineligible until M0 is ACCEPTED.
