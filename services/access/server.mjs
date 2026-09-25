@@ -89,7 +89,17 @@ function targetPermitted(body) {
   return cfg.origins.has(url.origin) && !url.username && !url.password;
 }
 
+// Every outcome logs exactly once. A failure before the upstream's headers is answered
+// with 502; after them the client response can only be cut, so it is destroyed rather
+// than left open (pipe() does not end the destination when the source is torn down).
 function forward(req, res, body, log) {
+  let settled = false;
+  const finish = (status) => { if (!settled) { settled = true; log(status); } };
+  const fail = () => {
+    if (settled) return;
+    if (res.headersSent) res.destroy(); else send(res, 502, { error: "upstream_unavailable" });
+    finish(502);
+  };
   const up = httpRequest({
     host: cfg.upstream.hostname, port: cfg.upstream.port || 80, method: req.method, path: req.url,
     headers: { "content-type": "application/json", "content-length": body.length, accept: "application/json" },
@@ -99,10 +109,14 @@ function forward(req, res, body, log) {
     for (const [k, v] of Object.entries(ur.headers)) if (!HOP.has(k)) headers[k] = v;
     res.writeHead(ur.statusCode, headers);
     ur.pipe(res);
-    ur.on("end", () => log(ur.statusCode));
+    ur.on("end", () => finish(ur.statusCode));
+    ur.on("error", fail);
+    ur.on("close", () => { if (!ur.complete) fail(); });
   });
   up.on("timeout", () => up.destroy(new Error("upstream timeout")));
-  up.on("error", () => { if (!res.headersSent) send(res, 502, { error: "upstream_unavailable" }); log(502); });
+  up.on("error", fail);
+  // A client that goes away cancels the upstream request instead of leaving it running.
+  res.on("close", () => { if (!res.writableFinished && !settled) { up.destroy(); finish(499); } });
   up.end(body);
 }
 

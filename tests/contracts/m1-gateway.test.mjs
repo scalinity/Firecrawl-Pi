@@ -41,8 +41,13 @@ before(async () => {
     const chunks = [];
     req.on("data", (c) => chunks.push(c));
     req.on("end", () => {
-      seen.push({ method: req.method, url: req.url, headers: req.headers, body: Buffer.concat(chunks).toString() });
+      const body = Buffer.concat(chunks).toString();
+      seen.push({ method: req.method, url: req.url, headers: req.headers, body });
+      let mode = null;
+      try { mode = JSON.parse(body).fakeUpstream ?? null; } catch { /* not JSON */ }
       res.writeHead(200, { "content-type": "application/json", "www-authenticate": 'Bearer resource_metadata="https://www.firecrawl.dev/.well-known/oauth-protected-resource"' });
+      // The core dying mid-response: headers and part of a body, then the socket drops.
+      if (mode === "abort-after-headers") { res.write('{"partial":'); setTimeout(() => res.socket.destroy(), 50); return; }
       res.end(JSON.stringify({ success: true }));
     });
   });
@@ -59,7 +64,7 @@ before(async () => {
     gw.on("exit", (c) => reject(new Error(`gateway exited ${c}`)));
   });
 });
-after(() => { gw?.kill(); upstream?.close(); if (dir) rmSync(dir, { recursive: true }); });
+after(() => { gw?.kill(); upstream?.closeAllConnections(); upstream?.close(); if (dir) rmSync(dir, { recursive: true }); });
 
 test("missing token: 401 with the gateway's own challenge, nothing forwarded", async () => {
   const n = seen.length;
@@ -142,6 +147,22 @@ test("a chunked body over 1 MiB (no Content-Length) gets a 413 response, not a r
   assert.match(reply, /^HTTP\/1\.1 413 /);
   assert.match(reply, /"error":"body_too_large"/);
   assert.equal(seen.length, n);
+});
+
+test("an upstream that dies after its headers ends the client response instead of hanging it", { timeout: 10000 }, async () => {
+  const outcome = await new Promise((resolve) => {
+    const data = Buffer.from(JSON.stringify({ url: `${FIXTURE}/static.html`, fakeUpstream: "abort-after-headers" }));
+    const timer = setTimeout(() => resolve("hung"), 5000);
+    const req = request({ host: "127.0.0.1", port: gwPort, method: "POST", path: "/v2/scrape", headers: {
+      authorization: `Bearer ${TOKEN}`, "content-type": "application/json", "content-length": data.length } }, (res) => {
+      res.on("data", () => {});
+      res.on("error", () => {});
+      res.on("close", () => { clearTimeout(timer); resolve(res.complete ? "complete" : "cut"); });
+    });
+    req.on("error", () => { clearTimeout(timer); resolve("cut"); });
+    req.end(data);
+  });
+  assert.equal(outcome, "cut");
 });
 
 test("unknown PI_* configuration keys stop startup", async () => {
