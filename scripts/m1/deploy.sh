@@ -6,6 +6,8 @@
 #     describes exactly what was copied;
 #   - verifies every copied file's SHA-256 on the Pi;
 #   - never deletes on the Pi: a file dropped from Git stays until removed by name.
+# Transport is `git archive HEAD` through tar: macOS ships openrsync (protocol 29),
+# which lacks --from0 and --chown, and the archive is exactly the tracked files at HEAD.
 set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 SSH=(ssh -i "$HOME/.ssh/pi" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15)
@@ -15,14 +17,11 @@ DEST=/opt/firecrawl-pi
 cd "$root"
 git diff --quiet HEAD -- || { echo "tracked files differ from HEAD; commit first" >&2; exit 1; }
 sha=$(git rev-parse HEAD)
-list=$(mktemp)
 sums=$(mktemp)
-trap 'rm -f "$list" "$sums"' EXIT
-git ls-files -z >"$list"
+trap 'rm -f "$sums"' EXIT
 git ls-files -z | xargs -0 shasum -a 256 >"$sums"
 
 "${SSH[@]}" "$PI" "sudo -n install -d -m 0755 -o root -g root $DEST"
-rsync -a --from0 --files-from="$list" --chown=root:root --rsync-path="sudo -n rsync" \
-  -e "${SSH[*]}" "$root/" "$PI:$DEST/"
+git archive --format=tar HEAD | "${SSH[@]}" "$PI" "sudo -n tar -x --no-same-owner -f - -C $DEST"
 "${SSH[@]}" "$PI" "cd $DEST && sha256sum --quiet --strict -c - && printf '%s\n' '$sha' | sudo -n tee .fcpi-source-commit >/dev/null" <"$sums"
-echo "deployed commit $sha ($(tr -cd '\0' <"$list" | wc -c | tr -d ' ') files) to $PI:$DEST"
+echo "deployed commit $sha ($(wc -l <"$sums" | tr -d ' ') files, hashes verified) to $PI:$DEST"
