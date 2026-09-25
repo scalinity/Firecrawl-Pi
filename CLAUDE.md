@@ -164,10 +164,10 @@ For the active milestone:
 2. inspect the relevant current code/configuration before modifying it;
 3. implement the complete milestone scope;
 4. automate its verification;
-5. run the required tests;
+5. run the required tests, holding any irreversible live step until the review is addressed (§5);
 6. run `/review-2`, with every review agent on Opus 5.5 (§5);
 7. after the review report is available, save it under `evidence/<milestone>/review/` with repository-relative paths (§5) and run `/address`;
-8. rerun every test affected by remediation;
+8. rerun every test affected by remediation, then run any held live step;
 9. record evidence and milestone status honestly;
 10. print the next milestone's kickoff prompt (§5), then stop at the milestone boundary unless progression was explicitly authorized.
 
@@ -184,6 +184,8 @@ After implementation of **every milestone**, run:
 ```
 
 Run every agent it spawns on **Opus 5.5** (the Agent tool's `opus` model), whatever model the session itself runs on. This review is the last independent check before the next milestone builds on the work.
+
+Where a milestone's required tests include an irreversible live step — a paid or credit-consuming call, live egress, or a destructive restore — run the fixture tests first, then the review and remediation below, and only then that step.
 
 Then, after the review report exists, save it as `evidence/<milestone>/review/REVIEW.md`, with every path made relative to the repository root and nothing §17 keeps out of evidence, and run:
 
