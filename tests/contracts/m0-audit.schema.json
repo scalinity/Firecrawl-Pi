@@ -79,7 +79,11 @@
       "items": { "type": "object", "required": ["field", "reason"], "properties": { "reason": { "type": "string", "minLength": 1 } } }
     },
     "missing_utilities": { "type": "array", "items": { "type": "string", "minLength": 1 } },
-    "network": { "type": "object", "required": ["default_route", "lan_block", "egress_ip_differs_from_interface"] },
+    "network": {
+      "type": "object",
+      "required": ["default_route", "lan_block", "egress_ip_sha256", "egress_ip_differs_from_interface"],
+      "properties": { "egress_ip_sha256": { "$ref": "#/$defs/sha256" }, "egress_ip_differs_from_interface": { "type": "boolean" } }
+    },
     "derived": {
       "type": "object",
       "required": ["resource_fit", "free_space"],

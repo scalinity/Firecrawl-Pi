@@ -20,6 +20,8 @@ const p = sections(RAW3);
 const tool = kv(p.sbin_tools);
 const RAW4 = "evidence/M0/raw/pi-audit-layout.txt";
 const lay = sections(RAW4);
+const RAW_ECHO = "evidence/M0/raw/pi-audit-extra-ipecho.txt";
+const echo = sections(RAW_ECHO).ip_echo.join(" ");
 const oomLine = a.kernel_log_storage_power[a.kernel_log_storage_power.indexOf("--- oom kills in journal (all boots)") + 1];
 const src = (file, sec) => `${file}#${sec}`;
 const obs = (sources, value) => ({ status: "observed", sources, value });
@@ -164,8 +166,9 @@ const audit = {
     default_route: a.network.find((l) => l.startsWith("default")),
     global_ipv6: a.network.slice(a.network.indexOf("--- global_ipv6") + 1, a.network.indexOf("--- hostname_I")).filter(Boolean).length > 0,
     lan_block: { cidr: "158.205.34.0/24", rfc1918: false, rdap: "158.198.0.0-158.215.255.255 JPNIC-NET-JP-ERX, ALLOCATED PORTABLE, JP (evidence/M0/network-exposure.json)" },
-    egress_ip_sha256: (x.ip_echo.find((l) => l.includes("EGRESS_IP_SHA256")) || "").match(/EGRESS_IP_SHA256:([0-9a-f]{64})/)?.[1],
-    egress_ip_differs_from_interface: /differs from 158\.205\.34\.18: yes/.test(x.ip_echo.join(" ")),
+    egress_ip_sha256: echo.match(/EGRESS_IP_SHA256:([0-9a-f]{64})/)?.[1],
+    egress_ip_source: RAW_ECHO + "#ip_echo",
+    egress_ip_differs_from_interface: /differs from (interface|[0-9.]+): yes/.test(echo),
     inbound_evidence: kv(x.inbound_evidence.map((l) => l.replace(/^sshd_journal_sources /, "").replace(/ /g, "\n")).join("\n").split("\n")),
     fail2ban_sshd: x.inbound_evidence.filter((l) => /Total|Currently/.test(l)).map((l) => l.replace(/^[|`\s-]+/, "").trim()),
   },

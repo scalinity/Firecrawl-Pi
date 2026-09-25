@@ -5,6 +5,7 @@
 set -u
 export LC_ALL=C
 sec() { printf '### %s\n' "$1"; }
+h() { printf '%s' "$1" | sha256sum | cut -c1-64; }
 
 probes() {
   sec probe_time
@@ -23,7 +24,7 @@ probes() {
   sec boot_config
   # Read-only views of boot configuration (never written).
   echo "--- /boot/firmware/cmdline.txt (as configured, before firmware additions)"
-  cat /boot/firmware/cmdline.txt 2>/dev/null
+  sed -E 's/rpi-imager-[0-9]+/rpi-imager-<id>/' /boot/firmware/cmdline.txt 2>/dev/null
   echo "--- /boot/firmware/config.txt (non-comment lines)"
   grep -vE '^\s*(#|$)' /boot/firmware/config.txt 2>/dev/null
   echo "--- kernel images present"
@@ -52,25 +53,42 @@ probes() {
   iw dev wlan0 link 2>/dev/null | grep -E 'signal|tx bitrate|rx bitrate' || echo "iw unavailable"
 
   sec inbound_evidence
-  # Evidence of reachability from outside the local /24, without scanning:
+  # Evidence of reachability from outside the local subnet, without scanning:
   # sshd connection sources recorded in the journal, counted by class only.
+  # The subnet is read from the interface, not hard-coded.
+  cidr=$(ip -4 -o addr show scope global 2>/dev/null | awk '{print $4}' | head -1)
+  printf 'local_cidr=%s\n' "${cidr:-UNKNOWN}"
   sudo -n fail2ban-client status sshd 2>/dev/null | grep -E 'Currently failed|Total failed|Currently banned|Total banned'
-  sudo -n journalctl -u ssh.service --no-pager -o cat 2>/dev/null \
-    | grep -oE 'from [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $2}' \
-    | awk -F. '{ if ($1"."$2"."$3=="158.205.34") l++; else o++ } END { printf "sshd_journal_sources local_subnet=%d outside_subnet=%d\n", l, o }'
-  sudo -n journalctl -u ssh.service --no-pager -o cat 2>/dev/null \
-    | grep -oE 'from [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $2}' | sort -u \
-    | awk -F. '$1"."$2"."$3!="158.205.34"' | wc -l | sed 's/^/distinct_outside_sources=/'
+  srcs=$(sudo -n journalctl -u ssh.service --no-pager -o cat 2>/dev/null | grep -oE 'from [0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | awk '{print $2}')
+  classify='function n(a, p) { split(a, p, "."); return ((p[1]*256+p[2])*256+p[3])*256+p[4] }
+    BEGIN { split(cidr, c, "/"); size = 2^(32-c[2]); base = int(n(c[1])/size)*size }
+    { if (n($1) >= base && n($1) < base+size) print "local " $1; else print "outside " $1 }'
+  printf '%s\n' "$srcs" | grep . | awk -v cidr="$cidr" "$classify" \
+    | awk '{ c[$1]++ } END { printf "sshd_journal_sources local_subnet=%d outside_subnet=%d\n", c["local"], c["outside"] }'
+  printf '%s\n' "$srcs" | grep . | sort -u | awk -v cidr="$cidr" "$classify" | grep -c '^outside' | sed 's/^/distinct_outside_sources=/'
   sudo -n journalctl -u ssh.service --no-pager -o short-iso 2>/dev/null | head -1 | cut -c1-25 | sed 's/^/journal_first_entry=/'
   sudo -n journalctl -u ssh.service --no-pager -o cat 2>/dev/null | grep -cE 'Invalid user|preauth' | sed 's/^/preauth_or_invalid_user_lines=/'
 
   sec ip_echo
   # The single permitted credential-free GET to a public IP-echo endpoint.
-  printf 'api.ipify.org => %s\n' "$(curl -s --max-time 10 https://api.ipify.org 2>&1)"
+  # Only a SHA-256 of the answer is printed: the raw address never leaves the Pi.
+  # FCPI_SKIP_IP_ECHO=1 skips the request (used once the permitted GET is spent).
+  if [ "${FCPI_SKIP_IP_ECHO:-0}" = 1 ]; then
+    echo "api.ipify.org => SKIPPED (FCPI_SKIP_IP_ECHO=1; no request sent)"
+  else
+    lan_ip=${cidr%/*}
+    egress=$(curl -s --max-time 10 https://api.ipify.org 2>/dev/null)
+    if printf '%s' "$egress" | grep -qE '^[0-9]{1,3}(\.[0-9]{1,3}){3}$'; then
+      printf 'api.ipify.org => EGRESS_IP_SHA256:%s (raw value withheld; differs from interface: %s)\n' \
+        "$(h "$egress")" "$( [ "$egress" != "$lan_ip" ] && echo yes || echo no)"
+    else
+      echo "api.ipify.org => UNAVAILABLE (no IPv4 literal returned within 10s)"
+    fi
+    unset egress
+  fi
 }
 
 out=$(probes 2>&1)
-h() { printf '%s' "$1" | sha256sum | cut -c1-64; }
 for mac in $(printf '%s\n' "$out" | grep -oiE '([0-9a-f]{2}[:-]){5}[0-9a-f]{2}' | sort -u); do
   out=${out//$mac/MAC_SHA256:$(h "$(printf '%s' "$mac" | tr 'A-F-' 'a-f:')")}
 done

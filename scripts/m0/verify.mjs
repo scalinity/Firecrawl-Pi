@@ -163,6 +163,8 @@ const checks = {
       walk("evidence/M0"); files.push("deploy/versions.lock.json");
       const audit = json("evidence/M0/audit.json");
       const egressHash = audit.network.egress_ip_sha256;
+      // Fail closed: without the recorded hash the egress-IP rule could never fire.
+      if (!/^[0-9a-f]{64}$/.test(egressHash ?? "")) return { ok: false, actual: "audit.network.egress_ip_sha256 absent or malformed; the raw-egress-IP rule cannot run" };
       const rules = [
         ["private-key", /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
         ["github-token", /\b(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,})/],

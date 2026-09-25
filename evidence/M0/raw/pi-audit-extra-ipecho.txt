@@ -1,0 +1,8 @@
+### provenance
+capture_utc=2026-09-25T03:21:03Z
+produced_by=scripts/m0/pi-audit-extra.sh at commit 6333fe9 (git blob 21ddb434ff125e98f8abc58c59352252366824cd)
+post_capture_redaction=yes: that script version printed the raw api.ipify.org answer; on the workstation, before any commit, the raw address was replaced with its SHA-256 and a comparison with the interface address 158.205.34.18. The raw address was never committed.
+superseded_by=scripts/m0/pi-audit-extra.sh now hashes on the Pi; FCPI_SKIP_IP_ECHO=1 re-runs skip the request because the single permitted GET was spent here.
+### ip_echo
+api.ipify.org => EGRESS_IP_SHA256:994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d (raw value withheld; differs from 158.205.34.18: yes)
+end

@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m0.audit/v1",
-  "generated_utc": "2026-09-25T03:37:14Z",
-  "repository_sha": "80ef9c75180322441336e4b710b9a913c7ca98ba",
+  "generated_utc": "2026-09-25T03:53:27Z",
+  "repository_sha": "220eaa2b341d9817e3d9383fb10f0aa655188ff9",
   "worktree_dirty": true,
   "upstream": {
     "repository": "https://github.com/firecrawl/firecrawl",
@@ -31,7 +31,7 @@
     {
       "id": "P2-audit-extra",
       "script": "scripts/m0/pi-audit-extra.sh",
-      "script_sha256": "2cac76b3c97d26c49dd9d3a30214560301ffe776d8afeb6f3941c88e5498d450",
+      "script_sha256": "cd20227c87efe52251d3f2861be4d836cd561899dbae3be73a2f9f48aff15332",
       "output": "evidence/M0/raw/pi-audit-extra.txt",
       "output_sha256": "055ce746b96e27979b6530295d50719a61a1436590878752796774372121d7f9",
       "utc": "2026-09-25T03:21:03Z",
@@ -810,6 +810,7 @@
       "rdap": "158.198.0.0-158.215.255.255 JPNIC-NET-JP-ERX, ALLOCATED PORTABLE, JP (evidence/M0/network-exposure.json)"
     },
     "egress_ip_sha256": "994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d",
+    "egress_ip_source": "evidence/M0/raw/pi-audit-extra-ipecho.txt#ip_echo",
     "egress_ip_differs_from_interface": true,
     "inbound_evidence": {
       "local_subnet": "36",
