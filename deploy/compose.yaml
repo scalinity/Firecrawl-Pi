@@ -256,6 +256,11 @@ services:
         bind: { create_host_path: false }
     ports:
       - "127.0.0.1:3380:3300"
+    # Docker's resolver still answers the project's own names. Other names go to this
+    # upstream from the container's namespace, where fcpi_guard drops them at the bridge;
+    # the host's loopback resolver, used by default, is reached from the host's namespace,
+    # past the guard (evidence/M1/closeout/CLOSEOUT.md). 192.0.2.1 is TEST-NET-1 (RFC 5737).
+    dns: [192.0.2.1]
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]

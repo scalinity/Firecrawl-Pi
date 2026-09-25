@@ -778,7 +778,7 @@ const checks = {
     } },
 
   V20: { name: "access-bridge-guard-drops-everything-but-replies", inputs: [`${RAW}guard.txt`, "deploy/host/fcpi-guard.nft", `${RAW}stack-final.txt`, `${EV}rendered-compose.json`],
-    expected: "without the guard, the gateway container reaches the host through the bridge address and the LAN address and reaches the Internet through the bridge's NAT (the positive control); with the guard loaded from its installed copy, identical to the repository's file and naming the bridge Compose names, all three are dropped and counted; no drop is counted between the probe and the dockerd gate test, or from the gate's reload to the end of the window; the gateway still serves the fixture through 127.0.0.1:3380 (R5)",
+    expected: "without the guard, the gateway container reaches the host through the bridge address and the LAN address and reaches the Internet through the bridge's NAT (the positive control); with the guard loaded from its installed copy, identical to the repository's file and naming the bridge Compose names, all three are dropped and counted; no drop is counted between the probe and the dockerd gate test, or from the gate's reload to the end of the window; a public name the gateway resolved past the guard through the host's loopback resolver no longer resolves once the gateway has its own upstream; the gateway still serves the fixture through 127.0.0.1:3380 (R5)",
     run() {
       const s = sections(`${RAW}guard.txt`);
       const meta = (p) => kv((s[`${p}_meta`] ?? []).join(" "));
@@ -797,10 +797,14 @@ const checks = {
       const quiet = KEYS.every((k) => Number.isFinite(ca[k]) && cp[k] === ca[k] && ce[k] === 0) && meta("end").guard_table === "present";
       const gw = (sections(`${RAW}stack-final.txt`).gateway_tests ?? []).find((l) => l.startsWith("valid_token_fixture_scrape "));
       const served = !!gw && kv(gw).status === "200";
-      const ok = beforeOk && afterOk && counted && quiet && served;
-      const dns = a?.dns_example_com ? (a.dns_example_com.resolved ? "resolves" : a.dns_example_com.error) : "not probed";
+      // DNS: with the guard loaded but before the gateway's own upstream, a public name resolves
+      // past the guard (the positive control); with it, the lookup fails.
+      const pd = probe("predns");
+      const dnsOk = pd?.dns_example_com?.resolved === true && a?.dns_example_com?.resolved === false;
+      const ok = beforeOk && afterOk && counted && quiet && served && dnsOk;
+      const dns = `before the gateway's DNS setting ${pd?.dns_example_com ? (pd.dns_example_com.resolved ? "resolves" : pd.dns_example_com.error) : "not probed"}, with it ${a?.dns_example_com ? (a.dns_example_com.resolved ? "resolves" : a.dns_example_com.error) : "not probed"}`;
       const fmt = (p) => (p ? Object.entries(p.tcp).map(([k, v]) => `${k}=${v.connected ? "connected" : v.error}`).join(",") : "missing");
-      return { ok, actual: `without guard: ${fmt(b)}; with guard: ${fmt(a)}; counters after probe ${JSON.stringify(ca)}, before the gate ${JSON.stringify(cp)}, at window end (after the gate's reload) ${JSON.stringify(ce)}; installed guard equals the repository file=${meta("after").guard_file_sha256 === fileHash}; rendered bridge name=${bridge}, matched by the guard=${coupled}; a public name from the gateway with the guard loaded: ${dns} (observed, not asserted); gateway fixture scrape=${gw ? kv(gw).status : "missing"}` };
+      return { ok, actual: `without guard: ${fmt(b)}; with guard: ${fmt(a)}; counters after probe ${JSON.stringify(ca)}, before the gate ${JSON.stringify(cp)}, at window end (after the gate's reload) ${JSON.stringify(ce)}; installed guard equals the repository file=${meta("after").guard_file_sha256 === fileHash}; rendered bridge name=${bridge}, matched by the guard=${coupled}; a public name from the gateway: ${dns}; gateway fixture scrape=${gw ? kv(gw).status : "missing"}` };
     } },
 
   V21: { name: "gateway-contract-tests-on-the-pinned-node", inputs: [`${RAW}gateway-tests-pinned-node.txt`, "tests/contracts/m1-gateway.test.mjs", "deploy/versions.lock.json"],

@@ -149,8 +149,9 @@ sudo -n systemctl daemon-reload
 sudo -n /usr/sbin/nft -f $ETC/fcpi-guard.nft || die "loading inet fcpi_guard failed"
 echo "loaded  inet fcpi_guard"
 # NetworkManager leaves Docker's interfaces alone. A config reload re-reads conf.d without
-# touching any active connection (wlan0 is not matched). The effective setting is checked,
-# not the file, so a reload that failed or never ran is caught on the next run too.
+# touching any active connection (wlan0 is not matched). `--print-config` merges the files
+# as NetworkManager would; the Docker interfaces' live states show whether the running
+# daemon applies them, so a reload that failed or never ran is caught on the next run too.
 install_if_changed $REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf /etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf
 want='unmanaged-devices=interface-name:veth*,interface-name:fcpi-*,interface-name:docker0'
 if ! sudo -n /usr/sbin/NetworkManager --print-config | grep -xF "$want" >/dev/null || \
