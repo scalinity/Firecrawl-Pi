@@ -41,9 +41,9 @@ No finding breaks one. The three M1-owned findings are verifier and probe defect
 | R14 | NetworkManager offers the idle `netplan-eth0` profile (no interface name, no match) to every Docker veth: 27 activations and 25 aborted DHCP transactions in the window. wlan0 logged no state change, so the LAN link was not disturbed. | M8 (host lifecycle) | No | A NetworkManager `unmanaged-devices` drop-in for `veth*` and `fcpi-*`, verified by NM device state before and after. | Deferred to M8 |
 | R15 | `deploy/nuq-postgres/nuq.sql`'s ALTER SYSTEM leaves server-class write tuning on the microSD (`bgwriter_delay` 50 ms, `bgwriter_lru_maxpages` 1000, `wal_writer_delay` 10 ms, `wal_buffers` 64 MB, `effective_io_concurrency` 200), plus 16 nightly REINDEX CONCURRENTLY jobs. Only the WAL sizes are overridden. | M8 (resource tuning) | No | Measure card writes in the soak and override by `-c` where they matter. | Deferred to M8 |
 | R16 | `scripts/m1/deploy.sh` never deletes on the Pi, so deploying an older commit leaves later-added files in place, including in the bind-mounted `services/access` and `tests/fixtures/m1`. | M8 (rollback rehearsal) | No | Deploy removes files under `/opt/firecrawl-pi` that are absent from the archive's manifest. | Deferred to M8 |
-| R17 | `scripts/m1/core-egress-probe.mjs` hardcodes the Pi's LAN address twice, although `scripts/m1/pi-target.conf` is its single definition. | M1 | No | The probe reads the address from the environment; the collector passes it from `scripts/m1/pi-target.conf`. | Fixed (see below) |
-| R18 | V14 attributes any value of the snapshot's `nft_ruleset_sha256` line to the project without inspecting it. Its cited backing, `raw/nft-ruleset.txt`, has no header, timestamp or collector, and does not hash to the AFTER value. | M1 (verifier) | No: the ruleset file holds only Docker's tables and `fcpi_audit`, and before M1 nf_tables was not loaded | V14 attributes the firewall line only if `raw/nft-ruleset.txt` lists exactly Docker's and the project's tables. | Fixed (see below) |
-| R19 | V13 requires `volume_or_data_deletion_commands_run=0`, a literal that `scripts/m1/pi-persistence.sh:45` prints unconditionally, so that clause cannot fail. The sentinel readback carries the proof. | M1 (verifier) | No | Drop the literal from the collector and the check. | Fixed (see below) |
+| R17 | `scripts/m1/core-egress-probe.mjs` hardcodes the Pi's LAN address twice, although `scripts/m1/pi-target.conf` is its single definition. | M1 | No | The probe reads the address from the environment; the collector passes it from `scripts/m1/pi-target.conf`. | Fixed in `9c3cc48` |
+| R18 | V14 attributes any value of the snapshot's `nft_ruleset_sha256` line to the project without inspecting it. Its cited backing, `raw/nft-ruleset.txt`, has no header, timestamp or collector, and does not hash to the AFTER value. | M1 (verifier) | No: the ruleset file holds only Docker's tables and `fcpi_audit`, and before M1 nf_tables was not loaded | V14 attributes the firewall line only if `raw/nft-ruleset.txt` lists exactly Docker's and the project's tables. | Fixed in `c09f44e` |
+| R19 | V13 requires `volume_or_data_deletion_commands_run=0`, a literal that `scripts/m1/pi-persistence.sh:45` prints unconditionally, so that clause cannot fail. The sentinel readback carries the proof. | M1 (verifier) | No | Drop the literal from the collector and the check. | Fixed in `77fb535` |
 | R20 | `evidence/M1/INTERPRETATION.md` says the 09:02Z–09:14Z window ran against `e6dbfa1`. `raw/stack.txt`, `raw/nuq-roundtrip.txt`, `raw/docker-gate.txt` and `raw/pi-init-rerun.txt` record `bf8dd96`. | none | No | None: `git diff bf8dd96 e6dbfa1 -- deploy services tests/fixtures` is empty, so the deployed runtime was identical. Recorded here. | No action |
 | R21 | `evidence/M1/INTERPRETATION.md` §8 item 9 lists the LAN address only in `scripts/m1/pi-target.conf` and M0 evidence. M1 also put it in `raw/lan-probe.txt`, `raw/stack.txt`, `raw/stack-final.txt` and `scripts/m1/core-egress-probe.mjs` (R17). | none | No | None before a first push; the pre-push full-history scan takes this file list. | No action |
 
@@ -312,7 +312,17 @@ Each item stands on its own; the evidence is carried as fact.
 
 ## `/address` outcomes (R17–R19)
 
-Filled in after the fixes; see the table below the close-out checks.
+Fixed after the report commit `9bd0b3e`, one commit each. None of them changes what M1 runs on the Pi.
+
+| Finding | Commit | Change | Verification |
+|---|---|---|---|
+| R17 | `9c3cc48` | `scripts/m1/core-egress-probe.mjs` reads `PI_LAN_ADDRESS` and throws without it; `scripts/m1/pi-collect-stack.sh` extracts it from the deployed `scripts/m1/pi-target.conf` and passes it to `docker exec` | Live, piped from the workstation into the running core and fixture containers: 4 targets each, every lookup fails, every connect gets ENETUNREACH. Without the variable, the probe refuses to run. After the fix, `git grep` finds the address in no script except `scripts/m1/pi-target.conf`. |
+| R18 | `c09f44e` | V14 attributes the firewall line only when `raw/nft-ruleset.txt` lists exactly `bridge fcpi_audit`, `inet fcpi_audit`, `ip filter`, `ip nat`, `ip raw`, `ip6 filter` and `ip6 nat`; the file is a declared input | Scratchpad copy: PASS on the recorded evidence; FAIL with one extra table appended |
+| R19 | `77fb535` | The literal is gone from `scripts/m1/pi-persistence.sh`, and V13 no longer requires it | Scratchpad copy: PASS on the recorded transcript and on one without the literal; FAIL with the Redis sentinel readback emptied |
+
+Regression: all 27 checks that need no Pi were rerun with the fixed verifier. Each matches `evidence/M1/verification.json` in state and `actual`. The only input hash that differs is V14's, because of its new input. `evidence/M1/snapshot-diff.txt` regenerates identically.
+
+`evidence/M1/verification.json` was not rewritten; it remains the accepted record. The Pi's deployed copy under `/opt/firecrawl-pi` still holds the pre-fix collectors until the next `scripts/m1/deploy.sh`, which M2 runs.
 
 ## Checks at close-out
 
@@ -323,7 +333,7 @@ Filled in after the fixes; see the table below the close-out checks.
 | The eight deviations judged | PASS | 8/8 |
 | The nine M1 deltas checked | PASS | 9/9 |
 | Gateway contract tests | PASS | 15/15 (`node --test tests/contracts/m1-gateway.test.mjs`, Node v26.8.2) |
-| Every path cited in this file exists | PASS | 94/94 repository paths (`raw/` and `sources/` resolved as defined above; upstream file names, Pi-side paths, `docker.service` and `.html` are not repository paths) |
+| Every path cited in this file exists | PASS | 98/98 repository paths (`raw/` and `sources/` resolved as defined above; upstream file names, Pi-side paths, `docker.service` and `.html` are not repository paths) |
 | `git status --short` lists nothing outside this review's ownership and nothing under `evidence/M1/` except `evidence/M1/review/` | PASS | Only `?? evidence/M1/review/` before the report commit, at HEAD `f2103c1` |
 | Redaction: M0 and M1 rules fire on both controls, then find nothing in `evidence/M1/review/` | PASS | V15's rule block copied to the scratchpad; M0 rule names match `scripts/m0/verify.mjs`; 16/16 M0 and 5/5 M1 rules fire on their controls; 0 hits in the 4 review files; neither the LAN address nor the SSH host appears |
 | V15's live-secret hash comparison, on `evidence/M1/review/` | PASS | 5 distinct, non-empty SHA-256s computed on the Pi (no value left it); 0 matches. The comparison over the whole repository was not rerun. |
