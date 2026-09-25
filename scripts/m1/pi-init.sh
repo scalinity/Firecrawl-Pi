@@ -119,5 +119,5 @@ sudo -n systemctl enable fcpi-stack.service 2>&1 | sed 's/^/systemctl: /'
 echo "fcpi-stack enabled=$(systemctl is-enabled fcpi-stack.service)"
 
 sec inventory
-sudo -n sh -c "stat -c '%U:%G %a %s %n' $ETC $ETC/config.env $S $S/* $S/clients $S/clients/* $DATA $DATA/.fcpi-data-id $DATA/postgres $DATA/redis $DATA/rabbitmq $DATA/rabbitmq/.erlang.cookie" 2>&1
+sudo -n sh -c "stat -c '%u:%g %a %s %n' $ETC $ETC/config.env $S $S/* $S/clients $S/clients/* $DATA $DATA/.fcpi-data-id $DATA/postgres $DATA/redis $DATA/rabbitmq $DATA/rabbitmq/.erlang.cookie" 2>&1
 echo end

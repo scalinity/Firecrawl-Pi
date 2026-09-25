@@ -24,7 +24,8 @@ uuid=$(findmnt -n -o UUID --target "$PI_DATA_DIR") || fail "findmnt failed for $
 [ "$(cat "$PI_DATA_DIR/.fcpi-data-id")" = "$PI_DATA_ID" ] || fail "data ID in $PI_DATA_DIR/.fcpi-data-id does not match PI_DATA_ID"
 
 rendered=$(docker compose -f "$PI_COMPOSE_FILE" config --format json) || fail "cannot render $PI_COMPOSE_FILE"
-binds=$(printf '%s' "$rendered" | jq -r '.services[] | .volumes[]? | select(.type == "bind") | "\(.bind.create_host_path // true) \(.source)"')
+# tostring, not `// true`: jq's // treats an explicit false as missing.
+binds=$(printf '%s' "$rendered" | jq -r '.services[] | .volumes[]? | select(.type == "bind") | "\(.bind.create_host_path | tostring) \(.source)"')
 [ -n "$binds" ] || fail "no bind mounts rendered from $PI_COMPOSE_FILE"
 n=0
 while read -r create src; do
