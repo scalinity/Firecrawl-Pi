@@ -348,6 +348,21 @@
       "evidence_path": "evidence/M1/verification.json"
     },
     {
+      "test_id": "M1-V17",
+      "name": "dockerd-gated-by-data-check",
+      "utc": "2026-09-25T08:51:35Z",
+      "repository_sha": "0ae2b1c63f15434b10a47a220f7259d5cb6f096e",
+      "worktree_dirty": true,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series": "none (patches begin in M2)",
+      "config_or_fixture_hash": "b4425b5ca4359830a224aa61c0df8c201a83672bb15a62ce5626e92042586579",
+      "expected": "dockerd runs the data check as ExecStartPre from the deployed drop-in; with dockerd stopped alone (containers still marked for revival) and a failing check, dockerd does not start, no project uid runs any process and nothing under /srv/firecrawl-pi changes; with the real config dockerd starts and its restart policies revive all six containers healthy",
+      "state": "PASS",
+      "actual": "drop-in deployed=true; before: 6 running (unless-stopped); dockerd stopped alone: fcpi-stack=active; gated start: exit=1 state=activating dockerd_processes=0 check_failures=1 writers=0 manifest_unchanged=yes; restored: revived_healthy=6",
+      "exit_code": 0,
+      "evidence_path": "evidence/M1/verification.json"
+    },
+    {
       "test_id": "M1-V13",
       "name": "persistence-sentinels-survive-force-recreate",
       "utc": "2026-09-25T08:17:25Z",
