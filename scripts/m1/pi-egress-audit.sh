@@ -26,7 +26,7 @@ case "$mode" in
 start)
   sudo -n nft -f - <<EOF
 table bridge fcpi_audit
-flush table bridge fcpi_audit
+delete table bridge fcpi_audit
 table bridge fcpi_audit {
   chain audit_pre {
     type filter hook prerouting priority -300; policy accept;
@@ -36,7 +36,7 @@ table bridge fcpi_audit {
   }
 }
 table inet fcpi_audit
-flush table inet fcpi_audit
+delete table inet fcpi_audit
 table inet fcpi_audit {
   chain audit_fwd {
     type filter hook forward priority -300; policy accept;
