@@ -197,7 +197,7 @@ Then rerun affected tests, and record each finding's outcome in the saved report
 
 - fixed, with its commit;
 - rejected, with the evidence that it is not a defect;
-- deferred, with the later milestone that owns it and the reason;
+- deferred, with the later milestone that owns it and the reason; only a finding outside this milestone's canonical Scope may be deferred, and a critical finding inside that Scope blocks ACCEPTED;
 - returned to the earlier milestone that owns it, for M9 only, which has no later milestone; the fix runs as a session in that milestone's scope.
 
 `/address` commits each fix; skip its push step, because the repository has no remote and a first push needs a full-history scan.
