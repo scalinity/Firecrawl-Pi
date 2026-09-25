@@ -19,17 +19,17 @@ start)
 table inet fcpi_audit
 flush table inet fcpi_audit
 table inet fcpi_audit {
-  chain pre {
+  chain audit_pre {
     type filter hook prerouting priority -300; policy accept;
     iifname $BR counter comment "all_from_internal"
     iifname $BR meta nfproto ipv4 ip daddr != $NETS counter comment "ipv4_off_subnet_from_internal"
     iifname $BR meta nfproto ipv6 counter comment "ipv6_from_internal"
   }
-  chain fwd {
+  chain audit_fwd {
     type filter hook forward priority -300; policy accept;
     iifname $BR oifname != $BR counter comment "forwarded_out_of_internal"
   }
-  chain inp {
+  chain audit_in {
     type filter hook input priority -300; policy accept;
     iifname $BR counter comment "to_host_from_internal"
   }
