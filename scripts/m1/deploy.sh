@@ -22,11 +22,16 @@ cd "$root"
 # while a verification window is open and never affect what the Pi runs.
 git diff --quiet HEAD -- . ':(exclude)evidence' || { echo "tracked files outside evidence/ differ from HEAD; commit first" >&2; exit 1; }
 sha=$(git rev-parse HEAD)
-sums=$(mktemp)
-trap 'rm -f "$sums"' EXIT
-git ls-files -z | xargs -0 shasum -a 256 >"$sums"
+# One archive is built, hashed from its own extracted contents, and sent: the hashes the Pi
+# checks describe exactly what it received, whatever the working tree holds.
+work=$(mktemp -d)
+trap 'rm -rf "$work"' EXIT
+git -c tar.umask=0022 archive --format=tar HEAD >"$work/src.tar"
+mkdir "$work/tree" && tar -xf "$work/src.tar" -C "$work/tree"
+(cd "$work/tree" && find . -type f -print0 | xargs -0 shasum -a 256) >"$work/sums"
+sums=$work/sums
 
 "${SSH[@]}" "$PI" "sudo -n install -d -m 0755 -o root -g root $DEST"
-git -c tar.umask=0022 archive --format=tar HEAD | "${SSH[@]}" "$PI" "sudo -n tar -x --no-same-owner -f - -C $DEST"
+"${SSH[@]}" "$PI" "sudo -n tar -x --no-same-owner -f - -C $DEST" <"$work/src.tar"
 "${SSH[@]}" "$PI" "cd $DEST && sha256sum --quiet --strict -c - && printf '%s\n' '$sha' | sudo -n tee .fcpi-source-commit >/dev/null" <"$sums"
 echo "deployed commit $sha ($(wc -l <"$sums" | tr -d ' ') files, hashes verified) to $PI:$DEST"
