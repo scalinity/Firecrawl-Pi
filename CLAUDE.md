@@ -197,7 +197,7 @@ Then rerun affected tests, and record each finding's outcome in the saved report
 
 - fixed, with its commit;
 - rejected, with the evidence that it is not a defect;
-- deferred, with the later milestone that owns it and the reason; only a finding outside this milestone's canonical Scope may be deferred, and a critical finding inside that Scope blocks ACCEPTED;
+- deferred, with the later milestone that owns it and the reason. A finding may be deferred only if it lies outside this milestone's canonical Scope, or if closing it needs something that later milestone first supplies (named in the reason, for example a workload it first runs). A critical finding inside that Scope blocks ACCEPTED;
 - returned to the earlier milestone that owns it, for M9 only, which has no later milestone; the fix runs as a session in that milestone's scope.
 
 The milestone's verifier, rerun after `/address`, checks that the saved report exists and that every finding in it has one of these outcomes (§26).
