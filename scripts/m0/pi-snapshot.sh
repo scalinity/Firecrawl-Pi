@@ -8,9 +8,12 @@
 #   - swap: the "Used" column is dropped;
 #   - firewall: hashed from `nft -s` (stateless: no packet/byte counters);
 #   - lsmod: module name and size only (use counts move with normal activity).
+# lsmod is read before `ss`, because ss's sock_diag query can auto-load
+# inet_diag/tcp_diag; reading modules first keeps such a load visible in AFTER.
 # A section whose probe could change state is skipped with the reason printed.
 set -u
 export LC_ALL=C
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 sec() { printf '### %s\n' "$1"; }
 
 sec meta
@@ -37,14 +40,14 @@ else
   echo "SKIPPED docker.service not active; no docker command run"
 fi
 
+sec lsmod
+lsmod | awk 'NR>1 {print $1, $2}' | sort
+
 sec ss_listen
 sudo -n ss -Hlntup | awk '{print $1, $5, $7}' | sort
 
 sec findmnt
 findmnt -rn -o TARGET,SOURCE,FSTYPE,OPTIONS | sort
-
-sec lsmod
-lsmod | awk 'NR>1 {print $1, $2}' | sort
 
 # Only query a firewall backend whose kernel module is already loaded, so that
 # listing rules can never auto-load a netfilter module.
