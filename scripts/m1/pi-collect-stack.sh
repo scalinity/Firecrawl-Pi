@@ -12,6 +12,9 @@ REPO=/opt/firecrawl-pi
 S=/etc/firecrawl-pi/secrets
 GW=http://127.0.0.1:3380
 FIXTURE_URL=http://m1.fixture.fcpi.test:8080/static.html
+# The host LAN address for the egress probe, from its single definition (not sourced: the
+# file also holds workstation-side SSH settings).
+PI_LAN_ADDRESS=$(sed -n "s/^PI_LAN_ADDRESS=//p" "$REPO/scripts/m1/pi-target.conf")
 SERVICES=(nuq-postgres redis rabbitmq firecrawl-core access-gateway fixture)
 
 D() { sudo -n docker "$@"; }
@@ -146,8 +149,8 @@ for c in "$CORE" "$FX" "$PG" "$RD" "$RMQ" "$GWC"; do
 done
 
 sec egress_probes
-echo "core $(D exec -i "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-egress-probe.mjs" 2>&1)"
-echo "fixture $(D exec -i "$FX" node --input-type=module - <"$REPO/scripts/m1/core-egress-probe.mjs" 2>&1)"
+echo "core $(D exec -i -e PI_LAN_ADDRESS="$PI_LAN_ADDRESS" "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-egress-probe.mjs" 2>&1)"
+echo "fixture $(D exec -i -e PI_LAN_ADDRESS="$PI_LAN_ADDRESS" "$FX" node --input-type=module - <"$REPO/scripts/m1/core-egress-probe.mjs" 2>&1)"
 echo "host_control_example_com=$(getent ahostsv4 example.com >/dev/null && echo resolves || echo fails)"
 
 sec core_log_scan
