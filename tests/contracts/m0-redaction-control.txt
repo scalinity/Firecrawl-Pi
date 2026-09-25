@@ -1,0 +1,19 @@
+# Positive control for the V07 redaction scan (scripts/m0/verify.mjs).
+# Every value is synthetic: TEST-NET-1 address, the AWS documentation example
+# key, locally administered MACs and .invalid hosts. V07 must find one hit per
+# rule here before it scans the repository; this file is excluded from that scan.
+private-key: -----BEGIN RSA PRIVATE KEY-----
+github-token: ghp_AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+openai-style-key: sk-FIXTUREFIXTUREFIXTUREFIXTURE
+aws-key: AKIAIOSFODNN7EXAMPLE
+slack-token: xoxb-000000000000-FIXTURE
+jwt: eyJhbGciOiJub25lIn0.eyJzdWIiOiJmaXh0dXJlIn0.c2lnbmF0dXJlZml4dHVyZQ
+bearer: Authorization: Bearer FIXTUREFIXTUREFIXTUREFIXTURE
+credential-assignment: password=fixture-not-a-secret
+url-credentials: https://fixtureuser:fixturepass@example.invalid/
+local-path: /home/fixture-user/project
+mac-address: 02:00:00:00:00:02
+raw-egress-ip: 192.0.2.77
+raw-board-serial: 0123456789abcdef
+raw-machine-id: /var/log/journal/0123456789abcdef0123456789abcdef/system.journal
+unexplained-mac-hash: MAC_SHA256:a921c4a6c87a60040912c1fdc954cebde8f8ab18a9b91b3be35c6a2f76b58072
