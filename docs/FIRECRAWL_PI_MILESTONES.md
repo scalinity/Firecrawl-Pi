@@ -575,7 +575,7 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 | Milestone | Current status | Evidence |
 |---|---|---|
 | M0 | ACCEPTED | `evidence/M0/INTERPRETATION.md`, `evidence/M0/audit.json`, `evidence/M0/verification.json` (V01–V08 PASS on evidence captured after the B1 reboot, BEFORE/AFTER diff empty), `evidence/M0/b1/APPLIED.md`, `evidence/M0/review/DECISIONS.md`, `deploy/versions.lock.json` |
-| M1 | NOT_STARTED | Eligible: M0 accepted |
+| M1 | ACCEPTED | `evidence/M1/INTERPRETATION.md`, `evidence/M1/verification.json` (27 of 28 checks PASS; N09 FAIL records the upstream NuQ connect-escape defect on the proof stack, M2 patch candidate PC-NUQ-CONNECT, and V10 proves the deployed stack recovers by restart), `evidence/M1/snapshot-diff.txt` (0 changes to unrelated state, boot unchanged), `evidence/M1/rendered-compose.json`, `deploy/versions.lock.json` |
 | M2 | NOT_STARTED | No retrieval/browser implementation performed |
 | M3 | NOT_STARTED | No live REST/private gateway configured |
 | M4 | NOT_STARTED | No project MCP endpoint/client test performed |
@@ -600,4 +600,4 @@ Do not promote a failing release. Keep the previous accepted deployment or the r
 
 The separate review, a fresh Opus 5.5 session at xhigh effort that read the evidence and both canonical documents rather than the M0 transcript, decided D1–D6 on 2026-09-25; the decisions, their evidence, the rejected alternatives and what each one obliges are in `evidence/M0/review/DECISIONS.md`. Expected later gates, not current failures: provider credentials and explicit budget or free-credit permission (M5–M7); Tailscale installation and account association (M3); an off-device backup destination and recovery-key custody (M8). The microSD-only storage permits the spec §21.1 pilot; whether the card meets final unattended acceptance is an M8 question.
 
-**Next authorized implementation action:** M1 (durable, private Firecrawl core), applying the D1–D6 decisions and the M1 deltas in `evidence/M0/review/DECISIONS.md`.
+**Next authorized implementation action:** the scarce review of M1's evidence (a fresh Opus 5.5 session at xhigh effort; the packet and its questions are in `evidence/M1/INTERPRETATION.md` §8), then M2 (guarded retrieval integration and resource-safe browser). M2's first build still needs the owner's D6 answer on a Mac container runtime.
