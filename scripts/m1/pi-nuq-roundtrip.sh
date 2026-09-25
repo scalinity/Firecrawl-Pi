@@ -32,8 +32,11 @@ counters() { # broker-wide counters from rabbitmq_prometheus, read from inside t
     const want = /^rabbitmq_global_messages_(delivered_get_auto_ack|delivered_consume_manual_ack|routed|dead_lettered_expired)_total\{/;
     for (const l of t.split("\n")) if (want.test(l)) console.log(l);' 2>&1
 }
-scrape() { # scrape [api_timeout_ms]
-  D exec -i -e SCRAPE_URL="$FIXTURE_URL" -e SCRAPE_TIMEOUT_MS="${1:-60000}" "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-scrape.mjs"
+scrape() { # scrape [api_timeout_ms]: /v0/scrape, the route that enqueues a listenable NuQ job
+  D exec -i -e SCRAPE_ENDPOINT=v0 -e SCRAPE_URL="$FIXTURE_URL" -e SCRAPE_TIMEOUT_MS="${1:-60000}" "$CORE" node --input-type=module - <"$REPO/scripts/m1/core-scrape.mjs"
+}
+newest_job() { # newest_job <epoch>: the newest fixture job created after <epoch>
+  psq "select id from nuq.queue_scrape where data->>'url' = '$FIXTURE_URL' and created_at > to_timestamp($1) order by created_at desc limit 1"
 }
 jobrow() { # jobrow <scrape_id>
   psq "select id || ' status=' || status || ' stalls=' || coalesce(stalls, 0) || ' listen_channel_id=' || coalesce(listen_channel_id, 'null') || ' group_id=' || coalesce(group_id::text, 'null') from nuq.queue_scrape where id = '$1'"
@@ -46,8 +49,8 @@ echo "core=$CORE rabbitmq=$RMQ postgres=$PG fixture=$FIXTURE_URL"
 # ---------------------------------------------------------------- case 1
 sec case1_counters_before; counters
 sec case1_scrape
-c1=$(scrape 60000); echo "$c1"
-id1=$(echo "$c1" | jq -r '.scrape_id // empty')
+t1=$(now); c1=$(scrape 60000); echo "$c1"
+id1=$(newest_job $t1)
 sec case1_job_row; [ -n "$id1" ] && jobrow "$id1"
 sec case1_queues; queues
 sec case1_counters_after; counters
@@ -92,8 +95,8 @@ for i in $(seq 1 120); do D exec -u rabbitmq "$RMQ" rabbitmq-diagnostics -q ping
 echo "broker_ping_ok_after_s=$(( $(now) - t3 ))"
 sleep 5
 sec case3_scrape
-c3=$(scrape 60000); echo "$c3"
-id3=$(echo "$c3" | jq -r '.scrape_id // empty')
+t3s=$(now); c3=$(scrape 60000); echo "$c3"
+id3=$(newest_job $t3s)
 sec case3_job_row; [ -n "$id3" ] && jobrow "$id3"
 sec case3_queues; queues
 sec case3_core_log_lines

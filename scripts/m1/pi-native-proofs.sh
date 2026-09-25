@@ -37,8 +37,10 @@ put() { # put <file> <owner> <content>: a 0600 secret file in the tmpfs proof di
 cg() { # effective cgroup limits and usage of a container, from its own scope
   local id; id=$(D inspect -f '{{.Id}}' "$1" 2>/dev/null) || { echo "$1 absent"; return; }
   local p=/sys/fs/cgroup/system.slice/docker-$id.scope
-  printf '%s memory.max=%s memory.current=%s memory.peak=%s cpu.max=%s pids.current=%s\n' "$1" \
-    "$(cat $p/memory.max)" "$(cat $p/memory.current)" "$(cat $p/memory.peak 2>/dev/null)" "$(cat $p/cpu.max | tr ' ' '/')" "$(cat $p/pids.current)"
+  printf '%s memory.max=%s memory.current=%s memory.peak=%s anon=%s file=%s shmem=%s memory.swap.max=%s cpu.max=%s pids.current=%s\n' "$1" \
+    "$(cat $p/memory.max)" "$(cat $p/memory.current)" "$(cat $p/memory.peak 2>/dev/null)" \
+    "$(awk '$1=="anon"{print $2}' $p/memory.stat)" "$(awk '$1=="file"{print $2}' $p/memory.stat)" "$(awk '$1=="shmem"{print $2}' $p/memory.stat)" \
+    "$(cat $p/memory.swap.max 2>/dev/null)" "$(cat $p/cpu.max | tr ' ' '/')" "$(cat $p/pids.current)"
 }
 
 case "$mode" in
@@ -109,7 +111,7 @@ probe)
   sleep 20
   echo "cron_runs_succeeded=$(q "select count(*) from cron.job_run_details where status = 'succeeded'")"
   echo "cron_runs_failed=$(q "select count(*) from cron.job_run_details where status = 'failed'")"
-  q "select name || '=' || setting || coalesce(unit, '') || ' source=' || source from pg_settings where name in ('shared_buffers','work_mem','max_connections','max_wal_size','min_wal_size','fsync','full_page_writes','synchronous_commit','wal_buffers','cron.database_name','shared_preload_libraries') order by name"
+  q "select name || '=' || current_setting(name) || ' source=' || source from pg_settings where name in ('shared_buffers','work_mem','max_connections','max_wal_size','min_wal_size','fsync','full_page_writes','synchronous_commit','wal_buffers','cron.database_name','shared_preload_libraries') order by name"
 
   sec redis
   echo "ping=$(D exec fcpi-proof-redis redis-cli PING)"
@@ -171,7 +173,7 @@ probe)
   sec gateway
   echo "contract_tests_node=$(D run --rm --network none "${LBL[@]}" "$IMG_NODE" node --version)"
   D run --rm --network none "${LBL[@]}" --user 65534:65534 -v "$REPO":/repo:ro -w /repo "$IMG_NODE" \
-    node --test tests/contracts/m1-gateway.test.mjs 2>&1 | grep -E '^(✔|✖|ℹ (tests|pass|fail))'
+    node --test --test-reporter=tap tests/contracts/m1-gateway.test.mjs 2>&1 | grep -E '^(ok|not ok|# (tests|pass|fail)) '
   echo "authenticated:"
   D run --rm -i --network "$NET" "${LBL[@]}" --user 65534:65534 -v "$SEC/gw-token":/run/token:ro \
     -e SCRAPE_API=http://fcpi-proof-gateway:3300 -e SCRAPE_TOKEN_FILE=/run/token -e SCRAPE_URL="$FIXTURE_URL" \
