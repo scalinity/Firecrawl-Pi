@@ -22,6 +22,7 @@ for (const path of process.argv.slice(2)) {
       const o = i * phentsize;
       if (ph.readUInt32LE(o) === 1) loads.push(Number(ph.readBigUInt64LE(o + 48)));
     }
+    if (!loads.length) throw new Error("no PT_LOAD segments"); // Math.min() of nothing is Infinity
     out.load_segments = loads.length;
     out.min_load_align_hex = "0x" + Math.min(...loads).toString(16);
     out.page_16k_compatible = Math.min(...loads) >= 0x4000;
