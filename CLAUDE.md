@@ -166,7 +166,7 @@ For the active milestone:
 4. automate its verification;
 5. run the required tests;
 6. run `/review-2`, with every review agent on Opus 5.5 (§5);
-7. after the review report is available, save it under `evidence/<milestone>/review/` and run `/address`;
+7. after the review report is available, save it under `evidence/<milestone>/review/` with repository-relative paths (§5) and run `/address`;
 8. rerun every test affected by remediation;
 9. record evidence and milestone status honestly;
 10. print the next milestone's kickoff prompt (§5), then stop at the milestone boundary unless progression was explicitly authorized.
@@ -185,7 +185,7 @@ After implementation of **every milestone**, run:
 
 Run every agent it spawns on **Opus 5.5** (the Agent tool's `opus` model), whatever model the session itself runs on. This review is the last independent check before the next milestone builds on the work.
 
-Then, after the review report exists, save it as `evidence/<milestone>/review/REVIEW.md` and run:
+Then, after the review report exists, save it as `evidence/<milestone>/review/REVIEW.md`, with every path made relative to the repository root and nothing §17 keeps out of evidence, and run:
 
 ```text
 /address
