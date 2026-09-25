@@ -16,6 +16,9 @@ accept='application/vnd.oci.image.index.v1+json,application/vnd.docker.distribut
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
 
+jfail() { jq -n --arg reg "$reg" --arg repo "$repo" --arg tag "$tag" --arg now "$now" --arg why "$1" \
+  '{registry:$reg, repository:$repo, tag:$tag, resolved_utc:$now, status:"unresolved", unresolved_reason:$why}'; exit 0; }
+
 token=""
 fetch() { # fetch <url> <out> [accept]; sets $code; obtains an anonymous bearer token on 401
   local url=$1 out=$2 acc=${3:-$accept} hdr=()
@@ -23,23 +26,26 @@ fetch() { # fetch <url> <out> [accept]; sets $code; obtains an anonymous bearer 
   code=$(curl -sS -L --max-time 60 -D "$tmp/h" -o "$out" -w '%{http_code}' -H "Accept: $acc" ${hdr[@]+"${hdr[@]}"} "$url")
   if [ "$code" = 401 ] && [ -z "$token" ]; then
     local wa realm service scope
-    wa=$(grep -i '^www-authenticate:' "$tmp/h" | head -1 | tr -d '\r')
+    wa=$(grep -i '^www-authenticate:' "$tmp/h" | head -1 | tr -d '\r' || true)
+    grep -qi 'realm="' <<<"$wa" || jfail "HTTP 401 without a usable WWW-Authenticate challenge"
     realm=$(sed -E 's/.*realm="([^"]+)".*/\1/' <<<"$wa")
     service=$(sed -nE 's/.*service="([^"]+)".*/\1/p' <<<"$wa")
     scope="repository:$repo:pull"
-    token=$(curl -sS --max-time 30 -G "$realm" --data-urlencode "service=$service" --data-urlencode "scope=$scope" | jq -r '.token // .access_token')
+    token=$(curl -sS --max-time 30 -G "$realm" --data-urlencode "service=$service" --data-urlencode "scope=$scope" | jq -r '.token // .access_token // empty')
+    [ -n "$token" ] || jfail "anonymous token request returned no token"
     fetch "$url" "$out" "$acc"
   fi
 }
-
-jfail() { jq -n --arg reg "$reg" --arg repo "$repo" --arg tag "$tag" --arg now "$now" --arg why "$1" \
-  '{registry:$reg, repository:$repo, tag:$tag, resolved_utc:$now, status:"unresolved", unresolved_reason:$why}'; exit 0; }
 
 fetch "https://$reg/v2/$repo/manifests/$tag" "$tmp/top"
 [ "$code" = 200 ] || jfail "manifest GET returned HTTP $code"
 top_digest="sha256:$(shasum -a 256 "$tmp/top" | cut -c1-64)"
 hdr_digest=$(grep -i '^docker-content-digest:' "$tmp/h" | tail -1 | awk '{print $2}' | tr -d '\r')
+# Pull-by-digest resolves the registry's digest, so it must equal the hash of the saved bytes.
+[ -z "$hdr_digest" ] || [ "$hdr_digest" = "$top_digest" ] || jfail "registry digest $hdr_digest != sha256 of saved bytes $top_digest"
 mt=$(jq -r '.mediaType // empty' "$tmp/top")
+# OCI indexes may omit mediaType in the body; fall back to the Content-Type header.
+[ -n "$mt" ] || mt=$(grep -i '^content-type:' "$tmp/h" | tail -1 | awk '{print $2}' | tr -d '\r;' || true)
 
 case "$mt" in
   *index*|*manifest.list*)
