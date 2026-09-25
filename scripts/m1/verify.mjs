@@ -662,10 +662,13 @@ const checks = {
       const silent = [...[...M0_RULES.map(([n]) => n), ...M0_HASH_RULES].filter((r) => !f0.has(r)), ...[...M1_RULES.map(([n]) => n), ...M1_HASH_RULES].filter((r) => !f1.has(r))];
       if (silent.length) return { ok: false, actual: `positive controls: rules that did not fire: ${silent.join(", ")}` };
       // Live: SHA-256 of each M1 secret value, computed on the Pi; no value leaves it.
-      const hashes = ssh(`sudo -n sh -c 'S=/etc/firecrawl-pi/secrets; h() { printf "%s" "$1" | sha256sum | cut -c1-64; }; \
+      const hashes = ssh(`sudo -n sh -c 'S=/etc/firecrawl-pi/secrets; h() { [ -n "$1" ] || { echo "EMPTY secret extraction" >&2; exit 1; }; printf "%s" "$1" | sha256sum | cut -c1-64; }; \
         h "$(cat $S/core_postgres_password)"; h "$(sed -n "s#^amqp://fcpi:\\(.*\\)@rabbitmq:5672\\$#\\1#p" $S/core_nuq_rabbitmq_url)"; \
         h "$(sed -n "s#^redis://:\\(.*\\)@redis:6379\\$#\\1#p" $S/core_redis_url)"; h "$(cat $S/clients/m1-verify.token)"; h "$(cat /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie)"'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
       if (hashes.length !== 5 || new Set(hashes).size !== 5) return { ok: false, actual: `expected 5 distinct live secret hashes from the Pi, got ${hashes.length}` };
+      // Second guard: an extraction that came back empty would hash to sha256(""), a distinct
+      // 64-hex value that would silently exclude that secret from the scan.
+      if (hashes.includes(sha256(""))) return { ok: false, actual: "a live secret extraction on the Pi returned an empty value" };
       const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard"], { encoding: "utf8" })
         .split("\n").filter((f) => f && f !== M0_CONTROL && f !== M1_CONTROL && has(f));
       const hits = scanFiles(files, { m0: m0ids, secrets: new Set(hashes) }, [...M0_RULES, ...M1_RULES], SYNTHETIC_ALLOW);
