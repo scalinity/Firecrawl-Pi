@@ -60,6 +60,7 @@ table inet fcpi_audit {
   }
 }
 EOF
+  date +%s | sudo -n tee /run/fcpi-egress-audit.start >/dev/null
   echo "started $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   ;;
 read)
@@ -72,5 +73,12 @@ read)
     sudo -n nft -j list set $s | jq -r --arg s "$s" '.nftables[] | select(.set) | .set.elem // [] | .[] | (.elem.val // .) | .concat
       | "flow set=\($s | gsub(" "; ":")) src=\(.[0]) dst=\(.[1]) l4proto=\(.[2])"'
   done
+  # NetworkManager on this host auto-activates the owner's netplan-eth0 profile on a new
+  # container-side veth during the milliseconds it exists in the host namespace, and starts
+  # a DHCP transaction (0.0.0.0 -> 255.255.255.255 udp) that reaches the project bridge.
+  # These lines attribute such host-originated broadcasts.
+  since=$(sudo -n cat /run/fcpi-egress-audit.start 2>/dev/null || echo 0)
+  sudo -n journalctl -u NetworkManager --since "@$since" --no-pager -o short-iso 2>/dev/null \
+    | grep -E 'auto-activating connection|dhcp4 \(veth' | sed -E 's/^([^ ]+) [^ ]+ NetworkManager\[[0-9]+\]: <info> +\[[0-9.]+\] /nm \1 /'
   ;;
 esac
