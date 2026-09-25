@@ -1,0 +1,130 @@
+# Excerpts from firecrawl/firecrawl at the pinned commit 7666c1f9ae8720a6bba271e0f60b6a217f8a5210 (AGPL-3.0).
+# url=https://codeload.github.com/firecrawl/firecrawl/tar.gz/7666c1f9ae8720a6bba271e0f60b6a217f8a5210
+# retrieved_utc=2026-09-25T22:12:20Z
+# tarball_sha256=a8d8f36ccb04b1122044e03c58fd45e42e63771d60a7aae9d0064d665e8547fa
+# Short excerpts quoted for review; paths are relative to apps/api/src unless stated. Line numbers are the upstream file's.
+
+## apps/nuq-postgres at the pin (SHA-256 of the upstream files)
+44edb370cfc2601076e174c5461ffdfda8a1051b3c2a87c1b5231d002a66ee77  apps/nuq-postgres/nuq.sql
+00108183ba9947db346226e3cc120b92b4cfcc60b215b320ad682f7944e93e45  apps/nuq-postgres/Dockerfile
+
+## PC-NUQ-CONNECT: startSender() and getJobToProcess() use try/finally with no catch
+--- services/worker/nuq.ts:326-333
+  326    private async startSender() {
+  327      if (this.sender || this.shuttingDown || this.senderStarting) return;
+  328      this.senderStarting = true;
+  329  
+  330      try {
+  331        if (config.NUQ_RABBITMQ_URL) {
+  332          const connection = await amqp.connect(config.NUQ_RABBITMQ_URL);
+  333          const channel = await connection.createChannel();
+--- services/worker/nuq.ts:376-380
+  376        }
+  377      } finally {
+  378        this.senderStarting = false;
+  379      }
+  380    }
+--- services/worker/nuq.ts:1290-1296
+ 1290    public async getJobToProcess(): Promise<NuQJob<any, any> | null> {
+ 1291      const start = Date.now();
+ 1292      try {
+ 1293        if (config.NUQ_RABBITMQ_URL) {
+ 1294          await this.startSender();
+ 1295  
+ 1296          if (this.sender) {
+--- services/worker/nuq.ts:1314-1319
+ 1314            }
+ 1315          } else {
+ 1316            logger.warn("NuQ sender not started, falling back to postgres", {
+ 1317              module: "nuq/rabbitmq",
+ 1318            });
+ 1319          }
+--- services/worker/nuq.ts:1330-1331
+ 1330          ).rows[0],
+ 1331        )!;
+## The two polling loops the rejection escapes
+--- services/queue-worker.ts:329-330
+  329    while (!isShuttingDown) {
+  330      const job = await crawlFinishedQueue.getJobToProcess();
+--- services/worker/nuq-worker-runner.ts:120-121
+  120    while (!isShuttingDown) {
+  121      const job = await options.queue.getJobToProcess();
+
+## #4244 path: the listener is assigned (146) before consume() (182); a retry is scheduled once, 250 ms after close
+--- services/worker/nuq.ts:123-128
+  123    private async startListener() {
+  124      if (this.listener || this.shuttingDown || this.listenerStarting) return;
+  125  
+  126      if (config.NUQ_RABBITMQ_URL) {
+  127        this.listenerStarting = true;
+  128  
+--- services/worker/nuq.ts:146-153
+  146          this.listener = {
+  147            type: "rabbitmq",
+  148            connection,
+  149            channel,
+  150            queue: queue.queue,
+  151          };
+  152        } finally {
+  153          this.listenerStarting = false;
+--- services/worker/nuq.ts:163-175
+  163  
+  164          if (reconnectTimeout) clearTimeout(reconnectTimeout);
+  165          reconnectTimeout = setTimeout(
+  166            (() => {
+  167              this.startListener().catch(err =>
+  168                logger.error("Error in NuQ listener reconnect", {
+  169                  err,
+  170                  module: "nuq/rabbitmq",
+  171                }),
+  172              );
+  173            }).bind(this),
+  174            250,
+  175          );
+--- services/worker/nuq.ts:182-183
+  182        await this.listener.channel.consume(
+  183          this.listener.queue,
+--- services/worker/nuq.ts:297-301
+  297    private async addListener(
+  298      id: string,
+  299      listener: (status: "completed" | "failed") => void,
+  300    ) {
+  301      await this.startListener();
+
+## ALLOW_LOCAL_WEBHOOKS: one global switch for the fetch engine's connect-time private-address check
+--- config.ts:314-314
+  314    ALLOW_LOCAL_WEBHOOKS: z.stringbool().optional(),
+--- scraper/scrapeURL/engines/utils/safeFetch.ts:42-42
+   42    return baseAgent.compose(interceptors.redirect({ maxRedirections: 5000 }));
+--- scraper/scrapeURL/engines/utils/safeFetch.ts:45-60
+   45  function attachSecurityCheck(agent: undici.Dispatcher) {
+   46    agent.on("connect", (_, targets) => {
+   47      const client: undici.Client = targets.slice(-1)[0] as undici.Client;
+   48      const socketSymbol = Object.getOwnPropertySymbols(client).find(
+   49        x => x.description === "socket",
+   50      )!;
+   51      const socket: Socket | TLSSocket = (client as any)[socketSymbol];
+   52  
+   53      if (
+   54        socket.remoteAddress &&
+   55        isIPPrivate(socket.remoteAddress) &&
+   56        config.ALLOW_LOCAL_WEBHOOKS !== true
+   57      ) {
+   58        socket.destroy(new InsecureConnectionError());
+   59      }
+   60    });
+--- services/webhook/delivery.ts:106-109
+  106    private shouldSendEvent(event: WebhookEvent): boolean {
+  107      if (config.DISABLE_WEBHOOK_DELIVERY) {
+  108        return false;
+  109      }
+--- services/webhook/delivery.ts:123-123
+  123      if (isIPPrivate(webhookHost) && config.ALLOW_LOCAL_WEBHOOKS !== true) {
+--- controllers/v2/types.ts:57-57
+   57        if (config.TEST_SUITE_SELF_HOSTED && config.ALLOW_LOCAL_WEBHOOKS) {
+--- occurrences of ALLOW_LOCAL_WEBHOOKS under apps/api/src (non-test)
+config.ts:314
+scraper/scrapeURL/engines/utils/safeFetch.ts:56
+controllers/v1/types.ts:62
+controllers/v2/types.ts:57
+services/webhook/delivery.ts:123

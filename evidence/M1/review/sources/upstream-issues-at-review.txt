@@ -1,0 +1,33 @@
+# Upstream issue and pull-request state, from the public GitHub REST API without authentication.
+# Retrieved 2026-09-25T22:13:32Z (issues 4244, 4263), 22:13:40Z (searches), 22:13:45Z (issue 2583).
+
+url=https://api.github.com/repos/firecrawl/firecrawl/issues/4244
+number=4244 kind=issue state=open state_reason=null created=2026-08-06T08:54:32Z closed=null merged=n/a
+title=api: NuQ channel.consume() outside try/finally permanently breaks the RabbitMQ listener — all waitForJob calls hang after one consume() failure
+html_url=https://github.com/firecrawl/firecrawl/issues/4244
+
+url=https://api.github.com/repos/firecrawl/firecrawl/issues/4263
+number=4263 kind=pull-request state=open state_reason=null created=2026-08-07T19:24:59Z closed=null merged=n/a
+title=fix(api): register NuQ RabbitMQ consumer before setting listener
+html_url=https://github.com/firecrawl/firecrawl/pull/4263
+
+url=https://api.github.com/repos/firecrawl/firecrawl/issues/2583
+number=2583 kind=issue state=closed state_reason=completed created=2025-12-19T13:56:32Z closed=2025-12-26T19:50:46Z merged=n/a
+title=[Self-Host] Api container fails on docker compose up due to RabbitMQ timing (ECONNREFUSED)
+html_url=https://github.com/firecrawl/firecrawl/issues/2583
+
+url=https://api.github.com/search/issues?q=repo:firecrawl/firecrawl+startSender
+total_count=0
+
+url=https://api.github.com/search/issues?q=repo:firecrawl/firecrawl+NuQ+ECONNREFUSED
+total_count=6
+number=3866 state=open kind=pull-request title=fix(helm): nuq-postgres CrashLoopBackOff on PVs with lost+found
+number=4137 state=open kind=issue title=[Self-Host] Building with Podman instead of Docker
+number=2583 state=closed kind=issue title=[Self-Host] Api container fails on docker compose up due to RabbitMQ timing (ECONNREFUSED)
+number=2264 state=closed kind=issue title=[Bug] Docker compose fails on postgres
+number=1421 state=closed kind=issue title=[Self-Host] Supabase connection error, even though USE_DB_AUTHENTICATION is false
+number=2145 state=closed kind=issue title=[Self-Host] nuq-worker crashes by attempting to connect to PostgreSQL in setups without a database
+
+# Reading: #4244 (listener left without a consumer after one consume() failure) and its fix #4263 are both open.
+# No upstream issue or pull request mentions startSender. #2583 (API fails at compose up on RabbitMQ timing) closed
+# 2025-12-26 as completed, yet startSender() at 7666c1f still has no catch (see upstream-7666c1f-nuq-and-fetch-excerpts.txt).

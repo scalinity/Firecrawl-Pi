@@ -1,0 +1,13 @@
+# ghcr.io/firecrawl/firecrawl:2.11.162 re-resolved, and GitHub artifact attestations queried.
+# An anonymous pull token from https://ghcr.io/token?scope=repository:firecrawl/firecrawl:pull was used and not stored.
+# url=https://ghcr.io/v2/firecrawl/firecrawl/manifests/2.11.162  retrieved_utc=2026-09-25T22:14:04Z
+docker-content-digest: sha256:1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63
+index_body_sha256=1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63
+manifest sha256:cc27dadc6eb259b077fcd478df794cd2d41c51616599c0ca161055a587bcc95c linux/amd64
+manifest sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af linux/arm64
+
+# url=https://api.github.com/repos/firecrawl/firecrawl/attestations/sha256:1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63  retrieved_utc=2026-09-25T22:14:04Z
+http_status=404 message=Not Found
+# url=https://api.github.com/repos/firecrawl/firecrawl/attestations/sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af  retrieved_utc=2026-09-25T22:14:09Z
+http_status=404 message=Not Found
+# Reading: the index and its arm64 manifest are unchanged from M0 and M1 (index 1b223ef1..., arm64 6157ce24...); no attestation exists for either digest.
