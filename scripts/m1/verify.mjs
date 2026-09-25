@@ -655,15 +655,24 @@ const checks = {
       const removed = B.filter((l) => !A.includes(l)), added = A.filter((l) => !B.includes(l));
       const unexplained = [];
       const byReason = {};
+      const diffRows = { project: [], unrelated: [] };
       for (const [kind, list] of [["removed", removed], ["added", added]]) for (const l of list) {
         const [sec, line] = [l.slice(0, l.indexOf("\t")), l.slice(l.indexOf("\t") + 1)];
         const why = attribute(sec, line, ids);
         // A removed line is only acceptable as the runtime's "before" state or an SSH session.
         const acceptable = why && (kind === "added" || /container runtime installed by M1|own SSH session|nftables/.test(why));
         if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else byReason[why] = (byReason[why] ?? 0) + 1;
+        diffRows[acceptable ? "project" : "unrelated"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${why ? `\t# ${why}` : ""}`);
       }
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       const ok = unexplained.length === 0 && !!boot("evidence/M1/snapshot-before.txt") && boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt");
+      // The BEFORE/AFTER diff, written by the check that judges it so the two cannot disagree.
+      writeFileSync(resolve(ROOT, "evidence/M1/snapshot-diff.txt"), [
+        "# M1 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m1/verify.mjs V14)",
+        `# before: ${read("evidence/M1/snapshot-before.txt").split("\n")[1]}  after: ${read("evidence/M1/snapshot-after.txt").split("\n")[1]}`,
+        `# boot_id: ${boot("evidence/M1/snapshot-before.txt") && boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt") ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
+        `## changes to unrelated state (${diffRows.unrelated.length})`, ...diffRows.unrelated,
+        `## project additions and the audit's own SSH sessions (${diffRows.project.length})`, ...diffRows.project, ""].join("\n"));
       return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(byReason)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt")}` };
     } },
 
