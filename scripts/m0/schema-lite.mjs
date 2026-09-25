@@ -19,7 +19,12 @@ export function validate(schema, data) {
   };
   const walk = (s, v, path) => {
     for (const k of Object.keys(s)) if (!SUPPORTED.has(k)) throw new Error(`unsupported schema keyword '${k}' at ${path}`);
-    if (s.$ref) return walk(resolveRef(s.$ref), v, path);
+    if (s.$ref) {
+      // Siblings of $ref would be ignored by this walker, so reject them rather than drop them silently.
+      const siblings = Object.keys(s).filter((k) => !["$ref", "$defs", "$schema", "$id", "title", "description"].includes(k));
+      if (siblings.length) throw new Error(`$ref with sibling keywords (${siblings.join(", ")}) at ${path}`);
+      return walk(resolveRef(s.$ref), v, path);
+    }
     if (s.type) {
       const ts = Array.isArray(s.type) ? s.type : [s.type];
       if (!ts.some((t) => typeOk(v, t))) { errors.push(`${path}: expected ${ts.join("|")}, got ${typeOf(v)}`); return; }

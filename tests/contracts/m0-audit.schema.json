@@ -88,8 +88,30 @@
       "type": "object",
       "required": ["resource_fit", "free_space"],
       "properties": {
-        "resource_fit": { "type": "object", "required": ["mem_total_mib", "mem_available_mib", "existing_usage_mib", "cap_sum_mib", "reserve_mib", "required_mib", "headroom_mib", "fits"] },
-        "free_space": { "type": "object", "required": ["root_avail_bytes", "root_avail_gib", "threshold_gib", "meets_threshold"] }
+        "resource_fit": {
+          "type": "object",
+          "required": ["mem_total_mib", "mem_available_mib", "existing_usage_mib", "cap_sum_mib", "reserve_mib", "required_mib", "headroom_mib", "fits"],
+          "properties": {
+            "mem_total_mib": { "type": "number", "minimum": 1 },
+            "mem_available_mib": { "type": "number", "minimum": 0 },
+            "existing_usage_mib": { "type": "number", "minimum": 0 },
+            "cap_sum_mib": { "type": "number", "minimum": 1 },
+            "reserve_mib": { "type": "number", "minimum": 1 },
+            "required_mib": { "type": "number", "minimum": 1 },
+            "headroom_mib": { "type": "number" },
+            "fits": { "type": "boolean" }
+          }
+        },
+        "free_space": {
+          "type": "object",
+          "required": ["root_avail_bytes", "root_avail_gib", "threshold_gib", "meets_threshold"],
+          "properties": {
+            "root_avail_bytes": { "type": "integer", "minimum": 0 },
+            "root_avail_gib": { "type": "number", "minimum": 0 },
+            "threshold_gib": { "type": "number", "minimum": 1 },
+            "meets_threshold": { "type": "boolean" }
+          }
+        }
       }
     },
     "plans": {
