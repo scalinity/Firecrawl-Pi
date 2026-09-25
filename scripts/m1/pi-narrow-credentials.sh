@@ -2,10 +2,11 @@
 # Narrow the core's data-service credentials on an install that predates the core role
 # (evidence/M1/review/REVIEW.md, R11). Runs ON the Pi against the running stack:
 #   ssh ... 'bash /opt/firecrawl-pi/scripts/m1/pi-narrow-credentials.sh'
-#   - PostgreSQL: the core stops using the superuser. Role fcpi_core owns the NuQ schema
-#     (deploy/nuq-postgres/fcpi-core-role.psql) and gets a new password, so the core no
-#     longer holds the superuser's: core_postgres_password is replaced, and its twin
-#     postgres_core_role_password is created for the initdb script.
+#   - PostgreSQL: the core stops using the superuser. Role fcpi_core may read and write
+#     NuQ's tables and nothing more (deploy/nuq-postgres/fcpi-core-role.psql), with a new
+#     password, so the core no longer holds the superuser's: core_postgres_password is
+#     replaced, and its twin postgres_core_role_password is created for the initdb script.
+#     The superuser loses its network password.
 #   - RabbitMQ: user fcpi keeps its AMQP permissions and loses the administrator tag.
 #   - Redis is unchanged: narrowing it needs a measured command set (M8).
 # Then it applies the Compose change that switches the core to fcpi_core, after the data
@@ -37,6 +38,9 @@ PG=$(name nuq-postgres); RMQ=$(name rabbitmq)
 
 sec secrets
 if exists $S/core_postgres_password && exists $S/postgres_core_role_password; then
+  # A run interrupted between the link and the rename leaves two different values; that
+  # is stopped, not repaired.
+  sudo -n cmp -s $S/core_postgres_password $S/postgres_core_role_password || die "core_postgres_password and postgres_core_role_password differ (an interrupted run?)"
   echo "kept    $S/core_postgres_password and $S/postgres_core_role_password"
 elif exists $S/core_postgres_password && ! exists $S/postgres_core_role_password; then
   # The pre-role state: the core's file holds the superuser's password. Anything else is
@@ -60,12 +64,18 @@ echo "core_equals_superuser=$(sudo -n cmp -s $S/core_postgres_password $S/postgr
 echo "core_role_pair_equal=$(sudo -n cmp -s $S/core_postgres_password $S/postgres_core_role_password && echo yes || echo no)"
 
 sec postgres_role
-{ printf "\\\\set pw '%s'\n" "$(sudo -n cat $S/postgres_core_role_password)"; cat $REPO/deploy/nuq-postgres/fcpi-core-role.psql; } \
+# Read into a variable first: a failed read inside printf's arguments would go unnoticed
+# and set an empty password.
+pw=$(sudo -n cat $S/postgres_core_role_password)
+[ -n "$pw" ] || die "postgres_core_role_password is empty"
+{ printf "\\\\set pw '%s'\n" "$pw"; cat $REPO/deploy/nuq-postgres/fcpi-core-role.psql; } \
   | sudo -n docker exec -i "$PG" psql -U postgres -d postgres -X -q -v ON_ERROR_STOP=1
+unset pw
 q() { sudo -n docker exec "$PG" psql -U postgres -d postgres -X -Atc "$1"; }
 echo "role=$(q "select rolname||' super='||rolsuper||' createrole='||rolcreaterole||' createdb='||rolcreatedb||' replication='||rolreplication||' bypassrls='||rolbypassrls from pg_roles where rolname='fcpi_core'")"
 echo "nuq_owner=$(q "select pg_get_userbyid(nspowner) from pg_namespace where nspname='nuq'")"
-echo "nuq_relations_not_owned=$(q "select count(*) from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='nuq' and c.relkind in ('r','p','v','m','S') and pg_get_userbyid(c.relowner)<>'fcpi_core'")"
+echo "fcpi_core_privileges=$(q "select string_agg(distinct privilege_type, ',' order by privilege_type) from information_schema.table_privileges where grantee='fcpi_core' and table_schema='nuq'")"
+echo "superuser_has_password=$(q "select rolpassword is not null from pg_authid where rolname='postgres'")"
 
 sec rabbitmq_tags
 sudo -n docker exec "$RMQ" rabbitmqctl set_user_tags fcpi 2>&1 | tail -1
@@ -73,9 +83,11 @@ echo "users=$(sudo -n docker exec "$RMQ" rabbitmqctl list_users -q | awk 'NR>1 {
 
 sec apply
 sudo -n $REPO/deploy/host/fcpi-data-check.sh
-"${COMPOSE[@]}" up -d --wait --wait-timeout 900 2>&1 | tail -8
-echo "up_exit=${PIPESTATUS[0]}"
+rc=0; "${COMPOSE[@]}" up -d --wait --wait-timeout 900 2>&1 | tail -8 || rc=$?
+echo "up_exit=$rc"
+[ "$rc" = 0 ] || die "docker compose up failed"
 echo "healthy=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter health=healthy | wc -l)"
-PG=$(name nuq-postgres) # `up` recreated it
-echo "core_tcp_sessions=$(q "select usename||':'||count(*) from pg_stat_activity where client_addr is not null group by usename" | tr '\n' ' ')"
+PG=$(name nuq-postgres) # `up` may have recreated it
+# Sessions from other containers; pg_cron's own connections come over loopback.
+echo "core_tcp_sessions=$(q "select usename||':'||count(*) from pg_stat_activity where client_addr is not null and host(client_addr) not in ('127.0.0.1','::1') group by usename" | tr '\n' ' ')"
 echo end
