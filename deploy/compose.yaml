@@ -1,6 +1,8 @@
 # FCPI curated Compose (M1: durable, private core; fixture-only profile).
-# Start and stop through systemd (fcpi-stack.service), which runs fcpi-data-check
-# first. Every image is pinned by its linux/arm64 manifest digest; the NuQ image is
+# Start and stop through systemd (fcpi-stack.service). The fail-closed data check
+# (deploy/host/fcpi-data-check.sh) runs before every start of the stack and, through a
+# docker.service drop-in, before every dockerd start, which is when restart policies
+# revive containers after an unclean shutdown. Every image is pinned by its linux/arm64 manifest digest; the NuQ image is
 # built on the Pi from deploy/nuq-postgres and referenced by its built digest.
 # Host publication: the access gateway on 127.0.0.1:3380 only.
 # Every bind mount sets create_host_path: false, so a missing data path fails the

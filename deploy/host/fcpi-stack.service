@@ -11,8 +11,10 @@ RemainAfterExit=yes
 # `up --wait` returns once every service is healthy; a failed health wait fails the start.
 ExecStart=/usr/bin/docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml up -d --wait --wait-timeout 900
 # `stop` (not `down`): containers and networks stay, and restart policies do not revive
-# explicitly stopped containers at the next daemon start, so a boot always goes through
-# fcpi-data-check first.
+# explicitly stopped containers at the next daemon start. Containers that were running
+# when the host lost power are revived by dockerd itself at its start; the drop-in
+# docker.service.d/10-fcpi-data-check.conf runs the same check before every dockerd start,
+# so that path is gated too.
 ExecStop=/usr/bin/docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml stop
 TimeoutStartSec=1000
 TimeoutStopSec=180

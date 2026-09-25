@@ -114,7 +114,16 @@ for u in fcpi-data-check.service fcpi-stack.service; do
     echo "kept    /etc/systemd/system/$u"
   fi
 done
+# dockerd runs the data check before every start (see the drop-in for why).
+D=/etc/systemd/system/docker.service.d
+sudo -n install -d -m 0755 -o root -g root $D
+if ! sudo -n cmp -s $REPO/deploy/host/docker.service.d/10-fcpi-data-check.conf $D/10-fcpi-data-check.conf; then
+  sudo -n install -m 0644 -o root -g root $REPO/deploy/host/docker.service.d/10-fcpi-data-check.conf $D/10-fcpi-data-check.conf && echo "installed $D/10-fcpi-data-check.conf"
+else
+  echo "kept    $D/10-fcpi-data-check.conf"
+fi
 sudo -n systemctl daemon-reload
+echo "docker ExecStartPre=$(systemctl show -p ExecStartPre --value docker.service | grep -o 'path=[^ ;]*' | tr '\n' ' ')"
 sudo -n systemctl enable fcpi-stack.service 2>&1 | sed 's/^/systemctl: /'
 echo "fcpi-stack enabled=$(systemctl is-enabled fcpi-stack.service)"
 

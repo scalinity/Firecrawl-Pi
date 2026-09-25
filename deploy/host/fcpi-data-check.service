@@ -3,6 +3,9 @@ Description=FCPI fail-closed data check (mount UUID, data ID, bind mounts)
 Documentation=file:///opt/firecrawl-pi/deploy/host/fcpi-data-check.sh
 After=local-fs.target
 RequiresMountsFor=/srv/firecrawl-pi
+# No ordering against docker.service is needed: the check renders Compose with the CLI
+# alone (verified with no daemon reachable), and dockerd runs the same script as its own
+# ExecStartPre (docker.service.d/10-fcpi-data-check.conf).
 
 [Service]
 Type=oneshot
