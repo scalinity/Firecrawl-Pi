@@ -165,7 +165,7 @@ For the active milestone:
 3. implement the complete milestone scope;
 4. automate its verification;
 5. run the required tests, holding any irreversible live step until the review is addressed (§5);
-6. run `/review-2`, with every review agent on Opus 5.5 (§5);
+6. run `/review-2` with every agent on the review model (§5);
 7. after the review report is available, save it under `evidence/<milestone>/review/` with repository-relative paths (§5) and run `/address`;
 8. rerun every test affected by remediation, then run any held live step;
 9. record evidence and milestone status honestly;
@@ -183,7 +183,7 @@ After implementation of **every milestone**, run:
 /review-2
 ```
 
-Run every agent it spawns on **Opus 5.5** (the Agent tool's `opus` model), whatever model the session itself runs on. This review is the last independent check before the next milestone builds on the work.
+**The review model is Opus 5.5.** Run every agent `/review-2` spawns on it (the Agent tool's `opus` alias, while that alias resolves to Opus 5.5), whatever model the session itself runs on; this overrides the skill's own model pin. If the review model is unavailable, run both agents on one other model, name that model in the saved report, and record the review as a substitution. The review's independence comes from its agents' fresh context, not from a different model.
 
 Where a milestone's required tests include an irreversible live step — a paid or credit-consuming call, live egress, or a destructive restore — run the fixture tests first, then the review and remediation below, and only then that step.
 
@@ -222,7 +222,7 @@ A review is not independent merely because the same execution log was reread. Th
 
 - take its entry gate from its own Dependencies section in `FIRECRAWL_PI_MILESTONES.md`;
 - read every saved report under `evidence/*/review/` and take each finding deferred to this milestone as scope;
-- run `/review-2` with Opus 5.5 agents after implementation, save the report, and run `/address` once the report exists;
+- run `/review-2` on the review model (Opus 5.5) after implementation, save the report, and run `/address` once the report exists;
 - rerun every affected test;
 - end its own close-out by printing the following milestone's kickoff prompt with these same instructions.
 
@@ -937,7 +937,7 @@ A milestone is complete only when:
 - required artifacts exist;
 - automated verification has run;
 - acceptance criteria pass or honest blockers are recorded;
-- `/review-2` has run with Opus 5.5 agents, and its report is saved under `evidence/<milestone>/review/`;
+- `/review-2` has run on the review model, or its §5 substitution is recorded, and its report is saved under `evidence/<milestone>/review/`;
 - `/address` has remediated review findings, and each finding's outcome is recorded in that report;
 - every finding an earlier saved review deferred to this milestone has an outcome recorded in this milestone's report;
 - affected tests have been rerun;
