@@ -6,6 +6,7 @@ import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, request } from "node:http";
 import { spawn } from "node:child_process";
+import { connect } from "node:net";
 import { createHash } from "node:crypto";
 import { mkdtempSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -122,6 +123,24 @@ test("bodies over 1 MiB are refused with 413", async () => {
   const n = seen.length;
   const r = await call("POST", "/v2/scrape", { token: TOKEN, body: { url: `${FIXTURE}/static.html`, pad: "x".repeat(1024 * 1024) } });
   assert.equal(r.status, 413);
+  assert.equal(seen.length, n);
+});
+
+test("a chunked body over 1 MiB (no Content-Length) gets a 413 response, not a reset", async () => {
+  const n = seen.length;
+  const reply = await new Promise((resolve) => {
+    const s = connect(gwPort, "127.0.0.1");
+    const got = [];
+    s.on("data", (d) => got.push(d));
+    s.on("error", () => {}); // late writes after the gateway closes may fail; the reply is what matters
+    s.on("close", () => resolve(Buffer.concat(got).toString()));
+    s.write(`POST /v2/scrape HTTP/1.1\r\nhost: gw\r\nauthorization: Bearer ${TOKEN}\r\ncontent-type: application/json\r\ntransfer-encoding: chunked\r\n\r\n`);
+    const chunk = Buffer.alloc(64 * 1024, 0x78);
+    for (let sent = 0; sent <= 1024 * 1024; sent += chunk.length) s.write(`${chunk.length.toString(16)}\r\n${chunk}\r\n`);
+    s.end("0\r\n\r\n");
+  });
+  assert.match(reply, /^HTTP\/1\.1 413 /);
+  assert.match(reply, /"error":"body_too_large"/);
   assert.equal(seen.length, n);
 });
 

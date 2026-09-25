@@ -38,6 +38,7 @@ function loadConfig(env) {
 const cfg = loadConfig(process.env);
 
 const BODY_CAP = 1024 * 1024;
+const DRAIN_CAP = 8 * BODY_CAP;
 const ROUTES = new Set(["POST /v1/scrape", "POST /v2/scrape"]);
 const HOP = new Set(["connection", "keep-alive", "transfer-encoding", "upgrade", "proxy-authenticate", "proxy-authorization", "te", "trailer", "www-authenticate"]);
 
@@ -57,18 +58,28 @@ function send(res, status, body, extra = {}) {
   res.end(buf);
 }
 
+// Over the cap, stop buffering and reject; the handler answers 413 and closes the
+// connection. The remainder is read and discarded (up to DRAIN_CAP) rather than left
+// unread, because closing a socket with unread input sends a reset that can destroy the
+// 413 before the client reads it. This holds for a declared Content-Length and for a
+// chunked body alike.
 function readBody(req) {
   return new Promise((resolve, reject) => {
-    const declared = Number(req.headers["content-length"] ?? 0);
-    if (declared > BODY_CAP) return reject(Object.assign(new Error("too large"), { status: 413 }));
+    const tooLarge = () => Object.assign(new Error("too large"), { status: 413 });
     const chunks = [];
     let size = 0;
+    let over = Number(req.headers["content-length"] ?? 0) > BODY_CAP;
     req.on("data", (c) => {
       size += c.length;
-      if (size > BODY_CAP) { req.destroy(); reject(Object.assign(new Error("too large"), { status: 413 })); } else chunks.push(c);
+      if (over) { if (size > DRAIN_CAP) req.destroy(); return; }
+      if (size <= BODY_CAP) return chunks.push(c);
+      over = true;
+      chunks.length = 0;
+      reject(tooLarge());
     });
-    req.on("end", () => resolve(Buffer.concat(chunks)));
+    req.on("end", () => (over ? reject(tooLarge()) : resolve(Buffer.concat(chunks))));
     req.on("error", reject);
+    if (over) reject(tooLarge());
   });
 }
 
@@ -106,7 +117,7 @@ const server = createServer(async (req, res) => {
   if (path === "/admin" || path.startsWith("/admin/") || !ROUTES.has(`${req.method} ${path}`)) { send(res, 404, { error: "not_found" }); return log(404); }
 
   let body;
-  try { body = await readBody(req); } catch (e) { send(res, e.status ?? 400, { error: e.status === 413 ? "body_too_large" : "bad_request" }); return log(e.status ?? 400); }
+  try { body = await readBody(req); } catch (e) { send(res, e.status ?? 400, { error: e.status === 413 ? "body_too_large" : "bad_request" }, { connection: "close" }); return log(e.status ?? 400); }
   if (!targetPermitted(body)) { send(res, 403, { error: "target_not_permitted", detail: "M1 permits only the configured fixture origins" }); return log(403); }
   forward(req, res, body, log);
 });
