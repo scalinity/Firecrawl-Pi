@@ -1,6 +1,7 @@
-# FCPI access-bridge guard. Loaded by docker.service's ExecStartPre
-# (deploy/host/docker.service.d/20-fcpi-guard.conf) before every dockerd start, so no
-# container runs without it, and a failed load keeps dockerd down.
+# FCPI access-bridge guard. scripts/m1/pi-init.sh installs it as
+# /etc/firecrawl-pi/fcpi-guard.nft, and docker.service's ExecStartPre
+# (deploy/host/docker.service.d/20-fcpi-guard.conf) loads it before every dockerd start,
+# so no container runs without it, and a failed load keeps dockerd down.
 # fcpi-access is the only non-internal project bridge. It carries the gateway's loopback
 # publication, which docker-proxy reaches from the host, so the only traffic it needs is
 # the replies to those host-initiated connections. Everything else is dropped and counted:

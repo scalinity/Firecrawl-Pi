@@ -128,30 +128,38 @@ for u in fcpi-data-check.service fcpi-stack.service; do
     echo "kept    /etc/systemd/system/$u"
   fi
 done
+# install_if_changed <source> <target>: root-owned 0644 copy, only when it differs.
+install_if_changed() {
+  if ! sudo -n cmp -s "$1" "$2"; then sudo -n install -m 0644 -o root -g root "$1" "$2"; echo "installed $2"; else echo "kept    $2"; fi
+}
 # dockerd runs the data check, then loads the access-bridge guard, before every start
-# (see each drop-in for why).
+# (see each drop-in for why). The guard's ruleset is checked before anything refers to it,
+# and lives under /etc/firecrawl-pi rather than the deploy tree, so a deploy of an older
+# commit cannot remove the file the drop-in loads.
+sudo -n /usr/sbin/nft -c -f $REPO/deploy/host/fcpi-guard.nft || die "deploy/host/fcpi-guard.nft does not parse"
+install_if_changed $REPO/deploy/host/fcpi-guard.nft $ETC/fcpi-guard.nft
 D=/etc/systemd/system/docker.service.d
 sudo -n install -d -m 0755 -o root -g root $D
 for f in 10-fcpi-data-check.conf 20-fcpi-guard.conf; do
-  if ! sudo -n cmp -s $REPO/deploy/host/docker.service.d/$f $D/$f; then
-    sudo -n install -m 0644 -o root -g root $REPO/deploy/host/docker.service.d/$f $D/$f && echo "installed $D/$f"
-  else
-    echo "kept    $D/$f"
-  fi
+  install_if_changed $REPO/deploy/host/docker.service.d/$f $D/$f
 done
 sudo -n systemctl daemon-reload
 # The drop-in loads the guard at the next dockerd start; load it now as well, so a
 # running dockerd does not wait for a restart. The load replaces the table atomically.
-sudo -n /usr/sbin/nft -f $REPO/deploy/host/fcpi-guard.nft && echo "loaded  inet fcpi_guard"
+sudo -n /usr/sbin/nft -f $ETC/fcpi-guard.nft || die "loading inet fcpi_guard failed"
+echo "loaded  inet fcpi_guard"
 # NetworkManager leaves Docker's interfaces alone. A config reload re-reads conf.d without
-# touching any active connection (wlan0 is not matched).
-N=/etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf
-if ! sudo -n cmp -s $REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf $N; then
-  sudo -n install -m 0644 -o root -g root $REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf $N && echo "installed $N"
-  sudo -n nmcli general reload conf && echo "reloaded NetworkManager configuration"
-else
-  echo "kept    $N"
+# touching any active connection (wlan0 is not matched). The effective setting is checked,
+# not the file, so a reload that failed or never ran is caught on the next run too.
+install_if_changed $REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf /etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf
+want='unmanaged-devices=interface-name:veth*,interface-name:fcpi-*,interface-name:docker0'
+if ! sudo -n /usr/sbin/NetworkManager --print-config | grep -xF "$want" >/dev/null || \
+   [ "$(nmcli -t -f DEVICE,STATE device | grep -cE '^(veth[0-9a-f]+|fcpi-[a-z]+|docker0):' )" != "$(nmcli -t -f DEVICE,STATE device | grep -cE '^(veth[0-9a-f]+|fcpi-[a-z]+|docker0):unmanaged$')" ]; then
+  sudo -n nmcli general reload conf || die "nmcli general reload conf failed"
+  echo "reloaded NetworkManager configuration"
 fi
+sudo -n /usr/sbin/NetworkManager --print-config | grep -xF "$want" >/dev/null || die "NetworkManager's effective unmanaged-devices is not '$want'"
+echo "NetworkManager $want"
 echo "docker ExecStartPre=$(systemctl show -p ExecStartPre --value docker.service | grep -o 'path=[^ ;]*' | tr '\n' ' ')"
 sudo -n systemctl enable fcpi-stack.service 2>&1 | sed 's/^/systemctl: /'
 echo "fcpi-stack enabled=$(systemctl is-enabled fcpi-stack.service)"

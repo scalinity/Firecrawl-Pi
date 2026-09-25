@@ -26,7 +26,7 @@ sec meta
 date -u +%Y-%m-%dT%H:%M:%SZ
 echo "source_commit=$(cat $REPO/.fcpi-source-commit)"
 echo "guard_table=$(sudo -n nft list table inet fcpi_guard >/dev/null 2>&1 && echo present || echo absent)"
-echo "guard_file_sha256=$(sha256sum <$REPO/deploy/host/fcpi-guard.nft | cut -c1-64)"
+echo "guard_file_sha256=$(sudo -n sha256sum /etc/firecrawl-pi/fcpi-guard.nft 2>/dev/null | cut -c1-64) guard_repo_sha256=$(sha256sum <$REPO/deploy/host/fcpi-guard.nft | cut -c1-64)"
 
 if [ "$phase" = before ] || [ "$phase" = after ]; then
   sec probe
