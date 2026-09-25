@@ -4,7 +4,9 @@
 # control that shows the probe can see an open port.
 #   scripts/m1/lan-probe.sh > evidence/M1/raw/lan-probe.txt
 set -uo pipefail
-PI=158.205.34.18
+# shellcheck source=scripts/m1/pi-target.conf
+. "$(cd "$(dirname "$0")" && pwd)/pi-target.conf"
+PI=$PI_LAN_ADDRESS
 echo "### meta"
 date -u +%Y-%m-%dT%H:%M:%SZ
 echo "vantage=workstation on the Pi's LAN; target=$PI"

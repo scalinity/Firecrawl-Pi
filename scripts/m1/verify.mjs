@@ -23,7 +23,13 @@ const kv = (s) => Object.fromEntries([...(s ?? "").matchAll(/([A-Za-z_][\w.]*)=(
 const lineOf = (lines, prefix) => (lines ?? []).find((l) => l.startsWith(prefix));
 const b64md = (b64) => (b64 ? Buffer.from(b64.replace(/^b64:/, ""), "base64").toString("utf8") : null);
 const expectedMd = () => read(EXPECTED_MD);
-const ssh = (cmd) => execFileSync("ssh", ["-i", `${process.env.HOME}/.ssh/pi`, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "danny@pi.local", cmd], { encoding: "utf8" });
+// The SSH target comes from scripts/m1/pi-target.conf, shared with deploy.sh and lan-probe.sh.
+const target = () => {
+  const t = Object.fromEntries(read("scripts/m1/pi-target.conf").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
+  if (!t.PI_SSH_TARGET || !t.PI_SSH_KEY) throw new Error("scripts/m1/pi-target.conf lacks PI_SSH_TARGET or PI_SSH_KEY");
+  return t;
+};
+const ssh = (cmd) => { const t = target(); return execFileSync("ssh", ["-i", t.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", t.PI_SSH_TARGET, cmd], { encoding: "utf8" }); };
 
 // Pinned digests come from the lock, which scripts/m1/build-lock.mjs derives from evidence.
 function digests() {

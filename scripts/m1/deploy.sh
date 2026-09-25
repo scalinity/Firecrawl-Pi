@@ -10,8 +10,10 @@
 # which lacks --from0 and --chown, and the archive is exactly the tracked files at HEAD.
 set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
-SSH=(ssh -i "$HOME/.ssh/pi" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15)
-PI=danny@pi.local
+# shellcheck source=scripts/m1/pi-target.conf
+. "$root/scripts/m1/pi-target.conf"
+SSH=(ssh -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15)
+PI=$PI_SSH_TARGET
 DEST=/opt/firecrawl-pi
 
 cd "$root"
