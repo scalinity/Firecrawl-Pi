@@ -208,8 +208,9 @@ services:
     pids_limit: 512
     stop_grace_period: 45s
     healthcheck:
-      # Beyond the API heartbeat: nuq-worker-0's /health runs a PostgreSQL query.
-      test: ["CMD", "node", "-e", "Promise.all(['http://127.0.0.1:3002/v0/health/liveness','http://127.0.0.1:3006/health'].map(u=>fetch(u,{signal:AbortSignal.timeout(5000)}).then(r=>{if(!r.ok)throw new Error(u)}))).then(()=>process.exit(0),()=>process.exit(1))"]
+      # Beyond the API heartbeat: nuq-worker-0's /health runs a PostgreSQL query. It runs as
+      # the service uid (3002), not the container's root, like every resident process.
+      test: ["CMD", "setpriv", "--reuid=3002", "--regid=3002", "--clear-groups", "node", "-e", "Promise.all(['http://127.0.0.1:3002/v0/health/liveness','http://127.0.0.1:3006/health'].map(u=>fetch(u,{signal:AbortSignal.timeout(5000)}).then(r=>{if(!r.ok)throw new Error(u)}))).then(()=>process.exit(0),()=>process.exit(1))"]
       interval: 30s
       timeout: 15s
       retries: 3

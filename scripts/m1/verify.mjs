@@ -49,8 +49,10 @@ const SERVICE_UID = { "nuq-postgres": "5432", redis: "6379", rabbitmq: "5672", "
 // Spec §22 caps (fixture: M1-only, outside the §22 table).
 const CAPS = { "nuq-postgres": [640, 0.75], redis: [320, 0.35], rabbitmq: [512, 0.5], "firecrawl-core": [2304, 2.25], "access-gateway": [160, 0.3], fixture: [64, 0.1] };
 
+// Transient healthcheck processes (the core's `setpriv ... node -e ...`) are not topology.
+const isHealthcheck = (args) => /^(setpriv |node -e )/.test(args ?? "");
 function coreTopology(lines) {
-  const procs = lines.filter(Boolean).map((l) => { const f = l.split(" "); return { pid: f[0], ppid: f[1], user: f[2], args: f.slice(4).join(" ") }; });
+  const procs = lines.filter(Boolean).map((l) => { const f = l.split(" "); return { pid: f[0], ppid: f[1], user: f[2], args: f.slice(4).join(" ") }; }).filter((p) => !isHealthcheck(p.args));
   const harness = procs.filter((p) => p.args === "node dist/src/harness.js --start-docker");
   const nodeKids = CHILDREN.map((c) => procs.filter((p) => p.args === `node ${c}`).length);
   const shKids = CHILDREN.map((c) => procs.filter((p) => p.args === `sh -c node ${c}`).length);
@@ -377,7 +379,7 @@ const checks = {
         const s = sections(f);
         const t = coreTopology((s.core_processes ?? []));
         const uids = {};
-        for (const l of (s.process_elf ?? []).filter(Boolean)) { const svc = l.split(" ")[0]; (uids[svc] ??= new Set()).add(kv(l).uid); }
+        for (const l of (s.process_elf ?? []).filter(Boolean)) { if (isHealthcheck(l.slice(l.indexOf(" args=") + 6))) continue; const svc = l.split(" ")[0]; (uids[svc] ??= new Set()).add(kv(l).uid); }
         const uidOk = Object.entries(SERVICE_UID).every(([svc, u]) => uids[svc] && uids[svc].size === 1 && uids[svc].has(u));
         const good = t.total === 13 && t.harness === 1 && t.node_children.every((n) => n === 1) && t.sh_wrappers.every((n) => n === 1) && t.other.length === 0 && t.users.length === 1 && t.users[0] === "3002" && uidOk;
         ok &&= good;

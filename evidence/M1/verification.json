@@ -97,8 +97,8 @@
     {
       "test_id": "M1-N06",
       "name": "proof-api-harness-native",
-      "utc": "2026-09-25T08:17:25Z",
-      "repository_sha": "2739545178b72d154334772baec28b7eb0584bc0",
+      "utc": "2026-09-25T08:58:21Z",
+      "repository_sha": "b6832c276d6182237ca1b87265e0ef56893a2732",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
@@ -184,8 +184,8 @@
     {
       "test_id": "M1-V02",
       "name": "process-topology-and-uids",
-      "utc": "2026-09-25T08:17:25Z",
-      "repository_sha": "2739545178b72d154334772baec28b7eb0584bc0",
+      "utc": "2026-09-25T08:58:21Z",
+      "repository_sha": "b6832c276d6182237ca1b87265e0ef56893a2732",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
