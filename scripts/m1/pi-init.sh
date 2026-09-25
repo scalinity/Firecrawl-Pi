@@ -37,6 +37,11 @@ date -u +%Y-%m-%dT%H:%M:%SZ
 echo "source_commit=$(cat $REPO/.fcpi-source-commit 2>/dev/null)"
 
 sec directories
+# Before creating anything: the nearest existing ancestor of the data directory (the mount
+# point itself, once a dedicated device is configured) must already be on the expected
+# filesystem, so a missing data device never receives even an empty tree.
+anc=$DATA; while [ ! -e "$anc" ]; do anc=$(dirname "$anc"); done
+[ "$(findmnt -n -o UUID --target "$anc")" = "$UUID_EXPECTED" ] || die "$anc (nearest existing ancestor of $DATA) is not on filesystem $UUID_EXPECTED"
 mkd $ETC 0:0 0755
 mkd $S 0:0 0700
 mkd $S/clients 0:0 0700
