@@ -5,14 +5,20 @@
 // A check whose evidence is missing is NOT_RUN, never PASS.
 // Usage: node scripts/m1/verify.mjs            (all checks)
 //        node scripts/m1/verify.mjs V04 V15    (subset; others keep their last record)
+// FCPI_M1_EVIDENCE=evidence/M1/closeout/ node scripts/m1/verify.mjs V01 ...
+//   reruns checks against the close-out's evidence (its raw/, snapshots, rendered Compose
+//   and verification.json), leaving the files that back M1's acceptance untouched.
 import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { ROOT, sha256, sha256File, repoState, sections, git } from "../m0/lib.mjs";
 
-const OUT = "evidence/M1/verification.json";
+const EV = process.env.FCPI_M1_EVIDENCE ?? "evidence/M1/";
+if (!/^evidence\/M1\/([a-z0-9-]+\/)?$/.test(EV)) throw new Error(`FCPI_M1_EVIDENCE must be evidence/M1/ or a directory below it, got ${EV}`);
+const CLOSEOUT = EV !== "evidence/M1/";
+const OUT = `${EV}verification.json`;
 const UPSTREAM_SHA = "7666c1f9ae8720a6bba271e0f60b6a217f8a5210";
-const RAW = "evidence/M1/raw/";
+const RAW = `${EV}raw/`;
 const EXPECTED_MD = "tests/fixtures/m1/expected/static.md";
 const read = (p) => readFileSync(resolve(ROOT, p), "utf8");
 const json = (p) => JSON.parse(read(p));
@@ -202,7 +208,10 @@ function scanFiles(files, ids, rules, allow = new Set()) {
 // ruleset listing instead: it must hold exactly Docker's tables and the project's counting tables.
 // Before M1 nf_tables was not loaded, so no other ruleset existed for M1 to change.
 const NFT_TABLES = ["bridge fcpi_audit", "inet fcpi_audit", "ip filter", "ip nat", "ip raw", "ip6 filter", "ip6 nat"];
+// From M1's close-out on, the project's access-bridge guard (deploy/host/fcpi-guard.nft) too.
+const NFT_TABLES_GUARDED = [...NFT_TABLES, "inet fcpi_guard"].sort();
 const nftTables = () => [...read(`${RAW}nft-ruleset.txt`).matchAll(/^table (\S+ \S+) \{$/gm)].map((m) => m[1]).sort();
+const GUARD = "project access-bridge guard (deploy/host/fcpi-guard.nft)";
 const MODULE_ALLOW = /^(bridge|stp|llc|veth|overlay|br_netfilter|ip_set|xt_[a-z_]+|xt_[A-Z]+|x_tables|nf_[a-z0-9_]+|nft_[a-z0-9_]+|ip6?_tables|ip6?table_[a-z]+|iptable_[a-z]+|ipt_[A-Z]+|xfrm_algo|xfrm_user|nf_tables|nfnetlink)$/;
 function keyedSnapshot(file) {
   const out = [];
@@ -235,7 +244,14 @@ function attribute(sec, line, containerIds) {
     if (m && containerIds.has(m[1])) return "fcpi container root filesystem";
   }
   if (sec === "lsmod" && MODULE_ALLOW.test(line.split(" ")[0])) return "kernel module loaded by the container runtime";
-  if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) return JSON.stringify(nftTables()) === JSON.stringify(NFT_TABLES) ? "nftables: Docker's tables and the project's fcpi_audit tables (evidence/M1/raw/nft-ruleset.txt)" : null;
+  if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) {
+    const t = JSON.stringify(nftTables());
+    if (t === JSON.stringify(NFT_TABLES)) return "nftables: Docker's tables and the project's fcpi_audit tables (evidence/M1/raw/nft-ruleset.txt)";
+    return t === JSON.stringify(NFT_TABLES_GUARDED) ? `nftables: Docker's tables, the project's fcpi_audit tables and its fcpi_guard table (${RAW}nft-ruleset.txt)` : null;
+  }
+  // Sections scripts/m1/pi-snapshot-net.sh adds from the close-out on.
+  if (sec === "nft_tables" && line === "table inet fcpi_guard") return GUARD;
+  if (sec === "nft_chains" && /^inet fcpi_guard (forward hook=forward|input hook=input) prio=-10 policy=accept$/.test(line)) return GUARD;
   if (sec === "ss_listen" && /^tcp 127\.0\.0\.1:3380 users:\(\("docker-proxy",/.test(line)) return "the gateway's only host publication";
   return null;
 }
@@ -483,7 +499,8 @@ const checks = {
       const addCommit = git("log", "--diff-filter=A", "--format=%H", "--", EXPECTED_MD).split("\n").pop();
       const committed = git("log", "-1", "--format=%cI", "--", EXPECTED_MD);
       const unchangedSinceAdded = !!addCommit && git("rev-parse", `${addCommit}:${EXPECTED_MD}`) === git("hash-object", EXPECTED_MD);
-      const firstScrape = (lineOf(sections(`${RAW}native-proofs.txt`).scrape_direct, "{") ?? "").match(/"utc_start":"([^"]+)"/)?.[1];
+      // The earliest scrape is always M1's native proof, whichever evidence is being checked.
+      const firstScrape = (lineOf(sections("evidence/M1/raw/native-proofs.txt").scrape_direct, "{") ?? "").match(/"utc_start":"([^"]+)"/)?.[1];
       const before = unchangedSinceAdded && !!committed && !!firstScrape && new Date(committed) < new Date(firstScrape);
       const ok = Object.values(res).every((r) => r.gateway && r.direct) && before;
       return { ok, actual: `${JSON.stringify(res)}; expected last changed ${committed} (content unchanged since added in ${addCommit.slice(0, 7)}: ${unchangedSinceAdded}), earliest recorded scrape ${firstScrape}, committed first=${before}; expected sha256=${sha256File(EXPECTED_MD)}` };
@@ -508,7 +525,7 @@ const checks = {
       const rq = s.rabbitmq_health ?? [];
       const g = (p) => (lineOf(rq, p) ?? "").slice(p.length);
       const rqOk = /Ping succeeded/.test(g("ping=")) && g("check_running=") === "ok" && g("check_local_alarms=") === "ok" && g("node=") === "rabbit@rabbitmq" && g("memory_high_watermark_bytes=") === "268435456" &&
-        g("users=").trim() === "fcpi[administrator]" && g("cookie=") === "5672:5672 400" && !/rabbitmq_management /.test(g("enabled_plugins=") + " ") && g("process_uid=") === "5672";
+        /^fcpi\[(administrator)?\]$/.test(g("users=").trim()) && g("cookie=") === "5672:5672 400" && !/rabbitmq_management /.test(g("enabled_plugins=") + " ") && g("process_uid=") === "5672";
       const ok = health.length === 6 && health.every((h) => h === "healthy") && coreOk && pgOk && rdOk && rqOk;
       return { ok, actual: `container health=${health.join(",")}; core endpoints all 200=${coreOk}; postgres=${pgOk} (cron runs 10 min: ${pgk.cron_runs_last_10min_succeeded} ok/${pgk.cron_runs_last_10min_failed} failed, connections ${pgk.connections}/${pgk.max_connections}); redis=${rdOk}; rabbitmq=${rqOk} (plugins: ${g("enabled_plugins=").trim()})` };
     } },
@@ -517,7 +534,7 @@ const checks = {
     expected: "a /v0/scrape job is prefetched into the durable quorum queue nuq.queue_scrape.prefetch, taken by the worker (basic.get), and its completion returns through the exclusive, auto-delete, non-durable classic reply queue with one consumer",
     run() { const { case1 } = roundTripCases(`${RAW}nuq-roundtrip.txt`); return { ok: case1.pass, actual: JSON.stringify(case1) }; } },
 
-  V09: { name: "nuq-roundtrip-case-2-expiry-and-postgres", inputs: [`${RAW}nuq-roundtrip.txt`, `${RAW}nuq-roundtrip-attempt1.txt`],
+  V09: { name: "nuq-roundtrip-case-2-expiry-and-postgres", inputs: [`${RAW}nuq-roundtrip.txt`, "evidence/M1/raw/nuq-roundtrip-attempt1.txt"],
     expected: "with nuq-worker-0 stopped, the prefetched message vanishes unconsumed within a window containing 50 s, the broker counts one expired message, the job stays active in PostgreSQL, the lock reaper re-queues it (stalls >= 1), and it completes after the worker resumes",
     run() { const { case2 } = roundTripCases(`${RAW}nuq-roundtrip.txt`); return { ok: case2.pass, actual: JSON.stringify(case2) + "; the first Compose-stack run (nuq-roundtrip-attempt1.txt) could not pause the worker (no CAP_KILL for root in the hardened core) and is not counted" }; } },
 
@@ -614,10 +631,10 @@ const checks = {
       return { ok, actual: `drop-in deployed=${di.drop_in_sha256 === repoHash}; before: ${b.running_containers} running (${(lineOf(s.before, "restart_policies=") ?? "").slice(17).trim()}); dockerd stopped alone: fcpi-stack=${st.fcpi_stack}; gated start: exit=${g.start_exit} state=${g.docker} dockerd_processes=${g.dockerd_processes} check_failures=${g.check_failures} writers=${g.writers} manifest_unchanged=${g.manifest_unchanged}; restored: revived_healthy=${r.revived_healthy}` };
     } },
 
-  V18: { name: "allow-local-webhooks-contained", inputs: ["evidence/M1/rendered-compose.json", "docs/FIRECRAWL_PI_SPEC.md"],
+  V18: { name: "allow-local-webhooks-contained", inputs: [`${EV}rendered-compose.json`, "docs/FIRECRAWL_PI_SPEC.md"],
     expected: "if the core sets ALLOW_LOCAL_WEBHOOKS=true (spec §29's M1 fixture-only exception), then webhook delivery is disabled, every network the core joins is internal, and every origin the gateway permits names a host that exists only as an alias on the fixture network; the spec records the exception",
     run() {
-      const R = json("evidence/M1/rendered-compose.json");
+      const R = json(`${EV}rendered-compose.json`);
       const core = R.services["firecrawl-core"], gw = R.services["access-gateway"];
       const allow = core.environment?.ALLOW_LOCAL_WEBHOOKS === "true";
       const coreNets = Object.keys(core.networks ?? {});
@@ -650,14 +667,17 @@ const checks = {
       return { ok, actual: `sentinel=${v}; all 6 containers replaced=${replaced}; postgres=${(s.read ?? []).includes(`postgres_read=${v}`)} redis=${(s.read ?? []).includes(`redis_read=${v}`)} rabbitmq=${JSON.stringify(rq.messages) === JSON.stringify([v])} (messages held: ${rq.messages?.length ?? "none"}); recreate ${kv(lineOf(s.recreate, "recreate_exit")).elapsed_s} s; node name stable=${(s.after ?? []).includes("rabbitmq_node=rabbit@rabbitmq")}` };
     } },
 
-  V14: { name: "unrelated-state-unchanged", inputs: ["evidence/M1/snapshot-before.txt", "evidence/M1/snapshot-after.txt", `${RAW}stack-final.txt`, `${RAW}nft-ruleset.txt`],
+  V14: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}stack-final.txt`, `${RAW}nft-ruleset.txt`],
     expected: "every difference between BEFORE and AFTER is attributed to a project addition (runtime, its modules and firewall tables, fcpi containers and their scopes, mounts and namespaces, the 127.0.0.1:3380 publication, fcpi-stack.service) or is the audit's own SSH session; no unrelated line is removed or changed; boot ID unchanged",
     run() {
-      if (!has("evidence/M1/snapshot-after.txt")) return { notRun: true, actual: "AFTER snapshot not yet taken" };
-      const ids = new Set((read("evidence/M1/snapshot-after.txt").match(/^### docker_ps\n([\s\S]*?)\n### /m)?.[1] ?? "").split("\n").map((l) => l.split("\t")[0]).filter((x) => /^[0-9a-f]{64}$/.test(x)));
+      const [BEFORE, AFTER] = [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`];
+      if (!has(AFTER)) return { notRun: true, actual: "AFTER snapshot not yet taken" };
+      // fcpi containers on either side: a container the project replaced is gone from AFTER.
+      const psIds = (f) => (read(f).match(/^### docker_ps\n([\s\S]*?)\n### /m)?.[1] ?? "").split("\n").map((l) => l.split("\t")[0]).filter((x) => /^[0-9a-f]{64}$/.test(x));
+      const ids = new Set([...psIds(BEFORE), ...psIds(AFTER)]);
       const norm = (sec, l) => (sec === "ss_listen" ? l.replace(/pid=\d+,fd=\d+/g, "pid,fd") : l);
-      const B = keyedSnapshot("evidence/M1/snapshot-before.txt").map(([s, l]) => `${s}\t${norm(s, l)}`);
-      const A = keyedSnapshot("evidence/M1/snapshot-after.txt").map(([s, l]) => `${s}\t${norm(s, l)}`);
+      const B = keyedSnapshot(BEFORE).map(([s, l]) => `${s}\t${norm(s, l)}`);
+      const A = keyedSnapshot(AFTER).map(([s, l]) => `${s}\t${norm(s, l)}`);
       const removed = B.filter((l) => !A.includes(l)), added = A.filter((l) => !B.includes(l));
       const unexplained = [];
       const byReason = {};
@@ -665,21 +685,23 @@ const checks = {
       for (const [kind, list] of [["removed", removed], ["added", added]]) for (const l of list) {
         const [sec, line] = [l.slice(0, l.indexOf("\t")), l.slice(l.indexOf("\t") + 1)];
         const why = attribute(sec, line, ids);
-        // A removed line is only acceptable as the runtime's "before" state or an SSH session.
-        const acceptable = why && (kind === "added" || /container runtime installed by M1|own SSH session|nftables/.test(why));
+        // A removed line is only acceptable as the runtime's "before" state, an SSH session, a
+        // firewall hash the project changed, or a container the project replaced (with its
+        // scope, root filesystem and network namespace).
+        const acceptable = why && (kind === "added" || /container runtime installed by M1|own SSH session|nftables|fcpi container|container network namespace/.test(why));
         if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else byReason[why] = (byReason[why] ?? 0) + 1;
         diffRows[acceptable ? "project" : "unrelated"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${why ? `\t# ${why}` : ""}`);
       }
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
-      const ok = unexplained.length === 0 && !!boot("evidence/M1/snapshot-before.txt") && boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt");
+      const ok = unexplained.length === 0 && !!boot(BEFORE) && boot(BEFORE) === boot(AFTER);
       // The BEFORE/AFTER diff, written by the check that judges it so the two cannot disagree.
-      writeFileSync(resolve(ROOT, "evidence/M1/snapshot-diff.txt"), [
-        "# M1 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m1/verify.mjs V14)",
-        `# before: ${read("evidence/M1/snapshot-before.txt").split("\n")[1]}  after: ${read("evidence/M1/snapshot-after.txt").split("\n")[1]}`,
-        `# boot_id: ${boot("evidence/M1/snapshot-before.txt") && boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt") ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
+      writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), [
+        `# ${CLOSEOUT ? "M1 close-out" : "M1"} BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m1/verify.mjs V14)`,
+        `# before: ${read(BEFORE).split("\n")[1]}  after: ${read(AFTER).split("\n")[1]}`,
+        `# boot_id: ${boot(BEFORE) && boot(BEFORE) === boot(AFTER) ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
         `## changes to unrelated state (${diffRows.unrelated.length})`, ...diffRows.unrelated,
         `## project additions and the audit's own SSH sessions (${diffRows.project.length})`, ...diffRows.project, ""].join("\n"));
-      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(byReason)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot("evidence/M1/snapshot-before.txt") === boot("evidence/M1/snapshot-after.txt")}` };
+      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(byReason)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(BEFORE) === boot(AFTER)}` };
     } },
 
   V15: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, "evidence/M0/audit.json"], live: true,
@@ -700,9 +722,10 @@ const checks = {
       if (silent.length) return { ok: false, actual: `positive controls: rules that did not fire: ${silent.join(", ")}` };
       // Live: SHA-256 of each M1 secret value, computed on the Pi; no value leaves it.
       const hashes = ssh(`sudo -n sh -c 'S=/etc/firecrawl-pi/secrets; h() { [ -n "$1" ] || { echo "EMPTY secret extraction" >&2; exit 1; }; printf "%s" "$1" | sha256sum | cut -c1-64; }; \
-        h "$(cat $S/core_postgres_password)"; h "$(sed -n "s#^amqp://fcpi:\\(.*\\)@rabbitmq:5672\\$#\\1#p" $S/core_nuq_rabbitmq_url)"; \
+        h "$(cat $S/postgres_password)"; h "$(cat $S/core_postgres_password)"; h "$(sed -n "s#^amqp://fcpi:\\(.*\\)@rabbitmq:5672\\$#\\1#p" $S/core_nuq_rabbitmq_url)"; \
         h "$(sed -n "s#^redis://:\\(.*\\)@redis:6379\\$#\\1#p" $S/core_redis_url)"; h "$(cat $S/clients/m1-verify.token)"; h "$(cat /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie)"'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
-      if (hashes.length !== 5 || new Set(hashes).size !== 5) return { ok: false, actual: `expected 5 distinct live secret hashes from the Pi, got ${hashes.length}` };
+      // Six values since the close-out: the superuser's password and the core role's differ.
+      if (hashes.length !== 6 || new Set(hashes).size !== 6) return { ok: false, actual: `expected 6 distinct live secret hashes from the Pi, got ${hashes.length} (${new Set(hashes).size} distinct)` };
       // Second guard: an extraction that came back empty would hash to sha256(""), a distinct
       // 64-hex value that would silently exclude that secret from the scan.
       if (hashes.includes(sha256(""))) return { ok: false, actual: "a live secret extraction on the Pi returned an empty value" };
@@ -713,12 +736,12 @@ const checks = {
       return { ok: hits.length === 0, configHash: hashOf(hashed), actual: `positive controls fired all ${M0_RULES.length + M0_HASH_RULES.length} M0 and ${M1_RULES.length + M1_HASH_RULES.length} M1 rules; files scanned=${files.length}; live secret hashes compared=${hashes.length}; findings=${hits.length}${hits.length ? " [" + hits.slice(0, 20).join("; ") + "]" : ""}` };
     } },
 
-  V16: { name: "lock-compose-digest-and-provenance-consistency", inputs: ["deploy/versions.lock.json", "deploy/compose.yaml", "evidence/M1/rendered-compose.json"],
+  V16: { name: "lock-compose-digest-and-provenance-consistency", inputs: ["deploy/versions.lock.json", "deploy/compose.yaml", `${EV}rendered-compose.json`],
     expected: "every Compose image is referenced by the digest the lock selects, with platform linux/arm64; the lock records the API image's build SHA and upstream run 30579949775 without attestation, the NuQ base digest, measured pg_cron and built digest, the container runtime and the RabbitMQ series actually run",
     run() {
       const L = json("deploy/versions.lock.json");
       const d = digests().all;
-      const R = json("evidence/M1/rendered-compose.json");
+      const R = json(`${EV}rendered-compose.json`);
       const want = { "nuq-postgres": `fcpi/nuq-postgres@${d.pg}`, redis: `redis@${d.redis}`, rabbitmq: `rabbitmq@${d.rmq}`, "firecrawl-core": `ghcr.io/firecrawl/firecrawl@${d.core}`, "access-gateway": `node@${d.node}`, fixture: `node@${d.node}` };
       const bad = Object.entries(want).filter(([svc, ref]) => R.services[svc]?.image !== ref || R.services[svc]?.platform !== "linux/arm64").map(([svc]) => svc);
       const composeText = read("deploy/compose.yaml");
@@ -731,6 +754,124 @@ const checks = {
         L.host_runtime.container_runtime.status === "resolved" && /^29\.8\.1 /.test(L.host_runtime.container_runtime.engine) &&
         L.images.rabbitmq.selected.tag === "4.3.6" && L.images.nuq_postgres_base.pg_cron_package.status === "resolved";
       return { ok, actual: `services not matching the lock=${bad.join(",") || "none"}; compose text pins=${inCompose}; api build_sha=${L.images.firecrawl_api_prebuilt.selected.config_firecrawl_build_sha.slice(0, 8)}; nuq built=${d.pg.slice(7, 19)}; pg_cron=${bp.nuq_postgres_image.pg_cron_measured}; runtime=${L.host_runtime.container_runtime.engine}; rabbitmq=${L.images.rabbitmq.selected.tag}` };
+    } },
+
+  // ===================================================================== close-out (evidence/M1/review/REVIEW.md)
+  // Each reads evidence only the close-out collects, so it is NOT_RUN against M1's own record.
+  V19: { name: "dockerd-gate-holds-through-the-restart-limit", inputs: [`${RAW}docker-gate.txt`, "deploy/host/docker.service.d/20-fcpi-guard.conf"],
+    expected: "with a failing data check, dockerd is observed, sampling every second, until systemd stops restarting it (StartLimitBurst) or for at least 120 s: no dockerd process and no project process at any sample, NRestarts and Result recorded, the data manifest unchanged; the guard drop-in is deployed as in the repository and runs after the data check; after the restore the guard table is loaded with its 4 rules (R13)",
+    run() {
+      const s = sections(`${RAW}docker-gate.txt`);
+      if (!s.start_limit) return { notRun: true, actual: "this transcript predates the restart-limit observation (REVIEW.md R13)" };
+      const k = (sec) => kv((s[sec] ?? []).join(" "));
+      const l = k("start_limit"), g = k("gated_start"), r = k("restored_start"), di = k("drop_in");
+      const guardHash = sha256(read("deploy/host/docker.service.d/20-fcpi-guard.conf"));
+      const order = /path=\/opt\/firecrawl-pi\/deploy\/host\/fcpi-data-check\.sh path=\/usr\/sbin\/nft/.test((s.drop_in ?? []).join(" "));
+      const long = l.reached_failed === "yes" || Number(l.observed_s) >= 120;
+      const ok = long && l.max_dockerd_processes === "0" && l.max_writers === "0" && l.active_state !== "active" && /^\d+$/.test(l.nrestarts ?? "") && !!l.result &&
+        g.manifest_unchanged === "yes" && di.guard_drop_in_sha256 === guardHash && di.guard_repo_sha256 === guardHash && order &&
+        r.revived_healthy === "6" && r.guard_table === "present" && r.guard_rules === "4";
+      return { ok, actual: `observed ${l.observed_s} s, reached failed=${l.reached_failed} (active=${l.active_state} sub=${l.sub_state} result=${l.result} NRestarts=${l.nrestarts}; states seen: ${(lineOf(s.start_limit, "states_seen=") ?? "").slice(12)}); max dockerd processes=${l.max_dockerd_processes}, max project processes=${l.max_writers}; manifest unchanged=${g.manifest_unchanged}; policy ${(lineOf(s.drop_in, "restart=") ?? "").trim()}; guard drop-in deployed=${di.guard_drop_in_sha256 === guardHash}, runs after the data check=${order}; after restore: revived healthy=${r.revived_healthy}, guard table=${r.guard_table} with ${r.guard_rules} rules` };
+    } },
+
+  V20: { name: "access-bridge-guard-drops-everything-but-replies", inputs: [`${RAW}guard.txt`, "deploy/host/fcpi-guard.nft", `${RAW}stack-final.txt`],
+    expected: "without the guard, the gateway container reaches the host through the bridge address and the LAN address and reaches the Internet through the bridge's NAT (the positive control); with the guard loaded from the repository's file, all three are dropped and counted; no drop is counted between the probe and the dockerd gate test, or from the gate's reload to the end of the window; the gateway still serves the fixture through 127.0.0.1:3380 (R5)",
+    run() {
+      const s = sections(`${RAW}guard.txt`);
+      const meta = (p) => kv((s[`${p}_meta`] ?? []).join(" "));
+      const probe = (p) => { try { return JSON.parse((lineOf(s[`${p}_probe`], "gateway {") ?? "").slice(8)); } catch { return null; } };
+      const cnt = (p) => Object.fromEntries((s[`${p}_counters`] ?? []).filter((l) => / packets=\d+$/.test(l)).map((l) => [l.split(" ")[0], Number(kv(l).packets)]));
+      const KEYS = ["access_forward_out_dropped", "access_forward_in_dropped", "access_input_new_dropped"];
+      const b = probe("before"), a = probe("after");
+      const fileHash = sha256(read("deploy/host/fcpi-guard.nft"));
+      const beforeOk = meta("before").guard_table === "absent" && !!b && Object.keys(b.tcp).length === 3 && Object.values(b.tcp).every((t) => t.connected === true);
+      const afterOk = meta("after").guard_table === "present" && meta("after").guard_file_sha256 === fileHash && !!a && Object.keys(a.tcp).length === 3 && Object.values(a.tcp).every((t) => t.connected === false);
+      const ca = cnt("after"), cp = cnt("pregate"), ce = cnt("end");
+      const counted = ca.access_input_new_dropped >= 2 && ca.access_forward_out_dropped >= 1;
+      const quiet = KEYS.every((k) => Number.isFinite(ca[k]) && cp[k] === ca[k] && ce[k] === 0) && meta("end").guard_table === "present";
+      const gw = (sections(`${RAW}stack-final.txt`).gateway_tests ?? []).find((l) => l.startsWith("valid_token_fixture_scrape "));
+      const served = !!gw && kv(gw).status === "200";
+      const ok = beforeOk && afterOk && counted && quiet && served;
+      const fmt = (p) => (p ? Object.entries(p.tcp).map(([k, v]) => `${k}=${v.connected ? "connected" : v.error}`).join(",") : "missing");
+      return { ok, actual: `without guard: ${fmt(b)}; with guard: ${fmt(a)}; counters after probe ${JSON.stringify(ca)}, before the gate ${JSON.stringify(cp)}, at window end (after the gate's reload) ${JSON.stringify(ce)}; guard file deployed=${meta("after").guard_file_sha256 === fileHash}; gateway fixture scrape=${gw ? kv(gw).status : "missing"}` };
+    } },
+
+  V21: { name: "gateway-contract-tests-on-the-pinned-node", inputs: [`${RAW}gateway-tests-pinned-node.txt`, "tests/contracts/m1-gateway.test.mjs", "deploy/versions.lock.json"],
+    expected: "every test the gateway's contract suite declares passes inside the pinned node image the gateway runs (Node v22.23.3), with no network, a read-only root filesystem and the gateway's uid; the throwaway container is gone afterwards (R10)",
+    run() {
+      const t = read(`${RAW}gateway-tests-pinned-node.txt`), s = sections(`${RAW}gateway-tests-pinned-node.txt`);
+      const img = kv(lineOf(s.meta, "image=") ?? "").image;
+      const pass = Number((t.match(/^# pass (\d+)$/m) ?? [])[1]), fail = Number((t.match(/^# fail (\d+)$/m) ?? [])[1]);
+      const declared = (read("tests/contracts/m1-gateway.test.mjs").match(/^test\(/gm) ?? []).length;
+      const run = s.run ?? [];
+      const ok = img === `node@${digests().all.node}` && run.includes("node_version=v22.23.3") && pass === declared && fail === 0 && run.includes("exit=0") && run.includes("leftover_transient_containers=0");
+      return { ok, actual: `image=${img} (lock ${digests().all.node.slice(0, 19)}); ${lineOf(run, "node_version=")}; pass=${pass}/${declared} declared, fail=${fail}; ${lineOf(run, "exit=")}; ${lineOf(run, "leftover_transient_containers=")}` };
+    } },
+
+  V22: { name: "core-credentials-narrowed", inputs: [`${RAW}credentials.txt`, `${EV}rendered-compose.json`],
+    expected: "the core connects to PostgreSQL as fcpi_core: not a superuser, no role, database, replication or RLS-bypass rights, owner of the NuQ schema and of every NuQ relation and enum, with a password different from the superuser's; its container receives neither superuser secret; the only TCP sessions are fcpi_core's; RabbitMQ user fcpi has no tags and keeps its vhost permissions; Redis is unchanged, deferred to M8 (R11)",
+    run() {
+      const s = sections(`${RAW}credentials.txt`);
+      const p = kv((s.postgres ?? []).join(" ")), sc = kv((s.secrets ?? []).join(" "));
+      const sessions = (lineOf(s.postgres, "tcp_sessions=") ?? "").slice(13).trim().split(" ").filter(Boolean);
+      const roleOk = p.role === "fcpi_core" && ["super", "createrole", "createdb", "replication", "bypassrls"].every((k) => p[k] === "false");
+      const ownOk = p.superusers === "postgres" && p.nuq_owner === "fcpi_core" && Number(p.nuq_relations) > 0 && p.nuq_relations_not_owned === "0" && p.nuq_types_not_owned === "0";
+      const sessOk = sessions.length > 0 && sessions.every((x) => /^fcpi_core:\d+$/.test(x));
+      const files = ["postgres_password 5432:5432 600", "core_postgres_password 0:0 600", "postgres_core_role_password 5432:5432 600"];
+      const secOk = sc.core_equals_superuser === "no" && sc.core_role_pair_equal === "yes" && files.every((f) => (s.secrets ?? []).includes(f));
+      const rq = s.rabbitmq ?? [];
+      const rqOk = (lineOf(rq, "users=") ?? "").slice(6).trim() === "fcpi[]" && /(^|;)fcpi \.\* \.\* \.\*(;|$)/.test((lineOf(rq, "permissions=") ?? "").slice(12));
+      const R = json(`${EV}rendered-compose.json`);
+      const secretsOf = (svc) => (R.services[svc]?.secrets ?? []).map((x) => x.source);
+      const composeOk = R.services["firecrawl-core"]?.environment?.POSTGRES_USER === "fcpi_core" && !secretsOf("firecrawl-core").some((x) => /^postgres_/.test(x)) &&
+        secretsOf("nuq-postgres").includes("postgres_core_role_password");
+      const ok = roleOk && ownOk && sessOk && secOk && rqOk && composeOk;
+      return { ok, actual: `role ${lineOf(s.postgres, "role=")?.slice(5)}; superusers=${p.superusers}; nuq owner=${p.nuq_owner}, relations=${p.nuq_relations} (not owned ${p.nuq_relations_not_owned}), enums not owned=${p.nuq_types_not_owned}; TCP sessions ${sessions.join(" ") || "none"}; core password equals superuser's=${sc.core_equals_superuser}, core pair equal=${sc.core_role_pair_equal}, file modes ok=${files.every((f) => (s.secrets ?? []).includes(f))}; rabbitmq ${(lineOf(rq, "users=") ?? "").trim()} ${(lineOf(rq, "permissions=") ?? "").trim()}; core POSTGRES_USER=${R.services["firecrawl-core"]?.environment?.POSTGRES_USER}, core secrets=${secretsOf("firecrawl-core").join(",")}; redis default user unchanged (M8)` };
+    } },
+
+  V23: { name: "networkmanager-leaves-docker-interfaces-alone", inputs: [`${RAW}nm.txt`, "deploy/host/NetworkManager/90-fcpi-unmanaged.conf"],
+    expected: "before the file, NetworkManager handles Docker's interfaces (the positive control); once pi-init.sh installs it as in the repository and reloads NM's configuration, every veth, fcpi-* bridge and docker0 is unmanaged and wlan0 stays connected; across the verification window (containers recreated, dockerd restarted) NM starts no activation or DHCP transaction on a Docker interface and wlan0 never changes state (R14)",
+    run() {
+      const s = sections(`${RAW}nm.txt`);
+      const dev = (p) => (s[`${p}_devices`] ?? []).filter(Boolean).map((l) => { const f = l.split(" "); return { d: f[0], state: f.slice(2).join(" ") }; });
+      const docker = (p) => dev(p).filter((x) => x.d !== "wlan0");
+      const wlan = (p) => dev(p).find((x) => x.d === "wlan0")?.state;
+      const repoHash = sha256(read("deploy/host/NetworkManager/90-fcpi-unmanaged.conf"));
+      const j = kv((s.window_journal ?? []).join(" "));
+      const beforeHandled = docker("before").some((x) => x.state !== "unmanaged");
+      const unmanaged = (p) => docker(p).length > 0 && docker(p).every((x) => x.state === "unmanaged");
+      const ok = beforeHandled && kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash && unmanaged("after") && unmanaged("window") &&
+        ["before", "after", "window"].every((p) => wlan(p) === "connected") &&
+        j.docker_interface_activations === "0" && j.docker_interface_dhcp_transactions === "0" && j.wlan0_state_changes === "0";
+      const tally = (p) => Object.entries(docker(p).reduce((m, x) => ({ ...m, [x.state]: (m[x.state] ?? 0) + 1 }), {})).map(([k, v]) => `${k}:${v}`).join(",");
+      return { ok, actual: `before: Docker interfaces ${tally("before")}, wlan0 ${wlan("before")}; after reload: ${tally("after")}, wlan0 ${wlan("after")}; window end: ${tally("window")}, wlan0 ${wlan("window")}; since ${j.since ?? "?"}: activations=${j.docker_interface_activations} dhcp=${j.docker_interface_dhcp_transactions} wlan0 state changes=${j.wlan0_state_changes}; conf deployed=${kv((s.after_meta ?? []).join(" ")).conf_sha256 === repoHash}` };
+    } },
+
+  V24: { name: "deploy-removes-files-dropped-from-git", inputs: [`${RAW}deploy-prune.txt`, "scripts/m1/deploy.sh"],
+    expected: "a file and a directory planted under /opt/firecrawl-pi that no commit contains are removed by the deploy, after every deployed file's hash is verified; .fcpi-source-commit is kept and names the deployed commit; the Pi then holds exactly the archive's files plus that one (R16)",
+    run() {
+      const s = sections(`${RAW}deploy-prune.txt`);
+      const m = kv((s.meta ?? []).join(" ")), pl = kv((s.plant ?? []).join(" ")), af = kv((s.after ?? []).join(" "));
+      const dep = s.deploy ?? [];
+      const ok = m.probe_tracked === "no" && pl.planted === "yes" && dep.includes("removed ./tests/closeout-stale/probe.txt") && dep.includes("removed-dir ./tests/closeout-stale") &&
+        dep.some((l) => /hashes verified, [1-9]\d* stale files removed\)/.test(l)) && dep.includes("deploy_exit=0") &&
+        af.stale_file_present === "no" && af.stale_dir_present === "no" && af.source_commit === m.head && Number(af.pi_files) === Number(m.archive_files) + 1;
+      return { ok, actual: `planted=${pl.planted}; deploy: ${(dep.find((l) => /^deployed commit /.test(l)) ?? "no summary").replace(/ to \S+$/, "")}; removed lines=${dep.filter((l) => /^removed/.test(l)).join(" | ")}; after: stale file=${af.stale_file_present}, stale dir=${af.stale_dir_present}, source commit matches=${af.source_commit === m.head}, files on the Pi=${af.pi_files} for ${m.archive_files} archived` };
+    } },
+
+  V25: { name: "closeout-baseline-matches-m1-after", inputs: [`${EV}snapshot-before.txt`, "evidence/M1/snapshot-after.txt"],
+    expected: "the close-out's BEFORE equals M1's AFTER apart from SSH session scopes and the sections the snapshot gained for the close-out (nft_tables, nft_chains, forwarding), which BEFORE records; boot ID unchanged (R8)",
+    run() {
+      if (!CLOSEOUT) return { notRun: true, actual: "runs only against the close-out's evidence (FCPI_M1_EVIDENCE)" };
+      const NET = ["nft_tables", "nft_chains", "forwarding"];
+      const norm = (sec, l) => (sec === "ss_listen" ? l.replace(/pid=\d+,fd=\d+/g, "pid,fd") : l);
+      const lines = (f) => keyedSnapshot(f).filter(([sec]) => !NET.includes(sec)).map(([sec, l]) => `${sec}\t${norm(sec, l)}`).filter((l) => !/\tsession-\d+\.scope$/.test(l)).sort();
+      const a = lines("evidence/M1/snapshot-after.txt"), b = lines(`${EV}snapshot-before.txt`);
+      const only = (x, y) => x.filter((l) => !y.includes(l));
+      const net = Object.fromEntries(NET.map((sec) => [sec, keyedSnapshot(`${EV}snapshot-before.txt`).filter(([x, l]) => x === sec && !/^SKIPPED/.test(l)).length]));
+      const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
+      const ok = only(a, b).length === 0 && only(b, a).length === 0 && NET.every((sec) => net[sec] > 0) && !!boot(`${EV}snapshot-before.txt`) && boot(`${EV}snapshot-before.txt`) === boot("evidence/M1/snapshot-after.txt");
+      return { ok, actual: `lines only in M1 AFTER=${only(a, b).length}${only(a, b).length ? " [" + only(a, b).slice(0, 4).join("; ") + "]" : ""}, only in close-out BEFORE=${only(b, a).length}${only(b, a).length ? " [" + only(b, a).slice(0, 4).join("; ") + "]" : ""}; new sections recorded ${JSON.stringify(net)}; boot_id_equal=${boot(`${EV}snapshot-before.txt`) === boot("evidence/M1/snapshot-after.txt")}` };
     } },
 };
 
