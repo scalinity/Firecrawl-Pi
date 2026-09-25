@@ -455,11 +455,15 @@ const checks = {
         const d = JSON.parse(lineOf(s.direct_scrape, "{") ?? "{}");
         res[f.split("/").pop()] = { gateway: gmd === exp, direct: b64md(d.markdown_b64) === exp };
       }
-      const committed = git("log", "--diff-filter=A", "--format=%cI", "--", EXPECTED_MD).split("\n").pop();
+      // The file must be unchanged since the commit that added it, and that last change must
+      // predate the earliest scrape: an edit made to match observed output would fail here.
+      const addCommit = git("log", "--diff-filter=A", "--format=%H", "--", EXPECTED_MD).split("\n").pop();
+      const committed = git("log", "-1", "--format=%cI", "--", EXPECTED_MD);
+      const unchangedSinceAdded = !!addCommit && git("rev-parse", `${addCommit}:${EXPECTED_MD}`) === git("hash-object", EXPECTED_MD);
       const firstScrape = (lineOf(sections(`${RAW}native-proofs.txt`).scrape_direct, "{") ?? "").match(/"utc_start":"([^"]+)"/)?.[1];
-      const before = committed && firstScrape && new Date(committed) < new Date(firstScrape);
+      const before = unchangedSinceAdded && !!committed && !!firstScrape && new Date(committed) < new Date(firstScrape);
       const ok = Object.values(res).every((r) => r.gateway && r.direct) && before;
-      return { ok, actual: `${JSON.stringify(res)}; expected committed ${committed}, earliest recorded scrape ${firstScrape}, committed first=${before}; expected sha256=${sha256File(EXPECTED_MD)}` };
+      return { ok, actual: `${JSON.stringify(res)}; expected last changed ${committed} (content unchanged since added in ${addCommit.slice(0, 7)}: ${unchangedSinceAdded}), earliest recorded scrape ${firstScrape}, committed first=${before}; expected sha256=${sha256File(EXPECTED_MD)}` };
     } },
 
   V07: { name: "dependency-health-beyond-heartbeat", inputs: [`${RAW}stack-final.txt`],
