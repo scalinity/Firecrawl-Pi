@@ -42,7 +42,6 @@ sec recreate
 t0=$(date +%s)
 "${COMPOSE[@]}" up -d --force-recreate --wait --wait-timeout 900 2>&1 | tail -8
 echo "recreate_exit=${PIPESTATUS[0]} elapsed_s=$(( $(date +%s) - t0 ))"
-echo "volume_or_data_deletion_commands_run=0"
 
 sec after
 ids

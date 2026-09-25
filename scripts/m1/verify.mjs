@@ -632,6 +632,7 @@ const checks = {
 
   V13: { name: "persistence-sentinels-survive-force-recreate", inputs: [`${RAW}persistence.txt`],
     expected: "sentinels written to PostgreSQL, Redis (AOF) and RabbitMQ (durable quorum queue, confirmed publish) read back identically after `docker compose up -d --force-recreate`, with every container replaced, no volume or data deletion, the RabbitMQ node name unchanged and data ownership intact",
+    // Nothing deleted is shown by the readback: every sentinel survives and data ownership is unchanged.
     run() {
       const s = sections(`${RAW}persistence.txt`);
       const v = kv(lineOf(s.meta, "sentinel=")).sentinel;
@@ -642,7 +643,7 @@ const checks = {
       const w = JSON.parse((lineOf(s.write, "rabbitmq_write=") ?? "rabbitmq_write={}").slice(15));
       const owners = (s.read ?? []).filter((l) => /^\d+:\d+ 700 \/srv\/firecrawl-pi\/data/.test(l));
       const ok = /^m1-sentinel-[0-9a-f-]{36}$/.test(v ?? "") && (s.write ?? []).includes(`postgres_written=${v}`) && (s.write ?? []).includes("redis_set=OK") && w.confirmed === true &&
-        replaced && kv(lineOf(s.recreate, "recreate_exit")).recreate_exit === "0" && (s.recreate ?? []).includes("volume_or_data_deletion_commands_run=0") &&
+        replaced && kv(lineOf(s.recreate, "recreate_exit")).recreate_exit === "0" &&
         (s.read ?? []).includes(`postgres_read=${v}`) && (s.read ?? []).includes(`redis_read=${v}`) && Array.isArray(rq.messages) && rq.messages.length === 1 && rq.messages[0] === v &&
         (s.before ?? []).includes("rabbitmq_node=rabbit@rabbitmq") && (s.after ?? []).includes("rabbitmq_node=rabbit@rabbitmq") &&
         owners.join("|") === "0:0 700 /srv/firecrawl-pi/data|5432:5432 700 /srv/firecrawl-pi/data/postgres|6379:6379 700 /srv/firecrawl-pi/data/redis|5672:5672 700 /srv/firecrawl-pi/data/rabbitmq";
