@@ -22,6 +22,6 @@ trap 'rm -f "$sums"' EXIT
 git ls-files -z | xargs -0 shasum -a 256 >"$sums"
 
 "${SSH[@]}" "$PI" "sudo -n install -d -m 0755 -o root -g root $DEST"
-git archive --format=tar HEAD | "${SSH[@]}" "$PI" "sudo -n tar -x --no-same-owner -f - -C $DEST"
+git -c tar.umask=0022 archive --format=tar HEAD | "${SSH[@]}" "$PI" "sudo -n tar -x --no-same-owner -f - -C $DEST"
 "${SSH[@]}" "$PI" "cd $DEST && sha256sum --quiet --strict -c - && printf '%s\n' '$sha' | sudo -n tee .fcpi-source-commit >/dev/null" <"$sums"
 echo "deployed commit $sha ($(wc -l <"$sums" | tr -d ' ') files, hashes verified) to $PI:$DEST"
