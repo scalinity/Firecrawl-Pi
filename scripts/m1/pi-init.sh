@@ -21,12 +21,17 @@ die() { echo "pi-init: STOP: $*" >&2; exit 1; }
 gen_hex() { head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n'; }
 exists() { sudo -n test -e "$1"; }
 # put <path> <owner> <mode>: write stdin to <path> atomically, only if <path> is absent.
+# The final step is a hard link, which refuses an existing target, so a file created in
+# between is never overwritten; temp files are removed on exit, even after an interruption.
+TMPS=()
+trap 'for t in "${TMPS[@]}"; do sudo -n rm -f -- "$t"; done' EXIT
 put() {
   if exists "$1"; then cat >/dev/null; echo "kept    $1"; return; fi
-  local tmp; tmp=$(sudo -n mktemp "$(dirname "$1")/.fcpi-tmp.XXXXXX")
+  local tmp; tmp=$(sudo -n mktemp "$(dirname "$1")/.fcpi-tmp.XXXXXX"); TMPS+=("$tmp")
   sudo -n tee "$tmp" >/dev/null
-  sudo -n chown "$2" "$tmp" && sudo -n chmod "$3" "$tmp" && sudo -n mv -T "$tmp" "$1"
-  echo "created $1"
+  sudo -n chown "$2" "$tmp" && sudo -n chmod "$3" "$tmp"
+  if sudo -n ln -- "$tmp" "$1" 2>/dev/null; then echo "created $1"; else echo "kept    $1 (appeared meanwhile)"; fi
+  sudo -n rm -f -- "$tmp"
 }
 mkd() { # mkd <dir> <owner> <mode>: create if absent; an existing directory is left as it is
   if exists "$1"; then echo "kept    $1/"; else sudo -n install -d -o "${2%:*}" -g "${2#*:}" -m "$3" "$1" && echo "created $1/"; fi
