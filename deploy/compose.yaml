@@ -51,11 +51,23 @@ services:
       POSTGRES_DB: postgres          # pg_cron can only be created in cron.database_name
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
-    secrets: [postgres_password]
+    # postgres_core_role_password: the core's own role, created at initdb by
+    # 020-fcpi-core-role.sh (the image's entrypoint ignores the .psql file it reads).
+    secrets: [postgres_password, postgres_core_role_password]
     volumes:
       - type: bind
         source: /srv/firecrawl-pi/data/postgres
         target: /var/lib/postgresql/data
+        bind: { create_host_path: false }
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/nuq-postgres/initdb/020-fcpi-core-role.sh
+        target: /docker-entrypoint-initdb.d/020-fcpi-core-role.sh
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/nuq-postgres/fcpi-core-role.psql
+        target: /docker-entrypoint-initdb.d/fcpi-core-role.psql
+        read_only: true
         bind: { create_host_path: false }
     tmpfs:
       - /var/run/postgresql:mode=1777,size=4m
@@ -177,7 +189,7 @@ services:
       USE_DB_AUTHENTICATION: "false"    # private core behind the authenticated gateway
       POSTGRES_HOST: nuq-postgres
       POSTGRES_PORT: "5432"
-      POSTGRES_USER: postgres
+      POSTGRES_USER: fcpi_core          # owns the NuQ schema only; not a superuser (deploy/nuq-postgres/fcpi-core-role.psql)
       POSTGRES_DB: postgres
       SCRAPE_MAX_ATTEMPTS: "1"          # spec §29; M2's adapter owns retries
       # The fetch engine refuses private addresses unless this is true; the only private
@@ -342,6 +354,7 @@ networks:
 secrets:
   postgres_password: { file: /etc/firecrawl-pi/secrets/postgres_password }
   core_postgres_password: { file: /etc/firecrawl-pi/secrets/core_postgres_password }
+  postgres_core_role_password: { file: /etc/firecrawl-pi/secrets/postgres_core_role_password }
   rabbitmq_default_user_conf: { file: /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf }
   redis_users_acl: { file: /etc/firecrawl-pi/secrets/redis_users_acl }
   core_redis_url: { file: /etc/firecrawl-pi/secrets/core_redis_url }

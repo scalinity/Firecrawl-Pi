@@ -71,15 +71,19 @@ else
 fi
 
 sec secrets
-if ! exists $S/postgres_password && ! exists $S/core_postgres_password; then
+# The superuser's password stays with PostgreSQL; the core gets its own role, fcpi_core
+# (deploy/nuq-postgres/fcpi-core-role.psql), with a separate password: one copy for the
+# core's wrapper, one for the initdb script that creates the role.
+gen_hex | put $S/postgres_password 5432:5432 0600
+if ! exists $S/core_postgres_password && ! exists $S/postgres_core_role_password; then
   pw=$(gen_hex)
-  printf '%s' "$pw" | put $S/postgres_password 5432:5432 0600
+  printf '%s' "$pw" | put $S/postgres_core_role_password 5432:5432 0600
   printf '%s' "$pw" | put $S/core_postgres_password 0:0 0600
   unset pw
-elif exists $S/postgres_password && exists $S/core_postgres_password; then
-  echo "kept    $S/postgres_password and $S/core_postgres_password"
+elif exists $S/core_postgres_password && exists $S/postgres_core_role_password; then
+  echo "kept    $S/core_postgres_password and $S/postgres_core_role_password"
 else
-  die "postgres_password and core_postgres_password must be created together"
+  die "core_postgres_password and postgres_core_role_password must exist together (an install that predates the core role: run scripts/m1/pi-narrow-credentials.sh first)"
 fi
 if ! exists $S/rabbitmq_default_user_conf && ! exists $S/core_nuq_rabbitmq_url; then
   pw=$(gen_hex)
@@ -124,15 +128,30 @@ for u in fcpi-data-check.service fcpi-stack.service; do
     echo "kept    /etc/systemd/system/$u"
   fi
 done
-# dockerd runs the data check before every start (see the drop-in for why).
+# dockerd runs the data check, then loads the access-bridge guard, before every start
+# (see each drop-in for why).
 D=/etc/systemd/system/docker.service.d
 sudo -n install -d -m 0755 -o root -g root $D
-if ! sudo -n cmp -s $REPO/deploy/host/docker.service.d/10-fcpi-data-check.conf $D/10-fcpi-data-check.conf; then
-  sudo -n install -m 0644 -o root -g root $REPO/deploy/host/docker.service.d/10-fcpi-data-check.conf $D/10-fcpi-data-check.conf && echo "installed $D/10-fcpi-data-check.conf"
-else
-  echo "kept    $D/10-fcpi-data-check.conf"
-fi
+for f in 10-fcpi-data-check.conf 20-fcpi-guard.conf; do
+  if ! sudo -n cmp -s $REPO/deploy/host/docker.service.d/$f $D/$f; then
+    sudo -n install -m 0644 -o root -g root $REPO/deploy/host/docker.service.d/$f $D/$f && echo "installed $D/$f"
+  else
+    echo "kept    $D/$f"
+  fi
+done
 sudo -n systemctl daemon-reload
+# The drop-in loads the guard at the next dockerd start; load it now as well, so a
+# running dockerd does not wait for a restart. The load replaces the table atomically.
+sudo -n /usr/sbin/nft -f $REPO/deploy/host/fcpi-guard.nft && echo "loaded  inet fcpi_guard"
+# NetworkManager leaves Docker's interfaces alone. A config reload re-reads conf.d without
+# touching any active connection (wlan0 is not matched).
+N=/etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf
+if ! sudo -n cmp -s $REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf $N; then
+  sudo -n install -m 0644 -o root -g root $REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf $N && echo "installed $N"
+  sudo -n nmcli general reload conf && echo "reloaded NetworkManager configuration"
+else
+  echo "kept    $N"
+fi
 echo "docker ExecStartPre=$(systemctl show -p ExecStartPre --value docker.service | grep -o 'path=[^ ;]*' | tr '\n' ' ')"
 sudo -n systemctl enable fcpi-stack.service 2>&1 | sed 's/^/systemctl: /'
 echo "fcpi-stack enabled=$(systemctl is-enabled fcpi-stack.service)"

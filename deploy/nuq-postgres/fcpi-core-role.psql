@@ -1,0 +1,25 @@
+-- FCPI: the core's own PostgreSQL role. It owns the NuQ schema and every object in it, so
+-- it can do whatever NuQ does there, but it is not a superuser: no COPY ... PROGRAM, no
+-- extension, role or cron management, and no access to schemas it does not own.
+-- pg_cron's jobs stay the superuser's and keep working on the tables they maintain.
+-- Run by the superuser through psql with the variable pw set from a secret file over
+-- stdin (never on a command line). Idempotent: a rerun resets the password and
+-- re-asserts ownership. Callers: initdb/020-fcpi-core-role.sh (a new data directory) and
+-- scripts/m1/pi-narrow-credentials.sh (the existing one).
+\set ON_ERROR_STOP on
+SELECT 'CREATE ROLE fcpi_core LOGIN' WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'fcpi_core') \gexec
+ALTER ROLE fcpi_core WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD :'pw';
+ALTER SCHEMA nuq OWNER TO fcpi_core;
+-- Tables, views and standalone sequences; indexes, TOAST tables, row types and sequences
+-- owned by a column follow their table.
+SELECT format('ALTER %s nuq.%I OWNER TO fcpi_core',
+         CASE c.relkind WHEN 'S' THEN 'SEQUENCE' WHEN 'v' THEN 'VIEW' WHEN 'm' THEN 'MATERIALIZED VIEW' ELSE 'TABLE' END, c.relname)
+  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+ WHERE n.nspname = 'nuq' AND c.relkind IN ('r', 'p', 'v', 'm', 'S')
+   AND NOT (c.relkind = 'S' AND EXISTS (SELECT FROM pg_depend d WHERE d.objid = c.oid AND d.deptype IN ('a', 'i'))) \gexec
+SELECT format('ALTER TYPE nuq.%I OWNER TO fcpi_core', t.typname)
+  FROM pg_type t JOIN pg_namespace n ON n.oid = t.typnamespace
+ WHERE n.nspname = 'nuq' AND t.typtype IN ('e', 'd') \gexec
+SELECT format('ALTER ROUTINE nuq.%I(%s) OWNER TO fcpi_core', p.proname, pg_get_function_identity_arguments(p.oid))
+  FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+ WHERE n.nspname = 'nuq' \gexec

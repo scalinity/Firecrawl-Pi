@@ -1,0 +1,23 @@
+# FCPI access-bridge guard. Loaded by docker.service's ExecStartPre
+# (deploy/host/docker.service.d/20-fcpi-guard.conf) before every dockerd start, so no
+# container runs without it, and a failed load keeps dockerd down.
+# fcpi-access is the only non-internal project bridge. It carries the gateway's loopback
+# publication, which docker-proxy reaches from the host, so the only traffic it needs is
+# the replies to those host-initiated connections. Everything else is dropped and counted:
+# forwarding in either direction (no route out through the bridge's NAT) and new
+# connections from the bridge to any host listener.
+# The first two lines make the load idempotent: the table is replaced in one transaction.
+table inet fcpi_guard
+delete table inet fcpi_guard
+table inet fcpi_guard {
+  chain forward {
+    type filter hook forward priority filter - 10; policy accept;
+    iifname "fcpi-access" counter drop comment "access_forward_out_dropped"
+    oifname "fcpi-access" counter drop comment "access_forward_in_dropped"
+  }
+  chain input {
+    type filter hook input priority filter - 10; policy accept;
+    iifname "fcpi-access" ct state established,related accept
+    iifname "fcpi-access" counter drop comment "access_input_new_dropped"
+  }
+}
