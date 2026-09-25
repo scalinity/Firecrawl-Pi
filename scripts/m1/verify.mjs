@@ -555,6 +555,21 @@ const checks = {
       return { ok, actual: `branches ${JSON.stringify(res)}; compose refuses missing bind=${composeOk}; restart ok=${restart.start_exit === "0"} healthy=${healthy}/6; manager env restored=${(s.restart ?? []).includes("manager_env_PI_CONFIG_FILE=0")}` };
     } },
 
+  V17: { name: "dockerd-gated-by-data-check", inputs: [`${RAW}docker-gate.txt`, "deploy/host/docker.service.d/10-fcpi-data-check.conf"],
+    expected: "dockerd runs the data check as ExecStartPre from the deployed drop-in; with dockerd stopped alone (containers still marked for revival) and a failing check, dockerd does not start, no project uid runs any process and nothing under /srv/firecrawl-pi changes; with the real config dockerd starts and its restart policies revive all six containers healthy",
+    run() {
+      const s = sections(`${RAW}docker-gate.txt`);
+      const k = (sec) => kv((s[sec] ?? []).join(" "));
+      const di = k("drop_in"), b = k("before"), st = k("stop_dockerd_alone"), g = k("gated_start"), r = k("restored_start");
+      const repoHash = sha256(read("deploy/host/docker.service.d/10-fcpi-data-check.conf"));
+      const ok = /path=\/opt\/firecrawl-pi\/deploy\/host\/fcpi-data-check\.sh/.test((s.drop_in ?? []).join(" ")) && di.drop_in_sha256 === repoHash && di.repo_sha256 === repoHash &&
+        b.running_containers === "6" && (s.before ?? []).includes("restart_policies=unless-stopped ") &&
+        st.docker === "inactive" && st.fcpi_stack === "active" && st.writers === "0" &&
+        g.start_exit !== "0" && g.start_exit !== undefined && g.dockerd_processes === "0" && Number(g.check_failures) >= 1 && g.writers === "0" && g.manifest_unchanged === "yes" &&
+        r.start_exit === "0" && r.docker === "active" && r.revived_healthy === "6" && r.manager_env_PI_CONFIG_FILE === "0";
+      return { ok, actual: `drop-in deployed=${di.drop_in_sha256 === repoHash}; before: ${b.running_containers} running (${(lineOf(s.before, "restart_policies=") ?? "").slice(17).trim()}); dockerd stopped alone: fcpi-stack=${st.fcpi_stack}; gated start: exit=${g.start_exit} state=${g.docker} dockerd_processes=${g.dockerd_processes} check_failures=${g.check_failures} writers=${g.writers} manifest_unchanged=${g.manifest_unchanged}; restored: revived_healthy=${r.revived_healthy}` };
+    } },
+
   V13: { name: "persistence-sentinels-survive-force-recreate", inputs: [`${RAW}persistence.txt`],
     expected: "sentinels written to PostgreSQL, Redis (AOF) and RabbitMQ (durable quorum queue, confirmed publish) read back identically after `docker compose up -d --force-recreate`, with every container replaced, no volume or data deletion, the RabbitMQ node name unchanged and data ownership intact",
     run() {

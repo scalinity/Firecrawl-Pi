@@ -1,0 +1,25 @@
+### meta
+2026-09-25T08:47:25Z
+source_commit=0ae2b1c63f15434b10a47a220f7259d5cb6f096e
+### drop_in
+exec_start_pre=path=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh 
+drop_in_sha256=8ae20be1cd61fb13b7c676e6fad6ba9d24699ea392e5aad010dad492f2143694 repo_sha256=8ae20be1cd61fb13b7c676e6fad6ba9d24699ea392e5aad010dad492f2143694
+### before
+running_containers=6 writers=31
+restart_policies=unless-stopped 
+### stop_dockerd_alone
+docker=inactive fcpi_stack=active writers=0
+manifest=2c3ce373286e1347f69833bbdabf5973dfa973ef717179cef52940ae1278798c
+### gated_start
+Job for docker.service failed because the control process exited with error code.
+start_exit=1
+docker=activating result=exit-code dockerd_processes=0
+check_failures=1
+writers=0
+manifest_unchanged=yes
+### restored_start
+start_exit=0
+docker=active result=success fcpi_stack=active
+revived_healthy=6 writers=33
+manager_env_PI_CONFIG_FILE=0
+end
