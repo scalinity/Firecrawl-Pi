@@ -243,6 +243,8 @@ function attribute(sec, line, containerIds) {
     const m = line.match(/^\/var\/lib\/docker\/rootfs\/overlayfs\/([0-9a-f]{64}) overlay overlay /);
     if (m && containerIds.has(m[1])) return "fcpi container root filesystem";
   }
+  // The guard's `ct state` match loads nft_ct; M1's own runtime never did.
+  if (sec === "lsmod" && /^nft_ct /.test(line) && JSON.stringify(nftTables()) === JSON.stringify(NFT_TABLES_GUARDED)) return `kernel module for the guard's ct state match (${GUARD.slice(GUARD.indexOf("(") + 1, -1)})`;
   if (sec === "lsmod" && MODULE_ALLOW.test(line.split(" ")[0])) return "kernel module loaded by the container runtime";
   if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) {
     const t = JSON.stringify(nftTables());
