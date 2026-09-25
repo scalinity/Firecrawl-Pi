@@ -38,6 +38,8 @@ echo "source_commit=$(cat $REPO/.fcpi-source-commit)"
 sec drop_in
 echo "exec_start_pre=$(systemctl show -p ExecStartPre --value docker.service | grep -o 'path=[^ ;]*' | tr '\n' ' ')"
 echo "drop_in_sha256=$(sha256sum </etc/systemd/system/docker.service.d/10-fcpi-data-check.conf | cut -c1-64) repo_sha256=$(sha256sum <$REPO/deploy/host/docker.service.d/10-fcpi-data-check.conf | cut -c1-64)"
+echo "guard_drop_in_sha256=$(sha256sum </etc/systemd/system/docker.service.d/20-fcpi-guard.conf 2>/dev/null | cut -c1-64) guard_repo_sha256=$(sha256sum <$REPO/deploy/host/docker.service.d/20-fcpi-guard.conf | cut -c1-64)"
+echo "restart=$(systemctl show -p Restart --value docker.service) restart_usec=$(systemctl show -p RestartUSec --value docker.service) start_limit_burst=$(systemctl show -p StartLimitBurst --value docker.service) start_limit_interval=$(systemctl show -p StartLimitIntervalUSec --value docker.service)"
 
 sec before
 echo "running_containers=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi | wc -l) writers=$(writers)"
@@ -55,12 +57,29 @@ sudo -n systemctl set-environment PI_CONFIG_FILE=$T/bad.env
 since=$(date '+%Y-%m-%d %H:%M:%S')
 sudo -n systemctl start --job-mode=ignore-dependencies docker.service 2>&1 | head -1
 echo "start_exit=${PIPESTATUS[0]}"
-# Restart=always retries; wait out StartLimitBurst so a late success could not be missed.
-for i in $(seq 1 30); do [ "$(systemctl show -p ActiveState --value docker.service)" = failed ] && break; sleep 2; done
+# Restart=always retries; observe until systemd gives up (StartLimitBurst) or 180 s pass,
+# sampling every second, so a late or brief dockerd start could not be missed.
+t0=$(date +%s); max_dockerd=0; max_writers=0; states=""
+while :; do
+  n=$(pgrep -xc dockerd); w=$(writers)
+  [ "$n" -gt "$max_dockerd" ] && max_dockerd=$n
+  [ "$w" -gt "$max_writers" ] && max_writers=$w
+  st="$(systemctl show -p ActiveState --value docker.service)/$(systemctl show -p SubState --value docker.service)"
+  case " $states " in *" $st "*) ;; *) states="$states $st" ;; esac
+  [ "${st%%/*}" = failed ] && break
+  [ $(( $(date +%s) - t0 )) -ge 180 ] && break
+  sleep 1
+done
+observed=$(( $(date +%s) - t0 ))
 echo "docker=$(systemctl is-active docker.service) result=$(systemctl show -p Result --value docker.service) dockerd_processes=$(pgrep -xc dockerd)"
 echo "check_failures=$(sudo -n journalctl -u docker.service --since "$since" --no-pager -o cat | grep -c 'fcpi-data-check: FAIL: filesystem UUID')"
 echo "writers=$(writers)"
 M=$(manifest); echo "manifest_unchanged=$([ "$M" = "$M0" ] && echo yes || echo NO)"
+
+sec start_limit
+echo "observed_s=$observed reached_failed=$([ "$(systemctl show -p ActiveState --value docker.service)" = failed ] && echo yes || echo no) active_state=$(systemctl show -p ActiveState --value docker.service) sub_state=$(systemctl show -p SubState --value docker.service) result=$(systemctl show -p Result --value docker.service) nrestarts=$(systemctl show -p NRestarts --value docker.service)"
+echo "states_seen=${states# }"
+echo "max_dockerd_processes=$max_dockerd max_writers=$max_writers"
 
 sec restored_start
 sudo -n systemctl unset-environment PI_CONFIG_FILE
@@ -73,4 +92,6 @@ done
 echo "docker=$(systemctl is-active docker.service) result=$(systemctl show -p Result --value docker.service) fcpi_stack=$(systemctl is-active fcpi-stack.service)"
 echo "revived_healthy=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter health=healthy | wc -l) writers=$(writers)"
 echo "manager_env_PI_CONFIG_FILE=$(systemctl show-environment | grep -c '^PI_CONFIG_FILE=')"
+# The guard's drop-in reloaded the table at this start (its counters restart at zero).
+echo "guard_table=$(sudo -n nft list table inet fcpi_guard >/dev/null 2>&1 && echo present || echo absent) guard_rules=$(sudo -n nft -j list table inet fcpi_guard 2>/dev/null | jq '[.nftables[] | select(.rule)] | length')"
 echo end
