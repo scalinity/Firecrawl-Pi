@@ -68,9 +68,9 @@ read)
     sudo -n nft -j list table $fam fcpi_audit | jq -r --arg fam "$fam" '.nftables[] | select(.rule) | .rule
       | "\(.comment) family=\($fam) packets=\([.expr[] | select(.counter) | .counter.packets][0]) bytes=\([.expr[] | select(.counter) | .counter.bytes][0])"'
   done
-  for s in "bridge seen_v4_off" "bridge seen_v6" "inet seen_in_v4" "inet seen_in_v6"; do
+  for s in "bridge fcpi_audit seen_v4_off" "bridge fcpi_audit seen_v6" "inet fcpi_audit seen_in_v4" "inet fcpi_audit seen_in_v6"; do
     sudo -n nft -j list set $s | jq -r --arg s "$s" '.nftables[] | select(.set) | .set.elem // [] | .[] | (.elem.val // .) | .concat
-      | "flow set=\($s | sub(" "; ":")) src=\(.[0]) dst=\(.[1]) l4proto=\(.[2])"'
+      | "flow set=\($s | gsub(" "; ":")) src=\(.[0]) dst=\(.[1]) l4proto=\(.[2])"'
   done
   ;;
 esac
