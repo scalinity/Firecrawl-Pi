@@ -1,0 +1,10 @@
+# Positive control for the M1 additions to the redaction scan (scripts/m1/verify.mjs V15).
+# Every value is synthetic. The scan must find one hit per M1 rule here before it scans
+# the repository; this file is excluded from that scan, as m0-redaction-control.txt is.
+# The two by-hash rules are fed the SHA-256 of the synthetic values on the last two lines
+# as if they were live secrets, exactly as the real scan is fed the Pi's secret hashes.
+url-empty-user-credentials: redis://:fixturefixturefixture@redis.invalid:6379
+rabbitmq-default-pass: default_pass = fixture-not-a-secret-value
+fcpi-client-token: fcpi_m1v_0000000000000000000000000000000000000000000000000000000000000000
+live-secret-by-hash-hex: 0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f
+live-secret-by-hash-cookie: ABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOPABCDEFGHIJKLMNOP

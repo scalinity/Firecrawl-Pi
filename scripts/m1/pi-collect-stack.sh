@@ -25,7 +25,7 @@ date -u +%Y-%m-%dT%H:%M:%SZ
 echo "source_commit=$(cat $REPO/.fcpi-source-commit)"
 echo "host_page_size=$(getconf PAGESIZE) kernel=$(uname -r) uname_m=$(uname -m)"
 echo "boot_id_sha256=$(sha256sum </proc/sys/kernel/random/boot_id | cut -c1-64)"
-echo "binfmt_misc_handlers=$(ls /proc/sys/fs/binfmt_misc 2>/dev/null | grep -vcE '^(register|status)$')"
+echo "binfmt_misc_handlers=$(ls /proc/sys/fs/binfmt_misc 2>/dev/null | grep -vE '^(register|status)$' | tr '\n' , | sed 's/,$//')"
 
 sec containers
 for s in "${SERVICES[@]}"; do

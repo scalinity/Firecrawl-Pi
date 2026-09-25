@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-25T04:16:31Z",
-  "generated_by": "scripts/m0/build-lock.mjs (M0)",
-  "repository_sha": "433eda001bb91adf27d0711d52d07ea28da48b08",
+  "generated_utc": "2026-09-25T08:16:07Z",
+  "generated_by": "scripts/m1/build-lock.mjs (M1), from the M0 lock at 8ed6192; entries owned by later milestones are as M0 wrote them",
+  "repository_sha": "f3efc3ac695c7a74d4416b2dde7d2e509e2aadac",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -156,7 +156,15 @@
         "arm64_manifest_digest": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_node_22.23.3-bookworm-slim.index.json",
-        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_node_22.23.3-bookworm-slim.arm64.json"
+        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_node_22.23.3-bookworm-slim.arm64.json",
+        "image_id_on_pi": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "platform_on_pi": "linux/arm64",
+        "verified_utc": "2026-09-25T08:09:57Z",
+        "evidence": "evidence/M1/raw/image-inspect.txt",
+        "used_by": [
+          "access-gateway (services/access)",
+          "fixture (tests/fixtures/m1)"
+        ]
       }
     },
     "nuq_postgres_base": {
@@ -172,7 +180,11 @@
         "arm64_manifest_digest": "sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_postgres_17.11-trixie.index.json",
-        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_postgres_17.11-trixie.arm64.json"
+        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_postgres_17.11-trixie.arm64.json",
+        "image_id_on_pi": "sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761",
+        "platform_on_pi": "linux/arm64",
+        "verified_utc": "2026-09-25T08:09:57Z",
+        "evidence": "evidence/M1/raw/image-inspect.txt"
       },
       "same_index_digest_as": "library/postgres:17",
       "note": "17.11 (2026-08-13) fixed 28 CVEs; do not go below it.",
@@ -185,8 +197,12 @@
         ],
         "source": "evidence/M0/sources/pgdg-trixie-arm64-postgresql-17-cron.txt",
         "retrieved_utc": "2026-09-25T04:04:43Z",
-        "status": "unresolved",
-        "reason": "Upstream installs it unpinned; the exact version is fixed when the M1 image is built and must be recorded then."
+        "status": "resolved",
+        "reason": "Pinned in the project Dockerfile and measured in the built image.",
+        "pinned_in_dockerfile": "postgresql-17-cron=1.6.8-1.pgdg13+2",
+        "measured_in_built_image": "1.6.8-1.pgdg13+2",
+        "postgresql_package_in_built_image": "17.11-1.pgdg13+2",
+        "evidence": "evidence/M1/raw/image-inspect.txt#nuq_image_packages"
       }
     },
     "redis": {
@@ -202,7 +218,12 @@
         "arm64_manifest_digest": "sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/registry-1.docker.io_library_redis_8.10.2-alpine.index.json",
-        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_redis_8.10.2-alpine.arm64.json"
+        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_redis_8.10.2-alpine.arm64.json",
+        "image_id_on_pi": "sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44",
+        "platform_on_pi": "linux/arm64",
+        "verified_utc": "2026-09-25T08:09:57Z",
+        "evidence": "evidence/M1/raw/image-inspect.txt",
+        "note": "redis-server runs directly as uid 6379; bundled Redis 8 modules are not loaded (upstream issues no module command)."
       },
       "same_index_digest_as": "library/redis:alpine",
       "note": "Upstream uses the floating redis:alpine tag, which resolves to this digest. 8.10.2 includes the 2026-08-17 and 2026-09-17 security releases. License: RSALv2/SSPLv1/AGPLv3 (personal use).",
@@ -216,8 +237,28 @@
     "rabbitmq": {
       "role": "RabbitMQ (NuQ messaging)",
       "selected": {
-        "status": "unresolved",
-        "reason": "Decision D3 (separate review): upstream compose pins rabbitmq:3-management (3.13.7, community support ended); 4.3.6 is the only community-supported series (evidence/M0/sources/rabbitmq-release-information.txt). NuQ declares only quorum queues and one exclusive classic reply queue, both valid on 4.x."
+        "registry": "registry-1.docker.io",
+        "repository": "library/rabbitmq",
+        "tag": "4.3.6",
+        "resolved_utc": "2026-09-25T03:31:29Z",
+        "status": "selected",
+        "index_digest": "sha256:d0bffe70e755f348625415f32b0a090662e5f06b3ba3f82a4c7aaa18621b1279",
+        "registry_reported_digest": "sha256:d0bffe70e755f348625415f32b0a090662e5f06b3ba3f82a4c7aaa18621b1279",
+        "arm64_manifest_digest": "sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8",
+        "platform": "linux/arm64",
+        "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_4.3.6.index.json",
+        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_4.3.6.arm64.json",
+        "decision": "D3",
+        "accepted_after": "M1 NuQ round trip (evidence/M1/raw/nuq-roundtrip.txt)",
+        "image_id_on_pi": "sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8",
+        "platform_on_pi": "linux/arm64",
+        "verified_utc": "2026-09-25T08:09:57Z",
+        "evidence": "evidence/M1/raw/image-inspect.txt",
+        "series_check": {
+          "newer_series_ga": "none: no 4.4 release or tag",
+          "retrieved": "evidence/M1/sources/rabbitmq-releases-at-m1.txt"
+        },
+        "community_support_ends": "2026-11-30 (series move: M8)"
       },
       "candidates": [
         {
@@ -232,21 +273,8 @@
           "platform": "linux/arm64",
           "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3.13.7.index.json",
           "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3.13.7.arm64.json",
-          "why": "same major as upstream compose, without the management plugin (spec §22)"
-        },
-        {
-          "registry": "registry-1.docker.io",
-          "repository": "library/rabbitmq",
-          "tag": "4.3.6",
-          "resolved_utc": "2026-09-25T03:31:29Z",
-          "status": "resolved",
-          "index_digest": "sha256:d0bffe70e755f348625415f32b0a090662e5f06b3ba3f82a4c7aaa18621b1279",
-          "registry_reported_digest": "sha256:d0bffe70e755f348625415f32b0a090662e5f06b3ba3f82a4c7aaa18621b1279",
-          "arm64_manifest_digest": "sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8",
-          "platform": "linux/arm64",
-          "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_4.3.6.index.json",
-          "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_4.3.6.arm64.json",
-          "why": "supported series; fixes the 2026-08/09 advisories"
+          "why": "same major as upstream compose, without the management plugin (spec §22)",
+          "role": "recorded fallback if 4.x fails for a 4.x-specific reason (D3); not used"
         }
       ],
       "upstream_reference": {
@@ -287,21 +315,46 @@
     },
     "firecrawl_api_prebuilt": {
       "role": "Upstream-built API image for the pinned commit (config FIRECRAWL_BUILD_SHA=7666c1f9...)",
-      "candidate": {
+      "status": "selected",
+      "reason": "Decision D6: acquired by arm64 digest for M1; its build SHA equals the pinned commit. M2 replaces it with a project build.",
+      "selected": {
         "registry": "ghcr.io",
         "repository": "firecrawl/firecrawl",
         "tag": "2.11.162",
         "resolved_utc": "2026-09-25T03:24:36Z",
-        "status": "resolved",
+        "status": "selected",
         "index_digest": "sha256:1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63",
         "registry_reported_digest": "sha256:1b223ef18d410f67615f32ccaa3dcedfc26af4286f096247bddca3b624545e63",
         "arm64_manifest_digest": "sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af",
         "platform": "linux/arm64",
         "index_file": "evidence/M0/registry/ghcr.io_firecrawl_firecrawl_2.11.162.index.json",
-        "arm64_manifest_file": "evidence/M0/registry/ghcr.io_firecrawl_firecrawl_2.11.162.arm64.json"
-      },
-      "status": "candidate",
-      "reason": "Decision D6: acquire this arm64 image for M1 versus build from source. Third-party built; provenance is the image's recorded build SHA, not a reproducible build."
+        "arm64_manifest_file": "evidence/M0/registry/ghcr.io_firecrawl_firecrawl_2.11.162.arm64.json",
+        "decision": "D6 (evidence/M0/review/DECISIONS.md)",
+        "referenced_by": "arm64 manifest digest, never by tag",
+        "config_firecrawl_build_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+        "build_sha_equals_pinned_commit": true,
+        "node_version_in_image": "22.23.2",
+        "image_id_on_pi": "sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af",
+        "platform_on_pi": "linux/arm64",
+        "verified_utc": "2026-09-25T08:09:57Z",
+        "evidence": "evidence/M1/raw/image-inspect.txt",
+        "runtime_configuration": {
+          "NUQ_WORKER_COUNT": "1",
+          "USE_DB_AUTHENTICATION": "false",
+          "SCRAPE_MAX_ATTEMPTS": "1",
+          "ALLOW_LOCAL_WEBHOOKS": "true (fixture-only profile; see evidence/M1/INTERPRETATION.md)",
+          "DISABLE_WEBHOOK_DELIVERY": "true",
+          "USE_GO_MARKDOWN_PARSER": "unset (Go library inert; upstream default)",
+          "BULL_AUTH_KEY": "unset",
+          "NODE_OPTIONS": "--max-old-space-size=256",
+          "not_consumed_at_pin": [
+            "NUM_WORKERS_PER_QUEUE",
+            "CRAWL_CONCURRENT_REQUESTS",
+            "MAX_CONCURRENT_JOBS",
+            "BROWSER_POOL_SIZE"
+          ]
+        }
+      }
     },
     "go_build": {
       "role": "Build stage for libhtml-to-markdown.so",
@@ -367,6 +420,21 @@
     },
     "excluded": {
       "foundationdb": "foundationdb/foundationdb:7.3.63 server/init excluded by the selected architecture (spec §5); not resolved."
+    },
+    "nuq_postgres": {
+      "role": "NuQ PostgreSQL image, built on the Pi from deploy/nuq-postgres (decision D6)",
+      "selected": {
+        "repository": "fcpi/nuq-postgres",
+        "local_tag": "m1",
+        "built_image_digest": "sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180",
+        "repo_digest": "fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180",
+        "platform": "linux/arm64",
+        "status": "built",
+        "image_id_on_pi": "sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180",
+        "platform_on_pi": "linux/arm64",
+        "verified_utc": "2026-09-25T08:09:57Z",
+        "evidence": "evidence/M1/raw/image-inspect.txt"
+      }
     }
   },
   "browser": {
@@ -434,8 +502,38 @@
   },
   "host_runtime": {
     "container_runtime": {
-      "status": "unresolved",
-      "reason": "Nothing is installed. M1 chooses between docker-ce 5:29.8.1-1~debian.13~trixie / compose-plugin 5.5.1-1~debian.13~trixie (Docker repository, evidence/M0/sources/docker-ce-trixie-arm64-versions.txt) and docker.io from Debian (candidate recorded in evidence/M0/audit.json section4.docker_compose_versions)."
+      "status": "resolved",
+      "source": "Docker apt repository https://download.docker.com/linux/debian trixie stable arm64",
+      "signing_key_fingerprint": "9DC858229FC7DD38854AE2D88D81803C0EBFCD88",
+      "packages": {
+        "containerd.io": "2.3.5-1~debian.13~trixie",
+        "docker-buildx-plugin": "0.37.1-1~debian.13~trixie",
+        "docker-ce": "5:29.8.1-1~debian.13~trixie",
+        "docker-ce-cli": "5:29.8.1-1~debian.13~trixie",
+        "docker-compose-plugin": "5.5.1-1~debian.13~trixie",
+        "iptables": "1.8.11-2"
+      },
+      "held": [
+        "docker-ce",
+        "docker-ce-cli",
+        "containerd.io",
+        "docker-compose-plugin",
+        "docker-buildx-plugin"
+      ],
+      "engine": "29.8.1 api=1.56 os/arch=linux/arm64",
+      "compose": "Docker Compose version v5.5.1",
+      "buildx": "github.com/docker/buildx v0.37.1 0b265a9f62db554fa9aba6dd19e1bd5704bc7d8a",
+      "daemon_json": {
+        "path": "/etc/docker/daemon.json",
+        "source": "deploy/host/docker-daemon.json",
+        "sha256": "edbafd86a9366e29c07c1d347345083f95626a60752fde6316310598ab0c03d2"
+      },
+      "image_store": "containerd snapshotter (overlayfs)",
+      "reason": "Chosen over Debian docker.io 26.1.5: Engine 28.0.0 (moby#49325) stops neighbour hosts reaching ports mapped on a loopback address, and the LAN is flat (evidence/M1/sources/moby-v28.0.0-release-notes-excerpt.txt).",
+      "evidence": [
+        "evidence/M1/raw/runtime-plan.txt",
+        "evidence/M1/raw/runtime-install.txt"
+      ]
     },
     "kernel": {
       "source": "evidence/M0/audit.json architecture"
@@ -449,7 +547,45 @@
     "status": "none yet: the integration patch series starts in M2"
   },
   "build_provenance": {
-    "status": "unresolved",
-    "reason": "No image was built in M0. The build host decision (Mac arm64 Linux VM, Pi native, or acquired prebuilt image) is decision D6."
+    "status": "resolved",
+    "firecrawl_api_image": {
+      "image": "ghcr.io/firecrawl/firecrawl@sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af",
+      "built_by": "upstream GitHub Actions run 30579949775 (push to main, success)",
+      "built_utc": "2026-07-30T20:43:18Z",
+      "runner": "native arm64 runner",
+      "source_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "provenance": false,
+      "attestation": "none found",
+      "note": "A consistent public chain, not a signed or reproducible build (decision D6).",
+      "evidence": "evidence/M0/review/sources/firecrawl-2.11.162-image-provenance.txt"
+    },
+    "nuq_postgres_image": {
+      "image": "fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180",
+      "built_on": "the Pi (linux/arm64, native)",
+      "built_utc": "2026-09-25T06:58:05Z",
+      "builder": "github.com/docker/buildx v0.37.1 0b265a9f62db554fa9aba6dd19e1bd5704bc7d8a",
+      "provenance": false,
+      "sbom": false,
+      "dockerfile": {
+        "path": "deploy/nuq-postgres/Dockerfile",
+        "sha256": "936aef18258164e0a44d429b2ad77383326bcbb93f16a2cce25835731f2c113a",
+        "upstream_sha256": "00108183ba9947db346226e3cc120b92b4cfcc60b215b320ad682f7944e93e45",
+        "edits": [
+          "FROM postgres:17.11-trixie by arm64 digest",
+          "postgresql-17-cron=1.6.8-1.pgdg13+2 pinned"
+        ]
+      },
+      "nuq_sql": {
+        "path": "deploy/nuq-postgres/nuq.sql",
+        "sha256": "44edb370cfc2601076e174c5461ffdfda8a1051b3c2a87c1b5231d002a66ee77",
+        "unmodified_upstream": true
+      },
+      "base_image": "postgres@sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761",
+      "pg_cron_measured": "1.6.8-1.pgdg13+2",
+      "evidence": [
+        "evidence/M1/raw/nuq-build.txt",
+        "evidence/M1/raw/image-inspect.txt"
+      ]
+    }
   }
 }
