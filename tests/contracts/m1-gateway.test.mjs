@@ -54,16 +54,24 @@ before(async () => {
   await new Promise((r) => upstream.listen(0, "127.0.0.1", r));
   dir = mkdtempSync(join(tmpdir(), "fcpi-gw-"));
   writeFileSync(join(dir, "hashes"), `# test\nm1-test sha256:${createHash("sha256").update(TOKEN).digest("hex")}\n`);
-  gwPort = 20000 + Math.floor(Math.random() * 20000);
-  gw = spawn(process.execPath, [GATEWAY], { env: {
-    PI_GATEWAY_LISTEN_PORT: String(gwPort), PI_CORE_URL: `http://127.0.0.1:${upstream.address().port}`,
-    PI_GATEWAY_TOKEN_HASHES_FILE: join(dir, "hashes"), PI_PERMITTED_TARGET_ORIGINS: FIXTURE,
-  }, stdio: ["ignore", "pipe", "inherit"] });
-  await new Promise((resolve, reject) => {
-    gw.stdout.on("data", (d) => { if (String(d).includes('"listening"')) resolve(); });
-    gw.on("exit", (c) => reject(new Error(`gateway exited ${c}`)));
-  });
+  ({ proc: gw, port: gwPort } = await startGateway({ PI_CORE_URL: `http://127.0.0.1:${upstream.address().port}` }));
 });
+
+// Starts a gateway on an OS-assigned port (PI_GATEWAY_LISTEN_PORT=0) and resolves with the
+// port it reports, or rejects if it exits or does not start listening within 10 s.
+function startGateway(env) {
+  const proc = spawn(process.execPath, [GATEWAY], { env: {
+    PI_GATEWAY_LISTEN_PORT: "0", PI_GATEWAY_TOKEN_HASHES_FILE: join(dir, "hashes"), PI_PERMITTED_TARGET_ORIGINS: FIXTURE, ...env,
+  }, stdio: ["ignore", "pipe", "inherit"] });
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => { proc.kill(); reject(new Error("gateway did not start listening within 10 s")); }, 10000);
+    proc.stdout.on("data", (d) => {
+      const line = String(d).split("\n").find((l) => l.includes('"listening"'));
+      if (line) { clearTimeout(timer); resolve({ proc, port: JSON.parse(line).listening }); }
+    });
+    proc.on("exit", (c) => { clearTimeout(timer); reject(new Error(`gateway exited ${c}`)); });
+  });
+}
 after(() => { gw?.kill(); upstream?.closeAllConnections(); upstream?.close(); if (dir) rmSync(dir, { recursive: true }); });
 
 test("missing token: 401 with the gateway's own challenge, nothing forwarded", async () => {

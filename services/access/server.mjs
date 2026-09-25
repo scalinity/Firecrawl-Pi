@@ -137,5 +137,5 @@ const server = createServer(async (req, res) => {
 });
 server.headersTimeout = 10000;
 server.requestTimeout = cfg.upstreamTimeoutMs + 10000;
-server.listen(cfg.port, "0.0.0.0", () => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", listening: cfg.port, tokens: cfg.hashes.length, target_origins: [...cfg.origins] })));
+server.listen(cfg.port, "0.0.0.0", () => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", listening: server.address().port, tokens: cfg.hashes.length, target_origins: [...cfg.origins] })));
 for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => server.close(() => process.exit(0)));
