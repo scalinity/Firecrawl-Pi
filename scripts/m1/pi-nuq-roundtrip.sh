@@ -24,8 +24,8 @@ sec() { printf '### %s\n' "$1"; }
 ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 now() { date +%s; }
 psq() { D exec "$PG" psql -U postgres -Atc "$1" 2>&1; }
-queues() { D exec "$RMQ" rabbitmqctl list_queues -q name type durable auto_delete exclusive messages_ready messages consumers 2>&1; }
-ready() { D exec "$RMQ" rabbitmqctl list_queues -q name messages_ready 2>/dev/null | awk -v q="$PREFETCH" '$1==q {print $2}'; }
+queues() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name type durable auto_delete exclusive messages_ready messages consumers 2>&1; }
+ready() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name messages_ready 2>/dev/null | awk -v q="$PREFETCH" '$1==q {print $2}'; }
 counters() { # broker-wide counters from rabbitmq_prometheus, read from inside the core network
   D exec -i "$CORE" node --input-type=module -e '
     const t = await (await fetch("http://rabbitmq:15692/metrics", { signal: AbortSignal.timeout(5000) })).text();
@@ -88,7 +88,7 @@ sec case2_counters_after; counters
 sec case3_restart
 t3=$(now); echo "restart_begin=$(ts)"
 D restart "$RMQ" >/dev/null
-for i in $(seq 1 120); do D exec "$RMQ" rabbitmq-diagnostics -q ping >/dev/null 2>&1 && break; sleep 1; done
+for i in $(seq 1 120); do D exec -u rabbitmq "$RMQ" rabbitmq-diagnostics -q ping >/dev/null 2>&1 && break; sleep 1; done
 echo "broker_ping_ok_after_s=$(( $(now) - t3 ))"
 sleep 5
 sec case3_scrape

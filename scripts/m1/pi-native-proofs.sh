@@ -68,7 +68,7 @@ up)
     -v "$REPO/tests/fixtures/m1":/fixture:ro "$IMG_NODE" node /fixture/server.mjs >/dev/null
   # Wait for PostgreSQL's init (nuq.sql) and RabbitMQ before the harness connects.
   for i in $(seq 1 90); do D exec fcpi-proof-pg psql -U postgres -Atc "select count(*) from cron.job" 2>/dev/null | grep -qx 36 && break; sleep 2; done
-  for i in $(seq 1 90); do D exec fcpi-proof-rabbitmq rabbitmq-diagnostics -q ping >/dev/null 2>&1 && break; sleep 2; done
+  for i in $(seq 1 90); do D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmq-diagnostics -q ping >/dev/null 2>&1 && break; sleep 2; done
   D run -d --name fcpi-proof-core "${LBL[@]}" --network "$NET" --network-alias firecrawl-core \
     --memory 2304m --memory-swap 2304m --cpus 2.25 \
     -e HOST=0.0.0.0 -e PORT=3002 -e NUQ_WORKER_COUNT=1 -e USE_DB_AUTHENTICATION=false \
@@ -117,21 +117,21 @@ probe)
   D exec fcpi-proof-redis redis-cli INFO memory | grep -E '^(mem_allocator|used_memory_human|maxmemory_human|maxmemory_policy):' | tr -d '\r'
 
   sec rabbitmq
-  echo "ping=$(D exec fcpi-proof-rabbitmq rabbitmq-diagnostics -q ping 2>&1 | tr '\n' ' ')"
-  echo "server_version=$(D exec fcpi-proof-rabbitmq rabbitmq-diagnostics -q server_version 2>&1)"
-  echo "erlang_emu_flavor=$(D exec fcpi-proof-rabbitmq rabbitmqctl eval 'erlang:system_info(emu_flavor).' 2>&1)"
-  echo "erlang_otp_release=$(D exec fcpi-proof-rabbitmq rabbitmqctl eval 'erlang:system_info(otp_release).' 2>&1)"
-  echo "check_running=$(D exec fcpi-proof-rabbitmq rabbitmq-diagnostics -q check_running >/dev/null 2>&1 && echo ok || echo failed)"
-  echo "check_local_alarms=$(D exec fcpi-proof-rabbitmq rabbitmq-diagnostics -q check_local_alarms >/dev/null 2>&1 && echo ok || echo failed)"
-  echo "memory_high_watermark=$(D exec fcpi-proof-rabbitmq rabbitmqctl eval 'vm_memory_monitor:get_memory_limit().' 2>&1)"
-  echo "enabled_plugins=$(D exec fcpi-proof-rabbitmq rabbitmq-plugins list -e -m -q 2>&1 | tr '\n' ' ')"
-  echo "users=$(D exec fcpi-proof-rabbitmq rabbitmqctl list_users -q 2>&1 | awk '{print $1}' | tr '\n' ' ')"
+  echo "ping=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmq-diagnostics -q ping 2>&1 | tr '\n' ' ')"
+  echo "server_version=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmq-diagnostics -q server_version 2>&1)"
+  echo "erlang_emu_flavor=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmqctl eval 'erlang:system_info(emu_flavor).' 2>&1)"
+  echo "erlang_otp_release=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmqctl eval 'erlang:system_info(otp_release).' 2>&1)"
+  echo "check_running=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmq-diagnostics -q check_running >/dev/null 2>&1 && echo ok || echo failed)"
+  echo "check_local_alarms=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmq-diagnostics -q check_local_alarms >/dev/null 2>&1 && echo ok || echo failed)"
+  echo "memory_high_watermark=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmqctl eval 'vm_memory_monitor:get_memory_limit().' 2>&1)"
+  echo "enabled_plugins=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmq-plugins list -e -m -q 2>&1 | tr '\n' ' ')"
+  echo "users=$(D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmqctl list_users -q 2>&1 | awk '{print $1}' | tr '\n' ' ')"
   # Healthcheck probe cost inside the 512 MiB cap: sample the container's memory.current
   # every 50 ms while one probe runs, and report the peak above the pre-probe baseline.
   id=$(D inspect -f '{{.Id}}' fcpi-proof-rabbitmq); f=/sys/fs/cgroup/system.slice/docker-$id.scope/memory.current
   for probe in "rabbitmq-diagnostics -q ping" "bash -c '</dev/tcp/127.0.0.1/5672'"; do
     base=$(cat "$f"); peak=$base
-    D exec fcpi-proof-rabbitmq sh -c "$probe" >/dev/null 2>&1 & pid=$!
+    D exec -u rabbitmq fcpi-proof-rabbitmq sh -c "$probe" >/dev/null 2>&1 & pid=$!
     t0=$(date +%s%N)
     while kill -0 $pid 2>/dev/null; do v=$(cat "$f"); [ "$v" -gt "$peak" ] && peak=$v; sleep 0.05; done
     wait $pid; rc=$?
@@ -185,7 +185,7 @@ probe)
   D logs fcpi-proof-fixture 2>&1 | tail -20
 
   sec rabbitmq_queues
-  D exec fcpi-proof-rabbitmq rabbitmqctl list_queues -q name type durable auto_delete exclusive messages consumers 2>&1
+  D exec -u rabbitmq fcpi-proof-rabbitmq rabbitmqctl list_queues -q name type durable auto_delete exclusive messages consumers 2>&1
 
   sec cgroups
   for c in "${CONTAINERS[@]}"; do cg "$c"; done
