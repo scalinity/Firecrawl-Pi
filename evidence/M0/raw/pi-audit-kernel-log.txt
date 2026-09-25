@@ -1,0 +1,46 @@
+### probe_time
+2026-09-25T03:56:23Z
+### kernel_log_current_boot
+2026-09-25T03:18:44+00:00 pi kernel: /proc/cgroups lists only v1 controllers, use cgroup.controllers of root cgroup for v2 info
+### dmesg_tail
+2026-09-22T15:32:50,958114-04:00 usbcore: registered new interface driver usbserial_generic
+2026-09-22T15:32:50,958587-04:00 usbserial: USB Serial support registered for generic
+2026-09-22T15:32:50,962321-04:00 usbcore: registered new interface driver ch341
+2026-09-22T15:32:50,962373-04:00 usbserial: USB Serial support registered for ch341-uart
+2026-09-22T15:32:50,962405-04:00 ch341 1-1:1.0: ch341-uart converter detected
+2026-09-22T15:32:50,970963-04:00 brcmfmac: F1 signature read @0x18000000=0x15264345
+2026-09-22T15:32:50,972284-04:00 brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43455-sdio for chip BCM4345/6
+2026-09-22T15:32:50,972433-04:00 usbcore: registered new interface driver brcmfmac
+2026-09-22T15:32:50,975252-04:00 usb 1-1: ch341-uart converter now attached to ttyUSB0
+2026-09-22T15:32:50,975303-04:00 ch341 3-1:1.0: ch341-uart converter detected
+2026-09-22T15:32:50,988364-04:00 usb 3-1: ch341-uart converter now attached to ttyUSB1
+2026-09-22T15:32:50,990343-04:00 vc4-drm axi:gpu: bound 107c580000.hvs (ops vc4_hvs_ops [vc4])
+2026-09-22T15:32:50,996044-04:00 Registered IR keymap rc-cec
+2026-09-22T15:32:50,996079-04:00 rc rc0: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0
+2026-09-22T15:32:50,996121-04:00 input: vc4-hdmi-0 as /devices/platform/soc@107c000000/107c701400.hdmi/rc/rc0/input1
+2026-09-22T15:32:50,998012-04:00 input: vc4-hdmi-0 HDMI Jack as /devices/platform/soc@107c000000/107c701400.hdmi/sound/card0/input2
+2026-09-22T15:32:51,001633-04:00 vc4-drm axi:gpu: bound 107c701400.hdmi (ops vc4_hdmi_ops [vc4])
+2026-09-22T15:32:51,006308-04:00 Registered IR keymap rc-cec
+2026-09-22T15:32:51,006348-04:00 rc rc1: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1
+2026-09-22T15:32:51,006390-04:00 input: vc4-hdmi-1 as /devices/platform/soc@107c000000/107c706400.hdmi/rc/rc1/input3
+2026-09-22T15:32:51,008326-04:00 input: vc4-hdmi-1 HDMI Jack as /devices/platform/soc@107c000000/107c706400.hdmi/sound/card1/input4
+2026-09-22T15:32:51,012331-04:00 vc4-drm axi:gpu: bound 107c706400.hdmi (ops vc4_hdmi_ops [vc4])
+2026-09-22T15:32:51,012482-04:00 vc4-drm axi:gpu: bound 107c500000.mop (ops vc4_txp_ops [vc4])
+2026-09-22T15:32:51,012548-04:00 vc4-drm axi:gpu: bound 107c501000.moplet (ops vc4_txp_ops [vc4])
+2026-09-22T15:32:51,012605-04:00 vc4-drm axi:gpu: bound 107c410000.pixelvalve (ops vc4_crtc_ops [vc4])
+2026-09-22T15:32:51,012654-04:00 vc4-drm axi:gpu: bound 107c411000.pixelvalve (ops vc4_crtc_ops [vc4])
+2026-09-22T15:32:51,013354-04:00 [drm] Initialized vc4 0.0.0 for axi:gpu on minor 1
+2026-09-22T15:32:51,016030-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-22T15:32:51,022836-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-22T15:32:51,028965-04:00 vc4-drm axi:gpu: [drm] Cannot find any crtc or sizes
+2026-09-22T15:32:51,141583-04:00 brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+2026-09-22T15:32:51,141827-04:00 brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4345/6 wl0: Aug 29 2023 01:47:08 version 7.45.265 (28bca26 CY) FWID 01-b677b91b
+2026-09-22T15:32:51,344641-04:00 raspberrypi-firmware soc@107c000000:firmware: Request 0x00030097 returned status 0x80000001
+2026-09-22T15:32:53,332082-04:00 macb 1f00100000.ethernet eth0: PHY [1f00100000.ethernet-ffffffff:01] driver [Broadcom BCM54213PE] (irq=POLL)
+2026-09-22T15:32:53,332965-04:00 macb 1f00100000.ethernet eth0: configuring for phy/rgmii-id link mode
+2026-09-22T15:32:53,335989-04:00 macb 1f00100000.ethernet: gem-ptp-timer ptp clock registered.
+2026-09-22T15:32:53,363508-04:00 brcmfmac: brcmf_cfg80211_set_power_mgmt: power save enabled
+2026-09-22T15:32:54,450427-04:00 systemd-journald[282]: File /var/log/journal/MACHINE_ID_SHA256:ec98e9910f7ca9f467ebe340f7fd3d59a6198d7a17482330f862b3cf7113f86a/user-1000.journal corrupted or uncleanly shut down, renaming and replacing.
+2026-09-22T15:32:56,454699-04:00 brcmfmac: brcmf_cfg80211_set_power_mgmt: power save disabled
+2026-09-24T23:18:45,469886-04:00 /proc/cgroups lists only v1 controllers, use cgroup.controllers of root cgroup for v2 info
+end
