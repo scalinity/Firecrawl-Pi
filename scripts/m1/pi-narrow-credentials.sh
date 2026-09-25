@@ -76,5 +76,6 @@ sudo -n $REPO/deploy/host/fcpi-data-check.sh
 "${COMPOSE[@]}" up -d --wait --wait-timeout 900 2>&1 | tail -8
 echo "up_exit=${PIPESTATUS[0]}"
 echo "healthy=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter health=healthy | wc -l)"
+PG=$(name nuq-postgres) # `up` recreated it
 echo "core_tcp_sessions=$(q "select usename||':'||count(*) from pg_stat_activity where client_addr is not null group by usename" | tr '\n' ' ')"
 echo end
