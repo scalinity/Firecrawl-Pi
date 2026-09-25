@@ -74,9 +74,12 @@ sec case1_core_log; joblog "$t1" "$(echo "$c1" | jq -r '.scrape_id // empty')"
 sec case2_counters_before; counters
 sec case2_timeline
 wpid=$(D exec "$CORE" ps -eo pid,args --no-headers | awk '$2=="node" && $3 ~ /services\/worker\/nuq-worker\.js$/ {print $1}')
-echo "nuq_worker_pid=$wpid"
+# Signal as the worker's own uid: the hardened core keeps no CAP_KILL, so its root cannot
+# signal uid 3002 processes. A failed SIGSTOP is printed, and verify.mjs then fails case 2.
+wuid=$(D exec "$CORE" stat -c %u /proc/$wpid)
+echo "nuq_worker_pid=$wpid uid=$wuid"
 t0=$(now)
-D exec -u 0 "$CORE" kill -STOP "$wpid" && echo "t+0 SIGSTOP nuq-worker-0 at $(ts)"
+if D exec -u "$wuid" "$CORE" kill -STOP "$wpid"; then echo "t+0 SIGSTOP nuq-worker-0 at $(ts) state=$(D exec "$CORE" awk '/^State:/ {print $2}' /proc/$wpid/status)"; else echo "SIGSTOP_FAILED case2_not_exercised"; fi
 out2=$(mktemp)
 scrape 240000 >"$out2" 2>&1 &
 spid=$!
@@ -89,12 +92,12 @@ for i in $(seq 1 150); do
   [ $seen_ready = 1 ] && [ "${r:-0}" = 0 ] && [ $seen_expired = 0 ] && seen_expired=1 && echo "t+$el EVENT prefetch_message_gone_unconsumed"
   # Resume once the expired job was re-queued by the lock reaper and prefetched again, or at 120 s.
   if [ $resumed = 0 ] && { { [ $seen_expired = 1 ] && [ "${r:-0}" -ge 1 ] && echo "$row" | grep -q 'stalls=[1-9]'; } || [ $el -ge 120 ]; }; then
-    D exec -u 0 "$CORE" kill -CONT "$wpid" && resumed=1 && echo "t+$el SIGCONT nuq-worker-0 at $(ts)"
+    D exec -u "$wuid" "$CORE" kill -CONT "$wpid" && resumed=1 && echo "t+$el SIGCONT nuq-worker-0 at $(ts)"
   fi
   [ $resumed = 1 ] && ! kill -0 $spid 2>/dev/null && break
   sleep 1
 done
-[ $resumed = 0 ] && D exec -u 0 "$CORE" kill -CONT "$wpid" && echo "SIGCONT (loop end)"
+[ $resumed = 0 ] && D exec -u "$wuid" "$CORE" kill -CONT "$wpid" && echo "SIGCONT (loop end)"
 wait $spid
 c2=$(cat "$out2"); rm -f "$out2"
 sec case2_scrape; echo "$c2"
