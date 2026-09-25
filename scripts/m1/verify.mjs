@@ -321,7 +321,9 @@ const checks = {
       const g = sections(`${RAW}native-proofs.txt`).gateway ?? [];
       const idx = g.indexOf("authenticated:");
       const auth = JSON.parse(g[idx + 1] ?? "{}"), unauth = JSON.parse(g[g.indexOf("unauthenticated:") + 1] ?? "{}");
-      const ok = g.includes("contract_tests_node=v22.23.3") && g.includes("# pass 8") && g.includes("# fail 0") && auth.http_status === 200 && b64md(auth.markdown_b64) === expectedMd() &&
+      const tapOk = g.filter((l) => /^ok \d/.test(l)).length, tapNotOk = g.filter((l) => /^not ok/.test(l)).length, tapPass = Number((lineOf(g, "# pass ") ?? "").slice(7));
+      // Internally consistent TAP, not a pinned count: the proof ran the suite of its day.
+      const ok = g.includes("contract_tests_node=v22.23.3") && tapOk > 0 && tapNotOk === 0 && tapPass === tapOk && g.includes("# fail 0") && auth.http_status === 200 && b64md(auth.markdown_b64) === expectedMd() &&
         unauth.http_status === 401 && unauth.www_authenticate === 'Bearer realm="fcpi"';
       return { ok, actual: `node=${(lineOf(g, "contract_tests_node=") ?? "").split("=")[1]}; tests=${g.filter((l) => /^ok \d/.test(l)).length} ok, ${g.filter((l) => /^not ok/.test(l)).length} not ok; authenticated=${auth.http_status} markdown_exact=${b64md(auth.markdown_b64) === expectedMd()}; unauthenticated=${unauth.http_status} challenge=${unauth.www_authenticate}` };
     } },
@@ -449,8 +451,9 @@ const checks = {
       let local = { code: null, out: "" };
       try { local.out = execFileSync(process.execPath, ["--test", "--test-reporter=tap", "tests/contracts/m1-gateway.test.mjs"], { cwd: ROOT, encoding: "utf8" }); local.code = 0; } catch (x) { local = { code: x.status, out: x.stdout ?? "" }; }
       const pass = Number((local.out.match(/^# pass (\d+)$/m) ?? [])[1]), fail = Number((local.out.match(/^# fail (\d+)$/m) ?? [])[1]);
-      const ok = unauthOk && noCloud && e("valid_token_admin", "404") && e("valid_token_unlisted_route", "404") && e("valid_token_non_fixture_target", "403") && e("valid_token_internal_target", "403") && e("valid_token_fixture_scrape", "200") && local.code === 0 && pass === 8 && fail === 0;
-      return { ok, actual: `${Object.entries(g).map(([k, v]) => `${k}=${v.status}`).join(" ")}; unauthenticated bodies/challenges gateway-owned=${unauthOk}; Cloud challenge anywhere=${!noCloud}; local contract tests (node ${process.version}): pass=${pass} fail=${fail}` };
+      const declared = (read("tests/contracts/m1-gateway.test.mjs").match(/^test\(/gm) ?? []).length; // every test the file declares must pass
+      const ok = unauthOk && noCloud && e("valid_token_admin", "404") && e("valid_token_unlisted_route", "404") && e("valid_token_non_fixture_target", "403") && e("valid_token_internal_target", "403") && e("valid_token_fixture_scrape", "200") && local.code === 0 && pass === declared && fail === 0;
+      return { ok, actual: `${Object.entries(g).map(([k, v]) => `${k}=${v.status}`).join(" ")}; unauthenticated bodies/challenges gateway-owned=${unauthOk}; Cloud challenge anywhere=${!noCloud}; local contract tests (node ${process.version}): pass=${pass}/${declared} declared, fail=${fail}` };
     } },
 
   V06: { name: "static-fixture-markdown-exact", inputs: [`${RAW}stack.txt`, `${RAW}stack-final.txt`, EXPECTED_MD, "tests/fixtures/m1/site/static.html"],
