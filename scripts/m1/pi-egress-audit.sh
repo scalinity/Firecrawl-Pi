@@ -7,16 +7,19 @@
 # Runs ON the Pi:  ssh ... 'bash /opt/firecrawl-pi/scripts/m1/pi-egress-audit.sh start|read'
 #
 # Frames between containers on one bridge are switched at layer 2 and never reach the
-# inet hooks (Engine 28+ no longer forces br_netfilter), so the bridge-family table sees
-# every frame entering fcpi-core or fcpi-fixture. `all_frames_into_internal_bridges` is
-# the positive control: container traffic must raise it, which proves the instrument
-# sees the bridges. Every other counter must stay 0: IPv4 addressed off the internal
-# subnets, any IPv6, and (inet) anything delivered to the host or routed out.
+# inet hooks (Engine 28+ no longer forces br_netfilter), so a bridge-family table counts
+# them. This kernel lacks CONFIG_NFT_BRIDGE_META (no `meta ibrname`), so the bridge rules
+# match the internal subnets rather than bridge names, which also survives the veth
+# renames that container recreation causes. `ipv4_from_internal_subnets` is the positive
+# control: container traffic must raise it, which proves the instrument sees the bridges.
+# Every other counter must stay 0: IPv4 from the internal subnets addressed anywhere
+# else, IPv6 on any bridge (no project network has IPv6), and (inet) anything from the
+# internal bridges delivered to the host or routed out.
 set -euo pipefail
 export LC_ALL=C
 export PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 mode=${1:?usage: pi-egress-audit.sh start|read}
-BR='{ "fcpi-core", "fcpi-fixture" }'
+BR='{ "fcpi-core", "fcpi-fixture" }'   # inet rules only
 NETS='{ 10.231.1.0/24, 10.231.3.0/24 }'
 
 case "$mode" in
@@ -27,9 +30,9 @@ flush table bridge fcpi_audit
 table bridge fcpi_audit {
   chain audit_pre {
     type filter hook prerouting priority -300; policy accept;
-    meta ibrname $BR counter comment "all_frames_into_internal_bridges"
-    meta ibrname $BR ether type ip ip daddr != $NETS counter comment "ipv4_off_subnet_on_internal_bridges"
-    meta ibrname $BR ether type ip6 counter comment "ipv6_on_internal_bridges"
+    ether type ip ip saddr $NETS counter comment "ipv4_from_internal_subnets"
+    ether type ip ip saddr $NETS ip daddr != $NETS counter comment "ipv4_from_internal_to_off_subnet"
+    ether type ip6 counter comment "ipv6_on_any_bridge"
   }
 }
 table inet fcpi_audit
