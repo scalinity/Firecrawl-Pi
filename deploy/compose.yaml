@@ -21,6 +21,7 @@ services:
     pull_policy: never
     hostname: nuq-postgres
     restart: unless-stopped
+    user: "5432:5432"                  # dedicated uid; the image default (999) is pihole on this host
     # Command-line settings outrank nuq.sql's ALTER SYSTEM values in postgresql.auto.conf:
     # WAL sizing for the 64 GB card, spec §22 memory/connection limits, durability kept on.
     command:
@@ -52,11 +53,10 @@ services:
         target: /var/lib/postgresql/data
         bind: { create_host_path: false }
     tmpfs:
-      - /var/run/postgresql:size=4m
+      - /var/run/postgresql:mode=1777,size=4m
       - /tmp:size=64m
     read_only: true
     cap_drop: [ALL]
-    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
     security_opt: [no-new-privileges:true]
     mem_limit: 640m
     memswap_limit: 640m
@@ -78,7 +78,7 @@ services:
     pull_policy: missing
     hostname: redis
     restart: unless-stopped
-    user: "999:1000"
+    user: "6379:6379"                  # dedicated uid; the image default (999) is pihole on this host
     entrypoint: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     secrets: [redis_users_acl]
     volumes:
@@ -117,11 +117,14 @@ services:
     # directory, stable across container recreation.
     hostname: rabbitmq
     restart: unless-stopped
+    user: "5672:5672"                  # dedicated uid; the image default (999) is pihole on this host
     environment:
       RABBITMQ_NODENAME: rabbit@rabbitmq
-      RABBITMQ_DEFAULT_USER: fcpi
-      RABBITMQ_DEFAULT_PASS_FILE: /run/secrets/rabbitmq_password
-    secrets: [rabbitmq_password]
+    # The 4.x entrypoint rejects RABBITMQ_DEFAULT_PASS_FILE, and the plain variable would
+    # show in docker inspect, so the first-boot user comes from a 0600 conf fragment.
+    secrets:
+      - source: rabbitmq_default_user_conf
+        target: /etc/rabbitmq/conf.d/40-fcpi-default-user.conf
     volumes:
       - type: bind
         source: /srv/firecrawl-pi/data/rabbitmq
@@ -136,7 +139,6 @@ services:
       - /tmp:size=16m
     read_only: true
     cap_drop: [ALL]
-    cap_add: [CHOWN, DAC_OVERRIDE, FOWNER, SETGID, SETUID]
     security_opt: [no-new-privileges:true]
     mem_limit: 512m
     memswap_limit: 512m
@@ -182,7 +184,7 @@ services:
       NODE_OPTIONS: --max-old-space-size=256
       # Deliberately unset: USE_GO_MARKDOWN_PARSER (the Go library stays inert),
       # BULL_AUTH_KEY (queue admin disabled), SEARXNG_ENDPOINT (M5), every Cloud key.
-    secrets: [postgres_password, core_redis_url, core_nuq_rabbitmq_url]
+    secrets: [core_postgres_password, core_redis_url, core_nuq_rabbitmq_url]
     volumes:
       - type: bind
         source: /opt/firecrawl-pi/deploy/firecrawl-core/entrypoint.sh
@@ -261,7 +263,7 @@ services:
     pull_policy: missing
     hostname: fixture
     restart: unless-stopped
-    user: "65534:65534"
+    user: "8080:8080"
     command: ["node", "/fixture/server.mjs"]
     volumes:
       - type: bind
@@ -321,7 +323,8 @@ networks:
 # scripts/m1/pi-init.sh; names, owners and modes are listed in deploy/secrets.template.
 secrets:
   postgres_password: { file: /etc/firecrawl-pi/secrets/postgres_password }
-  rabbitmq_password: { file: /etc/firecrawl-pi/secrets/rabbitmq_password }
+  core_postgres_password: { file: /etc/firecrawl-pi/secrets/core_postgres_password }
+  rabbitmq_default_user_conf: { file: /etc/firecrawl-pi/secrets/rabbitmq_default_user_conf }
   redis_users_acl: { file: /etc/firecrawl-pi/secrets/redis_users_acl }
   core_redis_url: { file: /etc/firecrawl-pi/secrets/core_redis_url }
   core_nuq_rabbitmq_url: { file: /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url }

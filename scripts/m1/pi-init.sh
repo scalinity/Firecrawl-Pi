@@ -41,10 +41,12 @@ mkd $ETC 0:0 0755
 mkd $S 0:0 0700
 mkd $S/clients 0:0 0700
 mkd /srv/firecrawl-pi 0:0 0755
-mkd $DATA 0:0 0755
-mkd $DATA/postgres 999:999 0700
-mkd $DATA/redis 999:1000 0700
-mkd $DATA/rabbitmq 999:999 0700
+# 0700: the service uids below own their subdirectories, and nothing else on the host
+# needs to traverse into the data tree.
+mkd $DATA 0:0 0700
+mkd $DATA/postgres 5432:5432 0700
+mkd $DATA/redis 6379:6379 0700
+mkd $DATA/rabbitmq 5672:5672 0700
 [ "$(findmnt -n -o UUID --target $DATA)" = "$UUID_EXPECTED" ] || die "$DATA is not on filesystem $UUID_EXPECTED"
 
 sec data_identity
@@ -59,22 +61,31 @@ else
 fi
 
 sec secrets
-gen_hex | put $S/postgres_password 0:0 0600
-if ! exists $S/rabbitmq_password && ! exists $S/core_nuq_rabbitmq_url; then
+if ! exists $S/postgres_password && ! exists $S/core_postgres_password; then
   pw=$(gen_hex)
-  printf '%s' "$pw" | put $S/rabbitmq_password 999:999 0600
+  printf '%s' "$pw" | put $S/postgres_password 5432:5432 0600
+  printf '%s' "$pw" | put $S/core_postgres_password 0:0 0600
+  unset pw
+elif exists $S/postgres_password && exists $S/core_postgres_password; then
+  echo "kept    $S/postgres_password and $S/core_postgres_password"
+else
+  die "postgres_password and core_postgres_password must be created together"
+fi
+if ! exists $S/rabbitmq_default_user_conf && ! exists $S/core_nuq_rabbitmq_url; then
+  pw=$(gen_hex)
+  printf 'default_user = fcpi\ndefault_pass = %s\n' "$pw" | put $S/rabbitmq_default_user_conf 5672:5672 0600
   printf 'amqp://fcpi:%s@rabbitmq:5672' "$pw" | put $S/core_nuq_rabbitmq_url 0:0 0600
   unset pw
-elif exists $S/rabbitmq_password && exists $S/core_nuq_rabbitmq_url; then
-  echo "kept    $S/rabbitmq_password and $S/core_nuq_rabbitmq_url"
+elif exists $S/rabbitmq_default_user_conf && exists $S/core_nuq_rabbitmq_url; then
+  echo "kept    $S/rabbitmq_default_user_conf and $S/core_nuq_rabbitmq_url"
 else
-  die "rabbitmq_password and core_nuq_rabbitmq_url must be created together"
+  die "rabbitmq_default_user_conf and core_nuq_rabbitmq_url must be created together"
 fi
 if ! exists $S/redis_users_acl && ! exists $S/core_redis_url; then
   pw=$(gen_hex)
   printf 'redis://:%s@redis:6379' "$pw" | put $S/core_redis_url 0:0 0600
   printf 'user default on #%s ~* &* +@all\nuser health on nopass -@all +ping\n' "$(printf '%s' "$pw" | sha256sum | cut -c1-64)" \
-    | put $S/redis_users_acl 999:1000 0600
+    | put $S/redis_users_acl 6379:6379 0600
   unset pw
 elif exists $S/redis_users_acl && exists $S/core_redis_url; then
   echo "kept    $S/redis_users_acl and $S/core_redis_url"
@@ -93,7 +104,7 @@ else
 fi
 # Erlang cookie: generated here, before the broker's first start, so no CLI call can
 # create a root-owned one first (evidence/M1/raw/native-proofs-up-attempt1.txt).
-gen_hex | tr '0-9a-f' 'A-P' | put $DATA/rabbitmq/.erlang.cookie 999:999 0400
+gen_hex | tr '0-9a-f' 'A-P' | put $DATA/rabbitmq/.erlang.cookie 5672:5672 0400
 
 sec systemd_units
 for u in fcpi-data-check.service fcpi-stack.service; do

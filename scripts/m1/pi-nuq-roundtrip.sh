@@ -30,8 +30,11 @@ sec() { printf '### %s\n' "$1"; }
 ts() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 now() { date +%s; }
 psq() { D exec "$PG" psql -U postgres -Atc "$1" 2>&1; }
-queues() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name type durable auto_delete exclusive messages_ready messages consumers 2>&1; }
-ready() { D exec -u rabbitmq "$RMQ" rabbitmqctl list_queues -q name messages_ready 2>/dev/null | awk -v q="$PREFETCH" '$1==q {print $2}'; }
+# RabbitMQ CLI calls run as the broker's own uid, so they read its Erlang cookie and can
+# never create a root-owned one: the Compose uid (5672), or the image's rabbitmq user.
+RMQ_USER=$(D inspect -f '{{.Config.User}}' "$RMQ" 2>/dev/null); RMQ_USER=${RMQ_USER%%:*}; RMQ_USER=${RMQ_USER:-rabbitmq}
+queues() { D exec -u "$RMQ_USER" "$RMQ" rabbitmqctl list_queues -q name type durable auto_delete exclusive messages_ready messages consumers 2>&1; }
+ready() { D exec -u "$RMQ_USER" "$RMQ" rabbitmqctl list_queues -q name messages_ready 2>/dev/null | awk -v q="$PREFETCH" '$1==q {print $2}'; }
 counters() { # non-zero broker-wide counters from rabbitmq_prometheus, read from inside the core network.
   # No `-i` and stdin from /dev/null, so no command here can consume a caller's stdin.
   D exec "$CORE" node --input-type=module -e '
@@ -103,7 +106,7 @@ sec case3_restart
 core_state
 t3=$(now); echo "restart_begin=$(ts)"
 D restart "$RMQ" >/dev/null
-for i in $(seq 1 120); do D exec -u rabbitmq "$RMQ" rabbitmq-diagnostics -q ping >/dev/null 2>&1 && break; sleep 1; done
+for i in $(seq 1 120); do D exec -u "$RMQ_USER" "$RMQ" rabbitmq-diagnostics -q ping >/dev/null 2>&1 && break; sleep 1; done
 echo "broker_ping_ok_after_s=$(( $(now) - t3 ))"
 sleep 5
 # The core may have restarted (upstream lets amqp.connect ECONNREFUSED escape the NuQ

@@ -10,7 +10,7 @@ secret() {
   [ -r "/run/secrets/$1" ] || { echo "fcpi-core-entrypoint: secret $1 is missing" >&2; exit 1; }
   tr -d '\n' <"/run/secrets/$1"
 }
-POSTGRES_PASSWORD=$(secret postgres_password)
+POSTGRES_PASSWORD=$(secret core_postgres_password)
 NUQ_RABBITMQ_URL=$(secret core_nuq_rabbitmq_url)
 REDIS_URL=$(secret core_redis_url)
 REDIS_RATE_LIMIT_URL=$REDIS_URL
