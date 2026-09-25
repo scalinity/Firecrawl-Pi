@@ -200,7 +200,7 @@ Then rerun affected tests, and record each finding's outcome in the saved report
 - deferred, with the later milestone that owns it and the reason; only a finding outside this milestone's canonical Scope may be deferred, and a critical finding inside that Scope blocks ACCEPTED;
 - returned to the earlier milestone that owns it, for M9 only, which has no later milestone; the fix runs as a session in that milestone's scope.
 
-`/address` commits each fix; skip its push step, because the repository has no remote and a first push needs a full-history scan.
+`/address` commits each fix; skip its push step while the repository has no remote, because a first push needs a full-history scan.
 
 This is the milestone's review of record. No separate review session runs between milestones unless the owner asks for one: each milestone takes its entry gate from its own Dependencies section in `FIRECRAWL_PI_MILESTONES.md`, starts from its kickoff prompt, reads every saved report under `evidence/*/review/`, and takes every finding deferred to it as its own scope.
 
