@@ -99,7 +99,9 @@ function roundTripCases(file) {
   }
   const jobPresentUntilGone = gone > 0 && obs.slice(0, gone + 1).every((o) => o.job.startsWith("active"));
   const requeued = obs.some((o) => /stalls=[1-9]/.test(o.job));
-  const resumedAfterExpiry = tl.some((l) => /SIGCONT nuq-worker-0/.test(l));
+  // The resume must come after the message vanished, not from the 120 s fallback before it.
+  const sigcontT = Number((tl.find((l) => /^t\+\d+ SIGCONT nuq-worker-0/.test(l)) ?? "").match(/^t\+(\d+)/)?.[1] ?? NaN);
+  const resumedAfterExpiry = gone > 0 && sigcontT >= obs[gone].t;
   const case2 = {
     worker_stopped: stopped, expiry_window_s: expiry, job_active_in_postgres_until_gone: jobPresentUntilGone, requeued_by_lock_reaper: requeued, resumed: resumedAfterExpiry,
     dead_lettered_expired_delta: counter("case2_counters_after", "dead_lettered_expired", "rabbit_quorum_queue") - counter("case2_counters_before", "dead_lettered_expired", "rabbit_quorum_queue"),

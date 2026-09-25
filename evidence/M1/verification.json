@@ -127,8 +127,8 @@
     {
       "test_id": "M1-N08",
       "name": "proof-nuq-roundtrip-cases-1-2",
-      "utc": "2026-09-25T08:17:25Z",
-      "repository_sha": "2739545178b72d154334772baec28b7eb0584bc0",
+      "utc": "2026-09-25T08:58:43Z",
+      "repository_sha": "09266f645cf06d9e767c37ca14ebd7fceb97f17a",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
@@ -289,8 +289,8 @@
     {
       "test_id": "M1-V09",
       "name": "nuq-roundtrip-case-2-expiry-and-postgres",
-      "utc": "2026-09-25T08:17:25Z",
-      "repository_sha": "2739545178b72d154334772baec28b7eb0584bc0",
+      "utc": "2026-09-25T08:58:43Z",
+      "repository_sha": "09266f645cf06d9e767c37ca14ebd7fceb97f17a",
       "worktree_dirty": true,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
