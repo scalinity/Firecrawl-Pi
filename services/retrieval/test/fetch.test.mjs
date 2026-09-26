@@ -145,6 +145,20 @@ test("TLS to an IP literal names no server (review finding S4)", async () => {
   assert.ok(!warnings.includes("DEP0123"), `warnings: ${warnings.join(",")}`);
 });
 
+test("a HEAD redirected by 303 stays a HEAD (review finding S8)", async () => {
+  const methods = [];
+  const t = await serve((req, res) => {
+    methods.push(`${req.method} ${req.url}`);
+    if (req.url === "/a") res.writeHead(303, { location: "/b" }).end();
+    else res.writeHead(200, { "content-type": "application/pdf", "content-length": "5" }).end(req.method === "HEAD" ? undefined : "%PDF-");
+  });
+  try {
+    const r = await guardedFetch({ url: `http://fx.fixture.fcpi.test:${t.port}/a`, method: "HEAD", maxBytes: 1024, deadline: soon(), policy: fixturePolicy(t.port), lookupFixture });
+    assert.equal(r.status, 200);
+    assert.deepEqual(methods, ["HEAD /a", "HEAD /b"]);
+  } finally { t.s.close(); }
+});
+
 test("caller credentials go only to the first origin", async () => {
   const other = await serve((req, res) => res.end("other"));
   const first = await serve((req, res) => res.writeHead(302, { location: `http://fy.fixture.fcpi.test:${other.port}/` }).end());

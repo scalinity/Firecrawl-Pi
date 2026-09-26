@@ -155,7 +155,9 @@ export async function guardedFetch({ url, method = "GET", headers, maxBytes, dea
       if (hop >= policy.maxRedirects) throw new Denied("TOO_MANY_REDIRECTS", `more than ${policy.maxRedirects} redirects`);
       let next;
       try { next = new URL(res.headers.location, current).toString(); } catch { throw new Denied("INVALID_URL", "unparseable redirect location"); }
-      if (res.status === 303 || ((res.status === 301 || res.status === 302) && verb === "POST")) verb = "GET";
+      // As Fetch does: 303 turns any method but GET and HEAD into GET, so a HEAD stays bodiless
+      // (review finding S8); 301 and 302 do so for POST only.
+      if ((res.status === 303 && verb !== "HEAD") || ((res.status === 301 || res.status === 302) && verb === "POST")) verb = "GET";
       current = next;
       continue;
     }
