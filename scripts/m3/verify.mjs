@@ -598,7 +598,7 @@ const checks = {
       return { ok, actual: `vantage=${m?.vantage}; official client base URL=${sk.client?.[0]?.apiUrl}` };
     } },
   P02: { name: "tailnet-tls-private-serving", inputs: [`${RAW}tailscale-before.txt`, `${RAW}tailscale-install.txt`, `${RAW}lan-probe.txt`],
-    expected: "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed",
+    expected: "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed; the loaded guard holds the repository guard file's three tailnet rules, and over the tailnet no port the host listens on answers except :8443 (the control)",
     run() {
       const status = `${RAW}tailscale-status.txt`, check = `${RAW}tailnet-check.txt`;
       if (!has(status) || !has(check)) return { blocked: true, actual: `Tailscale is installed on the Pi (${(read(`${RAW}tailscale-install.txt`).match(/installed=(\S+)/) ?? [])[1]}); awaiting the account association and the workstation's tailnet membership (${!has(status) ? "no Pi status" : "no workstation check"})` };
@@ -618,8 +618,14 @@ const checks = {
         serve: web.length === 1 && /:8443$/.test(web[0].host_port) && web[0].handlers?.["/"] === "http://127.0.0.1:3380" && serve.funnel === 0,
         tls: w?.status === 200 && w.tls_authorized === true && w.cert_subject_matches === true && w.core_live === true, no_token: n?.status === 401 && n.code === "UNAUTHORIZED",
         urls: j?.status === 200 && j.results_url_on_tailnet_origin === true, host: h?.status === 421, lan: lan.includes("port=8443 closed") };
+      // The tailnet boundary: the loaded guard holds the repository's three tailnet rules, and over the
+      // tailnet only :8443 answers (the control) of every port the host listens on.
+      const g = kv((s.guard ?? []).flatMap((l) => l.split(" ")));
+      const tp = (records(check).tailnet_ports ?? []).filter((r) => r.case === "tailnet_port");
+      cond.tailnet_guard = g.tailnet_rules === "3" && g.guard_file_sha256 === sha256File("deploy/host/fcpi-guard.nft");
+      cond.tailnet_ports = tp.length >= 4 && tp.find((r) => r.port === 8443)?.result === "open" && tp.filter((r) => r.port !== 8443).every((r) => r.result !== "open");
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
-      return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; backend=${ts.backend}; serve=${JSON.stringify(web)}; TLS ${w?.tls_protocol} authorized=${w?.tls_authorized} issuer=${w?.cert_issuer_org}; with token=${w?.status} without=${n?.status} foreign host=${h?.status}` };
+      return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; backend=${ts.backend}; serve=${JSON.stringify(web)}; TLS ${w?.tls_protocol} authorized=${w?.tls_authorized} issuer=${w?.cert_issuer_org}; with token=${w?.status} without=${n?.status} foreign host=${h?.status}; tailnet ports=${tp.map((r) => `${r.port}:${r.result}`).join(",")}` };
     } },
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
     expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to a later milestone), cites only commits that exist, and holds no absolute local path",

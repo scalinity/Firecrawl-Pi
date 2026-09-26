@@ -1,11 +1,13 @@
 #!/usr/bin/env node
 // The private TLS path from the workstation (spec §19.1, AC02): the gateway through Tailscale Serve at
 // https://<machine>.<tailnet>.ts.net:8443, reached from this machine over the tailnet, the certificate
-// verified against the system's trust store (no verification is ever skipped).
+// verified against the system's trust store (no verification is ever skipped); then every port the
+// host listens on, tried over the tailnet, so what a tailnet peer reaches is measured.
 //   node scripts/m3/tailnet-check.mjs < token > evidence/M3/raw/tailnet-check.txt
 // The origin is read from the gateway's host-side file on the Pi into memory; the tailnet's name is
 // printed as <pi-tailnet-name-host>. The token (read-only scope) arrives on stdin and is never printed.
 import { request } from "node:https";
+import { connect } from "node:net";
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 
@@ -47,5 +49,21 @@ const j = await get("/platform/v1/jobs?limit=1", { tok: token });
 out({ case: "job_list_urls", status: j.status, results_url_on_tailnet_origin: (j.json?.jobs ?? []).every((x) => String(x.results).startsWith(`${u.origin}/`)) && (j.json?.jobs ?? []).length === 1 });
 const h = await get("/platform/v1/status", { tok: token, host: "evil.example" });
 out({ case: "foreign_host_header", status: h.status, code: h.json?.code ?? null });
+
+// What else a tailnet peer reaches on the Pi (spec §20.1: the Tailscale client serves the gateway
+// alone): every TCP port the host listens on, as the Pi lists them (ports only; ones bound to loopback
+// alone cannot be reached from a peer), tried from here over the tailnet, with Serve's :8443 as the
+// positive control. Only the classification is printed.
+process.stdout.write("### tailnet_ports\n");
+const listening = execFileSync("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", T.PI_SSH_TARGET, "sudo -n ss -Hltn"], { encoding: "utf8" })
+  .split("\n").map((l) => l.trim().split(/\s+/)[3]).filter(Boolean).filter((a) => !/^(127\.|\[::1\]:|::1:)/.test(a)).map((a) => Number(a.slice(a.lastIndexOf(":") + 1)));
+const ports = [...new Set([...listening, 8443])].sort((a, b) => a - b);
+const tryPort = (port) => new Promise((resolve) => {
+  const s = connect({ host: u.hostname, port, timeout: 4000 });
+  s.on("connect", () => { s.destroy(); resolve("open"); });
+  s.on("timeout", () => { s.destroy(); resolve("timeout"); });
+  s.on("error", (e) => resolve(e.code === "ECONNREFUSED" ? "refused" : String(e.code)));
+});
+for (const r of await Promise.all(ports.map(async (port) => ({ port, result: await tryPort(port) })))) out({ case: "tailnet_port", ...r });
 process.stdout.write("### end\n");
 out({ exit: 0 });

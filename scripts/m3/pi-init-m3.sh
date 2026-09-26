@@ -64,6 +64,21 @@ sudo -n cat "$DATA/.fcpi-data-id" | put "$DATA/artifacts/.fcpi-artifact-root" 33
 [ "$(sudo -n cat "$DATA/artifacts/.fcpi-artifact-root")" = "$(sudo -n cat "$DATA/.fcpi-data-id")" ] || die "the artifact marker does not hold this data mount's ID"
 echo "artifact_root_filesystem_uuid=$(sudo -n findmnt -n -o UUID --target $DATA/artifacts)"
 
+sec guard
+# The guard gains the tailnet's rules in M3 (deploy/host/fcpi-guard.nft): checked, installed where
+# dockerd's ExecStartPre loads it, and loaded now when it changed. A load replaces the table and
+# empties its host-networks set, which fcpi-egress-local.sh refills, as scripts/m2/pi-init-m2.sh does.
+sudo -n /usr/sbin/nft -c -f $REPO/deploy/host/fcpi-guard.nft || die "deploy/host/fcpi-guard.nft does not parse"
+if ! sudo -n cmp -s $REPO/deploy/host/fcpi-guard.nft $ETC/fcpi-guard.nft; then
+  sudo -n install -m 0644 -o root -g root $REPO/deploy/host/fcpi-guard.nft $ETC/fcpi-guard.nft
+  sudo -n /usr/sbin/nft -f $ETC/fcpi-guard.nft || die "loading inet fcpi_guard failed"
+  sudo -n $ETC/fcpi-egress-local.sh || die "fcpi-egress-local.sh failed"
+  echo "installed and loaded $ETC/fcpi-guard.nft"
+else
+  echo "kept    $ETC/fcpi-guard.nft"
+fi
+echo "guard_file_sha256=$(sudo -n sha256sum $ETC/fcpi-guard.nft | cut -c1-64) tailnet_rules=$(sudo -n /usr/sbin/nft -j list chain inet fcpi_guard input | jq '[.nftables[] | select(.rule) | select([.rule.expr[] | .match? | select(.left.meta.key == "iifname" and .right == "tailscale0")] | length > 0)] | length') local_v4_elements=$(sudo -n /usr/sbin/nft -j list set inet fcpi_guard egress_local_v4 | jq '[.nftables[] | select(.set) | .set.elem // [] | length] | add')"
+
 sec inventory
 sudo -n sh -c "stat -c '%u:%g %a %n' $S/gateway_postgres_password $S/postgres_gateway_role_password $S/gateway $S/gateway/clients $S/clients $DATA/artifacts $DATA/artifacts/.fcpi-artifact-root"
 echo end

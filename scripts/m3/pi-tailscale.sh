@@ -82,6 +82,9 @@ case "${1:-}" in
     sudo -n tailscale serve status --json 2>/dev/null | jq -c '{tcp: (.TCP // {} | keys), web: (.Web // {} | to_entries | map({host_port: (.key | sub("^[^:]*"; "<pi-tailnet-name-host>")), handlers: (.value.Handlers | to_entries | map({(.key): .value.Proxy}) | add)})), funnel: (.AllowFunnel // {} | length)}'
     echo "### origins_file"
     sudo -n sh -c "stat -c '%u:%g %a' $ORIGINS; grep -v '^#' $ORIGINS"
+    echo "### guard"
+    # The tailnet's rules in the loaded guard, and the installed guard file they came from.
+    echo "guard_file_sha256=$(sudo -n sha256sum /etc/firecrawl-pi/fcpi-guard.nft | cut -c1-64) tailnet_rules=$(sudo -n nft -j list chain inet fcpi_guard input | jq '[.nftables[] | select(.rule) | select([.rule.expr[] | .match? | select(.left.meta.key == "iifname" and .right == "tailscale0")] | length > 0)] | length')"
     echo "### resolv"
     echo "resolv_conf_sha256=$(sha256sum /etc/resolv.conf | cut -c1-64) nameservers=$(grep -c '^nameserver' /etc/resolv.conf)"
     echo "### listeners"

@@ -10,6 +10,10 @@
 # public addresses, and their replies; DNS to the host's resolver on the bridge's own address;
 # nothing else. The retrieval service validates every target itself (spec §20.2); this is the
 # network's own floor under it.
+# tailscale0 is the tailnet (M3): the Tailscale client serves the access gateway alone (spec §20.1),
+# so a tailnet peer may open connections only to Serve's :8443. New connections to any other host
+# listener that arrive on it are dropped and counted; replies to the host's own connections pass.
+# The interface is matched by name, so the rules hold from the moment tailscaled creates it.
 # The first two lines make the load idempotent: the table is replaced in one transaction.
 table inet fcpi_guard
 delete table inet fcpi_guard
@@ -48,5 +52,8 @@ table inet fcpi_guard {
     iifname "fcpi-egress" ip daddr 10.231.6.1 udp dport 53 counter accept comment "egress_dns_udp_accepted"
     iifname "fcpi-egress" ip daddr 10.231.6.1 tcp dport 53 counter accept comment "egress_dns_tcp_accepted"
     iifname "fcpi-egress" counter drop comment "egress_input_dropped"
+    iifname "tailscale0" ct state established,related accept
+    iifname "tailscale0" tcp dport 8443 counter accept comment "tailnet_serve_accepted"
+    iifname "tailscale0" counter drop comment "tailnet_input_dropped"
   }
 }
