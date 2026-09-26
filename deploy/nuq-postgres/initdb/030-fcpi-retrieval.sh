@@ -6,5 +6,6 @@
 fcpi_pw=$(tr -d '\n' </run/secrets/postgres_retrieval_role_password)
 if [ -z "$fcpi_pw" ]; then echo "030-fcpi-retrieval: secret postgres_retrieval_role_password is empty" >&2; exit 1; fi
 docker_process_sql </docker-entrypoint-initdb.d/fcpi-retrieval-schema.psql
-printf "\\\\set pw '%s'\nALTER ROLE fcpi_retrieval PASSWORD :'pw';\n" "$fcpi_pw" | docker_process_sql
+# Neither the statement nor an error about it may reach the server log with the password.
+printf "SET log_statement = 'none';\nSET log_min_error_statement = panic;\n\\\\set pw '%s'\nALTER ROLE fcpi_retrieval PASSWORD :'pw';\n" "$fcpi_pw" | docker_process_sql
 unset fcpi_pw

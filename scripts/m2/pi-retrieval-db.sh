@@ -19,7 +19,8 @@ echo "source_commit=$(cat $REPO/.fcpi-source-commit)"
 
 sec schema
 psql <"$REPO/deploy/nuq-postgres/fcpi-retrieval-schema.sql"
-{ printf '\\set pw %s\n' "$(sudo -n cat $S/retrieval_postgres_password)"; echo "ALTER ROLE fcpi_retrieval PASSWORD :'pw';"; } | psql
+# Neither the statement nor an error about it may reach the server log with the password.
+{ printf 'SET log_statement = %s;\nSET log_min_error_statement = panic;\n\\set pw %s\n' "'none'" "$(sudo -n cat $S/retrieval_postgres_password)"; echo "ALTER ROLE fcpi_retrieval PASSWORD :'pw';"; } | psql
 echo "applied=yes"
 
 sec rights
