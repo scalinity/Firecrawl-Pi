@@ -52,10 +52,29 @@ function run(cmd, args, env, cwd) {
 }
 const piNow = () => pi("date -u +%Y-%m-%dT%H:%M:%S.%3NZ").trim();
 const logs = (svc, since) => pi(`sudo -n docker logs --since ${since} fcpi-${svc}-1 2>&1`).split("\n").filter((l) => l.startsWith("{")).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
-function piView(label, since) {
+// The crawl a client started, as the ledger ends it: what the platform guarantees is that the job finishes
+// durably, whether or not the client's model polled until it did (it has no way to wait between calls).
+const ledgerJob = (id) => {
+  if (!/^[0-9a-f-]{36}$/.test(id ?? "")) return null;
+  const q = `SELECT state || '|' || archived FROM fcpi_platform.job WHERE id = '${id}';`;
+  const row = execFileSync("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", T.PI_SSH_TARGET,
+    "sudo -n docker exec -i fcpi-nuq-postgres-1 psql -U postgres -d postgres -q -At -X -v ON_ERROR_STOP=1"], { encoding: "utf8", input: q }).trim();
+  const [state, archived] = row.split("|");
+  return state ? { state, archived: Number(archived) } : null;
+};
+async function crawlOutcome(id) {
+  for (let i = 0; i < 60; i++) {
+    const j = ledgerJob(id);
+    if (!j || ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED", "EXPIRED"].includes(j.state)) return { id, ...(j ?? { state: null }) };
+    await new Promise((res) => setTimeout(res, 2000));
+  }
+  return { id, ...(ledgerJob(id) ?? { state: null }) };
+}
+async function piView(label, since) {
   const ml = logs("mcp-gateway", since).filter((l) => l.client === label);
   const gl = logs("access-gateway", since).filter((l) => l.client === label);
-  out("pi_view", { client: label,
+  const crawlId = ml.find((l) => l.event === "tool" && l.tool === "firecrawl_crawl" && l.outcome === "ok")?.job ?? null;
+  out("pi_view", { client: label, crawl_job: crawlId ? await crawlOutcome(crawlId) : null,
     exchanges: ml.filter((l) => l.event === "exchange").map((l) => ({ client_info: l.client_info ?? null, http_method: l.http_method, mcp_method: l.mcp_method, protocol_version: l.protocol_version, status: l.status, content_type: l.content_type, session_header_sent: l.session_header_sent })),
     tools: ml.filter((l) => l.event === "tool").map((l) => ({ client_info: l.client_info ?? null, era: l.era, protocol_version: l.protocol_version, tool: l.tool, job: l.job, outcome: l.outcome, downstream_status: l.downstream?.status ?? null })),
     gateway: gl.map((l) => ({ method: l.method, route: l.route, status: l.status, mcp_method: l.mcp_method ?? null })) });
@@ -107,7 +126,7 @@ try {
       permission_denials: Array.isArray(j?.permission_denials) ? j.permission_denials.map((d) => d.tool_name ?? null) : null,
       num_turns: j?.num_turns ?? null, total_cost_usd: j?.total_cost_usd ?? null, answer: answerLine(j?.result), result_head: String(j?.result ?? r.stdout).slice(0, 400), stderr_head: r.stderr.slice(0, 300) });
     await new Promise((res) => setTimeout(res, 1500));
-    piView("m4claude", since);
+    await piView("m4claude", since);
   }
   // ---- Codex CLI on gpt-6-luna ----
   {
@@ -120,7 +139,7 @@ try {
     const answer = existsSync(last) ? readFileSync(last, "utf8") : "";
     out("codex", { client: version("codex"), model: "gpt-6-luna", exit: r.code, ms: r.ms, answer: answerLine(answer), result_head: answer.slice(0, 400), stderr_tail: r.stderr.slice(-400) });
     await new Promise((res) => setTimeout(res, 1500));
-    piView("m4codex", since);
+    await piView("m4codex", since);
   }
 } catch (e) {
   out("error", { message: String(e?.stack ?? e).slice(0, 600) });

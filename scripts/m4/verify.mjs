@@ -595,19 +595,23 @@ const checks = {
 
   // ================================================================ the held live step: real target clients
   R01: { name: "real-target-clients", inputs: [`${RAW}real-clients.txt`],
-    expected: "Claude Code on Haiku and Codex CLI on gpt-6-luna, each configured from deploy/clients/ with its own token scoped to read,scrape,crawl only over the tailnet and no other MCP server (Claude Code also with no built-in tool and no user settings, and no permission denial recorded), answer the fixture prompt with the page's sentinel and a completed two-page crawl; the MCP service logged each client's scrape, crawl and status calls as ok under that client's own label, with the revision each actually used, and neither saw a session header; this is real-client evidence, kept apart from the SDK fixtures",
+    expected: "Claude Code on Haiku and Codex CLI on gpt-6-luna, each configured from deploy/clients/ with its own token scoped to read,scrape,crawl only over the tailnet and no other MCP server (Claude Code also with no built-in tool and no user settings, and no permission denial recorded), answer the fixture prompt with the page's sentinel and the crawl status each last read, and the two-page crawl each started finishes in the ledger SUCCEEDED with both pages archived; the MCP service logged each client's scrape, crawl and status calls as ok under that client's own label, with the revision each actually used, and neither saw a session header; this is real-client evidence, kept apart from the SDK fixtures",
     run() {
       const r = records(`${RAW}real-clients.txt`);
       const pv = (label) => (r.pi_view ?? []).find((x) => x.client === label) ?? null;
-      const good = (answer) => /^SENTINEL=fcpi-m3-p06-[0-9a-f]{4} CRAWL=completed DOCS=2$/.test(answer ?? "");
+      // The answer names the page's sentinel and the crawl status the client last read (completed, or still
+      // scraping: a client's model has no way to wait between polls); the crawl it started must then finish
+      // in the ledger with both pages archived, which is what the platform guarantees.
+      const good = (answer) => /^SENTINEL=fcpi-m3-p06-[0-9a-f]{4} CRAWL=(completed|scraping) DOCS=\d+$/.test(answer ?? "");
+      const finished = (v) => v?.crawl_job?.state === "SUCCEEDED" && v.crawl_job.archived === 2;
       const used = (v) => { const tools = new Set((v?.tools ?? []).filter((t) => t.outcome === "ok").map((t) => t.tool)); return ["firecrawl_scrape", "firecrawl_crawl", "firecrawl_check_crawl_status"].every((t) => tools.has(t)); };
       const revs = (v) => [...new Set((v?.tools ?? []).map((t) => `${t.era}/${t.protocol_version}`))].join(",");
       const products = (v) => [...new Set([...(v?.tools ?? []), ...(v?.exchanges ?? [])].map((x) => x.client_info).filter(Boolean).map((i) => `${i.name}@${i.version}`))].join(",") || "none named";
       const cc = r.claude_code?.[0], cx = r.codex?.[0], vc = pv("m4claude"), vx = pv("m4codex");
-      const cond = { run: r.meta?.length === 1 && r.end?.[0]?.exit === 0 && !r.error, claude_answer: cc?.exit === 0 && good(cc.answer), claude_isolated: Array.isArray(cc?.permission_denials) && cc.permission_denials.length === 0,
+      const cond = { run: r.meta?.length === 1 && r.end?.[0]?.exit === 0 && !r.error, claude_answer: cc?.exit === 0 && good(cc.answer), claude_crawl_finished: finished(vc), claude_isolated: Array.isArray(cc?.permission_denials) && cc.permission_denials.length === 0,
         scopes: ["m4claude", "m4codex"].every((l) => (r.tokens ?? []).some((t) => t.label === l && t.scopes === "read,scrape,crawl")), claude_calls: used(vc) && (vc?.exchanges ?? []).length >= 3 && vc.exchanges.every((e) => e.session_header_sent === false),
-        codex_answer: cx?.exit === 0 && good(cx.answer), codex_calls: used(vx) && (vx?.exchanges ?? []).length >= 3 && vx.exchanges.every((e) => e.session_header_sent === false) };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; Claude Code ${cc?.client} (${(cc?.models_used ?? []).join(",")}): ${cc?.answer}, revision ${revs(vc)}, named itself ${products(vc)}; Codex ${cx?.client} (${cx?.model}): ${cx?.answer}, revision ${revs(vx)}, named itself ${products(vx)}` };
+        codex_answer: cx?.exit === 0 && good(cx.answer), codex_crawl_finished: finished(vx), codex_calls: used(vx) && (vx?.exchanges ?? []).length >= 3 && vx.exchanges.every((e) => e.session_header_sent === false) };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; Claude Code ${cc?.client} (${(cc?.models_used ?? []).join(",")}): ${cc?.answer}, crawl ${vc?.crawl_job?.state}/${vc?.crawl_job?.archived}, revision ${revs(vc)}, named itself ${products(vc)}; Codex ${cx?.client} (${cx?.model}): ${cx?.answer}, crawl ${vx?.crawl_job?.state}/${vx?.crawl_job?.archived}, revision ${revs(vx)}, named itself ${products(vx)}` };
     } },
 
   // ================================================================ the review of record
