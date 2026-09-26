@@ -1,0 +1,158 @@
+{
+  "schema": "fcpi.capabilities/v1",
+  "comment": "The REST contract the access gateway serves (FIRECRAWL_PI_SPEC.md §16.1): the routes, the options each accepts, the limits and the evidence that covers them. services/access validates every request against it and services/access/client.mjs builds its URLs from it; scripts/m3/route-shapes.mjs checks each route's upstream shape against the pinned source.",
+  "upstream": {
+    "repository": "https://github.com/firecrawl/firecrawl",
+    "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+    "source_tree": "1b98286b4a16c6e9f831bc628ede1e8c3d680f48",
+    "routes_file": "apps/api/src/routes/v2.ts",
+    "routes_file_sha256": "9b491b0fe04a36fcdf8ae55a7650b03f2d508551d82035970e3c8186b3e71992",
+    "schemas_file": "apps/api/src/controllers/v2/types.ts",
+    "schemas_file_sha256": "c92adcbd994a86640b2e189542e552fd4147bde8d9350794808583448cc316d6",
+    "client": { "package": "@mendable/firecrawl-js", "version": "4.31.1", "source": "apps/js-sdk/firecrawl/package.json" }
+  },
+  "routes": [
+    { "id": "scrape", "method": "POST", "path": "/v2/scrape", "upstream": "POST /v2/scrape", "scope": "scrape", "mode": "sync", "body": "scrape", "evidence": ["M3-A01"] },
+    { "id": "map", "method": "POST", "path": "/v2/map", "upstream": "POST /v2/map", "scope": "map", "mode": "sync", "body": "map", "evidence": ["M3-A01"] },
+    { "id": "crawl.submit", "method": "POST", "path": "/v2/crawl", "upstream": "POST /v2/crawl", "scope": "crawl", "mode": "async", "kind": "crawl", "body": "crawl", "evidence": ["M3-A01", "M3-J01", "M3-J02", "M3-J04"] },
+    { "id": "crawl.status", "method": "GET", "path": "/v2/crawl/{id}", "upstream": "GET /v2/crawl/:jobId", "scope": "read", "kind": "crawl", "evidence": ["M3-A02", "M3-J06"] },
+    { "id": "crawl.cancel", "method": "DELETE", "path": "/v2/crawl/{id}", "upstream": "DELETE /v2/crawl/:jobId", "scope": "cancel", "kind": "crawl", "evidence": ["M3-J07"] },
+    { "id": "crawl.errors", "method": "GET", "path": "/v2/crawl/{id}/errors", "upstream": "GET /v2/crawl/:jobId/errors", "scope": "read", "kind": "crawl", "evidence": ["M3-A01"] },
+    { "id": "batch.submit", "method": "POST", "path": "/v2/batch/scrape", "upstream": "POST /v2/batch/scrape", "scope": "batch", "mode": "async", "kind": "batch", "body": "batch", "evidence": ["M3-A01", "M3-J04"] },
+    { "id": "batch.status", "method": "GET", "path": "/v2/batch/scrape/{id}", "upstream": "GET /v2/batch/scrape/:jobId", "scope": "read", "kind": "batch", "evidence": ["M3-A02", "M3-J06"] },
+    { "id": "batch.cancel", "method": "DELETE", "path": "/v2/batch/scrape/{id}", "upstream": "DELETE /v2/batch/scrape/:jobId", "scope": "cancel", "kind": "batch", "evidence": ["M3-J07"] },
+    { "id": "batch.errors", "method": "GET", "path": "/v2/batch/scrape/{id}/errors", "upstream": "GET /v2/batch/scrape/:jobId/errors", "scope": "read", "kind": "batch", "evidence": ["M3-A01"] },
+    { "id": "platform.status", "method": "GET", "path": "/platform/v1/status", "scope": "read", "evidence": ["M3-C01"] },
+    { "id": "platform.jobs", "method": "GET", "path": "/platform/v1/jobs", "scope": "read", "evidence": ["M3-C01"] },
+    { "id": "platform.job", "method": "GET", "path": "/platform/v1/jobs/{id}", "scope": "read", "evidence": ["M3-J01", "M3-J02"] }
+  ],
+  "not_enabled": [
+    { "method": "POST", "path": "/v2/search", "reason": "web search is M5's (SearXNG behind the retrieval service)" },
+    { "method": "POST", "path": "/v2/extract", "reason": "structured extraction needs the budgeted model adapter (M5)" },
+    { "method": "GET", "path": "/v2/extract/{id}", "reason": "structured extraction needs the budgeted model adapter (M5)" },
+    { "method": "POST", "path": "/v2/parse", "reason": "document upload parsing is not offered; documents are parsed from URLs" },
+    { "method": "GET", "path": "/v2/scrape/{id}", "reason": "upstream serves it from its Supabase store, which a self-hosted core lacks; a synchronous scrape returns its result inline" },
+    { "method": "GET", "path": "/v2/crawl/ongoing", "reason": "upstream lists every client's crawls as one team; use /platform/v1/jobs" },
+    { "method": "GET", "path": "/v2/crawl/active", "reason": "upstream lists every client's crawls as one team; use /platform/v1/jobs" },
+    { "method": "POST", "path": "/v2/crawl/params-preview", "reason": "prompt-generated crawl options need the model adapter (M5)" },
+    { "method": "POST", "path": "/v2/agent", "reason": "the Cloud agent product is not offered (spec §2.2)" },
+    { "method": "POST", "path": "/v2/browser", "reason": "interactive browser sessions are not offered (spec §2.2)" }
+  ],
+  "scopes": ["read", "scrape", "map", "crawl", "batch", "cancel"],
+  "formats": {
+    "allowed": ["markdown", "html", "rawHtml", "links"],
+    "refused": {
+      "screenshot": "screenshots arrive with M7's verified browser extras",
+      "json": "structured output needs the budgeted model adapter (M5)",
+      "summary": "summaries need the budgeted model adapter (M5)",
+      "question": "questions need the budgeted model adapter (M5)",
+      "highlights": "highlights need the budgeted model adapter (M5)",
+      "query": "queries need the budgeted model adapter (M5)",
+      "deterministicJson": "structured output needs the budgeted model adapter (M5)",
+      "changeTracking": "change tracking arrives with M7",
+      "images": "the images format is not verified in this deployment",
+      "attributes": "the attributes format is not verified in this deployment",
+      "branding": "the branding format is not offered",
+      "product": "the product format is not offered",
+      "menu": "the menu format is not offered",
+      "audio": "media extraction is not offered (spec §6)",
+      "video": "media extraction is not offered (spec §6)"
+    }
+  },
+  "fieldsets": {
+    "scrapeOptions": {
+      "formats": { "type": "formats" },
+      "onlyMainContent": { "type": "boolean" },
+      "includeTags": { "type": "strings", "maxItems": 50, "maxLength": 256 },
+      "excludeTags": { "type": "strings", "maxItems": 50, "maxLength": 256 },
+      "waitFor": { "type": "integer", "min": 0, "max": 15000 },
+      "timeout": { "type": "integer", "min": 1000, "max": 90000 },
+      "removeBase64Images": { "type": "boolean" },
+      "blockAds": { "type": "boolean" },
+      "fastMode": { "type": "boolean" },
+      "proxy": { "type": "enum", "values": ["auto", "basic"] },
+      "mobile": { "type": "const", "value": false },
+      "skipTlsVerification": { "type": "const", "value": false }
+    }
+  },
+  "bodies": {
+    "scrape": {
+      "extends": "scrapeOptions",
+      "fields": { "url": { "type": "url", "required": true }, "origin": { "type": "replaced" } }
+    },
+    "batch": {
+      "extends": "scrapeOptions",
+      "fields": {
+        "urls": { "type": "urls", "required": true },
+        "ignoreInvalidURLs": { "type": "boolean" },
+        "origin": { "type": "replaced" }
+      }
+    },
+    "crawl": {
+      "fields": {
+        "url": { "type": "url", "required": true },
+        "limit": { "type": "integer", "min": 1, "max": 200, "default": 50 },
+        "maxDiscoveryDepth": { "type": "integer", "min": 0, "max": 3, "default": 3 },
+        "includePaths": { "type": "regexes", "maxItems": 50, "maxLength": 512 },
+        "excludePaths": { "type": "regexes", "maxItems": 50, "maxLength": 512 },
+        "crawlEntireDomain": { "type": "boolean" },
+        "allowExternalLinks": { "type": "boolean" },
+        "allowSubdomains": { "type": "boolean" },
+        "sitemap": { "type": "enum", "values": ["skip", "include", "only"] },
+        "deduplicateSimilarURLs": { "type": "boolean" },
+        "ignoreQueryParameters": { "type": "boolean" },
+        "regexOnFullURL": { "type": "boolean" },
+        "delay": { "type": "number", "min": 0, "max": 60, "exclusiveMin": true },
+        "scrapeOptions": { "type": "object", "fieldset": "scrapeOptions" },
+        "origin": { "type": "replaced" }
+      }
+    },
+    "map": {
+      "fields": {
+        "url": { "type": "url", "required": true },
+        "limit": { "type": "integer", "min": 1, "max": 1000, "default": 1000 },
+        "includeSubdomains": { "type": "boolean" },
+        "ignoreQueryParameters": { "type": "boolean" },
+        "search": { "type": "string", "maxLength": 500 },
+        "sitemap": { "type": "enum", "values": ["only", "include", "skip"] },
+        "timeout": { "type": "integer", "min": 1000, "max": 90000 },
+        "origin": { "type": "replaced" }
+      }
+    }
+  },
+  "refused": {
+    "actions": "page actions arrive with M7's verified safe subset",
+    "headers": "custom request headers to targets are not verified in this deployment",
+    "location": "geographic routing arrives with the proxy policy (M6)",
+    "webhook": "webhook delivery arrives with M7's signed outbox",
+    "appendToId": "appending to a batch is not offered: upstream runs every client as one team, so the gateway cannot scope it",
+    "prompt": "prompt-generated crawl options need the model adapter (M5)",
+    "maxConcurrency": "the platform sets concurrency (spec §23.1)",
+    "zeroDataRetention": "the platform's retention policy applies to every job (spec §21.3)",
+    "integration": "integration tags are not recorded",
+    "parsers": "parser selection is not verified in this deployment; PDFs are parsed by default",
+    "maxAge": "caching arrives with M7",
+    "minAge": "caching arrives with M7",
+    "storeInCache": "caching arrives with M7",
+    "lockdown": "caching arrives with M7",
+    "ignoreRobotsTxt": "robots.txt is always respected",
+    "robotsUserAgent": "the crawler's robots.txt identity is fixed",
+    "onlyCleanContent": "clean-content extraction is not verified in this deployment",
+    "redactPII": "PII redaction is a Cloud service",
+    "threatProtection": "threat protection is a Cloud service",
+    "auditMetadata": "audit metadata is a Cloud service",
+    "profile": "browser profiles are not offered",
+    "useMock": "mock responses are a development feature",
+    "useIndex": "there is no search index in this deployment",
+    "ignoreCache": "there is no map cache in this deployment",
+    "filterByPath": "map path filtering is not verified in this deployment"
+  },
+  "limits": {
+    "bodyBytes": 1048576,
+    "crawl": { "deadlineMinutes": 30 },
+    "batch": { "maxUrls": 25, "hardMaxUrls": 100, "deadlineMinutes": 30 },
+    "admission": { "maxOpenJobs": 20, "maxOpenUnits": 500, "activeUpstreamJobs": 1, "maxSyncInFlight": 4 },
+    "results": { "pageDefaultLimit": 100, "pageMaxLimit": 100, "pageMaxBytes": 10485760, "retentionDays": 7, "metadataDays": 30, "idempotencyHours": 24, "archiveResponseMaxBytes": 16777216 },
+    "auth": { "failuresPerMinute": 30 }
+  }
+}

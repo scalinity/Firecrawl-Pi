@@ -1,0 +1,12 @@
+{
+  "name": "fcpi-access-gateway",
+  "version": "0.3.0",
+  "private": true,
+  "description": "FCPI access gateway: the authenticated REST boundary and durable job ledger (FIRECRAWL_PI_SPEC.md §16, §20.3, §21)",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node server.mjs", "test": "node --test test/*.test.mjs" },
+  "dependencies": {
+    "pg": "8.23.0"
+  }
+}

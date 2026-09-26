@@ -1,144 +1,309 @@
-// FCPI access gateway, M1 scope: the only host-published service.
-//   - every route requires a bearer token whose SHA-256 is in the hash file; the
-//     gateway never holds a plaintext token;
-//   - 401 bodies and challenges are the gateway's own; an upstream WWW-Authenticate
-//     (which names Firecrawl Cloud's resource metadata) is never passed through;
-//   - only POST /v1/scrape and POST /v2/scrape are routed; /admin/* never is, because
-//     upstream's /admin/integration/* proxies to integrations.firecrawl.dev unauthenticated;
-//   - until M2's guarded retrieval exists, a scrape target must be one of the
-//     configured fixture origins (M1 permits only test-target traffic);
-//   - request bodies are capped at 1 MiB before parsing (spec §20.3).
-// Full token lifecycle, scopes and Host/Origin policy belong to M3. Node built-ins only.
-import { createServer, request as httpRequest } from "node:http";
-import { createHash, timingSafeEqual } from "node:crypto";
-import { readFileSync } from "node:fs";
+// FCPI access gateway (FIRECRAWL_PI_SPEC.md §16, §19.1, §20.3, §21): the only host-published service
+// and the one policy boundary in front of the core.
+//   - Host must be one of the origins the gateway is served at (DNS rebinding); a browser Origin must
+//     be allow-listed (none is by default); no CORS headers are ever sent.
+//   - Every route needs a bearer token from the client registry; 401 for a missing or unknown one
+//     (429 once failures pass their per-minute budget), 403 for a missing scope. Upstream challenges,
+//     which name Firecrawl Cloud, never pass through.
+//   - Routes, options and limits come from the capability manifest; an option it refuses is answered
+//     with UNSUPPORTED_OPTION before any work begins; known native routes it does not enable are 501.
+//   - Crawls and batch scrapes are durable jobs (src/jobs.mjs): a receipt commits before the answer,
+//     every lookup is by the credential's principal, results are archived and served after the core
+//     forgets them. Identity headers are never forwarded: the gateway builds each upstream request.
+import { createServer } from "node:http";
+import { randomUUID } from "node:crypto";
+import { pipeline } from "node:stream/promises";
+import { loadConfig } from "./src/config.mjs";
+import { makeRegistry, makeFailureLimiter } from "./src/auth.mjs";
+import { validateBody, requestHash, RequestError } from "./src/validate.mjs";
+import { makeStore, AdmissionError } from "./src/store.mjs";
+import { openArchive } from "./src/archive.mjs";
+import { makeUpstream, sendJson } from "./src/upstream.mjs";
+import { makeJobs } from "./src/jobs.mjs";
 
-const KNOWN = new Set(["PI_GATEWAY_LISTEN_PORT", "PI_CORE_URL", "PI_GATEWAY_TOKEN_HASHES_FILE", "PI_PERMITTED_TARGET_ORIGINS", "PI_CORE_TIMEOUT_MS"]);
-function loadConfig(env) {
-  const unknown = Object.keys(env).filter((k) => k.startsWith("PI_") && !KNOWN.has(k));
-  if (unknown.length) throw new Error(`unknown configuration keys: ${unknown.join(", ")}`);
-  const upstream = new URL(env.PI_CORE_URL ?? "");
-  if (upstream.protocol !== "http:" || upstream.pathname !== "/") throw new Error("PI_CORE_URL must be an http origin");
-  const origins = (env.PI_PERMITTED_TARGET_ORIGINS ?? "").split(",").map((s) => s.trim()).filter(Boolean);
-  if (!origins.length || origins.some((o) => new URL(o).origin !== o)) throw new Error("PI_PERMITTED_TARGET_ORIGINS must list exact origins");
-  const hashes = readFileSync(env.PI_GATEWAY_TOKEN_HASHES_FILE, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map((l) => {
-    const m = l.match(/^([A-Za-z0-9._-]{1,64})\s+sha256:([0-9a-f]{64})$/);
-    if (!m) throw new Error("token hash file: each line must be '<label> sha256:<64 hex>'");
-    return { label: m[1], digest: Buffer.from(m[2], "hex") };
-  });
-  if (!hashes.length) throw new Error("token hash file holds no hashes");
-  return {
-    port: Number(env.PI_GATEWAY_LISTEN_PORT ?? 3300),
-    upstream,
-    origins: new Set(origins),
-    hashes,
-    upstreamTimeoutMs: Number(env.PI_CORE_TIMEOUT_MS ?? 120000),
-  };
-}
+const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
+const M = cfg.manifest, L = M.limits;
+const registry = makeRegistry(cfg.clientsFile, M.scopes, log);
+const failures = makeFailureLimiter(L.auth.failuresPerMinute);
+const archive = await openArchive(cfg.artifactRoot);
+const store = makeStore(cfg, log);
+const upstream = makeUpstream(cfg);
+const jobs = makeJobs({ cfg, store, upstream, archive, log: (o) => log({ build: cfg.build, ...o }) });
+const PATH = jobs.PATH;
+const started = Date.now();
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-const BODY_CAP = 1024 * 1024;
-const DRAIN_CAP = 8 * BODY_CAP;
-const ROUTES = new Set(["POST /v1/scrape", "POST /v2/scrape"]);
-const HOP = new Set(["connection", "keep-alive", "transfer-encoding", "upgrade", "proxy-authenticate", "proxy-authorization", "te", "trailer", "www-authenticate"]);
+// Exact templates, matched against the raw request path (never decoded or normalised), so an
+// encoded or doubled segment simply does not match.
+const template = (p) => new RegExp(`^${p.replace(/[.*+?^$()|[\]\\]/g, "\\$&").replace(/\{id\}/g, "([0-9A-Za-z-]{1,64})")}$`);
+const ROUTES = M.routes.map((r) => ({ ...r, re: template(r.path) }));
+const DISABLED = M.not_enabled.map((r) => ({ ...r, re: template(r.path) }));
 
-// Returns the matching token's label, or null. Every stored digest is compared, in constant time.
-function authenticate(header) {
-  const m = /^Bearer ([\x21-\x7e]{16,512})$/.exec(header ?? "");
-  if (!m) return null;
-  const digest = createHash("sha256").update(m[1]).digest();
-  let label = null;
-  for (const h of cfg.hashes) if (timingSafeEqual(digest, h.digest) && label === null) label = h.label;
-  return label;
-}
+let syncInFlight = 0;
+let quota = null;
+const quotaBytes = async () => (quota ??= await archive.quotaBytes());
 
-function send(res, status, body, extra = {}) {
-  const buf = Buffer.from(JSON.stringify(body));
-  res.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": buf.length, "cache-control": "no-store", ...extra });
-  res.end(buf);
-}
-
-// Over the cap, stop buffering and reject; the handler answers 413 and closes the
-// connection. The remainder is read and discarded (up to DRAIN_CAP) rather than left
-// unread, because closing a socket with unread input sends a reset that can destroy the
-// 413 before the client reads it. This holds for a declared Content-Length and for a
-// chunked body alike.
+// Reads the body, refusing it past the cap. The remainder is drained (to 8x the cap) rather than
+// left unread, because closing a socket with unread input resets it and can destroy the 413.
 function readBody(req) {
+  const cap = L.bodyBytes;
   return new Promise((resolve, reject) => {
-    const tooLarge = () => Object.assign(new Error("too large"), { status: 413 });
+    const tooLarge = () => new RequestError(413, "BODY_TOO_LARGE", `The request body exceeds ${cap} bytes.`);
     const chunks = [];
-    let size = 0;
-    let over = Number(req.headers["content-length"] ?? 0) > BODY_CAP;
+    let size = 0, over = Number(req.headers["content-length"] ?? 0) > cap;
     req.on("data", (c) => {
       size += c.length;
-      if (over) { if (size > DRAIN_CAP) req.destroy(); return; }
-      if (size <= BODY_CAP) return chunks.push(c);
-      over = true;
-      chunks.length = 0;
-      reject(tooLarge());
+      if (over) { if (size > 8 * cap) req.destroy(); return; }
+      if (size <= cap) return chunks.push(c);
+      over = true; chunks.length = 0; reject(tooLarge());
     });
     req.on("end", () => (over ? reject(tooLarge()) : resolve(Buffer.concat(chunks))));
     req.on("error", reject);
     if (over) reject(tooLarge());
   });
 }
-
-function targetPermitted(body) {
-  let url;
-  try { url = new URL(JSON.parse(body.toString("utf8")).url); } catch { return false; }
-  return cfg.origins.has(url.origin) && !url.username && !url.password;
+async function readJson(req) {
+  const buf = await readBody(req);
+  try { return JSON.parse(buf.toString("utf8")); } catch { throw new RequestError(400, "BAD_REQUEST", "The request body is not valid JSON."); }
 }
 
-// Every outcome logs exactly once. A failure before the upstream's headers is answered
-// with 502 (504 when the upstream went silent); after them the client response can only
-// be cut, so it is destroyed rather than left open (pipe() does not end the destination
-// when the source is torn down). Only the matched path is forwarded, never a query string.
-function forward(req, res, body, log, path) {
-  let settled = false;
-  let timedOut = false;
-  const finish = (status) => { if (!settled) { settled = true; log(status); } };
-  const fail = () => {
-    if (settled) return;
-    const status = timedOut ? 504 : 502;
-    if (res.headersSent) res.destroy(); else send(res, status, { error: timedOut ? "upstream_timeout" : "upstream_unavailable" });
-    finish(status);
+const withTimeout = (p, ms) => Promise.race([p.catch(() => {}), new Promise((r) => setTimeout(r, ms).unref())]);
+const nativeStatus = (s) => ({ SUCCEEDED: "completed", PARTIAL: "completed", FAILED: "failed", CANCELLED: "cancelled" })[s] ?? "scraping";
+const iso = (d) => (d ? new Date(d).toISOString() : undefined);
+
+function pageParams(url) {
+  const sp = url.searchParams;
+  const int = (k, min, max) => {
+    if (!sp.has(k)) return null;
+    const v = sp.get(k);
+    if (!/^\d{1,10}$/.test(v) || Number(v) < min || Number(v) > max) throw new RequestError(400, "BAD_REQUEST", `'${k}' must be an integer from ${min} to ${max}.`);
+    return Number(v);
   };
-  const up = httpRequest({
-    host: cfg.upstream.hostname, port: cfg.upstream.port || 80, method: req.method, path,
-    headers: { "content-type": "application/json", "content-length": body.length, accept: "application/json" },
-    timeout: cfg.upstreamTimeoutMs,
-  }, (ur) => {
-    const headers = {};
-    for (const [k, v] of Object.entries(ur.headers)) if (!HOP.has(k)) headers[k] = v;
-    res.writeHead(ur.statusCode, headers);
-    ur.pipe(res);
-    ur.on("end", () => finish(ur.statusCode));
-    ur.on("error", fail);
-    ur.on("close", () => { if (!ur.complete) fail(); });
-  });
-  up.on("timeout", () => { timedOut = true; up.destroy(new Error("upstream timeout")); });
-  up.on("error", fail);
-  // A client that goes away cancels the upstream request instead of leaving it running.
-  res.on("close", () => { if (!res.writableFinished && !settled) { up.destroy(); finish(499); } });
-  up.end(body);
+  return { skip: int("skip", 0, 1e9) ?? 0, limit: int("limit", 1, L.results.pageMaxLimit), explicitLimit: sp.has("limit") };
 }
 
-const server = createServer(async (req, res) => {
-  const start = process.hrtime.bigint();
-  const path = (req.url ?? "").split("?")[0];
-  let label = null;
-  const log = (status) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", method: req.method, path, status, client: label, ms: Number(process.hrtime.bigint() - start) / 1e6 }));
+function uncertain(ctx, job) {
+  ctx.send(503, { success: false, code: "SUBMISSION_UNCERTAIN", id: job.id, receipt: `${ctx.origin}/platform/v1/jobs/${job.id}`,
+    error: "The job is recorded, but whether the core has accepted it is still being reconciled. Retry this request with the same idempotency key, or read the receipt." }, { "retry-after": "10" });
+}
 
-  label = authenticate(req.headers.authorization);
-  if (!label) { send(res, 401, { error: "unauthorized" }, { "www-authenticate": 'Bearer realm="fcpi"' }); return log(401); }
-  if (path === "/admin" || path.startsWith("/admin/") || !ROUTES.has(`${req.method} ${path}`)) { send(res, 404, { error: "not_found" }); return log(404); }
+// ---- asynchronous submissions ------------------------------------------------------------------------
+function submissionAnswer(ctx, route, job, invalidURLs) {
+  if (job.state === "SUBMITTING" || job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job);
+  if (job.state === "FAILED" && job.http_status && !job.upstream_id) return ctx.send(job.http_status, { success: false, code: job.error_code, error: job.error });
+  ctx.send(200, { success: true, id: job.id, url: `${ctx.origin}${PATH[route.kind]}/${job.id}`, ...(route.kind === "batch" ? { invalidURLs } : {}) });
+}
 
-  let body;
-  try { body = await readBody(req); } catch (e) { send(res, e.status ?? 400, { error: e.status === 413 ? "body_too_large" : "bad_request" }, { connection: "close" }); return log(e.status ?? 400); }
-  if (!targetPermitted(body)) { send(res, 403, { error: "target_not_permitted", detail: "M1 permits only the configured fixture origins" }); return log(403); }
-  forward(req, res, body, log, path);
+async function submit(ctx, route) {
+  const raw = await readJson(ctx.req);
+  const { body, units, invalidURLs } = validateBody(route.body, raw, M);
+  const idemKey = ctx.req.headers["x-idempotency-key"];
+  if (idemKey !== undefined && !/^[A-Za-z0-9._:-]{8,128}$/.test(idemKey)) throw new RequestError(400, "BAD_REQUEST", "x-idempotency-key must be 8-128 characters of letters, digits and ._:-");
+  let admitted;
+  try {
+    admitted = await store.admit({ principal: ctx.client.principal, clientLabel: ctx.client.label, kind: route.kind, body, hash: requestHash(route.kind, body), units, idemKey, quotaBytes: await quotaBytes() });
+  } catch (e) {
+    if (e instanceof AdmissionError) return ctx.send(e.status, { success: false, code: e.code, error: e.message }, { "retry-after": String(e.retryAfter) });
+    log({ event: "ledger_unavailable", request_id: ctx.id, error: e.message });
+    // Never 502: a client library retries 502 by resubmitting (upstream apps/js-sdk httpClient.ts).
+    return ctx.send(503, { success: false, code: "PLATFORM_UNAVAILABLE", error: "The job ledger is unavailable, so nothing was accepted; retry later." }, { "retry-after": "10" });
+  }
+  if (admitted.conflict) return ctx.send(409, { success: false, code: "IDEMPOTENCY_CONFLICT", error: "This idempotency key was used with a different request in the last 24 hours." });
+  ctx.job = admitted.job.id;
+  let job = admitted.job;
+  if (["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN"].includes(job.state)) {
+    await withTimeout(jobs.kick(), cfg.submitTimeoutMs + 10000);
+    job = (await store.getJobAny(job.id)) ?? job;
+  }
+  submissionAnswer(ctx, route, job, invalidURLs);
+}
+
+// ---- job lookups -------------------------------------------------------------------------------------
+async function jobFor(ctx, route, id) {
+  if (!UUID.test(id)) throw new RequestError(400, "BAD_REQUEST", "Invalid job ID format. Job ID must be a valid UUID.");
+  const job = await store.getJob(id.toLowerCase(), ctx.client.principal);
+  if (!job || (route.kind && job.kind !== route.kind)) { ctx.send(404, { success: false, error: "Job not found" }); return null; }
+  ctx.job = job.id;
+  return job;
+}
+const expired = (ctx, job) => ctx.send(410, { success: false, code: "EXPIRED", error: `This job's results passed their retention on ${iso(job.results_expire_at)}.` });
+
+async function status(ctx, route, id) {
+  const job = await jobFor(ctx, route, id);
+  if (!job) return;
+  const { skip, limit, explicitLimit } = pageParams(ctx.url);
+  const self = (s) => `${ctx.origin}${PATH[job.kind]}/${job.id}?skip=${s}${explicitLimit ? `&limit=${limit}` : ""}`;
+  const expiresAt = iso(job.results_expire_at) ?? new Date(Date.now() + L.results.retentionDays * 86400000).toISOString();
+  if (job.state === "EXPIRED") return expired(ctx, job);
+  if (job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job);
+  if (job.state === "RECEIVED" || job.state === "SUBMITTING") {
+    return ctx.send(200, { success: true, status: "scraping", completed: 0, total: 0, creditsUsed: 0, expiresAt, data: [], createdAt: iso(job.created_at) });
+  }
+  if (job.state === "QUEUED" || job.state === "RUNNING") {
+    let r;
+    for (const lim of [limit ?? L.results.pageDefaultLimit, 1]) {
+      try { r = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}?skip=${skip}&limit=${lim}`, { timeoutMs: 30000, maxBytes: L.results.archiveResponseMaxBytes }); break; }
+      catch (e) { if (e.code !== "TOO_LARGE") return ctx.send(503, { success: false, code: "UPSTREAM_UNAVAILABLE", error: "The core did not answer; retry." }, { "retry-after": "5" }); r = null; }
+    }
+    if (!r) return ctx.send(503, { success: false, code: "RESULT_TOO_LARGE", error: "The next document is larger than a status page may carry; it is served from the archive once the job ends." }, { "retry-after": "30" });
+    if (r.status !== 200 || !r.json) return ctx.send(503, { success: false, code: "UPSTREAM_UNAVAILABLE", error: `The core answered ${r.status}; retry.` }, { "retry-after": "5" });
+    const b = r.json, data = Array.isArray(b.data) ? b.data : [];
+    // `next` only while documents remain past this page, so a client following it never spins on an
+    // unfinished job (upstream also sets it for any running job).
+    const more = (b.completed ?? 0) > skip + data.length;
+    return ctx.send(200, { success: b.success !== false, status: b.status, completed: b.completed ?? 0, total: b.total ?? 0, creditsUsed: b.creditsUsed ?? 0, expiresAt,
+      ...(more ? { next: self(skip + data.length) } : {}), data, ...(b.createdAt ? { createdAt: b.createdAt } : {}), ...(b.warning ? { warning: b.warning } : {}) });
+  }
+  // Finished: served from the archive, whatever the core still holds.
+  const pageLimit = limit ?? L.results.pageDefaultLimit;
+  const rows = await store.documentsPage(job.id, skip, pageLimit);
+  const page = [];
+  let bytes = 0;
+  for (const row of rows) { if (page.length && bytes + row.bytes > L.results.pageMaxBytes) break; page.push(row); bytes += row.bytes; }
+  const next = skip + page.length < job.archived ? self(skip + page.length) : undefined;
+  const rejected = job.state === "FAILED" && !job.upstream_id;
+  const head = { success: !rejected, status: nativeStatus(job.state), completed: job.archived, total: job.total ?? job.archived, creditsUsed: job.credits_used ?? 0,
+    expiresAt, ...(next ? { next } : {}), ...(job.error ? { error: job.error } : {}), createdAt: iso(job.created_at), completedAt: iso(job.finished_at) };
+  const res = ctx.res;
+  res.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-request-id": ctx.id });
+  res.write(`${JSON.stringify(head).slice(0, -1)},"data":[`);
+  try {
+    for (let i = 0; i < page.length; i++) {
+      if (i) res.write(",");
+      await pipeline(archive.stream(page[i].sha256), res, { end: false });
+    }
+    res.end("]}");
+    ctx.logged(200);
+  } catch (e) {
+    log({ event: "archive_read_failed", request_id: ctx.id, job: job.id, error: e.message });
+    res.destroy();
+    ctx.logged(500);
+  }
+}
+
+async function errors(ctx, route, id) {
+  const job = await jobFor(ctx, route, id);
+  if (!job) return;
+  if (job.state === "EXPIRED") return expired(ctx, job);
+  if (job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job);
+  if (job.state === "QUEUED" || job.state === "RUNNING") {
+    const r = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}/errors`, { timeoutMs: 15000, maxBytes: 4 * 1048576 }).catch(() => null);
+    if (r?.status === 200 && Array.isArray(r.json?.errors)) return ctx.send(200, { errors: r.json.errors, robotsBlocked: r.json.robotsBlocked ?? [] });
+    return ctx.send(503, { success: false, code: "UPSTREAM_UNAVAILABLE", error: "The core did not answer; retry." }, { "retry-after": "5" });
+  }
+  ctx.send(200, job.errors ?? { errors: [], robotsBlocked: [] });
+}
+
+async function cancel(ctx, route, id) {
+  let job = await jobFor(ctx, route, id);
+  if (!job) return;
+  const done = () => ctx.send(200, { status: "cancelled" });
+  if (job.state === "EXPIRED") return expired(ctx, job);
+  if (job.state === "CANCELLED") return done();
+  if (["SUCCEEDED", "PARTIAL", "FAILED"].includes(job.state)) return ctx.send(409, { success: false, error: "Crawl is already completed" });
+  job = await store.requestCancel(job.id);
+  if (job.state === "RECEIVED" && (await store.cancelUnsubmitted(job.id))) return done();
+  if (job.state === "QUEUED" || job.state === "RUNNING") {
+    const d = await upstream.call("DELETE", `${PATH[job.kind]}/${job.upstream_id}`, { timeoutMs: 15000 }).catch(() => null);
+    if (d?.status === 409) return ctx.send(409, { success: false, error: "Crawl is already completed" });
+    if (d?.status === 200) await store.cancelSent(job.id);
+  }
+  // The intent is durable: the dispatcher never submits a cancelled job, and the poller sends the
+  // upstream cancellation once the job is mapped (or again, if this attempt failed).
+  done();
+}
+
+// ---- platform routes --------------------------------------------------------------------------------
+const receipt = (ctx, job, events) => ({
+  id: job.id, kind: job.kind, state: job.state, createdAt: iso(job.created_at), updatedAt: iso(job.updated_at), submittedAt: iso(job.submitted_at),
+  finishedAt: iso(job.finished_at), deadline: iso(job.deadline), resultsExpireAt: iso(job.results_expire_at), metadataExpireAt: iso(job.metadata_expire_at),
+  submissionKey: job.submission_key, upstreamId: job.upstream_id, units: job.units, dispatchAttempts: job.dispatch_attempts,
+  cancelRequestedAt: iso(job.cancel_requested_at), upstreamStatus: job.upstream_status, completed: job.completed, total: job.total, archived: job.archived,
+  errorCount: job.errors?.errors?.length ?? 0, error: job.error ? { code: job.error_code, message: job.error, httpStatus: job.http_status } : null,
+  results: `${ctx.origin}${PATH[job.kind]}/${job.id}`, ...(events ? { events: events.map((e) => ({ at: iso(e.at), from: e.from_state, to: e.to_state, detail: e.detail })) } : {}),
+});
+
+async function platformJob(ctx, route, id) {
+  const job = await jobFor(ctx, route, id);
+  if (job) ctx.send(200, { success: true, job: receipt(ctx, job, await store.events(job.id)) });
+}
+async function platformJobs(ctx) {
+  const sp = ctx.url.searchParams;
+  const limit = sp.has("limit") ? Number(sp.get("limit")) : 20;
+  if (!Number.isInteger(limit) || limit < 1 || limit > 100) throw new RequestError(400, "BAD_REQUEST", "'limit' must be an integer from 1 to 100.");
+  ctx.send(200, { success: true, jobs: (await store.listJobs(ctx.client.principal, limit)).map((j) => receipt(ctx, j)) });
+}
+async function platformStatus(ctx) {
+  const t0 = Date.now();
+  const core = await upstream.call("GET", "/v0/health/liveness", { timeoutMs: 3000, maxBytes: 65536 }).then((r) => ({ live: r.status === 200, ms: Date.now() - t0 }), () => ({ live: false, ms: Date.now() - t0 }));
+  let ledger = { ok: false }, summary = null;
+  try { summary = await store.summary(); ledger = { ok: true }; } catch (e) { ledger = { ok: false, error: e.message }; }
+  ctx.send(200, { success: true, service: "access-gateway", build: cfg.build, instance: jobs.instance, uptimeSeconds: Math.round((Date.now() - started) / 1000),
+    core, ledger, jobs: summary?.states ?? null, archive: { bytes: summary?.archiveBytes ?? null, quotaBytes: await quotaBytes() },
+    capabilities: { routes: M.routes.map((r) => `${r.method} ${r.path}`), notEnabled: M.not_enabled.map((r) => `${r.method} ${r.path}`), formats: M.formats.allowed },
+    limits: L });
+}
+
+// ---- synchronous routes -----------------------------------------------------------------------------
+async function sync(ctx, route) {
+  const raw = await readJson(ctx.req);
+  const { body } = validateBody(route.body, raw, M);
+  if (syncInFlight >= L.admission.maxSyncInFlight) return ctx.send(503, { success: false, code: "OVERLOADED", error: `${syncInFlight} synchronous requests are already in flight (limit ${L.admission.maxSyncInFlight}); retry shortly.` }, { "retry-after": "5" });
+  syncInFlight += 1;
+  upstream.forward(ctx.res, route.path, body, (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
+}
+
+const HANDLERS = { scrape: sync, map: sync, "crawl.submit": submit, "batch.submit": submit, "crawl.status": status, "batch.status": status, "crawl.errors": errors,
+  "batch.errors": errors, "crawl.cancel": cancel, "batch.cancel": cancel, "platform.status": platformStatus, "platform.jobs": platformJobs, "platform.job": platformJob };
+
+// ---- the server -------------------------------------------------------------------------------------
+const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
+  const t0 = process.hrtime.bigint();
+  const rawPath = (req.url ?? "").split("?")[0];
+  const ctx = { id: randomUUID(), req, res, route: null, client: null, job: null, done: false };
+  ctx.logged = (status, code) => {
+    if (ctx.done) return;
+    ctx.done = true;
+    log({ build: cfg.build, request_id: ctx.id, method: req.method, route: ctx.route ?? "unmatched", status, code: code ?? null, client: ctx.client?.label ?? null,
+      principal: ctx.client?.principal ?? null, job: ctx.job, ms: Number(process.hrtime.bigint() - t0) / 1e6 });
+  };
+  ctx.send = (status, body, extra = {}) => { sendJson(res, status, body, { "x-request-id": ctx.id, ...extra }); ctx.logged(status, body?.code); };
+  try {
+    const host = String(req.headers.host ?? "").toLowerCase();
+    ctx.origin = cfg.hosts.get(host);
+    if (!ctx.origin) return ctx.send(421, { success: false, code: "MISDIRECTED", error: "This host name is not served here." });
+    if (req.headers.origin !== undefined && !cfg.browserOrigins.has(req.headers.origin)) return ctx.send(403, { success: false, code: "ORIGIN_NOT_ALLOWED", error: "Browser origins are not allowed." });
+    ctx.url = new URL(req.url.startsWith("/") ? req.url : "/", ctx.origin);
+    ctx.client = registry.authenticate(req.headers.authorization);
+    if (!ctx.client) {
+      const wait = failures.fail();
+      if (wait) return ctx.send(429, { success: false, code: "TOO_MANY_FAILED_ATTEMPTS", error: "Too many failed authentication attempts; retry later." }, { "retry-after": String(wait) });
+      return ctx.send(401, { success: false, code: "UNAUTHORIZED", error: "Unauthorized: a valid gateway token is required." }, { "www-authenticate": 'Bearer realm="fcpi"' });
+    }
+    // Routes not enabled are matched first: upstream registers /v2/crawl/ongoing before /v2/crawl/:jobId.
+    const off = DISABLED.find((r) => r.method === req.method && r.re.test(rawPath));
+    if (off) return ctx.send(501, { success: false, code: "CAPABILITY_NOT_ENABLED", error: `${off.method} ${off.path} is not enabled in this deployment: ${off.reason}.` });
+    let m = null;
+    const route = ROUTES.find((r) => r.method === req.method && (m = r.re.exec(rawPath)));
+    if (!route) return ctx.send(404, { success: false, code: "NOT_FOUND", error: "No such route." });
+    ctx.route = route.id;
+    if (!ctx.client.scopes.has(route.scope)) return ctx.send(403, { success: false, code: "INSUFFICIENT_SCOPE", error: `This token lacks the '${route.scope}' scope.` });
+    await HANDLERS[route.id](ctx, route, m[1]);
+  } catch (e) {
+    if (e instanceof RequestError) {
+      if (!res.headersSent) return ctx.send(e.status, { success: false, code: e.code, error: e.message, ...e.extra }, e.status === 413 ? { connection: "close" } : {});
+    } else {
+      log({ event: "handler_error", request_id: ctx.id, route: ctx.route, error: e.message });
+      if (!res.headersSent) return ctx.send(503, { success: false, code: "PLATFORM_UNAVAILABLE", error: "The gateway could not complete the request; retry later." }, { "retry-after": "10" });
+    }
+    if (!ctx.done) { res.destroy(); ctx.logged(500); }
+  }
 });
 server.headersTimeout = 10000;
-server.requestTimeout = cfg.upstreamTimeoutMs + 10000;
-server.listen(cfg.port, "0.0.0.0", () => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", listening: server.address().port, tokens: cfg.hashes.length, target_origins: [...cfg.origins] })));
-for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => server.close(() => process.exit(0)));
+server.requestTimeout = Math.max(cfg.coreTimeoutMs, cfg.submitTimeoutMs) + 15000;
+server.listen(cfg.port, "0.0.0.0", () => {
+  log({ event: "listening", build: cfg.build, instance: jobs.instance, port: server.address().port, clients: registry.size, hosts: [...cfg.hosts.values()], routes: ROUTES.length });
+  jobs.start().catch((e) => log({ event: "jobs_start_failed", error: e.message }));
+});
+for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => server.close(async () => { await jobs.stop(); await store.close().catch(() => {}); process.exit(0); }));
