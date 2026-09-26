@@ -30,6 +30,9 @@ D run "${RUN[@]}" --network "$N" --user 3310:3310 -e FCPI_TEST_PG="$N-pg" \
   "$RI" sh -c 'node --version; node --test --test-timeout=120000 test/*.test.mjs' 2>&1
 echo "test_exit=$?"
 D rm -f "$N-pg" >/dev/null 2>&1; D network rm "$N" >/dev/null 2>&1
+echo "### gateway_m5_tap"
+D run "${RUN[@]}" --network none --user 3380:3380 -v "$REPO/services/access/test:/srv/access/test:ro" "$GI" node --test --test-reporter=tap --test-timeout=60000 test/extract.test.mjs 2>&1
+echo "test_exit=$?"
 bash "$REPO/scripts/m4/pi-mcp-tests.sh" | sed -e 's/^### meta$/### m4_runner_meta/' -e '/^### end$/d' -e '/^end$/d'
 echo "### transient"
 echo "leftover_transient_containers=$(D ps -aq --filter label=fcpi.transient | wc -l) leftover_transient_networks=$(D network ls -q --filter label=fcpi.transient | wc -l)"

@@ -902,10 +902,11 @@ test("a ledger schema this build was not written for stops startup; an unreachab
     const t = setTimeout(() => { p.kill("SIGKILL"); resolve({ code: "running", out }); }, ms);
     p.on("exit", (code) => { clearTimeout(t); resolve({ code, out }); });
   });
-  await h.db.query("INSERT INTO fcpi_platform.schema_version (version) VALUES (2)");
+  // A ledger one version past the build's (version 2 since M5's extract kind).
+  await h.db.query("INSERT INTO fcpi_platform.schema_version (version) VALUES (3)");
   const newer = await run(h.env());
   assert.equal(newer.code, 1);
-  assert.match(newer.out, /schema version is 2, this build needs 1; refusing to start/);
+  assert.match(newer.out, /schema version is 3, this build needs 2; refusing to start/);
   assert.doesNotMatch(newer.out, /"event":"listening"/);
   await h.db.query("DROP TABLE fcpi_platform.schema_version");
   const none = await run(h.env());
