@@ -160,6 +160,31 @@ function attribute(sec, line, ids, owner = null) {
   return null;
 }
 
+// The reboot during M5's window (raw/reboot.txt, M4's recorder; raw/reboot-cause.txt names the host's own
+// Wi-Fi watchdog that ordered it): the record must tie BEFORE's boot to the journal's previous boot and
+// AFTER's to the current one. Only then does a line the reboot itself changed count as attributed, each by
+// what changed, as M4's X04 counts them: a module in both snapshots whose size differs, a mount whose target,
+// source and type are the same with only its options changed, a service's ephemeral UDP port chosen again at
+// its start, and a unit no longer running that neither snapshot lists as enabled.
+function rebootTie(bootB, bootA) {
+  if (!has(`${RAW}reboot.txt`) || !bootB || !bootA || bootB === bootA) return null;
+  const s = S(`${RAW}reboot.txt`);
+  const boots = Object.fromEntries((s.boots ?? []).map((l) => kv(l.split(" "))).map((b) => [b.idx, b]));
+  const cur = kv(((s.current ?? [])[0] ?? "").split(" "));
+  const tied = boots["-1"]?.boot_id_sha256 === bootB && boots["0"]?.boot_id_sha256 === bootA && cur.boot_id_sha256 === bootA;
+  return tied ? { kernel: cur.kernel, ended: boots["-1"].last } : null;
+}
+function rebootAttribute(sec, line, kind, B, A) {
+  const other = kind === "removed" ? A : B;
+  const inOther = (pred) => other.some(([s, l]) => s === sec && l !== line && pred(l));
+  if (sec === "lsmod") { const n = line.split(" ")[0]; if (inOther((l) => l.split(" ")[0] === n)) return "the reboot: a module in both snapshots, loaded again at boot"; }
+  if (sec === "findmnt") { const [t, src, fs] = line.split(" "); if (inOther((l) => { const f = l.split(" "); return f[0] === t && f[1] === src && f[2] === fs; })) return "the reboot: a mount made again at boot, only its options changed"; }
+  { const m = line.match(/^udp (?:0\.0\.0\.0|\*):(\d+) users:\(\("([^"]+)",pid,fd\)\)$/);
+    if (sec === "ss_listen" && m && +m[1] >= 32768 && inOther((l) => l.startsWith("udp ") && l.includes(`(("${m[2]}",`))) return "the reboot: a service's ephemeral UDP port, chosen again at its start"; }
+  if (sec === "systemd_running" && kind === "removed" && /\.service$/.test(line) && !B.concat(A).some(([s, l]) => s === "systemd_enabled" && l === line)) return "the reboot: a unit not enabled at boot, started on demand in the earlier boot";
+  return null;
+}
+
 // ---- memory samples ----------------------------------------------------------------------------------
 const samples = () => ["fixture", "live"].flatMap((p) => (has(`${RAW}e2e-${p}.txt`) ? (records(`${RAW}e2e-${p}.txt`).resources ?? []).map((r) => ({ run: p, ...r })) : []));
 
@@ -551,24 +576,27 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; samples=${xs.length}; peak fractions=${JSON.stringify(Object.fromEntries(Object.entries(peaks).map(([k, v]) => [k, +v.toFixed(3)])))}; min MemAvailable=${Math.round(avail / 1024)} MiB` };
     } },
   X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`, "evidence/M4/raw/nft-ruleset.txt"],
-    expected: "every line differing between M5's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset), the collector's own SSH session, or the owner's own work that raw/owner-session.txt records; no unrelated line is removed or changed; the boot ID is unchanged; rule by rule against M4's recorded ruleset, every change is Docker's for the new fcpi-search and fcpi-model bridges, and the installed guard is the repository's",
+    expected: "every line differing between M5's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset), the collector's own SSH session, or the owner's own work that raw/owner-session.txt records; no unrelated line is removed or changed; the boot ID is unchanged, or changed only across the reboot raw/reboot.txt ties to both snapshots, whose own changes count only where a module, a mount or a service's UDP port is the same thing made again at boot or a unit neither snapshot lists as enabled is not running; rule by rule against M4's recorded ruleset, every change is Docker's for the new fcpi-search and fcpi-model bridges, and the installed guard is the repository's",
     run() {
       const [B, A] = [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`];
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       const psIds = (f) => (read(f).match(/^### docker_ps\n([\s\S]*?)\n### /m)?.[1] ?? "").split("\n").map((l) => l.split("\t")[0]).filter((x) => /^[0-9a-f]{64}$/.test(x));
       const ids = new Set([...psIds(B), ...psIds(A)]);
+      const tie = rebootTie(boot(B), boot(A));
       const norm = (sec, l) => (sec === "ss_listen" ? l.replace(/pid=\d+,fd=\d+/g, "pid,fd") : l);
       const KP = (f) => keyedSnapshot(f).map(([s, l]) => [s, norm(s, l)]);
-      const b = KP(B).map(([s, l]) => `${s}\t${l}`), a = KP(A).map(([s, l]) => `${s}\t${l}`);
+      const kb = KP(B), ka = KP(A);
+      const b = kb.map(([s, l]) => `${s}\t${l}`), a = ka.map(([s, l]) => `${s}\t${l}`);
+
       const removed = b.filter((l) => !a.includes(l)), added = a.filter((l) => !b.includes(l));
       const owner = ownerContext();
-      const unexplained = [], why = {}, rows = { project: [], owner: [], unrelated: [] };
+      const unexplained = [], why = {}, rows = { project: [], owner: [], reboot: [], unrelated: [] };
       for (const [kind, list] of [["removed", removed], ["added", added]]) for (const l of list) {
         const [sec, line] = [l.slice(0, l.indexOf("\t")), l.slice(l.indexOf("\t") + 1)];
-        const w = attribute(sec, line, ids, owner);
-        const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains|Pi-hole's own|the owner's editor server/.test(w));
+        const w = attribute(sec, line, ids, owner) ?? (tie ? rebootAttribute(sec, line, kind, kb, ka) : null);
+        const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains|Pi-hole's own|the owner's editor server|^the reboot: /.test(w));
         if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else why[w] = (why[w] ?? 0) + 1;
-        rows[!acceptable ? "unrelated" : /owner|Pi-hole/.test(w) ? "owner" : "project"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
+        rows[!acceptable ? "unrelated" : /^the reboot: /.test(w) ? "reboot" : /owner|Pi-hole/.test(w) ? "owner" : "project"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
       }
       const hdr = kv(((read(`${RAW}nft-ruleset.txt`).match(/^# guard_file_sha256=.*$/m) ?? [""])[0]).slice(2).split(" "));
       const guardOk = hdr.guard_file_sha256 === sha256File("deploy/host/fcpi-guard.nft");
@@ -578,12 +606,13 @@ const checks = {
       const afterHash = (read(A).match(/^nft_ruleset_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       const rulesTied = /^[0-9a-f]{64}$/.test(hdr.ruleset_sha256 ?? "") && hdr.ruleset_sha256 === afterHash;
       writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), ["# M5 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m5/verify.mjs X04)",
-        `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
+        `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : tie ? `changed across the reboot raw/reboot.txt ties to both snapshots (the earlier boot ended ${tie.ended}; raw/reboot-cause.txt)` : "CHANGED or MISSING"}`,
         `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## the owner's own work on the Pi and Pi-hole's own socket rotation (${rows.owner.length}; raw/owner-session.txt)`, ...rows.owner,
+        `## the reboot's own changes (${rows.reboot.length}; raw/reboot.txt, raw/reboot-cause.txt)`, ...rows.reboot,
         `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project,
         `## ruleset changes since M4's recorded ruleset (${ruleChanges.length}; Docker's for fcpi-search and fcpi-model unless listed as unattributed)`, ...ruleChanges.map((r) => r.replace(/\t/g, " ")), ""].join("\n"));
-      const ok = unexplained.length === 0 && !!boot(B) && boot(B) === boot(A) && guardOk && rulesTied && r4.size > 50 && r5.size > 50 && unattributed.length === 0 && ruleChanges.length >= 1;
-      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; rules changed since M4=${ruleChanges.length}, unattributed=${unattributed.length}${unattributed.length ? " [" + unattributed.slice(0, 6).join("; ") + "]" : ""}; guard is the repository's=${guardOk}; ruleset tied to AFTER=${rulesTied}` };
+      const ok = unexplained.length === 0 && !!boot(B) && (boot(B) === boot(A) || !!tie) && guardOk && rulesTied && r4.size > 50 && r5.size > 50 && unattributed.length === 0 && ruleChanges.length >= 1;
+      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}, reboot tied=${!!tie}; rules changed since M4=${ruleChanges.length}, unattributed=${unattributed.length}${unattributed.length ? " [" + unattributed.slice(0, 6).join("; ") + "]" : ""}; guard is the repository's=${guardOk}; ruleset tied to AFTER=${rulesTied}` };
     } },
   X05: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, M3_CONTROL, "scripts/m1/pi-target.conf", "evidence/M0/audit.json"], live: true,
     expected: "the positive controls fire every rule; then no rule matches in any tracked or new repository file; no file holds any live secret (M4's, M5's gateway, SearXNG-proxy and SearXNG secrets, every provider key present and every client token file on the Pi), compared by SHA-256 computed on the Pi; no file added or changed since M5 began holds the Pi's LAN address, its /24 network or its SSH target",
