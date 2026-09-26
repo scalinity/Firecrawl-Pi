@@ -16,7 +16,7 @@ import { pipeline } from "node:stream/promises";
 import { loadConfig } from "./src/config.mjs";
 import { makeRegistry, makeFailureLimiter } from "./src/auth.mjs";
 import { validateBody, requestHash, RequestError } from "./src/validate.mjs";
-import { makeStore, AdmissionError } from "./src/store.mjs";
+import { makeStore, AdmissionError, SCHEMA_VERSION } from "./src/store.mjs";
 import { openArchive } from "./src/archive.mjs";
 import { makeUpstream, sendJson } from "./src/upstream.mjs";
 import { makeJobs } from "./src/jobs.mjs";
@@ -319,6 +319,23 @@ const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
     if (!ctx.done) { res.destroy(); ctx.logged(500); }
   }
 });
+// The ledger's schema must be the one this build is written for (M3's rollback rule): any other stops
+// the process before it serves anything, and so does a ledger without the version table or the right
+// to read it (SQL errors, class 42). A ledger that cannot be reached yet is not a mismatch; startup
+// waits for it.
+for (;;) {
+  try {
+    const v = await store.schemaVersion();
+    if (v === SCHEMA_VERSION) break;
+    console.error(`access-gateway: the ledger's schema version is ${v}, this build needs ${SCHEMA_VERSION}; refusing to start`);
+    process.exit(1);
+  } catch (e) {
+    if (String(e.code ?? "").startsWith("42")) { console.error(`access-gateway: the ledger's schema version cannot be read (${e.message}); refusing to start`); process.exit(1); }
+    log({ event: "ledger_unreachable_at_start", error: e.message });
+    await new Promise((r) => setTimeout(r, 5000));
+  }
+}
+
 server.headersTimeout = 10000;
 server.requestTimeout = Math.max(cfg.coreTimeoutMs, cfg.submitTimeoutMs) + 15000;
 server.listen(cfg.port, "0.0.0.0", () => {

@@ -886,6 +886,31 @@ test("shutdown claims nothing: a job that comes due while open requests finish i
   await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(id)).state), 15000, "dispatched by the next process");
 });
 
+test("a ledger schema this build was not written for stops startup; an unreachable ledger is waited for", async () => {
+  const h = await harness();
+  await h.kill();
+  const run = (env, ms = 15000) => new Promise((resolve) => {
+    const p = spawn(process.execPath, [join(GW_DIR, "server.mjs")], { env, stdio: ["ignore", "pipe", "pipe"] });
+    let out = ""; p.stdout.on("data", (d) => { out += d; }); p.stderr.on("data", (d) => { out += d; });
+    const t = setTimeout(() => { p.kill("SIGKILL"); resolve({ code: "running", out }); }, ms);
+    p.on("exit", (code) => { clearTimeout(t); resolve({ code, out }); });
+  });
+  await h.db.query("INSERT INTO fcpi_platform.schema_version (version) VALUES (2)");
+  const newer = await run(h.env());
+  assert.equal(newer.code, 1);
+  assert.match(newer.out, /schema version is 2, this build needs 1; refusing to start/);
+  assert.doesNotMatch(newer.out, /"event":"listening"/);
+  await h.db.query("DROP TABLE fcpi_platform.schema_version");
+  const none = await run(h.env());
+  assert.equal(none.code, 1);
+  assert.match(none.out, /schema version cannot be read/);
+  // Nothing listening on the ledger's port: startup waits, logging, rather than exiting.
+  const away = await run({ ...h.env(), PGPORT: "1" }, 7000);
+  assert.equal(away.code, "running");
+  assert.match(away.out, /"event":"ledger_unreachable_at_start"/);
+  assert.doesNotMatch(away.out, /"event":"listening"/);
+});
+
 test("configuration that is unknown, unsafe or missing its data mount stops startup", async () => {
   const base = H.env();
   // Each case must stop for its own reason, named in what the process prints, not merely exit non-zero.

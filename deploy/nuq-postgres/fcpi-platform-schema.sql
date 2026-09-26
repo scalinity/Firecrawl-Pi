@@ -87,6 +87,15 @@ CREATE TABLE IF NOT EXISTS fcpi_platform.job_document (
 );
 CREATE INDEX IF NOT EXISTS job_document_sha256 ON fcpi_platform.job_document (sha256);
 
+-- The ledger's schema version. The gateway reads it at startup and refuses to run against any other
+-- (M3's rollback rule: never a binary against a ledger schema it was not written for); a migration
+-- that changes the schema raises it in the same transaction.
+CREATE TABLE IF NOT EXISTS fcpi_platform.schema_version (
+  version    integer PRIMARY KEY,
+  applied_at timestamptz NOT NULL DEFAULT now()
+);
+INSERT INTO fcpi_platform.schema_version (version) VALUES (1) ON CONFLICT DO NOTHING;
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'fcpi_gateway') THEN
@@ -123,6 +132,7 @@ GRANT EXECUTE ON FUNCTION fcpi_platform.upstream_groups_for_marker(text) TO fcpi
 REVOKE ALL ON SCHEMA fcpi_platform FROM PUBLIC;
 GRANT USAGE ON SCHEMA fcpi_platform TO fcpi_gateway;
 GRANT SELECT, INSERT, UPDATE, DELETE ON fcpi_platform.job, fcpi_platform.job_event, fcpi_platform.idempotency, fcpi_platform.job_document TO fcpi_gateway;
+GRANT SELECT ON fcpi_platform.schema_version TO fcpi_gateway;
 -- The gateway reads nothing of NuQ's or the retrieval service's directly.
 REVOKE ALL ON SCHEMA nuq FROM fcpi_gateway;
 REVOKE ALL ON SCHEMA fcpi_retrieval FROM fcpi_gateway;

@@ -57,7 +57,10 @@ SELECT 'platform_tables=' || count(*)
   || ' gateway_dml_on=' || count(*) FILTER (WHERE has_table_privilege('fcpi_gateway', c.oid, 'SELECT') AND has_table_privilege('fcpi_gateway', c.oid, 'INSERT')
                                              AND has_table_privilege('fcpi_gateway', c.oid, 'UPDATE') AND has_table_privilege('fcpi_gateway', c.oid, 'DELETE'))
   || ' gateway_other_rights_on=' || count(*) FILTER (WHERE has_table_privilege('fcpi_gateway', c.oid, 'TRUNCATE,REFERENCES,TRIGGER'))
-  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'fcpi_platform' AND c.relkind = 'r';
+  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'fcpi_platform' AND c.relkind = 'r' AND c.relname <> 'schema_version';
+SELECT 'schema_version=' || (SELECT max(version) FROM fcpi_platform.schema_version)
+  || ' gateway_version_select=' || has_table_privilege('fcpi_gateway', 'fcpi_platform.schema_version', 'SELECT')
+  || ' gateway_version_write=' || has_table_privilege('fcpi_gateway', 'fcpi_platform.schema_version', 'INSERT,UPDATE,DELETE,TRUNCATE,REFERENCES,TRIGGER');
 SELECT 'gateway_schema_create=' || has_schema_privilege('fcpi_gateway', 'fcpi_platform', 'CREATE')
   || ' gateway_nuq_usage=' || has_schema_privilege('fcpi_gateway', 'nuq', 'USAGE')
   || ' gateway_retrieval_usage=' || has_schema_privilege('fcpi_gateway', 'fcpi_retrieval', 'USAGE')

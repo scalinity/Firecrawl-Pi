@@ -8,6 +8,8 @@ import { randomUUID } from "node:crypto";
 export const OPEN = ["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN", "QUEUED", "RUNNING"];
 export const UPSTREAM_ACTIVE = ["SUBMITTING", "SUBMISSION_UNCERTAIN", "QUEUED", "RUNNING"];
 export const FINISHED = ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"];
+// The ledger schema this code is written for (fcpi_platform.schema_version).
+export const SCHEMA_VERSION = 1;
 const LOCK = "hashtext('fcpi.platform.admission')";
 // Columns a transition may set; the names are code constants, never client input.
 const SETTABLE = new Set(["upstream_id", "submitter", "dispatch_attempts", "next_dispatch_at", "submit_started_at", "submitted_at", "deadline",
@@ -67,6 +69,7 @@ export function makeStore(cfg, log = () => {}) {
   return {
     pool,
     ping: () => q("SELECT 1"),
+    schemaVersion: async () => (await q("SELECT max(version) AS v FROM fcpi_platform.schema_version")).rows[0].v,
     close: () => pool.end(),
 
     // Admits one asynchronous submission. Returns { job, existing } or { conflict }; throws
