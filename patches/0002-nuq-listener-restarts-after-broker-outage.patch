@@ -1,0 +1,266 @@
+fcpi patch 0002: NuQ listener restarts after a broker outage (review finding R1, upstream #4244 / PR #4263)
+Upstream 7666c1f9, apps/api/src/services/worker/nuq.ts. The listener registers its consumer before it is
+published (as PR #4263 does), restarts with a 250 ms to 5 s backoff until the broker answers, and delivers
+completions missed while it was down. waitForJob() polls PostgreSQL when the listener cannot start, instead
+of failing a job the worker still completes.
+
+diff --git a/apps/api/src/services/worker/nuq.ts b/apps/api/src/services/worker/nuq.ts
+index db632c22310e45200ac7bd6fc7844226ff479fda..dc4ba83d3346302f8e0c4ae928f94670df46061b 100644
+--- a/apps/api/src/services/worker/nuq.ts
++++ b/apps/api/src/services/worker/nuq.ts
+@@ -119,6 +119,26 @@ class NuQ<JobData = any, JobReturnValue = any> {
+   } = {};
+   private listenerStarting = false;
+   private shuttingDown = false;
++  // fcpi (#4244): the RabbitMQ listener is restarted until the broker answers again, with a
++  // backoff from 250 ms to 5 s, so it returns after a broker restart without waiting for the
++  // next waiter to call startListener().
++  private listenerRetryMs = 250;
++  private listenerRetryTimer: NodeJS.Timeout | null = null;
++
++  private scheduleListenerRestart() {
++    if (this.shuttingDown || this.listenerRetryTimer) return;
++    const delay = this.listenerRetryMs;
++    this.listenerRetryMs = Math.min(this.listenerRetryMs * 2, 5000);
++    this.listenerRetryTimer = setTimeout(() => {
++      this.listenerRetryTimer = null;
++      this.startListener().catch(err =>
++        logger.error("Error in NuQ listener reconnect", {
++          err,
++          module: "nuq/rabbitmq",
++        }),
++      );
++    }, delay);
++  }
+ 
+   private async startListener() {
+     if (this.listener || this.shuttingDown || this.listenerStarting) return;
+@@ -126,9 +146,24 @@ class NuQ<JobData = any, JobReturnValue = any> {
+     if (config.NUQ_RABBITMQ_URL) {
+       this.listenerStarting = true;
+ 
++      // fcpi: a connection is closed again if setup fails after it opened.
++      let opened: amqp.ChannelModel | null = null;
+       try {
+         const connection = await amqp.connect(config.NUQ_RABBITMQ_URL);
++        opened = connection;
++        connection.on("error", err =>
++          logger.warn("NuQ listener connection error", {
++            err,
++            module: "nuq/rabbitmq",
++          }),
++        );
+         const channel = await connection.createChannel();
++        channel.on("error", err =>
++          logger.warn("NuQ listener channel error", {
++            err,
++            module: "nuq/rabbitmq",
++          }),
++        );
+         await channel.prefetch(5);
+         const queue = await channel.assertQueue(
+           this.queueName + ".listen." + this.listenChannelId,
+@@ -143,72 +178,76 @@ class NuQ<JobData = any, JobReturnValue = any> {
+           },
+         );
+ 
+-        this.listener = {
+-          type: "rabbitmq",
++        const listener = {
++          type: "rabbitmq" as const,
+           connection,
+           channel,
+           queue: queue.queue,
+         };
+-      } finally {
+-        this.listenerStarting = false;
+-      }
+ 
+-      let reconnectTimeout: NodeJS.Timeout | null = null;
++        let closed = false;
++        const onClose = () => {
++          if (closed) return;
++          closed = true;
++          logger.info("NuQ listener channel closed", {
++            module: "nuq/rabbitmq",
++          });
++          if (this.listener === listener) this.listener = null;
++          connection.close().catch(() => {});
++          this.scheduleListenerRestart();
++        };
+ 
+-      const onClose = function onClose() {
+-        logger.info("NuQ listener channel closed", {
+-          module: "nuq/rabbitmq",
+-        });
+-        this.listener = null;
++        connection.on("close", onClose);
++        channel.on("close", onClose);
++
++        // fcpi (#4244, as upstream PR #4263 proposes): the consumer is registered before the
++        // listener is published. A consume() that fails can then no longer leave a listener
++        // without a consumer, which startListener() would treat as running and never replace.
++        await channel.consume(
++          queue.queue,
++          msg => {
++            if (msg === null) {
++              onClose();
++              return;
++            }
+ 
+-        if (reconnectTimeout) clearTimeout(reconnectTimeout);
+-        reconnectTimeout = setTimeout(
+-          (() => {
+-            this.startListener().catch(err =>
+-              logger.error("Error in NuQ listener reconnect", {
+-                err,
+-                module: "nuq/rabbitmq",
+-              }),
+-            );
+-          }).bind(this),
+-          250,
+-        );
+-        return;
+-      }.bind(this);
+-
+-      this.listener.connection.on("close", onClose);
+-      this.listener.channel.on("close", onClose);
+-
+-      await this.listener.channel.consume(
+-        this.listener.queue,
+-        (msg => {
+-          if (msg === null) {
+-            onClose();
+-            return;
+-          }
++            logger.info("NuQ job received", {
++              module: "nuq/rabbitmq",
++              jobId: msg.properties.correlationId,
++              status: msg.content.toString(),
++            });
+ 
+-          logger.info("NuQ job received", {
+-            module: "nuq/rabbitmq",
+-            jobId: msg.properties.correlationId,
+-            status: msg.content.toString(),
+-          });
++            const jobId = msg.properties.correlationId as string;
++            const status = msg.content.toString() as "completed" | "failed";
+ 
+-          const jobId = msg.properties.correlationId as string;
+-          const status = msg.content.toString() as "completed" | "failed";
++            if (jobId in this.listens) {
++              this.listens[jobId].forEach(listener => listener(status));
++            }
++            delete this.listens[jobId];
+ 
+-          if (jobId in this.listens) {
+-            this.listens[jobId].forEach(listener => listener(status));
+-          }
+-          delete this.listens[jobId];
++            try {
++              channel.ack(msg);
++            } catch (err) {
++              logger.warn("NuQ listener ack failed", {
++                err,
++                module: "nuq/rabbitmq",
++              });
++            }
++          },
++          {
++            noAck: false,
++          },
++        );
+ 
+-          if (this.listener && this.listener.type === "rabbitmq") {
+-            this.listener.channel.ack(msg);
+-          }
+-        }).bind(this),
+-        {
+-          noAck: false,
+-        },
+-      );
++        this.listener = listener;
++        this.listenerRetryMs = 250;
++      } catch (err) {
++        opened?.close().catch(() => {});
++        this.scheduleListenerRestart();
++        throw err;
++      } finally {
++        this.listenerStarting = false;
++      }
+     } else {
+       this.listenerStarting = true;
+ 
+@@ -281,17 +320,21 @@ class NuQ<JobData = any, JobReturnValue = any> {
+       }
+     }
+ 
++    // fcpi: with the listener restarted after every broker outage, this pass also delivers the
++    // completions whose messages were lost while it was down; a failure here is logged, not thrown.
+     (async () => {
+       const backedUpJobs = (
+         await this.getJobs(Object.keys(this.listens))
+       ).filter(job => ["completed", "failed"].includes(job.status));
+       for (const job of backedUpJobs) {
+-        this.listens[job.id].forEach(listener =>
++        (this.listens[job.id] ?? []).forEach(listener =>
+           listener(job.status as "completed" | "failed"),
+         );
+         delete this.listens[job.id];
+       }
+-    })();
++    })().catch(err =>
++      logger.warn("NuQ backed-up job check failed", { err, module: "nuq" }),
++    );
+   }
+ 
+   private async addListener(
+@@ -1202,7 +1245,35 @@ class NuQ<JobData = any, JobReturnValue = any> {
+             try {
+               await this.addListener(id, listener);
+             } catch (e) {
+-              reject(e);
++              // fcpi (PC-NUQ-CONNECT): with the broker unreachable, wait by polling PostgreSQL
++              // instead of failing the caller for a job the worker still completes through its
++              // PostgreSQL path. The listener restarts on its own once the broker is back.
++              _logger.warn("NuQ listener unavailable, waiting by polling", {
++                module: "nuq",
++                method: "nuqWaitForJob",
++                error: e,
++                scrapeId: id,
++              });
++              if (timer) clearTimeout(timer);
++              const timeoutAt = timeout !== null ? Date.now() + timeout : null;
++              const poll = async () => {
++                try {
++                  const job = await this.getJob(id, _logger);
++                  if (job && ["completed", "failed"].includes(job.status)) {
++                    return job.status === "completed"
++                      ? resolve(job.returnvalue!)
++                      : reject(new Error(job.failedReason!));
++                  }
++                } catch (err) {
++                  return reject(err);
++                }
++                if (timeoutAt && Date.now() > timeoutAt) {
++                  return reject(new Error("Timed out"));
++                }
++                setTimeout(poll, 500);
++              };
++              poll();
++              return;
+             }
+ 
+             try {
+@@ -1545,6 +1616,10 @@ class NuQ<JobData = any, JobReturnValue = any> {
+   // === Cleanup
+   public async shutdown() {
+     this.shuttingDown = true;
++    if (this.listenerRetryTimer) {
++      clearTimeout(this.listenerRetryTimer);
++      this.listenerRetryTimer = null;
++    }
+     if (this.listener) {
+       const nl = this.listener;
+       this.listener = null;

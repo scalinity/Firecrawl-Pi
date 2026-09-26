@@ -1,0 +1,38 @@
+fcpi patch 0005: search has no direct DuckDuckGo fallback in the pi-resilient profile
+Upstream 7666c1f9, apps/api/src/search/index.ts and apps/api/src/search/v2/index.ts.
+
+diff --git a/apps/api/src/search/index.ts b/apps/api/src/search/index.ts
+index 027724329872460e2463184fca84b0676b8dcb60..4caa5826a1ae64dd9f436dd26482bdf4c74101de 100644
+--- a/apps/api/src/search/index.ts
++++ b/apps/api/src/search/index.ts
+@@ -57,6 +57,12 @@ export async function search({
+       });
+       if (results.length > 0) return results;
+     }
++    // fcpi: in the pi-resilient profile search has no direct fallback; DuckDuckGo would be
++    // direct home-IP egress outside the retrieval service (spec §10.2, §13).
++    if (config.PI_RETRIEVAL_URL) {
++      logger.info("No search provider result; the pi-resilient profile has no direct fallback");
++      return [];
++    }
+     logger.info("Using DuckDuckGo search");
+     const ddg = await ddgSearch(query, num_results, {
+       tbs,
+diff --git a/apps/api/src/search/v2/index.ts b/apps/api/src/search/v2/index.ts
+index 3dca1a8489003852c8d79b5e2dfb87e86dcc50d5..a4a0d95255127e0001f106471f9bdb0f6dc4a2cf 100644
+--- a/apps/api/src/search/v2/index.ts
++++ b/apps/api/src/search/v2/index.ts
+@@ -66,6 +66,13 @@ export async function search({
+       if (results.web && results.web.length > 0) return results;
+     }
+ 
++    // fcpi: in the pi-resilient profile search has no direct fallback; DuckDuckGo would be
++    // direct home-IP egress outside the retrieval service (spec §10.2, §13).
++    if (config.PI_RETRIEVAL_URL) {
++      logger.info("No search provider result; the pi-resilient profile has no direct fallback");
++      return {};
++    }
++
+     logger.info("Using DuckDuckGo search");
+     const ddgResults = await ddgSearch(query, num_results, {
+       tbs,

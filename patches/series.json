@@ -1,0 +1,177 @@
+{
+  "schema": "fcpi.patch-series/v1",
+  "upstream": {
+    "repository": "https://github.com/firecrawl/firecrawl",
+    "tag": "v2.11.162",
+    "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
+  },
+  "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
+  "result_tree": "928dbeb94222f94e8512fa90dcca89b448d76c50",
+  "series_sha256": "47802669261e5dc63767f9127511c67c0d884a12a1514dc1455dc3962e866038",
+  "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
+  "patches": [
+    {
+      "file": "0001-nuq-sender-survives-broker-outage.patch",
+      "sha256": "38241b2cdb2b6d68ae1fc567320764db761b975d48955eb1d793caa786f8e68e",
+      "reason": "A refused RabbitMQ connection ended the harness (review finding R2, PC-NUQ-CONNECT).",
+      "symbols": [
+        "apps/api/src/services/worker/nuq.ts NuQ.startSender",
+        "apps/api/src/services/worker/nuq.ts NuQ.prefetchJobs"
+      ],
+      "tests": [
+        "M2-B01 broker outage with no restart policy",
+        "M2-B02 worker killed mid-job"
+      ]
+    },
+    {
+      "file": "0002-nuq-listener-restarts-after-broker-outage.patch",
+      "sha256": "2fa40cc3914827e34ee2226c61fb35ed7fdd11417d3620f7d6e719edf5d92c01",
+      "reason": "After a broker restart the listener was never re-established while the process survived (review finding R1, upstream #4244 / PR #4263).",
+      "symbols": [
+        "apps/api/src/services/worker/nuq.ts NuQ.startListener",
+        "apps/api/src/services/worker/nuq.ts NuQ.scheduleListenerRestart (new)",
+        "apps/api/src/services/worker/nuq.ts NuQ.waitForJob",
+        "apps/api/src/services/worker/nuq.ts NuQ.shutdown"
+      ],
+      "tests": [
+        "M2-B01 listen queue has one consumer within 60 s and a new synchronous scrape returns"
+      ]
+    },
+    {
+      "file": "0003-pi-resilient-engine-adapter.patch",
+      "sha256": "91be2610ef9fb141683adb57c480bdcf14d90ea00c05672f57ea0ab438049438",
+      "reason": "The engine registration and result translation spec §8.1 requires; every page acquisition goes to the retrieval service.",
+      "symbols": [
+        "apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts scrapeURLWithPiResilient (new)",
+        "apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts piFetch, usePiResilient (new)",
+        "apps/api/src/scraper/scrapeURL/engines/index.ts Engine, engines, engineHandlers, engineMRTs, engineOptions, buildFallbackList",
+        "apps/api/src/scraper/scrapeURL/index.ts scrapeURLLoop (fatal-error list)",
+        "apps/api/src/scraper/scrapeURL/error.ts PiRetrievalError (new)",
+        "apps/api/src/lib/error.ts ErrorCodes",
+        "apps/api/src/lib/error-serde.ts errorMap",
+        "apps/api/src/config.ts configSchema (PI_RETRIEVAL_URL, PI_RETRIEVAL_TOKEN), validatedConfigSchema",
+        "apps/api/src/controllers/v2/types.ts applyScrapeOptionsDefaults"
+      ],
+      "tests": [
+        "M2-P01 source-path coverage",
+        "M2-R01..R06 retrieval fixtures",
+        "M2-A01 attempt budget"
+      ]
+    },
+    {
+      "file": "0004-guarded-auxiliary-downloads.patch",
+      "sha256": "776cf0dd6bf9f76da49cd8080b20861ea48470aa4fea27bcb36dc612e927b585",
+      "reason": "File downloads and map's redirect resolution fetched directly with the core's own dispatcher (spec §8.4).",
+      "symbols": [
+        "apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts fetchFileToBuffer, downloadFile, guardedFetch (new)",
+        "apps/api/src/lib/validateUrl.ts resolveRedirects",
+        "apps/api/src/scraper/crawler/sitemap.ts _getSitemapXMLGZ",
+        "apps/api/src/scraper/WebScraper/sitemap.ts getLinksFromSitemap"
+      ],
+      "tests": [
+        "M2-P01 source-path coverage"
+      ]
+    },
+    {
+      "file": "0005-search-without-direct-fallback.patch",
+      "sha256": "924735ea34d8529b97087d9b179bac4f8b247bdc14cdd6e06dc1ac163429bb38",
+      "reason": "Search fell back to DuckDuckGo over the home connection whenever SearXNG was unset or empty (evidence/M0/source-review.json S15).",
+      "symbols": [
+        "apps/api/src/search/index.ts search",
+        "apps/api/src/search/v2/index.ts search"
+      ],
+      "tests": [
+        "M2-P01 source-path coverage (search)"
+      ]
+    },
+    {
+      "file": "0006-reproducible-arm64-build.patch",
+      "sha256": "b59e8e98908dabaa8b36622ced1f474e8833eb91ef12acaec3cf65281894b224",
+      "reason": "The upstream Dockerfile floats every base image, the Rust toolchain and the crate graph, and downloads the FoundationDB client unchecked (decisions D4, D6).",
+      "symbols": [
+        "apps/api/Dockerfile",
+        "apps/api/native/Cargo.lock (new)",
+        "apps/api/native/rust-toolchain.toml (new)",
+        "apps/api/native/.gitignore",
+        "apps/api/native/package.json scripts.build"
+      ],
+      "tests": [
+        "M2-D01 build reproducibility"
+      ]
+    }
+  ],
+  "coverage": [
+    {
+      "path": "scrape pages (v0, v1, v2, batch members)",
+      "reaches": "scrapeURL -> buildFallbackList",
+      "covered_by": "0003: the adapter is the only engine",
+      "call_site": "apps/api/src/scraper/scrapeURL/engines/index.ts buildFallbackList"
+    },
+    {
+      "path": "crawl pages",
+      "reaches": "scrape-worker processJob -> runWebScraper -> scrapeURL, one NuQ job per page",
+      "covered_by": "0003",
+      "call_site": "apps/api/src/main/runWebScraper.ts runWebScraper"
+    },
+    {
+      "path": "robots.txt",
+      "reaches": "lib/robots-txt.ts fetchRobotsTxt -> scrapeURL with forceEngine including \"fetch\"",
+      "covered_by": "0003: forced engines map to the adapter",
+      "call_site": "apps/api/src/lib/robots-txt.ts fetchRobotsTxt"
+    },
+    {
+      "path": "sitemaps (plain)",
+      "reaches": "crawler/sitemap.ts and WebScraper/sitemap.ts -> scrapeURL with forceEngine including \"fetch\"",
+      "covered_by": "0003",
+      "call_site": "apps/api/src/scraper/crawler/sitemap.ts getSitemapXML; apps/api/src/scraper/WebScraper/sitemap.ts getLinksFromSitemap"
+    },
+    {
+      "path": "sitemaps (.gz)",
+      "reaches": "fetchFileToBuffer",
+      "covered_by": "0004",
+      "call_site": "apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts fetchFileToBuffer"
+    },
+    {
+      "path": "PDF and document downloads",
+      "reaches": "the adapter returns the bytes and hands them to scrapePDF / scrapeDocument as a prefetch; any remaining engine download uses downloadFile.ts",
+      "covered_by": "0003, 0004",
+      "call_site": "apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts; apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts"
+    },
+    {
+      "path": "map redirect resolution",
+      "reaches": "lib/validateUrl.ts resolveRedirects",
+      "covered_by": "0004",
+      "call_site": "apps/api/src/lib/validateUrl.ts resolveRedirects"
+    },
+    {
+      "path": "search queries",
+      "reaches": "search/index.ts, search/v2/index.ts -> searxng_search at SEARXNG_ENDPOINT, the retrieval service's SearXNG-compatible route",
+      "covered_by": "0005 removes the DuckDuckGo fallback; deploy/compose.yaml points SEARXNG_ENDPOINT at the retrieval service",
+      "call_site": "apps/api/src/search/v2/searxng.ts searxng_search"
+    },
+    {
+      "path": "search result pages",
+      "reaches": "search/scrape.ts -> processJobInternal -> scrapeURL",
+      "covered_by": "0003",
+      "call_site": "apps/api/src/search/scrape.ts"
+    },
+    {
+      "path": "browser subresources",
+      "reaches": "Chromium in the browser worker, whose only route out is the retrieval service's forward proxy",
+      "covered_by": "services/browser, services/retrieval (not an upstream patch)",
+      "call_site": "services/retrieval proxy; deploy/compose.yaml fcpi_browser (internal)"
+    },
+    {
+      "path": "webhook delivery",
+      "reaches": "services/webhook/delivery.ts",
+      "covered_by": "disabled: DISABLE_WEBHOOK_DELIVERY=true",
+      "call_site": "apps/api/src/services/webhook/delivery.ts shouldSendEvent"
+    },
+    {
+      "path": "anything unlisted",
+      "reaches": "a direct connection from the core",
+      "covered_by": "none needed: the core sits only on internal networks, so a direct connection gets ENETUNREACH (M2-E02)",
+      "call_site": "deploy/compose.yaml firecrawl-core networks"
+    }
+  ]
+}

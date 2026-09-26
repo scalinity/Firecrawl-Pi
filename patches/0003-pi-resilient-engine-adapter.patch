@@ -1,0 +1,560 @@
+fcpi patch 0003: the pi-resilient engine adapter (FIRECRAWL_PI_SPEC.md §8)
+Upstream 7666c1f9. Adds engines/pi-resilient (the adapter and the retrieval-service client) and registers it as
+the only engine when PI_RETRIEVAL_URL is set; config.ts refuses the profile beside another engine or
+ALLOW_LOCAL_WEBHOOKS. Forced "fetch" engines (robots.txt, sitemaps) go to it, the typed PiRetrievalError ends
+the engine loop, and skipTlsVerification defaults to false in the profile.
+
+diff --git a/apps/api/src/config.ts b/apps/api/src/config.ts
+index 2d2a600ff6106004c10abcae4cfdf747090ca9e3..f0350cfbbdf51250d7661086f41105377f46c02f 100644
+--- a/apps/api/src/config.ts
++++ b/apps/api/src/config.ts
+@@ -253,6 +253,11 @@ const configSchema = z.object({
+ 
+   // External Services
+   PLAYWRIGHT_MICROSERVICE_URL: z.string().optional(),
++  // fcpi: the pi-resilient profile. With PI_RETRIEVAL_URL set, every acquisition goes through
++  // the project retrieval service (scraper/scrapeURL/engines/pi-resilient); the token is the
++  // core's credential for it, loaded from a secret file by the container entrypoint.
++  PI_RETRIEVAL_URL: emptyStringAsUndefined(z.url()),
++  PI_RETRIEVAL_TOKEN: emptyStringAsUndefined(z.string().min(32)),
+   HTML_TO_MARKDOWN_SERVICE_URL: z.string().optional(),
+   SMART_SCRAPE_API_URL: z.string().optional(),
+ 
+@@ -412,6 +417,26 @@ const configSchema = z.object({
+ });
+ 
+ const validatedConfigSchema = configSchema.superRefine((value, context) => {
++  // fcpi: the pi-resilient profile starts only when it is complete and exclusive: no other
++  // acquisition engine, and no global switch that disables the fetch path's private-address check.
++  if (value.PI_RETRIEVAL_URL !== undefined || value.PI_RETRIEVAL_TOKEN !== undefined) {
++    const conflicts = [
++      ["PI_RETRIEVAL_URL", value.PI_RETRIEVAL_URL === undefined],
++      ["PI_RETRIEVAL_TOKEN", value.PI_RETRIEVAL_TOKEN === undefined],
++      ["FIRE_ENGINE_BETA_URL", !!value.FIRE_ENGINE_BETA_URL],
++      ["PLAYWRIGHT_MICROSERVICE_URL", !!value.PLAYWRIGHT_MICROSERVICE_URL],
++      ["ALLOW_LOCAL_WEBHOOKS", value.ALLOW_LOCAL_WEBHOOKS === true],
++    ] as const;
++    for (const [path, bad] of conflicts) {
++      if (bad) {
++        context.addIssue({
++          code: "custom",
++          path: [path],
++          message: "the pi-resilient profile needs PI_RETRIEVAL_URL and PI_RETRIEVAL_TOKEN, and no other engine or ALLOW_LOCAL_WEBHOOKS",
++        });
++      }
++    }
++  }
+   for (const error of getMcpActionLogConfigErrors(value)) {
+     context.addIssue({
+       code: "custom",
+diff --git a/apps/api/src/controllers/v2/types.ts b/apps/api/src/controllers/v2/types.ts
+index 75266121dcc6abd62a22f67e01753a8a6492cee3..6903da32f287f6bd01ea96cb9af52623947f36d3 100644
+--- a/apps/api/src/controllers/v2/types.ts
++++ b/apps/api/src/controllers/v2/types.ts
+@@ -736,7 +736,9 @@ export const applyScrapeOptionsDefaults = <T extends ScrapeOptionsBase>(
+   ...obj,
+   skipTlsVerification:
+     obj.skipTlsVerification ??
+-    ((obj.headers && Object.keys(obj.headers).length > 0) ||
++    // fcpi: the pi-resilient profile verifies TLS by default and refuses to skip it (spec §9.2).
++    (config.PI_RETRIEVAL_URL ||
++    (obj.headers && Object.keys(obj.headers).length > 0) ||
+     (obj.actions && obj.actions.length > 0)
+       ? false
+       : true),
+diff --git a/apps/api/src/lib/error-serde.ts b/apps/api/src/lib/error-serde.ts
+index 2be6cba1852f05abca4165b4b83dd0cb4a56cf9a..32d26439272118df5163de9819dcace6f1918ec9 100644
+--- a/apps/api/src/lib/error-serde.ts
++++ b/apps/api/src/lib/error-serde.ts
+@@ -35,6 +35,7 @@ import {
+   VideoUnsupportedUrlError,
+   MediaAccessDeniedError,
+   XTwitterConfigurationError,
++  PiRetrievalError,
+ } from "../scraper/scrapeURL/error";
+ import { UnsafeDomainBlockedError } from "./threat-protection/error";
+ 
+@@ -73,6 +74,7 @@ const errorMap: Record<ErrorCodes, any> = {
+   SCRAPE_VIDEO_UNSUPPORTED_URL: VideoUnsupportedUrlError,
+   SCRAPE_MEDIA_ACCESS_DENIED: MediaAccessDeniedError,
+   SCRAPE_X_TWITTER_CONFIGURATION_ERROR: XTwitterConfigurationError,
++  SCRAPE_FCPI_RETRIEVAL: PiRetrievalError,
+   MAP_FAILED: MapFailedError,
+   unsafe_domain_blocked: UnsafeDomainBlockedError,
+ 
+diff --git a/apps/api/src/lib/error.ts b/apps/api/src/lib/error.ts
+index f906e7ee26f1ef749af7f04b569cd1071a900f6f..378101af0895e1b69c184c036cb7ff3bb5ba321a 100644
+--- a/apps/api/src/lib/error.ts
++++ b/apps/api/src/lib/error.ts
+@@ -30,6 +30,8 @@ export type ErrorCodes =
+   | "SCRAPE_VIDEO_UNSUPPORTED_URL"
+   | "SCRAPE_MEDIA_ACCESS_DENIED"
+   | "SCRAPE_X_TWITTER_CONFIGURATION_ERROR"
++  // fcpi: a typed failure from the project retrieval service (pi-resilient profile)
++  | "SCRAPE_FCPI_RETRIEVAL"
+   | "PARSE_UNSUPPORTED_OPTIONS"
+   | "CRAWL_DENIAL"
+   | "MAP_FAILED"
+diff --git a/apps/api/src/scraper/scrapeURL/engines/index.ts b/apps/api/src/scraper/scrapeURL/engines/index.ts
+index 5ac7621068c5ace2cd51c6514eef3daf8b6fff56..dea23feaf5cfb7aaa008641651ef98b7f5f4c758 100644
+--- a/apps/api/src/scraper/scrapeURL/engines/index.ts
++++ b/apps/api/src/scraper/scrapeURL/engines/index.ts
+@@ -36,6 +36,12 @@ import {
+   canUseExchangeForRequest,
+   type ExchangeScrapeMetadata,
+ } from "../../../lib/exchange";
++import {
++  piResilientFeatures,
++  piResilientMaxReasonableTime,
++  scrapeURLWithPiResilient,
++  usePiResilient,
++} from "./pi-resilient";
+ 
+ export type Engine =
+   | "exchange"
+@@ -52,7 +58,8 @@ export type Engine =
+   | "index"
+   | "index;documents"
+   | "wikipedia"
+-  | "x-twitter";
++  | "x-twitter"
++  | "pi-resilient";
+ 
+ const useFireEngine =
+   config.FIRE_ENGINE_BETA_URL !== "" &&
+@@ -69,7 +76,11 @@ const useXTwitter =
+   (config.XAI_API_KEY !== undefined && config.XAI_API_KEY !== "") ||
+   config.USE_DB_AUTHENTICATION === true;
+ 
+-const engines: Engine[] = [
++// fcpi: in the pi-resilient profile the adapter is the only engine; config.ts refuses to start
++// the profile beside fire-engine or the Playwright service.
++const engines: Engine[] = usePiResilient
++  ? ["pi-resilient"]
++  : [
+   ...(useXTwitter ? ["x-twitter" as const] : []),
+   ...(useWikipedia ? ["wikipedia" as const] : []),
+   ...(useIndex ? ["index" as const, "index;documents" as const] : []),
+@@ -190,6 +201,7 @@ const engineHandlers: {
+   document: scrapeDocument,
+   wikipedia: scrapeURLWithWikipedia,
+   "x-twitter": scrapeURLWithXTwitter,
++  "pi-resilient": scrapeURLWithPiResilient,
+ };
+ 
+ const engineMRTs: {
+@@ -216,6 +228,7 @@ const engineMRTs: {
+   document: documentMaxReasonableTime,
+   wikipedia: wikipediaMaxReasonableTime,
+   "x-twitter": xTwitterMaxReasonableTime,
++  "pi-resilient": piResilientMaxReasonableTime,
+ };
+ 
+ const engineOptions: {
+@@ -543,6 +556,10 @@ const engineOptions: {
+     },
+     quality: 1500,
+   },
++  "pi-resilient": {
++    features: piResilientFeatures,
++    quality: 5,
++  },
+ };
+ 
+ export function shouldUseIndex(meta: Meta) {
+@@ -578,6 +595,23 @@ export async function buildFallbackList(meta: Meta): Promise<
+     unsupportedFeatures: Set<FeatureFlag>;
+   }[]
+ > {
++  // fcpi: in the pi-resilient profile every acquisition, including the ones upstream forces to
++  // "fetch" (robots.txt and sitemaps), goes to the adapter, which refuses what it cannot serve
++  // with a precise error. Index-only requests (lockdown) have no index here and fail.
++  if (usePiResilient) {
++    if (meta.options.lockdown || meta.internalOptions.agentIndexOnly) {
++      return [];
++    }
++    return [
++      {
++        engine: "pi-resilient",
++        unsupportedFeatures: new Set(
++          [...meta.featureFlags].filter(f => !piResilientFeatures[f]),
++        ),
++      },
++    ];
++  }
++
+   if (
+     !meta.internalOptions.agentIndexOnly &&
+     meta.internalOptions.forceEngine === undefined
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..7f821920e45c9ee641a8c1b6f2763298aef26346
+--- /dev/null
++++ b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts
+@@ -0,0 +1,83 @@
++// fcpi: auxiliary downloads in the pi-resilient profile: .gz sitemaps, PDF and document
++// downloads outside the adapter, and map's redirect resolution. They go through the retrieval
++// service's POST /internal/fetch, under the same SSRF, redirect, size, pacing and Cloud-denylist
++// policy as page acquisitions, without the quality check or the browser. The service streams
++// the target's body back and names the target's status, content type and final URL in x-fcpi-*
++// headers; this rebuilds the target's response from them, so callers read it unchanged.
++import * as undici from "undici";
++import { randomUUID } from "node:crypto";
++import { config } from "../../../../config";
++import { PiRetrievalError } from "../../error";
++
++export const usePiResilient =
++  config.PI_RETRIEVAL_URL !== undefined && config.PI_RETRIEVAL_URL !== "";
++
++const NULL_BODY_STATUSES = new Set([101, 204, 205, 304]);
++
++export async function piFetch(
++  url: string,
++  init: {
++    method?: "GET" | "HEAD";
++    headers?: Record<string, string>;
++    signal?: AbortSignal | null;
++    maxBytes?: number;
++    purpose: "sitemap" | "document" | "discovery";
++    timeoutMs?: number;
++  },
++): Promise<undici.Response> {
++  let res: undici.Response;
++  try {
++    res = await undici.fetch(`${config.PI_RETRIEVAL_URL}/internal/fetch`, {
++      method: "POST",
++      headers: {
++        authorization: `Bearer ${config.PI_RETRIEVAL_TOKEN}`,
++        "content-type": "application/json",
++      },
++      body: JSON.stringify({
++        requestId: randomUUID(),
++        url,
++        method: init.method ?? "GET",
++        headers: init.headers ?? {},
++        purpose: init.purpose,
++        maxBytes: init.maxBytes ?? null,
++        deadline: new Date(Date.now() + (init.timeoutMs ?? 30_000)).toISOString(),
++      }),
++      signal: init.signal ?? undefined,
++    });
++  } catch (error) {
++    if (init.signal?.aborted) throw error;
++    throw new PiRetrievalError(
++      "RETRIEVAL_SERVICE_UNAVAILABLE",
++      "The retrieval service could not be reached.",
++      true,
++    );
++  }
++  if (res.status !== 200) {
++    const body = (await res.json().catch(() => null)) as {
++      failure?: { class: string; detail: string; retryable: boolean; retryAfter: number | null };
++    } | null;
++    const f = body?.failure;
++    throw new PiRetrievalError(
++      f?.class ?? "RETRIEVAL_SERVICE_ERROR",
++      f?.detail ?? `The retrieval service answered HTTP ${res.status}.`,
++      f?.retryable ?? res.status >= 500,
++      f?.retryAfter ?? null,
++    );
++  }
++  const status = Number(res.headers.get("x-fcpi-target-status"));
++  const headers = new undici.Headers();
++  const contentType = res.headers.get("content-type");
++  if (contentType) headers.set("content-type", contentType);
++  const targetLength = res.headers.get("x-fcpi-target-content-length");
++  if (targetLength) headers.set("content-length", targetLength);
++  const bodiless = NULL_BODY_STATUSES.has(status) || init.method === "HEAD";
++  if (bodiless) await res.body?.cancel().catch(() => {});
++  const out = new undici.Response(bodiless ? null : res.body, {
++    status,
++    headers,
++  });
++  Object.defineProperty(out, "url", {
++    value: res.headers.get("x-fcpi-final-url") ?? url,
++  });
++  return out;
++}
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
+new file mode 100644
+index 0000000000000000000000000000000000000000..eb6c14e67ea7b0ebadb53e27b02e027e070a97d9
+--- /dev/null
++++ b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
+@@ -0,0 +1,202 @@
++// fcpi: the pi-resilient engine adapter (FIRECRAWL_PI_SPEC.md §8.1). In the pi-resilient
++// profile (PI_RETRIEVAL_URL set) every acquisition is one call to the project retrieval
++// service's POST /internal/acquire. The service owns target validation, SSRF and redirect
++// checks, egress, domain pacing, global permits, the four-attempt budget per logical page
++// and browser rendering. This file only translates: the request's fields go out, an
++// EngineScrapeResult or a typed PiRetrievalError comes back. PDFs and documents are parsed by
++// the upstream engines from the bytes this acquisition returned, never downloaded again.
++import * as undici from "undici";
++import { randomUUID } from "node:crypto";
++import { config } from "../../../../config";
++import type { Meta } from "../..";
++import type { EngineScrapeResult, FeatureFlag } from "..";
++import { AddFeatureError, PiRetrievalError } from "../../error";
++import { specialtyScrapeCheck } from "../utils/specialtyHandler";
++import { scrapePDF } from "../pdf";
++import { scrapeDocument } from "../document";
++
++// Defined in ./fetch, a leaf module, so the download helpers can use it without an import cycle.
++export { usePiResilient } from "./fetch";
++
++// The features this deployment really serves. Screenshots and actions have result hooks in
++// the retrieval and browser services but stay unregistered until M7; proxies, geo and stealth
++// arrive with M6; skipTlsVerification is refused, because TLS is always verified (spec §9.2).
++export const piResilientFeatures: { [F in FeatureFlag]: boolean } = {
++  actions: false,
++  waitFor: true,
++  screenshot: false,
++  "screenshot@fullScreen": false,
++  pdf: true,
++  document: true,
++  audio: false,
++  video: false,
++  atsv: false,
++  location: false,
++  mobile: false,
++  skipTlsVerification: false,
++  useFastMode: true,
++  stealthProxy: false,
++  branding: false,
++  disableAdblock: true,
++};
++
++// The service's own ceiling is 90 s from a logical page's first attempt (spec §9.3).
++const MAX_ACQUISITION_MS = 90_000;
++
++function purposeOf(meta: Meta): "page" | "robots" | "sitemap" {
++  if (meta.internalOptions.teamId === "robots-txt") return "robots";
++  if (meta.internalOptions.teamId === "sitemap") return "sitemap";
++  return "page";
++}
++
++export async function scrapeURLWithPiResilient(
++  meta: Meta,
++): Promise<EngineScrapeResult> {
++  const unsupported = [...meta.featureFlags].filter(
++    f => !piResilientFeatures[f],
++  );
++  if (unsupported.length > 0) {
++    throw new PiRetrievalError(
++      "UNSUPPORTED_CAPABILITY",
++      `This deployment does not offer: ${unsupported.join(", ")}.`,
++    );
++  }
++
++  const remaining = Math.min(
++    meta.abort.scrapeTimeout() ?? MAX_ACQUISITION_MS,
++    MAX_ACQUISITION_MS,
++  );
++  const request = {
++    requestId: randomUUID(),
++    // The scrape job's id: stable across NuQ requeues and upstream's own retries, so all of
++    // them draw on one attempt budget in the service (review finding R3).
++    logicalAcquisitionId: meta.id,
++    principalId: meta.internalOptions.teamId ?? null,
++    jobId: meta.id,
++    crawlId: meta.internalOptions.crawlId ?? null,
++    url: meta.rewrittenUrl ?? meta.url,
++    deadline: new Date(Date.now() + Math.max(remaining, 0)).toISOString(),
++    purpose: purposeOf(meta),
++    expect: meta.featureFlags.has("pdf")
++      ? "pdf"
++      : meta.featureFlags.has("document")
++        ? "document"
++        : "html",
++    headers: meta.options.headers ?? {},
++    waitFor: meta.options.waitFor ?? 0,
++    fast: meta.featureFlags.has("useFastMode"),
++  };
++
++  let response: undici.Response;
++  try {
++    response = await undici.fetch(`${config.PI_RETRIEVAL_URL}/internal/acquire`, {
++      method: "POST",
++      headers: {
++        authorization: `Bearer ${config.PI_RETRIEVAL_TOKEN}`,
++        "content-type": "application/json",
++      },
++      body: JSON.stringify(request),
++      signal: meta.abort.asSignal(),
++    });
++  } catch (error) {
++    if (meta.abort.asSignal().aborted) throw error;
++    throw new PiRetrievalError(
++      "RETRIEVAL_SERVICE_UNAVAILABLE",
++      "The retrieval service could not be reached.",
++      true,
++    );
++  }
++  if (response.status !== 200) {
++    throw new PiRetrievalError(
++      "RETRIEVAL_SERVICE_ERROR",
++      `The retrieval service answered HTTP ${response.status}.`,
++      response.status >= 500,
++    );
++  }
++  const result = (await response.json()) as {
++    ok: boolean;
++    attemptId: string;
++    attemptsUsed: number;
++    strategy: string | null;
++    finalUrl: string;
++    targetStatus: number;
++    contentType: string | null;
++    body?: string;
++    bodyBase64?: string;
++    bytes: number;
++    quality?: { verdict: string };
++    failure?: {
++      class: string;
++      detail: string;
++      retryable: boolean;
++      retryAfter: number | null;
++    } | null;
++  };
++
++  meta.logger.info("pi-resilient acquisition", {
++    logicalAcquisitionId: request.logicalAcquisitionId,
++    attemptId: result.attemptId,
++    attemptsUsed: result.attemptsUsed,
++    strategy: result.strategy,
++    targetStatus: result.targetStatus,
++    bytes: result.bytes,
++    verdict: result.quality?.verdict ?? null,
++    failure: result.failure?.class ?? null,
++  });
++
++  if (!result.ok) {
++    const f = result.failure ?? {
++      class: "RETRIEVAL_FAILED",
++      detail: "",
++      retryable: false,
++      retryAfter: null,
++    };
++    throw new PiRetrievalError(f.class, f.detail, f.retryable, f.retryAfter);
++  }
++
++  const contentType = result.contentType ?? undefined;
++  // PDFs, documents and other binary types follow upstream's content-type rules; the file is
++  // the one this acquisition returned, handed to the parser as a prefetch.
++  if (result.bodyBase64 !== undefined) {
++    try {
++      await specialtyScrapeCheck(
++        meta.logger.child({ method: "pi-resilient/specialtyScrapeCheck" }),
++        contentType ? { "content-type": contentType } : undefined,
++        {
++          url: result.finalUrl,
++          pageStatusCode: result.targetStatus,
++          content: "",
++          file: { name: "", content: result.bodyBase64 },
++          usedMobileProxy: false,
++        } as any,
++      );
++    } catch (error) {
++      if (error instanceof AddFeatureError && error.pdfPrefetch) {
++        return await scrapePDF({ ...meta, pdfPrefetch: error.pdfPrefetch });
++      }
++      if (error instanceof AddFeatureError && error.documentPrefetch) {
++        return await scrapeDocument({
++          ...meta,
++          documentPrefetch: error.documentPrefetch,
++        });
++      }
++      throw error;
++    }
++    throw new PiRetrievalError(
++      "UNSUPPORTED_CONTENT",
++      `Content type ${contentType ?? "(none)"} is neither HTML, a PDF nor a document.`,
++    );
++  }
++
++  return {
++    url: result.finalUrl,
++    html: result.body ?? "",
++    statusCode: result.targetStatus,
++    contentType,
++    proxyUsed: "basic",
++  };
++}
++
++export function piResilientMaxReasonableTime(meta: Meta): number {
++  return MAX_ACQUISITION_MS + (meta.options.waitFor ?? 0);
++}
+diff --git a/apps/api/src/scraper/scrapeURL/error.ts b/apps/api/src/scraper/scrapeURL/error.ts
+index 1e28043bdaeca7e04f6315f90548869ccad8a0e7..de18259d12c687460b216e1c2a300028b43b2fa3 100644
+--- a/apps/api/src/scraper/scrapeURL/error.ts
++++ b/apps/api/src/scraper/scrapeURL/error.ts
+@@ -719,3 +719,47 @@ export class ScrapeRetryLimitError extends TransportableError {
+     return x;
+   }
+ }
++
++// fcpi: a typed failure returned by the project retrieval service, or a capability this
++// deployment does not offer. The class names come from FIRECRAWL_PI_SPEC.md §9.2 (for example
++// AUTH_REQUIRED, RATE_LIMITED, BLOCKED_PUBLIC_CONTENT, SSRF_DENIED, ATTEMPT_BUDGET_EXHAUSTED,
++// PROXY_REQUIRED, UNSUPPORTED_CAPABILITY). It is fatal to the engine loop, so no upstream retry
++// or feature toggle acquires the page again after the service has decided.
++export class PiRetrievalError extends TransportableError {
++  constructor(
++    public failureClass: string,
++    public detail: string,
++    public retryable: boolean = false,
++    public retryAfter: number | null = null,
++  ) {
++    super(
++      "SCRAPE_FCPI_RETRIEVAL",
++      `Retrieval failed: ${failureClass}. ${detail}` +
++        (retryAfter !== null ? ` Retry after ${retryAfter} s.` : ""),
++    );
++  }
++
++  serialize() {
++    return {
++      ...super.serialize(),
++      failureClass: this.failureClass,
++      detail: this.detail,
++      retryable: this.retryable,
++      retryAfter: this.retryAfter,
++    };
++  }
++
++  static deserialize(
++    _: ErrorCodes,
++    data: ReturnType<typeof this.prototype.serialize>,
++  ) {
++    const x = new PiRetrievalError(
++      data.failureClass,
++      data.detail,
++      data.retryable,
++      data.retryAfter,
++    );
++    x.stack = data.stack;
++    return x;
++  }
++}
+diff --git a/apps/api/src/scraper/scrapeURL/index.ts b/apps/api/src/scraper/scrapeURL/index.ts
+index fa13ae67d7025782836e5cc03887f126a83ef9d2..bd2027101f978908f05ce4d9263c50a0a78ba53f 100644
+--- a/apps/api/src/scraper/scrapeURL/index.ts
++++ b/apps/api/src/scraper/scrapeURL/index.ts
+@@ -53,6 +53,7 @@ import {
+   ScrapeRetryLimitError,
+   BrandingNotSupportedError,
+   XTwitterConfigurationError,
++  PiRetrievalError,
+ } from "./error";
+ import { ScrapeRetryTracker } from "./retryTracker";
+ import { executeTransformers } from "./transformers";
+@@ -849,7 +850,9 @@ async function scrapeURLLoop(meta: Meta): Promise<ScrapeUrlResponse> {
+               error.error instanceof ProxySelectionError ||
+               error.error instanceof NoCachedDataError ||
+               error.error instanceof AgentIndexOnlyError ||
+-              error.error instanceof XTwitterConfigurationError
++              error.error instanceof XTwitterConfigurationError ||
++              // fcpi: the retrieval service has decided; nothing upstream acquires again.
++              error.error instanceof PiRetrievalError
+             ) {
+               throw error.error;
+             } else if (error.error instanceof LLMRefusalError) {

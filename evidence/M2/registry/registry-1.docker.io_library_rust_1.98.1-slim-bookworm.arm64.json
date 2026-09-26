@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 2,
+  "mediaType": "application/vnd.oci.image.manifest.v1+json",
+  "config": {
+    "mediaType": "application/vnd.oci.image.config.v1+json",
+    "digest": "sha256:17156b215e21a0b10b1d7576ee47b656ef76bb4f59575f396adcf59320dc6d8a",
+    "size": 3122
+  },
+  "layers": [
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:333125b5cee9fb6718bdcb523fc93b4adc71b7c37ada6146a20c193430e549b9",
+      "size": 28123680
+    },
+    {
+      "mediaType": "application/vnd.oci.image.layer.v1.tar+gzip",
+      "digest": "sha256:19b9a6316d31dfc368a367f8ce730b2dedb89578a5050f48554fdc9be3624982",
+      "size": 247987923
+    }
+  ],
+  "annotations": {
+    "com.docker.official-images.bashbrew.arch": "arm64v8",
+    "org.opencontainers.image.base.digest": "sha256:0c8bbb8e987a035fe1d9704eb2e571b7e9a836e1caa46345290674b45b69e417",
+    "org.opencontainers.image.base.name": "debian:bookworm-slim",
+    "org.opencontainers.image.created": "2026-09-19T01:15:07Z",
+    "org.opencontainers.image.revision": "4dc5209f5e720a3d6b5eb336cabb69a424a822c1",
+    "org.opencontainers.image.source": "https://github.com/rust-lang/docker-rust.git#4dc5209f5e720a3d6b5eb336cabb69a424a822c1:stable/bookworm/slim",
+    "org.opencontainers.image.url": "https://hub.docker.com/_/rust",
+    "org.opencontainers.image.version": "1-slim-bookworm"
+  }
+}

@@ -1,0 +1,174 @@
+fcpi patch 0004: auxiliary downloads through the retrieval service
+Upstream 7666c1f9. downloadFile.ts (fetchFileToBuffer, downloadFile) and lib/validateUrl.ts resolveRedirects
+use the retrieval service's /internal/fetch in the pi-resilient profile; both sitemap gunzips are bounded at
+the sitemap protocol's 50 MB.
+
+diff --git a/apps/api/src/lib/validateUrl.ts b/apps/api/src/lib/validateUrl.ts
+index a73c06f0dbc4c0abf69e37456b11a738f30fdebc..a6d98bc72d36f7c667b4c3b0932c3958ba8f1793 100644
+--- a/apps/api/src/lib/validateUrl.ts
++++ b/apps/api/src/lib/validateUrl.ts
+@@ -1,5 +1,9 @@
+ import * as undici from "undici";
+ import { getSecureDispatcher } from "../scraper/scrapeURL/engines/utils/safeFetch";
++import {
++  piFetch,
++  usePiResilient,
++} from "../scraper/scrapeURL/engines/pi-resilient/fetch";
+ 
+ export const protocolIncluded = (url: string) => {
+   // if :// not in the start of the url assume http (maybe https?)
+@@ -207,12 +211,22 @@ export async function resolveRedirects(
+       : AbortSignal.timeout(2000);
+ 
+     try {
+-      const response = await undici.fetch(targetUrl, {
+-        method,
+-        redirect: "follow",
+-        dispatcher: getSecureDispatcher(false),
+-        signal,
+-      });
++      // fcpi: in the pi-resilient profile, through the retrieval service (purpose discovery).
++      const response = usePiResilient
++        ? await piFetch(targetUrl, {
++            method,
++            signal,
++            maxBytes: 1024 * 1024,
++            purpose: "discovery",
++            timeoutMs: 2000,
++          })
++        : await undici.fetch(targetUrl, {
++            method,
++            redirect: "follow",
++            dispatcher: getSecureDispatcher(false),
++            signal,
++          });
++      if (usePiResilient) await response.body?.cancel().catch(() => {});
+ 
+       return response.url;
+     } catch (error) {
+diff --git a/apps/api/src/scraper/WebScraper/sitemap.ts b/apps/api/src/scraper/WebScraper/sitemap.ts
+index 62d240bedfc364f87590204c2bfdd338edaf956b..0978ed42560c339b19d75a1ec117fcbb6ee30861 100644
+--- a/apps/api/src/scraper/WebScraper/sitemap.ts
++++ b/apps/api/src/scraper/WebScraper/sitemap.ts
+@@ -69,7 +69,10 @@ export async function getLinksFromSitemap(
+         const { buffer } = await fetchFileToBuffer(sitemapUrl, false, {
+           headers,
+         });
+-        const decompressed = await gunzipAsync(buffer);
++        const decompressed = await gunzipAsync(buffer, {
++    // fcpi: the sitemap protocol caps an uncompressed sitemap at 50 MB; a larger output is refused.
++    maxOutputLength: 52_428_800,
++  });
+         content = decompressed.toString("utf-8");
+       } catch (error) {
+         logger.error("Failed to download/decompress gzip sitemap", {
+diff --git a/apps/api/src/scraper/crawler/sitemap.ts b/apps/api/src/scraper/crawler/sitemap.ts
+index 040de8599faf9fd5ad57898961ee79379a160803..ce63d67b6f678438cbce155fdd64a95ebb37cfd5 100644
+--- a/apps/api/src/scraper/crawler/sitemap.ts
++++ b/apps/api/src/scraper/crawler/sitemap.ts
+@@ -40,7 +40,10 @@ async function _getSitemapXMLGZ(
+   options: SitemapScrapeOptions,
+ ): Promise<string> {
+   const { buffer } = await fetchFileToBuffer(options.url);
+-  const decompressed = await gunzipAsync(buffer);
++  const decompressed = await gunzipAsync(buffer, {
++    // fcpi: the sitemap protocol caps an uncompressed sitemap at 50 MB; a larger output is refused.
++    maxOutputLength: 52_428_800,
++  });
+   return decompressed.toString("utf-8");
+ }
+ 
+diff --git a/apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts b/apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts
+index 380da34d375c1b36dcc6904e8a58b94527483364..fef429d0fe66ead243142b21ce7a42879a74061c 100644
+--- a/apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts
++++ b/apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts
+@@ -5,6 +5,7 @@ import {
+   AddFeatureError,
+   DNSResolutionError,
+   EngineError,
++  PiRetrievalError,
+   SiteError,
+   SSLError,
+   UnsupportedFileError,
+@@ -14,6 +15,7 @@ import { TransformStream as NodeTransformStream } from "node:stream/web";
+ import { v7 as uuid } from "uuid";
+ import * as undici from "undici";
+ import { getSecureDispatcher } from "./safeFetch";
++import { piFetch, usePiResilient } from "../pi-resilient/fetch";
+ import { logger } from "../../../../lib/logger";
+ 
+ const mapUndiciError = (url: string, skipTlsVerification: boolean, e: any) => {
+@@ -58,6 +60,29 @@ const mapUndiciError = (url: string, skipTlsVerification: boolean, e: any) => {
+   }
+ };
+ 
++// fcpi: in the pi-resilient profile a download goes through the retrieval service, which
++// verifies TLS itself whatever the caller asks.
++function guardedFetch(
++  url: string,
++  skipTlsVerification: boolean,
++  init: undici.RequestInit | undefined,
++  maxSize: number | undefined,
++): Promise<undici.Response> {
++  if (usePiResilient) {
++    return piFetch(url, {
++      headers: init?.headers as Record<string, string> | undefined,
++      signal: init?.signal ?? null,
++      maxBytes: maxSize,
++      purpose: /sitemap|\.gz(\?|$)/i.test(url) ? "sitemap" : "document",
++    });
++  }
++  return undici.fetch(url, {
++    ...init,
++    redirect: "follow",
++    dispatcher: getSecureDispatcher(skipTlsVerification),
++  });
++}
++
+ function createSizeLimiter(maxSize: number) {
+   let bytesRead = 0;
+   return new NodeTransformStream<Uint8Array, Uint8Array>({
+@@ -91,11 +116,7 @@ export async function fetchFileToBuffer(
+   buffer: Buffer;
+ }> {
+   try {
+-    const response = await undici.fetch(url, {
+-      ...init,
+-      redirect: "follow",
+-      dispatcher: getSecureDispatcher(skipTlsVerification),
+-    });
++    const response = await guardedFetch(url, skipTlsVerification, init, maxSize);
+     if (maxSize !== undefined) {
+       checkContentLength(response, maxSize);
+     }
+@@ -123,7 +144,7 @@ export async function fetchFileToBuffer(
+       buffer: Buffer.concat(chunks),
+     };
+   } catch (e) {
+-    if (e instanceof UnsupportedFileError) throw e;
++    if (e instanceof UnsupportedFileError || e instanceof PiRetrievalError) throw e;
+     throw mapUndiciError(url, skipTlsVerification, e);
+   }
+ }
+@@ -144,11 +165,7 @@ export async function downloadFile(
+ 
+   // TODO: maybe we could use tlsclient for this? for proxying
+   try {
+-    const response = await undici.fetch(url, {
+-      ...init,
+-      redirect: "follow",
+-      dispatcher: getSecureDispatcher(skipTlsVerification),
+-    });
++    const response = await guardedFetch(url, skipTlsVerification, init, maxSize);
+ 
+     if (maxSize !== undefined) {
+       checkContentLength(response, maxSize);
+@@ -181,7 +198,7 @@ export async function downloadFile(
+     };
+   } catch (e) {
+     shouldCleanup = true;
+-    if (e instanceof UnsupportedFileError) throw e;
++    if (e instanceof UnsupportedFileError || e instanceof PiRetrievalError) throw e;
+     throw mapUndiciError(url, skipTlsVerification, e);
+   } finally {
+     tempFileWrite.close();

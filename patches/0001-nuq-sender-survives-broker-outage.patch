@@ -1,0 +1,102 @@
+fcpi patch 0001: NuQ sender survives a broker outage (review finding R2, PC-NUQ-CONNECT)
+Upstream 7666c1f9, apps/api/src/services/worker/nuq.ts. startSender() had try/finally and no catch, so a
+refused connection during a RabbitMQ restart escaped the worker loops and ended the harness. It now catches,
+logs, leaves the sender null (every caller already falls back to PostgreSQL or skips the message) and holds
+reconnect attempts for 2 s; error listeners are attached before any further await. prefetchJobs() leaves jobs
+queued while the broker is unreachable instead of marking them active for the lock reaper.
+
+diff --git a/apps/api/src/services/worker/nuq.ts b/apps/api/src/services/worker/nuq.ts
+index fb5b1ca64306f1ed8c48e72c43d1bf5e41b2190a..db632c22310e45200ac7bd6fc7844226ff479fda 100644
+--- a/apps/api/src/services/worker/nuq.ts
++++ b/apps/api/src/services/worker/nuq.ts
+@@ -322,15 +322,36 @@ class NuQ<JobData = any, JobReturnValue = any> {
+     channel: amqp.Channel;
+   } | null = null;
+   private senderStarting = false;
++  // fcpi: after a failed connect, callers skip the broker until this time instead of retrying on
++  // every 250 ms poll.
++  private senderRetryAt = 0;
+ 
+   private async startSender() {
+     if (this.sender || this.shuttingDown || this.senderStarting) return;
++    if (Date.now() < this.senderRetryAt) return;
+     this.senderStarting = true;
+ 
++    // fcpi: a connection is closed again if setup fails after it opened.
++    let opened: amqp.ChannelModel | null = null;
+     try {
+       if (config.NUQ_RABBITMQ_URL) {
+         const connection = await amqp.connect(config.NUQ_RABBITMQ_URL);
++        opened = connection;
++        // fcpi: error listeners before any further await, so a broker that fails mid-setup
++        // emits into a listener instead of crashing the process.
++        connection.on("error", err => {
++          logger.error("NuQ sender connection error", {
++            module: "nuq/rabbitmq",
++            err,
++          });
++        });
+         const channel = await connection.createChannel();
++        channel.on("error", err => {
++          logger.error("NuQ sender channel error", {
++            module: "nuq/rabbitmq",
++            err,
++          });
++        });
+         await channel.assertQueue(this.queueName + ".prefetch", {
+           durable: true,
+           arguments: {
+@@ -353,27 +374,24 @@ class NuQ<JobData = any, JobReturnValue = any> {
+           this.sender = null;
+         });
+ 
+-        channel.on("error", err => {
+-          logger.error("NuQ sender channel error", {
+-            module: "nuq/rabbitmq",
+-            err,
+-          });
+-        });
+-
+         connection.on("close", () => {
+           logger.info("NuQ sender connection closed", {
+             module: "nuq/rabbitmq",
+           });
+           this.sender = null;
+         });
+-
+-        connection.on("error", err => {
+-          logger.error("NuQ sender connection error", {
+-            module: "nuq/rabbitmq",
+-            err,
+-          });
+-        });
+       }
++    } catch (err) {
++      // fcpi (PC-NUQ-CONNECT): a broker that is down or restarting must not end the process.
++      // Every caller already handles a null sender: getJobToProcess() takes the job from
++      // PostgreSQL, and sendJobEnd()/sendJobPrefetch() log and skip the message.
++      logger.warn("NuQ sender could not connect to RabbitMQ; continuing without it", {
++        module: "nuq/rabbitmq",
++        err,
++      });
++      this.sender = null;
++      this.senderRetryAt = Date.now() + 2000;
++      opened?.close().catch(() => {});
+     } finally {
+       this.senderStarting = false;
+     }
+@@ -1251,6 +1269,14 @@ class NuQ<JobData = any, JobReturnValue = any> {
+   public async prefetchJobs(_logger: Logger = logger): Promise<number> {
+     const start = Date.now();
+     try {
++      // fcpi (PC-NUQ-CONNECT): with the broker unreachable a prefetched job cannot be
++      // delivered, so leave it queued for getJobToProcess()'s PostgreSQL path rather than
++      // marking it active and leaving it to the lock reaper.
++      if (config.NUQ_RABBITMQ_URL) {
++        await this.startSender();
++        if (!this.sender) return 0;
++      }
++
+       const jobs = (
+         await nuqPool.query(
+           `
