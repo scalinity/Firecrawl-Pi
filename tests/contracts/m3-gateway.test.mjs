@@ -688,6 +688,39 @@ test("an uncertain submission's answer says what a retry would do: with a key, w
   }
 });
 
+test("a job past its deadline is cancelled upstream and ends FAILED with JOB_DEADLINE_EXCEEDED", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  await h.db.query("UPDATE fcpi_platform.job SET deadline = now() - interval '1 second' WHERE id = $1", [r.json.id]);
+  const j = await waitFor(async () => { const x = await h.job(r.json.id); return x.state === "FAILED" && x; }, 15000, "stopped at the deadline");
+  assert.equal(j.error_code, "JOB_DEADLINE_EXCEEDED");
+  assert.equal(h.core.jobs.get(up).cancelled, true, "the core was told to stop");
+  assert.ok(h.logs.some((l) => l.action === "deadline_cancel_sent" && l.job === r.json.id));
+});
+
+test("reconciliation that finds two upstream jobs for one submission keeps the earliest and cancels the other", async () => {
+  const h = await harness({ extraEnv: { PI_GATEWAY_SUBMIT_TIMEOUT_MS: "20000" } });
+  h.core.mode = "persist-hang";
+  const pending = h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() }).catch((e) => ({ error: e.code }));
+  await waitFor(() => h.core.submissions().length === 1, 5000, "submission at the core");
+  const id = (await h.db.query("SELECT id FROM fcpi_platform.job ORDER BY created_at DESC LIMIT 1")).rows[0].id;
+  await h.kill();
+  await pending;
+  const first = (await h.db.query("SELECT group_id FROM nuq.queue_scrape WHERE data->>'origin' = $1", [`fcpi:${id}`])).rows[0].group_id;
+  // A later upstream job carrying the same marker, as a duplicate submission would leave.
+  const dup = randomUUID();
+  await h.db.query("INSERT INTO nuq.queue_scrape (id, data, group_id, created_at) VALUES ($1, $2, $3, now() + interval '1 second')", [randomUUID(), { mode: "kickoff", origin: `fcpi:${id}`, crawl_id: dup }, dup]);
+  h.core.jobs.set(dup, { kind: "crawl", status: "scraping", docs: [], errors: [], body: {}, cancelled: false });
+  h.core.mode = "ok";
+  await h.start();
+  const j = await waitFor(async () => { const x = await h.job(id); return ["QUEUED", "RUNNING"].includes(x.state) && x; }, 15000, "reconciled");
+  assert.equal(j.upstream_id, first, "the earliest upstream job is kept");
+  await waitFor(() => h.core.jobs.get(dup).cancelled, 5000, "the duplicate cancelled");
+  assert.ok(h.logs.some((l) => l.action === "reconciled" && l.duplicates === 1));
+  assert.equal(h.core.jobs.get(first).cancelled, false);
+});
+
 test("a submission the core refuses is FAILED and answered like upstream's refusal", async () => {
   const h = await harness();
   h.core.mode = "reject";
