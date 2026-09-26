@@ -9,7 +9,8 @@
 // - Claude Code reads deploy/clients/claude-code.mcp.json with --strict-mcp-config, so no other MCP
 //   server loads, and runs with no built-in tool (--tools "") and no user settings (--setting-sources
 //   project in an empty directory: no hooks, plugins or user permissions); Codex runs with --ignore-user-config and the server from deploy/clients/codex.config.toml
-//   given as -c overrides, so none of the owner's other servers or plugins load either.
+//   given as -c overrides, so none of the owner's other servers or plugins load either. Each is granted
+//   the prompt's three tools and no other (--allowedTools; a per-tool approval_mode="approve").
 // - The token reaches each client only through its environment (FCPI_MCP_TOKEN), never a command line or
 //   a file; each runs in an empty temporary directory, so no project instructions are loaded.
 // - What each client did is read from the Pi: the MCP service's records for its token's label (era,
@@ -38,6 +39,9 @@ const PROMPT = `Use only the tools of the MCP server named fcpi. Do these steps 
 2. Call firecrawl_crawl with url ${FX}/, limit 2 and sitemap "include". It returns a job id.
 3. Call firecrawl_check_crawl_status with that id. If its status is not completed, call it again, at most 10 times in total.
 Then reply with exactly one line and nothing else: SENTINEL=<the sentinel> CRAWL=<the last status> DOCS=<the number of documents returned>`;
+// The tools the prompt needs, granted to each client alike: headless, neither can ask, so a tool not
+// granted is refused on the workstation (Codex asks before any tool not marked read-only, the crawl).
+const TOOLS = ["firecrawl_scrape", "firecrawl_crawl", "firecrawl_check_crawl_status"];
 
 function run(cmd, args, env, cwd) {
   return new Promise((resolve) => {
@@ -120,7 +124,7 @@ try {
       // permissions. Only the fcpi server's tools are there to call. (--bare would also skip the keychain
       // the login lives in.)
       "--tools", "", "--setting-sources", "project",
-      "--allowedTools", "mcp__fcpi__firecrawl_scrape mcp__fcpi__firecrawl_crawl mcp__fcpi__firecrawl_check_crawl_status"], { FCPI_MCP_URL: URL_MCP, FCPI_MCP_TOKEN: token }, dir);
+      "--allowedTools", TOOLS.map((t) => `mcp__fcpi__${t}`).join(" ")], { FCPI_MCP_URL: URL_MCP, FCPI_MCP_TOKEN: token }, dir);
     let j = null; try { j = JSON.parse(r.stdout); } catch { /* not JSON */ }
     out("claude_code", { client: version("claude"), model_alias: "haiku", models_used: j?.modelUsage ? Object.keys(j.modelUsage) : null, exit: r.code, ms: r.ms, is_error: j?.is_error ?? null,
       permission_denials: Array.isArray(j?.permission_denials) ? j.permission_denials.map((d) => d.tool_name ?? null) : null,
@@ -134,7 +138,7 @@ try {
     const token = pi("sudo -n cat /etc/firecrawl-pi/secrets/clients/m4codex.token").trim();
     const last = join(dir, "codex-last.txt");
     const r = await run("codex", ["exec", "--ignore-user-config", "--skip-git-repo-check", "-s", "read-only", "-m", "gpt-6-luna",
-      ...codexServer(), "-c", 'approval_policy="never"',
+      ...codexServer(), ...TOOLS.flatMap((t) => ["-c", `mcp_servers.fcpi.tools.${t}.approval_mode="approve"`]), "-c", 'approval_policy="never"',
       "-o", last, PROMPT], { FCPI_MCP_TOKEN: token }, dir);
     const answer = existsSync(last) ? readFileSync(last, "utf8") : "";
     out("codex", { client: version("codex"), model: "gpt-6-luna", exit: r.code, ms: r.ms, answer: answerLine(answer), result_head: answer.slice(0, 400), stderr_tail: r.stderr.slice(-400) });
