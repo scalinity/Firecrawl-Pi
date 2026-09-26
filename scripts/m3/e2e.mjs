@@ -48,7 +48,10 @@ async function waitHealthy(svc, ms = 300000) {
   const end = Date.now() + ms;
   for (;;) { const h = health(svc); if (h === "running healthy") return h; if (Date.now() > end) throw new Error(`${svc} not healthy: ${h}`); await sleep(2000); }
 }
-const fixtureLog = (since) => pi(`sudo -n docker logs --since ${since} ${cname("fixture-m3")} 2>&1`).split("\n").filter((l) => l.startsWith("{")).map((l) => JSON.parse(l)).filter((l) => l.path);
+// Times compared with the fixture's own come from the Pi's clock (piNow), so the workstation's clock never
+// enters a comparison; with no time given the whole log is read.
+const piNow = () => pi("date -u +%Y-%m-%dT%H:%M:%S.%3NZ").trim();
+const fixtureLog = (since) => pi(`sudo -n docker logs ${since ? `--since ${since} ` : ""}${cname("fixture-m3")} 2>&1`).split("\n").filter((l) => l.startsWith("{")).map((l) => JSON.parse(l)).filter((l) => l.path);
 const markerGroups = (id) => Number(sql(`SELECT count(DISTINCT group_id) FROM (SELECT group_id, data FROM nuq.queue_scrape UNION ALL SELECT group_id, data FROM nuq.queue_scrape_backlog) j WHERE j.data->>'origin' = 'fcpi:${id}' OR j.data->'scrapeOptions'->>'origin' = 'fcpi:${id}';`)[0]);
 const ledgerJob = (id) => { const [r] = sql(`SELECT state, coalesce(upstream_id::text,''), archived, coalesce(error_code,''), dispatch_attempts FROM fcpi_platform.job WHERE id = '${id}';`); if (!r) return null; const [state, upstream, archived, error_code, attempts] = r.split("|"); return { state, upstream, archived: Number(archived), error_code, attempts: Number(attempts) }; };
 const events = (id) => sql(`SELECT from_state, to_state, coalesce(detail,'') FROM fcpi_platform.job_event WHERE job_id = '${id}' ORDER BY at, id;`).map((l) => { const [from, to, detail] = l.split("|"); return { from: from || null, to, detail }; });
@@ -182,7 +185,7 @@ const PHASES = {
   },
 
   async sync() {
-    const a0 = attemptsCount(), since = now();
+    const a0 = attemptsCount(), since = piNow();
     const s = await post("scrape", { url: `${FX}/p01`, formats: ["markdown", "html", "rawHtml", "links"] });
     const d = s.json?.data ?? {};
     out("scrape", { ...brief(s), success: s.json?.success, sentinel_in_markdown: /fcpi-m3-p01-[0-9a-f]{4}/.test(d.markdown ?? ""), sentinel_in_html: /fcpi-m3-p01-[0-9a-f]{4}/.test(d.html ?? ""),
@@ -192,7 +195,7 @@ const PHASES = {
     out("map", { case: "whole", ...brief(m), links: (m.json?.links ?? []).map((l) => (typeof l === "string" ? l : l.url)).sort() });
     const m5 = await post("map", { url: `${FX}/`, limit: 5 });
     out("map", { case: "limit_5", ...brief(m5), links: (m5.json?.links ?? []).map((l) => (typeof l === "string" ? l : l.url)).sort() });
-    const a1 = attemptsCount(), j1 = jobsCount(), since2 = now();
+    const a1 = attemptsCount(), j1 = jobsCount();
     const refused = [
       ["scrape_screenshot", "scrape", { url: `${FX}/p03?refused=screenshot`, formats: ["screenshot"] }], ["scrape_json_format", "scrape", { url: `${FX}/p03?refused=json`, formats: [{ type: "json", prompt: "x" }] }],
       ["scrape_actions", "scrape", { url: `${FX}/p03?refused=actions`, actions: [{ type: "wait", milliseconds: 100 }] }], ["scrape_headers", "scrape", { url: `${FX}/p03?refused=headers`, headers: { cookie: "a=b" } }],
@@ -207,7 +210,8 @@ const PHASES = {
       ["scrape_unknown_key", "scrape", { url: `${FX}/p03?refused=unknown`, bogus: true }],
     ];
     for (const [c, kind, body] of refused) { const r = await post(kind, body); out("refused", { case: c, ...brief(r), option: r.json?.option ?? null }); }
-    const hits = fixtureLog(since2).filter((l) => (l.query ?? "").includes("refused="));
+    // The refused requests carry unique queries, so the whole log is searched for them.
+    const hits = fixtureLog().filter((l) => (l.query ?? "").includes("refused="));
     out("refused_effects", { attempts_before: a1, attempts_after: attemptsCount(), jobs_before: j1, jobs_after: jobsCount(), fixture_hits_for_refused: hits.length, positive_control_attempts_from_scrape: a1 - a0,
       fixture_hits_since_scrape: fixtureLog(since).filter((l) => l.path === "/p01").length });
     // Limits: each refused whole, with no receipt left behind.
@@ -272,7 +276,7 @@ const PHASES = {
   },
 
   async cancel() {
-    const since = now();
+    const since = piNow();
     const s = await post("crawl", { url: `${FX}/slow/`, limit: 30, sitemap: "skip" });
     out("slow_crawl", { case: "submit", ...brief(s), id: s.json?.id ?? null });
     const id = s.json.id;
@@ -281,7 +285,7 @@ const PHASES = {
     const qs = ledgerJob(q.json.id);
     out("queued_crawl", { case: "submit_while_other_runs", ...brief(q), id: q.json?.id ?? null, ledger_state: qs.state });
     out("queued_crawl", { case: "cancel", ...brief(await http("DELETE", `/v2/crawl/${q.json.id}`, { tok: "m3a" })), ledger_state: ledgerJob(q.json.id).state, marker_groups: markerGroups(q.json.id) });
-    const tCancel = now();
+    const tCancel = piNow();   // on the Pi's clock, like the fixture's log it is compared with
     const c = await http("DELETE", `/v2/crawl/${id}`, { tok: "m3a" });
     out("slow_crawl", { case: "cancel", ...brief(c), body: c.json, at: tCancel });
     const done = await waitState(id, ["CANCELLED", "FAILED", "SUCCEEDED", "PARTIAL"], 300000);
