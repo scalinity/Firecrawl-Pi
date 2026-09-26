@@ -16,4 +16,7 @@ WAN=$(sudo -n sed -n 's#^\([0-9.]*\)/32$#\1#p' /etc/firecrawl-pi/egress-local.ex
 # ruleset's, computed as the host snapshot computes nft_ruleset_sha256, so the rules listed here are tied
 # to the AFTER snapshot's hash.
 echo "# guard_file_sha256=$(sudo -n sha256sum /etc/firecrawl-pi/fcpi-guard.nft | cut -c1-64) ruleset_sha256=$(sudo -n nft -s list ruleset 2>/dev/null | sha256sum | cut -c1-64)"
-bash "$REPO/scripts/m1/pi-nft-ruleset.sh" | sed -E "s/${LAN//./\\.}/<pi-lan-address>/g; s/${NET}([^0-9]|$)/<pi-lan-network>\\1/g${WAN:+; s/${WAN//./\\.}/<pi-wan-address>/g}"
+# Tailscale's own rules name the node's tailnet addresses (its ts-input accepts them on lo); they are
+# replaced too, as the host snapshot does, and a network with its mask (100.64.0.0/10) is kept.
+bash "$REPO/scripts/m1/pi-nft-ruleset.sh" | sed -E "s/${LAN//./\\.}/<pi-lan-address>/g; s/${NET}([^0-9]|$)/<pi-lan-network>\\1/g${WAN:+; s/${WAN//./\\.}/<pi-wan-address>/g}" \
+  | sed -E 's#100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.[0-9]{1,3}\.[0-9]{1,3}([^0-9/.]|$)#<tailnet-address>\2#g; s#fd7a:115c:a1e0:[0-9a-f:]*[0-9a-f]#<tailnet-address-v6>#g'
