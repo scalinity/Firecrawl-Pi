@@ -7,7 +7,7 @@ const KNOWN = new Set([
   "PI_GATEWAY_LISTEN_PORT", "PI_CORE_URL", "PI_CORE_TIMEOUT_MS", "PI_GATEWAY_CLIENTS_FILE", "PI_ALLOWED_HOSTS", "PI_ALLOWED_HOSTS_FILE",
   "PI_ALLOWED_ORIGINS", "PI_CAPABILITIES_FILE", "PI_ARTIFACT_ROOT", "PI_CREDENTIALS_DIR", "PI_POSTGRES_HOST",
   "PI_POSTGRES_DB", "PI_POSTGRES_USER", "PI_GATEWAY_SUBMIT_TIMEOUT_MS", "PI_GATEWAY_SUBMIT_SETTLE_MS",
-  "PI_GATEWAY_POLL_MS", "PI_CLOUD_ACCESS_ENABLED",
+  "PI_GATEWAY_POLL_MS", "PI_CLOUD_ACCESS_ENABLED", "PI_MCP_URL",
 ]);
 
 const int = (env, key, dflt, min, max) => {
@@ -50,6 +50,9 @@ export function loadConfig(env) {
   }
   const manifest = JSON.parse(readFileSync(env.PI_CAPABILITIES_FILE, "utf8"));
   checkManifest(manifest);
+  // The MCP service (M4): a fixed http origin on the internal network the two share. Absent, /mcp is no route.
+  const mcpUrl = env.PI_MCP_URL ? new URL(env.PI_MCP_URL) : null;
+  if (mcpUrl && (mcpUrl.protocol !== "http:" || mcpUrl.pathname !== "/" || mcpUrl.search || mcpUrl.username || mcpUrl.password)) throw new Error("PI_MCP_URL must be an http origin");
   const pw = readFileSync(`${env.PI_CREDENTIALS_DIR}/gateway_postgres_password`, "utf8").trim();
   if (pw.length < 32) throw new Error("gateway_postgres_password is shorter than 32 characters");
   return {
@@ -64,6 +67,7 @@ export function loadConfig(env) {
     browserOrigins,
     manifest,
     artifactRoot: env.PI_ARTIFACT_ROOT,
+    mcpUrl,
     db: { host: env.PI_POSTGRES_HOST, database: env.PI_POSTGRES_DB, user: env.PI_POSTGRES_USER, password: pw },
     build: process.env.FCPI_SOURCE_COMMIT ?? "unknown",
   };
@@ -96,4 +100,8 @@ export function checkManifest(m) {
   if (crawl.limit.max > 200 || crawl.maxDiscoveryDepth.max > 3) throw new Error("capability manifest: crawl limits exceed spec §23.1's hard caps");
   if (m.bodies.map.fields.limit.max > 1000) throw new Error("capability manifest: map limit exceeds spec §23.1's 1,000");
   for (const r of m.routes) if (!m.scopes.includes(r.scope)) throw new Error(`capability manifest: route ${r.id} names unknown scope ${r.scope}`);
+  // The MCP section: the gateway serves its path and enforces its in-flight cap and exchange deadline.
+  if (m.mcp?.path !== "/mcp") throw new Error("capability manifest: mcp.path must be /mcp");
+  pos(m.mcp.limits?.maxInFlight, "mcp.limits.maxInFlight", 64);
+  pos(m.mcp.limits?.exchangeTimeoutMs, "mcp.limits.exchangeTimeoutMs", 600000);
 }

@@ -10,6 +10,8 @@
 //   - Crawls and batch scrapes are durable jobs (src/jobs.mjs): a receipt commits before the answer,
 //     every lookup is by the credential's principal, results are archived and served after the core
 //     forgets them. Identity headers are never forwarded: the gateway builds each upstream request.
+//   - /mcp (M4) passes the same Host, Origin and token checks, then goes to the MCP service (src/mcp.mjs),
+//     whose tools call these REST routes back with the same token (spec §7.2, §20.1).
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { pipeline } from "node:stream/promises";
@@ -20,6 +22,7 @@ import { makeStore, AdmissionError, SCHEMA_VERSION } from "./src/store.mjs";
 import { openArchive } from "./src/archive.mjs";
 import { makeUpstream, sendJson } from "./src/upstream.mjs";
 import { makeJobs } from "./src/jobs.mjs";
+import { makeMcpProxy } from "./src/mcp.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -273,6 +276,9 @@ async function sync(ctx, route) {
   upstream.forward(ctx.res, route.path, body, (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
 }
 
+// ---- the MCP route (src/mcp.mjs), served only when the MCP service's address is configured ------------
+const mcp = cfg.mcpUrl ? makeMcpProxy({ url: cfg.mcpUrl, limits: M.mcp.limits, readBody, send: (ctx, status, body, extra) => ctx.send(status, body, extra) }) : null;
+
 const HANDLERS = { scrape: sync, map: sync, "crawl.submit": submit, "batch.submit": submit, "crawl.status": status, "batch.status": status, "crawl.errors": errors,
   "batch.errors": errors, "crawl.cancel": cancel, "batch.cancel": cancel, "platform.status": platformStatus, "platform.jobs": platformJobs, "platform.job": platformJob };
 
@@ -285,7 +291,7 @@ const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
     if (ctx.done) return;
     ctx.done = true;
     log({ build: cfg.build, request_id: ctx.id, method: req.method, route: ctx.route ?? "unmatched", status, code: code ?? null, client: ctx.client?.label ?? null,
-      principal: ctx.client?.principal ?? null, job: ctx.job, ms: Number(process.hrtime.bigint() - t0) / 1e6 });
+      principal: ctx.client?.principal ?? null, job: ctx.job, ms: Number(process.hrtime.bigint() - t0) / 1e6, ...ctx.extra });
   };
   ctx.send = (status, body, extra = {}) => { sendJson(res, status, body, { "x-request-id": ctx.id, ...extra }); ctx.logged(status, body?.code); };
   try {
@@ -300,6 +306,8 @@ const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
       if (wait) return ctx.send(429, { success: false, code: "TOO_MANY_FAILED_ATTEMPTS", error: "Too many failed authentication attempts; retry later." }, { "retry-after": String(wait) });
       return ctx.send(401, { success: false, code: "UNAUTHORIZED", error: "Unauthorized: a valid gateway token is required." }, { "www-authenticate": 'Bearer realm="fcpi"' });
     }
+    // /mcp: every check above has passed; the MCP service authorizes nothing itself (src/mcp.mjs).
+    if (mcp && rawPath === M.mcp.path) { ctx.route = "mcp"; return await mcp.handle(ctx); }
     // Routes not enabled are matched first: upstream registers /v2/crawl/ongoing before /v2/crawl/:jobId.
     const off = DISABLED.find((r) => r.method === req.method && r.re.test(rawPath));
     if (off) return ctx.send(501, { success: false, code: "CAPABILITY_NOT_ENABLED", error: `${off.method} ${off.path} is not enabled in this deployment: ${off.reason}.` });
