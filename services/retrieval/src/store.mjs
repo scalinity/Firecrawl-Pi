@@ -39,7 +39,9 @@ export function nextCooldown(previousS, retryAfterS, sinceLastEndS = null) {
 
 export class Store {
   constructor(config) {
-    this.pool = new pg.Pool({ ...config, max: 4, idleTimeoutMillis: 30000, application_name: "fcpi-retrieval" });
+    // A database that stops answering fails a request in seconds instead of holding its permit to the
+    // deadline: 5 s to connect, 10 s per statement (review finding S13).
+    this.pool = new pg.Pool({ ...config, max: 4, idleTimeoutMillis: 30000, connectionTimeoutMillis: 5000, statement_timeout: 10000, application_name: "fcpi-retrieval" });
     this.pool.on("error", () => {}); // an idle client's error surfaces on its next query
   }
 

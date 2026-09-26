@@ -84,3 +84,11 @@ test("cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does no
     await store.coolDown("a.example", null); assert.equal(await s("a.example"), 60);
   } finally { await store.close(); }
 });
+
+test("the pool connects within 5 s and bounds each statement at 10 s (review finding S13)", opts, async () => {
+  const store = await fresh();
+  try {
+    assert.equal(store.pool.options.connectionTimeoutMillis, 5000);
+    assert.equal((await store.pool.query("SHOW statement_timeout")).rows[0].statement_timeout, "10s");
+  } finally { await store.close(); }
+});
