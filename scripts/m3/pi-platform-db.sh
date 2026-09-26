@@ -99,7 +99,7 @@ img=$(sudo -n docker inspect -f '{{.Config.Image}}' "$PG")
 for role in fcpi_gateway fcpi_core fcpi_retrieval postgres; do
   out=$(sudo -n docker run --rm --network fcpi_platform --label fcpi.transient=hba-probe --read-only --tmpfs /tmp:size=8m --cap-drop ALL \
     --security-opt no-new-privileges:true --user 5432:5432 --entrypoint psql "$img" \
-    "host=nuq-postgres port=5432 dbname=postgres user=$role password=not-the-password connect_timeout=10" -Atc 'select 1' 2>&1 || true)
+    "host=nuq-postgres port=5432 dbname=postgres user=$role password=wrong connect_timeout=10" -Atc 'select 1' 2>&1 || true)
   case "$out" in
     *"pg_hba.conf rejects connection"*) result=rejected_by_hba ;;
     *"password authentication failed"*) result=password_failed ;;
