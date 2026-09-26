@@ -63,6 +63,7 @@ export async function modelHandler(req, res) {
   if (mode === "quota-429") return json(res, 429, { error: { message: "You exceeded your current quota", type: "insufficient_quota", code: "insufficient_quota" } });
   if (mode === "http-429") return json(res, 429, { error: { message: "Rate limit reached", type: "requests", code: "rate_limit_exceeded" } }, { "retry-after": "7" });
   if (mode === "http-500") return json(res, 500, { error: { message: "The server had an error", type: "server_error" } });
+  if (mode === "http-502") return json(res, 502, { error: { message: "Bad gateway" } });
   if (mode === "http-400") return json(res, 400, { error: { message: "Invalid schema", type: "invalid_request_error" } });
   if (mode === "slow") { await new Promise((r) => setTimeout(r, 90000)); }
   if (mode === "delay") { await new Promise((r) => setTimeout(r, 3000)); }
@@ -113,6 +114,8 @@ export async function parserHandler(req, res) {
     if (mode === "http-401") return json(res, 401, { detail: "Invalid API key" });
     if (mode === "http-402") return json(res, 402, { detail: "Insufficient credits" });
     if (mode === "http-500") return json(res, 500, { detail: "Internal error" });
+    if (mode === "http-502") return json(res, 502, { detail: "Bad gateway" });
+    if (mode === "accepted-202") { const id = `pjb-${randomUUID()}`; jobs.set(id, { mode: "ok", pages: 1, scanned: true, fileId: `file-${randomUUID()}`, polls: 0, tier: config.tier }); return json(res, 202, { id, status: "PENDING" }); }
     if (mode === "no-job-id") return json(res, 200, { status: "PENDING" });
     const pages = Math.max(1, (file.toString("latin1").match(/\/Type \/Page\b(?!s)/g) ?? []).length);
     const scanned = /\/Subtype \/Image/.test(file.toString("latin1")) && !/BT /.test(file.toString("latin1"));

@@ -90,7 +90,9 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
 
 test("provider refusals are classified: a refused request is released, an answered one settled", async () => {
   for (const [mode, cls, state] of [["http-401", "PROVIDER_AUTH_FAILED", "RELEASED"], ["http-402", "PROVIDER_BILLING", "RELEASED"], ["quota-429", "PROVIDER_BILLING", "RELEASED"],
-    ["http-429", "PROVIDER_RATE_LIMITED", "RELEASED"], ["http-400", "PROVIDER_REJECTED", "RELEASED"], ["refuse", "EXTRACTION_REFUSED", "SETTLED"], ["length", "EXTRACTION_OUTPUT_LIMIT", "SETTLED"]]) {
+    ["http-429", "PROVIDER_RATE_LIMITED", "RELEASED"], ["http-400", "PROVIDER_REJECTED", "RELEASED"], ["http-500", "PROVIDER_ERROR", "RELEASED"],
+    // A proxy's 502 after delivery leaves the outcome unknown: the reservation stays counted (review W11).
+    ["http-502", "PROVIDER_UNCERTAIN", "UNCERTAIN"], ["refuse", "EXTRACTION_REFUSED", "SETTLED"], ["length", "EXTRACTION_OUTPUT_LIMIT", "SETTLED"]]) {
     const r = await rig();
     try {
       const out = await r.extract(req({ prompt: `fcpi-mode=${mode}` }));
@@ -98,6 +100,7 @@ test("provider refusals are classified: a refused request is released, an answer
       assert.deepEqual(r.store.states(), [state], mode);
       assert.equal(r.calls(), 1, `${mode}: one request, no retry`);
       if (state === "RELEASED") assert.equal(r.store.used("fixture"), 0, `${mode}: nothing counted`);
+      if (state === "UNCERTAIN") assert.equal(r.store.used("fixture"), [...r.store.rows.values()][0].reserved, `${mode}: the whole reservation counted`);
     } finally { await r.srv.close(); }
   }
 });

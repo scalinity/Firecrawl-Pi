@@ -104,6 +104,15 @@ test("a parse reused under its logical id must be the same request: another owne
   } finally { await r.srv.close(); }
 });
 
+test("an upload accepted with a 202 starts its job like a 200 (review W11)", async () => {
+  const r = await rig();
+  try {
+    const out = await r.parse(req(withMode("accepted-202")));
+    assert.match(out.markdown, /FCPI SCAN 42/);
+    assert.deepEqual(r.store.states(), ["SETTLED"]);
+  } finally { await r.srv.close(); }
+});
+
 test("an upload answered without a job id counts against the breaker; its credits stay reserved (review W10)", async () => {
   const r = await rig();
   try {
@@ -116,7 +125,7 @@ test("an upload answered without a job id counts against the breaker; its credit
 });
 
 test("provider refusals release the credits; a failed or unfinished job keeps them reserved until reconciled", async () => {
-  for (const [mode, cls, state] of [["http-401", "PROVIDER_AUTH_FAILED", "RELEASED"], ["http-402", "PROVIDER_BILLING", "RELEASED"], ["http-500", "PROVIDER_ERROR", "RELEASED"],
+  for (const [mode, cls, state] of [["http-401", "PROVIDER_AUTH_FAILED", "RELEASED"], ["http-402", "PROVIDER_BILLING", "RELEASED"], ["http-500", "PROVIDER_ERROR", "RELEASED"], ["http-502", "PROVIDER_UNCERTAIN", "UNCERTAIN"],
     ["job-fails", "PARSE_FAILED", "UNCERTAIN"], ["never-finishes", "PROVIDER_UNCERTAIN", "UNCERTAIN"], ["empty", "PARSE_EMPTY", "SETTLED"]]) {
     const r = await rig();
     try {

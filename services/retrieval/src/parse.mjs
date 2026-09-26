@@ -99,6 +99,13 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
       throw fail("PROVIDER_UNCERTAIN", `the parse request may have been processed and no answer came; its ${amount} credits stay reserved`);
     };
     const refused = async (status, what) => {
+      // A 502 or 504 comes from a proxy in front of the provider after the request was delivered: whether the
+      // provider did the work is unknown, so the credits stay reserved (spec §28.3; review W11).
+      if (status === 502 || status === 504) {
+        breaker.failure();
+        await store.markBudgetUncertain(res.id, `provider answered ${status} to the ${what}`);
+        throw fail("PROVIDER_UNCERTAIN", `${pp.provider} answered HTTP ${status} to the ${what}; whether it ran is unknown, so its ${amount} credits stay reserved`);
+      }
       await store.releaseBudget(res.id, `provider answered ${status} to the ${what}`);
       if (status === 401 || status === 403) { breaker.failure(); throw fail("PROVIDER_AUTH_FAILED", `${pp.provider} refused the credential (HTTP ${status})`); }
       if (status === 402) { breaker.failure(); throw fail("PROVIDER_BILLING", `${pp.provider} refused for lack of credits (HTTP 402)`); }
@@ -112,7 +119,8 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
       { name: "configuration", value: JSON.stringify({ tier: pp.tier, version: pp.version, page_ranges: { max_pages: pages } }) }]);
     let up;
     try { up = await call("POST", "/api/v2/parse/upload", form.body, { "content-type": form.contentType }); } catch (e) { if (e instanceof ProviderError) await settleOrThrow(e); throw e; }
-    if (up.status !== 200) await refused(up.status, "upload");
+    // Any 2xx has accepted the upload and started a job.
+    if (up.status < 200 || up.status > 299) await refused(up.status, "upload");
     let jobId = null;
     try { jobId = JSON.parse(up.body.toString("utf8"))?.id ?? null; } catch { /* below */ }
     if (typeof jobId !== "string" || !/^[A-Za-z0-9_-]{1,100}$/.test(jobId)) {

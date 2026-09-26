@@ -134,6 +134,14 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     let json = null;
     try { json = JSON.parse(answer.body.toString("utf8")); } catch { /* classified below */ }
     const code = json?.error?.code ?? json?.error?.type ?? null;
+    if (answer.status === 502 || answer.status === 504) {
+      // A proxy in front of the provider answered after the request was delivered: whether the completion ran
+      // is unknown, so the reservation stays counted (spec §28.3; review W11).
+      breaker.failure();
+      await store.markBudgetUncertain(res.id, `provider answered ${answer.status}`);
+      log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: `http_${answer.status}`, reserved_micro_usd: amount, ms: Date.now() - started });
+      throw fail("PROVIDER_UNCERTAIN", `${m.provider} answered HTTP ${answer.status}; whether the request ran is unknown, so its reservation of ${amount} micro-USD stays counted`);
+    }
     if (answer.status !== 200) {
       const status = answer.status;
       // A provider refusal is an answer, and a refused request is not billed: the reservation is released.
