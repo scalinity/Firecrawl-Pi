@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-26T13:08:18Z",
-  "generated_by": "scripts/m3/build-lock.mjs (M3), from the lock M2 closed with at aa22d92; entries owned by later milestones are as M2 wrote them",
-  "repository_sha": "5c4dbb41fa14c438cb1ac62fa0532978cb6cb166",
+  "generated_utc": "2026-09-26T17:16:15Z",
+  "generated_by": "scripts/m4/build-lock.mjs (M4), from the lock M3 closed with at 0abf44c; entries owned by later milestones are as M3 wrote them",
+  "repository_sha": "2bc5c68d2c3d9c248bd47e71517ca1329deec1d5",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -51,61 +51,127 @@
       "verified_current_stable_utc": "2026-09-25T03:14:49Z",
       "newer_revision": "none (only the rolling draft)",
       "compatibility_revision": "2025-11-25",
-      "source": "evidence/M0/security-review.md §A"
+      "source": "evidence/M0/security-review.md §A",
+      "observed": "both revisions on the wire in M4 (evidence/M4/raw/e2e-wire.txt, e2e-sdk.txt, e2e-tailnet.txt)"
     },
     "packages": {
       "@modelcontextprotocol/server": {
-        "selected": "2.0.0",
-        "engines_node": ">=20",
-        "integrity": "sha512-YhHWdHfpFMQfd0prsEnxKeS3Qz3ytIGmsS0sth4KDjnacIT7hxk6hXHkJ9KysxlkvTM+WZAtQbbcUhdoP4Hvtw==",
-        "dependencies": {
-          "zod": "^4.2.0",
-          "@modelcontextprotocol/core": "2.0.0"
-        },
-        "source": "evidence/M0/sources/npm-modelcontextprotocol_server_2.0.0.json",
-        "retrieved_utc": "2026-09-25T04:04:39Z"
+        "selected": "2.1.0",
+        "integrity": "sha512-FdvwZU5N03O77Suh35JqjAqq5R1ZTEPFtwu6N4BgBq28qrQtrCnpbLL5U2pwYCuE194jAw0xnlOVmIqhfoYuUQ==",
+        "role": "runtime",
+        "source": "services/mcp/package-lock.json"
       },
       "@modelcontextprotocol/core": {
-        "selected": "2.0.0",
-        "engines_node": ">=20",
-        "integrity": "sha512-pJCEwGG7Lfr/+PQp9ZTwKXNeO5wzbfKL7H3MYpCorM4oFBoQrdjnBgEoqG+RjhsvS1FKrDbKux+M1HhlnGWqcA==",
-        "dependencies": {
-          "zod": "^4.2.0"
-        },
-        "source": "evidence/M0/sources/npm-modelcontextprotocol_core_2.0.0.json",
-        "retrieved_utc": "2026-09-25T04:04:40Z"
+        "selected": "2.1.0",
+        "integrity": "sha512-YdFj5gMRHr0gYNAhTbQDgjLHiEJdIAUYxomhKseUNye7ZGlISQmUoLh2sveFFCiQ7j2YMffT1kgSND0FSfIFjQ==",
+        "role": "runtime",
+        "source": "services/mcp/package-lock.json"
       },
       "@modelcontextprotocol/node": {
-        "selected": "2.0.0",
-        "engines_node": ">=20",
-        "integrity": "sha512-Y4hAC2XdGDUdDOCbLDOCA4+aL3NUldjsOWlDL/YwpAxrPhRm1xHd7lZ+mLacvZ9t3PaH28wgNoaLQGrIk1P2pg==",
-        "dependencies": {
-          "@hono/node-server": "^1.19.9"
-        },
-        "peerDependencies": {
-          "hono": "^4.11.4",
-          "@modelcontextprotocol/server": "^2.0.0"
-        },
-        "source": "evidence/M0/sources/npm-modelcontextprotocol_node_2.0.0.json",
-        "retrieved_utc": "2026-09-25T04:04:41Z"
+        "selected": "2.1.0",
+        "integrity": "sha512-6xg3iWVcOfiL8Y7rI6xUqXD0lI2AY5q3djsa/cOi1IJUSwx06t0gvhSwU/6mIIohrFlt40/ANUG56DQ0HLhILQ==",
+        "role": "runtime",
+        "source": "services/mcp/package-lock.json"
+      },
+      "@modelcontextprotocol/client": {
+        "selected": "2.1.0",
+        "integrity": "sha512-mDVhoy5WjDb0U+4dQPzLcciC2erSex/GRVQqnoZdiuMoE3YiTZdiS7ezNcFwX4XEOWOaj7jZr0kLYnILnL8orA==",
+        "role": "test-only (dev dependency): the SDK clients of M4's live evidence",
+        "source": "services/mcp/package-lock.json"
       }
     },
-    "dist_tags": {
-      "latest": "2.1.0",
-      "source": "evidence/M0/sources/npm-mcp-server-dist-tags.json",
-      "retrieved_utc": "2026-09-25T04:04:41Z"
+    "decision": "D5 (evidence/M0/review/DECISIONS.md): 2.1.0 was still npm's latest for all four on 2026-09-26, with no advisory against the v2 packages and npm audit clean",
+    "lockfile_packages": {
+      "@hono/node-server": {
+        "version": "1.19.17",
+        "integrity": "sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ==",
+        "dev": false
+      },
+      "@modelcontextprotocol/client": {
+        "version": "2.1.0",
+        "integrity": "sha512-mDVhoy5WjDb0U+4dQPzLcciC2erSex/GRVQqnoZdiuMoE3YiTZdiS7ezNcFwX4XEOWOaj7jZr0kLYnILnL8orA==",
+        "dev": true
+      },
+      "@modelcontextprotocol/core": {
+        "version": "2.1.0",
+        "integrity": "sha512-YdFj5gMRHr0gYNAhTbQDgjLHiEJdIAUYxomhKseUNye7ZGlISQmUoLh2sveFFCiQ7j2YMffT1kgSND0FSfIFjQ==",
+        "dev": false
+      },
+      "@modelcontextprotocol/node": {
+        "version": "2.1.0",
+        "integrity": "sha512-6xg3iWVcOfiL8Y7rI6xUqXD0lI2AY5q3djsa/cOi1IJUSwx06t0gvhSwU/6mIIohrFlt40/ANUG56DQ0HLhILQ==",
+        "dev": false
+      },
+      "@modelcontextprotocol/server": {
+        "version": "2.1.0",
+        "integrity": "sha512-FdvwZU5N03O77Suh35JqjAqq5R1ZTEPFtwu6N4BgBq28qrQtrCnpbLL5U2pwYCuE194jAw0xnlOVmIqhfoYuUQ==",
+        "dev": false
+      },
+      "cross-spawn": {
+        "version": "7.0.6",
+        "integrity": "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==",
+        "dev": true
+      },
+      "eventsource": {
+        "version": "3.0.7",
+        "integrity": "sha512-CRT1WTyuQoD771GW56XEZFQ/ZoSfWid1alKGDYMmkt2yl8UXrVR4pspqWNEcqKvVIzg6PAltWjxcSSPrboA4iA==",
+        "dev": true
+      },
+      "eventsource-parser": {
+        "version": "3.1.1",
+        "integrity": "sha512-EKN1vKAMcZ8MlYMpaNuxN6R9yakzH6uajHcHVTqWJzvu5pWw9DyhbP35HH8MVBQ+dZjAfDxk+A8NiR9KWaXiyQ==",
+        "dev": true
+      },
+      "hono": {
+        "version": "4.13.9",
+        "integrity": "sha512-7dMkQmZoC4E6F7AtaQSPhlWAdnBti+j7rreMZl8QB4jFiEhP9TWbGWUMi8WYzBCgmgulxuvLQupKqo+Co6Omyg==",
+        "dev": false
+      },
+      "isexe": {
+        "version": "2.0.0",
+        "integrity": "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw==",
+        "dev": true
+      },
+      "jose": {
+        "version": "6.2.12",
+        "integrity": "sha512-9NiFmJEex0sy2Dk58j2UGBSHgUs2ypF9eZSu4L6vjOX3Dp96Sw1F3uL+H+D1sx02jZZdzUT0HgvCy59CuvXcWw==",
+        "dev": true
+      },
+      "path-key": {
+        "version": "3.1.1",
+        "integrity": "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q==",
+        "dev": true
+      },
+      "pkce-challenge": {
+        "version": "5.0.1",
+        "integrity": "sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ==",
+        "dev": true
+      },
+      "shebang-command": {
+        "version": "2.0.0",
+        "integrity": "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA==",
+        "dev": true
+      },
+      "shebang-regex": {
+        "version": "3.0.0",
+        "integrity": "sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==",
+        "dev": true
+      },
+      "which": {
+        "version": "2.0.2",
+        "integrity": "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==",
+        "dev": true
+      },
+      "zod": {
+        "version": "4.6.5",
+        "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==",
+        "dev": false
+      }
     },
-    "transitive_exact_versions": {
-      "status": "unresolved",
-      "reason": "hono, @hono/node-server and zod resolve only in the M4 package lock; M0 runs no npm install."
-    },
-    "candidate": {
-      "version": "2.1.0",
-      "server_integrity": "sha512-FdvwZU5N03O77Suh35JqjAqq5R1ZTEPFtwu6N4BgBq28qrQtrCnpbLL5U2pwYCuE194jAw0xnlOVmIqhfoYuUQ==",
-      "source": "evidence/M0/sources/npm-modelcontextprotocol_server_2.1.0.json",
-      "retrieved_utc": "2026-09-25T04:04:40Z",
-      "status": "candidate",
-      "reason": "2.1.0 adds a 4 MiB request-body cap and 100-message batch cap (#2698) and rejects modern requests missing MCP-Protocol-Version (#2590); 2.0.0 has neither. No GHSA exists for v2 packages. Decision D5 (separate review)."
+    "serving": {
+      "entry": "createMcpHandler(factory, { legacy: 'stateless', maxSubscriptions: 0 }) through toNodeHandler",
+      "endpoint": "/mcp behind the access gateway",
+      "catalog": "deploy/policies/capabilities.json mcp section"
     }
   },
   "runtimes": {
@@ -496,12 +562,12 @@
       "evidence": "evidence/M2/raw/service-build.txt"
     },
     "access_gateway": {
-      "role": "The access gateway image (built on the Pi, natively linux/arm64)",
+      "role": "The access gateway image (built on the Pi, natively linux/arm64), with the /mcp route since M4",
       "status": "selected",
-      "image_id": "sha256:5d814709144736f8587932d6d5210ddb64f6629a5dc913e6ba1f1c02844f5023",
+      "image_id": "sha256:41f52b80fdf17bb77af9aeb612b85a44cb3eb9aa2defe8c8fc03c6580b7a53a6",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "2d0bb605491a6cccedded64fee2c1c1266c096fb",
+      "built_from_commit": "ee91a9d4b24ece5621d808f47427b67e1c3be6a4",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -568,7 +634,50 @@
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
         }
       },
-      "evidence": "evidence/M3/raw/gateway-build.txt"
+      "evidence": "evidence/M4/raw/image-build.txt"
+    },
+    "mcp_gateway": {
+      "role": "The MCP service image (built on the Pi, natively linux/arm64): the official SDK's stateless request factory in front of the gateway's REST routes",
+      "status": "selected",
+      "image_id": "sha256:c852f225849c9a77e3844dfdd55647cea142163714c2bb9618fee737aa6c6e0f",
+      "platform": "linux/arm64",
+      "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "built_from_commit": "ee91a9d4b24ece5621d808f47427b67e1c3be6a4",
+      "dockerfile": {
+        "path": "services/mcp/Dockerfile",
+        "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
+      },
+      "lockfile": {
+        "path": "services/mcp/package-lock.json",
+        "sha256": "9787eba2f11d0851a1cf82d36e0aa61dc3244e0292540c892d21ca8ac3108ee1"
+      },
+      "packages": {
+        "@hono/node-server": {
+          "version": "1.19.17",
+          "integrity": "sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ=="
+        },
+        "@modelcontextprotocol/core": {
+          "version": "2.1.0",
+          "integrity": "sha512-YdFj5gMRHr0gYNAhTbQDgjLHiEJdIAUYxomhKseUNye7ZGlISQmUoLh2sveFFCiQ7j2YMffT1kgSND0FSfIFjQ=="
+        },
+        "@modelcontextprotocol/node": {
+          "version": "2.1.0",
+          "integrity": "sha512-6xg3iWVcOfiL8Y7rI6xUqXD0lI2AY5q3djsa/cOi1IJUSwx06t0gvhSwU/6mIIohrFlt40/ANUG56DQ0HLhILQ=="
+        },
+        "@modelcontextprotocol/server": {
+          "version": "2.1.0",
+          "integrity": "sha512-FdvwZU5N03O77Suh35JqjAqq5R1ZTEPFtwu6N4BgBq28qrQtrCnpbLL5U2pwYCuE194jAw0xnlOVmIqhfoYuUQ=="
+        },
+        "hono": {
+          "version": "4.13.9",
+          "integrity": "sha512-7dMkQmZoC4E6F7AtaQSPhlWAdnBti+j7rreMZl8QB4jFiEhP9TWbGWUMi8WYzBCgmgulxuvLQupKqo+Co6Omyg=="
+        },
+        "zod": {
+          "version": "4.6.5",
+          "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="
+        }
+      },
+      "evidence": "evidence/M4/raw/image-build.txt"
     }
   },
   "browser": {
@@ -1381,7 +1490,7 @@
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "ccd319b0996fb08e3f3caae02eb23e7ed25778f95f359d811148d827a7c8b835",
+    "capabilities_sha256": "717b7c772faf7bea7a0f7511b3cbebfe7cf2c3bd97de8b90f4e1d9cfc02ae470",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
