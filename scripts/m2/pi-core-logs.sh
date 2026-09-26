@@ -13,11 +13,9 @@ sudo -n install -d -m 0700 -o root -g root /var/log/firecrawl-pi "$DIR"
 # Every fcpi core container Docker still knows, running or not: none is replaced unscanned.
 ids=$(sudo -n docker ps -aq --no-trunc --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=firecrawl-core)
 printf '### meta\nutc=%s label=%s instances=%s source_commit=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$label" "$(printf '%s\n' $ids | grep -c .)" "$(cat /opt/firecrawl-pi/.fcpi-source-commit)"
-for id in $ids; do
-  f=$DIR/$id.log
-  sudo -n sh -c "docker logs '$id' >'$f.tmp' 2>&1 && chmod 0600 '$f.tmp' && mv -f '$f.tmp' '$f'"
-  printf '### instance_%s\n' "${id:0:12}"
-  sudo -n docker inspect -f 'id={{.Id}} image={{.Image}} created={{.Created}} started={{.State.StartedAt}} finished={{.State.FinishedAt}} running={{.State.Running}} restarts={{.RestartCount}} log_driver={{.HostConfig.LogConfig.Type}}' "$id"
+# The scan of one saved instance log, $1.
+scan() {
+  local f=$1
   echo "log_lines=$(sudo -n wc -l "$f" | cut -d" " -f1) log_sha256=$(sudo -n sha256sum "$f" | cut -c1-64)"
   for pat in 'firecrawl\.dev' 'firecrawl\.com' 'mendable' 'integrations\.' 'duckduckgo' 'posthog' 'sentry\.io' 'getaddrinfo' 'EAI_AGAIN' 'ENOTFOUND' 'ENETUNREACH'; do
     echo "pattern=$pat count=$(sudo -n grep -ciE "$pat" "$f" || true)"
@@ -54,6 +52,22 @@ for id in $ids; do
   echo "control=Starting services count=$(sudo -n grep -c 'Starting services' "$f" || true)"
   # The harness prints "<process> YYYY-MM-DD HH:MM:SS <level> …" in UTC, the container's zone.
   echo "newest_line_utc=$(sudo -n tail -n 200 "$f" | sed -E 's/\x1b\[[0-9;]*m//g' | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}' | tail -1 | tr ' ' T)Z"
+}
+for id in $ids; do
+  f=$DIR/$id.log
+  sudo -n sh -c "docker logs '$id' >'$f.tmp' 2>&1 && chmod 0600 '$f.tmp' && mv -f '$f.tmp' '$f'"
+  printf '### instance_%s\n' "${id:0:12}"
+  sudo -n docker inspect -f 'id={{.Id}} image={{.Image}} created={{.Created}} started={{.State.StartedAt}} finished={{.State.FinishedAt}} running={{.State.Running}} restarts={{.RestartCount}} log_driver={{.HostConfig.LogConfig.Type}}' "$id"
+  scan "$f"
+done
+# Every earlier instance whose log was saved here before it was replaced, scanned again with the
+# same rules, so each core instance of the milestone has one classified record.
+for f in $(sudo -n find "$DIR" -maxdepth 1 -name '*.log' | sort); do
+  id=$(basename "$f" .log)
+  case " $(echo $ids) " in *" $id "*) continue ;; esac
+  printf '### stored_%s\n' "${id:0:12}"
+  echo "id=$id saved_utc=$(sudo -n date -u -r "$f" +%Y-%m-%dT%H:%M:%SZ)"
+  scan "$f"
 done
 echo "### end"
 echo end
