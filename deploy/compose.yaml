@@ -342,7 +342,7 @@ services:
   # is that bridge's host address (the host's resolver), so no lookup leaves through the host's own
   # namespace past the guard (evidence/M1/closeout/CLOSEOUT.md).
   retrieval-service:
-    image: fcpi/retrieval@sha256:b18d8be958316157a78f0144bce802d908066976e92b6d1ff1002cf5e5356eb3
+    image: fcpi/retrieval@sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a
     platform: linux/arm64
     pull_policy: never
     hostname: retrieval-service
@@ -405,7 +405,7 @@ services:
   # (Docker's default plus chroot, clone and unshare; scripts/m2/build-seccomp.mjs). Its network is
   # internal and holds only itself and the retrieval service, whose proxy is its one way out.
   browser-worker:
-    image: fcpi/browser@sha256:eb2d8bf6abc39bd1224655b45a938f9a7302bb03fa212d8e9e2ba5afbdd687ef
+    image: fcpi/browser@sha256:cd83da63af0f9f5039c4b41a8832d84f72b1ba47f19cb410aa39a2a356de4824
     platform: linux/arm64
     pull_policy: never
     hostname: browser-worker

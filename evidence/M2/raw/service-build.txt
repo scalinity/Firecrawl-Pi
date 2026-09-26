@@ -424,3 +424,103 @@ fcpi/browser:m2 id=sha256:eb2d8bf6abc39bd1224655b45a938f9a7302bb03fa212d8e9e2ba5
 leftover_transient_containers=0
 ### end
 end
+### meta
+utc=2026-09-26T03:45:42Z
+source_commit=4e6f0d4da62aceea1405f1e82c3a9fc1a9e6604e
+builder=github.com/docker/buildx v0.37.1 0b265a9f62db554fa9aba6dd19e1bd5704bc7d8a
+mem_available_mib_before=5183
+### build_retrieval
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 621B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 83.03kB done
+#4 DONE 0.0s
+
+#5 [1/5] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.0s done
+#5 DONE 0.1s
+
+#6 [2/5] WORKDIR /srv/retrieval
+#6 CACHED
+
+#7 [3/5] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 CACHED
+
+#9 [5/5] COPY src ./src
+#9 DONE 1.1s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 0.3s done
+#10 exporting manifest sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a 0.1s done
+#10 exporting config sha256:a27388efc6d4ee80db1f0e1cccb4dc1277f02fed63532138aaf5ad6c3ccf9efa 0.1s done
+#10 naming to docker.io/fcpi/retrieval:m2
+#10 naming to docker.io/fcpi/retrieval:m2 0.0s done
+#10 unpacking to docker.io/fcpi/retrieval:m2
+#10 unpacking to docker.io/fcpi/retrieval:m2 0.8s done
+#10 DONE 1.3s
+build_exit=0 elapsed_s=3 mem_available_mib=5169
+### build_browser
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.13kB done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for mcr.microsoft.com/playwright@sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717
+#2 DONE 0.3s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 15.48kB done
+#4 DONE 0.0s
+
+#5 [1/5] FROM mcr.microsoft.com/playwright@sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717
+#5 resolve mcr.microsoft.com/playwright@sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717 0.0s done
+#5 DONE 0.1s
+
+#6 [2/5] WORKDIR /srv/browser
+#6 CACHED
+
+#7 [3/5] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 CACHED
+
+#9 [5/5] COPY src ./src
+#9 DONE 0.2s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 0.2s done
+#10 exporting manifest sha256:cd83da63af0f9f5039c4b41a8832d84f72b1ba47f19cb410aa39a2a356de4824 0.0s done
+#10 exporting config sha256:3ba7ece787e0e9dd4238048f26d128a1ac5af594febf75427b0f43f0f30b77bf 0.0s done
+#10 naming to docker.io/fcpi/browser:m2 done
+#10 unpacking to docker.io/fcpi/browser:m2
+#10 unpacking to docker.io/fcpi/browser:m2 0.2s done
+#10 DONE 0.5s
+build_exit=0 elapsed_s=1 mem_available_mib=5179
+### images
+fcpi/retrieval:m2 id=sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a os=linux arch=arm64 size=354918324 user=3310:3310
+fcpi/browser:m2 id=sha256:cd83da63af0f9f5039c4b41a8832d84f72b1ba47f19cb410aa39a2a356de4824 os=linux arch=arm64 size=3500875716 user=3320:3320
+leftover_transient_containers=0
+### end
+end
