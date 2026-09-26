@@ -178,21 +178,26 @@ const checks = {
       return { ok, actual: `unit ${u.pass}/${u.tests} of ${du} declared (skipped ${u.skipped}); contract ${c.pass}/${c.tests} of ${dc} declared (skipped ${c.skipped}); named tests missing=${missing.join(";") || "none"}; image is the running one=${img === digestOf(composeImage("access-gateway"))}; node=${node}` };
     } },
   R01: { name: "route-shapes-verified-at-the-pin", inputs: [`${RAW}route-shapes.txt`, "deploy/policies/capabilities.json", "patches/series.json"],
-    expected: "the checked tree is upstream 7666c1f9 with the patch series (its recorded result tree); the route and schema files hash to the manifest's values; every native route the manifest serves is registered upstream with that method and shape; every route it declares not enabled is registered upstream; every call the pinned official client (the manifest's version) makes to a served path is one the manifest serves",
+    expected: "the checked tree is upstream 7666c1f9 with the patch series (its recorded result tree); the route and schema files hash to the manifest's values; every native route the manifest serves is registered upstream with that method and shape; every route it declares not enabled is registered upstream; every call the pinned official client (the manifest's version) makes on a served path's family (the same path under another method, or a path under a served one) is served or declared not enabled; each verdict is recomputed from the raw registrations and client calls, not read from the collector's labels",
     run() {
       const s = S(`${RAW}route-shapes.txt`), m = json("deploy/policies/capabilities.json"), ser = json("patches/series.json"), meta = kv(s.meta);
+      // Every verdict is recomputed here from the raw registrations and client calls against the manifest
+      // in the repository; the collector's own labels (FOUND, REGISTERED, served) are not read.
       const regs = (s.registrations ?? []).filter((l) => /^[A-Z]+ \//.test(l));
-      const routes = (s.manifest_routes ?? []).filter(Boolean);
-      const native = routes.filter((l) => !/ platform$/.test(l));
-      const bad = native.filter((l) => !/ FOUND same_shape=true$/.test(l));
-      const off = (s.not_enabled ?? []).filter(Boolean);
-      const calls = (s.client_calls ?? []).filter((l) => /^[A-Z]+ \//.test(l));
-      const unservedServed = calls.filter((l) => / unserved$/.test(l) && m.routes.some((r) => l.startsWith(`${r.method} ${r.path.replace(/\{id\}.*$/, "")}`) && l.split(" ")[1] === r.path));
+      const form = (method, path) => `${method} ${path.replace("{id}", ":jobId")}`;
+      const native = m.routes.filter((r) => r.upstream);
+      const bad = native.filter((r) => !regs.includes(r.upstream) || form(r.method, r.path) !== r.upstream).map((r) => r.id);
+      const offAbsent = m.not_enabled.filter((r) => !regs.includes(form(r.method, r.path)) && !regs.includes(form(r.method, r.path).replace(":jobId", ":id"))).map((r) => `${r.method} ${r.path}`);
+      const calls = (s.client_calls ?? []).filter((l) => /^[A-Z]+ \//.test(l)).map((l) => l.split(" ").slice(0, 2));
+      const servedKey = new Set(native.map((r) => `${r.method} ${r.path}`)), offKey = new Set(m.not_enabled.map((r) => `${r.method} ${r.path}`));
+      // A client call on a served path's family (the same path under another method, or a path under a
+      // served one) must be served or declared not enabled, so the client meets a named refusal, not a gap.
+      const gaps = calls.filter(([method, path]) => native.some((r) => path === r.path || path.startsWith(`${r.path}/`)) && !servedKey.has(`${method} ${path}`) && !offKey.has(`${method} ${path}`)).map((c) => c.join(" "));
       const hashes = (read(`${RAW}route-shapes.txt`).match(/routes_file=\S+ sha256=([0-9a-f]{64})/) ?? [])[1] === m.upstream.routes_file_sha256 && (read(`${RAW}route-shapes.txt`).match(/schemas_file=\S+ sha256=([0-9a-f]{64})/) ?? [])[1] === m.upstream.schemas_file_sha256;
-      const servedCalls = calls.filter((l) => / served$/.test(l)).length;
+      const servedCalls = calls.filter(([method, path]) => servedKey.has(`${method} ${path}`)).length;
       const ok = meta.head === UPSTREAM_SHA && meta.tree === ser.result_tree && m.upstream.source_tree === ser.result_tree && hashes && regs.length >= 50 && native.length === 10 && bad.length === 0 &&
-        off.length === m.not_enabled.length && off.every((l) => / REGISTERED$/.test(l)) && meta.client === `${m.upstream.client.package}@${m.upstream.client.version}` && servedCalls >= 10 && unservedServed.length === 0;
-      return { ok, actual: `head=${meta.head?.slice(0, 7)} tree=${meta.tree?.slice(0, 8)}; file hashes match=${hashes}; registrations=${regs.length}; native routes=${native.length}, not found or reshaped=${bad.join(";") || "none"}; not enabled=${off.length}, all registered upstream=${off.every((l) => / REGISTERED$/.test(l))}; client=${meta.client}, served calls=${servedCalls}` };
+        offAbsent.length === 0 && meta.client === `${m.upstream.client.package}@${m.upstream.client.version}` && servedCalls >= 10 && gaps.length === 0;
+      return { ok, actual: `head=${meta.head?.slice(0, 7)} tree=${meta.tree?.slice(0, 8)}; file hashes match=${hashes}; registrations=${regs.length}; native routes=${native.length}, not registered or reshaped=${bad.join(";") || "none"}; not enabled=${m.not_enabled.length}, not registered upstream=${offAbsent.join(";") || "none"}; client=${meta.client}, served calls=${servedCalls}, client calls on a served family neither served nor declared=${gaps.join(";") || "none"}` };
     } },
 
   // ================================================================ REST contract and authorization

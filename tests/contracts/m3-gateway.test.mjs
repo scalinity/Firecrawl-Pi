@@ -264,6 +264,11 @@ test("a missing scope is 403; admin, unlisted and absolute-form paths are 404; k
   for (const p of ["/admin/integration/create-user", "//v2/scrape", "/%76%32/scrape", "/v2/scrape/../crawl", "/v0/health/liveness"]) assert.equal((await H.call("POST", p, { token: T.a, body: {} })).status, 404, p);
   assert.equal((await H.call("POST", "/v2/search", { token: T.a, body: { query: "x" } })).status, 501);
   assert.equal((await H.call("GET", "/v2/crawl/ongoing", { token: T.a })).status, 501);
+  for (const m of ["POST", "DELETE"]) {
+    const i = await H.call(m, `/v2/scrape/${randomUUID()}/interact`, { token: T.a, body: {} });
+    assert.equal(i.status, 501, `${m} interact`);
+    assert.equal(i.json.code, "CAPABILITY_NOT_ENABLED");
+  }
   assert.match(await raw(H.port, `POST http://gw/v2/scrape HTTP/1.1\r\nhost: ${HOST}\r\nconnection: close\r\nauthorization: Bearer ${T.a}\r\ncontent-type: application/json\r\ncontent-length: 2\r\n\r\n{}`), /^HTTP\/1\.1 404 /);
   assert.equal(H.core.requests.length, n);
 });

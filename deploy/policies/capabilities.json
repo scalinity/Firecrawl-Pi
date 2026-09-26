@@ -36,7 +36,9 @@
     { "method": "GET", "path": "/v2/crawl/active", "reason": "upstream lists every client's crawls as one team; use /platform/v1/jobs" },
     { "method": "POST", "path": "/v2/crawl/params-preview", "reason": "prompt-generated crawl options need the model adapter (M5)" },
     { "method": "POST", "path": "/v2/agent", "reason": "the Cloud agent product is not offered (spec §2.2)" },
-    { "method": "POST", "path": "/v2/browser", "reason": "interactive browser sessions are not offered (spec §2.2)" }
+    { "method": "POST", "path": "/v2/browser", "reason": "interactive browser sessions are not offered (spec §2.2)" },
+    { "method": "POST", "path": "/v2/scrape/{id}/interact", "reason": "interactive browser sessions are not offered (spec §2.2)" },
+    { "method": "DELETE", "path": "/v2/scrape/{id}/interact", "reason": "interactive browser sessions are not offered (spec §2.2)" }
   ],
   "scopes": ["read", "scrape", "map", "crawl", "batch", "cancel"],
   "formats": {
