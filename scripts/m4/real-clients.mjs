@@ -1,0 +1,99 @@
+#!/usr/bin/env node
+// M4's real target clients (spec §18; AC13's "actual target-client evidence distinguished from SDK
+// fixtures"): Claude Code on Haiku and Codex CLI on gpt-6-luna, both installed on the workstation, each
+// given the /mcp endpoint over the tailnet (Tailscale Serve, TLS) with a gateway token of its own
+// (m4claude, m4codex), and one short headless prompt against the M3 fixture: scrape a page, start a
+// crawl, read its status. Each run uses a model on the owner's account, as the owner approved for M4, so
+// it is a held live step: run after the review is addressed.
+//   node scripts/m4/real-clients.mjs > evidence/M4/raw/real-clients.txt
+// - Claude Code reads deploy/clients/claude-code.mcp.json with --strict-mcp-config, so no other MCP
+//   server loads; Codex runs with --ignore-user-config and the server from deploy/clients/codex.config.toml
+//   given as -c overrides, so none of the owner's other servers or plugins load either.
+// - The token reaches each client only through its environment (FCPI_MCP_TOKEN), never a command line or
+//   a file; each runs in an empty temporary directory, so no project instructions are loaded.
+// - What each client did is read from the Pi: the MCP service's records for its token's label (era,
+//   protocol revision, tools, outcomes) and the gateway's. The clients' own model-provider traffic
+//   (Anthropic, OpenAI) is theirs, labelled here, and never touches the platform.
+import { execFileSync, spawn } from "node:child_process";
+import { readFileSync, mkdtempSync, rmSync, existsSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
+const T = Object.fromEntries(readFileSync(join(ROOT, "scripts/m1/pi-target.conf"), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
+const pi = (cmd) => execFileSync("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", T.PI_SSH_TARGET, cmd], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+const FX = "http://m3.fixture.fcpi.test:8080";
+const origin = pi("sudo -n cat /etc/firecrawl-pi/secrets/gateway/served-origins").split("\n").map((l) => l.trim()).filter((l) => /^https:\/\//.test(l));
+if (origin.length !== 1) throw new Error(`expected one https served origin, found ${origin.length}`);
+const URL_MCP = `${origin[0]}/mcp`, HOSTNAME = new URL(origin[0]).hostname;
+const hideIds = (s) => [[T.PI_SSH_KEY, "<pi-ssh-key>"], [T.PI_SSH_TARGET, "<pi-ssh-target>"], [T.PI_LAN_ADDRESS, "<pi-lan-address>"], [HOSTNAME, "<pi-tailnet-name-host>"], [process.env.HOME, "<home>"]]
+  .reduce((x, [a, b]) => (a ? x.split(a).join(b) : x), s).replace(/\b[a-z0-9-]+\.ts\.net\b/gi, "<pi-tailnet-name-host>").replace(/\b100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}\b/g, "<tailnet-address>");
+let current = null;
+const out = (section, rec) => { if (section !== current) { process.stdout.write(`### ${section}\n`); current = section; } process.stdout.write(`${hideIds(JSON.stringify({ utc: new Date().toISOString(), ...rec }))}\n`); };
+const version = (cmd) => execFileSync(cmd, ["--version"], { encoding: "utf8" }).trim().split("\n")[0];
+const PROMPT = `Use only the tools of the MCP server named fcpi. Do these steps in order:
+1. Call firecrawl_scrape with url ${FX}/p06 and formats ["markdown"]. In the page's markdown find the sentinel, a string that starts with fcpi-m3-.
+2. Call firecrawl_crawl with url ${FX}/, limit 2 and sitemap "include". It returns a job id.
+3. Call firecrawl_check_crawl_status with that id. If its status is not completed, call it again, at most 10 times in total.
+Then reply with exactly one line and nothing else: SENTINEL=<the sentinel> CRAWL=<the last status> DOCS=<the number of documents returned>`;
+
+function run(cmd, args, env, cwd) {
+  return new Promise((resolve) => {
+    const t0 = Date.now();
+    const p = spawn(cmd, args, { cwd, env: { ...process.env, ...env }, stdio: ["ignore", "pipe", "pipe"] });
+    let so = "", se = "";
+    p.stdout.on("data", (c) => (so += c));
+    p.stderr.on("data", (c) => (se += c));
+    const kill = setTimeout(() => p.kill("SIGTERM"), 600000);
+    p.on("close", (code) => { clearTimeout(kill); resolve({ code, stdout: so, stderr: se, ms: Date.now() - t0 }); });
+  });
+}
+const piNow = () => pi("date -u +%Y-%m-%dT%H:%M:%S.%3NZ").trim();
+const logs = (svc, since) => pi(`sudo -n docker logs --since ${since} fcpi-${svc}-1 2>&1`).split("\n").filter((l) => l.startsWith("{")).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+function piView(label, since) {
+  const ml = logs("mcp-gateway", since).filter((l) => l.client === label);
+  const gl = logs("access-gateway", since).filter((l) => l.client === label);
+  out("pi_view", { client: label,
+    exchanges: ml.filter((l) => l.event === "exchange").map((l) => ({ http_method: l.http_method, mcp_method: l.mcp_method, protocol_version: l.protocol_version, status: l.status, content_type: l.content_type, session_header_sent: l.session_header_sent })),
+    tools: ml.filter((l) => l.event === "tool").map((l) => ({ era: l.era, protocol_version: l.protocol_version, tool: l.tool, job: l.job, outcome: l.outcome, downstream_status: l.downstream?.status ?? null })),
+    gateway: gl.map((l) => ({ method: l.method, route: l.route, status: l.status, mcp_method: l.mcp_method ?? null })) });
+}
+const answerLine = (s) => (String(s ?? "").match(/SENTINEL=\S+ CRAWL=\S+ DOCS=\S+/) ?? [null])[0];
+
+out("meta", { platform: process.platform, deployed_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), pi_utc: piNow(), endpoint: "https://<pi-tailnet-name-host>:8443/mcp" });
+let code = 0;
+const dir = mkdtempSync(join(tmpdir(), "fcpi-m4-real-"));
+try {
+  // ---- Claude Code on Haiku ----
+  {
+    const since = piNow();
+    const token = pi("sudo -n cat /etc/firecrawl-pi/secrets/clients/m4claude.token").trim();
+    const cfg = join(ROOT, "deploy/clients/claude-code.mcp.json");
+    const r = await run("claude", ["-p", PROMPT, "--model", "haiku", "--mcp-config", cfg, "--strict-mcp-config", "--output-format", "json",
+      "--allowedTools", "mcp__fcpi__firecrawl_scrape mcp__fcpi__firecrawl_crawl mcp__fcpi__firecrawl_check_crawl_status"], { FCPI_MCP_URL: URL_MCP, FCPI_MCP_TOKEN: token }, dir);
+    let j = null; try { j = JSON.parse(r.stdout); } catch { /* not JSON */ }
+    out("claude_code", { client: version("claude"), model_alias: "haiku", models_used: j?.modelUsage ? Object.keys(j.modelUsage) : null, exit: r.code, ms: r.ms, is_error: j?.is_error ?? null,
+      num_turns: j?.num_turns ?? null, total_cost_usd: j?.total_cost_usd ?? null, answer: answerLine(j?.result), result_head: String(j?.result ?? r.stdout).slice(0, 400), stderr_head: r.stderr.slice(0, 300) });
+    await new Promise((res) => setTimeout(res, 1500));
+    piView("m4claude", since);
+  }
+  // ---- Codex CLI on gpt-6-luna ----
+  {
+    const since = piNow();
+    const token = pi("sudo -n cat /etc/firecrawl-pi/secrets/clients/m4codex.token").trim();
+    const last = join(dir, "codex-last.txt");
+    const r = await run("codex", ["exec", "--ignore-user-config", "--skip-git-repo-check", "-s", "read-only", "-m", "gpt-6-luna",
+      "-c", `mcp_servers.fcpi.url=${JSON.stringify(URL_MCP)}`, "-c", 'mcp_servers.fcpi.bearer_token_env_var="FCPI_MCP_TOKEN"', "-c", 'approval_policy="never"',
+      "-o", last, PROMPT], { FCPI_MCP_TOKEN: token }, dir);
+    const answer = existsSync(last) ? readFileSync(last, "utf8") : "";
+    out("codex", { client: version("codex"), model: "gpt-6-luna", exit: r.code, ms: r.ms, answer: answerLine(answer), result_head: answer.slice(0, 400), stderr_tail: r.stderr.slice(-400) });
+    await new Promise((res) => setTimeout(res, 1500));
+    piView("m4codex", since);
+  }
+} catch (e) {
+  out("error", { message: String(e?.stack ?? e).slice(0, 600) });
+  code = 1;
+} finally { rmSync(dir, { recursive: true, force: true }); }
+out("end", { exit: code });
+process.exit(code);

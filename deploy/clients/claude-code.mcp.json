@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "fcpi": {
+      "type": "http",
+      "url": "${FCPI_MCP_URL}",
+      "headers": { "Authorization": "Bearer ${FCPI_MCP_TOKEN}" }
+    }
+  }
+}

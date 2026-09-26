@@ -130,7 +130,7 @@ const modern = (method, params = {}, { tok = "m4a", headers = {}, id = 1, meta =
   headers: { "mcp-protocol-version": MODERN, "mcp-method": method, ...(method === "tools/call" ? { "mcp-name": params.name } : {}), ...headers },
   body: { jsonrpc: "2.0", id, method, params: { ...params, _meta: { ...meta, ...(params._meta ?? {}) } } } });
 const call = (name, args, o = {}) => modern("tools/call", { name, arguments: args, ...(o.progress ? { _meta: { progressToken: o.progress } } : {}) }, o);
-const legacyPost = (method, params, { tok = "m4a", id = 1, init = false } = {}) => raw("POST", { tok, headers: init ? {} : { "mcp-protocol-version": LEGACY }, body: { jsonrpc: "2.0", id, method, ...(params ? { params } : {}) } });
+const legacyPost = (method, params, { tok = "m4a", id = 1, init = false, abortAfterMs } = {}) => raw("POST", { tok, abortAfterMs, headers: init ? {} : { "mcp-protocol-version": LEGACY }, body: { jsonrpc: "2.0", id, method, ...(params ? { params } : {}) } });
 const toolText = (r) => r?.last?.result?.content?.[0]?.text ?? null;
 const payloadOf = (r) => { try { return JSON.parse(toolText(r)); } catch { return null; } };
 const sentinel = (s) => (String(s ?? "").match(/fcpi-m3-[a-z0-9]+-[0-9a-f]{4}/) ?? [null])[0];
@@ -138,7 +138,7 @@ const sentinel = (s) => (String(s ?? "").match(/fcpi-m3-[a-z0-9]+-[0-9a-f]{4}/) 
 // header, the JSON-RPC error code, the tool result's error flag, and the connection's local port.
 const wire = (r, extra = {}) => r.aborted ? { aborted: true, local_port: r.localPort, ...extra } : ({ status: r.status, request_id: r.headers["x-request-id"] ?? null, content_type: r.headers["content-type"] ?? null, sse: r.sse,
   session_header: r.headers["mcp-session-id"] ?? null, www_authenticate: r.headers["www-authenticate"] ?? null, acao: r.headers["access-control-allow-origin"] ?? null, code: r.last?.code ?? null,
-  rpc_error: r.last?.error ? { code: r.last.error.code, message: String(r.last.error.message).slice(0, 160) } : null, result_type: r.last?.result?.resultType ?? null,
+  rpc_error: r.last?.error && typeof r.last.error === "object" ? { code: r.last.error.code, message: String(r.last.error.message).slice(0, 160) } : null, result_type: r.last?.result?.resultType ?? null,
   is_error: r.last?.result?.isError ?? null, local_port: r.localPort, ...extra });
 
 // ---- the SDK client ----------------------------------------------------------------------------------
@@ -282,8 +282,9 @@ const PHASES = {
     const invalid = await call("firecrawl_scrape", { url: `${FX}/p06`, formats: ["screenshot"] });
     out("scopes", { case: "schema_refused_option", ...wire(invalid), text: toolText(invalid)?.slice(0, 200) ?? null });
 
-    // The payload bound: a 600 KiB page in two formats comes back cut, and says what was cut.
-    const bg = await call("firecrawl_scrape", { url: `${FX}/big`, formats: ["markdown", "rawHtml"] });
+    // The payload bound: a 100 KiB page in three formats (about 300 KiB) comes back cut, and says what was
+    // cut. (A 600 KiB page aborts the core's API process at its heap cap: evidence/M4/raw/core-heap-probe*.txt.)
+    const bg = await call("firecrawl_scrape", { url: `${FX}/big?kb=100`, formats: ["markdown", "html", "rawHtml"] });
     const bp = payloadOf(bg);
     out("bound", { case: "big_page", ...wire(bg), text_bytes: Buffer.byteLength(toolText(bg) ?? ""), truncated: bp?.truncated?.fields ?? null, sentinel: sentinel(bp?.data?.markdown) });
 
@@ -323,7 +324,10 @@ const PHASES = {
     out("modern", { case: "same_key_other_arguments", is_error: conflict.isError ?? false, error: sdkPayload(conflict)?.error ?? null });
     const st = await pollSdk(A.client, "firecrawl_check_crawl_status", c1.id);
     out("modern", { case: "crawl_status", id: c1.id, status: st.status, completed: st.completed, returned: st.returned, next_skip: st.nextSkip, sentinels: st.data.map((d) => sentinel(d.markdown)).sort() });
-    const rc = sdkPayload(await A.client.callTool({ name: "firecrawl_get_result", arguments: { id: c1.id } }));
+    saveState({ finishedCrawl: c1.id });
+    // The ledger finishes a job on its next poll after the core does: read the receipt until it has.
+    let rc = null;
+    for (let i = 0; i < 60; i++) { rc = sdkPayload(await A.client.callTool({ name: "firecrawl_get_result", arguments: { id: c1.id } })); if (["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"].includes(rc?.state)) break; await sleep(2000); }
     out("modern", { case: "receipt", id: rc?.id ?? null, state: rc?.state ?? null, transitions: (rc?.events ?? []).map((e) => `${e.from ?? "-"}>${e.to}`) });
     const ledger = sql(`SELECT count(*) FROM fcpi_platform.idempotency WHERE key = '${key}';`)[0];
     out("modern", { case: "ledger_jobs_for_key", key_rows: Number(ledger) });
@@ -361,51 +365,78 @@ const PHASES = {
   },
 
   // Request-local cancellation in both eras (the modern one on request id 0, D5 obligation 3), and the
-  // durable crawl cancellation.
+  // durable crawl cancellation. The fixture logs a request when it answers, so its start is that time
+  // less the page's known delay; every compared time is the Pi's clock.
   async cancel() {
     // A pinned client adopting a discover result it already holds sends no probe, so its first request
     // is tools/call with id 0.
     const d = await modern("server/discover");
     const C = sdkClient("fcpi-m4-cancel", { tok: "m4a", pin: MODERN });
     await C.connect({ prior: { kind: "modern", discover: d.last.result } });
-    for (const [era, cl] of [["modern", C], ["legacy", null]]) {
+    const DELAY = 10000;   // under the retrieval service's 15 s HTTP attempt ceiling (spec §9.3)
+    // The modern client closes its request's stream; the 2025-era SDK client sends notifications/cancelled
+    // instead (its protocol has no per-request abort), which stateless serving hands to a fresh instance
+    // that holds nothing of the running request: that one runs on, and the record says so.
+    for (const [era, cl] of [["modern", C], ["legacy_sdk_notification", null]]) {
       const client = cl ?? sdkClient("fcpi-m4-cancel-legacy", { tok: "m4a" });
       if (!cl) await client.connect();
       const marker = `cancel-${era}-${randomUUID().slice(0, 8)}`;
       const since = piNow();
       const ac = new AbortController();
-      const t0 = Date.now();
-      const p = client.client.callTool({ name: "firecrawl_scrape", arguments: { url: `${FX}/delay?ms=15000&m4=${marker}` } }, { signal: ac.signal }).then(() => "answered", (e) => `rejected:${e.name}`);
-      // Cancel once the fixture has the request, so the whole chain was in flight.
-      let reached = false;
-      for (let i = 0; i < 40 && !reached; i++) { await sleep(250); reached = fixtureLog(since).some((l) => (l.query ?? "").includes(marker)); }
+      const p = client.client.callTool({ name: "firecrawl_scrape", arguments: { url: `${FX}/delay?ms=${DELAY}&m4=${marker}` } }, { signal: ac.signal }).then(() => "answered", (e) => `rejected:${e.name}`);
+      await sleep(3000);
+      const abortAt = piNow();
       ac.abort();
       const outcome = await p;
-      await sleep(3000);
+      await sleep(DELAY);   // the fixture answers its held request and logs it
       const ex = client.exchanges.filter((e) => e.body_method === "tools/call").at(-1);
       const rec = toolRecs(since, (l) => l.tool === "firecrawl_scrape").at(-1);
       const gw = gwLog(since);
-      out("request_cancel", { case: era, marker, fixture_reached_before_cancel: reached, cancelled_after_ms: Date.now() - t0, client_outcome: outcome, body_id: ex?.body_id ?? null,
-        mcp_tool_record: rec ? { jsonrpc_id: rec.jsonrpc_id, era: rec.era, outcome: rec.outcome, downstream: rec.downstream } : null,
-        gateway_mcp_exchange: gw.filter((l) => l.route === "mcp" && l.status === 499).map((l) => l.request_id).length,
-        gateway_scrape_records: gw.filter((l) => l.route === "scrape").map((l) => ({ status: l.status, client: l.client })) });
+      out("request_cancel", { case: era, marker, abort_at: abortAt, client_outcome: outcome, body_id: ex?.body_id ?? null, exchange_failed: ex?.failed ?? null,
+        fixture: fixtureLog(since).filter((l) => (l.query ?? "").includes(marker)).map((l) => ({ answered: l.utc, started: new Date(Date.parse(l.utc) - DELAY).toISOString() })),
+        mcp_tool_record: rec ? { request_id: rec.request_id, jsonrpc_id: rec.jsonrpc_id, era: rec.era, outcome: rec.outcome, downstream: rec.downstream, utc: rec.utc } : null,
+        gateway_mcp_exchanges: gw.filter((l) => l.route === "mcp" && l.request_id === rec?.request_id).map((l) => ({ status: l.status, mcp_method: l.mcp_method })),
+        gateway_scrape_records: gw.filter((l) => l.route === "scrape").map((l) => ({ status: l.status, client: l.client, utc: l.utc })),
+        cancel_notifications: gw.filter((l) => l.route === "mcp" && l.status === 202 && Date.parse(l.utc) >= Date.parse(abortAt)).length });
       if (!cl) await client.client.close();
     }
     await C.client.close();
-    // The durable crawl cancellation: no new pages after it settles.
+    // A 2025-era request whose connection closes mid-call is cancelled like a modern one: the transport's
+    // own semantics, through the gateway.
+    {
+      const marker = `cancel-legacy-close-${randomUUID().slice(0, 8)}`;
+      const since = piNow();
+      const r = await legacyPost("tools/call", { name: "firecrawl_scrape", arguments: { url: `${FX}/delay?ms=${DELAY}&m4=${marker}` } }, { id: 0, abortAfterMs: 3000 });
+      const abortAt = piNow();
+      await sleep(DELAY);
+      const rec = toolRecs(since, (l) => l.tool === "firecrawl_scrape").at(-1);
+      const gw = gwLog(since);
+      out("request_cancel", { case: "legacy_connection_close", marker, abort_at: abortAt, client_outcome: r.aborted ? "closed" : `answered:${r.status}`,
+        fixture: fixtureLog(since).filter((l) => (l.query ?? "").includes(marker)).map((l) => ({ answered: l.utc, started: new Date(Date.parse(l.utc) - DELAY).toISOString() })),
+        mcp_tool_record: rec ? { request_id: rec.request_id, jsonrpc_id: rec.jsonrpc_id, era: rec.era, outcome: rec.outcome, downstream: rec.downstream, utc: rec.utc } : null,
+        gateway_mcp_exchanges: gw.filter((l) => l.route === "mcp" && l.request_id === rec?.request_id).map((l) => ({ status: l.status, mcp_method: l.mcp_method })),
+        gateway_scrape_records: gw.filter((l) => l.route === "scrape").map((l) => ({ status: l.status, client: l.client, utc: l.utc })) });
+    }
+    // The durable crawl cancellation, as M3's J07 measures it: no slow page starts more than 2.5 s after
+    // the cancel. Each slow page answers after 2 s.
     const since = piNow();
-    const cr = await call("firecrawl_crawl", { url: `${FX}/slow/`, limit: 10, sitemap: "skip" });
+    const cr = await call("firecrawl_crawl", { url: `${FX}/slow/`, limit: 30, sitemap: "skip" });
     const id = payloadOf(cr)?.id;
     await sleep(6000);
+    const cancelAt = piNow();
     const k1 = await call("firecrawl_cancel_crawl", { id });
     const k2 = await call("firecrawl_cancel_crawl", { id });
-    const atCancel = fixtureLog(since).filter((l) => /^\/slow\/s\d+$/.test(l.path)).length;
-    let st = null;
+    let st = null, rc = null;
     for (let i = 0; i < 60; i++) { st = payloadOf(await call("firecrawl_check_crawl_status", { id })); if (st?.status === "cancelled") break; await sleep(1000); }
-    await sleep(20000);
-    const later = fixtureLog(since).filter((l) => /^\/slow\/s\d+$/.test(l.path)).length;
-    const rc = payloadOf(await call("firecrawl_get_result", { id }));
-    out("crawl_cancel", { case: "slow_crawl", id, cancel: payloadOf(k1), cancel_again: payloadOf(k2), status: st?.status ?? null, receipt_state: rc?.state ?? null, slow_pages_at_cancel: atCancel, slow_pages_20s_after_settle: later });
+    for (let i = 0; i < 60; i++) { rc = payloadOf(await call("firecrawl_get_result", { id })); if (rc?.state === "CANCELLED") break; await sleep(1000); }
+    await sleep(5000);
+    const pages = fixtureLog(since).filter((l) => /^\/slow\/s\d+$/.test(l.path)).map((l) => ({ path: l.path, answered: l.utc, started: new Date(Date.parse(l.utc) - 2000).toISOString() }));
+    out("crawl_cancel", { case: "slow_crawl", id, cancel_at: cancelAt, cancel: payloadOf(k1), cancel_again: payloadOf(k2), status: st?.status ?? null, receipt_state: rc?.state ?? null,
+      archived: rc?.archived ?? null, completed: rc?.completed ?? null, fixture_requests: pages });
+    // A finished crawl cannot be cancelled: the gateway's 409, as a tool error.
+    const done = state().finishedCrawl;
+    const fin = done ? await call("firecrawl_cancel_crawl", { id: done }) : null;
+    out("crawl_cancel", { case: "finished_crawl", id: done ?? null, ...(fin ? wire(fin) : {}), error: fin ? payloadOf(fin)?.error ?? null : null });
   },
 
   // The MCP service restarted between a crawl and its status, and every related call on its own TCP

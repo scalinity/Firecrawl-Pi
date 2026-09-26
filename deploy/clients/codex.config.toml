@@ -1,0 +1,6 @@
+# Codex CLI: the FCPI MCP server, for ~/.codex/config.toml or `codex -c` overrides (M4). The tailnet
+# origin is the one Tailscale Serve answers at (the Pi's served-origins file); the token is a gateway
+# client token of its own, read from the environment and never written here.
+[mcp_servers.fcpi]
+url = "https://<pi-tailnet-name-host>:8443/mcp"
+bearer_token_env_var = "FCPI_MCP_TOKEN"
