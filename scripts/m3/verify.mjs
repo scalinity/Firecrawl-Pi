@@ -290,7 +290,8 @@ const checks = {
       const shas = (p?.docs ?? []).map((d) => d.sha256);
       const later = [ex.served_after_expiry?.find((r) => r.kind === "crawl"), ar.served_after_recreate?.find((r) => r.kind === "crawl")];
       const same = later.every((r) => r && JSON.stringify(r.served_sha256) === JSON.stringify(shas));
-      const internal = /firecrawl-core|10\.231\.|:3002/.test(read(`${RAW}e2e-jobs.txt`));
+      // In the gateway's answers only (the driver's own restore, resource and ledger records name services).
+      const internal = /firecrawl-core|10\.231\.|:3002/.test(JSON.stringify(["crawl_graph", "idempotency", "crawl_limit", "batch", "list"].map((k) => jb[k] ?? [])));
       const ok = JSON.stringify(p?.pages) === "[5,5,2]" && nextsOk && new Set(shas).size === 12 && new Set((p?.docs ?? []).map((d) => d.url)).size === 12 && same && !internal && ex.served_after_expiry?.every((r) => r.nexts_private === true);
       return { ok, actual: `pages=${JSON.stringify(p?.pages)}; next URLs on the private origin with the external id=${nextsOk}; unique documents=${new Set(shas).size}; same documents after expiry and recreation=${same}; internal host in the transcript=${internal}` };
     } },
