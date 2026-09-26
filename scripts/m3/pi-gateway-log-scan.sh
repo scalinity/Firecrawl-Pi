@@ -13,7 +13,10 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 c=$(sudo -n docker ps -aq --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=access-gateway)
 [ -n "$c" ] && [ "$(printf '%s\n' "$c" | wc -l)" -eq 1 ] || { echo "scan=failed reason=not-exactly-one-gateway-container"; exit 1; }
 L=$(sudo -n docker logs "$c" 2>&1)
-first_event=$(printf '%s\n' "$L" | head -1 | jq -r '.event // "none"' 2>/dev/null || echo unreadable)
+# The first line by parameter expansion: `printf | head -1` can end printf with SIGPIPE on a long log, and
+# under pipefail that failure appended a stray "unreadable" line (CLAUDE.md §33.6).
+first=${L%%$'\n'*}
+first_event=$(printf '%s\n' "$first" | jq -r '.event // "none"' 2>/dev/null || echo unreadable)
 echo "instance=$(sudo -n docker inspect -f '{{.Id}}' "$c" | cut -c1-12) created=$(sudo -n docker inspect -f '{{.Created}}' "$c") started=$(sudo -n docker inspect -f '{{.State.StartedAt}}' "$c") lines=$(printf '%s\n' "$L" | grep -c .) request_records=$(printf '%s\n' "$L" | grep -c '"request_id"') job_records=$(printf '%s\n' "$L" | grep -c '"event":"job"') starts=$(printf '%s\n' "$L" | grep -c '"event":"listening"') first_event=$first_event"
 for pat in 'firecrawl\.dev' 'firecrawl\.com' 'mendable' 'fcpi_[a-z0-9]+_[0-9a-f]{64}' 'Bearer [A-Za-z0-9]' '[Aa]uthorization' 'm3\.fixture\.fcpi\.test'; do
   echo "pattern=$pat count=$(printf '%s\n' "$L" | grep -cE "$pat")"
