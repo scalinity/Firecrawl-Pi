@@ -202,11 +202,14 @@ const checks = {
         rendered: digestOf(composeImage("access-gateway")) === last?.[1], running: running === last?.[1], commit_recorded: !!lastCommit && imgCommit === lastCommit };
       // The evidence describes the code at HEAD: the image's build commit and every deployed commit a raw
       // record names differ from HEAD in nothing the Pi runs or the drivers do (the verifier, the lock
-      // builder and the lock may move on). tailscale-before.txt is the host before Tailscale existed, a
-      // state that cannot be collected again.
+      // builder and the lock may move on). Two records are of one-time transitions that cannot be taken
+      // again: tailscale-before.txt, the host before Tailscale existed, and init-m3.txt, the first host
+      // initialisation that created M3's secrets (a re-run, init-m3-check.txt, only keeps them). The build
+      // log gateway-build.txt holds every build's commit; the running image's is imgCommit above.
       const CODE = ["services/access", "deploy", ":(exclude)deploy/versions.lock.json", "scripts/m1/deploy.sh", "scripts/m3", ":(exclude)scripts/m3/verify.mjs", ":(exclude)scripts/m3/build-lock.mjs",
         "tests/contracts/m3-gateway.test.mjs", "tests/fixtures/m3"];
-      const named = readdirSync(resolve(ROOT, RAW)).filter((f) => f !== "tailscale-before.txt" && /\.(txt|json)$/.test(f))
+      const ONE_TIME = new Set(["tailscale-before.txt", "init-m3.txt", "gateway-build.txt"]);
+      const named = readdirSync(resolve(ROOT, RAW)).filter((f) => !ONE_TIME.has(f) && /\.(txt|json)$/.test(f))
         .flatMap((f) => [...read(`${RAW}${f}`).matchAll(/source_commit(?:=|":")([0-9a-f]{40})/g)].map((m) => [f, m[1]]));
       const commits = new Set([imgCommit, ...named.map(([, c]) => c)].filter(Boolean));
       const stale = [...commits].filter((c) => { try { git("diff", "--quiet", c, "HEAD", "--", ...CODE); return false; } catch { return true; } });
