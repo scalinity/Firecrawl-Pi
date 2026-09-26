@@ -219,7 +219,10 @@ const extractServer = http.createServer(async (req, res) => {
     if (!storeReady) return notReady(res);
     const X = budget.extraction;
     const body = await readJson(req, X.maxDocuments * X.maxDocumentBytes * 2 + 1048576);
-    return send(res, 200, await extract(body, abort.signal));
+    // An extraction no unit of which succeeded answers with its failure's own status (402 for a budget or the
+    // paid-dispatch switch, 502 for a provider, and so on), the result body carrying every unit's outcome.
+    const out = await extract(body, abort.signal);
+    return send(res, out.ok ? 200 : (STATUS[out.failure?.class] ?? 502), out);
   } catch (e) { onError(res, path, e); }
 });
 extractServer.requestTimeout = 0; // an extraction runs for minutes; its own deadline bounds it

@@ -335,7 +335,7 @@ async function scrapeWithJson(ctx, body, json) {
       x = await extractor.extract({ logicalId: `scrape:${ctx.id}`, schema: json.schema, prompt: json.prompt ?? null,
         documents: [{ url: doc.metadata?.url ?? body.url, markdown: typeof doc.markdown === "string" ? doc.markdown : "" }], deadline: new Date(Date.now() + left).toISOString() }, Math.max(1000, left));
     } catch (e) { return ctx.send(503, { success: false, code: "EXTRACTION_UNAVAILABLE", error: `The extraction service could not be reached (${e.code}); the page was scraped but not extracted.` }, { "retry-after": "10" }); }
-    const failure = x.status !== 200 ? x.json?.failure : (x.json?.ok ? null : x.json?.failure);
+    const failure = x.status === 200 && x.json?.ok ? null : (x.json?.failure ?? null);
     if (failure || x.status !== 200) {
       const f = failure ?? { class: "EXTRACTION_FAILED", detail: `the extraction service answered ${x.status}` };
       return ctx.send(x.status !== 200 ? x.status : 502, { success: false, code: f.class, error: `The page was scraped, but its json format failed: ${f.detail}` }, f.retryAfter ? { "retry-after": String(f.retryAfter) } : {});

@@ -71,9 +71,11 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
       say({ job: job.id, action: "extractor_unavailable", reason: e.code, delivered: e.delivered });
       return false;
     }
-    const failure = x.status !== 200 ? x.json?.failure ?? { class: `EXTRACTOR_HTTP_${x.status}`, detail: `the extraction service answered ${x.status}` } : (x.json?.ok ? null : x.json?.failure);
-    const result = x.status === 200 && x.json ? { data: x.json.data, sources: x.json.sources, warnings: x.json.warnings, missingRequired: x.json.missingRequired,
-      model: x.json.model, units: x.json.units, usage: x.json.usage } : { data: null, failure };
+    const j = x.json ?? {};
+    const failure = x.status === 200 && j.ok ? null : (j.failure ?? { class: `EXTRACTOR_HTTP_${x.status}`, detail: `the extraction service answered ${x.status}` });
+    // The units and usage are kept whether or not any unit succeeded: they say what was tried and what it cost.
+    const result = { data: failure ? null : j.data ?? null, sources: j.sources ?? {}, warnings: j.warnings ?? [], missingRequired: j.missingRequired ?? [],
+      model: j.model ?? null, units: j.units ?? [], usage: j.usage ?? null, ...(failure ? { failure } : {}) };
     const buf = Buffer.from(JSON.stringify(result));
     const put = await archive.put(buf);
     await store.addDocuments(job.id, [{ ordinal: 0, docKey: "result", sha256: put.sha256, bytes: put.bytes }]);
