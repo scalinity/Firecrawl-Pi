@@ -1,0 +1,16 @@
+### meta
+utc=2026-09-26T13:05:06Z source_commit=5c4dbb41fa14c438cb1ac62fa0532978cb6cb166
+### control
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=20 create_host_path=false
+exit=0
+### missing_artifact_bind
+copy_names_missing_source=1
+fcpi-data-check: FAIL: bind source <missing-artifact-path> is absent
+exit=1
+missing_path_created=no
+### shadow_artifact_root
+lacks .fcpi-artifact-root: refusing to write outside the project's data mount
+exit=1 timed_out=no listening=0 files_written=0
+### transient
+leftover_transient_containers=0
+end

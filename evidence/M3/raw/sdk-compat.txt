@@ -1,0 +1,29 @@
+### meta
+{"utc":"2026-09-26T13:01:44.713Z","client":"@mendable/firecrawl-js@4.31.1","node":"v26.8.2","env_FIRECRAWL_API_URL_set":false}
+### client
+{"utc":"2026-09-26T13:01:44.715Z","apiUrl":"http://127.0.0.1:3380"}
+### scrape
+{"utc":"2026-09-26T13:01:44.909Z","sentinel":"fcpi-m3-p02-d64d","links":3,"url":"http://m3.fixture.fcpi.test:8080/p02","statusCode":200}
+### map
+{"utc":"2026-09-26T13:01:45.046Z","links":["http://m3.fixture.fcpi.test:8080","http://m3.fixture.fcpi.test:8080/p01","http://m3.fixture.fcpi.test:8080/p02","http://m3.fixture.fcpi.test:8080/p03","http://m3.fixture.fcpi.test:8080/p04","http://m3.fixture.fcpi.test:8080/p05","http://m3.fixture.fcpi.test:8080/p06","http://m3.fixture.fcpi.test:8080/p07","http://m3.fixture.fcpi.test:8080/p08","http://m3.fixture.fcpi.test:8080/p09","http://m3.fixture.fcpi.test:8080/p10","http://m3.fixture.fcpi.test:8080/p11"]}
+### crawl
+{"utc":"2026-09-26T13:01:52.356Z","status":"completed","completed":4,"total":4,"docs":4,"urls":["http://m3.fixture.fcpi.test:8080/","http://m3.fixture.fcpi.test:8080/p01","http://m3.fixture.fcpi.test:8080/p02","http://m3.fixture.fcpi.test:8080/p03"],"expiresAt":"2026-10-03T13:01:52.324Z"}
+### batch
+{"utc":"2026-09-26T13:01:52.393Z","case":"start_twice_same_key","id":"9dc5295d-f2e6-4b7b-bb16-f87df00371cd","first_id":"9dc5295d-f2e6-4b7b-bb16-f87df00371cd","url_on_private_origin":true}
+{"utc":"2026-09-26T13:02:07.921Z","case":"status","status":"completed","docs":2,"sentinels":["fcpi-m3-p05-f853","fcpi-m3-p06-53f2"]}
+### crawl_errors
+{"utc":"2026-09-26T13:02:07.929Z","errors":0,"robotsBlocked":[],"error":null}
+### cancel
+{"utc":"2026-09-26T13:02:17.104Z","cancel_returned":true,"final_status":"cancelled","docs":3}
+### refused
+{"utc":"2026-09-26T13:02:17.114Z","refused":true,"name":"FirecrawlSdkError","status":400,"code":"UNSUPPORTED_OPTION","message":"format 'screenshot' is not supported by this deployment: screenshots arrive with M7's verified browser extras."}
+### connections
+{"utc":"2026-09-26T13:02:17.114Z","hosts":["127.0.0.1:3380"],"total":2,"lookups":[]}
+### ledger
+{"utc":"2026-09-26T13:02:17.470Z","id":"0c055129-aa26-4a59-84ad-8a0cd2424134","kind":"crawl","state":"SUCCEEDED","upstream":"01a0ddce-aedd-7779-9417-eb39828d99bb","cancel_requested":false,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":7}
+{"utc":"2026-09-26T13:02:17.471Z","id":"9dc5295d-f2e6-4b7b-bb16-f87df00371cd","kind":"batch","state":"SUCCEEDED","upstream":"01a0ddce-dd2e-7703-91fb-8df80f25e3e2","cancel_requested":false,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":2}
+{"utc":"2026-09-26T13:02:17.471Z","id":"9eeb323e-f02d-485b-897a-20162c1f343c","kind":"crawl","state":"RUNNING","upstream":"01a0ddcf-17bf-70a8-a846-e572524bf55c","cancel_requested":true,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":11}
+### resources
+{"utc":"2026-09-26T13:02:17Z","label":"end-sdk-compat","gateway":{"instance":"17da053c19f7","started_at":"2026-09-26T12:58:46.184451378Z","peak":34340864,"max":"167772160","current":23773184,"oom_kill":0},"core":{"instance":"6a78fb1588f2","started_at":"2026-09-26T13:01:12.080660865Z","peak":1901969408,"max":"2415919104","current":1795670016,"oom_kill":0},"vmstat_oom_kill":6,"mem_available_kib":5223472}
+### end
+{"utc":"2026-09-26T13:02:17.835Z","exit":0}

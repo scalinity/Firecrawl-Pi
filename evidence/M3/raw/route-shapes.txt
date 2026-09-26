@@ -1,0 +1,151 @@
+### meta
+utc=2026-09-26T12:51:25Z
+head=7666c1f9ae8720a6bba271e0f60b6a217f8a5210
+tree=1b98286b4a16c6e9f831bc628ede1e8c3d680f48
+routes_file=apps/api/src/routes/v2.ts sha256=9b491b0fe04a36fcdf8ae55a7650b03f2d508551d82035970e3c8186b3e71992
+schemas_file=apps/api/src/controllers/v2/types.ts sha256=c92adcbd994a86640b2e189542e552fd4147bde8d9350794808583448cc316d6
+client=@mendable/firecrawl-js@4.31.1
+### registrations
+GET /v2/keyless/eligibility
+POST /v2/search
+POST /v2/search/:jobId/feedback
+POST /v2/feedback
+POST /v2/parse/upload-url
+PUT /v2/parse/upload/:uploadId
+POST /v2/parse
+POST /v2/scrape
+GET /v2/scrape/:jobId
+POST /v2/scrape/:jobId/interact
+DELETE /v2/scrape/:jobId/interact
+POST /v2/batch/scrape
+POST /v2/map
+POST /v2/crawl
+POST /v2/crawl/params-preview
+GET /v2/crawl/ongoing
+GET /v2/crawl/active
+GET /v2/crawl/:jobId
+DELETE /v2/crawl/:jobId
+WS /v2/crawl/:jobId
+GET /v2/batch/scrape/:jobId
+DELETE /v2/batch/scrape/:jobId
+GET /v2/batch/scrape/:jobId/errors
+GET /v2/crawl/:jobId/errors
+POST /v2/extract
+GET /v2/extract/:jobId
+POST /v2/agent
+GET /v2/agent/:jobId
+DELETE /v2/agent/:jobId
+GET /v2/team/credit-usage
+GET /v2/team/credit-usage/historical
+GET /v2/team/token-usage
+GET /v2/team/token-usage/historical
+GET /v2/concurrency-check
+GET /v2/team/queue-status
+GET /v2/team/activity
+GET /v2/team/threat-protection
+PUT /v2/team/threat-protection
+POST /v2/team/threat-protection/zscaler/test-connection
+GET /v2/team/threat-protection/zscaler/categories
+POST /v2/team/threat-protection/zscaler/sync
+GET /v2/team/siem
+PUT /v2/team/siem
+POST /v2/team/siem/test
+POST /v2/monitor
+GET /v2/monitor
+POST /v2/monitor/email/confirm
+POST /v2/monitor/email/unsubscribe
+GET /v2/monitor/:monitorId
+DELETE /v2/monitor/:monitorId
+POST /v2/monitor/:monitorId/run
+GET /v2/monitor/:monitorId/checks
+GET /v2/monitor/:monitorId/checks/:checkId
+POST /v2/slack/oauth/start
+GET /v2/slack/oauth/callback
+GET /v2/slack/status
+GET /v2/slack/channels
+DELETE /v2/slack/installation
+POST /v2/slack/commands
+POST /v2/slack/events
+POST /v2/browser
+POST /v2/interact
+GET /v2/browser
+GET /v2/interact
+POST /v2/browser/:sessionId/execute
+POST /v2/interact/:sessionId/execute
+GET /v2/browser/:sessionId/replay
+GET /v2/interact/:sessionId/replay
+GET /v2/browser/:sessionId/replay/:pageId
+GET /v2/interact/:sessionId/replay/:pageId
+DELETE /v2/browser/:sessionId
+DELETE /v2/interact/:sessionId
+POST /v2/browser/webhook/destroyed
+POST /v2/support/ask
+POST /v2/support/docs-search
+### manifest_routes
+scrape POST /v2/scrape upstream=POST_/v2/scrape FOUND same_shape=true
+map POST /v2/map upstream=POST_/v2/map FOUND same_shape=true
+crawl.submit POST /v2/crawl upstream=POST_/v2/crawl FOUND same_shape=true
+crawl.status GET /v2/crawl/{id} upstream=GET_/v2/crawl/:jobId FOUND same_shape=true
+crawl.cancel DELETE /v2/crawl/{id} upstream=DELETE_/v2/crawl/:jobId FOUND same_shape=true
+crawl.errors GET /v2/crawl/{id}/errors upstream=GET_/v2/crawl/:jobId/errors FOUND same_shape=true
+batch.submit POST /v2/batch/scrape upstream=POST_/v2/batch/scrape FOUND same_shape=true
+batch.status GET /v2/batch/scrape/{id} upstream=GET_/v2/batch/scrape/:jobId FOUND same_shape=true
+batch.cancel DELETE /v2/batch/scrape/{id} upstream=DELETE_/v2/batch/scrape/:jobId FOUND same_shape=true
+batch.errors GET /v2/batch/scrape/{id}/errors upstream=GET_/v2/batch/scrape/:jobId/errors FOUND same_shape=true
+platform.status GET /platform/v1/status platform
+platform.jobs GET /platform/v1/jobs platform
+platform.job GET /platform/v1/jobs/{id} platform
+### not_enabled
+POST /v2/search REGISTERED
+POST /v2/extract REGISTERED
+GET /v2/extract/{id} REGISTERED
+POST /v2/parse REGISTERED
+GET /v2/scrape/{id} REGISTERED
+GET /v2/crawl/ongoing REGISTERED
+GET /v2/crawl/active REGISTERED
+POST /v2/crawl/params-preview REGISTERED
+POST /v2/agent REGISTERED
+POST /v2/browser REGISTERED
+POST /v2/scrape/{id}/interact REGISTERED
+DELETE /v2/scrape/{id}/interact REGISTERED
+### client_calls
+DELETE /v2/agent/{id} unserved
+DELETE /v2/batch/scrape/{id} served
+DELETE /v2/browser/{id} unserved
+DELETE /v2/crawl/{id} served
+DELETE /v2/monitor/{id} unserved
+DELETE /v2/scrape/{id}/interact not_enabled
+GET /v2/agent/{id} unserved
+GET /v2/batch/scrape/{id} served
+GET /v2/batch/scrape/{id}/errors served
+GET /v2/concurrency-check unserved
+GET /v2/crawl/active not_enabled
+GET /v2/crawl/{id} served
+GET /v2/crawl/{id}/errors served
+GET /v2/extract/{id} not_enabled
+GET /v2/monitor/{id} unserved
+GET /v2/monitor/{id}/checks/{id}{id} unserved
+GET /v2/monitor/{id}/checks{id} unserved
+GET /v2/monitor{id} unserved
+GET /v2/team/credit-usage unserved
+GET /v2/team/credit-usage/historical{id} unserved
+GET /v2/team/queue-status unserved
+GET /v2/team/token-usage unserved
+GET /v2/team/token-usage/historical{id} unserved
+POST /v2/agent not_enabled
+POST /v2/batch/scrape served
+POST /v2/browser not_enabled
+POST /v2/browser/{id}/execute unserved
+POST /v2/crawl served
+POST /v2/crawl/params-preview not_enabled
+POST /v2/extract not_enabled
+POST /v2/feedback unserved
+POST /v2/map served
+POST /v2/monitor unserved
+POST /v2/monitor/{id}/run unserved
+POST /v2/parse not_enabled
+POST /v2/scrape served
+POST /v2/scrape/{id}/interact not_enabled
+POST /v2/search not_enabled
+POST /v2/search/{id}/feedback unserved
+end

@@ -1,0 +1,21 @@
+### meta
+utc=2026-09-26T08:22:29Z source_commit=6263fbd380079ef83e6b21e43445e2e158db9927
+### secrets
+created /etc/firecrawl-pi/secrets/gateway_postgres_password
+created /etc/firecrawl-pi/secrets/postgres_gateway_role_password
+created /etc/firecrawl-pi/secrets/gateway/
+created /etc/firecrawl-pi/secrets/gateway/clients
+kept    /etc/firecrawl-pi/secrets/clients/
+### artifacts
+created /srv/firecrawl-pi/data/artifacts/
+created /srv/firecrawl-pi/data/artifacts/.fcpi-artifact-root
+artifact_root_on_data_mount=
+### inventory
+3380:3380 600 /etc/firecrawl-pi/secrets/gateway_postgres_password
+5432:5432 600 /etc/firecrawl-pi/secrets/postgres_gateway_role_password
+3380:3380 700 /etc/firecrawl-pi/secrets/gateway
+3380:3380 600 /etc/firecrawl-pi/secrets/gateway/clients
+0:0 700 /etc/firecrawl-pi/secrets/clients
+3380:3380 700 /srv/firecrawl-pi/data/artifacts
+3380:3380 600 /srv/firecrawl-pi/data/artifacts/.fcpi-artifact-root
+end

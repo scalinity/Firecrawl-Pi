@@ -1,0 +1,33 @@
+### meta
+utc=2026-09-26T13:05:08Z source_commit=5c4dbb41fa14c438cb1ac62fa0532978cb6cb166
+### rights
+role=fcpi_core login=true super=false createrole=false createdb=false replication=false bypassrls=false has_password=true
+role=fcpi_gateway login=true super=false createrole=false createdb=false replication=false bypassrls=false has_password=true
+role=fcpi_nuq_reader login=false super=false createrole=false createdb=false replication=false bypassrls=false has_password=false
+role=fcpi_retrieval login=true super=false createrole=false createdb=false replication=false bypassrls=false has_password=true
+schema_owner=postgres
+owned_objects role=fcpi_gateway n=0 functions=0
+owned_objects role=fcpi_nuq_reader n=0 functions=1
+platform_tables=4 gateway_dml_on=4 gateway_other_rights_on=0
+schema_version=1 gateway_version_select=true gateway_version_write=false
+gateway_schema_create=false gateway_nuq_usage=false gateway_retrieval_usage=false gateway_public_create=false core_platform_usage=false retrieval_platform_usage=false
+lookup owner=fcpi_nuq_reader security_definer=true config=search_path=pg_catalog, pg_temp gateway_execute=true core_execute=false public_execute=false
+reader_tables=nuq.queue_scrape,nuq.queue_scrape_backlog
+cron_tables_public_select=job,job_run_details
+### hba_rules
+hba_rule n=1 type=host db=postgres user=fcpi_gateway address=10.231.7.0 mask=255.255.255.0 method=scram-sha-256 error=
+hba_rule n=2 type=host db=all user=all address=10.231.7.0 mask=255.255.255.0 method=reject error=
+hba_rule n=3 type=local db=all user=all address= mask= method=trust error=
+hba_rule n=4 type=host db=all user=all address=127.0.0.1 mask=255.255.255.255 method=trust error=
+hba_rule n=5 type=host db=all user=all address=::1 mask=ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff method=trust error=
+hba_rule n=6 type=local db=replication user=all address= mask= method=trust error=
+hba_rule n=7 type=host db=replication user=all address=127.0.0.1 mask=255.255.255.255 method=trust error=
+hba_rule n=8 type=host db=replication user=all address=::1 mask=ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff method=trust error=
+hba_rule n=9 type=host db=all user=all address=all mask= method=scram-sha-256 error=
+### hba_probe
+probe role=fcpi_gateway result=password_failed
+probe role=fcpi_core result=rejected_by_hba
+probe role=fcpi_retrieval result=rejected_by_hba
+probe role=postgres result=rejected_by_hba
+leftover_transient=0
+end

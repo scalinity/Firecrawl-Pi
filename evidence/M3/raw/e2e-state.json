@@ -1,0 +1,137 @@
+{
+  "ownerJob": "6e6067ca-2782-4430-b523-8341435f241d",
+  "graphJob": "5f6163fc-5f02-4f95-b534-b17fda29dc43",
+  "batchJob": "ae9fb4ec-8e4b-45d2-9370-e0bd5805d54f",
+  "limitJob": "c9726a7a-b5d1-42cd-b9c7-36899b7f17f2",
+  "graphDocs": [
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-450d-75e6-b28c-12f9b6401b60",
+      "sentinel": "fcpi-m3-index-f877",
+      "sha256": "cfdb4b1167c36c2a6c182e3b56559bc1b92d08c7f93ccb359fbbb133e89fe263"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p01",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p01",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4745-7664-af92-c5550ee466f8",
+      "sentinel": "fcpi-m3-p01-df1c",
+      "sha256": "cff4adffb80284cc8e5a3c43f045da384dd16540d19918de88083711f79f6225"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p02",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p02",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-474c-708d-a81f-da2067131629",
+      "sentinel": "fcpi-m3-p02-d64d",
+      "sha256": "140f996a94b832624841340038158f62384dada378b46e2958b23ad374ab60ce"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p03",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p03",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4751-7573-9da8-b0734264b11e",
+      "sentinel": "fcpi-m3-p03-aa2a",
+      "sha256": "fe8185dbf5485245835c29c227b611a4c4921996a7ccb2a0f862ad7dc2008e40"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p04",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p04",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4758-7571-9a82-9d52e18011a8",
+      "sentinel": "fcpi-m3-p04-4413",
+      "sha256": "812e6403a8a5fb761d112fe58a81948af7d966ad0a900e8d5f9037155c43cc05"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p06",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p06",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4784-71e9-9be2-e5a1c013fd29",
+      "sentinel": "fcpi-m3-p06-53f2",
+      "sha256": "5248ad15829c8d9a1297ac62ffa49621f11a26ef650bad261fd29b73931fd7a6"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p07",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p07",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4784-71e9-9be2-e8dcc184db34",
+      "sentinel": "fcpi-m3-p07-8d32",
+      "sha256": "747cf4279ceda46b2d20123115e386d6d5450b6d6ffb0af203e4842489b18408"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p09",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p09",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4784-71e9-9be2-f08df35671e1",
+      "sentinel": "fcpi-m3-p09-096e",
+      "sha256": "5bf1034e0c93cd84545413e8dce6fd3a8eece6414e414f7b0c2e7b10954f4786"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p08",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p08",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4784-71e9-9be2-ec0612c6c2be",
+      "sentinel": "fcpi-m3-p08-407e",
+      "sha256": "47a49f21809f14b37a6930da4ca3960c5b40cbdbdfebfcbc61ab9db760aaf90e"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p10",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p10",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4784-71e9-9be2-f74db69133e9",
+      "sentinel": "fcpi-m3-p10-d950",
+      "sha256": "f37267213bf8506c6dee8d26979971da421af42e6df9f9897f1e84fb7fc8b93f"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p11",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p11",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4784-71e9-9be2-fbc85fd1bd82",
+      "sentinel": "fcpi-m3-p11-8229",
+      "sha256": "5f8deaa1f80626dff09c48e4580e1371d7bd7087eaae210767349ad238ef4e87"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p05",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p05",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-4784-71e9-9be2-e14aabfa6db6",
+      "sentinel": "fcpi-m3-p05-f853",
+      "sha256": "17bec946ad87653a96c323a506653c864d1b5ec733463a848ec936e8a90c1c3f"
+    }
+  ],
+  "batchDocs": [
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p01",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p01",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-9b7b-744f-91b9-2c9377323fbb",
+      "sentinel": "fcpi-m3-p01-df1c",
+      "sha256": "e400d2d88cc5aa9e49e18e08fb688f8fa9154bde3c44edb58eb37ecd8b131d6b"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/p02",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/p02",
+      "statusCode": 200,
+      "scrapeId": "01a0ddc6-9b7b-744f-91b9-3126b11293d8",
+      "sentinel": "fcpi-m3-p02-d64d",
+      "sha256": "72e05419fe2768da034c3d6a5ec27600f8c279b97a63984aa899ffbab3e8655a"
+    },
+    {
+      "url": "http://m3.fixture.fcpi.test:8080/missing",
+      "sourceURL": "http://m3.fixture.fcpi.test:8080/missing",
+      "statusCode": 404,
+      "scrapeId": "01a0ddc6-9b7b-744f-91b9-37941b8c2e29",
+      "sentinel": null,
+      "sha256": "8d460cd565ac11e02163058c94cb3703c1d3d31048286bb501b224d11cb97efd"
+    }
+  ],
+  "crashJobs": {
+    "k1": "50bd9b76-e8c2-4377-89df-ead3a90857b7",
+    "k2": "df48a28e-51ae-4b72-8223-13306ebd5922",
+    "k3": "3cc63e35-1555-4049-94ed-3b02946863a9",
+    "k4": "6cd902bf-daed-4339-ae60-a2a88f7996c2",
+    "k5": "8db4bdd0-b0bd-4b18-997a-4449f06f0b59"
+  }
+}

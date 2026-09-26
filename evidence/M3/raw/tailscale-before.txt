@@ -1,0 +1,5 @@
+### before
+utc=2026-09-26T10:14:23Z
+resolv_conf_sha256=de08881cd2a06e1a3dba4a62ca41abfe418f74f4ede94e596105a813bc9662cf nameservers=1
+tailscale_installed=no
+apt_sources=debian.sources,docker.sources,raspi.sources,

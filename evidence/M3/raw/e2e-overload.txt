@@ -1,0 +1,38 @@
+### meta
+{"utc":"2026-09-26T12:53:36.169Z","phase":"overload","source_commit":"5c4dbb41fa14c438cb1ac62fa0532978cb6cb166","vantage":"workstation through an SSH forward of 127.0.0.1:3380","platform":"darwin","node":"v26.8.2"}
+### admission
+{"utc":"2026-09-26T12:53:36.912Z","case":"active_slow_crawl","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"5ad8b3b74e6802391f25ae0e4c07967fdb88aef02f5446dd63b205d76b644665"}
+{"utc":"2026-09-26T12:53:36.930Z","case":"crawl_200_0","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"d191177ecf7177d89ad07629b03e8d99fbcd374e6748dea3b8c39902292b87ee"}
+{"utc":"2026-09-26T12:53:36.985Z","case":"crawl_200_1","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"66a35e28f629a49835b1f6dc21ca3a7e9933506fb5afd0cc07a5fa70620b6049"}
+{"utc":"2026-09-26T12:53:37.646Z","case":"units_over_500","status":503,"code":"OVERLOADED","error":"Open jobs already hold 430 page units and this one adds 200 (limit 500); retry later.","www_authenticate":null,"retry_after":"30","acao":null,"body_sha256":"5f522bb97ce8351270b4af10aff74d8bbecb57b568d1a5ebd36491e4bd401893","open_jobs":3,"open_units":430}
+{"utc":"2026-09-26T12:53:38.286Z","case":"jobs_over_20","accepted_before_refusal":17,"status":503,"code":"OVERLOADED","error":"The platform already holds 20 open jobs (limit 20); retry later.","www_authenticate":null,"retry_after":"30","acao":null,"body_sha256":"5350ccf2d26308a89f976ce8b8a7ef4ae39d0ee9d5bba30121d455bd9df06faf","open_jobs":20}
+{"utc":"2026-09-26T12:53:56.673Z","case":"cleanup","states":["CANCELLED"],"count":20,"queued_ever_submitted":0}
+### restore
+{"utc":"2026-09-26T12:53:57.628Z","firecrawl-core":{"was":"running","now":"running healthy"},"access-gateway":{"was":"running","now":"running healthy"}}
+### resources
+{"utc":"2026-09-26T12:53:57Z","label":"end-overload","gateway":{"instance":"17da053c19f7","started_at":"2026-09-26T12:45:47.779873305Z","peak":37945344,"max":"167772160","current":26263552,"oom_kill":0},"core":{"instance":"86aa34050f7b","started_at":"2026-09-26T12:45:47.054640156Z","peak":1925382144,"max":"2415919104","current":1812955136,"oom_kill":0},"vmstat_oom_kill":6,"mem_available_kib":5285056}
+### ledger
+{"utc":"2026-09-26T12:53:58.365Z","id":"3288cb56-b815-4f73-992a-f88ee2d45a33","kind":"crawl","state":"CANCELLED","upstream":"01a0ddc7-3bcc-767f-89dc-11f5c9b30e0e","cancel_requested":true,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":31}
+{"utc":"2026-09-26T12:53:58.365Z","id":"ae55b9f0-1be6-41e3-904b-e9615d8aa9b0","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"1e4aa64e-d91c-4878-8b67-1842cfc9e875","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"c4b8b40e-0cab-4c24-ac8b-8ed08aa4f93b","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"2162b2d2-85b6-4537-8bea-87bb02ca44d2","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"90850b98-9a91-49ff-a04e-70508d66a390","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"9535d53b-31f8-422b-a974-3d7ab62fa3b1","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"d0691bab-6ee9-49fc-b050-356cdac4810b","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"8d4d5933-de66-4b05-9574-2ec710ac2151","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"efd80296-667a-4a0c-af7f-833519726cc0","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"22304526-401e-4f22-9fcc-a8c956317318","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"63b2cc32-2a79-43a2-b81e-8bd2aefb5263","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"a4ed984c-c038-4692-b872-9fb7ee569563","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"e58a92ef-0cde-4e38-9877-b3912b7b4878","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"d77725dd-67ae-40a2-84ca-3e3095e114e9","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"e7a18855-d18b-47a1-ad35-6366c310a34b","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"6e993bca-d318-49b8-9491-df171c8755a2","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"46eaa7a1-bbc5-4681-ab04-26a94a81c543","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"44dbef84-18da-4c1f-a47b-599305c7cf0a","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+{"utc":"2026-09-26T12:53:58.365Z","id":"de9f7dcc-d3b3-4a41-a13c-94e8706da0b1","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+### forward
+{"utc":"2026-09-26T12:53:58.365Z","pid":60886,"local":"127.0.0.1:3380","remote":"127.0.0.1:3380","exited_before_end":false}
+### end
+{"utc":"2026-09-26T12:53:58.366Z","exit":0}
