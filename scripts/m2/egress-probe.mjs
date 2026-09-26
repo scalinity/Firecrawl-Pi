@@ -19,6 +19,9 @@ if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(lan ?? "")) throw new Error("PI_LAN_ADDRESS 
 
 // Another address on the host's LAN (/24), never printed: traffic to it is forwarded, so it meets
 // the guard's host-local rule, where traffic to the host's own address is delivered to the host.
+// The router's public address when the host has one configured as local (review finding W8); never
+// printed, labelled "wan".
+const wan = /^\d{1,3}(\.\d{1,3}){3}$/.test(process.env.PI_WAN_ADDRESS ?? "") ? process.env.PI_WAN_ADDRESS : null;
 const neighbour = lan.replace(/\.\d+$/, lan.endsWith(".1") ? ".2" : ".1");
 const tcp = (host, port, ms = 3000) => new Promise((resolve) => {
   const s = connect({ host, port, timeout: ms });
@@ -76,6 +79,7 @@ const cases = {
     ["tcp lan:22 (the host's own LAN address, guard input)", "fail", () => tcp(lan, 22)],
     ["tcp lan:80 (the host's own LAN address, guard input)", "fail", () => tcp(lan, 80)],
     ["tcp lan-neighbour:80 (another host on the LAN, guard egress_local)", "fail", () => tcp(neighbour, 80)],
+    ...(wan ? [["tcp wan:80 (the router's public address, guard egress_local)", "fail", () => tcp(wan, 80)], ["tcp wan:443 (the router's public address, guard egress_local)", "fail", () => tcp(wan, 443)]] : []),
     ["tcp 10.231.6.1:22 (host on the bridge, guard input)", "fail", () => tcp("10.231.6.1", 22)],
     ["tcp 10.231.6.1:80 (host web listener on the bridge, guard input)", "fail", () => tcp("10.231.6.1", 80)],
     ["tcp 169.254.169.254:80 (metadata, guard special)", "fail", () => tcp("169.254.169.254", 80)],

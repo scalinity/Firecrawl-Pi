@@ -619,8 +619,20 @@ const checks = {
       const kvc = (sec) => Object.fromEntries((s[sec] ?? []).filter((l) => /packets=/.test(l)).map((l) => [l.split(" ")[0], +l.split("=")[1]]));
       const b = kvc("guard_before"), a = kvc("guard_after"), d = (k) => (a[k] ?? 0) - (b[k] ?? 0);
       const rose = ["egress_special_dropped", "egress_local_dropped", "egress_other_dropped", "egress_input_dropped"].every((k) => d(k) > 0);
-      const ok = JSON.stringify(nonInternal) === JSON.stringify(["fcpi_access", "fcpi_egress"]) && dnsSet && ["browser", "retrieval", "fixture"].every((r) => probes[r]?.all_as_expected === true) && rose && d("egress_web_accepted") === 0 && (a.egress_web_accepted ?? -1) === 0;
-      return { ok, actual: `non-internal=${nonInternal.join(",")}; own DNS on them=${dnsSet}; browser/retrieval/fixture as expected=${["browser", "retrieval", "fixture"].map((r) => probes[r]?.all_as_expected).join("/")}; guard deltas special=${d("egress_special_dropped")} local=${d("egress_local_dropped")} other=${d("egress_other_dropped")} input=${d("egress_input_dropped")} web_accepted=${d("egress_web_accepted")}` };
+      // With the router's public address configured as local (X11), both probes to it must fail.
+      const wanOn = /wan_configured=yes/.test((s.meta ?? []).join(" "));
+      const wanCases = (probes.retrieval?.probes ?? []).filter((p) => /^tcp wan:/.test(p.label));
+      const wanOk = wanOn && wanCases.length === 2 && wanCases.every((p) => p.as_expected);
+      const ok = wanOk && JSON.stringify(nonInternal) === JSON.stringify(["fcpi_access", "fcpi_egress"]) && dnsSet && ["browser", "retrieval", "fixture"].every((r) => probes[r]?.all_as_expected === true) && rose && d("egress_web_accepted") === 0 && (a.egress_web_accepted ?? -1) === 0;
+      return { ok, actual: `router public address probed=${wanOk} (configured=${wanOn}); non-internal=${nonInternal.join(",")}; own DNS on them=${dnsSet}; browser/retrieval/fixture as expected=${["browser", "retrieval", "fixture"].map((r) => probes[r]?.all_as_expected).join("/")}; guard deltas special=${d("egress_special_dropped")} local=${d("egress_local_dropped")} other=${d("egress_other_dropped")} input=${d("egress_input_dropped")} web_accepted=${d("egress_web_accepted")}` };
+    } },
+  X11: { name: "router-public-address-is-host-local", inputs: [`${RAW}wan-address.txt`, "evidence/M0/audit.json"],
+    expected: "the router's public address (review finding W8), measured once as M0 measured it and printed only as a hash, is in the retrieval service's local-network file and the guard's host-local set",
+    run() {
+      const w = kv((sections(`${RAW}wan-address.txt`).measure ?? []).join(" ").split(" ")), c = kv(sections(`${RAW}wan-address.txt`).check);
+      const sameAsM0 = w.wan_sha256 === json("evidence/M0/audit.json").network.egress_ip_sha256;
+      const ok = w.measured === "yes" && /^[0-9a-f]{64}$/.test(w.wan_sha256 ?? "") && c.in_cidrs_file === "yes" && c.in_guard_set === "yes";
+      return { ok, actual: `measured=${w.measured}; same address as M0=${sameAsM0}; in the local-network file=${c.in_cidrs_file}; in the guard set=${c.in_guard_set}` };
     } },
   X04: { name: "access-bridge-guard-still-holds", inputs: [`${RAW}guard.txt`, "deploy/host/fcpi-guard.nft"],
     expected: "the guard table is loaded from the file the repository holds; from inside the gateway, the host's bridge address, its LAN sshd and a public address do not connect (M1's V20 probe)",
