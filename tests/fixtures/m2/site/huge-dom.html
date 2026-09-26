@@ -5,8 +5,14 @@
 <main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main>
 <script>
   // Builds a document of about 30 million characters without any network: the browser tier must
-  // refuse it as SIZE_LIMIT, as a direct body over 25 MiB is refused.
-  document.getElementById("root").textContent = "x".repeat(30 * 1000 * 1000);
+  // refuse it as SIZE_LIMIT, as a direct body over 25 MiB is refused. The text sits in an element
+  // that is not displayed, so the document's size is what is tested: displayed, text of this size
+  // exhausts the renderer's memory cap in layout before any size is measured, and the kernel's
+  // memory-cgroup kill contains it (evidence/M2/raw/rt-browser-huge-dom-visible.txt).
+  const store = document.createElement("div");
+  store.hidden = true;
+  store.textContent = "x".repeat(30 * 1000 * 1000);
+  document.body.append(store);
 </script>
 </body>
 </html>

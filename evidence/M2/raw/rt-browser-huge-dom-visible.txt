@@ -1,0 +1,147 @@
+### browser_meta
+utc=2026-09-26T06:28:17.888Z source_commit=da51fce607d861549e576f66368bef93c8b80169
+firecrawl-core=0b74c9db4de97c4e3853b9fb4599da4b1e1024955dbcce42f6fb3487c6b5a2fb image=sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d started=2026-09-26T06:26:04.98820288Z restarts=0
+retrieval-service=b187c85ddd07fb5c3323eae74bd87f5340ea52d8c2a970fb58792438ec2e388a image=sha256:bd8671ff05ef67687bb20ac62c7dfd53d4bc9d39f32762729e263751fa90824d started=2026-09-26T06:25:59.101968176Z restarts=0
+fixture-m2=27de601ca3d1a49508eed2350c6e1200e0a07705dd2a20cec5df050cd08dd41f image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T04:18:45.022045436Z restarts=0
+browser-worker=04a7479edc0f8f2a16c688b3433567269547930d02d11b48c15090713258f06e image=sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c started=2026-09-26T06:28:11.825334778Z restarts=0
+### browser_driver
+{"utc":"2026-09-26T06:28:21.268Z","case":"C03-js","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/js.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dc66-78f3-75db-aa10-d19fedf65462","sentinels":["fcpi-m2-js-5c1e"],"markdown_chars":307,"warning":null,"ms":3044}
+{"utc":"2026-09-26T06:28:23.955Z","case":"C04-delayed","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/delayed.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dc66-849a-758e-86e6-c47264d44699","sentinels":["fcpi-m2-delayed-9b2d"],"markdown_chars":228,"warning":null,"ms":2686}
+{"utc":"2026-09-26T06:28:25.756Z","case":"C06-cookie-js","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/cookie-js","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dc66-8f1c-701c-b7dd-943e0bfce7f3","sentinels":["fcpi-m2-cookiejs-7d1c"],"markdown_chars":172,"warning":null,"ms":1800}
+{"utc":"2026-09-26T06:28:27.400Z","case":"C27-js-late","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/js-slow.html","http":500,"success":false,"code":"SCRAPE_FCPI_RETRIEVAL","error":"Retrieval failed: RENDER_INCOMPLETE. the page was still a script shell after rendering (visible_chars=0; scripts=1; noscript asks for JavaScript)","statusCode":null,"scrapeId":null,"sentinels":[],"markdown_chars":0,"warning":null,"ms":1644}
+{"utc":"2026-09-26T06:28:27.436Z","case":"C28-short-scripted","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/short-scripted.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dc66-9c8b-734e-8414-0a08c6834a70","sentinels":["fcpi-m2-shortjs-4d2e"],"markdown_chars":59,"warning":null,"ms":36}
+{"utc":"2026-09-26T06:28:29.136Z","case":"C29-gallery","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/gallery.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dc66-9cae-726f-b351-b500db5c7020","sentinels":["fcpi-m2-gallery-9a1b"],"markdown_chars":203,"warning":null,"ms":1700}
+{"utc":"2026-09-26T06:28:30.998Z","case":"C30-huge-dom","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/huge-dom.html","http":500,"success":false,"code":"SCRAPE_FCPI_RETRIEVAL","error":"Retrieval failed: RENDERER_CRASHED. page.evaluate: Target crashed ","statusCode":null,"scrapeId":null,"sentinels":[],"markdown_chars":0,"warning":null,"ms":1862}
+{"utc":"2026-09-26T06:28:32.854Z","case":"S15-subresources","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/subresources.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dc66-aaa1-7199-995f-7966282e4194","sentinels":["fcpi-m2-subresources-6f0b"],"markdown_chars":479,"warning":null,"ms":1855}
+{"utc":"2026-09-26T06:28:34.568Z","case":"S15b-subresources-direct","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/subresources.html?direct=1","logicalId":"m2-subres-af51ed94-1c84-4a03-b2e7-c303a86cf23f","http":200,"ok":true,"attemptsUsed":2,"strategies":["direct_http","direct_browser"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":["fcpi-m2-subresources-6f0b"],"subresources":{"requests":14,"blocked":0,"overLimit":0,"offHost":0},"proxyDenied":["SSRF_DENIED:nuq-postgres:5432","SSRF_DENIED:[::1]:3002","SSRF_DENIED:127.0.0.1:3002","SSRF_DENIED:10.231.1.5:6379","SSRF_DENIED:127.0.0.1:3002","SSRF_DENIED:169.254.169.254","CLOUD_DENIED:api.firecrawl.dev:443","SSRF_DENIED:192.168.1.1","SSRF_DENIED:[::ffff:7f00:1]:3002","SSRF_DENIED:127.0.0.1","SSRF_DENIED:127.0.0.1","SSRF_DENIED:10.231.2.1:8080","SSRF_DENIED:10.231.1.4:5672"],"started":"2026-09-26T06:28:32.854Z","ms":1714}
+{"utc":"2026-09-26T06:28:34.568Z","case":"end"}
+driver_exit=0
+### browser_browser_processes
+utc=2026-09-26T06:28:39Z
+      1       0 Ss        27 docker-init
+      7       1 Sl        27 MainThread
+     32       7 Ssl       21 chrome-headless
+     35      32 S         21 chrome-headless
+     36      32 S         21 chrome-headless
+     38      36 S         21 chrome-headless
+     54      35 Sl        21 chrome-headless
+     67      32 Sl        20 chrome-headless
+    152       0 Rs         0 ps
+### browser_retrieval_log
+{"utc":"2026-09-26T06:28:21.241Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"79fdcd87-beb8-47a9-9642-47b618edd522","logical_id":"01a0dc66-78f3-75db-aa10-d19fedf65462","purpose":"page","url_hmac":"7ab438787391285d1c72d1e7658e3f77","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":721,"ms":2942}
+{"utc":"2026-09-26T06:28:23.935Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"a8f9c081-676c-4c33-90b8-12bd7d114146","logical_id":"01a0dc66-849a-758e-86e6-c47264d44699","purpose":"page","url_hmac":"afa7220ecde5c916e944bda2e0e13e0b","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":643,"ms":2656}
+{"utc":"2026-09-26T06:28:25.744Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"d34b414d-7df2-4eac-a497-d6a42132650b","logical_id":"01a0dc66-8f1c-701c-b7dd-943e0bfce7f3","purpose":"page","url_hmac":"d6ecde2fd5306bf48d147ad0def79f04","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":592,"ms":1768}
+{"utc":"2026-09-26T06:28:27.388Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"88e467e6-422b-484c-9c6d-cd686b8f5ac7","logical_id":"01a0dc66-961f-7758-a057-30aec8c586cd","purpose":"page","url_hmac":"1642bf96a1038e984eb25ae69cfa789d","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"js_shell","failure":"RENDER_INCOMPLETE","bytes":546,"ms":1622}
+{"utc":"2026-09-26T06:28:27.426Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"68388f76-2d0c-476c-ae72-80db9fc5526b","logical_id":"01a0dc66-9c8b-734e-8414-0a08c6834a70","purpose":"page","url_hmac":"bee0f7531bb3d07266468de790a24130","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":454,"ms":17}
+{"utc":"2026-09-26T06:28:29.121Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"151f2d1b-7383-4e78-b678-6b24ad379fc1","logical_id":"01a0dc66-9cae-726f-b351-b500db5c7020","purpose":"page","url_hmac":"040b7d48f61d6aa5bee9bdbb7831d02a","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":545,"ms":1677}
+{"utc":"2026-09-26T06:28:30.943Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"e3e5aa2b-a454-4175-8612-e4276429d6e3","logical_id":"01a0dc66-a353-70fb-adf4-7cc5049d365d","purpose":"page","url_hmac":"6a4dca24a9a88041280369b45050d186","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"js_shell","failure":"RENDERER_CRASHED","bytes":489,"ms":1796}
+{"utc":"2026-09-26T06:28:31.185Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"nuq-postgres:5432","failure":"SSRF_DENIED","detail":"port 5432 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:31.190Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"[::1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:31.191Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:31.194Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"10.231.1.5:6379","failure":"SSRF_DENIED","detail":"port 6379 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:31.216Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:31.225Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"api.firecrawl.dev:443","failure":"CLOUD_DENIED","detail":"api.firecrawl.dev is a Firecrawl Cloud service destination"}
+{"utc":"2026-09-26T06:28:31.226Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"10.231.2.1:8080","failure":"SSRF_DENIED","detail":"port 8080 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:31.230Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"169.254.169.254","failure":"SSRF_DENIED","detail":"address 169.254.169.254 is link-local"}
+{"utc":"2026-09-26T06:28:31.231Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"192.168.1.1","failure":"SSRF_DENIED","detail":"address 192.168.1.1 is private"}
+{"utc":"2026-09-26T06:28:31.232Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"[::ffff:7f00:1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:31.233Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-09-26T06:28:31.233Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-09-26T06:28:31.233Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","target_host":"10.231.1.4:5672","failure":"SSRF_DENIED","detail":"port 5672 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:32.839Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"b869e705-1823-4b42-94f9-ad2745f9c0e0","logical_id":"01a0dc66-aaa1-7199-995f-7966282e4194","purpose":"page","url_hmac":"7a1d1e124aa989a777b224685fc3285a","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":1741,"ms":1780}
+{"utc":"2026-09-26T06:28:32.955Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"nuq-postgres:5432","failure":"SSRF_DENIED","detail":"port 5432 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:32.960Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"[::1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:32.962Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:32.963Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"10.231.1.5:6379","failure":"SSRF_DENIED","detail":"port 6379 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:32.984Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:32.988Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"169.254.169.254","failure":"SSRF_DENIED","detail":"address 169.254.169.254 is link-local"}
+{"utc":"2026-09-26T06:28:32.990Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"api.firecrawl.dev:443","failure":"CLOUD_DENIED","detail":"api.firecrawl.dev is a Firecrawl Cloud service destination"}
+{"utc":"2026-09-26T06:28:32.990Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"192.168.1.1","failure":"SSRF_DENIED","detail":"address 192.168.1.1 is private"}
+{"utc":"2026-09-26T06:28:32.993Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"[::ffff:7f00:1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:32.994Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-09-26T06:28:32.995Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-09-26T06:28:33.002Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"10.231.2.1:8080","failure":"SSRF_DENIED","detail":"port 8080 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:33.003Z","service":"retrieval","build":"0.2.0","event":"proxy_denied","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","target_host":"10.231.1.4:5672","failure":"SSRF_DENIED","detail":"port 5672 is not the scheme's default port"}
+{"utc":"2026-09-26T06:28:34.560Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"d9e51f98-5f9a-4cda-aef4-c2fdcd0997ca","logical_id":"m2-subres-af51ed94-1c84-4a03-b2e7-c303a86cf23f","purpose":"page","url_hmac":"e12a0e6824deb660fe2e0c6b0d1874bd","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":1741,"ms":1693}
+### browser_fixture_log
+{"utc":"2026-09-26T06:28:18.317Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:19.684Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:21.290Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/delayed.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:21.376Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/delayed.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:24.000Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/cookie-js","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:24.170Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/cookie-js","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:24.200Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/cookie-js","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":"present"}
+{"utc":"2026-09-26T06:28:25.778Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js-slow.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:25.849Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js-slow.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:27.423Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/short-scripted.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:27.456Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/gallery.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:27.514Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/gallery.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:27.543Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?i=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:27.544Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?gallery=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:27.544Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?i=2","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:27.545Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?i=3","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:29.162Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/huge-dom.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:29.230Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/huge-dom.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:31.100Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/subresources.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:31.167Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/subresources.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:31.198Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:32.879Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/subresources.html","query":"?direct=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:32.938Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/subresources.html","query":"?direct=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:28:32.965Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+### browser_browser_log
+{"utc":"2026-09-26T06:28:19.587Z","service":"browser","build":"0.2.0","event":"browser_launched","version":"153.0.8010.12","ms":1249,"launches":1}
+{"utc":"2026-09-26T06:28:21.232Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"c4346b49-7b60-4803-8edc-e91802488409","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":2895,"pages_served":1}
+{"utc":"2026-09-26T06:28:23.928Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"994056ba-1f6b-441f-812f-480a3c7a7784","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":2625,"pages_served":2}
+{"utc":"2026-09-26T06:28:25.739Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"e7643ee1-9358-4b97-8704-631dd81a4d46","ok":true,"failure":null,"status":200,"requests":2,"blocked":0,"over_limit":0,"ms":1648,"pages_served":3}
+{"utc":"2026-09-26T06:28:27.384Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"4bcea2fa-90d4-44d2-93b8-af4c56062ecc","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":1592,"pages_served":4}
+{"utc":"2026-09-26T06:28:29.112Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"0a8a24af-93b2-4c48-a6a3-012fcf5752cd","ok":true,"failure":null,"status":200,"requests":5,"blocked":0,"over_limit":0,"ms":1644,"pages_served":5}
+{"utc":"2026-09-26T06:28:30.921Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"a7a4ba62-24b6-4570-bf2b-031bf3fab2f5","ok":false,"failure":"RENDERER_CRASHED","status":null,"requests":1,"blocked":0,"over_limit":0,"ms":1743,"pages_served":6}
+{"utc":"2026-09-26T06:28:32.834Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"09b0d84f-b9a2-4fdb-a2d2-4753b4a7adc5","ok":true,"failure":null,"status":200,"requests":14,"blocked":0,"over_limit":0,"ms":1720,"pages_served":7}
+{"utc":"2026-09-26T06:28:34.554Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"29e22e95-3a71-431c-8297-8161cb444d52","ok":true,"failure":null,"status":200,"requests":14,"blocked":0,"over_limit":0,"ms":1663,"pages_served":8}
+### browser_attempts
+01a0dc66-78f3-75db-aa10-d19fedf65462	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:18.309Z	2026-09-26T06:28:18.319Z	js_shell	200	721		2
+01a0dc66-78f3-75db-aa10-d19fedf65462	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:18.322Z	2026-09-26T06:28:21.240Z	rendered	200	721	1	2
+01a0dc66-849a-758e-86e6-c47264d44699	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:21.283Z	2026-09-26T06:28:21.293Z	js_shell	200	643		2
+01a0dc66-849a-758e-86e6-c47264d44699	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:21.295Z	2026-09-26T06:28:23.931Z	rendered	200	643	1	2
+01a0dc66-8f1c-701c-b7dd-943e0bfce7f3	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:23.981Z	2026-09-26T06:28:24.073Z	js_shell	200	271		2
+01a0dc66-8f1c-701c-b7dd-943e0bfce7f3	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:24.074Z	2026-09-26T06:28:25.742Z	rendered	200	592	2	2
+01a0dc66-961f-7758-a057-30aec8c586cd	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:25.771Z	2026-09-26T06:28:25.780Z	js_shell	200	546		2
+01a0dc66-961f-7758-a057-30aec8c586cd	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:25.783Z	2026-09-26T06:28:27.386Z	RENDER_INCOMPLETE	200	546	1	2
+01a0dc66-9c8b-734e-8414-0a08c6834a70	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:27.413Z	2026-09-26T06:28:27.425Z	adequate	200	454		1
+01a0dc66-9cae-726f-b351-b500db5c7020	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:27.449Z	2026-09-26T06:28:27.458Z	js_shell	200	429		2
+01a0dc66-9cae-726f-b351-b500db5c7020	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:27.459Z	2026-09-26T06:28:29.117Z	rendered	200	545	5	2
+01a0dc66-a353-70fb-adf4-7cc5049d365d	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:29.152Z	2026-09-26T06:28:29.165Z	js_shell	200	489		2
+01a0dc66-a353-70fb-adf4-7cc5049d365d	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:29.166Z	2026-09-26T06:28:30.937Z	RENDERER_CRASHED		489	1	2
+01a0dc66-aaa1-7199-995f-7966282e4194	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:31.069Z	2026-09-26T06:28:31.104Z	js_shell	200	1712		2
+01a0dc66-aaa1-7199-995f-7966282e4194	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:31.106Z	2026-09-26T06:28:32.837Z	rendered	200	1741	14	2
+m2-subres-af51ed94-1c84-4a03-b2e7-c303a86cf23f	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:28:32.870Z	2026-09-26T06:28:32.881Z	js_shell	200	1712		2
+m2-subres-af51ed94-1c84-4a03-b2e7-c303a86cf23f	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:28:32.882Z	2026-09-26T06:28:34.558Z	rendered	200	1741	14	2
+### browser_permits
+browser	0	t	
+url	0	t	
+url	1	t	
+### browser_health
+browser-worker running healthy restarts=0
+firecrawl-core running healthy restarts=0
+retrieval-service running healthy restarts=0
+access-gateway running healthy restarts=0
+nuq-postgres running healthy restarts=0
+rabbitmq running healthy restarts=0
+redis running healthy restarts=0
+fixture running healthy restarts=0
+fixture-m2 running healthy restarts=0
+### browser_cgroups_end
+browser-worker max=1610612736 current=168771584 peak=1610612736 low 0 high 0 max 108 oom 1 oom_kill 1 oom_group_kill 0 
+firecrawl-core max=2415919104 current=1775960064 peak=1959919616 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+retrieval-service max=469762048 current=65830912 peak=83984384 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+access-gateway max=167772160 current=16580608 peak=29507584 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+nuq-postgres max=671088640 current=134627328 peak=187449344 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+rabbitmq max=536870912 current=136380416 peak=210075648 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+redis max=335544320 current=10207232 peak=16367616 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture max=67108864 current=17416192 peak=37322752 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture-m2 max=201326592 current=115851264 peak=184156160 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+host_mem_available_mib=5079
+### browser_browser_health
+{"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":8,"launches":1,"busy":false}
+### browser_end
+end
