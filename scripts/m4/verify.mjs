@@ -612,7 +612,7 @@ const checks = {
 
   // ================================================================ the review of record
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
-    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to M5 or later), gives every finding an earlier review deferred to M4 (CLAUDE.md §30) a row of its own (there is none at M4's start), cites only commits that exist, and holds no absolute local path",
+    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists, and every finding found during M4 outside the review (F), a row with an outcome (fixed with its commit, rejected with evidence, deferred to M5 or later), gives every finding an earlier review deferred to M4 (CLAUDE.md §30) a row of its own (there is none at M4's start), cites only commits that exist, and holds no absolute local path",
     run() {
       const text = read(`${EV}review/REVIEW.md`);
       const rows = text.split("\n").filter((l) => /^\| [A-Z]{1,2}\d+ \|/.test(l)).map((l) => l.split(" | "));
@@ -621,7 +621,9 @@ const checks = {
         return has(dir) ? readdirSync(resolve(ROOT, dir)).filter((f) => f.endsWith(".md")).flatMap((f) => read(`${dir}/${f}`).split("\n").filter((l) => /^\| [A-Z]{1,2}\d+ \|/.test(l) && /\| Deferred to M4\b/.test(l)).map((l) => `${m} ${l.split(" | ")[0].slice(2)}`)) : []; });
       const carriedRows = text.split("\n").filter((l) => /^\| M\d [A-Z]{1,2}\d+ \|/.test(l)).map((l) => l.split(" | "));
       const carriedBad = carried.filter((id) => { const r = carriedRows.find((c) => c[0] === `| ${id}`); return !r || !/^(Fixed|Rejected, with the evidence|Deferred to M[5-9]\b)/.test(r[2] ?? ""); });
-      const listedIds = [...text.matchAll(/^\s*\d+\. \*\*([CWS]\d+) —/gm)].map((m) => m[1]);
+      // The review's findings (C, W, S) and those found during M4 outside it (F), which later milestones take
+      // from this report just the same.
+      const listedIds = [...text.matchAll(/^\s*\d+\. \*\*([CWSF]\d+) —/gm)].map((m) => m[1]);
       const uncovered = listedIds.filter((id) => !rows.some((c) => c[0] === `| ${id}`));
       const uncited = rows.filter((c) => /^Fixed/.test(c[3] ?? "") && !/`[0-9a-f]{7,40}`/.test(c[4] ?? "")).map((c) => c[0].slice(2));
       const commits = [...new Set(rows.flatMap((c) => [...(c[4] ?? "").matchAll(/`([0-9a-f]{7,40})`/g)].map((m) => m[1])))];
