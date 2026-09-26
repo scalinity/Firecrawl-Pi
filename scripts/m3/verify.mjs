@@ -211,9 +211,12 @@ const checks = {
       const ONE_TIME = new Set(["tailscale-before.txt", "init-m3.txt", "gateway-build.txt"]);
       const named = readdirSync(resolve(ROOT, RAW)).filter((f) => !ONE_TIME.has(f) && /\.(txt|json)$/.test(f))
         .flatMap((f) => [...read(`${RAW}${f}`).matchAll(/source_commit(?:=|":")([0-9a-f]{40})/g)].map((m) => [f, m[1]]));
-      const commits = new Set([imgCommit, ...named.map(([, c]) => c)].filter(Boolean));
+      // The image is built from services/access alone, a commit before the one that pins its digest in
+      // deploy/compose.yaml, so its build commit is compared on that path; every deployed commit on all of CODE.
+      const imgStale = !imgCommit || (() => { try { git("diff", "--quiet", imgCommit, "HEAD", "--", "services/access"); return false; } catch { return true; } })();
+      const commits = new Set(named.map(([, c]) => c).filter(Boolean));
       const stale = [...commits].filter((c) => { try { git("diff", "--quiet", c, "HEAD", "--", ...CODE); return false; } catch { return true; } });
-      cond.evidence_at_head = named.length >= 10 && stale.length === 0;
+      cond.evidence_at_head = named.length >= 10 && stale.length === 0 && !imgStale;
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
       return { ok: bad.length === 0, actual: `records naming a deployed commit=${named.length}, commits differing from HEAD in code=${stale.map((c) => c.slice(0, 7)).join(",") || "none"}; builds=${builds.length}; last=${last?.[1]?.slice(7, 19)} arch=${last?.[2]} user=${last?.[3]}; running=${running?.slice(7, 19)}; image commit=${imgCommit?.slice(0, 7)}; failed conditions=${bad.join(",") || "none"}` };
     } },
