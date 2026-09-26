@@ -35,6 +35,7 @@ const testManifest = (over = {}) => {
   m.limits.auth.failuresPerMinute = 5;
   m.limits.admission.maxSyncInFlight = 2;
   m.limits.admission.maxOpenJobs = over.maxOpenJobs ?? 20;
+  if (over.archiveResponseMaxBytes) m.limits.results.archiveResponseMaxBytes = over.archiveResponseMaxBytes;
   return m;
 };
 const clientsText = (labels) => labels.map(([l, p, s]) => `${l} ${p} ${s} sha256:${createHash("sha256").update(T[l]).digest("hex")}`).join("\n") + "\n";
@@ -45,7 +46,7 @@ async function admin(db) { const c = new pg.Client({ host: PGHOST, port: Number(
 // ---- the fake core -----------------------------------------------------------------------------------
 function fakeCore(dbName) {
   const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false };
-  const docOf = (id, i) => ({ markdown: `# page ${i}`, metadata: { sourceURL: `http://m3.fixture.fcpi.test:8080/p${i}`, scrapeId: `${id.slice(0, 8)}-doc-${i}`, statusCode: 200 } });
+  const docOf = (id, i, big = false) => ({ markdown: `# page ${i}${big ? "x".repeat(8192) : ""}`, metadata: { sourceURL: `http://m3.fixture.fcpi.test:8080/p${i}`, scrapeId: `${id.slice(0, 8)}-doc-${i}`, statusCode: 200 } });
   const persist = async (kind, id, body) => {
     const data = kind === "crawl" ? { mode: "kickoff", origin: body.origin, crawl_id: id } : { mode: "single_urls", origin: "api", scrapeOptions: { origin: body.origin }, crawl_id: id };
     await s.db.query("INSERT INTO nuq.queue_scrape (id, data, group_id) VALUES ($1, $2, $3)", [randomUUID(), data, id]);
@@ -101,7 +102,7 @@ function fakeCore(dbName) {
   // Answers every held submission that the core created (persist-hang), as it would have.
   s.release = () => { const n = s.held.filter((h) => h.answer).length; for (const h of s.held) h.answer?.(); s.held = []; return n; };
   // n documents, after `holes` finished pages that have no stored document.
-  s.complete = (id, n, errs = 0, holes = 0) => { const j = s.jobs.get(id); j.docs = [...Array(holes).fill(null), ...Array.from({ length: n }, (_, i) => docOf(id, i))]; j.errors = Array.from({ length: errs }, (_, i) => ({ id: randomUUID(), url: `http://m3.fixture.fcpi.test:8080/missing${i}`, error: "Not found", code: "SCRAPE_NOT_FOUND" })); j.status = "completed"; };
+  s.complete = (id, n, errs = 0, holes = 0, big = []) => { const j = s.jobs.get(id); j.docs = [...Array(holes).fill(null), ...Array.from({ length: n }, (_, i) => docOf(id, i, big.includes(i)))]; j.errors = Array.from({ length: errs }, (_, i) => ({ id: randomUUID(), url: `http://m3.fixture.fcpi.test:8080/missing${i}`, error: "Not found", code: "SCRAPE_NOT_FOUND" })); j.status = "completed"; };
   s.upstreamOf = async (jobId) => (await s.db.query("SELECT upstream_id FROM fcpi_platform.job WHERE id = $1", [jobId])).rows[0]?.upstream_id;
   s.submissions = () => s.requests.filter((r) => r.method === "POST" && /^\/v2\/(crawl|batch\/scrape)$/.test(r.url));
   s.connectDb = async () => { s.db = await admin(dbName); };
@@ -376,6 +377,20 @@ test("per-item errors the core fails to serve are fetched again, never read as n
   assert.equal(gone.state, "PARTIAL");
   assert.equal(gone.archived, 2);
   assert.deepEqual(gone.errors.errors.map((e) => e.code), ["UPSTREAM_ERRORS_LOST"]);
+});
+
+test("a page over the archive's size cap falls back to one document at a time, and a document over it is skipped and recorded", async () => {
+  const h = await harness({ manifest: testManifest({ archiveResponseMaxBytes: 4096 }) });
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  h.core.complete(up, 3, 0, 0, [1]);
+  const done = await waitFor(async () => { const j = await h.job(r.json.id); return ["SUCCEEDED", "PARTIAL"].includes(j.state) && j; }, 15000, "archive");
+  assert.equal(done.state, "PARTIAL");
+  assert.equal(done.archived, 2, "the documents either side of the large one are kept");
+  const pages = h.core.requests.filter((q) => q.method === "GET" && q.url.startsWith(`/v2/crawl/${up}?`) && !q.url.includes("skip=1000000000")).map((q) => q.url.split("?")[1]);
+  assert.ok(pages.includes("skip=0&limit=10") && pages.includes("skip=0&limit=1") && pages.includes("skip=1&limit=1"), pages.join(" "));
+  assert.deepEqual(done.errors.errors.map((e) => e.code), ["ARCHIVE_DOCUMENT_TOO_LARGE"]);
+  assert.ok(!h.logs.some((l) => l.action === "archive_interrupted"), "an oversized answer is TOO_LARGE, not an interruption");
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {

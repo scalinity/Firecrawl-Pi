@@ -28,14 +28,15 @@ export function makeUpstream(cfg) {
         headers: { accept: "application/json", ...(data ? { "content-type": "application/json", "content-length": data.length } : {}) } }, (res) => {
         const len = Number(res.headers["content-length"] ?? NaN);
         if (Number.isFinite(len) && len > maxBytes) {
-          res.destroy();
-          return done(reject, new UpstreamError(`upstream response of ${len} bytes exceeds ${maxBytes}`, { delivered: true, code: "TOO_LARGE" }));
+          // Settle first: destroying an unfinished response emits "aborted" at once, which would settle it as RESET.
+          done(reject, new UpstreamError(`upstream response of ${len} bytes exceeds ${maxBytes}`, { delivered: true, code: "TOO_LARGE" }));
+          return res.destroy();
         }
         const chunks = [];
         let size = 0;
         res.on("data", (c) => {
           size += c.length;
-          if (size > maxBytes) { res.destroy(); done(reject, new UpstreamError(`upstream response exceeds ${maxBytes} bytes`, { delivered: true, code: "TOO_LARGE" })); } else chunks.push(c);
+          if (size > maxBytes) { done(reject, new UpstreamError(`upstream response exceeds ${maxBytes} bytes`, { delivered: true, code: "TOO_LARGE" })); res.destroy(); } else chunks.push(c);
         });
         res.on("end", () => {
           const buf = Buffer.concat(chunks);
