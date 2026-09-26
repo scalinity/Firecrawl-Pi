@@ -37,6 +37,9 @@ const token = readFileSync(0, "utf8").trim();
 const pkg = JSON.parse(readFileSync(join(dir, "node_modules/@mendable/firecrawl-js/package.json"), "utf8"));
 const { default: Firecrawl } = await import(pathToFileURL(join(dir, "node_modules/@mendable/firecrawl-js/dist/index.js")).href);
 const T = Object.fromEntries(readFileSync(new URL("../m1/pi-target.conf", import.meta.url), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
+// As e2e.mjs does: a listener already on 127.0.0.1:3380 would receive the client's requests instead of the gateway.
+const free = await new Promise((r) => { const s = connect(3380, "127.0.0.1"); s.on("connect", () => { s.destroy(); r(false); }); s.on("error", () => r(true)); });
+if (!free) { console.error("127.0.0.1:3380 is already in use on the workstation"); process.exit(1); }
 const tunnel = spawn("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-N", "-o", "ExitOnForwardFailure=yes", "-L", "127.0.0.1:3380:127.0.0.1:3380", T.PI_SSH_TARGET], { stdio: "ignore" });
 for (let i = 0; i < 60; i++) {
   if (await new Promise((r) => { const s = connect(3380, "127.0.0.1"); s.on("connect", () => { s.destroy(); r(true); }); s.on("error", () => r(false)); })) break;

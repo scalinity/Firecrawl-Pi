@@ -61,6 +61,8 @@ const ledgerJob = (id) => { const [r] = sql(`SELECT state, coalesce(upstream_id:
 const events = (id) => sql(`SELECT from_state, to_state, coalesce(detail,'') FROM fcpi_platform.job_event WHERE job_id = '${id}' ORDER BY at, id;`).map((l) => { const [from, to, detail] = l.split("|"); return { from: from || null, to, detail }; });
 const attemptsCount = () => Number(sql("SELECT count(*) FROM fcpi_retrieval.attempt;")[0]);
 const jobsCount = () => Number(sql("SELECT count(*) FROM fcpi_platform.job;")[0]);
+// The job an idempotency key admitted, while it is in the given state (keys are the drivers' own, random).
+const byKey = (key, st) => sql(`SELECT j.id FROM fcpi_platform.idempotency i JOIN fcpi_platform.job j ON j.id = i.job_id WHERE i.key = '${key}' AND j.state = '${st}';`)[0] ?? null;
 
 // ---- the forward -----------------------------------------------------------------------------------
 let tunnel = null;
@@ -348,7 +350,7 @@ const PHASES = {
     const k2key = `m3-k2-${randomUUID()}`;
     const k2p = crawl(k2key).then((r) => ({ acknowledged: true, ...brief(r) }), (e) => ({ acknowledged: false, error: e.code ?? e.message }));
     let k2id = null;
-    for (let i = 0; i < 60 && !k2id; i++) { await sleep(500); k2id = sql(`SELECT id FROM fcpi_platform.job WHERE state = 'SUBMITTING' ORDER BY created_at DESC LIMIT 1;`)[0] ?? null; }
+    for (let i = 0; i < 60 && !k2id; i++) { await sleep(500); k2id = byKey(k2key, 'SUBMITTING'); }
     out("k2_answer_lost", { case: "in_flight", id: k2id, ledger: ledgerJob(k2id) });
     out("k2_answer_lost", { case: "gateway_killed", result: gwKill(), client: await k2p });
     D(`unpause ${cname("firecrawl-core")}`);
@@ -367,7 +369,7 @@ const PHASES = {
     const k3key = `m3-k3-${randomUUID()}`;
     const k3p = crawl(k3key).then((r) => ({ acknowledged: true, ...brief(r) }), (e) => ({ acknowledged: false, error: e.code ?? e.message }));
     let k3id = null;
-    for (let i = 0; i < 60 && !k3id; i++) { await sleep(500); k3id = sql(`SELECT id FROM fcpi_platform.job WHERE state = 'SUBMITTING' ORDER BY created_at DESC LIMIT 1;`)[0] ?? null; }
+    for (let i = 0; i < 60 && !k3id; i++) { await sleep(500); k3id = byKey(k3key, 'SUBMITTING'); }
     out("k3_submission_lost", { case: "in_flight", id: k3id, ledger: ledgerJob(k3id) });
     out("k3_submission_lost", { case: "gateway_killed", result: gwKill(), client: await k3p });
     out("core_logs", { label: "k3-before-core-kill", summary: coreLogs("m3-k3-before-kill").split("\n").filter((l) => /^(classified|control=)/.test(l)) });

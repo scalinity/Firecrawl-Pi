@@ -20,7 +20,8 @@ echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-
 D network create --internal --label fcpi.transient=gateway-tests "$N" >/dev/null
 D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=gateway-tests --tmpfs /var/lib/postgresql/data --tmpfs /var/run/postgresql \
   -e POSTGRES_HOST_AUTH_METHOD=trust "$PGIMG" >/dev/null
-for _ in $(seq 1 90); do D exec "$N-pg" pg_isready -U postgres -q 2>/dev/null && break; sleep 1; done
+# Over TCP: the entrypoint's temporary init server listens on the socket only, so this waits for the real one.
+for _ in $(seq 1 90); do D exec "$N-pg" pg_isready -h 127.0.0.1 -U postgres -q 2>/dev/null && break; sleep 1; done
 sleep 1
 run() { # run <section> <command…>: one node --test run in the gateway image
   local s=$1; shift
