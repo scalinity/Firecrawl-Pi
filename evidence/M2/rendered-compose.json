@@ -389,7 +389,7 @@
         "retries": 3,
         "start_period": "3m0s"
       },
-      "image": "fcpi/firecrawl-api@sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53",
+      "image": "fcpi/firecrawl-api@sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c",
       "logging": {
         "driver": "json-file",
         "options": {

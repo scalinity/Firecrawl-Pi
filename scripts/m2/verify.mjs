@@ -10,6 +10,7 @@ import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { ROOT, sha256, sha256File, repoState, sections, git, kv } from "../m0/lib.mjs";
+import { d1, SRC } from "./d1.mjs";
 
 const EV = process.env.FCPI_M2_EVIDENCE ?? "evidence/M2/";
 const RAW = `${EV}raw/`;
@@ -71,48 +72,7 @@ const SERVICE_UID = { "nuq-postgres": "5432", redis: "6379", rabbitmq: "5672", "
 const composeImage = (svc) => json(`${EV}rendered-compose.json`).services[svc]?.image ?? "";
 const digestOf = (ref) => (ref.match(/@(sha256:[0-9a-f]{64})$/) ?? [])[1] ?? null;
 
-// ---- D1: Chrome's in-the-wild bugs and the bundled Chromium ------------------------------------
-const SRC = "evidence/M2/sources/";
-const vcmp = (a, b) => { const x = a.split(".").map(Number), y = b.split(".").map(Number); for (let i = 0; i < 4; i++) if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) - (y[i] ?? 0); return 0; };
-function d1() {
-  const posts = read(`${SRC}chrome-releases-posts-since-2019.jsonl`).split("\n").filter(Boolean).map((l) => JSON.parse(l));
-  const browsers = json(`${SRC}playwright-core-1.63.0-browsers.json`);
-  const chromium = browsers.browsers.find((b) => b.name === "chromium");
-  const bundled = chromium.browserVersion;
-  const tags = json(`${SRC}npm-playwright-dist-tags.json`);
-  const dash = json(`${SRC}chromiumdash-m153.json`);
-  const deps = read(`${SRC}chromium-153.0.8010.12-deps-v8.txt`);
-  const v8rev = (deps.match(/'v8_revision': '([0-9a-f]{40})'/) ?? [])[1];
-  const anc = read(`${SRC}v8-${(v8rev ?? "").slice(0, 8)}-ancestry.jsonl`).split("\n").filter(Boolean).map((l) => JSON.parse(l));
-  const branch = read(`${SRC}v8-branch-heads-${dash.v8_branch}-log.jsonl`).split("\n").filter(Boolean).map((l) => JSON.parse(l));
-  const pin = branch.findIndex((c) => c.commit === v8rev);
-  const later = pin > 0 ? branch.slice(0, pin) : [];
-  // Every CVE a post says is exploited in the wild, with its crbug id and the first stable
-  // Linux version whose post carries it.
-  const cves = new Map();
-  for (const p of posts) for (const sentence of p.in_the_wild_sentences ?? []) for (const [cve] of sentence.matchAll(/CVE-\d{4}-\d{4,}/g)) {
-    const line = (p.in_the_wild_bug_lines ?? []).find((l) => l.includes(cve)) ?? "";
-    const bug = (line.match(/^\[\s*(\d+)\s*\]/) ?? [])[1] ?? null;
-    // A post that names no Linux build (Android, Extended Stable, other wordings) gives the first
-    // Chrome version it names.
-    const v = p.linux ?? p.version_first ?? null;
-    const cur = cves.get(cve);
-    if (!cur || (v && (!cur.first_fixed || vcmp(v, cur.first_fixed) < 0))) cves.set(cve, { cve, bug: bug ?? cur?.bug ?? null, first_fixed: v ?? cur?.first_fixed ?? null, published: p.published, v8: /in V8/.test(line) });
-  }
-  const branchPoint = Date.parse(dash.branch_point);
-  const rows = [...cves.values()].sort((a, b) => a.cve.localeCompare(b.cve)).map((c) => {
-    const a = !!c.first_fixed && vcmp(bundled, c.first_fixed) >= 0;
-    const fix = c.bug ? anc.find((x) => (x.fixed ?? []).some((f) => f.split(/[,\s]+/).includes(c.bug))) : null;
-    const reopened = c.bug ? later.some((x) => (x.bugs_named ?? []).includes(c.bug)) : false;
-    const b = !!fix && !reopened;
-    // A fix whose stable post came after the bundled milestone branched may postdate the build
-    // though its version number is lower; there (b) is reported beside (a).
-    const afterBranch = Date.parse(c.published) >= branchPoint;
-    return { ...c, a, b, fix_commit: fix?.commit ?? null, after_branch_point: afterBranch, pass: a || b };
-  });
-  return { bundled, revision: chromium.revision, latest: tags["dist-tags"]?.latest ?? tags.latest, v8rev, pin, rows };
-}
-
+// ---- D1: Chrome's in-the-wild bugs and the bundled Chromium (scripts/m2/d1.mjs, shared with the lock)
 // ---- redaction ---------------------------------------------------------------------------------
 const M0_CONTROL = "tests/contracts/m0-redaction-control.txt", M1_CONTROL = "tests/contracts/m1-redaction-control.txt";
 const RULES = [
@@ -279,7 +239,7 @@ const checks = {
       const listed = new Set((L.in_the_wild ?? []).map((x) => x.cve));
       const missing = r.rows.map((x) => x.cve).filter((c) => !listed.has(c));
       const running = (JSON.parse((S(`${RAW}stack.txt`).browser_health ?? []).join(" ").replace(/^\d+ /, "") || "{}").version) ?? null;
-      const watch = r.rows.filter((x) => !x.a || x.after_branch_point).map((x) => `${x.cve}:a=${x.a},b=${x.b}`);
+      const watch = r.rows.filter((x) => !x.test_a || x.after_branch_point).map((x) => `${x.cve}:a=${x.test_a},b=${x.test_b}`);
       const ok = r.latest === "1.63.0" && r.bundled === "153.0.8010.12" && r.rows.length > 0 && fail.length === 0 && missing.length === 0 && running === r.bundled && L.playwright === "1.63.0";
       return { ok, actual: `npm latest=${r.latest}; bundled=${r.bundled} (revision ${r.revision}); in-the-wild CVEs=${r.rows.length}; failing both tests=${fail.join(",") || "none"}; (a) failed or fix after branch point: ${watch.join(" ") || "none"}; lock lists=${listed.size}, missing=${missing.length}; lock playwright=${L.playwright}; running=${running}` };
     } },
@@ -299,7 +259,7 @@ const checks = {
         cargo_locked: /napi build --platform --release -- --locked/.test(log), frozen: /pnpm install --frozen-lockfile/.test(log), apt: /fcpi-apt-build: snapshot=20260925T000000Z/.test(log),
         fdb: /\/tmp\/fdb-clients\.deb: OK/.test(log), no_native_output: !/native install:\s+Compiling/.test(log.slice(log.indexOf("pnpm run build"))),
         series_env: log.includes(`FCPI_PATCH_SERIES_SHA256=${series.series_sha256}`), runs: digestOf(composeImage("firecrawl-core")) === id,
-        lock: L.build_provenance?.firecrawl_api_image_m2?.image_id === id && L.build_provenance?.firecrawl_api_image_m2?.patch_series_sha256 === series.series_sha256 && /go1\.27\.1/.test(L.build_provenance?.firecrawl_api_image_m2?.go_version ?? ""),
+        lock: L.build_provenance?.firecrawl_api_image_patched?.image_id === id && L.build_provenance?.firecrawl_api_image_patched?.patch_series_sha256 === series.series_sha256 && /go1\.27\.1/.test(L.build_provenance?.firecrawl_api_image_patched?.go_version ?? "") && L.images?.go_build?.selected?.arm64_manifest_digest === (log.match(/golang:1\.27\.1-bookworm@(sha256:[0-9a-f]{64})/) ?? [])[1],
       };
       const bad = Object.entries(want).filter(([, v]) => !v).map(([k]) => k);
       return { ok: froms.length >= 3 && unpinned.length === 0 && bad.length === 0, actual: `FROM lines=${froms.length}; unpinned=${unpinned.join(",") || "none"}; failed conditions=${bad.join(",") || "none"}; image=${id?.slice(7, 19)}` };
@@ -764,9 +724,8 @@ const checks = {
     run() {
       const R = json(`${EV}rendered-compose.json`), L = json("deploy/versions.lock.json"), s = json("patches/series.json");
       const unpinned = Object.entries(R.services).filter(([, v]) => !/@sha256:[0-9a-f]{64}$/.test(v.image) || v.platform !== "linux/arm64").map(([k]) => k);
-      const m2 = L.m2 ?? {};
-      const cond = { api: m2.images?.firecrawl_api === digestOf(composeImage("firecrawl-core")), retrieval: m2.images?.retrieval === digestOf(composeImage("retrieval-service")), browser: m2.images?.browser === digestOf(composeImage("browser-worker")),
-        series: m2.patch_series?.series_sha256 === s.series_sha256 && JSON.stringify(m2.patch_series?.patches ?? []) === JSON.stringify(s.patches.map((p) => ({ file: p.file, sha256: p.sha256 }))),
+      const cond = { api: L.images?.firecrawl_api_patched?.image_id === digestOf(composeImage("firecrawl-core")), retrieval: L.images?.retrieval?.image_id === digestOf(composeImage("retrieval-service")), browser: L.images?.browser_worker?.image_id === digestOf(composeImage("browser-worker")),
+        series: L.patches?.series_sha256 === s.series_sha256 && JSON.stringify((L.patches?.patches ?? []).map((p) => ({ file: p.file, sha256: p.sha256 }))) === JSON.stringify(s.patches.map((p) => ({ file: p.file, sha256: p.sha256 }))),
         playwright: L.browser?.playwright === "1.63.0" && L.browser?.chromium_revision === d1().revision, archives: L.browser?.archive_sha256?.status === "resolved" };
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
       return { ok: unpinned.length === 0 && bad.length === 0, actual: `unpinned=${unpinned.join(",") || "none"}; lock disagrees on=${bad.join(",") || "none"}` };
