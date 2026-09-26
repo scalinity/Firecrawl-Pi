@@ -131,6 +131,17 @@ test("a logical unit retried under a different input cap is refused rather than 
   } finally { await r.srv.close(); }
 });
 
+test("no request is started with less than a second of the deadline left, and the gate refuses a passed deadline (review W14)", async () => {
+  const r = await rig();
+  try {
+    const out = await r.extract(req({ deadline: new Date(Date.now() + 500).toISOString() }));
+    assert.equal(out.failure.class, "DEADLINE_EXCEEDED");
+    assert.equal(r.calls(), 0);
+    assert.equal(r.store.rows.size, 0, "nothing reserved");
+    assert.equal(await makeGate().take(Date.now() - 1), false);
+  } finally { await r.srv.close(); }
+});
+
 test("a rate limit stops the extraction's later units: the provider is asked once (review S8)", async () => {
   const r = await rig();
   try {

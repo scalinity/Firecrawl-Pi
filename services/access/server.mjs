@@ -331,11 +331,13 @@ async function scrapeWithJson(ctx, body, json) {
     catch (e) { return ctx.send(e.code === "TIMEOUT" ? 504 : 502, { success: false, code: e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: e.code === "TIMEOUT" ? "The core did not answer in time." : "The core is unavailable." }); }
     if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 502 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
     const doc = r.json.data;
-    const left = cfg.coreTimeoutMs + 10000 - (Date.now() - t0);
+    // The extraction's deadline is what is left of the request's; the gateway waits five seconds past it, so an
+    // answer the retrieval service sends at its deadline (a paid one, perhaps) still arrives (review W14).
+    const left = Math.max(1000, cfg.coreTimeoutMs + 10000 - (Date.now() - t0));
     let x;
     try {
       x = await extractor.extract({ logicalId: `scrape:${ctx.id}`, schema: json.schema, prompt: json.prompt ?? null,
-        documents: [{ url: doc.metadata?.url ?? body.url, markdown: typeof doc.markdown === "string" ? doc.markdown : "" }], deadline: new Date(Date.now() + left).toISOString() }, Math.max(1000, left));
+        documents: [{ url: doc.metadata?.url ?? body.url, markdown: typeof doc.markdown === "string" ? doc.markdown : "" }], deadline: new Date(Date.now() + left).toISOString() }, left + 5000);
     } catch (e) { return ctx.send(503, { success: false, code: "EXTRACTION_UNAVAILABLE", error: `The extraction service could not be reached (${e.code}); the page was scraped but not extracted.` }, { "retry-after": "10" }); }
     const failure = x.status === 200 && x.json?.ok ? null : (x.json?.failure ?? null);
     if (failure || x.status !== 200) {

@@ -38,6 +38,7 @@ export function canonical(v) {
   return JSON.stringify(v);
 }
 const sha = (s) => createHash("sha256").update(s).digest("hex");
+const MIN_REQUEST_MS = 1000;
 
 // One active model request for the whole service (spec §14), waited for until the caller's deadline.
 export function makeGate() {
@@ -45,6 +46,7 @@ export function makeGate() {
   const waiters = [];
   return {
     async take(deadline, signal) {
+      if (Date.now() >= deadline || signal?.aborted) return false;
       while (busy) {
         if (Date.now() >= deadline || signal?.aborted) return false;
         await new Promise((r) => { const t = setTimeout(r, Math.min(250, Math.max(1, deadline - Date.now()))); waiters.push(() => { clearTimeout(t); r(); }); });
@@ -78,6 +80,8 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     if (prov.paid && !paidDispatch) throw fail("PAID_DISPATCH_DISABLED", `'${model}' is a paid model and paid dispatch is disabled (PI_PAID_DISPATCH_ENABLED=false)`);
     const cred = readCredential(providersDir, prov.credential);
     if (prov.credential && !cred) throw fail("BLOCKED_CREDENTIAL", `provider ${m.provider} has no credential in this deployment`);
+    // A request needs at least a second before the caller's deadline: none is started past it (review W14).
+    if (deadline - Date.now() < MIN_REQUEST_MS) throw fail("DEADLINE_EXCEEDED", "less than a second of the deadline is left; no request is started", { retryable: true });
     const breaker = breakerOf(m.provider);
     const probe = breaker.state() === "half_open";
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${m.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
@@ -110,6 +114,12 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       await store.releaseBudget(res.id, "no model request slot before the deadline");
       throw signal?.aborted ? fail("CANCELLED", "the caller cancelled") : fail("RESOURCE_BUSY", "another model request held the one slot until the deadline", { retryable: true });
     }
+    if (deadline - Date.now() < MIN_REQUEST_MS) {
+      gate.give();
+      breaker.neutral();
+      await store.releaseBudget(res.id, "the wait for the model slot left no time before the deadline");
+      throw fail("DEADLINE_EXCEEDED", "the wait for the model slot left less than a second before the deadline; no request is started", { retryable: true });
+    }
     const started = Date.now();
     let answer;
     try {
@@ -117,7 +127,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       // so its retry reuses it instead of paying twice; only the next call is not made.
       answer = await providerRequest({ baseUrl: prov.baseUrl, path: "/chat/completions", body: payload, getPolicy, resolvePublic, lookupFixture,
         headers: { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
-        timeoutMs: Math.max(1000, Math.min(budget.extraction.requestTimeoutMs, deadline - Date.now())) });
+        timeoutMs: Math.min(budget.extraction.requestTimeoutMs, deadline - Date.now()) });
     } catch (e) {
       gate.give();
       if (!(e instanceof ProviderError)) throw e;
