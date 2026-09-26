@@ -84,6 +84,16 @@ test("the provider is held to the reserved pages, and pages past them are settle
   } finally { await r.srv.close(); }
 });
 
+test("a retried parse that returned no text is PARSE_EMPTY again, with no second upload (review W12)", async () => {
+  const r = await rig();
+  try {
+    const q = req(withMode("empty"));
+    await assert.rejects(r.parse(q), (e) => e.failureClass === "PARSE_EMPTY");
+    await assert.rejects(r.parse(q), (e) => e.failureClass === "PARSE_EMPTY");
+    assert.equal(r.stats().uploads, 1);
+  } finally { await r.srv.close(); }
+});
+
 test("an upload answered without a job id counts against the breaker; its credits stay reserved (review W10)", async () => {
   const r = await rig();
   try {

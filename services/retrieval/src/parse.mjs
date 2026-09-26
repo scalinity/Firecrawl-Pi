@@ -71,7 +71,11 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
       provider: pp.provider, subject: name, kind: "parse", unit: "credits", rateCard: card.id, requestHash: key, amount, day, month, notifyAt: budget.notifyAtFraction });
     if (r.existing) {
       breaker.neutral();
-      if (r.existing.state === "SETTLED" && r.existing.result?.markdown !== undefined) return { ok: true, parser: name, ...r.existing.result, cached: false, reused: true, credits: Number(r.existing.actual) };
+      if (r.existing.state === "SETTLED" && typeof r.existing.result?.markdown === "string") {
+        // A settled parse that returned no text stays a failure when retried, never empty success (review W12).
+        if (!r.existing.result.markdown) throw fail("PARSE_EMPTY", `the provider returned no text for ${r.existing.result.pages} pages`);
+        return { ok: true, parser: name, ...r.existing.result, cached: false, reused: true, credits: Number(r.existing.actual) };
+      }
       throw fail("EXTRACTION_UNCERTAIN", `this document's parse was sent before and its outcome is unknown (${r.existing.state}); it is not sent again`);
     }
     if (r.exhausted) {
