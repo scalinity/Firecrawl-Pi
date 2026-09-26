@@ -275,7 +275,7 @@ services:
   # deployed commit (scripts/m3/pi-build-gateway.sh) on the digest-pinned node base. Targets are no
   # longer limited to fixtures here: every acquisition passes the retrieval service's policy (M2).
   access-gateway:
-    image: fcpi/access-gateway@sha256:1e3f0ea6e2eaf9990cc5aa917799a0eb4345b1ebad7a0363b0ce091d52f4c7ef
+    image: fcpi/access-gateway@sha256:41f52b80fdf17bb77af9aeb612b85a44cb3eb9aa2defe8c8fc03c6580b7a53a6
     platform: linux/arm64
     pull_policy: never
     hostname: access-gateway
@@ -362,7 +362,7 @@ services:
   # fixed address fails fast. No depends_on either way: REST never waits for MCP, and MCP starts
   # whether or not REST answers yet.
   mcp-gateway:
-    image: fcpi/mcp-gateway@sha256:fb7e5192df4d5ccbd5810ae2e73280e4edb17090b8f8ffc40d49fe6f37ea7c16
+    image: fcpi/mcp-gateway@sha256:c852f225849c9a77e3844dfdd55647cea142163714c2bb9618fee737aa6c6e0f
     platform: linux/arm64
     pull_policy: never
     hostname: mcp-gateway
