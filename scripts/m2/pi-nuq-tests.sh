@@ -193,11 +193,12 @@ fetch("http://127.0.0.1:3002/v2/batch/scrape", { method: "POST", headers: { "con
     sec "stall_$n"
     first=$(( 2 * n - 1 ))
     for _ in $(seq 1 400); do [ "$(attempts "$job")" -ge "$first" ] && break; sleep 0.2; done
-    D exec --user 3002 "$CORE" kill -STOP "$pid"; echo "stopped utc=$(now) exit=$? attempts=$(attempts "$job")"
+    # The status is taken before any expansion: inside the echo, $? would be the last $(…)'s.
+    D exec --user 3002 "$CORE" kill -STOP "$pid"; rc=$?; echo "stopped utc=$(now) exit=$rc attempts=$(attempts "$job")"
     echo "row $(job_row "$job")"
     for _ in $(seq 1 60); do row=$(job_row "$job"); [ "$(printf '%s\n' "$row" | cut -f3)" -ge "$n" ] 2>/dev/null && break; sleep 2; done
     echo "requeued utc=$(now) attempts=$(attempts "$job") row $row"
-    D exec --user 3002 "$CORE" kill -CONT "$pid"; echo "continued utc=$(now) exit=$?"
+    D exec --user 3002 "$CORE" kill -CONT "$pid"; rc=$?; echo "continued utc=$(now) exit=$rc"
   done
   sec final
   for _ in $(seq 1 90); do row=$(job_row "$job"); case $row in *$'\t'completed$'\t'*|*$'\t'failed$'\t'*) break ;; esac; sleep 2; done

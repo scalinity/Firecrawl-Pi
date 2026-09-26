@@ -422,7 +422,7 @@ const checks = {
       return { ok, actual: `attempts after each call=${c.map((x) => x?.attemptsUsed).join(",")}; third=${c[2]?.failure}; fixture requests=${hits}` };
     } },
   A02: { name: "requeued-job-shares-its-budget", inputs: [`${RAW}nuq-stall.txt`],
-    expected: "a batch job on a slow 503 target, stalled twice until NuQ's reaper requeued it, sees at most four attempts for its logical page (six without one budget); the fixture's request count equals the attempt rows; the run after the second stall spends none",
+    expected: "a batch job on a slow 503 target, stalled twice (each SIGSTOP and SIGCONT of the worker exits 0) until NuQ's reaper requeued it, sees at most four attempts for its logical page (six without one budget); the fixture's request count equals the attempt rows; the run after the second stall spends none",
     run() {
       const s = S(`${RAW}nuq-stall.txt`);
       const rows = (s.stall_attempts ?? []).filter((l) => l.split("\t").length >= 5);
@@ -431,8 +431,10 @@ const checks = {
       const stalls = +((final.match(/\t(\d+)\t/) ?? [])[1] ?? -1);
       const acq = jsonLines(s.stall_acquisitions);
       const last = acq[acq.length - 1];
-      const ok = rows.length >= 3 && rows.length <= 4 && hits === rows.length && stalls >= 2 && acq.length >= 3 && last?.attempts_used <= 4 && (last?.strategies ?? [1]).length === 0 && /failed|completed/.test(final);
-      return { ok, actual: `attempt rows=${rows.length}; fixture requests=${hits}; stalls=${stalls}; runs=${acq.length}, attempts after each=${acq.map((a) => a.attempts_used).join(",")}; final=${final.split("\t")[1]}` };
+      const signals = ["stall_stall_1", "stall_stall_2"].flatMap((k) => (s[k] ?? []).filter((l) => /^(stopped|continued) /.test(l)).map((l) => (l.match(/ exit=(\d+)/) ?? [])[1]));
+      const signalled = signals.length === 4 && signals.every((x) => x === "0");
+      const ok = signalled && rows.length >= 3 && rows.length <= 4 && hits === rows.length && stalls >= 2 && acq.length >= 3 && last?.attempts_used <= 4 && (last?.strategies ?? [1]).length === 0 && /failed|completed/.test(final);
+      return { ok, actual: `worker stop/continue exits=${signals.join(",")}; attempt rows=${rows.length}; fixture requests=${hits}; stalls=${stalls}; runs=${acq.length}, attempts after each=${acq.map((a) => a.attempts_used).join(",")}; final=${final.split("\t")[1]}` };
     } },
   A03: { name: "direct-traffic-within-limits", inputs: [`${RAW}rt-pacing.txt`],
     expected: "on a domain with the default direct limits, the target sees navigations at least 2 s apart (10 ms tolerance for arrival jitter), one at a time, and no more than 20 in the hour, counting the three that arrive by redirect from another domain; the 21st is refused PROXY_REQUIRED at once instead of waiting",
