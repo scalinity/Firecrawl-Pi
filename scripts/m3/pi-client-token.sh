@@ -14,7 +14,9 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 umask 077
 S=/etc/firecrawl-pi/secrets
 REG=$S/gateway/clients
-SCOPES="read scrape map crawl batch cancel"
+# The scopes are the capability manifest's (M5 added search and extract), the list the gateway checks too.
+SCOPES=$(jq -r '.scopes | join(" ")' /opt/firecrawl-pi/deploy/policies/capabilities.json)
+[[ $SCOPES =~ ^[a-z]+(\ [a-z]+)*$ ]] || die "the capability manifest's scopes cannot be read"
 die() { echo "pi-client-token: $*" >&2; exit 1; }
 sudo -n test -f $REG || die "$REG is absent: run scripts/m3/pi-init-m3.sh"
 # Only one change at a time: the registry is read, changed and renamed under this lock.
