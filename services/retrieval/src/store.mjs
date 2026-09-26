@@ -26,11 +26,15 @@ export function paceDecision({ now, state, hourCount, dayCount, limits }) {
   return { go: true };
 }
 
-// The next 429 cooldown (spec §9.3): the target's Retry-After when it gives one, otherwise 60 s
-// doubling on each recurrence up to an hour.
-export function nextCooldown(previousS, retryAfterS) {
+// The next 429 cooldown (spec §9.3): the target's Retry-After when it gives one; otherwise 60 s,
+// doubling up to an hour when the 429 recurs within an hour of the last cooldown's end. A short
+// Retry-After cannot seed a bare cooldown below 60 s, and an old hour-long one is not kept for
+// ever (review finding W14). sinceLastEndS: seconds since the last cooldown ended (negative while
+// it lasts), or null when there was none.
+export function nextCooldown(previousS, retryAfterS, sinceLastEndS = null) {
   if (retryAfterS !== null && retryAfterS !== undefined) return Math.max(1, Math.min(retryAfterS, 86400));
-  return previousS ? Math.min(previousS * 2, 3600) : 60;
+  const recurring = !!previousS && sinceLastEndS !== null && sinceLastEndS < 3600;
+  return recurring ? Math.min(Math.max(previousS * 2, 60), 3600) : 60;
 }
 
 export class Store {
@@ -156,8 +160,9 @@ export class Store {
   async coolDown(domain, retryAfterS) {
     await this.#tx(async (c) => {
       await c.query("INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT DO NOTHING", [domain]);
-      const prev = (await c.query("SELECT cooldown_s FROM fcpi_retrieval.domain_state WHERE domain = $1 FOR UPDATE", [domain])).rows[0].cooldown_s;
-      const s = nextCooldown(prev, retryAfterS);
+      const prev = (await c.query(
+        "SELECT cooldown_s, extract(epoch FROM now() - cooldown_until)::float8 AS since_end FROM fcpi_retrieval.domain_state WHERE domain = $1 FOR UPDATE", [domain])).rows[0];
+      const s = nextCooldown(prev.cooldown_s, retryAfterS, prev.since_end);
       await c.query("UPDATE fcpi_retrieval.domain_state SET cooldown_s = $2, cooldown_until = now() + ($2::int * interval '1 second') WHERE domain = $1", [domain, s]);
     });
   }

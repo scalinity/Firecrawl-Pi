@@ -57,9 +57,14 @@ test("direct pacing: gap, one in flight, the hourly and daily caps, cooldowns", 
   assert.equal(cool.failure.class, "RATE_LIMITED");
   assert.equal(cool.failure.retryAfter, 30);
   assert.equal(nextCooldown(null, null), 60);
-  assert.equal(nextCooldown(60, null), 120);
-  assert.equal(nextCooldown(2400, null), 3600);
+  assert.equal(nextCooldown(60, null, 10), 120);
+  assert.equal(nextCooldown(2400, null, -5), 3600);
   assert.equal(nextCooldown(120, 5), 5);
+  // review finding W14: a Retry-After of 1 s does not make the next bare cooldown 2 s, and an old
+  // hour-long cooldown is not kept once an hour has passed without a 429.
+  assert.equal(nextCooldown(1, null, 10), 60);
+  assert.equal(nextCooldown(3600, null, 7200), 60);
+  assert.equal(nextCooldown(3600, null, null), 60);
   assert.equal(retryAfterSeconds("12"), 12);
   assert.ok(retryAfterSeconds(new Date(Date.now() + 30000).toUTCString()) >= 29);
 });

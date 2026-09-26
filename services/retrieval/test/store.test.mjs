@@ -71,3 +71,16 @@ test("a restart reclaims every lease and domain hold (review finding W3)", opts,
     assert.equal(Number((await sql("SELECT count(*) FROM fcpi_retrieval.domain_state WHERE holder IS NOT NULL"))[0].count), 0);
   } finally { await again.close(); }
 });
+
+test("cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does not seed the bare one (review finding W14)", opts, async () => {
+  const store = await fresh();
+  try {
+    const s = async (d) => Number((await sql("SELECT cooldown_s FROM fcpi_retrieval.domain_state WHERE domain = $1", [d]))[0].cooldown_s);
+    await store.coolDown("a.example", null); assert.equal(await s("a.example"), 60);
+    await store.coolDown("a.example", null); assert.equal(await s("a.example"), 120);
+    await store.coolDown("b.example", 1); assert.equal(await s("b.example"), 1);
+    await store.coolDown("b.example", null); assert.equal(await s("b.example"), 60);
+    await sql("UPDATE fcpi_retrieval.domain_state SET cooldown_s = 3600, cooldown_until = now() - interval '2 hours' WHERE domain = 'a.example'");
+    await store.coolDown("a.example", null); assert.equal(await s("a.example"), 60);
+  } finally { await store.close(); }
+});
