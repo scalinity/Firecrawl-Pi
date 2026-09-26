@@ -299,7 +299,10 @@ const PHASES = {
     out("pi_view", { case: "spoofed_identity_as_logged", client: spoofRec?.client ?? null, principal: spoofRec?.principal ?? null });
     out("pi_view", { case: "tool_records", records: ml.filter((l) => l.event === "tool").map((l) => ({ request_id: l.request_id, era: l.era, protocol_version: l.protocol_version, tool: l.tool, client: l.client, outcome: l.outcome, downstream: l.downstream })) });
     out("pi_view", { case: "exchange_records", records: ml.filter((l) => l.event === "exchange").map((l) => ({ request_id: l.request_id, http_method: l.http_method, mcp_method: l.mcp_method, protocol_version: l.protocol_version, status: l.status, content_type: l.content_type, session_header_sent: l.session_header_sent })) });
-    out("pi_view", { case: "serve_records", eras: ml.filter((l) => l.event === "serve").reduce((a, l) => ({ ...a, [l.era]: (a[l.era] ?? 0) + 1 }), {}) });
+    // Every server instance built in the window, with the request it served: which requests reached the
+    // factory at all, and on which leg.
+    out("pi_view", { case: "serve_records", eras: ml.filter((l) => l.event === "serve").reduce((a, l) => ({ ...a, [l.era]: (a[l.era] ?? 0) + 1 }), {}),
+      records: ml.filter((l) => l.event === "serve").map((l) => ({ request_id: l.request_id, era: l.era })) });
     const gl = gwLog(since).filter((l) => l.request_id);
     out("pi_view", { case: "gateway_records", records: gl.map((l) => ({ request_id: l.request_id, method: l.method, route: l.route, status: l.status, code: l.code, client: l.client, mcp_method: l.mcp_method ?? null })) });
   },

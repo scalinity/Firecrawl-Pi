@@ -254,17 +254,23 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; SDK exchanges=${ex.length} (POST ${posts.length}), methods=${[...new Set(posts.map((e) => e.body_method))].join(",")}; raw answers checked for a session header=${wireRecs.length}; receipt=${rc?.state}` };
     } },
   P02: { name: "malformed-missing-mismatched-metadata-rejected", inputs: [`${RAW}e2e-wire.txt`],
-    expected: "on the modern path: a missing MCP-Protocol-Version, a missing Mcp-Method, an Mcp-Method or Mcp-Name that disagrees with the body, and a header revision that disagrees with the envelope are 400 -32020; the modern header without the envelope and a malformed envelope are 400 -32602; an unsupported revision is 400 -32022; a body that is not JSON is 400 -32700; none of them was served as a 2025-era request, none reached the fixture and the MCP service logged no tool call for any of them, while the well-formed control reached the fixture and was logged (D5 obligation 1)",
+    expected: "on the modern path: a missing MCP-Protocol-Version, a missing Mcp-Method, an Mcp-Method or Mcp-Name that disagrees with the body, and a header revision that disagrees with the envelope are 400 -32020; the modern header without the envelope and a malformed envelope are 400 -32602; an unsupported revision is 400 -32022; none of those eight JSON-bodied requests reached the server factory on either leg (the SDK's classification rejects them first), so none was served as a 2025-era request; a body that is not JSON is 400 -32700, answered by the SDK's legacy leg, which handles every non-JSON body, as its parse error; none of the nine reached the fixture and the MCP service logged no tool call for any of them, while the well-formed control reached the factory on the modern leg, reached the fixture and was logged (D5 obligation 1)",
     run() {
       const w = E("wire"), v = w.validation ?? [];
       const EXP = { missing_protocol_version_header: -32020, missing_method_header: -32020, method_header_mismatch: -32020, name_header_mismatch: -32020, version_header_body_mismatch: -32020,
         modern_header_without_envelope: -32602, malformed_envelope: -32602, unsupported_revision: -32022, not_json: -32700 };
       const seen = one(w.pi_view, "fixture_markers")?.seen ?? {};
       const toolIds = new Set((one(w.pi_view, "tool_records")?.records ?? []).map((t) => t.request_id));
+      const serve = one(w.pi_view, "serve_records")?.records ?? [];
+      const served = (id) => serve.filter((s) => s.request_id === id).map((s) => s.era);
       const wrong = Object.entries(EXP).filter(([c, code]) => { const r = one(v, c); return !(r && r.status === 400 && r.rpc_error?.code === code && r.result_type === null && seen[c] === 0 && UUID_RE.test(r.request_id ?? "") && !toolIds.has(r.request_id)); }).map(([c]) => c);
+      // The eight JSON-bodied cases never reach the factory; the non-JSON body reaches the legacy leg only.
+      const reachedFactory = Object.keys(EXP).filter((c) => c !== "not_json" && served(one(v, c)?.request_id).length > 0);
+      const nj = served(one(v, "not_json")?.request_id);
       const ctl = one(v, "well_formed_control");
-      const ok = endOk(w) && wrong.length === 0 && ctl?.status === 200 && seen.well_formed_control === 1 && sentinelOf(ctl.sentinel, "p04") && toolIds.has(ctl.request_id);
-      return { ok, actual: `cases=${Object.keys(EXP).length}, answered otherwise=${wrong.join(",") || "none"}; fixture requests for rejected cases=${Object.keys(EXP).reduce((a, c) => a + (seen[c] ?? 0), 0)}, for the control=${seen.well_formed_control}; codes=${Object.keys(EXP).map((c) => one(v, c)?.rpc_error?.code).join(",")}` };
+      const ok = endOk(w) && serve.length >= 10 && wrong.length === 0 && reachedFactory.length === 0 && same(nj, ["legacy"]) && same(served(ctl?.request_id), ["modern"]) &&
+        ctl?.status === 200 && seen.well_formed_control === 1 && sentinelOf(ctl.sentinel, "p04") && toolIds.has(ctl.request_id);
+      return { ok, actual: `cases=${Object.keys(EXP).length}, answered otherwise=${wrong.join(",") || "none"}; JSON-bodied cases that reached the factory=${reachedFactory.join(",") || "none"}; the non-JSON body served on=${nj.join(",") || "none"}; the control served on=${served(ctl?.request_id).join(",") || "none"}; fixture requests for rejected cases=${Object.keys(EXP).reduce((a, c) => a + (seen[c] ?? 0), 0)}, for the control=${seen.well_formed_control}; codes=${Object.keys(EXP).map((c) => one(v, c)?.rpc_error?.code).join(",")}` };
     } },
   P03: { name: "json-and-request-scoped-sse", inputs: [`${RAW}e2e-wire.txt`, `${RAW}e2e-tailnet.txt`],
     expected: "a modern call without a progress token is one application/json answer; the same call with a progress token is a text/event-stream answer carrying the progress notification with that token before the result; the MCP service logged that exchange as an event stream; 2025-era answers are streams; through Tailscale Serve the SDK client's progress call streamed and delivered its notification",
