@@ -67,14 +67,16 @@ case "${1:-}" in
     sudo -n ln -- "$tmp" $S/clients/$label.token || { sudo -n rm -f -- "$tmp"; die "could not create the token file"; }
     sudo -n rm -f -- "$tmp"
     unset token
-    { sudo -n cat $REG; printf '%s %s %s sha256:%s\n' "$label" "$principal" "$scopes" "$hash"; } | replace
+    # A registry left unchanged takes the new token file with it, so the label can be created again.
+    { sudo -n cat $REG; printf '%s %s %s sha256:%s\n' "$label" "$principal" "$scopes" "$hash"; } | replace \
+      || { sudo -n rm -f -- $S/clients/$label.token; die "the registry was not changed, so $label's token file was removed"; }
     echo "created $label principal=$principal scopes=$scopes token_file=$S/clients/$label.token"
     ;;
   revoke)
     label=${2:-}
     [[ $label =~ ^[a-z0-9]{1,32}$ ]] || die "label must be 1-32 lowercase letters or digits"
     sudo -n awk -v l="$label" '$1 == l {f=1} END {exit f ? 0 : 1}' $REG || die "no client $label"
-    sudo -n awk -v l="$label" '$1 != l' $REG | replace
+    sudo -n awk -v l="$label" '$1 != l' $REG | replace || die "$label is still registered, and its token file is kept"
     sudo -n rm -f -- $S/clients/$label.token
     echo "revoked $label"
     ;;
