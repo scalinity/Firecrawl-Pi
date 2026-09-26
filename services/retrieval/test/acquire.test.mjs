@@ -95,3 +95,21 @@ test("a redirect into another domain is paced and counted there, and a 429 cools
     assert.equal(b.hits.filter((h) => h.path === "/p3").length, 0);
   } finally { a.s.close(); b.s.close(); }
 });
+
+test("downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1)", async () => {
+  const f = await serve((req, res) => res.writeHead(200, { "content-type": "application/xml" }).end("<urlset/>"));
+  try {
+    const store = new FakeStore(), policy = policyFor([["f.fixture.fcpi.test", f.port, "fixture"]]);
+    const fetchOnce = makeFetcher({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
+    const req = () => ({ requestId: `r-${Math.random()}`, url: `http://f.fixture.fcpi.test:${f.port}/sitemap.xml.gz`, purpose: "sitemap", deadline: new Date(Date.now() + 1500).toISOString() });
+    // Both permits held elsewhere: the download waits for one, and gives up at its deadline.
+    await store.takePermit("url", "page-1", 2); await store.takePermit("url", "page-2", 2);
+    await assert.rejects(fetchOnce(req()), (e) => e.failureClass === "RESOURCE_BUSY" && e.retryable === true);
+    assert.equal(f.hits.length, 0);
+    await store.releasePermit("url", "page-1"); await store.releasePermit("url", "page-2");
+    for (let n = 1; n <= 4; n++) assert.equal((await fetchOnce(req())).status, 200);
+    await assert.rejects(fetchOnce(req()), (e) => e.failureClass === "ATTEMPT_BUDGET_EXHAUSTED");
+    assert.equal(f.hits.length, 4);
+    assert.equal(store.permits.size, 0);
+  } finally { f.s.close(); }
+});

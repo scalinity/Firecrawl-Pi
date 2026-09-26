@@ -14,8 +14,7 @@ import { Store } from "./store.mjs";
 import { makePublicResolver } from "./resolve.mjs";
 import { ProxySessions, startProxy } from "./proxy.mjs";
 import { makeBrowserClient } from "./browser.mjs";
-import { makeAcquirer, makeFetcher } from "./acquire.mjs";
-import { guardedFetch } from "./httpfetch.mjs";
+import { makeAcquirer, makeFetcher, makeSearcher } from "./acquire.mjs";
 import { Denied } from "./ssrf.mjs";
 
 const env = loadEnv(process.env);
@@ -54,9 +53,10 @@ startProxy({ listen: env.proxyListen, sessions, getPolicy, resolvePublic, log })
 const browser = makeBrowserClient({ url: env.browserUrl, token: readSecret(env.credentialsDir, "retrieval_browser_token"),
   proxyServer: `http://${env.proxyListen.host}:${env.proxyListen.port}`, sessions, getPolicy });
 const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, log });
-const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, resolvePublic, log });
+const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, log });
+const search = makeSearcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, log });
 
-const STATUS = { SSRF_DENIED: 403, CLOUD_DENIED: 403, INVALID_URL: 400, INVALID_REQUEST: 400, RATE_LIMITED: 429, PROXY_REQUIRED: 429,
+const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, INVALID_URL: 400, INVALID_REQUEST: 400, RATE_LIMITED: 429, PROXY_REQUIRED: 429,
   RESOURCE_BUSY: 429, TIMEOUT: 504, DEADLINE_EXCEEDED: 504, SIZE_LIMIT: 413, ATTEMPT_BUDGET_EXHAUSTED: 409, RETRIEVAL_NOT_READY: 503 };
 const send = (res, status, body, extra = {}) => {
   const buf = Buffer.from(JSON.stringify(body));
@@ -88,7 +88,11 @@ const server = http.createServer(async (req, res) => {
       const ok = storeReady && getLocalReady();
       return send(res, ok ? 200 : 503, { ok, store: storeReady, local_networks: getLocalReady(), browser: b.ok === true ? "up" : "down" });
     }
-    if (req.method === "GET" && path === "/searxng/search") return await searxng(req, res, abort.signal);
+    if (req.method === "GET" && path === "/searxng/search") {
+      if (!storeReady) return send(res, 503, { failure: { class: "RETRIEVAL_NOT_READY", detail: "the database is not reachable", retryable: true, retryAfter: null } });
+      const r = await search(req.url, abort.signal);
+      return res.writeHead(r.status, { "content-type": r.headers["content-type"] ?? "application/json", "content-length": r.body.length }).end(r.body);
+    }
     if (path !== "/internal/acquire" && path !== "/internal/fetch") return send(res, 404, { error: "not_found" });
     if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed" });
     if (!authorized(req)) return send(res, 401, { error: "unauthorized" });
@@ -107,20 +111,6 @@ const server = http.createServer(async (req, res) => {
     else res.destroy();
   }
 });
-
-// The core's search asks SearXNG's JSON API; this answers from the policy's search backend, a
-// fixture in M2, reached under the same target rules as any fetch. Only the query and the
-// paging/format parameters SearXNG defines are passed on.
-async function searxng(req, res, signal) {
-  const policy = getPolicy();
-  if (policy.search.backend === null) return send(res, 503, { error: "no search backend in this release" });
-  const inbound = new URL(req.url, "http://x");
-  const out = new URL(policy.search.backend);
-  for (const k of ["q", "format", "pageno", "language", "time_range", "categories", "engines"]) if (inbound.searchParams.has(k)) out.searchParams.set(k, inbound.searchParams.get(k));
-  const r = await guardedFetch({ url: out.toString(), maxBytes: 1024 * 1024, deadline: Date.now() + 10000, policy, resolvePublic, signal });
-  log({ event: "search", backend_host: out.hostname, target_status: r.status, bytes: r.bytes });
-  res.writeHead(r.status, { "content-type": r.headers["content-type"] ?? "application/json", "content-length": r.body.length }).end(r.body);
-}
 
 server.listen(env.listen.port, env.listen.host, () => log({ event: "listening", listen: `${env.listen.host}:${env.listen.port}`, proxy: `${env.proxyListen.host}:${env.proxyListen.port}` }));
 for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => { server.close(); store.close().finally(() => process.exit(0)); });

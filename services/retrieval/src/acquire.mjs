@@ -5,7 +5,7 @@
 // URL permits, the browser attempt also holds the browser permit, and every direct navigation is
 // paced per registrable domain. There is no proxy or enhanced tier before M6/M7: work that would
 // need one fails as PROXY_REQUIRED or BLOCKED_PUBLIC_CONTENT instead of using the home connection.
-import { randomUUID, createHmac, randomBytes } from "node:crypto";
+import { randomUUID, createHmac, randomBytes, createHash } from "node:crypto";
 import { getDomain } from "tldts";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { guardedFetch, CookieJar, USER_AGENT } from "./httpfetch.mjs";
@@ -52,6 +52,15 @@ function decodeText(buf, contentType) {
 // navigation's decision; pacedFetch() paces every hop of a redirect chain, so a redirect to
 // another registrable domain meets that domain's gap, hold and caps (review finding C4).
 export function makePacer({ store, getPolicy, resolvePublic, lookupFixture }) {
+  // Wait for one of `slots` permits of `kind` until the deadline; the lease covers the longest
+  // acquisition and is freed explicitly, or by expiry if this process dies holding it.
+  async function holdPermit(kind, holder, slots, deadline, signal) {
+    for (;;) {
+      if ((await store.takePermit(kind, holder, slots, getPolicy().permitLeaseMs)) !== null) return true;
+      if (Date.now() + 250 > deadline || signal?.aborted) return false;
+      await sleep(250, signal);
+    }
+  }
   async function pace(target, holder, deadline, signal) {
     const policy = getPolicy();
     const domain = domainOf(target);
@@ -81,20 +90,11 @@ export function makePacer({ store, getPolicy, resolvePublic, lookupFixture }) {
       if (held) await store.releaseDomain(held, holder);
     }
   }
-  return { pace, pacedFetch };
+  return { holdPermit, pace, pacedFetch };
 }
 
 export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, log }) {
-  const { pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
-  // Wait for a permit until the deadline; the lease covers the longest acquisition, and is freed
-  // explicitly, or by expiry if this process dies holding it.
-  async function holdPermit(kind, holder, slots, deadline, signal) {
-    for (;;) {
-      if ((await store.takePermit(kind, holder, slots, getPolicy().permitLeaseMs)) !== null) return true;
-      if (Date.now() + 250 > deadline || signal?.aborted) return false;
-      await sleep(250, signal);
-    }
-  }
+  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
 
   return async function acquire(body, signal) {
     const started = Date.now();
@@ -213,10 +213,19 @@ export function retryAfterSeconds(v) {
 }
 
 // POST /internal/fetch: one direct attempt for an auxiliary download (sitemap, document,
-// discovery), under the same target, pacing and size rules, without the quality check or the
-// browser. Resolves { status, headers, body, finalUrl } or throws Denied.
-export function makeFetcher({ store, getPolicy, getLocalReady, resolvePublic, lookupFixture, log }) {
-  const { pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
+// discovery), under the same target, pacing, permit and size rules, without the quality check or
+// the browser. Resolves { status, headers, body, finalUrl } or throws Denied.
+// Its logical id is the caller's, or one derived from the purpose, method, URL and a ten-minute
+// window, so repeated downloads of one URL (upstream retries, NuQ requeues, a second crawl of the
+// same site) share one budget of attempts (review finding W1).
+export const FETCH_WINDOW_MS = 10 * 60 * 1000;
+export function fetchLogicalId(b, now = Date.now()) {
+  if (typeof b.logicalAcquisitionId === "string" && b.logicalAcquisitionId && b.logicalAcquisitionId.length <= 256) return `fetch:${b.logicalAcquisitionId}`;
+  const key = createHash("sha256").update(`${b.purpose} ${b.method === "HEAD" ? "HEAD" : "GET"} ${b.url}`).digest("hex").slice(0, 32);
+  return `fetch:${key}:${Math.floor(now / FETCH_WINDOW_MS)}`;
+}
+export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, log }) {
+  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
   return async function fetchOnce(b, signal) {
     const policy = getPolicy();
     if (!b || typeof b.url !== "string" || typeof b.requestId !== "string") throw new Denied("INVALID_REQUEST", "url and requestId are required");
@@ -226,22 +235,58 @@ export function makeFetcher({ store, getPolicy, getLocalReady, resolvePublic, lo
     if (!getLocalReady()) throw new Denied("RETRIEVAL_NOT_READY", "the host's local-network list is not loaded");
     const deadline = Math.min(Date.parse(b.deadline) || Date.now() + 30000, Date.now() + 30000);
     const maxBytes = Math.min(Number.isInteger(b.maxBytes) ? b.maxBytes : policy.maxBodyBytes, policy.maxBodyBytes);
-    const logicalId = `fetch:${b.requestId}`;
+    const logicalId = fetchLogicalId(b);
     await store.openAcquisition(logicalId, urlHmac(b.url), new Date(deadline));
-    const attemptId = randomUUID();
-    const ordinal = await store.reserveAttempt({ logicalId, attemptId, requestId: b.requestId, purpose: b.purpose, strategy: "direct_http", domain: target.host, maxAttempts: 1 });
-    if (ordinal === null) throw new Denied("ATTEMPT_BUDGET_EXHAUSTED", "this download was already attempted");
-    const paced = await pace(target, attemptId, deadline, signal);
-    if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); throw new Denied(paced.failure.class, paced.failure.detail, paced.failure); }
+    // A download is one of the global URL acquisitions, like a page (spec §23.1).
+    const holder = randomUUID();
+    if (!(await holdPermit("url", holder, permits.url, deadline, signal))) throw new Denied("RESOURCE_BUSY", "no URL acquisition permit before the deadline", { retryable: true });
     try {
-      const r = await pacedFetch(paced.domain, { url: b.url, method, headers: b.headers, maxBytes, deadline }, attemptId, deadline, signal);
+      const attemptId = randomUUID();
+      const ordinal = await store.reserveAttempt({ logicalId, attemptId, requestId: b.requestId, purpose: b.purpose, strategy: "direct_http", domain: target.host, maxAttempts: policy.attempts.maxPerPage });
+      if (ordinal === null) throw new Denied("ATTEMPT_BUDGET_EXHAUSTED", `this download's ${policy.attempts.maxPerPage} attempts are spent`);
+      const paced = await pace(target, attemptId, deadline, signal);
+      if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); throw new Denied(paced.failure.class, paced.failure.detail, paced.failure); }
+      let r;
+      try {
+        r = await pacedFetch(paced.domain, { url: b.url, method, headers: b.headers, maxBytes, deadline }, attemptId, deadline, signal);
+      } catch (e) {
+        await store.finishAttempt(attemptId, { outcome: e.failureClass ?? "ERROR" });
+        throw e;
+      }
       await store.finishAttempt(attemptId, { outcome: "fetched", targetStatus: r.status, bytes: r.bytes });
       if (r.status === 429) await store.coolDown(domainOf(parseTarget(r.finalUrl, policy)), retryAfterSeconds(r.headers["retry-after"]));
       log({ event: "fetch", request_id: b.requestId, purpose: b.purpose, url_hmac: urlHmac(b.url), target_status: r.status, bytes: r.bytes });
       return r;
-    } catch (e) {
-      await store.finishAttempt(attemptId, { outcome: e.failureClass ?? "ERROR" });
-      throw e;
+    } finally {
+      await store.releasePermit("url", holder);
+    }
+  };
+}
+
+// GET /searxng/search: the core's search, answered from the policy's search backend (a fixture in
+// M2) under a URL permit and the same pacing as every other request (review finding W1). Only the
+// query and the paging/format parameters SearXNG defines are passed on.
+export function makeSearcher({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, log }) {
+  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
+  return async function search(inboundUrl, signal) {
+    const policy = getPolicy();
+    if (policy.search.backend === null) throw new Denied("SEARCH_UNAVAILABLE", "no search backend in this release");
+    if (!getLocalReady()) throw new Denied("RETRIEVAL_NOT_READY", "the host's local-network list is not loaded", { retryable: true });
+    const inbound = new URL(inboundUrl, "http://x");
+    const out = new URL(policy.search.backend);
+    for (const k of ["q", "format", "pageno", "language", "time_range", "categories", "engines"]) if (inbound.searchParams.has(k)) out.searchParams.set(k, inbound.searchParams.get(k));
+    const target = parseTarget(out.toString(), policy);
+    const deadline = Date.now() + 10000;
+    const holder = randomUUID();
+    if (!(await holdPermit("url", holder, permits.url, deadline, signal))) throw new Denied("RESOURCE_BUSY", "no URL acquisition permit before the deadline", { retryable: true });
+    try {
+      const paced = await pace(target, holder, deadline, signal);
+      if (paced.failure) throw new Denied(paced.failure.class, paced.failure.detail, paced.failure);
+      const r = await pacedFetch(paced.domain, { url: out.toString(), maxBytes: 1024 * 1024, deadline }, holder, deadline, signal);
+      log({ event: "search", backend_host: out.hostname, target_status: r.status, bytes: r.bytes });
+      return r;
+    } finally {
+      await store.releasePermit("url", holder);
     }
   };
 }
