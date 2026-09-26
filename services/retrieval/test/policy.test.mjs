@@ -6,12 +6,19 @@ import { readFileSync } from "node:fs";
 import { loadEnv, loadLocalCidrs, loadPolicy, parseSha256 } from "../src/policy.mjs";
 
 const env = { PI_RETRIEVAL_LISTEN: "10.231.5.10:3310", PI_RETRIEVAL_PROXY_LISTEN: "10.231.2.10:3312", PI_EGRESS_POLICY_FILE: "/p", PI_EGRESS_LOCAL_CIDRS_FILE: "/l",
-  PI_RESOLVER: "10.231.6.1", PI_BROWSER_URL: "http://10.231.2.20:3320", PI_CREDENTIALS_DIR: "/run/secrets", PI_POSTGRES_HOST: "nuq-postgres", PI_POSTGRES_DB: "postgres", PI_POSTGRES_USER: "fcpi_retrieval" };
+  PI_RESOLVER: "10.231.6.1", PI_BROWSER_URL: "http://10.231.2.20:3320", PI_CREDENTIALS_DIR: "/run/secrets", PI_POSTGRES_HOST: "nuq-postgres", PI_POSTGRES_DB: "postgres", PI_POSTGRES_USER: "fcpi_retrieval",
+  PI_SEARCH_URL: "http://10.231.10.20:8080/search", PI_SEARCH_PROXY_LISTEN: "10.231.10.10:3313", PI_EXTRACT_LISTEN: "10.231.9.20:3314", PI_BUDGET_POLICY_FILE: "/b",
+  PI_PROVIDERS_DIR: "/run/providers", PI_SELECTION_FILE: "/srv/providers/selection.json" };
 
-test("the environment: unknown keys, the flags that must stay false, the permit counts", () => {
+test("the environment: unknown keys, the flags that must stay false, paid dispatch as a switch, the permit counts", () => {
   assert.deepEqual(loadEnv(env).permits, { url: 2, browser: 1 });
   assert.throws(() => loadEnv({ ...env, PI_SOMETHING_NEW: "1" }), /unknown configuration keys/);
-  for (const k of ["PI_PAID_DISPATCH_ENABLED", "PI_CLOUD_ACCESS_ENABLED", "PI_BROWSER_EXTRAS_ENABLED"]) assert.throws(() => loadEnv({ ...env, [k]: "true" }), /must be false/);
+  for (const k of ["PI_CLOUD_ACCESS_ENABLED", "PI_BROWSER_EXTRAS_ENABLED"]) assert.throws(() => loadEnv({ ...env, [k]: "true" }), /must be false/);
+  // M5: paid dispatch is off unless set exactly to "true"; anything else stops startup.
+  assert.equal(loadEnv(env).paidDispatch, false);
+  assert.equal(loadEnv({ ...env, PI_PAID_DISPATCH_ENABLED: "true" }).paidDispatch, true);
+  assert.throws(() => loadEnv({ ...env, PI_PAID_DISPATCH_ENABLED: "yes" }), /true or false/);
+  assert.throws(() => loadEnv({ ...env, PI_SEARCH_URL: "http://searxng:8080/search" }), /fixed address/);
   assert.throws(() => loadEnv({ ...env, PI_MAX_URL_ACQUISITIONS: "3" }), /spec §23.1/);
   assert.throws(() => loadEnv({ ...env, PI_RESOLVER: "dns.example" }), /IPv4/);
   assert.throws(() => loadEnv({ ...env, PI_RETRIEVAL_LISTEN: "0.0.0.0" }), /ip:port/);
