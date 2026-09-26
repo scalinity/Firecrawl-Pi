@@ -18,9 +18,9 @@ jq -e --arg m "$model" '.models | has($m)' "$REPO/deploy/policies/budget.json" >
 jq -e --arg p "$parser" '.parsers | has($p)' "$REPO/deploy/policies/budget.json" >/dev/null || { echo "parser $parser is not in the budget policy" >&2; exit 2; }
 C=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=retrieval-service)
 want=$(jq -cn --arg s "$search" --arg m "$model" --arg p "$parser" '{search: $s, extractionModel: $m, parser: $p}')
-# Already the file's selection and the one the service last reported: nothing changes, so nothing to wait for.
-if [ "$(sudo -n cat "$F" | jq -c .)" = "$want" ] && [ -n "$C" ] && \
-   [ "$(sudo -n docker logs "$C" 2>/dev/null | jq -c 'select(.event == "selection_loaded") | {search, extractionModel, parser}' 2>/dev/null | tail -1)" = "$want" ]; then
+# Already the file's selection: the service loaded it at its start or when it last changed, and rewriting the
+# same content would make it log nothing to wait for (its log may no longer hold the line), so nothing is done.
+if [ "$(sudo -n cat "$F" | jq -c .)" = "$want" ]; then
   echo "selection applied: search=$search model=$model parser=$parser utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) (unchanged)"; exit 0
 fi
 tmp=$(sudo -n mktemp /etc/firecrawl-pi/selection/.fcpi-tmp.XXXXXX)
