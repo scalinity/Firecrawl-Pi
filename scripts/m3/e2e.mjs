@@ -150,13 +150,16 @@ const PHASES = {
     out("owner", { case: "alpha_job_list_control", status: own.status, is_list: Array.isArray(own.json?.jobs), contains_alpha_job: (own.json?.jobs ?? []).some((j) => j.id === id) });
     saveState({ ownerJob: id });
     // Revocation: m3rev works, is revoked on the Pi, and is refused within seconds, without a restart.
-    out("revoke", { case: "before", ...brief(await http("GET", "/platform/v1/status", { tok: "m3rev" })) });
+    // The gateway's start time before the revocation and after the refusal: equal, or it was restarted
+    // (a manual restart leaves RestartCount at 0, so the count alone cannot show it).
+    const startedAt = () => D(`inspect -f '{{.State.StartedAt}}' ${cname("access-gateway")}`).trim();
+    out("revoke", { case: "before", ...brief(await http("GET", "/platform/v1/status", { tok: "m3rev" })), started_at: startedAt() });
     const t0 = Date.now();
     out("revoke", { case: "revoked_on_pi", result: pi("bash /opt/firecrawl-pi/scripts/m3/pi-client-token.sh revoke m3rev").trim() });
     let r, n = 0;
     do { await sleep(250); r = await http("GET", "/platform/v1/status", { tok: "m3rev" }); n++; } while (r.status === 200 && Date.now() - t0 < 10000);
     out("revoke", { case: "after", ms_until_refused: Date.now() - t0, polls: n, ...brief(r) });
-    out("revoke", { case: "gateway_restarts_during", restart_count: D(`inspect -f '{{.RestartCount}} {{.State.StartedAt}}' ${cname("access-gateway")}`).trim() });
+    out("revoke", { case: "gateway_restarts_during", restart_count: D(`inspect -f '{{.RestartCount}} {{.State.StartedAt}}' ${cname("access-gateway")}`).trim(), started_at_after: startedAt() });
     // Host and Origin.
     for (const [c2, host, headers] of [["host_foreign", "evil.example", {}], ["host_rebinding_name", "attacker.example:3380", {}], ["host_localhost_alias", "localhost:3380", {}], ["host_loopback", HOST, {}],
       ["origin_foreign", HOST, { origin: "https://evil.example" }], ["origin_null", HOST, { origin: "null" }], ["origin_absent", HOST, {}]]) {

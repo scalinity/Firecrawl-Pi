@@ -240,7 +240,7 @@ const checks = {
       return { ok, actual: `pages=${JSON.stringify(p?.pages)}; next URLs on the private origin with the external id=${nextsOk}; unique documents=${new Set(shas).size}; same documents after expiry and recreation=${same}; internal host in the transcript=${internal}` };
     } },
   A03: { name: "credentials-missing-invalid-revoked-scope-owner", inputs: [`${RAW}e2e-auth.txt`],
-    expected: "missing, unknown, Basic-scheme and empty tokens get 401 with the gateway's own challenge (Bearer realm=\"fcpi\", never a firecrawl.dev one) while a valid token gets 200; a read-only token gets 403 INSUFFICIENT_SCOPE on scrape, map, crawl, batch and cancel and 200 on status; on five job routes another principal gets exactly the unknown-id answer (same status and body hash), with and without spoofed identity headers, while the owner gets 200 and the other principal's job list (a list) excludes the job that the owner's own list holds (the control); a token revoked on the Pi is refused within 3 s without a gateway restart, having worked just before",
+    expected: "missing, unknown, Basic-scheme and empty tokens get 401 with the gateway's own challenge (Bearer realm=\"fcpi\", never a firecrawl.dev one) while a valid token gets 200; a read-only token gets 403 INSUFFICIENT_SCOPE on scrape, map, crawl, batch and cancel and 200 on status; on five job routes another principal gets exactly the unknown-id answer (same status and body hash), with and without spoofed identity headers, while the owner gets 200 and the other principal's job list (a list) excludes the job that the owner's own list holds (the control); a token revoked on the Pi is refused within 3 s without a gateway restart (its start time the same before the revocation and after the refusal), having worked just before",
     run() {
       const a = E("auth");
       const un = a.unauthenticated ?? [];
@@ -253,7 +253,8 @@ const checks = {
         one(a.owner, "alpha_job_list_control")?.status === 200 && one(a.owner, "alpha_job_list_control")?.is_list === true && one(a.owner, "alpha_job_list_control")?.contains_alpha_job === true;
       const rv = a.revoke ?? [];
       const restart = one(rv, "gateway_restarts_during")?.restart_count ?? "";
-      const rvOk = one(rv, "before")?.status === 200 && one(rv, "revoked_on_pi")?.result === "revoked m3rev" && one(rv, "after")?.status === 401 && one(rv, "after").ms_until_refused <= 3000 && /^0 /.test(restart);
+      const rvOk = one(rv, "before")?.status === 200 && one(rv, "revoked_on_pi")?.result === "revoked m3rev" && one(rv, "after")?.status === 401 && one(rv, "after").ms_until_refused <= 3000 && /^0 /.test(restart) &&
+        /^\d{4}-\d\d-\d\dT/.test(one(rv, "before")?.started_at ?? "") && one(rv, "before").started_at === one(rv, "gateway_restarts_during")?.started_at_after;
       const noCloud = !/firecrawl\.dev/.test(read(`${RAW}e2e-auth.txt`).split("\n").filter((l) => l.includes("www_authenticate")).join("\n"));
       const ok = endOk(a) && unOk && scOk && owOk && rvOk && noCloud;
       return { ok, actual: `unauthenticated=${unOk}; scopes=${scOk}; owner isolation over ${ow.length} routes=${owOk}; revocation refused after ${one(rv, "after")?.ms_until_refused} ms (restarts ${restart.split(" ")[0]})=${rvOk}; no Cloud challenge=${noCloud}` };
