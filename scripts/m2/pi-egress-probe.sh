@@ -35,6 +35,8 @@ for s in firecrawl-core browser-worker retrieval-service fixture-m2 access-gatew
 done
 
 sec guard_before
+# The host-local set is filled at every dockerd and stack start; only its size is printed.
+echo "egress_local_v4_elements=$(sudo -n nft -j list set inet fcpi_guard egress_local_v4 | jq '[.nftables[] | select(.set) | .set.elem // [] | length] | add')"
 counters
 sec probes
 for pair in core:firecrawl-core browser:browser-worker retrieval:retrieval-service fixture:fixture-m2; do
