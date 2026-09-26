@@ -563,6 +563,22 @@ const checks = {
       return { ok, actual: `samples=${all.length}, phases without one=${unsampled.join(",") || "none"}, restarts unseen by the peaks=${restarts.join(",") || "none"}, deliberate MCP restarts seen=${controls.filter(Boolean).length} of ${controls.length}, over a cap or low on memory=${over.join(",") || "none"}; highest peaks: MCP ${peak("mcp").toFixed(1)} MiB, gateway ${peak("gateway").toFixed(1)} MiB, core ${peak("core").toFixed(0)} MiB; host OOM-kill counts seen=${[...hostOoms].join(",")}; cgroup OOM kills at the end=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}; swap not capped at the end=${Object.entries(cg).filter(([, v]) => v["memory.swap.max"] !== "0").map(([k]) => k).join(",") || "none"}` };
     } },
 
+  M02: { name: "mcp-memory-envelope-measured", inputs: [`${RAW}mcp-memory-probe.txt`, `${EV}rendered-compose.json`, "deploy/policies/capabilities.json"],
+    expected: "in a throwaway container of the image the stack runs, with the node options the service runs with and the deployed manifest, the MCP server answers maxToolCalls concurrent status reads, three rounds, whose gateway answers are at the answer cap (within 64 KiB, the control that the envelope was really exercised), both as a page of documents and as one document over the payload limit: every call succeeds within the payload limit, the server stays up, and its peak resident memory stays under 80% of the service's 192 MiB cap",
+    run() {
+      const s = S(`${RAW}mcp-memory-probe.txt`), meta = kv(((s.meta ?? [""])[0] ?? "").split(" ")), recs = jsonLines(s.probe);
+      const base = recs.find((r) => r.event === "baseline"), shapes = recs.filter((r) => r.event === "shape");
+      const R = json(`${EV}rendered-compose.json`).services["mcp-gateway"], L = MANIFEST.mcp.limits, cap = 192 * MIB;
+      const cond = { image: meta.image === composeImage("mcp-gateway"), options: base?.node_options === (R.environment?.NODE_OPTIONS ?? "") && /--max-old-space-size=\d+/.test(base?.node_options ?? ""),
+        manifest: base?.rest_response_max_bytes === L.restResponseMaxBytes && base.max_tool_calls === L.maxToolCalls, cap_is_services: +R.mem_limit === cap,
+        shapes: shapes.length === 2 && ["page", "one_large_document"].every((n) => shapes.some((x) => x.shape === n)),
+        at_the_cap: shapes.every((x) => x.answer_bytes >= L.restResponseMaxBytes - 65536),
+        calls: shapes.every((x) => x.calls === 3 * L.maxToolCalls && x.ok === x.calls && x.alive === true && x.max_text_bytes <= L.toolTextMaxBytes),
+        headroom: shapes.every((x) => Number.isFinite(x.peak_rss) && x.peak_rss < 0.8 * cap), exit: (s.probe ?? []).includes("probe_exit=0"),
+        no_leftovers: (s.transient ?? []).includes("leftover_transient_containers=0") };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; answer cap ${L.restResponseMaxBytes} × ${L.maxToolCalls} concurrent; peaks=${shapes.map((x) => `${x.shape}:${(x.peak_rss / MIB).toFixed(1)} MiB`).join(",")} of ${cap / MIB} MiB (80% = ${(0.8 * cap / MIB).toFixed(1)}); node options=${base?.node_options}` };
+    } },
+
   // ================================================================ the held live step: real target clients
   R01: { name: "real-target-clients", inputs: [`${RAW}real-clients.txt`],
     expected: "Claude Code on Haiku and Codex CLI on gpt-6-luna, each configured from deploy/clients/ with its own token over the tailnet and no other MCP server, answer the fixture prompt with the page's sentinel and a completed two-page crawl; the MCP service logged each client's scrape, crawl and status calls as ok under that client's own label, with the revision each actually used, and neither saw a session header; this is real-client evidence, kept apart from the SDK fixtures",
