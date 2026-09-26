@@ -86,8 +86,10 @@ if [ -n "${SAMPLER:-}" ]; then
 fi
 # Every process left in the browser worker after the phase: pid, parent, state, age in seconds and
 # name (no arguments). A killed or cancelled render must leave no Chromium process older than the
-# phase's end and none defunct.
+# phase's end and none defunct. Chromium's zygote reaps its children asynchronously, so the list
+# is taken 5 s after the driver ends.
 if [ -n "$BW" ] && [ "$(D inspect -f '{{.State.Status}}' "$BW" 2>/dev/null)" = running ]; then
+  sleep 5
   sec browser_processes
   echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
   D exec --user 3320 "$BW" ps -eo pid=,ppid=,stat=,etimes=,comm= 2>&1
