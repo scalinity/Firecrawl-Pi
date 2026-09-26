@@ -139,7 +139,10 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
         let up = 0, down = 0;
         upstream.on("data", (c) => { down += c.length; });
         clientSocket.on("data", (c) => { up += c.length; });
-        upstream.once("close", () => log({ event: "proxy_request", session: s.attemptId, method: "CONNECT", target_host: target.host, bytes_out: up, bytes_in: down }));
+        // A tunnel is logged when it opens, so each engine connection is attributable at once (a client may keep
+        // it open long after its last request), and again with its byte counts when it closes.
+        upstream.once("connect", () => log({ event: "proxy_request", session: s.attemptId, method: "CONNECT", target_host: target.host, status: 200 }));
+        upstream.once("close", () => log({ event: "proxy_tunnel_closed", session: s.attemptId, target_host: target.host, bytes_out: up, bytes_in: down }));
       }
       s.sockets.add(upstream).add(clientSocket);
       upstream.on("error", () => clientSocket.destroy());
