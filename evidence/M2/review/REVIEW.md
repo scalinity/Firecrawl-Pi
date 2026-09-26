@@ -255,37 +255,43 @@ Recorded by `/address` (CLAUDE.md §5): fixed with its commit, rejected with the
 
 | ID | Severity | Finding | Outcome | Commits |
 |---|---|---|---|---|
-| C1 | 🔴 | Quadratic classifier regexes | Pending /address | |
-| C2 | 🔴 | Proxy crash on a status below 100 | Pending /address | |
-| C3 | 🔴 | Rendered HTML unbounded | Pending /address | |
-| C4 | 🔴 | Pacing and cooldowns see only the first hop | Pending /address | |
-| C5 | 🔴 | Short scripted pages fail RENDER_INCOMPLETE | Pending /address | |
-| W1 | 🟡 | Fetch and search skip URL permits; fetch budget per call | Pending /address | |
-| W2 | 🟡 | Cancellation lost between steps | Pending /address | |
-| W3 | 🟡 | Permit and hold leaks on errors and restarts | Pending /address | |
-| W4 | 🟡 | Daily-cap race | Pending /address | |
-| W5 | 🟡 | Worker busy check-then-set | Pending /address | |
-| W6 | 🟡 | Resource-limit cuts reported as success; no proxy request cap | Pending /address | |
-| W7 | 🟡 | Host-network check fails open while the list is missing | Pending /address | |
-| W8 | 🟡 | Router WAN address not local | Pending /address | |
-| W9 | 🟡 | Critical-path code without unit tests | Pending /address | |
-| W10 | 🟡 | Mid-body reset classified UNSUPPORTED_CONTENT | Pending /address | |
-| W11 | 🟡 | HEAD and redirects fail on declared length | Pending /address | |
-| W12 | 🟡 | Fire-and-forget close can kill the next browser | Pending /address | |
-| W13 | 🟡 | Adapter drops typed failures on non-200 | Pending /address | |
-| W14 | 🟡 | Cooldown floor and reset | Pending /address | |
-| W15 | 🟡 | Verifier checks that pass on missing or wrong evidence | Pending /address | |
-| W16 | 🟡 | D1 test (a) after the branch point | Pending /address | |
-| S1 | 🔵 | Fixture exception reachable from public input | Pending /address | |
-| S2 | 🔵 | Duplicated pacing loop and dead code | Pending /address | |
-| S3 | 🔵 | Configuration checked too late | Pending /address | |
-| S4 | 🔵 | Cookie Secure flag and SNI for IP literals | Pending /address | |
-| S5 | 🔵 | Data lifecycle | Pending /address | |
-| S6 | 🔵 | Search failures look like empty results | Pending /address | |
-| S7 | 🔵 | sleep() leaks abort listeners | Pending /address | |
-| S8 | 🔵 | HEAD + 303 switches to GET | Pending /address | |
-| S9 | 🔵 | Local-network reload cannot see a change | Pending /address | |
-| S10 | 🔵 | Final-URL header throws for non-Latin-1 | Pending /address | |
-| S11 | 🔵 | Stall test records the wrong exit status | Pending /address | |
-| S12 | 🔵 | NuQ listener start races | Pending /address | |
-| S13 | 🔵 | PostgreSQL pool without timeouts | Pending /address | |
+| C1 | 🔴 | Quadratic classifier regexes | Fixed: markup is read in one linear pass, so no page can stall the classifier | `a58e065` |
+| C2 | 🔴 | Proxy crash on a status below 100 | Fixed: a status outside 100–599 is a 502 and the proxy keeps serving | `4c3cac0` |
+| C3 | 🔴 | Rendered HTML unbounded | Fixed: the worker bounds the rendered document like a direct body, and the client bounds its reply | `1bdfb1f` |
+| C4 | 🔴 | Pacing and cooldowns see only the first hop | Fixed: every hop of a redirect chain is paced and counted on its own domain; a 429 cools down the host that sent it | `ebdcf29` |
+| C5 | 🔴 | Short scripted pages fail RENDER_INCOMPLETE | Fixed: RENDER_INCOMPLETE only on structural signs of client rendering | `9d64ada` |
+| W1 | 🟡 | Fetch and search skip URL permits; fetch budget per call | Fixed: downloads and searches hold a URL permit, and a URL's downloads share one budget | `7b522bb` |
+| W2 | 🟡 | Cancellation lost between steps | Fixed: every wait resolves at once for an aborted caller, and each step checks it | `47f2204` |
+| W3 | 🟡 | Permit and hold leaks on errors and restarts | Fixed: each permit and hold is released on its own, and a start reclaims stranded leases | `cea4600` |
+| W4 | 🟡 | Daily-cap race | Fixed: the daily count is serialised across domains by an advisory lock | `2d21d4c` |
+| W5 | 🟡 | Worker busy check-then-set | Fixed: the one-render flag is checked and set with no await between | `468ef95` |
+| W6 | 🟡 | Resource-limit cuts reported as success; no proxy request cap | Fixed: a render past its budget is RESOURCE_LIMIT and proxied requests are capped; a render result without a final URL, found while fixing, is read as ending where it began | `028c227`, `73974c5` |
+| W7 | 🟡 | Host-network check fails open while the list is missing | Fixed: every address is refused while the local-network list is not loaded | `a5a737f` |
+| W8 | 🟡 | Router WAN address not local | Fixed: the router's public address is host-local once measured (pi-wan-address.sh, check X11) | `bd511e7` |
+| W9 | 🟡 | Critical-path code without unit tests | Fixed: unit tests for the acquisition branches, configuration, proxy edges and the Store's SQL | `3f7538c` |
+| W10 | 🟡 | Mid-body reset classified UNSUPPORTED_CONTENT | Fixed: a reset mid-body is TARGET_UNREACHABLE, so the same-tier retry runs | `3fcea84` |
+| W11 | 🟡 | HEAD and redirects fail on declared length | Fixed: only a body that is read is judged by the length it declares | `73b20cc` |
+| W12 | 🟡 | Fire-and-forget close can kill the next browser | Fixed: one close per render, and only the browser that disconnected is cleared | `4d99ddc` |
+| W13 | 🟡 | Adapter drops typed failures on non-200 | Fixed: the adapter carries the service's typed refusal on every status, and refuses long waits by name | `6a4e819` |
+| W14 | 🟡 | Cooldown floor and reset | Fixed: bare 429 cooldowns start at 60 s, and old ones lapse | `a8a51f6` |
+| W15 | 🟡 | Verifier checks that pass on missing or wrong evidence | Fixed: C02, M03 and M04 require their inputs; X05 matches the refusal line; S01 requires the class and accounts for every attempt; X01 is bounded to a fixture window | `63d007c` |
+| W16 | 🟡 | D1 test (a) after the branch point | Fixed: after the bundled milestone branched, only test (b) admits a fix | `e426234` |
+| S1 | 🔵 | Fixture exception reachable from public input | Fixed: fixture hosts count only for work that began at a fixture | `af6ab36` |
+| S2 | 🔵 | Duplicated pacing loop and dead code | Fixed: the unused peer hook, attempt-count query and re-export are removed; the duplicated pacing loop went with W1 | `6dc0acb`, `7b522bb` |
+| S3 | 🔵 | Configuration checked too late | Fixed: the permit lease must outlast the acquisition deadline by 30 s, and token hashes are checked at startup | `6e2bbb6` |
+| S4 | 🔵 | Cookie Secure flag and SNI for IP literals | Fixed: Secure cookies go only over https, and TLS sends no SNI for an IP literal | `051dc42` |
+| S5 | 🔵 | Data lifecycle | Fixed: the URL-hash key lasts across restarts; idle pacing rows are pruned; the acquisition prune is indexed (the daily count already used direct_nav_at) | `515ed83`, `8b30808` |
+| S6 | 🔵 | Search failures look like empty results | Deferred to M5: M2 routes search acquisition through the guarded policy (patch 0005) against a fixture backend; telling a backend error from an empty result needs the real backend, SearXNG, which M5's Scope supplies, and M5's Automated Verification names its controlled error and empty-result cases |  |
+| S7 | 🔵 | sleep() leaks abort listeners | Fixed: a wait removes its abort listener however it ends | `eb3714b` |
+| S8 | 🔵 | HEAD + 303 switches to GET | Fixed: a HEAD stays a HEAD across a 303 | `508f22a` |
+| S9 | 🔵 | Local-network reload cannot see a change | Fixed: the service mounts the list's directory, and X11 checks that it sees a rewrite | `55a10ba` |
+| S10 | 🔵 | Final-URL header throws for non-Latin-1 | Fixed: a download's final URL is returned in serialized form | `46f330d` |
+| S11 | 🔵 | Stall test records the wrong exit status | Fixed: the status is taken on the kill's own line, and A02 requires it | `19145cb` |
+| S12 | 🔵 | NuQ listener start races | Fixed: callers share one listener start, and a listener closed while starting is not published | `caf654e` |
+| S13 | 🔵 | PostgreSQL pool without timeouts | Fixed: 5 s to connect and 10 s per statement | `26f0386` |
+
+### Reruns
+
+- The retrieval unit suite, with a throwaway PostgreSQL on the workstation's Colima VM (the pinned postgres image and the service image's dependencies): 61 tests, 61 pass, none skipped. Each fix's new test was also run against the code before it and failed there, except S3's, S12's and S13's (S13's asserts settings the previous pool did not make; S12 has no unit harness).
+- Patch 0002 (S12) and patch 0003 (W13) change the API image: the series re-applies to a clean checkout of 7666c1f9 with result tree 1b98286b; the build of record, and M2-B01 and M2-D02 against it, run in the final re-collection.
+- Everything the Pi runs is redeployed, and every phase is collected again inside one guard-counter window (X01), before the verifier runs at a clean tree; `evidence/M2/verification.json` records the results.
