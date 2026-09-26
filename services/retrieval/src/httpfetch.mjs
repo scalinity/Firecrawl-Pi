@@ -114,7 +114,9 @@ function requestOnce({ target, address, method, headers, maxBytes, deadline, sig
         if (out > maxBytes) { done(); return fail(new Denied("SIZE_LIMIT", `decoded body exceeds ${maxBytes} bytes`)); }
         chunks.push(c);
       });
-      sink.on("error", () => { done(); fail(new Denied("UNSUPPORTED_CONTENT", "the body could not be decoded")); });
+      // Only a decoder's error means the body could not be decoded; the response's own error is the
+      // network's (a reset mid-body), which is transient (review finding W10).
+      decoder?.on("error", () => { done(); fail(new Denied("UNSUPPORTED_CONTENT", "the body could not be decoded")); });
       sink.on("end", () => { done(); if (!settled) { settled = true; resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks), wireBytes: wire }); } });
       res.on("error", (e) => { done(); fail(new Denied("TARGET_UNREACHABLE", `${target.host}: ${e.code ?? e.message}`)); });
     });

@@ -141,3 +141,17 @@ test("caller credentials go only to the first origin", async () => {
   assert.deepEqual(Object.keys(callerHeaders({ Host: "evil", "Proxy-Authorization": "x", "X-Forwarded-For": "1.2.3.4", Accept: "text/html" })), ["accept"]);
   assert.throws(() => callerHeaders({ cookie: "x".repeat(20000) }), Denied);
 });
+
+test("a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body UNSUPPORTED_CONTENT (review finding W10)", async () => {
+  const { s, port } = await serve((req, res) => {
+    if (req.url === "/gz") { res.writeHead(200, { "content-type": "text/html", "content-encoding": "gzip" }); res.end(Buffer.from("not gzip at all")); return; }
+    res.writeHead(200, { "content-type": "text/html", "content-length": "1000" });
+    res.write("<p>only the start");
+    setTimeout(() => res.socket.destroy(), 50);
+  });
+  try {
+    const go = (p) => guardedFetch({ url: `http://fx.fixture.fcpi.test:${port}${p}`, maxBytes: 1 << 20, deadline: soon(), policy: fixturePolicy(port), lookupFixture });
+    await assert.rejects(go("/reset"), (e) => e.failureClass === "TARGET_UNREACHABLE");
+    await assert.rejects(go("/gz"), (e) => e.failureClass === "UNSUPPORTED_CONTENT");
+  } finally { s.close(); }
+});
