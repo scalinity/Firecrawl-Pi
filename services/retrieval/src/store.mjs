@@ -101,11 +101,6 @@ export class Store {
       [attemptId, outcome, targetStatus, bytes, subresources]);
   }
 
-  async attemptsUsed(logicalId) {
-    const r = await this.pool.query("SELECT attempts FROM fcpi_retrieval.acquisition WHERE logical_id = $1", [logicalId]);
-    return r.rows[0]?.attempts ?? 0;
-  }
-
   // A free slot of `kind` (never held, or its lease expired), taken for leaseMs. Null when all are held.
   async takePermit(kind, holder, slots, leaseMs) {
     const r = await this.pool.query(

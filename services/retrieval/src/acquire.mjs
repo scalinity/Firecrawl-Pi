@@ -9,7 +9,7 @@ import { randomUUID, createHmac, randomBytes, createHash } from "node:crypto";
 import { getDomain } from "tldts";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { guardedFetch, CookieJar, USER_AGENT } from "./httpfetch.mjs";
-import { classify, isTextual, isHtml } from "./quality.mjs";
+import { classify, isTextual } from "./quality.mjs";
 
 const PURPOSES = new Set(["page", "robots", "sitemap"]);
 const EXPECTS = new Set(["html", "pdf", "document"]);
@@ -318,5 +318,3 @@ export function makeSearcher({ store, getPolicy, getLocalReady, permits, resolve
     }
   };
 }
-
-export { isHtml };

@@ -60,7 +60,7 @@ function decoderFor(encoding) {
 }
 
 // One request to one pinned address. Resolves { status, headers, body (Buffer), wireBytes }.
-function requestOnce({ target, address, method, headers, maxBytes, deadline, signal, onPeer }) {
+function requestOnce({ target, address, method, headers, maxBytes, deadline, signal }) {
   return new Promise((resolve, reject) => {
     // An abort listener added to an already-aborted signal never fires, so it is checked first.
     if (signal?.aborted) return reject(new Denied("CANCELLED", "the caller cancelled the acquisition"));
@@ -83,7 +83,6 @@ function requestOnce({ target, address, method, headers, maxBytes, deadline, sig
       const check = () => {
         // The peer must be the address that was validated; anything else is refused.
         if (socket.remoteAddress && socket.remoteAddress !== address) fail(new Denied("SSRF_DENIED", `connected peer ${socket.remoteAddress} is not the validated ${address}`));
-        else onPeer?.(socket.remoteAddress);
       };
       if (socket.remoteAddress) check(); else socket.once("connect", check);
     });
