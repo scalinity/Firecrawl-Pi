@@ -23,7 +23,7 @@ since=$(date +%s)
 C=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=retrieval-service)
 [ -n "$C" ] || { echo "retrieval-service is not running; the selection applies at its start"; exit 0; }
 for _ in $(seq 1 75); do
-  if sudo -n docker logs --since "@$since" "$C" 2>/dev/null | jq -ce --arg s "$search" --arg m "$model" --arg p "$parser" 'select(.event == "selection_loaded" and .search == $s and .extractionModel == $m and .parser == $p)' 2>/dev/null | grep . >/dev/null; then
+  if sudo -n docker logs --since "$since" "$C" 2>/dev/null | jq -ce --arg s "$search" --arg m "$model" --arg p "$parser" 'select(.event == "selection_loaded" and .search == $s and .extractionModel == $m and .parser == $p)' 2>/dev/null | grep . >/dev/null; then
     echo "selection applied: search=$search model=$model parser=$parser utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"; exit 0
   fi
   sleep 1
