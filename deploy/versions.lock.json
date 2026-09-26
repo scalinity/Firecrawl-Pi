@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-26T18:04:34Z",
-  "generated_by": "scripts/m4/build-lock.mjs (M4), from the lock M3 closed with at 0abf44c; entries owned by later milestones are as M3 wrote them",
-  "repository_sha": "e70e4ad9110fe5a44d0a5e72a45da7105d2cd8e8",
+  "generated_utc": "2026-09-26T21:56:15Z",
+  "generated_by": "scripts/m5/build-lock.mjs (M5), from the lock M4 closed with at 10cdc59; entries owned by later milestones are as M4 wrote them",
+  "repository_sha": "7e7c3eb94373e4f3e15e3069fd6d8693f270d42e",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -361,22 +361,32 @@
       }
     },
     "searxng": {
-      "role": "Private metasearch",
+      "role": "Private metasearch (M5): JSON only, one worker, no limiter, its only route the retrieval service's search proxy",
+      "status": "selected",
       "selected": {
         "registry": "registry-1.docker.io",
         "repository": "searxng/searxng",
-        "tag": "2026.9.23-3cd69d30e",
-        "resolved_utc": "2026-09-25T03:24:35Z",
-        "status": "resolved",
-        "index_digest": "sha256:bcfaed4091d59f7ce85670bd701a2d0295872196dc19908a3965a8353b149f83",
-        "registry_reported_digest": "sha256:bcfaed4091d59f7ce85670bd701a2d0295872196dc19908a3965a8353b149f83",
-        "arm64_manifest_digest": "sha256:0c7b839d2050617618f151c0919260c156c701a812dc6404f1114fe43a0f0710",
+        "tag": "2026.9.25-12f8b6515",
+        "status": "selected",
+        "index_digest": "sha256:5286edb35782454ab8a102c5eff6b54bff745853191b46aeead95f225aa6dfb6",
+        "arm64_manifest_digest": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
         "platform": "linux/arm64",
-        "index_file": "evidence/M0/registry/registry-1.docker.io_searxng_searxng_2026.9.23-3cd69d30e.index.json",
-        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_searxng_searxng_2026.9.23-3cd69d30e.arm64.json"
+        "revision": "12f8b6515ca77c3c3bc1498584950ef5daca1433",
+        "license": "AGPL-3.0-or-later",
+        "registry_record": "evidence/M5/raw/searxng-registry.txt"
       },
-      "same_index_digest_as_at_m0": "searxng/searxng:latest",
-      "note": "Tags are date+commit; M5 may re-resolve."
+      "replaces": {
+        "tag": "2026.9.23-3cd69d30e",
+        "arm64_manifest_digest": "sha256:0c7b839d2050617618f151c0919260c156c701a812dc6404f1114fe43a0f0710",
+        "why": "M0's candidate re-resolved to the newest tag when M5 began (2026-09-26), as its note allowed; the native proof ran on this digest (evidence/M5/raw/stack.txt, searxng_native)"
+      },
+      "settings": {
+        "path": "deploy/searxng/settings.yml",
+        "sha256": "4a13562c8b3f355e2789c64d92ba0feac104050ccac9260668818dfea5a0ea20",
+        "entrypoint": "deploy/searxng/entrypoint.sh",
+        "entrypoint_sha256": "a87c687c0ffd6d8742176ebd53b02edb83fa0e3b7aa00a5dad333bf01ef01429"
+      },
+      "license_note": "AGPL-3.0-or-later, run unmodified from the upstream image and configured by files; nothing is distributed"
     },
     "firecrawl_api_prebuilt": {
       "role": "Upstream-built API image for the pinned commit (config FIRECRAWL_BUILD_SHA=7666c1f9...)",
@@ -519,12 +529,12 @@
       "status": "selected"
     },
     "firecrawl_api_patched": {
-      "role": "The API image the stack runs from M2: the pinned commit with patches/ applied (review finding Q7, decision D6)",
+      "role": "The API image the stack runs: the pinned commit with patches/ applied, patches 0007 (typed search failures) and 0008 (the document policy) since M5",
       "status": "selected",
-      "image_id": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+      "image_id": "sha256:4ae6468ffc4d2632544ba427ac66c9b142b6c1d008c83ee08530253da6dc96b3",
       "platform": "linux/arm64",
       "source_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "patch_series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
       "runtime_configuration": {
         "NUQ_WORKER_COUNT": "1",
         "USE_DB_AUTHENTICATION": "false",
@@ -538,16 +548,87 @@
       }
     },
     "retrieval": {
-      "role": "The retrieval-service image (built on the Pi, natively linux/arm64)",
+      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, and since M5 the search, model and parser adapters and their budgets",
       "status": "selected",
-      "image_id": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+      "image_id": "sha256:0782026f3f9e202462919d5f034f5070fcdc3e08494148ceee1f1e061b4c7211",
       "platform": "linux/arm64",
-      "base_manifest_digest": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
-        "sha256": "cfbaacaa097d237699952ef9b6095962cad78845903400179810d5d8543d3eae"
+        "sha256": "7ccd57a22212dd1b3d6d57b4ba93ca57c66912ad587e6af370818ef8986bb8cd"
       },
-      "evidence": "evidence/M2/raw/service-build.txt"
+      "evidence": "evidence/M5/raw/image-build.txt",
+      "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "built_from_commit": "248c9275e92b5d28d0931c45d0921b1393de2176",
+      "lockfile": {
+        "path": "services/retrieval/package-lock.json",
+        "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
+      },
+      "packages": {
+        "pg": {
+          "version": "8.23.0",
+          "integrity": "sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg=="
+        },
+        "pg-cloudflare": {
+          "version": "1.4.0",
+          "integrity": "sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A=="
+        },
+        "pg-connection-string": {
+          "version": "2.14.0",
+          "integrity": "sha512-XwWDGcLRGCXAR8F/AM5bG7Q+A3Wm2s6QeEjlOKZLlH3UYcguiqCWKyWXVag5TLTIjR7oOJUY8kcADaZgWPyLeg=="
+        },
+        "pg-int8": {
+          "version": "1.0.1",
+          "integrity": "sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw=="
+        },
+        "pg-pool": {
+          "version": "3.14.0",
+          "integrity": "sha512-gKtPkFdQPU3DksooVLi9LsjZxrsBUZIpa+7aVx+LV5pNh0KzP4Zleud2po+ConrxbuXGBJ6Hfer6hdgpIBpBaw=="
+        },
+        "pg-protocol": {
+          "version": "1.16.0",
+          "integrity": "sha512-sILXutLVjCLjcDuOmvhX5e2Z4cS5qG/6Bu3VkpFwdf/633ElGLpEh9bgmuI5I4sqKqkifQiGyiCcx1HdtrK7tg=="
+        },
+        "pg-types": {
+          "version": "2.2.0",
+          "integrity": "sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA=="
+        },
+        "pgpass": {
+          "version": "1.0.5",
+          "integrity": "sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug=="
+        },
+        "postgres-array": {
+          "version": "2.0.0",
+          "integrity": "sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA=="
+        },
+        "postgres-bytea": {
+          "version": "1.0.1",
+          "integrity": "sha512-5+5HqXnsZPE65IJZSMkZtURARZelel2oXUEO8rH83VS/hxH5vv1uHquPg5wZs8yMAfdv971IU+kcPUczi7NVBQ=="
+        },
+        "postgres-date": {
+          "version": "1.0.7",
+          "integrity": "sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q=="
+        },
+        "postgres-interval": {
+          "version": "1.2.0",
+          "integrity": "sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ=="
+        },
+        "split2": {
+          "version": "4.2.0",
+          "integrity": "sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg=="
+        },
+        "tldts": {
+          "version": "7.4.15",
+          "integrity": "sha512-SJVBeHOxDbNoq14CvpAoA2mLEWdbldGK8nR+yumpjY5nrlZxOflcA7p1Qj1gbTGmbu9DY9qLj/bENSWhBzjxRQ=="
+        },
+        "tldts-core": {
+          "version": "7.4.15",
+          "integrity": "sha512-ERuv0p98XgSzmlSLJr8vDNxX+uATGInlN97V3R+JpYWaSqn5IG3ewWgCwczk4bkOpgth/o8Nt5FOi4B4w0n/1A=="
+        },
+        "xtend": {
+          "version": "4.0.2",
+          "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
+        }
+      }
     },
     "browser_worker": {
       "role": "The browser-worker image (built on the Pi, natively linux/arm64)",
@@ -562,12 +643,12 @@
       "evidence": "evidence/M2/raw/service-build.txt"
     },
     "access_gateway": {
-      "role": "The access gateway image (built on the Pi, natively linux/arm64), with the /mcp route since M4",
+      "role": "The access gateway image (built on the Pi, natively linux/arm64), with search, the json format and extraction jobs since M5",
       "status": "selected",
-      "image_id": "sha256:a811a0b2379ed3927280716981c7ef3bc81ce96c2ad4d72e685ce152b6b12eb3",
+      "image_id": "sha256:bdfc078b88085c47f269e55ae2bc6f2311f6b9345d08896fcfce818e3f573cb6",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "4fa7121eb25d9587ffd1a1fca822ba219940df33",
+      "built_from_commit": "248c9275e92b5d28d0931c45d0921b1393de2176",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -634,15 +715,15 @@
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
         }
       },
-      "evidence": "evidence/M4/raw/image-build.txt"
+      "evidence": "evidence/M5/raw/image-build.txt"
     },
     "mcp_gateway": {
-      "role": "The MCP service image (built on the Pi, natively linux/arm64): the official SDK's stateless request factory in front of the gateway's REST routes",
+      "role": "The MCP service image (built on the Pi, natively linux/arm64), with the search and extraction tools since M5",
       "status": "selected",
-      "image_id": "sha256:852d82931d1d621b21b62735648ed550e38f6606c894eed8bfe0e3ddef2887de",
+      "image_id": "sha256:47fffaac82d2676e456454972d8b00478a8480f2adaf5ba047e7e9c7b474f544",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "4fa7121eb25d9587ffd1a1fca822ba219940df33",
+      "built_from_commit": "248c9275e92b5d28d0931c45d0921b1393de2176",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
@@ -677,7 +758,7 @@
           "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="
         }
       },
-      "evidence": "evidence/M4/raw/image-build.txt"
+      "evidence": "evidence/M5/raw/image-build.txt"
     }
   },
   "browser": {
@@ -1390,9 +1471,9 @@
   "patches": {
     "status": "resolved",
     "upstream_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-    "series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+    "series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
     "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
-    "result_tree": "1b98286b4a16c6e9f831bc628ede1e8c3d680f48",
+    "result_tree": "36917fb853bcef10761a491ff063eda8251dd7be",
     "patches": [
       {
         "file": "0001-nuq-sender-survives-broker-outage.patch",
@@ -1423,6 +1504,16 @@
         "file": "0006-reproducible-arm64-build.patch",
         "sha256": "c548cfedc365ab269b518ba5fb103ba525e7d75a0fa24775338fe8cd175e02e6",
         "reason": "The upstream Dockerfile floats every base image, the Rust toolchain and the crate graph, and downloads the FoundationDB client unchecked (decisions D4, D6)."
+      },
+      {
+        "file": "0007-typed-search-failures.patch",
+        "sha256": "d8ac7472c2b3e29307f527791bea9a12f3daa826438c5b2e57e9746a7f42b47b",
+        "reason": "A search backend failure became an empty result at three layers: searxng_search and search both returned {} on any error, and patch 0005 returned {} when SearXNG had no results (review finding S6, spec §13)."
+      },
+      {
+        "file": "0008-document-policy-and-parser-fallback.patch",
+        "sha256": "4d2dceb7475a98d9629f4f976c0cf887c7845ad5ecb9e0232b00511a4aafbbf9",
+        "reason": "Native PDF parsing returned empty markdown as success for a scan-only document, had no page cap, and fell back to a pdf-parse whose bundled pdf.js 1.10 refuses some valid files; spec §15 asks for native parsing first, typed refusals and a budgeted complex-document fallback."
       }
     ],
     "manifest": "patches/series.json (symbols, tests and the call-site coverage of each traced path)"
@@ -1469,14 +1560,14 @@
       ]
     },
     "firecrawl_api_image_patched": {
-      "image_id": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+      "image_id": "sha256:4ae6468ffc4d2632544ba427ac66c9b142b6c1d008c83ee08530253da6dc96b3",
       "built_on": "the workstation's Colima VM, natively linux/arm64 (decision D6)",
-      "built_utc": "2026-09-26T06:21:16Z",
-      "repository_commit": "0890682b37a3f825c9a3854aafaaec0b5c7c40a2",
+      "built_utc": "2026-09-26T21:09:33Z",
+      "repository_commit": "73ec6c6e22f7481779142f467cb98eed0b8420ce",
       "code_dirty": false,
       "no_cache": true,
-      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
-      "result_tree": "1b98286b4a16c6e9f831bc628ede1e8c3d680f48",
+      "patch_series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
+      "result_tree": "36917fb853bcef10761a491ff063eda8251dd7be",
       "go_version": "go version go1.27.1 linux/arm64",
       "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
       "node": "v22.23.3",
@@ -1484,17 +1575,181 @@
       "debian_snapshot": "20260925T000000Z\"",
       "provenance": false,
       "sbom": false,
-      "evidence": "evidence/M2/raw/api-build.log"
+      "evidence": "evidence/M2/raw/api-build.log",
+      "build_log": "evidence/M5/raw/api-build.log",
+      "transfer": "evidence/M5/raw/api-push.txt (docker save on the VM, docker load on the Pi, the image id compared)"
     }
   },
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "717b7c772faf7bea7a0f7511b3cbebfe7cf2c3bd97de8b90f4e1d9cfc02ae470",
+    "capabilities_sha256": "96c2766771a3b86ad1d658a71a80e21db2762b7036d537070aabe4605dc4e82f",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
     "official_client_source": "apps/js-sdk/firecrawl/package.json in the pinned upstream tree (evidence/M3/raw/route-shapes.txt)",
     "official_client_use": "contract tests from the workstation (scripts/m3/sdk-compat.mjs), installed outside the repository; not a deployed dependency"
+  },
+  "providers": {
+    "budget_policy": {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2530424b1a0643b0421f934819555406545759dd5b5417cbc4e635303b8f94f4",
+      "paid_caps": {
+        "llm": {
+          "day": 0,
+          "month": 0
+        },
+        "parser": {
+          "month": 0
+        }
+      },
+      "paid_total_caps": {
+        "day": 0
+      },
+      "paid_dispatch": "PI_PAID_DISPATCH_ENABLED=false in deploy/compose.yaml"
+    },
+    "rate_cards": [
+      {
+        "id": "openai/gpt-4.1-mini-2025-04-14@2026-09-26",
+        "subject": "gpt-4.1-mini-2025-04-14",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "inputPerMTok": 400000,
+        "cachedInputPerMTok": 100000,
+        "outputPerMTok": 1600000,
+        "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini, observed 2026-09-26 (spec O11)"
+      },
+      {
+        "id": "fixture/fcpi-fixture-model@2026-09-26",
+        "subject": "fcpi-fixture-model",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "inputPerMTok": 400000,
+        "cachedInputPerMTok": 100000,
+        "outputPerMTok": 1600000,
+        "source": "fixture: GPT-4.1 Mini's prices, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-race@2026-09-26",
+        "subject": "fcpi-fixture-race",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "inputPerMTok": 400000,
+        "cachedInputPerMTok": 100000,
+        "outputPerMTok": 1600000,
+        "source": "fixture: GPT-4.1 Mini's prices, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-stale@2026-01-01",
+        "subject": "fcpi-fixture-stale",
+        "effectiveFrom": "2026-01-01",
+        "effectiveTo": "2026-02-01",
+        "inputPerMTok": 400000,
+        "cachedInputPerMTok": 100000,
+        "outputPerMTok": 1600000,
+        "source": "fixture: a rate card no longer in effect"
+      },
+      {
+        "id": "llamaparse/cost_effective@2026-09-26",
+        "subject": "llamaparse-cost-effective",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "creditsPerPage": 3,
+        "microUsdPerCredit": 1250,
+        "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ and https://www.llamaindex.ai/pricing, observed 2026-09-22 (spec O12, O13)"
+      },
+      {
+        "id": "fixture/fcpi-fixture-parser@2026-09-26",
+        "subject": "fcpi-fixture-parser",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "creditsPerPage": 3,
+        "microUsdPerCredit": 0,
+        "source": "fixture: LlamaParse's credits per page, no money"
+      }
+    ],
+    "models": {
+      "gpt-4.1-mini-2025-04-14": {
+        "provider": "openai",
+        "category": "llm"
+      },
+      "fcpi-fixture-model": {
+        "provider": "fixture-model",
+        "category": "fixture"
+      },
+      "fcpi-fixture-race": {
+        "provider": "fixture-model",
+        "category": "fixture_race"
+      },
+      "fcpi-fixture-stale": {
+        "provider": "fixture-model",
+        "category": "fixture"
+      }
+    },
+    "parsers": {
+      "llamaparse-cost-effective": {
+        "provider": "llamaparse",
+        "category": "parser",
+        "tier": "cost_effective",
+        "version": "latest"
+      },
+      "fcpi-fixture-parser": {
+        "provider": "fixture-parser",
+        "category": "fixture_parser",
+        "tier": "cost_effective",
+        "version": "fixture-1"
+      }
+    },
+    "default_model": "gpt-4.1-mini-2025-04-14",
+    "default_parser": "llamaparse-cost-effective",
+    "providers": {
+      "openai": {
+        "kind": "model",
+        "base_url": "https://api.openai.com/v1",
+        "paid": true,
+        "credential_file": "openai_api_key"
+      },
+      "fixture-model": {
+        "kind": "model",
+        "base_url": "http://model.fixture.fcpi.test:8080/v1",
+        "paid": false,
+        "credential_file": null
+      },
+      "llamaparse": {
+        "kind": "parser",
+        "base_url": "https://api.cloud.llamaindex.ai",
+        "paid": true,
+        "credential_file": "llamaparse_api_key"
+      },
+      "fixture-parser": {
+        "kind": "parser",
+        "base_url": "http://parser.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null
+      }
+    },
+    "search": {
+      "engines": {
+        "fixture": [
+          "fcpi fixture",
+          "fcpi fixture b"
+        ],
+        "live": [
+          "duckduckgo",
+          "bing",
+          "brave"
+        ]
+      },
+      "live_engine_hosts": [
+        "duckduckgo.com",
+        "html.duckduckgo.com",
+        "lite.duckduckgo.com",
+        "www.bing.com",
+        "search.brave.com"
+      ],
+      "per_hour": 60,
+      "cache_seconds": 900,
+      "deadline_ms": 10000
+    }
   }
 }
