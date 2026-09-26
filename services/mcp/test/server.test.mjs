@@ -319,3 +319,16 @@ test("a status page over the answer cap is read again one document at a time; a 
   assert.equal(payload(h).error.code, "RESULT_TOO_LARGE");
   assert.match(payload(h).error.message, /REST results route/);
 });
+
+test("client header text reaches the log only as its grammar allows", async () => {
+  const hostile = "firecrawl_scrape\"}<script>" + "x".repeat(500);
+  const r = await http("POST", { headers: { ...identity(), "mcp-protocol-version": "not-a-date", "mcp-method": "tools/call", "mcp-name": hostile },
+    body: { jsonrpc: "2.0", id: 3, method: "tools/call", params: { name: "firecrawl_scrape", arguments: { url: "https://example.com/x" }, _meta: META } } });
+  assert.equal(r.status, 400);
+  await sleep(100);
+  const ex = logs.filter((l) => l.event === "exchange").at(-1);
+  assert.equal(ex.mcp_name, "invalid");
+  assert.equal(ex.protocol_version, "invalid");
+  assert.equal(ex.mcp_method, "tools/call");
+  assert.ok(!JSON.stringify(logs).includes("<script>"));
+});
