@@ -103,3 +103,37 @@ test("the proxy answers 503 while the local-network list is not loaded (review f
     assert.deepEqual(sessions.close("not-ready").denied.map((d) => d.class), ["RETRIEVAL_NOT_READY"]);
   } finally { proxy.close(); good.close(); }
 });
+
+test("malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9)", async () => {
+  let seenAuth = "unset", hold = null;
+  const up = http.createServer((q, r) => {
+    seenAuth = q.headers["proxy-authorization"] ?? null;
+    if (q.url === "/slow") { hold = r; r.writeHead(200); r.write("partial"); } else r.end("fine");
+  }).listen(0, "127.0.0.1");
+  await listening(up);
+  try {
+    await withProxy(up.address().port, async ({ port, sessions }) => {
+      const url = `http://fx.fixture.fcpi.test:${up.address().port}`;
+      const malformed = await new Promise((resolve) => http.request({ host: "127.0.0.1", port, path: `${url}/`, headers: { "proxy-authorization": "Basic %%%" } }, (r) => resolve(r.statusCode)).end());
+      assert.equal(malformed, 407);
+      const cred = sessions.open("edge", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      assert.equal((await viaProxy(port, `${url}/`, cred)).status, 200);
+      assert.equal(seenAuth, null); // the attempt's credential never reaches the target
+      const connect = await new Promise((resolve) => {
+        const s = net.connect(port, "127.0.0.1", () => s.write(`CONNECT example.com:80 HTTP/1.1\r\nhost: example.com:80\r\nproxy-authorization: Basic ${Buffer.from(`${cred.username}:${cred.password}`).toString("base64")}\r\n\r\n`));
+        let d = ""; s.on("data", (c) => { d += c; }); s.on("end", () => resolve(d)); s.on("error", () => resolve(d));
+      });
+      assert.match(connect, /^HTTP\/1\.1 403/);
+      // Closing the session tears down its open connections.
+      const partial = new Promise((resolve) => {
+        const req = http.request({ host: "127.0.0.1", port, path: `${url}/slow`, headers: { "proxy-authorization": `Basic ${Buffer.from(`${cred.username}:${cred.password}`).toString("base64")}` } }, (r) => {
+          r.on("data", () => sessions.close("edge"));
+          r.on("close", () => resolve("closed")); r.on("error", () => resolve("closed"));
+        });
+        req.on("error", () => resolve("closed"));
+        req.end();
+      });
+      assert.equal(await partial, "closed");
+    });
+  } finally { hold?.destroy(); up.close(); }
+});

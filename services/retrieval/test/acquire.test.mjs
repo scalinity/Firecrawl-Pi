@@ -160,3 +160,60 @@ test("a render that hit its budget is RESOURCE_LIMIT, not a success (review find
     }
   } finally { t.s.close(); }
 });
+
+// ---- the orchestration's branches (review finding W9) ---------------------------------------------
+const SHELL = '<main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main><script src="/app.js"></script>';
+const RENDERED = "<main><h1>Rendered</h1><p>Enough article text here to be an adequate page of its own, once rendered by script.</p></main>";
+const okRender = (html = RENDERED) => ({ render: async (a) => ({ ok: true, html, status: 200, finalUrl: a.url, subresources: { requests: 1, overLimit: 0 }, proxy: { requests: 1, bytes: 10, capped: false, denied: [] } }) });
+
+test("a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE", async () => {
+  const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(SHELL));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    const good = await acquirerFor(store, policy, okRender())(body(`http://t.fixture.fcpi.test:${t.port}/`));
+    assert.deepEqual([good.ok, good.strategies, good.attemptsUsed], [true, ["direct_http", "direct_browser"], 2]);
+    const still = await acquirerFor(store, policy, okRender(SHELL))(body(`http://t.fixture.fcpi.test:${t.port}/`));
+    assert.equal(still.failure.class, "RENDER_INCOMPLETE");
+    assert.equal(store.attempts.at(-1).outcome, "RENDER_INCOMPLETE");
+  } finally { t.s.close(); }
+});
+
+test("a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser", async () => {
+  let n = 0;
+  const t = await serve((req, res) => (req.url === "/down" ? res.writeHead(503, { "content-type": "text/html" }).end("<p>down</p>") : (n++, res.writeHead(200, { "content-type": "text/html" }).end(SHELL))));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    const down = await acquirerFor(store, policy)(body(`http://t.fixture.fcpi.test:${t.port}/down`, "down-1"));
+    assert.deepEqual([down.ok, down.targetStatus, down.attemptsUsed], [true, 503, 2]);
+    // Three attempts already spent on this logical page: the fourth is direct, none is left for the browser.
+    await store.openAcquisition("late-1", "h", new Date(Date.now() + 60000));
+    store.acq.get("late-1").attempts = 3;
+    const late = await acquirerFor(store, policy, okRender())(body(`http://t.fixture.fcpi.test:${t.port}/`, "late-1"));
+    assert.equal(late.failure.class, "ATTEMPT_BUDGET_EXHAUSTED");
+    assert.equal(n, 1);
+  } finally { t.s.close(); }
+});
+
+test("a pacing refusal is the attempt's recorded outcome and reaches no target", async () => {
+  const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end("<p>x</p>"));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    await store.coolDown("t.fixture.fcpi.test", 30);
+    const r = await acquirerFor(store, policy)(body(`http://t.fixture.fcpi.test:${t.port}/`));
+    assert.equal(r.failure.class, "RATE_LIMITED");
+    assert.equal(store.attempts.at(-1).outcome, "RATE_LIMITED");
+    assert.equal(t.hits.length, 0);
+  } finally { t.s.close(); }
+});
+
+test("requests are validated and bodies decoded by their declared charset", async () => {
+  const { validateAcquireRequest, decodeText } = await import("../src/acquire.mjs");
+  const ok = body("http://example.com/");
+  for (const bad of [null, { ...ok, url: "" }, { ...ok, deadline: "soon" }, { ...ok, purpose: "crawl" }, { ...ok, expect: "video" }, { ...ok, headers: [] }, { ...ok, waitFor: 15001 }, { ...ok, logicalAcquisitionId: "x".repeat(257) }]) {
+    assert.throws(() => validateAcquireRequest(bad), (e) => e.failureClass === "INVALID_REQUEST");
+  }
+  assert.equal(validateAcquireRequest(ok).waitFor, 0);
+  assert.equal(decodeText(Buffer.from([0x63, 0x61, 0x66, 0xe9]), "text/html; charset=iso-8859-1"), "café");
+  assert.equal(decodeText(Buffer.from('<meta charset="windows-1252"><p>\x93q\x94</p>', "latin1"), "text/html"), '<meta charset="windows-1252"><p>“q”</p>');
+  assert.equal(decodeText(Buffer.from("héllo", "utf8"), "text/html; charset=not-a-charset"), "héllo");
+});

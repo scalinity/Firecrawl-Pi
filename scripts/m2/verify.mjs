@@ -749,13 +749,14 @@ const checks = {
       return { ok: unpinned.length === 0 && bad.length === 0, actual: `unpinned=${unpinned.join(",") || "none"}; lock disagrees on=${bad.join(",") || "none"}` };
     } },
   U01: { name: "retrieval-unit-tests-pass", inputs: [`${RAW}unit-tests.txt`, `${EV}rendered-compose.json`],
-    expected: "the retrieval service's unit suite passes inside the image the stack runs, with no network, and leaves no throwaway container",
+    expected: "the retrieval service's unit suite passes inside the image the stack runs, the Store's SQL tests included against a throwaway PostgreSQL (none skipped), and leaves no throwaway container or network",
     run() {
       const s = S(`${RAW}unit-tests.txt`), tap = s.tap ?? [];
       const n = (k) => +((tap.find((l) => l.startsWith(`# ${k} `)) ?? "").split(" ")[2]);
       const img = (kv(s.meta?.join(" ").split(" ")).image ?? "").split("@")[1];
-      const ok = n("tests") >= 20 && n("pass") === n("tests") && n("fail") === 0 && tap.includes("test_exit=0") && img === digestOf(composeImage("retrieval-service")) && (s.transient ?? []).includes("leftover_transient_containers=0");
-      return { ok, actual: `tests=${n("tests")} pass=${n("pass")} fail=${n("fail")}; image is the running one=${img === digestOf(composeImage("retrieval-service"))}` };
+      const ok = n("tests") >= 40 && n("pass") === n("tests") && n("fail") === 0 && n("skipped") === 0 && tap.includes("test_exit=0") && img === digestOf(composeImage("retrieval-service")) &&
+        (s.transient ?? []).includes("leftover_transient_containers=0 leftover_transient_networks=0");
+      return { ok, actual: `tests=${n("tests")} pass=${n("pass")} fail=${n("fail")} skipped=${n("skipped")}; image is the running one=${img === digestOf(composeImage("retrieval-service"))}` };
     } },
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
     expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding an outcome (fixed with its commit, rejected with evidence, deferred to a later milestone), cites only commits that exist, and holds no absolute local path",

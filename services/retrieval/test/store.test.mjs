@@ -34,3 +34,40 @@ test("the platform's daily cap holds under concurrent pacers of different domain
     assert.equal(Number((await sql("SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE NOT fixture"))[0].count), 200);
   } finally { await store.close(); }
 });
+
+test("permits: slot 0 is a slot, a full kind answers null, an expired lease is free again (review finding W9)", opts, async () => {
+  const store = await fresh();
+  try {
+    const [a, b] = [crypto.randomUUID(), crypto.randomUUID()];
+    assert.equal(await store.takePermit("url", a, 2, 60000), 0);
+    assert.equal(await store.takePermit("url", b, 2, 60000), 1);
+    assert.equal(await store.takePermit("url", crypto.randomUUID(), 2, 60000), null);
+    await store.releasePermit("url", a);
+    assert.equal(await store.takePermit("url", crypto.randomUUID(), 2, 60000), 0);
+    assert.equal(await store.takePermit("browser", crypto.randomUUID(), 1, 1), 0);
+    await new Promise((r) => setTimeout(r, 20));
+    assert.equal(await store.takePermit("browser", crypto.randomUUID(), 1, 60000), 0);
+  } finally { await store.close(); }
+});
+
+test("ten concurrent reservations on one logical page get exactly four attempts", opts, async () => {
+  const store = await fresh();
+  try {
+    await store.openAcquisition("race-1", "h", new Date(Date.now() + 60000));
+    const r = await Promise.all(Array.from({ length: 10 }, () => store.reserveAttempt({ logicalId: "race-1", attemptId: crypto.randomUUID(), requestId: "r", purpose: "page", strategy: "direct_http", domain: "d", maxAttempts: 4 })));
+    assert.deepEqual(r.filter((x) => x !== null).sort(), [1, 2, 3, 4]);
+  } finally { await store.close(); }
+});
+
+test("a restart reclaims every lease and domain hold (review finding W3)", opts, async () => {
+  const store = await fresh();
+  await store.takePermit("url", crypto.randomUUID(), 2, 600000);
+  await store.paceDirect("held.example", crypto.randomUUID(), direct, 600000, false);
+  await store.close();
+  const again = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval", password: "unused-under-trust" });
+  try {
+    await again.ready({ url: 2, browser: 1 });
+    assert.equal(Number((await sql("SELECT count(*) FROM fcpi_retrieval.permit WHERE holder IS NOT NULL"))[0].count), 0);
+    assert.equal(Number((await sql("SELECT count(*) FROM fcpi_retrieval.domain_state WHERE holder IS NOT NULL"))[0].count), 0);
+  } finally { await again.close(); }
+});

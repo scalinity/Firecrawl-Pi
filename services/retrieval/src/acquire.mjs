@@ -41,7 +41,7 @@ export function validateAcquireRequest(b) {
   return out;
 }
 
-function decodeText(buf, contentType) {
+export function decodeText(buf, contentType) {
   const header = (contentType?.match(/charset\s*=\s*["']?([^;"'\s]+)/i) ?? [])[1];
   const meta = (buf.subarray(0, 4096).toString("latin1").match(/<meta\b[^>]*charset\s*=\s*["']?([^"'\s/>]+)/i) ?? [])[1];
   for (const label of [header, meta, "utf-8"]) {
