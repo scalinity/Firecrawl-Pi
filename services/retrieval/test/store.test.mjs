@@ -92,3 +92,19 @@ test("the pool connects within 5 s and bounds each statement at 10 s (review fin
     assert.equal((await store.pool.query("SHOW statement_timeout")).rows[0].statement_timeout, "10s");
   } finally { await store.close(); }
 });
+
+test("the prune removes only pacing rows that hold nothing a decision reads, and pacing recreates them (review finding S5)", opts, async () => {
+  const store = await fresh();
+  try {
+    await sql(`INSERT INTO fcpi_retrieval.domain_state (domain, holder, hold_until, last_nav_at, cooldown_until, cooldown_s) VALUES
+      ('idle.example', NULL, NULL, now() - interval '3 days', now() - interval '2 hours', 60),
+      ('recent.example', NULL, NULL, now() - interval '1 hour', NULL, NULL),
+      ('cooling.example', NULL, NULL, now() - interval '3 days', now() - interval '10 minutes', 120),
+      ('held.example', gen_random_uuid(), now() + interval '60 seconds', now() - interval '3 days', NULL, NULL)`);
+    await store.prune();
+    assert.deepEqual((await sql("SELECT domain FROM fcpi_retrieval.domain_state ORDER BY domain")).map((r) => r.domain), ["cooling.example", "held.example", "recent.example"]);
+    assert.equal((await store.paceDirect("idle.example", crypto.randomUUID(), direct, 30000, false)).go, true);
+    assert.equal((await sql("SELECT count(*) FROM fcpi_retrieval.domain_state WHERE domain = 'idle.example'"))[0].count, "1");
+    assert.equal((await sql("SELECT count(*) FROM pg_indexes WHERE schemaname = 'fcpi_retrieval' AND indexname = 'acquisition_updated_at'"))[0].count, "1");
+  } finally { await store.close(); }
+});

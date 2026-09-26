@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.acquisition (
   attempts    integer NOT NULL DEFAULT 0 CHECK (attempts >= 0),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
+CREATE INDEX IF NOT EXISTS acquisition_updated_at ON fcpi_retrieval.acquisition (updated_at);
 
 -- One row per attempt, reserved before dispatch; outcome written when it ends.
 CREATE TABLE IF NOT EXISTS fcpi_retrieval.attempt (

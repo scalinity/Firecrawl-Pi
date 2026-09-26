@@ -127,9 +127,10 @@ export class Store {
       // domains are serialised on one advisory lock before counting; otherwise each could see 199 and
       // go (CWE-362; review finding W4). Fixture navigations are outside the cap and do not wait.
       if (!fixture) await c.query("SELECT pg_advisory_xact_lock(hashtext('fcpi.direct_nav.day'))");
-      await c.query("INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT DO NOTHING", [domain]);
+      // One statement creates or locks the row, so the prune cannot remove it between the two.
       const s = (await c.query(
-        "SELECT holder, hold_until, last_nav_at, cooldown_until, cooldown_s, now() AS now FROM fcpi_retrieval.domain_state WHERE domain = $1 FOR UPDATE", [domain])).rows[0];
+        `INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT (domain) DO UPDATE SET domain = EXCLUDED.domain
+         RETURNING holder, hold_until, last_nav_at, cooldown_until, cooldown_s, now() AS now`, [domain])).rows[0];
       const hourCount = Number((await c.query(
         "SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE domain = $1 AND at > now() - interval '1 hour'", [domain])).rows[0].count);
       const dayCount = Number((await c.query(
@@ -156,17 +157,23 @@ export class Store {
 
   async coolDown(domain, retryAfterS) {
     await this.#tx(async (c) => {
-      await c.query("INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT DO NOTHING", [domain]);
       const prev = (await c.query(
-        "SELECT cooldown_s, extract(epoch FROM now() - cooldown_until)::float8 AS since_end FROM fcpi_retrieval.domain_state WHERE domain = $1 FOR UPDATE", [domain])).rows[0];
+        `INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT (domain) DO UPDATE SET domain = EXCLUDED.domain
+         RETURNING cooldown_s, extract(epoch FROM now() - cooldown_until)::float8 AS since_end`, [domain])).rows[0];
       const s = nextCooldown(prev.cooldown_s, retryAfterS, prev.since_end);
       await c.query("UPDATE fcpi_retrieval.domain_state SET cooldown_s = $2, cooldown_until = now() + ($2::int * interval '1 second') WHERE domain = $1", [domain, s]);
     });
   }
 
-  // Bounded history: attempt rows and navigation counts older than their use are removed.
+  // Bounded history: attempt rows and navigation counts older than their use are removed, and so is
+  // a domain's pacing row once it holds nothing a decision reads: no live hold, no cooldown ended
+  // within the hour that doubling looks back over, no navigation within direct_nav's two days
+  // (review finding S5).
   async prune() {
     await this.pool.query("DELETE FROM fcpi_retrieval.direct_nav WHERE at < now() - interval '2 days'");
+    await this.pool.query(
+      `DELETE FROM fcpi_retrieval.domain_state WHERE (holder IS NULL OR hold_until < now())
+         AND (cooldown_until IS NULL OR cooldown_until < now() - interval '1 hour') AND (last_nav_at IS NULL OR last_nav_at < now() - interval '2 days')`);
     await this.pool.query("DELETE FROM fcpi_retrieval.attempt WHERE started_at < now() - interval '30 days'");
     await this.pool.query("DELETE FROM fcpi_retrieval.acquisition WHERE updated_at < now() - interval '30 days'");
   }
