@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-25T08:59:50Z",
-  "generated_by": "scripts/m1/build-lock.mjs (M1), from the M0 lock at 8ed6192; entries owned by later milestones are as M0 wrote them",
-  "repository_sha": "fe3ef343f81ff6180d91eef2d5fd3a705deb1248",
+  "generated_utc": "2026-09-26T04:44:18Z",
+  "generated_by": "scripts/m2/build-lock.mjs (M2), from the lock M1 closed with at 191c146; entries owned by later milestones are as M1 wrote them",
+  "repository_sha": "45bb7ddb99a0553e9389dafcf9e77175eb68a366",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -121,21 +121,20 @@
       "retrieved_utc": "2026-09-25T04:04:42Z"
     },
     "go_build_stage": {
-      "upstream": "golang:1.24",
-      "resolves_to": "1.24.13",
-      "same_index_digest_as": "library/golang:1.24",
-      "supported_go_lines_observed": [
-        "go1.27.1",
-        "go1.26.8"
-      ],
-      "source": "evidence/M0/sources/go-dl.json",
-      "retrieved_utc": "2026-09-25T04:04:42Z",
-      "status": "candidate",
-      "reason": "Go 1.24 is not among the supported releases go.dev lists; it builds only libhtml-to-markdown.so. Relevant only if the API image is built from source (decision D6); moving the build stage is decision D4."
+      "selected": "1.27.1",
+      "image": "golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1",
+      "gotoolchain": "local",
+      "status": "resolved",
+      "evidence": "evidence/M2/raw/api-build.log"
     },
     "rust_toolchain": {
-      "status": "unresolved",
-      "reason": "Upstream installs rustup's default stable at build time and ships no Cargo.lock (native/.gitignore); two git dependencies track branches. A project build must pin the toolchain and commit a generated Cargo.lock (M1/M2)."
+      "selected": "1.98.1",
+      "image": "rust:1.98.1-slim-bookworm@sha256:3ebe98baef5911f8461cf81ba05644374a3c5ef1f8a33db3977bd4175f5ff1fc",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+      "cargo": "cargo 1.98.1 (797e8a9bc 2026-08-05)",
+      "cargo_lock": "native/Cargo.lock, committed through patches/0006-reproducible-arm64-build.patch; the native build runs cargo --locked",
+      "status": "resolved",
+      "evidence": "evidence/M2/raw/api-build.log"
     },
     "pnpm": {
       "upstream": "11.4.0",
@@ -315,8 +314,8 @@
     },
     "firecrawl_api_prebuilt": {
       "role": "Upstream-built API image for the pinned commit (config FIRECRAWL_BUILD_SHA=7666c1f9...)",
-      "status": "selected",
-      "reason": "Decision D6: acquired by arm64 digest for M1; its build SHA equals the pinned commit. M2 replaces it with a project build.",
+      "status": "superseded",
+      "reason": "Decision D6: acquired by arm64 digest for M1; from M2 the stack runs the patched project build (images.firecrawl_api_patched). Kept for rollback to the M1 fixture-only profile.",
       "selected": {
         "registry": "ghcr.io",
         "repository": "firecrawl/firecrawl",
@@ -357,20 +356,21 @@
       }
     },
     "go_build": {
-      "role": "Build stage for libhtml-to-markdown.so",
-      "upstream_reference": {
+      "role": "Build stage for libhtml-to-markdown.so (decision D4)",
+      "selected": {
         "registry": "registry-1.docker.io",
         "repository": "library/golang",
-        "tag": "1.24.13",
-        "resolved_utc": "2026-09-25T03:24:27Z",
-        "status": "resolved",
-        "index_digest": "sha256:d2d2bc1c84f7e60d7d2438a3836ae7d0c847f4888464e7ec9ba3a1339a1ee804",
-        "registry_reported_digest": "sha256:d2d2bc1c84f7e60d7d2438a3836ae7d0c847f4888464e7ec9ba3a1339a1ee804",
-        "arm64_manifest_digest": "sha256:ffe598dd4ba5883dba7ae18a1dfd86a508792b37d960eaae23465597b6c40346",
-        "platform": "linux/arm64",
-        "index_file": "evidence/M0/registry/registry-1.docker.io_library_golang_1.24.13.index.json",
-        "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_golang_1.24.13.arm64.json"
-      }
+        "tag": "1.27.1-bookworm",
+        "resolved_utc": "2026-09-26T01:47:37Z",
+        "index_digest": "sha256:69a7b9788769bec032d238959b61854e9ae87f57be9029ec04e9885fabf99195",
+        "registry_reported_digest": "sha256:69a7b9788769bec032d238959b61854e9ae87f57be9029ec04e9885fabf99195",
+        "arm64_manifest_digest": "sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1",
+        "index_file": "evidence/M2/registry/registry-1.docker.io_library_golang_1.27.1-bookworm.index.json",
+        "arm64_manifest_file": "evidence/M2/registry/registry-1.docker.io_library_golang_1.27.1-bookworm.arm64.json",
+        "platform": "linux/arm64"
+      },
+      "go_version": "go version go1.27.1 linux/arm64",
+      "status": "selected"
     },
     "browser_base_option": {
       "role": "Option for the M2 browser worker (Playwright's own arm64 image for 1.58.1)",
@@ -435,43 +435,700 @@
         "verified_utc": "2026-09-25T08:09:57Z",
         "evidence": "evidence/M1/raw/image-inspect.txt"
       }
+    },
+    "rust_toolchain": {
+      "role": "Rust toolchain copied into the API build stage",
+      "selected": {
+        "registry": "registry-1.docker.io",
+        "repository": "library/rust",
+        "tag": "1.98.1-slim-bookworm",
+        "resolved_utc": "2026-09-26T01:47:38Z",
+        "index_digest": "sha256:ff521445a372125ed4f76e1453a1f8098f2d05332d1601d30db1c1f62757e730",
+        "registry_reported_digest": "sha256:ff521445a372125ed4f76e1453a1f8098f2d05332d1601d30db1c1f62757e730",
+        "arm64_manifest_digest": "sha256:3ebe98baef5911f8461cf81ba05644374a3c5ef1f8a33db3977bd4175f5ff1fc",
+        "index_file": "evidence/M2/registry/registry-1.docker.io_library_rust_1.98.1-slim-bookworm.index.json",
+        "arm64_manifest_file": "evidence/M2/registry/registry-1.docker.io_library_rust_1.98.1-slim-bookworm.arm64.json",
+        "platform": "linux/arm64"
+      },
+      "status": "selected"
+    },
+    "firecrawl_api_patched": {
+      "role": "The API image the stack runs from M2: the pinned commit with patches/ applied (review finding Q7, decision D6)",
+      "status": "selected",
+      "image_id": "sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c",
+      "platform": "linux/arm64",
+      "source_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea",
+      "runtime_configuration": {
+        "NUQ_WORKER_COUNT": "1",
+        "USE_DB_AUTHENTICATION": "false",
+        "SCRAPE_MAX_ATTEMPTS": "1",
+        "ALLOW_LOCAL_WEBHOOKS": "unset (review finding R4; the patched config refuses the pi-resilient profile if it is set)",
+        "DISABLE_WEBHOOK_DELIVERY": "true",
+        "PI_RETRIEVAL_URL": "http://retrieval-service:3310",
+        "SEARXNG_ENDPOINT": "http://retrieval-service:3310/searxng",
+        "USE_GO_MARKDOWN_PARSER": "unset (Go library inert; upstream default)",
+        "NODE_OPTIONS": "--max-old-space-size=256"
+      }
+    },
+    "retrieval": {
+      "role": "The retrieval-service image (built on the Pi, natively linux/arm64)",
+      "status": "selected",
+      "image_id": "sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a",
+      "platform": "linux/arm64",
+      "base_manifest_digest": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "dockerfile": {
+        "path": "services/retrieval/Dockerfile",
+        "sha256": "cfbaacaa097d237699952ef9b6095962cad78845903400179810d5d8543d3eae"
+      },
+      "evidence": "evidence/M2/raw/service-build.txt"
+    },
+    "browser_worker": {
+      "role": "The browser-worker image (built on the Pi, natively linux/arm64)",
+      "status": "selected",
+      "image_id": "sha256:cd83da63af0f9f5039c4b41a8832d84f72b1ba47f19cb410aa39a2a356de4824",
+      "platform": "linux/arm64",
+      "base_manifest_digest": "sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717",
+      "dockerfile": {
+        "path": "deploy/browser/Dockerfile",
+        "sha256": "aa4317b5311b60763a4c3550e69817ddcc421ad5f701a0982afd3d4b15319d79"
+      },
+      "evidence": "evidence/M2/raw/service-build.txt"
     }
   },
   "browser": {
-    "playwright": "1.58.1",
-    "chromium_revision": "1208",
-    "chromium_version": "145.0.7632.6",
-    "version_source": "evidence/M0/upstream/raw/playwright-core-1.58.1-browsers.json",
-    "arm64_archives": [
+    "playwright": "1.63.0",
+    "admission": {
+      "rule": "Decision D1: the newest stable Playwright at the build date, admitted only if its bundled Chromium carries the fix for every Chrome bug marked exploited in the wild by that date; test (a) preferred, test (b) only where (a) fails.",
+      "npm_latest_at_build": "1.63.0",
+      "bundled_chromium": "153.0.8010.12",
+      "v8_revision": "0b60d2b01800d7ba2c6eeb5e51ecd95f6dab44c7",
+      "v8_branch": "15.3",
+      "milestone_branch_point": "2026-08-17T00:00:00",
+      "later_v8_branch_commits_checked": 33,
+      "admitted": true,
+      "sources": "evidence/M2/sources/d1-index.txt",
+      "derived_by": "scripts/m2/d1.mjs"
+    },
+    "in_the_wild": [
       {
-        "name": "chromium-linux-arm64.zip",
-        "bytes": 188304613,
-        "url": "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-linux-arm64.zip",
-        "source": "evidence/M0/sources/playwright-chromium-1208-chromium-linux-arm64.zip.head.txt",
-        "retrieved_utc": "2026-09-25T04:04:46Z"
+        "cve": "CVE-2019-13720",
+        "bug": "1019226",
+        "first_fixed": "78.0.3904.87",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
       },
       {
-        "name": "chromium-headless-shell-linux-arm64.zip",
-        "bytes": 111562127,
-        "url": "https://cdn.playwright.dev/dbazure/download/playwright/builds/chromium/1208/chromium-headless-shell-linux-arm64.zip",
-        "source": "evidence/M0/sources/playwright-chromium-1208-chromium-headless-shell-linux-arm64.zip.head.txt",
-        "retrieved_utc": "2026-09-25T04:04:46Z"
+        "cve": "CVE-2019-5786",
+        "bug": "936448",
+        "first_fixed": "72.0.3626.121",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2020-15999",
+        "bug": "1139963",
+        "first_fixed": "86.0.4240.111",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2020-16009",
+        "bug": "1143772",
+        "first_fixed": "86.0.4240.183",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2020-16010",
+        "bug": "1144368",
+        "first_fixed": "86.0.4240.185",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2020-16013",
+        "bug": "1147206",
+        "first_fixed": "86.0.4240.198",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2020-16017",
+        "bug": "1146709",
+        "first_fixed": "86.0.4240.198",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2020-6418",
+        "bug": "1053604",
+        "first_fixed": "80.0.3987.122",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-21148",
+        "bug": "1170176",
+        "first_fixed": "88.0.4324.150",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-21166",
+        "bug": "1177465",
+        "first_fixed": "89.0.4389.72",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-21193",
+        "bug": "1186287",
+        "first_fixed": "89.0.4389.90",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-21206",
+        "bug": "1196781",
+        "first_fixed": "89.0.4389.128",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-21220",
+        "bug": "1196683",
+        "first_fixed": "89.0.4389.128",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-21224",
+        "bug": "1195777",
+        "first_fixed": "90.0.4430.85",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-30551",
+        "bug": "1216437",
+        "first_fixed": "91.0.4472.101",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-30554",
+        "bug": "1219857",
+        "first_fixed": "91.0.4472.114",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-30563",
+        "bug": "1228407",
+        "first_fixed": "91.0.4472.164",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-30632",
+        "bug": "1247763",
+        "first_fixed": "93.0.4577.82",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-30633",
+        "bug": "1247766",
+        "first_fixed": "93.0.4577.82",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-37973",
+        "bug": "1251727",
+        "first_fixed": "94.0.4606.61",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-37975",
+        "bug": "1252918",
+        "first_fixed": "94.0.4606.71",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-37976",
+        "bug": "1251787",
+        "first_fixed": "94.0.4606.71",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-38000",
+        "bug": "1249962",
+        "first_fixed": "95.0.4638.69",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-38003",
+        "bug": "1263462",
+        "first_fixed": "95.0.4638.69",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2021-4102",
+        "bug": "1278387",
+        "first_fixed": "96.0.4664.110",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-0609",
+        "bug": "1296150",
+        "first_fixed": "98.0.4758.102",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-1096",
+        "bug": "1309225",
+        "first_fixed": "99.0.4844.84",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-1364",
+        "bug": "1315901",
+        "first_fixed": "100.0.4896.127",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-2294",
+        "bug": "1341043",
+        "first_fixed": "102.0.5005.148",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-2856",
+        "bug": "1345630",
+        "first_fixed": "104.0.5112.101",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-3075",
+        "bug": "1358134",
+        "first_fixed": "105.0.5195.102",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-3723",
+        "bug": "1378239",
+        "first_fixed": "107.0.5304.87",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-4135",
+        "bug": "1392715",
+        "first_fixed": "107.0.5304.121",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2022-4262",
+        "bug": "1394403",
+        "first_fixed": "108.0.5359.94",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2023-2033",
+        "bug": "1432210",
+        "first_fixed": "112.0.5615.121",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2023-2136",
+        "bug": "1432603",
+        "first_fixed": "112.0.5615.165",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2023-3079",
+        "bug": "1450481",
+        "first_fixed": "114.0.5735.106",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2023-4863",
+        "bug": "1479274",
+        "first_fixed": "116.0.5845.187",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2023-5217",
+        "bug": "1486441",
+        "first_fixed": "117.0.5938.132",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2023-6345",
+        "bug": "1505053",
+        "first_fixed": "119.0.6045.199",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2023-7024",
+        "bug": "1513170",
+        "first_fixed": "120.0.6099.129",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2024-0519",
+        "bug": "1517354",
+        "first_fixed": "120.0.6099.224",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2024-4671",
+        "bug": "339266700",
+        "first_fixed": "124.0.6367.201",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2024-4761",
+        "bug": "339458194",
+        "first_fixed": "124.0.6367.207",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2024-4947",
+        "bug": "340221135",
+        "first_fixed": "125.0.6422.60",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2024-5274",
+        "bug": "341663589",
+        "first_fixed": "125.0.6422.112",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2024-7965",
+        "bug": "356196918",
+        "first_fixed": "128.0.6613.84",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2024-7971",
+        "bug": "360700873",
+        "first_fixed": "128.0.6613.84",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-10585",
+        "bug": "445380761",
+        "first_fixed": "140.0.7339.185",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-13223",
+        "bug": "460017370",
+        "first_fixed": "142.0.7444.175",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-14174",
+        "bug": "466192044",
+        "first_fixed": "143.0.7499.109",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-24201",
+        "bug": "401059730",
+        "first_fixed": "134.0.6998.88",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-2783",
+        "bug": "405143032",
+        "first_fixed": "134.0.6998.177",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-4664",
+        "bug": "415810136",
+        "first_fixed": "136.0.7103.113",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-5419",
+        "bug": "420636529",
+        "first_fixed": "136.0.7103.156",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-6554",
+        "bug": "427663123",
+        "first_fixed": "138.0.7204.92",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2025-6558",
+        "bug": "427162086",
+        "first_fixed": "138.0.7204.157",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2026-11645",
+        "bug": "506689381",
+        "first_fixed": "149.0.7827.102",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2026-2441",
+        "bug": "483569511",
+        "first_fixed": "144.0.7559.177",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2026-3909",
+        "bug": "491421267",
+        "first_fixed": "146.0.7680.80",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2026-3910",
+        "bug": "491410818",
+        "first_fixed": "146.0.7680.75",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2026-5281",
+        "bug": "491518608",
+        "first_fixed": "146.0.7680.177",
+        "test_a": true,
+        "test_b": false,
+        "fix_commit": null,
+        "fix_after_branch_point": false
+      },
+      {
+        "cve": "CVE-2026-85046",
+        "bug": "542403045",
+        "first_fixed": "152.0.7977.82",
+        "test_a": true,
+        "test_b": true,
+        "fix_commit": "e0562d87ad9c17042b581582c99237d798572e67",
+        "fix_after_branch_point": true
+      },
+      {
+        "cve": "CVE-2026-87491",
+        "bug": "543557673",
+        "first_fixed": "153.0.8010.36",
+        "test_a": false,
+        "test_b": true,
+        "fix_commit": "36079c36283aaf3d0cee0797e46ddc278988f7f2",
+        "fix_after_branch_point": true
+      }
+    ],
+    "chromium_revision": "1243",
+    "chromium_version": "153.0.8010.12",
+    "version_source": "evidence/M2/sources/playwright-core-1.63.0-browsers.json",
+    "arm64_archives": [
+      {
+        "name": "chrome",
+        "url": "https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux-arm64/chrome-linux-arm64.zip",
+        "bytes": 195926016,
+        "sha256": "7d8a4b4ff289efe44a06501a519df142c4c18fff7aaf1c1401a3fbb12b3bd069"
+      },
+      {
+        "name": "chrome-headless-shell",
+        "url": "https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux-arm64/chrome-headless-shell-linux-arm64.zip",
+        "bytes": 120278638,
+        "sha256": "d433c45172c7836e38124fe545f767b02210bfb43a6262f08a297473a8e91c99"
       }
     ],
     "archive_sha256": {
-      "status": "unresolved",
-      "reason": "Playwright publishes no per-archive checksum next to these URLs; the M2 build records the hash of what it installs."
+      "status": "resolved",
+      "source": "evidence/M2/sources/chromium-153.0.8010.12-linux-arm64-archives.txt",
+      "installed_files_matching_archives": "590/590",
+      "installed_files_source": "evidence/M2/raw/browser-proof.txt (installed_files_sha256)"
+    },
+    "base_image": {
+      "registry": "mcr.microsoft.com",
+      "repository": "playwright",
+      "tag": "v1.63.0-noble",
+      "resolved_utc": "2026-09-26T01:47:38Z",
+      "index_digest": "sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27",
+      "registry_reported_digest": "sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27",
+      "arm64_manifest_digest": "sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717",
+      "index_file": "evidence/M2/registry/mcr.microsoft.com_playwright_v1.63.0-noble.index.json",
+      "arm64_manifest_file": "evidence/M2/registry/mcr.microsoft.com_playwright_v1.63.0-noble.arm64.json",
+      "platform": "linux/arm64",
+      "role": "Base of the browser worker (deploy/browser/Dockerfile)"
     },
     "native_launch_on_host": {
-      "status": "unresolved",
-      "reason": "Not proven: the Pi runs a 16 KiB-page kernel; M2 must launch it natively (decision D2)."
-    },
-    "candidate": {
-      "playwright": "1.63.0",
-      "chromium_version": "153.0.8010.12",
-      "source": "evidence/M0/security-review.md §H",
-      "status": "candidate",
-      "reason": "Chrome stable shipped 829 security fixes after 2026-07-30, two exploited in the wild (CVE-2026-85046 fixed in 152.0.7977.82; CVE-2026-87491 fixed in 153.0.8010.36). Even 1.63.0's build number is below 153.0.8010.36. Decision D1 (separate review)."
+      "status": "resolved",
+      "kernel": "6.18.34+rpt-rpi-2712 machine=aarch64 page_size=16384",
+      "evidence": "evidence/M2/raw/browser-proof.txt",
+      "result": "native aarch64, every LOAD segment 16 KiB-aligned or more, non-root, sandbox on under the project seccomp profile (deploy/browser/seccomp.json)"
     }
   },
   "native_dependencies": {
@@ -491,7 +1148,11 @@
           "retrieved_utc": "2026-09-25T04:04:43Z"
         }
       ],
-      "note": "Upstream downloads it without verification; a project build must check this hash. Needed at build time only; not loaded on the PostgreSQL backend."
+      "note": "Upstream downloads it without verification; a project build must check this hash. Needed at build time only; not loaded on the PostgreSQL backend.",
+      "verified_in_build": {
+        "check": "/tmp/fdb-clients.deb: OK",
+        "evidence": "evidence/M2/raw/api-build.log"
+      }
     },
     "foundationdb_npm_addon": {
       "version": "2.0.1",
@@ -543,8 +1204,44 @@
     }
   },
   "patches": {
-    "series": [],
-    "status": "none yet: the integration patch series starts in M2"
+    "status": "resolved",
+    "upstream_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+    "series_sha256": "90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea",
+    "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
+    "result_tree": "cd46160c40afa42ab7c56232ecbeaf1549654b92",
+    "patches": [
+      {
+        "file": "0001-nuq-sender-survives-broker-outage.patch",
+        "sha256": "38241b2cdb2b6d68ae1fc567320764db761b975d48955eb1d793caa786f8e68e",
+        "reason": "A refused RabbitMQ connection ended the harness (review finding R2, PC-NUQ-CONNECT)."
+      },
+      {
+        "file": "0002-nuq-listener-restarts-after-broker-outage.patch",
+        "sha256": "2fa40cc3914827e34ee2226c61fb35ed7fdd11417d3620f7d6e719edf5d92c01",
+        "reason": "After a broker restart the listener was never re-established while the process survived (review finding R1, upstream #4244 / PR #4263)."
+      },
+      {
+        "file": "0003-pi-resilient-engine-adapter.patch",
+        "sha256": "abff6860fea1bca80e251269cca023bf05c528318339c43649d0c93615035fdd",
+        "reason": "The engine registration and result translation spec §8.1 requires; every page acquisition goes to the retrieval service."
+      },
+      {
+        "file": "0004-guarded-auxiliary-downloads.patch",
+        "sha256": "776cf0dd6bf9f76da49cd8080b20861ea48470aa4fea27bcb36dc612e927b585",
+        "reason": "File downloads and map's redirect resolution fetched directly with the core's own dispatcher (spec §8.4)."
+      },
+      {
+        "file": "0005-search-without-direct-fallback.patch",
+        "sha256": "924735ea34d8529b97087d9b179bac4f8b247bdc14cdd6e06dc1ac163429bb38",
+        "reason": "Search fell back to DuckDuckGo over the home connection whenever SearXNG was unset or empty (evidence/M0/source-review.json S15)."
+      },
+      {
+        "file": "0006-reproducible-arm64-build.patch",
+        "sha256": "c548cfedc365ab269b518ba5fb103ba525e7d75a0fa24775338fe8cd175e02e6",
+        "reason": "The upstream Dockerfile floats every base image, the Rust toolchain and the crate graph, and downloads the FoundationDB client unchecked (decisions D4, D6)."
+      }
+    ],
+    "manifest": "patches/series.json (symbols, tests and the call-site coverage of each traced path)"
   },
   "build_provenance": {
     "status": "resolved",
@@ -586,6 +1283,24 @@
         "evidence/M1/raw/nuq-build.txt",
         "evidence/M1/raw/image-inspect.txt"
       ]
+    },
+    "firecrawl_api_image_patched": {
+      "image_id": "sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c",
+      "built_on": "the workstation's Colima VM, natively linux/arm64 (decision D6)",
+      "built_utc": "2026-09-26T04:24:44Z",
+      "repository_commit": "83b3dad09dbd9d58d686101dc9f8b2a5459fd36e",
+      "code_dirty": false,
+      "no_cache": true,
+      "patch_series_sha256": "90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea",
+      "result_tree": "cd46160c40afa42ab7c56232ecbeaf1549654b92",
+      "go_version": "go version go1.27.1 linux/arm64",
+      "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
+      "node": "v22.23.3",
+      "pnpm": "11.4.0",
+      "debian_snapshot": "20260925T000000Z\"",
+      "provenance": false,
+      "sbom": false,
+      "evidence": "evidence/M2/raw/api-build.log"
     }
   }
 }
