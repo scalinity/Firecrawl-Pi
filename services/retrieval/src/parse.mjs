@@ -27,7 +27,8 @@ function multipart(fields) {
     parts.push(Buffer.from("\r\n"));
   }
   parts.push(Buffer.from(`--${boundary}--\r\n`));
-  return { body: Buffer.concat(parts), contentType: `multipart/form-data; boundary=${boundary}` };
+  // Sent as its parts: a document of up to 25 MiB is not copied into one more buffer (review S7).
+  return { body: parts, contentType: `multipart/form-data; boundary=${boundary}` };
 }
 
 export function makeParser({ store, getBudget, getSelection, paidDispatch, providersDir, getPolicy, resolvePublic, lookupFixture, log }) {

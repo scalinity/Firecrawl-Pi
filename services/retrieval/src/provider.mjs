@@ -37,12 +37,15 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
     throw e;
   }
   const mod = url.protocol === "https:" ? https : http;
+  // The body is one buffer or a list of buffers written in order (a multipart upload's parts).
+  const parts = body === null ? null : Array.isArray(body) ? body : [body];
+  const length = parts ? parts.reduce((n, p) => n + p.length, 0) : 0;
   return new Promise((resolve, reject) => {
     let written = false, settled = false;
     const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); fn(v); } };
     const req = mod.request({ host: target.host, port: target.port, method, path: url.pathname + url.search, agent: false, lookup: pinnedLookup(address),
       servername: target.literal ? undefined : target.host, rejectUnauthorized: true,
-      headers: { ...headers, host: url.host, ...(body ? { "content-length": body.length } : {}) } }, (res) => {
+      headers: { ...headers, host: url.host, ...(parts ? { "content-length": length } : {}) } }, (res) => {
       const chunks = [];
       let n = 0;
       res.on("data", (c) => { n += c.length; if (n > maxBytes) { res.destroy(); done(reject, new ProviderError("PROVIDER_RESPONSE_TOO_LARGE", `the provider's answer exceeds ${maxBytes} bytes`, { sent: true, status: res.statusCode })); } else chunks.push(c); });
@@ -59,6 +62,7 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
     const timer = setTimeout(() => { req.destroy(new Error("timeout")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `no answer within ${timeoutMs} ms`, { sent: written })); }, timeoutMs);
     req.on("error", (e) => done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${url.host}: ${e.code ?? e.message}`, { sent: written })));
     signal?.addEventListener("abort", () => { req.destroy(new Error("cancelled")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written })); }, { once: true });
-    req.end(body ?? undefined);
+    for (const p of parts?.slice(0, -1) ?? []) req.write(p);
+    req.end(parts ? parts.at(-1) : undefined);
   });
 }
