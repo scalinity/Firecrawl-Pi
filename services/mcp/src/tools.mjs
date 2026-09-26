@@ -139,14 +139,17 @@ function shape(kind, tool, r, args, m, omitted) {
       const skip = args.skip ?? 0, data = Array.isArray(b.data) ? b.data : [];
       const payload = { id: args.id, status: b.status, completed: b.completed ?? 0, total: b.total ?? 0, creditsUsed: b.creditsUsed ?? 0, expiresAt: b.expiresAt ?? null,
         ...(b.error ? { error: b.error } : {}), skip, returned: 0, nextSkip: null, data: [] };
+      // Each document is measured once against a running total (the page is never re-serialized per
+      // document), and a document too large alone is cut in place: the parsed answer is this call's own,
+      // so no copy of it is made.
+      let used = bytes(payload);
       for (const doc of data) {
-        const trial = { ...payload, data: [...payload.data, doc] };
-        if (bytes(trial) <= budget - 256) { payload.data.push(doc); continue; }
+        const size = bytes(doc) + 1;
+        if (used + size <= budget - 256) { payload.data.push(doc); used += size; continue; }
         if (payload.data.length) break;
         // The first document alone does not fit: it is returned cut, and the answer says so.
-        const copy = structuredClone(doc);
-        payload.data.push(copy);
-        payload.truncated = { document: skip, fields: fitDocument(payload, copy, budget - 512), note: "This document exceeded the tool payload limit, so the fields named here were cut; the whole document is at the results address with limit=1." };
+        payload.data.push(doc);
+        payload.truncated = { document: skip, fields: fitDocument(payload, doc, budget - 512), note: "This document exceeded the tool payload limit, so the fields named here were cut; the whole document is at the results address with limit=1." };
         break;
       }
       payload.returned = payload.data.length;

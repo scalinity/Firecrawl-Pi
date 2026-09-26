@@ -369,6 +369,9 @@ services:
     restart: unless-stopped
     user: "3400:3400"
     environment:
+      # A heap ceiling under the 192 MiB cap: at worst a predictable V8 failure rather than a cgroup OOM
+      # kill (evidence/M4/raw/mcp-memory-probe.txt measures the envelope with it).
+      NODE_OPTIONS: --max-old-space-size=96
       PI_MCP_LISTEN_PORT: "3400"
       PI_MCP_REST_URL: http://10.231.8.10:3300
       PI_CAPABILITIES_FILE: /srv/policy/capabilities.json

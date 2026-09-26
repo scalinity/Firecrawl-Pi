@@ -38,6 +38,7 @@ export function makeRest(cfg) {
         });
         res.on("end", () => {
           const buf = Buffer.concat(chunks);
+          chunks.length = 0;   // the pieces are not held beside the whole while it is parsed
           let json = null;
           try { json = buf.length ? JSON.parse(buf.toString("utf8")) : null; } catch { /* not JSON */ }
           done(resolve, { status: res.statusCode, json, headers: res.headers, bytes: buf.length });
