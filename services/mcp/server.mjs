@@ -113,7 +113,7 @@ const handler = createMcpHandler(factory, { legacy: "stateless", maxSubscription
   onerror: (e) => log({ event: "rejected", reason: String(e.message).slice(0, 240) }) });
 const node = toNodeHandler(handler, { maxRequestBodySize: M.limits.bodyBytes, onerror: (e) => log({ event: "adapter_error", error: String(e.message).slice(0, 240) }) });
 
-const IDENTITY = { client: /^[a-z0-9]{1,32}$/, principal: /^[a-z0-9][a-z0-9-]{0,62}$/, scopes: /^[a-z,]{1,64}$/, request: /^[0-9a-f-]{36}$/ };
+const IDENTITY = { client: /^[a-z0-9]{1,32}$/, principal: /^[a-z0-9][a-z0-9-]{0,62}$/, scopes: /^(?=[a-z,]{1,256}$)[a-z]+(?:,[a-z]+)*$/, request: /^[0-9a-f-]{36}$/ };
 const server = createServer({ maxHeaderSize: 16384 }, (req, res) => {
   const path = (req.url ?? "").split("?")[0];
   if (req.method === "GET" && path === "/health") {

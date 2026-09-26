@@ -202,16 +202,16 @@ const checks = {
       cond.deployed_code_is_head = deployed.length >= 1 && deployed.every(runsSame);
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; mcp image ${last("mcp-gateway")?.[1]?.slice(7, 19)} built from ${built("mcp-gateway")?.slice(0, 7)}; gateway image ${last("access-gateway")?.[1]?.slice(7, 19)} built from ${built("access-gateway")?.slice(0, 7)}; deployed commits named=${deployed.map((c) => c.slice(0, 7)).join(",")}` };
     } },
-  G02: { name: "suites-pass-in-the-running-images", inputs: [`${RAW}suites.txt`, `${EV}rendered-compose.json`, "services/mcp/test/tools.test.mjs", "services/mcp/test/server.test.mjs", "services/mcp/test/rest.test.mjs", "services/access/test/mcp.test.mjs", "tests/contracts/m3-gateway.test.mjs", "tests/contracts/m4-gateway-mcp.test.mjs"],
+  G02: { name: "suites-pass-in-the-running-images", inputs: [`${RAW}suites.txt`, `${EV}rendered-compose.json`, "services/mcp/test/tools.test.mjs", "services/mcp/test/server.test.mjs", "services/mcp/test/rest.test.mjs", "services/access/test/mcp.test.mjs", "tests/contracts/m3-gateway.test.mjs", "tests/contracts/m4-gateway-mcp.test.mjs", "tests/contracts/m4-grammars.test.mjs"],
     expected: "inside the images the stack renders (Node 22.23.3): the MCP service's unit, integration and gateway-client suites, the gateway's unit suites with the /mcp proxy's, M3's 40-test contract suite unchanged, and M4's gateway-level /mcp contract suite (every refusal before the MCP service, the validated identity forwarded, no route without PI_MCP_URL) all pass with none failing, and no throwaway container or network is left",
     run() {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
-      const mc = tapCounts(s.mcp_tap), gu = tapCounts(s.gateway_unit_tap), gc = tapCounts(s.gateway_contract_tap), gm = tapCounts(s.gateway_mcp_contract_tap);
+      const mc = tapCounts(s.mcp_tap), gu = tapCounts(s.gateway_unit_tap), gc = tapCounts(s.gateway_contract_tap), gm = tapCounts(s.gateway_mcp_contract_tap), gr = tapCounts(s.grammars_tap);
       const exit = (sec) => (s[sec] ?? []).includes("test_exit=0");
       const tr = kv((s.transient ?? []).flatMap((l) => l.split(" ")));
       const cond = { images: m.mcp_image === composeImage("mcp-gateway") && m.gateway_image === composeImage("access-gateway"),
         mcp: mc.tests >= 33 && mc.pass === mc.tests && mc.fail === 0 && exit("mcp_tap"), gateway_unit: gu.tests >= 26 && gu.pass === gu.tests && gu.fail === 0 && exit("gateway_unit_tap"),
-        m4_contract: gm.tests >= 3 && gm.pass === gm.tests && gm.fail === 0 && exit("gateway_mcp_contract_tap"),
+        m4_contract: gm.tests >= 3 && gm.pass === gm.tests && gm.fail === 0 && exit("gateway_mcp_contract_tap"), grammars: gr.tests >= 3 && gr.pass === gr.tests && gr.fail === 0 && exit("grammars_tap"),
         m3_contract: gc.tests === 40 && gc.pass === 40 && gc.fail === 0 && exit("gateway_contract_tap"), node: /mcp:v22\.23\.3,gateway:v22\.23\.3/.test(read(`${RAW}suites.txt`)),
         no_leftovers: tr.leftover_transient_containers === "0" && tr.leftover_transient_networks === "0" };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; mcp ${mc.pass}/${mc.tests}, gateway unit ${gu.pass}/${gu.tests}, M3 contract ${gc.pass}/${gc.tests}, M4 /mcp contract ${gm.pass}/${gm.tests}` };

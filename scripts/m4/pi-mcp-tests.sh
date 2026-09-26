@@ -35,6 +35,11 @@ mcp_run() {
   echo "test_exit=$?"
 }
 mcp_run mcp_tap node --test --test-reporter=tap --test-timeout=60000 test/tools.test.mjs test/server.test.mjs test/rest.test.mjs
+# The grammars the two services each enforce, read from the deployed tree (code only, mounted read-only).
+echo "### grammars_tap"
+D run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --user 3400:3400 --label fcpi.transient=m4-tests \
+  -e FCPI_REPO_ROOT=/srv/repo -v "$REPO:/srv/repo:ro" "$MCP" node --test --test-reporter=tap /srv/repo/tests/contracts/m4-grammars.test.mjs 2>&1
+echo "test_exit=$?"
 
 D network create --internal --label fcpi.transient=m4-tests "$N" >/dev/null
 D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=m4-tests --tmpfs /var/lib/postgresql/data --tmpfs /var/run/postgresql \
