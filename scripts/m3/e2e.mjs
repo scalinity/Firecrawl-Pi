@@ -441,9 +441,11 @@ const PHASES = {
     await sleep(3000);
     out("core_logs", { label: "expiry-before-core-recreate", summary: pi("bash /opt/firecrawl-pi/scripts/m2/pi-core-logs.sh m3-expiry-before-recreate").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
     resources("before-core-recreate");
+    const coreId = () => D(`inspect -f '{{.Id}}' ${cname("firecrawl-core")}`).trim().slice(0, 12);
+    const coreBefore = coreId();   // its log must be among the saved core logs (X01)
     pi("sudo -n docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml up -d --force-recreate --no-deps --wait --wait-timeout 600 firecrawl-core 2>&1 | tail -2");
     out("after_expiry", { upstream: upstreamRows(), redis_keys: ups.map(redisKeys), core_status: jobs.map(([k], i) => coreStatus(k, ups[i])), cleaner_runs: cron,
-      core_container_started: D(`inspect -f '{{.State.StartedAt}}' ${cname("firecrawl-core")}`).trim() });
+      core_container_started: D(`inspect -f '{{.State.StartedAt}}' ${cname("firecrawl-core")}`).trim(), core_instance_before: coreBefore, core_instance_after: coreId() });
     for (const [kind, id, before] of jobs) {
       const p = await pages(kind, id, 3);
       out("served_after_expiry", { kind, id, statuses: p.statuses, pages: p.pages, docs: p.docs.length, served_sha256: p.docs.map((d) => d.sha256), manifest_sha256: manifest[id],
