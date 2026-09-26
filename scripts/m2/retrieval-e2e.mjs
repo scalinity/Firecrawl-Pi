@@ -92,6 +92,17 @@ if (groups.has("ssrf")) {
     ["S14-redirect-name", "http://redis:6379/"], ["S19-redirect-lan", lan ? `http://${lan}/` : "http://lan.invalid/"]]) {
     await scrape(id, `${M2}/redirect?to=${encodeURIComponent(to)}`);
   }
+  // The same targets asked of the retrieval service directly, since the core refuses several of the
+  // literals above with its own URL check before they reach it, plus the IPv6, numeric and
+  // single-label forms. SR00 is the positive control: a permitted fixture page, asked the same way.
+  await acquire("SR00-control", { logicalAcquisitionId: `m2-ssrf-${randomUUID()}`, url: `${M2}/short.html?ssrf=control` });
+  for (const [id, url] of [["SR01-redis", "http://10.231.1.5:6379/"], ["SR02-loopback", "http://127.0.0.1:3002/"], ["SR03-ipv6-loopback", "http://[::1]/"],
+    ["SR04-hex-loopback", "http://0x7f000001/"], ["SR05-decimal-loopback", "http://2130706433/"], ["SR06-unspecified", "http://0.0.0.0/"],
+    ["SR07-ipv6-ula", "http://[fd00::1]/"], ["SR08-ipv6-link-local", "http://[fe80::1]/"], ["SR09-mapped-ipv6", "http://[::ffff:10.231.1.5]/"],
+    ["SR10-nat64-private", "http://[64:ff9b::a00:1]/"], ["SR11-service-name", "http://nuq-postgres:5432/"], ["SR12-single-label", "http://redis/"],
+    ["SR13-localhost", "http://localhost/"], ["SR14-private-port-80", "http://10.231.1.5/"], ["SR15-file-scheme", "file:///etc/passwd"],
+    ["SR16-lan-literal", lan ? `http://${lan}/` : "http://lan.invalid/"], ["SR17-metadata", "http://169.254.169.254/latest/meta-data/"],
+    ["SR18-cloud-api", "https://api.firecrawl.dev/v1/scrape"]]) await acquire(id, { logicalAcquisitionId: `m2-ssrf-${randomUUID()}`, url });
 }
 
 if (groups.has("browser")) {
@@ -128,8 +139,9 @@ if (groups.has("pacing")) {
 
 if (groups.has("permits")) {
   // At most two URL acquisitions at once (spec §23.1): three slow targets asked together.
-  // Three domains, so per-domain pacing (one in flight each) does not serialise them first.
-  const hosts = ["m2", "cool", "permit"];
+  // Three domains, so per-domain pacing (one in flight each) does not serialise them first; none of
+  // them is cool.fixture, whose cooldown from the static cases would refuse the request instead.
+  const hosts = ["m2", "permit", "permit2"];
   await Promise.all(hosts.map((h, i) => acquire(`A02-permits-${i + 1}`, { logicalAcquisitionId: `m2-permit-${randomUUID()}`, url: `http://${h}.fixture.fcpi.test:8080/slow?ms=4000&permit=${i + 1}` })));
 }
 
