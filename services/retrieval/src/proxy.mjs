@@ -8,7 +8,7 @@
 import http from "node:http";
 import net from "node:net";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { parseTarget, Denied } from "./ssrf.mjs";
+import { parseTarget, Denied, scopeFixtures } from "./ssrf.mjs";
 import { resolveTarget, pinnedLookup } from "./resolve.mjs";
 
 const HOP = new Set(["connection", "keep-alive", "proxy-authorization", "proxy-authenticate", "proxy-connection", "te", "trailer", "transfer-encoding", "upgrade"]);
@@ -19,9 +19,10 @@ export class ProxySessions {
   // A session for one browser attempt; returns the credential the browser presents.
   // maxRequests bounds what the page may ask for through the proxy (WebSockets and preconnects never
   // reach the worker's own subresource count); a session past either cap is marked capped.
-  open(attemptId, { expiresAt, maxBytes, maxRequests = 250 }) {
+  // fixture: the page is a fixture, so its requests may reach fixture hosts; otherwise none may.
+  open(attemptId, { expiresAt, maxBytes, maxRequests = 250, fixture = false }) {
     const password = randomBytes(24).toString("hex");
-    this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, maxRequests, bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
+    this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, maxRequests, fixture, bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
     return { username: attemptId, password };
   }
   auth(header) {
@@ -65,7 +66,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     let host = "?";
     try { host = new URL(req.url).host || "?"; } catch {}
     try {
-      const policy = getPolicy();
+      const policy = scopeFixtures(s.fixture, getPolicy());
       const target = parseTarget(req.url, policy);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
       const headers = {};
@@ -117,7 +118,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     if (overRequests(s)) { refuse(s, req.url, new Denied("RESOURCE_LIMIT", `more than ${s.maxRequests} requests`)); clientSocket.end("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\nfcpi: RESOURCE_LIMIT\n"); return; }
     const [host, port] = [req.url.slice(0, req.url.lastIndexOf(":")), req.url.slice(req.url.lastIndexOf(":") + 1)];
     try {
-      const policy = getPolicy();
+      const policy = scopeFixtures(s.fixture, getPolicy());
       const target = parseTarget(`https://${host}${port === "443" ? "" : `:${port}`}/`, policy);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
       const upstream = net.connect({ host: target.host, port: 443, lookup: pinnedLookup(address) });

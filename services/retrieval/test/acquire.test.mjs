@@ -193,8 +193,10 @@ test("a JS shell gets one browser attempt; a structural shell after it is RENDER
   const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(SHELL));
   try {
     const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
-    const good = await acquirerFor(store, policy, okRender())(body(`http://t.fixture.fcpi.test:${t.port}/`));
+    const seen = [], r = okRender();
+    const good = await acquirerFor(store, policy, { render: (a) => (seen.push(a), r.render(a)) })(body(`http://t.fixture.fcpi.test:${t.port}/`));
     assert.deepEqual([good.ok, good.strategies, good.attemptsUsed], [true, ["direct_http", "direct_browser"], 2]);
+    assert.equal(seen[0].fixture, true); // the proxy session may reach fixture hosts only for a fixture page (S1)
     const still = await acquirerFor(store, policy, okRender(SHELL))(body(`http://t.fixture.fcpi.test:${t.port}/`));
     assert.equal(still.failure.class, "RENDER_INCOMPLETE");
     assert.equal(store.attempts.at(-1).outcome, "RENDER_INCOMPLETE");

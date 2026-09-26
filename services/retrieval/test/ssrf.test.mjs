@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { BlockList } from "node:net";
-import { classifyAddress, embeddedIpv4, parseTarget, Denied } from "../src/ssrf.mjs";
+import { classifyAddress, embeddedIpv4, parseTarget, Denied, scopeFixtures } from "../src/ssrf.mjs";
 
 // A LAN on a globally routable prefix, as this host's is; a synthetic one stands in here.
 const lan = new BlockList();
@@ -22,6 +22,13 @@ test("IPv4 special-purpose ranges are never public", () => {
     assert.notEqual(classifyAddress(a, lan), "public", a);
   }
   for (const a of ["8.8.8.8", "1.1.1.1", "93.184.215.14", "172.32.0.1", "100.128.0.1", "11.0.0.1"]) assert.equal(classifyAddress(a, lan), "public", a);
+});
+
+test("fixture hosts count only for work that began at a fixture (review finding S1)", () => {
+  const fx = "http://m2.fixture.fcpi.test:8080/redirect";
+  assert.ok(parseTarget(fx, scopeFixtures(true, policy)).fixture);
+  assert.throws(() => parseTarget(fx, scopeFixtures(false, policy)), (e) => e instanceof Denied && e.failureClass === "SSRF_DENIED");
+  assert.equal(scopeFixtures(false, policy).cloudDenylist, policy.cloudDenylist);
 });
 
 test("the host's own LAN is refused even on a globally routable prefix", () => {

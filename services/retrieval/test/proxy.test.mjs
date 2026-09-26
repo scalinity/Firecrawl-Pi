@@ -33,19 +33,37 @@ function viaProxy(proxyPort, target, cred) {
   });
 }
 
+test("a public page's requests cannot reach a fixture host (review finding S1)", async () => {
+  const hits = [];
+  const fx = http.createServer((q, r) => { hits.push(q.url); r.end("fixture"); }).listen(0, "127.0.0.1");
+  await listening(fx);
+  try {
+    await withProxy(fx.address().port, async ({ port, sessions }) => {
+      const pub = sessions.open("public-page", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      const r = await viaProxy(port, `http://fx.fixture.fcpi.test:${fx.address().port}/slow`, pub);
+      assert.equal(r.status, 403);
+      assert.deepEqual(sessions.close("public-page").denied, [{ host: `fx.fixture.fcpi.test:${fx.address().port}`, class: "SSRF_DENIED" }]);
+      const own = sessions.open("fixture-page", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      assert.deepEqual(await viaProxy(port, `http://fx.fixture.fcpi.test:${fx.address().port}/ok`, own), { status: 200, body: "fixture" });
+      sessions.close("fixture-page");
+    });
+    assert.deepEqual(hits, ["/ok"]);
+  } finally { fx.close(); }
+});
+
 test("a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2)", async () => {
   const bad = net.createServer((s) => s.once("data", () => s.end("HTTP/1.1 099 Odd\r\ncontent-length: 0\r\n\r\n"))).listen(0, "127.0.0.1");
   const good = http.createServer((q, r) => r.end("fine")).listen(0, "127.0.0.1");
   await Promise.all([listening(bad), listening(good)]);
   try {
     await withProxy(bad.address().port, async ({ port, sessions }) => {
-      const cred = sessions.open("attempt-1", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      const cred = sessions.open("attempt-1", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
       const r = await viaProxy(port, `http://fx.fixture.fcpi.test:${bad.address().port}/x`, cred);
       assert.equal(r.status, 502);
       assert.deepEqual(sessions.close("attempt-1").denied, [{ host: `fx.fixture.fcpi.test:${bad.address().port}`, class: "PROXY_ERROR" }]);
     });
     await withProxy(good.address().port, async ({ port, sessions }) => {
-      const cred = sessions.open("attempt-2", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      const cred = sessions.open("attempt-2", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
       const r = await viaProxy(port, `http://fx.fixture.fcpi.test:${good.address().port}/`, cred);
       assert.deepEqual(r, { status: 200, body: "fine" });
     });
@@ -59,9 +77,9 @@ test("no credential, a wrong one or an expired one gets 407; a refused target 40
     await withProxy(good.address().port, async ({ port, sessions, logs }) => {
       const url = `http://fx.fixture.fcpi.test:${good.address().port}/`;
       assert.equal((await viaProxy(port, url, null)).status, 407);
-      const cred = sessions.open("attempt-3", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      const cred = sessions.open("attempt-3", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
       assert.equal((await viaProxy(port, url, { ...cred, password: "0".repeat(48) })).status, 407);
-      const old = sessions.open("attempt-4", { expiresAt: Date.now() - 1, maxBytes: 1 << 20 });
+      const old = sessions.open("attempt-4", { fixture: true, expiresAt: Date.now() - 1, maxBytes: 1 << 20 });
       assert.equal((await viaProxy(port, url, old)).status, 407);
       assert.equal((await viaProxy(port, "http://127.0.0.1:6379/", cred)).status, 403);
       assert.equal(logs.find((l) => l.event === "proxy_denied")?.attempt_id, "attempt-3");
@@ -76,14 +94,14 @@ test("a session past its request or byte cap is refused and marked capped (revie
   try {
     await withProxy(big.address().port, async ({ port, sessions }) => {
       const url = `http://fx.fixture.fcpi.test:${big.address().port}/`;
-      const byReq = sessions.open("req-cap", { expiresAt: Date.now() + 10000, maxBytes: 1 << 24, maxRequests: 2 });
+      const byReq = sessions.open("req-cap", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 24, maxRequests: 2 });
       assert.equal((await viaProxy(port, url, byReq)).status, 200);
       assert.equal((await viaProxy(port, url, byReq)).status, 200);
       assert.equal((await viaProxy(port, url, byReq)).status, 403);
       const a = sessions.close("req-cap");
       assert.equal(a.capped, true);
       assert.deepEqual(a.denied.map((d) => d.class), ["RESOURCE_LIMIT"]);
-      const byBytes = sessions.open("byte-cap", { expiresAt: Date.now() + 10000, maxBytes: 1024, maxRequests: 50 });
+      const byBytes = sessions.open("byte-cap", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1024, maxRequests: 50 });
       await viaProxy(port, url, byBytes).catch(() => null);
       assert.equal(sessions.close("byte-cap").capped, true);
     });
@@ -98,7 +116,7 @@ test("the proxy answers 503 while the local-network list is not loaded (review f
     resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
   await listening(proxy);
   try {
-    const cred = sessions.open("not-ready", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+    const cred = sessions.open("not-ready", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
     assert.equal((await viaProxy(proxy.address().port, `http://fx.fixture.fcpi.test:${good.address().port}/`, cred)).status, 503);
     assert.deepEqual(sessions.close("not-ready").denied.map((d) => d.class), ["RETRIEVAL_NOT_READY"]);
   } finally { proxy.close(); good.close(); }
@@ -116,7 +134,7 @@ test("malformed credentials, CONNECT to a non-443 port, forwarded proxy credenti
       const url = `http://fx.fixture.fcpi.test:${up.address().port}`;
       const malformed = await new Promise((resolve) => http.request({ host: "127.0.0.1", port, path: `${url}/`, headers: { "proxy-authorization": "Basic %%%" } }, (r) => resolve(r.statusCode)).end());
       assert.equal(malformed, 407);
-      const cred = sessions.open("edge", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      const cred = sessions.open("edge", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
       assert.equal((await viaProxy(port, `${url}/`, cred)).status, 200);
       assert.equal(seenAuth, null); // the attempt's credential never reaches the target
       const connect = await new Promise((resolve) => {

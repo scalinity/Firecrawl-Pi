@@ -197,7 +197,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         // Paced inside the try, so a database error while pacing still frees the browser permit.
         paced = await pace(renderTarget, attemptId, browserDeadline, signal);
         if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return fail(paced.failure); }
-        const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal });
+        const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal, fixture: !!renderTarget.fixture });
         // A result without its final URL (a worker fault) is read as ending where it began, not
         // parsed as a URL it is not.
         const finalUrl = typeof r.finalUrl === "string" && r.finalUrl ? r.finalUrl : renderUrl;

@@ -7,7 +7,7 @@ import http from "node:http";
 import https from "node:https";
 import zlib from "node:zlib";
 import { isIP } from "node:net";
-import { parseTarget, Denied } from "./ssrf.mjs";
+import { parseTarget, Denied, scopeFixtures } from "./ssrf.mjs";
 import { resolveTarget, pinnedLookup } from "./resolve.mjs";
 
 export const USER_AGENT = "Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36";
@@ -139,10 +139,12 @@ export async function guardedFetch({ url, method = "GET", headers, maxBytes, dea
   let current = url, verb = method;
   let extra = callerHeaders(headers);
   const firstOrigin = new URL(url).origin;
+  let hopPolicy = policy; // the first hop decides whether the chain may meet a fixture host
   for (let hop = 0; ; hop++) {
     if (signal?.aborted) throw new Denied("CANCELLED", "the caller cancelled the acquisition");
-    const target = parseTarget(current, policy);
-    const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
+    const target = parseTarget(current, hopPolicy);
+    if (hop === 0) hopPolicy = scopeFixtures(!!target.fixture, policy);
+    const address = await resolveTarget(target, { resolvePublic, policy: hopPolicy, lookupFixture });
     await onHop?.({ hop, target, address });
     const cookie = jar.header(target.url);
     const sent = { ...extra };

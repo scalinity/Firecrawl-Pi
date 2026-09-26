@@ -101,6 +101,11 @@ export function classifyAddress(addr, localCidrs) {
 const RESERVED_SUFFIXES = [".localhost", ".local", ".internal", ".lan", ".home", ".home.arpa", ".corp",
   ".intranet", ".private", ".test", ".example", ".invalid", ".onion", ".arpa", ".ts.net", ".alt"];
 
+// The fixture exception holds only for work that began at a fixture: a redirect chain or a rendered
+// page that began at a public URL is judged without the fixture hosts, so public input cannot reach
+// the fixture network, whose endpoints fixture limits leave unpaced (review finding S1).
+export const scopeFixtures = (beganAtFixture, policy) => (beganAtFixture ? policy : { ...policy, fixtures: [] });
+
 export function hostMatches(host, pattern) {
   return pattern.startsWith("*.") ? host.endsWith(pattern.slice(1)) : host === pattern;
 }
