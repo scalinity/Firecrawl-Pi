@@ -1,0 +1,36 @@
+### meta
+utc=2026-09-26T17:56:56Z source_commit=e70e4ad9110fe5a44d0a5e72a45da7105d2cd8e8
+### data_check
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=21 create_host_path=false
+### up
+ Container fcpi-rabbitmq-1 Healthy 
+ Container fcpi-mcp-gateway-1 Healthy 
+ Container fcpi-fixture-m2-1 Healthy 
+ Container fcpi-redis-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+### swap
+access-gateway memory.swap.max=0
+firecrawl-core memory.swap.max=0
+retrieval-service memory.swap.max=0
+nuq-postgres memory.swap.max=0
+rabbitmq memory.swap.max=0
+redis memory.swap.max=0
+browser-worker memory.swap.max=0
+mcp-gateway memory.swap.max=0
+fixture-m2 memory.swap.max=0
+fixture-m3 memory.swap.max=0
+fixture memory.swap.max=0
+### ps
+access-gateway running healthy fcpi/access-gateway@sha256:a811a0b2379ed3927280716981c7ef3bc81ce96c2ad4d72e685ce152b6b12eb3
+browser-worker running healthy fcpi/browser@sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c
+firecrawl-core running healthy fcpi/firecrawl-api@sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d
+fixture running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m2 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m3 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+mcp-gateway running healthy fcpi/mcp-gateway@sha256:852d82931d1d621b21b62735648ed550e38f6606c894eed8bfe0e3ddef2887de
+nuq-postgres running healthy fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180
+rabbitmq running healthy rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8
+redis running healthy redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44
+retrieval-service running healthy fcpi/retrieval@sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35
+end

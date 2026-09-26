@@ -1,0 +1,21 @@
+### meta
+utc=2026-09-26T15:36:02Z source_commit=5e7e96855dc20ba04ac93f492d92e7e6c41a0e39 node_options=--max-old-space-size=256
+### probe kb=100 formats=["markdown","html","rawHtml"]
+core started=2026-09-26T15:34:30.326109709Z restarts=2 health=healthy memory.current=1752072192 memory.peak=1948172288
+http=200 bytes=307731 seconds=0.233468
+markdown_chars=101541 html_chars=102684 rawHtml_chars=102746
+core started=2026-09-26T15:34:30.326109709Z restarts=2 health=healthy memory.current=1772748800 memory.peak=1948172288
+heap_failures_logged=0
+### probe kb=200 formats=["markdown"]
+core started=2026-09-26T15:34:30.326109709Z restarts=2 health=healthy memory.current=1771520000 memory.peak=1948172288
+http=200 bytes=204221 seconds=0.742672
+markdown_chars=203139 html_chars=0 rawHtml_chars=0
+core started=2026-09-26T15:34:30.326109709Z restarts=2 health=healthy memory.current=1787854848 memory.peak=1948172288
+heap_failures_logged=0
+### probe kb=400 formats=["markdown"]
+core started=2026-09-26T15:34:30.326109709Z restarts=2 health=healthy memory.current=1786937344 memory.peak=1948172288
+http=200 bytes=407549 seconds=2.009822
+markdown_chars=405761 html_chars=0 rawHtml_chars=0
+core started=2026-09-26T15:34:30.326109709Z restarts=2 health=healthy memory.current=1786757120 memory.peak=1948172288
+heap_failures_logged=0
+### end

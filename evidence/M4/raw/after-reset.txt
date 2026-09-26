@@ -1,0 +1,47 @@
+### meta
+utc=2026-09-26T17:48:12Z source_commit=c19cfee19822e03c9347c28f2e266e14ccbae1e6 boot_id_sha256=040f343e385397981d9a3d77da78c38f8924792247865d660a6185822ad1fb66 window_open=2026-09-26T17:21:47Z
+### recovery_logs
+postgres: 2026-09-26 17:20:08.981 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on aarch64-unknown-linux-gn
+postgres: 2026-09-26 17:29:02.837 UTC [1] LOG:  starting PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on aarch64-unknown-linux-gn
+postgres: 2026-09-26 17:29:03.123 UTC [15] LOG:  redo starts at 0/D6B6E68
+postgres: 2026-09-26 17:29:03.311 UTC [15] LOG:  redo done at 0/D85E450 system usage: CPU: user: 0.00 s, system: 0.01 
+redis: Configuration loaded
+redis: Reading RDB base file on AOF loading...
+redis: Loading RDB produced by version 8.10.2
+redis: RDB age 122078 seconds
+redis: RDB memory usage when created 0.71 Mb
+redis: RDB is base AOF
+redis: Done loading RDB, keys loaded: 0, keys expired: 0.
+redis: DB loaded from base file appendonly.aof.1.base.rdb: 0.039 seconds
+rabbitmq: 2026-09-26 17:31:19.159305+00:00 [info] <0.503.0> ra: meta data store initialised for system coordination. 1 record(s) recovered[0m
+rabbitmq: 2026-09-26 17:31:19.381010+00:00 [info] <0.519.0> ra: meta data store initialised for system quorum_queues. 5 record(s) recovered[0m
+rabbitmq: 2026-09-26 17:31:19.544725+00:00 [info] <0.532.0> ra_system_recover: ra system 'quorum_queues' server recovery strategy rabbit_quorum_queue:system_recover[0m
+rabbitmq: 2026-09-26 17:31:19.544949+00:00 [info] <0.532.0> [rabbit_quorum_queue:system_recover/1] rabbit not booted, skipping queue recovery[0m
+rabbitmq: 2026-09-26 17:31:21.529640+00:00 [info] <0.209.0> Running boot step recovery defined by app rabbit[0m
+rabbitmq: 2026-09-26 17:31:21.625051+00:00 [info] <0.648.0> Recovering 0 queues of type rabbit_classic_queue took 61ms[0m
+### container_logs
+access-gateway lines_with_nul=0 created=2026-09-26T17:20:01Z
+browser-worker lines_with_nul=0 created=2026-09-26T17:19:09Z
+firecrawl-core lines_with_nul=0 created=2026-09-26T17:19:15Z
+fixture lines_with_nul=0 created=2026-09-26T17:19:08Z
+fixture-m2 lines_with_nul=0 created=2026-09-26T17:19:08Z
+fixture-m3 lines_with_nul=0 created=2026-09-26T17:19:08Z
+mcp-gateway lines_with_nul=0 created=2026-09-26T17:19:09Z
+nuq-postgres lines_with_nul=1 created=2026-09-26T17:19:09Z
+rabbitmq lines_with_nul=0 created=2026-09-26T17:19:09Z
+redis lines_with_nul=0 created=2026-09-26T17:19:09Z
+retrieval-service lines_with_nul=0 created=2026-09-26T17:19:14Z
+### sentinels
+postgres_read=fcpi-m3-persist-12bb7256ea6e
+redis_read=fcpi-m3-persist-12bb7256ea6e
+rabbitmq_read={"utc":"2026-09-26T17:48:15.416Z","queue":"fcpi.m1.sentinel","messages_before":1,"messages":["fcpi-m3-persist-12bb7256ea6e"]}
+### jobs_since_window
+8e44cc1d-391a-4cea-97ae-6c802361993d kind=crawl state=SUCCEEDED upstream=true archived=4 created=2026-09-26T17:21:55Z finished=2026-09-26T17:22:12Z documents=4
+f4d69597-d2ca-42a0-9194-880279895050 kind=crawl state=SUCCEEDED upstream=true archived=2 created=2026-09-26T17:22:13Z finished=2026-09-26T17:22:27Z documents=2
+open_since_window=0
+open_before_window=0
+ledger jobs=176 events=652 documents=347
+### archive
+files=347 files_whose_content_differs_from_name=0
+live_documents=286 without_archive_file=0
+end

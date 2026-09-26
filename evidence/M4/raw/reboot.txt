@@ -1,0 +1,64 @@
+### meta
+utc=2026-09-26T17:56:01Z source_commit=69f9929541c3f7a2f6b7f4d5c01e4d67edae063f window_open=2026-09-26T17:21:47Z
+### boots
+idx=-1 boot_id_sha256=54a9acdff6a286e4c17c12dd682e946792c0509d39ce5a30bde1abf66db07ffe first=2026-09-26T16:35:10+00:00 last=2026-09-26T17:29:45+00:00
+idx=0 boot_id_sha256=040f343e385397981d9a3d77da78c38f8924792247865d660a6185822ad1fb66 first=2026-09-26T17:28:46+00:00 last=2026-09-26T17:56:01+00:00
+### current
+boot_id_sha256=040f343e385397981d9a3d77da78c38f8924792247865d660a6185822ad1fb66 kernel=6.18.50+rpt-rpi-2712 page_size=16384 up_since_utc=2026-09-26T17:30:50Z
+rsts=1000 throttled_this_boot=0x0
+RuntimeWatchdogUSec=1min RebootWatchdogUSec=2min
+### old_boot_end
+last_entries:
+  2026-09-26T17:29:44+00:00 tailscaled[1181611]
+  2026-09-26T17:29:44+00:00 tailscaled[1181611]
+  2026-09-26T17:29:45+00:00 tailscaled[1181611]
+shutdown_markers=0
+### wifi_loss
+2026-09-26T17:22:19+00:00 wpa_supplicant[1507588]: wlan0: CTRL-EVENT-DISCONNECTED bssid=<bssid> reason=0 locally_generated=1
+2026-09-26T17:22:35+00:00 NetworkManager[649]: <warn>  [1790443355.1692] device (wlan0): link timed out.
+2026-09-26T17:22:35+00:00 NetworkManager[649]: <info>  [1790443355.1693] device (wlan0): state change: activated -> failed (reason 'ssid-not-found', managed-type: 'full')
+2026-09-26T17:22:35+00:00 NetworkManager[649]: <warn>  [1790443355.1698] device (wlan0): Activation: failed for connection '<wifi-ssid>'
+2026-09-26T17:22:35+00:00 NetworkManager[649]: <info>  [1790443355.1704] manager: NetworkManager state is now CONNECTED_LOCAL
+2026-09-26T17:23:18+00:00 NetworkManager[649]: <info>  [1790443398.9174] manager: NetworkManager state is now CONNECTING
+2026-09-26T17:23:18+00:00 NetworkManager[649]: <info>  [1790443398.9178] device (wlan0): Activation: (wifi) access point '<wifi-ssid>' has security, but secrets are required.
+2026-09-26T17:23:18+00:00 NetworkManager[649]: <info>  [1790443398.9178] device (wlan0): state change: config -> need-auth (reason 'none', managed-type: 'full')
+2026-09-26T17:23:18+00:00 NetworkManager[649]: <info>  [1790443398.9187] device (wlan0): state change: need-auth -> prepare (reason 'none', managed-type: 'full')
+2026-09-26T17:23:44+00:00 NetworkManager[649]: <info>  [1790443424.1048] device (wlan0): state change: config -> need-auth (reason 'none', managed-type: 'full')
+2026-09-26T17:23:44+00:00 NetworkManager[649]: <info>  [1790443424.1059] device (wlan0): state change: need-auth -> prepare (reason 'none', managed-type: 'full')
+2026-09-26T17:24:09+00:00 NetworkManager[649]: <info>  [1790443449.1039] device (wlan0): state change: config -> need-auth (reason 'none', managed-type: 'full')
+2026-09-26T17:24:09+00:00 NetworkManager[649]: <info>  [1790443449.1056] device (wlan0): state change: need-auth -> prepare (reason 'none', managed-type: 'full')
+2026-09-26T17:24:29+00:00 NetworkManager[649]: <info>  [1790443469.8685] manager: NetworkManager state is now CONNECTED_LOCAL
+2026-09-26T17:28:49+00:00 kernel: ieee80211 phy0: brcmf_fil_cmd_data: bus is down. we have nothing to do.
+2026-09-26T17:28:49+00:00 kernel: ieee80211 phy0: brcmf_cfg80211_get_tx_power: error (-5)
+2026-09-26T17:28:50+00:00 kernel: usbcore: deregistering interface driver brcmfmac
+2026-09-26T17:28:53+00:00 kernel: brcmfmac: F1 signature read @0x18000000=0x15264345
+2026-09-26T17:28:53+00:00 kernel: brcmfmac: brcmf_fw_alloc_request: using brcm/brcmfmac43455-sdio for chip BCM4345/6
+2026-09-26T17:28:53+00:00 kernel: usbcore: registered new interface driver brcmfmac
+2026-09-26T17:28:53+00:00 kernel: brcmfmac: brcmf_c_process_txcap_blob: no txcap_blob available (err=-2)
+2026-09-26T17:28:53+00:00 kernel: brcmfmac: brcmf_c_preinit_dcmds: Firmware: BCM4345/6 wl0: Aug 29 2023 01:47:08 version 7.45.265 (28bca26 CY) FWID 01-b677b91b
+2026-09-26T17:28:53+00:00 kernel: brcmfmac: brcmf_cfg80211_set_power_mgmt: power save enabled
+### local_actions_after_loss
+loss_utc=2026-09-26T17:22:19+00:00
+sudo_commands=0 ssh_logins=0 sessions=0 console_logins=0
+### undervoltage
+old_boot=0 this_boot=0
+### recovery
+kernel_first=2026-09-26T17:28:46+00:00 Linux version 6.18.50+rpt-rpi-2712
+docker.service ExecMainStatus=0 ActiveState=active ActiveEnterTimestamp=Sat 2026-09-26 13:29:05 EDT
+fcpi-stack.service ExecMainStatus=0 ActiveState=active ActiveEnterTimestamp=Sat 2026-09-26 13:31:48 EDT
+2026-09-26T17:28:53+00:00 systemd[1]: Starting docker.service - Docker Application Container Engine...
+2026-09-26T17:28:53+00:00 fcpi-data-check.sh[1185]: fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=21 create_host_path=false
+2026-09-26T17:28:53+00:00 fcpi-egress-local.sh[1224]: fcpi-egress-local: no connected IPv4 network found
+2026-09-26T17:29:05+00:00 systemd[1]: Started docker.service - Docker Application Container Engine.
+access-gateway started=2026-09-26T17:28:58.335381899Z status=running health=healthy restarts=0
+browser-worker started=2026-09-26T17:28:58.48958588Z status=running health=healthy restarts=0
+firecrawl-core started=2026-09-26T17:28:58.277061695Z status=running health=healthy restarts=0
+fixture started=2026-09-26T17:28:58.294579566Z status=running health=healthy restarts=0
+fixture-m2 started=2026-09-26T17:28:58.316372047Z status=running health=healthy restarts=0
+fixture-m3 started=2026-09-26T17:28:58.450960028Z status=running health=healthy restarts=0
+mcp-gateway started=2026-09-26T17:28:58.48069338Z status=running health=healthy restarts=0
+nuq-postgres started=2026-09-26T17:28:58.387019269Z status=running health=healthy restarts=0
+rabbitmq started=2026-09-26T17:28:58.471304602Z status=running health=healthy restarts=0
+redis started=2026-09-26T17:28:58.407010843Z status=running health=healthy restarts=0
+retrieval-service started=2026-09-26T17:28:58.438731121Z status=running health=healthy restarts=0
+end

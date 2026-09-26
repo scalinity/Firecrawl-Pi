@@ -1,0 +1,42 @@
+### meta
+utc=2026-09-26T18:04:02Z since=2026-09-26T15:14:08Z running_kernel=6.18.50+rpt-rpi-2712 boot_id_sha256=040f343e385397981d9a3d77da78c38f8924792247865d660a6185822ad1fb66
+### apt_runs
+Start-Date: 2026-09-26  11:51:27
+Commandline: apt upgrade -y
+Requested-By: <owner> (1000)
+Install packages=4
+Install linux-image-6.18.50+rpt-rpi-2712:arm64 (1:6.18.50-1+rpt1, automatic
+Install linux-base-6.18.50+rpt-rpi-2712:arm64 (1:6.18.50-1+rpt1, automatic
+Upgrade packages=110
+Upgrade firmware-brcm80211:arm64 (1:20250410-2+rpt1, 1:20260519-1~bpo13+1+rpt1
+Upgrade linux-base-rpi-2712:arm64 (1:6.18.34-1+rpt1, 1:6.18.50-1+rpt1
+Upgrade linux-image-rpi-2712:arm64 (1:6.18.34-1+rpt1, 1:6.18.50-1+rpt1
+Upgrade raspi-firmware:arm64 (1:1.20260521-3, 1:1.20260915-1
+End-Date: 2026-09-26  11:53:05
+held=containerd.io docker-buildx-plugin docker-ce docker-ce-cli docker-compose-plugin 
+### journal
+2026-09-26T17:28:48.633771+00:00 pi systemd[1]: Reloading...
+2026-09-26T17:28:49.060477+00:00 pi systemd[1]: Reloading finished in 426 ms.
+2026-09-26T17:28:49.248933+00:00 pi systemd[1]: Reloading...
+2026-09-26T17:28:49.690511+00:00 pi systemd[1]: Reloading finished in 441 ms.
+2026-09-26T17:28:49.874495+00:00 pi systemd[1]: Reloading...
+2026-09-26T17:28:50.315883+00:00 pi systemd[1]: Reloading finished in 440 ms.
+### loopback_listeners
+### pihole_udp
+*:123
+*:53
+0.0.0.0:123
+0.0.0.0:53
+### container_swap
+access-gateway started=2026-09-26T17:57:23.475027237Z memory.swap.max=0
+firecrawl-core started=2026-09-26T17:57:22.699341893Z memory.swap.max=0
+retrieval-service started=2026-09-26T17:57:16.693525013Z memory.swap.max=0
+nuq-postgres started=2026-09-26T17:57:10.956043128Z memory.swap.max=0
+rabbitmq started=2026-09-26T17:57:10.763626672Z memory.swap.max=0
+redis started=2026-09-26T17:57:11.198456206Z memory.swap.max=0
+browser-worker started=2026-09-26T17:57:11.474120677Z memory.swap.max=0
+mcp-gateway started=2026-09-26T18:01:27.67931464Z memory.swap.max=0
+fixture-m2 started=2026-09-26T17:57:10.375516247Z memory.swap.max=0
+fixture-m3 started=2026-09-26T17:57:11.683926031Z memory.swap.max=0
+fixture started=2026-09-26T17:57:11.941446729Z memory.swap.max=0
+### end

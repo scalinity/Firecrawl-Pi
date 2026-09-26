@@ -1,0 +1,11 @@
+### meta
+utc=2026-09-26T17:43:59Z source_commit=c19cfee19822e03c9347c28f2e266e14ccbae1e6
+installed_sha256=16cfb4dabe838d9edbbb50d6ae5fb93c4b53b9a23b9e46d68d3ac357e59461e0 deployed_sha256=bd4ebaba7887deaecd6a0def9d2a8d43dbf035165bd27c69284927e1335a6498 installed_is_deployed=no
+### recorded
+file_written=2026-09-26T17:29:05Z ipv4_count=2 ipv4_sha256=9659345178bd0339852fd67f7e02128fe94ed78163bf9f6297fb5214ef8b5303
+### namespace_runs
+which=installed connected_routes=0 before=0 exit=1 message=fcpi-egress-local: no connected IPv4 network found after_count=0 after_sha256=01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b matches_recorded=no
+which=deployed connected_routes=0 before=0 exit=0 message=fcpi-egress-local: no connected IPv4 network found; the guard holds the 2 recorded ones after_count=2 after_sha256=9659345178bd0339852fd67f7e02128fe94ed78163bf9f6297fb5214ef8b5303 matches_recorded=yes
+### host_set
+count=2 sha256=9659345178bd0339852fd67f7e02128fe94ed78163bf9f6297fb5214ef8b5303 matches_recorded=yes
+end

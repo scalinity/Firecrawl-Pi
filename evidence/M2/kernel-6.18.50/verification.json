@@ -1,0 +1,448 @@
+{
+  "schema": "fcpi.m2.verification/v1",
+  "runner": "scripts/m2/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main.",
+  "results": [
+    {
+      "test_id": "M2-B00",
+      "name": "baseline-matches-m1-closeout-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-B01",
+      "name": "chromium-native-aarch64",
+      "utc": "2026-09-26T17:51:28Z",
+      "repository_sha": "69f9929541c3f7a2f6b7f4d5c01e4d67edae063f",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "config_or_fixture_hash": "721518aacceaa3065a031f3f7f269a3b2d0db1000ff6415ea80d53d27a3f3c92",
+      "expected": "the proof ran on the 16 KiB kernel (page_size=16384, aarch64) from an arm64 image; every Chromium binary is ELF aarch64; every process in the running browser worker is ELF machine 183",
+      "state": "PASS",
+      "actual": "kernel=6.18.50+rpt-rpi-2712 machine=aarch64 page_size=16384; image arch=arm64; binaries=13, all aarch64=true; running worker processes=2, all e_machine 183=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+        "retrieval": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+        "browser": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c"
+      },
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-B02",
+      "name": "chromium-load-segments-16k-aligned",
+      "utc": "2026-09-26T17:51:28Z",
+      "repository_sha": "69f9929541c3f7a2f6b7f4d5c01e4d67edae063f",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "config_or_fixture_hash": "5d49168169eed8294c5c33a8f0504eb3c3e2a076f4f78c3fb0c041572598e5b1",
+      "expected": "every Chromium ELF binary and library installed has every LOAD segment aligned at 0x4000 or above",
+      "state": "PASS",
+      "actual": "binaries=13; min alignment=0x10000; below 0x4000=none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+        "retrieval": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+        "browser": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c"
+      },
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-B03",
+      "name": "chromium-runs-non-root",
+      "utc": "2026-09-26T17:51:28Z",
+      "repository_sha": "69f9929541c3f7a2f6b7f4d5c01e4d67edae063f",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "config_or_fixture_hash": "721518aacceaa3065a031f3f7f269a3b2d0db1000ff6415ea80d53d27a3f3c92",
+      "expected": "every process of the proof ran as uid 3320 with no effective capability outside Chromium's own namespace; the running worker is user 3320:3320, cap_drop ALL, no-new-privileges, not privileged",
+      "state": "PASS",
+      "actual": "proof processes=9, uids=3320; unexpected capabilities=0; worker: user=3320:3320 cap_drop=ALL privileged=false",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+        "retrieval": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+        "browser": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c"
+      },
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-B04",
+      "name": "chromium-sandbox-on",
+      "utc": "2026-09-26T17:51:28Z",
+      "repository_sha": "69f9929541c3f7a2f6b7f4d5c01e4d67edae063f",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "config_or_fixture_hash": "69d61827f1d1ae82f897859fc4c556add54f5b7e6ed828556d5d8d7732f60234",
+      "expected": "under Docker's built-in seccomp profile Chromium refuses to start with its sandbox (the positive control); under the project profile it starts with no --no-sandbox or --disable-setuid-sandbox flag, its renderer in a nested PID namespace with its own seccomp filter; the running worker uses the project profile",
+      "state": "PASS",
+      "actual": "control launched=no (sandboxing failed); proof launched=true; sandbox flags off=true; renderer nspid_depth=3 seccomp_filters=2; worker seccomp profile=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+        "retrieval": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+        "browser": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c"
+      },
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-B05",
+      "name": "chromium-renders-fixture",
+      "utc": "2026-09-26T17:51:28Z",
+      "repository_sha": "69f9929541c3f7a2f6b7f4d5c01e4d67edae063f",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "config_or_fixture_hash": "5d49168169eed8294c5c33a8f0504eb3c3e2a076f4f78c3fb0c041572598e5b1",
+      "expected": "the proof renders the controlled JS fixture: h1 'Rendered by script' and the sentinel fcpi-m2-js-5c1e, written by script",
+      "state": "PASS",
+      "actual": "h1=Rendered by script; sentinel=fcpi-m2-js-5c1e; browser_version=153.0.8010.12",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+        "retrieval": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+        "browser": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c"
+      },
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-B06",
+      "name": "chromium-closes-cleanly",
+      "utc": "2026-09-26T17:51:28Z",
+      "repository_sha": "69f9929541c3f7a2f6b7f4d5c01e4d67edae063f",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "config_or_fixture_hash": "5d49168169eed8294c5c33a8f0504eb3c3e2a076f4f78c3fb0c041572598e5b1",
+      "expected": "close returns (closed=yes) and no Chromium process remains in the container after it",
+      "state": "PASS",
+      "actual": "closed=true; chrome processes open=7 after close=0",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+        "retrieval": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+        "browser": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c"
+      },
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-B07",
+      "name": "chromium-no-stray-processes",
+      "utc": "2026-09-26T17:51:28Z",
+      "repository_sha": "69f9929541c3f7a2f6b7f4d5c01e4d67edae063f",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "config_or_fixture_hash": "5d49168169eed8294c5c33a8f0504eb3c3e2a076f4f78c3fb0c041572598e5b1",
+      "expected": "after the proof, no uid-3320 or Chromium process is left on the host and no throwaway container remains",
+      "state": "PASS",
+      "actual": "uid_3320_processes=0; chrome_processes_on_host=0; leftover_transient_containers=0",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
+        "retrieval": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
+        "browser": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c"
+      },
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-D01",
+      "name": "d1-playwright-admission-every-in-the-wild-cve",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-D02",
+      "name": "api-build-reproducible-and-pinned",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-D03",
+      "name": "service-images-pinned",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-P01",
+      "name": "patch-series-hashes-and-call-site-manifest",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-P02",
+      "name": "traced-paths-reach-the-adapter",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-R01",
+      "name": "static-pages-never-start-chromium",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-R02",
+      "name": "js-delayed-cookie-pages-render",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-R03",
+      "name": "content-classified",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-R04",
+      "name": "size-time-and-redirect-limits",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-R05",
+      "name": "unregistered-capabilities-refused",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-S01",
+      "name": "ssrf-matrix-denied",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-S02",
+      "name": "browser-subresources-denied",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-A01",
+      "name": "four-attempts-per-logical-page",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-A02",
+      "name": "requeued-job-shares-its-budget",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-A03",
+      "name": "direct-traffic-within-limits",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-A04",
+      "name": "global-url-permits",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-C01",
+      "name": "cancellation-releases-permits-and-processes",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-C02",
+      "name": "browser-crash-contained",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-C03",
+      "name": "browser-down-isolated",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-M01",
+      "name": "caps-read-from-cgroups",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-M02",
+      "name": "core-peak-before-chromium",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-M03",
+      "name": "chromium-stress-within-cap",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-M04",
+      "name": "over-cap-browser-contained",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-N01",
+      "name": "broker-outage-survived-pc-nuq-connect",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-N02",
+      "name": "reply-queue-consumer-back-within-60s-4244",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-N03",
+      "name": "worker-killed-mid-job-recorded",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X02",
+      "name": "core-has-no-direct-egress",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X03",
+      "name": "egress-bridge-guarded-and-own-dns",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X11",
+      "name": "router-public-address-is-host-local",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X04",
+      "name": "access-bridge-guard-still-holds",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X05",
+      "name": "allow-local-webhooks-removed-r4",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X06",
+      "name": "published-ports-loopback-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X07",
+      "name": "core-credentials-dml-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X08",
+      "name": "persistence-across-force-recreate",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X09",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-X10",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-L01",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-U01",
+      "name": "retrieval-unit-tests-pass",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    },
+    {
+      "test_id": "M2-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M2/kernel-6.18.50/verification.json"
+    }
+  ]
+}
