@@ -416,8 +416,9 @@ const checks = {
       const scanL = st.mcp_log_scan ?? [], head = kv((scanL[0] ?? "").split(" "));
       const pats = scanL.filter((l) => l.startsWith("pattern=")).map((l) => kv(l.split(" ")));
       const tools = one(w.pi_view, "tool_records")?.records ?? [], gw = one(w.pi_view, "gateway_records")?.records ?? [];
-      const routeOf = { firecrawl_scrape: "scrape", firecrawl_capabilities: "platform.status" };
-      const unmatched = tools.filter((t) => !(t.era && t.protocol_version && t.client && t.downstream?.request_id && gw.some((g) => g.request_id === t.downstream.request_id && g.client === t.client && g.route === (routeOf[t.tool] ?? g.route))));
+      // Every tool's route, from the manifest: a tool record must match a gateway record on that route.
+      const routeOf = Object.fromEntries(MANIFEST.mcp.tools.map((x) => [x.name, x.route]));
+      const unmatched = tools.filter((t) => !(t.era && t.protocol_version && t.client && t.downstream?.request_id && gw.some((g) => g.request_id === t.downstream.request_id && g.client === t.client && g.route === routeOf[t.tool])));
       const cond = { scan: +head.lines > 50 && +head.exchange_records > 30 && +head.serve_records > 30 && +head.tool_records > 20 && +head.starts >= 3 && head.first_event === "listening",
         patterns: pats.length === 8 && pats.every((p) => p.count === "0"), correlated: tools.length >= 6 && unmatched.length === 0,
         health: (st.mcp_health ?? []).some((l) => /^200 .*"live":true/.test(l)) };
