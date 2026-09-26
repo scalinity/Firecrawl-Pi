@@ -47,7 +47,10 @@ function checkField(name, spec, v, manifest, path) {
       if (v < spec.min || v > spec.max || (spec.exclusiveMin && v === spec.min)) throw bad(`'${where}' must be ${spec.exclusiveMin ? "above" : "at least"} ${spec.min} and at most ${spec.max}`);
       return v;
     }
-    case "enum": if (!spec.values.includes(v)) throw bad(`'${where}' must be one of ${spec.values.join(", ")}`); return v;
+    case "enum":
+      if (typeof v === "string" && spec.refused?.[v]) throw new RequestError(400, "UNSUPPORTED_OPTION", `'${where}: ${v}' is not supported by this deployment: ${spec.refused[v]}.`, { option: `${where}.${v}` });
+      if (!spec.values.includes(v)) throw bad(`'${where}' must be one of ${spec.values.join(", ")}`);
+      return v;
     case "string": if (typeof v !== "string" || v.length > spec.maxLength) throw bad(`'${where}' must be a string of at most ${spec.maxLength} characters`); return v;
     case "strings": case "regexes": {
       if (!Array.isArray(v) || v.length > spec.maxItems || v.some((s) => typeof s !== "string" || s.length === 0 || s.length > spec.maxLength)) throw bad(`'${where}' must be an array of at most ${spec.maxItems} strings of 1-${spec.maxLength} characters`);

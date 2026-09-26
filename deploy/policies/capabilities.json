@@ -70,7 +70,7 @@
       "removeBase64Images": { "type": "boolean" },
       "blockAds": { "type": "boolean" },
       "fastMode": { "type": "boolean" },
-      "proxy": { "type": "enum", "values": ["auto", "basic"] },
+      "proxy": { "type": "enum", "values": ["auto", "basic"], "refused": { "stealth": "residential and stealth routing arrive with the proxy policy (M6)", "enhanced": "enhanced retrieval arrives with M7" } },
       "mobile": { "type": "const", "value": false },
       "skipTlsVerification": { "type": "const", "value": false }
     }

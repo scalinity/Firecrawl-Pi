@@ -26,6 +26,9 @@ test("refused options name themselves and why, before anything else", () => {
   refused(() => validateBody("scrape", { url: "https://example.com", mobile: true }, M), "UNSUPPORTED_OPTION");
   refused(() => validateBody("scrape", { url: "https://example.com", skipTlsVerification: true }, M), "UNSUPPORTED_OPTION");
   refused(() => validateBody("crawl", { url: "https://example.com", ignoreRobotsTxt: true }, M), "UNSUPPORTED_OPTION", /robots/);
+  refused(() => validateBody("scrape", { url: "https://example.com", proxy: "stealth" }, M), "UNSUPPORTED_OPTION", /M6/);
+  refused(() => validateBody("crawl", { url: "https://example.com", scrapeOptions: { proxy: "enhanced" } }, M), "UNSUPPORTED_OPTION", /M7/);
+  refused(() => validateBody("scrape", { url: "https://example.com", proxy: "turbo" }, M), "BAD_REQUEST");
 });
 
 test("unknown keys, bad types and out-of-range values are 400 BAD_REQUEST", () => {
