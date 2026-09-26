@@ -5,6 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
 import net from "node:net";
+import { createHash } from "node:crypto";
 import { BlockList } from "node:net";
 import { ProxySessions, startProxy } from "../src/proxy.mjs";
 
@@ -154,4 +155,14 @@ test("malformed credentials, CONNECT to a non-443 port, forwarded proxy credenti
       assert.equal(await partial, "closed");
     });
   } finally { hold?.destroy(); up.close(); }
+});
+
+test("a standing session's refusals are logged by host and not kept, so it cannot grow (review S5)", async () => {
+  await withProxy(1, async ({ port, sessions, logs }) => {
+    const password = "standing-session-password";
+    sessions.fixed("searxng", createHash("sha256").update(password).digest(), { allow: () => false, fixture: false });
+    for (let i = 0; i < 3; i++) assert.equal((await viaProxy(port, "http://engine.example.org/search", { username: "searxng", password })).status, 403);
+    assert.equal(logs.filter((l) => l.event === "proxy_denied" && l.attempt_id === "searxng" && l.failure === "DESTINATION_NOT_ALLOWED").length, 3);
+    assert.deepEqual(sessions.close("searxng").denied, []);
+  });
 });

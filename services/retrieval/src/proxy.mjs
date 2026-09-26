@@ -50,13 +50,13 @@ export class ProxySessions {
     return { requests: s.requests, bytes: s.bytes, capped: s.capped, denied: s.denied };
   }
   sweep() { for (const [id, s] of this.#s) if (Date.now() > s.expiresAt + 5000) this.close(id); }
-  // A standing session's counters since the last read, for the service's status.
-  counters(id) { const s = this.#s.get(id); if (!s) return null; const c = { requests: s.requests, bytes: s.bytes, denied: s.denied.length }; s.denied = s.denied.slice(-50); return c; }
 }
 
 export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupFixture, log }) {
+  // An attempt's refusals are returned when it closes; a standing session never closes, so it keeps none
+  // and each refusal is only logged (review S5).
   const refuse = (s, target, e) => {
-    s.denied.push({ host: target, class: e.failureClass ?? "PROXY_ERROR" });
+    if (!s.logEach) s.denied.push({ host: target, class: e.failureClass ?? "PROXY_ERROR" });
     log({ event: "proxy_denied", attempt_id: s.attemptId, target_host: target, failure: e.failureClass ?? "PROXY_ERROR", detail: e.detail ?? e.message });
   };
   const count = (s, n, ...socks) => {
