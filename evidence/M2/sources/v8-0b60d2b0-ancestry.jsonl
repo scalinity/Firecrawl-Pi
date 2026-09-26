@@ -1,0 +1,400 @@
+{"commit":"0b60d2b01800d7ba2c6eeb5e51ecd95f6dab44c7","committed":"Mon Aug 24 14:09:16 2026","subject":"Version 15.3.76.4","fixed":[]}
+{"commit":"70b9e2dee8887bb85190aa02b06e49d449721688","committed":"Mon Aug 24 14:05:57 2026","subject":"[M153] Native builtins are strict","fixed":["550760404,545767601"]}
+{"commit":"205b2c8ec2f176e1ae4068678e204252f8974fb4","committed":"Fri Aug 21 12:16:28 2026","subject":"Version 15.3.76.3","fixed":[]}
+{"commit":"19c466616b2f41fbf01ed3e49b40e116e7e10167","committed":"Fri Aug 21 12:12:50 2026","subject":"[M153] [runtime] Handle JSDataObjectBuilder map deprecating to dict","fixed":["550173617,541275802"]}
+{"commit":"db5d1a8da66a5f8e54fae6b3f4a3ab79209249f5","committed":"Fri Aug 21 09:38:34 2026","subject":"Version 15.3.76.2","fixed":[]}
+{"commit":"6be657b8d44f95e07822e56f08b91b74acc4e5ec","committed":"Fri Aug 21 09:34:42 2026","subject":"[M153] [compiler] Invalidate tracked fields on CheckMaps with instance migration","fixed":["550173433,546670199"]}
+{"commit":"6b545dbe4f62754b66ccffd4482c04d9aecacb90","committed":"Wed Aug 19 10:21:31 2026","subject":"Version 15.3.76.1","fixed":[]}
+{"commit":"5039a6bed34704272505e7b7fb38a231420e7778","committed":"Wed Aug 19 10:18:02 2026","subject":"[M153] [maglev] Narrow float64 conversions with the node's known type","fixed":["548914819,546647038"]}
+{"commit":"bea59ed367fb0c56e18a8716e5824338592b02ed","committed":"Mon Aug 17 16:36:32 2026","subject":"Version 15.3.76","fixed":[]}
+{"commit":"445f45796516823984c123282865478b0c4fc2f4","committed":"Mon Aug 17 15:07:00 2026","subject":"[sandbox] Do not flush bytecode of live functions","fixed":["546080080"]}
+{"commit":"a9a114987a30e09cf4ba9fc53bba6661b0883e8f","committed":"Mon Aug 17 14:13:55 2026","subject":"[maglev] Handle HoleyFloat64 phis flowing into NumberToString","fixed":["547330043"]}
+{"commit":"310b7828f5f64495972824b499cb10b785909543","committed":"Mon Aug 17 14:08:57 2026","subject":"Revert \"[maglev] Resume generators without the WithCatch trampoline wrapper\"","fixed":["42204525"]}
+{"commit":"4efc36f2f01e0cfa819e6b8dcbe080013a4f5cf5","committed":"Mon Aug 17 12:34:36 2026","subject":"[maglev] Resume generators without the WithCatch trampoline wrapper","fixed":["42204525"]}
+{"commit":"ee05ac3f503cc671f6944f2353e108650c8d050a","committed":"Mon Aug 17 12:33:31 2026","subject":"[flags] Prevent --shared-string-table with string transitions with stack","fixed":["547300590","542447324"]}
+{"commit":"970d651e4f9975430f9f4cf7e8c45ba7566f52a2","committed":"Mon Aug 17 11:47:34 2026","subject":"[api][module] Type-check synthetic module evaluation steps","fixed":["545375591"]}
+{"commit":"885ca2462a98df596337ccc13f06e37b1b4c61a4","committed":"Mon Aug 17 10:24:58 2026","subject":"[maglev] Inline Map.prototype.entries, keys, and values","fixed":["42204525"]}
+{"commit":"04d9d7446e7908d915a30c1a9cb870330444e6c8","committed":"Mon Aug 17 10:17:47 2026","subject":"[deoptimizer] Handle undefined in MaterializeFixedDoubleArray","fixed":["546308452"]}
+{"commit":"4397869ba389d6a999e55197b82cd8e7f9697e08","committed":"Mon Aug 17 10:16:41 2026","subject":"[test262] Roll test262","fixed":["v8:7834"]}
+{"commit":"73f9b30344d0641aee42343d90843f87d7106ba3","committed":"Mon Aug 17 09:55:57 2026","subject":"[builtins] Enable --fast-api-iterable-to-list behind --future","fixed":["455376685"]}
+{"commit":"fd75eb5d6753ea5b3cb9699ca3b345b680e8b3c9","committed":"Mon Aug 17 07:44:11 2026","subject":"[inspector] Don't eagerly evaluate Proxy getters","fixed":["533053738"]}
+{"commit":"5280f012d5ce0714c8db750cbada4251c76412c7","committed":"Sat Aug 15 17:50:49 2026","subject":"Revert \"[flags] Introduce --wasm-assume-ref-cast-desc-succeeds\"","fixed":["498924945","546884393"]}
+{"commit":"8de9b2022a57b8e8eec507f9a75889eb167ea4b3","committed":"Sat Aug 15 05:53:28 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"54053485021a89d434dac59096fa4fd01493da00","committed":"Fri Aug 14 18:16:55 2026","subject":"[turboshaft] Raise the JS partial-unrolling loop size limit to 64","fixed":["42204525"]}
+{"commit":"311d0e193f70fff8a099bc8b19139b6a225d7632","committed":"Fri Aug 14 16:32:32 2026","subject":"Roll agents from 0b207f130c53 to e64987d3ea47 (1 revision)","fixed":["None"]}
+{"commit":"dabf889cbd619eb8c036560b3e2f72bfaf6c9834","committed":"Fri Aug 14 16:00:49 2026","subject":"[runtime] Fix DCHECK in RandomNumberGenerator::NextInt()","fixed":["514776306"]}
+{"commit":"8158fb9fa1ec14bdc1be8544fc2bc0261f6affd4","committed":"Fri Aug 14 15:58:19 2026","subject":"Fix declaration of CppGCManaged in GCC","fixed":[]}
+{"commit":"534354cc1cf98a6a3015553c3b940ffa2147c7c8","committed":"Fri Aug 14 14:39:08 2026","subject":"[maglev] Compute value ranges for Int32ModulusWithOverflow","fixed":["42204525"]}
+{"commit":"89f91fe83a99a8335ad8e4744f7e993caa2ae4e6","committed":"Fri Aug 14 14:14:05 2026","subject":"[csa] Fix OrdinaryHasInstance() re constructors with null prototype","fixed":["541880797"]}
+{"commit":"b9a8bd0996a1350f6683f1cd995c3b00f1ff35e4","committed":"Fri Aug 14 14:11:18 2026","subject":"[maglev] Reduce Builtin::kReturnReceiver","fixed":["42204525"]}
+{"commit":"5521308ad31d25bd9faef82ef02e6347588f476f","committed":"Fri Aug 14 13:05:06 2026","subject":"Revert \"[sandbox] Store CppHeapPointerHandles in EmbedderDataArray\"","fixed":["534317475"]}
+{"commit":"65606621192e5cc74f1d86f630c836a0a1dce37d","committed":"Fri Aug 14 11:28:40 2026","subject":"[turbolev] Support HoleyFloat64Constant in AddVirtualObjectNestedValue","fixed":["546127404"]}
+{"commit":"6ec3e19da57334ed6871f095a1cccf3b704c4b13","committed":"Fri Aug 14 11:23:47 2026","subject":"[sandbox] Store CppHeapPointerHandles in EmbedderDataArray","fixed":["534317475"]}
+{"commit":"a636907e13df2f257ac40667cf46a6182bd3e29c","committed":"Fri Aug 14 10:14:23 2026","subject":"[maglev] Split the checked holey double loads into a load and a conversion","fixed":["545843233"]}
+{"commit":"1b2de7071e803c9e60df97ff884188a1235ec9a0","committed":"Fri Aug 14 10:11:53 2026","subject":"[maglev] Look through the reinterpreting casts when checking for sentinel NaNs","fixed":["545843233"]}
+{"commit":"777744f4513393c89c1d4bea70cbaec6743dfa1e","committed":"Fri Aug 14 10:10:47 2026","subject":"[maglev] Verify the precondition of the free Float64 to HoleyFloat64 widen","fixed":["545843233"]}
+{"commit":"8ce52538975024d9e41700c4db05b969846d668e","committed":"Fri Aug 14 10:06:43 2026","subject":"[maglev] Simplify the float conversion API","fixed":["545843233"]}
+{"commit":"609fc14b19fcdbfdbdaef38c748729bfcf8bbb0f","committed":"Fri Aug 14 10:05:36 2026","subject":"[maglev] Let the double array store canonicalize its own NaNs","fixed":["545843233"]}
+{"commit":"d7b0dce4e17ebe38604a454f74ec41a89febd225","committed":"Fri Aug 14 10:02:55 2026","subject":"[maglev] Don't silence NaNs when converting HoleyFloat64 to Float64","fixed":["545843233"]}
+{"commit":"3eefa7acc3f063c29606ab4ea5c3df2624912ef7","committed":"Fri Aug 14 10:01:41 2026","subject":"[maglev] Replace TaggedToFloat64ConversionType with NodeType","fixed":["545843233"]}
+{"commit":"ddfbdb6f2a46b70fc41db9cbad241cabb7327906","committed":"Fri Aug 14 08:49:04 2026","subject":"[test] Bump shards on slow builder","fixed":["40643784"]}
+{"commit":"369a822ae21152c0bea6239814891cdf58e49ff1","committed":"Fri Aug 14 08:11:44 2026","subject":"[debug] Add DebugScriptScopeInfo struct definition","fixed":["545412300"]}
+{"commit":"e52a8827b089dc26411413229acdb99c377be971","committed":"Fri Aug 14 08:04:17 2026","subject":"Reland \"[debug] Handle failed source position collection in CreateBreakInfo\"","fixed":["528114471"]}
+{"commit":"457848335ffb7520156260add513a321fdbcce99","committed":"Fri Aug 14 07:17:18 2026","subject":"[flags] Remove deprecated inspector_live_edit flag","fixed":["434596678"]}
+{"commit":"029f169ce5c81fd26b9d7ed6e615e29ea9f0084c","committed":"Fri Aug 14 05:40:18 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"85266289a88da4c6c1fabbb4bcdaa36f7f7d1feb","committed":"Thu Aug 13 23:26:46 2026","subject":"[test] Auto-infer conflicting --no flags","fixed":[]}
+{"commit":"1122c7113cb2d141a7d0065d3c1def0814121b11","committed":"Thu Aug 13 23:12:43 2026","subject":"[heap] Skip memento handling for object in the current LAB","fixed":["518163386"]}
+{"commit":"2021b0a2f68a3202af164d5497b364b1f2f9046b","committed":"Thu Aug 13 19:23:55 2026","subject":"[runtime] Don't run microtasks within DisallowJavascriptExecutionScope","fixed":["486958027","542972795","545791013"]}
+{"commit":"ef77a94b5abe98b1275bd511297f451a90e2c971","committed":"Thu Aug 13 16:50:28 2026","subject":"[test] Properly fix flaky assertOptimized with --stress-flush-code","fixed":["543946778"]}
+{"commit":"caee851897b2a18f8ca535da02870333ab02f3c6","committed":"Thu Aug 13 16:25:11 2026","subject":"Revert \"[debug] Handle failed source position collection in CreateBreakInfo\"","fixed":["528114471"]}
+{"commit":"29b5a0d3c47e6d63d9a20bbdae324cee3ed0fe5b","committed":"Thu Aug 13 15:18:48 2026","subject":"[maglev] Unpack rest parameters and arguments objects in ReduceCallWithSpread","fixed":[]}
+{"commit":"abf798d1d3ef1c8d0bbbff4ded575cb7f7c0294a","committed":"Thu Aug 13 14:54:15 2026","subject":"[build] Fix cluster build of maglev tests","fixed":[]}
+{"commit":"d315af3d83cfe3bc1709f5b140db393db42790b3","committed":"Thu Aug 13 12:47:30 2026","subject":"[regexp] Reset compiler flags between word boundary branches","fixed":["544575761"]}
+{"commit":"4fc8c9303319078d18e4bf55460b91c563aa4a67","committed":"Thu Aug 13 11:58:31 2026","subject":"[maglev] Elide hole check on holey-double loads feeding arithmetic","fixed":["42204525"]}
+{"commit":"8269891cf2b784d67ea70b0d7e7b40b0331a5079","committed":"Thu Aug 13 11:46:32 2026","subject":"[profiler] Do not truncate script sources","fixed":["497855658"]}
+{"commit":"cf102f331ba2a3a969f5d7463a378fd67e8eda48","committed":"Thu Aug 13 11:33:58 2026","subject":"Reland \"[ic] Bailout in StoreIC for resizable TypedArray prototype writes\"","fixed":["Make test faster and skip it with tsan"]}
+{"commit":"a04aa5e4e6eefe8f08d41772781062d8fdbe1c61","committed":"Thu Aug 13 11:28:25 2026","subject":"[debug] Handle failed source position collection in CreateBreakInfo","fixed":["528114471"]}
+{"commit":"d1bff904881da72e9a7776f0f695eaabc1350abf","committed":"Thu Aug 13 10:29:48 2026","subject":"[wasm interpreter] Fix unreachable cast modes, WasmNull map checks, stack guards","fixed":["none"]}
+{"commit":"68cf9ecd884b08acbe3a14a24555e6f3eaac94f8","committed":"Thu Aug 13 10:10:24 2026","subject":"[simd] Disable SVE implementation of array search for GCC","fixed":[]}
+{"commit":"c5107d5f4605cce0cd87ad9a261ce4f6fc8cbe15","committed":"Thu Aug 13 09:48:12 2026","subject":"Revert \"[heap] Check memento is not in LAB for MinorMS\"","fixed":["518163386"]}
+{"commit":"10ed899fa92b9ce21b62b8812def56408129405a","committed":"Thu Aug 13 09:29:20 2026","subject":"[profiler] Emit context fields for all context types","fixed":["497855658"]}
+{"commit":"30575891a4c92d734502379f3090a8236ca80682","committed":"Thu Aug 13 09:04:27 2026","subject":"[iterator] Unflag Iterator.prototype.join","fixed":["465715798"]}
+{"commit":"5724490e280c70031a1449bdf47c81e4f6020340","committed":"Thu Aug 13 09:00:33 2026","subject":"Revert \"[runtime] Run microtasks even within DisallowJavascriptExecutionScope\"","fixed":["486958027","542972795"]}
+{"commit":"39aa3909d58978fe741770bbae771b15fabc6d0f","committed":"Thu Aug 13 08:53:33 2026","subject":"[AVX10] Add basic EVEX encoding support","fixed":["536954139"]}
+{"commit":"7fd662da8a5fc156ba3e7d04b75ec4c7b2f744b9","committed":"Thu Aug 13 08:09:05 2026","subject":"[compiler] Avoid data race when reading outer ScopeInfo in bg merge","fixed":["541837151"]}
+{"commit":"4875ea47fe95957ef1d157b49dd0eb5f9548fa4a","committed":"Thu Aug 13 08:07:20 2026","subject":"[d8] Wrap global property lookup in TryCatch in runMessageLoopOnPause","fixed":["545105325"]}
+{"commit":"008288d1c1a26637a258049574ff1b5e824a9890","committed":"Thu Aug 13 08:05:38 2026","subject":"Reland \"[profiler] Emit RelocInfo edges in ExtractInstructionStreamReferences\"","fixed":["497855658"]}
+{"commit":"c99673ef4501d14f445e451f366627c8b92da0e6","committed":"Thu Aug 13 06:35:34 2026","subject":"Roll agents from 5f790215c322 to 0b207f130c53 (1 revision)","fixed":["None"]}
+{"commit":"1db7a565f297eb4a967b55d3588b55f31e6e8aa4","committed":"Thu Aug 13 05:26:02 2026","subject":"Update ICU (trusted)","fixed":[]}
+{"commit":"2f55586c350e4a1fe98ade3efea7f67a48c2ea26","committed":"Wed Aug 12 22:57:54 2026","subject":"[test] Fix acq-rel-rmw-operations on big-endian","fixed":[]}
+{"commit":"23b1f5c1681f50658c03242c6b0a67e45286790b","committed":"Wed Aug 12 21:24:06 2026","subject":"[regexp] Cache RegExp split results","fixed":[]}
+{"commit":"bcd57acddb3c0c9fecbba75e1951d313cfe65d1d","committed":"Wed Aug 12 20:17:10 2026","subject":"[runtime] Run microtasks even within DisallowJavascriptExecutionScope","fixed":["486958027","542972795"]}
+{"commit":"a02312019ea5cc31f14532a7b27cd710553cf8cd","committed":"Wed Aug 12 18:50:07 2026","subject":"[api] Remove deprecated methods, pt.2","fixed":["348660658"]}
+{"commit":"44a3ea5dfba49555118a387c6ea31f57b89de180","committed":"Wed Aug 12 18:37:34 2026","subject":"Roll agents from 78cc65e41fda to 5f790215c322 (1 revision)","fixed":["None"]}
+{"commit":"27bdcbf67f3f6f551d92d1438311722486cd4f0a","committed":"Wed Aug 12 17:50:23 2026","subject":"[wasm] Fix UAF of external string resource","fixed":["543901836"]}
+{"commit":"a2cb779bf6b77d91cb0618cd9dd7a07ebc744647","committed":"Wed Aug 12 16:43:28 2026","subject":"[test] Fix wasm/futex on big-endian","fixed":[]}
+{"commit":"83ffb1193f84e44ce8bbed2f67947ac7330970a4","committed":"Wed Aug 12 15:31:15 2026","subject":"[heap] Check memento is not in LAB for MinorMS","fixed":["518163386"]}
+{"commit":"23d36cd31254dcb4f50f75b74787bb933ee1206b","committed":"Wed Aug 12 15:16:30 2026","subject":"Revert \"[profiler] Emit RelocInfo edges in ExtractInstructionStreamReferences\"","fixed":["497855658"]}
+{"commit":"4fc16d88a62227943d164565d82ba753101486b1","committed":"Wed Aug 12 14:52:33 2026","subject":"[test] Remove slow d8 inspector regression test","fixed":["545349624"]}
+{"commit":"efa83eaca6b8c8c18da5327dfb640734ed1421d8","committed":"Wed Aug 12 14:47:41 2026","subject":"[flags] Remove incorrect turboshaft load elimination CHECK","fixed":["544160986"]}
+{"commit":"8937dcafa0b5857c69974439072b75f1ba654f15","committed":"Wed Aug 12 14:41:43 2026","subject":"[builtins] Fast-path PACKED_ELEMENTS in Array.prototype.join","fixed":[]}
+{"commit":"97ca076020ec60e70ac934f6ee0cf09f3089ced4","committed":"Wed Aug 12 14:33:15 2026","subject":"[sandbox] Remove Segment pool from SegmentedTable","fixed":["545081948"]}
+{"commit":"ea9c016f26ad274ab86595e8d3fc8712378706dd","committed":"Wed Aug 12 14:04:22 2026","subject":"AIX: Fix race condition in DecommitPages","fixed":[]}
+{"commit":"a84709f47eafe7aa77852b10f8696801ade4b1d0","committed":"Wed Aug 12 13:47:07 2026","subject":"[test] Skip slow inspector test in gc_stress mode","fixed":["545105325"]}
+{"commit":"d77793d811aaaa384b066fd63b2b5ee3bafb3701","committed":"Wed Aug 12 12:03:15 2026","subject":"[turbofan] Disable additive safe integer feedback (read-only)","fixed":["544579827"]}
+{"commit":"ed8988c9a545539ea4afedbd83aaf00ae95b8e5d","committed":"Wed Aug 12 11:39:55 2026","subject":"[bigsleep] Update V8 snapshot creation script","fixed":["488046617, 543321704"]}
+{"commit":"79f02d9b4dd68575ef9c9b17975e90edb24d3983","committed":"Wed Aug 12 11:27:23 2026","subject":"[objects] Remove live_edited bitfield from SharedFunctionInfo...","fixed":["434596678"]}
+{"commit":"93b565b9d8e5f90d4a6c267f4efc643ab60f8510","committed":"Wed Aug 12 11:08:27 2026","subject":"[profiler] Emit RelocInfo edges in ExtractInstructionStreamReferences","fixed":["497855658"]}
+{"commit":"3ea09f5625ad1ea206aff491f557d870fac9fa53","committed":"Wed Aug 12 11:07:19 2026","subject":"Revert \"[wasm] Perform atomic seq_cst load for shared memory.size\"","fixed":["533026477"]}
+{"commit":"2bb9ee82ef8add2c735511a0b8c294230f1b0375","committed":"Wed Aug 12 09:37:35 2026","subject":"[wasm] Perform atomic seq_cst load for shared memory.size","fixed":["533026477"]}
+{"commit":"dcdeaa882209245012edd3f67599839aba60a25e","committed":"Wed Aug 12 09:29:17 2026","subject":"Skip slow tests on TSAN","fixed":[]}
+{"commit":"538b53e6bb2769aa62bb3fc20e3317ed6a1e90ef","committed":"Wed Aug 12 09:25:18 2026","subject":"[test] Skip flaky test in gc_stress mode","fixed":["543946778"]}
+{"commit":"c46cc7a032bd26cf6e7c2d8db8e6f849b83d9b57","committed":"Wed Aug 12 09:22:21 2026","subject":"Fix String.toWellFormed","fixed":["541604100"]}
+{"commit":"f755d23ee517a4da41c834af69d6daa4b6b66850","committed":"Wed Aug 12 09:04:23 2026","subject":"[debug] Remove is_live_edited from DebugDelegate::ScriptCompiled","fixed":["434596678"]}
+{"commit":"0403cf0bc87141493e8ffcc5c073c40243178e71","committed":"Wed Aug 12 07:57:11 2026","subject":"[d8] Wrap global property lookup in TryCatch in InspectorFrontend::Send","fixed":["545105325"]}
+{"commit":"5816f4d68328dbec5482e7aa3075ea4d78e3e903","committed":"Wed Aug 12 07:50:32 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"b649f69607511fe3ffeed2918368a1146367eee8","committed":"Wed Aug 12 02:36:16 2026","subject":"[riscv][compiler] Unify wasm code-generator stack checks","fixed":["535877252"]}
+{"commit":"2cf1906ef1ab87ced446bbf083ac788ced18e32c","committed":"Wed Aug 12 02:30:46 2026","subject":"[riscv] Add zfh/zvfh detect","fixed":[]}
+{"commit":"36079c36283aaf3d0cee0797e46ddc278988f7f2","committed":"Tue Aug 11 19:43:17 2026","subject":"[wasm][sandbox] Fix side effects of WasmGetOwnProperty builtin","fixed":["543557673"]}
+{"commit":"2bbfbfb580673329220665906108830285decfd3","committed":"Tue Aug 11 17:53:21 2026","subject":"[cppgc] Optimize LAB representation and header initialization","fixed":["545162665"]}
+{"commit":"f2bb3c5121592bea1dfff36aab5bc79b524b56e4","committed":"Tue Aug 11 17:19:23 2026","subject":"[api] Take and return T* in Context CppHeapPointer embedder data APIs","fixed":["534317475"]}
+{"commit":"441d84acce645ea5c8cf4e2ebfeb1aff69c77c74","committed":"Tue Aug 11 17:09:01 2026","subject":"[tools] Bump morgan to 1.11.0 to address CVE-2026-5078","fixed":[]}
+{"commit":"4144ead9f60d646f8d5a4911dd10316a3ec46bcd","committed":"Tue Aug 11 16:05:25 2026","subject":"ppc64: Replace r0 with UseScratchRegisterScope in PushRoot","fixed":[]}
+{"commit":"f4eab5ff7460ce216b85694712cb35141a17848b","committed":"Tue Aug 11 15:50:48 2026","subject":"Fix stack iteration from fast C call","fixed":["541490470"]}
+{"commit":"2a52ded2a6b6012f6c1cbb266d38353253ff4356","committed":"Tue Aug 11 15:38:07 2026","subject":"[d8] Migrate AsyncHookWrap to CppGCManaged","fixed":["535892918"]}
+{"commit":"1d07b404b93a120929062e780ec1555a68fc0fc4","committed":"Tue Aug 11 15:36:58 2026","subject":"[debug] Remove LiveEdit core, diffing engine, and runtime intrinsics","fixed":["434596678"]}
+{"commit":"3d66b2bdda73ba4e990513c358a0c1223db603fb","committed":"Tue Aug 11 15:06:45 2026","subject":"[api] Remove deprecated methods, pt.1","fixed":["333672197"]}
+{"commit":"6d2a8bd2a76aaf80b783b101b93933591893d889","committed":"Tue Aug 11 15:05:40 2026","subject":"[api] Deprecate non-CppGC v8::MicrotaskQueue implementation","fixed":["515252150"]}
+{"commit":"6224d8efecbe6f3f67b9fe92d8874ca4d8c4ec84","committed":"Tue Aug 11 14:35:23 2026","subject":"Skip tests on TSAN","fixed":[]}
+{"commit":"133241ec5dd1c346ae36dbaa1d72244162cc7e60","committed":"Tue Aug 11 13:48:31 2026","subject":"[flags] Introduce --wasm-assume-ref-cast-desc-succeeds","fixed":["498924945"]}
+{"commit":"d3ad9479ea08885d2001d048cc011d9fb6b626e6","committed":"Tue Aug 11 13:47:22 2026","subject":"[test] Migrate test objects to CppGCManaged","fixed":["535892918"]}
+{"commit":"6c94c63ea357aee1086ffdd8280beafe96f31a8b","committed":"Tue Aug 11 13:30:37 2026","subject":"[d8] Migrate d8 objects to CppGCManaged","fixed":["535892918"]}
+{"commit":"593b6fddc4c0a14cde3bcf57de7491fde18f2168","committed":"Tue Aug 11 13:07:07 2026","subject":"[loong64][mips64] Fix DecodeField for BitFieldUnion","fixed":[]}
+{"commit":"6eacfe581c1fe1dc03aa9d46158967f06fe5e373","committed":"Tue Aug 11 12:48:54 2026","subject":"Migrate DisplayNamesInternal to CppGCManaged","fixed":["535892918"]}
+{"commit":"217ee115f4757f16d1e04506ed1fa8d96ee77a9a","committed":"Tue Aug 11 12:42:24 2026","subject":"[temporal] Move Temporal objects to CppGCManaged","fixed":["535892918"]}
+{"commit":"e533bd77f25f9786d206314b076bd4ed50df9dee","committed":"Tue Aug 11 12:36:00 2026","subject":"[wasm][sandbox] CHECK for SetUrl() race","fixed":["542146471"]}
+{"commit":"4f91dbb840e734a114e00ae470bc002cd025aa86","committed":"Tue Aug 11 11:52:28 2026","subject":"PPC/S390: skip regress/wasm/regress-526163463","fixed":[]}
+{"commit":"053c0945b60674b3b4d5d22c7fd87bec9a68d0f3","committed":"Tue Aug 11 11:29:09 2026","subject":"[intl] Migrate IcuBreakIteratorWithText to CppGCManaged","fixed":["535892918"]}
+{"commit":"6525748a15f582f339e501e24a00f38745fc4a35","committed":"Tue Aug 11 10:09:00 2026","subject":"[regalloc][arm] Add TRACE outputs for combined aliasing in FindFreeRegistersForRange","fixed":["522111578"]}
+{"commit":"67924b2ecdf929e8556b42db26b2b23759ece8e4","committed":"Tue Aug 11 10:07:55 2026","subject":"[regalloc][arm] Print correct SIMD register names in --trace-turbo-alloc","fixed":["522111578"]}
+{"commit":"285b7d9f11499c1a6eea930abcdda28d2923bdc8","committed":"Tue Aug 11 09:53:46 2026","subject":"Reland \"[tiering] Reset interrupt budget after flushing code\"","fixed":[]}
+{"commit":"d54c4a714ff03bc2ec4223fc134d4f7ba42a547e","committed":"Tue Aug 11 09:52:42 2026","subject":"Skip test also in the Turbofan variant","fixed":["545007122"]}
+{"commit":"1f9c473e4dddca627abe9b72e10c47effa1556c5","committed":"Tue Aug 11 09:51:38 2026","subject":"[extensions] Use CreateDataProperty in StatisticsExtension","fixed":["544223867"]}
+{"commit":"177f1a0661168c25be63d34234fdc0e70692bb88","committed":"Tue Aug 11 09:50:25 2026","subject":"[intl] Move intl-Managed to CppGCManaged","fixed":["535892918"]}
+{"commit":"1a4a2b03b12944eb848d8eb2f2f7c56cb1ec55f9","committed":"Tue Aug 11 08:24:01 2026","subject":"[sandbox] Harden pointer table off-space segment storage","fixed":["540656748, 536234354"]}
+{"commit":"847e017d7f549bab35b0b376df785398080d2cc2","committed":"Tue Aug 11 07:59:16 2026","subject":"Skip slow tests","fixed":[]}
+{"commit":"48e14b1826c654ad83219ca187dfa9d3c722fab3","committed":"Tue Aug 11 07:58:09 2026","subject":"[inspector] Deprecate Debugger.setScriptSource and remove liveedit tests","fixed":["434596678"]}
+{"commit":"250cbe36f711acc635fe5cef9ebbfd1938752d8e","committed":"Tue Aug 11 07:57:04 2026","subject":"[wasm-custom-desc] Make WasmNull entirely inaccessible","fixed":["403372470"]}
+{"commit":"915d04562213275b34bedaeb81e1030f150bac48","committed":"Tue Aug 11 07:56:00 2026","subject":"[test] Skip concurrent-string-ext-seq on stress variant","fixed":[]}
+{"commit":"808c9cd3bb1e354fa3cae7a24fe9cd13ea546313","committed":"Tue Aug 11 07:54:56 2026","subject":"[test] Add regression tests for optimizer deopt frame scope uses","fixed":["543836266"]}
+{"commit":"d815f5382651f0dec282b5772bdb09c3ed79d2a0","committed":"Tue Aug 11 07:53:51 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"b606ba74669b92a175682b3a0402c8e67f6b4440","committed":"Tue Aug 11 07:52:47 2026","subject":"Fix regress-394119934 on s390x","fixed":[]}
+{"commit":"ee5bc93fd0d0970186bb9a09a365526951566634","committed":"Tue Aug 11 07:51:41 2026","subject":"Reland \"[wasm] Fix nullptr deref in Liftoff debug side table coverage\"","fixed":["526163463"]}
+{"commit":"cb7c2e14ff8af03d7ab95c0c32f2d8f420ca6e25","committed":"Tue Aug 11 07:50:36 2026","subject":"[riscv] Fix AtomicStoreTaggedPointer and AtomicStore fence order","fixed":[]}
+{"commit":"2dfcb898e9e46dfed6fc9c47b56c226d73a196e6","committed":"Tue Aug 11 07:49:31 2026","subject":"[riscv][regexp]Skip backtrack stack setup for patterns that never backtrack","fixed":[]}
+{"commit":"c635f0d160b6e988b5ea5a907511a2929beb5d5e","committed":"Mon Aug 10 15:45:40 2026","subject":"ppc64: Replace r0 with UseScratchRegisterScope in Test* helpers","fixed":[]}
+{"commit":"c658a77923c51e3800329bc74197e2ea7717ec17","committed":"Mon Aug 10 14:59:26 2026","subject":"[sandbox] Use SBXCHECK in CreateWasmobject","fixed":["477867438"]}
+{"commit":"23294e43bec49915a9f3fb9f3b45acc559d1bd6e","committed":"Mon Aug 10 14:48:47 2026","subject":"[inspector] Pin InspectedContext in ConsoleHelper to prevent UAF","fixed":["523442920"]}
+{"commit":"6bf59a24e3af6c15dfdc94a5d60c393046fa6a01","committed":"Mon Aug 10 14:36:29 2026","subject":"[cleanup] Remove dead tags","fixed":[]}
+{"commit":"13a65af92cfa9200dfceb33f2b40f4781990d76a","committed":"Mon Aug 10 13:53:20 2026","subject":"[wasm] Migrate NativeModule to CppGCManaged","fixed":["535892918"]}
+{"commit":"f30358a1340e26ce26dc57697fe471a5b7de0864","committed":"Mon Aug 10 13:05:06 2026","subject":"[maglev] Add deopt uses for optimizer deopt frame scopes","fixed":["424157317"]}
+{"commit":"75eac38b022003ac7c6aec0c38936bc27ce83086","committed":"Mon Aug 10 12:31:43 2026","subject":"[wasm] Migrate ManagedData to CppGCManaged","fixed":["535892918"]}
+{"commit":"89853b3bb520280418327dd562a401405bafe682","committed":"Mon Aug 10 12:24:44 2026","subject":"Revert \"[ic] Bailout in StoreIC for resizable TypedArray prototype writes\"","fixed":["517972800"]}
+{"commit":"b5244a8b5b58d15776ff1014b5a845c55305ef04","committed":"Mon Aug 10 11:18:15 2026","subject":"[wasm] Migrate FuncData to CppGCManaged","fixed":["535892918"]}
+{"commit":"0e98c6e8c5a48c6fd59fe06795a464793e539093","committed":"Mon Aug 10 08:53:57 2026","subject":"[ic] Bailout in StoreIC for resizable TypedArray prototype writes","fixed":["517972800"]}
+{"commit":"12e3acec98da87ddca70ae3024846a7f9152bec7","committed":"Mon Aug 10 08:30:39 2026","subject":"[wasm] Move WasmStreaming to CppGCManaged","fixed":["535892918"]}
+{"commit":"473c8af09418cb6ea30ec564bb7e1207266a98ab","committed":"Mon Aug 10 08:10:28 2026","subject":"[maglev] Fix racy testNoOsr in osr-from-ml-to-tf-mode-1","fixed":[]}
+{"commit":"80ec08985c5beb9ddb85e7feb30103777ec8443f","committed":"Mon Aug 10 07:21:31 2026","subject":"[riscv][wasm-wide-arith] Consistently use IsUsed checks on output values","fixed":["491766259"]}
+{"commit":"6796b38354411d8af93e42d78785942fca60fbd1","committed":"Mon Aug 10 04:54:14 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"15ce9d47586c47d1e44c9ddc49366cf4edc509a2","committed":"Sun Aug 09 04:36:08 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"d6efe7102bc44f38d3d9915ef3f88b78983e1160","committed":"Sun Aug 09 03:15:28 2026","subject":"[test262] Roll test262","fixed":["v8:7834"]}
+{"commit":"2e8cedb300f5990ed8ef5dd14d435c678e38cf96","committed":"Sat Aug 08 17:01:47 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"497d2c5465f76983714037e92394eaed707775bb","committed":"Sat Aug 08 04:44:02 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"eebbc36f6f06a303912d8ddd9133cc171c20dc33","committed":"Fri Aug 07 14:25:28 2026","subject":"[wasm] Make --turboshaft-trusted-load-elim weakly imply LLE","fixed":[]}
+{"commit":"19a8a7fc414f67e146066fcdcfead3b57bf4e239","committed":"Fri Aug 07 13:38:16 2026","subject":"[maglev] Improved strategy for osr_from_maglev","fixed":["328115456, 540461931"]}
+{"commit":"84e9e5c60eeae4067f24b9878b22338dc31b8ef7","committed":"Fri Aug 07 13:34:05 2026","subject":"[cppgc] Avoid redundant full-page zeroing in NormalPageMemoryPool","fixed":[]}
+{"commit":"7b593419b1c123805b419ce79640dce46d7b3617","committed":"Fri Aug 07 13:22:37 2026","subject":"[maglev] Move EagerDeoptFrameScope to MaglevReducer","fixed":["424157317"]}
+{"commit":"81b2acf3bbfecea934d5daed87c27da6347b3182","committed":"Fri Aug 07 13:09:39 2026","subject":"[compiler] Avoid race condition when reading ScopeInfo during background merge","fixed":["541837151"]}
+{"commit":"5bee7c4fe36607b1cba4cc297db681ab6a2aab84","committed":"Fri Aug 07 13:07:12 2026","subject":"[deps] Add the llvm-libclang package","fixed":["531344950"]}
+{"commit":"f20ed15954ff97a08aa1c9653030e26661d9d41f","committed":"Fri Aug 07 12:47:18 2026","subject":"[maglev] Reduce TypedArrayConstructor in MaglevReducer","fixed":["424157317"]}
+{"commit":"f87a7536445fb12e068bfe28b1b3198f0a365a04","committed":"Fri Aug 07 12:44:24 2026","subject":"[maglev] Support LazyDeoptFrameScope in MaglevGraphOptimizer","fixed":["424157317"]}
+{"commit":"6b77715b801ddd890ab6133a335413280fd298ee","committed":"Fri Aug 07 11:32:43 2026","subject":"PPC/s390: [maglev] Merge TryOnStackReplacement with loop interrupt","fixed":[]}
+{"commit":"db939f0a038022116000f50d563fdd593762e3b0","committed":"Fri Aug 07 11:12:52 2026","subject":"Revert \"[tiering] Reset interrupt budget after flushing code\"","fixed":[]}
+{"commit":"4f0454054480ebeb530ae331090c659fcacee26b","committed":"Fri Aug 07 10:57:12 2026","subject":"[regexp] Add UseCounters for RegExp species and flag mismatch","fixed":["533408057"]}
+{"commit":"a7f588965975ed8261d1470c5aad984d8277c728","committed":"Fri Aug 07 10:50:39 2026","subject":"Revert \"[maglev] Fold cold branches into conditional deopt checks\"","fixed":["542646772"]}
+{"commit":"3ace1978fdf39887fdf812992fd7afe5dac7b972","committed":"Fri Aug 07 10:47:23 2026","subject":"[api] Introduce additional API for embedder data in the context","fixed":["534317475"]}
+{"commit":"f61df1b3f21c546a49a26e1b0dbfc7a996cf34ba","committed":"Fri Aug 07 09:33:55 2026","subject":"[interceptors] Fix attributes passed to definer callbacks","fixed":[]}
+{"commit":"c69bace374926ba465a755787cdefaf2c6785e29","committed":"Fri Aug 07 09:26:30 2026","subject":"[compiler] Ensure dictionary load fast-path only target JSObjects","fixed":["541251902"]}
+{"commit":"182c3abd64082e4c65f474c734ccfabeb22c6318","committed":"Fri Aug 07 09:25:12 2026","subject":"[flags] Drop FlagDefinitionsFuzzTest.StressFlagImplications","fixed":["542528844"]}
+{"commit":"ad68fcd8f3f1d4482483378b8e936f74f2d0f6ab","committed":"Fri Aug 07 08:47:16 2026","subject":"[regexp][tools] Generate fuzzer patterns from the ECMA-262 grammar","fixed":[]}
+{"commit":"4728eaa8cb126da9668af5f7fadb98a163198223","committed":"Fri Aug 07 08:46:11 2026","subject":"[iterator-helpers] Mark zip helpers exhausted on exception (strict)","fixed":["465357675"]}
+{"commit":"a285adf2e55be148ea966e9bcb20b2fc88b34880","committed":"Fri Aug 07 08:24:50 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"e0562d87ad9c17042b581582c99237d798572e67","committed":"Fri Aug 07 08:23:45 2026","subject":"[compiler] Don't inline Array.prototype.sort on mixed elements kinds","fixed":["542403045"]}
+{"commit":"b74028b55c1625ac0518212b0029eaa1607f6aa2","committed":"Fri Aug 07 08:22:41 2026","subject":"[sandbox] Restore ExternalString resource_data_ after serialization","fixed":["542023495"]}
+{"commit":"a9cc16f9401df3f51f9a0be01371bb2ced38cafc","committed":"Fri Aug 07 08:21:36 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"f579f7738a61363287e96af9c584e5e6c62944e2","committed":"Fri Aug 07 02:15:53 2026","subject":"[loong64][mips64][compiler] Unify wasm code-generator stack checks","fixed":[]}
+{"commit":"bad2378558fcc24a3e48c674a8a90770ca7e1c7e","committed":"Fri Aug 07 01:55:34 2026","subject":"[mips64][regexp] Remove the unconditional call to StoreRegExpStackPointerToMemory","fixed":[]}
+{"commit":"51d87d6cea98013d1bead63b69db33f89c19b885","committed":"Thu Aug 06 17:18:36 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"b2ce4c696a93541cb82db79032614af06688cc5a","committed":"Thu Aug 06 16:20:52 2026","subject":"[tools] add `v8 source [frame#]` to GDB and LLDB plugins","fixed":[]}
+{"commit":"a3793b7a5adb114c0133b9c4cd86c33415086071","committed":"Thu Aug 06 15:25:41 2026","subject":"[maglev] Pack MergePointInterpreterFrameState","fixed":["543076355"]}
+{"commit":"411b065dd6df83992d4d7359b5ce71ace382933d","committed":"Thu Aug 06 15:19:10 2026","subject":"[maglev] Allocate merge-state register state lazily","fixed":["543076355"]}
+{"commit":"38190615fd5ccc6c8267e0b513937481546ab55f","committed":"Thu Aug 06 15:08:34 2026","subject":"[maglev] Turn merge-state loop metadata into a subclass","fixed":["543076355"]}
+{"commit":"5166809f70ceeb497b4d560f46f37e117d95382f","committed":"Thu Aug 06 15:05:03 2026","subject":"[maglev] Merge TryOnStackReplacement with loop interrupt","fixed":[]}
+{"commit":"b5445de7d052f9cf9519da75fbdce0366b4bf3b2","committed":"Thu Aug 06 14:33:22 2026","subject":"[iterator-helpers] Mark zip helpers exhausted on exception","fixed":["465357675"]}
+{"commit":"76176f497c9d1ad381048d311db6604f85bd85e5","committed":"Thu Aug 06 12:48:57 2026","subject":"[api] Remove deprecated CppHeap::Terminate method","fixed":[]}
+{"commit":"de99f626090983bb01b91a0052150e120e699c0b","committed":"Thu Aug 06 12:38:59 2026","subject":"[maglev] Allocate loop metadata of merge states lazily","fixed":["543076355"]}
+{"commit":"b69a1a1d8613472f7a3f174060356687ba4255fa","committed":"Thu Aug 06 12:27:44 2026","subject":"[regexp] Record flags on deferred worklist items","fixed":[]}
+{"commit":"1d62bf553acac3b5380c48dd295c90ecbb12dcc3","committed":"Thu Aug 06 12:25:53 2026","subject":"[modules][counter] Add use counter for missing default + `export * from`","fixed":["542143302"]}
+{"commit":"45a68e7aa0d47c1f883da2e77d8ff6112dd7bdcd","committed":"Thu Aug 06 10:36:59 2026","subject":"[wasm][arm64] Use maybe_unauthenticated_pc in WasmFrame stack inspection","fixed":["541316788"]}
+{"commit":"1dbbf267698bc4f583938537c180ef02d038a4dd","committed":"Thu Aug 06 10:35:53 2026","subject":"[maglev] Fold cold branches into conditional deopt checks","fixed":["542646772"]}
+{"commit":"db1a465144dee3dbc0eadfc775704f5c4e1991e4","committed":"Thu Aug 06 10:33:33 2026","subject":"Reland \"[wasm][sandbox] Post async compilation tasks as non-nestable\"","fixed":["540430406"]}
+{"commit":"78276f18796f1e4c0698ab217e22af3ec27bbbaf","committed":"Thu Aug 06 09:57:31 2026","subject":"[runtime] Allocate mapped arguments with the sloppy arguments map","fixed":["536271629","536271629"]}
+{"commit":"ca18befb80caabaf1b2b325c69f4fb3ce0e69ec2","committed":"Thu Aug 06 09:41:34 2026","subject":"[test] Skip mjsunit/compiler/concurrent-string-ext-seq with --isolate","fixed":["539796962"]}
+{"commit":"c2e6a7cc25de002afab80f173344376122fb1a13","committed":"Thu Aug 06 09:20:09 2026","subject":"[api] Enable DisallowJavascriptExecution scope around api callbacks","fixed":["540137721, 40067940"]}
+{"commit":"d3f1727462090b3298ae03f8cbe3ea2113b63bd6","committed":"Thu Aug 06 09:19:04 2026","subject":"[regalloc][arm] Fix inactive range aliasing in FindFreeRegistersForRange","fixed":["522111578"]}
+{"commit":"439206080f622552ffc1307d89d4914de4de9df7","committed":"Thu Aug 06 09:18:00 2026","subject":"[debug] Clear blocklist on first context-requiring scope","fixed":["542461144"]}
+{"commit":"1bb6bdc6870e6b691a5d248f6ef6e8ba4fcd49b1","committed":"Thu Aug 06 09:16:56 2026","subject":"[iterator-helpers] Unflag joint iteration","fixed":["465357675"]}
+{"commit":"0d507b855f0a3426340926aad0de42001d51bec7","committed":"Thu Aug 06 09:15:52 2026","subject":"[maglev] Bound an untruncated operand by its static range","fixed":["542403050"]}
+{"commit":"651ef047d30225b4907e83f00c363ca235adf71e","committed":"Thu Aug 06 09:14:47 2026","subject":"[turbolev] Bypass tagging conversions when untagging","fixed":["424157317"]}
+{"commit":"a2861003e86f67f3ac811ced39247564d4bc453d","committed":"Thu Aug 06 09:13:43 2026","subject":"[test] Demote turbofan_additive_safe_int_feedback","fixed":["542403050"]}
+{"commit":"a9622c4f12e6f39d57a695f428bf7300baca00e6","committed":"Thu Aug 06 09:12:39 2026","subject":"[regexp] Restore flags after emitting a modifier group","fixed":[]}
+{"commit":"74399279e81c4a1c20ac4f4040755992ead5af59","committed":"Thu Aug 06 09:11:35 2026","subject":"[tiering] Reset OSR urgency along with tiering requests","fixed":[]}
+{"commit":"b36cf9f6ccd2931d1d0bde6a9f366d30667e4b75","committed":"Thu Aug 06 09:10:30 2026","subject":"[api] Prepare DisallowJavascriptExecution scope around api callbacks","fixed":["540137721, 40067940"]}
+{"commit":"f14dd2d2003354480e8f8a6fc9cf15d9bd00939f","committed":"Thu Aug 06 09:09:23 2026","subject":"[loong64][mips64][wasm-wide-arith] Consistently use IsUsed checks on output values","fixed":["491766259"]}
+{"commit":"a1c6d874d211da1d4aede810a2ca0b18b1ac7ac6","committed":"Thu Aug 06 09:08:18 2026","subject":"[loong64][mips64][regexp] Skip backtrack stack setup for patterns that never backtrack","fixed":[]}
+{"commit":"b1a756efd4d1449635610abe0ac929357e5478ae","committed":"Thu Aug 06 08:20:17 2026","subject":"Revert \"[compiler] Optimize UnhandledLiveRangeQueue with vector binary min-heap\"","fixed":[]}
+{"commit":"24ca3c92423e223d6ce9b39835382a550a07148b","committed":"Thu Aug 06 00:16:14 2026","subject":"Revert \"[wasm][sandbox] Post async compilation tasks as non-nestable\"","fixed":["540430406"]}
+{"commit":"2140fef7f16b27aae4f8ff2a3004f5db185a9441","committed":"Wed Aug 05 21:31:55 2026","subject":"[objects] Fix argument order in EmbedderDataSlot::load_raw","fixed":["534317475"]}
+{"commit":"9e596965c7d503ffa872bbdea829d7f56b9a5a93","committed":"Wed Aug 05 18:10:55 2026","subject":"[agents] Add GitHub Copilot CLI installer","fixed":["537631526"]}
+{"commit":"378544fbbb5d4083bf1c315027576f838f00f213","committed":"Wed Aug 05 17:33:08 2026","subject":"[wasm][sandbox] Post async compilation tasks as non-nestable","fixed":["540430406"]}
+{"commit":"f0e96a2ca87f1d3c9b8088c035a95ddfb3886d0a","committed":"Wed Aug 05 16:08:49 2026","subject":"[test] Remove regress-crbug-540352782.js","fixed":["542031527"]}
+{"commit":"5effa87628adbe85a8c6cb2ef0bc8b3a6936604a","committed":"Wed Aug 05 16:07:43 2026","subject":"[maglev] Export OpcodeToString with V8_EXPORT_PRIVATE","fixed":[]}
+{"commit":"eab6587285ce4b402f287eae8b267203c194fec0","committed":"Wed Aug 05 15:44:37 2026","subject":"[json] Use non-allocating GetDataValue() in GetBuiltin()","fixed":["533049459"]}
+{"commit":"c0b4199ccac2d1a1b99d13933d523e5d493f8151","committed":"Wed Aug 05 15:43:32 2026","subject":"[compiler] Optimize UnhandledLiveRangeQueue with vector binary min-heap","fixed":[]}
+{"commit":"d64be13239be5e50b8236f3096aec9b557064040","committed":"Wed Aug 05 15:42:26 2026","subject":"[strings] Fix one-byte detection on big-endian systems","fixed":[]}
+{"commit":"31061370bdd3573c482ab55ab412499191c4e9fa","committed":"Wed Aug 05 14:42:15 2026","subject":"[api] Introduce new API for embedder data in the context","fixed":["534317475"]}
+{"commit":"a817808e4ad27ef43cfc593c33d7f60690f01fbf","committed":"Wed Aug 05 14:33:05 2026","subject":"[debugger] Fix stack blocklist for outer closure scopes","fixed":["542461144"]}
+{"commit":"54589c80219b5e24cafa8c003f7e8bfdd5dfc513","committed":"Wed Aug 05 14:27:12 2026","subject":"[maglev] Stash node buffers during Subgraph construction","fixed":["542377192"]}
+{"commit":"069bed7c14f493cbc0dbb5dab54125f3137ebcf2","committed":"Wed Aug 05 14:23:34 2026","subject":"[embedder-fields] Unify EmbedderDataSlot layout into two separate fields","fixed":[]}
+{"commit":"01087f5f8f921c5f55f8f6bda4132d48f5eba0e7","committed":"Wed Aug 05 14:09:34 2026","subject":"Require fully trusted clients for the inspector profiler","fixed":["513395384"]}
+{"commit":"5279f5985fa10abb1962bd9a23f585629e3535a2","committed":"Wed Aug 05 13:04:38 2026","subject":"[regexp] Fix build on big-endian platforms","fixed":[]}
+{"commit":"5d6b78d0c238175818dea6d87462861fd2f1061a","committed":"Wed Aug 05 12:52:32 2026","subject":"[objects] Introduce CppGCManaged<T> to replace legacy Managed<T>","fixed":["535892918"]}
+{"commit":"c899a4b176700576f2635cdd2d85fbba0c4884d5","committed":"Wed Aug 05 12:28:17 2026","subject":"[wasm][cleanup] Destroy WasmCodeAllocator before owned_code_","fixed":["540430406, 541448581"]}
+{"commit":"90aea31a048284ba97528f0c040dd03e4ac4a25b","committed":"Wed Aug 05 12:01:50 2026","subject":"[api] Remove deprecated GetAlignedPointerFromEmbedderData and SetAlignedPointerInEmbedderData","fixed":["433909571"]}
+{"commit":"7a0999085d65439b2a676dccbd34a8fdd87bc7ad","committed":"Wed Aug 05 11:47:39 2026","subject":"[d8] Fix Worker memory leak on thread startup failure","fixed":["539309279"]}
+{"commit":"2eec4f2b766d5d3e62d72f88d1a47aa4de39ed71","committed":"Wed Aug 05 11:44:35 2026","subject":"[turbolev] Constant-fold CheckNotHole","fixed":["542377197"]}
+{"commit":"3f6e810067071348ac8dc6c49523dc569352fa0e","committed":"Wed Aug 05 11:35:02 2026","subject":"[inspector] Add 'scopeNumber' to 'Debugger.evaluateOnCallFrame'","fixed":["542461144"]}
+{"commit":"1f417b7d5b9cc3b0211afbfcbde24eb1cb2b913b","committed":"Wed Aug 05 10:13:17 2026","subject":"[turbolizer] Handle traces with CRLF line endings","fixed":["435583657"]}
+{"commit":"276bcdeef30451780dae16c58604d3826e6cb491","committed":"Wed Aug 05 09:24:28 2026","subject":"[flags][wasm] Fix too large values in --wasm-max-code-space-size-mb","fixed":["541020610"]}
+{"commit":"6f7da3c3fb41fff33595ff4c5b8f793080448a8b","committed":"Wed Aug 05 08:53:51 2026","subject":"[d8] Wrap property access from option bag in RealmCreate in TryCatch","fixed":["533926191"]}
+{"commit":"5682e5577adeb0fa9930e355fa92d3f464422221","committed":"Wed Aug 05 08:51:40 2026","subject":"[tiering] Reset interrupt budget after flushing code","fixed":[]}
+{"commit":"f4486eb1b791d7266411715e976fd08006697011","committed":"Wed Aug 05 08:44:58 2026","subject":"[tiering] Keep tiering request when setting code for newly created closure","fixed":[]}
+{"commit":"a5d0aed56a5a34831c4af6617bdcb167ba21267d","committed":"Wed Aug 05 08:42:04 2026","subject":"[APX] Add CCMP/CTEST support for bitwise AND/OR compare chains","fixed":["474204750"]}
+{"commit":"d1c79e04a41d2ce5e581243e2f984a10c5c6fa48","committed":"Wed Aug 05 08:37:46 2026","subject":"[flag] Enable AdditiveSafeInteger feedback for Turbolev only","fixed":["542403050"]}
+{"commit":"6a1200695e0fbab765c68a61fe26920207953e85","committed":"Wed Aug 05 08:36:40 2026","subject":"[maglev] Bound the exact value of a truncated addition","fixed":["542403050"]}
+{"commit":"9fa8e69c0d06200fa6f8e2ca4c357e5f10977788","committed":"Wed Aug 05 08:35:35 2026","subject":"[sandbox][test] Use CHECKs in CreateWasmobject for module assumptions","fixed":["477867438"]}
+{"commit":"3c06a07680f8dfe6386ba1a26868b33e8403887e","committed":"Wed Aug 05 06:15:46 2026","subject":"Reland \"[sparkplug+] Add ConstantFromStringPrototype handler\"","fixed":["chromium:429351411"]}
+{"commit":"c1d9c6947f7b7424c90830d08008330b3cfc1c02","committed":"Wed Aug 05 03:17:52 2026","subject":"[sparkplug+] Support sparkplug+ for unary operations","fixed":["chromium:429351411"]}
+{"commit":"0218677be4a45d5394faa541b6ec74b05def1261","committed":"Tue Aug 04 16:38:05 2026","subject":"[compiler] Reduce I32x4DotI8x16S","fixed":[]}
+{"commit":"8e04b37ee987eca0f2aa45f9a2bc45d1d2965ebd","committed":"Tue Aug 04 16:13:18 2026","subject":"[turbolev] Cleanup CheckLoopPhiInvalidation","fixed":["540324228"]}
+{"commit":"686b94d63f534d8951cfbf9020638c538ef42c59","committed":"Tue Aug 04 14:44:59 2026","subject":"[array-buffer] Fix serializing immutable buffers with no backing store","fixed":["450237486"]}
+{"commit":"56fd5423b9e4ea273cd6286f669bb734c2f9fa3f","committed":"Tue Aug 04 14:36:56 2026","subject":"[maglev] Fix bailouts during TryReduceArrayIteratingBuiltin loop","fixed":["540467501"]}
+{"commit":"b59355c3d872dbb1bbc4c5bb74702861641bdc10","committed":"Tue Aug 04 14:27:38 2026","subject":"[compiler] Run WasmShuffleAnalyzer once.","fixed":["537030480"]}
+{"commit":"7bd6db9dfd8a6b7061272f3d7d5a5b21c7194d53","committed":"Tue Aug 04 14:22:22 2026","subject":"[wasm] Generalize WasmModuleObject::Compile options with source URL","fixed":[]}
+{"commit":"102ccacf5bd8928c5ce168c50fef366459ad6a46","committed":"Tue Aug 04 14:05:50 2026","subject":"[inspector] Fix crash on interleaved debug breaks with scheduled OOM","fixed":["chromium:536283812"]}
+{"commit":"1e7ee91de77500f9905ebbc5bed33c2186b1e871","committed":"Tue Aug 04 13:52:53 2026","subject":"[regexp] Reset flags between negative lookaround branches","fixed":[]}
+{"commit":"00250c2d2cfb2306090a3330c621ee02d2ae6823","committed":"Tue Aug 04 13:51:02 2026","subject":"[wasm][sandbox] Fix call_indirect feedback and module lookup","fixed":["541448581","540430406"]}
+{"commit":"8094e805ef684d5b5847b1514768c86ccdda269c","committed":"Tue Aug 04 13:43:59 2026","subject":"[jetstream3] Fix benchmark skip parameter","fixed":["487336000"]}
+{"commit":"d9858e6d7910fb273b0300596469da1ed598f581","committed":"Tue Aug 04 13:41:28 2026","subject":"[sandbox] Add SwissTable* and InstallBaselineCode to verifier blocklist","fixed":["539052062, 537461412, 538926824"]}
+{"commit":"91c152d6e1bb5034acbafc3d62853ccd0228e0e9","committed":"Tue Aug 04 13:33:38 2026","subject":"[tiering] Stretch OSR interrupt budget while tiering is in progress","fixed":["328115456"]}
+{"commit":"8ba0f8ba4e805c409e8d296b12b6fe7954a07ecb","committed":"Tue Aug 04 13:14:44 2026","subject":"[test] Add a quiet mode, auto-enabled for AI agents","fixed":[]}
+{"commit":"c79ceabcd1b77fbf1031e8c29d97c84b5a8d9e99","committed":"Tue Aug 04 13:05:08 2026","subject":"[wasm] Skip minor GC stack iteration for suspended stacks without young pointers","fixed":["388533754"]}
+{"commit":"3e77003707250932b9aa2897f2b472af00aa02b2","committed":"Tue Aug 04 12:09:56 2026","subject":"[regexp] Don't share named-capture groups objects via the results cache","fixed":["514165662"]}
+{"commit":"ef6846d782f29e6d1a9e3ff1fff8208909b03511","committed":"Tue Aug 04 12:04:17 2026","subject":"[array-buffer] Zero-copy immutable ArrayBuffer serialization","fixed":["450237486"]}
+{"commit":"27a5bac0407b08f83075669eca7bf1dd8a2fc0ab","committed":"Tue Aug 04 12:00:45 2026","subject":"[gn] Fix v8_use_perfetto","fixed":[]}
+{"commit":"2c1f57ba7f47dbaf7ff7968ebd3bc167248ca7b4","committed":"Tue Aug 04 11:38:56 2026","subject":"[maglev] Cleanup loop interrupts","fixed":["328115456"]}
+{"commit":"2ca57be612053f8d2994e0f30f1543a58facf1ab","committed":"Tue Aug 04 11:29:42 2026","subject":"[compiler][arm64] Instruction latencies.","fixed":[]}
+{"commit":"94e9aa53e37a8095d4c97442b3fe152e3a0c64ad","committed":"Tue Aug 04 11:21:22 2026","subject":"Support debugging top level exceptions in modules","fixed":["40886587"]}
+{"commit":"43c12b5ef675e18e7a36c5941d82b26a74088719","committed":"Tue Aug 04 10:54:45 2026","subject":"[test] Fix flaky assertOptimized in mjsunit/turbolev/typed-arrays","fixed":["542039053"]}
+{"commit":"47bc5bc7f344d446e4fcd9fdafa478af7776a483","committed":"Tue Aug 04 10:45:12 2026","subject":"[bigint] Add a fold fast path to CachedMod for near-power-of-two","fixed":[]}
+{"commit":"82793a9fa91c67719117469b3d554796351ab9ce","committed":"Tue Aug 04 10:42:03 2026","subject":"[compiler] Clean up LiveRange bitfields and widen AssignedRegisterField to 8 bits","fixed":[]}
+{"commit":"8a0c633d2d364df43ccf908ae0bbf042bf330cf6","committed":"Tue Aug 04 10:29:19 2026","subject":"[test] Skip regress-539984773 for isolates and stress background compile","fixed":["542140533"]}
+{"commit":"ef2a96f731f0c466eea23faea24c614aaa6d535d","committed":"Tue Aug 04 09:44:17 2026","subject":"[turboshaft] Less effects for MajorGCForCompilerTesting","fixed":["529326875"]}
+{"commit":"7f80b64d14438a1fc821079b36335ff38e16cc06","committed":"Tue Aug 04 09:42:07 2026","subject":"[base] Optimize Relaxed_Memset with word-sized atomic stores","fixed":["540352782"]}
+{"commit":"97710f3b6036d760b97f32c31db9909d558d73f9","committed":"Tue Aug 04 09:26:49 2026","subject":"[turboshaft] Add another test for issue 527385397","fixed":["527385397"]}
+{"commit":"d9352ae5a93853bb0395fce71d2567780e1616cb","committed":"Tue Aug 04 07:46:58 2026","subject":"[maglev] Ensure from_index is a Smi in TryWithArrayIterationArgs","fixed":["42204525","42204525"]}
+{"commit":"d28cfff1516e92de181a63050bf01824a5a73e58","committed":"Tue Aug 04 06:46:19 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"bf8b58a5716055975abf74a211cd82f51347d869","committed":"Tue Aug 04 06:45:13 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"32d3f8c07ee3be9e9e636f76be20e11a8911c80a","committed":"Mon Aug 03 23:52:16 2026","subject":"[wasm] Optimize I8x16ShrS on ia32/x64 for 7-bit right shifts","fixed":["42201301"]}
+{"commit":"be00cecd31671edc63081ff20c32c23272321c90","committed":"Mon Aug 03 22:37:04 2026","subject":"[objects] Move InitialObjects test from cctest to unittests","fixed":[]}
+{"commit":"d10dd770b1fa1b52f078d42350bbb148ce2ad23a","committed":"Mon Aug 03 22:27:15 2026","subject":"[heap] Remove WeakGlobalUnmodifiedApiHandlesScavenge test from cctest","fixed":[]}
+{"commit":"ec2d2c1eab95421903404574a52406d94faabcd4","committed":"Mon Aug 03 22:26:07 2026","subject":"[heap] Remove DeleteWeakGlobalHandle test from cctest","fixed":[]}
+{"commit":"c6f5b205390ed942c6fe52774de4826cbfe23213","committed":"Mon Aug 03 22:19:50 2026","subject":"[heap] Move BytecodeArray test from cctest to unittests","fixed":[]}
+{"commit":"697f8d2ed52f125a4bfa8a0990a9ce35035a573b","committed":"Mon Aug 03 22:12:04 2026","subject":"[heap] Remove obsolete String test from cctest","fixed":[]}
+{"commit":"07c35b53090f60e88c753028a0b409d05f6ef254","committed":"Mon Aug 03 20:21:20 2026","subject":"[wasm] Optimize sshr by (width - 1) on arm64","fixed":["42201301"]}
+{"commit":"27c962fb3af6cb26be0dbc6db3cc7233784b8e79","committed":"Mon Aug 03 19:28:52 2026","subject":"Revert \"[fuzzing] Prototype for \"optimized code coverage\" (pseudo-coverage based on the Maglev graph)\"","fixed":["540758323"]}
+{"commit":"7520d20a6e38ac5ccf8d010e6b969a57d10bd621","committed":"Mon Aug 03 17:59:16 2026","subject":"[heap] Move HandleNull test from cctest to unittests","fixed":[]}
+{"commit":"35f61a92a2eebc28a3c39afc38736c845cfe69b4","committed":"Mon Aug 03 17:39:29 2026","subject":"[jetstream3] Skip a line item for ia32 built-ins pgo generation","fixed":["487336000"]}
+{"commit":"e7785934cd7355fe813660140abd73f4d4886290","committed":"Mon Aug 03 17:38:23 2026","subject":"[api][module] Return a Promise from Module::Evaluate()","fixed":["531396274"]}
+{"commit":"2cfb495c706b176b2bdc0d0e98ac4648d64390bc","committed":"Mon Aug 03 16:51:50 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"fcd55ed2667b915df729fb3f1561ca72c1ed0961","committed":"Mon Aug 03 16:28:15 2026","subject":"[maglev] Remove redundant BuildInt32Min in TryWithArrayIterationArgs","fixed":["42204525"]}
+{"commit":"d425474f61544164d2d55fb395242275d92305f0","committed":"Mon Aug 03 16:07:23 2026","subject":"[test262] Roll test262","fixed":["v8:7834"]}
+{"commit":"cfd84e8a1fa19d7f6cc4e08698e8852ff023e7e9","committed":"Mon Aug 03 16:05:45 2026","subject":"[api] Add olivf to OWNERS","fixed":[]}
+{"commit":"c4d57f54c2eb5051d33039d6c1954f778fbeef8e","committed":"Mon Aug 03 15:50:29 2026","subject":"[fuzzing] Prototype for \"optimized code coverage\" (pseudo-coverage based on the Maglev graph)","fixed":["540758323"]}
+{"commit":"63a87c3a14b2030da267b95e24431364d8fd7211","committed":"Mon Aug 03 15:44:29 2026","subject":"[wasm][turboshaft] Materialize stack check gap inside out-of-line block","fixed":["541001819"]}
+{"commit":"58083ad1e092d2565e9c8490ce5b2801074960c1","committed":"Mon Aug 03 15:15:46 2026","subject":"[arm64] Fix DecodeField for BitFieldUnion","fixed":[]}
+{"commit":"95c55cd89dafc0b7b2f9631c009bffc71183a2d8","committed":"Mon Aug 03 14:56:49 2026","subject":"Roll JetStream v3.0-custom from 91552391bf2f to ffde597c189c (1 revision)","fixed":["None"]}
+{"commit":"ca34849c930c579424be6dd7282269df1c8f76e3","committed":"Mon Aug 03 14:48:06 2026","subject":"[maglev] Handle bailouts in BuildStoreMap gracefully","fixed":["534277460","540905585"]}
+{"commit":"0afc5c71539044502c59056cac65554c6e236f10","committed":"Mon Aug 03 14:03:42 2026","subject":"flags: Mark stack_size as unsafe flag","fixed":["542088587, 538752795"]}
+{"commit":"9d729180de209eb2a3495eb34db3d20c804b658b","committed":"Mon Aug 03 13:46:36 2026","subject":"[regexp] Mark first-character-reject-bitset as failing without i18n","fixed":["500366486"]}
+{"commit":"047e0552b11ef9e361ae99b43bf188fcc038dc31","committed":"Mon Aug 03 12:30:33 2026","subject":"[maglev] Remove the per-block exception handler list","fixed":["541318919"]}
+{"commit":"966041bcee4f6e40832e75ffe91d441665b82503","committed":"Mon Aug 03 12:29:29 2026","subject":"[turboshaft] Fix OOB read in StringAt lowering on ThinString transition","fixed":["539984773"]}
+{"commit":"3dbbe12bd2a471dc9d6713eb9210be9ea459eb1d","committed":"Mon Aug 03 11:56:23 2026","subject":"[maglev] Keep Identity's forwarding use when deopt frames reference it","fixed":["540651858"]}
+{"commit":"809ec6cf185d5a4d4eb1407709a8762c8e945d7d","committed":"Mon Aug 03 11:29:48 2026","subject":"[maglev] Do not use possible maps of an object that may be a Smi","fixed":["541085654"]}
+{"commit":"45a0b10105b1e39650a2861b83dd35cca56c54ab","committed":"Mon Aug 03 10:56:07 2026","subject":"[regexp] Add a first-character rejection bitset for fast-fail","fixed":["500366486"]}
+{"commit":"0d69eb65c3ff978d729f2aa5bea9ac7f6d6575f8","committed":"Mon Aug 03 10:51:43 2026","subject":"[wasm] Optimize WebAssembly.Table bulk initialization","fixed":[]}
+{"commit":"727ff05e238f371adb2a43f653a86c1566fcea48","committed":"Mon Aug 03 10:38:30 2026","subject":"[test] Skip regress-539212794 when sandbox is disabled","fixed":["539212794"]}
+{"commit":"48420ce859651c72f0c71844051f9a4007964989","committed":"Mon Aug 03 10:12:12 2026","subject":"[api] Advance deprecation of ContextDisposedNotification(bool)","fixed":[]}
+{"commit":"effbf0fc9555ec832149d9884396b9c2f75a46e1","committed":"Mon Aug 03 08:39:37 2026","subject":"[maglev] Only infer a field type from a stable field map","fixed":["541926503"]}
+{"commit":"f861df252a44a8b906d7df278b6f41396d8b2711","committed":"Mon Aug 03 08:02:39 2026","subject":"[maglev] Protect against cross-realm generator next inlining again","fixed":["476989751"]}
+{"commit":"ec4d654f73190442f1b5639addd48028012b6022","committed":"Mon Aug 03 04:52:01 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"7e7fa2f9df0a753febb460a07bef4113c9c55cd9","committed":"Sun Aug 02 16:52:00 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"bf3d02947968c33781ad7a74e5e0234d9ac5d748","committed":"Sun Aug 02 04:52:09 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"a48b78348d46ca248ad7080eb29bf4545378198b","committed":"Sat Aug 01 16:46:32 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"1d17afafffbb434e04b2ee4bec7ca09989626341","committed":"Sat Aug 01 04:51:36 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"2ad1b92f41e8e86bc106b9b6095d575e16b99a48","committed":"Fri Jul 31 17:01:43 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"be7c12441c8baec279589b31ef8232727bc9a94c","committed":"Fri Jul 31 16:10:00 2026","subject":"ppc64: Replace r0 with UseScratchRegisterScope in frame helpers","fixed":[]}
+{"commit":"ab2cad06c8e209248ce0d2cf76e1f0d16aa51533","committed":"Fri Jul 31 15:34:56 2026","subject":"[turbofan] Disable additive safe integer feedback","fixed":["539350801"]}
+{"commit":"9b019eca14dde998e625b60610610fe0dd230595","committed":"Fri Jul 31 13:21:23 2026","subject":"[arm64] ISel: Fix VisitWordCompareZero for truncated inputs","fixed":["540446645"]}
+{"commit":"23b07facc450f6cfaea3f6cffe7aad5724dbf9a9","committed":"Fri Jul 31 12:50:05 2026","subject":"[gn] include -Wunnecessary-virtual-specifier on ppc64/s390x","fixed":[]}
+{"commit":"383120c3acd389f21cae65add09b75230ee929d7","committed":"Fri Jul 31 12:36:20 2026","subject":"[string] Fix UAF in TwoStringsToSlices with external strings","fixed":["535000102"]}
+{"commit":"23e3e4a95e56953f7bcdf23b4dc64f524e22da36","committed":"Fri Jul 31 12:34:37 2026","subject":"[turbolev] Do not print the graph after an aborted Turbolev phase","fixed":["540717862"]}
+{"commit":"678015ae439cc7ea46c60bba068bb6d388187d07","committed":"Fri Jul 31 11:36:57 2026","subject":"[generator] Protect against cross-realm generator next inlining","fixed":["476989751"]}
+{"commit":"a777999ee48633dc5587b01440180753a09eac31","committed":"Fri Jul 31 11:04:33 2026","subject":"[execution] Throw TypeError on re-entrant Atomics.wait calls","fixed":["532921336"]}
+{"commit":"a26c375789bae81af7917472610906448af256f9","committed":"Fri Jul 31 10:59:35 2026","subject":"[heap] Remove obsolete Tagging test from cctest","fixed":[]}
+{"commit":"ac72e04814eb0640638476dce461372769f1e348","committed":"Fri Jul 31 10:52:32 2026","subject":"[heap] Move GlobalHandles test from cctest to unittests","fixed":[]}
+{"commit":"e9df6a25d616e1091b7dbaba6eb4b0ed18df748c","committed":"Fri Jul 31 09:18:26 2026","subject":"[heap] Remove obsolete LocalHandles test from cctest","fixed":[]}
+{"commit":"a7cc642bb667fdb0ecaecad282a5dd1dee0233a9","committed":"Fri Jul 31 09:17:18 2026","subject":"[heap] Remove obsolete GarbageCollection test from cctest","fixed":[]}
+{"commit":"29c913b8cb3790eb5c08e3cd8d7374648ebc13f3","committed":"Fri Jul 31 09:16:10 2026","subject":"[heap] Move FindCodeForInnerPointer test from cctest to unittests","fixed":[]}
+{"commit":"5cf5f3dd300246c1d7912e584ce0817ec83c4a3d","committed":"Fri Jul 31 08:24:22 2026","subject":"[tiering] Don't reset to unoptimized code when a TurboFan job is aborted","fixed":[]}
+{"commit":"fcb07721e7332fcc841a97835273b50902770af8","committed":"Fri Jul 31 08:08:21 2026","subject":"[turboshaft] Fix localeCompare inline reading past an externalized","fixed":["537604528"]}
+{"commit":"89e5e1202cc419a33abca4eb8988ce58b442d445","committed":"Fri Jul 31 08:00:12 2026","subject":"[maglev] Add diagnostic CHECKs in PreparePhiTaggings","fixed":["524725997"]}
+{"commit":"b78701acb2e27054da979a686c224164937c74e6","committed":"Fri Jul 31 04:48:11 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"d405ed7c7b8141bb435ed5cf651163fa32e0d11a","committed":"Thu Jul 30 19:11:28 2026","subject":"[wasm interpreter] Key WasmInterpreterThreadMap by (thread, isolate)","fixed":["530659181"]}
+{"commit":"f4a59ca0ef1286ac4eccda99a90fccf1aea1ac93","committed":"Thu Jul 30 16:41:15 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"f52d2b16cd7d7f4efaff140a5a42bdf86efe82a1","committed":"Thu Jul 30 15:02:42 2026","subject":"[maglev][fuzzer] Fuzz --maglev-disable-builtin-reducers","fixed":[]}
+{"commit":"ade6975ecaadbc3320467fb7d82e01c46946aade","committed":"Thu Jul 30 13:38:27 2026","subject":"[array] Use atomic stores for Smi Array.prototype.fill during marking","fixed":["540352782"]}
+{"commit":"64b7406cb61f129399a9c3c81ef3b4b8a96e1066","committed":"Thu Jul 30 13:26:22 2026","subject":"[maglev] Add testing flag to disable eager builtin reducers in Maglev","fixed":[]}
+{"commit":"d445677d6ba28453e4160504d1e6dba2f201b8f2","committed":"Thu Jul 30 12:41:21 2026","subject":"Reland \"[defer-import-eval] Consider the whole SCC when checking sync readiness\"","fixed":["530457806"]}
+{"commit":"867fc2bbf6f79e8f932ffaab4efe168b49f958f9","committed":"Thu Jul 30 12:19:57 2026","subject":"[maglev][turbolev] Fix node adding with pending spliceand subgraphs","fixed":["540521147"]}
+{"commit":"28f2a2a080943d4494b8d84cfd706f757181a3a1","committed":"Thu Jul 30 12:12:46 2026","subject":"[turbolev] Skip unreachable blocks during phi untagging","fixed":["533979617","524725997"]}
+{"commit":"34c9403ae49beed4c324d50d974ff6d8af7b983b","committed":"Thu Jul 30 12:09:48 2026","subject":"[maglev] Process CheckInt32IsSmi in KNA processor","fixed":["424157317"]}
+{"commit":"78921f9ba0d61cc2a0cb419cbcd693443e05404e","committed":"Thu Jul 30 11:33:13 2026","subject":"[maglev] Add CloneFastJSArray info","fixed":["424157317"]}
+{"commit":"d1761037274ddbd89f756c1a0e0b23c76cd5c05f","committed":"Thu Jul 30 10:58:27 2026","subject":"[compiler] Fix Turbolev escape analysis crash on single-block loops","fixed":["540324228"]}
+{"commit":"443267f7ac4a4906be50f29115db625043fbae1a","committed":"Thu Jul 30 10:48:08 2026","subject":"[builtins] Fix OOB reads on string transition in toLowerCase and split","fixed":["533661183"]}
+{"commit":"2a21c756031083b4abcd0e3077790d485e270e14","committed":"Thu Jul 30 10:14:52 2026","subject":"[parser] Use creation-time scope in VariableDeclarationParsingScope","fixed":["526380803"]}
+{"commit":"b2cd34c02406ea7351bee3ea493e164e02cef64a","committed":"Thu Jul 30 09:33:55 2026","subject":"[runtime] Fast-path Array.prototype.indexOf on dictionary elements","fixed":["none"]}
+{"commit":"c435df1a8c40a57bc4e3d6781f02cac68ee120aa","committed":"Thu Jul 30 08:49:11 2026","subject":"Revert \"[sparkplug+] Add ConstantFromStringPrototype handler\"","fixed":["chromium:429351411"]}
+{"commit":"0616192af6309f2121f27ad735485db602c11fa6","committed":"Thu Jul 30 06:02:04 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"bdece242c255e323a465e4974e66408b09f99067","committed":"Thu Jul 30 05:06:32 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"b5486e5f94ee824eac1dad50b97e10eaeffb972d","committed":"Thu Jul 30 02:57:43 2026","subject":"[sparkplug+] Add ConstantFromStringPrototype handler","fixed":["chromium:429351411"]}
+{"commit":"1354efb8397af5850b1fc2de53a5ea32d4afc74d","committed":"Wed Jul 29 22:15:08 2026","subject":"Roll agents from 559f135fc214 to 78cc65e41fda (1 revision)","fixed":["None"]}
+{"commit":"8062e88db3334f3f6a9cc2e33aaa38242a99049e","committed":"Wed Jul 29 21:29:05 2026","subject":"Revert \"[wasm] Fix nullptr deref in Liftoff debug side table coverage\"","fixed":["526163463"]}
+{"commit":"f97650e45f6c64993d9b5a3df82760acd3bc4480","committed":"Wed Jul 29 19:38:26 2026","subject":"[wasm] Fix nullptr deref in Liftoff debug side table coverage","fixed":["526163463"]}
+{"commit":"472802a3cac80de0cc0940fcfcb7c65146c2d58d","committed":"Wed Jul 29 18:21:46 2026","subject":"[debug] Allow %OptimizeOsr without %PrepareFunctionForOptimization","fixed":["539006995"]}
+{"commit":"752405a70a5c8696196c5c29b1349b439eb881fd","committed":"Wed Jul 29 17:41:17 2026","subject":"[sandbox] Prevent fixed-arity JSPI code in mismatched JDT entries","fixed":["537948358"]}
+{"commit":"661117b008f6951ee3a35a46a09ea01d57f5c9af","committed":"Wed Jul 29 17:07:54 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"9265f06e7fb33246a536c95d01cd5a3169b782d5","committed":"Wed Jul 29 16:20:18 2026","subject":"[deoptimizer] Make DeoptimizeFunction code parameter non-optional","fixed":["531297707"]}
+{"commit":"eeafc895ddeb94f6cc128037d259655c38edbc93","committed":"Wed Jul 29 15:36:42 2026","subject":"[debug] Deoptimize blackboxed OSR frames when stepping","fixed":["531297707"]}
+{"commit":"b226a101472c992ef4dea54e5af1b21d03038d95","committed":"Wed Jul 29 15:16:38 2026","subject":"[compiler][tsan] Suppress the racy constant field read in the broker","fixed":["540205825"]}
+{"commit":"8b9a7b4da8662608a10861ebf8f79899780d5797","committed":"Wed Jul 29 14:14:52 2026","subject":"[build] Fix cluster build and macro hygiene","fixed":[]}
+{"commit":"9066fa1adf1d4ee5746d22d142e1d14364bf0b9e","committed":"Wed Jul 29 14:11:16 2026","subject":"S390 [wasm]: Fix wasm/atomics-memory64","fixed":[]}
+{"commit":"da1d3cf5cdcf5065d0ced0df867cf0270293e014","committed":"Wed Jul 29 13:51:52 2026","subject":"[cleanup] Format BUILD.bazel with the Google formatting rules","fixed":[]}
+{"commit":"ae05d54b7907534a2bc401119bdca03d24551a82","committed":"Wed Jul 29 12:31:09 2026","subject":"Remove Printf and PrintfNoPreserve from Arm64 MacroAssembler","fixed":[]}
+{"commit":"ef0c186ba5d1cc0a13a8b3e533257b907eab5b5c","committed":"Wed Jul 29 12:28:31 2026","subject":"[wasm] Fix unoptimized frame height for Liftoff deopt","fixed":["540056465"]}
+{"commit":"b80a7539b736c985e0fb9790ec76006f6f1d801f","committed":"Wed Jul 29 10:45:14 2026","subject":"[scopes] Check parameter semantics when reusing a cached ScopeInfo","fixed":["536271629"]}
+{"commit":"cb0a13d7ff2ec28ac783f216e734383bb84ecea5","committed":"Wed Jul 29 10:08:51 2026","subject":"[maglev] Mark ProcessWasmArgument as NotIdempotent","fixed":["539121142","539121142"]}
+{"commit":"76119d63ecad2caf280df8ba65cdf7956904d5a8","committed":"Wed Jul 29 10:00:00 2026","subject":"[maglev] Invalidate aliasing context slots in loop-header merge","fixed":["538938804"]}
+{"commit":"174f933328752dd837018517f40b6e178f884c89","committed":"Wed Jul 29 09:23:31 2026","subject":"[maglev][turbolev] Route new nodes to pending splice exit in optimizer","fixed":["539006995"]}
+{"commit":"d8eccd72a547069db99a4c39d4617e99d51a4739","committed":"Wed Jul 29 09:02:44 2026","subject":"[test262] Roll test262","fixed":["v8:7834"]}
+{"commit":"802fa126bbd28f49466b397adb0a7f038f31c8b9","committed":"Wed Jul 29 08:48:15 2026","subject":"[wasm-strings-utf8] Check max length for string-to-array","fixed":["539824383"]}
+{"commit":"0f0b8f00c604ea7478bbc63b96e78cf5b6e7898f","committed":"Wed Jul 29 08:36:10 2026","subject":"[maglev] Use a Maglev-specific max bytecode size limit","fixed":["539489804"]}
+{"commit":"41f8f972f93639071f5451904bf48bd3f5ffb894","committed":"Wed Jul 29 08:16:14 2026","subject":"[test] Skip weakrefs/minor-gc-* for stress_concurrent_allocation","fixed":["539790085"]}
+{"commit":"3b61bd4be5228af37d362b8f734a23e02473a4d0","committed":"Wed Jul 29 07:50:02 2026","subject":"[maglev] Return failed background compilation jobs to the main thread","fixed":["538562119"]}
+{"commit":"5846cc7d1745bb6aafb82c0ccb4548da6726defe","committed":"Wed Jul 29 07:10:56 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"9204fc071752535c094a5ee2aa6a15d81783dd19","committed":"Wed Jul 29 07:09:51 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"86630d14610d2a872200210f437a042f711960ea","committed":"Wed Jul 29 01:59:08 2026","subject":"[loong64][mips64][liftoff] Fix sp adjustment in PrepareTailCall","fixed":["511274900"]}
+{"commit":"66b7bf5e0ddc117ecfd04b8d79066fef3d9eaf2b","committed":"Tue Jul 28 20:11:29 2026","subject":"[heap] Remove obsolete TODO(hpayer) comments","fixed":[]}
+{"commit":"bb57cf5b6dfc0bb5d7fd7efabc245e7765444e3f","committed":"Tue Jul 28 17:51:06 2026","subject":"[objects] Move ContextMaps test from cctest to unittests","fixed":[]}
+{"commit":"545a79059c7422d81ac21bf2985e057d934dd69e","committed":"Tue Jul 28 16:44:06 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"aa7ac40507210f25ded5f29ccf182f8dcc1a0fd6","committed":"Tue Jul 28 15:32:00 2026","subject":"[turbolev] escape analysis: patch cached phi inputs on out-loop revisit","fixed":["538666333"]}
+{"commit":"23d6618512136c2e5921e3962f9878ff3501b34b","committed":"Tue Jul 28 15:18:34 2026","subject":"[heap] Remove obsolete HeapMaps cctest","fixed":[]}
+{"commit":"3ddec25cb22a93e034da3c3183e73cdec6b3f02c","committed":"Tue Jul 28 15:04:17 2026","subject":"[headers] Move Object number conversions out of objects-inl.h","fixed":["493505085"]}
+{"commit":"1a058d2e035bf325c3baccc8f8f0ede5096c519f","committed":"Tue Jul 28 14:59:04 2026","subject":"[maglev] Keep forward property facts in MergeForLoop without backedge witness","fixed":["517439598"]}
+{"commit":"c3ea7757b1906586207c05766e1070ea20266ea8","committed":"Tue Jul 28 14:08:56 2026","subject":"[wasm] Fix integer overflow in deserializer","fixed":["538378084"]}
+{"commit":"8b1fd5973ee98be22c8fb0b6d9165407dd28de32","committed":"Tue Jul 28 14:01:48 2026","subject":"[turbolev] Fix escape analysis loop revisit DCHECK","fixed":["529841774, 539464276"]}
+{"commit":"577d0cda2bb1d47a5132bef327371404e6fcde80","committed":"Tue Jul 28 13:44:56 2026","subject":"[loong64][maglev] Zero-extend Int32 index in element address","fixed":["513340698"]}
+{"commit":"2c3e7f7d4d65f274951d58eec078b2aacdfba58e","committed":"Tue Jul 28 13:00:39 2026","subject":"[arm64] Fix write barrier register aliasing","fixed":["530663440"]}
+{"commit":"429577a9437e269d4bbb5d529458a1e74643c856","committed":"Tue Jul 28 12:59:00 2026","subject":"[debug] Deoptimize OSR frames on debugger break and restart","fixed":["539453394, 531297707"]}
+{"commit":"4648822e53ea6ebc216cae2037974f43723ca0a3","committed":"Tue Jul 28 12:55:08 2026","subject":"[*lev] Restore hacks around empty types","fixed":["538884561","534277460"]}
+{"commit":"39ccace02f12c476027175ac9d77de18949f354c","committed":"Tue Jul 28 12:09:50 2026","subject":"[wasmfx] Increase stack pool capacity to 500MB","fixed":["388533754"]}
+{"commit":"16d931dfef996397201c0615610f226283f0f824","committed":"Tue Jul 28 11:51:33 2026","subject":"[heap] Address old TODO wrt to cacheline size","fixed":[]}
+{"commit":"2525210adc82244e401b44570593e9408d68b5c6","committed":"Tue Jul 28 10:55:25 2026","subject":"[version-auto-update] Version 15.3.0","fixed":[]}
+{"commit":"1a8428bc6478820db43c3a08780097dcc3d8e6c3","committed":"Tue Jul 28 10:46:12 2026","subject":"[wasm][turboshaft] Reload cached memory after fast API calls","fixed":["535659723"]}
+{"commit":"43f705962639bc6f3d70c71a5651061b9692e10f","committed":"Tue Jul 28 09:09:36 2026","subject":"[turbolev] escape analysis: do not discard backedge snapshots","fixed":["529841774","538666333"]}
+{"commit":"02a7c1b6d42083fbd2b256fd1f3ca3124227380e","committed":"Tue Jul 28 08:59:45 2026","subject":"[turbolev] escape analysis: fix wrong DCHECK about loop revisits","fixed":["529841774","539464276"]}
+{"commit":"e3b65b3fed9f2b1ec840201442ae13d04ae5a84d","committed":"Tue Jul 28 07:59:57 2026","subject":"Reland \"[parser] Do not mark script-level const as maybe assigned\"","fixed":[]}
+{"commit":"44315bf31d039031d6c23d3c99eee50ed3d08989","committed":"Tue Jul 28 05:44:54 2026","subject":"Update fuzztest (trusted)","fixed":[]}
+{"commit":"13d9e755e47218bb5369e8283389d42276b784aa","committed":"Tue Jul 28 04:47:08 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"45b697fc030f4f991d613aa9f1b0efe77832b6e7","committed":"Tue Jul 28 01:56:35 2026","subject":"[AVX10] AVX10.1 feature detection","fixed":["536954139"]}
+{"commit":"ddb5cc0c54814096ec78df470301d23ddee05f8f","committed":"Mon Jul 27 18:30:25 2026","subject":"[heap,sandbox] Fix race condition in EPT evacuation","fixed":["534092070"]}
+{"commit":"bdd78620214a77e8372f1d876d61a1a2bff482a7","committed":"Mon Jul 27 17:23:44 2026","subject":"[wasm] Add kWasmGCAllocation use counter","fixed":[]}
+{"commit":"da4571bfc2d9b0aca228c1fd3902d86f35713525","committed":"Mon Jul 27 16:59:49 2026","subject":"Update V8 DEPS (trusted)","fixed":[]}
+{"commit":"367aac8d410bcc18ce02852daa6b4b7a829e3b9b","committed":"Mon Jul 27 14:39:38 2026","subject":"[maglev] Promote NumberOrOddball conversions conditionally in KNA","fixed":["539110933"]}
+{"commit":"0e6ea09ef6f15ebd7f78555c0648c8b632ce3013","committed":"Mon Jul 27 14:25:08 2026","subject":"[maglev] Cache LoadFixedArrayElement results in KnownNodeAspects","fixed":["517439598"]}
+{"commit":"71e8f28b5ace9d56bff5e3b3292117e4673d0aef","committed":"Mon Jul 27 13:57:38 2026","subject":"Roll agents from dd4dfa767086 to 559f135fc214 (1 revision)","fixed":["None"]}
+{"commit":"33041f5d64827d670be346dcaa1e0ba62c95ed58","committed":"Mon Jul 27 13:09:03 2026","subject":"[maglev] Do not elide a map check that still has to reject Smis","fixed":["539072493"]}
+{"commit":"e5865866709fc78703caf3da0b41d06fc575e0e8","committed":"Mon Jul 27 12:32:45 2026","subject":"[turbolev] Escape Analysis: invalidate new phis' backedges if needed","fixed":["538652950","529841774"]}
+{"commit":"73b4712d0facc7f8fe888abefd5a5cbdec159ba5","committed":"Mon Jul 27 12:13:33 2026","subject":"[debug] Deoptimize topmost optimized frame on debugger break","fixed":["531297707"]}
+{"commit":"af1ff307151ed2bbb8b3cfdf1abe6f1aa6b5a998","committed":"Mon Jul 27 11:08:49 2026","subject":"[arm64] Add a CPU::GetInstance() fast path to suspend tag checks","fixed":[]}
+{"commit":"c5bca4e9bfc30b6c931eba832d49261f3cda3afd","committed":"Mon Jul 27 10:54:32 2026","subject":"[test] Name the tracing test's output so it is gitignored","fixed":[]}

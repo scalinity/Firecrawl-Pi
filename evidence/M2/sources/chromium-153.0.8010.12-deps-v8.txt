@@ -1,0 +1,2 @@
+  'v8_revision': '0b60d2b01800d7ba2c6eeb5e51ecd95f6dab44c7',
+    Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),

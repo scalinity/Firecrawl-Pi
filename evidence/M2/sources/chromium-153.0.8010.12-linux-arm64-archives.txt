@@ -1,0 +1,4 @@
+# Chromium 153.0.8010.12 linux-arm64 archives named by playwright-core 1.63.0 (browsers.json revision 1243; coreBundle.js: ubuntu24.04-arm64 and debian13-arm64 -> cftUrl, mirror https://cdn.playwright.dev, 307 to Google's Chrome for Testing bucket)
+# downloaded 2026-09-26T01:12:01Z..01:12:04Z on the workstation; url, bytes, sha256 of the archive
+chrome	https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux-arm64/chrome-linux-arm64.zip	195926016	7d8a4b4ff289efe44a06501a519df142c4c18fff7aaf1c1401a3fbb12b3bd069
+chrome-headless-shell	https://cdn.playwright.dev/builds/cft/153.0.8010.12/linux-arm64/chrome-headless-shell-linux-arm64.zip	120278638	d433c45172c7836e38124fe545f767b02210bfb43a6262f08a297473a8e91c99

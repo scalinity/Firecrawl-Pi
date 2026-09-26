@@ -1,0 +1,9 @@
+{
+  "milestone": 153,
+  "branch_point": "2026-08-17T00:00:00",
+  "stable_date": "2026-09-08T00:00:00",
+  "chromium_branch": "8010",
+  "chromium_main_branch_hash": "86cee6df69e0463a839c0cc8435c9d4c259434d3",
+  "chromium_main_branch_position": 1681091,
+  "v8_branch": "15.3"
+}
