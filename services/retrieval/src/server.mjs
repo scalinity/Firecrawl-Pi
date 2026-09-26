@@ -118,6 +118,7 @@ async function searxng(req, res, signal) {
   const out = new URL(policy.search.backend);
   for (const k of ["q", "format", "pageno", "language", "time_range", "categories", "engines"]) if (inbound.searchParams.has(k)) out.searchParams.set(k, inbound.searchParams.get(k));
   const r = await guardedFetch({ url: out.toString(), maxBytes: 1024 * 1024, deadline: Date.now() + 10000, policy, resolvePublic, signal });
+  log({ event: "search", backend_host: out.hostname, target_status: r.status, bytes: r.bytes });
   res.writeHead(r.status, { "content-type": r.headers["content-type"] ?? "application/json", "content-length": r.body.length }).end(r.body);
 }
 

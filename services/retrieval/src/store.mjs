@@ -11,16 +11,17 @@ export function paceDecision({ now, state, hourCount, dayCount, limits }) {
     const retryAfter = Math.ceil((state.cooldown_until - now) / 1000);
     return { failure: { class: "RATE_LIMITED", detail: "the domain is cooling down after a rate limit", retryable: true, retryAfter } };
   }
-  if (state.holder && state.hold_until && state.hold_until > now) return { waitMs: Math.min(state.hold_until - now, 250) };
-  if (state.last_nav_at && limits.minNavigationGapMs > 0) {
-    const gap = state.last_nav_at.getTime() + limits.minNavigationGapMs - now.getTime();
-    if (gap > 0) return { waitMs: gap };
-  }
+  // The caps come before any wait, so work the policy will refuse fails at once.
   if (limits.perDomainPerHour !== null && hourCount >= limits.perDomainPerHour) {
     return { failure: { class: "PROXY_REQUIRED", detail: `${limits.perDomainPerHour} direct navigations to this domain in the last hour; more needs approved proxy egress (M6)`, retryable: true, retryAfter: null } };
   }
   if (limits.platformPerDay !== null && dayCount >= limits.platformPerDay) {
     return { failure: { class: "PROXY_REQUIRED", detail: `${limits.platformPerDay} direct navigations across the platform today; more needs approved proxy egress (M6)`, retryable: true, retryAfter: null } };
+  }
+  if (state.holder && state.hold_until && state.hold_until > now) return { waitMs: Math.min(state.hold_until - now, 250) };
+  if (state.last_nav_at && limits.minNavigationGapMs > 0) {
+    const gap = state.last_nav_at.getTime() + limits.minNavigationGapMs - now.getTime();
+    if (gap > 0) return { waitMs: gap };
   }
   return { go: true };
 }

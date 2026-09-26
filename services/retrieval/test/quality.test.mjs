@@ -51,6 +51,8 @@ test("direct pacing: gap, one in flight, the hourly and daily caps, cooldowns", 
   assert.deepEqual(paceDecision({ now, state: s({ holder: "h", hold_until: new Date(now - 1) }), hourCount: 1, dayCount: 1, limits }), { go: true });
   assert.equal(paceDecision({ now, state: s({}), hourCount: 20, dayCount: 20, limits }).failure.class, "PROXY_REQUIRED");
   assert.equal(paceDecision({ now, state: s({}), hourCount: 3, dayCount: 200, limits }).failure.class, "PROXY_REQUIRED");
+  // A capped domain is refused at once, not after waiting out its gap.
+  assert.equal(paceDecision({ now, state: s({ last_nav_at: new Date(now - 500) }), hourCount: 20, dayCount: 20, limits }).failure.class, "PROXY_REQUIRED");
   const cool = paceDecision({ now, state: s({ cooldown_until: new Date(+now + 30000) }), hourCount: 0, dayCount: 0, limits });
   assert.equal(cool.failure.class, "RATE_LIMITED");
   assert.equal(cool.failure.retryAfter, 30);
