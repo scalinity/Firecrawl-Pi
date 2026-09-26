@@ -1068,3 +1068,14 @@ The sections above state what must hold. This one states how the project's work 
 - `pg_isready` inside a container whose uid has no passwd entry needs `-U`. psql prints command tags unless given `-q`.
 - `nft`, `NetworkManager` and other admin tools are in `/usr/sbin`, outside a non-root PATH on the Pi.
 - A container ID resolved before `docker compose up` can be stale after it: resolve it again.
+
+### 33.7 The workstation's Colima VM
+
+- **It exists for image builds only.** Colima is the Docker host that builds the patched API image natively for linux/arm64 (D6, `scripts/m2/build-api-image.sh`). The platform runs on the Pi; no deploy, collector, verifier or test needs Colima, so it has no reason to run outside a build.
+- **Start it for the build, and stop it after only if you started it.** Check `colima status` first. If it was stopped, `colima start` before the build and `colima stop` once the build log and image ID are recorded, because an idle VM holds workstation memory for nothing. If it was already running, leave it running: something else may be using it.
+- **Start it with no flags.** A bare `colima start` resumes the default profile as it was created; flags such as `--arch`, `--cpu`, `--memory` or `--runtime` change the VM that the version lock records as the build host.
+- **Stop, never delete.** `colima stop` keeps the VM disk and its build cache; `colima delete` destroys both and is not routine cleanup.
+- **A stopped VM is a stopped build, not a reason to build elsewhere.** The build uses the `colima` Docker context and fails when the VM is down. Start Colima rather than switching context or builder, because `deploy/versions.lock.json` names the Colima VM as the image's build host.
+- **Nothing starts it at login.** Do not register it with `brew services` or a LaunchAgent: no moment in the project's use needs it running before a build asks for it.
+- **Throwaway containers on the workstation follow §33.1 too.** A local test dependency, such as a PostgreSQL for database-backed tests, carries the label `fcpi.transient=<purpose>`, binds only to `127.0.0.1`, and is removed when its tests end. Before a session closes, `docker ps -a --filter label=fcpi.transient` on the workstation must list nothing, because a forgotten container keeps the VM busy and is found later by nobody who knows what it was.
+- **Never stop Colima under a container in use.** Before `colima stop`, list its running containers; stop the VM only when none is left, or when every one listed is this session's own and already finished with.
