@@ -595,7 +595,7 @@ const checks = {
 
   // ================================================================ the held live step: real target clients
   R01: { name: "real-target-clients", inputs: [`${RAW}real-clients.txt`],
-    expected: "Claude Code on Haiku and Codex CLI on gpt-6-luna, each configured from deploy/clients/ with its own token over the tailnet and no other MCP server (Claude Code also with no built-in tool and no user settings, and no permission denial recorded), answer the fixture prompt with the page's sentinel and a completed two-page crawl; the MCP service logged each client's scrape, crawl and status calls as ok under that client's own label, with the revision each actually used, and neither saw a session header; this is real-client evidence, kept apart from the SDK fixtures",
+    expected: "Claude Code on Haiku and Codex CLI on gpt-6-luna, each configured from deploy/clients/ with its own token scoped to read,scrape,crawl only over the tailnet and no other MCP server (Claude Code also with no built-in tool and no user settings, and no permission denial recorded), answer the fixture prompt with the page's sentinel and a completed two-page crawl; the MCP service logged each client's scrape, crawl and status calls as ok under that client's own label, with the revision each actually used, and neither saw a session header; this is real-client evidence, kept apart from the SDK fixtures",
     run() {
       const r = records(`${RAW}real-clients.txt`);
       const pv = (label) => (r.pi_view ?? []).find((x) => x.client === label) ?? null;
@@ -604,7 +604,8 @@ const checks = {
       const revs = (v) => [...new Set((v?.tools ?? []).map((t) => `${t.era}/${t.protocol_version}`))].join(",");
       const products = (v) => [...new Set([...(v?.tools ?? []), ...(v?.exchanges ?? [])].map((x) => x.client_info).filter(Boolean).map((i) => `${i.name}@${i.version}`))].join(",") || "none named";
       const cc = r.claude_code?.[0], cx = r.codex?.[0], vc = pv("m4claude"), vx = pv("m4codex");
-      const cond = { run: r.meta?.length === 1 && r.end?.[0]?.exit === 0 && !r.error, claude_answer: cc?.exit === 0 && good(cc.answer), claude_isolated: Array.isArray(cc?.permission_denials) && cc.permission_denials.length === 0, claude_calls: used(vc) && (vc?.exchanges ?? []).length >= 3 && vc.exchanges.every((e) => e.session_header_sent === false),
+      const cond = { run: r.meta?.length === 1 && r.end?.[0]?.exit === 0 && !r.error, claude_answer: cc?.exit === 0 && good(cc.answer), claude_isolated: Array.isArray(cc?.permission_denials) && cc.permission_denials.length === 0,
+        scopes: ["m4claude", "m4codex"].every((l) => (r.tokens ?? []).some((t) => t.label === l && t.scopes === "read,scrape,crawl")), claude_calls: used(vc) && (vc?.exchanges ?? []).length >= 3 && vc.exchanges.every((e) => e.session_header_sent === false),
         codex_answer: cx?.exit === 0 && good(cx.answer), codex_calls: used(vx) && (vx?.exchanges ?? []).length >= 3 && vx.exchanges.every((e) => e.session_header_sent === false) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; Claude Code ${cc?.client} (${(cc?.models_used ?? []).join(",")}): ${cc?.answer}, revision ${revs(vc)}, named itself ${products(vc)}; Codex ${cx?.client} (${cx?.model}): ${cx?.answer}, revision ${revs(vx)}, named itself ${products(vx)}` };
     } },

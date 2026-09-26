@@ -83,6 +83,11 @@ const answerLine = (s) => {
 };
 
 out("meta", { platform: process.platform, deployed_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), pi_utc: piNow(), endpoint: "https://<pi-tailnet-name-host>:8443/mcp" });
+// Each real client's token, as the registry holds it: its principal and scopes (only what the prompt needs).
+for (const l of pi("bash /opt/firecrawl-pi/scripts/m3/pi-client-token.sh list").split("\n").filter((x) => /^m4(claude|codex) /.test(x))) {
+  const [label, principal, scopes] = [l.split(" ")[0], (l.match(/principal=(\S+)/) ?? [])[1], (l.match(/scopes=(\S+)/) ?? [])[1]];
+  out("tokens", { label, principal, scopes });
+}
 let code = 0;
 const dir = mkdtempSync(join(tmpdir(), "fcpi-m4-real-"));
 try {
