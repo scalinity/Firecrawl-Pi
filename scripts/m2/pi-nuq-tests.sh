@@ -110,6 +110,7 @@ kill)
   [ -n "$job" ] && job_row "$job"
   sleep 3
   sec kill
+  restarts_before=$(D inspect -f '{{.RestartCount}}' "$CORE")
   pid=$(worker_pid); echo "worker_pid=${pid:-none} utc=$(now)"
   [ -n "$pid" ] && D exec --user 3002 "$CORE" kill -KILL "$pid"; echo "kill_exit=$?"
   sec core_observed
@@ -117,7 +118,10 @@ kill)
   sec client_result
   wait "$CLIENT"; cat "$tmp"; rm -f "$tmp"
   sec core_ready
-  for _ in $(seq 1 120); do [ "$(D inspect -f '{{if .State.Health}}{{.State.Health.Status}}{{end}}' "$CORE")" = healthy ] && break; sleep 2; done
+  # Ready means restarted since the kill and healthy again, not the old instance's last state.
+  for _ in $(seq 1 150); do
+    [ "$(D inspect -f '{{.RestartCount}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' "$CORE")" = "$((restarts_before + 1)) healthy" ] && break; sleep 2
+  done
   echo "utc=$(now) core $(core_state)"
   sec job_observed
   for i in $(seq 1 60); do

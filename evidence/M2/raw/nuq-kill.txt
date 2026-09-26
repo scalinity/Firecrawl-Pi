@@ -1,0 +1,62 @@
+### kill_meta
+utc=2026-09-26T04:05:04.706Z source_commit=baa494c4517b8eba9a619aeb33fbd60405fb7130
+core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+### kill_client_start
+job=01a0dbe3-593b-72cd-ba9b-0ee822c614fc utc=2026-09-26T04:05:05.455Z
+01a0dbe3-593b-72cd-ba9b-0ee822c614fc	active	0	04:05:05	t	
+### kill_kill
+worker_pid=35 utc=2026-09-26T04:05:08.601Z
+kill_exit=0
+### kill_core_observed
+t+2s status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+t+4s status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+t+6s status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+t+8s status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+t+10s status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+t+12s status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+### kill_client_result
+{"case":"B02-client","started":"2026-09-26T04:05:04.854Z","http":408,"success":false,"error":"Scrape timed out after waiting in the concurrency limit queue","sentinels":[],"ms":60165}
+exec_exit=0
+### kill_core_ready
+utc=2026-09-26T04:06:05.075Z core status=restarting health=unhealthy restarts=2 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+### kill_job_observed
+t+3s 01a0dbe3-593b-72cd-ba9b-0ee822c614fc	active	0	04:05:05	t	
+t+6s 01a0dbe3-593b-72cd-ba9b-0ee822c614fc	active	0	04:05:05	t	
+t+9s 01a0dbe3-593b-72cd-ba9b-0ee822c614fc	active	0	04:05:05	t	
+t+12s 01a0dbe3-593b-72cd-ba9b-0ee822c614fc	active	1	04:06:14	t	
+t+15s 01a0dbe3-593b-72cd-ba9b-0ee822c614fc	active	1	04:06:14	t	
+t+18s 01a0dbe3-593b-72cd-ba9b-0ee822c614fc	active	1	04:06:14	t	
+t+21s 01a0dbe3-593b-72cd-ba9b-0ee822c614fc	failed	1		t	SCRAPE_TIMEOUT|{"stack":"Error: The scrape operation timed out before completing. This happens when a page takes too long to load, render, or process. Possible 
+### kill_attempts
+01a0dbe3-593b-72cd-ba9b-0ee822c614fc	1	direct_http	CANCELLED		04:05:05.580
+### kill_fixture_hits
+hits=1
+### kill_core_log
+nuq-worker-0   2026-09-26 04:05:05 info [nuq-worker:]: Acquired job 
+✗ A service has terminated unexpectedly Error: nuq-worker-0 failed with exit code 137
+── Shutting down ──
+worker         2026-09-26 04:05:08 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-26 04:05:08 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-26 04:05:08 info [:]: Shutting down extract worker... 
+nuq-prefetch-worker 2026-09-26 04:05:08 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:05:08 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:05:08 info [nuq/rabbitmq:]: NuQ sender connection closed 
+nuq-prefetch-worker 2026-09-26 04:05:08 info [nuq/rabbitmq:]: NuQ sender connection closed 
+worker         2026-09-26 04:05:11 info [:]: All jobs finished. Shutting down... 
+api            2026-09-26 04:06:05 info [nuq/rabbitmq:]: NuQ listener channel closed 
+api            2026-09-26 04:06:05 info [nuq/rabbitmq:]: NuQ listener connection already closing during shutdown 
+nuq-worker-0   2026-09-26 04:06:22 info [nuq-worker:]: Acquired job 
+nuq-worker-0   2026-09-26 04:06:22 info [nuq/rabbitmq:]: NuQ job sent 
+ℹ All services running. Press Ctrl+C to stop
+### kill_health
+fixture-m2 running healthy restarts=0 policy=unless-stopped
+retrieval-service running healthy restarts=0 policy=unless-stopped
+browser-worker running healthy restarts=0 policy=unless-stopped
+firecrawl-core running starting restarts=2 policy=unless-stopped
+access-gateway running healthy restarts=0 policy=unless-stopped
+nuq-postgres running healthy restarts=0 policy=unless-stopped
+rabbitmq running healthy restarts=0 policy=unless-stopped
+redis running healthy restarts=0 policy=unless-stopped
+fixture running healthy restarts=0 policy=unless-stopped
+### kill_end
+end
