@@ -9,6 +9,7 @@ import { createServer, request } from "node:http";
 import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { fileURLToPath } from "node:url";
+import { readFileSync } from "node:fs";
 
 const MANIFEST_PATH = process.env.FCPI_TEST_MANIFEST ?? fileURLToPath(new URL("../../../deploy/policies/capabilities.json", import.meta.url));
 const SERVER = fileURLToPath(new URL("../server.mjs", import.meta.url));
@@ -17,6 +18,7 @@ const HOST = "127.0.0.1:3380";
 const MODERN = "2026-07-28", LEGACY = "2025-11-25";
 const META = { "io.modelcontextprotocol/protocolVersion": MODERN, "io.modelcontextprotocol/clientCapabilities": {}, "io.modelcontextprotocol/clientInfo": { name: "fcpi-test", version: "1" } };
 const JOB = "0f8fad5b-d9cb-469f-a165-70867728950e";
+const JOB_BIG = "1f8fad5b-d9cb-469f-a165-70867728950e", JOB_HUGE = "2f8fad5b-d9cb-469f-a165-70867728950e";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ---- the fake access gateway --------------------------------------------------------------------------
@@ -40,6 +42,11 @@ const fake = createServer((req, res) => {
     }
     if (req.method === "POST" && u.pathname === "/v2/crawl" && /dropme/.test(rec.body.url)) return req.socket.destroy();   // recorded, answer lost
     if (req.method === "POST" && u.pathname === "/v2/crawl") return send(200, { success: true, id: JOB, url: `http://${req.headers.host}/v2/crawl/${JOB}` });
+    // A page over the MCP answer cap unless read one document at a time; and one whose single document is.
+    if (req.method === "GET" && (u.pathname === `/v2/crawl/${JOB_BIG}` || u.pathname === `/v2/crawl/${JOB_HUGE}`)) {
+      const one = u.searchParams.get("limit") === "1" && u.pathname.endsWith(JOB_BIG);
+      return send(200, { success: true, status: "completed", completed: 3, total: 3, data: one ? [{ markdown: "small" }] : Array.from({ length: 3 }, () => ({ markdown: "x".repeat(1600000) })) });
+    }
     if (req.method === "GET" && u.pathname === `/v2/crawl/${JOB}`) return send(200, { success: true, status: "completed", completed: 2, total: 2, creditsUsed: 2, expiresAt: "2026-10-03T00:00:00.000Z", data: [{ markdown: "a" }, { markdown: "b" }] });
     if (req.method === "GET" && u.pathname === "/platform/v1/status") return send(200, { success: true, service: "access-gateway" });
     send(404, { success: false, error: "Job not found" });
@@ -300,4 +307,15 @@ test("past maxToolCalls a tool call is refused as OVERLOADED at once, and the ru
       assert.equal((await slow).last.result.isError, undefined, "the running call completes");
     } finally { port = saved; }
   } finally { one.kill(); }
+});
+
+test("a status page over the answer cap is read again one document at a time; a document still over it says where it is served whole", async () => {
+  const n = seen.length;
+  const r = await call("firecrawl_check_crawl_status", { id: JOB_BIG });
+  assert.equal(r.last.result.isError, undefined);
+  assert.equal(payload(r).returned, 1);
+  assert.deepEqual(seen.slice(n).map((s) => new URL(s.url, "http://g").searchParams.get("limit")), [String(JSON.parse(readFileSync(MANIFEST_PATH, "utf8")).mcp.limits.statusPageDefault), "1"]);
+  const h = await call("firecrawl_check_crawl_status", { id: JOB_HUGE });
+  assert.equal(payload(h).error.code, "RESULT_TOO_LARGE");
+  assert.match(payload(h).error.message, /REST results route/);
 });

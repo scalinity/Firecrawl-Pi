@@ -57,14 +57,23 @@ async function runTool(t, args, extra, era) {
     if (t.kind === "submit") args = { ...args, idempotencyKey: args.idempotencyKey ?? `mcp:${randomUUID()}` };
     const q = t.request(args);
     let r;
-    try { r = await rest.call({ ...q, token: auth.token, host: auth.extra.host, signal }); }
-    catch (e) {
+    const send = (qq) => rest.call({ ...qq, token: auth.token, host: auth.extra.host, signal });
+    try {
+      try { r = await send(q); }
+      catch (e) {
+        // A status page over the answer cap is read again one document at a time, as the gateway itself
+        // does for running jobs; a single document still over it is reported with where it is served whole.
+        if (t.kind !== "status" || e.code !== "TOO_LARGE" || (args.limit ?? L.statusPageDefault) <= 1) throw e;
+        args = { ...args, limit: 1 };
+        r = await send(t.request(args));
+      }
+    } catch (e) {
       const downstream = { route: t.route.id, status: null, code: e.code ?? "UNAVAILABLE", request_id: null };
       if (e.code === "ABORTED") { finish(null, downstream, "cancelled"); throw e; }
       if (t.kind === "submit" && e.code !== "TOO_LARGE") {
         return finish(text({ error: { code: "SUBMISSION_UNCERTAIN", idempotencyKey: args.idempotencyKey, message: `The gateway's answer was lost (${e.message}), so whether it recorded this job is unknown. Call ${t.name} again with the same arguments and this idempotencyKey: it returns the job if it was recorded and starts it once if it was not.` } }, true), downstream, "uncertain");
       }
-      const message = e.code === "TOO_LARGE" ? `The gateway's answer is larger than this service carries (${L.restResponseMaxBytes} bytes). ${t.kind === "status" ? "Read fewer documents at a time (limit=1)." : "Ask for fewer formats."}` : `The gateway did not answer: ${e.message}.`;
+      const message = e.code === "TOO_LARGE" ? `The gateway's answer is larger than this service carries (${L.restResponseMaxBytes} bytes). ${t.kind === "status" ? `The document at skip ${args.skip ?? 0} alone is that large: read it whole from the job's REST results route with limit=1.` : "Ask for fewer formats."}` : `The gateway did not answer: ${e.message}.`;
       return finish(text({ error: { code: e.code === "TOO_LARGE" ? "RESULT_TOO_LARGE" : "GATEWAY_UNAVAILABLE", message } }, true), downstream, "failed");
     }
     const { payload, isError } = t.shape(r, args);
