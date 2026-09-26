@@ -829,7 +829,7 @@ const checks = {
       const roleOk = p.role === "fcpi_core" && ["super", "createrole", "createdb", "replication", "bypassrls"].every((k) => p[k] === "false");
       const privOk = p.superusers === "postgres" && p.superuser_has_password === "f" && p.nuq_owner === "postgres" && p.fcpi_core_owned_objects === "0" &&
         p.fcpi_core_privileges === "DELETE,INSERT,SELECT,UPDATE" && Number(p.nuq_tables) > 0 && p.fcpi_core_tables_with_dml === p.nuq_tables && p.fcpi_core_schema_create === "f";
-      const probeOk = probe("dml") === "ok" && /permission denied for schema nuq/.test(probe("create_function_in_nuq")) && /must be owner of (table|relation) queue_scrape/.test(probe("create_trigger_on_nuq"));
+      const probeOk = probe("dml") === "ok" && /permission denied for schema nuq/.test(probe("create_function_in_nuq")) && /(must be owner of (table|relation)|permission denied for table) queue_scrape/.test(probe("create_trigger_on_nuq"));
       const ownOk = privOk && probeOk;
       const sessOk = sessions.length > 0 && sessions.every((x) => /^fcpi_core:\d+$/.test(x));
       const files = ["postgres_password 5432:5432 600", "core_postgres_password 0:0 600", "postgres_core_role_password 5432:5432 600"];

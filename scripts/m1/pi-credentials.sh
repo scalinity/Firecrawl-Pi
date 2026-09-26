@@ -35,7 +35,7 @@ sec fcpi_core_probe
 # As fcpi_core (local socket, trusted inside the container), each in a transaction that is
 # rolled back: a DML statement must succeed (the positive control); creating a function in
 # the NuQ schema and attaching a trigger to a NuQ table must both be refused.
-fq() { printf '%s\n' "$1" | sudo -n docker exec -i "$PG" psql -U fcpi_core -d postgres -X -At -v ON_ERROR_STOP=1 2>&1 | tr '\n' ' '; }
+fq() { printf '%s\n' "$1" | sudo -n docker exec -i "$PG" psql -U fcpi_core -d postgres -X -q -At -v ON_ERROR_STOP=1 2>&1 | tr '\n' ' '; }
 echo "dml=$(fq "begin; update nuq.queue_scrape set status = status where false; select 'ok'; rollback;")"
 echo "create_function_in_nuq=$(fq "begin; create function nuq.fcpi_probe() returns trigger language plpgsql as \$\$begin return null; end\$\$; rollback;")"
 echo "create_trigger_on_nuq=$(fq "begin; create function pg_temp.fcpi_probe() returns trigger language plpgsql as \$\$begin return null; end\$\$; create trigger fcpi_probe after update on nuq.queue_scrape for each statement execute function pg_temp.fcpi_probe(); rollback;")"
