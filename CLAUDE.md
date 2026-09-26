@@ -1001,3 +1001,70 @@ When choosing between two implementations that both satisfy the canonical requir
 Do not optimize for passing a superficial checklist.
 
 Build the platform so that its capabilities are **real, measured, recoverable, and useful**.
+
+---
+
+## 33. Working Conventions
+
+The sections above state what must hold. This one states how the project's work is done so that it holds, as running M0, M1 and their reviews established it. Each rule carries its reason.
+
+### 33.1 The Pi and its host state
+
+- Reach the Pi only through `scripts/m1/pi-target.conf`, the one definition of its SSH target, which every script sources.
+- Deploy only committed code with `scripts/m1/deploy.sh`. It sends `git archive HEAD`, verifies every hash on the Pi, removes files the archive lacks, and records the commit last. Never copy files to the Pi by hand: the recorded commit would stop describing what runs.
+- Snapshot around every session that changes the Pi, because unrelated services share this host:
+  - before the first change, take a BEFORE snapshot with `scripts/m1/snapshot.sh` and compare it with the previous AFTER snapshot, where only SSH session scopes may differ;
+  - after the last change, take the AFTER snapshot;
+  - attribute every line of their diff; an unexplained line is a finding.
+- Keep these host invariants, and change one only with evidence:
+  - **dockerd's start is gated.** Its ExecStartPre runs the data check, then loads `inet fcpi_guard` from `/etc/firecrawl-pi/fcpi-guard.nft`, and either failing keeps dockerd down. Docker therefore serves only this project: no container outlives a test unless it belongs to Compose project `fcpi`.
+  - **The gateway's bridge stays closed.** The guard closes `fcpi-access` except for replies to the loopback publication.
+  - **Every non-internal container names its own DNS upstream.** A container on any non-internal network gets one, as the gateway's `dns: [192.0.2.1]` does, because Docker's resolver otherwise reaches the host's loopback resolver from the host's namespace, past the guard.
+  - **The core has DML only.** It connects to PostgreSQL as `fcpi_core`, owns nothing, and must never get ownership or DDL, because the superuser's pg_cron jobs change NuQ's tables: a trigger their owner attached would run with superuser rights. DDL on NuQ runs as the superuser over the local socket.
+  - **dockerd restarts stay with dockerd.** `fcpi-stack.service` Wants, not Requires, docker.service, so a dockerd restart is not carried to it.
+  - **NetworkManager leaves Docker alone.** It keeps `veth*`, `fcpi-*` and `docker0` unmanaged. The only NetworkManager change allowed is the project's conf.d file, because the Pi's only uplink is Wi-Fi.
+- Throwaway test containers carry the label `fcpi.transient`. They run with no network where possible, a read-only root filesystem and the service's uid, and are removed, and the test records that none is left (`scripts/m1/pi-fresh-init-proof.sh`).
+
+### 33.2 Secrets and identifiers
+
+- **Generation.** Generate secrets on the Pi into `/etc/firecrawl-pi/secrets`: directory 0700, files 0600, each owned by the uid that reads it. Create them by hard link, so an existing file is never overwritten. Copies of one value (the core's and the initdb script's) are created together, and a mismatched pair stops the script rather than being repaired.
+- **Never on a command line.** A secret on a command line shows in the process list, so pass values over stdin, as `pi-narrow-credentials.sh` passes psql's `\set` from a builtin `printf`. Collectors print only yes/no comparisons, owners and modes.
+- **No new identifier occurrences.** The Pi's LAN address and SSH target are in tracked files as a recorded pre-push decision; add no new occurrence. Evidence that would carry them has them replaced with `<pi-lan-address>` and `<pi-ssh-target>` before commit, and its interpretation says so.
+- **The redaction scan runs last.** It covers every live secret by hash, with its positive controls, and runs after the last evidence file is written.
+
+### 33.3 Collectors, evidence and verifiers
+
+- **Collectors** print to stdout in `### section` blocks, beginning with a meta section (UTC time, deployed source commit). They change nothing unless their name says so. Pi-side collectors are `scripts/<milestone>/pi-*.sh`, run through SSH. Scripts from M1 on are mode 755, so the documented direct invocations work.
+- **Verifiers.** A milestone's verifier (`scripts/<milestone>/verify.mjs`) recomputes every result from raw evidence and records the §25 tuple with `code_dirty`.
+  - A check that cannot fail is a finding: name the input that would fail it.
+  - Every negative result needs a positive control in the same evidence: the probe that shows the target was reachable before, the count that shows the log was actually read.
+- **Accepted evidence is never overwritten.** Later work on an accepted milestone, such as a review or a close-out, writes beside it in `evidence/<milestone>/<name>/`. It reruns the milestone's checks there through the verifier's evidence-base switch (`FCPI_M1_EVIDENCE` for M1), whose default mode must still reproduce the accepted record byte for byte.
+- **Verify at a clean code tree.** Run the verifier with all code committed, so every record shows `code_dirty=false` and names the commit that produced it; evidence may be uncommitted at the time.
+- **After `/address`, bring the Pi up to date.** If `/address` changed anything the Pi runs, commit, redeploy, re-collect the affected evidence and retake the AFTER snapshot, then rerun the verifier.
+
+### 33.4 Canonical documents and ORCHESTRATION.html
+
+- Edit canonical documents in place, stating the current design only, with no "previously" trail. Keep `CLAUDE.md` and `AGENTS.md` byte-identical.
+- `ORCHESTRATION.html` embeds `AGENTS.md`, the spec and the milestones document line by line, with their SHA-256 values and cited line ranges. Whenever one of them changes, refresh the embedded snapshot, the embedded and displayed hashes and the ranges in the same commit.
+- Editing the page:
+  - its data blocks serialize as `JSON.stringify` (source-data) and `JSON.stringify(…, null, 2)` (unit-data, ref-data), with every `<` written as `<`; confirm they round-trip before editing;
+  - edit with exact-string replacements that assert one match;
+  - check the page in light and dark and at 390 px, served from localhost, then delete the screenshots.
+
+### 33.5 Git
+
+- Stage by name, never `git add -A`. Commit one fix per commit where the fixes are separable.
+- Messages use a neutral technical voice: what changed and why, with no attribution line of any kind.
+- Do not push while there is no remote: a first push needs a full-history scan.
+
+### 33.6 Known traps on this workstation and host
+
+- zsh does not word-split unquoted scalars: use arrays or `${=var}`. macOS has no `timeout`, and its `sed -i` needs `''`.
+- jq's `//` treats `false` as missing: use `tostring`.
+- `fwd` is an nftables keyword.
+- `journalctl --since` without a zone is local time (the Pi runs America/New_York): suffix `UTC` or use `@epoch`.
+- Under `pipefail`, `grep -q` can end its producer with SIGPIPE and turn a match into a failure: use `grep … >/dev/null`.
+- Under `set -e`, a failing command inside an `&&` list does not stop the script: check such steps explicitly.
+- `pg_isready` inside a container whose uid has no passwd entry needs `-U`. psql prints command tags unless given `-q`.
+- `nft`, `NetworkManager` and other admin tools are in `/usr/sbin`, outside a non-root PATH on the Pi.
+- A container ID resolved before `docker compose up` can be stale after it: resolve it again.
