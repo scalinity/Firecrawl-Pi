@@ -911,7 +911,7 @@ const checks = {
     run() {
       const text = read(`${EV}REVIEW.md`);
       const rows = text.split("\n").filter((l) => /^\| [CWS]\d+ \|/.test(l)).map((l) => l.split(" | "));
-      const outcome = (c) => c[4] ?? "";
+      const outcome = (c) => c[3] ?? ""; // | ID | Severity | Finding | Outcome | Commits | Check |
       const bad = rows.filter((c) => !/^(Fixed|Rejected, with the evidence|Deferred to M\d|Returned to M\d|Partly fixed, partly rejected)/.test(outcome(c))).map((c) => c[0].slice(2));
       const commits = [...new Set([...text.matchAll(/`([0-9a-f]{7})`/g)].map((m) => m[1]))];
       const missing = commits.filter((c) => { try { git("cat-file", "-e", `${c}^{commit}`); return false; } catch { return true; } });
