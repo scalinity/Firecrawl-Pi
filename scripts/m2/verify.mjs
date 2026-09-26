@@ -782,16 +782,21 @@ const checks = {
       return { ok, actual: `tests=${n("tests")} pass=${n("pass")} fail=${n("fail")} skipped=${n("skipped")}; image is the running one=${img === digestOf(composeImage("retrieval-service"))}` };
     } },
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
-    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding an outcome (fixed with its commit, rejected with evidence, deferred to a later milestone), cites only commits that exist, and holds no absolute local path",
+    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to a later milestone), cites only commits that exist, and holds no absolute local path",
     run() {
       const text = read(`${EV}review/REVIEW.md`);
       const rows = text.split("\n").filter((l) => /^\| [A-Z]{1,2}\d+ \|/.test(l)).map((l) => l.split(" | "));
       const bad = rows.filter((c) => !/^(Fixed|Rejected, with the evidence|Deferred to M\d|Partly fixed, partly rejected)/.test(c[3] ?? "")).map((c) => c[0].slice(2));
-      const commits = [...new Set([...text.matchAll(/`([0-9a-f]{7,40})`/g)].map((m) => m[1]))];
+      // Every finding the report lists has its row, and a fixed one names its commit.
+      const listedIds = [...text.matchAll(/^\s*\d+\. \*\*([CWS]\d+) —/gm)].map((m) => m[1]);
+      const uncovered = listedIds.filter((id) => !rows.some((c) => c[0] === `| ${id}`));
+      const uncited = rows.filter((c) => /^Fixed/.test(c[3] ?? "") && !/`[0-9a-f]{7,40}`/.test(c[4] ?? "")).map((c) => c[0].slice(2));
+      // The outcomes' commits: the review's own text also quotes upstream commits and tree ids.
+      const commits = [...new Set(rows.flatMap((c) => [...(c[4] ?? "").matchAll(/`([0-9a-f]{7,40})`/g)].map((m) => m[1])))];
       const missing = commits.filter((c) => { try { git("cat-file", "-e", `${c}^{commit}`); return false; } catch { return true; } });
       const local = /\/(private\/tmp|Users\/[^\/\s]+|home\/[^\/\s]+)\//.test(text);
-      const ok = rows.length > 0 && bad.length === 0 && missing.length === 0 && !local;
-      return { ok, actual: `findings=${rows.length}; without a recognised outcome=${bad.join(",") || "none"}; commits cited=${commits.length}, missing=${missing.join(",") || "none"}; absolute local path=${local}` };
+      const ok = rows.length > 0 && listedIds.length === rows.length && uncovered.length === 0 && uncited.length === 0 && bad.length === 0 && missing.length === 0 && !local;
+      return { ok, actual: `findings listed=${listedIds.length}, rows=${rows.length}, without a row=${uncovered.join(",") || "none"}; fixed without a commit=${uncited.join(",") || "none"}; without a recognised outcome=${bad.join(",") || "none"}; commits cited=${commits.length}, missing=${missing.join(",") || "none"}; absolute local path=${local}` };
     } },
 };
 
