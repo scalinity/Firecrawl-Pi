@@ -44,7 +44,7 @@ async function admin(db) { const c = new pg.Client({ host: PGHOST, port: Number(
 
 // ---- the fake core -----------------------------------------------------------------------------------
 function fakeCore(dbName) {
-  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [] };
+  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false };
   const docOf = (id, i) => ({ markdown: `# page ${i}`, metadata: { sourceURL: `http://m3.fixture.fcpi.test:8080/p${i}`, scrapeId: `${id.slice(0, 8)}-doc-${i}`, statusCode: 200 } });
   const persist = async (kind, id, body) => {
     const data = kind === "crawl" ? { mode: "kickoff", origin: body.origin, crawl_id: id } : { mode: "single_urls", origin: "api", scrapeOptions: { origin: body.origin }, crawl_id: id };
@@ -82,7 +82,11 @@ function fakeCore(dbName) {
         const j = s.jobs.get(m[2]);
         if (!j) return send(404, { success: false, error: "Job not found" });
         if (req.method === "DELETE") { if (j.status === "completed") return send(409, { error: "Crawl is already completed" }); j.status = "cancelled"; j.cancelled = true; return send(200, { status: "cancelled" }); }
-        if (m[3]) return send(200, { errors: j.errors, robotsBlocked: [] });
+        if (m[3]) {
+          if (s.errorsFail > 0) { s.errorsFail -= 1; return send(503, { success: false, error: "unavailable" }); }
+          if (s.errorsGone) return send(404, { success: false, error: "Job not found" });
+          return send(200, { errors: j.errors, robotsBlocked: [] });
+        }
         const skip = Number(u.searchParams.get("skip") ?? 0), limit = Number(u.searchParams.get("limit") ?? 100);
         // A finished page without a stored document is counted in next but not listed, as upstream does.
         const page = j.docs.slice(skip, skip + limit), data = page.filter(Boolean);
@@ -351,6 +355,27 @@ test("archival follows upstream's next past pages whose documents were not store
   h.core.jobs.get(cup).status = "cancelled";
   const cj = await waitFor(async () => { const j = await h.job(c.json.id); return j.state === "CANCELLED" && j; }, 15000, "cancelled job archived");
   assert.equal(cj.archived, 2);
+});
+
+test("per-item errors the core fails to serve are fetched again, never read as none; errors the core has forgotten are recorded as unknown", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  h.core.errorsFail = 3;
+  h.core.complete(up, 2, 1);
+  const done = await waitFor(async () => { const j = await h.job(r.json.id); return ["SUCCEEDED", "PARTIAL"].includes(j.state) && j; }, 15000, "archive");
+  assert.equal(done.state, "PARTIAL", "the upstream error arrived after three failed fetches");
+  assert.equal(h.core.errorsFail, 0);
+  assert.deepEqual(done.errors.errors.map((e) => e.code), ["SCRAPE_NOT_FOUND"]);
+  assert.ok(h.logs.some((l) => l.action === "archive_interrupted" && /errors status 503/.test(l.reason)));
+  const g = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 3 }) });
+  const gup = await waitFor(() => h.core.upstreamOf(g.json.id), 15000, "mapping");
+  h.core.errorsGone = true;
+  h.core.complete(gup, 2);
+  const gone = await waitFor(async () => { const j = await h.job(g.json.id); return ["SUCCEEDED", "PARTIAL"].includes(j.state) && j; }, 15000, "archive");
+  assert.equal(gone.state, "PARTIAL");
+  assert.equal(gone.archived, 2);
+  assert.deepEqual(gone.errors.errors.map((e) => e.code), ["UPSTREAM_ERRORS_LOST"]);
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {

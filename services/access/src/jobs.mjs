@@ -138,9 +138,15 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
       skip = nextSkip;
       limit = 10;
     }
+    // The per-item errors are part of the result: a failed fetch is retried on the next poll, never read
+    // as "no errors". A core that has forgotten the job by now leaves them unknown, and the job says so.
+    let e;
+    try { e = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}/errors`, { timeoutMs: 15000, maxBytes: 4 * 1048576 }); }
+    catch (err) { say({ job: job.id, action: "archive_interrupted", reason: `errors ${err.code}` }); return; }
     let errors = { errors: [], robotsBlocked: [] };
-    const e = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}/errors`, { timeoutMs: 15000, maxBytes: 4 * 1048576 }).catch(() => null);
-    if (e?.status === 200 && Array.isArray(e.json?.errors)) errors = { errors: e.json.errors.slice(0, 1000), robotsBlocked: (e.json.robotsBlocked ?? []).slice(0, 1000) };
+    if (e.status === 404) archiveErrors.push({ code: "UPSTREAM_ERRORS_LOST", error: "the core forgot this job before its per-item errors were archived; they are unknown" });
+    else if (e.status !== 200 || !Array.isArray(e.json?.errors)) { say({ job: job.id, action: "archive_interrupted", reason: `errors status ${e.status}` }); return; }
+    else errors = { errors: e.json.errors.slice(0, 1000), robotsBlocked: (e.json.robotsBlocked ?? []).slice(0, 1000) };
     errors.errors.push(...archiveErrors);
     let to = "SUCCEEDED", code = null, message = null;
     if (st.status === "failed") { to = "FAILED"; code = "UPSTREAM_FAILED"; message = String(statusBody?.error ?? "the job failed upstream").slice(0, 2000); }
