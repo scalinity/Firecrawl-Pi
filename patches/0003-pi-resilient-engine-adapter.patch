@@ -277,10 +277,10 @@ index 0000000000000000000000000000000000000000..7f821920e45c9ee641a8c1b6f2763298
 +}
 diff --git a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..5c07e6a3ca81944fca7ee50e84a30a63136138bc
+index 0000000000000000000000000000000000000000..c9f9e23a8f95f02771a8d06b270b26f1c5f5d1f2
 --- /dev/null
 +++ b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
-@@ -0,0 +1,209 @@
+@@ -0,0 +1,225 @@
 +// fcpi: the pi-resilient engine adapter (FIRECRAWL_PI_SPEC.md §8.1). In the pi-resilient
 +// profile (PI_RETRIEVAL_URL set) every acquisition is one call to the project retrieval
 +// service's POST /internal/acquire. The service owns target validation, SSRF and redirect
@@ -345,6 +345,15 @@ index 0000000000000000000000000000000000000000..5c07e6a3ca81944fca7ee50e84a30a63
 +    );
 +  }
 +
++  // The retrieval service bounds waitFor at 15 s (spec §12); a longer wait is refused here, by
++  // name, rather than as the service's bare HTTP 400 (review finding W13).
++  if ((meta.options.waitFor ?? 0) > 15_000) {
++    throw new PiRetrievalError(
++      "UNSUPPORTED_CAPABILITY",
++      "waitFor above 15000 ms is not offered in this deployment.",
++    );
++  }
++
 +  const remaining = Math.min(
 +    meta.abort.scrapeTimeout() ?? MAX_ACQUISITION_MS,
 +    MAX_ACQUISITION_MS,
@@ -397,10 +406,17 @@ index 0000000000000000000000000000000000000000..5c07e6a3ca81944fca7ee50e84a30a63
 +    );
 +  }
 +  if (response.status !== 200) {
++    // The service names its refusal (RETRIEVAL_NOT_READY, INVALID_REQUEST, …) in the body, as the
++    // auxiliary downloads already read it; the class survives to the caller (review finding W13).
++    const refusal = (await response.json().catch(() => null)) as {
++      failure?: { class: string; detail: string; retryable: boolean; retryAfter: number | null };
++    } | null;
++    const f = refusal?.failure;
 +    throw new PiRetrievalError(
-+      "RETRIEVAL_SERVICE_ERROR",
-+      `The retrieval service answered HTTP ${response.status}.`,
-+      response.status >= 500,
++      f?.class ?? "RETRIEVAL_SERVICE_ERROR",
++      f?.detail ?? `The retrieval service answered HTTP ${response.status}.`,
++      f?.retryable ?? response.status >= 500,
++      f?.retryAfter ?? null,
 +    );
 +  }
 +  const result = (await response.json()) as {

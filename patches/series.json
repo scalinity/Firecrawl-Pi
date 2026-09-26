@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "cd46160c40afa42ab7c56232ecbeaf1549654b92",
-  "series_sha256": "90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea",
+  "result_tree": "77df4dce6aaefeaff283d0b2bab3da82f2691349",
+  "series_sha256": "a7a02b647d4a613f6fd48f03ee16f9d2486a890a98744f9c6c3535202f96636a",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -39,7 +39,7 @@
     },
     {
       "file": "0003-pi-resilient-engine-adapter.patch",
-      "sha256": "abff6860fea1bca80e251269cca023bf05c528318339c43649d0c93615035fdd",
+      "sha256": "da924612efbdd8d516d61b41a815144f0ad7baa35989c7fc30d0c5ff98c9a757",
       "reason": "The engine registration and result translation spec §8.1 requires; every page acquisition goes to the retrieval service.",
       "symbols": [
         "apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts scrapeURLWithPiResilient (new)",
