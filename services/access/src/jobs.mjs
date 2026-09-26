@@ -116,7 +116,12 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
       if (r.status === 404) { await store.failLost(job.id, "UPSTREAM_STATE_LOST", "The core forgot this job before its results were archived."); return; }
       const docs = Array.isArray(r.json?.data) ? r.json.data : null;
       if (r.status !== 200 || !docs) { say({ job: job.id, action: "archive_interrupted", reason: `status ${r.status}` }); return; }
-      if (!docs.length) break;
+      // Upstream's `next` carries the position after this page: it counts finished pages that have no
+      // stored document but leaves them out of `data`, so an empty page is not the end. It also sets
+      // `next` on every page of a job that ended other than "completed", so the end is a `next` that is
+      // absent or does not move forward (apps/api/src/controllers/v2/crawl-status.ts).
+      const nextSkip = r.json.next ? Number(new URL(r.json.next).searchParams.get("skip")) : null;
+      if (r.json.next && !Number.isInteger(nextSkip)) { say({ job: job.id, action: "archive_interrupted", reason: "unreadable next" }); return; }
       const rows = [];
       for (const doc of docs) {
         const key = typeof doc?.metadata?.scrapeId === "string" ? doc.metadata.scrapeId : null;
@@ -129,7 +134,8 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
         rows.push({ ordinal: ordinal++, docKey, sha256: put.sha256, bytes: put.bytes });
       }
       await store.addDocuments(job.id, rows);
-      skip += docs.length;
+      if (nextSkip === null || nextSkip <= skip) break;
+      skip = nextSkip;
       limit = 10;
     }
     let errors = { errors: [], robotsBlocked: [] };

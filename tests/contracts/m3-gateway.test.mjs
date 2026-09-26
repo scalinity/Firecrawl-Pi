@@ -84,8 +84,9 @@ function fakeCore(dbName) {
         if (req.method === "DELETE") { if (j.status === "completed") return send(409, { error: "Crawl is already completed" }); j.status = "cancelled"; j.cancelled = true; return send(200, { status: "cancelled" }); }
         if (m[3]) return send(200, { errors: j.errors, robotsBlocked: [] });
         const skip = Number(u.searchParams.get("skip") ?? 0), limit = Number(u.searchParams.get("limit") ?? 100);
-        const data = j.docs.slice(skip, skip + limit);
-        const next = j.status !== "completed" || j.docs.length > skip + data.length ? `http://firecrawl-core:3002/v2/${m[1]}/${m[2]}?skip=${skip + data.length}` : undefined;
+        // A finished page without a stored document is counted in next but not listed, as upstream does.
+        const page = j.docs.slice(skip, skip + limit), data = page.filter(Boolean);
+        const next = j.status !== "completed" || j.docs.length > skip + page.length ? `http://firecrawl-core:3002/v2/${m[1]}/${m[2]}?skip=${skip + page.length}` : undefined;
         return send(200, { success: true, status: j.status, completed: j.docs.length, total: j.docs.length, creditsUsed: -1, expiresAt: new Date(Date.now() + 86400000).toISOString(), next, data });
       }
       send(404, { success: false, error: "not found" });
@@ -95,7 +96,8 @@ function fakeCore(dbName) {
   s.stop = async () => { for (const h of s.held) h.res.socket?.destroy(); s.held = []; s.server.closeAllConnections(); await new Promise((r) => s.server.close(r)); };
   // Answers every held submission that the core created (persist-hang), as it would have.
   s.release = () => { const n = s.held.filter((h) => h.answer).length; for (const h of s.held) h.answer?.(); s.held = []; return n; };
-  s.complete = (id, n, errs = 0) => { const j = s.jobs.get(id); j.docs = Array.from({ length: n }, (_, i) => docOf(id, i)); j.errors = Array.from({ length: errs }, (_, i) => ({ id: randomUUID(), url: `http://m3.fixture.fcpi.test:8080/missing${i}`, error: "Not found", code: "SCRAPE_NOT_FOUND" })); j.status = "completed"; };
+  // n documents, after `holes` finished pages that have no stored document.
+  s.complete = (id, n, errs = 0, holes = 0) => { const j = s.jobs.get(id); j.docs = [...Array(holes).fill(null), ...Array.from({ length: n }, (_, i) => docOf(id, i))]; j.errors = Array.from({ length: errs }, (_, i) => ({ id: randomUUID(), url: `http://m3.fixture.fcpi.test:8080/missing${i}`, error: "Not found", code: "SCRAPE_NOT_FOUND" })); j.status = "completed"; };
   s.upstreamOf = async (jobId) => (await s.db.query("SELECT upstream_id FROM fcpi_platform.job WHERE id = $1", [jobId])).rows[0]?.upstream_id;
   s.submissions = () => s.requests.filter((r) => r.method === "POST" && /^\/v2\/(crawl|batch\/scrape)$/.test(r.url));
   s.connectDb = async () => { s.db = await admin(dbName); };
@@ -331,6 +333,24 @@ test("a crawl is admitted, mapped, archived and paginated from the archive after
   const rec = await H.call("GET", `/platform/v1/jobs/${id}`, { token: T.a });
   assert.deepEqual(rec.json.job.events.map((e) => e.to), ["RECEIVED", "SUBMITTING", "QUEUED", "RUNNING", "PARTIAL"]);
   assert.equal(rec.json.job.upstreamId, up);
+});
+
+test("archival follows upstream's next past pages whose documents were not stored, and stops on a cancelled job's last page", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  h.core.complete(up, 3, 0, 12);
+  const done = await waitFor(async () => { const j = await h.job(r.json.id); return j.state === "SUCCEEDED" && j; }, 15000, "archive");
+  assert.equal(done.archived, 3, "the documents after twelve unstored pages are archived");
+  const page = await h.call("GET", `/v2/crawl/${r.json.id}`, { token: T.a });
+  assert.deepEqual(page.json.data.map((d) => d.metadata.scrapeId), [0, 1, 2].map((i) => `${up.slice(0, 8)}-doc-${i}`));
+  // A cancelled job: upstream keeps `next` on every page, so the end is a `next` that does not move.
+  const c = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 7 }) });
+  const cup = await waitFor(() => h.core.upstreamOf(c.json.id), 15000, "mapping");
+  h.core.complete(cup, 2);
+  h.core.jobs.get(cup).status = "cancelled";
+  const cj = await waitFor(async () => { const j = await h.job(c.json.id); return j.state === "CANCELLED" && j; }, 15000, "cancelled job archived");
+  assert.equal(cj.archived, 2);
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {
