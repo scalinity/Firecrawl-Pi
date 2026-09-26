@@ -7,8 +7,8 @@
 // host (Firecrawl Cloud's default among them) would show.
 //   node scripts/m3/sdk-compat.mjs <dir holding node_modules/@mendable/firecrawl-js> < token > evidence/M3/raw/sdk-compat.txt
 // The token (a gateway token with every scope) arrives on stdin and is never printed.
-import http from "node:http";
-import https from "node:https";
+import net from "node:net";
+import dns from "node:dns";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -17,15 +17,18 @@ import { connect } from "node:net";
 
 const dir = process.argv[2];
 const ORIGIN = "http://127.0.0.1:3380", FX = "http://m3.fixture.fcpi.test:8080";
-const seen = [];
-for (const [mod, scheme] of [[http, "http"], [https, "https"]]) {
-  const orig = mod.request;
-  mod.request = function (...args) {
-    const o = typeof args[0] === "string" || args[0] instanceof URL ? new URL(args[0]) : args[0];
-    seen.push(`${scheme}://${o.hostname ?? o.host}:${o.port ?? ""}`);
-    return orig.apply(this, args);
-  };
-}
+// Every TCP connection the process opens, whatever opens it (http.request and http.get, https, fetch),
+// and every name it looks up: a request to any other host, Firecrawl Cloud's default among them,
+// shows here even if its connection fails.
+const seen = [], looked = [];
+const origConnect = net.Socket.prototype.connect;
+net.Socket.prototype.connect = function (...args) {
+  const o = Array.isArray(args[0]) ? args[0][0] : args[0];   // net passes normalized (options, callback) as an array
+  seen.push(o && typeof o === "object" ? (o.path ? `unix:${o.path}` : `${o.host ?? "localhost"}:${o.port}`) : `${typeof args[1] === "string" ? args[1] : "localhost"}:${o}`);
+  return origConnect.apply(this, args);
+};
+const origLookup = dns.lookup;
+dns.lookup = function (host, ...rest) { looked.push(String(host)); return origLookup.call(this, host, ...rest); };
 let current = null;
 const out = (section, rec) => { if (section !== current) { process.stdout.write(`### ${section}\n`); current = section; } process.stdout.write(`${JSON.stringify({ utc: new Date().toISOString(), ...rec })}\n`); };
 const errOf = (e) => ({ name: e?.name ?? null, status: e?.status ?? null, code: e?.code ?? null, message: String(e?.message ?? e).slice(0, 200) });
@@ -39,7 +42,7 @@ for (let i = 0; i < 60; i++) {
   if (await new Promise((r) => { const s = connect(3380, "127.0.0.1"); s.on("connect", () => { s.destroy(); r(true); }); s.on("error", () => r(false)); })) break;
   await new Promise((r) => setTimeout(r, 250));
 }
-seen.length = 0;   // the probes above are not the client's
+seen.length = 0; looked.length = 0;   // the probes above are not the client's
 out("meta", { client: `${pkg.name}@${pkg.version}`, node: process.version, env_FIRECRAWL_API_URL_set: process.env.FIRECRAWL_API_URL !== undefined });
 
 const fc = new Firecrawl({ apiKey: token, apiUrl: ORIGIN });
@@ -73,7 +76,7 @@ try {
   out("error", errOf(e));
   code = 1;
 }
-out("connections", { hosts: [...new Set(seen)], total: seen.length });
+out("connections", { hosts: [...new Set(seen)], total: seen.length, lookups: [...new Set(looked)] });
 tunnel.kill();
 out("end", { exit: code });
 process.exit(code);

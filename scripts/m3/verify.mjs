@@ -474,7 +474,7 @@ const checks = {
 
   // ================================================================ zero Cloud, persistence, host state
   X01: { name: "zero-firecrawl-cloud-attempts", inputs: [`${RAW}egress-probe.txt`, `${RAW}guard-window-open.txt`, `${RAW}core-logs-final.txt`, `${RAW}stack.txt`, `${RAW}sdk-compat.txt`],
-    expected: "across one window, from a guard-counter snapshot before the first live phase to the egress probe after the last, with the guard's table not reloaded (same handle at both ends) and every live phase inside it, the guard accepted no web connection on the egress bridge; every core instance's saved log classifies each Cloud line as a refusal or a request echo and each name-resolution failure as a project service, with its positive control; the gateway's log (read, with request records) names no Cloud host; the official client connected only to the gateway's forwarded origin",
+    expected: "across one window, from a guard-counter snapshot before the first live phase to the egress probe after the last, with the guard's table not reloaded (same handle at both ends) and every live phase inside it, the guard accepted no web connection on the egress bridge; every core instance's saved log classifies each Cloud line as a refusal or a request echo and each name-resolution failure as a project service, with its positive control; the gateway's log (read, with request records) names no Cloud host; the official client, instrumented at the socket and name-lookup level (so http, https and fetch all show), opened more than ten connections, every one to the forwarded 127.0.0.1:3380, and looked up no name but that address",
     run() {
       const utcOf = (f) => Date.parse(((sections(f).meta ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]);
       const handle = (f) => ((sections(f).meta ?? []).join(" ").match(/guard_table_handle=(\d+)/) ?? [])[1];
@@ -496,9 +496,10 @@ const checks = {
       const pat = (p) => +((gl.find((l) => l.startsWith(`pattern=${p} `)) ?? "").match(/count=(\d+)/) ?? [NaN, NaN])[1];
       const gatewayLog = +glk.request_records > 0 && pat("firecrawl\\.dev") === 0 && pat("firecrawl\\.com") === 0 && pat("mendable") === 0;
       const sk = jsonLines(S(`${RAW}sdk-compat.txt`).connections)[0];
-      const client = sk && JSON.stringify(sk.hosts) === JSON.stringify(["http://127.0.0.1:3380"]) && sk.total > 10;
+      // Every socket the official client opened, whatever opened it, and every name it looked up.
+      const client = sk && JSON.stringify(sk.hosts) === JSON.stringify(["127.0.0.1:3380"]) && sk.total > 10 && Array.isArray(sk.lookups) && sk.lookups.every((h) => h === "127.0.0.1");
       const ok = inside && sameGuard && delta === 0 && recs.length >= 3 && badLogs.length === 0 && gatewayLog && client;
-      return { ok, actual: `phases inside the window=${inside}; guard not reloaded=${sameGuard}; web accepts in the window=${delta}; core instance records=${recs.length}, with unexplained lines or no control=${badLogs.map((r) => r.k).join(",") || "none"}; gateway log requests=${glk.request_records} Cloud lines=${pat("firecrawl\\.dev") + pat("firecrawl\\.com") + pat("mendable")}; client hosts=${JSON.stringify(sk?.hosts)}` };
+      return { ok, actual: `phases inside the window=${inside}; guard not reloaded=${sameGuard}; web accepts in the window=${delta}; core instance records=${recs.length}, with unexplained lines or no control=${badLogs.map((r) => r.k).join(",") || "none"}; gateway log requests=${glk.request_records} Cloud lines=${pat("firecrawl\\.dev") + pat("firecrawl\\.com") + pat("mendable")}; client sockets=${JSON.stringify(sk?.hosts)} lookups=${JSON.stringify(sk?.lookups)}` };
     } },
   X02: { name: "persistence-across-force-recreate", inputs: [`${RAW}persistence.txt`, `${RAW}e2e-after-recreate.txt`],
     expected: "after `up -d --force-recreate` with no volume removed, all ten services run healthy in new containers; the PostgreSQL, Redis and RabbitMQ sentinels read back; the ledger's rows (receipts, events, idempotency keys, document manifest) hash the same; the archive keeps every file, each hashing to its name; the client registry is unchanged; afterwards the gateway still accepts a token and serves the archived crawl and batch with the same document hashes; the core's log was saved first",
