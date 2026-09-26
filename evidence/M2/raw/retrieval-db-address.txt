@@ -1,0 +1,21 @@
+### meta
+utc=2026-09-26T06:22:14Z
+source_commit=37fe2a17d0eb3c1794b51b21ef8e70dadc73d06f
+### schema
+NOTICE:  schema "fcpi_retrieval" already exists, skipping
+NOTICE:  relation "acquisition" already exists, skipping
+NOTICE:  relation "attempt" already exists, skipping
+NOTICE:  relation "attempt_started_at" already exists, skipping
+NOTICE:  relation "permit" already exists, skipping
+NOTICE:  relation "domain_state" already exists, skipping
+NOTICE:  relation "direct_nav" already exists, skipping
+NOTICE:  relation "direct_nav_domain_at" already exists, skipping
+NOTICE:  relation "direct_nav_at" already exists, skipping
+applied=yes
+### rights
+role=fcpi_retrieval super=false createrole=false createdb=false replication=false bypassrls=false has_password=true
+schema_owner=postgres
+owned_objects=0
+tables=5 tables_with_dml=5 tables_with_other_rights=0
+schema_create=false nuq_usage=false
+end

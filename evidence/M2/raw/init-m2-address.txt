@@ -1,0 +1,31 @@
+### meta
+2026-09-26T06:21:54Z
+source_commit=37fe2a17d0eb3c1794b51b21ef8e70dadc73d06f
+### secrets
+kept    /etc/firecrawl-pi/secrets/retrieval_postgres_password and /etc/firecrawl-pi/secrets/postgres_retrieval_role_password
+kept    /etc/firecrawl-pi/secrets/core_retrieval_token and /etc/firecrawl-pi/secrets/retrieval_core_token_sha256
+kept    /etc/firecrawl-pi/secrets/retrieval_browser_token and /etc/firecrawl-pi/secrets/browser_token_sha256
+### host_files
+kept    /etc/firecrawl-pi/fcpi-guard.nft
+installed /etc/firecrawl-pi/fcpi-egress-local.sh
+kept    /etc/systemd/system/docker.service.d/10-fcpi-data-check.conf
+kept    /etc/systemd/system/docker.service.d/20-fcpi-guard.conf
+installed /etc/systemd/system/docker.service.d/30-fcpi-egress-local.conf
+kept    /etc/systemd/system/fcpi-stack.service
+loaded  inet fcpi_guard
+fcpi-egress-local: ipv4=1 ipv6=0
+docker ExecStartPre=path=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh path=/usr/sbin/nft path=/etc/firecrawl-pi/fcpi-egress-local.sh 
+fcpi-stack ExecStartPre=path=/etc/firecrawl-pi/fcpi-egress-local.sh 
+guard_rules=16 local_v4_elements=1
+### inventory
+3310:3310 600 /etc/firecrawl-pi/secrets/retrieval_postgres_password
+5432:5432 600 /etc/firecrawl-pi/secrets/postgres_retrieval_role_password
+0:0 600 /etc/firecrawl-pi/secrets/core_retrieval_token
+3310:3310 600 /etc/firecrawl-pi/secrets/retrieval_core_token_sha256
+3310:3310 600 /etc/firecrawl-pi/secrets/retrieval_browser_token
+3320:3320 600 /etc/firecrawl-pi/secrets/browser_token_sha256
+0:0 644 /etc/firecrawl-pi/fcpi-guard.nft
+0:0 755 /etc/firecrawl-pi/fcpi-egress-local.sh
+0:0 755 /etc/firecrawl-pi/egress-local
+0:0 644 /etc/firecrawl-pi/egress-local/egress-local.cidrs
+end
