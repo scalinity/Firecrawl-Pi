@@ -39,8 +39,13 @@ export class Store {
     this.pool.on("error", () => {}); // an idle client's error surfaces on its next query
   }
 
+  // One retrieval service runs per deployment, so at its start every lease and domain hold belongs
+  // to a process that no longer exists: they are reclaimed rather than left to expire, so a restart
+  // does not stall acquisitions for a lease period (review finding W3).
   async ready(permits) {
     await this.pool.query("SELECT 1");
+    await this.pool.query("UPDATE fcpi_retrieval.permit SET holder = NULL, lease_until = NULL WHERE holder IS NOT NULL");
+    await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE holder IS NOT NULL");
     for (const [kind, n] of Object.entries(permits)) {
       await this.pool.query("INSERT INTO fcpi_retrieval.permit (kind, slot) SELECT $1, g FROM generate_series(0, $2::int - 1) g ON CONFLICT DO NOTHING", [kind, n]);
     }

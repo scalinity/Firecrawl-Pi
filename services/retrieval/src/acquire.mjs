@@ -54,7 +54,14 @@ function decodeText(buf, contentType) {
 // Direct-egress pacing shared by every acquisition path (spec §10.2, §23.1): pace() takes one
 // navigation's decision; pacedFetch() paces every hop of a redirect chain, so a redirect to
 // another registrable domain meets that domain's gap, hold and caps (review finding C4).
-export function makePacer({ store, getPolicy, resolvePublic, lookupFixture }) {
+// Releases each held resource on its own: one failed release (the database briefly away) must not
+// skip the others; a lease that could not be released still expires (review finding W3).
+async function releaseAll(log, releases) {
+  const rs = await Promise.allSettled(releases.filter(Boolean).map((f) => f()));
+  for (const r of rs) if (r.status === "rejected") log?.({ event: "release_failed", error: r.reason?.code ?? r.reason?.message });
+}
+
+export function makePacer({ store, getPolicy, resolvePublic, lookupFixture, log }) {
   // Wait for one of `slots` permits of `kind` until the deadline; the lease covers the longest
   // acquisition and is freed explicitly, or by expiry if this process dies holding it.
   async function holdPermit(kind, holder, slots, deadline, signal) {
@@ -85,21 +92,21 @@ export function makePacer({ store, getPolicy, resolvePublic, lookupFixture }) {
     try {
       return await guardedFetch({ ...args, policy: getPolicy(), resolvePublic, lookupFixture, signal, onHop: async ({ hop, target: t }) => {
         if (hop === 0 || domainOf(t) === held) return;
-        if (held) await store.releaseDomain(held, holder);
+        if (held) await releaseAll(log, [() => store.releaseDomain(held, holder)]);
         held = null;
         const p = await pace(t, holder, deadline, signal);
         if (p.failure) throw new Denied(p.failure.class, `redirect to ${p.domain}: ${p.failure.detail}`, p.failure);
         held = p.domain;
       } });
     } finally {
-      if (held) await store.releaseDomain(held, holder);
+      if (held) await releaseAll(log, [() => store.releaseDomain(held, holder)]);
     }
   }
   return { holdPermit, pace, pacedFetch };
 }
 
 export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, log }) {
-  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
+  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
 
   return async function acquire(body, signal) {
     const started = Date.now();
@@ -179,8 +186,10 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         await store.finishAttempt(attemptId, { outcome: "RESOURCE_BUSY" });
         return fail(signal?.aborted ? CANCELLED : { class: "RESOURCE_BUSY", detail: "no browser permit before the deadline", retryable: true });
       }
-      const paced = await pace(renderTarget, attemptId, browserDeadline, signal);
+      let paced = null;
       try {
+        // Paced inside the try, so a database error while pacing still frees the browser permit.
+        paced = await pace(renderTarget, attemptId, browserDeadline, signal);
         if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return fail(paced.failure); }
         const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal });
         // The worker refuses main-frame navigations to another host, but a server redirect only the
@@ -203,11 +212,10 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
           subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [] });
       } finally {
-        await store.releaseDomain(paced.domain, attemptId);
-        await store.releasePermit("browser", attemptId);
+        await releaseAll(log, [paced && (() => store.releaseDomain(paced.domain, attemptId)), () => store.releasePermit("browser", attemptId)]);
       }
     } finally {
-      await store.releasePermit("url", holder);
+      await releaseAll(log, [() => store.releasePermit("url", holder)]);
     }
   };
 }
@@ -232,7 +240,7 @@ export function fetchLogicalId(b, now = Date.now()) {
   return `fetch:${key}:${Math.floor(now / FETCH_WINDOW_MS)}`;
 }
 export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, log }) {
-  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
+  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
   return async function fetchOnce(b, signal) {
     const policy = getPolicy();
     if (!b || typeof b.url !== "string" || typeof b.requestId !== "string") throw new Denied("INVALID_REQUEST", "url and requestId are required");
@@ -265,7 +273,7 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
       log({ event: "fetch", request_id: b.requestId, purpose: b.purpose, url_hmac: urlHmac(b.url), target_status: r.status, bytes: r.bytes });
       return r;
     } finally {
-      await store.releasePermit("url", holder);
+      await releaseAll(log, [() => store.releasePermit("url", holder)]);
     }
   };
 }
@@ -274,7 +282,7 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
 // M2) under a URL permit and the same pacing as every other request (review finding W1). Only the
 // query and the paging/format parameters SearXNG defines are passed on.
 export function makeSearcher({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, log }) {
-  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
+  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
   return async function search(inboundUrl, signal) {
     const policy = getPolicy();
     if (policy.search.backend === null) throw new Denied("SEARCH_UNAVAILABLE", "no search backend in this release");
@@ -293,7 +301,7 @@ export function makeSearcher({ store, getPolicy, getLocalReady, permits, resolve
       log({ event: "search", backend_host: out.hostname, target_status: r.status, bytes: r.bytes });
       return r;
     } finally {
-      await store.releasePermit("url", holder);
+      await releaseAll(log, [() => store.releasePermit("url", holder)]);
     }
   };
 }

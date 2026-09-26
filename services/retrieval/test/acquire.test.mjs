@@ -128,3 +128,20 @@ test("a caller that leaves during a retry's back-off gets CANCELLED and no furth
     assert.equal(store.permits.size, 0);
   } finally { t.s.close(); }
 });
+
+test("a database error while the browser attempt is paced still frees every permit and hold (review finding W3)", async () => {
+  const shell = '<main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main><script src="/app.js"></script>';
+  const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(shell));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    const real = store.paceDirect.bind(store);
+    let calls = 0;
+    store.paceDirect = async (...a) => { if (++calls === 2) throw Object.assign(new Error("connection terminated"), { code: "57P01" }); return real(...a); };
+    let rendered = false;
+    const browser = { render: async () => { rendered = true; return { ok: true, html: shell, status: 200 }; } };
+    await assert.rejects(acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${t.port}/`)), /connection terminated/);
+    assert.equal(rendered, false);
+    assert.equal(store.permits.size, 0);
+    assert.equal(store.state("t.fixture.fcpi.test").holder, null);
+  } finally { t.s.close(); }
+});

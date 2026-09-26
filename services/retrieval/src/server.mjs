@@ -76,7 +76,11 @@ function readJson(req, cap = 1024 * 1024) {
   });
 }
 
+// Requests in flight, so a stop can let them release their permits before the pool closes.
+let inflight = 0;
 const server = http.createServer(async (req, res) => {
+  inflight++;
+  res.on("close", () => { inflight--; });
   const path = (req.url ?? "").split("?")[0];
   // A caller that goes away cancels its acquisition: the render, the fetch and every wait stop.
   const abort = new AbortController();
@@ -113,4 +117,15 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(env.listen.port, env.listen.host, () => log({ event: "listening", listen: `${env.listen.host}:${env.listen.port}`, proxy: `${env.proxyListen.host}:${env.proxyListen.port}` }));
-for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => { server.close(); store.close().finally(() => process.exit(0)); });
+// On stop: take no new request, cancel the ones in flight (their callers see CANCELLED) and wait up
+// to 8 s for them to release what they hold, then close the pool (review finding W3).
+let stopping = false;
+for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, async () => {
+  if (stopping) return;
+  stopping = true;
+  server.close();
+  server.closeAllConnections?.();
+  const until = Date.now() + 8000;
+  while (inflight > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 100));
+  store.close().finally(() => process.exit(0));
+});
