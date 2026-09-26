@@ -151,8 +151,12 @@ export class Store {
     await this.pool.query("INSERT INTO fcpi_retrieval.direct_nav (domain, fixture) VALUES ($1, $2)", [domain, fixture]);
   }
 
+  // The gap runs from a navigation's end: the release stamps last_nav_at, so the next navigation to
+  // the domain reaches the target at least the gap after this one's request and response, however
+  // long its resolution, connection or browser start-up took (spec §10.2). The decision's own stamp
+  // stays for a holder that dies, whose hold then lapses.
   async releaseDomain(domain, holder) {
-    await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE domain = $1 AND holder = $2", [domain, holder]);
+    await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL, last_nav_at = now() WHERE domain = $1 AND holder = $2", [domain, holder]);
   }
 
   async coolDown(domain, retryAfterS) {

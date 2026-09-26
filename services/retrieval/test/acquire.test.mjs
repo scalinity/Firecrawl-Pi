@@ -46,7 +46,7 @@ export class FakeStore {
     return d;
   }
   async recordNavigation(domain, fixture) { this.navs.push({ domain, fixture, at: new Date(), recorded: true }); }
-  async releaseDomain(domain, holder) { const s = this.state(domain); if (s.holder === holder) Object.assign(s, { holder: null, hold_until: null }); }
+  async releaseDomain(domain, holder) { const s = this.state(domain); if (s.holder === holder) Object.assign(s, { holder: null, hold_until: null, last_nav_at: new Date() }); }
   async coolDown(domain, retryAfterS) {
     const s = this.state(domain), sec = nextCooldown(s.cooldown_s, retryAfterS);
     Object.assign(s, { cooldown_s: sec, cooldown_until: new Date(Date.now() + sec * 1000) });
@@ -139,6 +139,21 @@ test("a caller that leaves during a retry's back-off gets CANCELLED and no furth
     assert.equal(store.acq.get("cancel-1").attempts, 1);
     assert.equal(t.hits.length, 1);
     assert.equal(store.permits.size, 0);
+  } finally { t.s.close(); }
+});
+
+test("the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target", async () => {
+  const t = await serve((req, res) => page(res));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "direct"]]);
+    let slow = true; // the first navigation's resolution takes 250 ms, the second's none
+    const ac = makeAcquirer({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [],
+      lookupFixture: async () => { if (slow) { slow = false; await new Promise((r) => setTimeout(r, 250)); } return ["127.0.0.1"]; },
+      browser: { render: async () => ({ ok: false, failure: { class: "BROWSER_UNAVAILABLE", detail: "none" } }) }, urlHmac, log: () => {} });
+    assert.equal((await ac(body(`http://t.fixture.fcpi.test:${t.port}/a`))).ok, true);
+    assert.equal((await ac(body(`http://t.fixture.fcpi.test:${t.port}/b`))).ok, true);
+    const gap = t.hits[1].at - t.hits[0].at;
+    assert.ok(gap >= 400, `the target saw two navigations ${gap} ms apart`);
   } finally { t.s.close(); }
 });
 

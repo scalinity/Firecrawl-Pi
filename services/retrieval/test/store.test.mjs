@@ -108,3 +108,15 @@ test("the prune removes only pacing rows that hold nothing a decision reads, and
     assert.equal((await sql("SELECT count(*) FROM pg_indexes WHERE schemaname = 'fcpi_retrieval' AND indexname = 'acquisition_updated_at'"))[0].count, "1");
   } finally { await store.close(); }
 });
+
+test("releasing a domain restarts its navigation gap", opts, async () => {
+  const store = await fresh();
+  try {
+    const gap = { ...direct, minNavigationGapMs: 1500 }, h = crypto.randomUUID();
+    assert.equal((await store.paceDirect("gap.example", h, gap, 30000, false)).go, true);
+    await sql("UPDATE fcpi_retrieval.domain_state SET last_nav_at = now() - interval '10 seconds' WHERE domain = 'gap.example'"); // a decision long past
+    await store.releaseDomain("gap.example", h);
+    const d = await store.paceDirect("gap.example", crypto.randomUUID(), gap, 30000, false);
+    assert.ok(d.waitMs > 1000, `the next navigation may go after ${d.waitMs ?? 0} ms`);
+  } finally { await store.close(); }
+});
