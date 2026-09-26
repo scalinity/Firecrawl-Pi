@@ -51,8 +51,13 @@ SELECT 'lookup owner=' || pg_get_userbyid(p.proowner) || ' security_definer=' ||
   || ' core_execute=' || has_function_privilege('fcpi_core', p.oid, 'EXECUTE')
   || ' public_execute=' || coalesce((SELECT bool_or(a.grantee = 0) FROM aclexplode(p.proacl) a WHERE a.privilege_type = 'EXECUTE'), true)
   FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace WHERE n.nspname = 'fcpi_platform' AND p.proname = 'upstream_groups_for_marker';
-SELECT 'reader_tables=' || string_agg(c.relname, ',' ORDER BY c.relname)
+-- pg_cron grants SELECT on its own tables to PUBLIC (row security limits each role to its own
+-- jobs), so every role sees them; they are listed apart from what the reader was granted.
+SELECT 'reader_tables=' || string_agg(n.nspname || '.' || c.relname, ',' ORDER BY n.nspname, c.relname)
   FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-  WHERE has_table_privilege('fcpi_nuq_reader', c.oid, 'SELECT') AND n.nspname NOT IN ('pg_catalog', 'information_schema');
+  WHERE has_table_privilege('fcpi_nuq_reader', c.oid, 'SELECT') AND n.nspname NOT IN ('pg_catalog', 'information_schema', 'cron');
+SELECT 'cron_tables_public_select=' || string_agg(c.relname, ',' ORDER BY c.relname)
+  FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
+  WHERE n.nspname = 'cron' AND c.relkind = 'r' AND has_table_privilege('public', c.oid, 'SELECT');
 SQL
 echo end
