@@ -7,7 +7,8 @@
 // each manifest route with the upstream registration it names (or MISSING), each route the manifest
 // does not enable with whether upstream registers it, and the routes the pinned official client
 // (apps/js-sdk/firecrawl) calls. scripts/m3/verify.mjs (R01) recomputes the verdicts from this output.
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, mkdtempSync, copyFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { join, dirname } from "node:path";
@@ -24,8 +25,14 @@ const out = (s) => process.stdout.write(`${s}\n`);
 out("### meta");
 out(`utc=${new Date().toISOString().replace(/\.\d+Z$/, "Z")}`);
 out(`head=${git("rev-parse", "HEAD")}`);
-git("add", "-A");
-out(`tree=${git("write-tree")}`);
+// The working tree's tree id, computed through a copy of the checkout's index, so the prepared
+// checkout itself is left as it was (its index is not touched).
+const idx = join(mkdtempSync(join(tmpdir(), "fcpi-route-shapes-")), "index");
+copyFileSync(git("rev-parse", "--path-format=absolute", "--git-path", "index"), idx);
+const gitIdx = (...a) => execFileSync("git", ["-C", src, ...a], { encoding: "utf8", env: { ...process.env, GIT_INDEX_FILE: idx } }).trim();
+gitIdx("add", "-A");
+out(`tree=${gitIdx("write-tree")}`);
+rmSync(dirname(idx), { recursive: true, force: true });
 out(`routes_file=${manifest.upstream.routes_file} sha256=${sha(manifest.upstream.routes_file)}`);
 out(`schemas_file=${manifest.upstream.schemas_file} sha256=${sha(manifest.upstream.schemas_file)}`);
 const sdk = JSON.parse(readFileSync(join(src, "apps/js-sdk/firecrawl/package.json"), "utf8"));
