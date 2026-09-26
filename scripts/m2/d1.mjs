@@ -4,6 +4,8 @@
 //   (a) the bundled Chromium is at or above the first stable build carrying the fix;
 //   (b) the fix commit is an ancestor of the V8 revision the bundled Chromium pins, and no later
 //       commit on that V8 branch names the bug.
+// A CVE counts as fixed when either holds, except that (a) is no evidence for a fix whose stable
+// post came after the bundled milestone branched: only (b) admits that one, so a row outside V8 fails.
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { ROOT } from "../m0/lib.mjs";
@@ -41,8 +43,9 @@ export function d1() {
     const reopened = c.bug ? later.some((x) => (x.bugs_named ?? []).includes(c.bug)) : false;
     const b = !!fix && !reopened;
     // A fix whose stable post came after the bundled milestone branched may postdate the build
-    // though its version number is lower; there (b) is reported beside (a).
-    return { ...c, test_a: a, test_b: b, fix_commit: fix?.commit ?? null, after_branch_point: Date.parse(c.published) >= branchPoint, pass: a || b };
+    // though its version number is lower, so there only (b) counts.
+    const after = Date.parse(c.published) >= branchPoint;
+    return { ...c, test_a: a, test_b: b, fix_commit: fix?.commit ?? null, after_branch_point: after, pass: after ? b : a || b };
   });
   return { bundled, revision: chromium.revision, latest: tags["dist-tags"]?.latest ?? null, v8rev, v8_branch: dash.v8_branch, branch_point: dash.branch_point, later_branch_commits: later.length, rows };
 }

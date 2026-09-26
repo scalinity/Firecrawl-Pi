@@ -234,7 +234,7 @@ const checks = {
 
   // ============================================================== D1 admission and build (D4, D6)
   D01: { name: "d1-playwright-admission-every-in-the-wild-cve", inputs: [`${SRC}chrome-releases-posts-since-2019.jsonl`, `${SRC}playwright-core-1.63.0-browsers.json`, `${SRC}npm-playwright-dist-tags.json`, `${SRC}chromium-153.0.8010.12-deps-v8.txt`, `${SRC}chromiumdash-m153.json`, "deploy/versions.lock.json", `${RAW}stack.txt`],
-    expected: "Playwright 1.63.0 is npm's latest stable; its bundled Chromium passes test (a) or (b) for every CVE Chrome's posts call exploited in the wild; the lock lists every one of those CVEs with its result (a missing CVE fails); the running worker's Chromium is the bundled version",
+    expected: "Playwright 1.63.0 is npm's latest stable; its bundled Chromium passes test (a) or (b) for every CVE Chrome's posts call exploited in the wild, and (b) for one whose fix was posted after the bundled milestone branched; the lock lists every one of those CVEs with its result (a missing CVE fails); the running worker's Chromium is the bundled version",
     run() {
       const r = d1();
       const fail = r.rows.filter((x) => !x.pass).map((x) => x.cve);
@@ -244,7 +244,7 @@ const checks = {
       const running = (JSON.parse((S(`${RAW}stack.txt`).browser_health ?? []).join(" ").replace(/^\d+ /, "") || "{}").version) ?? null;
       const watch = r.rows.filter((x) => !x.test_a || x.after_branch_point).map((x) => `${x.cve}:a=${x.test_a},b=${x.test_b}`);
       const ok = r.latest === "1.63.0" && r.bundled === "153.0.8010.12" && r.rows.length > 0 && fail.length === 0 && missing.length === 0 && running === r.bundled && L.playwright === "1.63.0";
-      return { ok, actual: `npm latest=${r.latest}; bundled=${r.bundled} (revision ${r.revision}); in-the-wild CVEs=${r.rows.length}; failing both tests=${fail.join(",") || "none"}; (a) failed or fix after branch point: ${watch.join(" ") || "none"}; lock lists=${listed.size}, missing=${missing.length}; lock playwright=${L.playwright}; running=${running}` };
+      return { ok, actual: `npm latest=${r.latest}; bundled=${r.bundled} (revision ${r.revision}); in-the-wild CVEs=${r.rows.length}; not admitted=${fail.join(",") || "none"}; (a) failed or fix after branch point: ${watch.join(" ") || "none"}; lock lists=${listed.size}, missing=${missing.length}; lock playwright=${L.playwright}; running=${running}` };
     } },
   D02: { name: "api-build-reproducible-and-pinned", inputs: [`${RAW}api-build.log`, "patches/series.json", "deploy/versions.lock.json", `${EV}rendered-compose.json`],
     expected: "the build of record runs every step (no_cache=1) from the series' exact result tree; every FROM is pinned by digest; Go, Rust, Node and pnpm print their pinned versions; cargo runs --locked, pnpm --frozen-lockfile, apt from the fixed snapshot, the FoundationDB client passes its SHA-256; no native build output ships; the image the stack runs is this build's, carrying the series hash; the lock records the same Go stage, image and series",
