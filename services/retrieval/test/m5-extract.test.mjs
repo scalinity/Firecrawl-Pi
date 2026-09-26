@@ -159,6 +159,21 @@ test("a unit retried while its call is still in flight is EXTRACTION_IN_FLIGHT, 
   } finally { await r.srv.close(); }
 });
 
+test("a reuse-only extraction returns stored answers and sends nothing new (review S12)", async () => {
+  const r = await rig();
+  try {
+    const q = req();
+    assert.equal((await r.extract(q)).ok, true);
+    const again = await r.extract({ ...q, reuseOnly: true });
+    assert.equal(again.ok, true);
+    assert.equal(again.usage.reused, 1);
+    const fresh = await r.extract(req({ reuseOnly: true }));
+    assert.equal(fresh.failure.class, "DEADLINE_EXCEEDED");
+    assert.equal(r.calls(), 1, "only the first extraction reached the provider");
+    assert.equal([...r.store.rows.values()].at(-1).state, "RELEASED");
+  } finally { await r.srv.close(); }
+});
+
 test("a rate limit stops the extraction's later units: the provider is asked once (review S8)", async () => {
   const r = await rig();
   try {

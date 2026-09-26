@@ -145,3 +145,31 @@ test("a call still in flight at the extraction service keeps the job RUNNING, an
   await r.run();
   assert.equal(r.store.finished.to, "SUCCEEDED");
 });
+
+test("a job resumed past its deadline with every page archived makes one reuse-only call and can still finish (review S12)", async () => {
+  let up = false;
+  const r = await rig({ job: { request: REQ }, core: (b) => page(b.url, "Price: 1"),
+    extract: (body) => { if (!up) throw new ExtractorError("connect ECONNREFUSED", { code: "ECONNREFUSED", delivered: false }); return ok(body); } });
+  await r.run();
+  assert.equal(r.store.job.state, "RUNNING");
+  up = true;
+  r.store.job.overdue = true;
+  await r.run();
+  assert.equal(r.calls.scrape.length, 2, "nothing scraped after the deadline");
+  assert.equal(r.calls.extract.at(-1).reuseOnly, true);
+  assert.equal(r.store.finished.to, "SUCCEEDED");
+});
+
+test("a reuse-only call that cannot finish the job closes it FAILED on its deadline (review S12)", async () => {
+  let up = false;
+  const r = await rig({ job: { request: REQ }, core: (b) => page(b.url, "Price: 1"),
+    extract: () => { if (!up) throw new ExtractorError("connect ECONNREFUSED", { code: "ECONNREFUSED", delivered: false });
+      return { status: 504, json: { ok: false, units: [], failure: { class: "DEADLINE_EXCEEDED", detail: "this unit has no stored answer", retryable: false, retryAfter: null } } }; } });
+  await r.run();
+  up = true;
+  r.store.job.overdue = true;
+  await r.run();
+  assert.equal(r.store.finished.to, "FAILED");
+  assert.equal(r.store.finished.errorCode, "JOB_DEADLINE_EXCEEDED");
+  assert.match(r.store.finished.error, /stored answers did not finish it/);
+});

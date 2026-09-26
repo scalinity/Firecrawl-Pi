@@ -69,13 +69,16 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     const job = await store.claimExtract(instance, L.extract.deadlineMinutes);
     if (!job) return false;
     const urls = job.request.urls;
-    if (job.overdue) {
+    const have = await store.documentKeys(job.id);
+    // Past its deadline a job scrapes nothing more. When every page's outcome is archived, one call that only
+    // reuses the model answers already stored may still finish it; otherwise it fails (review S12).
+    const late = job.overdue;
+    if (late && !urls.every((_, i) => have.some((r) => r.doc_key === `source:${i}` || r.doc_key === `failure:${i}`))) {
       await store.finishExtract(job.id, "FAILED", { total: urls.length, errorCode: "JOB_DEADLINE_EXCEEDED", error: `the extraction ran past its ${L.extract.deadlineMinutes}-minute deadline` }, "deadline passed");
       say({ job: job.id, action: "deadline" });
       return true;
     }
-    say({ job: job.id, action: "run", urls: urls.length, attempt: job.dispatch_attempts });
-    const have = await store.documentKeys(job.id);
+    say({ job: job.id, action: late ? "reuse_after_deadline" : "run", urls: urls.length, attempt: job.dispatch_attempts });
     const docs = [], errors = [];
     for (const [i, url] of urls.entries()) {
       if (stopped) return false; // resumed by the next process: the job stays RUNNING
@@ -90,10 +93,11 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
       say({ job: job.id, action: "finished", state: "FAILED", reason: "NO_PAGES" });
       return true;
     }
+    const until = late ? Date.now() + 60000 : new Date(job.deadline).getTime();
     let x;
     try {
       x = await extractor.extract({ logicalId: job.submission_key, schema: job.request.schema, prompt: job.request.prompt ?? null, systemPrompt: job.request.systemPrompt ?? null,
-        documents: docs.map((d) => ({ url: d.url, markdown: d.markdown })), deadline: new Date(job.deadline).toISOString() }, Math.max(5000, new Date(job.deadline).getTime() - Date.now()));
+        documents: docs.map((d) => ({ url: d.url, markdown: d.markdown })), deadline: new Date(until).toISOString(), ...(late ? { reuseOnly: true } : {}) }, Math.max(5000, until - Date.now()) + 5000);
     } catch (e) {
       // Unreachable: the job stays RUNNING and is tried again (its reservations make that safe); a delivered
       // request that lost its answer is the same, since the retry reuses what was settled.
@@ -103,7 +107,7 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     const j = x.json ?? {};
     const failure = x.status === 200 && j.ok ? null : (j.failure ?? { class: `EXTRACTOR_HTTP_${x.status}`, detail: `the extraction service answered ${x.status}` });
     const transient = [failure, ...(j.units ?? []).map((u) => u.failure)].find((f) => f && TRANSIENT.has(f.class));
-    if (transient) { say({ job: job.id, action: "extraction_deferred", reason: transient.class }); return false; }
+    if (transient && !late) { say({ job: job.id, action: "extraction_deferred", reason: transient.class }); return false; }
     // The units and usage are kept whether or not any unit succeeded: they say what was tried and what it cost.
     const cutWarnings = docs.filter((d) => d.cutAt).map((d) => `${d.url}: the page's markdown was cut at ${d.cutAt} bytes before extraction`);
     const result = { data: failure ? null : j.data ?? null, sources: j.sources ?? {}, warnings: [...cutWarnings, ...(j.warnings ?? [])], missingRequired: j.missingRequired ?? [],
@@ -114,7 +118,9 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     for (const u of result.units ?? []) if (!u.ok) errors.push(note(job, u.url, u.failure?.class ?? "UNIT_FAILED", `unit ${u.part}: ${u.failure?.detail ?? "failed"}`, errors.length));
     const to = failure ? "FAILED" : errors.length ? "PARTIAL" : "SUCCEEDED";
     await store.finishExtract(job.id, to, { ...counts, completed: docs.length, errors: { errors, robotsBlocked: [] },
-      errorCode: failure?.class ?? null, error: failure ? String(failure.detail ?? "").slice(0, 2000) : null }, `extraction ${to.toLowerCase()}: ${docs.length} of ${urls.length} pages, ${errors.length} failures`);
+      errorCode: failure ? (late ? "JOB_DEADLINE_EXCEEDED" : failure.class) : null,
+      error: failure ? String(late ? `the extraction ran past its ${L.extract.deadlineMinutes}-minute deadline, and its stored answers did not finish it: ${failure.detail ?? ""}` : failure.detail ?? "").slice(0, 2000) : null },
+      `extraction ${to.toLowerCase()}: ${docs.length} of ${urls.length} pages, ${errors.length} failures`);
     say({ job: job.id, action: "finished", state: to, pages: docs.length, failures: errors.length, failure: failure?.class ?? null, cost_micro_usd: result.usage?.costMicroUsd ?? null });
     return true;
   }

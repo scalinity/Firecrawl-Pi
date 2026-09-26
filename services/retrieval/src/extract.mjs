@@ -73,7 +73,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const hold = {};
     try { return await callOnce(args, hold); } finally { if (hold.probe && hold.breaker.probing) hold.breaker.neutral(); }
   }
-  async function callOnce({ logicalId, callKey, kind, model, messages, schema, maxOutputTokens, requestHash, deadline, signal }, hold) {
+  async function callOnce({ logicalId, callKey, kind, model, messages, schema, maxOutputTokens, requestHash, deadline, signal, reuseOnly = false }, hold) {
     const budget = getBudget();
     const m = budget.models[model];
     if (!m) throw fail("MODEL_NOT_ALLOWED", `model '${String(model).slice(0, 80)}' is not in the budget policy's allowlist`);
@@ -114,8 +114,14 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       const x = r.exhausted;
       throw fail("BUDGET_EXHAUSTED", `the ${x.category} ${x.period} budget has ${Math.max(0, x.cap - x.used)} of ${x.cap} micro-USD left; this call reserves ${amount}`);
     }
-    for (const n of r.notices ?? []) log({ event: "budget_threshold", category: n.category, period: n.period, used: n.used, cap: n.cap });
     const res = r.reservation;
+    // A job past its deadline may use the answers already stored, and send nothing new (review S12).
+    if (reuseOnly) {
+      breaker.neutral();
+      await store.releaseBudget(res.id, "reuse only: no stored answer, and nothing new is sent past the job's deadline");
+      throw fail("DEADLINE_EXCEEDED", "the job is past its deadline and this unit has no stored answer; nothing new is sent");
+    }
+    for (const n of r.notices ?? []) log({ event: "budget_threshold", category: n.category, period: n.period, used: n.used, cap: n.cap });
     if (!(await gate.take(deadline, signal))) {
       breaker.neutral();
       await store.releaseBudget(res.id, "no model request slot before the deadline");
@@ -305,7 +311,7 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
         return errors.length ? { errors, raw: r.content } : { value: v };
       };
       try {
-        const base = { logicalId, model, schema: strict, maxOutputTokens: X.maxOutputTokens, requestHash, deadline, signal };
+        const base = { logicalId, model, schema: strict, maxOutputTokens: X.maxOutputTokens, requestHash, deadline, signal, reuseOnly: req.reuseOnly === true };
         let r = await adapter.call({ ...base, callKey: `${logicalId}:${i}:extract`, kind: "extract", messages });
         account(r);
         let j = judge(r);
