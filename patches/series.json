@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "77df4dce6aaefeaff283d0b2bab3da82f2691349",
-  "series_sha256": "a7a02b647d4a613f6fd48f03ee16f9d2486a890a98744f9c6c3535202f96636a",
+  "result_tree": "1b98286b4a16c6e9f831bc628ede1e8c3d680f48",
+  "series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -25,10 +25,11 @@
     },
     {
       "file": "0002-nuq-listener-restarts-after-broker-outage.patch",
-      "sha256": "2fa40cc3914827e34ee2226c61fb35ed7fdd11417d3620f7d6e719edf5d92c01",
+      "sha256": "8489318e6fdac6bbb7ff250ee8855c65a8fb81156d9ec55c5cf331f353dffc9b",
       "reason": "After a broker restart the listener was never re-established while the process survived (review finding R1, upstream #4244 / PR #4263).",
       "symbols": [
         "apps/api/src/services/worker/nuq.ts NuQ.startListener",
+        "apps/api/src/services/worker/nuq.ts NuQ.openListener (new)",
         "apps/api/src/services/worker/nuq.ts NuQ.scheduleListenerRestart (new)",
         "apps/api/src/services/worker/nuq.ts NuQ.waitForJob",
         "apps/api/src/services/worker/nuq.ts NuQ.shutdown"

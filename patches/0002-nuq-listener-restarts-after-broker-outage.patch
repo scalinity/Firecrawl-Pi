@@ -2,13 +2,14 @@ fcpi patch 0002: NuQ listener restarts after a broker outage (review finding R1,
 Upstream 7666c1f9, apps/api/src/services/worker/nuq.ts. The listener registers its consumer before it is
 published (as PR #4263 does), restarts with a 250 ms to 5 s backoff until the broker answers, and delivers
 completions missed while it was down. waitForJob() polls PostgreSQL when the listener cannot start, instead
-of failing a job the worker still completes.
+of failing a job the worker still completes. Every caller shares the start in flight, so one arriving during a
+start that fails polls too, and a listener closed while it was starting is not published (review finding S12).
 
 diff --git a/apps/api/src/services/worker/nuq.ts b/apps/api/src/services/worker/nuq.ts
-index db632c22310e45200ac7bd6fc7844226ff479fda..dc4ba83d3346302f8e0c4ae928f94670df46061b 100644
+index db632c22310e45200ac7bd6fc7844226ff479fda..e587782e20aa7c3095a08fb0de8d957595e727df 100644
 --- a/apps/api/src/services/worker/nuq.ts
 +++ b/apps/api/src/services/worker/nuq.ts
-@@ -119,6 +119,26 @@ class NuQ<JobData = any, JobReturnValue = any> {
+@@ -119,16 +119,59 @@ class NuQ<JobData = any, JobReturnValue = any> {
    } = {};
    private listenerStarting = false;
    private shuttingDown = false;
@@ -33,12 +34,24 @@ index db632c22310e45200ac7bd6fc7844226ff479fda..dc4ba83d3346302f8e0c4ae928f94670
 +    }, delay);
 +  }
  
-   private async startListener() {
-     if (this.listener || this.shuttingDown || this.listenerStarting) return;
-@@ -126,9 +146,24 @@ class NuQ<JobData = any, JobReturnValue = any> {
-     if (config.NUQ_RABBITMQ_URL) {
-       this.listenerStarting = true;
+-  private async startListener() {
+-    if (this.listener || this.shuttingDown || this.listenerStarting) return;
++  // fcpi: every caller shares the start in flight, so one that arrives during it learns whether it
++  // failed (waitForJob then polls PostgreSQL) instead of returning as if a listener were running.
++  private listenerStart: Promise<void> | null = null;
  
+-    if (config.NUQ_RABBITMQ_URL) {
+-      this.listenerStarting = true;
++  private startListener(): Promise<void> {
++    if (this.listener || this.shuttingDown) return Promise.resolve();
++    this.listenerStart ??= this.openListener().finally(() => {
++      this.listenerStart = null;
++    });
++    return this.listenerStart;
++  }
+ 
++  private async openListener() {
++    if (config.NUQ_RABBITMQ_URL) {
 +      // fcpi: a connection is closed again if setup fails after it opened.
 +      let opened: amqp.ChannelModel | null = null;
        try {
@@ -60,7 +73,7 @@ index db632c22310e45200ac7bd6fc7844226ff479fda..dc4ba83d3346302f8e0c4ae928f94670
          await channel.prefetch(5);
          const queue = await channel.assertQueue(
            this.queueName + ".listen." + this.listenChannelId,
-@@ -143,72 +178,76 @@ class NuQ<JobData = any, JobReturnValue = any> {
+@@ -143,72 +186,77 @@ class NuQ<JobData = any, JobReturnValue = any> {
            },
          );
  
@@ -180,19 +193,20 @@ index db632c22310e45200ac7bd6fc7844226ff479fda..dc4ba83d3346302f8e0c4ae928f94670
 -          noAck: false,
 -        },
 -      );
++        // fcpi: a close during consume() has already run onClose and scheduled a restart; the
++        // listener it closed is not published, or startListener() would treat it as running.
++        if (closed) throw new Error("NuQ listener closed while it was starting");
 +        this.listener = listener;
 +        this.listenerRetryMs = 250;
 +      } catch (err) {
 +        opened?.close().catch(() => {});
 +        this.scheduleListenerRestart();
 +        throw err;
-+      } finally {
-+        this.listenerStarting = false;
 +      }
      } else {
        this.listenerStarting = true;
  
-@@ -281,17 +320,21 @@ class NuQ<JobData = any, JobReturnValue = any> {
+@@ -281,17 +329,21 @@ class NuQ<JobData = any, JobReturnValue = any> {
        }
      }
  
@@ -216,7 +230,7 @@ index db632c22310e45200ac7bd6fc7844226ff479fda..dc4ba83d3346302f8e0c4ae928f94670
    }
  
    private async addListener(
-@@ -1202,7 +1245,35 @@ class NuQ<JobData = any, JobReturnValue = any> {
+@@ -1202,7 +1254,35 @@ class NuQ<JobData = any, JobReturnValue = any> {
              try {
                await this.addListener(id, listener);
              } catch (e) {
@@ -253,7 +267,7 @@ index db632c22310e45200ac7bd6fc7844226ff479fda..dc4ba83d3346302f8e0c4ae928f94670
              }
  
              try {
-@@ -1545,6 +1616,10 @@ class NuQ<JobData = any, JobReturnValue = any> {
+@@ -1545,6 +1625,10 @@ class NuQ<JobData = any, JobReturnValue = any> {
    // === Cleanup
    public async shutdown() {
      this.shuttingDown = true;
