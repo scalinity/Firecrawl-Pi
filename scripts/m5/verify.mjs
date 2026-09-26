@@ -394,12 +394,14 @@ const checks = {
     expected: "eight extractions sent at once on the fixture_race model, each reserving the same conservative amount while the first holds the one model slot: exactly floor((cap - used before) / amount) are granted and the rest are BUDGET_EXHAUSTED; the granted reservations overlap in time, their sum never passes what was left, and the category's settled total afterwards is the one before plus the granted calls' actual costs",
     run() {
       const r = FX().race?.[0], cap = BUDGET().categories.fixture_race.caps.day;
-      const before = (r?.usage_before ?? []).reduce((a, u) => a + Number(u.reserved) + Number(u.settled), 0);
+      const res0 = r?.reservations ?? [], day = res0.length ? new Date(res0[0].created_at).toISOString().slice(0, 10) : null;
+      const dayUse = (rows) => (rows ?? []).filter((u) => u.period === "day" && u.period_start === day).reduce((a, u) => a + Number(u.reserved) + Number(u.settled), 0);
+      const before = dayUse(r?.usage_before);
       const res = r?.reservations ?? [], amount = res.length ? Number(res[0].reserved) : NaN;
       const expected = Math.floor((cap - before) / amount);
       const ok = (r?.results ?? []).filter((x) => x.ok).length, exhausted = (r?.results ?? []).filter((x) => x.class === "BUDGET_EXHAUSTED").length;
       const overlap = res.length >= 2 && res.every((x) => Date.parse(x.created_at) < Math.min(...res.map((y) => Date.parse(y.settled_at))));
-      const after = (r?.usage_after ?? []).reduce((a, u) => a + Number(u.reserved) + Number(u.settled), 0);
+      const after = dayUse(r?.usage_after);
       const cond = { eight: (r?.results ?? []).length === 8, amounts_equal: res.every((x) => Number(x.reserved) === amount), granted: ok === expected && res.length === expected && expected >= 1 && exhausted === 8 - expected,
         within_cap: before + expected * amount <= cap, overlap, settled: after === before + res.reduce((a, x) => a + Number(x.actual), 0) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; cap=${cap} used before=${before} amount=${amount} expected=${expected} granted=${ok} exhausted=${exhausted}; settled after=${after}` };

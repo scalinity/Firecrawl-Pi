@@ -256,7 +256,17 @@ async function fixturePhase() {
     model_calls_before: before, model_calls_after: stats().model.calls });
   // AC25: concurrent reservations cannot pass the fixture_race category's cap.
   const raceUsage = usageRows().filter((u) => u.category === "fixture_race");
-  const big = `Product: Race Widget\n\n${"This paragraph pads the race fixture to a known size. ".repeat(1050)}`;
+  // The category's day cap is shared by every pass on one UTC day, so the document is sized from what is left:
+  // a reservation is 0.4 micro-USD per payload byte plus 4,000 output tokens at 1.6 (6,400), and a payload is
+  // the document plus about 1,200 bytes of instructions and schema. About 3.5 reservations fit, so the cap,
+  // not the burst's size, decides the split of granted and refused.
+  const today = new Date().toISOString().slice(0, 10);
+  const cap = JSON.parse(readFileSync(join(ROOT, "deploy/policies/budget.json"), "utf8")).categories.fixture_race.caps.day;
+  const used = raceUsage.filter((u) => u.period === "day" && u.period_start === today).reduce((a, u) => a + Number(u.reserved) + Number(u.settled), 0);
+  const pad = "This paragraph pads the race fixture to a known size. ";
+  const repeats = Math.floor(((cap - used) / 3.5 - 6400) / 0.4 / pad.length) - 25;
+  if (repeats < 50) out("error", { message: `the fixture_race day cap is nearly spent today (${used} of ${cap}); the race cannot show two overlapping grants` });
+  const big = `Product: Race Widget\n\n${pad.repeat(Math.max(repeats, 1))}`;
   // The fixture model's delay mode holds the first call in the one model slot for 3 s, so every reservation
   // of the burst is held at once and the cap alone decides which are granted.
   const race = internal(Array.from({ length: 8 }, (_, i) => ({ logicalId: `m5:${nonce}:race:${i}`, model: "fcpi-fixture-race", schema: SCHEMA, prompt: "fcpi-mode=delay", documents: [{ url: `${FX5}/extract/race-${i}`, markdown: big }] })));
