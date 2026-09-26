@@ -129,8 +129,34 @@ function keyedSnapshot(file) {
   }
   return out;
 }
+// A redacted ruleset listing as "table\tchain\trule" entries: set and map bodies (their elements change at
+// every stack start) and comments are left out, and nft's own warning, which a collection that captured
+// stderr interleaved mid-line (evidence/M2/raw/nft-ruleset.txt), is removed so its line is whole again.
+function ruleSet(path) {
+  const out = new Set();
+  let table = null, chain = null, inSet = false;
+  for (const raw of read(path).replace(/# Warning: table \S+ \S+ is managed by iptables-nft, do not touch!\n/g, "").split("\n")) {
+    const l = raw.trim();
+    let m;
+    if ((m = l.match(/^table (\S+ \S+) \{$/))) { table = m[1]; chain = null; inSet = false; continue; }
+    if ((m = l.match(/^chain (\S+) \{$/))) { chain = m[1]; inSet = false; continue; }
+    if (/^(set|map) \S+ \{$/.test(l)) { inSet = true; chain = null; continue; }
+    if (l === "}") { if (inSet) inSet = false; else if (chain) chain = null; else table = null; continue; }
+    if (table && chain && !inSet && l && !l.startsWith("#")) out.add(`${table}\t${chain}\t${l}`);
+  }
+  return out;
+}
 const MODULE_ALLOW = /^(bridge|stp|llc|veth|overlay|br_netfilter|ip_set|xt_[a-z_]+|xt_[A-Z]+|x_tables|nf_[a-z0-9_]+|nft_[a-z0-9_]+|ip6?_tables|ip6?table_[a-z]+|iptable_[a-z]+|ipt_[A-Z]+|xfrm_algo|xfrm_user|nf_tables|nfnetlink)$/;
+// Tailscale, installed in M3 with the owner's approval (spec §19.1), and what it adds to the host: its
+// daemon, the tunnel module, its listeners, and its iptables-nft tables and chains (ts-* chains, the
+// INPUT chain that jumps to ts-input, the mangle tables for its connection marks).
+const TAILSCALE_CHAIN = /^ip6? (filter|nat) ts-(input|forward|postrouting) |^ip6? filter INPUT hook=input prio=0 policy=accept$|^ip6? mangle (OUTPUT|PREROUTING) hook=|^ip6 nat POSTROUTING hook=postrouting prio=100 policy=accept$/;
 function attribute(sec, line, ids) {
+  if ((sec === "systemd_running" || sec === "systemd_enabled") && line === "tailscaled.service") return "Tailscale's daemon (M3, owner-approved)";
+  if (sec === "lsmod" && /^tun \d+$/.test(line)) return "Tailscale's tunnel module";
+  if (sec === "ss_listen" && /users:\(\("tailscaled",/.test(line)) return "Tailscale's listeners";
+  if (sec === "nft_tables" && /^table ip6? mangle$/.test(line)) return "Tailscale's mangle tables";
+  if (sec === "nft_chains" && TAILSCALE_CHAIN.test(line)) return "Tailscale's chains";
   if (sec === "systemd_running" && /^session-\d+\.scope$/.test(line)) return "own SSH session scope";
   if (sec === "systemd_running") { const m = line.match(/^docker-([0-9a-f]{64})\.scope$/); if (m && ids.has(m[1])) return "scope of an fcpi container"; }
   if (sec === "docker_ps") { const f = line.split("\t"); if (f.length === 4 && /^fcpi-/.test(f[1]) && ids.has(f[0])) return "fcpi container"; }
@@ -140,8 +166,8 @@ function attribute(sec, line, ids) {
     if (m && ids.has(m[1])) return "fcpi container root filesystem";
   }
   if (sec === "lsmod" && MODULE_ALLOW.test(line.split(" ")[0])) return "kernel module for the container runtime or the guard's sets";
-  if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) return "nftables ruleset: Docker's rules for M3's fcpi-platform bridge (evidence/M3/raw/nft-ruleset.txt)";
-  if (sec === "nft_chains" && /^ip6? (filter|nat|raw) /.test(line)) return "Docker's chains for M3's bridge";
+  if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) return "nftables ruleset: every changed rule attributed in X04 (evidence/M3/raw/nft-ruleset.txt)";
+  if (sec === "nft_chains" && /^ip6? (filter|nat|raw) (DOCKER[-A-Z0-9]*|FORWARD|PREROUTING|OUTPUT|POSTROUTING) /.test(line)) return "Docker's chains";
   return null;
 }
 
@@ -598,13 +624,35 @@ const checks = {
         rows[acceptable ? "project" : "unrelated"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
       }
       const tables = [...read(`${RAW}nft-ruleset.txt`).matchAll(/^table (\S+ \S+) \{/gm)].map((m) => m[1]).sort();
-      const tablesOk = JSON.stringify(tables) === JSON.stringify(["bridge fcpi_audit", "inet fcpi_audit", "inet fcpi_guard", "ip filter", "ip nat", "ip raw", "ip6 filter", "ip6 nat"]);
+      // The project's and Docker's tables, and Tailscale's two mangle tables once it runs; no other.
+      const tablesOk = ["bridge fcpi_audit", "inet fcpi_audit", "inet fcpi_guard", "ip filter", "ip nat", "ip raw", "ip6 filter", "ip6 nat"].every((t) => tables.includes(t)) &&
+        tables.every((t) => /^(bridge fcpi_audit|inet fcpi_audit|inet fcpi_guard|ip6? (filter|nat|raw|mangle))$/.test(t));
+      // The ruleset rule by rule against M2's recorded one: every rule added or removed since is the
+      // repository's guard (its installed file identical to deploy/host/fcpi-guard.nft), Tailscale's (its
+      // ts-* chains, the jumps into them, its mangle tables), or Docker's for M3's fcpi-platform bridge.
+      // The rules are the ones the AFTER snapshot's hash covers (the collector hashes them as it does).
+      const hdr = kv(((read(`${RAW}nft-ruleset.txt`).match(/^# guard_file_sha256=.*$/m) ?? [""])[0]).slice(2).split(" "));
+      const guardOk = hdr.guard_file_sha256 === sha256File("deploy/host/fcpi-guard.nft");
+      const r2 = ruleSet("evidence/M2/raw/nft-ruleset.txt"), r3 = ruleSet(`${RAW}nft-ruleset.txt`);
+      const ruleWhy = (r) => {
+        const [t, c, rule] = r.split("\t");
+        if (t === "inet fcpi_guard") return guardOk ? "the repository's guard" : null;
+        if (/^ip6? mangle$/.test(t) || /^ts-/.test(c) || /\bjump ts-(input|forward|postrouting)\b/.test(rule)) return "Tailscale's";
+        if (/"fcpi-platform"|10\.231\.7\.0\/24/.test(rule)) return "Docker's for fcpi-platform";
+        return null;
+      };
+      const ruleChanges = [...[...r3].filter((r) => !r2.has(r)).map((r) => `+ ${r}`), ...[...r2].filter((r) => !r3.has(r)).map((r) => `- ${r}`)];
+      const ruleCounts = {}, rulesUnattributed = [];
+      for (const ch of ruleChanges) { const w = ruleWhy(ch.slice(2)); if (w) ruleCounts[w] = (ruleCounts[w] ?? 0) + 1; else rulesUnattributed.push(ch.replace(/\t/g, " ").slice(0, 110)); }
+      const afterHash = (read(A).match(/^nft_ruleset_sha256=([0-9a-f]{64})$/m) ?? [])[1];
+      const rulesTied = /^[0-9a-f]{64}$/.test(hdr.ruleset_sha256 ?? "") && hdr.ruleset_sha256 === afterHash;
+      const rulesOk = guardOk && rulesTied && r2.size > 50 && r3.size > 50 && rulesUnattributed.length === 0;
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), ["# M3 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m3/verify.mjs X04)",
         `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
         `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project, ""].join("\n"));
-      const ok = unexplained.length === 0 && !!boot(B) && boot(B) === boot(A) && tablesOk;
-      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; ruleset tables=${tables.join(",")}` };
+      const ok = unexplained.length === 0 && !!boot(B) && boot(B) === boot(A) && tablesOk && rulesOk;
+      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; ruleset tables=${tables.join(",")}; rules changed since M2=${ruleChanges.length} ${JSON.stringify(ruleCounts)}, unattributed=${rulesUnattributed.length}${rulesUnattributed.length ? " [" + rulesUnattributed.slice(0, 6).join("; ") + "]" : ""}; installed guard is the repository's=${guardOk}; ruleset tied to the AFTER snapshot=${rulesTied}` };
     } },
   X05: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, M3_CONTROL, "scripts/m1/pi-target.conf", "evidence/M0/audit.json"], live: true,
     expected: "the positive controls fire every rule (M3's adds a synthetic tailnet name); then no rule matches in any tracked or new repository file, a tailnet name included; no file holds any live secret (eight of M2's, the gateway's PostgreSQL password and every client token file on the Pi, at least five), compared by SHA-256 computed on the Pi; no file added or changed since M3 began holds the Pi's LAN address, its /24 network or its SSH target",
