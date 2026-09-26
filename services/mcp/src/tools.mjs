@@ -114,7 +114,14 @@ const errorOf = (r) => ({ error: { httpStatus: r.status, code: r.json?.code ?? n
 function shape(kind, tool, r, args, m, omitted) {
   const budget = m.mcp.limits.toolTextMaxBytes;
   const ok = r.status >= 200 && r.status < 300 && r.json && r.json.success !== false;
-  if (!ok) { const e = errorOf(r); if (kind === "submit") e.error.idempotencyKey = args.idempotencyKey ?? null; return { isError: true, payload: e }; }
+  if (!ok) {
+    const e = errorOf(r);
+    if (kind === "submit") e.error.idempotencyKey = args.idempotencyKey ?? null;
+    // A page too large for the core can abort it, and the gateway then answers 502: an unchanged retry
+    // aborts it again, restarting the core under every job in flight.
+    if (tool.route === "scrape" && r.status === 502) e.error.advice = "The core stopped answering while it processed this page. If this recurs for the same URL, do not retry it unchanged: very large pages can stop the core. Ask for formats [\"markdown\"] alone, or leave the page out.";
+    return { isError: true, payload: e };
+  }
   const b = r.json;
   switch (kind) {
     case "sync": {

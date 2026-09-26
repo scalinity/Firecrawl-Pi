@@ -162,3 +162,14 @@ test("a map answer cut to fit stays under the limit with its marker in place", (
   const small = T.firecrawl_map.shape({ status: 200, json: { success: true, links: links.slice(0, 3) }, headers: {} }, {});
   assert.equal(small.payload.truncated, undefined);
 });
+
+test("a scrape the core stopped answering (502) advises against an unchanged retry; other errors do not", () => {
+  const T = byName(makeTools(m()));
+  const r = T.firecrawl_scrape.shape({ status: 502, json: { success: false, code: "UPSTREAM_UNAVAILABLE", error: "The core is unavailable." }, headers: {} }, {});
+  assert.equal(r.isError, true);
+  assert.match(r.payload.error.advice, /do not retry it unchanged/);
+  const other = T.firecrawl_scrape.shape({ status: 503, json: { success: false, code: "OVERLOADED", error: "busy" }, headers: {} }, {});
+  assert.equal(other.payload.error.advice, undefined);
+  const map = T.firecrawl_map.shape({ status: 502, json: { success: false, error: "x" }, headers: {} }, {});
+  assert.equal(map.payload.error.advice, undefined);
+});
