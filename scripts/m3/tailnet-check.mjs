@@ -23,13 +23,16 @@ function get(path, { tok, host } = {}) {
   return new Promise((resolve) => {
     const req = request({ host: u.hostname, port: Number(u.port || 443), path, method: "GET", servername: u.hostname, timeout: 20000,
       headers: { host: host ?? u.host, ...(tok ? { authorization: `Bearer ${tok}` } : {}) } }, (res) => {
+      // The TLS facts are read now, while the socket is attached: by the response's end a keep-alive agent
+      // has taken it back, and res.socket is null.
+      const sock = res.socket, cert = sock?.getPeerCertificate?.() ?? {};
+      const tls = { tls_authorized: sock?.authorized === true, tls_protocol: sock?.getProtocol?.() ?? null, cert_issuer_org: cert.issuer?.O ?? null,
+        cert_subject_matches: (cert.subjectaltname ?? "").includes(`DNS:${u.hostname}`), cert_valid_to: cert.valid_to ?? null };
       const chunks = [];
       res.on("data", (c) => chunks.push(c));
       res.on("end", () => {
-        const cert = res.socket.getPeerCertificate?.() ?? {};
         let json = null; try { json = JSON.parse(Buffer.concat(chunks).toString()); } catch { /* not JSON */ }
-        resolve({ status: res.statusCode, tls_authorized: res.socket.authorized === true, tls_protocol: res.socket.getProtocol?.() ?? null,
-          cert_issuer_org: cert.issuer?.O ?? null, cert_subject_matches: (cert.subjectaltname ?? "").includes(`DNS:${u.hostname}`), cert_valid_to: cert.valid_to ?? null, json });
+        resolve({ status: res.statusCode, ...tls, json });
       });
     });
     req.on("timeout", () => req.destroy(new Error("timeout")));
@@ -55,15 +58,21 @@ out({ case: "foreign_host_header", status: h.status, code: h.json?.code ?? null 
 // alone cannot be reached from a peer), tried from here over the tailnet, with Serve's :8443 as the
 // positive control. Only the classification is printed.
 process.stdout.write("### tailnet_ports\n");
-const listening = execFileSync("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", T.PI_SSH_TARGET, "sudo -n ss -Hltn"], { encoding: "utf8" })
-  .split("\n").map((l) => l.trim().split(/\s+/)[3]).filter(Boolean).filter((a) => !/^(127\.|\[::1\]:|::1:)/.test(a)).map((a) => Number(a.slice(a.lastIndexOf(":") + 1)));
-const ports = [...new Set([...listening, 8443])].sort((a, b) => a - b);
+// Each port with the process that owns it: tailscaled's own (Serve, and its peer API, which its userspace
+// network stack answers before the kernel's input hook) are told apart from the host's services.
+const listening = execFileSync("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", T.PI_SSH_TARGET, "sudo -n ss -Hltnp"], { encoding: "utf8" })
+  .split("\n").map((l) => l.trim().split(/\s+/)).filter((f) => f[3] && !/^(127\.|\[::1\]:|::1:)/.test(f[3]))
+  .map((f) => ({ port: Number(f[3].slice(f[3].lastIndexOf(":") + 1)), owner: /users:\(\("tailscaled",/.test(f.slice(5).join(" ")) ? "tailscaled" : "host" }));
+const ownerOf = new Map();
+for (const l of listening) if (ownerOf.get(l.port) !== "host") ownerOf.set(l.port, l.owner);   // a port any host process holds is the host's
+if (!ownerOf.has(8443)) ownerOf.set(8443, "tailscaled");
+const ports = [...ownerOf.keys()].sort((a, b) => a - b);
 const tryPort = (port) => new Promise((resolve) => {
   const s = connect({ host: u.hostname, port, timeout: 4000 });
   s.on("connect", () => { s.destroy(); resolve("open"); });
   s.on("timeout", () => { s.destroy(); resolve("timeout"); });
   s.on("error", (e) => resolve(e.code === "ECONNREFUSED" ? "refused" : String(e.code)));
 });
-for (const r of await Promise.all(ports.map(async (port) => ({ port, result: await tryPort(port) })))) out({ case: "tailnet_port", ...r });
+for (const r of await Promise.all(ports.map(async (port) => ({ port, owner: ownerOf.get(port), result: await tryPort(port) })))) out({ case: "tailnet_port", ...r });
 process.stdout.write("### end\n");
 out({ exit: 0 });

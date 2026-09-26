@@ -742,7 +742,7 @@ const checks = {
       return { ok, actual: `platform=${m?.platform}; forward pid=${fw?.pid} ended early=${fw?.exited_before_end}; the instance answering through the forward is the Pi's gateway=${!!v && v.gateway_instance_via_forward === v.gateway_instance_on_pi}; official client base URL=${sk.client?.[0]?.apiUrl}` };
     } },
   P02: { name: "tailnet-tls-private-serving", inputs: [`${RAW}tailscale-before.txt`, `${RAW}tailscale-install.txt`, `${RAW}lan-probe.txt`],
-    expected: "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed; the loaded guard holds the repository guard file's three tailnet rules, and over the tailnet no port the host listens on answers except :8443 (the control)",
+    expected: "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed; the loaded guard holds the repository guard file's three tailnet rules, and over the tailnet no port a host service listens on answers while Serve's :8443 does (the control); tailscaled's own peer API, which its userspace network stack answers before the host's firewall, is reported by name",
     run() {
       const status = `${RAW}tailscale-status.txt`, check = `${RAW}tailnet-check.txt`;
       // A credential block is a recorded state (the Pi's Tailscale awaiting its login or approval), never
@@ -772,9 +772,12 @@ const checks = {
       const g = kv((s.guard ?? []).flatMap((l) => l.split(" ")));
       const tp = (records(check).tailnet_ports ?? []).filter((r) => r.case === "tailnet_port");
       cond.tailnet_guard = g.tailnet_rules === "3" && g.guard_file_sha256 === sha256File("deploy/host/fcpi-guard.nft");
-      cond.tailnet_ports = tp.length >= 4 && tp.find((r) => r.port === 8443)?.result === "open" && tp.filter((r) => r.port !== 8443).every((r) => r.result !== "open");
+      // No port a host service holds answers over the tailnet; tailscaled's own (Serve's :8443, the control, and
+      // its peer API, which its userspace stack answers before the host's firewall) are told apart and reported.
+      const hostPorts = tp.filter((r) => r.owner === "host");
+      cond.tailnet_ports = hostPorts.length >= 4 && tp.every((r) => ["host", "tailscaled"].includes(r.owner)) && tp.find((r) => r.port === 8443)?.result === "open" && hostPorts.every((r) => r.result !== "open");
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
-      return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; backend=${ts.backend}; serve=${JSON.stringify(web)}; TLS ${w?.tls_protocol} authorized=${w?.tls_authorized} issuer=${w?.cert_issuer_org}; with token=${w?.status} without=${n?.status} foreign host=${h?.status}; tailnet ports=${tp.map((r) => `${r.port}:${r.result}`).join(",")}` };
+      return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; backend=${ts.backend}; serve=${JSON.stringify(web)}; TLS ${w?.tls_protocol} authorized=${w?.tls_authorized} issuer=${w?.cert_issuer_org}; with token=${w?.status} without=${n?.status} foreign host=${h?.status}; tailnet ports held by host services=${hostPorts.map((r) => `${r.port}:${r.result}`).join(",")}; tailscaled's own answering=${tp.filter((r) => r.owner === "tailscaled" && r.result === "open").map((r) => r.port).join(",")}` };
     } },
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
     expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to M4 or later), and gives every finding an earlier review deferred to M3 (CLAUDE.md §30) a row of its own with such an outcome, cites only commits that exist, and holds no absolute local path",
