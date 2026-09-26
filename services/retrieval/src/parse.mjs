@@ -71,6 +71,7 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
       provider: pp.provider, subject: name, kind: "parse", unit: "credits", rateCard: card.id, requestHash: key, amount, day, month, notifyAt: budget.notifyAtFraction });
     if (r.existing) {
       breaker.neutral();
+      if (r.existing.request_hash !== key) throw fail("LOGICAL_ID_CONFLICT", `this document's parse under ${logicalId} was made before for a different request`);
       if (r.existing.state === "SETTLED" && typeof r.existing.result?.markdown === "string") {
         // A settled parse that returned no text stays a failure when retried, never empty success (review W12).
         if (!r.existing.result.markdown) throw fail("PARSE_EMPTY", `the provider returned no text for ${r.existing.result.pages} pages`);

@@ -94,6 +94,16 @@ test("a retried parse that returned no text is PARSE_EMPTY again, with no second
   } finally { await r.srv.close(); }
 });
 
+test("a parse reused under its logical id must be the same request: another owner's is refused (review S2)", async () => {
+  const r = await rig();
+  try {
+    const q = req(docs.scanPdfBytes());
+    await r.parse(q);
+    await assert.rejects(r.parse({ ...q, owner: "owner-b" }), (e) => e.failureClass === "LOGICAL_ID_CONFLICT");
+    assert.equal(r.stats().uploads, 1);
+  } finally { await r.srv.close(); }
+});
+
 test("an upload answered without a job id counts against the breaker; its credits stay reserved (review W10)", async () => {
   const r = await rig();
   try {
