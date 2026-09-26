@@ -153,7 +153,7 @@ const checks = {
 
   // ================================================================ the gateway build and its tests
   G01: { name: "gateway-image-pinned-built-and-running", inputs: [`${RAW}gateway-build.txt`, `${EV}rendered-compose.json`, `${RAW}stack.txt`, "services/access/Dockerfile", "services/access/package-lock.json"],
-    expected: "the gateway builds FROM the digest-pinned node base with npm ci --omit=dev --ignore-scripts against its lockfile, for linux/arm64, as uid 3380, recording the commit it was built from; the image the stack renders and runs is the last build recorded, and its recorded commit is that build's",
+    expected: "the gateway builds FROM the digest-pinned node base with npm ci --omit=dev --ignore-scripts against its lockfile, for linux/arm64, as uid 3380, recording the commit it was built from; the image the stack renders and runs is the last build recorded, and its recorded commit is that build's; that commit and every deployed commit a raw record names differ from HEAD in nothing the Pi runs or the drivers do",
     run() {
       const log = read(`${RAW}gateway-build.txt`), df = read("services/access/Dockerfile");
       const builds = [...log.matchAll(/^fcpi\/access-gateway:m3 id=(sha256:[0-9a-f]{64}) os=linux arch=(\S+) size=\d+ user=(\S+)$/gm)];
@@ -167,8 +167,19 @@ const checks = {
       const cond = { built: !!last && /build_exit=0 /.test(log.split("### images").at(-2) ?? log), arm64: last?.[2] === "arm64", uid: last?.[3] === "3380:3380", from_pinned: froms.length === 1 && /@sha256:[0-9a-f]{64}$/.test(froms[0]),
         npm_ci: /npm ci --omit=dev --ignore-scripts/.test(df), lock_integrity: Object.entries(lock.packages).filter(([k]) => k).every(([, v]) => /^sha512-/.test(v.integrity ?? "")),
         rendered: digestOf(composeImage("access-gateway")) === last?.[1], running: running === last?.[1], commit_recorded: !!lastCommit && imgCommit === lastCommit };
+      // The evidence describes the code at HEAD: the image's build commit and every deployed commit a raw
+      // record names differ from HEAD in nothing the Pi runs or the drivers do (the verifier, the lock
+      // builder and the lock may move on). tailscale-before.txt is the host before Tailscale existed, a
+      // state that cannot be collected again.
+      const CODE = ["services/access", "deploy", ":(exclude)deploy/versions.lock.json", "scripts/m1/deploy.sh", "scripts/m3", ":(exclude)scripts/m3/verify.mjs", ":(exclude)scripts/m3/build-lock.mjs",
+        "tests/contracts/m3-gateway.test.mjs", "tests/fixtures/m3"];
+      const named = readdirSync(resolve(ROOT, RAW)).filter((f) => f !== "tailscale-before.txt" && /\.(txt|json)$/.test(f))
+        .flatMap((f) => [...read(`${RAW}${f}`).matchAll(/source_commit(?:=|":")([0-9a-f]{40})/g)].map((m) => [f, m[1]]));
+      const commits = new Set([imgCommit, ...named.map(([, c]) => c)].filter(Boolean));
+      const stale = [...commits].filter((c) => { try { git("diff", "--quiet", c, "HEAD", "--", ...CODE); return false; } catch { return true; } });
+      cond.evidence_at_head = named.length >= 10 && stale.length === 0;
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
-      return { ok: bad.length === 0, actual: `builds=${builds.length}; last=${last?.[1]?.slice(7, 19)} arch=${last?.[2]} user=${last?.[3]}; running=${running?.slice(7, 19)}; image commit=${imgCommit?.slice(0, 7)}; failed conditions=${bad.join(",") || "none"}` };
+      return { ok: bad.length === 0, actual: `records naming a deployed commit=${named.length}, commits differing from HEAD in code=${stale.map((c) => c.slice(0, 7)).join(",") || "none"}; builds=${builds.length}; last=${last?.[1]?.slice(7, 19)} arch=${last?.[2]} user=${last?.[3]}; running=${running?.slice(7, 19)}; image commit=${imgCommit?.slice(0, 7)}; failed conditions=${bad.join(",") || "none"}` };
     } },
   G02: { name: "gateway-tests-pass-in-the-running-image", inputs: [`${RAW}gateway-tests.txt`, `${EV}rendered-compose.json`, "services/access/test/validate.test.mjs", "services/access/test/auth.test.mjs", "services/access/test/archive.test.mjs", "tests/contracts/m3-gateway.test.mjs"],
     expected: "inside the image the stack runs (Node 22.23.3), the gateway's unit tests and its contract suite (a fake core with the pinned route shapes, a throwaway PostgreSQL) run every test they declare, all passing, none skipped or cancelled, including the header-stripping and the three submission-crash tests; no throwaway container or network is left",
