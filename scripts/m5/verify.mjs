@@ -213,7 +213,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; series ${s.series_sha256.slice(0, 8)} tree ${s.result_tree.slice(0, 8)}` };
     } },
   G02: { name: "suites-pass-in-the-running-images", inputs: [`${RAW}suites.txt`, `${EV}rendered-compose.json`],
-    expected: "inside the images the stack runs: the retrieval service's suite (at least 95 tests, the ledger's SQL among them against a throwaway PostgreSQL, none skipped), the gateway's extraction-runner tests, the MCP service's suites, the gateway's unit suites, M3's 40-test contract suite and M4's gateway-level /mcp contract suite all pass with none failing, and no throwaway container or network is left",
+    expected: "inside the images the stack runs: the retrieval service's suite (at least 95 tests, the ledger's SQL among them against a throwaway PostgreSQL, none skipped), the gateway's extraction-runner and json-format tests (at least 16), the MCP service's suites, the gateway's unit suites, M3's 40-test contract suite and M4's gateway-level /mcp contract suite all pass with none failing, and no throwaway container or network is left",
     run() {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
       const t = (k) => tapCounts(s[k]), exit0 = (k) => (s[k] ?? []).includes("test_exit=0");
@@ -221,7 +221,7 @@ const checks = {
       const tr = kv((s.transient ?? []).flatMap((l) => l.split(" ")));
       const cond = { images: m.retrieval_image === composeImage("retrieval-service") && m.gateway_image === composeImage("access-gateway") && m.mcp_image === composeImage("mcp-gateway"),
         retrieval: t("retrieval_tap").tests >= 95 && t("retrieval_tap").fail === 0 && skipped === 0 && exit0("retrieval_tap"),
-        gateway_m5: t("gateway_m5_tap").tests >= 7 && t("gateway_m5_tap").fail === 0 && exit0("gateway_m5_tap"),
+        gateway_m5: t("gateway_m5_tap").tests >= 16 && t("gateway_m5_tap").fail === 0 && exit0("gateway_m5_tap"),
         mcp: t("mcp_tap").tests >= 41 && t("mcp_tap").fail === 0 && exit0("mcp_tap"), gateway_unit: t("gateway_unit_tap").tests >= 30 && t("gateway_unit_tap").fail === 0 && exit0("gateway_unit_tap"),
         m3_contract: t("gateway_contract_tap").tests === 40 && t("gateway_contract_tap").pass === 40 && exit0("gateway_contract_tap"),
         m4_contract: t("gateway_mcp_contract_tap").tests >= 3 && t("gateway_mcp_contract_tap").fail === 0 && exit0("gateway_mcp_contract_tap"),
@@ -231,7 +231,7 @@ const checks = {
 
   // ================================================================ search (AC06; review finding S6)
   S01: { name: "search-typed-outcomes-rest", inputs: [`${RAW}e2e-fixture.txt`],
-    expected: "against the real SearXNG on the fixture engines, through REST: results (200, at least one); the same query again from the cache; a true empty answer (200, web: []); a partial answer (200 with a warning naming the engine that failed); every engine failing (502 SEARCH_ENGINES_FAILED, never an empty list); the backend stopped (503 SEARCH_BACKEND_UNAVAILABLE); the backend paused (504 SEARCH_TIMEOUT after the 10 s deadline); an option the pinned client ignores refused (400 UNSUPPORTED_OPTION); results scraped through the guarded path",
+    expected: "against the real SearXNG on the fixture engines, through REST: results (200, at least one); the same query again from the cache; a true empty answer (200, web: []); a partial answer (200 with a warning naming the engine that failed); every engine failing (502 SEARCH_ENGINES_FAILED, never an empty list); the backend stopped (503 SEARCH_BACKEND_UNAVAILABLE); the backend paused (504 SEARCH_TIMEOUT after the 10 s deadline); an option the pinned client ignores refused (400 UNSUPPORTED_OPTION); results scraped through the guarded path, and refused (403) to a token without the scrape scope that still searches (the control)",
     run() {
       const e = FX(), c = (k) => one(e.search, k);
       const cond = { run_whole: endOk(e), results: c("results")?.status === 200 && c("results").results >= 1, cached: c("repeat_cached")?.status === 200 && c("repeat_cached").results === c("results")?.results,
@@ -241,7 +241,8 @@ const checks = {
         backend_down: c("backend_down")?.status === 503 && c("backend_down").code === "SEARCH_BACKEND_UNAVAILABLE" && /exited/.test(c("backend_down").searxng ?? ""),
         timeout: c("backend_timeout")?.status === 504 && c("backend_timeout").code === "SEARCH_TIMEOUT" && c("backend_timeout").ms >= 10000 && c("backend_timeout").ms < 20000,
         refused_option: c("refused_option")?.status === 400 && c("refused_option").code === "UNSUPPORTED_OPTION",
-        scraped: c("results_scraped")?.status === 200 && c("results_scraped").scraped === c("results_scraped").results && c("results_scraped").results >= 1 };
+        scraped: c("results_scraped")?.status === 200 && c("results_scraped").scraped === c("results_scraped").results && c("results_scraped").results >= 1,
+        scrape_scope: c("scrape_scope_refused")?.status === 403 && c("scrape_scope_refused").code === "INSUFFICIENT_SCOPE" && c("search_scope_control")?.status === 200 };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${(e.search ?? []).map((r) => `${r.case}=${r.status ?? (r.isError ? "tool-error" : "ok")}${r.code ? ` ${r.code}` : ""}`).join("; ")}` };
     } },
   S02: { name: "search-typed-outcomes-mcp", inputs: [`${RAW}e2e-fixture.txt`],
@@ -309,7 +310,7 @@ const checks = {
 
   // ================================================================ extraction (AC07)
   E01: { name: "json-format-fixture-model", inputs: [`${RAW}e2e-fixture.txt`, "deploy/policies/budget.json"],
-    expected: "on the fixture model: the json scrape format returns the page's values (product, price, stock) with markdown when asked; a sparse page's absent values are null and the markdown is left out when not asked; an invalid first answer is repaired with exactly two calls; an answer invalid after its one repair is 502 EXTRACTION_INVALID_OUTPUT; a schema $ref is refused 400 before any call; the json format on a batch is refused; every model call of the phase was reserved before dispatch and settled at the rate card's price from the provider's own usage counts",
+    expected: "on the fixture model: the json scrape format returns the page's values (product, price, stock) with markdown when asked; a sparse page's absent values are null and the markdown is left out when not asked; an invalid first answer is repaired with exactly two calls; an answer invalid after its one repair is 502 EXTRACTION_INVALID_OUTPUT; a schema $ref is refused 400 before any call; the json format on a batch is refused; a token without the extract scope gets 403 for it with no model request, while the same token scrapes (the control); every model call of the phase was reserved before dispatch and settled at the rate card's price from the provider's own usage counts",
     run() {
       const e = FX(), c = (k) => one(e.extract, k);
       const rows = (e.ledger ?? []).find((l) => l.point === "extraction")?.rows ?? [];
@@ -321,6 +322,7 @@ const checks = {
         invalid_after_repair: c("json_invalid_after_repair")?.status === 502 && c("json_invalid_after_repair").code === "EXTRACTION_INVALID_OUTPUT",
         schema_ref: c("json_schema_ref_refused")?.status === 400 && c("json_schema_ref_refused").code === "SCHEMA_UNSUPPORTED",
         batch_refused: c("json_refused_on_batch")?.status === 400 && c("json_refused_on_batch").code === "UNSUPPORTED_OPTION",
+        scope: c("json_scope_refused")?.status === 403 && c("json_scope_refused").code === "INSUFFICIENT_SCOPE" && c("json_scope_refused").model_calls_before === c("json_scope_refused").model_calls_after && c("json_scope_control")?.status === 200,
         accounting: answered.length >= 8 && priced };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; settled model calls=${answered.length}, priced by the rate card=${priced}; repair usage=${JSON.stringify(c("json_one_repair")?.usage)}` };
     } },

@@ -163,6 +163,11 @@ async function fixturePhase() {
   out("search", { case: "true_empty", ...brief(r), results: webOf(r)?.length ?? null, data: r.json?.data ?? null });
   r = await rest("POST", "/v2/search", { query: q("scraped"), limit: 2, scrapeOptions: { formats: ["markdown"] } });
   out("search", { case: "results_scraped", ...brief(r), results: webOf(r)?.length ?? null, scraped: webOf(r)?.filter((x) => typeof x.markdown === "string" && /This is fixture search result/.test(x.markdown)).length ?? null });
+  // Scraping the results acquires those pages: a search-only token may search, not scrape (review W7).
+  r = await rest("POST", "/v2/search", { query: q("scraped"), limit: 2, scrapeOptions: { formats: ["markdown"] } }, { tok: "m5search" });
+  out("search", { case: "scrape_scope_refused", ...brief(r) });
+  r = await rest("POST", "/v2/search", { query: q("search only") }, { tok: "m5search" });
+  out("search", { case: "search_scope_control", ...brief(r), results: webOf(r)?.length ?? null });
   let t = await tool("firecrawl_search", { query: q("via mcp"), limit: 3 });
   out("search", { case: "mcp_results", isError: t.isError, results: t.payload?.data?.web?.length ?? null });
   t = await tool("firecrawl_search", { query: q("fcpi-empty mcp") });
@@ -212,6 +217,12 @@ async function fixturePhase() {
   out("extract", { case: "json_schema_ref_refused", ...brief(r) });
   r = await rest("POST", "/v2/batch/scrape", { urls: [`${FX5}/extract/product.html`], formats: [{ type: "json", schema: SCHEMA }] });
   out("extract", { case: "json_refused_on_batch", ...brief(r) });
+  // The json format spends the model budget: a token that may only scrape gets 403 and the model is not asked (review W7).
+  const callsScope = stats().model.calls;
+  r = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/product.html`, formats: [{ type: "json", schema: SCHEMA }] }, { tok: "m5scrape" });
+  out("extract", { case: "json_scope_refused", ...brief(r), model_calls_before: callsScope, model_calls_after: stats().model.calls });
+  r = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/product.html`, formats: ["markdown"] }, { tok: "m5scrape" });
+  out("extract", { case: "json_scope_control", ...brief(r) });
   // /v2/extract over explicit URLs, polled to completion; one URL that cannot be scraped makes it partial.
   const idem = `m5-${nonce}-extract`;
   r = await rest("POST", "/v2/extract", { urls: [`${FX5}/extract/product.html`, `${FX5}/extract/other.html`], schema: SCHEMA, prompt: "Extract the product." }, { headers: { "x-idempotency-key": idem } });

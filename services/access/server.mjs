@@ -27,7 +27,8 @@ import { makeUpstream, sendJson } from "./src/upstream.mjs";
 import { makeJobs } from "./src/jobs.mjs";
 import { makeMcpProxy } from "./src/mcp.mjs";
 import { makeExtractor } from "./src/extractor.mjs";
-import { makeExtractJobs, cutText } from "./src/extract.mjs";
+import { makeExtractJobs } from "./src/extract.mjs";
+import { makeJsonScrape } from "./src/jsonscrape.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -311,47 +312,19 @@ async function sync(ctx, route) {
   // M5: a scrape asking for the json format is scraped, then extracted (below).
   const json = route.id === "scrape" ? (body.formats ?? []).find((f) => typeof f === "object" && f.type === "json") : null;
   if (json) return extractor ? scrapeWithJson(ctx, body, json) : extractionUnavailable(ctx);
+  // Search that scrapes its results acquires those pages: a token needs the 'scrape' scope for it (review W7).
+  if (route.id === "search" && body.scrapeOptions && !ctx.client.scopes.has("scrape")) return ctx.send(403, { success: false, code: "INSUFFICIENT_SCOPE", error: "Scraping search results needs the 'scrape' scope." });
   if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   syncInFlight += 1;
   upstream.forward(ctx.res, route.path, body, (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
 }
 
-// The json format (spec §14): the page is scraped as markdown through the core, then read by the retrieval
-// service's model adapter under the request's id as its logical id. A failed extraction answers with the
-// adapter's typed class and status; a requested format is never silently dropped (spec §9.4).
+// The json format (src/jsonscrape.mjs), inside the synchronous admission limit.
+const jsonScrape = extractor ? makeJsonScrape({ cfg, M, upstream, extractor }) : null;
 async function scrapeWithJson(ctx, body, json) {
   if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   syncInFlight += 1;
-  const t0 = Date.now();
-  try {
-    const wanted = body.formats.filter((f) => typeof f === "string");
-    const formats = [...new Set([...wanted, "markdown"])];
-    let r;
-    try { r = await upstream.call("POST", "/v2/scrape", { body: { ...body, formats }, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
-    catch (e) { return ctx.send(e.code === "TIMEOUT" ? 504 : 502, { success: false, code: e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: e.code === "TIMEOUT" ? "The core did not answer in time." : "The core is unavailable." }); }
-    if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 502 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
-    const doc = r.json.data;
-    // The extraction's deadline is what is left of the request's; the gateway waits five seconds past it, so an
-    // answer the retrieval service sends at its deadline (a paid one, perhaps) still arrives (review W14).
-    const left = Math.max(1000, cfg.coreTimeoutMs + 10000 - (Date.now() - t0));
-    // The model reads the page's markdown up to the extraction limit; the gateway sends no more (review W4).
-    const md = cutText(doc.markdown, M.limits.extract.maxDocumentBytes);
-    let x;
-    try {
-      x = await extractor.extract({ logicalId: `scrape:${ctx.id}`, schema: json.schema, prompt: json.prompt ?? null,
-        documents: [{ url: doc.metadata?.url ?? body.url, markdown: md.text }], deadline: new Date(Date.now() + left).toISOString() }, left + 5000);
-    } catch (e) { return ctx.send(503, { success: false, code: "EXTRACTION_UNAVAILABLE", error: `The extraction service could not be reached (${e.code}); the page was scraped but not extracted.` }, { "retry-after": "10" }); }
-    const failure = x.status === 200 && x.json?.ok ? null : (x.json?.failure ?? null);
-    if (failure || x.status !== 200) {
-      const f = failure ?? { class: "EXTRACTION_FAILED", detail: `the extraction service answered ${x.status}` };
-      return ctx.send(x.status !== 200 ? x.status : 502, { success: false, code: f.class, error: `The page was scraped, but its json format failed: ${f.detail}` }, f.retryAfter ? { "retry-after": String(f.retryAfter) } : {});
-    }
-    doc.json = x.json.data;
-    if (!wanted.includes("markdown")) delete doc.markdown;
-    const warnings = [...(md.cut ? [`the page's markdown was cut at ${M.limits.extract.maxDocumentBytes} bytes before extraction`] : []), ...(x.json.warnings ?? [])];
-    if (warnings.length) doc.warning = [doc.warning, ...warnings].filter(Boolean).join("; ");
-    ctx.send(200, { success: true, data: doc, fcpi: { extraction: { model: x.json.model, sources: x.json.sources, missingRequired: x.json.missingRequired, usage: x.json.usage } } });
-  } finally { syncInFlight -= 1; }
+  try { await jsonScrape(ctx, body, json); } finally { syncInFlight -= 1; }
 }
 
 // ---- the MCP route (src/mcp.mjs), served only when the MCP service's address is configured ------------
