@@ -84,6 +84,14 @@ if [ -n "${SAMPLER:-}" ]; then
   sec cgroups_after; cgroup_state
   sec host_oom; sudo -n journalctl -k --since "@$(date -d "$start" +%s)" --no-pager -o short-iso 2>/dev/null | grep -iE 'oom|killed process' | redact | tail -20; echo end
 fi
+# Every process left in the browser worker after the phase: pid, parent, state, age in seconds and
+# name (no arguments). A killed or cancelled render must leave no Chromium process older than the
+# phase's end and none defunct.
+if [ -n "$BW" ] && [ "$(D inspect -f '{{.State.Status}}' "$BW" 2>/dev/null)" = running ]; then
+  sec browser_processes
+  echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  D exec --user 3320 "$BW" ps -eo pid=,ppid=,stat=,etimes=,comm= 2>&1
+fi
 if [ "$phase" = browser-down ]; then
   sec browser_start
   D compose -p fcpi -f $REPO/deploy/compose.yaml up -d --wait --wait-timeout 300 browser-worker 2>&1 | tail -1

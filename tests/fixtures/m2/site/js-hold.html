@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>FCPI M2 held-render fixture</title></head>
+<body>
+<main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main>
+<!-- The fixture answers this image after 20 s, and the page's load event waits for it, so a
+     render of this page is in flight for 20 s: long enough to cancel it or kill its browser. -->
+<img src="/slow?ms=20000&amp;hold=1" alt="">
+<script>
+  document.getElementById("root").innerHTML = "<h1>Held render</h1><p>This article is written by script at once; the page finishes loading twenty seconds later.</p><p>Sentinel: <strong>fcpi-m2-jshold-8c3a</strong></p>";
+</script>
+</body>
+</html>

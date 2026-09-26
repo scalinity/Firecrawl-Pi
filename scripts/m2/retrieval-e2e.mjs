@@ -15,6 +15,8 @@ const TOKEN = readFileSync("/run/secrets/core_retrieval_token", "utf8").trim();
 const groups = new Set((process.env.GROUP ?? "").split(",").filter(Boolean));
 const out = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), ...o }));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+// Sentinels count only in visible text: a fixture's scripts carry the text they will write.
+const visible = (html) => html.replace(/<(script|style|noscript|template)\b[\s\S]*?<\/\1\s*>/gi, " ");
 
 async function scrape(id, url, extra = {}, api = "v2") {
   const t0 = Date.now();
@@ -42,7 +44,7 @@ async function acquire(id, body, { abortAfterMs } = {}) {
   try {
     const r = await fetch(`${RS}/internal/acquire`, { method: "POST", headers: { authorization: `Bearer ${TOKEN}`, "content-type": "application/json" }, body: JSON.stringify(req), signal: ac.signal });
     const j = await r.json();
-    const text = j.body ?? "";
+    const text = visible(j.body ?? "");
     out({ case: id, kind: "rs", url_label: label(req.url), logicalId: req.logicalAcquisitionId, http: r.status, ok: j.ok, attemptsUsed: j.attemptsUsed, strategies: j.strategies,
       targetStatus: j.targetStatus, verdict: j.quality?.verdict ?? null, failure: j.failure?.class ?? null, retryAfter: j.failure?.retryAfter ?? null,
       sentinels: [...text.matchAll(/fcpi-m[12]-[a-z]+-[0-9a-f]{4}/g)].map((m) => m[0]), subresources: j.subresources ?? null,
@@ -109,6 +111,8 @@ if (groups.has("browser")) {
   await scrape("C03-js", `${M2}/js.html`);
   await scrape("C04-delayed", `${M2}/delayed.html`);
   await scrape("C06-cookie-js", `${M2}/cookie-js`);
+  // Content written 20 s after load: still a shell when the render settles, so no content.
+  await scrape("C27-js-late", `${M2}/js-slow.html`);
   await scrape("S15-subresources", `${M2}/subresources.html`);
   // The same page asked of the service directly, which returns each refused subresource by host.
   await acquire("S15b-subresources-direct", { logicalAcquisitionId: `m2-subres-${randomUUID()}`, url: `${M2}/subresources.html?direct=1` });
@@ -151,14 +155,14 @@ if (groups.has("cancel")) {
   // A caller that goes away: the acquisition stops and its permits are free again.
   await acquire("A06-cancel-http", { logicalAcquisitionId: `m2-cancel-${randomUUID()}`, url: `${M2}/slow?ms=30000&cancel=http` }, { abortAfterMs: 2000 });
   await sleep(1500);
-  await acquire("A07-cancel-browser", { logicalAcquisitionId: `m2-cancel-${randomUUID()}`, url: `${M2}/js-slow.html` }, { abortAfterMs: 6000 });
+  await acquire("A07-cancel-browser", { logicalAcquisitionId: `m2-cancel-${randomUUID()}`, url: `${M2}/js-hold.html?cancel=1` }, { abortAfterMs: 6000 });
   await sleep(1500);
   await acquire("A07b-after-cancel", { logicalAcquisitionId: `m2-cancel-${randomUUID()}`, url: `${M2}/js.html?after=cancel` });
 }
 
 if (groups.has("crash")) {
   // The collector kills Chromium while this render runs (review finding R6's crash case).
-  await acquire("A08-crash-render", { logicalAcquisitionId: `m2-crash-${randomUUID()}`, url: `${M2}/js-slow.html?crash=1` });
+  await acquire("A08-crash-render", { logicalAcquisitionId: `m2-crash-${randomUUID()}`, url: `${M2}/js-hold.html?crash=1` });
   await acquire("A08b-after-crash", { logicalAcquisitionId: `m2-crash-${randomUUID()}`, url: `${M2}/js.html?after=crash` });
 }
 
