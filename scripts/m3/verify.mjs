@@ -456,7 +456,7 @@ const checks = {
       const shv = kv((sh.find((l) => l.startsWith("exit=")) ?? "").split(" "));
       const ok = (s.control ?? []).some((l) => /^fcpi-data-check: OK /.test(l)) && (s.control ?? []).includes("exit=0") && m.includes("copy_names_missing_source=1") &&
         m.some((l) => /FAIL: bind source <missing-artifact-path> is absent/.test(l)) && m.includes("exit=1") && m.includes("missing_path_created=no") &&
-        sh.some((l) => /lacks \.fcpi-artifact-root/.test(l)) && shv.exit !== "0" && shv.exit !== undefined && shv.listening === "0" && shv.files_written === "0" && (s.transient ?? []).includes("leftover_transient_containers=0");
+        sh.some((l) => /lacks \.fcpi-artifact-root/.test(l)) && shv.exit !== "0" && shv.exit !== undefined && shv.timed_out === "no" && shv.listening === "0" && shv.files_written === "0" && (s.transient ?? []).includes("leftover_transient_containers=0");
       return { ok, actual: `control passes=${(s.control ?? []).includes("exit=0")}; absent bind refused=${m.includes("exit=1")}, path created=${(m.find((l) => l.startsWith("missing_path_created=")) ?? "").split("=")[1]}; shadow root exit=${shv.exit} listening=${shv.listening} files=${shv.files_written}` };
     } },
   N06: { name: "platform-network-and-ledger-rights", inputs: [`${RAW}stack.txt`, `${RAW}platform-rights.txt`],

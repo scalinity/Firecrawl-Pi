@@ -14,7 +14,8 @@ REPO=/opt/firecrawl-pi
 D() { sudo -n docker "$@"; }
 sec() { printf '### %s\n' "$1"; }
 T=$(sudo -n mktemp -d /run/fcpi-mount-check.XXXXXX)
-trap 'sudo -n rm -rf "$T"' EXIT
+MC=fcpi-mount-check-$$   # the gateway container below, named so the trap can remove it whatever happens
+trap 'sudo -n docker rm -f "$MC" >/dev/null 2>&1; sudo -n rm -rf "$T"' EXIT
 MISSING=/srv/firecrawl-pi/data/artifacts-absent-$$
 
 sec meta
@@ -39,14 +40,17 @@ sudo -n install -d -m 0777 "$T/empty" "$T/cred" "$T/clients"
 head -c 32 /dev/urandom | od -An -tx1 | tr -d ' \n' | sudo -n tee "$T/cred/gateway_postgres_password" >/dev/null
 printf '# none\n' | sudo -n tee "$T/clients/clients" >/dev/null
 sudo -n chmod 0644 "$T/cred/gateway_postgres_password" "$T/clients/clients"
-out=$(D run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --user 3380:3380 --label fcpi.transient=mount-check \
+# Bounded: a gateway that got past the check would wait for a ledger it cannot reach and never exit, so
+# the run is cut after 120 s (exit 124) and the trap removes the container the client leaves behind.
+out=$(timeout 120 sudo -n docker run --rm --name "$MC" --network none --read-only --cap-drop ALL --security-opt no-new-privileges:true --user 3380:3380 --label fcpi.transient=mount-check \
   -e PI_CORE_URL=http://firecrawl-core:3002 -e PI_GATEWAY_CLIENTS_FILE=/srv/clients/clients -e PI_ALLOWED_HOSTS=http://127.0.0.1:3380 \
   -e PI_CAPABILITIES_FILE=/srv/policy/capabilities.json -e PI_ARTIFACT_ROOT=/srv/artifacts -e PI_CREDENTIALS_DIR=/srv/cred \
   -e PI_POSTGRES_HOST=nuq-postgres -e PI_POSTGRES_DB=postgres -e PI_POSTGRES_USER=fcpi_gateway \
   -v "$REPO/deploy/policies/capabilities.json:/srv/policy/capabilities.json:ro" -v "$T/empty:/srv/artifacts" -v "$T/cred:/srv/cred:ro" -v "$T/clients:/srv/clients:ro" \
   "$IMG" 2>&1); rc=$?
 printf '%s\n' "$out" | grep -o 'lacks \.fcpi-artifact-root[^"]*' | head -1
-echo "exit=$rc listening=$(printf '%s\n' "$out" | grep -c '"event":"listening"') files_written=$(sudo -n find "$T/empty" -mindepth 1 | wc -l)"
+echo "exit=$rc timed_out=$([ "$rc" -eq 124 ] && echo yes || echo no) listening=$(printf '%s\n' "$out" | grep -c '"event":"listening"') files_written=$(sudo -n find "$T/empty" -mindepth 1 | wc -l)"
+D rm -f "$MC" >/dev/null 2>&1 || true
 sec transient
 echo "leftover_transient_containers=$(D ps -aq --filter label=fcpi.transient | wc -l)"
 echo end

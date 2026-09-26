@@ -14,6 +14,8 @@ D() { sudo -n docker "$@"; }
 image=$(sed -n 's#^ *image: \(fcpi/access-gateway@sha256:[0-9a-f]\{64\}\)$#\1#p' "$REPO/deploy/compose.yaml")
 PGIMG=$(jq -r '.images.nuq_postgres_base.selected | "postgres@\(.arm64_manifest_digest)"' "$REPO/deploy/versions.lock.json")
 N=fcpi-gwtest-$$
+# The throwaway PostgreSQL and network go however the script ends (an SSH session that drops included).
+trap 'sudo -n docker rm -f "$N-pg" >/dev/null 2>&1; sudo -n docker network rm "$N" >/dev/null 2>&1' EXIT
 echo "### meta"
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) image=${image:-absent} test_postgres=$PGIMG"
 [ -n "$image" ] || { echo "no gateway image in compose.yaml"; exit 1; }

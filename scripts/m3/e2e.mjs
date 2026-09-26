@@ -478,12 +478,39 @@ const PHASES = {
   },
 };
 
+// Whatever the phase did, the stack is left as it was found: the core unpaused and started, the gateway
+// started (a kill counts as a manual stop, which the restart policy does not undo), both healthy; and
+// after a failure, the run's own jobs still open are cancelled, so they do not hold the next run's slot.
+async function restore(failed) {
+  const status = (svc) => D(`inspect -f '{{.State.Status}}' ${cname(svc)}`).trim();
+  const rec = {};
+  for (const svc of ["firecrawl-core", "access-gateway"]) {
+    const was = status(svc);
+    if (was === "paused") D(`unpause ${cname(svc)}`);
+    else if (was !== "running") D(`start ${cname(svc)}`);
+    rec[svc] = { was, now: await waitHealthy(svc).catch((e) => `unhealthy: ${e.message}`) };
+  }
+  if (failed) {
+    const TOK = { "m3-alpha": "m3a", "m3-beta": "m3b", owner: "owner" };
+    const open = sql(`SELECT id, kind, principal FROM fcpi_platform.job WHERE created_at >= '${runSince}' AND state IN ('RECEIVED','SUBMITTING','SUBMISSION_UNCERTAIN','QUEUED','RUNNING');`).map((l) => l.split("|"));
+    rec.cancelled = [];
+    for (const [id, kind, principal] of open) {
+      if (!TOK[principal]) continue;
+      const r = await http("DELETE", `${kind === "crawl" ? "/v2/crawl" : "/v2/batch/scrape"}/${id}`, { tok: TOK[principal] }).catch((e) => ({ status: e.message }));
+      rec.cancelled.push({ id, status: r.status });
+    }
+  }
+  out("restore", rec);
+  return ["firecrawl-core", "access-gateway"].every((svc) => rec[svc].now === "running healthy");
+}
+
 if (!PHASES[phase]) { console.error(`usage: e2e.mjs ${Object.keys(PHASES).join("|")}`); process.exit(2); }
 out("meta", { phase, source_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), vantage: "workstation through an SSH forward of 127.0.0.1:3380", platform: process.platform, node: process.version });
 const runSince = piNow();   // the ledger snapshot below lists the jobs admitted from here on
 await openTunnel();
 let code = 0;
 try { await PHASES[phase](); } catch (e) { out("error", { message: e.message }); code = 1; }
+try { if (!(await restore(code !== 0))) code = 1; } catch (e) { out("error", { message: `restore: ${e.message}` }); code = 1; }
 resources(`end-${phase}`);
 // Every job this run admitted, as the ledger and NuQ hold them now, while NuQ still keeps their rows (J05).
 try { for (const l of pi(`bash /opt/firecrawl-pi/scripts/m3/pi-ledger-snapshot.sh ${runSince}`).split("\n").filter(Boolean)) out("ledger", JSON.parse(l)); }
