@@ -72,7 +72,9 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       for (const [k, v] of Object.entries(req.headers)) if (!HOP.has(k)) headers[k] = v;
       headers.connection = "close";
       const up = http.request({ host: target.host, port: target.port, method: req.method, path: target.url.pathname + target.url.search, headers, lookup: pinnedLookup(address), agent: false });
-      s.sockets.add(up);
+      // Both ends belong to the session: closing it (render over, or a cap) tears down the request and
+      // the browser's connection, not only the upstream half.
+      s.sockets.add(up).add(res.socket);
       up.on("socket", (sock) => sock.once("connect", () => { if (sock.remoteAddress !== address) up.destroy(new Denied("SSRF_DENIED", "peer changed")); }));
       up.on("response", (ur) => {
         const out = {};
@@ -89,10 +91,14 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
           return;
         }
         ur.on("data", (c) => count(s, c.length, up, res.socket));
+        // A piped source that is destroyed never ends its destination: an upstream response cut short
+        // ends the browser's response too, instead of leaving it open.
+        ur.on("aborted", () => res.destroy());
+        ur.on("error", () => res.destroy());
         ur.pipe(res);
       });
       up.on("error", () => { if (!res.headersSent) res.writeHead(502, { connection: "close" }).end(); else res.destroy(); });
-      res.on("close", () => { up.destroy(); s.sockets.delete(up); });
+      res.on("close", () => { up.destroy(); s.sockets.delete(up); s.sockets.delete(res.socket); });
       req.pipe(up);
     } catch (e) {
       refuse(s, host, e);
