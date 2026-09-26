@@ -178,7 +178,7 @@ const checks = {
 
   // ================================================================ the images, the lock and the suites
   G01: { name: "images-pinned-built-and-running", inputs: [`${RAW}image-build.txt`, `${EV}rendered-compose.json`, `${RAW}stack.txt`, "services/mcp/Dockerfile", "services/access/Dockerfile"],
-    expected: "both images build FROM the digest-pinned node base with npm ci --omit=dev --ignore-scripts against their lockfiles, for linux/arm64, the MCP service as uid 3400 and the gateway as uid 3380, recording the commit they were built from; the images the stack renders and runs are the last builds recorded; each image's source directory is unchanged from its build commit to HEAD, and every deployed commit a raw record names differs from HEAD in nothing the Pi runs or the drivers do",
+    expected: "both images build FROM the digest-pinned node base with npm ci --omit=dev --ignore-scripts against their lockfiles, for linux/arm64, the MCP service as uid 3400 and the gateway as uid 3380, recording the commit they were built from; the images the stack renders and runs are the last builds recorded; each image's source directory is unchanged from its build commit to HEAD, and every deployed commit a raw record names (the held real-client run's among them) differs from HEAD in nothing the Pi runs or the drivers do",
     run() {
       const log = read(`${RAW}image-build.txt`), st = S(`${RAW}stack.txt`);
       const last = (i) => [...log.matchAll(new RegExp(`^fcpi/${i}:m4 id=(sha256:[0-9a-f]{64}) os=linux arch=(\\S+) size=\\d+ user=(\\S+)$`, "gm"))].at(-1);
@@ -186,7 +186,9 @@ const checks = {
       const running = (s) => (st.containers ?? []).find((l) => l.startsWith(`${s} `))?.match(/ image=(sha256:[0-9a-f]{64}) /)?.[1];
       const df = (d) => read(`services/${d}/Dockerfile`);
       const froms = (d) => [...df(d).matchAll(/^FROM (\S+)/gm)].map((m) => m[1]);
-      const deployed = [...new Set([kv(st.meta ?? []).source_commit, ...PHASES.filter((p) => has(`${RAW}e2e-${p}.txt`)).map((p) => E(p).meta?.[0]?.deployed_commit), kv((S(`${RAW}suites.txt`).meta ?? [""])[0].split(" ")).source_commit].filter(Boolean))];
+      const deployed = [...new Set([kv(st.meta ?? []).source_commit, ...PHASES.filter((p) => has(`${RAW}e2e-${p}.txt`)).map((p) => E(p).meta?.[0]?.deployed_commit), kv((S(`${RAW}suites.txt`).meta ?? [""])[0].split(" ")).source_commit,
+        // The held real-client run too, once it has run: it must not have met a stale deployment.
+        ...(has(`${RAW}real-clients.txt`) ? [records(`${RAW}real-clients.txt`).meta?.[0]?.deployed_commit] : [])].filter(Boolean))];
       const runsSame = (c) => { try { git("diff", "--quiet", c, "HEAD", "--", "services", "deploy", "scripts", "tests", ":(exclude)deploy/versions.lock.json"); return true; } catch { return false; } };
       const dirSame = (c, d) => { try { git("diff", "--quiet", c, "HEAD", "--", d); return true; } catch { return false; } };
       const cond = {};
@@ -424,13 +426,17 @@ const checks = {
 
   // ================================================================ AC24, the network and the host
   X01: { name: "zero-firecrawl-cloud-attempts", inputs: [`${RAW}guard-window-open.txt`, `${RAW}egress-probe.txt`, `${RAW}core-logs-final.txt`, `${RAW}stack.txt`].concat(PHASES.map((p) => `${RAW}e2e-${p}.txt`)),
-    expected: "across one window, from a guard-counter snapshot before the first live phase to the egress probe after the last, with the guard's table not reloaded and every phase inside it, the guard accepted no web connection; the core's saved log classifies every Cloud line and name-resolution failure, with its control; the MCP container has no default route, reaches the gateway's fixed address (the control) and nothing public, and resolves no Firecrawl Cloud or public name; the MCP and gateway logs hold no Cloud host; every driver's sockets went only to the forward or to Tailscale Serve, and it looked up no name but the tailnet's",
+    expected: "across one window, from a guard-counter snapshot before the first live phase to the egress probe after the last, with the guard's table not reloaded and every phase inside it (the held real-client run too, once it has run), the guard accepted no web connection; the core's saved log classifies every Cloud line and name-resolution failure, with its control; the MCP container has no default route, reaches the gateway's fixed address (the control) and nothing public, and resolves no Firecrawl Cloud or public name; the MCP and gateway logs hold no Cloud host; every driver's sockets went only to the forward or to Tailscale Serve, and it looked up no name but the tailnet's",
     run() {
       const utcOf = (f) => Date.parse(((sections(f).meta ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]);
       const handle = (f) => ((sections(f).meta ?? []).join(" ").match(/guard_table_handle=(\d+)/) ?? [])[1];
       const web = (f, sec) => +((sections(f)[sec] ?? []).find((l) => l.startsWith("egress_web_accepted")) ?? "=NaN").split("=")[1];
       const open = utcOf(`${RAW}guard-window-open.txt`), close = utcOf(`${RAW}egress-probe.txt`);
-      const inside = PHASES.every((p) => { const t = Date.parse(E(p).meta?.[0]?.pi_utc ?? ""); return Number.isFinite(t) && t > open && t < close; });
+      const inWindow = (t) => Number.isFinite(t) && t > open && t < close;
+      const inside = PHASES.every((p) => inWindow(Date.parse(E(p).meta?.[0]?.pi_utc ?? "")));
+      // The held real-client run, once it has run, belongs to the same window: its traffic is covered too.
+      const realRun = has(`${RAW}real-clients.txt`) ? records(`${RAW}real-clients.txt`).meta?.[0] : undefined;
+      const realInside = realRun === undefined || inWindow(Date.parse(realRun?.pi_utc ?? ""));
       const delta = web(`${RAW}egress-probe.txt`, "guard_after") - web(`${RAW}guard-window-open.txt`, "counters");
       const recs = Object.entries(sections(`${RAW}core-logs-final.txt`)).filter(([k]) => /^(instance|stored)_/.test(k)).map(([, lines]) => {
         const c = lines.find((l) => l.startsWith("classified ")); const ctl = +((lines.find((l) => l.startsWith("control=")) ?? "").match(/count=(\d+)/) ?? [])[1];
@@ -443,7 +449,7 @@ const checks = {
       const cloudIn = (sec) => (S(`${RAW}stack.txt`)[sec] ?? []).filter((l) => /^pattern=(firecrawl\\\.(dev|com)|mendable)/.test(l)).map((l) => kv(l.split(" ")).count);
       const conns = PHASES.filter((p) => p !== "tailnet").map((p) => E(p).connections?.[0]);
       const tn = E("tailnet").tailnet_connections?.[0];
-      const cond = { same_guard: !!handle(`${RAW}guard-window-open.txt`) && handle(`${RAW}guard-window-open.txt`) === handle(`${RAW}egress-probe.txt`), phases_inside: inside, no_web: delta === 0,
+      const cond = { same_guard: !!handle(`${RAW}guard-window-open.txt`) && handle(`${RAW}guard-window-open.txt`) === handle(`${RAW}egress-probe.txt`), phases_inside: inside, real_clients_inside: realInside, no_web: delta === 0,
         core_logs: recs.length >= 1 && recs.every((r) => r.c && r.c.cloud_unexplained === "0" && r.c.dns_unexplained === "0" && r.ctl >= 1), mcp_reach: reachOk,
         logs_clean: [...cloudIn("mcp_log_scan"), ...cloudIn("gateway_log_scan")].length === 6 && [...cloudIn("mcp_log_scan"), ...cloudIn("gateway_log_scan")].every((c) => c === "0"),
         drivers: conns.every((c) => c && same(c.hosts, ["127.0.0.1:3380"]) && c.lookups.length === 0) && tn && same(tn.hosts, ["<pi-tailnet-name-host>:8443"]) && same(tn.lookups, ["<pi-tailnet-name-host>"]) };
