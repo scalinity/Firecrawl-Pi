@@ -135,7 +135,7 @@ async function render(r, signal) {
   });
   // A context never outlives its deadline or its caller: past either, the context is closed from
   // here, and past the grace period the whole browser is retired.
-  let expired = false, cancelled = false;
+  let expired = false, cancelled = false, crashed = false;
   const closeNow = async () => {
     const closed = await Promise.race([context.close().then(() => true, () => true), new Promise((res) => setTimeout(() => res(false), CLOSE_GRACE_MS))]);
     if (!closed) await retire("context did not close");
@@ -152,6 +152,8 @@ async function render(r, signal) {
       return route.continue();
     });
     const page = await context.newPage();
+    // A renderer that dies (in this container, usually the cgroup's memory cap) ends the page alone.
+    page.on("crash", () => { crashed = true; });
     page.on("dialog", (d) => d.dismiss().catch(() => {}));
     page.on("popup", (p) => p.close().catch(() => {}));
     const navBudget = Math.max(deadline - Date.now() - 1500, 1000);
@@ -169,7 +171,7 @@ async function render(r, signal) {
       timings: { totalMs: Date.now() - started }, browser: { version: browser?.version() ?? null, pagesServed: pagesServed + 1, launches },
     };
   } catch (e) {
-    const cls = e.failureClass ?? (cancelled ? "CANCELLED" : expired ? "TIMEOUT" : browser === null ? "BROWSER_CRASHED" : /Timeout/i.test(e.name) ? "TIMEOUT" : /net::ERR_/.test(e.message) ? "NAVIGATION_FAILED" : "BROWSER_ERROR");
+    const cls = e.failureClass ?? (cancelled ? "CANCELLED" : expired ? "TIMEOUT" : browser === null ? "BROWSER_CRASHED" : crashed ? "RENDERER_CRASHED" : /Timeout/i.test(e.name) ? "TIMEOUT" : /net::ERR_/.test(e.message) ? "NAVIGATION_FAILED" : "BROWSER_ERROR");
     return { ok: false, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300) }, subresources: counters, timings: { totalMs: Date.now() - started } };
   } finally {
     clearTimeout(killer);
