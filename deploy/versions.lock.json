@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-26T07:05:52Z",
-  "generated_by": "scripts/m2/build-lock.mjs (M2), from the lock M1 closed with at 191c146; entries owned by later milestones are as M1 wrote them",
-  "repository_sha": "5afbbe90ffb7db5b1e481f057fa187d292e3b42d",
+  "generated_utc": "2026-09-26T09:19:00Z",
+  "generated_by": "scripts/m3/build-lock.mjs (M3), from the lock M2 closed with at aa22d92; entries owned by later milestones are as M2 wrote them",
+  "repository_sha": "1f2bf5bf6985024ccfb37b07768617c1e5fabc83",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -494,6 +494,81 @@
         "sha256": "aa4317b5311b60763a4c3550e69817ddcc421ad5f701a0982afd3d4b15319d79"
       },
       "evidence": "evidence/M2/raw/service-build.txt"
+    },
+    "access_gateway": {
+      "role": "The access gateway image (built on the Pi, natively linux/arm64)",
+      "status": "selected",
+      "image_id": "sha256:b2873176f155715f2afb387766aca1d60835775e915140801a2c33ccbdb03bda",
+      "platform": "linux/arm64",
+      "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "built_from_commit": "271268bd72c162a1d263ff06563780cd130143eb",
+      "dockerfile": {
+        "path": "services/access/Dockerfile",
+        "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
+      },
+      "lockfile": {
+        "path": "services/access/package-lock.json",
+        "sha256": "c2c74fe19cb1a02348037d8809d3469028e6925df4c39c510f3168679901c1d8"
+      },
+      "packages": {
+        "pg": {
+          "version": "8.23.0",
+          "integrity": "sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg=="
+        },
+        "pg-cloudflare": {
+          "version": "1.4.0",
+          "integrity": "sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A=="
+        },
+        "pg-connection-string": {
+          "version": "2.14.0",
+          "integrity": "sha512-XwWDGcLRGCXAR8F/AM5bG7Q+A3Wm2s6QeEjlOKZLlH3UYcguiqCWKyWXVag5TLTIjR7oOJUY8kcADaZgWPyLeg=="
+        },
+        "pg-int8": {
+          "version": "1.0.1",
+          "integrity": "sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw=="
+        },
+        "pg-pool": {
+          "version": "3.14.0",
+          "integrity": "sha512-gKtPkFdQPU3DksooVLi9LsjZxrsBUZIpa+7aVx+LV5pNh0KzP4Zleud2po+ConrxbuXGBJ6Hfer6hdgpIBpBaw=="
+        },
+        "pg-protocol": {
+          "version": "1.16.0",
+          "integrity": "sha512-sILXutLVjCLjcDuOmvhX5e2Z4cS5qG/6Bu3VkpFwdf/633ElGLpEh9bgmuI5I4sqKqkifQiGyiCcx1HdtrK7tg=="
+        },
+        "pg-types": {
+          "version": "2.2.0",
+          "integrity": "sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA=="
+        },
+        "pgpass": {
+          "version": "1.0.5",
+          "integrity": "sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug=="
+        },
+        "postgres-array": {
+          "version": "2.0.0",
+          "integrity": "sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA=="
+        },
+        "postgres-bytea": {
+          "version": "1.0.1",
+          "integrity": "sha512-5+5HqXnsZPE65IJZSMkZtURARZelel2oXUEO8rH83VS/hxH5vv1uHquPg5wZs8yMAfdv971IU+kcPUczi7NVBQ=="
+        },
+        "postgres-date": {
+          "version": "1.0.7",
+          "integrity": "sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q=="
+        },
+        "postgres-interval": {
+          "version": "1.2.0",
+          "integrity": "sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ=="
+        },
+        "split2": {
+          "version": "4.2.0",
+          "integrity": "sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg=="
+        },
+        "xtend": {
+          "version": "4.0.2",
+          "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
+        }
+      },
+      "evidence": "evidence/M3/raw/gateway-build.txt"
     }
   },
   "browser": {
@@ -1302,5 +1377,15 @@
       "sbom": false,
       "evidence": "evidence/M2/raw/api-build.log"
     }
+  },
+  "gateway": {
+    "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
+    "capabilities": "deploy/policies/capabilities.json",
+    "capabilities_sha256": "8b0995c7c5e87c429836304d9e760ecbd09120f0b14b10787d58e49e856b3f9c",
+    "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
+    "platform_schema_sha256": "5dc2912d72c4135f1269ed35236adc39f25e73619324775abd6617d3445a5dbc",
+    "official_client": "@mendable/firecrawl-js@4.31.1",
+    "official_client_source": "apps/js-sdk/firecrawl/package.json in the pinned upstream tree (evidence/M3/raw/route-shapes.txt)",
+    "official_client_use": "contract tests from the workstation (scripts/m3/sdk-compat.mjs), installed outside the repository; not a deployed dependency"
   }
 }
