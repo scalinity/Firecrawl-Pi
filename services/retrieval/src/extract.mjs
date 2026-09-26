@@ -264,7 +264,9 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     }
     if (!chunks.length) throw fail("NO_CONTENT", "no document holds text to extract from");
     if (chunks.length > X.maxChunks) throw fail("INPUT_TOO_LARGE", `the documents need ${chunks.length} extraction units of at most ${X.maxInputTokens} input tokens; at most ${X.maxChunks} are allowed`);
-    const requestHash = sha(canonical({ model, schema, prompt, systemPrompt, docs: docs.map((d) => [d.url, sha(d.markdown)]) }));
+    // The input cap and the fixed instructions decide the chunks, so a unit's stored answers are reused only
+    // when both are unchanged (review S11).
+    const requestHash = sha(canonical({ model, schema, prompt, systemPrompt, docs: docs.map((d) => [d.url, sha(d.markdown)]), maxInputTokens: X.maxInputTokens, instructions: sha(SYSTEM) }));
     let data = null;
     const sources = {}, outcomes = [];
     const usage = { calls: 0, reused: 0, promptTokens: 0, completionTokens: 0, costMicroUsd: 0 };

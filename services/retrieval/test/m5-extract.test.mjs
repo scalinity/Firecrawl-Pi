@@ -118,6 +118,19 @@ test("three provider failures open the breaker: the next call is refused without
   } finally { await r.srv.close(); }
 });
 
+test("a logical unit retried under a different input cap is refused rather than merged from other chunks (review S11)", async () => {
+  const r = await rig();
+  try {
+    const q = req();
+    assert.equal((await r.extract(q)).ok, true);
+    const smaller = budgetFor({ modelPort: r.srv.port, mutate: (b) => { b.extraction.maxInputTokens -= 1000; } });
+    const extract2 = makeExtractor({ adapter: r.adapter, getBudget: () => smaller, getSelection: () => ({ extractionModel: "fcpi-fixture-model" }), log: () => {} });
+    const out = await extract2(q);
+    assert.equal(out.failure.class, "LOGICAL_ID_CONFLICT");
+    assert.equal(r.calls(), 1);
+  } finally { await r.srv.close(); }
+});
+
 test("a rate limit stops the extraction's later units: the provider is asked once (review S8)", async () => {
   const r = await rig();
   try {
