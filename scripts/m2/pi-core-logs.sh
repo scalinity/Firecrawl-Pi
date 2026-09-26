@@ -18,14 +18,15 @@ for id in $ids; do
   sudo -n sh -c "docker logs '$id' >'$f.tmp' 2>&1 && chmod 0600 '$f.tmp' && mv -f '$f.tmp' '$f'"
   printf '### instance_%s\n' "${id:0:12}"
   sudo -n docker inspect -f 'id={{.Id}} image={{.Image}} created={{.Created}} started={{.State.StartedAt}} finished={{.State.FinishedAt}} running={{.State.Running}} restarts={{.RestartCount}} log_driver={{.HostConfig.LogConfig.Type}}' "$id"
-  echo "log_lines=$(sudo -n wc -l <"$f") log_sha256=$(sudo -n sha256sum "$f" | cut -c1-64)"
+  echo "log_lines=$(sudo -n wc -l "$f" | cut -d" " -f1) log_sha256=$(sudo -n sha256sum "$f" | cut -c1-64)"
   for pat in 'firecrawl\.dev' 'firecrawl\.com' 'mendable' 'integrations\.' 'duckduckgo' 'posthog' 'sentry\.io' 'getaddrinfo' 'EAI_AGAIN' 'ENOTFOUND' 'ENETUNREACH'; do
     echo "pattern=$pat count=$(sudo -n grep -ciE "$pat" "$f" || true)"
   done
   # Positive controls: a line every harness start prints, and the instance's newest log line, so
   # a failed or truncated capture cannot pass as "no Cloud lines".
   echo "control=Starting services count=$(sudo -n grep -c 'Starting services' "$f" || true)"
-  echo "newest_line_utc=$(sudo -n tail -n 200 "$f" | grep -oE '"(timestamp|utc)":"[0-9T:.-]+Z"' | tail -1 | cut -d'"' -f4)"
+  # The harness prints "<process> YYYY-MM-DD HH:MM:SS <level> …" in UTC, the container's zone.
+  echo "newest_line_utc=$(sudo -n tail -n 200 "$f" | sed -E 's/\x1b\[[0-9;]*m//g' | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}' | tail -1 | tr ' ' T)Z"
 done
 echo "### end"
 echo end
