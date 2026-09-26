@@ -471,9 +471,13 @@ const PHASES = {
 
 if (!PHASES[phase]) { console.error(`usage: e2e.mjs ${Object.keys(PHASES).join("|")}`); process.exit(2); }
 out("meta", { phase, source_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), vantage: "workstation through an SSH forward of 127.0.0.1:3380", platform: process.platform, node: process.version });
+const runSince = piNow();   // the ledger snapshot below lists the jobs admitted from here on
 await openTunnel();
 let code = 0;
 try { await PHASES[phase](); } catch (e) { out("error", { message: e.message }); code = 1; }
+// Every job this run admitted, as the ledger and NuQ hold them now, while NuQ still keeps their rows (J05).
+try { for (const l of pi(`bash /opt/firecrawl-pi/scripts/m3/pi-ledger-snapshot.sh ${runSince}`).split("\n").filter(Boolean)) out("ledger", JSON.parse(l)); }
+catch (e) { out("error", { message: `ledger snapshot: ${e.message}` }); code = 1; }
 // The forward, as facts: its process, and whether it ended before the phase did.
 out("forward", { pid: tunnel?.pid ?? null, local: "127.0.0.1:3380", remote: "127.0.0.1:3380", exited_before_end: tunnelExit !== null });
 tunnel?.kill();

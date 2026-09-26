@@ -12,7 +12,7 @@ import dns from "node:dns";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
-import { spawn } from "node:child_process";
+import { spawn, execFileSync } from "node:child_process";
 import { connect } from "node:net";
 
 const dir = process.argv[2];
@@ -30,7 +30,10 @@ net.Socket.prototype.connect = function (...args) {
 const origLookup = dns.lookup;
 dns.lookup = function (host, ...rest) { looked.push(String(host)); return origLookup.call(this, host, ...rest); };
 let current = null;
-const out = (section, rec) => { if (section !== current) { process.stdout.write(`### ${section}\n`); current = section; } process.stdout.write(`${JSON.stringify({ utc: new Date().toISOString(), ...rec })}\n`); };
+// Error texts can carry the SSH command: the key path, the target, the LAN address and $HOME are replaced.
+const hideIds = (s) => [[T.PI_SSH_KEY, "<pi-ssh-key>"], [T.PI_SSH_TARGET, "<pi-ssh-target>"], [T.PI_LAN_ADDRESS, "<pi-lan-address>"], [process.env.HOME, "<home>"]]
+  .reduce((x, [a, b]) => (a ? x.split(a).join(b) : x), s);   // T is set before the first out()
+const out = (section, rec) => { if (section !== current) { process.stdout.write(`### ${section}\n`); current = section; } process.stdout.write(`${hideIds(JSON.stringify({ utc: new Date().toISOString(), ...rec }))}\n`); };
 const errOf = (e) => ({ name: e?.name ?? null, status: e?.status ?? null, code: e?.code ?? null, message: String(e?.message ?? e).slice(0, 200) });
 
 const token = readFileSync(0, "utf8").trim();
@@ -46,6 +49,9 @@ for (let i = 0; i < 60; i++) {
   await new Promise((r) => setTimeout(r, 250));
 }
 seen.length = 0; looked.length = 0;   // the probes above are not the client's
+// Commands on the Pi, over SSH (outside the recorded connections: ssh is its own process).
+const pi = (cmd) => execFileSync("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", T.PI_SSH_TARGET, cmd], { encoding: "utf8" });
+const runSince = pi("date -u +%Y-%m-%dT%H:%M:%S.%3NZ").trim();   // the ledger snapshot lists the jobs admitted from here on
 out("meta", { client: `${pkg.name}@${pkg.version}`, node: process.version, env_FIRECRAWL_API_URL_set: process.env.FIRECRAWL_API_URL !== undefined });
 
 const fc = new Firecrawl({ apiKey: token, apiUrl: ORIGIN });
@@ -80,6 +86,9 @@ try {
   code = 1;
 }
 out("connections", { hosts: [...new Set(seen)], total: seen.length, lookups: [...new Set(looked)] });
+// Every job this run admitted, as the ledger and NuQ hold them now (J05).
+try { for (const l of pi(`bash /opt/firecrawl-pi/scripts/m3/pi-ledger-snapshot.sh ${runSince}`).split("\n").filter(Boolean)) out("ledger", JSON.parse(l)); }
+catch (e) { out("error", { message: `ledger snapshot: ${String(e.message).slice(0, 200)}` }); code = 1; }
 tunnel.kill();
 out("end", { exit: code });
 process.exit(code);

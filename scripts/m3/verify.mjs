@@ -354,17 +354,17 @@ const checks = {
         one(I, "other_principal_same_key")?.status === 200 && otherId(one(I, "other_principal_same_key")) && one(I, "upstream_groups_for_key")?.marker_groups === 1 && one(I, "upstream_groups_for_key")?.beta_marker_groups === 0;
       return { ok, actual: `same id where expected=${JSON.stringify(same)}; other body=${one(I, "same_key_other_body")?.status}; other principal got its own job=${otherId(one(I, "other_principal_same_key"))}; upstream jobs for the key=${one(I, "upstream_groups_for_key")?.marker_groups}` };
     } },
-  J05: { name: "no-duplicate-logical-submission", inputs: [`${RAW}e2e-jobs.txt`, `${RAW}e2e-crash.txt`, `${RAW}e2e-cancel.txt`, `${RAW}e2e-overload.txt`],
-    expected: "across every job the live tests submitted, each finished job has exactly one upstream job carrying its submission key, and each job cancelled while queued has none",
+  J05: { name: "no-duplicate-logical-submission", inputs: ["auth", "jobs", "cancel", "overload", "crash"].map((p) => `${RAW}e2e-${p}.txt`).concat(`${RAW}sdk-compat.txt`),
+    expected: "every job each live run admitted, listed from the ledger at the run's end (the auth owner's crawl, the graph, limit and batch jobs, another principal's job, the cancel and overload jobs, the crash tests' and every official-client job), has at most one upstream job carrying its submission key: exactly one where the ledger maps an upstream id, read while NuQ still held that upstream group's rows, and none where it maps none",
     run() {
-      const recs = ["jobs", "crash", "cancel"].flatMap((n) => Object.values(E(n)).flat());
-      const counted = recs.filter((r) => Number.isInteger(r.marker_groups));
-      const finished = counted.filter((r) => ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"].includes(r.state));
-      const queued = E("cancel").queued_crawl?.find((r) => r.case === "cancel");
-      const over = E("overload").admission?.find((r) => r.case === "cleanup");
-      const ok = counted.length >= 8 && counted.every((r) => r.marker_groups <= 1) && finished.length >= 8 && finished.every((r) => r.marker_groups === 1 || (r.state === "CANCELLED" && r.marker_groups <= 1)) &&
-        queued?.marker_groups === 0 && over?.queued_ever_submitted === 0;
-      return { ok, actual: `records with an upstream count=${counted.length}, above one=${counted.filter((r) => r.marker_groups > 1).length}; finished=${finished.length}, without exactly one=${finished.filter((r) => r.marker_groups !== 1).length}; queued then cancelled submitted=${queued?.marker_groups}+${over?.queued_ever_submitted}` };
+      const files = ["auth", "jobs", "cancel", "overload", "crash"].map((p) => E(p)).concat([records(`${RAW}sdk-compat.txt`)]);
+      const jobs = [...new Map(files.flatMap((e) => e.ledger ?? []).map((r) => [r.id, r])).values()];
+      const above = jobs.filter((j) => !(Number.isInteger(j.marker_groups) && j.marker_groups <= 1));
+      const mapped = jobs.filter((j) => j.upstream), unmapped = jobs.filter((j) => !j.upstream);
+      const mappedBad = mapped.filter((j) => !(j.marker_groups === 1 && j.upstream_rows > 0));
+      const unmappedBad = unmapped.filter((j) => j.marker_groups !== 0);
+      const ok = files.every(endOk) && jobs.length >= 30 && mapped.length >= 10 && unmapped.filter((j) => j.cancel_requested).length >= 1 && above.length === 0 && mappedBad.length === 0 && unmappedBad.length === 0;
+      return { ok, actual: `jobs listed=${jobs.length} (mapped ${mapped.length}, unmapped ${unmapped.length}); above one upstream job=${above.length}; mapped without exactly one, or read after NuQ let go=${mappedBad.map((j) => j.id.slice(0, 8)).join(",") || "none"}; unmapped with one=${unmappedBad.map((j) => j.id.slice(0, 8)).join(",") || "none"}` };
     } },
   J06: { name: "results-served-after-core-redis-and-nuq-expiry-r9", inputs: [`${RAW}e2e-expiry.txt`],
     expected: "before: the finished crawl's and batch's NuQ job rows and group rows exist, Redis holds their crawl keys and the core answers 200 for them; then pg_cron's own nuq_group_crawl_clean deletes the rows (a successful run that started after the expiry UPDATE committed, both on the database's clock), the Redis keys expire and the core is recreated: 0 NuQ rows, 0 group rows, 0 keys and the core answers 404; yet the gateway serves every document, each hashing to the archive manifest and to the hash recorded when the job finished (evidence/M1/review/REVIEW.md R9)",
