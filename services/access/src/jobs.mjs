@@ -103,13 +103,16 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     const have = await store.archivedKeys(job.id);
     let ordinal = have.size, skip = 0, limit = 10;
     const archiveErrors = [];
+    // An entry the gateway adds to the per-item errors, in upstream's shape ({ id, timestamp, url, code,
+    // error }); the URL is empty where it is not known (a document too large to read).
+    const note = (code, error, url = "") => ({ id: `fcpi:${job.id}:${code}:${archiveErrors.length}`, timestamp: new Date().toISOString(), url, code, error });
     for (;;) {
       let r;
       try {
         r = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}?skip=${skip}&limit=${limit}`, { timeoutMs: 60000, maxBytes: L.results.archiveResponseMaxBytes });
       } catch (e) {
         if (e.code === "TOO_LARGE" && limit > 1) { limit = 1; continue; }
-        if (e.code === "TOO_LARGE") { archiveErrors.push({ code: "ARCHIVE_DOCUMENT_TOO_LARGE", error: `the document at position ${skip} exceeds ${L.results.archiveResponseMaxBytes} bytes and was not retained` }); skip += 1; continue; }
+        if (e.code === "TOO_LARGE") { archiveErrors.push(note("ARCHIVE_DOCUMENT_TOO_LARGE", `the document at position ${skip} exceeds ${L.results.archiveResponseMaxBytes} bytes and was not retained`)); skip += 1; continue; }
         say({ job: job.id, action: "archive_interrupted", reason: e.code });
         return; // the next poll resumes
       }
@@ -144,9 +147,16 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     try { e = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}/errors`, { timeoutMs: 15000, maxBytes: 4 * 1048576 }); }
     catch (err) { say({ job: job.id, action: "archive_interrupted", reason: `errors ${err.code}` }); return; }
     let errors = { errors: [], robotsBlocked: [] };
-    if (e.status === 404) archiveErrors.push({ code: "UPSTREAM_ERRORS_LOST", error: "the core forgot this job before its per-item errors were archived; they are unknown" });
+    if (e.status === 404) archiveErrors.push(note("UPSTREAM_ERRORS_LOST", "the core forgot this job before its per-item errors were archived; they are unknown"));
     else if (e.status !== 200 || !Array.isArray(e.json?.errors)) { say({ job: job.id, action: "archive_interrupted", reason: `errors status ${e.status}` }); return; }
-    else errors = { errors: e.json.errors.slice(0, 1000), robotsBlocked: (e.json.robotsBlocked ?? []).slice(0, 1000) };
+    else {
+      // At most 1,000 of each are kept, and a cut is recorded rather than silent.
+      const all = e.json.errors, blocked = Array.isArray(e.json.robotsBlocked) ? e.json.robotsBlocked : [];
+      errors = { errors: all.slice(0, 1000), robotsBlocked: blocked.slice(0, 1000) };
+      if (all.length > 1000 || blocked.length > 1000) {
+        archiveErrors.push(note("ERRORS_TRUNCATED", `${Math.max(0, all.length - 1000)} further per-item errors and ${Math.max(0, blocked.length - 1000)} further robots-blocked URLs were not retained`));
+      }
+    }
     errors.errors.push(...archiveErrors);
     let to = "SUCCEEDED", code = null, message = null;
     if (st.status === "failed") { to = "FAILED"; code = "UPSTREAM_FAILED"; message = String(statusBody?.error ?? "the job failed upstream").slice(0, 2000); }

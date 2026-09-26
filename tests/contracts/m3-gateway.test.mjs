@@ -383,14 +383,20 @@ test("a page over the archive's size cap falls back to one document at a time, a
   const h = await harness({ manifest: testManifest({ archiveResponseMaxBytes: 4096 }) });
   const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
   const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
-  h.core.complete(up, 3, 0, 0, [1]);
+  h.core.complete(up, 3, 1002, 0, [1]);
   const done = await waitFor(async () => { const j = await h.job(r.json.id); return ["SUCCEEDED", "PARTIAL"].includes(j.state) && j; }, 15000, "archive");
   assert.equal(done.state, "PARTIAL");
   assert.equal(done.archived, 2, "the documents either side of the large one are kept");
   const pages = h.core.requests.filter((q) => q.method === "GET" && q.url.startsWith(`/v2/crawl/${up}?`) && !q.url.includes("skip=1000000000")).map((q) => q.url.split("?")[1]);
   assert.ok(pages.includes("skip=0&limit=10") && pages.includes("skip=0&limit=1") && pages.includes("skip=1&limit=1"), pages.join(" "));
-  assert.deepEqual(done.errors.errors.map((e) => e.code), ["ARCHIVE_DOCUMENT_TOO_LARGE"]);
   assert.ok(!h.logs.some((l) => l.action === "archive_interrupted"), "an oversized answer is TOO_LARGE, not an interruption");
+  // The gateway's own entries have upstream's shape, and the cut of upstream's 1,002 errors to 1,000 is recorded.
+  const errs = (await h.call("GET", `/v2/crawl/${r.json.id}/errors`, { token: T.a })).json.errors;
+  assert.equal(errs.length, 1002, "1,000 of upstream's and the gateway's two");
+  const mine = errs.filter((e) => e.id.startsWith(`fcpi:${r.json.id}:`));
+  assert.deepEqual(mine.map((e) => e.code), ["ARCHIVE_DOCUMENT_TOO_LARGE", "ERRORS_TRUNCATED"]);
+  for (const e of mine) assert.ok(typeof e.url === "string" && typeof e.error === "string" && !Number.isNaN(Date.parse(e.timestamp)), JSON.stringify(e));
+  assert.match(mine[1].error, /^2 further per-item errors/);
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {
