@@ -44,11 +44,11 @@ export function checkSchema(schema, { maxBytes, maxDepth, maxProperties }) {
         throw new SchemaError("SCHEMA_INVALID", `${path}: an object schema must name its properties`);
       }
       if (s.additionalProperties !== undefined && s.additionalProperties !== false) throw new SchemaError("SCHEMA_UNSUPPORTED", `${path}: additionalProperties may only be false`);
-      if (s.required !== undefined && (!Array.isArray(s.required) || s.required.some((r) => typeof r !== "string" || !(r in s.properties)))) {
+      if (s.required !== undefined && (!Array.isArray(s.required) || s.required.some((r) => typeof r !== "string" || !Object.hasOwn(s.properties, r)))) {
         throw new SchemaError("SCHEMA_INVALID", `${path}.required must name properties the schema defines`);
       }
       for (const [name, sub] of Object.entries(s.properties)) {
-        if (!/^[A-Za-z0-9_.-]{1,64}$/.test(name)) throw new SchemaError("SCHEMA_INVALID", `${path}: property name '${name.slice(0, 80)}' must be 1-64 of A-Z a-z 0-9 _ . -`);
+        if (!/^[A-Za-z0-9_.-]{1,64}$/.test(name) || name === "__proto__") throw new SchemaError("SCHEMA_INVALID", `${path}: property name '${name.slice(0, 80)}' must be 1-64 of A-Z a-z 0-9 _ . -, and not __proto__`);
         if (++properties > maxProperties) throw new SchemaError("SCHEMA_TOO_LARGE", `the schema defines more than ${maxProperties} properties`);
         walk(sub, `${path}.${name}`, depth + 1);
       }
@@ -115,9 +115,9 @@ export function validate(value, schema, max = 20) {
     if (!types.some((t) => fits(v, t))) { errors.push(`${path}: expected ${types.join(" or ")}, got ${typeOf(v)}`); return; }
     if (s.enum && !s.enum.some((e) => e === v)) { errors.push(`${path}: not one of the allowed values`); return; }
     if (typeOf(v) === "object") {
-      for (const k of Object.keys(v)) if (!(k in s.properties)) errors.push(`${path}.${k}: not in the schema`);
-      for (const k of s.required ?? []) if (!(k in v)) errors.push(`${path}.${k}: missing`);
-      for (const [k, sub] of Object.entries(s.properties)) if (k in v) walk(v[k], sub, `${path}.${k}`);
+      for (const k of Object.keys(v)) if (!Object.hasOwn(s.properties, k)) errors.push(`${path}.${k}: not in the schema`);
+      for (const k of s.required ?? []) if (!Object.hasOwn(v, k)) errors.push(`${path}.${k}: missing`);
+      for (const [k, sub] of Object.entries(s.properties)) if (Object.hasOwn(v, k)) walk(v[k], sub, `${path}.${k}`);
     }
     if (typeOf(v) === "array") v.forEach((x, i) => walk(x, s.items, `${path}[${i}]`));
   };

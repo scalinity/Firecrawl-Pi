@@ -93,6 +93,17 @@ test("strict schemas: every property required and nullable (a chunk may lack a v
   assert.deepEqual(missingRequired({ a: "ok", b: [{ c: null }], e: null }, { ...s, properties: { ...s.properties, b: { type: "array", items: { type: "object", properties: { c: { type: "integer" } }, required: ["c"] } } } }), ["$.b[0].c"]);
 });
 
+test("inherited names are not schema properties, and __proto__ is refused as a name (review S3)", () => {
+  const t = toStrict({ type: "object", properties: { a: { type: "string" } } });
+  // A model answer naming Object.prototype's members is still outside the schema.
+  assert.deepEqual(validate(JSON.parse('{"a":"x","constructor":1,"toString":2,"__proto__":{"p":1}}'), t),
+    ["$.constructor: not in the schema", "$.toString: not in the schema", "$.__proto__: not in the schema"]);
+  const L = { maxBytes: 32768, maxDepth: 5, maxProperties: 100 };
+  // As a request body parses it: JSON.parse makes __proto__ an own property, not the prototype.
+  assert.throws(() => checkSchema(JSON.parse('{"type":"object","properties":{"__proto__":{"type":"string"}}}'), L), /not __proto__/);
+  assert.throws(() => checkSchema({ type: "object", properties: { a: { type: "string" } }, required: ["toString"] }, L), /required must name/);
+});
+
 test("the egress policy's search section and the host selection are validated", () => {
   const egress = readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8");
   const p = loadPolicy(egress);
