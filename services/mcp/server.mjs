@@ -103,18 +103,18 @@ async function runTool(t, args, extra, era) {
   } finally { toolCalls -= 1; }
 }
 
-// The instance serving each request, by the gateway's request id, until that request closes: a 2025-era
-// initialize names its client only to the instance that serves it, and the exchange record reads it there.
-// Nothing outlives its own request, so this is not session state.
-const serving = new Map();
+// The instance serving each request, keyed by that request's own auth object (the adapter hands req.auth to
+// the factory by reference in both eras): a 2025-era initialize names its client only to the instance that
+// serves it, and the exchange record reads it there. No other request can present the key, and the entry
+// goes with the request, so this is not session state.
+const serving = new WeakMap();
 
 // One McpServer per HTTP request: the same factory serves both eras.
 const factory = (ctx) => {
-  const requestId = ctx.authInfo?.extra?.requestId ?? null;
-  log({ event: "serve", request_id: requestId, era: ctx.era });
+  log({ event: "serve", request_id: ctx.authInfo?.extra?.requestId ?? null, era: ctx.era });
   const s = new McpServer(SERVER_INFO, { capabilities: { tools: { listChanged: false } }, instructions: INSTRUCTIONS, cacheHints: { "tools/list": HINT, "server/discover": HINT } });
   for (const t of tools) s.registerTool(t.name, t.config, (args, extra) => runTool(t, args, extra, ctx.era));
-  if (requestId) serving.set(requestId, s);
+  if (ctx.authInfo) serving.set(ctx.authInfo, s);
   return s;
 };
 
@@ -148,11 +148,7 @@ const server = createServer({ maxHeaderSize: 16384 }, (req, res) => {
     sessionHeader = Object.keys(o).some((k) => k.toLowerCase() === "mcp-session-id") || res.hasHeader("mcp-session-id");
     return writeHead.call(this, s, hs, ...rest);
   };
-  res.on("close", () => {
-    const inst = serving.get(h["x-request-id"]);
-    serving.delete(h["x-request-id"]);
-    exchangeLog(inst);
-  });
+  res.on("close", () => exchangeLog(serving.get(req.auth)));
   const exchangeLog = (inst) => log({ event: "exchange", request_id: h["x-request-id"], client_info: clientInfo(inst?.server?.getClientVersion?.()), http_method: req.method, mcp_method: logged(h["mcp-method"], LOGGED.method), mcp_name: logged(h["mcp-name"], LOGGED.name),
     protocol_version: logged(h["mcp-protocol-version"], LOGGED.version), status, content_type: contentType, session_header_sent: sessionHeader, completed: res.writableFinished,
     client: h["x-fcpi-client"], principal: h["x-fcpi-principal"], ms: Date.now() - t0 });
