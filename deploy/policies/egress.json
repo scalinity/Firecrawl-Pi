@@ -51,7 +51,8 @@
   "search": {
     "engines": {
       "fixture": [
-        "fcpi fixture"
+        "fcpi fixture",
+        "fcpi fixture b"
       ],
       "live": [
         "duckduckgo",

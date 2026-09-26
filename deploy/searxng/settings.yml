@@ -71,3 +71,16 @@ engines:
     # The fixture is served over plain http on the internal fixture network. Plain http stays off for every
     # other engine (SearXNG's outgoing.enable_http default): curl then speaks https alone.
     enable_http: true
+  # The second controlled engine, which also fails on "fcpi-partial": with it, one query shows a partial answer.
+  - name: fcpi fixture b
+    engine: json_engine
+    shortcut: fcpifb
+    categories: [general]
+    search_url: http://search.fixture.fcpi.test:8080/search-b?q={query}
+    results_query: results
+    url_query: url
+    title_query: title
+    content_query: content
+    timeout: 3.0
+    disabled: false
+    enable_http: true

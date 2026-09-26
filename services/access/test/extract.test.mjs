@@ -98,3 +98,11 @@ test("a job past its deadline is closed FAILED without any work", async () => {
   assert.equal(r.store.finished.errorCode, "JOB_DEADLINE_EXCEEDED");
   assert.equal(r.calls.scrape.length, 0);
 });
+
+test("a page whose target answered an error is a named page failure, not text to extract from", async () => {
+  const r = await rig({ job: { request: REQ }, core: (b) => (b.url.endsWith("/2") ? { status: 200, json: { success: true, data: { markdown: "not found", metadata: { url: b.url, statusCode: 404 } } } } : page(b.url, "Price: 1")), extract: ok });
+  await r.run();
+  assert.equal(r.store.finished.to, "PARTIAL");
+  assert.deepEqual(r.store.finished.errors.errors.map((e) => [e.url, e.code]), [["https://a.example/2", "TARGET_HTTP_404"]]);
+  assert.deepEqual(r.calls.extract[0].documents.map((d) => d.url), ["https://a.example/1"]);
+});

@@ -8,8 +8,10 @@
 //   parser  LlamaParse's REST API v2: POST /api/v2/parse/upload, GET /api/v2/parse/{id}?expand=markdown,
 //           DELETE /api/v1/files/{id}. A mode comment in the PDF ("%fcpi-parser-mode=<mode>") selects a
 //           failure; a page count is read from the PDF's page objects.
-//   search  the target of SearXNG's "fcpi fixture" json_engine: GET /search?q=… with results, none
-//           ("fcpi-empty"), a 500 ("fcpi-fail") or a stall past SearXNG's engine timeout ("fcpi-slow").
+//   search  the targets of SearXNG's "fcpi fixture" and "fcpi fixture b" json_engines: GET /search and
+//           /search-b ?q=… with results, none ("fcpi-empty"), a 500 ("fcpi-fail"; on /search-b also
+//           "fcpi-partial", which makes the pair's answer partial) or a stall past SearXNG's engine timeout
+//           ("fcpi-slow").
 // GET /__stats on each answers the calls it has seen, so a test can show that a refusal made none.
 import { randomUUID } from "node:crypto";
 
@@ -63,6 +65,7 @@ export async function modelHandler(req, res) {
   if (mode === "http-500") return json(res, 500, { error: { message: "The server had an error", type: "server_error" } });
   if (mode === "http-400") return json(res, 400, { error: { message: "Invalid schema", type: "invalid_request_error" } });
   if (mode === "slow") { await new Promise((r) => setTimeout(r, 90000)); }
+  if (mode === "delay") { await new Promise((r) => setTimeout(r, 3000)); }
   const content = (body.messages ?? []).filter((m) => m.role === "user").map((m) => m.content)[0] ?? "";
   const schema = body.response_format?.json_schema?.schema ?? { properties: {} };
   let answer = JSON.stringify(extractFrom(schema, content));
@@ -136,10 +139,12 @@ export async function parserHandler(req, res) {
 export async function searchHandler(req, res) {
   const url = new URL(req.url, "http://x");
   if (url.pathname === "/__stats") return json(res, 200, stats.search);
-  if (url.pathname !== "/search") return json(res, 404, {});
+  // /search-b is the second fixture engine: it also fails on "fcpi-partial", so the first engine's answer
+  // is a partial result.
+  if (url.pathname !== "/search" && url.pathname !== "/search-b") return json(res, 404, {});
   stats.search.calls++;
   const q = url.searchParams.get("q") ?? "";
-  if (/fcpi-fail/.test(q)) return json(res, 500, { error: "fixture engine failure" });
+  if (/fcpi-fail/.test(q) || (url.pathname === "/search-b" && /fcpi-partial/.test(q))) return json(res, 500, { error: "fixture engine failure" });
   if (/fcpi-slow/.test(q)) { await new Promise((r) => setTimeout(r, 15000)); }
   if (/fcpi-empty/.test(q)) return json(res, 200, { results: [] });
   const results = Array.from({ length: 7 }, (_, i) => ({ url: `http://m5.fixture.fcpi.test:8080/extract/result-${i + 1}.html`, title: `Fixture result ${i + 1} for ${q.slice(0, 40)}`, content: `Fixture result ${i + 1}.` }));

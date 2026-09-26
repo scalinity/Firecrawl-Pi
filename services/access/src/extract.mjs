@@ -30,6 +30,9 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     try { r = await upstream.call("POST", "/v2/scrape", { body, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
     catch (e) { return { failure: { code: `UPSTREAM_${e.code}`, error: `the core did not answer the scrape (${e.code})`, retry: !e.delivered } }; }
     if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return { failure: { code: String(r.json?.code ?? `HTTP_${r.status}`).slice(0, 64), error: r.json?.error ?? `the core answered ${r.status}` } };
+    // A target that answered an error (404, 500 …) gave an error page, not the page asked for: no extraction from it.
+    const targetStatus = Number(r.json.data.metadata?.statusCode ?? 200);
+    if (targetStatus >= 400) return { failure: { code: `TARGET_HTTP_${targetStatus}`, error: `the page answered HTTP ${targetStatus}` } };
     const buf = Buffer.from(JSON.stringify(r.json.data));
     const put = await archive.put(buf);
     await store.addDocuments(job.id, [{ ordinal: i + 1, docKey: key, sha256: put.sha256, bytes: put.bytes }]);

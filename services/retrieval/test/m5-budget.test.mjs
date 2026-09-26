@@ -96,7 +96,7 @@ test("strict schemas: every property required and nullable (a chunk may lack a v
 test("the egress policy's search section and the host selection are validated", () => {
   const egress = readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8");
   const p = loadPolicy(egress);
-  assert.deepEqual(p.search.engines.fixture, ["fcpi fixture"]);
+  assert.deepEqual(p.search.engines.fixture, ["fcpi fixture", "fcpi fixture b"]);
   assert.equal(p.search.perHour, 60);
   const e = (f) => { const j = JSON.parse(egress); f(j); return JSON.stringify(j); };
   assert.throws(() => loadPolicy(e((j) => { j.search.perHour = 61; })), /perHour/);

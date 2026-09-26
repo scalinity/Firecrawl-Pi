@@ -30,6 +30,12 @@ function backendGet(url, deadlineMs, signal) {
       res.on("error", () => done(reject, new Denied("SEARCH_BACKEND_ERROR", "the search backend's answer was cut off", { retryable: true })));
     });
     const timer = setTimeout(() => { req.destroy(); done(reject, new Denied("SEARCH_TIMEOUT", `the search backend did not answer within ${deadlineMs} ms`, { retryable: true })); }, deadlineMs);
+    // A stopped backend's address stops answering, so a connection to it hangs rather than being refused:
+    // no connection within 2 s is the backend being down, told apart from one that connects and stalls.
+    const connectTimer = setTimeout(() => { req.destroy(); done(reject, new Denied("SEARCH_BACKEND_UNAVAILABLE", "the search backend did not accept a connection within 2000 ms", { retryable: true })); }, Math.min(2000, deadlineMs));
+    req.on("socket", (s) => { if (!s.connecting) clearTimeout(connectTimer); else s.once("connect", () => clearTimeout(connectTimer)); });
+    const clear = () => clearTimeout(connectTimer);
+    req.on("response", clear); req.on("error", clear); req.on("close", clear);
     req.on("error", (e) => done(reject, new Denied("SEARCH_BACKEND_UNAVAILABLE", `the search backend could not be reached (${e.code ?? e.message})`, { retryable: true })));
     signal?.addEventListener("abort", () => { req.destroy(); done(reject, new Denied("CANCELLED", "the caller cancelled")); }, { once: true });
   });

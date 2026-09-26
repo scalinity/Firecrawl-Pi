@@ -157,6 +157,8 @@ async function fixturePhase() {
   out("search", { case: "mcp_true_empty", isError: t.isError, results: t.payload?.data?.web?.length ?? null });
   r = await rest("POST", "/v2/search", { query: q("tbs"), tbs: "qdr:d" });
   out("search", { case: "refused_option", ...brief(r) });
+  r = await rest("POST", "/v2/search", { query: q("fcpi-partial") });
+  out("search", { case: "partial", ...brief(r), results: webOf(r)?.length ?? null, warning: r.json?.warning ?? null });
   r = await rest("POST", "/v2/search", { query: q("fcpi-fail") });
   out("search", { case: "engines_failed", ...brief(r) });
   t = await tool("firecrawl_search", { query: q("fcpi-fail mcp") });
@@ -242,14 +244,17 @@ async function fixturePhase() {
   // AC25: concurrent reservations cannot pass the fixture_race category's cap.
   const raceUsage = usageRows().filter((u) => u.category === "fixture_race");
   const big = `Product: Race Widget\n\n${"This paragraph pads the race fixture to a known size. ".repeat(1050)}`;
-  const race = internal(Array.from({ length: 8 }, (_, i) => ({ logicalId: `m5:${nonce}:race:${i}`, model: "fcpi-fixture-race", schema: SCHEMA, documents: [{ url: `${FX5}/extract/race-${i}`, markdown: big }] })));
+  // The fixture model's delay mode holds the first call in the one model slot for 3 s, so every reservation
+  // of the burst is held at once and the cap alone decides which are granted.
+  const race = internal(Array.from({ length: 8 }, (_, i) => ({ logicalId: `m5:${nonce}:race:${i}`, model: "fcpi-fixture-race", schema: SCHEMA, prompt: "fcpi-mode=delay", documents: [{ url: `${FX5}/extract/race-${i}`, markdown: big }] })));
   out("race", { usage_before: raceUsage, results: race.map((x) => ({ status: x.status, ok: x.json?.ok ?? null, class: x.json?.failure?.class ?? x.json?.units?.[0]?.failure?.class ?? null, started: x.started, ms: x.ms })),
-    reservations: ledger(m0).filter((l) => l.category === "fixture_race" && l.logical_id.startsWith(`m5:${nonce}:race:`)).map((l) => ({ logical_id: l.logical_id, reserved: l.reserved, actual: l.actual, state: l.state })),
+    reservations: ledger(m0).filter((l) => l.category === "fixture_race" && l.logical_id.startsWith(`m5:${nonce}:race:`)).map((l) => ({ logical_id: l.logical_id, reserved: l.reserved, actual: l.actual, state: l.state, created_at: l.created_at, settled_at: l.settled_at })),
     usage_after: usageRows().filter((u) => u.category === "fixture_race") });
   // Provider failures last, since three open the breaker for five minutes: a refused credential, a
   // request with no answer (the reservation kept whole), a provider error; then the breaker refuses without a request.
   const failures = [];
-  for (const [c, mode] of [["auth_refused", "http-401"], ["no_answer", "slow"], ["provider_error", "http-500"]]) {
+  // The slow case first: its failure is counted when its 60 s end, so the three fall inside the breaker's window.
+  for (const [c, mode] of [["no_answer", "slow"], ["auth_refused", "http-401"], ["provider_error", "http-500"]]) {
     const rr = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/product.html`, formats: [{ type: "json", schema: SCHEMA, prompt: `fcpi-mode=${mode}` }] });
     failures.push({ case: c, ...brief(rr) });
   }

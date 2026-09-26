@@ -16,11 +16,17 @@ search=${1:?usage: pi-selection.sh <fixture|live> <model> <parser> | show} model
 case $search in fixture|live) ;; *) echo "search must be fixture or live" >&2; exit 2 ;; esac
 jq -e --arg m "$model" '.models | has($m)' "$REPO/deploy/policies/budget.json" >/dev/null || { echo "model $model is not in the budget policy" >&2; exit 2; }
 jq -e --arg p "$parser" '.parsers | has($p)' "$REPO/deploy/policies/budget.json" >/dev/null || { echo "parser $parser is not in the budget policy" >&2; exit 2; }
+C=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=retrieval-service)
+want=$(jq -cn --arg s "$search" --arg m "$model" --arg p "$parser" '{search: $s, extractionModel: $m, parser: $p}')
+# Already the file's selection and the one the service last reported: nothing changes, so nothing to wait for.
+if [ "$(sudo -n cat "$F" | jq -c .)" = "$want" ] && [ -n "$C" ] && \
+   [ "$(sudo -n docker logs "$C" 2>/dev/null | jq -c 'select(.event == "selection_loaded") | {search, extractionModel, parser}' 2>/dev/null | tail -1)" = "$want" ]; then
+  echo "selection applied: search=$search model=$model parser=$parser utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) (unchanged)"; exit 0
+fi
 tmp=$(sudo -n mktemp /etc/firecrawl-pi/selection/.fcpi-tmp.XXXXXX)
 jq -cn --arg s "$search" --arg m "$model" --arg p "$parser" '{search: $s, extractionModel: $m, parser: $p}' | sudo -n tee "$tmp" >/dev/null
 sudo -n chmod 0644 "$tmp" && sudo -n mv -f "$tmp" "$F"
 since=$(date +%s)
-C=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=retrieval-service)
 [ -n "$C" ] || { echo "retrieval-service is not running; the selection applies at its start"; exit 0; }
 for _ in $(seq 1 75); do
   if sudo -n docker logs --since "$since" "$C" 2>/dev/null | jq -ce --arg s "$search" --arg m "$model" --arg p "$parser" 'select(.event == "selection_loaded" and .search == $s and .extractionModel == $m and .parser == $p)' 2>/dev/null | grep . >/dev/null; then
