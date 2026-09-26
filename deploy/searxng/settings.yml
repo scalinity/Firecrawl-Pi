@@ -55,6 +55,10 @@ plugins:
     active: false
 
 engines:
+  # SearXNG ships Bing disabled; the live set enables it (an entry named like a default engine is merged
+  # into it). The retrieval service names the engines on every query either way.
+  - name: bing
+    disabled: false
   # The controlled engine (tests/fixtures/m5/providers.mjs searchHandler), reached through the search
   # proxy like every other engine, for the fixture phase's results, empty answers and failures.
   - name: fcpi fixture
