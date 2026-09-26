@@ -1,0 +1,212 @@
+### meta
+2026-09-26T04:16:08Z
+source_commit=0219c1bcd24b2e1321b334cd96aa1bf96e92e520
+host_page_size=16384 kernel=6.18.34+rpt-rpi-2712 uname_m=aarch64
+boot_id_sha256=54a9acdff6a286e4c17c12dd682e946792c0509d39ce5a30bde1abf66db07ffe
+binfmt_misc_handlers=python3.13
+### containers
+nuq-postgres name=fcpi-nuq-postgres-1 image=sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180 platform=linux/arm64 state=running health=healthy restarts=0 user=5432:5432 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T03:02:03.812482192Z
+nuq-postgres uname_m=aarch64
+redis name=fcpi-redis-1 image=sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44 platform=linux/arm64 state=running health=healthy restarts=0 user=6379:6379 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:34.819082929Z
+redis uname_m=aarch64
+rabbitmq name=fcpi-rabbitmq-1 image=sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8 platform=linux/arm64 state=running health=healthy restarts=0 user=5672:5672 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T04:01:52.515725237Z
+rabbitmq uname_m=aarch64
+firecrawl-core name=fcpi-firecrawl-core-1 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 platform=linux/arm64 state=running health=healthy restarts=2 user= readonly_rootfs=true privileged=false network_mode=fcpi_acquire cap_drop=ALL cap_add=CAP_SETGID,CAP_SETUID security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T04:06:05.502686457Z
+firecrawl-core uname_m=aarch64
+access-gateway name=fcpi-access-gateway-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=3380:3380 readonly_rootfs=true privileged=false network_mode=fcpi_access cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T03:21:53.040725069Z
+access-gateway uname_m=aarch64
+fixture name=fcpi-fixture-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:34.432153681Z
+fixture uname_m=aarch64
+retrieval-service name=fcpi-retrieval-service-1 image=sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a platform=linux/arm64 state=running health=healthy restarts=0 user=3310:3310 readonly_rootfs=true privileged=false network_mode=fcpi_acquire cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T03:46:04.385829905Z
+retrieval-service uname_m=aarch64
+browser-worker name=fcpi-browser-worker-1 image=sha256:cd83da63af0f9f5039c4b41a8832d84f72b1ba47f19cb410aa39a2a356de4824 platform=linux/arm64 state=running health=healthy restarts=0 user=3320:3320 readonly_rootfs=true privileged=false network_mode=fcpi_browser cap_drop=ALL cap_add= security_opt=no-new-privileges:true,seccomp={"defaultAction":"SCMP_ACT_ERRNO","defaultErrnoRet":1,"archMap":[{"architecture":"SCMP_ARCH_X86_64","subArchitectures":["SCMP_ARCH_X86","SCMP_ARCH_X32"]},{"architecture":"SCMP_ARCH_AARCH64","subArchitectures":["SCMP_ARCH_ARM"]},{"architecture":"SCMP_ARCH_MIPS64","subArchitectures":["SCMP_ARCH_MIPS","SCMP_ARCH_MIPS64N32"]},{"architecture":"SCMP_ARCH_MIPS64N32","subArchitectures":["SCMP_ARCH_MIPS","SCMP_ARCH_MIPS64"]},{"architecture":"SCMP_ARCH_MIPSEL64","subArchitectures":["SCMP_ARCH_MIPSEL","SCMP_ARCH_MIPSEL64N32"]},{"architecture":"SCMP_ARCH_MIPSEL64N32","subArchitectures":["SCMP_ARCH_MIPSEL","SCMP_ARCH_MIPSEL64"]},{"architecture":"SCMP_ARCH_S390X","subArchitectures":["SCMP_ARCH_S390"]},{"architecture":"SCMP_ARCH_RISCV64","subArchitectures":null},{"architecture":"SCMP_ARCH_LOONGARCH64","subArchitectures":null}],"syscalls":[{"names":["accept","accept4","access","adjtimex","alarm","bind","brk","cachestat","capget","capset","chdir","chmod","chown","chown32","clock_adjtime","clock_adjtime64","clock_getres","clock_getres_time64","clock_gettime","clock_gettime64","clock_nanosleep","clock_nanosleep_time64","close","close_range","connect","copy_file_range","creat","dup","dup2","dup3","epoll_create","epoll_create1","epoll_ctl","epoll_ctl_old","epoll_pwait","epoll_pwait2","epoll_wait","epoll_wait_old","eventfd","eventfd2","execve","execveat","exit","exit_group","faccessat","faccessat2","fadvise64","fadvise64_64","fallocate","fanotify_mark","fchdir","fchmod","fchmodat","fchmodat2","fchown","fchown32","fchownat","fcntl","fcntl64","fdatasync","fgetxattr","flistxattr","flock","fork","fremovexattr","fsetxattr","fstat","fstat64","fstatat64","fstatfs","fstatfs64","fsync","ftruncate","ftruncate64","futex","futex_requeue","futex_time64","futex_wait","futex_waitv","futex_wake","futimesat","getcpu","getcwd","getdents","getdents64","getegid","getegid32","geteuid","geteuid32","getgid","getgid32","getgroups","getgroups32","getitimer","getpeername","getpgid","getpgrp","getpid","getppid","getpriority","getrandom","getresgid","getresgid32","getresuid","getresuid32","getrlimit","get_robust_list","getrusage","getsid","getsockname","getsockopt","get_thread_area","gettid","gettimeofday","getuid","getuid32","getxattr","getxattrat","inotify_add_watch","inotify_init","inotify_init1","inotify_rm_watch","io_cancel","ioctl","io_destroy","io_getevents","io_pgetevents","io_pgetevents_time64","ioprio_get","ioprio_set","io_setup","io_submit","ipc","kill","landlock_add_rule","landlock_create_ruleset","landlock_restrict_self","lchown","lchown32","lgetxattr","link","linkat","listen","listmount","listxattr","listxattrat","llistxattr","_llseek","lremovexattr","lseek","lsetxattr","lstat","lstat64","madvise","map_shadow_stack","membarrier","memfd_create","memfd_secret","mincore","mkdir","mkdirat","mknod","mknodat","mlock","mlock2","mlockall","mmap","mmap2","mprotect","mq_getsetattr","mq_notify","mq_open","mq_timedreceive","mq_timedreceive_time64","mq_timedsend","mq_timedsend_time64","mq_unlink","mremap","mseal","msgctl","msgget","msgrcv","msgsnd","msync","munlock","munlockall","munmap","name_to_handle_at","nanosleep","newfstatat","_newselect","open","openat","openat2","pause","pidfd_open","pidfd_send_signal","pipe","pipe2","pkey_alloc","pkey_free","pkey_mprotect","poll","ppoll","ppoll_time64","prctl","pread64","preadv","preadv2","prlimit64","process_mrelease","pselect6","pselect6_time64","pwrite64","pwritev","pwritev2","read","readahead","readlink","readlinkat","readv","recv","recvfrom","recvmmsg","recvmmsg_time64","recvmsg","remap_file_pages","removexattr","removexattrat","rename","renameat","renameat2","restart_syscall","riscv_hwprobe","rmdir","rseq","rt_sigaction","rt_sigpending","rt_sigprocmask","rt_sigqueueinfo","rt_sigreturn","rt_sigsuspend","rt_sigtimedwait","rt_sigtimedwait_time64","rt_tgsigqueueinfo","sched_getaffinity","sched_getattr","sched_getparam","sched_get_priority_max","sched_get_priority_min","sched_getscheduler","sched_rr_get_interval","sched_rr_get_interval_time64","sched_setaffinity","sched_setattr","sched_setparam","sched_setscheduler","sched_yield","seccomp","select","semctl","semget","semop","semtimedop","semtimedop_time64","send","sendfile","sendfile64","sendmmsg","sendmsg","sendto","setfsgid","setfsgid32","setfsuid","setfsuid32","setgid","setgid32","setgroups","setgroups32","setitimer","setpgid","setpriority","setregid","setregid32","setresgid","setresgid32","setresuid","setresuid32","setreuid","setreuid32","setrlimit","set_robust_list","setsid","setsockopt","set_thread_area","set_tid_address","setuid","setuid32","setxattr","setxattrat","shmat","shmctl","shmdt","shmget","shutdown","sigaltstack","signalfd","signalfd4","sigprocmask","sigreturn","socketcall","socketpair","splice","stat","stat64","statfs","statfs64","statmount","statx","symlink","symlinkat","sync","sync_file_range","syncfs","sysinfo","tee","tgkill","time","timer_create","timer_delete","timer_getoverrun","timer_gettime","timer_gettime64","timer_settime","timer_settime64","timerfd_create","timerfd_gettime","timerfd_gettime64","timerfd_settime","timerfd_settime64","times","tkill","truncate","truncate64","ugetrlimit","umask","uname","unlink","unlinkat","uretprobe","utime","utimensat","utimensat_time64","utimes","vfork","vmsplice","wait4","waitid","waitpid","write","writev"],"action":"SCMP_ACT_ALLOW"},{"names":["process_vm_readv","process_vm_writev","ptrace"],"action":"SCMP_ACT_ALLOW","includes":{"minKernel":"4.8"}},{"names":["socket"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":38,"op":"SCMP_CMP_LT"}]},{"names":["socket"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":39,"op":"SCMP_CMP_EQ"}]},{"names":["socket"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":40,"op":"SCMP_CMP_GT"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":0,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":8,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":131072,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":131080,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":4294967295,"op":"SCMP_CMP_EQ"}]},{"names":["sync_file_range2","swapcontext"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["ppc64le"]}},{"names":["arm_fadvise64_64","arm_sync_file_range","sync_file_range2","breakpoint","cacheflush","set_tls"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["arm","arm64"]}},{"names":["arch_prctl"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["amd64","x32"]}},{"names":["modify_ldt"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["amd64","x32","x86"]}},{"names":["s390_pci_mmio_read","s390_pci_mmio_write","s390_runtime_instr"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["s390","s390x"]}},{"names":["riscv_flush_icache"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["riscv64"]}},{"names":["open_by_handle_at"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_DAC_READ_SEARCH"]}},{"names":["bpf","clone","clone3","fanotify_init","fsconfig","fsmount","fsopen","fspick","lookup_dcookie","lsm_get_self_attr","lsm_list_modules","lsm_set_self_attr","mount","mount_setattr","move_mount","open_tree","perf_event_open","quotactl","quotactl_fd","setdomainname","sethostname","setns","syslog","umount","umount2","unshare"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_ADMIN"]}},{"names":["clone"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":2114060288,"op":"SCMP_CMP_MASKED_EQ"}],"excludes":{"caps":["CAP_SYS_ADMIN"],"arches":["s390","s390x"]}},{"names":["clone"],"action":"SCMP_ACT_ALLOW","args":[{"index":1,"value":2114060288,"op":"SCMP_CMP_MASKED_EQ"}],"comment":"s390 parameter ordering for clone is different","includes":{"arches":["s390","s390x"]},"excludes":{"caps":["CAP_SYS_ADMIN"]}},{"names":["clone3"],"action":"SCMP_ACT_ERRNO","errnoRet":38,"excludes":{"caps":["CAP_SYS_ADMIN"]}},{"names":["reboot"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_BOOT"]}},{"names":["chroot"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_CHROOT"]}},{"names":["delete_module","init_module","finit_module"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_MODULE"]}},{"names":["acct"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_PACCT"]}},{"names":["kcmp","pidfd_getfd","process_madvise","process_vm_readv","process_vm_writev","ptrace"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_PTRACE"]}},{"names":["iopl","ioperm"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_RAWIO"]}},{"names":["settimeofday","stime","clock_settime","clock_settime64"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_TIME"]}},{"names":["vhangup"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_TTY_CONFIG"]}},{"names":["get_mempolicy","mbind","set_mempolicy","set_mempolicy_home_node"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_NICE"]}},{"names":["syslog"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYSLOG"]}},{"names":["bpf"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_BPF"]}},{"names":["perf_event_open"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_PERFMON"]}},{"names":["chroot","clone","unshare"],"action":"SCMP_ACT_ALLOW","comment":"fcpi: Chromium's namespace sandbox (scripts/m2/build-seccomp.mjs)"}]} docker_sock_mount=0 started_at=2026-09-26T03:46:03.877369956Z
+browser-worker uname_m=aarch64
+fixture-m2 name=fcpi-fixture-m2-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T03:52:52.415669085Z
+fixture-m2 uname_m=aarch64
+### process_elf
+nuq-postgres pid=702031 uid=5432 e_machine=183 comm=postgres args=postgres -c shared_buffers=128MB -c work_mem=4MB -c max_connections=32 -c max_wal_size=1GB
+nuq-postgres pid=702064 uid=5432 e_machine=183 comm=postgres args=postgres: checkpointer                                                                    
+nuq-postgres pid=702065 uid=5432 e_machine=183 comm=postgres args=postgres: background writer                                                               
+nuq-postgres pid=702067 uid=5432 e_machine=183 comm=postgres args=postgres: walwriter                                                                       
+nuq-postgres pid=702068 uid=5432 e_machine=183 comm=postgres args=postgres: autovacuum launcher                                                             
+nuq-postgres pid=702069 uid=5432 e_machine=183 comm=postgres args=postgres: pg_cron launcher                                                                
+nuq-postgres pid=702070 uid=5432 e_machine=183 comm=postgres args=postgres: logical replication launcher                                                    
+nuq-postgres pid=782838 uid=5432 e_machine=183 comm=postgres args=postgres: fcpi_core postgres 10.231.1.5(54446) idle                                       
+nuq-postgres pid=785613 uid=5432 e_machine=183 comm=postgres args=postgres: fcpi_core postgres 10.231.1.5(42390) idle                                       
+nuq-postgres pid=794329 uid=5432 e_machine=183 comm=postgres args=postgres: fcpi_core postgres 10.231.1.5(53346) idle                                       
+redis pid=595879 uid=6379 e_machine=183 comm=redis-server args=redis-server 0.0.0.0:6379                    
+rabbitmq pid=778051 uid=5672 e_machine=183 comm=beam.smp args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/beam.smp -W w -MBas ageffcbf -MHas ageffcbf -MBl
+rabbitmq pid=778095 uid=5672 e_machine=183 comm=erl_child_setup args=erl_child_setup 1024 
+rabbitmq pid=778144 uid=5672 e_machine=183 comm=inet_gethost args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/inet_gethost 4 
+rabbitmq pid=778145 uid=5672 e_machine=183 comm=inet_gethost args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/inet_gethost 4 
+rabbitmq pid=778155 uid=5672 e_machine=183 comm=epmd args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/epmd -daemon 
+rabbitmq pid=778250 uid=5672 e_machine=183 comm=sh args=/bin/sh -s rabbit_disk_monitor 
+firecrawl-core pid=782646 uid=3002 e_machine=183 comm=node args=node dist/src/harness.js --start-docker 
+firecrawl-core pid=782693 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/index.js 
+firecrawl-core pid=782694 uid=3002 e_machine=183 comm=node args=node dist/src/index.js 
+firecrawl-core pid=782695 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/queue-worker.js 
+firecrawl-core pid=782696 uid=3002 e_machine=183 comm=node args=node dist/src/services/queue-worker.js 
+firecrawl-core pid=782697 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/extract-worker.js 
+firecrawl-core pid=782701 uid=3002 e_machine=183 comm=node args=node dist/src/services/extract-worker.js 
+firecrawl-core pid=782704 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-worker.js 
+firecrawl-core pid=782710 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-worker.js 
+firecrawl-core pid=782711 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-prefetch-worker.js 
+firecrawl-core pid=782717 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-prefetch-worker.js 
+firecrawl-core pid=782719 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-reconciler-worker.js 
+firecrawl-core pid=782730 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-reconciler-worker.js 
+access-gateway pid=721612 uid=3380 e_machine=183 comm=node args=node /srv/access/server.mjs 
+fixture pid=595739 uid=8080 e_machine=183 comm=node args=node /fixture/server.mjs 
+retrieval-service pid=756113 uid=3310 e_machine=183 comm=node args=node src/server.mjs 
+browser-worker pid=756040 uid=3320 e_machine=183 comm=docker-init args=/sbin/docker-init -- node src/server.mjs 
+browser-worker pid=756069 uid=3320 e_machine=183 comm=MainThread args=node src/server.mjs 
+browser-worker pid=757095 uid=3320 e_machine=183 comm=chrome-headless args=/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux-arm64/chrome-headl
+browser-worker pid=757123 uid=3320 e_machine=183 comm=chrome-headless args=/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux-arm64/chrome-headl
+browser-worker pid=757124 uid=3320 e_machine=183 comm=chrome-headless args=/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux-arm64/chrome-headl
+browser-worker pid=757130 uid=3320 e_machine=183 comm=chrome-headless args=/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux-arm64/chrome-headl
+browser-worker pid=757147 uid=3320 e_machine=183 comm=chrome-headless args=/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux-arm64/chrome-headl
+browser-worker pid=757185 uid=3320 e_machine=183 comm=chrome-headless args=/ms-playwright/chromium_headless_shell-1243/chrome-headless-shell-linux-arm64/chrome-headl
+fixture-m2 pid=764785 uid=8080 e_machine=183 comm=node args=node /fixtures/m2/server.mjs 
+### core_processes
+1 0 3002 59456 node dist/src/harness.js --start-docker
+22 1 3002 1488 sh -c node dist/src/index.js
+23 22 3002 391936 node dist/src/index.js
+24 1 3002 1488 sh -c node dist/src/services/queue-worker.js
+25 24 3002 361008 node dist/src/services/queue-worker.js
+26 1 3002 1488 sh -c node dist/src/services/extract-worker.js
+30 26 3002 355856 node dist/src/services/extract-worker.js
+33 1 3002 1504 sh -c node dist/src/services/worker/nuq-worker.js
+39 33 3002 379616 node dist/src/services/worker/nuq-worker.js
+40 1 3002 1504 sh -c node dist/src/services/worker/nuq-prefetch-worker.js
+46 40 3002 85856 node dist/src/services/worker/nuq-prefetch-worker.js
+48 1 3002 1504 sh -c node dist/src/services/worker/nuq-reconciler-worker.js
+59 48 3002 352096 node dist/src/services/worker/nuq-reconciler-worker.js
+### cgroups
+nuq-postgres memory.max=671088640 memory.swap.max=0 cpu.max=75000/100000 pids.max=128 memory.current=138067968 memory.peak=162168832 anon=15695872 file=115654656 shmem=97206272 pids.current=10
+redis memory.max=335544320 memory.swap.max=max cpu.max=35000/100000 pids.max=64 memory.current=8732672 memory.peak=16400384 anon=6111232 file=884736 shmem=0 pids.current=6
+rabbitmq memory.max=536870912 memory.swap.max=0 cpu.max=50000/100000 pids.max=256 memory.current=138313728 memory.peak=250396672 anon=106627072 file=19120128 shmem=14041088 pids.current=29
+firecrawl-core memory.max=2415919104 memory.swap.max=0 cpu.max=225000/100000 pids.max=512 memory.current=1800355840 memory.peak=1898102784 anon=1657618432 file=180224 shmem=0 pids.current=93
+access-gateway memory.max=167772160 memory.swap.max=0 cpu.max=30000/100000 pids.max=64 memory.current=16957440 memory.peak=27901952 anon=13287424 file=49152 shmem=0 pids.current=7
+fixture memory.max=67108864 memory.swap.max=max cpu.max=10000/100000 pids.max=32 memory.current=18694144 memory.peak=39223296 anon=15925248 file=557056 shmem=0 pids.current=11
+retrieval-service memory.max=469762048 memory.swap.max=0 cpu.max=60000/100000 pids.max=128 memory.current=33669120 memory.peak=67321856 anon=30359552 file=229376 shmem=0 pids.current=11
+browser-worker memory.max=1610612736 memory.swap.max=0 cpu.max=150000/100000 pids.max=512 memory.current=137379840 memory.peak=1610612736 anon=127172608 file=2555904 shmem=1376256 pids.current=60
+fixture-m2 memory.max=201326592 memory.swap.max=0 cpu.max=20000/100000 pids.max=32 memory.current=17285120 memory.peak=36601856 anon=14893056 file=16384 shmem=0 pids.current=11
+### host_memory
+MemTotal:        8255888 kB
+MemAvailable:    5256544 kB
+SwapTotal:       2097136 kB
+SwapFree:        2097104 kB
+### published
+access-gateway 3300/tcp -> 127.0.0.1:3380
+--- host listeners (ss -Hltnup)
+tcp 0.0.0.0:1883 users:(("mosquitto",pid=959,fd=5))
+tcp 0.0.0.0:22 users:(("sshd",pid=973,fd=6))
+tcp 0.0.0.0:443 users:(("pihole-FTL",pid=966,fd=36))
+tcp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=22))
+tcp 0.0.0.0:80 users:(("pihole-FTL",pid=966,fd=35))
+tcp 0.0.0.0:8080 users:(("python",pid=978,fd=3))
+tcp 0.0.0.0:9001 users:(("mosquitto",pid=959,fd=9))
+tcp 127.0.0.1:3380 users:(("docker-proxy",pid=721693,fd=8))
+tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=7),("systemd",pid=1,fd=183))
+tcp [::]:22 users:(("sshd",pid=973,fd=7))
+tcp [::]:443 users:(("pihole-FTL",pid=966,fd=38))
+tcp [::]:53 users:(("pihole-FTL",pid=966,fd=24))
+tcp [::]:80 users:(("pihole-FTL",pid=966,fd=37))
+udp *:123 users:(("pihole-FTL",pid=966,fd=44))
+udp *:33469 users:(("avahi-daemon",pid=592,fd=15))
+udp *:53 users:(("pihole-FTL",pid=966,fd=23))
+udp *:5353 users:(("avahi-daemon",pid=592,fd=13))
+udp 0.0.0.0:123 users:(("pihole-FTL",pid=966,fd=43))
+udp 0.0.0.0:35401 users:(("pihole-FTL",pid=966,fd=41))
+udp 0.0.0.0:37382 users:(("avahi-daemon",pid=592,fd=14))
+udp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=21))
+udp 0.0.0.0:5353 users:(("avahi-daemon",pid=592,fd=12))
+udp 0.0.0.0:59635 users:(("pihole-FTL",pid=966,fd=42))
+udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=8),("systemd",pid=1,fd=184))
+### networks
+fcpi_access internal=false subnet=10.231.0.0/24 gateway_mode_ipv4=nat bridge=fcpi-access ipv6=false members=fcpi-access-gateway-1
+fcpi_api internal=true subnet=10.231.4.0/24 gateway_mode_ipv4=isolated bridge=fcpi-api ipv6=false members=fcpi-access-gateway-1,fcpi-firecrawl-core-1
+fcpi_core internal=true subnet=10.231.1.0/24 gateway_mode_ipv4=isolated bridge=fcpi-core ipv6=false members=fcpi-firecrawl-core-1,fcpi-nuq-postgres-1,fcpi-rabbitmq-1,fcpi-redis-1,fcpi-retrieval-service-1
+fcpi_fixture internal=true subnet=10.231.3.0/24 gateway_mode_ipv4=isolated bridge=fcpi-fixture ipv6=false members=fcpi-fixture-1,fcpi-fixture-m2-1,fcpi-retrieval-service-1
+fcpi_acquire internal=true subnet=10.231.5.0/24 gateway_mode_ipv4=isolated bridge=fcpi-acquire ipv6=false members=fcpi-firecrawl-core-1,fcpi-retrieval-service-1
+fcpi_browser internal=true subnet=10.231.2.0/24 gateway_mode_ipv4=isolated bridge=fcpi-browser ipv6=false members=fcpi-browser-worker-1,fcpi-retrieval-service-1
+fcpi_egress internal=false subnet=10.231.6.0/24 gateway_mode_ipv4=nat bridge=fcpi-egress ipv6=false members=fcpi-retrieval-service-1
+bridge fcpi-access addresses=10.231.0.1/24
+bridge fcpi-api addresses=
+bridge fcpi-core addresses=
+bridge fcpi-fixture addresses=
+bridge fcpi-acquire addresses=
+bridge fcpi-browser addresses=
+bridge fcpi-egress addresses=10.231.6.1/24
+### core_health
+{"utc":"2026-09-26T04:16:13.135Z","api_liveness":{"status":200,"body":"{\"status\":\"ok\"}"},"api_readiness":{"status":200,"body":"{\"status\":\"ok\"}"},"queue_worker":{"status":200,"body":"{\"ok\":true}"},"extract_worker":{"status":200,"body":"{\"ok\":true}"},"nuq_worker_0":{"status":200,"body":"OK"},"nuq_reconciler":{"status":200,"body":"OK"},"nuq_prefetch_worker":{"status":200,"body":"OK"}}
+### postgres_health
+select_1=1
+version=PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+pg_cron_launcher_backends=1
+cron_jobs=36
+cron_runs_last_10min_succeeded=158
+cron_runs_last_10min_failed=0
+connections=10 max_connections=32
+cron.database_name=postgres source=configuration file
+data_directory=/var/lib/postgresql/data source=override
+fsync=on source=command line
+full_page_writes=on source=command line
+max_connections=32 source=command line
+max_wal_size=1GB source=command line
+min_wal_size=80MB source=command line
+shared_buffers=128MB source=command line
+synchronous_commit=on source=command line
+work_mem=4MB source=command line
+process_uid=5432
+### redis_health
+health_user_ping=PONG
+health_user_info_denied=NOPERM User health has no permissions to run the 'info' command
+no_auth_ping=NOAUTH Authentication required.
+rdb_changes_since_last_save:5642
+aof_enabled:1
+aof_last_bgrewrite_status:ok
+aof_last_write_status:ok
+used_memory_human:1.60M
+maxmemory_human:192.00M
+maxmemory_policy:noeviction
+mem_allocator:jemalloc-5.3.0
+redis_version:8.10.2
+arch_bits:64
+### rabbitmq_health
+ping=Ping succeeded 
+check_running=ok
+check_local_alarms=ok
+server_version=4.3.6
+node=rabbit@rabbitmq
+memory_high_watermark_bytes=268435456
+users=fcpi[] 
+enabled_plugins=rabbitmq_management_agent rabbitmq_prometheus rabbitmq_web_dispatch 
+cookie=5672:5672 400
+process_uid=5672
+name	type	durable	auto_delete	exclusive	messages	consumers
+extract.dlq	quorum	true	false		0	1
+extract.jobs	quorum	true	false		0	1
+nuq.queue_scrape.prefetch	quorum	true	false		0	0
+nuq.queue_crawl_finished.prefetch	quorum	true	false		0	0
+fcpi.m1.sentinel	quorum	true	false		1	0
+### gateway_tests
+missing_token status=401 www_authenticate=Bearer_realm="fcpi" body={"success":null,"error":"unauthorized","code":null,"markdown":null,"statusCode":null}
+wrong_token status=401 www_authenticate=Bearer_realm="fcpi" body={"success":null,"error":"unauthorized","code":null,"markdown":null,"statusCode":null}
+missing_token_admin status=401 www_authenticate=Bearer_realm="fcpi" body={"success":null,"error":"unauthorized","code":null,"markdown":null,"statusCode":null}
+valid_token_admin status=404 www_authenticate= body={"success":null,"error":"not_found","code":null,"markdown":null,"statusCode":null}
+valid_token_unlisted_route status=404 www_authenticate= body={"success":null,"error":"not_found","code":null,"markdown":null,"statusCode":null}
+valid_token_non_fixture_target status=403 www_authenticate= body={"success":null,"error":"target_not_permitted","code":null,"markdown":null,"statusCode":null}
+valid_token_internal_target status=403 www_authenticate= body={"success":null,"error":"target_not_permitted","code":null,"markdown":null,"statusCode":null}
+valid_token_fixture_scrape status=200 www_authenticate= body={"success":true,"error":null,"code":null,"markdown":"b64:U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","statusCode":200}
+valid_token_m2_js_scrape status=200 www_authenticate= body={"success":true,"error":null,"code":null,"markdown":"b64:UmVuZGVyZWQgYnkgc2NyaXB0Cj09PT09PT09PT09PT09PT09PQoKVGhpcyBhcnRpY2xlIGlzIHdyaXR0ZW4gaW50byB0aGUgcGFnZSBieSBKYXZhU2NyaXB0IGFmdGVyIGl0IGxvYWRzLgoKQSBzdGF0aWMgZmV0Y2ggb2YgdGhpcyBwYWdlIHNlZXMgb25seSBhbiBlbXB0eSBtYWluIGVsZW1lbnQgYW5kIGEgbm9zY3JpcHQgbm90aWNlLCBzbyB0aGUgcmV0cmlldmFsIHNlcnZpY2UgbXVzdCBjbGFzc2lmeSBpdCBhcyBhIEpTIHNoZWxsIGFuZCByZW5kZXIgaXQgaW4gdGhlIGJyb3dzZXIuCgpTZW50aW5lbDogKipmY3BpLW0yLWpzLTVjMWUqKg==","statusCode":200}
+### direct_scrape
+{"utc_start":"2026-09-26T04:16:34.741Z","endpoint":"v2","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0dbed-dffd-7061-a61a-852da793d8ed","source_status":200,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":114}
+### retrieval_ready
+200 {"ok":true,"store":true,"local_networks":true,"browser":"up"}
+### browser_health
+200 {"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":1,"launches":2,"busy":false}
+### permits
+browser 0 t
+url 0 t
+url 1 t
+end
