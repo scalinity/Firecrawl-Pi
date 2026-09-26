@@ -6,7 +6,7 @@
 // record to be there (an absent one fails, it does not pass vacuously); every negative result is read
 // beside its positive control; each check's `expected` names what it compares.
 //   node scripts/m3/verify.mjs [CHECK_ID …]
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { execFileSync } from "node:child_process";
 import { ROOT, sha256, sha256File, repoState, sections, git, kv } from "../m0/lib.mjs";
@@ -677,19 +677,26 @@ const checks = {
       return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; backend=${ts.backend}; serve=${JSON.stringify(web)}; TLS ${w?.tls_protocol} authorized=${w?.tls_authorized} issuer=${w?.cert_issuer_org}; with token=${w?.status} without=${n?.status} foreign host=${h?.status}; tailnet ports=${tp.map((r) => `${r.port}:${r.result}`).join(",")}` };
     } },
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
-    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to a later milestone), cites only commits that exist, and holds no absolute local path",
+    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to M4 or later), and gives every finding an earlier review deferred to M3 (CLAUDE.md §30) a row of its own with such an outcome, cites only commits that exist, and holds no absolute local path",
     run() {
       const text = read(`${EV}review/REVIEW.md`);
       const rows = text.split("\n").filter((l) => /^\| [A-Z]{1,2}\d+ \|/.test(l)).map((l) => l.split(" | "));
-      const bad = rows.filter((c) => !/^(Fixed|Rejected, with the evidence|Deferred to M\d|Partly fixed, partly rejected)/.test(c[3] ?? "")).map((c) => c[0].slice(2));
+      // A deferral names a later milestone (M4-M9); M3's own findings cannot be deferred to M3 or earlier.
+      const bad = rows.filter((c) => !/^(Fixed|Rejected, with the evidence|Deferred to M[4-9]\b|Partly fixed, partly rejected)/.test(c[3] ?? "")).map((c) => c[0].slice(2));
+      // Findings earlier reviews deferred to M3 (CLAUDE.md §30): each has a row "| M<n> <id> | finding |
+      // outcome | commits |" here, with a recognised outcome, a fix citing its commits.
+      const carried = ["M0", "M1", "M2"].flatMap((m) => { const dir = `evidence/${m}/review`;
+        return has(dir) ? readdirSync(resolve(ROOT, dir)).filter((f) => f.endsWith(".md")).flatMap((f) => read(`${dir}/${f}`).split("\n").filter((l) => /^\| [A-Z]{1,2}\d+ \|/.test(l) && /\| Deferred to M3\b/.test(l)).map((l) => `${m} ${l.split(" | ")[0].slice(2)}`)) : []; });
+      const carriedRows = text.split("\n").filter((l) => /^\| M\d [A-Z]{1,2}\d+ \|/.test(l)).map((l) => l.split(" | "));
+      const carriedBad = carried.filter((id) => { const r = carriedRows.find((c) => c[0] === `| ${id}`); return !r || !/^(Fixed|Rejected, with the evidence|Deferred to M[4-9]\b)/.test(r[2] ?? "") || (/^Fixed/.test(r[2]) && !/`[0-9a-f]{7,40}`/.test(r[3] ?? "")); });
       const listedIds = [...text.matchAll(/^\s*\d+\. \*\*([CWS]\d+) —/gm)].map((m) => m[1]);
       const uncovered = listedIds.filter((id) => !rows.some((c) => c[0] === `| ${id}`));
       const uncited = rows.filter((c) => /^Fixed/.test(c[3] ?? "") && !/`[0-9a-f]{7,40}`/.test(c[4] ?? "")).map((c) => c[0].slice(2));
       const commits = [...new Set(rows.flatMap((c) => [...(c[4] ?? "").matchAll(/`([0-9a-f]{7,40})`/g)].map((m) => m[1])))];
       const missing = commits.filter((c) => { try { git("cat-file", "-e", `${c}^{commit}`); return false; } catch { return true; } });
       const local = /\/(private\/tmp|Users\/[^\/\s]+|home\/[^\/\s]+)\//.test(text);
-      const ok = rows.length > 0 && listedIds.length === rows.length && uncovered.length === 0 && uncited.length === 0 && bad.length === 0 && missing.length === 0 && !local;
-      return { ok, actual: `findings listed=${listedIds.length}, rows=${rows.length}, without a row=${uncovered.join(",") || "none"}; fixed without a commit=${uncited.join(",") || "none"}; without a recognised outcome=${bad.join(",") || "none"}; commits cited=${commits.length}, missing=${missing.join(",") || "none"}; absolute local path=${local}` };
+      const ok = rows.length > 0 && listedIds.length === rows.length && uncovered.length === 0 && uncited.length === 0 && bad.length === 0 && missing.length === 0 && !local && carried.length > 0 && carriedBad.length === 0;
+      return { ok, actual: `carried over from earlier reviews=${carried.join(",")}, without a recognised outcome=${carriedBad.join(",") || "none"}; findings listed=${listedIds.length}, rows=${rows.length}, without a row=${uncovered.join(",") || "none"}; fixed without a commit=${uncited.join(",") || "none"}; without a recognised outcome=${bad.join(",") || "none"}; commits cited=${commits.length}, missing=${missing.join(",") || "none"}; absolute local path=${local}` };
     } },
 };
 
