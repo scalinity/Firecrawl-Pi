@@ -36,7 +36,7 @@ let browser = null, launchedAt = 0, pagesServed = 0, busy = false, launches = 0;
 
 async function launch() {
   const t = Date.now();
-  browser = await chromium.launch({
+  const b = await chromium.launch({
     headless: true,
     chromiumSandbox: true,
     // Each context names its own proxy (the attempt's credential); Chromium needs a launch-level
@@ -45,9 +45,12 @@ async function launch() {
     args: ["--force-webrtc-ip-handling-policy=disable_non_proxied_udp", "--webrtc-ip-handling-policy=disable_non_proxied_udp"],
     timeout: 30000,
   });
+  browser = b;
   launchedAt = Date.now(); pagesServed = 0; launches++;
-  browser.on("disconnected", () => { log({ event: "browser_disconnected" }); browser = null; });
-  log({ event: "browser_launched", version: browser.version(), ms: Date.now() - t, launches });
+  // Only this instance's own disconnect clears it: a retired browser that disconnects late must not
+  // clear its successor (review finding W12).
+  b.on("disconnected", () => { log({ event: "browser_disconnected" }); if (browser === b) browser = null; });
+  log({ event: "browser_launched", version: b.version(), ms: Date.now() - t, launches });
 }
 
 // Every Chromium process in this container is this worker's; after a failed close or a crash they
@@ -142,10 +145,14 @@ async function render(r, signal) {
   // A context never outlives its deadline or its caller: past either, the context is closed from
   // here, and past the grace period the whole browser is retired.
   let expired = false, cancelled = false, crashed = false;
-  const closeNow = async () => {
+  // One close per render, shared by the deadline, the caller's abort and the render's own end: the
+  // render does not return (and the worker stays busy) until it, and any retire it needs, has
+  // finished, so a late retire cannot kill the next render's browser (review finding W12).
+  let closing = null;
+  const closeNow = () => (closing ??= (async () => {
     const closed = await Promise.race([context.close().then(() => true, () => true), new Promise((res) => setTimeout(() => res(false), CLOSE_GRACE_MS))]);
     if (!closed) await retire("context did not close");
-  };
+  })());
   const killer = setTimeout(() => { expired = true; closeNow(); }, Math.max(deadline - Date.now(), 1));
   const onAbort = () => { cancelled = true; clearTimeout(killer); closeNow(); };
   if (signal?.aborted) onAbort(); else signal?.addEventListener("abort", onAbort, { once: true });
@@ -191,8 +198,7 @@ async function render(r, signal) {
     clearTimeout(killer);
     signal?.removeEventListener("abort", onAbort);
     pagesServed++;
-    const closed = await Promise.race([context.close().then(() => true, () => true), new Promise((res) => setTimeout(() => res(false), CLOSE_GRACE_MS))]);
-    if (!closed) await retire("context did not close");
+    await closeNow();
   }
 }
 
