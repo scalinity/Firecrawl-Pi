@@ -55,7 +55,7 @@ try {
   const key = `sdk-${Date.now()}`;
   const b1 = await fc.startBatchScrape([`${FX}/p05`, `${FX}/p06`], { formats: ["markdown"], idempotencyKey: key });
   const b2 = await fc.startBatchScrape([`${FX}/p05`, `${FX}/p06`], { formats: ["markdown"], idempotencyKey: key });
-  out("batch", { case: "start_twice_same_key", same_id: b1.id === b2.id, url_on_private_origin: String(b1.url).startsWith(`${ORIGIN}/v2/batch/scrape/`) });
+  out("batch", { case: "start_twice_same_key", id: b2.id ?? null, first_id: b1.id ?? null, url_on_private_origin: String(b1.url).startsWith(`${ORIGIN}/v2/batch/scrape/`) });
   let bs;
   for (let i = 0; i < 300; i++) { bs = await fc.getBatchScrapeStatus(b1.id); if (["completed", "failed", "cancelled"].includes(bs.status)) break; await new Promise((r) => setTimeout(r, 1000)); }
   out("batch", { case: "status", status: bs.status, docs: bs.data.length, sentinels: bs.data.map((d) => (d.markdown?.match(/fcpi-m3-p0[56]-[0-9a-f]{4}/) ?? [null])[0]).sort() });

@@ -48,6 +48,11 @@ function records(path) {
 const E = (name) => records(`${RAW}e2e-${name}.txt`);
 const one = (recs, c) => (recs ?? []).find((r) => r.case === c) ?? null;
 const endOk = (e) => e.end?.[0]?.exit === 0 && !e.error;
+// Ids recorded side by side: the same job means two equal UUIDs, another job two different UUIDs, so a
+// missing id (two undefined values compare equal) passes neither.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const sameId = (r) => !!r && UUID_RE.test(r.id ?? "") && r.id === r.first_id;
+const otherId = (r) => !!r && UUID_RE.test(r.id ?? "") && UUID_RE.test(r.first_id ?? "") && r.id !== r.first_id;
 const sorted = (a) => [...a].sort();
 const GRAPH = [`${FX}/`, ...Array.from({ length: 11 }, (_, i) => `${FX}/p${String(i + 1).padStart(2, "0")}`)];
 const MAP12 = [FX, ...GRAPH.slice(1)];
@@ -235,7 +240,7 @@ const checks = {
       return { ok, actual: `pages=${JSON.stringify(p?.pages)}; next URLs on the private origin with the external id=${nextsOk}; unique documents=${new Set(shas).size}; same documents after expiry and recreation=${same}; internal host in the transcript=${internal}` };
     } },
   A03: { name: "credentials-missing-invalid-revoked-scope-owner", inputs: [`${RAW}e2e-auth.txt`],
-    expected: "missing, unknown, Basic-scheme and empty tokens get 401 with the gateway's own challenge (Bearer realm=\"fcpi\", never a firecrawl.dev one) while a valid token gets 200; a read-only token gets 403 INSUFFICIENT_SCOPE on scrape, map, crawl, batch and cancel and 200 on status; on five job routes another principal gets exactly the unknown-id answer (same status and body hash), with and without spoofed identity headers, while the owner gets 200 and the other principal's job list excludes the job; a token revoked on the Pi is refused within 3 s without a gateway restart, having worked just before",
+    expected: "missing, unknown, Basic-scheme and empty tokens get 401 with the gateway's own challenge (Bearer realm=\"fcpi\", never a firecrawl.dev one) while a valid token gets 200; a read-only token gets 403 INSUFFICIENT_SCOPE on scrape, map, crawl, batch and cancel and 200 on status; on five job routes another principal gets exactly the unknown-id answer (same status and body hash), with and without spoofed identity headers, while the owner gets 200 and the other principal's job list (a list) excludes the job that the owner's own list holds (the control); a token revoked on the Pi is refused within 3 s without a gateway restart, having worked just before",
     run() {
       const a = E("auth");
       const un = a.unauthenticated ?? [];
@@ -244,7 +249,8 @@ const checks = {
       const scOk = ["read_token_submits_crawl", "read_token_scrapes", "read_token_maps", "read_token_cancels", "read_token_submits_batch"].every((c) => one(sc, c)?.status === 403 && one(sc, c)?.code === "INSUFFICIENT_SCOPE") && one(sc, "read_token_reads_status_control")?.status === 200;
       const ow = (a.owner ?? []).filter((r) => / \//.test(r.case ?? ""));
       const owOk = ow.length === 5 && ow.every((r) => r.beta.status === 404 && r.beta.body_sha256 === r.unknown.body_sha256 && r.beta_spoofed_headers.body_sha256 === r.unknown.body_sha256 && r.beta.status === r.unknown.status) &&
-        one(a.owner, "alpha_reads_own_control")?.status === 200 && one(a.owner, "beta_job_list")?.contains_alpha_job === false && one(a.owner, "beta_job_list")?.status === 200;
+        one(a.owner, "alpha_reads_own_control")?.status === 200 && one(a.owner, "beta_job_list")?.contains_alpha_job === false && one(a.owner, "beta_job_list")?.status === 200 && one(a.owner, "beta_job_list")?.is_list === true &&
+        one(a.owner, "alpha_job_list_control")?.status === 200 && one(a.owner, "alpha_job_list_control")?.is_list === true && one(a.owner, "alpha_job_list_control")?.contains_alpha_job === true;
       const rv = a.revoke ?? [];
       const restart = one(rv, "gateway_restarts_during")?.restart_count ?? "";
       const rvOk = one(rv, "before")?.status === 200 && one(rv, "revoked_on_pi")?.result === "revoked m3rev" && one(rv, "after")?.status === 401 && one(rv, "after").ms_until_refused <= 3000 && /^0 /.test(restart);
@@ -253,14 +259,14 @@ const checks = {
       return { ok, actual: `unauthenticated=${unOk}; scopes=${scOk}; owner isolation over ${ow.length} routes=${owOk}; revocation refused after ${one(rv, "after")?.ms_until_refused} ms (restarts ${restart.split(" ")[0]})=${rvOk}; no Cloud challenge=${noCloud}` };
     } },
   A04: { name: "request-limits-and-overload", inputs: [`${RAW}e2e-sync.txt`, `${RAW}e2e-overload.txt`, `${RAW}e2e-auth.txt`],
-    expected: "a body over 1 MiB is 413, a 26-URL batch, a crawl limit of 201 or depth 4, a map limit of 1001 and a waitFor of 15001 are 400, headers over 16 KiB are 431; of six held synchronous scrapes four run and two get 503 OVERLOADED with Retry-After, and a later one runs; with 430 page units open a 200-page crawl is 503 OVERLOADED, and with 20 open jobs the next is 503 OVERLOADED, both with Retry-After, and every job queued for the test was cancelled without reaching the core; past the failure budget unknown tokens get 429 while a valid token still gets 200",
+    expected: "a body over 1 MiB is 413, a 26-URL batch, a crawl limit of 201 or depth 4, a map limit of 1001 and a waitFor of 15001 are 400, headers over 16 KiB are 431; of six held synchronous scrapes four run and two get 503 OVERLOADED, each with a positive Retry-After, and a later one runs; with 430 page units open a 200-page crawl is 503 OVERLOADED, and with 20 open jobs the next is 503 OVERLOADED, both with Retry-After, and every job queued for the test was cancelled without reaching the core; past the failure budget unknown tokens get 429 while a valid token still gets 200",
     run() {
       const sy = E("sync"), ov = E("overload"), au = E("auth");
       const L = sy.limits ?? [], st = (c) => one(L, c)?.status;
       const limits = st("body_over_1mib") === 413 && ["batch_26_urls", "crawl_limit_201", "crawl_depth_4", "map_limit_1001", "wait_for_15001"].every((c) => st(c) === 400) && st("header_over_16kib") === 431;
       const so = (sy.sync_overload ?? []).find((r) => r.statuses), after = one(sy.sync_overload, "after_release");
       const sync = so && so.statuses.filter((x) => x === 200).length === 4 && so.statuses.filter((x) => x === 503).length === 2 && so.codes.filter((c) => c === "OVERLOADED").length === 2 &&
-        so.retry_after.filter(Boolean).every((x) => Number(x) > 0) && after?.status === 200;
+        so.retry_after.filter((_, i) => so.statuses[i] === 503).length === 2 && so.retry_after.filter((_, i) => so.statuses[i] === 503).every((x) => Number(x) > 0) && after?.status === 200;
       const A = ov.admission ?? [];
       const units = one(A, "units_over_500"), jobs = one(A, "jobs_over_20"), clean = one(A, "cleanup");
       const adm = units?.status === 503 && units.code === "OVERLOADED" && units.open_units === 430 && Number(units.retry_after) > 0 && jobs?.status === 503 && jobs.code === "OVERLOADED" && jobs.open_jobs === 20 &&
@@ -301,11 +307,11 @@ const checks = {
       const seq2 = (f2?.events ?? []).map((e) => e.to).slice(0, 4).join(">");
       const seq3 = (f3?.events ?? []).map((e) => e.to).slice(0, 6).join(">");
       const k2ok = one(k2, "gateway_killed")?.client?.acknowledged === false && one(k2, "core_created_it_meanwhile")?.marker_groups === 1 && seq2 === "RECEIVED>SUBMITTING>SUBMISSION_UNCERTAIN>QUEUED" &&
-        f2.events.some((e) => /reconciled/.test(e.detail)) && one(k2, "client_retries_same_key")?.same_id === true && f2?.state === "SUCCEEDED" && f2.marker_groups === 1;
+        f2.events.some((e) => /reconciled/.test(e.detail)) && sameId(one(k2, "client_retries_same_key")) && f2?.state === "SUCCEEDED" && f2.marker_groups === 1;
       const k3ok = one(k3, "gateway_killed")?.client?.acknowledged === false && one(k3, "core_killed_while_paused")?.core_state === "exited" && one(k3, "core_back")?.marker_groups === 0 &&
         d3?.ledger_state === "SUBMISSION_UNCERTAIN" && d3.native_status?.status === 503 && d3.native_status.code === "SUBMISSION_UNCERTAIN" && d3.native_status.receipt === `${ORIGIN}/platform/v1/jobs/${one(k3, "in_flight")?.id}` &&
         d3.client_retry?.status === 503 && seq3 === "RECEIVED>SUBMITTING>SUBMISSION_UNCERTAIN>RECEIVED>SUBMITTING>QUEUED" && f3.events.some((e) => /180000 ms after it was sent/.test(e.detail)) && f3?.state === "SUCCEEDED" && f3.marker_groups === 1;
-      return { ok: endOk(c) && k2ok && k3ok, actual: `K2 ${seq2} final ${f2?.state} upstream=${f2?.marker_groups} retry same id=${one(k2, "client_retries_same_key")?.same_id}; K3 ${seq3} native=${d3?.native_status?.status} ${d3?.native_status?.code} final ${f3?.state} upstream=${f3?.marker_groups}` };
+      return { ok: endOk(c) && k2ok && k3ok, actual: `K2 ${seq2} final ${f2?.state} upstream=${f2?.marker_groups} retry same id=${sameId(one(k2, "client_retries_same_key"))}; K3 ${seq3} native=${d3?.native_status?.status} ${d3?.native_status?.code} final ${f3?.state} upstream=${f3?.marker_groups}` };
     } },
   J03: { name: "acknowledged-jobs-tracked-through-crashes-k4-k5", inputs: [`${RAW}e2e-crash.txt`],
     expected: "an acknowledged crawl running when the gateway is killed is tracked by the next gateway to SUCCEEDED with all 6 pages archived; one running when the core is killed reaches an explicit end state (here SUCCEEDED) after NuQ requeued the interrupted page (at least one stalled page, the positive control that work was cut), no page above 4 attempts, and one upstream job",
@@ -317,14 +323,16 @@ const checks = {
       return { ok, actual: `K4 ${k4?.state} archived=${k4?.archived}; K5 ${k5?.state} archived=${k5?.archived} stalled pages=${k5?.stalled_pages} attempts per page=${JSON.stringify(k5?.attempts_per_page)}` };
     } },
   J04: { name: "idempotent-requests-and-conflicting-reuse", inputs: [`${RAW}e2e-jobs.txt`, `${RAW}sdk-compat.txt`, `${RAW}e2e-crash.txt`],
-    expected: "a repeated crawl with the same idempotency key and body (also with its keys reordered) returns the same id; the same key with another body is 409 IDEMPOTENCY_CONFLICT; another principal's use of the key makes its own job; one upstream job carries the key; a batch retried under its key returns the same id, also through the official client; the crash tests' client retries under their keys return the ids they were given",
+    expected: "a repeated crawl with the same idempotency key and body (also with its keys reordered) returns the same id; the same key with another body is 409 IDEMPOTENCY_CONFLICT; another principal's use of the key makes its own job; one upstream job carries the key; a batch retried under its key returns the same id, also through the official client; the crash tests' client retries under their keys return the ids they were given; each \"same id\" is two recorded UUIDs that are equal, and the official client's run ended cleanly",
     run() {
       const jb = E("jobs"), I = jb.idempotency ?? [], cr = E("crash");
       const sk = records(`${RAW}sdk-compat.txt`);
-      const ok = one(I, "same_key_same_body")?.same_id === true && one(I, "same_key_reordered_body")?.same_id === true && one(I, "same_key_other_body")?.status === 409 && one(I, "same_key_other_body")?.code === "IDEMPOTENCY_CONFLICT" &&
-        one(I, "other_principal_same_key")?.status === 200 && one(I, "other_principal_same_key")?.same_id === false && one(I, "upstream_groups_for_key")?.marker_groups === 1 && one(I, "upstream_groups_for_key")?.beta_marker_groups === 0 &&
-        one(jb.batch, "same_key_again")?.same_id === true && sk.batch?.find((r) => r.case === "start_twice_same_key")?.same_id === true && one(cr.k2_answer_lost, "client_retries_same_key")?.same_id === true;
-      return { ok, actual: `same=${one(I, "same_key_same_body")?.same_id} reordered=${one(I, "same_key_reordered_body")?.same_id} other body=${one(I, "same_key_other_body")?.status} other principal new=${one(I, "other_principal_same_key")?.same_id === false}; upstream jobs for the key=${one(I, "upstream_groups_for_key")?.marker_groups}; batch retry same=${one(jb.batch, "same_key_again")?.same_id}; official client same=${sk.batch?.find((r) => r.case === "start_twice_same_key")?.same_id}` };
+      const skRetry = sk.batch?.find((r) => r.case === "start_twice_same_key");
+      const same = { same_body: sameId(one(I, "same_key_same_body")), reordered: sameId(one(I, "same_key_reordered_body")), batch: sameId(one(jb.batch, "same_key_again")),
+        official_client: endOk(sk) && sameId(skRetry), crash_retry: sameId(one(cr.k2_answer_lost, "client_retries_same_key")) };
+      const ok = Object.values(same).every(Boolean) && one(I, "same_key_other_body")?.status === 409 && one(I, "same_key_other_body")?.code === "IDEMPOTENCY_CONFLICT" &&
+        one(I, "other_principal_same_key")?.status === 200 && otherId(one(I, "other_principal_same_key")) && one(I, "upstream_groups_for_key")?.marker_groups === 1 && one(I, "upstream_groups_for_key")?.beta_marker_groups === 0;
+      return { ok, actual: `same id where expected=${JSON.stringify(same)}; other body=${one(I, "same_key_other_body")?.status}; other principal got its own job=${otherId(one(I, "other_principal_same_key"))}; upstream jobs for the key=${one(I, "upstream_groups_for_key")?.marker_groups}` };
     } },
   J05: { name: "no-duplicate-logical-submission", inputs: [`${RAW}e2e-jobs.txt`, `${RAW}e2e-crash.txt`, `${RAW}e2e-cancel.txt`, `${RAW}e2e-overload.txt`],
     expected: "across every job the live tests submitted, each finished job has exactly one upstream job carrying its submission key, and each job cancelled while queued has none",

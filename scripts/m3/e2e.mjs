@@ -144,7 +144,10 @@ const PHASES = {
     }
     out("owner", { case: "alpha_reads_own_control", ...brief(await http("GET", `/v2/crawl/${id}`, { tok: "m3a" })) });
     const list = await http("GET", "/platform/v1/jobs?limit=100", { tok: "m3b" });
-    out("owner", { case: "beta_job_list", status: list.status, contains_alpha_job: (list.json?.jobs ?? []).some((j) => j.id === id), jobs: (list.json?.jobs ?? []).length });
+    out("owner", { case: "beta_job_list", status: list.status, is_list: Array.isArray(list.json?.jobs), contains_alpha_job: (list.json?.jobs ?? []).some((j) => j.id === id), jobs: (list.json?.jobs ?? []).length });
+    // The control: the same list route shows alpha the job, so its absence from beta's list means something.
+    const own = await http("GET", "/platform/v1/jobs?limit=100", { tok: "m3a" });
+    out("owner", { case: "alpha_job_list_control", status: own.status, is_list: Array.isArray(own.json?.jobs), contains_alpha_job: (own.json?.jobs ?? []).some((j) => j.id === id) });
     saveState({ ownerJob: id });
     // Revocation: m3rev works, is revoked on the Pi, and is refused within seconds, without a restart.
     out("revoke", { case: "before", ...brief(await http("GET", "/platform/v1/status", { tok: "m3rev" })) });
@@ -225,12 +228,13 @@ const PHASES = {
     out("crawl_graph", { case: "submit", ...brief(g), id: g.json?.id ?? null, url: g.json?.url ?? null });
     const id = g.json.id;
     const again = await post("crawl", { url: `${FX}/`, limit: 12, sitemap: "include" }, "m3a", { "x-idempotency-key": key });
-    out("idempotency", { case: "same_key_same_body", ...brief(again), id: again.json?.id ?? null, same_id: again.json?.id === id });
+    // Both ids are recorded, never a comparison: the verifier requires two equal UUIDs, so two missing ids cannot pass.
+    out("idempotency", { case: "same_key_same_body", ...brief(again), id: again.json?.id ?? null, first_id: id });
     const reordered = await post("crawl", { sitemap: "include", limit: 12, url: `${FX}/` }, "m3a", { "x-idempotency-key": key });
-    out("idempotency", { case: "same_key_reordered_body", ...brief(reordered), same_id: reordered.json?.id === id });
+    out("idempotency", { case: "same_key_reordered_body", ...brief(reordered), id: reordered.json?.id ?? null, first_id: id });
     out("idempotency", { case: "same_key_other_body", ...brief(await post("crawl", { url: `${FX}/`, limit: 11 }, "m3a", { "x-idempotency-key": key })) });
     const beta = await post("crawl", { url: `${FX}/`, limit: 12, sitemap: "include" }, "m3b", { "x-idempotency-key": key });
-    out("idempotency", { case: "other_principal_same_key", ...brief(beta), id: beta.json?.id ?? null, same_id: beta.json?.id === id });
+    out("idempotency", { case: "other_principal_same_key", ...brief(beta), id: beta.json?.id ?? null, first_id: id });
     if (beta.json?.id) out("idempotency", { case: "other_principal_job_cancelled", ...brief(await http("DELETE", `/v2/crawl/${beta.json.id}`, { tok: "m3b" })) });
     const done = await waitState(id, ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"]);
     out("crawl_graph", { case: "finished", state: done.state, archived: done.archived, completed: done.completed, total: done.total, upstream_id: done.upstreamId, submission_key: done.submissionKey,
@@ -251,7 +255,7 @@ const PHASES = {
     const b = await post("batch", body, "m3a", { "x-idempotency-key": bkey });
     out("batch", { case: "submit", ...brief(b), id: b.json?.id ?? null, invalidURLs: b.json?.invalidURLs ?? null, url: b.json?.url ?? null });
     const b2 = await post("batch", body, "m3a", { "x-idempotency-key": bkey });
-    out("batch", { case: "same_key_again", same_id: b2.json?.id === b.json.id, status: b2.status });
+    out("batch", { case: "same_key_again", ...brief(b2), id: b2.json?.id ?? null, first_id: b.json.id });
     const bdone = await waitState(b.json.id, ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"]);
     const bp = await pages("batch", b.json.id);
     const be = await http("GET", `/v2/batch/scrape/${b.json.id}/errors`, { tok: "m3a" });
@@ -340,7 +344,7 @@ const PHASES = {
     await gwStart();
     await waitState(k2id, ["QUEUED", "RUNNING", "SUCCEEDED", "PARTIAL"], 120000);
     const retry = await crawl(k2key);
-    out("k2_answer_lost", { case: "client_retries_same_key", ...brief(retry), same_id: retry.json?.id === k2id });
+    out("k2_answer_lost", { case: "client_retries_same_key", ...brief(retry), id: retry.json?.id ?? null, first_id: k2id });
     const k2done = await waitState(k2id, ["SUCCEEDED", "PARTIAL", "FAILED"]);
     out("k2_answer_lost", { case: "finished", state: k2done.state, archived: k2done.archived, marker_groups: markerGroups(k2id), events: events(k2id) });
 
