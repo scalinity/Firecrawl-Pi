@@ -1,0 +1,337 @@
+### broker_meta
+utc=2026-09-26T04:01:12.532Z source_commit=2cd4601a30dbcf2451f834368d8bd6f418fe6cc9
+core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+### broker_restart_policy_off
+core status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=no
+### broker_before
+rabbitmq=running healthy listen_queues=1 consumers=1
+{"case":"B01-before","started":"2026-09-26T04:01:14.536Z","http":200,"success":true,"error":null,"sentinels":["fcpi-m2-short-3b8e"],"ms":878}
+exec_exit=0
+after_before_scrape listen_queues=1 consumers=1
+### broker_broker_stop
+utc=2026-09-26T04:01:17.151Z
+rabbitmq=exited
+### broker_during
+{"case":"B01-during","started":"2026-09-26T04:01:23.635Z","http":200,"success":true,"error":null,"sentinels":["fcpi-m2-short-3b8e"],"ms":614}
+exec_exit=0
+core status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=no
+### broker_broker_start
+utc=2026-09-26T04:01:52.350Z outage_s=35
+healthy_utc=2026-09-26T04:02:02.922Z rabbitmq=running healthy
+### broker_consumers
+t+2s listen_queues=1 consumers=1
+### broker_after
+{"case":"B01-after","started":"2026-09-26T04:02:04.799Z","http":200,"success":true,"error":null,"sentinels":["fcpi-m2-short-3b8e"],"ms":687}
+exec_exit=0
+after_scrape listen_queues=1 consumers=1
+### broker_core_state
+core status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=no
+      1       0    1891 node dist/src/harness.js --start-docker
+     22       1    1891 sh -c node dist/src/index.js
+     23      22    1891 node dist/src/index.js
+     24       1    1891 sh -c node dist/src/services/queue-worker.js
+     25      24    1891 node dist/src/services/queue-worker.js
+     26       1    1891 sh -c node dist/src/services/extract-worker.js
+     30      26    1891 node dist/src/services/extract-worker.js
+     33       1    1891 sh -c node dist/src/services/worker/nuq-worker.js
+     34      33    1891 node dist/src/services/worker/nuq-worker.js
+     45       1    1891 sh -c node dist/src/services/worker/nuq-prefetch-worker.js
+     51      45    1891 node dist/src/services/worker/nuq-prefetch-worker.js
+     52       1    1891 sh -c node dist/src/services/worker/nuq-reconciler-worker.js
+     58      52    1891 node dist/src/services/worker/nuq-reconciler-worker.js
+### broker_restart_policy_restore
+core status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+### broker_core_log
+nuq-worker-0   2026-09-26 04:01:15 info [nuq-worker:]: Acquired job 
+nuq-worker-0   2026-09-26 04:01:15 info [nuq/rabbitmq:]: NuQ job sent 
+worker         2026-09-26 04:01:15 info [extract-worker:crawlFinishWorker]: Acquired job 
+nuq-prefetch-worker 2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender connection closed 
+nuq-worker-0   2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-worker-0   2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender connection closed 
+worker         2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender channel closed 
+worker         2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender connection closed 
+nuq-prefetch-worker 2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ sender connection closed 
+api            2026-09-26 04:01:17 info [nuq/rabbitmq:]: NuQ listener channel closed 
+worker         2026-09-26 04:01:17 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+worker         2026-09-26 04:01:17 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:17 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+nuq-prefetch-worker 2026-09-26 04:01:17 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+api            2026-09-26 04:01:17 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1638:16)"},"module":"nuq/rabbitmq
+nuq-worker-0   2026-09-26 04:01:17 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+nuq-worker-0   2026-09-26 04:01:17 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:17 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:17 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1638:16)"},"module":"nuq/rabbitmq
+nuq-worker-0   2026-09-26 04:01:18 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:18 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:18 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:18 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:18 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-worker-0   2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:19 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:20 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:20 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:20 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:20 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:20 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-worker-0   2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:21 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:22 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:22 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:22 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:22 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-worker-0   2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:23 warn [nuq:nuqWaitForJob]: NuQ listener unavailable, waiting by polling {"module":"nuq","method":"nuqWaitForJob","error":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node
+worker         2026-09-26 04:01:23 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:24 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:24 info [nuq-worker:]: Acquired job 
+nuq-worker-0   2026-09-26 04:01:24 warn [nuq/rabbitmq:]: NuQ sender not started {"module":"nuq/rabbitmq","scrapeId":"01a0dbdf-f909-73b9-8ed2-8c6e6cf075e3","zeroDataRetention":false}
+nuq-worker-0   2026-09-26 04:01:24 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:24 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:24 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:24 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:24 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-worker-0   2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:25 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:26 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:26 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:26 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:26 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:27 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:28 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:28 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:28 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:28 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:29 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:29 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:30 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:30 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:30 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:30 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:31 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:32 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:32 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:32 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:32 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:33 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:34 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:34 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:34 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:34 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:34 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:35 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:36 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:36 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:36 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:36 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:37 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:38 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:38 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:38 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:38 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:39 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:39 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:40 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:40 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:40 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:40 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:41 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:42 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:42 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:42 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:42 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:43 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:44 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:44 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:44 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:44 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:44 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:45 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:46 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:46 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:46 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:46 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:47 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:48 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:48 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:48 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:49 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:49 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dns:122:26)"},"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:50 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:50 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:50 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:50 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+nuq-prefetch-worker 2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (no
+worker         2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+worker         2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-3001,"code":"EAI_AGAIN","syscall":"getaddrinfo","hostname":"rabbitmq","name":"Error","message":"getaddrinfo EAI_AGAIN rabbitmq","stack":"Error: getaddrinfo EAI_AGAIN rabbitmq\n    at GetAddrInfoReqWrap.onlookupall [as oncomplete] (node:dn
+nuq-worker-0   2026-09-26 04:01:51 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:52 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:52 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:52 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:52 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+nuq-prefetch-worker 2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+worker         2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+worker         2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+nuq-worker-0   2026-09-26 04:01:53 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:54 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:54 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:54 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:54 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+api            2026-09-26 04:01:54 error [nuq/rabbitmq:]: Error in NuQ listener reconnect {"err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1638:16)"},"module":"nuq/rabbitmq
+worker         2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+nuq-prefetch-worker 2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+worker         2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+worker         2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+nuq-worker-0   2026-09-26 04:01:55 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:56 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:56 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:56 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:56 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-prefetch-worker 2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+nuq-prefetch-worker 2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect
+worker         2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+worker         2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender could not connect to RabbitMQ; continuing without it {"module":"nuq/rabbitmq","err":{"errno":-111,"code":"ECONNREFUSED","syscall":"connect","address":"10.231.1.3","port":5672,"name":"Error","message":"connect ECONNREFUSED 10.231.1.3:5672","stack":"Error: connect ECONNREFUSED 10.231.1.3:5672\n    at TCPConnectWrap.afterConnect [as 
+nuq-worker-0   2026-09-26 04:01:57 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:58 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:58 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:58 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:58 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+worker         2026-09-26 04:01:59 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:01:59 warn [nuq/rabbitmq:]: NuQ sender not started, falling back to postgres {"module":"nuq/rabbitmq"}
+nuq-worker-0   2026-09-26 04:02:05 info [nuq-worker:]: Acquired job 
+nuq-worker-0   2026-09-26 04:02:05 info [nuq/rabbitmq:]: NuQ job sent 
+### broker_health
+fixture-m2 running healthy restarts=0 policy=unless-stopped
+retrieval-service running healthy restarts=0 policy=unless-stopped
+browser-worker running healthy restarts=0 policy=unless-stopped
+firecrawl-core running healthy restarts=0 policy=unless-stopped
+access-gateway running healthy restarts=0 policy=unless-stopped
+nuq-postgres running healthy restarts=0 policy=unless-stopped
+rabbitmq running healthy restarts=0 policy=unless-stopped
+redis running healthy restarts=0 policy=unless-stopped
+fixture running healthy restarts=0 policy=unless-stopped
+### broker_end
+end
