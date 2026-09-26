@@ -116,6 +116,8 @@ if (groups.has("browser")) {
   // Short, and image-led, pages that carry a script: rendered once, and returned as the page.
   await scrape("C28-short-scripted", `${M2}/short-scripted.html`);
   await scrape("C29-gallery", `${M2}/gallery.html`);
+  // A script that builds a 30-million-character document: refused like a direct body over 25 MiB.
+  await scrape("C30-huge-dom", `${M2}/huge-dom.html`);
   await scrape("S15-subresources", `${M2}/subresources.html`);
   // The same page asked of the service directly, which returns each refused subresource by host.
   await acquire("S15b-subresources-direct", { logicalAcquisitionId: `m2-subres-${randomUUID()}`, url: `${M2}/subresources.html?direct=1` });

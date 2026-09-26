@@ -25,6 +25,9 @@ const RECYCLE_PAGES = Number(process.env.PI_BROWSER_RECYCLE_PAGES ?? 50);
 const RECYCLE_MS = Number(process.env.PI_BROWSER_RECYCLE_MS ?? 30 * 60 * 1000);
 const CLOSE_GRACE_MS = 5000;
 const CONTEXT_MAX_MS = 120000;
+// A rendered document is bounded like a direct body (25 MiB): a script can build any DOM without
+// touching the network, so the proxy's byte count alone does not limit it.
+const HTML_MAX_CHARS = 25 * 1024 * 1024;
 const tokenHash = Buffer.from(readFileSync(`${process.env.PI_CREDENTIALS_DIR}/browser_token_sha256`, "utf8").trim().replace(/^sha256:/, ""), "hex");
 const BUILD = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "browser", build: BUILD, ...o }));
@@ -164,6 +167,11 @@ async function render(r, signal) {
     const extras = wantsExtras ? await runHooks(page, r.hooks) : { screenshot: null, actions: null };
     const redirects = [];
     for (let q = response?.request().redirectedFrom(); q; q = q.redirectedFrom()) redirects.unshift({ url: q.url() });
+    // Measured inside the renderer, in this container's own cgroup, so an oversized document never
+    // crosses into the retrieval service or the core (review finding C3).
+    const maxHtml = Math.min(Number(r.limits?.maxHtmlChars) || HTML_MAX_CHARS, HTML_MAX_CHARS);
+    const chars = await page.evaluate(() => document.documentElement?.outerHTML.length ?? 0);
+    if (chars > maxHtml) return { ok: false, failure: { class: "SIZE_LIMIT", detail: `rendered document of ${chars} characters exceeds ${maxHtml}` }, subresources: counters, timings: { totalMs: Date.now() - started } };
     const html = await page.content();
     return {
       ok: true, finalUrl: page.url(), status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,

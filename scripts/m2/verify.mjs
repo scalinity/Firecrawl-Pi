@@ -355,11 +355,11 @@ const checks = {
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
       return { ok: bad.length === 0, actual: `failing=${bad.join(",") || "none"}` };
     } },
-  R04: { name: "size-time-and-redirect-limits", inputs: [`${RAW}rt-static.txt`],
-    expected: "a declared body over 25 MiB and a gzip bomb are SIZE_LIMIT; a target slower than the scrape timeout times out; three redirects are followed and twelve are TOO_MANY_REDIRECTS",
+  R04: { name: "size-time-and-redirect-limits", inputs: [`${RAW}rt-static.txt`, `${RAW}rt-browser.txt`],
+    expected: "a declared body over 25 MiB, a gzip bomb and a script-built document over 25 MiB are SIZE_LIMIT; a target slower than the scrape timeout times out; three redirects are followed and twelve are TOO_MANY_REDIRECTS",
     run() {
-      const st = phase("static"), c = st.cases;
-      const cond = { large: /SIZE_LIMIT/.test(c["C13-large"]?.error ?? ""), bomb: /SIZE_LIMIT/.test(c["C14-gzip-bomb"]?.error ?? ""), timeout: c["C15-slow-timeout"]?.http === 408,
+      const st = phase("static"), c = st.cases, br = phase("browser");
+      const cond = { hugeDom: /SIZE_LIMIT/.test(br.cases["C30-huge-dom"]?.error ?? ""), large: /SIZE_LIMIT/.test(c["C13-large"]?.error ?? ""), bomb: /SIZE_LIMIT/.test(c["C14-gzip-bomb"]?.error ?? ""), timeout: c["C15-slow-timeout"]?.http === 408,
         chain3: c["C16-chain-3"]?.success === true && c["C16-chain-3"].sentinels.includes("fcpi-m1-static-7f3a"), chain12: /TOO_MANY_REDIRECTS/.test(c["C17-chain-12"]?.error ?? "") };
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
       return { ok: bad.length === 0, actual: `failing=${bad.join(",") || "none"}` };

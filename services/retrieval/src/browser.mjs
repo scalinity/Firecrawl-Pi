@@ -3,6 +3,20 @@
 // session is closed when the render ends, whatever the outcome, and its counters (requests, bytes,
 // refused targets) come back with the result. The worker's failure is the browser tier's failure
 // only: direct HTTP never depends on it.
+// The body as text, or null (and the stream cancelled) once it passes cap bytes.
+async function readCapped(res, cap) {
+  if (Number(res.headers.get("content-length")) > cap) { await res.body?.cancel().catch(() => {}); return null; }
+  const reader = res.body.getReader(), chunks = [];
+  let n = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) return Buffer.concat(chunks).toString("utf8");
+    n += value.length;
+    if (n > cap) { await reader.cancel().catch(() => {}); return null; }
+    chunks.push(value);
+  }
+}
+
 export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy }) {
   async function health() {
     try {
@@ -21,7 +35,7 @@ export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy
         body: JSON.stringify({
           attemptId, url: target, deadlineMs: Math.max(remaining - 500, 1000), waitForMs: waitFor, userAgent,
           proxy: { server: proxyServer, username: cred.username, password: cred.password },
-          limits: { maxSubresources: policy.browser.maxSubresources, contextMaxMs: policy.browser.contextMaxMs },
+          limits: { maxSubresources: policy.browser.maxSubresources, contextMaxMs: policy.browser.contextMaxMs, maxHtmlChars: policy.maxBodyBytes },
           // Result-contract hooks (spec §12): part of the worker's contract, never filled while the
           // extras stay unregistered (M7).
           hooks: { screenshot: null, actions: [] },
@@ -29,7 +43,11 @@ export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy
         signal: AbortSignal.any([AbortSignal.timeout(Math.max(remaining + 5000, 6000)), ...(signal ? [signal] : [])]),
       });
       if (res.status !== 200) return { ok: false, failure: { class: "BROWSER_UNAVAILABLE", detail: `the browser worker answered HTTP ${res.status}`, retryable: true, retryAfter: null } };
-      const r = await res.json();
+      // The worker bounds the document; this bounds its reply too, before parsing, however the
+      // worker behaves (JSON escaping may double the characters, plus the result's other fields).
+      const text = await readCapped(res, 2 * policy.maxBodyBytes + 1024 * 1024);
+      if (text === null) return { ok: false, failure: { class: "SIZE_LIMIT", detail: "the browser worker's reply exceeds the page limit", retryable: false, retryAfter: null } };
+      const r = JSON.parse(text);
       return r.ok === true ? r : { ...r, ok: false, failure: { retryable: true, retryAfter: null, ...r.failure } };
     } catch {
       const cancelled = signal?.aborted === true;

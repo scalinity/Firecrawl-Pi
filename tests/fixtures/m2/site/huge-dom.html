@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>FCPI M2 huge document fixture</title></head>
+<body>
+<main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main>
+<script>
+  // Builds a document of about 30 million characters without any network: the browser tier must
+  // refuse it as SIZE_LIMIT, as a direct body over 25 MiB is refused.
+  document.getElementById("root").textContent = "x".repeat(30 * 1000 * 1000);
+</script>
+</body>
+</html>
