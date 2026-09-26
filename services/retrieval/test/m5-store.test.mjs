@@ -115,6 +115,19 @@ test("a settlement gives back only the period rows its reservation took, whateve
   } finally { await store.close(); }
 });
 
+test("a paid parser's credits count against the paid total's day in micro-USD (review W3)", opts, async () => {
+  const store = await fresh();
+  try {
+    const parse = (over = {}) => base({ category: "parser", caps: { month: 1000 }, paidTotalCap: 50000, paidTotalRate: 1250, unit: "credits", amount: 30, ...over });
+    const a = (await store.reserveBudget(parse())).reservation;
+    assert.deepEqual((await usage(store)).sort(), ["_paid_total/day:37500+0", "parser/month:30+0"]);
+    // 30 more credits would be 37,500 more micro-USD, past the 50,000 day total though within the credit cap.
+    assert.deepEqual((await store.reserveBudget(parse())).exhausted, { category: "_paid_total", period: "day", cap: 50000, used: 37500 });
+    await store.settleBudget(a.id, 12, {});
+    assert.deepEqual((await usage(store)).sort(), ["_paid_total/day:0+15000", "parser/month:0+12"]);
+  } finally { await store.close(); }
+});
+
 test("the 80% threshold is noticed once per period", opts, async () => {
   const store = await fresh();
   try {

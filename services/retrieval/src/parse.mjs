@@ -58,7 +58,9 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${pp.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
     const amount = pages * card.creditsPerPage;
     const { day, month } = periodStarts();
-    const r = await store.reserveBudget({ id: randomUUID(), callKey: `${logicalId}:parse:${docSha.slice(0, 32)}`, logicalId, category: pp.category, caps: cat.caps, paidTotalCap: null,
+    const r = await store.reserveBudget({ id: randomUUID(), callKey: `${logicalId}:parse:${docSha.slice(0, 32)}`, logicalId, category: pp.category, caps: cat.caps,
+      // A paid parser's credits also count against the paid total's day, in micro-USD (spec §28.3).
+      paidTotalCap: prov.paid ? budget.paidTotal.caps.day : null, paidTotalRate: card.microUsdPerCredit,
       provider: pp.provider, subject: name, kind: "parse", unit: "credits", rateCard: card.id, requestHash: key, amount, day, month, notifyAt: budget.notifyAtFraction });
     if (r.existing) {
       breaker.neutral();

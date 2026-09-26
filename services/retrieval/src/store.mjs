@@ -177,14 +177,16 @@ export class Store {
   // Every writer of the usage rows takes them in one order (see lockOrder), so a reservation and a
   // settlement running at once never wait on each other's rows (review W2).
   // Reserves `amount` for one provider call before dispatch, against every period cap of its category
-  // and, for a paid USD category, the paid total's daily cap. One transaction: each period row is
+  // and, for a paid category, the paid total's daily cap in micro-USD: the amount times paidTotalRate (1 for
+  // a micro-USD category, the rate card's micro-USD per credit for a parser). One transaction: each period row is
   // updated only while reserved + settled + amount stays within its cap, and PostgreSQL re-checks that
   // condition against the newest row version when concurrent callers queue on the row lock, so no race
   // passes a cap. Returns { reservation } for a new one, { existing } when the call key was already
   // reserved (a retried request), or { exhausted: { category, period, cap, used } }.
   async reserveBudget(r) {
-    const periods = lockOrder([...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap })),
-      ...(r.paidTotalCap !== null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap }] : [])]);
+    const rate = r.paidTotalRate ?? 1;
+    const periods = lockOrder([...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap, amount: r.amount })),
+      ...(r.paidTotalCap !== null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap, amount: Math.ceil(r.amount * rate) }] : [])]);
     const EXHAUSTED = Symbol("exhausted");
     try {
       return await this.#tx(async (c) => {
@@ -199,7 +201,7 @@ export class Store {
           const u = await c.query(
             `UPDATE fcpi_retrieval.budget_usage SET reserved = reserved + $4
              WHERE category = $1 AND period = $2 AND period_start = $3 AND reserved + settled + $4 <= $5
-             RETURNING reserved, settled, notified`, [p.category, p.period, start, r.amount, p.cap]);
+             RETURNING reserved, settled, notified`, [p.category, p.period, start, p.amount, p.cap]);
           if (u.rowCount === 0) {
             const used = (await c.query("SELECT reserved + settled AS used FROM fcpi_retrieval.budget_usage WHERE category = $1 AND period = $2 AND period_start = $3", [p.category, p.period, start])).rows[0];
             throw Object.assign(new Error("exhausted"), { [EXHAUSTED]: { category: p.category, period: p.period, cap: p.cap, used: Number(used?.used ?? 0) } });
@@ -212,9 +214,9 @@ export class Store {
           }
         }
         const reservation = (await c.query(
-          `INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, state, day_start, month_start, paid_total, periods)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'RESERVED', $12, $13, $14, $15) RETURNING *`,
-          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap !== null, Object.keys(r.caps).sort()])).rows[0];
+          `INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, state, day_start, month_start, paid_total, periods, paid_total_rate)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'RESERVED', $12, $13, $14, $15, $16) RETURNING *`,
+          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap !== null, Object.keys(r.caps).sort(), rate])).rows[0];
         return { reservation, notices };
       });
     } catch (e) {
@@ -242,10 +244,12 @@ export class Store {
       if (!res || !["RESERVED", "UNCERTAIN"].includes(res.state)) return null;
       const taken = res.periods ?? (await c.query("SELECT period FROM fcpi_retrieval.budget_usage WHERE category = $1 AND ((period = 'day' AND period_start = $2) OR (period = 'month' AND period_start = $3))",
         [res.category, res.day_start, res.month_start])).rows.map((x) => x.period);
-      const rows = lockOrder([...taken.map((period) => ({ category: res.category, period })), ...(res.paid_total ? [{ category: "_paid_total", period: "day" }] : [])]);
+      const rows = lockOrder([...taken.map((period) => ({ category: res.category, period, rate: 1 })),
+        ...(res.paid_total ? [{ category: "_paid_total", period: "day", rate: Number(res.paid_total_rate) }] : [])]);
       for (const p of rows) {
         await c.query(`UPDATE fcpi_retrieval.budget_usage SET reserved = GREATEST(reserved - $4, 0), settled = settled + $5
-          WHERE category = $1 AND period = $2 AND period_start = $3`, [p.category, p.period, p.period === "day" ? res.day_start : res.month_start, res.reserved, actual]);
+          WHERE category = $1 AND period = $2 AND period_start = $3`, [p.category, p.period, p.period === "day" ? res.day_start : res.month_start,
+          Math.ceil(Number(res.reserved) * p.rate), Math.ceil(actual * p.rate)]);
       }
       return (await c.query(`UPDATE fcpi_retrieval.budget_reservation SET state = $2, actual = $3, usage = $4, result = $5, detail = $6, settled_at = now() WHERE id = $1 RETURNING *`,
         [id, to, actual, fields.usage ? JSON.stringify(fields.usage) : null, fields.result === undefined ? null : JSON.stringify(fields.result), fields.detail ?? null])).rows[0];
