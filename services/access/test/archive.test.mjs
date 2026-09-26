@@ -68,3 +68,12 @@ test("the quota is at most 10 GiB", async () => {
   const d = root();
   try { const q = await (await openArchive(d)).quotaBytes(); assert.ok(q > 0 && q <= 10 * 1024 ** 3); } finally { rmSync(d, { recursive: true }); }
 });
+
+test("room is refused for more than the filesystem can hold above its free-space floor", async () => {
+  const d = root();
+  try {
+    const a = await openArchive(d);
+    assert.equal(await a.hasRoom(1), true);
+    assert.equal(await a.hasRoom(Number.MAX_SAFE_INTEGER), false);
+  } finally { rmSync(d, { recursive: true }); }
+});

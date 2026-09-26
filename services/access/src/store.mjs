@@ -159,6 +159,8 @@ export function makeStore(cfg, log = () => {}) {
     archivedKeys: async (id) => new Set((await q("SELECT doc_key FROM fcpi_platform.job_document WHERE job_id = $1", [id])).rows.map((r) => r.doc_key)),
     documentsPage: async (id, skip, limit) => (await q("SELECT ordinal, sha256, bytes FROM fcpi_platform.job_document WHERE job_id = $1 AND ordinal >= $2 ORDER BY ordinal LIMIT $3", [id, skip, limit])).rows,
     documentCount: async (id) => (await q("SELECT count(*)::int AS n FROM fcpi_platform.job_document WHERE job_id = $1", [id])).rows[0].n,
+    // The bytes every retained document holds, the measure the result quota caps (spec §21.3).
+    archiveBytes: async () => Number((await q("SELECT coalesce(sum(bytes), 0)::bigint AS b FROM fcpi_platform.job_document")).rows[0].b),
     referenced: async (shas) => new Set((await q("SELECT DISTINCT sha256 FROM fcpi_platform.job_document WHERE sha256 = ANY($1)", [shas])).rows.map((r) => r.sha256)),
 
     // Retention (spec §21.3): results past their seven days leave the manifest and the job becomes

@@ -42,6 +42,12 @@ export async function openArchive(root) {
       const s = await statfs(root);
       return Math.min(10 * 1024 ** 3, Math.floor(s.blocks * s.bsize * 0.2));
     },
+    // Whether `bytes` more still leave the filesystem its floor of free space: the smaller of 1 GiB and
+    // 5% of it, since other data (the ledger's PostgreSQL among it) shares the filesystem.
+    async hasRoom(bytes) {
+      const s = await statfs(root);
+      return s.bavail * s.bsize - bytes >= Math.min(1024 ** 3, Math.floor(s.blocks * s.bsize * 0.05));
+    },
     // Removes temporary files and unreferenced documents older than an hour; `referenced(shas)`
     // answers which of a batch of hashes a manifest row still names.
     async sweep(referenced, olderThanMs = 3600000) {

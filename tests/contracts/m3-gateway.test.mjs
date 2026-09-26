@@ -12,7 +12,7 @@ import { spawn } from "node:child_process";
 import { connect } from "node:net";
 import { createHash, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, renameSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, renameSync, rmSync, statfsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -433,6 +433,31 @@ test("a job still open past its deadline and the grace period is closed with wha
   const served = await h.call("GET", `/v2/crawl/${r.json.id}?limit=100`, { token: T.a });
   assert.equal(served.json.data.length, 10, "the archived documents are served");
   await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(waiting.json.id)).state), 15000, "the waiting job dispatched");
+});
+
+test("archival stops at the result quota with what it holds, and admission then refuses new jobs with STORAGE_QUOTA", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  // The ledger's measure of the store is filled to within one and a half documents of the quota.
+  const s = statfsSync(join(h.dir, "art"));
+  const quota = Math.min(10 * 1024 ** 3, Math.floor(s.blocks * s.bsize * 0.2));
+  const doc = JSON.stringify({ markdown: "# page 0", metadata: { sourceURL: "http://m3.fixture.fcpi.test:8080/p0", scrapeId: `${up.slice(0, 8)}-doc-0`, statusCode: 200 } });
+  const filler = randomUUID(), fill = async (bytes, from) => {
+    for (let left = bytes, i = from; left > 0; i++) { const b = Math.min(left, 2e9); await h.db.query("INSERT INTO fcpi_platform.job_document (job_id, ordinal, doc_key, sha256, bytes) VALUES ($1, $2, $3, $4, $5)", [filler, i, `f${i}`, "0".repeat(64), b]); left -= b; }
+  };
+  await fill(quota - Math.floor(doc.length * 1.5), 0);
+  h.core.complete(up, 3);
+  const done = await waitFor(async () => { const j = await h.job(r.json.id); return ["SUCCEEDED", "PARTIAL", "FAILED"].includes(j.state) && j; }, 15000, "archive");
+  assert.equal(done.state, "PARTIAL");
+  assert.equal(done.error_code, "STORAGE_QUOTA");
+  assert.equal(done.archived, 1, "the document that fitted is kept");
+  assert.deepEqual(done.errors.errors.map((e) => e.code), ["STORAGE_QUOTA"]);
+  await fill(doc.length, 1000);
+  const refused = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 3 }) });
+  assert.equal(refused.status, 503);
+  assert.equal(refused.json.code, "STORAGE_QUOTA");
+  assert.equal(refused.headers["retry-after"], "300");
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {

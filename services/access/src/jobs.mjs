@@ -130,7 +130,11 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     // An entry the gateway adds to the per-item errors, in upstream's shape ({ id, timestamp, url, code,
     // error }); the URL is empty where it is not known (a document too large to read).
     const note = (code, error, url = "") => ({ id: `fcpi:${job.id}:${code}:${archiveErrors.length}`, timestamp: new Date().toISOString(), url, code, error });
-    for (;;) {
+    // Storage is checked before every document, not only at admission: archival stops at the result
+    // quota or the filesystem's free-space floor, and the job ends with what it holds.
+    const quota = await archive.quotaBytes();
+    let used = await store.archiveBytes(), full = false;
+    pages: for (;;) {
       let r;
       try {
         r = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}?skip=${skip}&limit=${limit}`, { timeoutMs: 60000, maxBytes: L.results.archiveResponseMaxBytes });
@@ -154,14 +158,20 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
         const key = typeof doc?.metadata?.scrapeId === "string" ? doc.metadata.scrapeId : null;
         if (key && have.has(key)) continue;
         const buf = Buffer.from(JSON.stringify(doc));
+        if (used + buf.length > quota || !(await archive.hasRoom(buf.length))) {
+          full = true;
+          archiveErrors.push(note("STORAGE_QUOTA", `archival stopped at the result store's quota or free-space floor; documents from the page at position ${skip} on were not retained`));
+          break;
+        }
         const put = await archive.put(buf);
         const docKey = key ?? `sha256:${put.sha256}`;
         if (have.has(docKey)) continue;
         have.add(docKey);
+        used += put.bytes;
         rows.push({ ordinal: ordinal++, docKey, sha256: put.sha256, bytes: put.bytes });
       }
       await store.addDocuments(job.id, rows);
-      if (nextSkip === null || nextSkip <= skip) break;
+      if (full || nextSkip === null || nextSkip <= skip) break pages;
       skip = nextSkip;
       limit = 10;
     }
@@ -186,6 +196,7 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     if (st.status === "failed") { to = "FAILED"; code = "UPSTREAM_FAILED"; message = String(statusBody?.error ?? "the job failed upstream").slice(0, 2000); }
     else if (st.status === "cancelled" && !job.cancel_requested_at && job.overdue) { to = "FAILED"; code = "JOB_DEADLINE_EXCEEDED"; message = `the job ran past its ${deadlineOf(job.kind)}-minute deadline and was stopped`; }
     else if (st.status === "cancelled") to = "CANCELLED";
+    else if (full) { to = have.size ? "PARTIAL" : "FAILED"; code = "STORAGE_QUOTA"; message = `the result store reached its quota or free-space floor after ${have.size} documents; the rest were not retained`; }
     else if (errors.errors.length) to = "PARTIAL";
     await store.finish(job.id, to, { ...st, errors, errorCode: code, error: message }, `upstream ${st.status}; ${have.size} documents archived, ${errors.errors.length} per-item errors`);
     say({ job: job.id, action: "finished", state: to, archived: have.size, errors: errors.errors.length });
