@@ -78,6 +78,15 @@ sec gateway_unauthenticated
 code=$(curl -sS -m 10 -o /dev/null -w '%{http_code}' http://127.0.0.1:3380/platform/v1/status)
 echo "status_without_token=$code"
 
+sec gateway_log_scan
+# The gateway's own log, counted only: its lines (the positive control that it was read), request
+# records, and any Cloud host, token, authorization value or target URL, none of which it may carry.
+L=$(D logs "$GWC" 2>&1)
+echo "lines=$(printf '%s\n' "$L" | grep -c .) request_records=$(printf '%s\n' "$L" | grep -c '"request_id"') job_records=$(printf '%s\n' "$L" | grep -c '"event":"job"')"
+for pat in 'firecrawl\.dev' 'firecrawl\.com' 'mendable' 'fcpi_[a-z0-9]+_[0-9a-f]{64}' 'Bearer [A-Za-z0-9]' '[Aa]uthorization' 'm3\.fixture\.fcpi\.test'; do
+  echo "pattern=$pat count=$(printf '%s\n' "$L" | grep -cE "$pat")"
+done
+
 sec postgres_health
 q() { D exec "$PG" psql -U postgres -Atc "$1" 2>&1; }
 echo "select_1=$(q 'select 1')"

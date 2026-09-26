@@ -244,7 +244,7 @@ const PHASES = {
     const l5 = await post("crawl", { url: `${FX}/`, limit: 5, sitemap: "include" });
     const l5done = await waitState(l5.json.id, ["SUCCEEDED", "PARTIAL", "FAILED"]);
     const l5p = await pages("crawl", l5.json.id);
-    out("crawl_limit", { id: l5.json.id, state: l5done.state, archived: l5done.archived, docs: l5p.docs.length, urls: l5p.docs.map((d) => d.url).sort() });
+    out("crawl_limit", { id: l5.json.id, state: l5done.state, archived: l5done.archived, docs: l5p.docs.length, marker_groups: markerGroups(l5.json.id), urls: l5p.docs.map((d) => d.url).sort() });
     // A batch with per-item outcomes: two pages, a 404, an authentication gate, and one invalid URL.
     const bkey = `m3-batch-${randomUUID()}`;
     const body = { urls: [`${FX}/p01`, `${FX}/p02`, `${FX}/missing`, `${FX}/gate`, "ftp://m3.fixture.fcpi.test/x"] };
@@ -278,7 +278,7 @@ const PHASES = {
     const done = await waitState(id, ["CANCELLED", "FAILED", "SUCCEEDED", "PARTIAL"], 300000);
     await sleep(8000);
     const log = fixtureLog(since).filter((l) => l.path.startsWith("/slow/s")).map((l) => ({ path: l.path, answered: l.utc, started: new Date(Date.parse(l.utc) - 2000).toISOString() }));
-    out("slow_crawl", { case: "finished", state: done.state, archived: done.archived, completed: done.completed, total: done.total, cancel_at: tCancel, fixture_requests: log,
+    out("slow_crawl", { case: "finished", state: done.state, archived: done.archived, completed: done.completed, total: done.total, marker_groups: markerGroups(id), cancel_at: tCancel, fixture_requests: log,
       events: (await receipt(id)).events.map((e) => e.to), queued_job_after: ledgerJob(q.json.id).state, queued_job_marker_groups: markerGroups(q.json.id) });
     const fin = state().graphJob;
     if (fin) out("finished_job", { case: "cancel_finished", ...brief(await http("DELETE", `/v2/crawl/${fin}`, { tok: "m3a" })) });
