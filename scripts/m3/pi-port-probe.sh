@@ -39,7 +39,7 @@ counters
 
 sec gateway
 # Names as the gateway resolves them, then addresses, then the host through the bridge.
-D exec -i -e ROLE=gateway -e TARGETS="core_api=firecrawl-core:3002 postgres=nuq-postgres:5432 core_worker_health=firecrawl-core:3006 core_prometheus=firecrawl-core:9090 \
+D exec -i -e ROLE=gateway -e TARGETS="core_api=firecrawl-core:3002 postgres=nuq-postgres:5432 core_3004=firecrawl-core:3004 core_3005=firecrawl-core:3005 core_3006=firecrawl-core:3006 core_3007=firecrawl-core:3007 core_3008=firecrawl-core:3008 core_9090=firecrawl-core:9090 \
 redis_name=redis:6379 rabbitmq_name=rabbitmq:5672 retrieval_name=retrieval-service:3310 browser_name=browser-worker:3320 fixture_name=fixture-m3:8080 \
 core_on_core_net=$CORE_CORE:3002 postgres_on_core_net=$PG_CORE:5432 redis_ip=$REDIS:6379 rabbitmq_ip=$RMQ:5672 retrieval_ip=$RS_ACQ:3310 retrieval_proxy_ip=10.231.2.10:3312 browser_ip=$BW:3320 fixture_ip=$FX3:8080 \
 host_sshd=$ACCESS_GW:22 host_dns=$ACCESS_GW:53 host_http=$ACCESS_GW:80 host_mqtt=$ACCESS_GW:1883 host_airdb=$ACCESS_GW:8080" \
@@ -61,7 +61,8 @@ D run --rm -i --network bridge --read-only --cap-drop ALL --security-opt no-new-
 sec host
 t() { if timeout 3 bash -c "exec 3<>/dev/tcp/$2/$3" 2>/dev/null; then echo "{\"role\":\"host\",\"label\":\"$1\",\"target\":\"$2:$3\",\"outcome\":\"open\"}"; else echo "{\"role\":\"host\",\"label\":\"$1\",\"target\":\"$2:$3\",\"outcome\":\"closed\"}"; fi; }
 t gateway_publication 127.0.0.1 3380
-for p in 3300 3002 3006 5432 6379 5672 3310 3312 3320 8080; do t "loopback_$p" 127.0.0.1 $p; done
+# 8080 is left out: on the host it is airdb, an unrelated service (M0 inventory); the fixtures listen only on fcpi_fixture.
+for p in 3300 3002 3004 3005 3006 3007 3008 5432 6379 5672 3310 3312 3320; do t "loopback_$p" 127.0.0.1 $p; done
 for pair in "core_api $CORE_API 3002" "postgres_platform $PG_PLATFORM 5432" "postgres_core $PG_CORE 5432" "redis $REDIS 6379" "rabbitmq $RMQ 5672" "retrieval $RS_ACQ 3310" "browser $BW 3320" "fixture_m3 $FX3 8080"; do
   set -- $pair; t "$1" "$2" "$3"
 done
