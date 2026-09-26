@@ -538,15 +538,17 @@ test("the same idempotency key returns the same job; another request under it is
 });
 
 test("another principal's job looks exactly like an unknown one", async () => {
-  const mine = (await H.db.query("SELECT id FROM fcpi_platform.job WHERE principal = 'pa' ORDER BY created_at LIMIT 1")).rows[0].id;
+  const h = await harness();
+  const mine = (await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() })).json.id;
   for (const [method, path] of [["GET", `/v2/crawl/${mine}`], ["GET", `/v2/crawl/${mine}/errors`], ["DELETE", `/v2/crawl/${mine}`], ["GET", `/platform/v1/jobs/${mine}`]]) {
-    const theirs = await H.call(method, path, { token: T.b });
-    const unknown = await H.call(method, path.replace(mine, randomUUID()), { token: T.b });
+    const theirs = await h.call(method, path, { token: T.b });
+    const unknown = await h.call(method, path.replace(mine, randomUUID()), { token: T.b });
     assert.equal(theirs.status, 404, path);
     assert.equal(theirs.text, unknown.text, path);
   }
-  assert.equal((await H.call("GET", `/v2/crawl/${mine}`, { token: T.a })).status, 200);
-  assert.ok(!(await H.call("GET", "/platform/v1/jobs", { token: T.b })).json.jobs.some((j) => j.id === mine));
+  assert.equal((await h.call("GET", `/v2/crawl/${mine}`, { token: T.a })).status, 200);
+  assert.ok((await h.call("GET", "/platform/v1/jobs", { token: T.a })).json.jobs.some((j) => j.id === mine), "the owner's list holds it (the control)");
+  assert.ok(!(await h.call("GET", "/platform/v1/jobs", { token: T.b })).json.jobs.some((j) => j.id === mine));
 });
 
 test("a revoked token stops working within two seconds, without a restart", async () => {
@@ -564,21 +566,25 @@ test("a revoked token stops working within two seconds, without a restart", asyn
 });
 
 test("cancellation: a queued job never reaches the core; a running one is cancelled upstream; a finished one is 409", async () => {
-  const first = await H.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 3 }) });
-  const second = await H.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 4 }) });
+  const h = await harness();
+  const first = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 3 }) });
+  const second = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 4 }) });
   assert.equal(second.status, 200);
-  assert.equal((await H.job(second.json.id)).state, "RECEIVED", "one upstream job at a time: the second waits");
-  const n = H.core.submissions().length;
-  assert.deepEqual((await H.call("DELETE", `/v2/crawl/${second.json.id}`, { token: T.a })).json, { status: "cancelled" });
-  assert.equal((await H.job(second.json.id)).state, "CANCELLED");
-  const up = await H.core.upstreamOf(first.json.id);
-  assert.equal((await H.call("DELETE", `/v2/crawl/${first.json.id}`, { token: T.ro })).status, 403, "cancel needs its own scope");
-  assert.deepEqual((await H.call("DELETE", `/v2/crawl/${first.json.id}`, { token: T.a })).json, { status: "cancelled" });
-  assert.equal(H.core.jobs.get(up).cancelled, true);
-  await waitFor(async () => (await H.job(first.json.id)).state === "CANCELLED", 90000, "cancelled");
-  assert.equal(H.core.submissions().length, n, "the cancelled queued job was never submitted");
-  const done = (await H.db.query("SELECT id FROM fcpi_platform.job WHERE state = 'SUCCEEDED' AND kind = 'batch' AND principal = 'pa' LIMIT 1")).rows[0].id;
-  assert.equal((await H.call("DELETE", `/v2/batch/scrape/${done}`, { token: T.a })).status, 409);
+  assert.equal((await h.job(second.json.id)).state, "RECEIVED", "one upstream job at a time: the second waits");
+  const n = h.core.submissions().length;
+  assert.deepEqual((await h.call("DELETE", `/v2/crawl/${second.json.id}`, { token: T.a })).json, { status: "cancelled" });
+  assert.equal((await h.job(second.json.id)).state, "CANCELLED");
+  const up = await h.core.upstreamOf(first.json.id);
+  assert.equal((await h.call("DELETE", `/v2/crawl/${first.json.id}`, { token: T.ro })).status, 403, "cancel needs its own scope");
+  assert.deepEqual((await h.call("DELETE", `/v2/crawl/${first.json.id}`, { token: T.a })).json, { status: "cancelled" });
+  assert.equal(h.core.jobs.get(up).cancelled, true);
+  await waitFor(async () => (await h.job(first.json.id)).state === "CANCELLED", 90000, "cancelled");
+  assert.equal(h.core.submissions().length, n, "the cancelled queued job was never submitted");
+  // A finished job of this test's own.
+  const batch = await h.call("POST", "/v2/batch/scrape", { token: T.a, body: { urls: ["https://a.example.com"] } });
+  h.core.complete(await waitFor(() => h.core.upstreamOf(batch.json.id), 15000, "mapping"), 1);
+  await waitFor(async () => (await h.job(batch.json.id)).state === "SUCCEEDED", 15000, "finished");
+  assert.equal((await h.call("DELETE", `/v2/batch/scrape/${batch.json.id}`, { token: T.a })).status, 409);
 });
 
 test("a waiting job whose cancellation was asked closes while another job holds the upstream slot", async () => {
@@ -640,7 +646,8 @@ test("gateway killed mid-submission after the core created the job: the next pro
 });
 
 test("gateway killed mid-submission that never reached the core: uncertain until the settle window, then submitted once", async () => {
-  const h = await harness({ settleMs: 3000, extraEnv: { PI_GATEWAY_SUBMIT_TIMEOUT_MS: "20000" } });
+  // The settle window must outlast the kill and restart with room to spare on a loaded Pi.
+  const h = await harness({ settleMs: 8000, extraEnv: { PI_GATEWAY_SUBMIT_TIMEOUT_MS: "20000" } });
   h.core.mode = "hang";
   const pending = h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody(), headers: { "x-idempotency-key": "k-hang-never-reached" } }).catch((e) => ({ error: e.code }));
   await waitFor(() => h.core.submissions().length === 1, 5000, "submission at the core");
@@ -764,9 +771,12 @@ test("a submission the core refuses is FAILED and answered like upstream's refus
 
 test("open-job admission caps answer 503 OVERLOADED with Retry-After", async () => {
   const h = await harness({ manifest: testManifest({ maxOpenJobs: 2 }) });
-  const codes = [];
-  for (let i = 0; i < 3; i++) codes.push((await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 2 + i }) })).json?.code ?? "ok");
-  assert.deepEqual(codes, ["ok", "ok", "OVERLOADED"]);
+  const rs = [];
+  for (let i = 0; i < 3; i++) rs.push(await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 2 + i }) }));
+  assert.deepEqual(rs.map((r) => r.status), [200, 200, 503]);
+  assert.equal(rs[2].json.code, "OVERLOADED");
+  assert.equal(rs[2].headers["retry-after"], "30");
+  assert.equal((await h.db.query("SELECT count(*)::int AS n FROM fcpi_platform.job")).rows[0].n, 2, "the refused submission left no receipt");
 });
 
 test("a job the core forgets before finishing fails as UPSTREAM_STATE_LOST; results past retention are 410", async () => {
@@ -878,9 +888,15 @@ test("shutdown claims nothing: a job that comes due while open requests finish i
 
 test("configuration that is unknown, unsafe or missing its data mount stops startup", async () => {
   const base = H.env();
-  const exits = [];
-  for (const env of [{ ...base, PI_TYPO: "1" }, { ...base, PI_CLOUD_ACCESS_ENABLED: "true" }, { ...base, PI_ARTIFACT_ROOT: mkdtempSync(join(tmpdir(), "fcpi-shadow-")) }, { ...base, PI_ALLOWED_HOSTS: "" }]) {
-    exits.push(await new Promise((resolve) => { const p = spawn(process.execPath, [join(GW_DIR, "server.mjs")], { env, stdio: "ignore" }); p.on("exit", resolve); }));
+  // Each case must stop for its own reason, named in what the process prints, not merely exit non-zero.
+  for (const [env, why] of [[{ ...base, PI_TYPO: "1" }, /unknown configuration keys: PI_TYPO/], [{ ...base, PI_CLOUD_ACCESS_ENABLED: "true" }, /PI_CLOUD_ACCESS_ENABLED must be false/],
+    [{ ...base, PI_ARTIFACT_ROOT: mkdtempSync(join(tmpdir(), "fcpi-shadow-")) }, /lacks \.fcpi-artifact-root: refusing to write outside the project's data mount/], [{ ...base, PI_ALLOWED_HOSTS: "" }, /PI_ALLOWED_HOSTS must list the origins/]]) {
+    const { code, err } = await new Promise((resolve) => {
+      const p = spawn(process.execPath, [join(GW_DIR, "server.mjs")], { env, stdio: ["ignore", "ignore", "pipe"] });
+      let err = ""; p.stderr.on("data", (d) => { err += d; });
+      p.on("exit", (code) => resolve({ code, err }));
+    });
+    assert.notEqual(code, 0, String(why));
+    assert.match(err, why);
   }
-  assert.ok(exits.every((c) => c !== 0), exits.join(","));
 });
