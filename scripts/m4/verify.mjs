@@ -159,6 +159,31 @@ function attribute(sec, line, ids, owner = null) {
   if (sec === "nft_chains" && /^ip6? (filter|nat|raw) (DOCKER[-A-Z0-9]*|FORWARD|PREROUTING|OUTPUT|POSTROUTING) /.test(line)) return "Docker's chains";
   return null;
 }
+// The unplanned reset during M4's window (raw/reboot.txt): the record must tie BEFORE's boot to the
+// journal's previous boot and AFTER's to the current one. Only then does a line the reboot itself changed
+// count as attributed, each by what changed: a module in both snapshots whose size differs (built for the
+// new kernel), a mount whose target, source and type are the same with only its options changed, a
+// service's ephemeral UDP port chosen again at its start, M1's runtime-only audit tables, and a unit no
+// longer running that neither snapshot lists as enabled. An enabled unit that stopped is never attributed.
+function rebootTie(bootB, bootA) {
+  if (!has(`${RAW}reboot.txt`) || !bootB || !bootA || bootB === bootA) return null;
+  const s = S(`${RAW}reboot.txt`);
+  const boots = Object.fromEntries((s.boots ?? []).map((l) => kv(l.split(" "))).map((b) => [b.idx, b]));
+  const cur = kv(((s.current ?? [])[0] ?? "").split(" "));
+  const tied = boots["-1"]?.boot_id_sha256 === bootB && boots["0"]?.boot_id_sha256 === bootA && cur.boot_id_sha256 === bootA;
+  return tied ? { kernel: cur.kernel, ended: boots["-1"].last, shutdown_markers: kv((s.old_boot_end ?? []).filter((l) => l.startsWith("shutdown_markers="))).shutdown_markers } : null;
+}
+function rebootAttribute(sec, line, kind, B, A) {
+  const other = kind === "removed" ? A : B;
+  const inOther = (pred) => other.some(([s, l]) => s === sec && l !== line && pred(l));
+  if (sec === "lsmod") { const n = line.split(" ")[0]; if (inOther((l) => l.split(" ")[0] === n)) return "the reboot: a module in both snapshots, built for the new kernel"; }
+  if (sec === "findmnt") { const [t, src, fs] = line.split(" "); if (inOther((l) => { const f = l.split(" "); return f[0] === t && f[1] === src && f[2] === fs; })) return "the reboot: a mount made again at boot, only its options changed"; }
+  { const m = line.match(/^udp (?:0\.0\.0\.0|\*):(\d+) users:\(\("([^"]+)",pid,fd\)\)$/);
+    if (sec === "ss_listen" && m && +m[1] >= 32768 && inOther((l) => l.startsWith("udp ") && l.includes(`(("${m[2]}",`))) return "the reboot: a service's ephemeral UDP port, chosen again at its start"; }
+  if (/^nft_(tables|chains)$/.test(sec) && kind === "removed" && / fcpi_audit( |$)/.test(line)) return "the reboot: M1's runtime-only egress-audit tables (scripts/m1/pi-egress-audit.sh), which M4 does not read";
+  if (sec === "systemd_running" && kind === "removed" && /\.service$/.test(line) && !B.concat(A).some(([s, l]) => s === "systemd_enabled" && l === line)) return "the reboot: a unit not enabled at boot, started on demand in the earlier boot";
+  return null;
+}
 
 // ---- memory samples (every phase's, M01) --------------------------------------------------------------
 const samples = () => PHASES.flatMap((p) => (has(`${RAW}e2e-${p}.txt`) ? (E(p).resources ?? []).map((r) => ({ run: p, ...r })) : []));
@@ -477,40 +502,45 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${net}; publications=${pub.join(";")}` };
     } },
   X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`, "evidence/M3/raw/nft-ruleset.txt", `${RAW}owner-session.txt`],
-    expected: "every line differing between M4's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset) or to the collector's own SSH session, or to the owner's own work on the Pi that raw/owner-session.txt records (an apt upgrade, an editor server) and Pi-hole's own rotating upstream sockets; no unrelated line is removed or changed; the boot ID is unchanged; rule by rule against M3's recorded ruleset, every change is Docker's for the new fcpi-mcp bridge, and the installed guard is the repository's",
+    expected: "every line differing between M4's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset) or to the collector's own SSH session, or to the owner's own work on the Pi that raw/owner-session.txt records (an apt upgrade, an editor server) and Pi-hole's own rotating upstream sockets; no unrelated line is removed or changed; the boot ID is unchanged, or changed only across the reset raw/reboot.txt ties to both snapshots, whose own changes count only where a module, a mount or a service's UDP port is the same thing made again at boot, M1's runtime-only audit tables and their rules are gone, or a unit neither snapshot lists as enabled is not running; rule by rule against M3's recorded ruleset, every change is Docker's for the new fcpi-mcp bridge, and the installed guard is the repository's",
     run() {
       const [B, A] = [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`];
+      const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
+      const tie = rebootTie(boot(B), boot(A));
       const psIds = (f) => (read(f).match(/^### docker_ps\n([\s\S]*?)\n### /m)?.[1] ?? "").split("\n").map((l) => l.split("\t")[0]).filter((x) => /^[0-9a-f]{64}$/.test(x));
       const ids = new Set([...psIds(B), ...psIds(A)]);
       const norm = (sec, l) => (sec === "ss_listen" ? l.replace(/pid=\d+,fd=\d+/g, "pid,fd") : l);
-      const K = (f) => keyedSnapshot(f).map(([s, l]) => `${s}\t${norm(s, l)}`);
-      const b = K(B), a = K(A);
+      const KP = (f) => keyedSnapshot(f).map(([s, l]) => [s, norm(s, l)]);
+      const kb = KP(B), ka = KP(A);
+      const b = kb.map(([s, l]) => `${s}\t${l}`), a = ka.map(([s, l]) => `${s}\t${l}`);
       const removed = b.filter((l) => !a.includes(l)), added = a.filter((l) => !b.includes(l));
       const owner = ownerContext();
-      const unexplained = [], why = {}, rows = { project: [], owner: [], unrelated: [] };
+      const unexplained = [], why = {}, rows = { project: [], owner: [], reboot: [], unrelated: [] };
       for (const [kind, list] of [["removed", removed], ["added", added]]) for (const l of list) {
         const [sec, line] = [l.slice(0, l.indexOf("\t")), l.slice(l.indexOf("\t") + 1)];
-        const w = attribute(sec, line, ids, owner);
-        const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains|Pi-hole's own|the owner's editor server/.test(w));
+        const w = attribute(sec, line, ids, owner) ?? (tie ? rebootAttribute(sec, line, kind, kb, ka) : null);
+        const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains|Pi-hole's own|the owner's editor server|^the reboot: /.test(w));
         if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else why[w] = (why[w] ?? 0) + 1;
-        rows[!acceptable ? "unrelated" : /owner|Pi-hole/.test(w) ? "owner" : "project"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
+        rows[!acceptable ? "unrelated" : /^the reboot: /.test(w) ? "reboot" : /owner|Pi-hole/.test(w) ? "owner" : "project"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
       }
       const hdr = kv(((read(`${RAW}nft-ruleset.txt`).match(/^# guard_file_sha256=.*$/m) ?? [""])[0]).slice(2).split(" "));
       const guardOk = hdr.guard_file_sha256 === sha256File("deploy/host/fcpi-guard.nft");
       const r3 = ruleSet("evidence/M3/raw/nft-ruleset.txt"), r4 = ruleSet(`${RAW}nft-ruleset.txt`);
       const ruleChanges = [...[...r4].filter((r) => !r3.has(r)).map((r) => `+ ${r}`), ...[...r3].filter((r) => !r4.has(r)).map((r) => `- ${r}`)];
-      const unattributed = ruleChanges.filter((ch) => !/"fcpi-mcp"|10\.231\.8\.0\/24/.test(ch)).map((ch) => ch.replace(/\t/g, " ").slice(0, 110));
+      // M1's audit tables are runtime-only: after the reset their rules are gone, attributed only under the tie.
+      const unattributed = ruleChanges.filter((ch) => !/"fcpi-mcp"|10\.231\.8\.0\/24/.test(ch) && !(tie && /^- (bridge|inet) fcpi_audit\t/.test(ch))).map((ch) => ch.replace(/\t/g, " ").slice(0, 110));
       const afterHash = (read(A).match(/^nft_ruleset_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       const rulesTied = /^[0-9a-f]{64}$/.test(hdr.ruleset_sha256 ?? "") && hdr.ruleset_sha256 === afterHash;
       const tables = [...read(`${RAW}nft-ruleset.txt`).matchAll(/^table (\S+ \S+) \{/gm)].map((m) => m[1]).sort();
       const tablesOk = tables.every((t) => /^(bridge fcpi_audit|inet fcpi_audit|inet fcpi_guard|ip6? (filter|nat|raw|mangle))$/.test(t)) && tables.includes("inet fcpi_guard");
-      const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), ["# M4 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m4/verify.mjs X04)",
-        `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
-        `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## the owner's own work on the Pi and Pi-hole's own socket rotation (${rows.owner.length}; raw/owner-session.txt)`, ...rows.owner, `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project,
-        `## ruleset changes since M3's recorded ruleset (${ruleChanges.length}; Docker's for fcpi-mcp unless listed as unattributed)`, ...ruleChanges.map((r) => r.replace(/\t/g, " ")), ""].join("\n"));
-      const ok = unexplained.length === 0 && !!boot(B) && boot(B) === boot(A) && guardOk && rulesTied && r3.size > 50 && r4.size > 50 && unattributed.length === 0 && ruleChanges.length >= 1 && tablesOk;
-      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; rules changed since M3=${ruleChanges.length}, unattributed=${unattributed.length}${unattributed.length ? " [" + unattributed.slice(0, 6).join("; ") + "]" : ""}; guard is the repository's=${guardOk}; ruleset tied to AFTER=${rulesTied}` };
+        `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`,
+        `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : tie ? `changed across the unplanned reset raw/reboot.txt records (the earlier boot's last entry ${tie.ended}, shutdown markers ${tie.shutdown_markers}; now ${tie.kernel})` : "CHANGED or MISSING"}`,
+        `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## the owner's own work on the Pi and Pi-hole's own socket rotation (${rows.owner.length}; raw/owner-session.txt)`, ...rows.owner,
+        `## the unplanned reset's own changes (${rows.reboot.length}; raw/reboot.txt)`, ...rows.reboot, `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project,
+        `## ruleset changes since M3's recorded ruleset (${ruleChanges.length}; Docker's for fcpi-mcp, or M1's audit tables gone at the reset, unless listed as unattributed)`, ...ruleChanges.map((r) => r.replace(/\t/g, " ")), ""].join("\n"));
+      const ok = unexplained.length === 0 && !!boot(B) && (boot(B) === boot(A) || !!tie) && guardOk && rulesTied && r3.size > 50 && r4.size > 50 && unattributed.length === 0 && ruleChanges.length >= 1 && tablesOk;
+      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}${tie ? `, reset tied by raw/reboot.txt (now ${tie.kernel})` : ""}; rules changed since M3=${ruleChanges.length}, unattributed=${unattributed.length}${unattributed.length ? " [" + unattributed.slice(0, 6).join("; ") + "]" : ""}; guard is the repository's=${guardOk}; ruleset tied to AFTER=${rulesTied}` };
     } },
   X05: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, M3_CONTROL, "scripts/m1/pi-target.conf", "evidence/M0/audit.json"], live: true,
     expected: "the positive controls fire every rule; then no rule matches in any tracked or new repository file; no file holds any live secret (M2's eight, the gateway's PostgreSQL password and every client token file on the Pi, M4's five among them), compared by SHA-256 computed on the Pi; no file added or changed since M4 began holds the Pi's LAN address, its /24 network or its SSH target",
@@ -612,6 +642,43 @@ const checks = {
         scopes: ["m4claude", "m4codex"].every((l) => (r.tokens ?? []).some((t) => t.label === l && t.scopes === "read,scrape,crawl")), claude_calls: used(vc) && (vc?.exchanges ?? []).length >= 3 && vc.exchanges.every((e) => e.session_header_sent === false),
         codex_answer: cx?.exit === 0 && good(cx.answer), codex_crawl_finished: finished(vx), codex_calls: used(vx) && (vx?.exchanges ?? []).length >= 3 && vx.exchanges.every((e) => e.session_header_sent === false) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; Claude Code ${cc?.client} (${(cc?.models_used ?? []).join(",")}): ${cc?.answer}, crawl ${vc?.crawl_job?.state}/${vc?.crawl_job?.archived}, revision ${revs(vc)}, named itself ${products(vc)}; Codex ${cx?.client} (${cx?.model}): ${cx?.answer}, crawl ${vx?.crawl_job?.state}/${vx?.crawl_job?.archived}, revision ${revs(vx)}, named itself ${products(vx)}` };
+    } },
+
+  // ================================================================ the unplanned reset (F4, F7, F8)
+  H01: { name: "unplanned-reset-recovered", inputs: [`${RAW}reboot.txt`, `${RAW}after-reset.txt`, `${RAW}egress-local-before-install.txt`, `${RAW}egress-local-fallback.txt`, `${RAW}up.txt`,
+      `${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, "evidence/M3/raw/persistence.txt", "evidence/M2/kernel-6.18.50/verification.json", "evidence/M2/kernel-6.18.50/raw/browser-proof.txt", "deploy/host/fcpi-egress-local.sh"],
+    expected: "raw/reboot.txt ties BEFORE's boot to the journal's previous boot and AFTER's to the current one, records an end with no shutdown sequence after the Wi-Fi loss and no local action after it, and the new boot on kernel 6.18.50 keeps D2's 16 KiB pages and came up through the gated start (the data check passed, dockerd and fcpi-stack active, 11 containers healthy); after it, M3's sentinel reads back from PostgreSQL, Redis and RabbitMQ, PostgreSQL's WAL redo completed, no job is left open, every archive file matches its name and every live document has its file; F8's defect is reproduced (the installed script left the set empty with no network) and its fix fills the set with the recorded networks in a namespace that starts empty, for the installed copy, which is the repository's; M2's Chromium checks B01-B07 pass on 6.18.50; and the stack was recreated after the reset, every swap limit 0",
+    run() {
+      const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
+      const tie = rebootTie(boot(`${EV}snapshot-before.txt`), boot(`${EV}snapshot-after.txt`));
+      const r = S(`${RAW}reboot.txt`), cur = kv(((r.current ?? [])[0] ?? "").split(" ")), acts = kv(((r.local_actions_after_loss ?? [])[1] ?? "").split(" "));
+      const rec = r.recovery ?? [], unit = (u) => kv((rec.find((l) => l.startsWith(`${u} `)) ?? "").split(" "));
+      const healthy = rec.filter((l) => / status=running health=healthy /.test(l));
+      const a = S(`${RAW}after-reset.txt`), sentinel = kv(((S("evidence/M3/raw/persistence.txt").meta ?? [])[0] ?? "").split(" ")).sentinel;
+      const ak = kv(a.sentinels ?? []), jobs = kv(a.jobs_since_window ?? []), arch = kv((a.archive ?? []).flatMap((l) => l.split(" ")));
+      const runs = (f) => Object.fromEntries((S(f).namespace_runs ?? []).map((l) => kv(l.split(" "))).map((x) => [x.which, x]));
+      const pre = runs(`${RAW}egress-local-before-install.txt`), post = runs(`${RAW}egress-local-fallback.txt`);
+      const fm = kv(((S(`${RAW}egress-local-fallback.txt`).meta ?? [])[1] ?? "").split(" ")), host = kv(((S(`${RAW}egress-local-fallback.txt`).host_set ?? [])[0] ?? "").split(" "));
+      const empty = (x) => x?.connected_routes === "0" && x?.before === "0";
+      const filled = (x) => empty(x) && x.exit === "0" && +x.after_count >= 1 && x.matches_recorded === "yes";
+      const m2 = json("evidence/M2/kernel-6.18.50/verification.json").results ?? [];
+      const bp = kv(((S("evidence/M2/kernel-6.18.50/raw/browser-proof.txt").meta ?? [])).flatMap((l) => l.split(" ")));
+      const up = S(`${RAW}up.txt`), upAt = kv(((up.meta ?? [])[0] ?? "").split(" ")).utc, swaps = (up.swap ?? []).filter((l) => /memory\.swap\.max=/.test(l));
+      const cond = {
+        reset_tied: !!tie, no_shutdown_sequence: tie?.shutdown_markers === "0", wifi_loss_recorded: /^\d{4}-/.test(kv(r.local_actions_after_loss ?? []).loss_utc ?? ""),
+        no_local_action: ["sudo_commands", "ssh_logins", "sessions", "console_logins"].every((k) => acts[k] === "0"),
+        d2_on_new_kernel: /^6\.18\.50/.test(cur.kernel ?? "") && cur.page_size === "16384",
+        gated_start: rec.some((l) => /fcpi-data-check: OK /.test(l)) && ["docker.service", "fcpi-stack.service"].every((u) => unit(u).ActiveState === "active" && unit(u).ExecMainStatus === "0") && healthy.length === 11,
+        sentinels: !!sentinel && ak.postgres_read === sentinel && ak.redis_read === sentinel && (ak.rabbitmq_read ?? "").includes(`"messages":["${sentinel}"]`),
+        postgres_redo_done: (a.recovery_logs ?? []).some((l) => /^postgres: .* redo done at /.test(l)),
+        no_job_open: jobs.open_since_window === "0" && jobs.open_before_window === "0",
+        archive_whole: +arch.files > 0 && arch.files_whose_content_differs_from_name === "0" && +arch.live_documents > 0 && arch.without_archive_file === "0",
+        f8_reproduced: pre.installed?.exit === "1" && pre.installed?.after_count === "0" && empty(pre.installed) && filled(pre.deployed),
+        f8_fixed: fm.installed_is_deployed === "yes" && fm.installed_sha256 === sha256File("deploy/host/fcpi-egress-local.sh") && filled(post.installed) && filled(post.deployed) && host.matches_recorded === "yes",
+        chromium_on_new_kernel: ["B01", "B02", "B03", "B04", "B05", "B06", "B07"].every((id) => m2.find((x) => x.test_id === `M2-${id}`)?.state === "PASS") && /^6\.18\.50/.test(bp.kernel ?? "") && bp.page_size === "16384",
+        recreated_after_reset: !!upAt && !!cur.up_since_utc && upAt > cur.up_since_utc && swaps.length === 11 && swaps.every((l) => / memory\.swap\.max=0$/.test(l)),
+      };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; reset: earlier boot's last entry ${tie?.ended}, shutdown markers ${tie?.shutdown_markers}, rsts=${kv(((r.current ?? [])[1] ?? "").split(" ")).rsts}; now ${cur.kernel} page_size=${cur.page_size}; healthy after the gated start=${healthy.length}; sentinel ${sentinel} read back; jobs open=${jobs.open_since_window}/${jobs.open_before_window}; archive files=${arch.files}, mismatched=${arch.files_whose_content_differs_from_name}, live documents=${arch.live_documents} without a file=${arch.without_archive_file}; F8 before: installed exit=${pre.installed?.exit} set=${pre.installed?.after_count}, after: ${post.installed?.after_count} recorded networks; M2 B01-B07 on 6.18.50=${m2.filter((x) => /^M2-B0[1-7]$/.test(x.test_id)).map((x) => x.state).join(",")}; stack recreated at ${upAt}, swap limits 0=${swaps.filter((l) => / memory\.swap\.max=0$/.test(l)).length}/${swaps.length}` };
     } },
 
   // ================================================================ the review of record
