@@ -761,7 +761,7 @@ const checks = {
   // ===================================================================== close-out (evidence/M1/review/REVIEW.md)
   // Each reads evidence only the close-out collects, so it is NOT_RUN against M1's own record.
   V19: { name: "dockerd-stays-down-while-the-data-check-fails", inputs: [`${RAW}docker-gate.txt`, "deploy/host/docker.service.d/20-fcpi-guard.conf"],
-    expected: "with a failing data check, dockerd is observed, sampling every second and logging each change of docker's and fcpi-stack's states and the job queue, until systemd stops restarting it (StartLimitBurst) or for at least 400 s: no dockerd process and no project process at any sample, NRestarts and Result recorded, the data manifest unchanged; the guard drop-in is deployed as in the repository and runs after the data check; after the restore the guard table is loaded with its 4 rules (R13)",
+    expected: "with a failing data check, dockerd is observed, sampling every second and logging each change of docker's and fcpi-stack's states and the job queue, until systemd stops restarting it: it reaches StartLimitBurst within 60 s, no restart job reaches fcpi-stack, no dockerd process and no project process appears at any sample, NRestarts and Result are recorded and the data manifest is unchanged; after the restore fcpi-stack is active; the guard drop-in is deployed as in the repository and runs after the data check; after the restore the guard table is loaded with its 4 rules (R13)",
     run() {
       const s = sections(`${RAW}docker-gate.txt`);
       if (!s.start_limit) return { notRun: true, actual: "this transcript predates the restart-limit observation (REVIEW.md R13)" };
@@ -769,10 +769,10 @@ const checks = {
       const l = k("start_limit"), g = k("gated_start"), r = k("restored_start"), di = k("drop_in");
       const guardHash = sha256(read("deploy/host/docker.service.d/20-fcpi-guard.conf"));
       const order = /path=\/opt\/firecrawl-pi\/deploy\/host\/fcpi-data-check\.sh path=\/usr\/sbin\/nft/.test((s.drop_in ?? []).join(" "));
-      const long = l.reached_failed === "yes" || Number(l.observed_s) >= 400;
+      const long = l.reached_failed === "yes" && Number(l.observed_s) <= 60;
       const tl = (s.start_limit_timeline ?? []).filter((x) => /^t\+\d+ /.test(x));
       const ok = long && l.max_dockerd_processes === "0" && l.max_writers === "0" && l.active_state !== "active" && /^\d+$/.test(l.nrestarts ?? "") && !!l.result &&
-        tl.length > 0 && Number(l.check_failures_total) >= 1 && g.manifest_unchanged === "yes" && di.guard_drop_in_sha256 === guardHash && di.guard_repo_sha256 === guardHash && order &&
+        tl.length > 0 && !tl.some((x) => /fcpi-stack\.service:restart/.test(x)) && Number(l.check_failures_total) >= 1 && r.fcpi_stack === "active" && g.manifest_unchanged === "yes" && di.guard_drop_in_sha256 === guardHash && di.guard_repo_sha256 === guardHash && order &&
         r.revived_healthy === "6" && r.guard_table === "present" && r.guard_rules === "4";
       return { ok, actual: `observed ${l.observed_s} s, reached failed=${l.reached_failed} (active=${l.active_state} sub=${l.sub_state} result=${l.result} NRestarts=${l.nrestarts}; states seen: ${(lineOf(s.start_limit, "states_seen=") ?? "").slice(12)}); max dockerd processes=${l.max_dockerd_processes}, max project processes=${l.max_writers}; data-check failures=${l.check_failures_total}; timeline (${tl.length} changes): ${tl.join(" | ").slice(0, 1400)}; manifest unchanged=${g.manifest_unchanged}; policy ${(lineOf(s.drop_in, "restart=") ?? "").trim()}; guard drop-in deployed=${di.guard_drop_in_sha256 === guardHash}, runs after the data check=${order}; after restore: revived healthy=${r.revived_healthy}, guard table=${r.guard_table} with ${r.guard_rules} rules` };
     } },

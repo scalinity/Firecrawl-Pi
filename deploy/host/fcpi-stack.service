@@ -1,9 +1,14 @@
 [Unit]
 Description=FCPI Compose stack (project fcpi)
 Documentation=file:///opt/firecrawl-pi/deploy/compose.yaml
-Requires=fcpi-data-check.service docker.service
+# Wants, not Requires, for docker.service: Requires carries a restart of dockerd to this unit,
+# and its ExecStop (`docker compose stop`) then waits on the socket of the dockerd being
+# restarted until TimeoutStopSec, which held a dockerd restart for 180 s and left this unit
+# failed (evidence/M1/closeout/raw/docker-gate-requires.txt). Containers are revived by their
+# restart policies behind the data check either way.
+Requires=fcpi-data-check.service
+Wants=docker.service network-online.target
 After=fcpi-data-check.service docker.service network-online.target
-Wants=network-online.target
 
 [Service]
 Type=oneshot

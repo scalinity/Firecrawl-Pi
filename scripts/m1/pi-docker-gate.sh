@@ -25,8 +25,8 @@ manifest() { sudo -n find /srv/firecrawl-pi -xdev -printf '%p|%y|%s|%T@|%u:%g|%m
 writers() { pgrep -u "$UIDS" | wc -l; }
 restore() {
   sudo -n systemctl unset-environment PI_CONFIG_FILE
-  sudo -n systemctl reset-failed docker.service docker.socket 2>/dev/null
-  sudo -n systemctl start docker.socket docker.service
+  sudo -n systemctl reset-failed docker.service docker.socket fcpi-stack.service 2>/dev/null
+  sudo -n systemctl start docker.socket docker.service fcpi-stack.service
   sudo -n rm -rf -- "$T"
 }
 trap restore EXIT
@@ -60,8 +60,9 @@ echo "start_exit=${PIPESTATUS[0]}"
 # Restart=always retries; observe until systemd gives up (StartLimitBurst) or 420 s pass,
 # sampling every second, so a late or brief dockerd start could not be missed. Each change
 # of docker's state, its restart count, fcpi-stack's state or the job queue is logged, to
-# show what a queued restart is waiting for (fcpi-stack Requires docker.service, so a
-# restart of docker is carried to it, and its ExecStop runs `docker compose stop`).
+# show what a queued restart waits for. With Requires=docker.service, fcpi-stack took each
+# restart of docker and its `docker compose stop` held it for TimeoutStopSec; the unit now
+# Wants docker.service (evidence/M1/closeout/raw/docker-gate-requires.txt).
 t0=$(date +%s); max_dockerd=0; max_writers=0; states=""; last=""; timeline=()
 while :; do
   n=$(pgrep -xc dockerd); w=$(writers)
@@ -91,12 +92,15 @@ printf '%s\n' "${timeline[@]}"
 
 sec restored_start
 sudo -n systemctl unset-environment PI_CONFIG_FILE
-sudo -n systemctl reset-failed docker.service docker.socket
+# The restore leaves fcpi-stack as the test found it, active (with Requires=docker.service a
+# dockerd restart used to leave it failed: evidence/M1/closeout/raw/docker-gate-requires.txt).
+sudo -n systemctl reset-failed docker.service docker.socket fcpi-stack.service
 sudo -n systemctl start docker.socket docker.service; echo "start_exit=$?"
 for i in $(seq 1 90); do
   [ "$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter health=healthy | wc -l)" = 6 ] && break
   sleep 3
 done
+sudo -n systemctl start fcpi-stack.service
 echo "docker=$(systemctl is-active docker.service) result=$(systemctl show -p Result --value docker.service) fcpi_stack=$(systemctl is-active fcpi-stack.service)"
 echo "revived_healthy=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter health=healthy | wc -l) writers=$(writers)"
 echo "manager_env_PI_CONFIG_FILE=$(systemctl show-environment | grep -c '^PI_CONFIG_FILE=')"
