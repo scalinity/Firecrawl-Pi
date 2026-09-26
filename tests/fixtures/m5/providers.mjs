@@ -113,6 +113,7 @@ export async function parserHandler(req, res) {
     if (mode === "http-401") return json(res, 401, { detail: "Invalid API key" });
     if (mode === "http-402") return json(res, 402, { detail: "Insufficient credits" });
     if (mode === "http-500") return json(res, 500, { detail: "Internal error" });
+    if (mode === "no-job-id") return json(res, 200, { status: "PENDING" });
     const pages = Math.max(1, (file.toString("latin1").match(/\/Type \/Page\b(?!s)/g) ?? []).length);
     const scanned = /\/Subtype \/Image/.test(file.toString("latin1")) && !/BT /.test(file.toString("latin1"));
     const id = `pjb-${randomUUID()}`, fileId = `file-${randomUUID()}`;

@@ -34,7 +34,12 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
   const breakers = new Map();
   const breakerOf = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
 
-  return async function parse({ logicalId, owner, bytes, pages, reason }, signal) {
+  // A parse that took a half-open breaker's one probe and ended with no verdict hands the probe back (review W10).
+  return async function parse(args, signal) {
+    const hold = {};
+    try { return await parseOnce(args, signal, hold); } finally { if (hold.probe && hold.breaker.probing) hold.breaker.neutral(); }
+  };
+  async function parseOnce({ logicalId, owner, bytes, pages, reason }, signal, hold) {
     const budget = getBudget(), P = budget.parsing;
     const name = getSelection().parser ?? P.defaultParser;
     const pp = budget.parsers[name];
@@ -55,7 +60,9 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     if (prov.credential && !cred) throw fail("PARSER_REQUIRED", `the document needs the complex-document parser (${reason.replace("_", " ")}), and ${pp.provider} has no credential in this deployment`);
     if (prov.paid && !paidDispatch) throw fail("PAID_DISPATCH_DISABLED", `'${name}' is a paid parser and paid dispatch is disabled (PI_PAID_DISPATCH_ENABLED=false)`);
     const breaker = breakerOf(pp.provider);
+    const probe = breaker.state() === "half_open";
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${pp.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
+    Object.assign(hold, { breaker, probe });
     const amount = pages * card.creditsPerPage;
     const { day, month } = periodStarts();
     const r = await store.reserveBudget({ id: randomUUID(), callKey: `${logicalId}:parse:${docSha.slice(0, 32)}`, logicalId, category: pp.category, caps: cat.caps,
@@ -104,6 +111,7 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     let jobId = null;
     try { jobId = JSON.parse(up.body.toString("utf8"))?.id ?? null; } catch { /* below */ }
     if (typeof jobId !== "string" || !/^[A-Za-z0-9_-]{1,100}$/.test(jobId)) {
+      breaker.failure();
       await store.markBudgetUncertain(res.id, "upload answered without a job id");
       throw fail("PROVIDER_UNCERTAIN", "the provider accepted the upload without naming its job; its credits stay reserved");
     }
@@ -157,5 +165,5 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     if (!markdown) throw fail("PARSE_EMPTY", `the provider returned no text for ${pagesOut.length} pages`);
     await store.parseCachePut({ key, owner: owner ?? "", bytesSha256: docSha, parser: name, pages: pagesOut.length, markdown, days: P.cacheDays });
     return { ok: true, parser: name, markdown, pages: pagesOut.length, cached: false, credits, file: fileOutcome };
-  };
+  }
 }

@@ -64,6 +64,17 @@ test("limits are checked before any spend: pages, size, type", async () => {
   } finally { await r.srv.close(); }
 });
 
+test("an upload answered without a job id counts against the breaker; its credits stay reserved (review W10)", async () => {
+  const r = await rig();
+  try {
+    for (let i = 0; i < 3; i++) await assert.rejects(r.parse(req(withMode("no-job-id"))), (e) => e.failureClass === "PROVIDER_UNCERTAIN");
+    const uploads = r.stats().uploads;
+    await assert.rejects(r.parse(req(docs.scanPdfBytes())), (e) => e.failureClass === "PROVIDER_UNAVAILABLE");
+    assert.equal(r.stats().uploads, uploads, "the open breaker sent nothing");
+    assert.deepEqual(r.store.states(), ["UNCERTAIN", "UNCERTAIN", "UNCERTAIN"]);
+  } finally { await r.srv.close(); }
+});
+
 test("provider refusals release the credits; a failed or unfinished job keeps them reserved until reconciled", async () => {
   for (const [mode, cls, state] of [["http-401", "PROVIDER_AUTH_FAILED", "RELEASED"], ["http-402", "PROVIDER_BILLING", "RELEASED"], ["http-500", "PROVIDER_ERROR", "RELEASED"],
     ["job-fails", "PARSE_FAILED", "UNCERTAIN"], ["never-finishes", "PROVIDER_UNCERTAIN", "UNCERTAIN"], ["empty", "PARSE_EMPTY", "SETTLED"]]) {

@@ -115,6 +115,23 @@ test("three provider failures open the breaker: the next call is refused without
   } finally { await r.srv.close(); }
 });
 
+test("a half-open probe that ends without a verdict hands the probe back (review W10)", async () => {
+  const r = await rig({ mutate: (b) => { b.breaker.openMs = 1000; } });
+  try {
+    for (let i = 0; i < 3; i++) await r.extract(req({ prompt: "fcpi-mode=http-500" }));
+    assert.equal(r.adapter.breakerState("fixture-model"), "open");
+    await new Promise((res) => setTimeout(res, 1100));
+    // The probe's reservation fails in the database: no provider verdict is recorded.
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async () => { r.store.reserveBudget = reserve; throw new Error("connection terminated"); };
+    await assert.rejects(r.extract(req()), /connection terminated/);
+    // The next call is admitted as the probe, succeeds and closes the breaker.
+    const out = await r.extract(req());
+    assert.equal(out.ok, true);
+    assert.equal(r.adapter.breakerState("fixture-model"), "closed");
+  } finally { await r.srv.close(); }
+});
+
 test("an unanswered call stays reserved and is never sent again; a settled one is reused without a charge", async () => {
   const r = await rig({ timeoutMs: 1500 });
   try {

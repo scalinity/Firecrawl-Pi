@@ -62,7 +62,13 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
   const breakerOf = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
 
   // messages: the chat; schema: the strict schema; returns { content, refusal, finishReason, usage, cost, reused, reservationId }.
-  async function call({ logicalId, callKey, kind, model, messages, schema, maxOutputTokens, requestHash, deadline, signal }) {
+  // A call that took a half-open breaker's one probe and ended with no verdict (a database error, say)
+  // hands the probe back, so the breaker cannot stay shut until a restart (review W10).
+  async function call(args) {
+    const hold = {};
+    try { return await callOnce(args, hold); } finally { if (hold.probe && hold.breaker.probing) hold.breaker.neutral(); }
+  }
+  async function callOnce({ logicalId, callKey, kind, model, messages, schema, maxOutputTokens, requestHash, deadline, signal }, hold) {
     const budget = getBudget();
     const m = budget.models[model];
     if (!m) throw fail("MODEL_NOT_ALLOWED", `model '${String(model).slice(0, 80)}' is not in the budget policy's allowlist`);
@@ -73,7 +79,9 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const cred = readCredential(providersDir, prov.credential);
     if (prov.credential && !cred) throw fail("BLOCKED_CREDENTIAL", `provider ${m.provider} has no credential in this deployment`);
     const breaker = breakerOf(m.provider);
+    const probe = breaker.state() === "half_open";
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${m.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
+    Object.assign(hold, { breaker, probe });
     const body = { model, messages, temperature: 0, n: 1, response_format: { type: "json_schema", json_schema: { name: "extraction", strict: true, schema } },
       [prov.maxTokensParam]: maxOutputTokens, ...(prov.store === false ? { store: false } : {}) };
     const payload = Buffer.from(JSON.stringify(body));
