@@ -175,3 +175,14 @@ test("a scrape the core stopped answering (502) advises against an unchanged ret
   const map = T.firecrawl_map.shape({ status: 502, json: { success: false, error: "x" }, headers: {} }, {});
   assert.equal(map.payload.error.advice, undefined);
 });
+
+test("a running job's page resumes after what it returned; a finished job's last page ends", () => {
+  const T = byName(makeTools(m()));
+  const id = "0f8fad5b-d9cb-469f-a165-70867728950e";
+  const running = T.firecrawl_check_crawl_status.shape({ status: 200, json: { success: true, status: "scraping", completed: 2, total: 9, data: [{ markdown: "a" }, { markdown: "b" }] }, headers: {} }, { id, skip: 3 });
+  assert.equal(running.payload.nextSkip, 5);
+  const empty = T.firecrawl_check_crawl_status.shape({ status: 200, json: { success: true, status: "scraping", completed: 0, total: 0, data: [] }, headers: {} }, { id, skip: 0 });
+  assert.equal(empty.payload.nextSkip, 0);
+  const done = T.firecrawl_check_crawl_status.shape({ status: 200, json: { success: true, status: "completed", completed: 2, total: 2, data: [{ markdown: "a" }, { markdown: "b" }] }, headers: {} }, { id, skip: 0 });
+  assert.equal(done.payload.nextSkip, null);
+});

@@ -160,7 +160,10 @@ function shape(kind, tool, r, args, m, omitted) {
         break;
       }
       payload.returned = payload.data.length;
-      const more = payload.returned < data.length || !!b.next;
+      // A running job's next poll resumes after what this one returned, even when every current document
+      // fitted: later documents arrive past them. A finished job has more only while documents remain.
+      const running = !["completed", "failed", "cancelled"].includes(b.status);
+      const more = running || payload.returned < data.length || !!b.next;
       payload.nextSkip = more ? skip + payload.returned : null;
       return { payload };
     }
