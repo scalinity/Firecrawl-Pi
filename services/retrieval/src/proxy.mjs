@@ -19,7 +19,7 @@ export class ProxySessions {
   // A session for one browser attempt; returns the credential the browser presents.
   open(attemptId, { expiresAt, maxBytes }) {
     const password = randomBytes(24).toString("hex");
-    this.#s.set(attemptId, { hash: digest(password), expiresAt, maxBytes, bytes: 0, requests: 0, denied: [], sockets: new Set() });
+    this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, bytes: 0, requests: 0, denied: [], sockets: new Set() });
     return { username: attemptId, password };
   }
   auth(header) {
@@ -44,7 +44,7 @@ export class ProxySessions {
 export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupFixture, log }) {
   const refuse = (s, target, e) => {
     s.denied.push({ host: target, class: e.failureClass ?? "PROXY_ERROR" });
-    log({ event: "proxy_denied", target_host: target, failure: e.failureClass ?? "PROXY_ERROR", detail: e.detail ?? e.message });
+    log({ event: "proxy_denied", attempt_id: s.attemptId, target_host: target, failure: e.failureClass ?? "PROXY_ERROR", detail: e.detail ?? e.message });
   };
   const count = (s, n, ...socks) => {
     s.bytes += n;
@@ -55,11 +55,12 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     const s = sessions.auth(req.headers["proxy-authorization"]);
     if (!s) { res.writeHead(407, { "proxy-authenticate": 'Basic realm="fcpi"', connection: "close" }).end(); return; }
     s.requests++;
+    // The refused request is named by the host and port it asked for, even when it fails to parse.
     let host = "?";
+    try { host = new URL(req.url).host || "?"; } catch {}
     try {
       const policy = getPolicy();
       const target = parseTarget(req.url, policy);
-      host = target.host;
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
       const headers = {};
       for (const [k, v] of Object.entries(req.headers)) if (!HOP.has(k)) headers[k] = v;
@@ -111,7 +112,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       clientSocket.on("close", drop);
       upstream.on("close", drop);
     } catch (e) {
-      refuse(s, host, e);
+      refuse(s, req.url, e);
       clientSocket.end(`HTTP/1.1 403 Forbidden\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nfcpi: ${e.failureClass ?? "refused"}\n`);
     }
   });
