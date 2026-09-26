@@ -27,7 +27,7 @@ import { makeUpstream, sendJson } from "./src/upstream.mjs";
 import { makeJobs } from "./src/jobs.mjs";
 import { makeMcpProxy } from "./src/mcp.mjs";
 import { makeExtractor } from "./src/extractor.mjs";
-import { makeExtractJobs } from "./src/extract.mjs";
+import { makeExtractJobs, cutText } from "./src/extract.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -334,10 +334,12 @@ async function scrapeWithJson(ctx, body, json) {
     // The extraction's deadline is what is left of the request's; the gateway waits five seconds past it, so an
     // answer the retrieval service sends at its deadline (a paid one, perhaps) still arrives (review W14).
     const left = Math.max(1000, cfg.coreTimeoutMs + 10000 - (Date.now() - t0));
+    // The model reads the page's markdown up to the extraction limit; the gateway sends no more (review W4).
+    const md = cutText(doc.markdown, M.limits.extract.maxDocumentBytes);
     let x;
     try {
       x = await extractor.extract({ logicalId: `scrape:${ctx.id}`, schema: json.schema, prompt: json.prompt ?? null,
-        documents: [{ url: doc.metadata?.url ?? body.url, markdown: typeof doc.markdown === "string" ? doc.markdown : "" }], deadline: new Date(Date.now() + left).toISOString() }, left + 5000);
+        documents: [{ url: doc.metadata?.url ?? body.url, markdown: md.text }], deadline: new Date(Date.now() + left).toISOString() }, left + 5000);
     } catch (e) { return ctx.send(503, { success: false, code: "EXTRACTION_UNAVAILABLE", error: `The extraction service could not be reached (${e.code}); the page was scraped but not extracted.` }, { "retry-after": "10" }); }
     const failure = x.status === 200 && x.json?.ok ? null : (x.json?.failure ?? null);
     if (failure || x.status !== 200) {
@@ -346,7 +348,8 @@ async function scrapeWithJson(ctx, body, json) {
     }
     doc.json = x.json.data;
     if (!wanted.includes("markdown")) delete doc.markdown;
-    if (x.json.warnings?.length) doc.warning = [doc.warning, ...x.json.warnings].filter(Boolean).join("; ");
+    const warnings = [...(md.cut ? [`the page's markdown was cut at ${M.limits.extract.maxDocumentBytes} bytes before extraction`] : []), ...(x.json.warnings ?? [])];
+    if (warnings.length) doc.warning = [doc.warning, ...warnings].filter(Boolean).join("; ");
     ctx.send(200, { success: true, data: doc, fcpi: { extraction: { model: x.json.model, sources: x.json.sources, missingRequired: x.json.missingRequired, usage: x.json.usage } } });
   } finally { syncInFlight -= 1; }
 }

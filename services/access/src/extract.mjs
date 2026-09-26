@@ -11,6 +11,14 @@
 // A job past its deadline is closed FAILED. Nothing here chooses a model or holds a provider credential.
 import { randomUUID } from "node:crypto";
 
+// A page's markdown cut to `max` bytes, where the model adapter cuts it too (its budget policy's
+// maxDocumentBytes): the gateway keeps and sends nothing the model would not read (review W4).
+export function cutText(s, max) {
+  if (typeof s !== "string") return { text: "", cut: false };
+  if (Buffer.byteLength(s) <= max) return { text: s, cut: false };
+  return { text: Buffer.from(s).subarray(0, max).toString("utf8").replace(/\uFFFD$/, ""), cut: true };
+}
+
 export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log }) {
   const instance = randomUUID();
   const L = cfg.manifest.limits;
@@ -33,10 +41,12 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     // A target that answered an error (404, 500 …) gave an error page, not the page asked for: no extraction from it.
     const targetStatus = Number(r.json.data.metadata?.statusCode ?? 200);
     if (targetStatus >= 400) return { failure: { code: `TARGET_HTTP_${targetStatus}`, error: `the page answered HTTP ${targetStatus}` } };
-    const buf = Buffer.from(JSON.stringify(r.json.data));
-    const put = await archive.put(buf);
+    // Only the page's text, cut where the adapter would cut it, and its metadata are kept.
+    const md = cutText(r.json.data.markdown, L.extract.maxDocumentBytes);
+    const doc = { markdown: md.text, metadata: r.json.data.metadata ?? {}, ...(md.cut ? { cutAt: L.extract.maxDocumentBytes } : {}) };
+    const put = await archive.put(Buffer.from(JSON.stringify(doc)));
     await store.addDocuments(job.id, [{ ordinal: i + 1, docKey: key, sha256: put.sha256, bytes: put.bytes }]);
-    return { doc: r.json.data };
+    return { doc };
   }
 
   async function runOne() {
@@ -56,7 +66,7 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
       const r = await scrapeOne(job, url, i, have);
       if (r.failure?.retry) { say({ job: job.id, action: "scrape_deferred", url_index: i, reason: r.failure.code }); return false; }
       if (r.failure) { errors.push(note(job, url, r.failure.code, r.failure.error, errors.length)); continue; }
-      docs.push({ url: r.doc?.metadata?.url ?? r.doc?.metadata?.sourceURL ?? url, markdown: typeof r.doc?.markdown === "string" ? r.doc.markdown : "" });
+      docs.push({ url: r.doc?.metadata?.url ?? r.doc?.metadata?.sourceURL ?? url, markdown: cutText(r.doc?.markdown, L.extract.maxDocumentBytes).text, cutAt: r.doc?.cutAt ?? null });
     }
     const counts = { total: urls.length };
     if (!docs.length) {
@@ -67,7 +77,7 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     let x;
     try {
       x = await extractor.extract({ logicalId: job.submission_key, schema: job.request.schema, prompt: job.request.prompt ?? null, systemPrompt: job.request.systemPrompt ?? null,
-        documents: docs, deadline: new Date(job.deadline).toISOString() }, Math.max(5000, new Date(job.deadline).getTime() - Date.now()));
+        documents: docs.map((d) => ({ url: d.url, markdown: d.markdown })), deadline: new Date(job.deadline).toISOString() }, Math.max(5000, new Date(job.deadline).getTime() - Date.now()));
     } catch (e) {
       // Unreachable: the job stays RUNNING and is tried again (its reservations make that safe); a delivered
       // request that lost its answer is the same, since the retry reuses what was settled.
@@ -77,7 +87,8 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     const j = x.json ?? {};
     const failure = x.status === 200 && j.ok ? null : (j.failure ?? { class: `EXTRACTOR_HTTP_${x.status}`, detail: `the extraction service answered ${x.status}` });
     // The units and usage are kept whether or not any unit succeeded: they say what was tried and what it cost.
-    const result = { data: failure ? null : j.data ?? null, sources: j.sources ?? {}, warnings: j.warnings ?? [], missingRequired: j.missingRequired ?? [],
+    const cutWarnings = docs.filter((d) => d.cutAt).map((d) => `${d.url}: the page's markdown was cut at ${d.cutAt} bytes before extraction`);
+    const result = { data: failure ? null : j.data ?? null, sources: j.sources ?? {}, warnings: [...cutWarnings, ...(j.warnings ?? [])], missingRequired: j.missingRequired ?? [],
       model: j.model ?? null, units: j.units ?? [], usage: j.usage ?? null, ...(failure ? { failure } : {}) };
     const buf = Buffer.from(JSON.stringify(result));
     const put = await archive.put(buf);

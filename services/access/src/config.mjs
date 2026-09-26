@@ -97,6 +97,7 @@ export function checkManifest(m, { mcp = false } = {}) {
     pos(L.extract.maxUrls, "limits.extract.maxUrls", 25);
     pos(L.extract.deadlineMinutes, "limits.extract.deadlineMinutes", 60);
     pos(L.extract.scrapeTimeoutMs, "limits.extract.scrapeTimeoutMs", 90000);
+    pos(L.extract.maxDocumentBytes, "limits.extract.maxDocumentBytes", 4 * 1048576);
   }
   if (m.routes.some((r) => r.kind === "extract") && !L.extract) throw new Error("capability manifest: an extract route needs limits.extract");
   if (m.bodies.search && m.bodies.search.fields.limit.max > 10) throw new Error("capability manifest: search limit exceeds spec §13's maximum of 10");

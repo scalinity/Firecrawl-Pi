@@ -11,7 +11,7 @@ import { openArchive, MARKER } from "../src/archive.mjs";
 import { makeExtractJobs } from "../src/extract.mjs";
 import { ExtractorError } from "../src/extractor.mjs";
 
-const M = { limits: { extract: { maxUrls: 10, deadlineMinutes: 20, scrapeTimeoutMs: 60000 } } };
+const M = { limits: { extract: { maxUrls: 10, deadlineMinutes: 20, scrapeTimeoutMs: 60000, maxDocumentBytes: 1048576 } } };
 class Ledger {
   constructor(job) { this.job = { state: "RECEIVED", dispatch_attempts: 0, ...job }; this.docs = []; this.finished = null; }
   async claimExtract() {
@@ -105,4 +105,16 @@ test("a page whose target answered an error is a named page failure, not text to
   assert.equal(r.store.finished.to, "PARTIAL");
   assert.deepEqual(r.store.finished.errors.errors.map((e) => [e.url, e.code]), [["https://a.example/2", "TARGET_HTTP_404"]]);
   assert.deepEqual(r.calls.extract[0].documents.map((d) => d.url), ["https://a.example/1"]);
+});
+
+test("a page's markdown is cut to the extraction limit as it lands, archived and sent cut, and the cut is said (review W4)", async () => {
+  const big = `Price: 1\n${"x".repeat(3 * 1048576)}`;
+  const r = await rig({ job: { request: REQ }, core: (b) => page(b.url, big), extract: ok });
+  await r.run();
+  assert.equal(r.store.finished.to, "SUCCEEDED");
+  for (const d of r.calls.extract[0].documents) assert.equal(Buffer.byteLength(d.markdown), 1048576);
+  const src = r.store.docs.find((d) => d.docKey === "source:0");
+  assert.ok(src.bytes < 1.1 * 1048576, "the archive holds the cut page");
+  const result = JSON.parse((await r.archive.read(r.store.docs.find((d) => d.docKey === "result").sha256)).toString());
+  assert.equal(result.warnings.filter((w) => /cut at 1048576 bytes/.test(w)).length, 2);
 });
