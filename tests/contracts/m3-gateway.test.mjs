@@ -553,8 +553,13 @@ test("a revoked token stops working within two seconds, without a restart", asyn
   assert.equal((await H.call("GET", "/platform/v1/status", { token: T.rev })).status, 200);
   writeFileSync(join(H.dir, "clients.next"), clientsText([["a", "pa", ALL], ["b", "pb", ALL], ["ro", "pa", "read"]]));
   renameSync(join(H.dir, "clients.next"), join(H.dir, "clients"));
-  await sleep(1200);
-  assert.equal((await H.call("GET", "/platform/v1/status", { token: T.rev })).status, 401);
+  // Polled up to the spec's two seconds, not slept past the reload; only the final 401 counts against
+  // the failure budget, since every poll before it is still a valid token.
+  const t0 = Date.now();
+  let st;
+  do { await sleep(50); st = (await H.call("GET", "/platform/v1/status", { token: T.rev })).status; } while (st === 200 && Date.now() - t0 < 2000);
+  assert.equal(st, 401);
+  assert.ok(Date.now() - t0 <= 2100, `refused after ${Date.now() - t0} ms`);
   assert.equal((await H.call("GET", "/platform/v1/status", { token: T.a })).status, 200);
 });
 

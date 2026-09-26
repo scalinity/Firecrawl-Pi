@@ -41,8 +41,12 @@ test("a replaced registry takes effect within a second: a removed token is refus
     assert.ok(r.authenticate(`Bearer ${tok("r", 9)}`));
     writeFileSync(join(dir, "next"), `${line("a", "pa", "read", tok("a", 1))}\n`);
     renameSync(join(dir, "next"), f);
-    await new Promise((res) => setTimeout(res, 1100));
+    // Polled rather than slept past the reload, so a loaded machine cannot turn it into a flake; the
+    // bound it asserts is the spec's (a revocation takes effect within two seconds).
+    const t0 = Date.now();
+    while (r.authenticate(`Bearer ${tok("r", 9)}`) && Date.now() - t0 < 2000) await new Promise((res) => setTimeout(res, 50));
     assert.equal(r.authenticate(`Bearer ${tok("r", 9)}`), null);
+    assert.ok(Date.now() - t0 <= 2050, `refused after ${Date.now() - t0} ms`);
     assert.ok(r.authenticate(`Bearer ${tok("a", 1)}`));
   } finally { rmSync(dir, { recursive: true }); }
 });
