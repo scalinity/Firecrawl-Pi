@@ -83,14 +83,21 @@ function pageParams(url) {
   return { skip: int("skip", 0, 1e9) ?? 0, limit: int("limit", 1, L.results.pageMaxLimit), explicitLimit: sp.has("limit") };
 }
 
-function uncertain(ctx, job) {
+// retry: what sending this request again does. "same" for a submission with an idempotency key (it
+// returns this job), "new" for one without (it creates a second job), "read" for a read.
+const RETRY = {
+  same: "Retry this request with the same idempotency key, or read the receipt.",
+  new: "Read the receipt: sent again without an idempotency key, this request would create a second job.",
+  read: "Retry shortly, or read the receipt.",
+};
+function uncertain(ctx, job, retry) {
   ctx.send(503, { success: false, code: "SUBMISSION_UNCERTAIN", id: job.id, receipt: `${ctx.origin}/platform/v1/jobs/${job.id}`,
-    error: "The job is recorded, but whether the core has accepted it is still being reconciled. Retry this request with the same idempotency key, or read the receipt." }, { "retry-after": "10" });
+    error: `The job is recorded, but whether the core has accepted it is still being reconciled. ${RETRY[retry]}` }, { "retry-after": "10" });
 }
 
 // ---- asynchronous submissions ------------------------------------------------------------------------
-function submissionAnswer(ctx, route, job, invalidURLs) {
-  if (job.state === "SUBMITTING" || job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job);
+function submissionAnswer(ctx, route, job, invalidURLs, keyed) {
+  if (job.state === "SUBMITTING" || job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job, keyed ? "same" : "new");
   if (job.state === "FAILED" && job.http_status && !job.upstream_id) return ctx.send(job.http_status, { success: false, code: job.error_code, error: job.error });
   ctx.send(200, { success: true, id: job.id, url: `${ctx.origin}${PATH[route.kind]}/${job.id}`, ...(route.kind === "batch" ? { invalidURLs } : {}) });
 }
@@ -116,7 +123,7 @@ async function submit(ctx, route) {
     await withTimeout(jobs.kick(), cfg.submitTimeoutMs + 10000);
     job = (await store.getJobAny(job.id)) ?? job;
   }
-  submissionAnswer(ctx, route, job, invalidURLs);
+  submissionAnswer(ctx, route, job, invalidURLs, idemKey !== undefined);
 }
 
 // ---- job lookups -------------------------------------------------------------------------------------
@@ -136,7 +143,7 @@ async function status(ctx, route, id) {
   const self = (s) => `${ctx.origin}${PATH[job.kind]}/${job.id}?skip=${s}${explicitLimit ? `&limit=${limit}` : ""}`;
   const expiresAt = iso(job.results_expire_at) ?? new Date(Date.now() + L.results.retentionDays * 86400000).toISOString();
   if (job.state === "EXPIRED") return expired(ctx, job);
-  if (job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job);
+  if (job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job, "read");
   if (job.state === "RECEIVED" || job.state === "SUBMITTING") {
     return ctx.send(200, { success: true, status: "scraping", completed: 0, total: 0, creditsUsed: 0, expiresAt, data: [], createdAt: iso(job.created_at) });
   }
@@ -196,7 +203,7 @@ async function errors(ctx, route, id) {
   const job = await jobFor(ctx, route, id);
   if (!job) return;
   if (job.state === "EXPIRED") return expired(ctx, job);
-  if (job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job);
+  if (job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job, "read");
   if (job.state === "QUEUED" || job.state === "RUNNING") {
     const r = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}/errors`, { timeoutMs: 15000, maxBytes: 4 * 1048576 }).catch(() => null);
     if (r?.status === 200 && Array.isArray(r.json?.errors)) return ctx.send(200, { errors: r.json.errors, robotsBlocked: r.json.robotsBlocked ?? [] });

@@ -657,6 +657,22 @@ test("the ledger fails after the core accepted a claimed job: the running gatewa
   await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(next)).state), 15000, "the next job dispatched");
 });
 
+test("an uncertain submission's answer says what a retry would do: with a key, without one, and for a read", async () => {
+  for (const keyed of [true, false]) {
+    const h = await harness({ settleMs: 60000 });
+    h.core.mode = "hang";
+    const headers = keyed ? { "x-idempotency-key": `k-uncertain-${randomUUID()}` } : {};
+    const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody(), headers });
+    assert.equal(r.status, 503);
+    assert.equal(r.json.code, "SUBMISSION_UNCERTAIN");
+    assert.match(r.json.error, keyed ? /Retry this request with the same idempotency key/ : /without an idempotency key, this request would create a second job/);
+    const read = await h.call("GET", `/v2/crawl/${r.json.id}`, { token: T.a });
+    assert.equal(read.json.code, "SUBMISSION_UNCERTAIN");
+    assert.match(read.json.error, /Retry shortly, or read the receipt/);
+    assert.doesNotMatch(read.json.error, /idempotency key/);
+  }
+});
+
 test("a submission the core refuses is FAILED and answered like upstream's refusal", async () => {
   const h = await harness();
   h.core.mode = "reject";
