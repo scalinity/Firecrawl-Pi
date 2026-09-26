@@ -345,16 +345,16 @@
     {
       "test_id": "M1-V15",
       "name": "secret-and-identifier-redaction-scan",
-      "utc": "2026-09-26T00:18:06Z",
-      "repository_sha": "20266873242435e32e900aa7ceab209f7e114e5d",
+      "utc": "2026-09-26T00:19:58Z",
+      "repository_sha": "544248f6bb0862855d349692dc97025cee82477b",
       "worktree_dirty": true,
       "code_dirty": false,
       "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
       "patch_series": "none (patches begin in M2)",
-      "config_or_fixture_hash": "ccbf4f44eb2e9cbd1c749d1b2fe6b6bedee14a23723998ffaab716205e2dc735",
+      "config_or_fixture_hash": "5e15a25c078983588a201c61d0d1a8e9a1c50cae2732333735497739c32e71c6",
       "expected": "both positive controls fire every rule (M0's rule set unchanged, plus M1's URL-credential, RabbitMQ default_pass, client-token and live-secret-by-hash rules); then no rule matches in any tracked or new repository file, and no file contains any live M1 secret value (compared by SHA-256 against hashes computed on the Pi)",
       "state": "PASS",
-      "actual": "positive controls fired all 16 M0 and 5 M1 rules; files scanned=259; live secret hashes compared=6; findings=0",
+      "actual": "positive controls fired all 16 M0 and 5 M1 rules; files scanned=260; live secret hashes compared=6; findings=0",
       "exit_code": 0,
       "live_sources": "the Pi over SSH (secret hashes only)",
       "evidence_path": "evidence/M1/closeout/verification.json"
@@ -500,6 +500,22 @@
       "expected": "a throwaway container of the pinned NuQ image initialising empty data runs 010-nuq.sql and 020-fcpi-core-role.sh, ignores the .psql beside them and logs no error; fcpi_core then exists with a password and no special rights, owns nothing, and holds exactly SELECT, INSERT, UPDATE and DELETE on every NuQ table, while the superuser has no password and keeps the cron jobs; a throwaway broker of the pinned image, first booting with 30-fcpi.conf, creates user fcpi with no tags; nothing is left behind (R11)",
       "state": "PASS",
       "actual": "initdb: running /docker-entrypoint-initdb.d/010-nuq.sql;sourcing /docker-entrypoint-initdb.d/020-fcpi-core-role.sh;ignoring /docker-entrypoint-initdb.d/fcpi-core-role.psql; errors=0; role fcpi_core super=false createrole=false createdb=false replication=false bypassrls=false, password set=t; superuser password set=f; nuq owner=postgres; fcpi_core owns 0, holds DELETE,INSERT,SELECT,UPDATE on 4/4 tables; cron postgres:36; broker first boot: users=fcpi[] default_user_tags_env={ok,[]}; leftovers: containers=0 secrets=no",
+      "exit_code": 0,
+      "evidence_path": "evidence/M1/closeout/verification.json"
+    },
+    {
+      "test_id": "M1-V27",
+      "name": "review-record-complete",
+      "utc": "2026-09-26T00:19:38Z",
+      "repository_sha": "da84f0f9d1e2020f7a29a1b8559a1d39cfda9ac1",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series": "none (patches begin in M2)",
+      "config_or_fixture_hash": "802b8a8ab92cb4f46eff1aa716055d25bc1e22b3d7603a8460cae491f92a8cbd",
+      "expected": "the saved /review-2 report (CLAUDE.md §5) gives every finding an outcome (fixed, rejected with evidence, deferred to a later milestone, or returned to an earlier one), cites only commits that exist, and holds no absolute local path",
+      "state": "PASS",
+      "actual": "findings=22; without a recognised outcome=none; commits cited=15, missing=none; absolute local path=false",
       "exit_code": 0,
       "evidence_path": "evidence/M1/closeout/verification.json"
     }

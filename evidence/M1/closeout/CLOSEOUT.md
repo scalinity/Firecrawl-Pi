@@ -4,7 +4,7 @@ The M1 review (`evidence/M1/review/REVIEW.md`) fixed R17–R19 and assigned the 
 
 The close-out ran in two windows.
 
-1. **Window 1 (2026-09-25 23:05–23:17Z).** It closed R5, R8, R10, R11 (PostgreSQL and RabbitMQ), R13, R14 and R16. It then had its own `/review-2` (two Opus 5.5 agents), which found two critical defects:
+1. **Window 1 (2026-09-25 23:05–23:17Z).** It closed R5, R8, R10, R11 (PostgreSQL and RabbitMQ), R13, R14 and R16. It then had its own `/review-2` (two Opus 5.5 agents; the report and every finding's outcome are in `REVIEW.md` beside this file), which found two critical defects:
    - the first R11 design was escalable, because `fcpi_core` owned tables that the superuser's cron jobs change;
    - V23's journal window read local time as UTC, so it read an empty journal.
 
@@ -17,7 +17,7 @@ The close-out ran in two windows.
 - **Audit window:** 23:57:35Z–00:15:52Z.
 - **Deployed commit:** window 2 redeployed after each fix, and each transcript names the commit it ran at. From `raw/restore-fcpi-stack.txt` on, the Pi runs `f4d0cae`, and later commits change only evidence and documentation.
 - **Checks:** `verification.json`, from `FCPI_M1_EVIDENCE=evidence/M1/closeout/ node scripts/m1/verify.mjs`, with every result at `code_dirty: false`.
-  - **26 of 26 rerun checks pass:** V01–V14, V15 (live), V16–V26.
+  - **27 of 27 rerun checks pass:** V01–V14, V15 (live), V16–V27. V27 checks the saved review record, `REVIEW.md` beside this file.
   - **N00–N09 were not rerun.** They prove M1's throwaway proof stack, which the close-out did not touch.
 - **M1's own record reproduces unchanged.** In default mode, the changed verifier reproduces all 27 non-live M1 results byte for byte and regenerates `evidence/M1/snapshot-diff.txt` identically. It also no longer lists the close-out checks there.
 
