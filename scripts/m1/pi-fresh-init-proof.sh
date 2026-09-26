@@ -46,12 +46,17 @@ D run -d --name $PGC --label fcpi.transient=fresh-init-proof --network none --re
 # The entrypoint restarts the server after initdb; wait for the final server, not the
 # temporary one ("PostgreSQL init process complete" comes between them).
 for i in $(seq 1 120); do
-  D logs $PGC 2>&1 | grep -q 'PostgreSQL init process complete' && D exec $PGC pg_isready -q 2>/dev/null && break
+  # grep without -q: an early exit would stop docker logs with SIGPIPE, which pipefail reports.
+  D logs $PGC 2>&1 | grep 'PostgreSQL init process complete' >/dev/null && D exec $PGC pg_isready -q 2>/dev/null && break
   sleep 1
 done
 echo "ready_after_s=$i"
-echo "initdb_scripts=$(D logs $PGC 2>&1 | grep -oE '(running|ignoring) /docker-entrypoint-initdb\.d/[^ ]+' | tr '\n' ';')"
-echo "init_errors=$(D logs $PGC 2>&1 | grep -cE '(ERROR|FATAL):')"
+echo "initdb_scripts=$(D logs $PGC 2>&1 | grep -oE '(running|sourcing|ignoring) /docker-entrypoint-initdb\.d/[^ ]+' | tr '\n' ';')"
+# FATAL "the database system is starting up" answers the readiness probe while the server
+# starts; every other ERROR or FATAL line counts, and is shown with any hex string masked.
+errs=$(D logs $PGC 2>&1 | grep -E '(ERROR|FATAL):' | grep -vE 'FATAL: +the database system is (starting up|shutting down)' | sed -E 's/[0-9a-f]{32,}/<hex>/g')
+echo "init_errors=$(printf '%s' "$errs" | grep -c .)"
+[ -z "$errs" ] || printf 'init_error %s\n' "$errs"
 q() { D exec $PGC psql -U postgres -d postgres -X -Atc "$1" 2>&1; }
 echo "role=$(q "select rolname||' super='||rolsuper||' createrole='||rolcreaterole||' createdb='||rolcreatedb||' replication='||rolreplication||' bypassrls='||rolbypassrls from pg_roles where rolname='fcpi_core'")"
 echo "superuser_has_password=$(q "select rolpassword is not null from pg_authid where rolname='postgres'")"

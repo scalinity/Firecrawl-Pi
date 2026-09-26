@@ -897,7 +897,7 @@ const checks = {
       const s = sections(`${RAW}fresh-init-proof.txt`);
       const p = kv((s.postgres_initdb ?? []).join(" ")), r = s.rabbitmq_first_boot ?? [], c = kv((s.cleanup ?? []).join(" "));
       const scripts = (lineOf(s.postgres_initdb, "initdb_scripts=") ?? "").slice(15);
-      const initOk = /running \/docker-entrypoint-initdb\.d\/010-nuq\.sql;/.test(scripts) && /running \/docker-entrypoint-initdb\.d\/020-fcpi-core-role\.sh;/.test(scripts) &&
+      const initOk = /running \/docker-entrypoint-initdb\.d\/010-nuq\.sql;/.test(scripts) && /sourcing \/docker-entrypoint-initdb\.d\/020-fcpi-core-role\.sh;/.test(scripts) &&
         /ignoring \/docker-entrypoint-initdb\.d\/fcpi-core-role\.psql;/.test(scripts) && p.init_errors === "0";
       const pgOk = p.role === "fcpi_core" && ["super", "createrole", "createdb", "replication", "bypassrls"].every((k) => p[k] === "false") &&
         p.superuser_has_password === "f" && p.fcpi_core_has_password === "t" && p.nuq_owner === "postgres" && p.fcpi_core_owned_objects === "0" &&
