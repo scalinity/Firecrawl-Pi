@@ -906,11 +906,24 @@ const checks = {
       const ok = initOk && pgOk && rmqOk && c.leftover_transient_containers === "0" && c.leftover_secret_dir === "no";
       return { ok, actual: `initdb: ${scripts} errors=${p.init_errors}; role ${(lineOf(s.postgres_initdb, "role=") ?? "").slice(5)}, password set=${p.fcpi_core_has_password}; superuser password set=${p.superuser_has_password}; nuq owner=${p.nuq_owner}; fcpi_core owns ${p.fcpi_core_owned_objects}, holds ${p.fcpi_core_privileges} on ${p.fcpi_core_tables_with_dml}/${p.nuq_tables} tables; cron ${(lineOf(s.postgres_initdb, "cron_job_owners=") ?? "").slice(16)}; broker first boot: ${(lineOf(r, "users=") ?? "").trim()} ${(lineOf(r, "default_user_tags_env=") ?? "").trim()}; leftovers: containers=${c.leftover_transient_containers} secrets=${c.leftover_secret_dir}` };
     } },
+  V27: { name: "review-record-complete", inputs: [`${EV}REVIEW.md`],
+    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding an outcome (fixed, rejected with evidence, deferred to a later milestone, or returned to an earlier one), cites only commits that exist, and holds no absolute local path",
+    run() {
+      const text = read(`${EV}REVIEW.md`);
+      const rows = text.split("\n").filter((l) => /^\| [CWS]\d+ \|/.test(l)).map((l) => l.split(" | "));
+      const outcome = (c) => c[4] ?? "";
+      const bad = rows.filter((c) => !/^(Fixed|Rejected, with the evidence|Deferred to M\d|Returned to M\d|Partly fixed, partly rejected)/.test(outcome(c))).map((c) => c[0].slice(2));
+      const commits = [...new Set([...text.matchAll(/`([0-9a-f]{7})`/g)].map((m) => m[1]))];
+      const missing = commits.filter((c) => { try { git("cat-file", "-e", `${c}^{commit}`); return false; } catch { return true; } });
+      const local = /\/(private\/tmp|Users\/[^\/\s]+|home\/[^\/\s]+)\//.test(text);
+      const ok = rows.length > 0 && bad.length === 0 && missing.length === 0 && !local;
+      return { ok, actual: `findings=${rows.length}; without a recognised outcome=${bad.join(",") || "none"}; commits cited=${commits.length}, missing=${missing.join(",") || "none"}; absolute local path=${local}` };
+    } },
 };
 
 // ---------------------------------------------------------------------------
 // The close-out checks read evidence only the close-out collects; M1's own record lists M1's checks.
-const CLOSEOUT_ONLY = new Set(["V19", "V20", "V21", "V22", "V23", "V24", "V25", "V26"]);
+const CLOSEOUT_ONLY = new Set(["V19", "V20", "V21", "V22", "V23", "V24", "V25", "V26", "V27"]);
 const listed = Object.keys(checks).filter((id) => CLOSEOUT || !CLOSEOUT_ONLY.has(id));
 const wanted = process.argv.slice(2).length ? process.argv.slice(2) : listed;
 const prior = has(OUT) ? json(OUT) : { results: [] };
