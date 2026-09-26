@@ -74,7 +74,7 @@ async function runTool(t, args, extra, era) {
       }
     } catch (e) {
       const downstream = { route: t.route.id, status: null, code: e.code ?? "UNAVAILABLE", request_id: null };
-      if (e.code === "ABORTED") { finish(null, downstream, "cancelled"); throw e; }
+      if (e.code === "ABORTED") { finish(null, downstream, "cancelled"); e.recorded = true; throw e; }
       if (t.kind === "submit" && e.code !== "TOO_LARGE") {
         return finish(text({ error: { code: "SUBMISSION_UNCERTAIN", idempotencyKey: args.idempotencyKey, message: `The gateway's answer was lost (${e.message}), so whether it recorded this job is unknown. Call ${t.name} again with the same arguments and this idempotencyKey: it returns the job if it was recorded and starts it once if it was not.` } }, true), downstream, "uncertain");
       }
@@ -91,6 +91,11 @@ async function runTool(t, args, extra, era) {
       return finish(text({ error: { code: "RESULT_TOO_LARGE", message: `The answer exceeds the ${L.toolTextMaxBytes}-byte tool payload limit in fields this service does not cut${t.kind === "status" ? "; the document is served whole by the job's REST results route" : ""}.` } }, true), downstream, "too_large");
     }
     return finish(out, downstream, isError ? "error" : "ok");
+  } catch (e) {
+    // Anything else that ends the call (the progress notification or shaping the answer) still leaves a
+    // tool record, so every call the gateway saw can be matched to one (O01).
+    if (!e?.recorded) finish(null, { route: t.route.id, status: null, code: "EXCEPTION", request_id: null }, "failed");
+    throw e;
   } finally { toolCalls -= 1; }
 }
 

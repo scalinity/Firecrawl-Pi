@@ -34,6 +34,8 @@ const fake = createServer((req, res) => {
     res.on("close", () => { if (!res.writableFinished) rec.closedEarly = true; });
     const u = new URL(req.url, "http://gw");
     if (req.headers.authorization === `Bearer ${TOK_RO}` && req.method === "POST") return send(403, { success: false, code: "INSUFFICIENT_SCOPE", error: "This token lacks the 'scrape' scope." });
+    // A malformed gateway answer that makes shaping throw: links an object, not a list.
+    if (req.method === "POST" && u.pathname === "/v2/map" && /badlinks/.test(rec.body.url)) return send(200, { success: true, links: { length: 5, pad: "y".repeat(300000) } });
     if (req.method === "POST" && u.pathname === "/v2/scrape") {
       if (/slow/.test(rec.body.url)) { await sleep(3000); return send(200, { success: true, data: { markdown: "late" } }); }
       if (/big/.test(rec.body.url)) return send(200, { success: true, data: { markdown: "x".repeat(700000), metadata: { sourceURL: rec.body.url } } });
@@ -331,4 +333,15 @@ test("client header text reaches the log only as its grammar allows", async () =
   assert.equal(ex.protocol_version, "invalid");
   assert.equal(ex.mcp_method, "tools/call");
   assert.ok(!JSON.stringify(logs).includes("<script>"));
+});
+
+test("a call that fails while its answer is shaped still leaves a tool record, and frees its slot", async () => {
+  const r = await call("firecrawl_map", { url: "https://example.com/badlinks" });
+  assert.ok(r.last.error || r.last.result?.isError, "the call fails");
+  await sleep(100);
+  const rec = logs.filter((l) => l.event === "tool" && l.tool === "firecrawl_map").at(-1);
+  assert.equal(rec.outcome, "failed");
+  assert.equal(rec.downstream.code, "EXCEPTION");
+  const after = await call("firecrawl_capabilities", {});
+  assert.equal(after.last.result.isError, undefined, "no slot is left held");
 });
