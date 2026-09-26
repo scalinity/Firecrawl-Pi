@@ -10,6 +10,8 @@
 #      service mounts the directory, not the file: the rename gives the file a new inode, which a
 #      single-file mount would never show (review finding S9);
 #   3. replaces the guard's egress_local_v4 set with the IPv4 ones, in one nft transaction.
+# With no connected network (at boot before Wi-Fi is up), the set takes the IPv4 networks the file
+# already names, and the file is left unchanged.
 # Networks in /etc/firecrawl-pi/egress-local.extra (one CIDR per line, # comments) are added to both:
 # the router's public address, which many routers answer or hairpin from the LAN side, goes there
 # (scripts/m2/pi-wan-address.sh; review finding W8).
@@ -23,7 +25,20 @@ mkdir -p "$DIR" && chmod 0755 "$DIR"
 connected='$1 ~ /\// && $2 == "dev" && $3 !~ /^(docker0|br-|veth|fcpi-)/ && $1 !~ /^fe80:/ {print $1}'
 v4=$(ip -4 -o route show table main scope link | awk "$connected" | sort -u)
 v6=$(ip -6 -o route show table main | awk "$connected" | sort -u)
-[ -n "$v4" ] || { echo "fcpi-egress-local: no connected IPv4 network found" >&2; exit 1; }
+if [ -z "$v4" ]; then
+  # No connected network yet, as at boot before Wi-Fi is up (dockerd's restart policies revive the
+  # containers regardless). The guard's set, empty after the guard loads, takes the IPv4 networks the
+  # last run recorded, the ones the retrieval service's copy still names, so the two agree and the set
+  # is never empty; the file is left as it is, for the next run that finds a network.
+  last=$(grep -E "^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$" "$OUT" 2>/dev/null || true)
+  [ -n "$last" ] || { echo "fcpi-egress-local: no connected IPv4 network found and none recorded" >&2; exit 1; }
+  nft -f - <<EOF
+flush set inet fcpi_guard egress_local_v4
+add element inet fcpi_guard egress_local_v4 { $(printf '%s, ' $last | sed 's/, $//') }
+EOF
+  echo "fcpi-egress-local: no connected IPv4 network found; the guard holds the $(printf '%s\n' $last | wc -l) recorded ones" >&2
+  exit 0
+fi
 EXTRA=/etc/firecrawl-pi/egress-local.extra
 if [ -f "$EXTRA" ]; then
   x4=$(grep -Ev "^[[:space:]]*(#|$)" "$EXTRA" | grep -E "^[0-9]{1,3}(\.[0-9]{1,3}){3}/[0-9]{1,2}$" || true)
