@@ -1,0 +1,12 @@
+### meta
+utc=2026-09-26T07:33:00Z source_commit=0dbbfdc2922cf8cdf412ccae2585a6ea240f751a
+### measure
+measured=yes wan_sha256=994d1c9d567a257214b8fe02520b0904bda5bb867ce565a1aa32a6a447f0e07d
+### install
+fcpi-egress-local: ipv4=2 ipv6=0
+### check
+in_cidrs_file=yes
+in_guard_set=yes
+service_sees_rewrite=yes
+### end
+end

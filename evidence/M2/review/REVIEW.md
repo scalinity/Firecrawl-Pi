@@ -267,14 +267,14 @@ Recorded by `/address` (CLAUDE.md §5): fixed with its commit, rejected with the
 | W5 | 🟡 | Worker busy check-then-set | Fixed: the one-render flag is checked and set with no await between | `468ef95` |
 | W6 | 🟡 | Resource-limit cuts reported as success; no proxy request cap | Fixed: a render past its budget is RESOURCE_LIMIT and proxied requests are capped; a render result without a final URL, found while fixing, is read as ending where it began | `028c227`, `73974c5` |
 | W7 | 🟡 | Host-network check fails open while the list is missing | Fixed: every address is refused while the local-network list is not loaded | `a5a737f` |
-| W8 | 🟡 | Router WAN address not local | Fixed: the router's public address is host-local once measured (pi-wan-address.sh, check X11) | `bd511e7` |
+| W8 | 🟡 | Router WAN address not local | Fixed: the router's public address is host-local once measured (pi-wan-address.sh, check X11), and the egress probe tries it (X03) | `bd511e7`, `735d8f3` |
 | W9 | 🟡 | Critical-path code without unit tests | Fixed: unit tests for the acquisition branches, configuration, proxy edges and the Store's SQL | `3f7538c` |
 | W10 | 🟡 | Mid-body reset classified UNSUPPORTED_CONTENT | Fixed: a reset mid-body is TARGET_UNREACHABLE, so the same-tier retry runs | `3fcea84` |
 | W11 | 🟡 | HEAD and redirects fail on declared length | Fixed: only a body that is read is judged by the length it declares | `73b20cc` |
 | W12 | 🟡 | Fire-and-forget close can kill the next browser | Fixed: one close per render, and only the browser that disconnected is cleared | `4d99ddc` |
 | W13 | 🟡 | Adapter drops typed failures on non-200 | Fixed: the adapter carries the service's typed refusal on every status, and refuses long waits by name | `6a4e819` |
 | W14 | 🟡 | Cooldown floor and reset | Fixed: bare 429 cooldowns start at 60 s, and old ones lapse | `a8a51f6` |
-| W15 | 🟡 | Verifier checks that pass on missing or wrong evidence | Fixed: C02, M03 and M04 require their inputs; X05 matches the refusal line; S01 requires the class and accounts for every attempt; X01 is bounded to a fixture window | `63d007c` |
+| W15 | 🟡 | Verifier checks that pass on missing or wrong evidence | Fixed: C02, M03 and M04 require their inputs; X05 matches the refusal line; S01 requires the class and accounts for every attempt; X01 is bounded to a fixture window whose ends record the guard table's handle | `63d007c`, `5afbbe9` |
 | W16 | 🟡 | D1 test (a) after the branch point | Fixed: after the bundled milestone branched, only test (b) admits a fix | `e426234` |
 | S1 | 🔵 | Fixture exception reachable from public input | Fixed: fixture hosts count only for work that began at a fixture | `af6ab36` |
 | S2 | 🔵 | Duplicated pacing loop and dead code | Fixed: the unused peer hook, attempt-count query and re-export are removed; the duplicated pacing loop went with W1 | `6dc0acb`, `7b522bb` |
@@ -292,6 +292,7 @@ Recorded by `/address` (CLAUDE.md §5): fixed with its commit, rejected with the
 
 ### Reruns
 
-- The retrieval unit suite, with a throwaway PostgreSQL on the workstation's Colima VM (the pinned postgres image and the service image's dependencies): 61 tests, 61 pass, none skipped. Each fix's new test was also run against the code before it and failed there, except S3's, S12's and S13's (S13's asserts settings the previous pool did not make; S12 has no unit harness).
-- Patch 0002 (S12) and patch 0003 (W13) change the API image: the series re-applies to a clean checkout of 7666c1f9 with result tree 1b98286b; the build of record, and M2-B01 and M2-D02 against it, run in the final re-collection.
-- Everything the Pi runs is redeployed, and every phase is collected again inside one guard-counter window (X01), before the verifier runs at a clean tree; `evidence/M2/verification.json` records the results.
+- The retrieval unit suite: 63 tests, 63 pass, none skipped, on the workstation with a throwaway PostgreSQL and on the Pi inside the running image (`raw/unit-tests.txt`). Each fix's new test failed on the code before it, except S3's, S12's and S13's (S13's asserts settings the previous pool did not make; S12 has no unit harness and is exercised by M2-N01 and M2-N02 on the rebuilt image).
+- The Pi runs every fix: the API build of record (`raw/api-build.log`, series c176f8c9, image b0859fca), the retrieval and browser images rebuilt from the deployed commit, the host's new local-network directory and the schema's new index (`raw/init-m2-address.txt`, `raw/retrieval-db-address.txt`).
+- The whole corpus was collected again inside one guard-counter window on those images, and every check in `verification.json` was rerun at a clean code tree.
+- Re-collection found three defects the review had not, each fixed: the pacer stamped a domain's gap when it decided, so set-up jitter let two requests reach the target 1,981 ms apart (`f8cde91`); X01 detected a guard reload only by dockerd's start (`5afbbe9`, recorded under W15); and the egress collector's router-address pattern was expanded by bash, so X03 never probed that address (`735d8f3`, recorded under W8). The huge-document fixture displayed its text, which exhausted the renderer's memory cap before the size bound ran; the fixture now holds the text out of layout (`4e0dad9`), and the displayed run is kept as `raw/rt-browser-huge-dom-visible.txt`.
