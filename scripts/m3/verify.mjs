@@ -622,12 +622,15 @@ const checks = {
       return { ok, actual: `gateway peak=${(+gw?.["memory.peak"] / MIB).toFixed(1)} of ${(+gw?.["memory.max"] / MIB).toFixed(0)} MiB; oom kills=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}; MemAvailable=${avail.toFixed(0)} MiB` };
     } },
   P01: { name: "private-access-from-the-target-machine", inputs: [`${RAW}e2e-auth.txt`, `${RAW}sdk-compat.txt`],
-    expected: "the live tests and the official client ran on the workstation, the machine the owner's agents run on, through an SSH forward of the gateway's loopback publication, with nothing published beyond loopback; their answers came from the Pi's gateway",
+    expected: "the live tests and the official client ran on the workstation (macOS), the machine the owner's agents run on, through an SSH forward of the gateway's loopback publication that stayed up for the whole phase, with nothing published beyond loopback; the gateway instance answering through the forward is the one the Pi's gateway container logged at its start",
     run() {
-      const m = jsonLines(S(`${RAW}e2e-auth.txt`).meta)[0];
+      // Facts, not the driver's description: the platform it ran on (the workstation is macOS; the Pi is
+      // Linux), a forward that stayed up for the whole phase, and the same gateway instance on both sides.
+      const au = E("auth"), m = au.meta?.[0], fw = au.forward?.[0], v = au.vantage?.[0];
       const sk = records(`${RAW}sdk-compat.txt`);
-      const ok = /^workstation through an SSH forward of 127\.0\.0\.1:3380$/.test(m?.vantage ?? "") && sk.client?.[0]?.apiUrl === "http://127.0.0.1:3380" && sk.end?.[0]?.exit === 0 && endOk(E("auth"));
-      return { ok, actual: `vantage=${m?.vantage}; official client base URL=${sk.client?.[0]?.apiUrl}` };
+      const ok = endOk(au) && m?.platform === "darwin" && Number.isInteger(fw?.pid) && fw.exited_before_end === false &&
+        UUID_RE.test(v?.gateway_instance_via_forward ?? "") && v.gateway_instance_via_forward === v.gateway_instance_on_pi && sk.client?.[0]?.apiUrl === "http://127.0.0.1:3380" && endOk(sk);
+      return { ok, actual: `platform=${m?.platform}; forward pid=${fw?.pid} ended early=${fw?.exited_before_end}; the instance answering through the forward is the Pi's gateway=${!!v && v.gateway_instance_via_forward === v.gateway_instance_on_pi}; official client base URL=${sk.client?.[0]?.apiUrl}` };
     } },
   P02: { name: "tailnet-tls-private-serving", inputs: [`${RAW}tailscale-before.txt`, `${RAW}tailscale-install.txt`, `${RAW}lan-probe.txt`],
     expected: "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed; the loaded guard holds the repository guard file's three tailnet rules, and over the tailnet no port the host listens on answers except :8443 (the control)",

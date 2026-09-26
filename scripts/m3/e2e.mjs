@@ -65,11 +65,12 @@ const jobsCount = () => Number(sql("SELECT count(*) FROM fcpi_platform.job;")[0]
 const byKey = (key, st) => sql(`SELECT j.id FROM fcpi_platform.idempotency i JOIN fcpi_platform.job j ON j.id = i.job_id WHERE i.key = '${key}' AND j.state = '${st}';`)[0] ?? null;
 
 // ---- the forward -----------------------------------------------------------------------------------
-let tunnel = null;
+let tunnel = null, tunnelExit = null;
 async function openTunnel() {
   const free = await new Promise((r) => { const s = connect(3380, "127.0.0.1"); s.on("connect", () => { s.destroy(); r(false); }); s.on("error", () => r(true)); });
   if (!free) throw new Error("127.0.0.1:3380 is already in use on the workstation");
   tunnel = spawn("ssh", [...SSH, "-N", "-o", "ExitOnForwardFailure=yes", "-L", "127.0.0.1:3380:127.0.0.1:3380", T.PI_SSH_TARGET], { stdio: "ignore" });
+  tunnel.on("exit", (code, signal) => { tunnelExit = { code, signal }; });
   for (let i = 0; i < 60; i++) {
     const up = await new Promise((r) => { const s = connect(3380, "127.0.0.1"); s.on("connect", () => { s.destroy(); r(true); }); s.on("error", () => r(false)); });
     if (up) return;
@@ -133,6 +134,11 @@ const PHASES = {
       out("unauthenticated", { case: c, ...brief(await http("GET", "/platform/v1/status", opts)) });
     }
     out("unauthenticated", { case: "valid_control", ...brief(await http("GET", "/platform/v1/status", { tok: "m3a" })) });
+    // The answers come from the Pi's gateway: the instance that answers through the forward is the one the
+    // Pi's gateway container logged when it started.
+    const via = (await http("GET", "/platform/v1/status", { tok: "m3ro" })).json?.instance ?? null;
+    const onPi = D(`logs ${cname("access-gateway")} 2>&1`).split("\n").filter((l) => l.includes('"event":"listening"')).map((l) => { try { return JSON.parse(l).instance; } catch { return null; } }).at(-1) ?? null;
+    out("vantage", { gateway_instance_via_forward: via, gateway_instance_on_pi: onPi });
     const u = randomUUID();
     for (const [c, m, p, b] of [["read_token_submits_crawl", "POST", "/v2/crawl", { url: `${FX}/`, limit: 1 }], ["read_token_scrapes", "POST", "/v2/scrape", { url: `${FX}/p01` }],
       ["read_token_maps", "POST", "/v2/map", { url: `${FX}/` }], ["read_token_cancels", "DELETE", `/v2/crawl/${u}`], ["read_token_submits_batch", "POST", "/v2/batch/scrape", { urls: [`${FX}/p01`] }]]) {
@@ -462,10 +468,12 @@ const PHASES = {
 };
 
 if (!PHASES[phase]) { console.error(`usage: e2e.mjs ${Object.keys(PHASES).join("|")}`); process.exit(2); }
-out("meta", { phase, source_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), vantage: "workstation through an SSH forward of 127.0.0.1:3380" });
+out("meta", { phase, source_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), vantage: "workstation through an SSH forward of 127.0.0.1:3380", platform: process.platform, node: process.version });
 await openTunnel();
 let code = 0;
 try { await PHASES[phase](); } catch (e) { out("error", { message: e.message }); code = 1; }
+// The forward, as facts: its process, and whether it ended before the phase did.
+out("forward", { pid: tunnel?.pid ?? null, local: "127.0.0.1:3380", remote: "127.0.0.1:3380", exited_before_end: tunnelExit !== null });
 tunnel?.kill();
 out("end", { exit: code });
 process.exit(code);
