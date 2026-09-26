@@ -330,7 +330,7 @@ Large Pi LLM, vector database, obligatory paid search subscription, Cloud Agent 
 
 Enable private SearXNG JSON output, choose a small tested engine set, enforce query/result/cache limits, and suppress uncontrolled native search fallback. Verify sitemap mapping remains usable without search. Mark any unsupported search category explicitly.
 
-Implement model endpoint/model allowlisting, atomic token-cost reservations, usage accounting, bounded schema validation/chunking and at most one budgeted repair. Preserve URL/page provenance and null/missing data rather than invented fields. Verify every enabled native AI path uses the local compatible endpoint instead of a hard-coded external service.
+Implement model endpoint/model allowlisting, atomic token-cost reservations, usage accounting, bounded schema validation/chunking and at most one budgeted repair. Preserve URL/page provenance and null/missing data rather than invented fields. Keep every native Firecrawl model path disabled and refused before it reaches a provider, and serve the `json` format and `/v2/extract` through the budgeted adapter (spec §14).
 
 Keep native document parsing first, with byte/MIME/size/page/time checks. Add explicit LlamaParse adapter and quality-based escalation; use the approved free tier/cap or separately approved paid plan. Cache by bytes/parser/options and handle retention/deletion. Unconfigured complex parsing yields `PARSER_REQUIRED`, not empty success. Keep each provider's breaker separate from basic retrieval health.
 

@@ -130,8 +130,8 @@ Legend: **N** native; **C** configured native; **S** additional self-hosted serv
 | Markdown | Native conversion | N | Required; usable text, not challenge content, AC03 |
 | HTML / raw HTML | Native output formats | N | Required; correct final URL and format, AC03 |
 | Links and metadata | Native extraction | N | Required; provenance and redirects, AC03 |
-| JSON extraction from a URL | External model needed | C+E; budgeted model endpoint | Required with credential, AC07 |
-| `/extract` across explicit URLs | Model, queues; some options may depend on Cloud | C/P; bounded explicit-URL subset | Required tested subset; reject unsupported discovery modes, AC07 |
+| JSON extraction from a URL | External model needed; native model paths cannot be held to one budget (§14) | X+E; the `json` scrape format through the budgeted model adapter | Required with credential, AC07 |
+| `/extract` across explicit URLs | Model, queues; some options depend on Cloud | X/P; bounded explicit-URL subset run as a durable gateway job through the budgeted model adapter | Required tested subset; reject unsupported discovery modes, AC07 |
 | JavaScript rendering | Browser service required | S; one isolated Chromium worker | Required, AC03/11 |
 | Screenshots | Bundled connector does not provide result fields | X; browser capture plus artifact delivery and engine patch | Required viewport/full-page within bounds, AC11 |
 | Page actions | Baseline engine feature gap | X/P; safe, finite read-oriented action subset | Required subset; no arbitrary JS/transactions, AC11 |
@@ -170,7 +170,7 @@ Sources for baseline distinctions: [F01, F04–F08, F12–F20]. The Cloud operat
 |---|---|---|
 | Host Docker/Compose + systemd | Lifecycle and bounded resources | One-host operation without an orchestration cluster |
 | Host Tailscale Serve | Private HTTPS/Tailnet reachability | Avoid public ports and duplicated TLS machinery |
-| `access-gateway` | Bearer authentication, route admission, limits, REST façade, artifact access | Keep backend private and policy identical for REST/MCP |
+| `access-gateway` | Bearer authentication, route admission, limits, REST façade, artifact access, extraction jobs | Keep backend private and policy identical for REST/MCP |
 | `mcp-gateway` | Official SDK protocol handling and tool mapping only | Restart/failure independent of REST |
 | `firecrawl-core` | Pinned upstream harness/API/workers | Preserve useful existing Firecrawl functionality |
 | `retrieval-service` | Retrieval waterfall, provider adapters, budgets, domain policy | Central policy for every supported acquisition path |
@@ -178,7 +178,7 @@ Sources for baseline distinctions: [F01, F04–F08, F12–F20]. The Cloud operat
 | `nuq-postgres` | NuQ and separate platform schema | Durable jobs/admission/budget metadata without another DB server |
 | `redis` | Upstream state/cache/rate-limit roles | Preserve upstream contracts, with persistence and eviction discipline |
 | `rabbitmq` | Upstream queue messaging | Retain actual pinned queue architecture |
-| `searxng` | Private metasearch | Low fixed-cost search utility |
+| `searxng` | Private metasearch, reaching engines only through the retrieval service's search proxy | Low fixed-cost search utility |
 | Host backup/status timers | Encrypted backup, restore checks, health collection | Avoid a full monitoring cluster |
 | Optional `tunnel-client` | Outbound OpenAI connectivity | Add only when the account supports it |
 
@@ -196,6 +196,7 @@ flowchart TD
     G -->|MCP| M[Stateless MCP gateway]
     G -->|REST| F[Firecrawl API and workers]
     M -->|internal REST through policy boundary| G
+    G -->|extraction route| R
     F --> R[Retrieval and provider service]
     R --> B[Isolated Chromium worker]
     R --> S[SearXNG]
@@ -230,6 +231,8 @@ flowchart LR
         RD[redis]
         MQ[rabbitmq]
         RS[retrieval-service]
+      end
+      subgraph Search[Search network]
         SX[searxng]
       end
       subgraph Browser[Browser network]
@@ -238,6 +241,7 @@ flowchart LR
       TS --> GW
       GW --> MCP
       GW --> FC
+      GW -->|extraction| RS
       MCP --> GW
       FC --> PG
       FC --> RD
@@ -411,7 +415,9 @@ Run a private SearXNG instance on the Pi with JSON output explicitly enabled in 
 
 The inspected native search function selects Fire Engine if configured, then SearXNG, then a direct DuckDuckGo path in some circumstances. Therefore simply setting `SEARXNG_ENDPOINT` does not establish a complete controlled-fallback policy. Route the endpoint through a SearXNG-compatible adapter in `retrieval-service` and suppress unmanaged fallthrough in the selected deployment profile. [V: F13]
 
-Default result count is five, maximum ten. Cache identical normalized query/language/category/time-filter requests for 15 minutes. Do not cache a backend outage as a legitimate zero-result query. Record search engine failures separately from empty results; a working engine can return valid results while another is blocked. Keep a bounded hourly query rate of 60 until tuning supports a higher value.
+SearXNG's only network is shared with the retrieval service, and its engine requests leave through that service's search proxy, which admits only the live engines' hosts, checks each request against the target rules and logs it by host. Live search egress is a host-side selection, held on a fixture engine until the milestone's review is addressed. What the caller receives through REST and MCP alike is one of four things, never a failure presented as an empty list: results (naming any engine that did not answer, as a partial result), a true empty answer from engines that answered, every engine failing (`SEARCH_ENGINES_FAILED`), or the backend failing (`SEARCH_BACKEND_UNAVAILABLE` when it accepts no connection, `SEARCH_BACKEND_ERROR`, `SEARCH_TIMEOUT` when it connects and does not answer).
+
+Default result count is five, maximum ten. Cache identical normalized query/language/category/time-filter requests for 15 minutes. Do not cache a backend outage as a legitimate zero-result query, nor a partial answer as a complete one. Record search engine failures separately from empty results; a working engine can return valid results while another is blocked. Keep a bounded hourly query rate of 60 until tuning supports a higher value.
 
 A **SearchAPI adapter** is a supported extension if local search reliability proves inadequate. `SEARCHAPI_API_KEY` in the example is not proof that all current v2 routes honor it. Its activation requires a verified API contract/rate card, explicit budget, and live test; no search subscription is mandatory initially. The initial release must pass the local search test without depending on Firecrawl Cloud. [V: F05; D]
 
@@ -419,15 +425,15 @@ Map is not synonymous with web search. Preserve sitemap/discovered-link mapping 
 
 ## 14. LLM and structured extraction architecture
 
-Run no general-purpose LLM on the Pi. Use the existing Firecrawl OpenAI-compatible configuration, backed by a small budget-enforcing provider adapter. Preferred conservative baseline is **`gpt-4.1-mini-2025-04-14`**, selected for an explicit non-reasoning structured-output contract and predictable billing, not as a claim that it is the newest or strongest model. Current official pricing lists $0.40/M input and $1.60/M output tokens for GPT-4.1 Mini. [V/E: F05, F14, O11]
+Run no general-purpose LLM on the Pi. Structured output is a project-owned, budget-enforcing model adapter in `retrieval-service`, speaking OpenAI-compatible chat completions with strict structured output to the provider. No native Firecrawl model path is enabled: the core receives no model configuration, and the gateway refuses every format and route that would reach one (summary, question, query, highlights, deterministic JSON, prompt-generated crawl options), and the `json` format everywhere but `/v2/scrape`. The reason is measured in the pinned source: one `json` scrape runs a structured call, a fallback-model call and a repair call, each with the AI SDK's own retries, up to nine paid calls; the explicit-URL `/extract` makes 2N+2 calls for N pages and abandons, rather than cancels, requests at a 45-second race; several call sites name Vertex, Groq and Google providers directly. None of that can be held to one repair inside one logical budget. Preferred conservative baseline is **`gpt-4.1-mini-2025-04-14`**, selected for an explicit non-reasoning structured-output contract and predictable billing, not as a claim that it is the newest or strongest model. Current official pricing lists $0.40/M input and $1.60/M output tokens for GPT-4.1 Mini. [V/E: F05, F14, O11]
 
 The adapter must allow model replacement without changing MCP tools. A LAN-hosted compatible model on another personal machine or Ollama is an alternative only when the actual endpoint passes schema, latency, token accounting, and failure tests. If that machine sleeps, acquisition without extraction must continue normally. Avoid a dependency on the Mac being awake.
 
-Set an allowlist of model IDs and endpoints; reject unexpected hard-coded model requests rather than silently forwarding them to an expensive model. Verify every enabled Firecrawl AI path against the selected base URL with an instrumented fixture. Native configuration names do not prove every specialized Cloud path is routed through them. Disable unsupported paths and report the limitation.
+Set an allowlist of model IDs and endpoints; reject unexpected model requests rather than silently forwarding them to an expensive model. Prove with an instrumented fixture that every native model path is refused before it reaches a provider, and report each such path as unsupported. Native configuration names do not prove every specialized Cloud path is routed through them.
 
-Expose a narrow OpenAI-compatible internal forwarding endpoint for the required chat/structured-output and, only if exercised, embedding operations. Native services receive a local service credential, not the external provider key. The adapter holds the actual provider secret and reserves the maximum configured token cost before forwarding. Log token counts/model/cost, never prompts or complete scraped content by default.
+The `json` scrape format and `/v2/extract` reach the adapter as one internal extraction route, on a network the gateway shares with the retrieval service alone, with the gateway's own credential; there is no general forwarding endpoint, and no embedding operation is offered. The gateway scrapes each page through the core and sends its markdown; it holds no provider key. The adapter holds the provider secret and reserves the maximum a call can cost (its request bytes as input tokens, plus the output cap) before sending it, then settles from the provider's reported usage. A call key names each call inside its logical unit, so a retried request reuses a settled call's stored answer and never sends one whose outcome is unknown. Log token counts/model/cost, never prompts or complete scraped content by default.
 
-Extraction defaults: maximum 32,000 input tokens per logical extraction unit, 4,000 output tokens, one active model request, at most one schema-repair call inside the same budget. Chunking is explicit and preserves page/URL provenance; missing fields are null/omitted according to the schema, never invented. Validate output against JSON Schema. Disallow remote schema references, enforce schema depth/size limits, and prevent scraped content from controlling tools or provider destinations.
+Extraction defaults: maximum 32,000 input tokens per logical extraction unit, 4,000 output tokens, one active model request, at most one schema-repair call inside the same budget. Chunking is explicit and preserves page/URL provenance; missing fields are null according to the schema, never invented. Every property is nullable within a unit, since one part of a page may lack a value the page holds; a required property still null after the units are merged is named, not filled. Validate output against JSON Schema. Disallow remote schema references, enforce schema depth/size limits, and prevent scraped content from controlling tools or provider destinations.
 
 For `/extract`, support explicit bounded URLs, prompt/schema, polling, and partial-failure reporting first. Multi-site autonomous discovery or Cloud research features are not silently emulated through a different API. Embeddings, image-alt generation, and semantic transforms are capability-gated; no embedding daemon or vector database is required merely to serve the basic acquisition use case.
 
@@ -456,7 +462,7 @@ The private gateway exposes a **Firecrawl-compatible v2 subset**, not an unquali
 | `POST /v2/map` | Native sitemap/discovered-link map; bounded URL count and acquisition policy |
 | `POST /v2/search` | SearXNG-backed results; requested result scraping uses the same guarded acquisition path |
 | `POST /v2/batch/scrape`; status/cancel routes | Bounded list of URLs, per-item outcomes, explicit job ID |
-| `POST /v2/extract`; status route | Explicit-URL extraction subset, model budget and schema validation |
+| `POST /v2/extract`; status route | Explicit-URL extraction subset run as a durable gateway job; model budget and schema validation |
 | `/platform/v1/status` | Authenticated capability/health summary; no secrets or page contents |
 | `/platform/v1/jobs/{id}` | Durable receipt, upstream mapping, recovery state, expiry, errors, and result references |
 | `/platform/v1/artifacts/{id}` | Authorized bounded artifact download; owner and expiry checked |
@@ -625,12 +631,12 @@ The initial Tailnet bearer-token profile is an out-of-band trusted-client authen
 | Caller | Allowed destination | Boundary |
 |---|---|---|
 | Host Tailscale/tunnel client | Access gateway only | Loopback, configured credential and identity |
-| Access gateway | MCP, Firecrawl REST, platform DB, artifact store | Separate service credentials; no browser control or provider secret access |
+| Access gateway | MCP, Firecrawl REST, platform DB, artifact store, the retrieval service's extraction route | Separate service credentials; no browser control or provider secret access |
 | MCP gateway | Access gateway's internal REST route | Fixed destination; credential delegated from validated owner/scopes |
 | Firecrawl core | PostgreSQL, Redis, RabbitMQ, retrieval service | No unconstrained direct Internet target access |
 | Retrieval service | Browser, SearXNG adapter, approved provider APIs, guarded web egress | Per-module credentials, budgets, and URL validation |
 | Browser worker | Guarded target/proxy egress; retrieval controller | No data-service access, no Docker socket or host mounts |
-| SearXNG | Approved search engines through egress policy | Query limits; no LAN/metadata targets |
+| SearXNG | Approved search engines, only through the retrieval service's search proxy | Query limits; no LAN/metadata targets; no other route |
 | Backup process | Quiesced data/config and approved backup destination | Host-owned credentials not exposed to application containers |
 
 Use user-defined isolated networks plus host egress enforcement appropriate to the actual Docker firewall backend. A Docker bridge marked `internal` is useful but not a substitute for permitting required provider traffic through a controlled path. Verify actual packets/connection logs from each role. Published Docker ports can interact unexpectedly with host firewall assumptions; inspect effective rules rather than relying on UFW alone. [V: O15]
@@ -898,7 +904,7 @@ Configuration is schema-validated at startup and exported only in redacted form.
 | `PLAYWRIGHT_MICROSERVICE_URL` | Upstream legacy connector address | Not the full resilience integration; selected patched engine uses its explicit internal endpoint [F07] |
 | `PROXY_SERVER`, `PROXY_USERNAME`, `PROXY_PASSWORD` | Verified upstream Playwright-style proxy hook | Do not use as global per-request routing contract; project adapters own live provider credentials [F04–F05] |
 | `SEARXNG_ENDPOINT` | Core → controlled SearXNG-compatible adapter | Suppress unmanaged fallback and test selected native path [F13] |
-| `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `MODEL_NAME` | Core → local budgeted compatible endpoint, local service key, approved model | Test every enabled AI path; real external key stays in adapter [F05, F14] |
+| `OPENAI_BASE_URL`, `OPENAI_API_KEY`, `MODEL_NAME` | Unset in the core | No native model path is enabled (§14); the provider's base URL, model allowlist and rate cards are in `PI_BUDGET_POLICY_FILE`, its key in `PI_PROVIDERS_DIR` [F05, F14] |
 | `MODEL_EMBEDDING_NAME`, `OLLAMA_BASE_URL` | Only when explicitly enabled | No default local model or embedding infrastructure [F14] |
 | `BULL_AUTH_KEY` | Unset | Queue admin disabled; no inherited example secret [F01] |
 | `FIRE_ENGINE_BETA_URL`, specialized extractor URLs | Unset unless individually proven/approved | Cloud/proprietary services are not automatically configured [F05–F06] |
@@ -914,6 +920,8 @@ Configuration is schema-validated at startup and exported only in redacted form.
 | `PI_MAX_URL_ACQUISITIONS=2`, `PI_MAX_BROWSER_PAGES=1` | New global permits | Shared across all clients and job types; lease recovery tested |
 | `PI_ARTIFACT_ROOT`, `PI_DATA_MOUNT_ID` | New storage contract | Approved mount, quota and retention; no caller-controlled path |
 | `PI_CLOUD_ACCESS_ENABLED=false` | New runtime invariant | No alternative Cloud fallback profile bundled by default |
+| `PI_PROVIDERS_DIR` | New retrieval service → provider credential files | One read-only directory; an absent key is `BLOCKED_CREDENTIAL` or `PARSER_REQUIRED`, never "configured" |
+| `PI_SELECTION_FILE` | New host selection → retrieval service | Chooses among the engines, models and parsers the committed policies list; absent, search stays on the fixture engine |
 
 A root `.env` used for Compose interpolation does not automatically inject every entry into every container. The final rendered Compose must explicitly pass only needed variables and secrets to each service. Validate effective values without printing credentials. A provider key in a file but absent from its adapter is `BLOCKED_CREDENTIAL`, not “configured successfully.”
 
@@ -1105,6 +1113,7 @@ Current state of every implementation-dependent row is **DESIGNED**, not achieve
 | Zyte PAYG enhanced retrieval | ScrapingBee subscription, all-local purity | Low fixed-cost final fallback | Variable tier costs and external data flow | Alternate approved provider without client changes |
 | SearXNG local | Paid search by default | Useful search without mandatory subscription | Upstream blocking/ranking variability | Explicit measured API fallback |
 | Remote replaceable LLM | Large Pi model, sleeping Mac dependency | Keep Pi dedicated to acquisition | External token cost/privacy boundary | Tested LAN compatible endpoint or newer approved API model |
+| Project-owned extraction adapter | Firecrawl's native model paths behind an OpenAI-compatible forwarder | One repair per unit, one logical budget and a call key that is never paid twice; native paths retry through fallback models and name other providers (§14) | The native `/extract` pipeline's own heuristics are not reused | Native paths re-enabled only if each can be held to the same budget and call contract |
 | Native parsing then LlamaParse | Always-cloud parse, heavy local OCR stack | Avoid unnecessary cost while handling hard documents | Live free/paid account gate | Tested alternative parser adapter |
 | Tailnet TLS + bearer gateway | Supabase auth stack, public unauthenticated API | Small private trust boundary with revocable credentials | Not public OAuth by itself | Add maintained OAuth resource-server profile when needed |
 | Optional OpenAI tunnel | Public ingress by default, pretend LAN reachable | Outbound-only documented product option | Account/product-specific | Separate authenticated ingress for other hosted agents |
