@@ -536,7 +536,7 @@ const checks = {
 
   // ================================================================ zero Cloud, persistence, host state
   X01: { name: "zero-firecrawl-cloud-attempts", inputs: [`${RAW}egress-probe.txt`, `${RAW}guard-window-open.txt`, `${RAW}core-logs-final.txt`, `${RAW}stack.txt`, `${RAW}persistence.txt`, `${RAW}e2e-expiry.txt`, `${RAW}sdk-compat.txt`],
-    expected: "across one window, from a guard-counter snapshot before the first live phase to the egress probe after the last, with the guard's table not reloaded (same handle at both ends) and every live phase inside it, the guard accepted no web connection on the egress bridge; every core instance M3 ran (the one the expiry phase replaced, the one it made, and the one the persistence recreate made) has a saved log, and every saved log classifies each Cloud line as a refusal or a request echo and each name-resolution failure as a project service, with its positive control; the gateway's log, from the container that served every live phase (scanned before the recreate replaced it) and the one that replaced it, each read and whole, names no Cloud host, token, authorization value or target URL; the official client, instrumented at the socket and name-lookup level (so http, https and fetch all show), opened more than ten connections, every one to the forwarded 127.0.0.1:3380, and looked up no name but that address",
+    expected: "across one window, from a guard-counter snapshot before the first live phase to the egress probe after the last, with the guard's table not reloaded (same handle at both ends) and every live phase inside it, the guard accepted no web connection on the egress bridge; every core instance M3 ran (the one the expiry phase replaced, the one it made, and the one the persistence recreate made) has a saved log, and every saved log classifies each Cloud line as a refusal or a request echo and each name-resolution failure as a project service, with its positive control; the gateway's log, from the container that served every live phase (scanned before the recreate replaced it) and the one that replaced it, each read and whole, names no Cloud host, token, authorization value or target URL; the official client, instrumented at the socket and name-lookup level (so http, https and fetch all show), opened connections (kept alive, so fewer than its requests), every one to the forwarded 127.0.0.1:3380, and looked up no name but that address",
     run() {
       const utcOf = (f) => Date.parse(((sections(f).meta ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]);
       const handle = (f) => ((sections(f).meta ?? []).join(" ").match(/guard_table_handle=(\d+)/) ?? [])[1];
@@ -569,7 +569,9 @@ const checks = {
       const glk = pre.k;
       const sk = jsonLines(S(`${RAW}sdk-compat.txt`).connections)[0];
       // Every socket the official client opened, whatever opened it, and every name it looked up.
-      const client = sk && JSON.stringify(sk.hosts) === JSON.stringify(["127.0.0.1:3380"]) && sk.total > 10 && Array.isArray(sk.lookups) && sk.lookups.every((h) => h === "127.0.0.1");
+      // Sockets, not requests: the client keeps its connections alive, so one socket carries many requests;
+      // at least one recorded is the control that the hook saw the client at all.
+      const client = sk && JSON.stringify(sk.hosts) === JSON.stringify(["127.0.0.1:3380"]) && sk.total >= 1 && Array.isArray(sk.lookups) && sk.lookups.every((h) => h === "127.0.0.1");
       // Every core instance M3 ran has its saved log among them: the one the expiry phase replaced, the one
       // it made (which the persistence recreate replaced), and the one that made.
       const exr = E("expiry").after_expiry?.[0], ps = S(`${RAW}persistence.txt`);
@@ -730,7 +732,10 @@ const checks = {
         ...jsonLines(S(`${RAW}persistence.txt`).resources_before_recreate).map((r) => ({ run: "persistence", ...r }))];
       const unsampled = [...PH, "sdk-compat", "persistence"].filter((p) => !samples.some((s) => s.run === p));
       const within = (c, capMib) => !!c && +c.max === capMib * MIB && Number.isFinite(c.peak) && c.peak < +c.max && c.oom_kill === 0;
-      const over = samples.filter((s) => !(within(s.gateway, 160) && (s.core === null || within(s.core, 2304)) && s.mem_available_kib >= 1024 * 1024)).map((s) => `${s.run}/${s.label}`);
+      // A container a crash test has already stopped is not running (null) in the samples before the next kill;
+      // it has no peak left to lose. Every end-of-run sample must hold both.
+      const ended = (s) => /^end-/.test(s.label);
+      const over = samples.filter((s) => !((s.gateway === null && !ended(s) ? true : within(s.gateway, 160)) && (s.core === null && !ended(s) ? true : within(s.core, 2304)) && s.mem_available_kib >= 1024 * 1024)).map((s) => `${s.run}/${s.label}`);
       const hostOoms = new Set(samples.map((s) => s.vmstat_oom_kill));
       const peakOf = (k) => Math.max(...samples.map((s) => s[k]?.peak ?? 0)) / MIB;
       const ok = unsampled.length === 0 && samples.length >= 18 && over.length === 0 && hostOoms.size === 1 && Number.isInteger([...hostOoms][0]) &&
