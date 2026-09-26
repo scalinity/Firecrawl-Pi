@@ -5,7 +5,7 @@
 # with integrity hashes and install scripts off, and the service's own files. Nothing compiles, so
 # the build runs beside the stack, as M1's NuQ build did. The patched API image, the one heavy
 # build, is built on the workstation (decision D6; scripts/m2/build-api-image.sh).
-#   ssh … 'bash /opt/firecrawl-pi/scripts/m2/pi-build-service-images.sh'
+#   ssh … 'bash -s -- [retrieval] [browser]' < scripts/m2/pi-build-service-images.sh
 set -euo pipefail
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 REPO=/opt/firecrawl-pi
@@ -30,8 +30,10 @@ build() { # build <name> <tag> <context> [dockerfile]
   echo "build_exit=$rc elapsed_s=$(( $(date +%s) - start )) mem_available_mib=$(mem)"
   [ "$rc" = 0 ] || exit "$rc"
 }
-build retrieval fcpi/retrieval:m2 $REPO/services/retrieval
-build browser fcpi/browser:m2 $REPO/services/browser $REPO/deploy/browser/Dockerfile
+# Both by default; `retrieval` or `browser` as arguments builds only those.
+want=" ${*:-retrieval browser} "
+[[ $want == *" retrieval "* ]] && build retrieval fcpi/retrieval:m2 $REPO/services/retrieval
+[[ $want == *" browser "* ]] && build browser fcpi/browser:m2 $REPO/services/browser $REPO/deploy/browser/Dockerfile
 
 sec images
 for t in fcpi/retrieval:m2 fcpi/browser:m2; do

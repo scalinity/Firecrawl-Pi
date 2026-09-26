@@ -104,7 +104,8 @@ export class Store {
                              WHERE kind = $1 AND slot < $3 AND (holder IS NULL OR lease_until < now())
                              ORDER BY slot LIMIT 1 FOR UPDATE SKIP LOCKED)
        RETURNING slot`, [kind, holder, slots, leaseMs]);
-    return r.rows[0]?.slot ?? null;
+    // The slot number, or null: slot 0 is a real slot, so callers compare with null.
+    return r.rows.length ? r.rows[0].slot : null;
   }
 
   async releasePermit(kind, holder) {

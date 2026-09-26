@@ -1,0 +1,20 @@
+### meta
+utc=2026-09-26T03:01:45Z label=before-m2-switch instances=1 source_commit=c2b9d9ad2e435aadabf5e374785ca717f0d3577f
+### instance_1258584d74c2
+id=1258584d74c25f3f7fb12d5ded4d79e89792de01c25f6b607c4b29db96159d2b image=sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af created=2026-09-26T00:02:53.061014912Z started=2026-09-26T00:14:45.702794228Z finished=2026-09-26T00:14:30.304863397Z running=true restarts=0 log_driver=json-file
+log_lines=412 log_sha256=91dbfc4531768d11fec5495a1800504601d24051efa42b848689fe8efbc47d1e
+pattern=firecrawl\.dev count=0
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=integrations\. count=0
+pattern=duckduckgo count=0
+pattern=posthog count=0
+pattern=sentry\.io count=0
+pattern=getaddrinfo count=0
+pattern=EAI_AGAIN count=0
+pattern=ENOTFOUND count=0
+pattern=ENETUNREACH count=0
+control=Starting services count=4
+newest_line_utc=2026-09-26T03:01:05Z
+### end
+end

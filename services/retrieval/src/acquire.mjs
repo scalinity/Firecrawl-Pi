@@ -51,7 +51,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
   // explicitly, or by expiry if this process dies holding it.
   async function holdPermit(kind, holder, slots, deadline, signal) {
     for (;;) {
-      if (await store.takePermit(kind, holder, slots, getPolicy().permitLeaseMs)) return true;
+      if ((await store.takePermit(kind, holder, slots, getPolicy().permitLeaseMs)) !== null) return true;
       if (Date.now() + 250 > deadline || signal?.aborted) return false;
       await sleep(250, signal);
     }
