@@ -563,7 +563,7 @@ const checks = {
       return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; ruleset tables=${tables.join(",")}` };
     } },
   X05: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, M3_CONTROL, "scripts/m1/pi-target.conf", "evidence/M0/audit.json"], live: true,
-    expected: "the positive controls fire every rule (M3's adds a synthetic tailnet name); then no rule matches in any tracked or new repository file, a tailnet name included; no file holds any of the fourteen live secrets (M2's nine, the gateway's PostgreSQL password and the four live client tokens), compared by SHA-256 computed on the Pi; no file added or changed since M3 began holds the Pi's LAN address, its /24 network or its SSH target",
+    expected: "the positive controls fire every rule (M3's adds a synthetic tailnet name); then no rule matches in any tracked or new repository file, a tailnet name included; no file holds any live secret (eight of M2's, the gateway's PostgreSQL password and every client token file on the Pi, at least five), compared by SHA-256 computed on the Pi; no file added or changed since M3 began holds the Pi's LAN address, its /24 network or its SSH target",
     run() {
       const c = [...scan([M0_CONTROL], { m0: { egress: sha256("192.0.2.77"), serial: sha256("0123456789abcdef"), machineId: sha256("0123456789abcdef0123456789abcdef"), macs: new Set([sha256("02:00:00:00:00:01")]) } }, RULES, new Set()),
         ...scan([M1_CONTROL], { secrets: new Set([sha256("0f".repeat(32)), sha256("ABCDEFGHIJKLMNOP".repeat(4))]) }, RULES, new Set()),
@@ -573,10 +573,12 @@ const checks = {
       if (silent.length) return { ok: false, actual: `positive controls: rules that did not fire: ${silent.join(", ")}` };
       const hashes = ssh(`sudo -n sh -c 'S=/etc/firecrawl-pi/secrets; h() { [ -n "$1" ] || { echo "EMPTY secret extraction" >&2; exit 1; }; printf "%s" "$1" | sha256sum | cut -c1-64; }; \
         h "$(cat $S/postgres_password)"; h "$(cat $S/core_postgres_password)"; h "$(sed -n "s#^amqp://fcpi:\\(.*\\)@rabbitmq:5672\\$#\\1#p" $S/core_nuq_rabbitmq_url)"; \
-        h "$(sed -n "s#^redis://:\\(.*\\)@redis:6379\\$#\\1#p" $S/core_redis_url)"; h "$(cat $S/clients/m1-verify.token)"; h "$(cat /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie)"; \
+        h "$(sed -n "s#^redis://:\\(.*\\)@redis:6379\\$#\\1#p" $S/core_redis_url)"; h "$(cat /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie)"; \
         h "$(cat $S/retrieval_postgres_password)"; h "$(cat $S/core_retrieval_token)"; h "$(cat $S/retrieval_browser_token)"; \
-        h "$(cat $S/gateway_postgres_password)"; for t in owner m3a m3b m3ro; do h "$(tr -d "\\n" < $S/clients/$t.token)"; done'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
-      if (hashes.length !== 14 || new Set(hashes).size !== 14 || hashes.includes(sha256(""))) return { ok: false, actual: `expected 14 distinct non-empty live secret hashes from the Pi, got ${hashes.length} (${new Set(hashes).size} distinct)` };
+        h "$(cat $S/gateway_postgres_password)"; for f in $S/clients/*.token; do h "$(tr -d "\\n" < "$f")"; done'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
+      // Nine fixed secrets and every client token file there is (m1-verify's, M3's four and any added
+      // since), so a client added later is scanned for too.
+      if (hashes.length < 14 || new Set(hashes).size !== hashes.length || hashes.includes(sha256(""))) return { ok: false, actual: `expected at least 14 distinct non-empty live secret hashes from the Pi (nine fixed and at least five client tokens), got ${hashes.length} (${new Set(hashes).size} distinct)` };
       const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard"], { encoding: "utf8" }).split("\n").filter((f) => f && ![M0_CONTROL, M1_CONTROL, M3_CONTROL].includes(f) && has(f) && !/\.(pdf|png|gz)$/.test(f));
       const audit = json("evidence/M0/audit.json");
       const m0 = { egress: audit.network.egress_ip_sha256, serial: audit.identity.board_serial_sha256, machineId: audit.identity.machine_id_sha256, macs: new Set([...Object.values(audit.identity.mac_sha256), sha256("00:00:00:00:00:00")]) };
@@ -584,7 +586,7 @@ const checks = {
       const t = target(), lan = t.PI_LAN_ADDRESS, net = lan.replace(/\.\d+$/, ".0");
       const changed = [...new Set([...git("diff", "--name-only", `${M3_START}..HEAD`).split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter((f) => f && has(f) && !/\.(pdf|png|gz)$/.test(f));
       const idHits = changed.filter((f) => { const x = read(f); return x.includes(lan) || x.includes(`${net}/`) || x.includes(t.PI_SSH_TARGET); });
-      return { ok: hits.length === 0 && idHits.length === 0, configHash: hashOf(files.filter((f) => f !== OUT)), actual: `controls fired all ${RULES.length + HASH_RULES.length} rules; files scanned=${files.length}; live secret hashes compared=${hashes.length}; findings=${hits.length}${hits.length ? " [" + hits.slice(0, 12).join("; ") + "]" : ""}; M3 files with the LAN address, network or SSH target=${idHits.join(",") || "none"} (of ${changed.length})` };
+      return { ok: hits.length === 0 && idHits.length === 0, configHash: hashOf(files.filter((f) => f !== OUT)), actual: `controls fired all ${RULES.length + HASH_RULES.length} rules; files scanned=${files.length}; live secret hashes compared=${hashes.length} (client tokens ${hashes.length - 9}); findings=${hits.length}${hits.length ? " [" + hits.slice(0, 12).join("; ") + "]" : ""}; M3 files with the LAN address, network or SSH target=${idHits.join(",") || "none"} (of ${changed.length})` };
     } },
   L01: { name: "lock-and-compose-consistent", inputs: ["deploy/versions.lock.json", "deploy/compose.yaml", `${EV}rendered-compose.json`, "services/access/package-lock.json", "deploy/policies/capabilities.json"],
     expected: "every Compose image is pinned by digest for linux/arm64; the lock records the gateway image the stack runs, its node base, its pg release with the lockfile's integrity, the capability manifest's hash and the pinned official client; M2's entries (API, retrieval and browser images) still match the stack",
