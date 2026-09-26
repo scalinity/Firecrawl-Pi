@@ -71,9 +71,9 @@ function fakeCore(dbName) {
         const kind = m[1] === "crawl" ? "crawl" : "batch";
         const id = randomUUID();
         if (s.mode === "reject") return send(400, { success: false, error: "Invalid regular expression in includePaths" });
-        if (s.mode === "hang") { s.held.push(res); return; }
+        if (s.mode === "hang") { s.held.push({ res }); return; }
         await persist(kind, id, body);
-        if (s.mode === "persist-hang") { s.held.push(res); return; }
+        if (s.mode === "persist-hang") { s.held.push({ res, answer: () => send(200, { success: true, id, url: `http://firecrawl-core:3002/v2/${m[1]}/${id}` }) }); return; }
         if (s.mode === "lose-answer") return res.socket.destroy();
         return send(200, { success: true, id, url: `http://firecrawl-core:3002/v2/${m[1]}/${id}` });
       }
@@ -91,7 +91,9 @@ function fakeCore(dbName) {
     });
   };
   s.start = async (port = 0) => { s.server = createServer(handler); await new Promise((r) => s.server.listen(port, "127.0.0.1", r)); s.port = s.server.address().port; };
-  s.stop = async () => { for (const r of s.held) r.socket?.destroy(); s.held = []; s.server.closeAllConnections(); await new Promise((r) => s.server.close(r)); };
+  s.stop = async () => { for (const h of s.held) h.res.socket?.destroy(); s.held = []; s.server.closeAllConnections(); await new Promise((r) => s.server.close(r)); };
+  // Answers every held submission that the core created (persist-hang), as it would have.
+  s.release = () => { const n = s.held.filter((h) => h.answer).length; for (const h of s.held) h.answer?.(); s.held = []; return n; };
   s.complete = (id, n, errs = 0) => { const j = s.jobs.get(id); j.docs = Array.from({ length: n }, (_, i) => docOf(id, i)); j.errors = Array.from({ length: errs }, (_, i) => ({ id: randomUUID(), url: `http://m3.fixture.fcpi.test:8080/missing${i}`, error: "Not found", code: "SCRAPE_NOT_FOUND" })); j.status = "completed"; };
   s.upstreamOf = async (jobId) => (await s.db.query("SELECT upstream_id FROM fcpi_platform.job WHERE id = $1", [jobId])).rows[0]?.upstream_id;
   s.submissions = () => s.requests.filter((r) => r.method === "POST" && /^\/v2\/(crawl|batch\/scrape)$/.test(r.url));
@@ -440,7 +442,7 @@ test("gateway killed mid-submission that never reached the core: uncertain until
   await h.kill();
   await pending;
   h.core.mode = "ok";
-  for (const r of h.core.held) r.socket?.destroy();
+  for (const x of h.core.held) x.res.socket?.destroy();
   await h.start();
   await waitFor(async () => (await h.job(id)).state === "SUBMISSION_UNCERTAIN", 5000, "uncertain");
   const during = await h.call("GET", `/v2/crawl/${id}`, { token: T.a });
@@ -451,6 +453,34 @@ test("gateway killed mid-submission that never reached the core: uncertain until
   assert.equal(h.core.submissions().length, 2);
   assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [`fcpi:${id}`])).rows[0].n, 1, "one upstream job carries the key");
   assert.deepEqual((await h.events(id)).map((e) => e.to_state).slice(0, 6), ["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN", "RECEIVED", "SUBMITTING", "QUEUED"]);
+});
+
+test("the ledger fails after the core accepted a claimed job: the running gateway reconciles it by marker, without a restart or a second submission", async () => {
+  const h = await harness({ extraEnv: { PI_GATEWAY_SUBMIT_TIMEOUT_MS: "20000" } });
+  h.core.mode = "persist-hang";
+  const pending = h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody(), headers: { "x-idempotency-key": "k-ledger-fails" } }).catch((e) => ({ error: e.code }));
+  await waitFor(() => h.core.submissions().length === 1, 5000, "submission at the core");
+  const id = (await h.db.query("SELECT id FROM fcpi_platform.job ORDER BY created_at DESC LIMIT 1")).rows[0].id;
+  // The answer arrives while the ledger refuses the gateway's writes (as during a PostgreSQL restart).
+  await h.db.query("REVOKE UPDATE ON fcpi_platform.job FROM fcpi_gateway");
+  const failedBefore = h.logs.filter((l) => l.action === "tick_failed").length;
+  assert.equal(h.core.release(), 1);
+  await waitFor(() => h.logs.filter((l) => l.action === "tick_failed").length > failedBefore, 5000, "the ledger write failing");
+  assert.equal((await h.job(id)).state, "SUBMITTING", "the claim outlived the failed write");
+  await h.db.query("GRANT UPDATE ON fcpi_platform.job TO fcpi_gateway");
+  h.core.mode = "ok";
+  await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(id)).state), 15000, "reconciled by the running process");
+  assert.equal(h.gw.exitCode, null, "no restart");
+  assert.deepEqual((await h.events(id)).map((e) => e.to_state).slice(0, 4), ["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN", "QUEUED"]);
+  assert.equal(h.core.submissions().length, 1, "no second submission");
+  assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [`fcpi:${id}`])).rows[0].n, 1);
+  await pending;
+  // The upstream slot frees when the job ends, and the next job is submitted.
+  await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 2 }) });
+  h.core.complete(await h.core.upstreamOf(id), 1);
+  await waitFor(async () => (await h.job(id)).state === "SUCCEEDED", 15000, "finished");
+  const next = (await h.db.query("SELECT id FROM fcpi_platform.job WHERE id <> $1", [id])).rows[0].id;
+  await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(next)).state), 15000, "the next job dispatched");
 });
 
 test("a submission the core refuses is FAILED and answered like upstream's refusal", async () => {

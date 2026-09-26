@@ -124,10 +124,12 @@ export function makeStore(cfg, log = () => {}) {
     markRequeued: (id, detail) => moveTx(id, ["SUBMITTING", "SUBMISSION_UNCERTAIN"], "RECEIVED",
       { submitter: null, next_dispatch_at: sql("now() + least(interval '60 seconds', interval '1 second' * power(2, least(dispatch_attempts, 6)))") }, detail),
     markUncertain: (id, detail) => moveTx(id, ["SUBMITTING"], "SUBMISSION_UNCERTAIN", {}, detail),
-    // SUBMITTING rows left by a previous process: their answer is lost with it.
-    async orphanSubmitting(instance) {
-      const ids = (await q("SELECT id FROM fcpi_platform.job WHERE state = 'SUBMITTING' AND submitter IS DISTINCT FROM $1", [instance])).rows.map((r) => r.id);
-      for (const id of ids) await moveTx(id, ["SUBMITTING"], "SUBMISSION_UNCERTAIN", {}, "submitter process ended before the answer was recorded");
+    // SUBMITTING rows nobody is submitting: a dispatch always ends (records its answer or throws)
+    // inside its own step of the serial chain, so a row seen between steps was abandoned, by an
+    // earlier process or by this one when a ledger write failed after the claim.
+    async orphanSubmitting() {
+      const ids = (await q("SELECT id FROM fcpi_platform.job WHERE state = 'SUBMITTING'")).rows.map((r) => r.id);
+      for (const id of ids) await moveTx(id, ["SUBMITTING"], "SUBMISSION_UNCERTAIN", {}, "the submission's answer was never recorded");
       return ids.length;
     },
     uncertain: async (settleMs) => (await q(`SELECT *, (submit_started_at < now() - $1 * interval '1 millisecond') AS settled FROM fcpi_platform.job WHERE state = 'SUBMISSION_UNCERTAIN' ORDER BY created_at`, [settleMs])).rows,

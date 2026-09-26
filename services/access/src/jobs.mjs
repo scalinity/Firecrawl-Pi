@@ -145,13 +145,11 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     say({ job: job.id, action: "finished", state: to, archived: have.size, errors: errors.errors.length });
   }
 
-  // Before this process submits anything, SUBMITTING rows a previous process left become uncertain:
-  // their answers died with it. Retried on every round until the ledger answers.
-  let orphansHandled = false;
+  // At the start of every round, SUBMITTING rows become uncertain: no dispatch is in flight between
+  // steps of the chain, so their answers were lost (a previous process died, or a ledger write failed
+  // after the claim). Reconciliation then finds them by marker before anything is resubmitted.
   async function prepare() {
-    if (orphansHandled) return;
-    const n = await store.orphanSubmitting(instance);
-    orphansHandled = true;
+    const n = await store.orphanSubmitting();
     if (n) say({ action: "orphaned_submissions", count: n });
   }
 
