@@ -488,6 +488,21 @@ test("status reads of a running job are bounded in size and in number", async ()
   assert.equal((await h.call("GET", `/v2/crawl/${r.json.id}?skip=1`, { token: T.a })).status, 200);
 });
 
+test("a page of a hundred archived documents is served whole, without piling listeners on the response", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 100 }) });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  h.core.complete(up, 100);
+  await waitFor(async () => (await h.job(r.json.id)).state === "SUCCEEDED", 15000, "archived");
+  const p = await h.call("GET", `/v2/crawl/${r.json.id}?limit=100`, { token: T.a });
+  assert.equal(p.status, 200);
+  assert.ok(p.json, "the answer is complete JSON");
+  assert.equal(p.json.data.length, 100);
+  assert.equal(new Set(p.json.data.map((d) => d.metadata.scrapeId)).size, 100);
+  await sleep(200);
+  assert.ok(!h.logs.some((l) => /MaxListenersExceededWarning/.test(l.stderr ?? "")), "no listener warning");
+});
+
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {
   const key = `idem-${randomUUID()}`;
   const n = H.core.submissions().length;

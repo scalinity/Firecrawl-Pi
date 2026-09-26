@@ -184,13 +184,15 @@ async function status(ctx, route, id) {
     expiresAt, ...(next ? { next } : {}), ...(job.error ? { error: job.error } : {}), createdAt: iso(job.created_at), completedAt: iso(job.finished_at) };
   const res = ctx.res;
   res.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-request-id": ctx.id });
-  res.write(`${JSON.stringify(head).slice(0, -1)},"data":[`);
+  // One pipeline for the whole answer (the head, each archived document, the close), so no document
+  // adds listeners to the response.
+  async function* body() {
+    yield `${JSON.stringify(head).slice(0, -1)},"data":[`;
+    for (let i = 0; i < page.length; i++) { if (i) yield ","; yield* archive.stream(page[i].sha256); }
+    yield "]}";
+  }
   try {
-    for (let i = 0; i < page.length; i++) {
-      if (i) res.write(",");
-      await pipeline(archive.stream(page[i].sha256), res, { end: false });
-    }
-    res.end("]}");
+    await pipeline(body, res);
     ctx.logged(200);
   } catch (e) {
     log({ event: "archive_read_failed", request_id: ctx.id, job: job.id, error: e.message });
