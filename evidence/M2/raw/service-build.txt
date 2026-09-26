@@ -257,3 +257,58 @@ fcpi/browser:m2 id=sha256:eb2d8bf6abc39bd1224655b45a938f9a7302bb03fa212d8e9e2ba5
 leftover_transient_containers=0
 ### end
 end
+### meta
+utc=2026-09-26T03:17:51Z
+source_commit=2d606e45a5c43274121025bcf8d22f2d3ae530ff
+builder=github.com/docker/buildx v0.37.1 0b265a9f62db554fa9aba6dd19e1bd5704bc7d8a
+mem_available_mib_before=5375
+### build_retrieval
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 621B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.6s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 82.62kB done
+#4 DONE 0.1s
+
+#5 [1/5] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.1s done
+#5 DONE 0.1s
+
+#6 [3/5] COPY package.json package-lock.json ./
+#6 CACHED
+
+#7 [2/5] WORKDIR /srv/retrieval
+#7 CACHED
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 CACHED
+
+#9 [5/5] COPY src ./src
+#9 DONE 0.5s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 0.3s done
+#10 exporting manifest sha256:f074c4cec095e95d003a4b34b0c5711adc6b172fdb40cd677f31968d8e68a671 0.0s done
+#10 exporting config sha256:4771d3f64c40a389007eb56ed2ada22b42e50ebde2d6510d4e93fe46a7ab322b 0.0s done
+#10 naming to docker.io/fcpi/retrieval:m2 done
+#10 unpacking to docker.io/fcpi/retrieval:m2 0.1s done
+#10 DONE 0.5s
+build_exit=0 elapsed_s=2 mem_available_mib=5381
+### images
+fcpi/retrieval:m2 id=sha256:f074c4cec095e95d003a4b34b0c5711adc6b172fdb40cd677f31968d8e68a671 os=linux arch=arm64 size=354918154 user=3310:3310
+fcpi/browser:m2 id=sha256:eb2d8bf6abc39bd1224655b45a938f9a7302bb03fa212d8e9e2ba5afbdd687ef os=linux arch=arm64 size=3500875641 user=3320:3320
+leftover_transient_containers=0
+### end
+end

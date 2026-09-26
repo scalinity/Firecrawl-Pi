@@ -192,7 +192,7 @@ services:
   firecrawl-core:
     # The project build: upstream 7666c1f9 plus patches/ (patches/series.json), built for
     # linux/arm64 by scripts/m2/build-api-image.sh and loaded by digest (review Q7, D6).
-    image: fcpi/firecrawl-api@sha256:8886231320087abb96ad36b969d4e05a1d0d9e957b127403f6f5d68747e1bb8b
+    image: fcpi/firecrawl-api@sha256:10e516069bc3a9c2ed86933f837f7c824ec66d88ef474b43610c97a1d8e3f727
     platform: linux/arm64
     pull_policy: never
     hostname: firecrawl-core
@@ -342,7 +342,7 @@ services:
   # is that bridge's host address (the host's resolver), so no lookup leaves through the host's own
   # namespace past the guard (evidence/M1/closeout/CLOSEOUT.md).
   retrieval-service:
-    image: fcpi/retrieval@sha256:4e0b93ab37161bc14f7b28dd936446a190115d966dbbfdfbb47ba2ac7128c6b6
+    image: fcpi/retrieval@sha256:f074c4cec095e95d003a4b34b0c5711adc6b172fdb40cd677f31968d8e68a671
     platform: linux/arm64
     pull_policy: never
     hostname: retrieval-service
