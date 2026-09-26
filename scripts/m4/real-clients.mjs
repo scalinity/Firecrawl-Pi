@@ -59,6 +59,21 @@ function piView(label, since) {
     tools: ml.filter((l) => l.event === "tool").map((l) => ({ era: l.era, protocol_version: l.protocol_version, tool: l.tool, job: l.job, outcome: l.outcome, downstream_status: l.downstream?.status ?? null })),
     gateway: gl.map((l) => ({ method: l.method, route: l.route, status: l.status, mcp_method: l.mcp_method ?? null })) });
 }
+// Codex's server, exactly as deploy/clients/codex.config.toml states it (the template the owner copies),
+// with the served origin in place of its placeholder: each key of [mcp_servers.fcpi] becomes a -c override.
+function codexServer() {
+  const lines = readFileSync(join(ROOT, "deploy/clients/codex.config.toml"), "utf8").split("\n");
+  const start = lines.findIndex((l) => l.trim() === "[mcp_servers.fcpi]");
+  if (start < 0) throw new Error("deploy/clients/codex.config.toml has no [mcp_servers.fcpi] table");
+  const out = [];
+  for (const l of lines.slice(start + 1)) {
+    if (/^\s*\[/.test(l)) break;
+    const m = l.match(/^\s*([a-z_]+)\s*=\s*(.+?)\s*$/);
+    if (m) out.push("-c", `mcp_servers.fcpi.${m[1]}=${m[2].replace("https://<pi-tailnet-name-host>:8443", origin[0])}`);
+  }
+  if (!out.some((x) => x.startsWith("mcp_servers.fcpi.url=")) || !out.some((x) => x.startsWith("mcp_servers.fcpi.bearer_token_env_var="))) throw new Error("the Codex template lacks url or bearer_token_env_var");
+  return out;
+}
 const answerLine = (s) => (String(s ?? "").match(/SENTINEL=\S+ CRAWL=\S+ DOCS=\S+/) ?? [null])[0];
 
 out("meta", { platform: process.platform, deployed_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), pi_utc: piNow(), endpoint: "https://<pi-tailnet-name-host>:8443/mcp" });
@@ -84,7 +99,7 @@ try {
     const token = pi("sudo -n cat /etc/firecrawl-pi/secrets/clients/m4codex.token").trim();
     const last = join(dir, "codex-last.txt");
     const r = await run("codex", ["exec", "--ignore-user-config", "--skip-git-repo-check", "-s", "read-only", "-m", "gpt-6-luna",
-      "-c", `mcp_servers.fcpi.url=${JSON.stringify(URL_MCP)}`, "-c", 'mcp_servers.fcpi.bearer_token_env_var="FCPI_MCP_TOKEN"', "-c", 'approval_policy="never"',
+      ...codexServer(), "-c", 'approval_policy="never"',
       "-o", last, PROMPT], { FCPI_MCP_TOKEN: token }, dir);
     const answer = existsSync(last) ? readFileSync(last, "utf8") : "";
     out("codex", { client: version("codex"), model: "gpt-6-luna", exit: r.code, ms: r.ms, answer: answerLine(answer), result_head: answer.slice(0, 400), stderr_tail: r.stderr.slice(-400) });
