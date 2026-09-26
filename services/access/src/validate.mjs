@@ -9,6 +9,9 @@ export class RequestError extends Error {
   constructor(status, code, message, extra = {}) { super(message); this.status = status; this.code = code; this.extra = extra; }
 }
 const bad = (msg) => new RequestError(400, "BAD_REQUEST", msg);
+// A manifest entry named by client input: own properties only, so "constructor" or "toString" is an
+// unknown name rather than an inherited function.
+const own = (o, k) => (o && Object.hasOwn(o, k) ? o[k] : undefined);
 
 // A target URL: http(s), no userinfo, a host with a top-level domain of two or more letters (as
 // upstream's URL schema requires), at most 2 KiB. Where it may resolve is the retrieval service's
@@ -29,7 +32,8 @@ function checkFormats(v, manifest) {
   for (const f of v) {
     const type = typeof f === "string" ? f : (f && typeof f === "object" && !Array.isArray(f) ? f.type : undefined);
     if (typeof type !== "string") throw bad("each format must be a string or an object with a type");
-    if (manifest.formats.refused[type]) throw new RequestError(400, "UNSUPPORTED_OPTION", `format '${type}' is not supported by this deployment: ${manifest.formats.refused[type]}.`, { option: `formats.${type}` });
+    const why = own(manifest.formats.refused, type);
+    if (why) throw new RequestError(400, "UNSUPPORTED_OPTION", `format '${type}' is not supported by this deployment: ${why}.`, { option: `formats.${type}` });
     if (!manifest.formats.allowed.includes(type)) throw bad(`unknown format '${type}'`);
     if (typeof f === "object" && Object.keys(f).some((k) => k !== "type")) throw bad(`format '${type}' takes no options`);
     if (!out.includes(type)) out.push(type);
@@ -48,7 +52,7 @@ function checkField(name, spec, v, manifest, path) {
       return v;
     }
     case "enum":
-      if (typeof v === "string" && spec.refused?.[v]) throw new RequestError(400, "UNSUPPORTED_OPTION", `'${where}: ${v}' is not supported by this deployment: ${spec.refused[v]}.`, { option: `${where}.${v}` });
+      if (typeof v === "string" && own(spec.refused, v)) throw new RequestError(400, "UNSUPPORTED_OPTION", `'${where}: ${v}' is not supported by this deployment: ${own(spec.refused, v)}.`, { option: `${where}.${v}` });
       if (!spec.values.includes(v)) throw bad(`'${where}' must be one of ${spec.values.join(", ")}`);
       return v;
     case "string": if (typeof v !== "string" || v.length > spec.maxLength) throw bad(`'${where}' must be a string of at most ${spec.maxLength} characters`); return v;
@@ -72,9 +76,9 @@ function checkObject(obj, fields, manifest, path = "") {
   const out = {};
   for (const [k, v] of Object.entries(obj)) {
     const where = path ? `${path}.${k}` : k;
-    const spec = fields[k];
+    const spec = own(fields, k);
     if (k.startsWith("__") && !spec) throw new RequestError(400, "UNSUPPORTED_OPTION", `'${where}' is an internal upstream option and is not accepted.`, { option: where });
-    if (!spec && manifest.refused[k]) throw new RequestError(400, "UNSUPPORTED_OPTION", `'${where}' is not supported by this deployment: ${manifest.refused[k]}.`, { option: where });
+    if (!spec && own(manifest.refused, k)) throw new RequestError(400, "UNSUPPORTED_OPTION", `'${where}' is not supported by this deployment: ${own(manifest.refused, k)}.`, { option: where });
     if (!spec) throw bad(`Unrecognized key in body: '${where}'`);
     if (spec.type === "replaced" || v === undefined) continue;
     out[k] = checkField(k, spec, v, manifest, path);

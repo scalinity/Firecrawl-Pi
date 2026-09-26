@@ -44,6 +44,15 @@ test("unknown keys, bad types and out-of-range values are 400 BAD_REQUEST", () =
   refused(() => validateBody("crawl", { url: "https://example.com", delay: 0 }, M), "BAD_REQUEST");
 });
 
+test("keys and values named after inherited object members are unknown, not manifest entries", () => {
+  for (const k of ["constructor", "toString", "hasOwnProperty", "valueOf"]) {
+    refused(() => validateBody("scrape", { url: "https://example.com", [k]: 1 }, M), "BAD_REQUEST", /Unrecognized key/);
+    refused(() => validateBody("crawl", { url: "https://example.com", scrapeOptions: { [k]: 1 } }, M), "BAD_REQUEST", /Unrecognized key/);
+    refused(() => validateBody("scrape", { url: "https://example.com", formats: [k] }, M), "BAD_REQUEST", /unknown format/);
+    refused(() => validateBody("scrape", { url: "https://example.com", proxy: k }, M), "BAD_REQUEST", /must be one of/);
+  }
+});
+
 test("crawl and map get the platform's defaults; a crawl's units are its limit", () => {
   const c = validateBody("crawl", { url: "https://example.com" }, M);
   assert.equal(c.body.limit, 50);
