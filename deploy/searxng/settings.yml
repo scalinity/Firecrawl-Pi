@@ -48,6 +48,12 @@ server:
 valkey:
   url: false
 
+plugins:
+  # The tracker-URL remover fetches ClearURLs rule lists from the Internet at start; nothing here needs it,
+  # and the container has no route for it (it failed closed when first started: evidence/M5/INTERPRETATION.md).
+  searx.plugins.tracker_url_remover.SXNGPlugin:
+    active: false
+
 engines:
   # The controlled engine (tests/fixtures/m5/providers.mjs searchHandler), reached through the search
   # proxy like every other engine, for the fixture phase's results, empty answers and failures.
@@ -62,3 +68,6 @@ engines:
     content_query: content
     timeout: 3.0
     disabled: false
+    # The fixture is served over plain http on the internal fixture network. Plain http stays off for every
+    # other engine (SearXNG's outgoing.enable_http default): curl then speaks https alone.
+    enable_http: true
