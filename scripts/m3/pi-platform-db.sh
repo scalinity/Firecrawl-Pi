@@ -23,7 +23,8 @@ if [ "${1:-}" != rights ]; then
   psql <"$REPO/deploy/nuq-postgres/fcpi-platform-schema.sql"
   pw=$(sudo -n cat $S/gateway_postgres_password)
   [ -n "$pw" ] || { echo "gateway_postgres_password is empty" >&2; exit 1; }
-  { printf 'SET log_statement = %s;\n\\set pw %s\n' "'none'" "$pw"; echo "ALTER ROLE fcpi_gateway PASSWORD :'pw';"; } | psql
+  # Neither the statement nor an error about it may reach the server log with the password.
+  { printf 'SET log_statement = %s;\nSET log_min_error_statement = panic;\n\\set pw %s\n' "'none'" "$pw"; echo "ALTER ROLE fcpi_gateway PASSWORD :'pw';"; } | psql
   unset pw
   echo "applied=yes"
 fi
