@@ -45,7 +45,7 @@ async function admin(db) { const c = new pg.Client({ host: PGHOST, port: Number(
 
 // ---- the fake core -----------------------------------------------------------------------------------
 function fakeCore(dbName) {
-  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false };
+  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false, pagesFailFrom: null };
   const docOf = (id, i, big = false) => ({ markdown: `# page ${i}${big ? "x".repeat(8192) : ""}`, metadata: { sourceURL: `http://m3.fixture.fcpi.test:8080/p${i}`, scrapeId: `${id.slice(0, 8)}-doc-${i}`, statusCode: 200 } });
   const persist = async (kind, id, body) => {
     const data = kind === "crawl" ? { mode: "kickoff", origin: body.origin, crawl_id: id } : { mode: "single_urls", origin: "api", scrapeOptions: { origin: body.origin }, crawl_id: id };
@@ -89,6 +89,7 @@ function fakeCore(dbName) {
           return send(200, { errors: j.errors, robotsBlocked: [] });
         }
         const skip = Number(u.searchParams.get("skip") ?? 0), limit = Number(u.searchParams.get("limit") ?? 100);
+        if (s.pagesFailFrom !== null && skip >= s.pagesFailFrom && skip < 1000000000) return send(500, { success: false, error: "internal" });
         // A finished page without a stored document is counted in next but not listed, as upstream does.
         const page = j.docs.slice(skip, skip + limit), data = page.filter(Boolean);
         const next = j.status !== "completed" || j.docs.length > skip + page.length ? `http://firecrawl-core:3002/v2/${m[1]}/${m[2]}?skip=${skip + page.length}` : undefined;
@@ -397,6 +398,41 @@ test("a page over the archive's size cap falls back to one document at a time, a
   assert.deepEqual(mine.map((e) => e.code), ["ARCHIVE_DOCUMENT_TOO_LARGE", "ERRORS_TRUNCATED"]);
   for (const e of mine) assert.ok(typeof e.url === "string" && typeof e.error === "string" && !Number.isNaN(Date.parse(e.timestamp)), JSON.stringify(e));
   assert.match(mine[1].error, /^2 further per-item errors/);
+});
+
+test("a job whose reconciliation fails does not stop the round: a running job is still archived", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  // An uncertain job whose marker lookup fails on every round.
+  const stuck = randomUUID();
+  await h.db.query(`INSERT INTO fcpi_platform.job (id, principal, client_label, kind, state, submission_key, request_hash, request, units, metadata_expire_at, submit_started_at)
+    VALUES ($1, 'pa', 'a', 'crawl', 'SUBMISSION_UNCERTAIN', $2, 'x', '{}', 1, now() + interval '1 day', now())`, [stuck, `fcpi:${stuck}`]);
+  await h.db.query("REVOKE EXECUTE ON FUNCTION fcpi_platform.upstream_groups_for_marker(text) FROM fcpi_gateway");
+  await waitFor(() => h.logs.some((l) => /permission denied for function/.test(l.error ?? "")), 5000, "the lookup failing");
+  h.core.complete(up, 2);
+  await waitFor(async () => (await h.job(r.json.id)).state === "SUCCEEDED", 15000, "archived while the other job's lookup fails");
+  await h.db.query("GRANT EXECUTE ON FUNCTION fcpi_platform.upstream_groups_for_marker(text) TO fcpi_gateway");
+  await h.db.query("DELETE FROM fcpi_platform.job WHERE id = $1", [stuck]);
+});
+
+test("a job still open past its deadline and the grace period is closed with what was archived, and frees the upstream slot", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  h.core.pagesFailFrom = 10;
+  h.core.complete(up, 12);
+  await waitFor(async () => (await h.job(r.json.id)).archived === 10 && h.logs.some((l) => l.action === "archive_interrupted" && l.job === r.json.id), 15000, "the first page archived, the second failing");
+  const waiting = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 3 }) });
+  assert.equal((await h.job(waiting.json.id)).state, "RECEIVED", "the slot is held");
+  await h.db.query("UPDATE fcpi_platform.job SET deadline = now() - interval '31 minutes' WHERE id = $1", [r.json.id]);
+  const closed = await waitFor(async () => { const j = await h.job(r.json.id); return j.state === "PARTIAL" && j; }, 15000, "closed");
+  assert.equal(closed.error_code, "ARCHIVE_INCOMPLETE");
+  assert.equal(closed.archived, 10);
+  assert.deepEqual(closed.errors.errors.map((e) => e.code), ["ARCHIVE_INCOMPLETE"]);
+  const served = await h.call("GET", `/v2/crawl/${r.json.id}?limit=100`, { token: T.a });
+  assert.equal(served.json.data.length, 10, "the archived documents are served");
+  await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(waiting.json.id)).state), 15000, "the waiting job dispatched");
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {

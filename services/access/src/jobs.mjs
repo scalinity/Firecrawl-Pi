@@ -17,6 +17,8 @@ import { randomUUID } from "node:crypto";
 const PATH = { crawl: "/v2/crawl", batch: "/v2/batch/scrape" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TERMINAL_UPSTREAM = new Set(["completed", "failed", "cancelled"]);
+// How long past its deadline an open job may hold the single upstream slot before it is closed.
+const STALL_GRACE_MINUTES = 30;
 
 export function makeJobs({ cfg, store, upstream, archive, log }) {
   const instance = randomUUID();
@@ -56,21 +58,26 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     return job.id;
   }
 
+  // Each job is handled on its own: a failure on one is logged and the round goes on to the others.
   async function resolveUncertain() {
     for (const job of await store.uncertain(cfg.submitSettleMs)) {
-      const groups = await store.markerGroups(job.submission_key);
-      if (groups.length) {
-        const [keep, ...extra] = groups;
-        await store.markSubmitted(job.id, keep.group_id, deadlineOf(job.kind), `reconciled: upstream ${keep.group_id} carries the submission key`);
-        say({ job: job.id, action: "reconciled", upstream: keep.group_id, duplicates: extra.length });
-        for (const g of extra) {
-          const d = await upstream.call("DELETE", `${PATH[job.kind]}/${g.group_id}`, { timeoutMs: 15000 }).catch((e) => ({ status: e.code }));
-          say({ job: job.id, action: "duplicate_cancelled", upstream: g.group_id, status: d.status });
-        }
-      } else if (job.settled) {
-        await store.markRequeued(job.id, `no upstream job carries the submission key ${cfg.submitSettleMs} ms after it was sent`);
-        say({ job: job.id, action: "requeued_after_settle" });
+      try { await resolveOne(job); } catch (e) { say({ job: job.id, action: "reconcile_failed", error: e.message }); }
+    }
+  }
+
+  async function resolveOne(job) {
+    const groups = await store.markerGroups(job.submission_key);
+    if (groups.length) {
+      const [keep, ...extra] = groups;
+      await store.markSubmitted(job.id, keep.group_id, deadlineOf(job.kind), `reconciled: upstream ${keep.group_id} carries the submission key`);
+      say({ job: job.id, action: "reconciled", upstream: keep.group_id, duplicates: extra.length });
+      for (const g of extra) {
+        const d = await upstream.call("DELETE", `${PATH[job.kind]}/${g.group_id}`, { timeoutMs: 15000 }).catch((e) => ({ status: e.code }));
+        say({ job: job.id, action: "duplicate_cancelled", upstream: g.group_id, status: d.status });
       }
+    } else if (job.settled) {
+      await store.markRequeued(job.id, `no upstream job carries the submission key ${cfg.submitSettleMs} ms after it was sent`);
+      say({ job: job.id, action: "requeued_after_settle" });
     }
   }
 
@@ -78,23 +85,40 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
   const statusOf = (job) => upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}?skip=1000000000&limit=1`, { timeoutMs: 15000, maxBytes: 1048576 });
 
   async function pollRunning() {
-    for (const job of await store.running()) {
-      if (!job.cancel_sent_at && (job.cancel_requested_at || job.overdue)) {
-        const d = await upstream.call("DELETE", `${PATH[job.kind]}/${job.upstream_id}`, { timeoutMs: 15000 }).catch((e) => ({ status: e.code }));
-        if (d.status === 200 || d.status === 409) { await store.cancelSent(job.id); job.cancel_sent_at = new Date(); }
-        say({ job: job.id, action: job.cancel_requested_at ? "cancel_sent" : "deadline_cancel_sent", status: d.status });
-      }
-      let s;
-      try { s = await statusOf(job); } catch (e) { say({ job: job.id, action: "poll_failed", reason: e.code }); continue; }
-      if (s.status === 404) { await store.failLost(job.id, "UPSTREAM_STATE_LOST", "The core no longer knows this job and it had not finished; its state cannot be reconstructed."); continue; }
-      if (s.status !== 200 || !s.json) continue;
-      const st = { status: s.json.status, completed: s.json.completed ?? 0, total: s.json.total ?? 0, creditsUsed: s.json.creditsUsed ?? null };
-      await store.progress(job.id, st);
-      if (!TERMINAL_UPSTREAM.has(st.status)) continue;
-      // A cancelled job keeps finishing the pages already in flight; archive once they have landed.
-      if (st.status === "cancelled" && st.completed < st.total && job.cancel_sent_at && Date.now() - new Date(job.cancel_sent_at).getTime() < 60000) continue;
-      await finalize(job, st, s.json);
+    for (const job of await store.running(STALL_GRACE_MINUTES)) {
+      try { await pollOne(job); } catch (e) { say({ job: job.id, action: "poll_failed", error: e.message }); }
+      if (job.stalled) await closeStalled(job).catch((e) => say({ job: job.id, action: "close_failed", error: e.message }));
     }
+  }
+
+  // A job still open STALL_GRACE_MINUTES after its deadline (its archival keeps failing, or the core
+  // never ends it) is closed with the documents already archived, so it stops holding the single
+  // upstream slot, and the reason is recorded. The move is guarded: a job this round finished stays so.
+  async function closeStalled(job) {
+    const n = await store.documentCount(job.id);
+    const msg = `the job was still open ${STALL_GRACE_MINUTES} minutes after its deadline, because its results could not be archived or the core did not end it; ${n} documents were archived`;
+    const entry = { id: `fcpi:${job.id}:ARCHIVE_INCOMPLETE:0`, timestamp: new Date().toISOString(), url: "", code: "ARCHIVE_INCOMPLETE", error: msg };
+    const done = await store.finish(job.id, n ? "PARTIAL" : "FAILED", { status: job.upstream_status, completed: job.completed, total: job.total, creditsUsed: job.credits_used,
+      errors: { errors: [entry], robotsBlocked: [] }, errorCode: "ARCHIVE_INCOMPLETE", error: msg }, msg);
+    if (done) say({ job: job.id, action: "closed_incomplete", state: done.state, archived: n });
+  }
+
+  async function pollOne(job) {
+    if (!job.cancel_sent_at && (job.cancel_requested_at || job.overdue)) {
+      const d = await upstream.call("DELETE", `${PATH[job.kind]}/${job.upstream_id}`, { timeoutMs: 15000 }).catch((e) => ({ status: e.code }));
+      if (d.status === 200 || d.status === 409) { await store.cancelSent(job.id); job.cancel_sent_at = new Date(); }
+      say({ job: job.id, action: job.cancel_requested_at ? "cancel_sent" : "deadline_cancel_sent", status: d.status });
+    }
+    let s;
+    try { s = await statusOf(job); } catch (e) { say({ job: job.id, action: "poll_failed", reason: e.code }); return; }
+    if (s.status === 404) { await store.failLost(job.id, "UPSTREAM_STATE_LOST", "The core no longer knows this job and it had not finished; its state cannot be reconstructed."); return; }
+    if (s.status !== 200 || !s.json) return;
+    const st = { status: s.json.status, completed: s.json.completed ?? 0, total: s.json.total ?? 0, creditsUsed: s.json.creditsUsed ?? null };
+    await store.progress(job.id, st);
+    if (!TERMINAL_UPSTREAM.has(st.status)) return;
+    // A cancelled job keeps finishing the pages already in flight; archive once they have landed.
+    if (st.status === "cancelled" && st.completed < st.total && job.cancel_sent_at && Date.now() - new Date(job.cancel_sent_at).getTime() < 60000) return;
+    await finalize(job, st, s.json);
   }
 
   // Archives every document and the per-item errors, then closes the job. Safe to repeat: documents

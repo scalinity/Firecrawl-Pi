@@ -135,7 +135,8 @@ export function makeStore(cfg, log = () => {}) {
     uncertain: async (settleMs) => (await q(`SELECT *, (submit_started_at < now() - $1 * interval '1 millisecond') AS settled FROM fcpi_platform.job WHERE state = 'SUBMISSION_UNCERTAIN' ORDER BY created_at`, [settleMs])).rows,
     markerGroups: async (marker) => (await q("SELECT group_id, first_seen FROM fcpi_platform.upstream_groups_for_marker($1)", [marker])).rows,
 
-    running: async () => (await q("SELECT *, (deadline IS NOT NULL AND deadline < now()) AS overdue FROM fcpi_platform.job WHERE state IN ('QUEUED', 'RUNNING') ORDER BY created_at")).rows,
+    // overdue: past the deadline (the core is told to stop); stalled: still open graceMinutes after it.
+    running: async (graceMinutes) => (await q("SELECT *, (deadline IS NOT NULL AND deadline < now()) AS overdue, (deadline IS NOT NULL AND deadline < now() - $1 * interval '1 minute') AS stalled FROM fcpi_platform.job WHERE state IN ('QUEUED', 'RUNNING') ORDER BY created_at", [graceMinutes])).rows,
     async progress(id, s) {
       await q("UPDATE fcpi_platform.job SET upstream_status = $2, completed = $3, total = $4, credits_used = $5, updated_at = now() WHERE id = $1",
         [id, s.status, s.completed, s.total, s.creditsUsed]);
