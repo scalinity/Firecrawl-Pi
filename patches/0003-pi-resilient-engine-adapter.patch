@@ -277,10 +277,10 @@ index 0000000000000000000000000000000000000000..7f821920e45c9ee641a8c1b6f2763298
 +}
 diff --git a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
 new file mode 100644
-index 0000000000000000000000000000000000000000..eb6c14e67ea7b0ebadb53e27b02e027e070a97d9
+index 0000000000000000000000000000000000000000..5c07e6a3ca81944fca7ee50e84a30a63136138bc
 --- /dev/null
 +++ b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
-@@ -0,0 +1,202 @@
+@@ -0,0 +1,209 @@
 +// fcpi: the pi-resilient engine adapter (FIRECRAWL_PI_SPEC.md §8.1). In the pi-resilient
 +// profile (PI_RETRIEVAL_URL set) every acquisition is one call to the project retrieval
 +// service's POST /internal/acquire. The service owns target validation, SSRF and redirect
@@ -289,7 +289,7 @@ index 0000000000000000000000000000000000000000..eb6c14e67ea7b0ebadb53e27b02e027e
 +// EngineScrapeResult or a typed PiRetrievalError comes back. PDFs and documents are parsed by
 +// the upstream engines from the bytes this acquisition returned, never downloaded again.
 +import * as undici from "undici";
-+import { randomUUID } from "node:crypto";
++import { createHash, randomUUID } from "node:crypto";
 +import { config } from "../../../../config";
 +import type { Meta } from "../..";
 +import type { EngineScrapeResult, FeatureFlag } from "..";
@@ -349,17 +349,24 @@ index 0000000000000000000000000000000000000000..eb6c14e67ea7b0ebadb53e27b02e027e
 +    meta.abort.scrapeTimeout() ?? MAX_ACQUISITION_MS,
 +    MAX_ACQUISITION_MS,
 +  );
++  const url = meta.rewrittenUrl ?? meta.url;
++  const purpose = purposeOf(meta);
 +  const request = {
 +    requestId: randomUUID(),
 +    // The scrape job's id: stable across NuQ requeues and upstream's own retries, so all of
-+    // them draw on one attempt budget in the service (review finding R3).
-+    logicalAcquisitionId: meta.id,
++    // them draw on one attempt budget in the service (review finding R3). Upstream gives every
++    // robots.txt and sitemap fetch of a crawl one id ("robots-txt;"/"sitemap;" + the crawl's), so
++    // for those the URL is part of the key: each document keeps its own budget.
++    logicalAcquisitionId:
++      purpose === "page"
++        ? meta.id
++        : `${meta.id}|${createHash("sha256").update(url).digest("hex").slice(0, 16)}`,
 +    principalId: meta.internalOptions.teamId ?? null,
 +    jobId: meta.id,
 +    crawlId: meta.internalOptions.crawlId ?? null,
-+    url: meta.rewrittenUrl ?? meta.url,
++    url,
 +    deadline: new Date(Date.now() + Math.max(remaining, 0)).toISOString(),
-+    purpose: purposeOf(meta),
++    purpose,
 +    expect: meta.featureFlags.has("pdf")
 +      ? "pdf"
 +      : meta.featureFlags.has("document")
