@@ -37,6 +37,10 @@ export function nextCooldown(previousS, retryAfterS, sinceLastEndS = null) {
   return recurring ? Math.min(Math.max(previousS * 2, 60), 3600) : 60;
 }
 
+// The one order in which budget usage rows are locked: a category's periods by name (day before month),
+// then the paid total's day.
+export const lockOrder = (rows) => rows.sort((a, b) => (a.category === "_paid_total") - (b.category === "_paid_total") || a.period.localeCompare(b.period));
+
 export class Store {
   constructor(config) {
     // A database that stops answering fails a request in seconds instead of holding its permit to the
@@ -170,6 +174,8 @@ export class Store {
   }
 
   // ---- provider budgets (spec §28.3) ---------------------------------------------------------------
+  // Every writer of the usage rows takes them in one order (see lockOrder), so a reservation and a
+  // settlement running at once never wait on each other's rows (review W2).
   // Reserves `amount` for one provider call before dispatch, against every period cap of its category
   // and, for a paid USD category, the paid total's daily cap. One transaction: each period row is
   // updated only while reserved + settled + amount stays within its cap, and PostgreSQL re-checks that
@@ -177,8 +183,8 @@ export class Store {
   // passes a cap. Returns { reservation } for a new one, { existing } when the call key was already
   // reserved (a retried request), or { exhausted: { category, period, cap, used } }.
   async reserveBudget(r) {
-    const periods = [...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap })),
-      ...(r.paidTotalCap !== null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap }] : [])];
+    const periods = lockOrder([...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap })),
+      ...(r.paidTotalCap !== null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap }] : [])]);
     const EXHAUSTED = Symbol("exhausted");
     try {
       return await this.#tx(async (c) => {
@@ -206,9 +212,9 @@ export class Store {
           }
         }
         const reservation = (await c.query(
-          `INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, state, day_start, month_start, paid_total)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'RESERVED', $12, $13, $14) RETURNING *`,
-          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap !== null])).rows[0];
+          `INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, state, day_start, month_start, paid_total, periods)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'RESERVED', $12, $13, $14, $15) RETURNING *`,
+          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap !== null, Object.keys(r.caps).sort()])).rows[0];
         return { reservation, notices };
       });
     } catch (e) {
@@ -221,14 +227,22 @@ export class Store {
 
   // Moves a reservation out of RESERVED/UNCERTAIN: settled at its measured amount (with the call's
   // usage and stored result), or released when the call demonstrably never reached the provider.
-  // The period rows give back the reservation and take the actual amount in the same transaction.
+  // The period rows give back the reservation and take the actual amount in the same transaction: the rows
+  // the reservation took, in the one lock order reservations use. A settlement that still loses a lock wait
+  // is tried once more, since a paid answer must not be lost to it (review W2).
   async #close(id, to, actual, fields = {}) {
+    try { return await this.#closeOnce(id, to, actual, fields); } catch (e) {
+      if (e.code !== "40P01" && e.code !== "40001") throw e;
+      return this.#closeOnce(id, to, actual, fields);
+    }
+  }
+  async #closeOnce(id, to, actual, fields) {
     return this.#tx(async (c) => {
       const res = (await c.query("SELECT * FROM fcpi_retrieval.budget_reservation WHERE id = $1 FOR UPDATE", [id])).rows[0];
       if (!res || !["RESERVED", "UNCERTAIN"].includes(res.state)) return null;
-      const rows = [...(await c.query("SELECT period FROM fcpi_retrieval.budget_usage WHERE category = $1 AND ((period = 'day' AND period_start = $2) OR (period = 'month' AND period_start = $3))",
-        [res.category, res.day_start, res.month_start])).rows.map((x) => ({ category: res.category, period: x.period })),
-        ...(res.paid_total ? [{ category: "_paid_total", period: "day" }] : [])];
+      const taken = res.periods ?? (await c.query("SELECT period FROM fcpi_retrieval.budget_usage WHERE category = $1 AND ((period = 'day' AND period_start = $2) OR (period = 'month' AND period_start = $3))",
+        [res.category, res.day_start, res.month_start])).rows.map((x) => x.period);
+      const rows = lockOrder([...taken.map((period) => ({ category: res.category, period })), ...(res.paid_total ? [{ category: "_paid_total", period: "day" }] : [])]);
       for (const p of rows) {
         await c.query(`UPDATE fcpi_retrieval.budget_usage SET reserved = GREATEST(reserved - $4, 0), settled = settled + $5
           WHERE category = $1 AND period = $2 AND period_start = $3`, [p.category, p.period, p.period === "day" ? res.day_start : res.month_start, res.reserved, actual]);

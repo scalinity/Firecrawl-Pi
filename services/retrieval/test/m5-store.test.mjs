@@ -88,6 +88,33 @@ test("a paid category also draws on the paid total's daily cap; a zero cap refus
   } finally { await store.close(); }
 });
 
+test("settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2)", opts, async () => {
+  const store = await fresh();
+  try {
+    const paid = (over = {}) => base({ category: "llm", caps: { month: 10000000, day: 10000000 }, paidTotalCap: 10000000, amount: 1000, ...over });
+    const held = [];
+    for (let i = 0; i < 20; i++) held.push((await store.reserveBudget(paid())).reservation);
+    // Twenty settlements and twenty new reservations interleaved: the caps' order in the policy (month first
+    // here) does not decide the lock order, so none waits on another's rows in the opposite order.
+    const out = await Promise.all([...held.map((r) => store.settleBudget(r.id, 400, {})), ...held.map(() => store.reserveBudget(paid()))]);
+    assert.equal(out.slice(0, 20).filter((r) => r?.state === "SETTLED").length, 20);
+    assert.equal(out.slice(20).filter((r) => r.reservation).length, 20);
+    assert.deepEqual((await usage(store)).sort(), ["_paid_total/day:20000+8000", "llm/day:20000+8000", "llm/month:20000+8000"]);
+  } finally { await store.close(); }
+});
+
+test("a settlement gives back only the period rows its reservation took, whatever the caps are now (review W2)", opts, async () => {
+  const store = await fresh();
+  try {
+    const dayOnly = (await store.reserveBudget(base({ caps: { day: 100000 }, amount: 5000 }))).reservation;
+    assert.deepEqual(dayOnly.periods, ["day"]);
+    // The category later gains a month cap, and another reservation draws on it.
+    await store.reserveBudget(base({ caps: { day: 100000, month: 100000 }, amount: 7000 }));
+    await store.settleBudget(dayOnly.id, 1000, {});
+    assert.deepEqual((await usage(store)).sort(), ["fixture_race/day:7000+1000", "fixture_race/month:7000+0"]);
+  } finally { await store.close(); }
+});
+
 test("the 80% threshold is noticed once per period", opts, async () => {
   const store = await fresh();
   try {

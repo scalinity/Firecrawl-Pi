@@ -106,6 +106,9 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.budget_reservation (
 );
 CREATE INDEX IF NOT EXISTS budget_reservation_logical ON fcpi_retrieval.budget_reservation (logical_id);
 CREATE INDEX IF NOT EXISTS budget_reservation_created ON fcpi_retrieval.budget_reservation (created_at);
+-- The category periods a reservation drew on, so its settlement gives back exactly those rows even when
+-- the caps changed in between.
+ALTER TABLE fcpi_retrieval.budget_reservation ADD COLUMN IF NOT EXISTS periods text[];
 
 -- M5: search (spec §13): identical normalized queries answered from here for 15 minutes; a backend or
 -- engine failure is never stored. One row per query sent to the backend, for the hourly cap.
