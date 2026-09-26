@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-26T17:16:15Z",
+  "generated_utc": "2026-09-26T18:04:34Z",
   "generated_by": "scripts/m4/build-lock.mjs (M4), from the lock M3 closed with at 0abf44c; entries owned by later milestones are as M3 wrote them",
-  "repository_sha": "2bc5c68d2c3d9c248bd47e71517ca1329deec1d5",
+  "repository_sha": "e70e4ad9110fe5a44d0a5e72a45da7105d2cd8e8",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -564,10 +564,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with the /mcp route since M4",
       "status": "selected",
-      "image_id": "sha256:41f52b80fdf17bb77af9aeb612b85a44cb3eb9aa2defe8c8fc03c6580b7a53a6",
+      "image_id": "sha256:a811a0b2379ed3927280716981c7ef3bc81ce96c2ad4d72e685ce152b6b12eb3",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "ee91a9d4b24ece5621d808f47427b67e1c3be6a4",
+      "built_from_commit": "4fa7121eb25d9587ffd1a1fca822ba219940df33",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -639,10 +639,10 @@
     "mcp_gateway": {
       "role": "The MCP service image (built on the Pi, natively linux/arm64): the official SDK's stateless request factory in front of the gateway's REST routes",
       "status": "selected",
-      "image_id": "sha256:c852f225849c9a77e3844dfdd55647cea142163714c2bb9618fee737aa6c6e0f",
+      "image_id": "sha256:852d82931d1d621b21b62735648ed550e38f6606c894eed8bfe0e3ddef2887de",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "ee91a9d4b24ece5621d808f47427b67e1c3be6a4",
+      "built_from_commit": "4fa7121eb25d9587ffd1a1fca822ba219940df33",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
