@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FCPI M2 JS fixture</title>
+</head>
+<body>
+<main id="content"><noscript>This page needs JavaScript.</noscript></main>
+<script>
+// The whole article exists only after this script runs: a static fetch sees an empty shell.
+document.getElementById("content").innerHTML =
+  "<h1>Rendered by script</h1>" +
+  "<p>This article is written into the page by JavaScript after it loads.</p>" +
+  "<p>A static fetch of this page sees only an empty main element and a noscript notice, " +
+  "so the retrieval service must classify it as a JS shell and render it in the browser.</p>" +
+  "<p>Sentinel: <strong>fcpi-m2-js-5c1e</strong></p>";
+</script>
+</body>
+</html>

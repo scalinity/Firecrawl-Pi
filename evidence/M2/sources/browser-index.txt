@@ -1,0 +1,4 @@
+# Browser sources: file, URL, retrieval UTC, SHA-256 of the saved file
+moby-docker-v29.8.1-seccomp-default.json	https://github.com/moby/moby/blob/docker-v29.8.1/vendor/github.com/moby/profiles/seccomp/default.json (the engine the Pi runs, 29.8.1)	2026-09-26T01:27:36Z	536529b665dd0972c37bfb569f5d4ac8a53592e7b00752bc39ff063ca9864c74
+playwright-v1.63.0-seccomp_profile.json	https://github.com/microsoft/playwright/blob/v1.63.0/utils/docker/seccomp_profile.json (compared, not used)	2026-09-26T01:27:36Z	cc3e61cabda6bbc1e53e54d27ba4d55a9d3be829b6dd1a596f4a7b31b1cc7849
+mcr-playwright-v1.63.0-noble.index.json	https://mcr.microsoft.com/v2/playwright/manifests/v1.63.0-noble (Docker-Content-Digest sha256:eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27)	2026-09-26T01:08:35Z	eff16c30e6f3f4af0a03fa4b706120d5e9b0891c344a27d64559aff5900a4a27

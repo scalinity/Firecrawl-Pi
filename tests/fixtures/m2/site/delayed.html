@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FCPI M2 delayed fixture</title>
+</head>
+<body>
+<main id="content"><p class="loading">Loading…</p></main>
+<script>
+// Content arrives 1.5 s after load, as a delayed client-side render would.
+setTimeout(() => {
+  document.getElementById("content").innerHTML =
+    "<h1>Rendered after a delay</h1>" +
+    "<p>This article appears one and a half seconds after the page loads.</p>" +
+    "<p>A browser that captures the page at the load event sees only a loading notice.</p>" +
+    "<p>Sentinel: <strong>fcpi-m2-delayed-9b2d</strong></p>";
+}, 1500);
+</script>
+</body>
+</html>
