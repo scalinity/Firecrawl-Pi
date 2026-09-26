@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "b1e15c644b354947540e554de2c271edb021a26f",
-  "series_sha256": "7013aa03ce432cf5af75d88c38b195b509753ca4ed8956d62095d0e87634e035",
+  "result_tree": "494a1bfcda1e3b0156f8d4cad93831ba75c73de3",
+  "series_sha256": "d6e790dcbff531fe404868844890c1de1df4ad2b77de335fa6a4983a6c68ce8b",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -86,7 +86,7 @@
     },
     {
       "file": "0006-reproducible-arm64-build.patch",
-      "sha256": "b59e8e98908dabaa8b36622ced1f474e8833eb91ef12acaec3cf65281894b224",
+      "sha256": "c995ba5d9bf5d61d3b433579af8dfa635dbc20d29eafd12f7530728cceea0047",
       "reason": "The upstream Dockerfile floats every base image, the Rust toolchain and the crate graph, and downloads the FoundationDB client unchecked (decisions D4, D6).",
       "symbols": [
         "apps/api/Dockerfile",

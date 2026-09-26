@@ -4,7 +4,7 @@ from a digest-pinned image, a committed Cargo.lock built with --locked, apt from
 the FoundationDB client checked against its published SHA-256.
 
 diff --git a/apps/api/Dockerfile b/apps/api/Dockerfile
-index 7e5378c0f283a194f0873f63e3ecbce7579a1f17..f88feed57a60a03c0cdcdee80fc1a682c6e94841 100644
+index 7e5378c0f283a194f0873f63e3ecbce7579a1f17..fb2827281a9d9e02a38236862b112047465bc407 100644
 --- a/apps/api/Dockerfile
 +++ b/apps/api/Dockerfile
 @@ -1,48 +1,67 @@
@@ -100,7 +100,22 @@ index 7e5378c0f283a194f0873f63e3ecbce7579a1f17..f88feed57a60a03c0cdcdee80fc1a682
  RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
      --mount=type=cache,target=/usr/local/cargo/registry \
      --mount=type=cache,target=/app/native/target \
-@@ -71,26 +90,35 @@ RUN pnpm prune --prod --ignore-scripts
+@@ -60,7 +79,13 @@ RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+ COPY . .
+ 
+ # Build the application from a clean output directory.
+-RUN rm -rf dist && pnpm run build
++# fcpi: without npm_config_verify_deps_before_run=false, pnpm 11 re-runs the install before `run`
++# whenever it judges node_modules stale, as it does after COPY . . over a cached install layer;
++# that recompiles the native module into native/target outside the cache mount, so the image's
++# contents would depend on the builder's cache. The test refuses a native/target that holds
++# anything beyond the empty mount point the cache mount leaves.
++RUN rm -rf dist && npm_config_verify_deps_before_run=false pnpm run build && \
++    [ -z "$(ls -A native/target 2>/dev/null)" ]
+ ARG GIT_SHA=unknown
+ RUN test -s dist/src/harness.js && \
+     test -s dist/src/controllers/v0/crawl-status.js && \
+@@ -71,26 +96,35 @@ RUN pnpm prune --prod --ignore-scripts
  
  # Runtime stage
  FROM base AS runtime
