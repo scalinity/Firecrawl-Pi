@@ -576,10 +576,27 @@ const checks = {
       const ok = /^workstation through an SSH forward of 127\.0\.0\.1:3380$/.test(m?.vantage ?? "") && sk.client?.[0]?.apiUrl === "http://127.0.0.1:3380" && sk.end?.[0]?.exit === 0 && endOk(E("auth"));
       return { ok, actual: `vantage=${m?.vantage}; official client base URL=${sk.client?.[0]?.apiUrl}` };
     } },
-  P02: { name: "tailnet-tls-private-serving", inputs: [],
-    expected: "Tailscale Serve terminates TLS on the tailnet for the gateway, an approved device reaches it and an unapproved one cannot (spec §19.1, milestones M3 Human Verification)",
+  P02: { name: "tailnet-tls-private-serving", inputs: [`${RAW}tailscale-before.txt`, `${RAW}tailscale-install.txt`, `${RAW}lan-probe.txt`],
+    expected: "Tailscale is installed from its repository with the signing key's published fingerprint and runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed",
     run() {
-      return { blocked: true, actual: "Tailscale is installed on neither the Pi nor the workstation; its installation and account association are the owner's decision (register: Tailscale, M3)" };
+      const status = `${RAW}tailscale-status.txt`, check = `${RAW}tailnet-check.txt`;
+      if (!has(status) || !has(check)) return { blocked: true, actual: `Tailscale is installed on the Pi (${(read(`${RAW}tailscale-install.txt`).match(/installed=(\S+)/) ?? [])[1]}); awaiting the account association and the workstation's tailnet membership (${!has(status) ? "no Pi status" : "no workstation check"})` };
+      const ins = read(`${RAW}tailscale-install.txt`), s = S(status), ts = kv((s.tailscale ?? []).flatMap((l) => l.split(" ")));
+      const serve = jsonLines(s.serve)[0] ?? {};
+      const web = serve.web ?? [];
+      const resolvBefore = (read(`${RAW}tailscale-before.txt`).match(/resolv_conf_sha256=([0-9a-f]{64})/) ?? [])[1];
+      const resolvAfter = (read(status).match(/resolv_conf_sha256=([0-9a-f]{64})/) ?? [])[1];
+      const c = records(check).tls ?? [];
+      const w = one(c, "status_with_read_token"), n = one(c, "status_without_token"), j = one(c, "job_list_urls"), h = one(c, "foreign_host_header");
+      const lan = S(`${RAW}lan-probe.txt`).project_ports ?? [];
+      const cond = { key: /key_fingerprint=2596A99EAAB33821893C0A79458CA832957F5868/.test(ins) && /installed=\S+ tailscaled=active/.test(ins),
+        running: ts.backend === "Running" && ts.tailscaled === "active", no_dns_routes_ssh: ts.corp_dns === "false" && ts.route_all === "false" && ts.run_ssh === "false" && ts.advertise_routes === "0" && ts.exit_node === "false",
+        resolv_unchanged: !!resolvBefore && resolvBefore === resolvAfter,
+        serve: web.length === 1 && /:8443$/.test(web[0].host_port) && web[0].handlers?.["/"] === "http://127.0.0.1:3380" && serve.funnel === 0,
+        tls: w?.status === 200 && w.tls_authorized === true && w.cert_subject_matches === true && w.core_live === true, no_token: n?.status === 401 && n.code === "UNAUTHORIZED",
+        urls: j?.status === 200 && j.results_url_on_tailnet_origin === true, host: h?.status === 421, lan: lan.includes("port=8443 closed") };
+      const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
+      return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; backend=${ts.backend}; serve=${JSON.stringify(web)}; TLS ${w?.tls_protocol} authorized=${w?.tls_authorized} issuer=${w?.cert_issuer_org}; with token=${w?.status} without=${n?.status} foreign host=${h?.status}` };
     } },
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
     expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to a later milestone), cites only commits that exist, and holds no absolute local path",
