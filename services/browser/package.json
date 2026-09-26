@@ -1,0 +1,12 @@
+{
+  "name": "fcpi-browser",
+  "version": "0.2.0",
+  "private": true,
+  "description": "FCPI browser worker: bounded, sandboxed Chromium (FIRECRAWL_PI_SPEC.md §12)",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node src/server.mjs" },
+  "dependencies": {
+    "playwright-core": "1.63.0"
+  }
+}
