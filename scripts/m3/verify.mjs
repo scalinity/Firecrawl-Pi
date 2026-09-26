@@ -412,7 +412,7 @@ const checks = {
       return { ok, actual: `control passes=${(s.control ?? []).includes("exit=0")}; absent bind refused=${m.includes("exit=1")}, path created=${(m.find((l) => l.startsWith("missing_path_created=")) ?? "").split("=")[1]}; shadow root exit=${shv.exit} listening=${shv.listening} files=${shv.files_written}` };
     } },
   N06: { name: "platform-network-and-ledger-rights", inputs: [`${RAW}stack.txt`, `${RAW}platform-rights.txt`],
-    expected: "fcpi_platform is internal and isolated with no host address and holds only the gateway and PostgreSQL; every internal project network is isolated; the gateway joins fcpi_access, fcpi_api and fcpi_platform only; fcpi_gateway is no superuser and owns nothing, holds DML on the four ledger tables and no other right, no CREATE and no usage of the NuQ or retrieval schemas; the marker lookup is SECURITY DEFINER with a pinned search_path, owned by the NOLOGIN fcpi_nuq_reader, which can read only NuQ's two job tables; PUBLIC and fcpi_core cannot execute it; neither fcpi_core nor fcpi_retrieval can use the platform schema",
+    expected: "fcpi_platform is internal and isolated with no host address and holds only the gateway and PostgreSQL; every internal project network is isolated; the gateway joins fcpi_access, fcpi_api and fcpi_platform only; fcpi_gateway is no superuser and owns nothing, holds DML on the four ledger tables and no other right, no CREATE and no usage of the NuQ or retrieval schemas; the marker lookup is SECURITY DEFINER with a pinned search_path, owned by the NOLOGIN fcpi_nuq_reader, which can read only NuQ's two job tables; PUBLIC and fcpi_core cannot execute it; neither fcpi_core nor fcpi_retrieval can use the platform schema; pg_hba's first two rules, loaded without error, admit only fcpi_gateway to the postgres database from 10.231.7.0/24 with its password and reject every other role from that subnet; probed from the platform network with a wrong password, fcpi_gateway reaches password authentication (the control) while fcpi_core, fcpi_retrieval and postgres are refused by pg_hba, and no probe container is left",
     run() {
       const s = S(`${RAW}stack.txt`), r = S(`${RAW}platform-rights.txt`).rights ?? [], rk = kv(r.flatMap((l) => l.split(" ")));
       const nets = Object.fromEntries((s.networks ?? []).filter((l) => /^fcpi_/.test(l)).map((l) => [l.split(" ")[0], kv(l.split(" ").slice(1))]));
@@ -430,6 +430,17 @@ const checks = {
         schemas: rk.gateway_schema_create === "false" && rk.gateway_nuq_usage === "false" && rk.gateway_retrieval_usage === "false" && rk.gateway_public_create === "false" && rk.core_platform_usage === "false" && rk.retrieval_platform_usage === "false",
         reader: /login=false super=false/.test(rd) && /owned_objects role=fcpi_nuq_reader n=0 functions=1/.test(r.join("\n")) && line("reader_tables=") === "reader_tables=nuq.queue_scrape,nuq.queue_scrape_backlog",
         lookup: /owner=fcpi_nuq_reader security_definer=true config=search_path=pg_catalog, pg_temp gateway_execute=true core_execute=false public_execute=false/.test(lookup) };
+      // pg_hba as loaded: the platform subnet's two rules come first (first match wins), and none errs.
+      const P = S(`${RAW}platform-rights.txt`);
+      const rules = (P.hba_rules ?? []).filter((l) => l.startsWith("hba_rule ")).map((l) => kv(l.split(" ").slice(1)));
+      const plat24 = (x) => x?.type === "host" && x.address === "10.231.7.0" && x.mask === "255.255.255.0";
+      cond.hba = rules.length >= 3 && plat24(rules[0]) && rules[0].db === "postgres" && rules[0].user === "fcpi_gateway" && rules[0].method === "scram-sha-256"
+        && plat24(rules[1]) && rules[1].db === "all" && rules[1].user === "all" && rules[1].method === "reject" && rules.every((x) => x.error === "");
+      // From the platform network: the gateway's role reaches password authentication (the control that
+      // the probe reached the server); every other role is refused by pg_hba before it.
+      const probe = Object.fromEntries((P.hba_probe ?? []).filter((l) => l.startsWith("probe ")).map((l) => { const k = kv(l.split(" ").slice(1)); return [k.role, k.result]; }));
+      cond.hba_probe = probe.fcpi_gateway === "password_failed" && ["fcpi_core", "fcpi_retrieval", "postgres"].every((x) => probe[x] === "rejected_by_hba")
+        && (P.hba_probe ?? []).includes("leftover_transient=0");
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
       return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; gateway networks=${gwNets.join(",")}; platform members=${plat?.members}; ${line("reader_tables=")}` };
     } },

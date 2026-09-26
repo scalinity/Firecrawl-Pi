@@ -26,6 +26,23 @@ if [ "${1:-}" != rights ]; then
   # Neither the statement nor an error about it may reach the server log with the password.
   { printf 'SET log_statement = %s;\nSET log_min_error_statement = panic;\n\\set pw %s\n' "'none'" "$pw"; echo "ALTER ROLE fcpi_gateway PASSWORD :'pw';"; } | psql
   unset pw
+  sec hba
+  # The platform network (fcpi_platform, 10.231.7.0/24) is the gateway's alone: from it, only
+  # fcpi_gateway may connect, only to the postgres database, with its password; any other role is
+  # refused before authentication. The lines go first (pg_hba's first match wins), once, as
+  # initdb/040-fcpi-platform.sh writes them on a new data directory; then the server reloads.
+  sudo -n docker exec -i -u 5432:5432 "$PG" sh -s <<'SH'
+set -eu
+hba="$PGDATA/pg_hba.conf"
+if ! grep -qx '# fcpi-platform-network' "$hba"; then
+  { printf '%s\n' '# fcpi-platform-network' 'host postgres fcpi_gateway 10.231.7.0/24 scram-sha-256' 'host all all 10.231.7.0/24 reject'; cat "$hba"; } >"$hba.fcpi"
+  mv "$hba.fcpi" "$hba"
+  echo "hba=added"
+else
+  echo "hba=present"
+fi
+SH
+  psql -At -c "SELECT 'reloaded=' || pg_reload_conf()"
   echo "applied=yes"
 fi
 
@@ -61,4 +78,31 @@ SELECT 'cron_tables_public_select=' || string_agg(c.relname, ',' ORDER BY c.reln
   FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
   WHERE n.nspname = 'cron' AND c.relkind = 'r' AND has_table_privilege('public', c.oid, 'SELECT');
 SQL
+
+sec hba_rules
+# The rules the server has loaded, in match order.
+psql -At <<'SQL'
+SELECT 'hba_rule n=' || rule_number || ' type=' || type || ' db=' || array_to_string(database, ',') || ' user=' || array_to_string(user_name, ',')
+  || ' address=' || coalesce(address, '') || ' mask=' || coalesce(netmask, '') || ' method=' || coalesce(auth_method, '') || ' error=' || coalesce(error, '')
+  FROM pg_hba_file_rules ORDER BY line_number;
+SQL
+
+sec hba_probe
+# From the platform network, as the gateway would connect: a throwaway container of the PostgreSQL
+# image (no capabilities, read-only, the service's uid) tries each role with a wrong password. The
+# gateway's role must reach password authentication, the positive control that the probe reached the
+# server; every other role must be refused by pg_hba first. Only the classification is printed.
+img=$(sudo -n docker inspect -f '{{.Config.Image}}' "$PG")
+for role in fcpi_gateway fcpi_core fcpi_retrieval postgres; do
+  out=$(sudo -n docker run --rm --network fcpi_platform --label fcpi.transient=hba-probe --read-only --tmpfs /tmp:size=8m --cap-drop ALL \
+    --security-opt no-new-privileges:true --user 5432:5432 --entrypoint psql "$img" \
+    "host=nuq-postgres port=5432 dbname=postgres user=$role password=not-the-password connect_timeout=10" -Atc 'select 1' 2>&1 || true)
+  case "$out" in
+    *"pg_hba.conf rejects connection"*) result=rejected_by_hba ;;
+    *"password authentication failed"*) result=password_failed ;;
+    *) result=other ;;
+  esac
+  echo "probe role=$role result=$result"
+done
+echo "leftover_transient=$(sudo -n docker ps -aq --filter label=fcpi.transient=hba-probe | wc -l)"
 echo end
