@@ -125,6 +125,26 @@ test("a cookie set on a redirect comes back on the next hop to the same host", a
   } finally { s.close(); }
 });
 
+test("a Secure cookie is sent only over https, and an http response cannot set one (review finding S4)", () => {
+  const jar = new CookieJar();
+  jar.store(new URL("https://a.example.com/"), ["s=1; Secure; Path=/", "p=2"]);
+  jar.store(new URL("http://a.example.com/"), ["t=3; secure"]);
+  assert.equal(jar.header(new URL("https://a.example.com/")), "s=1; p=2");
+  assert.equal(jar.header(new URL("http://a.example.com/")), "p=2");
+});
+
+test("TLS to an IP literal names no server (review finding S4)", async () => {
+  // No network here: the connection fails at once, after TLS options are applied.
+  const warnings = [];
+  const on = (w) => warnings.push(w.code);
+  process.on("warning", on);
+  try {
+    await assert.rejects(guardedFetch({ url: "https://93.184.215.14/", maxBytes: 1024, deadline: soon(), policy: { ...basePolicy, fixtures: [] }, resolvePublic: async () => [] }), (e) => e instanceof Denied);
+    await new Promise((r) => setImmediate(r));
+  } finally { process.off("warning", on); }
+  assert.ok(!warnings.includes("DEP0123"), `warnings: ${warnings.join(",")}`);
+});
+
 test("caller credentials go only to the first origin", async () => {
   const other = await serve((req, res) => res.end("other"));
   const first = await serve((req, res) => res.writeHead(302, { location: `http://fy.fixture.fcpi.test:${other.port}/` }).end());

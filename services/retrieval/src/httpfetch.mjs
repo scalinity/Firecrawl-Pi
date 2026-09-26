@@ -6,6 +6,7 @@
 import http from "node:http";
 import https from "node:https";
 import zlib from "node:zlib";
+import { isIP } from "node:net";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { resolveTarget, pinnedLookup } from "./resolve.mjs";
 
@@ -32,19 +33,24 @@ export function callerHeaders(headers) {
   return out;
 }
 
+// A Secure cookie goes back only over https, and only an https response may set one (CWE-614;
+// review finding S4).
 export class CookieJar {
   #byHost = new Map();
   header(url) {
-    const c = this.#byHost.get(url.hostname);
-    return c && c.size ? [...c].map(([k, v]) => `${k}=${v}`).join("; ") : null;
+    const tls = url.protocol === "https:";
+    const pairs = [...(this.#byHost.get(url.hostname) ?? [])].filter(([, c]) => tls || !c.secure).map(([k, c]) => `${k}=${c.value}`);
+    return pairs.length ? pairs.join("; ") : null;
   }
   store(url, setCookie) {
     for (const line of [].concat(setCookie ?? [])) {
-      const [pair] = String(line).split(";");
+      const [pair, ...attrs] = String(line).split(";");
       const eq = pair.indexOf("=");
       if (eq <= 0) continue;
+      const secure = attrs.some((a) => a.trim().toLowerCase() === "secure");
+      if (secure && url.protocol !== "https:") continue;
       const c = this.#byHost.get(url.hostname) ?? this.#byHost.set(url.hostname, new Map()).get(url.hostname);
-      if (c.size < 64) c.set(pair.slice(0, eq).trim(), pair.slice(eq + 1).trim());
+      if (c.size < 64) c.set(pair.slice(0, eq).trim(), { value: pair.slice(eq + 1).trim(), secure });
     }
   }
 }
@@ -73,7 +79,8 @@ function requestOnce({ target, address, method, headers, maxBytes, deadline, sig
       host: target.host, port: target.port, method, path: target.url.pathname + target.url.search,
       headers: { host: target.url.host, "user-agent": USER_AGENT, accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
         "accept-encoding": "gzip, deflate, br", ...headers },
-      lookup: pinnedLookup(address), agent: false, ...(tls ? { servername: target.host, rejectUnauthorized: true } : {}),
+      // TLS names the server only for a host name: SNI carries no address (RFC 6066; DEP0123).
+      lookup: pinnedLookup(address), agent: false, ...(tls ? { ...(isIP(target.host) ? {} : { servername: target.host }), rejectUnauthorized: true } : {}),
     });
     const timer = setTimeout(() => fail(new Denied("TIMEOUT", `no complete response within ${remaining} ms`)), remaining);
     const onAbort = () => fail(new Denied("CANCELLED", "the caller cancelled the acquisition"));
