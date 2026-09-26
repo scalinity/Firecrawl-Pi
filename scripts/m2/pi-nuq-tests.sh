@@ -141,7 +141,7 @@ kill)
   # reaches the restarted worker within the job's deadline.
   amarker=b02b-$(cat /proc/sys/kernel/random/uuid)
   sec async_submit
-  D exec -e URL="$M2/slow?ms=15000&$amarker=1" "$CORE" node -e '
+  D exec -e URL="$M2/slow?ms=8000&$amarker=1" "$CORE" node -e '
 fetch("http://127.0.0.1:3002/v2/batch/scrape", { method: "POST", headers: { "content-type": "application/json" },
   body: JSON.stringify({ urls: [process.env.URL], formats: ["markdown"], timeout: 300000 }) })
   .then(async (r) => { const j = await r.json(); console.log(JSON.stringify({ http: r.status, success: j.success, batchId: j.id ?? null, error: j.error ?? null })); });' 2>&1

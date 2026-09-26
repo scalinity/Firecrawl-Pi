@@ -1,0 +1,101 @@
+### kill_meta
+utc=2026-09-26T04:46:11.762Z source_commit=0862d73e6ae51d46687989794028d23b285b4bd1
+core=96af8aadfdf6fba811ad6f9144583ae5bb3bc673d856b0b1863a2ebaab5783db image=sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c status=running health=healthy restarts=0 started=2026-09-26T04:41:31.071542105Z policy=unless-stopped
+### kill_client_start
+job=01a0dc08-fe2e-74c6-a9a2-cc66abc0bc0b utc=2026-09-26T04:46:12.508Z
+01a0dc08-fe2e-74c6-a9a2-cc66abc0bc0b	active	0	04:46:12	t	
+### kill_kill
+worker_pid=39 utc=2026-09-26T04:46:15.708Z
+kill_exit=0
+### kill_core_observed
+t+2s status=running health=healthy restarts=0 started=2026-09-26T04:41:31.071542105Z policy=unless-stopped
+t+4s status=running health=healthy restarts=0 started=2026-09-26T04:41:31.071542105Z policy=unless-stopped
+t+6s status=running health=healthy restarts=0 started=2026-09-26T04:41:31.071542105Z policy=unless-stopped
+t+8s status=running health=healthy restarts=0 started=2026-09-26T04:41:31.071542105Z policy=unless-stopped
+t+10s status=running health=healthy restarts=0 started=2026-09-26T04:41:31.071542105Z policy=unless-stopped
+t+12s status=running health=healthy restarts=0 started=2026-09-26T04:41:31.071542105Z policy=unless-stopped
+### kill_client_result
+{"case":"B02-client","started":"2026-09-26T04:46:11.910Z","http":408,"success":false,"error":"Scrape timed out after waiting in the concurrency limit queue","sentinels":[],"ms":60171}
+exec_exit=0
+### kill_core_ready
+utc=2026-09-26T04:47:37.225Z core status=running health=healthy restarts=1 started=2026-09-26T04:47:12.716794873Z policy=unless-stopped
+### kill_job_observed
+t+3s 01a0dc08-fe2e-74c6-a9a2-cc66abc0bc0b	failed	1		t	SCRAPE_TIMEOUT|{"stack":"Error: The scrape operation timed out before completing. This happens when a page takes too long to load, render, or process. Possible 
+### kill_attempts
+01a0dc08-fe2e-74c6-a9a2-cc66abc0bc0b	1	direct_http	CANCELLED		04:46:13.738
+### kill_fixture_hits
+hits=1
+### kill_async_submit
+{"http":200,"success":true,"batchId":"01a0dc0a-4cc2-70f5-9919-c3adca52ae38","error":null}
+job=01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36 utc=2026-09-26T04:47:37.825Z
+### kill_async_kill
+worker_pid=35 utc=2026-09-26T04:47:40.909Z
+kill_exit=0
+### kill_async_core_ready
+utc=2026-09-26T04:48:07.886Z core status=running health=healthy restarts=2 started=2026-09-26T04:47:43.372149307Z policy=unless-stopped
+### kill_async_job_observed
+t+3s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+6s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+9s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+12s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+15s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+18s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+21s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+24s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+27s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+30s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+33s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	0	04:47:37	f	
+t+36s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	1	04:48:41	f	
+t+39s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	1	04:48:41	f	
+t+42s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	1	04:48:41	f	
+t+45s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	1	04:48:41	f	
+t+48s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	1	04:48:41	f	
+t+51s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	active	1	04:48:57	f	
+t+54s 01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	failed	1		f	SCRAPE_FCPI_RETRIEVAL|{"stack":"Error: Retrieval failed: TIMEOUT. no complete response within 14999 ms\n    at scrapeURLWithPiResilient (/app/dist/src/scraper/s
+### kill_async_attempts
+01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	1	direct_http	CANCELLED		04:47:38.340
+01a0dc0a-4ce2-73aa-9d33-b839ff0e0c36	2	direct_http	TIMEOUT		04:48:42.611
+### kill_async_fixture_hits
+hits=2
+### kill_core_log
+nuq-worker-0   2026-09-26 04:46:13 info [nuq-worker:]: Acquired job 
+✗ A service has terminated unexpectedly Error: nuq-worker-0 failed with exit code 137
+── Shutting down ──
+worker         2026-09-26 04:46:15 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-26 04:46:15 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-26 04:46:15 info [:]: Shutting down extract worker... 
+nuq-prefetch-worker 2026-09-26 04:46:15 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:46:15 info [nuq/rabbitmq:]: NuQ sender connection closed 
+nuq-prefetch-worker 2026-09-26 04:46:15 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:46:15 info [nuq/rabbitmq:]: NuQ sender connection closed 
+worker         2026-09-26 04:46:17 info [:]: All jobs finished. Shutting down... 
+api            2026-09-26 04:47:12 info [nuq/rabbitmq:]: NuQ listener channel closed 
+api            2026-09-26 04:47:12 info [nuq/rabbitmq:]: NuQ listener connection already closing during shutdown 
+nuq-worker-0   2026-09-26 04:47:27 info [nuq-worker:]: Acquired job 
+nuq-worker-0   2026-09-26 04:47:28 info [nuq/rabbitmq:]: NuQ job sent 
+ℹ All services running. Press Ctrl+C to stop
+nuq-worker-0   2026-09-26 04:47:38 info [nuq-worker:]: Acquired job 
+✗ A service has terminated unexpectedly Error: nuq-worker-0 failed with exit code 137
+── Shutting down ──
+extract-worker 2026-09-26 04:47:40 debug [:]: Received SIGTERM. Shutting down gracefully... 
+extract-worker 2026-09-26 04:47:40 info [:]: Shutting down extract worker... 
+worker         2026-09-26 04:47:40 debug [:]: Received SIGTERM. Shutting down gracefully... 
+nuq-prefetch-worker 2026-09-26 04:47:40 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:47:41 info [nuq/rabbitmq:]: NuQ sender connection closed 
+nuq-prefetch-worker 2026-09-26 04:47:41 info [nuq/rabbitmq:]: NuQ sender channel closed 
+nuq-prefetch-worker 2026-09-26 04:47:41 info [nuq/rabbitmq:]: NuQ sender connection closed 
+worker         2026-09-26 04:47:42 info [:]: All jobs finished. Shutting down... 
+ℹ All services running. Press Ctrl+C to stop
+nuq-worker-0   2026-09-26 04:48:42 info [nuq-worker:]: Acquired job 
+### kill_health
+firecrawl-core running healthy restarts=2 policy=unless-stopped
+access-gateway running healthy restarts=0 policy=unless-stopped
+retrieval-service running healthy restarts=0 policy=unless-stopped
+nuq-postgres running healthy restarts=0 policy=unless-stopped
+rabbitmq running healthy restarts=0 policy=unless-stopped
+redis running healthy restarts=0 policy=unless-stopped
+browser-worker running healthy restarts=0 policy=unless-stopped
+fixture running healthy restarts=0 policy=unless-stopped
+fixture-m2 running healthy restarts=0 policy=unless-stopped
+### kill_end
+end
