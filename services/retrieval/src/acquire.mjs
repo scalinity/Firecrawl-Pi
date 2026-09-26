@@ -192,23 +192,26 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         paced = await pace(renderTarget, attemptId, browserDeadline, signal);
         if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return fail(paced.failure); }
         const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal });
+        // A result without its final URL (a worker fault) is read as ending where it began, not
+        // parsed as a URL it is not.
+        const finalUrl = typeof r.finalUrl === "string" && r.finalUrl ? r.finalUrl : renderUrl;
         // The worker refuses main-frame navigations to another host, but a server redirect only the
         // browser followed is not seen until it happened: it is counted against its domain.
-        if (r.finalUrl && r.finalUrl !== renderUrl) {
+        if (finalUrl !== renderUrl) {
           let t = null;
-          try { t = parseTarget(r.finalUrl, policy); } catch { /* refused by the proxy already */ }
+          try { t = parseTarget(finalUrl, policy); } catch { /* refused by the proxy already */ }
           if (t && domainOf(t) !== paced.domain) { await store.recordNavigation(domainOf(t), !!t.fixture); log({ event: "browser_redirect_counted", attempt_id: attemptId, domain: domainOf(t) }); }
         }
-        const verdict = r.ok ? classify({ status: r.status, contentType: r.contentType ?? "text/html", body: r.html, finalUrl: r.finalUrl, requestedUrl: req.url }) : null;
+        const verdict = r.ok ? classify({ status: r.status, contentType: r.contentType ?? "text/html", body: r.html, finalUrl, requestedUrl: req.url }) : null;
         // A page whose own structure still says "rendered by script" after its one browser attempt
         // is no content (spec §9.4); a page that is merely short is the page (review finding C5).
         const shell = verdict?.verdict === "js_shell" && verdict.structural === true;
         const failure = !r.ok ? r.failure : verdict.failure ?? (shell
           ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null);
         await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
-        if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(r.finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }
+        if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }
         if (failure) return fail(failure);
-        return finish({ ok: true, body: r.html, finalUrl: r.finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
+        return finish({ ok: true, body: r.html, finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
           bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
           subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [] });
       } finally {
