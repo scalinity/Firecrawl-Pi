@@ -132,9 +132,16 @@ kill)
   echo "hits=$(D logs --since "$start" "$FX" 2>&1 | grep -c "$marker")"
   ;;
 stall)
+  # NuQ's prefetch worker takes a requeued job again at once (active, with a new lock) and hands
+  # it to the worker through the broker, so a requeue shows as the stalls count rising, not as a
+  # queued row. Each freeze starts when the run's first attempt row appears, so the worker holds
+  # the job; the retrieval service, not frozen, finishes that run's attempts meanwhile. The target
+  # answers 503 after 1.5 s, so a run spends two attempts in about 4 s and two runs fit inside the
+  # logical page's 90 s deadline: without one budget, three runs would make six attempts.
   marker=r3-$(cat /proc/sys/kernel/random/uuid)
+  attempts() { sql "SELECT count(*) FROM fcpi_retrieval.attempt WHERE logical_id = '$1';"; }
   sec submit
-  D exec -e URL="$M2/slow?ms=8000&status=503&$marker=1" "$CORE" node -e '
+  D exec -e URL="$M2/slow?ms=1500&status=503&$marker=1" "$CORE" node -e '
 fetch("http://127.0.0.1:3002/v2/batch/scrape", { method: "POST", headers: { "content-type": "application/json" },
   body: JSON.stringify({ urls: [process.env.URL], formats: ["markdown"] }) })
   .then(async (r) => { const j = await r.json(); console.log(JSON.stringify({ http: r.status, success: j.success, batchId: j.id ?? null, error: j.error ?? null })); });' 2>&1
@@ -142,15 +149,15 @@ fetch("http://127.0.0.1:3002/v2/batch/scrape", { method: "POST", headers: { "con
   for _ in $(seq 1 60); do job=$(sql "SELECT id FROM nuq.queue_scrape WHERE data->>'url' LIKE '%$marker%' LIMIT 1;"); [ -n "$job" ] && break; sleep 0.5; done
   echo "job=${job:-none}"
   [ -n "$job" ] || { echo "no job"; exit 1; }
+  pid=$(worker_pid); echo "worker_pid=${pid:-none}"
   for n in 1 2; do
     sec "stall_$n"
-    # Wait for run n: the job active with n-1 stalls, its acquisition under way.
-    for _ in $(seq 1 120); do row=$(job_row "$job"); case $row in *$'\t'active$'\t'$((n-1))$'\t'*) break ;; esac; sleep 1; done
-    echo "run_active utc=$(now) $row"
-    sleep 2
-    pid=$(worker_pid); D exec --user 3002 "$CORE" kill -STOP "$pid"; echo "stopped worker_pid=$pid utc=$(now) exit=$?"
-    for _ in $(seq 1 60); do row=$(job_row "$job"); case $row in *$'\t'queued$'\t'$n$'\t'*) break ;; esac; sleep 2; done
-    echo "requeued utc=$(now) $row"
+    first=$(( 2 * n - 1 ))
+    for _ in $(seq 1 400); do [ "$(attempts "$job")" -ge "$first" ] && break; sleep 0.2; done
+    D exec --user 3002 "$CORE" kill -STOP "$pid"; echo "stopped utc=$(now) exit=$? attempts=$(attempts "$job")"
+    echo "row $(job_row "$job")"
+    for _ in $(seq 1 60); do row=$(job_row "$job"); [ "$(printf '%s\n' "$row" | cut -f3)" -ge "$n" ] 2>/dev/null && break; sleep 2; done
+    echo "requeued utc=$(now) attempts=$(attempts "$job") row $row"
     D exec --user 3002 "$CORE" kill -CONT "$pid"; echo "continued utc=$(now) exit=$?"
   done
   sec final
@@ -160,7 +167,7 @@ fetch("http://127.0.0.1:3002/v2/batch/scrape", { method: "POST", headers: { "con
   sql "SELECT logical_id, ordinal, strategy, coalesce(outcome,''), coalesce(target_status::text,''), to_char(started_at AT TIME ZONE 'UTC','HH24:MI:SS.MS') FROM fcpi_retrieval.attempt WHERE logical_id = '$job' ORDER BY ordinal;"
   sql "SELECT logical_id, attempts FROM fcpi_retrieval.acquisition WHERE logical_id = '$job';"
   sec acquisitions
-  D logs --since "$start" "$RS" 2>&1 | grep '"event":"acquisition"' | grep "$job" | cut -c1-400
+  D logs --since "$start" "$RS" 2>&1 | grep '"event":"acquisition"' | grep "$job" | cut -c1-420
   sec fixture_hits
   echo "hits=$(D logs --since "$start" "$FX" 2>&1 | grep -c "$marker")"
   ;;

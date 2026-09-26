@@ -1,0 +1,27 @@
+### stall_meta
+utc=2026-09-26T03:52:58.883Z source_commit=eef93170440377d6a4507795bfb97f797bc85e2c
+core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+### stall_submit
+{"http":200,"success":true,"batchId":"01a0dbd8-45e0-71c8-b395-3289e991e8b1","error":null}
+job=01a0dbd8-45ee-778e-aaa7-94b2d8840483
+### stall_stall_1
+run_active utc=2026-09-26T03:52:59.326Z 01a0dbd8-45ee-778e-aaa7-94b2d8840483	active	0	03:52:59	f	
+stopped worker_pid=34 utc=2026-09-26T03:53:01.437Z exit=0
+requeued utc=2026-09-26T03:55:07.448Z 01a0dbd8-45ee-778e-aaa7-94b2d8840483	active	1	03:53:59	f	
+continued utc=2026-09-26T03:55:07.503Z exit=0
+### stall_stall_2
+run_active utc=2026-09-26T03:55:07.605Z 01a0dbd8-45ee-778e-aaa7-94b2d8840483	active	1	03:53:59	f	
+stopped worker_pid=34 utc=2026-09-26T03:55:09.716Z exit=0
+requeued utc=2026-09-26T03:57:15.450Z 01a0dbd8-45ee-778e-aaa7-94b2d8840483	active	3	03:56:29	f	
+continued utc=2026-09-26T03:57:15.510Z exit=0
+### stall_final
+utc=2026-09-26T03:57:15.610Z 01a0dbd8-45ee-778e-aaa7-94b2d8840483	failed	3		f	SCRAPE_FCPI_RETRIEVAL|{"stack":"Error: Retrieval failed: DEADLINE_EXCEEDED. the logical page's 90 s acquisition deadline has passed\n    at scrapeURLWithPiResil
+### stall_attempts
+01a0dbd8-45ee-778e-aaa7-94b2d8840483	1	direct_http	target_error	503	03:52:59.426
+01a0dbd8-45ee-778e-aaa7-94b2d8840483	2	direct_http	target_error	503	03:53:08.505
+01a0dbd8-45ee-778e-aaa7-94b2d8840483	2
+### stall_acquisitions
+{"utc":"2026-09-26T03:53:16.526Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"7367e39e-748c-4031-84cc-6ff50333e54c","logical_id":"01a0dbd8-45ee-778e-aaa7-94b2d8840483","purpose":"page","url_hmac":"7e0778206a0f0b0d077cb531e646fa75","attempts_used":2,"strategies":["direct_http","direct_http"],"target_status":503,"verdict":"target_error","failure":null,"bytes":192,"ms":1
+{"utc":"2026-09-26T03:57:15.537Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"de99f9cb-5877-420a-b02f-ea919797e38e","logical_id":"01a0dbd8-45ee-778e-aaa7-94b2d8840483","purpose":"page","url_hmac":"7e0778206a0f0b0d077cb531e646fa75","attempts_used":2,"strategies":[],"target_status":0,"verdict":null,"failure":"DEADLINE_EXCEEDED","bytes":0,"ms":10}
+### stall_fixture_hits
+hits=2
