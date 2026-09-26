@@ -76,6 +76,10 @@ sec gateway_log_before
 # its log), scanned before the recreate replaces it and its log with it.
 bash $REPO/scripts/m3/pi-gateway-log-scan.sh
 
+sec resources_before_recreate
+# The memory peaks of the containers the recreate replaces, which go with their cgroups (M01).
+bash $REPO/scripts/m3/pi-resources.sh before-recreate
+
 sec recreate
 "${COMPOSE[@]}" up -d --force-recreate --wait --wait-timeout 900 2>&1 | tail -3
 echo "recreate_exit=${PIPESTATUS[0]}"

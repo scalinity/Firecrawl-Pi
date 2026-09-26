@@ -61,6 +61,9 @@ const ledgerJob = (id) => { const [r] = sql(`SELECT state, coalesce(upstream_id:
 const events = (id) => sql(`SELECT from_state, to_state, coalesce(detail,'') FROM fcpi_platform.job_event WHERE job_id = '${id}' ORDER BY at, id;`).map((l) => { const [from, to, detail] = l.split("|"); return { from: from || null, to, detail }; });
 const attemptsCount = () => Number(sql("SELECT count(*) FROM fcpi_retrieval.attempt;")[0]);
 const jobsCount = () => Number(sql("SELECT count(*) FROM fcpi_platform.job;")[0]);
+// One memory sample (scripts/m3/pi-resources.sh), taken before anything replaces a container's cgroup and
+// its peak with it, and at the end of every phase (M01). A sample that cannot be taken is an error.
+const resources = (label) => { try { out("resources", JSON.parse(pi(`bash /opt/firecrawl-pi/scripts/m3/pi-resources.sh ${label}`))); } catch (e) { out("error", { message: `resources ${label}: ${e.message}` }); } };
 // The job an idempotency key admitted, while it is in the given state (keys are the drivers' own, random).
 const byKey = (key, st) => sql(`SELECT j.id FROM fcpi_platform.idempotency i JOIN fcpi_platform.job j ON j.id = i.job_id WHERE i.key = '${key}' AND j.state = '${st}';`)[0] ?? null;
 
@@ -336,11 +339,12 @@ const PHASES = {
   async crash() {
     const coreLogs = (label) => pi(`bash /opt/firecrawl-pi/scripts/m2/pi-core-logs.sh ${label}`);
     out("core_logs", { label: "crash-before", summary: coreLogs("m3-crash-before").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
-    const gwKill = () => D(`kill ${cname("access-gateway")}`).trim();
+    const gwKill = () => { resources("before-gateway-kill"); return D(`kill ${cname("access-gateway")}`).trim(); };
     const gwStart = async () => { D(`start ${cname("access-gateway")}`); return waitHealthy("access-gateway"); };
     const crawl = (key, limit = 3) => post("crawl", { url: `${FX}/`, limit, sitemap: "skip" }, "m3a", { "x-idempotency-key": key });
 
     // K1: never delivered. The core is stopped, so the dispatcher cannot connect: acknowledged, kept, submitted once later.
+    resources("before-core-stop");
     D(`stop ${cname("firecrawl-core")}`);
     const k1 = await crawl(`m3-k1-${randomUUID()}`);
     out("k1_never_delivered", { case: "submit_with_core_stopped", ...brief(k1), id: k1.json?.id ?? null, ledger: ledgerJob(k1.json.id), events: events(k1.json.id) });
@@ -379,6 +383,7 @@ const PHASES = {
     out("k3_submission_lost", { case: "in_flight", id: k3id, ledger: ledgerJob(k3id) });
     out("k3_submission_lost", { case: "gateway_killed", result: gwKill(), client: await k3p });
     out("core_logs", { label: "k3-before-core-kill", summary: coreLogs("m3-k3-before-kill").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
+    resources("before-core-kill-k3");
     out("k3_submission_lost", { case: "core_killed_while_paused", result: D(`kill ${cname("firecrawl-core")}`).trim(), core_state: D(`inspect -f '{{.State.Status}}' ${cname("firecrawl-core")}`).trim() });
     D(`start ${cname("firecrawl-core")}`); await waitHealthy("firecrawl-core");
     out("k3_submission_lost", { case: "core_back", marker_groups: markerGroups(k3id) });
@@ -404,6 +409,7 @@ const PHASES = {
     const k5 = await post("crawl", { url: `${FX}/slow/`, limit: 6, sitemap: "skip" }, "m3a", { "x-idempotency-key": `m3-k5-${randomUUID()}` });
     for (let i = 0; i < 120; i++) { const j = await receipt(k5.json.id); if ((j?.completed ?? 0) >= 1) break; await sleep(1000); }
     out("core_logs", { label: "k5-before-core-kill", summary: coreLogs("m3-k5-before-kill").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
+    resources("before-core-kill-k5");
     out("k5_core_crash_running", { case: "core_killed", id: k5.json.id, ledger: ledgerJob(k5.json.id), result: D(`kill ${cname("firecrawl-core")}`).trim() });
     D(`start ${cname("firecrawl-core")}`); await waitHealthy("firecrawl-core");
     const k5done = await waitState(k5.json.id, ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"], 900000);
@@ -434,6 +440,7 @@ const PHASES = {
     for (const u of ups) pi(`sudo -n sed -n 's#^redis://:\\(.*\\)@redis:6379$#\\1#p' /etc/firecrawl-pi/secrets/core_redis_url | sudo -n docker exec -i ${cname("redis")} sh -c 'read -r p; export REDISCLI_AUTH="$p"; redis-cli --no-auth-warning --scan --pattern "crawl:${u}*" | while read -r k; do redis-cli --no-auth-warning EXPIRE "$k" 1 >/dev/null; done'`);
     await sleep(3000);
     out("core_logs", { label: "expiry-before-core-recreate", summary: pi("bash /opt/firecrawl-pi/scripts/m2/pi-core-logs.sh m3-expiry-before-recreate").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
+    resources("before-core-recreate");
     pi("sudo -n docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml up -d --force-recreate --no-deps --wait --wait-timeout 600 firecrawl-core 2>&1 | tail -2");
     out("after_expiry", { upstream: upstreamRows(), redis_keys: ups.map(redisKeys), core_status: jobs.map(([k], i) => coreStatus(k, ups[i])), cleaner_runs: cron,
       core_container_started: D(`inspect -f '{{.State.StartedAt}}' ${cname("firecrawl-core")}`).trim() });
@@ -475,6 +482,7 @@ const runSince = piNow();   // the ledger snapshot below lists the jobs admitted
 await openTunnel();
 let code = 0;
 try { await PHASES[phase](); } catch (e) { out("error", { message: e.message }); code = 1; }
+resources(`end-${phase}`);
 // Every job this run admitted, as the ledger and NuQ hold them now, while NuQ still keeps their rows (J05).
 try { for (const l of pi(`bash /opt/firecrawl-pi/scripts/m3/pi-ledger-snapshot.sh ${runSince}`).split("\n").filter(Boolean)) out("ledger", JSON.parse(l)); }
 catch (e) { out("error", { message: `ledger snapshot: ${e.message}` }); code = 1; }

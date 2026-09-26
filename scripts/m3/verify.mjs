@@ -642,14 +642,25 @@ const checks = {
         jl?.exit === 0 && jl.lines.length === 5 && jl.lines.every((l) => /^[0-9a-f-]{36}  /.test(l)) && jd?.exit === 0 && jd.lines.some((l) => /RECEIVED -> SUBMITTING/.test(l)) && nb?.exit === 2 && /FCPI_BASE_URL/.test(nb.stderr ?? "");
       return { ok, actual: `status exit=${st?.exit}; json exit=${sj?.exit}; jobs lines=${jl?.lines?.length}; receipt with transitions=${jd?.lines?.some((l) => /->/.test(l))}; no base URL exit=${nb?.exit}` };
     } },
-  M01: { name: "memory-within-caps", inputs: [`${RAW}stack.txt`],
-    expected: "after every live phase, the gateway's memory peak stays under its 160 MiB cap and no project cgroup records an OOM kill; host MemAvailable stays at 1 GiB or more",
+  M01: { name: "memory-within-caps", inputs: [`${RAW}stack.txt`, `${RAW}persistence.txt`, `${RAW}sdk-compat.txt`].concat(["auth", "sync", "jobs", "cancel", "overload", "crash", "expiry", "cli", "after-recreate"].map((p) => `${RAW}e2e-${p}.txt`)),
+    expected: "sampled at the end of every live phase and of the official client's run, and before every kill, stop or recreate that would replace a cgroup and its peak: the gateway's peak stays under its 160 MiB cap and the core's under its 2,304 MiB cap, neither cgroup records an OOM kill, the host's OOM-kill count does not change across the samples and MemAvailable stays at 1 GiB or more; at the end no project cgroup records an OOM kill",
     run() {
       const cg = Object.fromEntries((S(`${RAW}stack.txt`).cgroups ?? []).filter((l) => / memory\.max=/.test(l)).map((l) => [l.split(" ")[0], kv(l.split(" ").slice(1))]));
       const gw = cg["access-gateway"];
       const avail = +((S(`${RAW}stack.txt`).host_memory ?? []).find((l) => l.startsWith("MemAvailable:")) ?? "").replace(/\D+/g, "") / 1024;
-      const ok = Object.keys(cg).length === 10 && gw && +gw["memory.max"] === 160 * MIB && +gw["memory.peak"] < +gw["memory.max"] && Object.values(cg).every((v) => v.oom_kill === "0") && avail >= 1024;
-      return { ok, actual: `gateway peak=${(+gw?.["memory.peak"] / MIB).toFixed(1)} of ${(+gw?.["memory.max"] / MIB).toFixed(0)} MiB; oom kills=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}; MemAvailable=${avail.toFixed(0)} MiB` };
+      // Every sample, labelled with the run that took it; each run must have sampled.
+      const PH = ["auth", "sync", "jobs", "cancel", "overload", "crash", "expiry", "cli", "after-recreate"];
+      const samples = [...PH.flatMap((p) => (E(p).resources ?? []).map((r) => ({ run: p, ...r }))),
+        ...(records(`${RAW}sdk-compat.txt`).resources ?? []).map((r) => ({ run: "sdk-compat", ...r })),
+        ...jsonLines(S(`${RAW}persistence.txt`).resources_before_recreate).map((r) => ({ run: "persistence", ...r }))];
+      const unsampled = [...PH, "sdk-compat", "persistence"].filter((p) => !samples.some((s) => s.run === p));
+      const within = (c, capMib) => !!c && +c.max === capMib * MIB && Number.isFinite(c.peak) && c.peak < +c.max && c.oom_kill === 0;
+      const over = samples.filter((s) => !(within(s.gateway, 160) && (s.core === null || within(s.core, 2304)) && s.mem_available_kib >= 1024 * 1024)).map((s) => `${s.run}/${s.label}`);
+      const hostOoms = new Set(samples.map((s) => s.vmstat_oom_kill));
+      const peakOf = (k) => Math.max(...samples.map((s) => s[k]?.peak ?? 0)) / MIB;
+      const ok = unsampled.length === 0 && samples.length >= 18 && over.length === 0 && hostOoms.size === 1 && Number.isInteger([...hostOoms][0]) &&
+        Object.keys(cg).length === 10 && gw && +gw["memory.max"] === 160 * MIB && +gw["memory.peak"] < +gw["memory.max"] && Object.values(cg).every((v) => v.oom_kill === "0") && avail >= 1024;
+      return { ok, actual: `samples=${samples.length}, runs without one=${unsampled.join(",") || "none"}, over a cap or low on memory=${over.join(",") || "none"}; highest peaks: gateway ${peakOf("gateway").toFixed(1)} MiB, core ${peakOf("core").toFixed(0)} MiB; host OOM-kill counts seen=${[...hostOoms].join(",")}; at the end: gateway peak=${(+gw?.["memory.peak"] / MIB).toFixed(1)} MiB, cgroup OOM kills=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}, MemAvailable=${avail.toFixed(0)} MiB` };
     } },
   P01: { name: "private-access-from-the-target-machine", inputs: [`${RAW}e2e-auth.txt`, `${RAW}sdk-compat.txt`],
     expected: "the live tests and the official client ran on the workstation (macOS), the machine the owner's agents run on, through an SSH forward of the gateway's loopback publication that stayed up for the whole phase, with nothing published beyond loopback; the gateway instance answering through the forward is the one the Pi's gateway container logged at its start",

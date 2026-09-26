@@ -89,6 +89,9 @@ out("connections", { hosts: [...new Set(seen)], total: seen.length, lookups: [..
 // Every job this run admitted, as the ledger and NuQ hold them now (J05).
 try { for (const l of pi(`bash /opt/firecrawl-pi/scripts/m3/pi-ledger-snapshot.sh ${runSince}`).split("\n").filter(Boolean)) out("ledger", JSON.parse(l)); }
 catch (e) { out("error", { message: `ledger snapshot: ${String(e.message).slice(0, 200)}` }); code = 1; }
+// A memory sample at the run's end, as every e2e phase takes (M01).
+try { out("resources", JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m3/pi-resources.sh end-sdk-compat"))); }
+catch (e) { out("error", { message: `resources: ${String(e.message).slice(0, 200)}` }); code = 1; }
 tunnel.kill();
 out("end", { exit: code });
 process.exit(code);
