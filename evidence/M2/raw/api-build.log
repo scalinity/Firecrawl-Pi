@@ -1,6 +1,6 @@
 ### meta
-utc=2026-09-26T03:17:49Z
-repository_commit=2d606e45a5c43274121025bcf8d22f2d3ae530ff code_dirty=false
+utc=2026-09-26T03:27:59Z
+repository_commit=de172752fda3801645819b12860d0ef91e2f9d9d code_dirty=false
 builder=github.com/docker/buildx v0.37.1 Homebrew context=colima
 engine=29.5.2 linux/arm64
 ### source
@@ -10,26 +10,23 @@ fcpi-source: applied 0002-nuq-listener-restarts-after-broker-outage.patch sha256
 fcpi-source: applied 0003-pi-resilient-engine-adapter.patch sha256=abff6860fea1bca80e251269cca023bf05c528318339c43649d0c93615035fdd
 fcpi-source: applied 0004-guarded-auxiliary-downloads.patch sha256=776cf0dd6bf9f76da49cd8080b20861ea48470aa4fea27bcb36dc612e927b585
 fcpi-source: applied 0005-search-without-direct-fallback.patch sha256=924735ea34d8529b97087d9b179bac4f8b247bdc14cdd6e06dc1ac163429bb38
-fcpi-source: applied 0006-reproducible-arm64-build.patch sha256=b59e8e98908dabaa8b36622ced1f474e8833eb91ef12acaec3cf65281894b224
-fcpi-source: result_tree=b1e15c644b354947540e554de2c271edb021a26f series_sha256=7013aa03ce432cf5af75d88c38b195b509753ca4ed8956d62095d0e87634e035
+fcpi-source: applied 0006-reproducible-arm64-build.patch sha256=c548cfedc365ab269b518ba5fb103ba525e7d75a0fa24775338fe8cd175e02e6
+fcpi-source: result_tree=cd46160c40afa42ab7c56232ecbeaf1549654b92 series_sha256=90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea
 ### build
 #0 building with "colima" instance using docker driver
 
 #1 [internal] load build definition from Dockerfile
-#1 transferring dockerfile: 7.03kB done
+#1 transferring dockerfile: 7.61kB done
 #1 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1
-#2 ...
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.0s
 
 #3 [internal] load metadata for docker.io/library/rust:1.98.1-slim-bookworm@sha256:3ebe98baef5911f8461cf81ba05644374a3c5ef1f8a33db3977bd4175f5ff1fc
-#3 DONE 0.5s
+#3 DONE 0.0s
 
-#2 [internal] load metadata for docker.io/library/golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1
-#2 DONE 0.5s
-
-#4 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
-#4 DONE 0.5s
+#4 [internal] load metadata for docker.io/library/golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1
+#4 DONE 0.0s
 
 #5 [internal] load .dockerignore
 #5 transferring context: 88B done
@@ -39,46 +36,46 @@ fcpi-source: result_tree=b1e15c644b354947540e554de2c271edb021a26f series_sha256=
 #6 resolve docker.io/library/rust:1.98.1-slim-bookworm@sha256:3ebe98baef5911f8461cf81ba05644374a3c5ef1f8a33db3977bd4175f5ff1fc done
 #6 DONE 0.0s
 
-#7 [go-build 1/4] FROM docker.io/library/golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1
-#7 resolve docker.io/library/golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1 done
+#7 [base 1/2] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#7 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e done
 #7 DONE 0.0s
 
-#8 [base 1/2] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
-#8 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e done
+#8 [go-build 1/4] FROM docker.io/library/golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1
+#8 resolve docker.io/library/golang:1.27.1-bookworm@sha256:1668bbf856490c9bd0b77204ae1cdaebe273dc459b5eeb3a31a4ddc78ca6fae1 done
 #8 DONE 0.0s
 
 #9 [internal] load build context
 #9 transferring context: 13.88MB 0.1s done
 #9 DONE 0.1s
 
-#10 [build  2/14] RUN printf 'Types: deb\nURIs: http://snapshot.debian.org/archive/debian/%s\nSuites: bookworm bookworm-updates\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n\nTypes: deb\nURIs: http://snapshot.debian.org/archive/debian-security/%s\nSuites: bookworm-security\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n'       "20260925T000000Z" "20260925T000000Z" > /etc/apt/sources.list.d/debian.sources &&     apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y     curl     build-essential     pkg-config     python3     && rm -rf /var/lib/apt/lists/* &&     echo "fcpi-apt-build: snapshot=20260925T000000Z" && dpkg-query -W -f='fcpi-apt-build: ${Package}=${Version}\n'
+#10 [build  8/14] COPY patches ./patches
 #10 CACHED
 
-#11 [build  4/14] COPY --from=rust /usr/local/rustup /usr/local/rustup
+#11 [build  5/14] COPY --from=rust /usr/local/cargo /usr/local/cargo
 #11 CACHED
 
-#12 [build  9/14] COPY native ./native
+#12 [build  6/14] RUN chmod -R a+w /usr/local/rustup /usr/local/cargo && rustc --version && cargo --version
 #12 CACHED
 
-#13 [build  6/14] RUN chmod -R a+w /usr/local/rustup /usr/local/cargo && rustc --version && cargo --version
+#13 [build  7/14] COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 #13 CACHED
 
-#14 [build  8/14] COPY patches ./patches
+#14 [build  1/14] WORKDIR /app
 #14 CACHED
 
-#15 [build  7/14] COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
+#15 [build  4/14] COPY --from=rust /usr/local/rustup /usr/local/rustup
 #15 CACHED
 
-#16 [build  3/14] RUN ARCH=$(dpkg --print-architecture) &&     [ "$ARCH" = arm64 ] || { echo "fcpi: this build is linux/arm64 only" >&2; exit 1; } &&     curl -fsSL -o /tmp/fdb-clients.deb       "https://github.com/apple/foundationdb/releases/download/7.3.63/foundationdb-clients_7.3.63-1_aarch64.deb" &&     echo "a3c451ddb8242cc2396ba3419e1f3c9b283a64ea2eaff555377f4503bf9c3a64  /tmp/fdb-clients.deb" | sha256sum -c - &&     dpkg -i /tmp/fdb-clients.deb && rm /tmp/fdb-clients.deb
+#16 [base 2/2] RUN corepack enable && corepack prepare pnpm@11.4.0 --activate && node --version && pnpm --version
 #16 CACHED
 
-#17 [build  5/14] COPY --from=rust /usr/local/cargo /usr/local/cargo
+#17 [build  2/14] RUN printf 'Types: deb\nURIs: http://snapshot.debian.org/archive/debian/%s\nSuites: bookworm bookworm-updates\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n\nTypes: deb\nURIs: http://snapshot.debian.org/archive/debian-security/%s\nSuites: bookworm-security\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n'       "20260925T000000Z" "20260925T000000Z" > /etc/apt/sources.list.d/debian.sources &&     apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y     curl     build-essential     pkg-config     python3     && rm -rf /var/lib/apt/lists/* &&     echo "fcpi-apt-build: snapshot=20260925T000000Z" && dpkg-query -W -f='fcpi-apt-build: ${Package}=${Version}\n'
 #17 CACHED
 
-#18 [base 2/2] RUN corepack enable && corepack prepare pnpm@11.4.0 --activate && node --version && pnpm --version
+#18 [build  3/14] RUN ARCH=$(dpkg --print-architecture) &&     [ "$ARCH" = arm64 ] || { echo "fcpi: this build is linux/arm64 only" >&2; exit 1; } &&     curl -fsSL -o /tmp/fdb-clients.deb       "https://github.com/apple/foundationdb/releases/download/7.3.63/foundationdb-clients_7.3.63-1_aarch64.deb" &&     echo "a3c451ddb8242cc2396ba3419e1f3c9b283a64ea2eaff555377f4503bf9c3a64  /tmp/fdb-clients.deb" | sha256sum -c - &&     dpkg -i /tmp/fdb-clients.deb && rm /tmp/fdb-clients.deb
 #18 CACHED
 
-#19 [build  1/14] WORKDIR /app
+#19 [build  9/14] COPY native ./native
 #19 CACHED
 
 #20 [build 10/14] RUN --mount=type=cache,id=pnpm,target=/pnpm/store     --mount=type=cache,target=/usr/local/cargo/registry     --mount=type=cache,target=/app/native/target     pnpm install --frozen-lockfile
@@ -87,344 +84,49 @@ fcpi-source: result_tree=b1e15c644b354947540e554de2c271edb021a26f series_sha256=
 #21 [build 11/14] COPY . .
 #21 DONE 0.1s
 
-#22 [build 12/14] RUN rm -rf dist && pnpm run build
-#22 0.396 Scope: all 2 workspace projects
-#22 0.460 Lockfile is up to date, resolution step is skipped
-#22 0.495 Already up to date
-#22 0.878 
-#22 0.931 native install$ pnpm build
-#22 1.094 native install: $ napi build --platform --release -- --locked
-#22 6.585 native install:    Compiling proc-macro2 v1.0.107
-#22 6.585 native install:    Compiling quote v1.0.47
-#22 6.585 native install:    Compiling unicode-ident v1.0.26
-#22 6.586 native install:    Compiling libc v0.2.189
-#22 6.586 native install:    Compiling cfg-if v1.0.5
-#22 6.586 native install:    Compiling zerocopy v0.8.59
-#22 6.586 native install:    Compiling version_check v0.9.5
-#22 6.609 native install:    Compiling stable_deref_trait v1.2.1
-#22 6.610 native install:    Compiling memchr v2.8.3
-#22 6.619 native install:    Compiling typenum v1.20.1
-#22 6.628 native install:    Compiling siphasher v1.0.4
-#22 6.686 native install:    Compiling siphasher v0.3.11
-#22 6.686 native install:    Compiling smallvec v1.16.2
-#22 6.689 native install:    Compiling generic-array v0.14.7
-#22 6.746 native install:    Compiling getrandom v0.1.16
-#22 6.752 native install:    Compiling log v0.4.34
-#22 6.832 native install:    Compiling serde_core v1.0.229
-#22 6.860 native install:    Compiling scopeguard v1.2.0
-#22 6.910 native install:    Compiling syn v1.0.109
-#22 6.949 native install:    Compiling syn v3.0.6
-#22 6.969 native install:    Compiling syn v2.0.119
-#22 7.021 native install:    Compiling getrandom v0.2.17
-#22 7.040 native install:    Compiling crypto-common v0.1.7
-#22 7.054 native install:    Compiling rand_core v0.5.1
-#22 7.069 native install:    Compiling rand_core v0.6.4
-#22 7.078 native install:    Compiling serde v1.0.229
-#22 7.119 native install:    Compiling rand_pcg v0.2.1
-#22 7.130 native install:    Compiling block-buffer v0.10.4
-#22 7.150 native install:    Compiling autocfg v1.5.1
-#22 7.170 native install:    Compiling subtle v2.6.1
-#22 7.183 native install:    Compiling rustversion v1.0.23
-#22 7.263 native install:    Compiling digest v0.10.7
-#22 7.277 native install:    Compiling phf_shared v0.8.0
-#22 7.335 native install:    Compiling phf_shared v0.13.1
-#22 7.352 native install:    Compiling crc32fast v1.5.2
-#22 7.410 native install:    Compiling new_debug_unreachable v1.0.6
-#22 7.419 native install:    Compiling fastrand v2.5.0
-#22 7.431 native install:    Compiling cpufeatures v0.2.17
-#22 7.452 native install:    Compiling phf_generator v0.13.1
-#22 7.456 native install:    Compiling block-padding v0.3.3
-#22 7.490 native install:    Compiling jobserver v0.1.35
-#22 7.494 native install:    Compiling encoding_rs v0.8.42
-#22 7.498 native install:    Compiling phf_shared v0.10.0
-#22 7.537 native install:    Compiling phf_shared v0.11.3
-#22 7.546 native install:    Compiling allocator-api2 v0.2.21
-#22 7.579 native install:    Compiling precomputed-hash v0.1.1
-#22 7.590 native install:    Compiling find-msvc-tools v0.1.14
-#22 7.598 native install:    Compiling shlex v2.0.1
-#22 7.639 native install:    Compiling equivalent v1.0.2
-#22 7.650 native install:    Compiling foldhash v0.2.0
-#22 7.655 native install:    Compiling litemap v0.8.3
-#22 7.684 native install:    Compiling proc-macro-hack v0.5.20+deprecated
-#22 7.715 native install:    Compiling parking_lot_core v0.9.12
-#22 7.719 native install:    Compiling simd-adler32 v0.3.10
-#22 7.743 native install:    Compiling dtoa v1.0.11
-#22 7.773 native install:    Compiling crossbeam-utils v0.8.23
-#22 7.777 native install:    Compiling itoa v1.0.18
-#22 7.798 native install:    Compiling writeable v0.6.4
-#22 7.847 native install:    Compiling ppv-lite86 v0.2.21
-#22 7.872 native install:    Compiling dtoa-short v0.3.5
-#22 7.875 native install:    Compiling hashbrown v0.17.1
-#22 7.877 native install:    Compiling cc v1.5.1
-#22 7.902 native install:    Compiling rand_chacha v0.2.2
-#22 7.910 native install:    Compiling rand_chacha v0.3.1
-#22 7.947 native install:    Compiling rand v0.7.3
-#22 8.005 native install:    Compiling rand v0.8.8
-#22 8.026 native install:    Compiling synstructure v0.14.0
-#22 8.131 native install:    Compiling inout v0.1.4
-#22 8.173 native install:    Compiling phf_generator v0.8.0
-#22 8.200 native install:    Compiling phf_generator v0.10.0
-#22 8.208 native install:    Compiling phf_generator v0.11.3
-#22 8.228 native install:    Compiling icu_properties_data v2.3.0
-#22 8.231 native install:    Compiling multiversion_no_op v1.0.0
-#22 8.254 native install:    Compiling crossbeam-epoch v0.9.21
-#22 8.276 native install:    Compiling pkg-config v0.3.34
-#22 8.296 native install:    Compiling icu_normalizer_data v2.3.0
-#22 8.314 native install:    Compiling adler2 v2.0.1
-#22 8.325 native install:    Compiling simdutf8 v0.1.5
-#22 8.347 native install:    Compiling utf8_iter v1.0.4
-#22 8.365 native install:    Compiling getrandom v0.3.4
-#22 8.416 native install:    Compiling miniz_oxide v0.9.1
-#22 8.438 native install:    Compiling string_cache_codegen v0.5.4
-#22 8.452 native install:    Compiling phf_codegen v0.10.0
-#22 8.477 native install:    Compiling zstd-sys v2.1.0+zstd.1.5.7
-#22 8.479 native install:    Compiling cipher v0.4.4
-#22 8.582 native install:    Compiling zerofrom-derive v0.1.8
-#22 8.601 native install:    Compiling yoke-derive v0.8.3
-#22 8.617 native install:    Compiling zerovec-derive v0.11.6
-#22 8.624 native install:    Compiling serde_derive v1.0.229
-#22 8.644 native install:    Compiling displaydoc v0.2.7
-#22 8.764 native install:    Compiling cssparser-macros v0.6.1
-#22 8.957 native install:    Compiling lock_api v0.4.14
-#22 9.023 native install:    Compiling aho-corasick v1.1.5
-#22 9.038 native install:    Compiling regex-syntax v0.8.11
-#22 9.042 native install:    Compiling zerofrom v0.1.8
-#22 9.048 native install:    Compiling pin-project-lite v0.2.17
-#22 9.065 native install:    Compiling crossbeam-deque v0.8.8
-#22 9.083 native install:    Compiling yoke v0.8.3
-#22 9.108 native install:    Compiling byteorder v1.5.0
-#22 9.141 native install:    Compiling zerovec v0.11.8
-#22 9.145 native install:    Compiling zerotrie v0.2.5
-#22 9.175 native install:    Compiling zlib-rs v0.6.8
-#22 9.179 native install:    Compiling mac v0.1.1
-#22 9.190 native install:    Compiling futf v0.1.5
-#22 9.256 native install:    Compiling parking_lot v0.12.5
-#22 9.356 native install:    Compiling tinystr v0.8.4
-#22 9.409 native install:    Compiling icu_locale_core v2.3.0
-#22 9.425 native install:    Compiling potential_utf v0.1.6
-#22 9.447 native install:    Compiling phf_macros v0.8.0
-#22 9.493 native install:    Compiling icu_collections v2.3.0
-#22 9.688 native install:    Compiling regex-automata v0.4.18
-#22 9.713 native install:    Compiling icu_provider v2.3.1
-#22 9.854 native install:    Compiling cssparser v0.27.2
-#22 9.918 native install:    Compiling flate2 v1.1.10
-#22 10.12 native install:    Compiling markup5ever v0.11.0
-#22 10.39 native install:    Compiling phf_codegen v0.8.0
-#22 10.40 native install:    Compiling indexmap v2.14.2
-#22 10.42 native install:    Compiling sha2 v0.10.9
-#22 10.68 native install:    Compiling num-traits v0.2.19
-#22 10.70 native install:    Compiling thiserror v2.0.21
-#22 10.74 native install:    Compiling bitflags v2.13.2
-#22 10.74 native install:    Compiling futures-sink v0.3.34
-#22 10.76 native install:    Compiling napi-build v2.5.0
-#22 10.79 native install:    Compiling rayon-core v1.13.0
-#22 10.80 native install:    Compiling rand_core v0.10.1
-#22 10.84 native install:    Compiling getrandom v0.4.3
-#22 10.84 native install:    Compiling futures-core v0.3.34
-#22 10.84 native install:    Compiling utf-8 v0.7.6
-#22 10.87 native install:    Compiling futures-channel v0.3.34
-#22 10.87 native install:    Compiling tendril v0.4.3
-#22 10.90 native install:    Compiling string_cache v0.8.9
-#22 10.92 native install:    Compiling phf v0.8.0
-#22 10.94 native install:    Compiling phf v0.10.1
-#22 10.95 native install:    Compiling regex v1.13.1
-#22 10.97 native install:    Compiling selectors v0.22.0
-#22 10.98 native install:    Compiling icu_properties v2.3.0
-#22 10.98 native install:    Compiling icu_normalizer v2.3.0
-#22 11.26 native install:    Compiling html5ever v0.26.0
-#22 11.33 native install:    Compiling phf_macros v0.13.1
-#22 11.37 native install:    Compiling thiserror-impl v2.0.21
-#22 11.48 native install:    Compiling futures-macro v0.3.34
-#22 11.62 native install:    Compiling phf_codegen v0.13.1
-#22 11.65 native install:    Compiling indexmap v1.9.3
-#22 11.75 native install:    Compiling proc-macro2-diagnostics v0.10.1
-#22 11.77 native install:    Compiling once_cell v1.21.4
-#22 11.78 native install:    Compiling utf8parse v0.2.2
-#22 11.80 native install:    Compiling futures-io v0.3.34
-#22 11.81 native install:    Compiling tinyvec v1.13.3
-#22 11.84 native install:    Compiling futures-task v0.3.34
-#22 11.84 native install:    Compiling lazy_static v1.5.0
-#22 11.85 native install:    Compiling bumpalo v3.20.3
-#22 11.86 native install:    Compiling itoa v0.4.8
-#22 11.88 native install:    Compiling matches v0.1.10
-#22 11.89 native install:    Compiling deranged v0.5.8
-#22 11.90 native install:    Compiling powerfmt v0.2.0
-#22 11.93 native install:    Compiling time-core v0.1.9
-#22 11.97 native install:    Compiling nodrop v0.1.14
-#22 11.97 native install:    Compiling slab v0.4.12
-#22 11.99 native install:    Compiling convert_case v0.4.0
-#22 12.00 native install:    Compiling zmij v1.0.23
-#22 12.02 native install:    Compiling jiff-core v0.1.1
-#22 12.07 native install:    Compiling num-conv v0.2.2
-#22 12.09 native install:    Compiling zstd-safe v7.3.0
-#22 12.11 native install:    Compiling derive_more v0.99.20
-#22 12.14 native install:    Compiling futures-util v0.3.34
-#22 12.18 native install:    Compiling servo_arc v0.1.1
-#22 12.20 native install:    Compiling time v0.3.55
-#22 12.21 native install:    Compiling unicode-normalization v0.1.25
-#22 12.22 native install:    Compiling zopfli v0.8.3
-#22 12.40 native install:    Compiling jiff v0.2.37
-#22 12.83 native install:    Compiling anstyle-parse v1.0.0
-#22 12.89 native install:    Compiling phf v0.13.1
-#22 13.02 native install:    Compiling selectors v0.37.0
-#22 13.06 native install:    Compiling idna_adapter v1.2.2
-#22 13.21 native install:    Compiling chacha20 v0.10.2
-#22 13.29 native install:    Compiling rand_core v0.9.5
-#22 13.33 native install:    Compiling fxhash v0.2.1
-#22 13.34 native install:    Compiling derive_more-impl v2.1.1
-#22 13.37 native install:    Compiling aes v0.8.4
-#22 13.37 native install:    Compiling hashbrown v0.12.3
-#22 13.40 native install:    Compiling unicode-bidi v0.3.18
-#22 13.56 native install:    Compiling thin-slice v0.1.1
-#22 13.59 native install:    Compiling bitflags v1.3.2
-#22 13.60 native install:    Compiling unicode-properties v0.1.4
-#22 13.61 native install:    Compiling anyhow v1.0.104
-#22 13.67 native install:    Compiling is_terminal_polyfill v1.70.2
-#22 13.69 native install:    Compiling serde_json v1.0.151
-#22 13.69 native install:    Compiling colorchoice v1.0.5
-#22 13.69 native install:    Compiling iana-time-zone v0.1.65
-#22 13.71 native install:    Compiling anstyle v1.0.14
-#22 13.72 native install:    Compiling thiserror v1.0.69
-#22 13.74 native install:    Compiling rustc-hash v2.1.3
-#22 13.77 native install:    Compiling crc-catalog v2.5.0
-#22 13.79 native install:    Compiling either v1.18.0
-#22 13.79 native install:    Compiling percent-encoding v2.3.2
-#22 13.80 native install:    Compiling unicode-segmentation v1.13.3
-#22 13.84 native install:    Compiling anstyle-query v1.1.5
-#22 13.85 native install:    Compiling rayon v1.12.0
-#22 13.85 native install:    Compiling form_urlencoded v1.2.2
-#22 13.86 native install:    Compiling anstream v1.0.0
-#22 13.90 native install:    Compiling convert_case v0.12.0
-#22 13.90 native install:    Compiling crc v3.4.0
-#22 13.92 native install:    Compiling chrono v0.4.45
-#22 13.96 native install:    Compiling derive_more v2.1.1
-#22 13.98 native install:    Compiling stringprep v0.1.5
-#22 14.18 native install:    Compiling rand_chacha v0.9.0
-#22 14.43 native install:    Compiling rand v0.10.3
-#22 14.57 native install:    Compiling idna v1.1.0
-#22 14.65 native install:    Compiling futures-executor v0.3.34
-#22 14.65 native install:    Compiling cssparser v0.36.0
-#22 14.74 native install:    Compiling tracing-core v0.1.36
-#22 14.80 native install:    Compiling env_filter v2.0.0
-#22 14.81 native install:    Compiling napi v3.13.0
-#22 14.88 native install:    Compiling thiserror-impl v1.0.69
-#22 14.96 native install:    Compiling zeroize_derive v1.5.0
-#22 15.00 native install:    Compiling cbc v0.1.2
-#22 15.02 native install:    Compiling ecb v0.1.2
-#22 15.04 native install:    Compiling md-5 v0.10.6
-#22 15.04 native install:    Compiling hmac v0.12.1
-#22 15.08 native install:    Compiling nom v8.0.0
-#22 15.08 native install:    Compiling servo_arc v0.4.3
-#22 15.12 native install:    Compiling libloading v0.9.0
-#22 15.19 native install:    Compiling semver v1.0.28
-#22 15.19 native install:    Compiling rangemap v1.8.0
-#22 15.20 native install:    Compiling minimal-lexical v0.2.1
-#22 15.27 native install:    Compiling libbz2-rs-sys v0.2.5
-#22 15.28 native install:    Compiling regex-automata v0.1.10
-#22 15.30 native install:    Compiling typed-path v0.12.3
-#22 15.32 native install:    Compiling debug_unsafe v0.1.4
-#22 15.34 native install:    Compiling weezl v0.1.12
-#22 15.35 native install:    Compiling ttf-parser v0.25.1
-#22 15.37 native install:    Compiling bstr v0.2.17
-#22 15.67 native install:    Compiling bzip2 v0.6.1
-#22 15.74 native install:    Compiling zip v7.2.0
-#22 15.83 native install:    Compiling atoi_simd v0.17.0
-#22 15.84 native install:    Compiling nom v7.1.3
-#22 15.91 native install:    Compiling napi-derive-backend v6.1.4
-#22 15.96 native install:    Compiling zeroize v1.9.0
-#22 16.00 native install:    Compiling napi-sys v3.3.2
-#22 16.22 native install:    Compiling lopdf v0.42.0
-#22 16.33 native install:    Compiling pbkdf2 v0.12.2
-#22 16.37 native install:    Compiling env_logger v0.11.11
-#22 16.50 native install:    Compiling maud_macros v0.27.0
-#22 16.58 native install:    Compiling url v2.5.8
-#22 16.76 native install:    Compiling futures v0.3.34
-#22 16.78 native install:    Compiling kuchikiki v0.8.2
-#22 16.79 native install:    Compiling rand v0.9.5
-#22 16.98 native install:    Compiling lzma-rust2 v0.13.0
-#22 17.02 native install:    Compiling sharded-slab v0.1.7
-#22 17.10 native install:    Compiling firecrawl_rs v0.1.0 (/app/native)
-#22 17.12 native install:    Compiling tokio v1.53.1
-#22 17.13 native install:    Compiling quick-xml v0.39.4
-#22 17.16 native install:    Compiling codepage v0.1.3
-#22 17.19 native install:    Compiling tracing-attributes v0.1.31
-#22 17.22 native install:    Compiling sha1 v0.10.7
-#22 17.29 native install:    Compiling thread_local v1.1.10
-#22 17.35 native install:    Compiling psl-types v2.0.11
-#22 17.41 native install:    Compiling mime v0.3.17
-#22 17.53 native install:    Compiling ctor v1.0.13
-#22 17.56 native install:    Compiling base64 v0.22.1
-#22 17.69 native install:    Compiling constant_time_eq v0.3.1
-#22 17.70 native install:    Compiling deflate64 v0.1.12
-#22 17.71 native install:    Compiling fnv v1.0.7
-#22 17.72 native install:    Compiling uuid v1.26.1
-#22 17.73 native install:    Compiling nohash-hasher v0.2.0
-#22 17.76 native install:    Compiling ppmd-rust v1.5.0
-#22 17.76 native install:    Compiling hex v0.4.3
-#22 17.83 native install:    Compiling fast-float2 v0.2.4
-#22 17.85 native install:    Compiling nodesig v1.0.0 (https://github.com/firecrawl/nodesig#b8ebc4a7)
-#22 17.86 native install:    Compiling cfb v0.10.0
-#22 17.92 native install:    Compiling calamine v0.34.0 (https://github.com/firecrawl/calamine?branch=fc-prod#47ad71f8)
-#22 17.96 native install:    Compiling napi-derive v3.6.9
-#22 17.96 native install:    Compiling tracing v0.1.44
-#22 18.05 native install:    Compiling lol_html v2.9.0
-#22 18.34 native install:    Compiling psl v2.1.238
-#22 18.45 native install:    Compiling tracing-subscriber v0.3.23
-#22 18.49 native install:    Compiling texting_robots v0.2.2
-#22 18.86 native install:    Compiling maud v0.27.0
-#22 18.90 native install:    Compiling strsim v0.11.1
-#22 18.92 native install:    Compiling roxmltree v0.20.0
-#22 21.27 native install:    Compiling zstd v0.13.3
-#22 21.36 native install:    Compiling zip v5.1.1
-#22 23.80 native install:    Compiling pdf-inspector v0.1.8
-#22 66.58 native install:     Finished `release` profile [optimized] target(s) in 1m 00s
-#22 66.61 native install: Done
-#22 66.67 . prepare$ cd ../.. && husky ./apps/api/.husky
-#22 66.69 . prepare: .git can't be found
-#22 66.69 . prepare: Done
-#22 66.70 Done in 1m 6.4s using pnpm v11.4.0
-#22 66.71 $ tsc
-#22 DONE 67.5s
+#22 [build 12/14] RUN rm -rf dist && pnpm_config_verify_deps_before_run=false pnpm run build &&     [ -z "$(ls -A native/target 2>/dev/null)" ]
+#22 0.256 $ tsc
+#22 DONE 1.1s
 
 #23 [build 13/14] RUN test -s dist/src/harness.js &&     test -s dist/src/controllers/v0/crawl-status.js &&     printf '%s\n' "7666c1f9ae8720a6bba271e0f60b6a217f8a5210" > BUILD_SHA
 #23 DONE 0.1s
 
 #24 [build 14/14] RUN pnpm prune --prod --ignore-scripts
-#24 0.347 Lockfile is up to date, resolution step is skipped
-#24 0.366 Already up to date
-#24 1.260 
-#24 1.260 devDependencies:
-#24 1.260 - @sentry/core 10.67.0
-#24 1.260 - @types/amqplib 0.10.7
-#24 1.260 - @types/body-parser 1.19.5
-#24 1.260 - @types/cors 2.8.17
-#24 1.260 - @types/culori 4.0.1
-#24 1.260 - @types/escape-html 1.0.4
-#24 1.260 - @types/express 5.0.6
-#24 1.260 - @types/express-ws 3.0.6
-#24 1.260 - @types/he 1.2.3
-#24 1.260 - @types/lodash 4.17.14
-#24 1.260 - @types/multer 2.1.0
-#24 1.260 - @types/node 22.19.1
-#24 1.260 - @types/pdf-parse 1.1.4
-#24 1.260 - @types/pg 8.15.5
-#24 1.260 - @types/supertest 6.0.2
-#24 1.260 - @types/tough-cookie 4.0.5
-#24 1.260 - husky 9.1.7
-#24 1.260 - knip 5.88.1
-#24 1.260 - lint-staged 16.1.6
-#24 1.260 - supertest 6.3.4
-#24 1.260 - tsc-watch 7.1.1
-#24 1.260 - tsx 4.20.3
-#24 1.260 - undici-types 7.16.0
-#24 1.260 - vitest 4.1.9
-#24 1.260 
-#24 DONE 1.3s
+#24 0.337 Lockfile is up to date, resolution step is skipped
+#24 0.354 Already up to date
+#24 1.184 
+#24 1.184 devDependencies:
+#24 1.184 - @sentry/core 10.67.0
+#24 1.184 - @types/amqplib 0.10.7
+#24 1.184 - @types/body-parser 1.19.5
+#24 1.184 - @types/cors 2.8.17
+#24 1.184 - @types/culori 4.0.1
+#24 1.184 - @types/escape-html 1.0.4
+#24 1.184 - @types/express 5.0.6
+#24 1.184 - @types/express-ws 3.0.6
+#24 1.184 - @types/he 1.2.3
+#24 1.184 - @types/lodash 4.17.14
+#24 1.184 - @types/multer 2.1.0
+#24 1.184 - @types/node 22.19.1
+#24 1.184 - @types/pdf-parse 1.1.4
+#24 1.184 - @types/pg 8.15.5
+#24 1.184 - @types/supertest 6.0.2
+#24 1.184 - @types/tough-cookie 4.0.5
+#24 1.184 - husky 9.1.7
+#24 1.184 - knip 5.88.1
+#24 1.184 - lint-staged 16.1.6
+#24 1.184 - supertest 6.3.4
+#24 1.184 - tsc-watch 7.1.1
+#24 1.184 - tsx 4.20.3
+#24 1.184 - undici-types 7.16.0
+#24 1.184 - vitest 4.1.9
+#24 1.184 
+#24 DONE 1.2s
 
-#25 [runtime 1/9] RUN printf 'Types: deb\nURIs: http://snapshot.debian.org/archive/debian/%s\nSuites: bookworm bookworm-updates\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n\nTypes: deb\nURIs: http://snapshot.debian.org/archive/debian-security/%s\nSuites: bookworm-security\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n'       "20260925T000000Z" "20260925T000000Z" > /etc/apt/sources.list.d/debian.sources &&     apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y     git     procps     curl     && rm -rf /var/lib/apt/lists/* &&     echo "fcpi-apt-runtime: snapshot=20260925T000000Z" && dpkg-query -W -f='fcpi-apt-runtime: ${Package}=${Version}\n'
+#25 [runtime 2/9] RUN ARCH=$(dpkg --print-architecture) &&     [ "$ARCH" = arm64 ] || { echo "fcpi: this build is linux/arm64 only" >&2; exit 1; } &&     curl -fsSL -o /tmp/fdb-clients.deb       "https://github.com/apple/foundationdb/releases/download/7.3.63/foundationdb-clients_7.3.63-1_aarch64.deb" &&     echo "a3c451ddb8242cc2396ba3419e1f3c9b283a64ea2eaff555377f4503bf9c3a64  /tmp/fdb-clients.deb" | sha256sum -c - &&     dpkg -i /tmp/fdb-clients.deb && rm /tmp/fdb-clients.deb
 #25 CACHED
 
-#26 [runtime 2/9] RUN ARCH=$(dpkg --print-architecture) &&     [ "$ARCH" = arm64 ] || { echo "fcpi: this build is linux/arm64 only" >&2; exit 1; } &&     curl -fsSL -o /tmp/fdb-clients.deb       "https://github.com/apple/foundationdb/releases/download/7.3.63/foundationdb-clients_7.3.63-1_aarch64.deb" &&     echo "a3c451ddb8242cc2396ba3419e1f3c9b283a64ea2eaff555377f4503bf9c3a64  /tmp/fdb-clients.deb" | sha256sum -c - &&     dpkg -i /tmp/fdb-clients.deb && rm /tmp/fdb-clients.deb
+#26 [runtime 1/9] RUN printf 'Types: deb\nURIs: http://snapshot.debian.org/archive/debian/%s\nSuites: bookworm bookworm-updates\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n\nTypes: deb\nURIs: http://snapshot.debian.org/archive/debian-security/%s\nSuites: bookworm-security\nComponents: main\nSigned-By: /usr/share/keyrings/debian-archive-keyring.gpg\n'       "20260925T000000Z" "20260925T000000Z" > /etc/apt/sources.list.d/debian.sources &&     apt-get -o Acquire::Check-Valid-Until=false update && apt-get install -y     git     procps     curl     && rm -rf /var/lib/apt/lists/* &&     echo "fcpi-apt-runtime: snapshot=20260925T000000Z" && dpkg-query -W -f='fcpi-apt-runtime: ${Package}=${Version}\n'
 #26 CACHED
 
 #27 [runtime 3/9] WORKDIR /app
@@ -433,23 +135,23 @@ fcpi-source: result_tree=b1e15c644b354947540e554de2c271edb021a26f series_sha256=
 #28 [runtime 4/9] COPY --from=build /app/node_modules ./node_modules
 #28 ...
 
-#29 [go-build 3/4] COPY sharedLibs/go-html-to-md ./sharedLibs/go-html-to-md
+#29 [go-build 2/4] WORKDIR /app
 #29 CACHED
 
-#30 [go-build 2/4] WORKDIR /app
+#30 [go-build 3/4] COPY sharedLibs/go-html-to-md ./sharedLibs/go-html-to-md
 #30 CACHED
 
 #31 [go-build 4/4] RUN go version && go env GOTOOLCHAIN && cd sharedLibs/go-html-to-md &&     go mod download && go mod verify &&     go build -o libhtml-to-markdown.so -buildmode=c-shared html-to-markdown.go
 #31 CACHED
 
 #28 [runtime 4/9] COPY --from=build /app/node_modules ./node_modules
-#28 DONE 1.2s
+#28 DONE 1.1s
 
 #32 [runtime 5/9] COPY --from=build /app/dist ./dist
 #32 DONE 0.1s
 
 #33 [runtime 6/9] COPY --from=build /app/native ./native
-#33 DONE 0.4s
+#33 DONE 0.0s
 
 #34 [runtime 7/9] COPY --from=build /app/BUILD_SHA ./BUILD_SHA
 #34 DONE 0.0s
@@ -462,17 +164,17 @@ fcpi-source: result_tree=b1e15c644b354947540e554de2c271edb021a26f series_sha256=
 
 #37 exporting to image
 #37 exporting layers
-#37 exporting layers 11.0s done
-#37 exporting manifest sha256:10e516069bc3a9c2ed86933f837f7c824ec66d88ef474b43610c97a1d8e3f727 done
-#37 exporting config sha256:dd0593b13c7886fa8a46cc4ba08814a97aa64dbdcd3aa9a4128f9cdc3ff6f038 done
+#37 exporting layers 7.1s done
+#37 exporting manifest sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 done
+#37 exporting config sha256:0ac3033d1d1d24c3c004bebb4433309649668f903362889b4e51a49faa7ad9d7 done
 #37 naming to docker.io/fcpi/firecrawl-api:m2 done
 #37 unpacking to docker.io/fcpi/firecrawl-api:m2
-#37 unpacking to docker.io/fcpi/firecrawl-api:m2 3.7s done
-#37 DONE 14.7s
-build_exit=0 elapsed_s=87
+#37 unpacking to docker.io/fcpi/firecrawl-api:m2 2.2s done
+#37 DONE 9.3s
+build_exit=0 elapsed_s=15
 ### image
-id=sha256:10e516069bc3a9c2ed86933f837f7c824ec66d88ef474b43610c97a1d8e3f727 os=linux arch=arm64 size=567656506 created=2026-09-25T23:19:04.696006485-04:00
+id=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 os=linux arch=arm64 size=320453519 created=2026-09-25T23:28:08.510707941-04:00
 NODE_VERSION=22.23.3
 FIRECRAWL_BUILD_SHA=7666c1f9ae8720a6bba271e0f60b6a217f8a5210
-FCPI_PATCH_SERIES_SHA256=7013aa03ce432cf5af75d88c38b195b509753ca4ed8956d62095d0e87634e035
+FCPI_PATCH_SERIES_SHA256=90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea
 ### end

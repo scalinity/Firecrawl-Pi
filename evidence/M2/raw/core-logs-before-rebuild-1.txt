@@ -1,0 +1,20 @@
+### meta
+utc=2026-09-26T03:21:26Z label=before-core-rebuild-1 instances=1 source_commit=bc4f09f7d6d4e18cd5e58e4e830d51a8d3623a35
+### instance_47ad1849187e
+id=47ad1849187e3adcd0318ae0579edd4827e4fdbd1a2f59c8e4465610f34383d0 image=sha256:8886231320087abb96ad36b969d4e05a1d0d9e957b127403f6f5d68747e1bb8b created=2026-09-26T03:02:01.348014659Z started=2026-09-26T03:02:15.532905047Z finished=0001-01-01T00:00:00Z running=true restarts=0 log_driver=json-file
+log_lines=1250 log_sha256=ba95f0fb765da49c59cfe3254e6301cbf6132e201fa7c90ebb719af9f001d9d3
+pattern=firecrawl\.dev count=14
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=integrations\. count=0
+pattern=duckduckgo count=0
+pattern=posthog count=0
+pattern=sentry\.io count=0
+pattern=getaddrinfo count=0
+pattern=EAI_AGAIN count=0
+pattern=ENOTFOUND count=0
+pattern=ENETUNREACH count=0
+control=Starting services count=1
+newest_line_utc=2026-09-26T03:20:33Z
+### end
+end
