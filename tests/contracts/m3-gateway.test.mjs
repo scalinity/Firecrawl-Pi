@@ -794,6 +794,23 @@ test("the platform status reports the core, the ledger and the capabilities", as
   assert.ok(s.json.capabilities.notEnabled.includes("POST /v2/search"));
 });
 
+test("shutdown claims nothing: a job that comes due while open requests finish is left for the next process", async () => {
+  const h = await harness();
+  const id = randomUUID();
+  await h.db.query(`INSERT INTO fcpi_platform.job (id, principal, client_label, kind, state, submission_key, request_hash, request, units, metadata_expire_at, next_dispatch_at)
+    VALUES ($1, 'pa', 'a', 'crawl', 'RECEIVED', $2, 'x', $3, 1, now() + interval '1 day', now() + interval '500 milliseconds')`, [id, `fcpi:${id}`, JSON.stringify(crawlBody())]);
+  const slow = h.call("POST", "/v2/scrape", { token: T.a, body: { url: "https://slow.example.com/" } });
+  await sleep(100);
+  const exited = new Promise((r) => h.gw.once("exit", r));
+  h.gw.kill("SIGTERM");
+  assert.equal((await slow).status, 200, "the open request finishes");
+  await exited;
+  assert.equal(h.core.submissions().length, 0, "nothing was submitted during shutdown");
+  assert.equal((await h.job(id)).state, "RECEIVED");
+  await h.start();
+  await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(id)).state), 15000, "dispatched by the next process");
+});
+
 test("configuration that is unknown, unsafe or missing its data mount stops startup", async () => {
   const base = H.env();
   const exits = [];

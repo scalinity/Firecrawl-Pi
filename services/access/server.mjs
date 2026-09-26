@@ -323,4 +323,8 @@ server.listen(cfg.port, "0.0.0.0", () => {
   log({ event: "listening", build: cfg.build, instance: jobs.instance, port: server.address().port, clients: registry.size, hosts: [...cfg.hosts.values()], routes: ROUTES.length });
   jobs.start().catch((e) => log({ event: "jobs_start_failed", error: e.message }));
 });
-for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => server.close(async () => { await jobs.stop(); await store.close().catch(() => {}); process.exit(0); }));
+// Shutdown: job rounds stop at once, then open requests finish (Docker allows 20 s), then the pool closes.
+for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => {
+  jobs.stop();
+  server.close(async () => { await jobs.stop(); await store.close().catch(() => {}); process.exit(0); });
+});

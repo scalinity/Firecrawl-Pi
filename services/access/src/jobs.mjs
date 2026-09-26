@@ -217,7 +217,7 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     while (await dispatchOne());
   }
 
-  let timers = [];
+  let timers = [], stopped = false;
   return {
     instance,
     async start() {
@@ -231,9 +231,12 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
       sweep();
       serial(tick).catch((e) => say({ action: "tick_failed", error: e.message }));
     },
-    stop() { for (const t of timers) clearInterval(t); timers = []; return chain; },
+    // Stops every round: no timer fires again and a kick does nothing, so nothing is claimed while the
+    // process shuts down (a claim killed mid-POST would leave an uncertain submission). Resolves when
+    // the round in progress has finished.
+    stop() { stopped = true; for (const t of timers) clearInterval(t); timers = []; return chain; },
     // Runs one reconciliation and dispatch round; resolves when it has finished.
-    kick: () => serial(async () => { await prepare(); await resolveUncertain(); await dispatchOne(); }),
+    kick: () => (stopped ? chain : serial(async () => { await prepare(); await resolveUncertain(); await dispatchOne(); })),
     PATH,
   };
 }
