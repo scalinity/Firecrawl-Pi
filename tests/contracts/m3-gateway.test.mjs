@@ -549,6 +549,18 @@ test("cancellation: a queued job never reaches the core; a running one is cancel
   assert.equal((await H.call("DELETE", `/v2/batch/scrape/${done}`, { token: T.a })).status, 409);
 });
 
+test("a waiting job whose cancellation was asked closes while another job holds the upstream slot", async () => {
+  const h = await harness();
+  const first = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 2 }) });
+  await waitFor(() => h.core.upstreamOf(first.json.id), 15000, "mapping");
+  // As after a cancellation that raced a claim and a requeue: RECEIVED, cancellation asked, not closed.
+  const second = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 3 }) });
+  await h.db.query("UPDATE fcpi_platform.job SET cancel_requested_at = now() WHERE id = $1", [second.json.id]);
+  await waitFor(async () => (await h.job(second.json.id)).state === "CANCELLED", 5000, "closed while the slot is held");
+  assert.ok(["QUEUED", "RUNNING"].includes((await h.job(first.json.id)).state), "the first job still holds the slot");
+  assert.equal(h.core.submissions().length, 1, "the cancelled job never reached the core");
+});
+
 // ---- crash and recovery around submission -------------------------------------------------------------
 test("never delivered: with the core down the job is acknowledged, kept, and submitted once when the core returns", async () => {
   const h = await harness();

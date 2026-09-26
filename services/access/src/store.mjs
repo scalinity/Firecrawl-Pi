@@ -106,18 +106,19 @@ export function makeStore(cfg, log = () => {}) {
     listJobs: async (principal, limit) => (await q("SELECT * FROM fcpi_platform.job WHERE principal = $1 ORDER BY created_at DESC LIMIT $2", [principal, limit])).rows,
 
     // The next job to submit upstream, claimed as SUBMITTING by this instance; null while another job
-    // is active upstream or none is due. A queued job whose cancellation was asked is closed instead.
+    // is active upstream or none is due.
     async claimNext(instance) {
       return tx(async (c) => {
         await c.query(`SELECT pg_advisory_xact_lock(${LOCK})`);
+        // Waiting jobs whose cancellation was asked close first, whether or not another job holds the
+        // upstream slot, so they stop counting against the admission caps.
+        const cancelled = (await c.query("SELECT id FROM fcpi_platform.job WHERE state = 'RECEIVED' AND cancel_requested_at IS NOT NULL FOR UPDATE SKIP LOCKED")).rows;
+        for (const { id } of cancelled) await move(c, id, ["RECEIVED"], "CANCELLED", { finished_at: sql("now()"), results_expire_at: retention }, "cancelled before submission");
         const active = (await c.query("SELECT count(*)::int AS n FROM fcpi_platform.job WHERE state = ANY($1)", [UPSTREAM_ACTIVE])).rows[0].n;
         if (active >= L.admission.activeUpstreamJobs) return null;
-        for (;;) {
-          const next = (await c.query("SELECT id, cancel_requested_at FROM fcpi_platform.job WHERE state = 'RECEIVED' AND next_dispatch_at <= now() ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED")).rows[0];
-          if (!next) return null;
-          if (next.cancel_requested_at) { await move(c, next.id, ["RECEIVED"], "CANCELLED", { finished_at: sql("now()"), results_expire_at: retention }, "cancelled before submission"); continue; }
-          return move(c, next.id, ["RECEIVED"], "SUBMITTING", { submitter: instance, submit_started_at: sql("now()"), dispatch_attempts: sql("dispatch_attempts + 1") });
-        }
+        const next = (await c.query("SELECT id FROM fcpi_platform.job WHERE state = 'RECEIVED' AND cancel_requested_at IS NULL AND next_dispatch_at <= now() ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED")).rows[0];
+        if (!next) return null;
+        return move(c, next.id, ["RECEIVED"], "SUBMITTING", { submitter: instance, submit_started_at: sql("now()"), dispatch_attempts: sql("dispatch_attempts + 1") });
       });
     },
     markSubmitted: (id, upstreamId, deadlineMinutes, detail) => moveTx(id, ["SUBMITTING", "SUBMISSION_UNCERTAIN"], "QUEUED",
