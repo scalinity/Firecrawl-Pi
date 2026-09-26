@@ -317,6 +317,9 @@ export class Store {
     // Usage records outlive the 30 days of job metadata (spec §21.3) so a month's spend stays explainable;
     // an unsettled reservation is never pruned, since it still counts against its cap.
     await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED')");
+    // A settled call's stored answer (page content) serves only a retry of its logical unit, so it goes after
+    // the seven days that job results and parse caches keep; the amounts and usage stay (review W9).
+    await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET result = NULL WHERE result IS NOT NULL AND settled_at < now() - interval '7 days'");
   }
 
   async close() { await this.pool.end(); }

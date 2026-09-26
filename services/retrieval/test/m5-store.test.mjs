@@ -132,6 +132,26 @@ test("a paid parser's credits count against the paid total's day in micro-USD (r
   } finally { await store.close(); }
 });
 
+test("pruning clears a week-old settled call's stored answer and keeps its amounts (review W9)", opts, async () => {
+  const store = await fresh();
+  try {
+    const old = (await store.reserveBudget(base())).reservation, recent = (await store.reserveBudget(base())).reservation;
+    await store.settleBudget(old.id, 100, { usage: { promptTokens: 1, completionTokens: 1 }, result: { content: "page text" } });
+    await store.settleBudget(recent.id, 100, { result: { content: "page text" } });
+    const admin = new pg.Client({ host: HOST, user: "postgres", database: "postgres" });
+    await admin.connect();
+    await admin.query("UPDATE fcpi_retrieval.budget_reservation SET settled_at = now() - interval '8 days' WHERE id = $1", [old.id]);
+    await store.prune();
+    const rows = (await admin.query("SELECT id, result, actual, usage FROM fcpi_retrieval.budget_reservation")).rows;
+    await admin.end();
+    const byId = Object.fromEntries(rows.map((x) => [x.id, x]));
+    assert.equal(byId[old.id].result, null);
+    assert.equal(Number(byId[old.id].actual), 100);
+    assert.deepEqual(byId[old.id].usage, { promptTokens: 1, completionTokens: 1 });
+    assert.deepEqual(byId[recent.id].result, { content: "page text" });
+  } finally { await store.close(); }
+});
+
 test("the 80% threshold is noticed once per period", opts, async () => {
   const store = await fresh();
   try {
