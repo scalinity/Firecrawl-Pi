@@ -17,9 +17,11 @@ const digest = (s) => createHash("sha256").update(s).digest();
 export class ProxySessions {
   #s = new Map();
   // A session for one browser attempt; returns the credential the browser presents.
-  open(attemptId, { expiresAt, maxBytes }) {
+  // maxRequests bounds what the page may ask for through the proxy (WebSockets and preconnects never
+  // reach the worker's own subresource count); a session past either cap is marked capped.
+  open(attemptId, { expiresAt, maxBytes, maxRequests = 250 }) {
     const password = randomBytes(24).toString("hex");
-    this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, bytes: 0, requests: 0, denied: [], sockets: new Set() });
+    this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, maxRequests, bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
     return { username: attemptId, password };
   }
   auth(header) {
@@ -36,7 +38,7 @@ export class ProxySessions {
     if (!s) return null;
     this.#s.delete(attemptId);
     for (const sock of s.sockets) sock.destroy();
-    return { requests: s.requests, bytes: s.bytes, denied: s.denied };
+    return { requests: s.requests, bytes: s.bytes, capped: s.capped, denied: s.denied };
   }
   sweep() { for (const [id, s] of this.#s) if (Date.now() > s.expiresAt + 5000) this.close(id); }
 }
@@ -48,13 +50,16 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
   };
   const count = (s, n, ...socks) => {
     s.bytes += n;
-    if (s.bytes > s.maxBytes) for (const x of socks) x.destroy();
+    if (s.bytes > s.maxBytes) { s.capped = true; for (const x of socks) x.destroy(); }
   };
+  // Past the session's request cap every further request is refused (review finding W6).
+  const overRequests = (s) => { if (s.requests <= s.maxRequests) return false; s.capped = true; return true; };
 
   const server = http.createServer(async (req, res) => {
     const s = sessions.auth(req.headers["proxy-authorization"]);
     if (!s) { res.writeHead(407, { "proxy-authenticate": 'Basic realm="fcpi"', connection: "close" }).end(); return; }
     s.requests++;
+    if (overRequests(s)) { refuse(s, req.url, new Denied("RESOURCE_LIMIT", `more than ${s.maxRequests} requests`)); res.writeHead(403, { connection: "close" }).end("fcpi: RESOURCE_LIMIT\n"); return; }
     // The refused request is named by the host and port it asked for, even when it fails to parse.
     let host = "?";
     try { host = new URL(req.url).host || "?"; } catch {}
@@ -101,6 +106,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     const s = sessions.auth(req.headers["proxy-authorization"]);
     if (!s) { clientSocket.end('HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm="fcpi"\r\nConnection: close\r\n\r\n'); return; }
     s.requests++;
+    if (overRequests(s)) { refuse(s, req.url, new Denied("RESOURCE_LIMIT", `more than ${s.maxRequests} requests`)); clientSocket.end("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\nfcpi: RESOURCE_LIMIT\n"); return; }
     const [host, port] = [req.url.slice(0, req.url.lastIndexOf(":")), req.url.slice(req.url.lastIndexOf(":") + 1)];
     try {
       const policy = getPolicy();

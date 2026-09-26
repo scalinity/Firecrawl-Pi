@@ -56,7 +56,9 @@ export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy
   }
 
   async function render(args) {
-    const cred = sessions.open(args.attemptId, { expiresAt: args.deadline, maxBytes: getPolicy().browser.maxSubresourceBytes });
+    const policy = getPolicy();
+    // The main document and its redirects pass the proxy too, hence the margin over the subresources.
+    const cred = sessions.open(args.attemptId, { expiresAt: args.deadline, maxBytes: policy.browser.maxSubresourceBytes, maxRequests: policy.browser.maxSubresources + 20 });
     let result;
     try { result = await call(args, cred); } finally { result = { ...result, proxy: sessions.close(args.attemptId) }; }
     return result;

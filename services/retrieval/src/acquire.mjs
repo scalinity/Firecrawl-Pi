@@ -206,7 +206,11 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         // A page whose own structure still says "rendered by script" after its one browser attempt
         // is no content (spec §9.4); a page that is merely short is the page (review finding C5).
         const shell = verdict?.verdict === "js_shell" && verdict.structural === true;
-        const failure = !r.ok ? r.failure : verdict.failure ?? (shell
+        // A render that hit its subresource, request or byte cap loaded only part of the page: that is
+        // a resource-limit result, not a success (spec §12; review finding W6).
+        const limited = r.ok && (r.subresources?.overLimit > 0 || r.proxy?.capped === true)
+          ? { class: "RESOURCE_LIMIT", detail: `the page passed its browser budget (${r.subresources?.requests ?? 0} subresources, ${r.proxy?.requests ?? 0} proxied requests, ${r.proxy?.bytes ?? 0} bytes)`, retryable: false, retryAfter: null } : null;
+        const failure = !r.ok ? r.failure : limited ?? verdict.failure ?? (shell
           ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null);
         await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
         if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }

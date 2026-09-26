@@ -69,3 +69,23 @@ test("no credential, a wrong one or an expired one gets 407; a refused target 40
     });
   } finally { good.close(); }
 });
+
+test("a session past its request or byte cap is refused and marked capped (review finding W6)", async () => {
+  const big = http.createServer((q, r) => r.end("x".repeat(64 * 1024))).listen(0, "127.0.0.1");
+  await listening(big);
+  try {
+    await withProxy(big.address().port, async ({ port, sessions }) => {
+      const url = `http://fx.fixture.fcpi.test:${big.address().port}/`;
+      const byReq = sessions.open("req-cap", { expiresAt: Date.now() + 10000, maxBytes: 1 << 24, maxRequests: 2 });
+      assert.equal((await viaProxy(port, url, byReq)).status, 200);
+      assert.equal((await viaProxy(port, url, byReq)).status, 200);
+      assert.equal((await viaProxy(port, url, byReq)).status, 403);
+      const a = sessions.close("req-cap");
+      assert.equal(a.capped, true);
+      assert.deepEqual(a.denied.map((d) => d.class), ["RESOURCE_LIMIT"]);
+      const byBytes = sessions.open("byte-cap", { expiresAt: Date.now() + 10000, maxBytes: 1024, maxRequests: 50 });
+      await viaProxy(port, url, byBytes).catch(() => null);
+      assert.equal(sessions.close("byte-cap").capped, true);
+    });
+  } finally { big.close(); }
+});

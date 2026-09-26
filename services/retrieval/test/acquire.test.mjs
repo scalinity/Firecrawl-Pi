@@ -145,3 +145,18 @@ test("a database error while the browser attempt is paced still frees every perm
     assert.equal(store.state("t.fixture.fcpi.test").holder, null);
   } finally { t.s.close(); }
 });
+
+test("a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6)", async () => {
+  const shell = '<main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main><script src="/app.js"></script>';
+  const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(shell));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    const rendered = "<main><h1>Rendered</h1><p>Enough article text here to be an adequate page of its own, once rendered by script.</p></main>";
+    for (const r of [{ subresources: { requests: 200, overLimit: 3 }, proxy: { requests: 200, bytes: 10, capped: false, denied: [] } },
+      { subresources: { requests: 5, overLimit: 0 }, proxy: { requests: 260, bytes: 10, capped: true, denied: [] } }]) {
+      const browser = { render: async () => ({ ok: true, html: rendered, status: 200, ...r }) };
+      const out = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${t.port}/`));
+      assert.equal(out.failure?.class, "RESOURCE_LIMIT");
+    }
+  } finally { t.s.close(); }
+});
