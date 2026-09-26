@@ -83,6 +83,7 @@ export function checkManifest(m) {
   pos(L.admission.maxOpenUnits, "limits.admission.maxOpenUnits", 500);
   pos(L.admission.activeUpstreamJobs, "limits.admission.activeUpstreamJobs", 1);
   pos(L.admission.maxSyncInFlight, "limits.admission.maxSyncInFlight", 16);
+  pos(L.admission.maxStatusReadsInFlight, "limits.admission.maxStatusReadsInFlight", 4);
   pos(L.results.pageMaxLimit, "limits.results.pageMaxLimit", 1000);
   pos(L.results.pageDefaultLimit, "limits.results.pageDefaultLimit", L.results.pageMaxLimit);
   pos(L.results.pageMaxBytes, "limits.results.pageMaxBytes", 10485760);

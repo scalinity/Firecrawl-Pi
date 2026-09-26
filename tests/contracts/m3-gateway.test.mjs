@@ -36,6 +36,8 @@ const testManifest = (over = {}) => {
   m.limits.admission.maxSyncInFlight = 2;
   m.limits.admission.maxOpenJobs = over.maxOpenJobs ?? 20;
   if (over.archiveResponseMaxBytes) m.limits.results.archiveResponseMaxBytes = over.archiveResponseMaxBytes;
+  if (over.pageMaxBytes) m.limits.results.pageMaxBytes = over.pageMaxBytes;
+  if (over.maxStatusReadsInFlight) m.limits.admission.maxStatusReadsInFlight = over.maxStatusReadsInFlight;
   return m;
 };
 const clientsText = (labels) => labels.map(([l, p, s]) => `${l} ${p} ${s} sha256:${createHash("sha256").update(T[l]).digest("hex")}`).join("\n") + "\n";
@@ -45,7 +47,7 @@ async function admin(db) { const c = new pg.Client({ host: PGHOST, port: Number(
 
 // ---- the fake core -----------------------------------------------------------------------------------
 function fakeCore(dbName) {
-  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false, pagesFailFrom: null };
+  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false, pagesFailFrom: null, pageDelayMs: 0 };
   const docOf = (id, i, big = false) => ({ markdown: `# page ${i}${big ? "x".repeat(8192) : ""}`, metadata: { sourceURL: `http://m3.fixture.fcpi.test:8080/p${i}`, scrapeId: `${id.slice(0, 8)}-doc-${i}`, statusCode: 200 } });
   const persist = async (kind, id, body) => {
     const data = kind === "crawl" ? { mode: "kickoff", origin: body.origin, crawl_id: id } : { mode: "single_urls", origin: "api", scrapeOptions: { origin: body.origin }, crawl_id: id };
@@ -90,6 +92,7 @@ function fakeCore(dbName) {
         }
         const skip = Number(u.searchParams.get("skip") ?? 0), limit = Number(u.searchParams.get("limit") ?? 100);
         if (s.pagesFailFrom !== null && skip >= s.pagesFailFrom && skip < 1000000000) return send(500, { success: false, error: "internal" });
+        if (s.pageDelayMs && skip < 1000000000) await sleep(s.pageDelayMs);
         // A finished page without a stored document is counted in next but not listed, as upstream does.
         const page = j.docs.slice(skip, skip + limit), data = page.filter(Boolean);
         const next = j.status !== "completed" || j.docs.length > skip + page.length ? `http://firecrawl-core:3002/v2/${m[1]}/${m[2]}?skip=${skip + page.length}` : undefined;
@@ -458,6 +461,31 @@ test("archival stops at the result quota with what it holds, and admission then 
   assert.equal(refused.status, 503);
   assert.equal(refused.json.code, "STORAGE_QUOTA");
   assert.equal(refused.headers["retry-after"], "300");
+});
+
+test("status reads of a running job are bounded in size and in number", async () => {
+  const h = await harness({ manifest: testManifest({ pageMaxBytes: 4096, maxStatusReadsInFlight: 1 }) });
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody() });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  // Two documents so far, the first over the page cap, and the job still running.
+  h.core.complete(up, 2, 0, 0, [0]);
+  h.core.jobs.get(up).status = "scraping";
+  const big = await h.call("GET", `/v2/crawl/${r.json.id}`, { token: T.a });
+  assert.equal(big.status, 503);
+  assert.equal(big.json.code, "RESULT_TOO_LARGE");
+  assert.equal(big.headers["retry-after"], "30");
+  const small = await h.call("GET", `/v2/crawl/${r.json.id}?skip=1`, { token: T.a });
+  assert.equal(small.status, 200);
+  assert.equal(small.json.data.length, 1);
+  // One buffered read at a time: a second one meanwhile is 503 OVERLOADED, and the slot comes back.
+  h.core.pageDelayMs = 800;
+  const both = await Promise.all([1, 2].map(() => h.call("GET", `/v2/crawl/${r.json.id}?skip=1`, { token: T.a })));
+  assert.deepEqual(both.map((x) => x.status).sort(), [200, 503]);
+  const over = both.find((x) => x.status === 503);
+  assert.equal(over.json.code, "OVERLOADED");
+  assert.equal(over.headers["retry-after"], "5");
+  h.core.pageDelayMs = 0;
+  assert.equal((await h.call("GET", `/v2/crawl/${r.json.id}?skip=1`, { token: T.a })).status, 200);
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {

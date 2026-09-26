@@ -40,7 +40,7 @@ const template = (p) => new RegExp(`^${p.replace(/[.*+?^$()|[\]\\]/g, "\\$&").re
 const ROUTES = M.routes.map((r) => ({ ...r, re: template(r.path) }));
 const DISABLED = M.not_enabled.map((r) => ({ ...r, re: template(r.path) }));
 
-let syncInFlight = 0;
+let syncInFlight = 0, statusReads = 0;
 let quota = null;
 const quotaBytes = async () => (quota ??= await archive.quotaBytes());
 
@@ -141,11 +141,19 @@ async function status(ctx, route, id) {
     return ctx.send(200, { success: true, status: "scraping", completed: 0, total: 0, creditsUsed: 0, expiresAt, data: [], createdAt: iso(job.created_at) });
   }
   if (job.state === "QUEUED" || job.state === "RUNNING") {
-    let r;
-    for (const lim of [limit ?? L.results.pageDefaultLimit, 1]) {
-      try { r = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}?skip=${skip}&limit=${lim}`, { timeoutMs: 30000, maxBytes: L.results.archiveResponseMaxBytes }); break; }
-      catch (e) { if (e.code !== "TOO_LARGE") return ctx.send(503, { success: false, code: "UPSTREAM_UNAVAILABLE", error: "The core did not answer; retry." }, { "retry-after": "5" }); r = null; }
+    // A running job's page is buffered, parsed and served again: at most pageMaxBytes each, and at most
+    // maxStatusReadsInFlight at once, so polling clients cannot push the gateway past its memory cap.
+    if (statusReads >= L.admission.maxStatusReadsInFlight) {
+      return ctx.send(503, { success: false, code: "OVERLOADED", error: `${statusReads} status reads of running jobs are already in flight (limit ${L.admission.maxStatusReadsInFlight}); retry shortly.` }, { "retry-after": "5" });
     }
+    statusReads += 1;
+    let r;
+    try {
+      for (const lim of [limit ?? L.results.pageDefaultLimit, 1]) {
+        try { r = await upstream.call("GET", `${PATH[job.kind]}/${job.upstream_id}?skip=${skip}&limit=${lim}`, { timeoutMs: 30000, maxBytes: L.results.pageMaxBytes }); break; }
+        catch (e) { if (e.code !== "TOO_LARGE") return ctx.send(503, { success: false, code: "UPSTREAM_UNAVAILABLE", error: "The core did not answer; retry." }, { "retry-after": "5" }); r = null; }
+      }
+    } finally { statusReads -= 1; }
     if (!r) return ctx.send(503, { success: false, code: "RESULT_TOO_LARGE", error: "The next document is larger than a status page may carry; it is served from the archive once the job ends." }, { "retry-after": "30" });
     if (r.status !== 200 || !r.json) return ctx.send(503, { success: false, code: "UPSTREAM_UNAVAILABLE", error: `The core answered ${r.status}; retry.` }, { "retry-after": "5" });
     const b = r.json, data = Array.isArray(b.data) ? b.data : [];
