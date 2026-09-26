@@ -1,0 +1,46 @@
+{
+  "schema": "fcpi.egress-policy/v1",
+  "direct": {
+    "perDomainInFlight": 1,
+    "minNavigationGapMs": 2000,
+    "perDomainPerHour": 20,
+    "platformPerDay": 200
+  },
+  "fixtureLimits": {
+    "perDomainInFlight": 1,
+    "minNavigationGapMs": 0,
+    "perDomainPerHour": null,
+    "platformPerDay": null
+  },
+  "ports": [80, 443],
+  "maxRedirects": 10,
+  "maxBodyBytes": 26214400,
+  "attempts": {
+    "maxPerPage": 4,
+    "acquisitionDeadlineMs": 90000,
+    "httpAttemptMs": 15000,
+    "browserAttemptMs": 30000
+  },
+  "permitLeaseMs": 120000,
+  "browser": {
+    "maxSubresources": 200,
+    "maxSubresourceBytes": 26214400,
+    "contextMaxMs": 120000
+  },
+  "cloudDenylist": [
+    "firecrawl.dev",
+    "*.firecrawl.dev",
+    "firecrawl.com",
+    "*.firecrawl.com",
+    "mendable.ai",
+    "*.mendable.ai"
+  ],
+  "fixtures": [
+    { "host": "m1.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m2.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "pace.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "direct" }
+  ],
+  "search": {
+    "backend": "http://m2.fixture.fcpi.test:8080/search"
+  }
+}
