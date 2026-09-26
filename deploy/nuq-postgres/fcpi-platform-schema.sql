@@ -8,14 +8,15 @@
 \set ON_ERROR_STOP on
 CREATE SCHEMA IF NOT EXISTS fcpi_platform AUTHORIZATION postgres;
 
--- One row per acknowledged asynchronous submission (crawl or batch scrape). The id is the external
--- job id clients see; submission_key is the logical submission key the gateway writes into the
--- upstream request's `origin`, so a reconciler can find an upstream job whose answer was lost.
+-- One row per acknowledged asynchronous submission: a crawl or batch scrape the core runs, or (M5) an
+-- extraction the gateway runs itself. The id is the external job id clients see; submission_key is the
+-- logical submission key the gateway writes into the upstream request's `origin`, so a reconciler can find
+-- an upstream job whose answer was lost, and an extraction's logical id at the model adapter.
 CREATE TABLE IF NOT EXISTS fcpi_platform.job (
   id                  uuid PRIMARY KEY,
   principal           text NOT NULL,
   client_label        text NOT NULL,
-  kind                text NOT NULL CHECK (kind IN ('crawl', 'batch')),
+  kind                text NOT NULL CONSTRAINT job_kind_check CHECK (kind IN ('crawl', 'batch', 'extract')),
   state               text NOT NULL CHECK (state IN ('RECEIVED', 'SUBMITTING', 'SUBMISSION_UNCERTAIN', 'QUEUED', 'RUNNING',
                                                      'SUCCEEDED', 'PARTIAL', 'FAILED', 'CANCELLED', 'EXPIRED')),
   submission_key      text NOT NULL UNIQUE,
@@ -95,6 +96,13 @@ CREATE TABLE IF NOT EXISTS fcpi_platform.schema_version (
   applied_at timestamptz NOT NULL DEFAULT now()
 );
 INSERT INTO fcpi_platform.schema_version (version) VALUES (1) ON CONFLICT DO NOTHING;
+-- Version 2 (M5): extraction jobs. A ledger made at version 1 gains the kind in place; the constraint
+-- and the version move in one transaction, so the gateway never sees one without the other.
+BEGIN;
+ALTER TABLE fcpi_platform.job DROP CONSTRAINT IF EXISTS job_kind_check;
+ALTER TABLE fcpi_platform.job ADD CONSTRAINT job_kind_check CHECK (kind IN ('crawl', 'batch', 'extract'));
+INSERT INTO fcpi_platform.schema_version (version) VALUES (2) ON CONFLICT DO NOTHING;
+COMMIT;
 
 DO $$
 BEGIN

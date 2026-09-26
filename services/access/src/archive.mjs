@@ -6,7 +6,7 @@
 // start rather than write into a directory that is not the project's data mount.
 import { createHash, randomUUID } from "node:crypto";
 import { existsSync, createReadStream } from "node:fs";
-import { mkdir, open, rename, readdir, stat, unlink, statfs, utimes } from "node:fs/promises";
+import { mkdir, open, rename, readdir, stat, unlink, statfs, utimes, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 export const MARKER = ".fcpi-artifact-root";
@@ -38,6 +38,12 @@ export async function openArchive(root) {
       return { sha256: sha, bytes: buf.length };
     },
     stream: (sha) => createReadStream(pathOf(sha)),
+    // A whole document, checked against its name (M5: an extraction resumes from the pages it archived).
+    async read(sha) {
+      const buf = await readFile(pathOf(sha));
+      if (createHash("sha256").update(buf).digest("hex") !== sha) throw new Error(`archived document ${sha} does not match its name`);
+      return buf;
+    },
     // The quota (spec §21.3): the smaller of 10 GiB and 20% of the filesystem holding the root.
     async quotaBytes() {
       const s = await statfs(root);

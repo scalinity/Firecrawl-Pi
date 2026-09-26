@@ -9,7 +9,7 @@ export const OPEN = ["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN", "QUEUED",
 export const UPSTREAM_ACTIVE = ["SUBMITTING", "SUBMISSION_UNCERTAIN", "QUEUED", "RUNNING"];
 export const FINISHED = ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"];
 // The ledger schema this code is written for (fcpi_platform.schema_version).
-export const SCHEMA_VERSION = 1;
+export const SCHEMA_VERSION = 2;
 const LOCK = "hashtext('fcpi.platform.admission')";
 // Columns a transition may set; the names are code constants, never client input.
 const SETTABLE = new Set(["upstream_id", "submitter", "dispatch_attempts", "next_dispatch_at", "submit_started_at", "submitted_at", "deadline",
@@ -115,11 +115,12 @@ export function makeStore(cfg, log = () => {}) {
         await c.query(`SELECT pg_advisory_xact_lock(${LOCK})`);
         // Waiting jobs whose cancellation was asked close first, whether or not another job holds the
         // upstream slot, so they stop counting against the admission caps.
-        const cancelled = (await c.query("SELECT id FROM fcpi_platform.job WHERE state = 'RECEIVED' AND cancel_requested_at IS NOT NULL FOR UPDATE SKIP LOCKED")).rows;
+        const cancelled = (await c.query("SELECT id FROM fcpi_platform.job WHERE state = 'RECEIVED' AND kind IN ('crawl', 'batch') AND cancel_requested_at IS NOT NULL FOR UPDATE SKIP LOCKED")).rows;
         for (const { id } of cancelled) await move(c, id, ["RECEIVED"], "CANCELLED", { finished_at: sql("now()"), results_expire_at: retention }, "cancelled before submission");
-        const active = (await c.query("SELECT count(*)::int AS n FROM fcpi_platform.job WHERE state = ANY($1)", [UPSTREAM_ACTIVE])).rows[0].n;
+        // The single upstream slot is the core's (spec §23.1): the gateway's own extraction jobs never hold it.
+        const active = (await c.query("SELECT count(*)::int AS n FROM fcpi_platform.job WHERE state = ANY($1) AND kind IN ('crawl', 'batch')", [UPSTREAM_ACTIVE])).rows[0].n;
         if (active >= L.admission.activeUpstreamJobs) return null;
-        const next = (await c.query("SELECT id FROM fcpi_platform.job WHERE state = 'RECEIVED' AND cancel_requested_at IS NULL AND next_dispatch_at <= now() ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED")).rows[0];
+        const next = (await c.query("SELECT id FROM fcpi_platform.job WHERE state = 'RECEIVED' AND kind IN ('crawl', 'batch') AND cancel_requested_at IS NULL AND next_dispatch_at <= now() ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED")).rows[0];
         if (!next) return null;
         return move(c, next.id, ["RECEIVED"], "SUBMITTING", { submitter: instance, submit_started_at: sql("now()"), dispatch_attempts: sql("dispatch_attempts + 1") });
       });
@@ -145,7 +146,27 @@ export function makeStore(cfg, log = () => {}) {
     markerGroups: async (marker) => (await q("SELECT group_id, first_seen FROM fcpi_platform.upstream_groups_for_marker($1)", [marker])).rows,
 
     // overdue: past the deadline (the core is told to stop); stalled: still open graceMinutes after it.
-    running: async (graceMinutes) => (await q("SELECT *, (deadline IS NOT NULL AND deadline < now()) AS overdue, (deadline IS NOT NULL AND deadline < now() - $1 * interval '1 minute') AS stalled FROM fcpi_platform.job WHERE state IN ('QUEUED', 'RUNNING') ORDER BY created_at", [graceMinutes])).rows,
+    running: async (graceMinutes) => (await q("SELECT *, (deadline IS NOT NULL AND deadline < now()) AS overdue, (deadline IS NOT NULL AND deadline < now() - $1 * interval '1 minute') AS stalled FROM fcpi_platform.job WHERE state IN ('QUEUED', 'RUNNING') AND kind IN ('crawl', 'batch') ORDER BY created_at", [graceMinutes])).rows,
+
+    // M5: the gateway's own extraction jobs (src/extract.mjs). One runs at a time: a RUNNING one (an earlier
+    // process's, after a restart) is resumed first; otherwise the oldest RECEIVED one is claimed. Returns
+    // the job with overdue set once its deadline has passed, or null.
+    async claimExtract(instance, deadlineMinutes) {
+      return tx(async (c) => {
+        await c.query(`SELECT pg_advisory_xact_lock(${LOCK})`);
+        const running = (await c.query("SELECT *, (deadline < now()) AS overdue FROM fcpi_platform.job WHERE state = 'RUNNING' AND kind = 'extract' ORDER BY created_at LIMIT 1")).rows[0];
+        if (running) return running;
+        const next = (await c.query("SELECT id FROM fcpi_platform.job WHERE state = 'RECEIVED' AND kind = 'extract' ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED")).rows[0];
+        if (!next) return null;
+        const row = await move(c, next.id, ["RECEIVED"], "RUNNING", { submitter: instance, submitted_at: sql("now()"), dispatch_attempts: sql("dispatch_attempts + 1"),
+          deadline: sql("now() + $? * interval '1 minute'", [deadlineMinutes]) }, "the gateway started the extraction");
+        return row ? { ...row, overdue: false } : null;
+      });
+    },
+    finishExtract: (id, to, f, detail) => moveTx(id, ["RUNNING"], to, {
+      finished_at: sql("now()"), results_expire_at: retention, completed: f.completed ?? null, total: f.total ?? null,
+      errors: f.errors ?? null, error_code: f.errorCode ?? null, error: f.error ?? null }, detail),
+    documentKeys: async (id) => (await q("SELECT doc_key, ordinal, sha256, bytes FROM fcpi_platform.job_document WHERE job_id = $1 ORDER BY ordinal", [id])).rows,
     async progress(id, s) {
       await q("UPDATE fcpi_platform.job SET upstream_status = $2, completed = $3, total = $4, credits_used = $5, updated_at = now() WHERE id = $1",
         [id, s.status, s.completed, s.total, s.creditsUsed]);

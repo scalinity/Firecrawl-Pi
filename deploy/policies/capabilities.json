@@ -14,6 +14,7 @@
   "routes": [
     { "id": "scrape", "method": "POST", "path": "/v2/scrape", "upstream": "POST /v2/scrape", "scope": "scrape", "mode": "sync", "body": "scrape", "evidence": ["M3-A01"] },
     { "id": "map", "method": "POST", "path": "/v2/map", "upstream": "POST /v2/map", "scope": "map", "mode": "sync", "body": "map", "evidence": ["M3-A01"] },
+    { "id": "search", "method": "POST", "path": "/v2/search", "upstream": "POST /v2/search", "scope": "search", "mode": "sync", "body": "search", "evidence": ["M5-S01", "M5-S02"] },
     { "id": "crawl.submit", "method": "POST", "path": "/v2/crawl", "upstream": "POST /v2/crawl", "scope": "crawl", "mode": "async", "kind": "crawl", "body": "crawl", "evidence": ["M3-A01", "M3-J01", "M3-J02", "M3-J04"] },
     { "id": "crawl.status", "method": "GET", "path": "/v2/crawl/{id}", "upstream": "GET /v2/crawl/:jobId", "scope": "read", "kind": "crawl", "evidence": ["M3-A02", "M3-J06"] },
     { "id": "crawl.cancel", "method": "DELETE", "path": "/v2/crawl/{id}", "upstream": "DELETE /v2/crawl/:jobId", "scope": "cancel", "kind": "crawl", "evidence": ["M3-J07"] },
@@ -22,35 +23,33 @@
     { "id": "batch.status", "method": "GET", "path": "/v2/batch/scrape/{id}", "upstream": "GET /v2/batch/scrape/:jobId", "scope": "read", "kind": "batch", "evidence": ["M3-A02", "M3-J06"] },
     { "id": "batch.cancel", "method": "DELETE", "path": "/v2/batch/scrape/{id}", "upstream": "DELETE /v2/batch/scrape/:jobId", "scope": "cancel", "kind": "batch", "evidence": ["M3-J07"] },
     { "id": "batch.errors", "method": "GET", "path": "/v2/batch/scrape/{id}/errors", "upstream": "GET /v2/batch/scrape/:jobId/errors", "scope": "read", "kind": "batch", "evidence": ["M3-A01"] },
+    { "id": "extract.submit", "method": "POST", "path": "/v2/extract", "upstream": "gateway: services/access/src/extract.mjs", "scope": "extract", "mode": "async", "kind": "extract", "body": "extract", "evidence": ["M5-E02"] },
+    { "id": "extract.status", "method": "GET", "path": "/v2/extract/{id}", "upstream": "gateway: services/access/src/extract.mjs", "scope": "read", "kind": "extract", "evidence": ["M5-E02"] },
     { "id": "platform.status", "method": "GET", "path": "/platform/v1/status", "scope": "read", "evidence": ["M3-C01"] },
     { "id": "platform.jobs", "method": "GET", "path": "/platform/v1/jobs", "scope": "read", "evidence": ["M3-C01"] },
     { "id": "platform.job", "method": "GET", "path": "/platform/v1/jobs/{id}", "scope": "read", "evidence": ["M3-J01", "M3-J02"] }
   ],
   "not_enabled": [
-    { "method": "POST", "path": "/v2/search", "reason": "web search is M5's (SearXNG behind the retrieval service)" },
-    { "method": "POST", "path": "/v2/extract", "reason": "structured extraction needs the budgeted model adapter (M5)" },
-    { "method": "GET", "path": "/v2/extract/{id}", "reason": "structured extraction needs the budgeted model adapter (M5)" },
     { "method": "POST", "path": "/v2/parse", "reason": "document upload parsing is not offered; documents are parsed from URLs" },
     { "method": "GET", "path": "/v2/scrape/{id}", "reason": "upstream serves it from its Supabase store, which a self-hosted core lacks; a synchronous scrape returns its result inline" },
     { "method": "GET", "path": "/v2/crawl/ongoing", "reason": "upstream lists every client's crawls as one team; use /platform/v1/jobs" },
     { "method": "GET", "path": "/v2/crawl/active", "reason": "upstream lists every client's crawls as one team; use /platform/v1/jobs" },
-    { "method": "POST", "path": "/v2/crawl/params-preview", "reason": "prompt-generated crawl options need the model adapter (M5)" },
+    { "method": "POST", "path": "/v2/crawl/params-preview", "reason": "prompt-generated crawl options run a native model path this deployment does not enable (spec §14)" },
     { "method": "POST", "path": "/v2/agent", "reason": "the Cloud agent product is not offered (spec §2.2)" },
     { "method": "POST", "path": "/v2/browser", "reason": "interactive browser sessions are not offered (spec §2.2)" },
     { "method": "POST", "path": "/v2/scrape/{id}/interact", "reason": "interactive browser sessions are not offered (spec §2.2)" },
     { "method": "DELETE", "path": "/v2/scrape/{id}/interact", "reason": "interactive browser sessions are not offered (spec §2.2)" }
   ],
-  "scopes": ["read", "scrape", "map", "crawl", "batch", "cancel"],
+  "scopes": ["read", "scrape", "map", "crawl", "batch", "cancel", "search", "extract"],
   "formats": {
-    "allowed": ["markdown", "html", "rawHtml", "links"],
+    "allowed": ["markdown", "html", "rawHtml", "links", "json"],
     "refused": {
       "screenshot": "screenshots arrive with M7's verified browser extras",
-      "json": "structured output needs the budgeted model adapter (M5)",
-      "summary": "summaries need the budgeted model adapter (M5)",
-      "question": "questions need the budgeted model adapter (M5)",
-      "highlights": "highlights need the budgeted model adapter (M5)",
-      "query": "queries need the budgeted model adapter (M5)",
-      "deterministicJson": "structured output needs the budgeted model adapter (M5)",
+      "summary": "summaries run a native model path this deployment does not enable; structured output is the json format (spec §14)",
+      "question": "questions run a native model path this deployment does not enable; structured output is the json format (spec §14)",
+      "highlights": "highlights run a native model path this deployment does not enable; structured output is the json format (spec §14)",
+      "query": "queries run a native model path this deployment does not enable; structured output is the json format (spec §14)",
+      "deterministicJson": "deterministic JSON runs a native model path this deployment does not enable; structured output is the json format (spec §14)",
       "changeTracking": "change tracking arrives with M7",
       "images": "the images format is not verified in this deployment",
       "attributes": "the attributes format is not verified in this deployment",
@@ -59,6 +58,9 @@
       "menu": "the menu format is not offered",
       "audio": "media extraction is not offered (spec §6)",
       "video": "media extraction is not offered (spec §6)"
+    },
+    "objects": {
+      "json": { "schema": { "type": "schema", "required": true }, "prompt": { "type": "string", "maxLength": 4000 } }
     }
   },
   "fieldsets": {
@@ -120,6 +122,46 @@
         "timeout": { "type": "integer", "min": 1000, "max": 90000 },
         "origin": { "type": "replaced" }
       }
+    },
+    "search": {
+      "fields": {
+        "query": { "type": "string", "maxLength": 500, "required": true },
+        "limit": { "type": "integer", "min": 1, "max": 10, "default": 5 },
+        "lang": { "type": "string", "maxLength": 16 },
+        "includeDomains": { "type": "strings", "maxItems": 20, "maxLength": 253 },
+        "excludeDomains": { "type": "strings", "maxItems": 20, "maxLength": 253 },
+        "timeout": { "type": "integer", "min": 1000, "max": 90000 },
+        "scrapeOptions": { "type": "object", "fieldset": "scrapeOptions" },
+        "origin": { "type": "replaced" }
+      },
+      "refused": {
+        "sources": "only web results are offered: the pinned search client asks SearXNG for general results alone",
+        "categories": "search categories are not offered: the pinned client turns them into site filters and a Cloud index",
+        "tbs": "time filters are not offered: the pinned search client does not pass them to SearXNG",
+        "country": "country targeting is not offered: SearXNG takes no country parameter",
+        "filter": "search filters are not offered by SearXNG",
+        "highlights": "search highlights run on a Cloud index",
+        "enterprise": "enterprise search modes are a Cloud service"
+      }
+    },
+    "extract": {
+      "fields": {
+        "urls": { "type": "urls", "required": true },
+        "schema": { "type": "schema", "required": true },
+        "prompt": { "type": "string", "maxLength": 4000 },
+        "systemPrompt": { "type": "string", "maxLength": 4000 },
+        "ignoreInvalidURLs": { "type": "boolean" },
+        "showSources": { "type": "boolean" },
+        "scrapeOptions": { "type": "object", "fieldset": "scrapeOptions" },
+        "origin": { "type": "replaced" }
+      },
+      "refused": {
+        "enableWebSearch": "extraction reads only the URLs given; autonomous discovery is not offered (spec §14)",
+        "allowExternalLinks": "extraction reads only the URLs given; following links is not offered (spec §14)",
+        "includeSubdomains": "extraction reads only the URLs given (spec §14)",
+        "limit": "extraction reads only the URLs given (spec §14)",
+        "agent": "the Cloud agent product is not offered (spec §2.2)"
+      }
     }
   },
   "refused": {
@@ -128,7 +170,7 @@
     "location": "geographic routing arrives with the proxy policy (M6)",
     "webhook": "webhook delivery arrives with M7's signed outbox",
     "appendToId": "appending to a batch is not offered: upstream runs every client as one team, so the gateway cannot scope it",
-    "prompt": "prompt-generated crawl options need the model adapter (M5)",
+    "prompt": "prompt-generated crawl options run a native model path this deployment does not enable (spec §14)",
     "maxConcurrency": "the platform sets concurrency (spec §23.1)",
     "zeroDataRetention": "the platform's retention policy applies to every job (spec §21.3)",
     "integration": "integration tags are not recorded",
@@ -153,12 +195,13 @@
     "bodyBytes": 1048576,
     "crawl": { "deadlineMinutes": 30 },
     "batch": { "maxUrls": 25, "hardMaxUrls": 100, "deadlineMinutes": 30 },
+    "extract": { "maxUrls": 10, "deadlineMinutes": 20, "scrapeTimeoutMs": 60000 },
     "admission": { "maxOpenJobs": 20, "maxOpenUnits": 500, "activeUpstreamJobs": 1, "maxSyncInFlight": 4, "maxStatusReadsInFlight": 2 },
     "results": { "pageDefaultLimit": 100, "pageMaxLimit": 100, "pageMaxBytes": 10485760, "retentionDays": 7, "metadataDays": 30, "idempotencyHours": 24, "archiveResponseMaxBytes": 16777216 },
     "auth": { "failuresPerMinute": 30 }
   },
   "mcp": {
-    "comment": "The MCP surface (FIRECRAWL_PI_SPEC.md §16.3, §17): the access gateway serves `path` after its own Host, Origin, token and body checks and proxies it to services/mcp, which registers one tool per entry below, its input schema generated from the named route's body in this manifest, and calls that route on the gateway with the caller's own token. A tool the spec names whose route is not enabled is listed under `omitted` by that route, whose not_enabled reason is the reason.",
+    "comment": "The MCP surface (FIRECRAWL_PI_SPEC.md §16.3, §17): the access gateway serves `path` after its own Host, Origin, token and body checks and proxies it to services/mcp, which registers one tool per entry below, its input schema generated from the named route's body in this manifest, and calls that route on the gateway with the caller's own token. A tool the spec names whose route is not enabled is listed under `omitted` by that route, whose not_enabled reason is the reason; since M5 none is.",
     "path": "/mcp",
     "protocol": { "modern": "2026-07-28", "legacy": "2025-11-25", "legacyServing": "stateless" },
     "limits": { "maxInFlight": 8, "maxToolCalls": 4, "exchangeTimeoutMs": 130000, "restTimeoutMs": 120000, "restResponseMaxBytes": 4194304, "toolTextMaxBytes": 262144, "statusPageDefault": 10, "statusPageMax": 20, "catalogTtlMs": 60000 },
@@ -169,6 +212,9 @@
       { "name": "firecrawl_map", "route": "map", "title": "Map a site's URLs",
         "description": "Discover the URLs of a public site from its sitemap and links, without scraping each page.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true } },
+      { "name": "firecrawl_search", "route": "search", "title": "Search the web",
+        "description": "Search the web through the platform's private SearXNG and return the results' URLs, titles and snippets; with scrapeOptions.formats, each result page is scraped too. A search whose engines all failed, or whose backend is down, is an error naming the failure, never an empty list; a partial result says which engines did not answer.",
+        "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": false, "openWorldHint": true } },
       { "name": "firecrawl_crawl", "route": "crawl.submit", "title": "Start a crawl",
         "description": "Start a crawl of a public site. Returns the job id as soon as the job is durably recorded; the crawl runs in the background. Poll it with firecrawl_check_crawl_status. Every start carries an idempotency key, yours or one made for it and returned in the answer: to retry, call again with the same arguments and that key, and the same job comes back instead of a second one.",
         "annotations": { "readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": true } },
@@ -187,17 +233,19 @@
       { "name": "firecrawl_batch_status", "route": "batch.status", "title": "Read a batch scrape",
         "description": "Read a batch scrape's status and one bounded page of its documents. When more documents remain, the answer holds nextSkip: call again with skip set to it.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false } },
+      { "name": "firecrawl_extract", "route": "extract.submit", "title": "Extract structured data",
+        "description": "Extract data matching a JSON schema from up to ten given URLs, as one background job: each page is scraped, then read by the platform's budgeted model. Returns the job id once it is durably recorded; poll it with firecrawl_extract_status. Values a page does not hold come back null, never invented. Every start carries an idempotency key, yours or one made for it: to retry, call again with the same arguments and that key.",
+        "annotations": { "readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": true } },
+      { "name": "firecrawl_extract_status", "route": "extract.status", "title": "Read an extraction",
+        "description": "Read an extraction job: its status and, once finished, the extracted data, the source URLs of each value, and any page or unit that failed and why.",
+        "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false } },
       { "name": "firecrawl_get_result", "route": "platform.job", "title": "Read a job's receipt",
-        "description": "Read the durable receipt of a crawl or batch job: its state and transitions, counts, error summary, retention and the address of its results.",
+        "description": "Read the durable receipt of a crawl, batch or extraction job: its state and transitions, counts, error summary, retention and the address of its results.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false } },
       { "name": "firecrawl_capabilities", "route": "platform.status", "title": "Describe this deployment",
         "description": "Describe what this deployment supports: its routes, formats and limits, the core's and the job ledger's health, and the MCP tools it omits and why.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false } }
     ],
-    "omitted": [
-      { "name": "firecrawl_search", "method": "POST", "path": "/v2/search" },
-      { "name": "firecrawl_extract", "method": "POST", "path": "/v2/extract" },
-      { "name": "firecrawl_extract_status", "method": "GET", "path": "/v2/extract/{id}" }
-    ]
+    "omitted": []
   }
 }

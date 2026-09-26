@@ -55,7 +55,7 @@
     "maxSchemaProperties": 100,
     "maxPromptChars": 4000,
     "requestTimeoutMs": 60000,
-    "resultMaxBytes": 262144
+    "resultMaxBytes": 196608
   },
   "parsing": {
     "defaultParser": "llamaparse-cost-effective",

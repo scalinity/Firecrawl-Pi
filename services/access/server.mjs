@@ -12,6 +12,9 @@
 //     forgets them. Identity headers are never forwarded: the gateway builds each upstream request.
 //   - /mcp (M4) passes the same Host, Origin and token checks, then goes to the MCP service (src/mcp.mjs),
 //     whose tools call these REST routes back with the same token (spec §7.2, §20.1).
+//   - M5: /v2/search is a synchronous route like scrape; the json scrape format and /v2/extract jobs send
+//     pages the core scraped to the retrieval service's budgeted model adapter (src/extractor.mjs,
+//     src/extract.mjs), whose failures reach the caller typed.
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { pipeline } from "node:stream/promises";
@@ -23,6 +26,8 @@ import { openArchive } from "./src/archive.mjs";
 import { makeUpstream, sendJson } from "./src/upstream.mjs";
 import { makeJobs } from "./src/jobs.mjs";
 import { makeMcpProxy } from "./src/mcp.mjs";
+import { makeExtractor } from "./src/extractor.mjs";
+import { makeExtractJobs } from "./src/extract.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -33,7 +38,9 @@ const archive = await openArchive(cfg.artifactRoot);
 const store = makeStore(cfg, log);
 const upstream = makeUpstream(cfg);
 const jobs = makeJobs({ cfg, store, upstream, archive, log: (o) => log({ build: cfg.build, ...o }) });
-const PATH = jobs.PATH;
+const extractor = cfg.extractUrl ? makeExtractor({ url: cfg.extractUrl, token: cfg.extractToken }) : null;
+const extractJobs = extractor ? makeExtractJobs({ cfg, store, upstream, archive, extractor, log: (o) => log({ build: cfg.build, ...o }) }) : null;
+const PATH = { ...jobs.PATH, extract: "/v2/extract" };
 const started = Date.now();
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -102,7 +109,8 @@ function uncertain(ctx, job, retry) {
 function submissionAnswer(ctx, route, job, invalidURLs, keyed) {
   if (job.state === "SUBMITTING" || job.state === "SUBMISSION_UNCERTAIN") return uncertain(ctx, job, keyed ? "same" : "new");
   if (job.state === "FAILED" && job.http_status && !job.upstream_id) return ctx.send(job.http_status, { success: false, code: job.error_code, error: job.error });
-  ctx.send(200, { success: true, id: job.id, url: `${ctx.origin}${PATH[route.kind]}/${job.id}`, ...(route.kind === "batch" ? { invalidURLs } : {}) });
+  ctx.send(200, { success: true, id: job.id, url: `${ctx.origin}${PATH[route.kind]}/${job.id}`, ...(route.kind === "batch" ? { invalidURLs } : {}),
+    ...(route.kind === "extract" ? { urlTrace: [], ...(invalidURLs.length ? { invalidURLs } : {}) } : {}) });
 }
 
 async function submit(ctx, route) {
@@ -122,6 +130,8 @@ async function submit(ctx, route) {
   if (admitted.conflict) return ctx.send(409, { success: false, code: "IDEMPOTENCY_CONFLICT", error: "This idempotency key was used with a different request in the last 24 hours." });
   ctx.job = admitted.job.id;
   let job = admitted.job;
+  // An extraction runs for minutes: its receipt is the answer, and the runner takes it from there.
+  if (route.kind === "extract") { void extractJobs.kick().catch(() => {}); return submissionAnswer(ctx, route, job, invalidURLs, idemKey !== undefined); }
   if (["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN"].includes(job.state)) {
     await withTimeout(jobs.kick(), cfg.submitTimeoutMs + 10000);
     job = (await store.getJobAny(job.id)) ?? job;
@@ -236,6 +246,27 @@ async function cancel(ctx, route, id) {
   done();
 }
 
+// ---- extraction status (M5) ---------------------------------------------------------------------------
+// Upstream's extract status shape (status processing | completed | failed | cancelled, data, sources,
+// expiresAt), served from the ledger and the archived result, with the platform's own detail under fcpi:
+// the model, the units and their failures, the pages that could not be scraped, and the usage.
+async function extractStatus(ctx, route, id) {
+  const job = await jobFor(ctx, route, id);
+  if (!job) return;
+  if (job.state === "EXPIRED") return expired(ctx, job);
+  const expiresAt = iso(job.results_expire_at) ?? new Date(Date.now() + L.results.retentionDays * 86400000).toISOString();
+  if (job.state === "RECEIVED" || job.state === "RUNNING") return ctx.send(200, { success: true, status: "processing", data: null, expiresAt, createdAt: iso(job.created_at) });
+  const row = (await store.documentKeys(job.id)).find((r) => r.doc_key === "result");
+  const result = row ? JSON.parse((await archive.read(row.sha256)).toString("utf8")) : {};
+  const pageFailures = job.errors?.errors ?? [];
+  const warnings = [...(result.warnings ?? []), ...pageFailures.map((e) => `${e.url}: ${e.code}: ${e.error}`)];
+  const tokens = result.usage ? result.usage.promptTokens + result.usage.completionTokens : undefined;
+  ctx.send(200, { success: true, status: { SUCCEEDED: "completed", PARTIAL: "completed", FAILED: "failed", CANCELLED: "cancelled" }[job.state], data: result.data ?? null,
+    sources: result.sources ?? {}, expiresAt, ...(job.error ? { error: job.error } : {}), ...(warnings.length ? { warning: warnings.join("; ").slice(0, 8000) } : {}),
+    ...(tokens !== undefined ? { tokensUsed: tokens } : {}), createdAt: iso(job.created_at), completedAt: iso(job.finished_at),
+    fcpi: { state: job.state, errorCode: job.error_code ?? null, model: result.model ?? null, missingRequired: result.missingRequired ?? [], units: result.units ?? [], usage: result.usage ?? null, pageFailures } });
+}
+
 // ---- platform routes --------------------------------------------------------------------------------
 const receipt = (ctx, job, events) => ({
   id: job.id, kind: job.kind, state: job.state, createdAt: iso(job.created_at), updatedAt: iso(job.updated_at), submittedAt: iso(job.submitted_at),
@@ -261,25 +292,65 @@ async function platformStatus(ctx) {
   const core = await upstream.call("GET", "/v0/health/liveness", { timeoutMs: 3000, maxBytes: 65536 }).then((r) => ({ live: r.status === 200, ms: Date.now() - t0 }), () => ({ live: false, ms: Date.now() - t0 }));
   let ledger = { ok: false }, summary = null;
   try { summary = await store.summary(); ledger = { ok: true }; } catch (e) { ledger = { ok: false, error: e.message }; }
+  // The providers (M5), from the retrieval service: each one's credential present or not, its breaker, the
+  // host's selection and the budgets, never a secret. Unreachable, it says so; REST is not affected.
+  const providers = extractor ? await extractor.providers().then((r) => (r.status === 200 ? r.json : { error: `HTTP ${r.status}` }), (e) => ({ error: e.code })) : null;
   ctx.send(200, { success: true, service: "access-gateway", build: cfg.build, instance: jobs.instance, uptimeSeconds: Math.round((Date.now() - started) / 1000),
-    core, ledger, jobs: summary?.states ?? null, archive: { bytes: summary?.archiveBytes ?? null, quotaBytes: await quotaBytes() },
+    core, ledger, providers, jobs: summary?.states ?? null, archive: { bytes: summary?.archiveBytes ?? null, quotaBytes: await quotaBytes() },
     capabilities: { routes: M.routes.map((r) => `${r.method} ${r.path}`), notEnabled: M.not_enabled.map((r) => `${r.method} ${r.path}`), formats: M.formats.allowed },
     limits: L });
 }
 
 // ---- synchronous routes -----------------------------------------------------------------------------
+const overloaded = (ctx) => ctx.send(503, { success: false, code: "OVERLOADED", error: `${syncInFlight} synchronous requests are already in flight (limit ${L.admission.maxSyncInFlight}); retry shortly.` }, { "retry-after": "5" });
 async function sync(ctx, route) {
   const raw = await readJson(ctx.req);
   const { body } = validateBody(route.body, raw, M);
-  if (syncInFlight >= L.admission.maxSyncInFlight) return ctx.send(503, { success: false, code: "OVERLOADED", error: `${syncInFlight} synchronous requests are already in flight (limit ${L.admission.maxSyncInFlight}); retry shortly.` }, { "retry-after": "5" });
+  // M5: a scrape asking for the json format is scraped, then extracted (below).
+  const json = route.id === "scrape" ? (body.formats ?? []).find((f) => typeof f === "object" && f.type === "json") : null;
+  if (json) return scrapeWithJson(ctx, body, json);
+  if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   syncInFlight += 1;
   upstream.forward(ctx.res, route.path, body, (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
+}
+
+// The json format (spec §14): the page is scraped as markdown through the core, then read by the retrieval
+// service's model adapter under the request's id as its logical id. A failed extraction answers with the
+// adapter's typed class and status; a requested format is never silently dropped (spec §9.4).
+async function scrapeWithJson(ctx, body, json) {
+  if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
+  syncInFlight += 1;
+  const t0 = Date.now();
+  try {
+    const wanted = body.formats.filter((f) => typeof f === "string");
+    const formats = [...new Set([...wanted, "markdown"])];
+    let r;
+    try { r = await upstream.call("POST", "/v2/scrape", { body: { ...body, formats }, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
+    catch (e) { return ctx.send(e.code === "TIMEOUT" ? 504 : 502, { success: false, code: e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: e.code === "TIMEOUT" ? "The core did not answer in time." : "The core is unavailable." }); }
+    if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 502 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
+    const doc = r.json.data;
+    const left = cfg.coreTimeoutMs + 10000 - (Date.now() - t0);
+    let x;
+    try {
+      x = await extractor.extract({ logicalId: `scrape:${ctx.id}`, schema: json.schema, prompt: json.prompt ?? null,
+        documents: [{ url: doc.metadata?.url ?? body.url, markdown: typeof doc.markdown === "string" ? doc.markdown : "" }], deadline: new Date(Date.now() + left).toISOString() }, Math.max(1000, left));
+    } catch (e) { return ctx.send(503, { success: false, code: "EXTRACTION_UNAVAILABLE", error: `The extraction service could not be reached (${e.code}); the page was scraped but not extracted.` }, { "retry-after": "10" }); }
+    const failure = x.status !== 200 ? x.json?.failure : (x.json?.ok ? null : x.json?.failure);
+    if (failure || x.status !== 200) {
+      const f = failure ?? { class: "EXTRACTION_FAILED", detail: `the extraction service answered ${x.status}` };
+      return ctx.send(x.status !== 200 ? x.status : 502, { success: false, code: f.class, error: `The page was scraped, but its json format failed: ${f.detail}` }, f.retryAfter ? { "retry-after": String(f.retryAfter) } : {});
+    }
+    doc.json = x.json.data;
+    if (!wanted.includes("markdown")) delete doc.markdown;
+    if (x.json.warnings?.length) doc.warning = [doc.warning, ...x.json.warnings].filter(Boolean).join("; ");
+    ctx.send(200, { success: true, data: doc, fcpi: { extraction: { model: x.json.model, sources: x.json.sources, missingRequired: x.json.missingRequired, usage: x.json.usage } } });
+  } finally { syncInFlight -= 1; }
 }
 
 // ---- the MCP route (src/mcp.mjs), served only when the MCP service's address is configured ------------
 const mcp = cfg.mcpUrl ? makeMcpProxy({ url: cfg.mcpUrl, limits: M.mcp.limits, readBody, send: (ctx, status, body, extra) => ctx.send(status, body, extra) }) : null;
 
-const HANDLERS = { scrape: sync, map: sync, "crawl.submit": submit, "batch.submit": submit, "crawl.status": status, "batch.status": status, "crawl.errors": errors,
+const HANDLERS = { scrape: sync, map: sync, search: sync, "extract.submit": submit, "extract.status": extractStatus, "crawl.submit": submit, "batch.submit": submit, "crawl.status": status, "batch.status": status, "crawl.errors": errors,
   "batch.errors": errors, "crawl.cancel": cancel, "batch.cancel": cancel, "platform.status": platformStatus, "platform.jobs": platformJobs, "platform.job": platformJob };
 
 // ---- the server -------------------------------------------------------------------------------------
@@ -349,9 +420,11 @@ server.requestTimeout = Math.max(cfg.coreTimeoutMs, cfg.submitTimeoutMs) + 15000
 server.listen(cfg.port, "0.0.0.0", () => {
   log({ event: "listening", build: cfg.build, instance: jobs.instance, port: server.address().port, clients: registry.size, hosts: [...cfg.hosts.values()], routes: ROUTES.length });
   jobs.start().catch((e) => log({ event: "jobs_start_failed", error: e.message }));
+  extractJobs?.start();
 });
 // Shutdown: job rounds stop at once, then open requests finish (Docker allows 20 s), then the pool closes.
 for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => {
   jobs.stop();
-  server.close(async () => { await jobs.stop(); await store.close().catch(() => {}); process.exit(0); });
+  extractJobs?.stop();
+  server.close(async () => { await jobs.stop(); await extractJobs?.stop(); await store.close().catch(() => {}); process.exit(0); });
 });

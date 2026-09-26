@@ -18,7 +18,7 @@ test("a scrape keeps accepted options, drops origin, and adds nothing", () => {
 test("refused options name themselves and why, before anything else", () => {
   refused(() => validateBody("scrape", { url: "https://example.com", actions: [] }, M), "UNSUPPORTED_OPTION", /actions.*M7/);
   refused(() => validateBody("scrape", { url: "https://example.com", formats: ["screenshot"] }, M), "UNSUPPORTED_OPTION", /screenshot/);
-  refused(() => validateBody("scrape", { url: "https://example.com", formats: [{ type: "json", prompt: "x" }] }, M), "UNSUPPORTED_OPTION", /M5/);
+  refused(() => validateBody("scrape", { url: "https://example.com", formats: [{ type: "summary" }] }, M), "UNSUPPORTED_OPTION", /native model path/);
   refused(() => validateBody("batch", { urls: ["https://example.com"], appendToId: "0190f1a0-0000-7000-8000-000000000000" }, M), "UNSUPPORTED_OPTION", /one team/);
   refused(() => validateBody("crawl", { url: "https://example.com", webhook: "https://hook.example" }, M), "UNSUPPORTED_OPTION", /outbox/);
   refused(() => validateBody("crawl", { url: "https://example.com", scrapeOptions: { headers: { cookie: "x" } } }, M), "UNSUPPORTED_OPTION", /headers/);
@@ -88,4 +88,44 @@ test("the request hash ignores key order but not values", () => {
   assert.equal(requestHash("crawl", a), requestHash("crawl", b));
   assert.notEqual(requestHash("crawl", a), requestHash("crawl", c));
   assert.notEqual(requestHash("crawl", a), requestHash("batch", a));
+});
+
+// ---- M5: search, the json format and extraction ------------------------------------------------------
+test("search: bounded query and limit, and every option the pinned client would ignore refused by name", () => {
+  const { body } = validateBody("search", { query: "fcpi widgets" }, M);
+  assert.deepEqual(body, { query: "fcpi widgets", limit: 5 });
+  refused(() => validateBody("search", { query: "x", limit: 11 }, M), "BAD_REQUEST");
+  refused(() => validateBody("search", { query: "x".repeat(501) }, M), "BAD_REQUEST");
+  refused(() => validateBody("search", {}, M), "BAD_REQUEST", /query.*required/);
+  for (const [k, v, why] of [["tbs", "qdr:d", /time filters/], ["country", "de", /country/], ["categories", ["github"], /categories/], ["sources", [{ type: "news" }], /web results/], ["highlights", true, /Cloud index/], ["location", "Berlin", /M6/]]) {
+    refused(() => validateBody("search", { query: "x", [k]: v }, M), "UNSUPPORTED_OPTION", why);
+  }
+});
+
+test("the json format: a schema is required, it is an object within 16 KiB, and it is offered on scrape alone", () => {
+  const { body } = validateBody("scrape", { url: "https://example.com", formats: ["markdown", { type: "json", schema: { type: "object", properties: { a: { type: "string" } } }, prompt: "p" }] }, M);
+  assert.deepEqual(body.formats, ["markdown", { type: "json", schema: { type: "object", properties: { a: { type: "string" } } }, prompt: "p" }]);
+  refused(() => validateBody("scrape", { url: "https://example.com", formats: [{ type: "json", prompt: "x" }] }, M), "BAD_REQUEST", /schema.*required/);
+  refused(() => validateBody("scrape", { url: "https://example.com", formats: [{ type: "json", schema: [] }] }, M), "BAD_REQUEST", /JSON Schema object/);
+  refused(() => validateBody("scrape", { url: "https://example.com", formats: [{ type: "json", schema: { type: "object", description: "x".repeat(17000) } }] }, M), "BAD_REQUEST", /16384/);
+  refused(() => validateBody("scrape", { url: "https://example.com", formats: [{ type: "json", schema: {}, extra: 1 }] }, M), "BAD_REQUEST", /Unrecognized key/);
+  const J = { type: "json", schema: { type: "object", properties: { a: { type: "string" } } } };
+  refused(() => validateBody("batch", { urls: ["https://example.com"], formats: [J] }, M), "UNSUPPORTED_OPTION", /\/v2\/extract/);
+  refused(() => validateBody("crawl", { url: "https://example.com", scrapeOptions: { formats: [J] } }, M), "UNSUPPORTED_OPTION", /\/v2\/extract/);
+  refused(() => validateBody("search", { query: "x", scrapeOptions: { formats: [J] } }, M), "UNSUPPORTED_OPTION", /\/v2\/extract/);
+});
+
+test("extraction: explicit URLs only, at most ten, a schema required; discovery refused by name", () => {
+  const S = { type: "object", properties: { a: { type: "string" } } };
+  const { body, units, invalidURLs } = validateBody("extract", { urls: ["https://a.example/1", "https://a.example/1", "not a url"], schema: S, ignoreInvalidURLs: true, showSources: true }, M);
+  assert.deepEqual(body, { urls: ["https://a.example/1"], schema: S });
+  assert.equal(units, 1);
+  assert.deepEqual(invalidURLs, ["not a url"]);
+  refused(() => validateBody("extract", { urls: Array.from({ length: 11 }, (_, i) => `https://a.example/${i}`), schema: S }, M), "BAD_REQUEST", /at most 10/);
+  refused(() => validateBody("extract", { urls: ["https://a.example/*"], schema: S }, M), "UNSUPPORTED_OPTION", /discovery/);
+  refused(() => validateBody("extract", { urls: ["https://a.example/"], prompt: "find prices" }, M), "BAD_REQUEST", /schema.*required/);
+  for (const [k, v, why] of [["enableWebSearch", true, /discovery/], ["allowExternalLinks", true, /following links/], ["agent", { model: "x" }, /agent/], ["limit", 5, /URLs given/]]) {
+    refused(() => validateBody("extract", { urls: ["https://a.example/"], schema: S, [k]: v }, M), "UNSUPPORTED_OPTION", why);
+  }
+  refused(() => validateBody("extract", { urls: ["https://a.example/"], schema: S, prompt: "x".repeat(4001) }, M), "BAD_REQUEST");
 });

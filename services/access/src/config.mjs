@@ -8,6 +8,8 @@ const KNOWN = new Set([
   "PI_ALLOWED_ORIGINS", "PI_CAPABILITIES_FILE", "PI_ARTIFACT_ROOT", "PI_CREDENTIALS_DIR", "PI_POSTGRES_HOST",
   "PI_POSTGRES_DB", "PI_POSTGRES_USER", "PI_GATEWAY_SUBMIT_TIMEOUT_MS", "PI_GATEWAY_SUBMIT_SETTLE_MS",
   "PI_GATEWAY_POLL_MS", "PI_CLOUD_ACCESS_ENABLED", "PI_MCP_URL",
+  // M5: the retrieval service's extraction listener.
+  "PI_EXTRACT_URL",
 ]);
 
 const int = (env, key, dflt, min, max) => {
@@ -53,6 +55,13 @@ export function loadConfig(env) {
   // The MCP service (M4): a fixed http origin on the internal network the two share. Absent, /mcp is no route.
   const mcpUrl = env.PI_MCP_URL ? new URL(env.PI_MCP_URL) : null;
   if (mcpUrl && (mcpUrl.protocol !== "http:" || mcpUrl.pathname !== "/" || mcpUrl.search || mcpUrl.username || mcpUrl.password)) throw new Error("PI_MCP_URL must be an http origin");
+  // The extraction service (M5): a fixed http origin on fcpi_model, reached with the gateway's own credential.
+  // Absent, extraction jobs and the json format cannot run, so the manifest's extract route refuses to start.
+  const extractUrl = env.PI_EXTRACT_URL ? new URL(env.PI_EXTRACT_URL) : null;
+  if (extractUrl && (extractUrl.protocol !== "http:" || extractUrl.pathname !== "/" || extractUrl.search || !/^\d+\.\d+\.\d+\.\d+$/.test(extractUrl.hostname))) throw new Error("PI_EXTRACT_URL must be an http origin at a fixed address");
+  if (!extractUrl && manifest.routes.some((r) => r.kind === "extract")) throw new Error("the manifest enables extraction, and PI_EXTRACT_URL is not set");
+  const extractToken = extractUrl ? readFileSync(`${env.PI_CREDENTIALS_DIR}/gateway_retrieval_token`, "utf8").trim() : null;
+  if (extractUrl && !/^[\x21-\x7e]{32,512}$/.test(extractToken)) throw new Error("gateway_retrieval_token must be 32-512 printable characters");
   const pw = readFileSync(`${env.PI_CREDENTIALS_DIR}/gateway_postgres_password`, "utf8").trim();
   if (pw.length < 32) throw new Error("gateway_postgres_password is shorter than 32 characters");
   return {
@@ -68,6 +77,7 @@ export function loadConfig(env) {
     manifest,
     artifactRoot: env.PI_ARTIFACT_ROOT,
     mcpUrl,
+    extractUrl, extractToken,
     db: { host: env.PI_POSTGRES_HOST, database: env.PI_POSTGRES_DB, user: env.PI_POSTGRES_USER, password: pw },
     build: process.env.FCPI_SOURCE_COMMIT ?? "unknown",
   };
@@ -83,6 +93,13 @@ export function checkManifest(m, { mcp = false } = {}) {
   pos(L.batch.hardMaxUrls, "limits.batch.hardMaxUrls", 100);
   pos(L.batch.maxUrls, "limits.batch.maxUrls", L.batch.hardMaxUrls);
   pos(L.batch.deadlineMinutes, "limits.batch.deadlineMinutes", 30);
+  if (L.extract) {
+    pos(L.extract.maxUrls, "limits.extract.maxUrls", 25);
+    pos(L.extract.deadlineMinutes, "limits.extract.deadlineMinutes", 60);
+    pos(L.extract.scrapeTimeoutMs, "limits.extract.scrapeTimeoutMs", 90000);
+  }
+  if (m.routes.some((r) => r.kind === "extract") && !L.extract) throw new Error("capability manifest: an extract route needs limits.extract");
+  if (m.bodies.search && m.bodies.search.fields.limit.max > 10) throw new Error("capability manifest: search limit exceeds spec §13's maximum of 10");
   pos(L.admission.maxOpenJobs, "limits.admission.maxOpenJobs", 20);
   pos(L.admission.maxOpenUnits, "limits.admission.maxOpenUnits", 500);
   pos(L.admission.activeUpstreamJobs, "limits.admission.activeUpstreamJobs", 1);
