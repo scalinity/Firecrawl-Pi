@@ -53,7 +53,9 @@ sec meta
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) sentinel=$V"
 
 sec core_logs_before
-bash $REPO/scripts/m2/pi-core-logs.sh before-m3-persistence | grep -E '^(### |classified|control=|utc=)'
+# Its own section headers are indented, so they stay inside this section and do not replace this
+# transcript's meta and end sections for a reader.
+bash $REPO/scripts/m2/pi-core-logs.sh before-m3-persistence | grep -E '^(### |classified|control=|utc=)' | sed 's/^### /  instance-record /'
 
 sec write
 pg "create schema if not exists fcpi_m3_sentinel; create table if not exists fcpi_m3_sentinel.sentinel (k text primary key, v text not null, written_at timestamptz not null default now()); insert into fcpi_m3_sentinel.sentinel (k, v) values ('m3', '$V') on conflict (k) do update set v = excluded.v, written_at = now() returning 'postgres_written=' || v;"
