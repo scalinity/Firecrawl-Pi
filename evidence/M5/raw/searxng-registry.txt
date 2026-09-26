@@ -1,0 +1,25 @@
+### meta
+utc=2026-09-26T20:16:21Z tool=docker-buildx-imagetools
+### index
+Name:      docker.io/searxng/searxng:2026.9.25-12f8b6515
+MediaType: application/vnd.oci.image.index.v1+json
+Digest:    sha256:5286edb35782454ab8a102c5eff6b54bff745853191b46aeead95f225aa6dfb6
+           
+Manifests: 
+  Name:      docker.io/searxng/searxng:2026.9.25-12f8b6515@sha256:c5455a215b9da11146f594c0f2c9357d5657bc9a7f6e47aa3c2f3f167defb3c3
+  MediaType: application/vnd.oci.image.manifest.v1+json
+  Platform:  linux/amd64
+             
+  Name:      docker.io/searxng/searxng:2026.9.25-12f8b6515@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19
+  MediaType: application/vnd.oci.image.manifest.v1+json
+  Platform:  linux/arm64
+             
+  Name:      docker.io/searxng/searxng:2026.9.25-12f8b6515@sha256:e79e9f3f97be9cc42fe3e43b998ed4b21d0ff9f802a7ec949f105f82fa40b77e
+  MediaType: application/vnd.oci.image.manifest.v1+json
+  Platform:  linux/arm/v7
+### tags
+latest sha256:5286edb35782454ab8a102c5eff6b54bff745853191b46aeead95f225aa6dfb6 2026-09-25T16:57:05.57054Z
+2026.9.25-12f8b6515 sha256:5286edb35782454ab8a102c5eff6b54bff745853191b46aeead95f225aa6dfb6 2026-09-25T16:57:02.5266Z
+2026.9.25-d8ae3abd5 sha256:38ed750807fb00c26047e51896b50f83e7843d120d9e65f950770305f62c7111 2026-09-25T14:37:48.940143Z
+2026.9.25-487f51922 sha256:4f74bc40fe934c083cd7c42840b2c8f1b532c2ef907514e3e67e0e7c61a8bd13 2026-09-25T09:12:09.811108Z
+### end

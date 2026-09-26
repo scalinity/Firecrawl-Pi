@@ -1,0 +1,24 @@
+### meta
+{"utc":"2026-09-26T22:07:23.254Z","phase":"live","pi_utc":"2026-09-26T22:07:22.644Z","deployed_commit":"8903e1e47885bede933a84bb69ea75089b027685","selection_before":{"search":"fixture","extractionModel":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective"},"providers":{"selection":{"search":"fixture","extractionModel":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective","source":"file"},"paidDispatch":false,"budgetPolicySha256":"2530424b1a0643b0421f934819555406545759dd5b5417cbc4e635303b8f94f4","providers":{"openai":{"kind":"model","paid":true,"credential":"absent","breaker":"closed"},"fixture-model":{"kind":"model","paid":false,"credential":"not_required","breaker":"open"},"llamaparse":{"kind":"parser","paid":true,"credential":"absent","breaker":"closed"},"fixture-parser":{"kind":"parser","paid":false,"credential":"not_required","breaker":"closed"}},"budgets":[{"category":"fixture","period":"day","period_start":"2026-09-26","reserved":41112,"settled":115962},{"category":"fixture_parser","period":"day","period_start":"2026-09-26","reserved":18,"settled":30},{"category":"fixture_race","period":"day","period_start":"2026-09-26","reserved":0,"settled":64641}],"caps":{"llm":{"paid":true,"unit":"micro_usd","caps":{"day":0,"month":0}},"parser":{"paid":true,"unit":"credits","caps":{"month":0}},"fixture":{"paid":false,"unit":"micro_usd","caps":{"day":5000000}},"fixture_race":{"paid":false,"unit":"micro_usd","caps":{"day":100000}},"fixture_parser":{"paid":false,"unit":"credits","caps":{"day":3000}}}}}
+### selection
+{"utc":"2026-09-26T22:07:48.638Z","search":"live","model":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective","applied":true}
+### live_search
+{"utc":"2026-09-26T22:07:49.242Z","case":"results","status":200,"code":null,"error":null,"success":true,"results":5,"hosts":["www.raspberrypi.com","en.wikipedia.org","www.healthline.com","www.raspberrypi.com","www.raspberrypi.org"],"warning":"Partial search result: 2 engine(s) did not answer (brave: too many requests; duckduckgo: CAPTCHA)."}
+{"utc":"2026-09-26T22:07:52.424Z","case":"nothing_matches","status":200,"code":null,"error":null,"success":true,"results":5,"warning":"Partial search result: 2 engine(s) did not answer (brave: Suspended: too many requests; duckduckgo: CAPTCHA)."}
+{"utc":"2026-09-26T22:07:55.627Z","case":"mcp_results","isError":false,"results":3,"code":null}
+### live_search_log
+{"utc":"2026-09-26T22:07:56.081Z","events":[{"outcome":"partial","selection":"live","engines":["duckduckgo","bing","brave"],"results":10,"unresponsive":2},{"outcome":"partial","selection":"live","engines":["duckduckgo","bing","brave"],"results":10,"unresponsive":2},{"outcome":"partial","selection":"live","engines":["duckduckgo","bing","brave"],"results":10,"unresponsive":2}],"egress":[{"method":"CONNECT","host":"www.bing.com","status":200,"bytes_in":null},{"method":"CONNECT","host":"html.duckduckgo.com","status":200,"bytes_in":null},{"method":"CONNECT","host":"search.brave.com","status":200,"bytes_in":null}]}
+### live_model
+{"utc":"2026-09-26T22:07:56.306Z","case":"blocked","credential":"absent","paidDispatch":false,"llmCaps":{"paid":true,"unit":"micro_usd","caps":{"day":0,"month":0}}}
+### live_parser
+{"utc":"2026-09-26T22:07:56.306Z","case":"blocked","credential":"absent","paidDispatch":false,"parserCaps":{"paid":true,"unit":"credits","caps":{"month":0}}}
+### ledger
+{"utc":"2026-09-26T22:07:56.607Z","point":"live","rows":[]}
+### resources
+{"utc":"2026-09-26T22:07:56Z","label":"live-end","retrieval":{"instance":"d9241b542d98","started_at":"2026-09-26T22:02:47.40597331Z","peak":55083008,"max":"469762048","current":36143104,"oom_kill":0},"searxng":{"instance":"3706e7f372de","started_at":"2026-09-26T22:07:14.621900672Z","peak":106053632,"max":"335544320","current":98156544,"oom_kill":0},"gateway":{"instance":"845cf7f9e253","started_at":"2026-09-26T22:02:54.131301434Z","peak":63979520,"max":"167772160","current":26460160,"oom_kill":0},"mcp":{"instance":"01ce0bfc70b7","started_at":"2026-09-26T22:02:41.969266943Z","peak":57065472,"max":"201326592","current":38191104,"oom_kill":0},"core":{"instance":"a64954e03d66","started_at":"2026-09-26T22:02:53.384897681Z","peak":1932918784,"max":"2415919104","current":1803386880,"oom_kill":0},"vmstat_oom_kill":0,"mem_available_kib":5237600}
+### connections
+{"utc":"2026-09-26T22:07:57.256Z","hosts":["127.0.0.1:3380"],"lookups":[]}
+### meta_end
+{"utc":"2026-09-26T22:07:57.619Z","pi_utc":"2026-09-26T22:07:57.427Z","selection_after":{"search":"live","extractionModel":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective"}}
+### end
+{"utc":"2026-09-26T22:07:57.863Z","exit":0}
