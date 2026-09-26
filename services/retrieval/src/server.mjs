@@ -123,11 +123,11 @@ function authorized(req, hash) {
   const m = /^Bearer ([\x21-\x7e]{32,512})$/.exec(req.headers.authorization ?? "");
   return !!m && timingSafeEqual(createHash("sha256").update(m[1]).digest(), hash);
 }
-function readBody(req, cap) {
+function readBody(req, cap, overflowClass = "INVALID_REQUEST") {
   return new Promise((resolve, reject) => {
     const chunks = [];
     let n = 0;
-    req.on("data", (c) => { n += c.length; if (n > cap) { reject(new Denied("INVALID_REQUEST", `body exceeds ${cap} bytes`)); req.destroy(); } else chunks.push(c); });
+    req.on("data", (c) => { n += c.length; if (n > cap) { reject(new Denied(overflowClass, `body exceeds ${cap} bytes`)); req.destroy(); } else chunks.push(c); });
     req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
   });
@@ -194,8 +194,11 @@ const server = http.createServer(async (req, res) => {
     if (!authorized(req, coreTokenHash)) return send(res, 401, { error: "unauthorized" });
     if (!storeReady) return notReady(res);
     if (path === "/internal/parse") {
-      const bytes = await readBody(req, budget.parsing.maxBytes + 1);
+      // A document past the parser's limit is DOCUMENT_TOO_LARGE, and a page count that is not a number is a
+      // malformed request rather than a count of zero (review S10).
       const h = (k) => { const v = req.headers[k]; return typeof v === "string" ? v : null; };
+      if (!/^[0-9]{1,6}$/.test(h("x-fcpi-pages") ?? "")) throw new Denied("INVALID_REQUEST", "x-fcpi-pages must be the document's page count");
+      const bytes = await readBody(req, budget.parsing.maxBytes, "DOCUMENT_TOO_LARGE");
       const r = await parse({ logicalId: h("x-fcpi-logical-id"), owner: h("x-fcpi-owner"), pages: Number(h("x-fcpi-pages")), reason: h("x-fcpi-reason"), bytes }, abort.signal);
       return send(res, 200, r);
     }
