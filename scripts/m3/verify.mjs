@@ -356,11 +356,15 @@ const checks = {
       return { ok, actual: `records with an upstream count=${counted.length}, above one=${counted.filter((r) => r.marker_groups > 1).length}; finished=${finished.length}, without exactly one=${finished.filter((r) => r.marker_groups !== 1).length}; queued then cancelled submitted=${queued?.marker_groups}+${over?.queued_ever_submitted}` };
     } },
   J06: { name: "results-served-after-core-redis-and-nuq-expiry-r9", inputs: [`${RAW}e2e-expiry.txt`],
-    expected: "before: the finished crawl's and batch's NuQ job rows and group rows exist, Redis holds their crawl keys and the core answers 200 for them; then pg_cron's own nuq_group_crawl_clean deletes the rows (its runs succeeded), the Redis keys expire and the core is recreated: 0 NuQ rows, 0 group rows, 0 keys and the core answers 404; yet the gateway serves every document, each hashing to the archive manifest and to the hash recorded when the job finished (evidence/M1/review/REVIEW.md R9)",
+    expected: "before: the finished crawl's and batch's NuQ job rows and group rows exist, Redis holds their crawl keys and the core answers 200 for them; then pg_cron's own nuq_group_crawl_clean deletes the rows (a successful run that started after the expiry UPDATE committed, both on the database's clock), the Redis keys expire and the core is recreated: 0 NuQ rows, 0 group rows, 0 keys and the core answers 404; yet the gateway serves every document, each hashing to the archive manifest and to the hash recorded when the job finished (evidence/M1/review/REVIEW.md R9)",
     run() {
       const ex = E("expiry"), b = ex.before?.[0], a = ex.after_expiry?.[0], sv = ex.served_after_expiry ?? [];
       const before = b && b.upstream.length === 2 && b.upstream.every((r) => r.nuq_jobs > 0 && r.group_row === 1) && b.redis_keys.every((n) => n > 0) && b.core_status.every((s) => s === "200");
-      const after = a && a.upstream.every((r) => r.nuq_jobs === 0 && r.group_row === 0) && a.redis_keys.every((n) => n === 0) && a.core_status.every((s) => s === "404") && (a.cleaner_runs ?? []).some((l) => /^succeeded /.test(l));
+      // pg_cron's own cleaner did it: a successful run that started after the expiry UPDATE committed (both
+      // times from the database's clock).
+      const expAt = Date.parse(ex.expire?.[0]?.at_db ?? "");
+      const cleaned = Number.isFinite(expAt) && (a?.cleaner_runs ?? []).some((l) => { const [st, t] = l.split(" "); return st === "succeeded" && Date.parse(t) > expAt; });
+      const after = a && a.upstream.every((r) => r.nuq_jobs === 0 && r.group_row === 0) && a.redis_keys.every((n) => n === 0) && a.core_status.every((s) => s === "404") && cleaned;
       const served = sv.length === 2 && sv.every((r) => r.statuses.every((s) => s === 200) && r.docs > 0 && r.docs === r.manifest_sha256.length && JSON.stringify(r.served_sha256) === JSON.stringify(r.manifest_sha256) && JSON.stringify(r.served_sha256) === JSON.stringify(r.recorded_before_sha256));
       return { ok: endOk(ex) && before && after && served, actual: `before: nuq rows ${JSON.stringify(b?.upstream?.map((r) => r.nuq_jobs))} keys ${JSON.stringify(b?.redis_keys)} core ${JSON.stringify(b?.core_status)}; after: rows ${JSON.stringify(a?.upstream?.map((r) => r.nuq_jobs + r.group_row))} keys ${JSON.stringify(a?.redis_keys)} core ${JSON.stringify(a?.core_status)}; served ${sv.map((r) => `${r.kind}=${r.docs} hashes equal=${JSON.stringify(r.served_sha256) === JSON.stringify(r.manifest_sha256)}`).join(" ")}` };
     } },

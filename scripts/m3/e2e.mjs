@@ -426,9 +426,11 @@ const PHASES = {
     out("before", { upstream: upstreamRows(), redis_keys: ups.map(redisKeys), core_status: jobs.map(([k], i) => coreStatus(k, ups[i])), cleaner: sql("SELECT jobname || ' ' || schedule FROM cron.job WHERE jobname IN ('nuq_group_crawl_clean', 'nuq_queue_scrape_clean_completed', 'nuq_group_crawl_finished');") });
     // The core's own expiry, brought forward: the group's expiry moves to the past, and pg_cron's
     // nuq_group_crawl_clean (every minute) deletes the group and every job row; Redis's keys expire.
-    out("expire", { updated: sql(`UPDATE nuq.group_crawl SET expires_at = now() - interval '1 second' WHERE id IN ('${ups.join("','")}') AND status = 'completed' RETURNING id;`).length });
+    const updated = sql(`UPDATE nuq.group_crawl SET expires_at = now() - interval '1 second' WHERE id IN ('${ups.join("','")}') AND status = 'completed' RETURNING id;`).length;
+    // The database's time once the UPDATE has committed: only a cleaner run that started after it counts.
+    out("expire", { updated, at_db: sql("SELECT to_char(clock_timestamp() at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"');")[0] });
     for (let i = 0; i < 150 && upstreamRows().some((r) => r.nuq_jobs + r.group_row > 0); i++) await sleep(2000);
-    const cron = sql("SELECT status || ' ' || to_char(start_time at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS\"Z\"') FROM cron.job_run_details d JOIN cron.job j ON j.jobid = d.jobid WHERE j.jobname = 'nuq_group_crawl_clean' ORDER BY d.start_time DESC LIMIT 3;");
+    const cron = sql("SELECT status || ' ' || to_char(start_time at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"') FROM cron.job_run_details d JOIN cron.job j ON j.jobid = d.jobid WHERE j.jobname = 'nuq_group_crawl_clean' ORDER BY d.start_time DESC LIMIT 3;");
     for (const u of ups) pi(`sudo -n sed -n 's#^redis://:\\(.*\\)@redis:6379$#\\1#p' /etc/firecrawl-pi/secrets/core_redis_url | sudo -n docker exec -i ${cname("redis")} sh -c 'read -r p; export REDISCLI_AUTH="$p"; redis-cli --no-auth-warning --scan --pattern "crawl:${u}*" | while read -r k; do redis-cli --no-auth-warning EXPIRE "$k" 1 >/dev/null; done'`);
     await sleep(3000);
     out("core_logs", { label: "expiry-before-core-recreate", summary: pi("bash /opt/firecrawl-pi/scripts/m2/pi-core-logs.sh m3-expiry-before-recreate").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
