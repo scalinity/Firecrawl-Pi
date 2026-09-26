@@ -7,7 +7,8 @@
 // it is a held live step: run after the review is addressed.
 //   node scripts/m4/real-clients.mjs > evidence/M4/raw/real-clients.txt
 // - Claude Code reads deploy/clients/claude-code.mcp.json with --strict-mcp-config, so no other MCP
-//   server loads; Codex runs with --ignore-user-config and the server from deploy/clients/codex.config.toml
+//   server loads, and runs with no built-in tool (--tools "") and no user settings (--setting-sources
+//   project in an empty directory: no hooks, plugins or user permissions); Codex runs with --ignore-user-config and the server from deploy/clients/codex.config.toml
 //   given as -c overrides, so none of the owner's other servers or plugins load either.
 // - The token reaches each client only through its environment (FCPI_MCP_TOKEN), never a command line or
 //   a file; each runs in an empty temporary directory, so no project instructions are loaded.
@@ -91,9 +92,14 @@ try {
     const token = pi("sudo -n cat /etc/firecrawl-pi/secrets/clients/m4claude.token").trim();
     const cfg = join(ROOT, "deploy/clients/claude-code.mcp.json");
     const r = await run("claude", ["-p", PROMPT, "--model", "haiku", "--mcp-config", cfg, "--strict-mcp-config", "--output-format", "json",
+      // No built-in tool (Bash, Read, Edit and the rest), and no user settings: no hooks, plugins or user
+      // permissions. Only the fcpi server's tools are there to call. (--bare would also skip the keychain
+      // the login lives in.)
+      "--tools", "", "--setting-sources", "project",
       "--allowedTools", "mcp__fcpi__firecrawl_scrape mcp__fcpi__firecrawl_crawl mcp__fcpi__firecrawl_check_crawl_status"], { FCPI_MCP_URL: URL_MCP, FCPI_MCP_TOKEN: token }, dir);
     let j = null; try { j = JSON.parse(r.stdout); } catch { /* not JSON */ }
     out("claude_code", { client: version("claude"), model_alias: "haiku", models_used: j?.modelUsage ? Object.keys(j.modelUsage) : null, exit: r.code, ms: r.ms, is_error: j?.is_error ?? null,
+      permission_denials: Array.isArray(j?.permission_denials) ? j.permission_denials.map((d) => d.tool_name ?? null) : null,
       num_turns: j?.num_turns ?? null, total_cost_usd: j?.total_cost_usd ?? null, answer: answerLine(j?.result), result_head: String(j?.result ?? r.stdout).slice(0, 400), stderr_head: r.stderr.slice(0, 300) });
     await new Promise((res) => setTimeout(res, 1500));
     piView("m4claude", since);
