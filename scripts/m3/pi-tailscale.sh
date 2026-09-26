@@ -28,7 +28,13 @@ case "${1:-}" in
   install)
     T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
     curl -fsSL "https://pkgs.tailscale.com/stable/debian/$CODENAME.noarmor.gpg" -o "$T/key.gpg"
-    got=$(gpg --show-keys --with-colons "$T/key.gpg" | awk -F: '$1 == "fpr" {print $10; exit}')
+    # The whole file becomes apt's signed-by keyring, so it must hold one primary key, Tailscale's:
+    # a second key appended to a genuine one would otherwise be trusted too. The first fingerprint
+    # gpg lists is the primary's; subkeys follow it.
+    keys=$(gpg --show-keys --with-colons "$T/key.gpg")
+    n=$(printf '%s\n' "$keys" | awk -F: '$1 == "pub"' | wc -l)
+    [ "$n" -eq 1 ] || die "the downloaded keyring holds $n primary keys, not one"
+    got=$(printf '%s\n' "$keys" | awk -F: '$1 == "fpr" {print $10; exit}')
     [ "$got" = "$FPR" ] || die "the downloaded key's fingerprint is $got, not $FPR"
     curl -fsSL "https://pkgs.tailscale.com/stable/debian/$CODENAME.tailscale-keyring.list" -o "$T/list"
     want="deb [signed-by=$KEYRING] https://pkgs.tailscale.com/stable/debian $CODENAME main"
@@ -61,6 +67,9 @@ case "${1:-}" in
   status)
     echo "### meta"
     echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat /opt/firecrawl-pi/.fcpi-source-commit)"
+    echo "### keyring"
+    # apt's signed-by keyring for the repository, as installed: one primary key, Tailscale's.
+    gpg --show-keys --with-colons "$KEYRING" 2>/dev/null | awk -F: '$1 == "pub" {n++} $1 == "fpr" && !f {f = $10} END {print "primary_keys=" n + 0 " primary_fpr=" f}'
     echo "### tailscale"
     echo "version=$(tailscale version | head -1) tailscaled=$(systemctl is-active tailscaled) enabled=$(systemctl is-enabled tailscaled)"
     sudo -n tailscale status --json | jq -r '"backend=\(.BackendState) magicdns_suffix_set=\(.MagicDNSSuffix != "") self_online=\(.Self.Online) tailnet_addresses=\(.Self.TailscaleIPs | length) peers=\(.Peer // {} | length)"'

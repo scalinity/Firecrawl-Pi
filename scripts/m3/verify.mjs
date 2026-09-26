@@ -593,7 +593,7 @@ const checks = {
       return { ok, actual: `vantage=${m?.vantage}; official client base URL=${sk.client?.[0]?.apiUrl}` };
     } },
   P02: { name: "tailnet-tls-private-serving", inputs: [`${RAW}tailscale-before.txt`, `${RAW}tailscale-install.txt`, `${RAW}lan-probe.txt`],
-    expected: "Tailscale is installed from its repository with the signing key's published fingerprint and runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed",
+    expected: "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed",
     run() {
       const status = `${RAW}tailscale-status.txt`, check = `${RAW}tailnet-check.txt`;
       if (!has(status) || !has(check)) return { blocked: true, actual: `Tailscale is installed on the Pi (${(read(`${RAW}tailscale-install.txt`).match(/installed=(\S+)/) ?? [])[1]}); awaiting the account association and the workstation's tailnet membership (${!has(status) ? "no Pi status" : "no workstation check"})` };
@@ -605,7 +605,9 @@ const checks = {
       const c = records(check).tls ?? [];
       const w = one(c, "status_with_read_token"), n = one(c, "status_without_token"), j = one(c, "job_list_urls"), h = one(c, "foreign_host_header");
       const lan = S(`${RAW}lan-probe.txt`).project_ports ?? [];
+      const kr = kv((s.keyring ?? []).flatMap((l) => l.split(" ")));
       const cond = { key: /key_fingerprint=2596A99EAAB33821893C0A79458CA832957F5868/.test(ins) && /installed=\S+ tailscaled=active/.test(ins),
+        keyring: kr.primary_keys === "1" && kr.primary_fpr === "2596A99EAAB33821893C0A79458CA832957F5868",
         running: ts.backend === "Running" && ts.tailscaled === "active", no_dns_routes_ssh: ts.corp_dns === "false" && ts.route_all === "false" && ts.run_ssh === "false" && ts.advertise_routes === "0" && ts.exit_node === "false",
         resolv_unchanged: !!resolvBefore && resolvBefore === resolvAfter,
         serve: web.length === 1 && /:8443$/.test(web[0].host_port) && web[0].handlers?.["/"] === "http://127.0.0.1:3380" && serve.funnel === 0,
