@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import { classify } from "../src/quality.mjs";
 import { paceDecision, nextCooldown } from "../src/store.mjs";
 import { loadPolicy } from "../src/policy.mjs";
-import { retryAfterSeconds } from "../src/acquire.mjs";
+import { retryAfterSeconds, sniffContentType } from "../src/acquire.mjs";
 
 // tests/fixtures is mounted beside the tests when they run in the service's image (M1's static
 // page included).
@@ -116,4 +116,15 @@ test("only structure makes a shell that fails after rendering; a short scripted 
   assert.equal(classify({ ...page, body: site("js.html") }).structural, true);
   assert.equal(classify({ ...page, body: site("js-slow.html") }).structural, true);
   assert.equal(classify({ ...page, body: '<script src="/a.js"></script><div class="spinner loading"></div><p>Loading</p>' }).structural, true);
+});
+
+test("the PDF magic settles the type at the start of a body, or within the first KiB of one declared a PDF or opaque (review W5)", () => {
+  const b = (s) => Buffer.from(s, "latin1");
+  assert.equal(sniffContentType(b("%PDF-1.7\n..."), "text/html"), "application/pdf");
+  assert.equal(sniffContentType(b("\xEF\xBB\xBF \n%PDF-1.4"), "text/html; charset=utf-8"), "application/pdf");
+  assert.equal(sniffContentType(b("junk before the header\n%PDF-1.4"), "application/octet-stream"), "application/pdf");
+  // An HTML page that mentions the string near its top stays HTML, however it is declared.
+  assert.equal(sniffContentType(b("<html><title>What does %PDF-1.7 mean?</title>"), "text/html; charset=utf-8"), "text/html; charset=utf-8");
+  assert.equal(sniffContentType(b("<!doctype html><p>%PDF-1.7</p>"), "application/pdf"), "text/html");
+  assert.equal(sniffContentType(b("<p>plain</p>"), "application/pdf"), "application/pdf");
 });

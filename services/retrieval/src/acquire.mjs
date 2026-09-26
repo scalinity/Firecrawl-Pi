@@ -239,12 +239,16 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
   };
 }
 
-// The content type the body's own bytes show, where they settle it; the declared type otherwise.
+// The content type the body's own bytes show, where they settle it; the declared type otherwise. A body is a
+// PDF when it starts with the magic (after a BOM or whitespace), or when it is declared a PDF or an opaque
+// type and the magic lies in the first KiB, as PDF readers allow: an HTML page that merely mentions
+// "%PDF-" near its top stays HTML (review W5).
 const PDF_MAGIC = Buffer.from("%PDF-");
 export function sniffContentType(body, declared) {
   const head = body.subarray(0, 1024);
-  if (head.includes(PDF_MAGIC)) return "application/pdf";
+  if (/^(\xEF\xBB\xBF)?\s*%PDF-/.test(head.toString("latin1"))) return "application/pdf";
   if (declared && /^application\/pdf\b/i.test(declared) && /^\s*(<!doctype html|<html|<head|<body)/i.test(head.toString("latin1"))) return "text/html";
+  if ((!declared || /^application\/(pdf|octet-stream)\b/i.test(declared)) && head.includes(PDF_MAGIC)) return "application/pdf";
   return declared;
 }
 
