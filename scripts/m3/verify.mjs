@@ -1,0 +1,637 @@
+#!/usr/bin/env node
+// M3 verification (docs/FIRECRAWL_PI_MILESTONES.md, M3 "Automated Verification"; CLAUDE.md §25, §26,
+// §33.3). Every check recomputes its result from the raw evidence under evidence/M3/ (or the directory
+// FCPI_M3_EVIDENCE names) and records the §25 tuple, with code_dirty, in evidence/M3/verification.json.
+// A check whose evidence is missing is NOT_RUN, never PASS; a check that reads a record requires that
+// record to be there (an absent one fails, it does not pass vacuously); every negative result is read
+// beside its positive control; each check's `expected` names what it compares.
+//   node scripts/m3/verify.mjs [CHECK_ID …]
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { execFileSync } from "node:child_process";
+import { ROOT, sha256, sha256File, repoState, sections, git, kv } from "../m0/lib.mjs";
+
+const EV = process.env.FCPI_M3_EVIDENCE ?? "evidence/M3/";
+const RAW = `${EV}raw/`;
+const OUT = `${EV}verification.json`;
+const UPSTREAM_SHA = "7666c1f9ae8720a6bba271e0f60b6a217f8a5210";
+const M3_START = "aa22d92"; // the kickoff's HEAD: files changed after it are M3's
+const ORIGIN = "http://127.0.0.1:3380", FX = "http://m3.fixture.fcpi.test:8080";
+const read = (p) => readFileSync(resolve(ROOT, p), "utf8");
+const json = (p) => JSON.parse(read(p));
+const has = (p) => existsSync(resolve(ROOT, p));
+const now = () => new Date().toISOString().replace(/\.\d+Z$/, "Z");
+const hashOf = (paths) => sha256(paths.map((p) => `${p}:${sha256File(p)}`).join("\n"));
+const MIB = 1024 * 1024;
+const target = () => {
+  const t = Object.fromEntries(read("scripts/m1/pi-target.conf").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
+  if (!t.PI_SSH_TARGET || !t.PI_SSH_KEY || !t.PI_LAN_ADDRESS) throw new Error("scripts/m1/pi-target.conf lacks PI_SSH_TARGET, PI_SSH_KEY or PI_LAN_ADDRESS");
+  return t;
+};
+const ssh = (cmd) => { const t = target(); return execFileSync("ssh", ["-i", t.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", t.PI_SSH_TARGET, cmd], { encoding: "utf8" }); };
+const digestOf = (ref) => (ref.match(/@(sha256:[0-9a-f]{64})$/) ?? [])[1] ?? null;
+const composeImage = (svc) => json(`${EV}rendered-compose.json`).services[svc]?.image ?? "";
+const S = (f) => sections(f);
+const jsonLines = (lines) => (lines ?? []).filter((l) => l.startsWith("{")).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
+// A JSON-line transcript: { section: [records] }. A section that appears again (the driver prints a
+// header whenever the section changes) adds to its earlier records rather than replacing them.
+function records(path) {
+  const out = {};
+  let cur = null;
+  for (const line of read(path).split("\n")) {
+    const m = line.match(/^### (\S+)$/);
+    if (m) { cur = m[1]; out[cur] ??= []; continue; }
+    if (cur && line.startsWith("{")) { try { out[cur].push(JSON.parse(line)); } catch { /* not a record */ } }
+  }
+  return out;
+}
+const E = (name) => records(`${RAW}e2e-${name}.txt`);
+const one = (recs, c) => (recs ?? []).find((r) => r.case === c) ?? null;
+const endOk = (e) => e.end?.[0]?.exit === 0 && !e.error;
+const sorted = (a) => [...a].sort();
+const GRAPH = [`${FX}/`, ...Array.from({ length: 11 }, (_, i) => `${FX}/p${String(i + 1).padStart(2, "0")}`)];
+const MAP12 = [FX, ...GRAPH.slice(1)];
+const tapCounts = (lines) => { const n = (k) => +((lines.find((l) => l.startsWith(`# ${k} `)) ?? "").split(" ")[2]); return { tests: n("tests"), pass: n("pass"), fail: n("fail"), skipped: n("skipped"), cancelled: n("cancelled") }; };
+
+// ---- redaction (M2's rules, M3's live secrets) ------------------------------------------------------
+const M0_CONTROL = "tests/contracts/m0-redaction-control.txt", M1_CONTROL = "tests/contracts/m1-redaction-control.txt";
+const RULES = [
+  ["private-key", /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
+  ["github-token", /\b(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,})/],
+  ["openai-style-key", /\bsk-[A-Za-z0-9_-]{20,}/],
+  ["aws-key", /\bAKIA[0-9A-Z]{16}\b/],
+  ["slack-token", /\bxox[baprs]-[A-Za-z0-9-]{10,}/],
+  ["jwt", /\beyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/],
+  ["bearer", /Bearer\s+[A-Za-z0-9._~+/-]{20,}/],
+  ["credential-assignment", /\b(password|passwd|secret|api[_-]?key|access[_-]?token|auth[_-]?token)\b\s*[:=]\s*["']?(?!REDACTED|<|\$\{|null|false|true|none|string|undefined)[A-Za-z0-9+/_\-.]{8,}/i],
+  ["url-credentials", /[a-z][a-z0-9+.-]*:\/\/[^\s/:@<]+:[^\s/@]+@/i],
+  ["local-path", /\/(private\/tmp|Users\/[^\/\s]+|home\/[^\/\s]+)\//],
+  ["mac-address", /(?<![0-9A-Fa-f:])(?:[0-9A-Fa-f]{2}[:-]){5}[0-9A-Fa-f]{2}(?![0-9A-Fa-f:])/],
+  ["imager-instance-id", /rpi-imager-\d{6,}/],
+  ["url-empty-user-credentials", /[a-z][a-z0-9+.-]*:\/\/:[A-Za-z0-9._~%+-]{8,}@/i],
+  ["rabbitmq-default-pass", /\bdefault_pass\s*=\s*(?!%s|<)\S{8,}/],
+  ["fcpi-client-token", /\bfcpi_[a-z0-9]+_[0-9a-f]{32,}\b/],
+];
+// Literal strings allowed outside the controls (scripts/m2/verify.mjs's list; M3 adds none).
+const ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00:02", "02:00:00:00:00:99",
+  "amqp://fcpi:%s@", "amqp://fcpi:$rmqpw@", String.raw`amqp://fcpi:\\(.*\\)@`, "http://user:pw@",
+  "password: r.proxy.password", "password: cred.password", "password = randomBytes", "password: readSecret"]);
+const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie"];
+function scan(files, ids, rules = RULES, allow = ALLOW) {
+  const hits = [];
+  const secrets = ids.secrets;
+  for (const f of files) read(f).split("\n").forEach((line, i) => {
+    const at = `${f}:${i + 1}`;
+    for (const [name, re] of rules) if ([...line.matchAll(new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g"))].some((m) => !allow.has(m[0]))) hits.push(`${at} ${name}`);
+    if (ids.m0) {
+      for (const m of line.match(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g) ?? []) if (sha256(m) === ids.m0.egress) hits.push(`${at} raw-egress-ip`);
+      for (const m of line.match(/(?<![0-9A-Fa-f])[0-9A-Fa-f]{16}(?![0-9A-Fa-f])/g) ?? []) if (sha256(m.toLowerCase()) === ids.m0.serial) hits.push(`${at} raw-board-serial`);
+      for (const m of line.match(/(?<![0-9A-Fa-f])[0-9A-Fa-f]{32}(?![0-9A-Fa-f])/g) ?? []) if (sha256(m.toLowerCase()) === ids.m0.machineId) hits.push(`${at} raw-machine-id`);
+      for (const m of line.matchAll(/MAC_SHA256:([0-9a-f]{64})/g)) if (!ids.m0.macs.has(m[1])) hits.push(`${at} unexplained-mac-hash`);
+    }
+    if (secrets) {
+      for (const m of line.match(/(?<![0-9A-Fa-f])[0-9a-f]{64}(?![0-9A-Fa-f])/g) ?? []) if (secrets.has(sha256(m))) hits.push(`${at} live-secret-by-hash-hex`);
+      for (const m of line.match(/fcpi_[a-z0-9]+_[0-9a-f]{64}/g) ?? []) if (secrets.has(sha256(m))) hits.push(`${at} live-secret-by-hash-hex`);
+      for (const m of line.match(/(?<![A-Z])[A-P]{64}(?![A-Z])/g) ?? []) if (secrets.has(sha256(m))) hits.push(`${at} live-secret-by-hash-cookie`);
+    }
+  });
+  return hits;
+}
+
+// ---- snapshot attribution (scripts/m2/verify.mjs X09, with M3's bridge) ------------------------------
+function keyedSnapshot(file) {
+  const out = []; let sec = null;
+  for (const l of read(file).split("\n")) {
+    const m = l.match(/^### (\S+)$/);
+    if (m) { sec = m[1]; continue; }
+    if (sec && sec !== "meta" && l !== "end" && l !== "") out.push([sec, l]);
+  }
+  return out;
+}
+const MODULE_ALLOW = /^(bridge|stp|llc|veth|overlay|br_netfilter|ip_set|xt_[a-z_]+|xt_[A-Z]+|x_tables|nf_[a-z0-9_]+|nft_[a-z0-9_]+|ip6?_tables|ip6?table_[a-z]+|iptable_[a-z]+|ipt_[A-Z]+|xfrm_algo|xfrm_user|nf_tables|nfnetlink)$/;
+function attribute(sec, line, ids) {
+  if (sec === "systemd_running" && /^session-\d+\.scope$/.test(line)) return "own SSH session scope";
+  if (sec === "systemd_running") { const m = line.match(/^docker-([0-9a-f]{64})\.scope$/); if (m && ids.has(m[1])) return "scope of an fcpi container"; }
+  if (sec === "docker_ps") { const f = line.split("\t"); if (f.length === 4 && /^fcpi-/.test(f[1]) && ids.has(f[0])) return "fcpi container"; }
+  if (sec === "findmnt") {
+    if (/^\/run\/docker\/netns\/[0-9a-f]+ nsfs\[net:\[\d+\]\] nsfs rw$/.test(line)) return "container network namespace";
+    const m = line.match(/^\/var\/lib\/docker\/rootfs\/overlayfs\/([0-9a-f]{64}) overlay overlay /);
+    if (m && ids.has(m[1])) return "fcpi container root filesystem";
+  }
+  if (sec === "lsmod" && MODULE_ALLOW.test(line.split(" ")[0])) return "kernel module for the container runtime or the guard's sets";
+  if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) return "nftables ruleset: Docker's rules for M3's fcpi-platform bridge (evidence/M3/raw/nft-ruleset.txt)";
+  if (sec === "nft_chains" && /^ip6? (filter|nat|raw) /.test(line)) return "Docker's chains for M3's bridge";
+  return null;
+}
+
+// ---- checks ------------------------------------------------------------------------------------------
+const checks = {
+  B00: { name: "baseline-matches-m2-after", inputs: [`${EV}snapshot-before.txt`, "evidence/M2/snapshot-after.txt"],
+    expected: "M3's BEFORE snapshot equals M2's AFTER apart from SSH session scopes, and the boot ID is unchanged",
+    run() {
+      const strip = (f) => keyedSnapshot(f).map((x) => x.join("\t")).filter((l) => !/\tsession-\d+\.scope$/.test(l)).sort();
+      const a = strip("evidence/M2/snapshot-after.txt"), b = strip(`${EV}snapshot-before.txt`);
+      const only = (x, y) => x.filter((l) => !y.includes(l));
+      const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
+      const ok = a.length > 50 && only(a, b).length === 0 && only(b, a).length === 0 && !!boot(`${EV}snapshot-before.txt`) && boot("evidence/M2/snapshot-after.txt") === boot(`${EV}snapshot-before.txt`);
+      return { ok, actual: `lines=${a.length}; only in M2 AFTER=${only(a, b).length}, only in M3 BEFORE=${only(b, a).length}, boot_id_equal=${boot("evidence/M2/snapshot-after.txt") === boot(`${EV}snapshot-before.txt`)}` };
+    } },
+
+  // ================================================================ the gateway build and its tests
+  G01: { name: "gateway-image-pinned-built-and-running", inputs: [`${RAW}gateway-build.txt`, `${EV}rendered-compose.json`, `${RAW}stack.txt`, "services/access/Dockerfile", "services/access/package-lock.json"],
+    expected: "the gateway builds FROM the digest-pinned node base with npm ci --omit=dev --ignore-scripts against its lockfile, for linux/arm64, as uid 3380, recording the commit it was built from; the image the stack renders and runs is the last build recorded, and its recorded commit is that build's",
+    run() {
+      const log = read(`${RAW}gateway-build.txt`), df = read("services/access/Dockerfile");
+      const builds = [...log.matchAll(/^fcpi\/access-gateway:m3 id=(sha256:[0-9a-f]{64}) os=linux arch=(\S+) size=\d+ user=(\S+)$/gm)];
+      const last = builds.at(-1);
+      const lastCommit = [...log.matchAll(/^FCPI_SOURCE_COMMIT=([0-9a-f]{40})$/gm)].at(-1)?.[1];
+      const froms = [...df.matchAll(/^FROM (\S+)/gm)].map((m) => m[1]);
+      const st = S(`${RAW}stack.txt`);
+      const running = (st.containers ?? []).find((l) => l.startsWith("access-gateway "))?.match(/ image=(sha256:[0-9a-f]{64}) /)?.[1];
+      const imgCommit = kv(st.gateway_image ?? []).image_FCPI_SOURCE_COMMIT;
+      const lock = json("services/access/package-lock.json");
+      const cond = { built: !!last && /build_exit=0 /.test(log.split("### images").at(-2) ?? log), arm64: last?.[2] === "arm64", uid: last?.[3] === "3380:3380", from_pinned: froms.length === 1 && /@sha256:[0-9a-f]{64}$/.test(froms[0]),
+        npm_ci: /npm ci --omit=dev --ignore-scripts/.test(df), lock_integrity: Object.entries(lock.packages).filter(([k]) => k).every(([, v]) => /^sha512-/.test(v.integrity ?? "")),
+        rendered: digestOf(composeImage("access-gateway")) === last?.[1], running: running === last?.[1], commit_recorded: !!lastCommit && imgCommit === lastCommit };
+      const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
+      return { ok: bad.length === 0, actual: `builds=${builds.length}; last=${last?.[1]?.slice(7, 19)} arch=${last?.[2]} user=${last?.[3]}; running=${running?.slice(7, 19)}; image commit=${imgCommit?.slice(0, 7)}; failed conditions=${bad.join(",") || "none"}` };
+    } },
+  G02: { name: "gateway-tests-pass-in-the-running-image", inputs: [`${RAW}gateway-tests.txt`, `${EV}rendered-compose.json`, "services/access/test/validate.test.mjs", "services/access/test/auth.test.mjs", "services/access/test/archive.test.mjs", "tests/contracts/m3-gateway.test.mjs"],
+    expected: "inside the image the stack runs (Node 22.23.3), the gateway's unit tests and its contract suite (a fake core with the pinned route shapes, a throwaway PostgreSQL) run every test they declare, all passing, none skipped or cancelled, including the header-stripping and the three submission-crash tests; no throwaway container or network is left",
+    run() {
+      const s = S(`${RAW}gateway-tests.txt`);
+      const declared = (files) => files.reduce((n, f) => n + (read(f).match(/^test\(/gm) ?? []).length, 0);
+      const u = tapCounts(s.unit_tap ?? []), c = tapCounts(s.contract_tap ?? []);
+      const du = declared(["services/access/test/validate.test.mjs", "services/access/test/auth.test.mjs", "services/access/test/archive.test.mjs"]), dc = declared(["tests/contracts/m3-gateway.test.mjs"]);
+      const okNames = (s.contract_tap ?? []).filter((l) => /^ok \d+ - /.test(l)).map((l) => l.replace(/^ok \d+ - /, ""));
+      const need = ["only the gateway's headers reach the core", "never delivered", "answer lost after the core created the job", "never reached the core"];
+      const missing = need.filter((n) => !okNames.some((x) => x.includes(n)));
+      const img = (kv((s.meta ?? []).join(" ").split(" ")).image ?? "").split("@")[1];
+      const node = ((s.contract_tap ?? []).concat(s.transient ?? []).join("\n").match(/node_version=(v[\d.]+)/) ?? [])[1];
+      const ok = u.tests === du && u.pass === du && u.fail === 0 && u.skipped === 0 && c.tests === dc && c.pass === dc && c.fail === 0 && c.skipped === 0 && c.cancelled === 0 &&
+        (s.unit_tap ?? []).includes("test_exit=0") && (s.contract_tap ?? []).includes("test_exit=0") && missing.length === 0 && img === digestOf(composeImage("access-gateway")) && node === "v22.23.3" &&
+        (s.transient ?? []).includes("leftover_transient_containers=0 leftover_transient_networks=0");
+      return { ok, actual: `unit ${u.pass}/${u.tests} of ${du} declared (skipped ${u.skipped}); contract ${c.pass}/${c.tests} of ${dc} declared (skipped ${c.skipped}); named tests missing=${missing.join(";") || "none"}; image is the running one=${img === digestOf(composeImage("access-gateway"))}; node=${node}` };
+    } },
+  R01: { name: "route-shapes-verified-at-the-pin", inputs: [`${RAW}route-shapes.txt`, "deploy/policies/capabilities.json", "patches/series.json"],
+    expected: "the checked tree is upstream 7666c1f9 with the patch series (its recorded result tree); the route and schema files hash to the manifest's values; every native route the manifest serves is registered upstream with that method and shape; every route it declares not enabled is registered upstream; every call the pinned official client (the manifest's version) makes to a served path is one the manifest serves",
+    run() {
+      const s = S(`${RAW}route-shapes.txt`), m = json("deploy/policies/capabilities.json"), ser = json("patches/series.json"), meta = kv(s.meta);
+      const regs = (s.registrations ?? []).filter((l) => /^[A-Z]+ \//.test(l));
+      const routes = (s.manifest_routes ?? []).filter(Boolean);
+      const native = routes.filter((l) => !/ platform$/.test(l));
+      const bad = native.filter((l) => !/ FOUND same_shape=true$/.test(l));
+      const off = (s.not_enabled ?? []).filter(Boolean);
+      const calls = (s.client_calls ?? []).filter((l) => /^[A-Z]+ \//.test(l));
+      const unservedServed = calls.filter((l) => / unserved$/.test(l) && m.routes.some((r) => l.startsWith(`${r.method} ${r.path.replace(/\{id\}.*$/, "")}`) && l.split(" ")[1] === r.path));
+      const hashes = (read(`${RAW}route-shapes.txt`).match(/routes_file=\S+ sha256=([0-9a-f]{64})/) ?? [])[1] === m.upstream.routes_file_sha256 && (read(`${RAW}route-shapes.txt`).match(/schemas_file=\S+ sha256=([0-9a-f]{64})/) ?? [])[1] === m.upstream.schemas_file_sha256;
+      const servedCalls = calls.filter((l) => / served$/.test(l)).length;
+      const ok = meta.head === UPSTREAM_SHA && meta.tree === ser.result_tree && m.upstream.source_tree === ser.result_tree && hashes && regs.length >= 50 && native.length === 10 && bad.length === 0 &&
+        off.length === m.not_enabled.length && off.every((l) => / REGISTERED$/.test(l)) && meta.client === `${m.upstream.client.package}@${m.upstream.client.version}` && servedCalls >= 10 && unservedServed.length === 0;
+      return { ok, actual: `head=${meta.head?.slice(0, 7)} tree=${meta.tree?.slice(0, 8)}; file hashes match=${hashes}; registrations=${regs.length}; native routes=${native.length}, not found or reshaped=${bad.join(";") || "none"}; not enabled=${off.length}, all registered upstream=${off.every((l) => / REGISTERED$/.test(l))}; client=${meta.client}, served calls=${servedCalls}` };
+    } },
+
+  // ================================================================ REST contract and authorization
+  A01: { name: "authorized-scrape-crawl-batch-map", inputs: [`${RAW}e2e-sync.txt`, `${RAW}e2e-jobs.txt`, `${RAW}sdk-compat.txt`],
+    expected: "through the private path with a scoped token: a scrape returns the fixture's sentinel in Markdown and HTML with its links and status 200; a map returns exactly the 12 graph URLs (5 under limit 5); a crawl of the controlled graph finishes with the 12 unique pages and their sentinels; a crawl limited to 5 returns exactly 5; a batch keeps per-item outcomes (two pages, a 404 page, the authentication gate as an AUTH_REQUIRED error) and reports the invalid URL; the pinned official client does the same operations against the gateway",
+    run() {
+      const sy = E("sync"), jb = E("jobs");
+      const sc = sy.scrape?.[0], mw = one(sy.map, "whole"), m5 = one(sy.map, "limit_5");
+      const g = one(jb.crawl_graph, "finished"), gp = one(jb.crawl_graph, "pages_limit_5"), l5 = jb.crawl_limit?.[0], bs = one(jb.batch, "submit"), bf = one(jb.batch, "finished");
+      const sk = records(`${RAW}sdk-compat.txt`);
+      const cond = {
+        sync_ran: endOk(sy), scrape: sc?.status === 200 && sc.success === true && sc.sentinel_in_markdown === true && sc.sentinel_in_html === true && sc.statusCode === 200 && (sc.links ?? []).includes(`${FX}/p05`),
+        map_whole: JSON.stringify(mw?.links) === JSON.stringify(sorted(MAP12)), map_limit: (m5?.links ?? []).length === 5,
+        jobs_ran: endOk(jb), crawl: g?.state === "SUCCEEDED" && g.archived === 12 && JSON.stringify(sorted((gp?.docs ?? []).map((d) => d.url))) === JSON.stringify(sorted(GRAPH)) && (gp?.docs ?? []).every((d) => /^fcpi-m3-(index|p\d\d)-[0-9a-f]{4}$/.test(d.sentinel ?? "")),
+        crawl_limit: l5?.state === "SUCCEEDED" && l5.docs === 5 && l5.archived === 5,
+        batch: bs?.status === 200 && JSON.stringify(bs.invalidURLs) === JSON.stringify(["ftp://m3.fixture.fcpi.test/x"]) && bf?.state === "PARTIAL" && (bf.docs ?? []).length === 3 &&
+          (bf.docs ?? []).some((d) => d.url === `${FX}/missing` && d.statusCode === 404) && (bf.errors ?? []).length === 1 && bf.errors[0].url === `${FX}/gate` && /AUTH_REQUIRED/.test(bf.errors[0].error),
+        sdk: sk.end?.[0]?.exit === 0 && /^fcpi-m3-p02-/.test(sk.scrape?.[0]?.sentinel ?? "") && JSON.stringify(sk.map?.[0]?.links) === JSON.stringify(sorted(MAP12)) && sk.crawl?.[0]?.status === "completed" && sk.crawl[0].docs === 4 &&
+          sk.batch?.find((r) => r.case === "status")?.docs === 2 && sk.cancel?.[0]?.final_status === "cancelled",
+      };
+      const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
+      return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; crawl ${g?.state} archived=${g?.archived}; batch ${bf?.state} docs=${(bf?.docs ?? []).length} errors=${(bf?.errors ?? []).length}; map=${(mw?.links ?? []).length}; official client exit=${sk.end?.[0]?.exit}` };
+    } },
+  A02: { name: "pagination-private-origin-stable", inputs: [`${RAW}e2e-jobs.txt`, `${RAW}e2e-expiry.txt`, `${RAW}e2e-after-recreate.txt`],
+    expected: "a finished 12-page crawl read 5 at a time comes back as pages of 5, 5 and 2 whose `next` URLs name the gateway's private origin, the job's external id and increasing skips, never an internal host; the union is the 12 documents once each; the same pages read after the core forgot the job and after every container was recreated give the same documents",
+    run() {
+      const jb = E("jobs"), ex = E("expiry"), ar = E("after-recreate");
+      const p = one(jb.crawl_graph, "pages_limit_5"), id = one(jb.crawl_graph, "submit")?.id;
+      const nextsOk = (p?.nexts ?? []).length === 2 && p.nexts.every((n, i) => n === `${ORIGIN}/v2/crawl/${id}?skip=${5 * (i + 1)}&limit=5`);
+      const shas = (p?.docs ?? []).map((d) => d.sha256);
+      const later = [ex.served_after_expiry?.find((r) => r.kind === "crawl"), ar.served_after_recreate?.find((r) => r.kind === "crawl")];
+      const same = later.every((r) => r && JSON.stringify(r.served_sha256) === JSON.stringify(shas));
+      const internal = /firecrawl-core|10\.231\.|:3002/.test(read(`${RAW}e2e-jobs.txt`));
+      const ok = JSON.stringify(p?.pages) === "[5,5,2]" && nextsOk && new Set(shas).size === 12 && new Set((p?.docs ?? []).map((d) => d.url)).size === 12 && same && !internal && ex.served_after_expiry?.every((r) => r.nexts_private === true);
+      return { ok, actual: `pages=${JSON.stringify(p?.pages)}; next URLs on the private origin with the external id=${nextsOk}; unique documents=${new Set(shas).size}; same documents after expiry and recreation=${same}; internal host in the transcript=${internal}` };
+    } },
+  A03: { name: "credentials-missing-invalid-revoked-scope-owner", inputs: [`${RAW}e2e-auth.txt`],
+    expected: "missing, unknown, Basic-scheme and empty tokens get 401 with the gateway's own challenge (Bearer realm=\"fcpi\", never a firecrawl.dev one) while a valid token gets 200; a read-only token gets 403 INSUFFICIENT_SCOPE on scrape, map, crawl, batch and cancel and 200 on status; on five job routes another principal gets exactly the unknown-id answer (same status and body hash), with and without spoofed identity headers, while the owner gets 200 and the other principal's job list excludes the job; a token revoked on the Pi is refused within 3 s without a gateway restart, having worked just before",
+    run() {
+      const a = E("auth");
+      const un = a.unauthenticated ?? [];
+      const unOk = ["missing", "invalid", "basic_scheme", "bearer_empty"].every((c) => { const r = one(un, c); return r?.status === 401 && r.code === "UNAUTHORIZED" && r.www_authenticate === 'Bearer realm="fcpi"'; }) && one(un, "valid_control")?.status === 200;
+      const sc = a.scope ?? [];
+      const scOk = ["read_token_submits_crawl", "read_token_scrapes", "read_token_maps", "read_token_cancels", "read_token_submits_batch"].every((c) => one(sc, c)?.status === 403 && one(sc, c)?.code === "INSUFFICIENT_SCOPE") && one(sc, "read_token_reads_status_control")?.status === 200;
+      const ow = (a.owner ?? []).filter((r) => / \//.test(r.case ?? ""));
+      const owOk = ow.length === 5 && ow.every((r) => r.beta.status === 404 && r.beta.body_sha256 === r.unknown.body_sha256 && r.beta_spoofed_headers.body_sha256 === r.unknown.body_sha256 && r.beta.status === r.unknown.status) &&
+        one(a.owner, "alpha_reads_own_control")?.status === 200 && one(a.owner, "beta_job_list")?.contains_alpha_job === false && one(a.owner, "beta_job_list")?.status === 200;
+      const rv = a.revoke ?? [];
+      const restart = one(rv, "gateway_restarts_during")?.restart_count ?? "";
+      const rvOk = one(rv, "before")?.status === 200 && one(rv, "revoked_on_pi")?.result === "revoked m3rev" && one(rv, "after")?.status === 401 && one(rv, "after").ms_until_refused <= 3000 && /^0 /.test(restart);
+      const noCloud = !/firecrawl\.dev/.test(read(`${RAW}e2e-auth.txt`).split("\n").filter((l) => l.includes("www_authenticate")).join("\n"));
+      const ok = endOk(a) && unOk && scOk && owOk && rvOk && noCloud;
+      return { ok, actual: `unauthenticated=${unOk}; scopes=${scOk}; owner isolation over ${ow.length} routes=${owOk}; revocation refused after ${one(rv, "after")?.ms_until_refused} ms (restarts ${restart.split(" ")[0]})=${rvOk}; no Cloud challenge=${noCloud}` };
+    } },
+  A04: { name: "request-limits-and-overload", inputs: [`${RAW}e2e-sync.txt`, `${RAW}e2e-overload.txt`, `${RAW}e2e-auth.txt`],
+    expected: "a body over 1 MiB is 413, a 26-URL batch, a crawl limit of 201 or depth 4, a map limit of 1001 and a waitFor of 15001 are 400, headers over 16 KiB are 431; of six held synchronous scrapes four run and two get 503 OVERLOADED with Retry-After, and a later one runs; with 430 page units open a 200-page crawl is 503 OVERLOADED, and with 20 open jobs the next is 503 OVERLOADED, both with Retry-After, and every job queued for the test was cancelled without reaching the core; past the failure budget unknown tokens get 429 while a valid token still gets 200",
+    run() {
+      const sy = E("sync"), ov = E("overload"), au = E("auth");
+      const L = sy.limits ?? [], st = (c) => one(L, c)?.status;
+      const limits = st("body_over_1mib") === 413 && ["batch_26_urls", "crawl_limit_201", "crawl_depth_4", "map_limit_1001", "wait_for_15001"].every((c) => st(c) === 400) && st("header_over_16kib") === 431;
+      const so = (sy.sync_overload ?? []).find((r) => r.statuses), after = one(sy.sync_overload, "after_release");
+      const sync = so && so.statuses.filter((x) => x === 200).length === 4 && so.statuses.filter((x) => x === 503).length === 2 && so.codes.filter((c) => c === "OVERLOADED").length === 2 &&
+        so.retry_after.filter(Boolean).every((x) => Number(x) > 0) && after?.status === 200;
+      const A = ov.admission ?? [];
+      const units = one(A, "units_over_500"), jobs = one(A, "jobs_over_20"), clean = one(A, "cleanup");
+      const adm = units?.status === 503 && units.code === "OVERLOADED" && units.open_units === 430 && Number(units.retry_after) > 0 && jobs?.status === 503 && jobs.code === "OVERLOADED" && jobs.open_jobs === 20 &&
+        Number(jobs.retry_after) > 0 && JSON.stringify(clean?.states) === '["CANCELLED"]' && clean.queued_ever_submitted === 0;
+      const rl = au.rate_limit?.[0];
+      const rate = rl && rl.first_429_at > 0 && rl.statuses.slice(0, rl.first_429_at).every((x) => x === 401) && rl.statuses.slice(rl.first_429_at).every((x) => x === 429) && rl.valid_during === 200;
+      return { ok: endOk(sy) && endOk(ov) && limits && sync && adm && rate, actual: `limits=${limits}; synchronous ${JSON.stringify(so?.statuses)} then ${after?.status}; units refusal at ${units?.open_units} open, jobs refusal at ${jobs?.open_jobs} open, cleanup ${JSON.stringify(clean?.states)} submitted=${clean?.queued_ever_submitted}; 429 from attempt ${rl?.first_429_at}, valid during=${rl?.valid_during}` };
+    } },
+  A05: { name: "unsupported-options-refused-before-work", inputs: [`${RAW}e2e-sync.txt`],
+    expected: "each refused option (screenshot and json formats, actions, headers, mobile, maxAge, __agentInterop, skipTlsVerification, the stealth proxy, a crawl's webhook, prompt, ignoreRobotsTxt, zeroDataRetention and page actions, a batch's appendToId and webhook, a map's location and useIndex) is 400 UNSUPPORTED_OPTION naming the option, an unknown key is 400 BAD_REQUEST, and across all of them no retrieval attempt, no receipt and no fixture request occurred, while the scrape before them made attempts and reached the fixture",
+    run() {
+      const sy = E("sync"), R = sy.refused ?? [];
+      const expectOption = { scrape_screenshot: "formats.screenshot", scrape_json_format: "formats.json", scrape_actions: "actions", scrape_headers: "headers", scrape_mobile: "mobile", scrape_max_age: "maxAge",
+        scrape_agent_interop: "__agentInterop", scrape_skip_tls: "skipTlsVerification", scrape_stealth: "proxy.stealth", crawl_webhook: "webhook", crawl_prompt: "prompt", crawl_ignore_robots: "ignoreRobotsTxt",
+        crawl_zdr: "zeroDataRetention", crawl_scrape_actions: "scrapeOptions.actions", batch_append: "appendToId", batch_webhook: "webhook", map_location: "location", map_use_index: "useIndex" };
+      const bad = Object.entries(expectOption).filter(([c, o]) => { const r = one(R, c); return !(r?.status === 400 && r.code === "UNSUPPORTED_OPTION" && r.option === o); }).map(([c]) => c);
+      const unk = one(R, "scrape_unknown_key");
+      const fx = sy.refused_effects?.[0];
+      const effects = fx && fx.attempts_before === fx.attempts_after && fx.jobs_before === fx.jobs_after && fx.fixture_hits_for_refused === 0 && fx.positive_control_attempts_from_scrape > 0 && fx.fixture_hits_since_scrape >= 1;
+      return { ok: endOk(sy) && bad.length === 0 && unk?.status === 400 && unk.code === "BAD_REQUEST" && effects, actual: `refusals checked=${Object.keys(expectOption).length}, wrong=${bad.join(",") || "none"}; unknown key=${unk?.status} ${unk?.code}; attempts ${fx?.attempts_before}->${fx?.attempts_after}, receipts ${fx?.jobs_before}->${fx?.jobs_after}, fixture hits=${fx?.fixture_hits_for_refused}; control: scrape attempts=${fx?.positive_control_attempts_from_scrape}` };
+    } },
+
+  // ================================================================ durable jobs
+  J01: { name: "crash-before-upstream-submission-k1", inputs: [`${RAW}e2e-crash.txt`],
+    expected: "with the core stopped a crawl is acknowledged (200) and its receipt stays RECEIVED, the dispatch recorded as not delivered; after the gateway is killed and the core returns, the next gateway submits it once and it succeeds, one upstream job carrying its key",
+    run() {
+      const c = E("crash"), k = c.k1_never_delivered ?? [];
+      const s = one(k, "submit_with_core_stopped"), f = one(k, "finished");
+      const ok = endOk(c) && s?.status === 200 && s.ledger?.state === "RECEIVED" && s.events.some((e) => e.from === "SUBMITTING" && e.to === "RECEIVED" && /not delivered/.test(e.detail)) &&
+        one(k, "gateway_killed")?.result === "fcpi-access-gateway-1" && f?.state === "SUCCEEDED" && f.archived > 0 && f.marker_groups === 1 && f.events.filter((e) => e.to === "QUEUED").length === 1;
+      return { ok, actual: `acknowledged=${s?.status} while the receipt was ${s?.ledger?.state}; final ${f?.state} archived=${f?.archived}; upstream jobs with its key=${f?.marker_groups}` };
+    } },
+  J02: { name: "crash-after-upstream-submission-k2-k3", inputs: [`${RAW}e2e-crash.txt`],
+    expected: "K2: the gateway dies with the submission at a paused core (the client gets no acknowledgement); the woken core creates the job; the next gateway marks it SUBMISSION_UNCERTAIN and maps it by its key without resubmitting; the client's retry with the same key gets the same id; it succeeds with one upstream job. K3: the core is killed while paused, so no upstream job exists; the next gateway keeps it SUBMISSION_UNCERTAIN, the native status route answers 503 SUBMISSION_UNCERTAIN with the receipt on the private origin, and only after the settle window is it submitted, once; it succeeds with one upstream job",
+    run() {
+      const c = E("crash"), k2 = c.k2_answer_lost ?? [], k3 = c.k3_submission_lost ?? [];
+      const f2 = one(k2, "finished"), f3 = one(k3, "finished"), d3 = one(k3, "during_settle_window");
+      const seq2 = (f2?.events ?? []).map((e) => e.to).slice(0, 4).join(">");
+      const seq3 = (f3?.events ?? []).map((e) => e.to).slice(0, 6).join(">");
+      const k2ok = one(k2, "gateway_killed")?.client?.acknowledged === false && one(k2, "core_created_it_meanwhile")?.marker_groups === 1 && seq2 === "RECEIVED>SUBMITTING>SUBMISSION_UNCERTAIN>QUEUED" &&
+        f2.events.some((e) => /reconciled/.test(e.detail)) && one(k2, "client_retries_same_key")?.same_id === true && f2?.state === "SUCCEEDED" && f2.marker_groups === 1;
+      const k3ok = one(k3, "gateway_killed")?.client?.acknowledged === false && one(k3, "core_killed_while_paused")?.core_state === "exited" && one(k3, "core_back")?.marker_groups === 0 &&
+        d3?.ledger_state === "SUBMISSION_UNCERTAIN" && d3.native_status?.status === 503 && d3.native_status.code === "SUBMISSION_UNCERTAIN" && d3.native_status.receipt === `${ORIGIN}/platform/v1/jobs/${one(k3, "in_flight")?.id}` &&
+        d3.client_retry?.status === 503 && seq3 === "RECEIVED>SUBMITTING>SUBMISSION_UNCERTAIN>RECEIVED>SUBMITTING>QUEUED" && f3.events.some((e) => /180000 ms after it was sent/.test(e.detail)) && f3?.state === "SUCCEEDED" && f3.marker_groups === 1;
+      return { ok: endOk(c) && k2ok && k3ok, actual: `K2 ${seq2} final ${f2?.state} upstream=${f2?.marker_groups} retry same id=${one(k2, "client_retries_same_key")?.same_id}; K3 ${seq3} native=${d3?.native_status?.status} ${d3?.native_status?.code} final ${f3?.state} upstream=${f3?.marker_groups}` };
+    } },
+  J03: { name: "acknowledged-jobs-tracked-through-crashes-k4-k5", inputs: [`${RAW}e2e-crash.txt`],
+    expected: "an acknowledged crawl running when the gateway is killed is tracked by the next gateway to SUCCEEDED with all 6 pages archived; one running when the core is killed reaches an explicit end state (here SUCCEEDED) after NuQ requeued the interrupted page (at least one stalled page, the positive control that work was cut), no page above 4 attempts, and one upstream job",
+    run() {
+      const c = E("crash"), k4 = one(c.k4_gateway_crash_running, "finished"), k5 = one(c.k5_core_crash_running, "finished");
+      const ok = endOk(c) && one(c.k4_gateway_crash_running, "acknowledged_running")?.ledger?.state === "RUNNING" && k4?.state === "SUCCEEDED" && k4.archived === 6 && k4.marker_groups === 1 &&
+        one(c.k5_core_crash_running, "core_killed")?.ledger?.state === "RUNNING" && ["SUCCEEDED", "PARTIAL", "FAILED"].includes(k5?.state) && k5.marker_groups === 1 && k5.stalled_pages >= 1 &&
+        (k5.attempts_per_page ?? []).length > 0 && k5.attempts_per_page.every((n) => n <= 4);
+      return { ok, actual: `K4 ${k4?.state} archived=${k4?.archived}; K5 ${k5?.state} archived=${k5?.archived} stalled pages=${k5?.stalled_pages} attempts per page=${JSON.stringify(k5?.attempts_per_page)}` };
+    } },
+  J04: { name: "idempotent-requests-and-conflicting-reuse", inputs: [`${RAW}e2e-jobs.txt`, `${RAW}sdk-compat.txt`, `${RAW}e2e-crash.txt`],
+    expected: "a repeated crawl with the same idempotency key and body (also with its keys reordered) returns the same id; the same key with another body is 409 IDEMPOTENCY_CONFLICT; another principal's use of the key makes its own job; one upstream job carries the key; a batch retried under its key returns the same id, also through the official client; the crash tests' client retries under their keys return the ids they were given",
+    run() {
+      const jb = E("jobs"), I = jb.idempotency ?? [], cr = E("crash");
+      const sk = records(`${RAW}sdk-compat.txt`);
+      const ok = one(I, "same_key_same_body")?.same_id === true && one(I, "same_key_reordered_body")?.same_id === true && one(I, "same_key_other_body")?.status === 409 && one(I, "same_key_other_body")?.code === "IDEMPOTENCY_CONFLICT" &&
+        one(I, "other_principal_same_key")?.status === 200 && one(I, "other_principal_same_key")?.same_id === false && one(I, "upstream_groups_for_key")?.marker_groups === 1 && one(I, "upstream_groups_for_key")?.beta_marker_groups === 0 &&
+        one(jb.batch, "same_key_again")?.same_id === true && sk.batch?.find((r) => r.case === "start_twice_same_key")?.same_id === true && one(cr.k2_answer_lost, "client_retries_same_key")?.same_id === true;
+      return { ok, actual: `same=${one(I, "same_key_same_body")?.same_id} reordered=${one(I, "same_key_reordered_body")?.same_id} other body=${one(I, "same_key_other_body")?.status} other principal new=${one(I, "other_principal_same_key")?.same_id === false}; upstream jobs for the key=${one(I, "upstream_groups_for_key")?.marker_groups}; batch retry same=${one(jb.batch, "same_key_again")?.same_id}; official client same=${sk.batch?.find((r) => r.case === "start_twice_same_key")?.same_id}` };
+    } },
+  J05: { name: "no-duplicate-logical-submission", inputs: [`${RAW}e2e-jobs.txt`, `${RAW}e2e-crash.txt`, `${RAW}e2e-cancel.txt`, `${RAW}e2e-overload.txt`],
+    expected: "across every job the live tests submitted, each finished job has exactly one upstream job carrying its submission key, and each job cancelled while queued has none",
+    run() {
+      const recs = ["jobs", "crash", "cancel"].flatMap((n) => Object.values(E(n)).flat());
+      const counted = recs.filter((r) => Number.isInteger(r.marker_groups));
+      const finished = counted.filter((r) => ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"].includes(r.state));
+      const queued = E("cancel").queued_crawl?.find((r) => r.case === "cancel");
+      const over = E("overload").admission?.find((r) => r.case === "cleanup");
+      const ok = counted.length >= 8 && counted.every((r) => r.marker_groups <= 1) && finished.length >= 8 && finished.every((r) => r.marker_groups === 1 || (r.state === "CANCELLED" && r.marker_groups <= 1)) &&
+        queued?.marker_groups === 0 && over?.queued_ever_submitted === 0;
+      return { ok, actual: `records with an upstream count=${counted.length}, above one=${counted.filter((r) => r.marker_groups > 1).length}; finished=${finished.length}, without exactly one=${finished.filter((r) => r.marker_groups !== 1).length}; queued then cancelled submitted=${queued?.marker_groups}+${over?.queued_ever_submitted}` };
+    } },
+  J06: { name: "results-served-after-core-redis-and-nuq-expiry-r9", inputs: [`${RAW}e2e-expiry.txt`],
+    expected: "before: the finished crawl's and batch's NuQ job rows and group rows exist, Redis holds their crawl keys and the core answers 200 for them; then pg_cron's own nuq_group_crawl_clean deletes the rows (its runs succeeded), the Redis keys expire and the core is recreated: 0 NuQ rows, 0 group rows, 0 keys and the core answers 404; yet the gateway serves every document, each hashing to the archive manifest and to the hash recorded when the job finished (evidence/M1/review/REVIEW.md R9)",
+    run() {
+      const ex = E("expiry"), b = ex.before?.[0], a = ex.after_expiry?.[0], sv = ex.served_after_expiry ?? [];
+      const before = b && b.upstream.length === 2 && b.upstream.every((r) => r.nuq_jobs > 0 && r.group_row === 1) && b.redis_keys.every((n) => n > 0) && b.core_status.every((s) => s === "200");
+      const after = a && a.upstream.every((r) => r.nuq_jobs === 0 && r.group_row === 0) && a.redis_keys.every((n) => n === 0) && a.core_status.every((s) => s === "404") && (a.cleaner_runs ?? []).some((l) => /^succeeded /.test(l));
+      const served = sv.length === 2 && sv.every((r) => r.statuses.every((s) => s === 200) && r.docs > 0 && r.docs === r.manifest_sha256.length && JSON.stringify(r.served_sha256) === JSON.stringify(r.manifest_sha256) && JSON.stringify(r.served_sha256) === JSON.stringify(r.recorded_before_sha256));
+      return { ok: endOk(ex) && before && after && served, actual: `before: nuq rows ${JSON.stringify(b?.upstream?.map((r) => r.nuq_jobs))} keys ${JSON.stringify(b?.redis_keys)} core ${JSON.stringify(b?.core_status)}; after: rows ${JSON.stringify(a?.upstream?.map((r) => r.nuq_jobs + r.group_row))} keys ${JSON.stringify(a?.redis_keys)} core ${JSON.stringify(a?.core_status)}; served ${sv.map((r) => `${r.kind}=${r.docs} hashes equal=${JSON.stringify(r.served_sha256) === JSON.stringify(r.manifest_sha256)}`).join(" ")}` };
+    } },
+  J07: { name: "cancellation-stops-new-work", inputs: [`${RAW}e2e-cancel.txt`, `${RAW}sdk-compat.txt`],
+    expected: "a crawl queued behind a running one is cancelled before submission (CANCELLED, no upstream job); the running slow crawl's cancel answers {status: cancelled}, it ends CANCELLED with its completed pages archived, and no slow page started more than 2.5 s after the cancel; cancelling a finished crawl is 409; the official client's cancel returns true and the crawl ends cancelled",
+    run() {
+      const c = E("cancel"), s = one(c.slow_crawl, "finished"), q = one(c.queued_crawl, "cancel"), cc = one(c.slow_crawl, "cancel");
+      const cut = Date.parse(s?.cancel_at ?? "") + 2500;
+      const late = (s?.fixture_requests ?? []).filter((r) => Date.parse(r.started) > cut);
+      const sk = records(`${RAW}sdk-compat.txt`);
+      const ok = endOk(c) && one(c.queued_crawl, "submit_while_other_runs")?.ledger_state === "RECEIVED" && q?.status === 200 && q.ledger_state === "CANCELLED" && q.marker_groups === 0 &&
+        cc?.status === 200 && cc.body?.status === "cancelled" && s?.state === "CANCELLED" && s.archived === s.completed && s.archived >= 2 && (s.fixture_requests ?? []).length >= 2 && late.length === 0 &&
+        one(c.finished_job, "cancel_finished")?.status === 409 && sk.cancel?.[0]?.cancel_returned === true && sk.cancel[0].final_status === "cancelled";
+      return { ok, actual: `queued job ${q?.ledger_state} upstream=${q?.marker_groups}; running job ${s?.state} archived=${s?.archived}; slow pages started after cancel+2.5 s=${late.length} of ${(s?.fixture_requests ?? []).length}; finished job cancel=${one(c.finished_job, "cancel_finished")?.status}; official client=${sk.cancel?.[0]?.final_status}` };
+    } },
+
+  // ================================================================ network boundary
+  N01: { name: "host-and-origin-validated", inputs: [`${RAW}e2e-auth.txt`],
+    expected: "a foreign Host and a rebinding-style Host are 421 MISDIRECTED; the served loopback origins are 200; a foreign or null browser Origin (and a foreign preflight) is 403 ORIGIN_NOT_ALLOWED; no Origin is 200; no response carries Access-Control-Allow-Origin",
+    run() {
+      const H = E("auth").host_origin ?? [], st = (c) => one(H, c)?.status;
+      const ok = st("host_foreign") === 421 && st("host_rebinding_name") === 421 && st("host_localhost_alias") === 200 && st("host_loopback") === 200 && st("origin_foreign") === 403 && st("origin_null") === 403 &&
+        st("origin_absent") === 200 && st("preflight_foreign") === 403 && H.length === 8 && H.every((r) => r.acao === null);
+      return { ok, actual: H.map((r) => `${r.case}=${r.status}`).join(" ") + `; ACAO sent=${H.some((r) => r.acao !== null)}` };
+    } },
+  N02: { name: "spoofed-principal-headers-have-no-effect", inputs: [`${RAW}e2e-auth.txt`, `${RAW}gateway-tests.txt`],
+    expected: "live: another principal sending x-fcpi-principal, x-fcpi-owner, x-forwarded-user, x-forwarded-for and x-real-ip naming the owner still gets exactly the unknown-id answer on every job route; contract: the core receives only the gateway's own headers (no authorization, cookie, forwarded, idempotency or x-fcpi-* header) and no query string",
+    run() {
+      const ow = (E("auth").owner ?? []).filter((r) => r.beta_spoofed_headers);
+      const live = ow.length === 5 && ow.every((r) => r.beta_spoofed_headers.status === 404 && r.beta_spoofed_headers.body_sha256 === r.unknown.body_sha256);
+      const contract = (S(`${RAW}gateway-tests.txt`).contract_tap ?? []).some((l) => /^ok \d+ - a valid token scrapes; upstream's Cloud challenge is stripped; only the gateway's headers reach the core/.test(l));
+      return { ok: live && contract, actual: `live routes with spoofed headers answered as unknown=${ow.filter((r) => r.beta_spoofed_headers.body_sha256 === r.unknown.body_sha256).length}/${ow.length}; contract header test passed=${contract}` };
+    } },
+  N03: { name: "internal-ports-denied-from-every-vantage", inputs: [`${RAW}port-probe.txt`, `${RAW}lan-probe.txt`],
+    expected: "from the gateway (the permitted vantage) the core's API and PostgreSQL open (the positive controls) and nothing else but the core's own harness ports on fcpi_api: Redis, RabbitMQ, the retrieval service (/internal/acquire too), the browser worker and the fixture are unresolved or dropped, as are the host's listeners through the bridge; a container on the publication bridge reaches only the gateway's port; a container on Docker's default bridge reaches no project service (the host's sshd is its control); on the host only 127.0.0.1:3380 is open; from the LAN every project port is closed while sshd (the control) is open; the guard counted the dropped attempts; no throwaway container is left",
+    run() {
+      const s = S(`${RAW}port-probe.txt`), recs = ["gateway", "access_peer", "default_bridge", "host"].flatMap((k) => jsonLines(s[k]));
+      const by = (role) => Object.fromEntries(recs.filter((r) => r.role === role).map((r) => [r.label, r.outcome]));
+      const g = by("gateway"), ap = by("access_peer"), db = by("default_bridge"), h = by("host");
+      const gOpen = Object.entries(g).filter(([, o]) => o === "open").map(([l]) => l);
+      const gateway = g.core_api === "open" && g.postgres === "open" && gOpen.every((l) => /^(core_api|postgres|core_30\d\d)$/.test(l)) &&
+        ["redis_name", "rabbitmq_name", "retrieval_name", "browser_name", "fixture_name", "redis_ip", "rabbitmq_ip", "retrieval_ip", "retrieval_proxy_ip", "browser_ip", "fixture_ip", "core_on_core_net", "postgres_on_core_net",
+          "host_sshd", "host_dns", "host_http", "host_mqtt", "host_airdb", "retrieval_internal"].every((l) => g[l] && g[l] !== "open");
+      const peer = ap.gateway_port === "open" && Object.entries(ap).filter(([l]) => l !== "gateway_port").every(([, o]) => o !== "open") && Object.keys(ap).length >= 9;
+      const bridge = db.host_sshd === "open" && Object.entries(db).filter(([l]) => l !== "host_sshd").every(([, o]) => o !== "open") && Object.keys(db).length >= 10;
+      const host = h.gateway_publication === "open" && Object.entries(h).filter(([l]) => l !== "gateway_publication").every(([, o]) => o === "closed") && Object.keys(h).length >= 20;
+      const ctr = (sec) => Object.fromEntries((s[sec] ?? []).map((l) => l.split(" packets=")).filter((x) => x.length === 2).map(([k, v]) => [k, +v]));
+      const drops = (ctr("guard_after").access_forward_out_dropped ?? 0) > (ctr("guard_before").access_forward_out_dropped ?? Infinity) && (ctr("guard_after").access_input_new_dropped ?? 0) > (ctr("guard_before").access_input_new_dropped ?? Infinity);
+      const lan = S(`${RAW}lan-probe.txt`);
+      const lanOk = (lan.project_ports ?? []).filter((l) => /^port=/.test(l)).length >= 19 && !(lan.project_ports ?? []).some((l) => / open$/.test(l)) && (lan.control ?? []).includes("port=22 open");
+      const ok = gateway && peer && bridge && host && drops && lanOk && (s.transient ?? []).includes("leftover_transient_containers=0");
+      return { ok, actual: `gateway opens=${gOpen.join(",")}; access peer=${peer}; default bridge=${bridge}; host=${host} (${Object.keys(h).length} probes); guard counted drops=${drops}; LAN closed ${(lan.project_ports ?? []).filter((l) => / closed$/.test(l)).length} with control=${(lan.control ?? []).includes("port=22 open")}` };
+    } },
+  N04: { name: "published-ports-loopback-only", inputs: [`${RAW}stack.txt`],
+    expected: "the only project publication is the gateway on 127.0.0.1:3380, the one docker-proxy listener on the host; the gateway answers without a token 401",
+    run() {
+      const s = S(`${RAW}stack.txt`);
+      const pub = (s.published ?? []).filter((l) => / -> /.test(l));
+      const listeners = (s.published ?? []).filter((l) => /docker-proxy/.test(l));
+      const ok = JSON.stringify(pub) === JSON.stringify(["access-gateway 3300/tcp -> 127.0.0.1:3380"]) && listeners.length === 1 && /127\.0\.0\.1:3380/.test(listeners[0]) && kv(s.gateway_unauthenticated).status_without_token === "401";
+      return { ok, actual: `publications=${pub.join(";")}; docker-proxy listeners=${listeners.length}; without a token=${kv(s.gateway_unauthenticated).status_without_token}` };
+    } },
+  N05: { name: "missing-data-mount-fails-closed", inputs: [`${RAW}mount-check.txt`],
+    expected: "the data check passes on the real configuration (the control) and fails when the artifact bind source is absent, creating nothing at that path; the gateway image with an artifact root lacking the marker exits non-zero before listening and writes nothing; no throwaway container is left",
+    run() {
+      const s = S(`${RAW}mount-check.txt`), m = s.missing_artifact_bind ?? [], sh = s.shadow_artifact_root ?? [];
+      const shv = kv((sh.find((l) => l.startsWith("exit=")) ?? "").split(" "));
+      const ok = (s.control ?? []).some((l) => /^fcpi-data-check: OK /.test(l)) && (s.control ?? []).includes("exit=0") && m.includes("copy_names_missing_source=1") &&
+        m.some((l) => /FAIL: bind source <missing-artifact-path> is absent/.test(l)) && m.includes("exit=1") && m.includes("missing_path_created=no") &&
+        sh.some((l) => /lacks \.fcpi-artifact-root/.test(l)) && shv.exit !== "0" && shv.exit !== undefined && shv.listening === "0" && shv.files_written === "0" && (s.transient ?? []).includes("leftover_transient_containers=0");
+      return { ok, actual: `control passes=${(s.control ?? []).includes("exit=0")}; absent bind refused=${m.includes("exit=1")}, path created=${(m.find((l) => l.startsWith("missing_path_created=")) ?? "").split("=")[1]}; shadow root exit=${shv.exit} listening=${shv.listening} files=${shv.files_written}` };
+    } },
+  N06: { name: "platform-network-and-ledger-rights", inputs: [`${RAW}stack.txt`, `${RAW}platform-rights.txt`],
+    expected: "fcpi_platform is internal and isolated with no host address and holds only the gateway and PostgreSQL; every internal project network is isolated; the gateway joins fcpi_access, fcpi_api and fcpi_platform only; fcpi_gateway is no superuser and owns nothing, holds DML on the four ledger tables and no other right, no CREATE and no usage of the NuQ or retrieval schemas; the marker lookup is SECURITY DEFINER with a pinned search_path, owned by the NOLOGIN fcpi_nuq_reader, which can read only NuQ's two job tables; PUBLIC and fcpi_core cannot execute it; neither fcpi_core nor fcpi_retrieval can use the platform schema",
+    run() {
+      const s = S(`${RAW}stack.txt`), r = S(`${RAW}platform-rights.txt`).rights ?? [], rk = kv(r.flatMap((l) => l.split(" ")));
+      const nets = Object.fromEntries((s.networks ?? []).filter((l) => /^fcpi_/.test(l)).map((l) => [l.split(" ")[0], kv(l.split(" ").slice(1))]));
+      const plat = nets.fcpi_platform;
+      const gwNets = sorted(Object.entries(nets).filter(([, v]) => (v.members ?? "").split(",").includes("fcpi-access-gateway-1")).map(([k]) => k));
+      const isolated = Object.entries(nets).filter(([, v]) => v.internal === "true").every(([, v]) => v.gateway_mode_ipv4 === "isolated");
+      const noAddr = (s.networks ?? []).includes("bridge fcpi-platform addresses=");
+      const line = (p) => r.find((l) => l.startsWith(p)) ?? "";
+      const gw = line("role=fcpi_gateway "), rd = line("role=fcpi_nuq_reader ");
+      const lookup = line("lookup ");
+      const cond = { platform_net: plat?.internal === "true" && plat.gateway_mode_ipv4 === "isolated" && plat.members === "fcpi-access-gateway-1,fcpi-nuq-postgres-1" && noAddr, isolated,
+        gateway_nets: JSON.stringify(gwNets) === JSON.stringify(["fcpi_access", "fcpi_api", "fcpi_platform"]),
+        gateway_role: /super=false/.test(gw) && /createrole=false createdb=false replication=false bypassrls=false/.test(gw) && /owned_objects role=fcpi_gateway n=0 functions=0/.test(r.join("\n")),
+        dml: rk.platform_tables === "4" && rk.gateway_dml_on === "4" && rk.gateway_other_rights_on === "0",
+        schemas: rk.gateway_schema_create === "false" && rk.gateway_nuq_usage === "false" && rk.gateway_retrieval_usage === "false" && rk.gateway_public_create === "false" && rk.core_platform_usage === "false" && rk.retrieval_platform_usage === "false",
+        reader: /login=false super=false/.test(rd) && /owned_objects role=fcpi_nuq_reader n=0 functions=1/.test(r.join("\n")) && line("reader_tables=") === "reader_tables=nuq.queue_scrape,nuq.queue_scrape_backlog",
+        lookup: /owner=fcpi_nuq_reader security_definer=true config=search_path=pg_catalog, pg_temp gateway_execute=true core_execute=false public_execute=false/.test(lookup) };
+      const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
+      return { ok: bad.length === 0, actual: `failed conditions=${bad.join(",") || "none"}; gateway networks=${gwNets.join(",")}; platform members=${plat?.members}; ${line("reader_tables=")}` };
+    } },
+
+  // ================================================================ zero Cloud, persistence, host state
+  X01: { name: "zero-firecrawl-cloud-attempts", inputs: [`${RAW}egress-probe.txt`, `${RAW}guard-window-open.txt`, `${RAW}core-logs-final.txt`, `${RAW}stack.txt`, `${RAW}sdk-compat.txt`],
+    expected: "across one window, from a guard-counter snapshot before the first live phase to the egress probe after the last, with the guard's table not reloaded (same handle at both ends) and every live phase inside it, the guard accepted no web connection on the egress bridge; every core instance's saved log classifies each Cloud line as a refusal or a request echo and each name-resolution failure as a project service, with its positive control; the gateway's log (read, with request records) names no Cloud host; the official client connected only to the gateway's forwarded origin",
+    run() {
+      const utcOf = (f) => Date.parse(((sections(f).meta ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]);
+      const handle = (f) => ((sections(f).meta ?? []).join(" ").match(/guard_table_handle=(\d+)/) ?? [])[1];
+      const web = (f, sec) => +((sections(f)[sec] ?? []).find((l) => l.startsWith("egress_web_accepted")) ?? "=NaN").split("=")[1];
+      const open = utcOf(`${RAW}guard-window-open.txt`), close = utcOf(`${RAW}egress-probe.txt`);
+      const phases = ["auth", "sync", "jobs", "cancel", "overload", "crash", "expiry", "cli", "after-recreate"].map((p) => `${RAW}e2e-${p}.txt`);
+      const times = phases.map((f) => (has(f) ? Date.parse(jsonLines(sections(f).meta)[0]?.utc ?? "") : NaN));
+      const sdkT = Date.parse(jsonLines(S(`${RAW}sdk-compat.txt`).meta)[0]?.utc ?? "");
+      const inside = [...times, sdkT].every((t) => Number.isFinite(t) && t > open && t < close);
+      const sameGuard = !!handle(`${RAW}guard-window-open.txt`) && handle(`${RAW}guard-window-open.txt`) === handle(`${RAW}egress-probe.txt`);
+      const delta = web(`${RAW}egress-probe.txt`, "guard_after") - web(`${RAW}guard-window-open.txt`, "counters");
+      const recs = Object.entries(sections(`${RAW}core-logs-final.txt`)).filter(([k]) => /^(instance|stored)_/.test(k)).map(([k, lines]) => {
+        const c = lines.find((l) => l.startsWith("classified ")); const ctl = +((lines.find((l) => l.startsWith("control=")) ?? "").match(/count=(\d+)/) ?? [])[1];
+        return { k, c: c ? kv(c.split(" ").slice(1)) : null, ctl };
+      });
+      const badLogs = recs.filter((r) => !r.c || r.c.cloud_unexplained !== "0" || r.c.dns_unexplained !== "0" || !(r.ctl >= 1));
+      const gl = S(`${RAW}stack.txt`).gateway_log_scan ?? [];
+      const glk = kv((gl[0] ?? "").split(" "));
+      const pat = (p) => +((gl.find((l) => l.startsWith(`pattern=${p} `)) ?? "").match(/count=(\d+)/) ?? [NaN, NaN])[1];
+      const gatewayLog = +glk.request_records > 0 && pat("firecrawl\\.dev") === 0 && pat("firecrawl\\.com") === 0 && pat("mendable") === 0;
+      const sk = jsonLines(S(`${RAW}sdk-compat.txt`).connections)[0];
+      const client = sk && JSON.stringify(sk.hosts) === JSON.stringify(["http://127.0.0.1:3380"]) && sk.total > 10;
+      const ok = inside && sameGuard && delta === 0 && recs.length >= 3 && badLogs.length === 0 && gatewayLog && client;
+      return { ok, actual: `phases inside the window=${inside}; guard not reloaded=${sameGuard}; web accepts in the window=${delta}; core instance records=${recs.length}, with unexplained lines or no control=${badLogs.map((r) => r.k).join(",") || "none"}; gateway log requests=${glk.request_records} Cloud lines=${pat("firecrawl\\.dev") + pat("firecrawl\\.com") + pat("mendable")}; client hosts=${JSON.stringify(sk?.hosts)}` };
+    } },
+  X02: { name: "persistence-across-force-recreate", inputs: [`${RAW}persistence.txt`, `${RAW}e2e-after-recreate.txt`],
+    expected: "after `up -d --force-recreate` with no volume removed, all ten services run healthy in new containers; the PostgreSQL, Redis and RabbitMQ sentinels read back; the ledger's rows (receipts, events, idempotency keys, document manifest) hash the same; the archive keeps every file, each hashing to its name; the client registry is unchanged; afterwards the gateway still accepts a token and serves the archived crawl and batch with the same document hashes; the core's log was saved first",
+    run() {
+      const s = S(`${RAW}persistence.txt`), V = kv((s.meta ?? []).join(" ").split(" ")).sentinel;
+      const ids = (sec) => Object.fromEntries((s[sec] ?? []).filter((l) => /^[a-z0-9-]+ [0-9a-f]{64}$/.test(l)).map((l) => l.split(" ")));
+      const b = ids("before"), a = ids("after");
+      const replaced = Object.keys(b).length === 10 && Object.keys(b).every((k) => a[k] && a[k] !== b[k]);
+      const healthy = (s.after ?? []).filter((l) => / running healthy$/.test(l)).length === 10;
+      const pick = (sec, p) => (s[sec] ?? []).find((l) => l.startsWith(p)) ?? "";
+      const same = (p) => pick("write", p) !== "" && pick("write", p) === pick("read", p);
+      const r = kv(s.read);
+      const ar = E("after-recreate");
+      const served = (ar.served_after_recreate ?? []).length === 2 && ar.served_after_recreate.every((x) => x.docs > 0 && JSON.stringify(x.served_sha256) === JSON.stringify(x.recorded_before_sha256));
+      const ok = replaced && healthy && /recreate_exit=0/.test((s.recreate ?? []).join(" ")) && r.postgres_read === V && r.redis_read === V && (r.rabbitmq_read ?? "").includes(V) &&
+        same("ledger ") && same("archive files=") && pick("read", "archive files_whose_content_differs_from_name=") === "archive files_whose_content_differs_from_name=0" && same("registry ") &&
+        (s.core_logs_before ?? []).some((l) => l.startsWith("classified ")) && one(ar.tokens, "still_valid")?.status === 200 && served && endOk(ar);
+      return { ok, actual: `replaced=${replaced}; healthy=${healthy}; sentinels pg=${r.postgres_read === V} redis=${r.redis_read === V} rabbitmq=${(r.rabbitmq_read ?? "").includes(V)}; ledger same=${same("ledger ")}; archive same=${same("archive files=")}; registry same=${same("registry ")}; served after=${served}` };
+    } },
+  X03: { name: "non-internal-containers-name-their-dns-and-the-core-stays-inside", inputs: [`${RAW}egress-probe.txt`],
+    expected: "every container on a non-internal network names its own DNS upstream (the gateway 192.0.2.1, the retrieval service its egress bridge's host address); the core has no default route; the M3 fixture joins only the internal fixture network",
+    run() {
+      const at = (S(`${RAW}egress-probe.txt`).attachments ?? []);
+      const svc = (n) => at.find((l) => l.startsWith(`${n} networks=`)) ?? "";
+      const route = (n) => (at.find((l) => l.startsWith(`${n} default_route=`)) ?? "").match(/default_route=(\S+)/)?.[1];
+      const ok = /networks=fcpi_access,fcpi_api,fcpi_platform dns=192\.0\.2\.1 /.test(svc("access-gateway")) && /dns=10\.231\.6\.1 /.test(svc("retrieval-service")) && /networks=fcpi_fixture dns= /.test(svc("fixture-m3")) && route("firecrawl-core") === "no";
+      return { ok, actual: `gateway: ${svc("access-gateway").replace(/ network_mode=.*$/, "")}; fixture-m3: ${svc("fixture-m3").replace(/ network_mode=.*$/, "")}; core default route=${route("firecrawl-core")}` };
+    } },
+  X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`],
+    expected: "every line differing between M3's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset with Docker's rules for M3's bridge) or to the collector's own SSH session; no unrelated line is removed or changed; the boot ID is unchanged; the ruleset holds only Docker's and the project's tables",
+    run() {
+      const [B, A] = [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`];
+      const psIds = (f) => (read(f).match(/^### docker_ps\n([\s\S]*?)\n### /m)?.[1] ?? "").split("\n").map((l) => l.split("\t")[0]).filter((x) => /^[0-9a-f]{64}$/.test(x));
+      const ids = new Set([...psIds(B), ...psIds(A)]);
+      const norm = (sec, l) => (sec === "ss_listen" ? l.replace(/pid=\d+,fd=\d+/g, "pid,fd") : l);
+      const K = (f) => keyedSnapshot(f).map(([s, l]) => `${s}\t${norm(s, l)}`);
+      const b = K(B), a = K(A);
+      const removed = b.filter((l) => !a.includes(l)), added = a.filter((l) => !b.includes(l));
+      const unexplained = [], why = {}, rows = { project: [], unrelated: [] };
+      for (const [kind, list] of [["removed", removed], ["added", added]]) for (const l of list) {
+        const [sec, line] = [l.slice(0, l.indexOf("\t")), l.slice(l.indexOf("\t") + 1)];
+        const w = attribute(sec, line, ids);
+        const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains/.test(w));
+        if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else why[w] = (why[w] ?? 0) + 1;
+        rows[acceptable ? "project" : "unrelated"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
+      }
+      const tables = [...read(`${RAW}nft-ruleset.txt`).matchAll(/^table (\S+ \S+) \{/gm)].map((m) => m[1]).sort();
+      const tablesOk = JSON.stringify(tables) === JSON.stringify(["bridge fcpi_audit", "inet fcpi_audit", "inet fcpi_guard", "ip filter", "ip nat", "ip raw", "ip6 filter", "ip6 nat"]);
+      const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
+      writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), ["# M3 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m3/verify.mjs X04)",
+        `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
+        `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project, ""].join("\n"));
+      const ok = unexplained.length === 0 && !!boot(B) && boot(B) === boot(A) && tablesOk;
+      return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; ruleset tables=${tables.join(",")}` };
+    } },
+  X05: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, "scripts/m1/pi-target.conf", "evidence/M0/audit.json"], live: true,
+    expected: "the positive controls fire every rule; then no rule matches in any tracked or new repository file; no file holds any of the fourteen live secrets (M2's nine, the gateway's PostgreSQL password and the four live client tokens), compared by SHA-256 computed on the Pi; no file added or changed since M3 began holds the Pi's LAN address, its /24 network or its SSH target",
+    run() {
+      const c = [...scan([M0_CONTROL], { m0: { egress: sha256("192.0.2.77"), serial: sha256("0123456789abcdef"), machineId: sha256("0123456789abcdef0123456789abcdef"), macs: new Set([sha256("02:00:00:00:00:01")]) } }, RULES, new Set()),
+        ...scan([M1_CONTROL], { secrets: new Set([sha256("0f".repeat(32)), sha256("ABCDEFGHIJKLMNOP".repeat(4))]) }, RULES, new Set())];
+      const fired = new Set(c.map((h) => h.split(" ").pop()));
+      const silent = [...RULES.map(([n]) => n), ...HASH_RULES].filter((r) => !fired.has(r));
+      if (silent.length) return { ok: false, actual: `positive controls: rules that did not fire: ${silent.join(", ")}` };
+      const hashes = ssh(`sudo -n sh -c 'S=/etc/firecrawl-pi/secrets; h() { [ -n "$1" ] || { echo "EMPTY secret extraction" >&2; exit 1; }; printf "%s" "$1" | sha256sum | cut -c1-64; }; \
+        h "$(cat $S/postgres_password)"; h "$(cat $S/core_postgres_password)"; h "$(sed -n "s#^amqp://fcpi:\\(.*\\)@rabbitmq:5672\\$#\\1#p" $S/core_nuq_rabbitmq_url)"; \
+        h "$(sed -n "s#^redis://:\\(.*\\)@redis:6379\\$#\\1#p" $S/core_redis_url)"; h "$(cat $S/clients/m1-verify.token)"; h "$(cat /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie)"; \
+        h "$(cat $S/retrieval_postgres_password)"; h "$(cat $S/core_retrieval_token)"; h "$(cat $S/retrieval_browser_token)"; \
+        h "$(cat $S/gateway_postgres_password)"; for t in owner m3a m3b m3ro; do h "$(tr -d "\\n" < $S/clients/$t.token)"; done'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
+      if (hashes.length !== 14 || new Set(hashes).size !== 14 || hashes.includes(sha256(""))) return { ok: false, actual: `expected 14 distinct non-empty live secret hashes from the Pi, got ${hashes.length} (${new Set(hashes).size} distinct)` };
+      const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard"], { encoding: "utf8" }).split("\n").filter((f) => f && f !== M0_CONTROL && f !== M1_CONTROL && has(f) && !/\.(pdf|png|gz)$/.test(f));
+      const audit = json("evidence/M0/audit.json");
+      const m0 = { egress: audit.network.egress_ip_sha256, serial: audit.identity.board_serial_sha256, machineId: audit.identity.machine_id_sha256, macs: new Set([...Object.values(audit.identity.mac_sha256), sha256("00:00:00:00:00:00")]) };
+      const hits = scan(files, { m0, secrets: new Set(hashes) });
+      const t = target(), lan = t.PI_LAN_ADDRESS, net = lan.replace(/\.\d+$/, ".0");
+      const changed = [...new Set([...git("diff", "--name-only", `${M3_START}..HEAD`).split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter((f) => f && has(f) && !/\.(pdf|png|gz)$/.test(f));
+      const idHits = changed.filter((f) => { const x = read(f); return x.includes(lan) || x.includes(`${net}/`) || x.includes(t.PI_SSH_TARGET); });
+      return { ok: hits.length === 0 && idHits.length === 0, configHash: hashOf(files.filter((f) => f !== OUT)), actual: `controls fired all ${RULES.length + HASH_RULES.length} rules; files scanned=${files.length}; live secret hashes compared=${hashes.length}; findings=${hits.length}${hits.length ? " [" + hits.slice(0, 12).join("; ") + "]" : ""}; M3 files with the LAN address, network or SSH target=${idHits.join(",") || "none"} (of ${changed.length})` };
+    } },
+  L01: { name: "lock-and-compose-consistent", inputs: ["deploy/versions.lock.json", "deploy/compose.yaml", `${EV}rendered-compose.json`, "services/access/package-lock.json", "deploy/policies/capabilities.json"],
+    expected: "every Compose image is pinned by digest for linux/arm64; the lock records the gateway image the stack runs, its node base, its pg release with the lockfile's integrity, the capability manifest's hash and the pinned official client; M2's entries (API, retrieval and browser images) still match the stack",
+    run() {
+      const R = json(`${EV}rendered-compose.json`), L = json("deploy/versions.lock.json"), pl = json("services/access/package-lock.json");
+      const unpinned = Object.entries(R.services).filter(([, v]) => !/@sha256:[0-9a-f]{64}$/.test(v.image) || v.platform !== "linux/arm64").map(([k]) => k);
+      const g = L.images?.access_gateway ?? {};
+      const cond = { gateway: g.image_id === digestOf(R.services["access-gateway"].image), base: g.base === "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        pg: g.packages?.pg?.version === pl.packages["node_modules/pg"].version && g.packages.pg.integrity === pl.packages["node_modules/pg"].integrity,
+        manifest: L.gateway?.capabilities_sha256 === sha256File("deploy/policies/capabilities.json"), client: L.gateway?.official_client === "@mendable/firecrawl-js@4.31.1",
+        api: L.images?.firecrawl_api_patched?.image_id === digestOf(R.services["firecrawl-core"].image), retrieval: L.images?.retrieval?.image_id === digestOf(R.services["retrieval-service"].image),
+        browser: L.images?.browser_worker?.image_id === digestOf(R.services["browser-worker"].image) };
+      const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
+      return { ok: unpinned.length === 0 && bad.length === 0 && Object.keys(R.services).length === 10, actual: `services=${Object.keys(R.services).length}; unpinned=${unpinned.join(",") || "none"}; lock disagrees on=${bad.join(",") || "none"}` };
+    } },
+  C01: { name: "fcpi-status-and-jobs", inputs: [`${RAW}e2e-cli.txt`],
+    expected: "`fcpi status` exits 0 naming a live core and a working ledger, `--json` prints the status document, `fcpi jobs` lists the token's jobs and `fcpi jobs <id>` prints a receipt with its transitions, all through the private path with a read-only token on stdin; without a base URL fcpi exits 2 and names the missing setting",
+    run() {
+      const f = E("cli").fcpi ?? [];
+      const byArgs = (a) => f.find((r) => JSON.stringify(r.args) === JSON.stringify(a));
+      const st = byArgs(["status"]), sj = byArgs(["status", "--json"]), jl = byArgs(["jobs", "--limit", "5"]), jd = byArgs(["jobs", "<graph job>"]), nb = f.find((r) => r.case === "no_base_url");
+      const ok = st?.exit === 0 && st.lines.some((l) => /^core +live/.test(l)) && st.lines.some((l) => /^ledger +ok/.test(l)) && sj?.exit === 0 && sj.lines.includes('  "success": true,') &&
+        jl?.exit === 0 && jl.lines.length === 5 && jl.lines.every((l) => /^[0-9a-f-]{36}  /.test(l)) && jd?.exit === 0 && jd.lines.some((l) => /RECEIVED -> SUBMITTING/.test(l)) && nb?.exit === 2 && /FCPI_BASE_URL/.test(nb.stderr ?? "");
+      return { ok, actual: `status exit=${st?.exit}; json exit=${sj?.exit}; jobs lines=${jl?.lines?.length}; receipt with transitions=${jd?.lines?.some((l) => /->/.test(l))}; no base URL exit=${nb?.exit}` };
+    } },
+  M01: { name: "memory-within-caps", inputs: [`${RAW}stack.txt`],
+    expected: "after every live phase, the gateway's memory peak stays under its 160 MiB cap and no project cgroup records an OOM kill; host MemAvailable stays at 1 GiB or more",
+    run() {
+      const cg = Object.fromEntries((S(`${RAW}stack.txt`).cgroups ?? []).filter((l) => / memory\.max=/.test(l)).map((l) => [l.split(" ")[0], kv(l.split(" ").slice(1))]));
+      const gw = cg["access-gateway"];
+      const avail = +((S(`${RAW}stack.txt`).host_memory ?? []).find((l) => l.startsWith("MemAvailable:")) ?? "").replace(/\D+/g, "") / 1024;
+      const ok = Object.keys(cg).length === 10 && gw && +gw["memory.max"] === 160 * MIB && +gw["memory.peak"] < +gw["memory.max"] && Object.values(cg).every((v) => v.oom_kill === "0") && avail >= 1024;
+      return { ok, actual: `gateway peak=${(+gw?.["memory.peak"] / MIB).toFixed(1)} of ${(+gw?.["memory.max"] / MIB).toFixed(0)} MiB; oom kills=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}; MemAvailable=${avail.toFixed(0)} MiB` };
+    } },
+  P01: { name: "private-access-from-the-target-machine", inputs: [`${RAW}e2e-auth.txt`, `${RAW}sdk-compat.txt`],
+    expected: "the live tests and the official client ran on the workstation, the machine the owner's agents run on, through an SSH forward of the gateway's loopback publication, with nothing published beyond loopback; their answers came from the Pi's gateway",
+    run() {
+      const m = jsonLines(S(`${RAW}e2e-auth.txt`).meta)[0];
+      const sk = records(`${RAW}sdk-compat.txt`);
+      const ok = /^workstation through an SSH forward of 127\.0\.0\.1:3380$/.test(m?.vantage ?? "") && sk.client?.[0]?.apiUrl === "http://127.0.0.1:3380" && sk.end?.[0]?.exit === 0 && endOk(E("auth"));
+      return { ok, actual: `vantage=${m?.vantage}; official client base URL=${sk.client?.[0]?.apiUrl}` };
+    } },
+  P02: { name: "tailnet-tls-private-serving", inputs: [],
+    expected: "Tailscale Serve terminates TLS on the tailnet for the gateway, an approved device reaches it and an unapproved one cannot (spec §19.1, milestones M3 Human Verification)",
+    run() {
+      return { blocked: true, actual: "Tailscale is installed on neither the Pi nor the workstation; its installation and account association are the owner's decision (register: Tailscale, M3)" };
+    } },
+  V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
+    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists a row with an outcome (fixed with its commit, rejected with evidence, deferred to a later milestone), cites only commits that exist, and holds no absolute local path",
+    run() {
+      const text = read(`${EV}review/REVIEW.md`);
+      const rows = text.split("\n").filter((l) => /^\| [A-Z]{1,2}\d+ \|/.test(l)).map((l) => l.split(" | "));
+      const bad = rows.filter((c) => !/^(Fixed|Rejected, with the evidence|Deferred to M\d|Partly fixed, partly rejected)/.test(c[3] ?? "")).map((c) => c[0].slice(2));
+      const listedIds = [...text.matchAll(/^\s*\d+\. \*\*([CWS]\d+) —/gm)].map((m) => m[1]);
+      const uncovered = listedIds.filter((id) => !rows.some((c) => c[0] === `| ${id}`));
+      const uncited = rows.filter((c) => /^Fixed/.test(c[3] ?? "") && !/`[0-9a-f]{7,40}`/.test(c[4] ?? "")).map((c) => c[0].slice(2));
+      const commits = [...new Set(rows.flatMap((c) => [...(c[4] ?? "").matchAll(/`([0-9a-f]{7,40})`/g)].map((m) => m[1])))];
+      const missing = commits.filter((c) => { try { git("cat-file", "-e", `${c}^{commit}`); return false; } catch { return true; } });
+      const local = /\/(private\/tmp|Users\/[^\/\s]+|home\/[^\/\s]+)\//.test(text);
+      const ok = rows.length > 0 && listedIds.length === rows.length && uncovered.length === 0 && uncited.length === 0 && bad.length === 0 && missing.length === 0 && !local;
+      return { ok, actual: `findings listed=${listedIds.length}, rows=${rows.length}, without a row=${uncovered.join(",") || "none"}; fixed without a commit=${uncited.join(",") || "none"}; without a recognised outcome=${bad.join(",") || "none"}; commits cited=${commits.length}, missing=${missing.join(",") || "none"}; absolute local path=${local}` };
+    } },
+};
+
+// ---- runner ------------------------------------------------------------------------------------------
+const listed = Object.keys(checks);
+const wanted = process.argv.slice(2).length ? process.argv.slice(2) : listed;
+const prior = has(OUT) ? json(OUT) : { results: [] };
+const results = Object.fromEntries(prior.results.map((r) => [r.test_id, r]));
+const repo = repoState();
+const series = json("patches/series.json");
+for (const id of wanted) {
+  const c = checks[id];
+  if (!c) throw new Error(`unknown check ${id}`);
+  const rec = { test_id: `M3-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, expected: c.expected };
+  try {
+    const missing = c.inputs.filter((p) => !has(p));
+    if (missing.length) Object.assign(rec, { state: "NOT_RUN", actual: `evidence missing: ${missing.join(", ")}`, exit_code: null });
+    else {
+      rec.config_or_fixture_hash = c.inputs.length ? hashOf(c.inputs) : null;
+      const r = c.run();
+      if (r.blocked) Object.assign(rec, { state: "BLOCKED_CREDENTIAL", actual: r.actual, exit_code: null });
+      else Object.assign(rec, { state: r.ok ? "PASS" : "FAIL", actual: r.actual, exit_code: r.ok ? 0 : 1 });
+      if (r.configHash) rec.config_or_fixture_hash = r.configHash;
+    }
+    if (c.live) rec.live_sources = "the Pi over SSH (secret hashes only)";
+  } catch (e) {
+    Object.assign(rec, { state: "FAIL", actual: `check raised: ${e.message}`, exit_code: 2, classification: "verifier-error" });
+  }
+  rec.image_digests_platform = has(`${EV}rendered-compose.json`) ? { platform: "linux/arm64", gateway: digestOf(composeImage("access-gateway")), api: digestOf(composeImage("firecrawl-core")), retrieval: digestOf(composeImage("retrieval-service")), browser: digestOf(composeImage("browser-worker")) } : null;
+  // An error text can carry the SSH command; the Pi's identifiers never enter the record.
+  { const t = target(); rec.actual = String(rec.actual).split(t.PI_SSH_TARGET).join("<pi-ssh-target>").split(t.PI_LAN_ADDRESS).join("<pi-lan-address>"); }
+  rec.evidence_path = OUT;
+  results[rec.test_id] = rec;
+  console.log(`${rec.test_id} ${rec.state.padEnd(18)} ${c.name}${rec.state !== "PASS" ? `  — ${rec.actual.slice(0, 240)}` : ""}`);
+}
+const ordered = listed.map((id) => results[`M3-${id}`] ?? { test_id: `M3-${id}`, name: checks[id].name, state: "NOT_RUN", actual: "never run", evidence_path: OUT });
+writeFileSync(resolve(ROOT, OUT), JSON.stringify({ schema: "fcpi.m3.verification/v1", runner: "scripts/m3/verify.mjs",
+  repository_sha_note: "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main.",
+  results: ordered }, null, 2) + "\n");
+process.exitCode = ordered.every((r) => r.state === "PASS" || r.state === "BLOCKED_CREDENTIAL") ? 0 : 1;
