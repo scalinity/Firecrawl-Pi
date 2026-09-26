@@ -47,14 +47,15 @@ D run -d --name $PGC --label fcpi.transient=fresh-init-proof --network none --re
 # temporary one ("PostgreSQL init process complete" comes between them).
 for i in $(seq 1 120); do
   # grep without -q: an early exit would stop docker logs with SIGPIPE, which pipefail reports.
-  D logs $PGC 2>&1 | grep 'PostgreSQL init process complete' >/dev/null && D exec $PGC pg_isready -q 2>/dev/null && break
+  D logs $PGC 2>&1 | grep 'PostgreSQL init process complete' >/dev/null && D exec $PGC pg_isready -q -U postgres 2>/dev/null && break
   sleep 1
 done
 echo "ready_after_s=$i"
 echo "initdb_scripts=$(D logs $PGC 2>&1 | grep -oE '(running|sourcing|ignoring) /docker-entrypoint-initdb\.d/[^ ]+' | tr '\n' ';')"
-# FATAL "the database system is starting up" answers the readiness probe while the server
-# starts; every other ERROR or FATAL line counts, and is shown with any hex string masked.
-errs=$(D logs $PGC 2>&1 | grep -E '(ERROR|FATAL):' | grep -vE 'FATAL: +the database system is (starting up|shutting down)' | sed -E 's/[0-9a-f]{32,}/<hex>/g')
+# Two FATAL lines are part of a normal initdb: "the database system is starting up" answers
+# a readiness probe, and the pg_cron launcher is terminated when the entrypoint stops its
+# temporary server. Every other ERROR or FATAL line counts, shown with hex strings masked.
+errs=$(D logs $PGC 2>&1 | grep -E '(ERROR|FATAL):' | grep -vE 'FATAL: +(the database system is (starting up|shutting down)|terminating background worker "pg_cron launcher" due to administrator command)' | sed -E 's/[0-9a-f]{32,}/<hex>/g')
 echo "init_errors=$(printf '%s' "$errs" | grep -c .)"
 [ -z "$errs" ] || printf 'init_error %s\n' "$errs"
 q() { D exec $PGC psql -U postgres -d postgres -X -Atc "$1" 2>&1; }
