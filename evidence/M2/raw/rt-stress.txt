@@ -1,88 +1,89 @@
 ### stress_meta
-utc=2026-09-26T03:43:57.352Z source_commit=dd45b9fbc4f0f022b788e50564d8ad9659a00f84
-firecrawl-core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 started=2026-09-26T03:30:35.718535339Z restarts=0
-retrieval-service=b3318567209d9a96c9166352b9947ead46923534d01340186e58aa1d801f2a9b image=sha256:b18d8be958316157a78f0144bce802d908066976e92b6d1ff1002cf5e5356eb3 started=2026-09-26T03:42:20.038709195Z restarts=0
-fixture-m2=3f584f92fdcc356e196cb6fe62d52bd896612cfaaa2a454dc26cfed27a70c4b9 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T03:42:19.536774382Z restarts=0
-browser-worker=c17ec6bdbe3e502b4f97bd3451ae3bc6edcda7257d25752c2714a460ae090d4a image=sha256:eb2d8bf6abc39bd1224655b45a938f9a7302bb03fa212d8e9e2ba5afbdd687ef started=2026-09-26T03:39:29.412972342Z restarts=0
+utc=2026-09-26T06:56:48.425Z source_commit=5afbbe90ffb7db5b1e481f057fa187d292e3b42d
+firecrawl-core=ef81828d65363460489e1221831377ea9218c1382499d7145cea5bba1f59f7cd image=sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d started=2026-09-26T06:54:03.034468501Z restarts=0
+retrieval-service=031d4b4248281736df7936981f1b7aa24e60388189fef09f4d65e2758ef27704 image=sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35 started=2026-09-26T06:50:20.227821603Z restarts=0
+fixture-m2=5f892079b8d60a48b0d3c7e575928f335516cee2a84fa2cfd7ac2c443976ef12 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T06:50:15.779802108Z restarts=0
+browser-worker=64c0fc1d9bfd8749afa553a9e887b31b19525dbb7037e4463133784fb338b100 image=sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c started=2026-09-26T06:55:36.291482211Z restarts=0
 ### stress_cgroups_before
-retrieval-service max=469762048 current=29982720 peak=48709632 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture-m2 max=201326592 current=15695872 peak=35078144 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-browser-worker max=1610612736 current=141410304 peak=186548224 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-firecrawl-core max=2415919104 current=1815707648 peak=1914109952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-access-gateway max=167772160 current=14352384 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-nuq-postgres max=671088640 current=129794048 peak=149553152 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-rabbitmq max=536870912 current=135774208 peak=210026496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-redis max=335544320 current=8634368 peak=16400384 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture max=67108864 current=18710528 peak=37994496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+browser-worker max=1610612736 current=171786240 peak=271417344 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+firecrawl-core max=2415919104 current=1785937920 peak=1910046720 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+access-gateway max=167772160 current=15319040 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+retrieval-service max=469762048 current=68567040 peak=101777408 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+nuq-postgres max=671088640 current=148783104 peak=164200448 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+rabbitmq max=536870912 current=123502592 peak=209403904 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+redis max=335544320 current=8896512 peak=15269888 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture-m2 max=201326592 current=84197376 peak=113311744 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture max=67108864 current=14909440 peak=35438592 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
 ### stress_driver
-{"utc":"2026-09-26T03:44:00.618Z","case":"A10-stress-within-cap","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/stress.html?mb=512","logicalId":"m2-stress-be4c0110-cb5e-47d4-8fa7-c06aadaa0b27","http":200,"ok":true,"attemptsUsed":2,"strategies":["direct_http","direct_browser"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":["fcpi-m2-stress-8c3a"],"subresources":{"requests":1,"blocked":0,"overLimit":0},"proxyDenied":[],"started":"2026-09-26T03:43:58.643Z","ms":1975}
-{"utc":"2026-09-26T03:44:00.619Z","case":"end"}
+{"utc":"2026-09-26T06:56:51.658Z","case":"A10-stress-within-cap","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/stress.html?mb=512","logicalId":"m2-stress-5a31a194-9ace-4bef-ad53-cb0d00c320b9","http":200,"ok":true,"attemptsUsed":2,"strategies":["direct_http","direct_browser"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":["fcpi-m2-stress-8c3a"],"subresources":{"requests":1,"blocked":0,"overLimit":0,"offHost":0},"proxyDenied":[],"started":"2026-09-26T06:56:49.732Z","ms":1926}
+{"utc":"2026-09-26T06:56:51.659Z","case":"end"}
 driver_exit=0
 ### stress_memory_samples
-t=03:43:58 mem_available_mib=5110 retrieval-service=31 fixture-m2=17 browser-worker=221 firecrawl-core=1748 access-gateway=13 nuq-postgres=129 rabbitmq=131 redis=7 fixture=17
-t=03:44:00 mem_available_mib=4586 retrieval-service=28 fixture-m2=16 browser-worker=676 firecrawl-core=1749 access-gateway=13 nuq-postgres=127 rabbitmq=131 redis=8 fixture=17
-t=03:44:01 mem_available_mib=5084 retrieval-service=30 fixture-m2=15 browser-worker=143 firecrawl-core=1732 access-gateway=13 nuq-postgres=127 rabbitmq=131 redis=8 fixture=17
-t=03:44:02 mem_available_mib=5085 retrieval-service=28 fixture-m2=15 browser-worker=143 firecrawl-core=1732 access-gateway=13 nuq-postgres=126 rabbitmq=131 redis=8 fixture=17
-t=03:44:03 mem_available_mib=5089 retrieval-service=28 fixture-m2=15 browser-worker=143 firecrawl-core=1733 access-gateway=22 nuq-postgres=126 rabbitmq=131 redis=9 fixture=17
+t=06:56:49 mem_available_mib=5073 browser-worker=249 firecrawl-core=1720 access-gateway=14 retrieval-service=66 nuq-postgres=143 rabbitmq=118 redis=6 fixture-m2=82 fixture=14
+t=06:56:51 mem_available_mib=4566 browser-worker=702 firecrawl-core=1720 access-gateway=14 retrieval-service=65 nuq-postgres=141 rabbitmq=119 redis=10 fixture-m2=80 fixture=14
+t=06:56:52 mem_available_mib=5051 browser-worker=169 firecrawl-core=1702 access-gateway=14 retrieval-service=67 nuq-postgres=141 rabbitmq=118 redis=8 fixture-m2=80 fixture=14
+t=06:56:53 mem_available_mib=5054 browser-worker=169 firecrawl-core=1702 access-gateway=14 retrieval-service=67 nuq-postgres=142 rabbitmq=118 redis=8 fixture-m2=80 fixture=14
+t=06:56:54 mem_available_mib=5060 browser-worker=169 firecrawl-core=1704 access-gateway=14 retrieval-service=65 nuq-postgres=141 rabbitmq=118 redis=8 fixture-m2=80 fixture=14
 ### stress_cgroups_after
-retrieval-service max=469762048 current=31080448 peak=48709632 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture-m2 max=201326592 current=15974400 peak=35078144 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-browser-worker max=1610612736 current=151388160 peak=710836224 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-firecrawl-core max=2415919104 current=1816805376 peak=1914109952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-access-gateway max=167772160 current=14827520 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-nuq-postgres max=671088640 current=131743744 peak=149553152 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-rabbitmq max=536870912 current=136822784 peak=210026496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-redis max=335544320 current=9682944 peak=16400384 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture max=67108864 current=18710528 peak=37994496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+browser-worker max=1610612736 current=179240960 peak=738443264 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+firecrawl-core max=2415919104 current=1785905152 peak=1910046720 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+access-gateway max=167772160 current=15319040 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+retrieval-service max=469762048 current=68632576 peak=101777408 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+nuq-postgres max=671088640 current=148783104 peak=164200448 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+rabbitmq max=536870912 current=123502592 peak=209403904 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+redis max=335544320 current=7798784 peak=15269888 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture-m2 max=201326592 current=84246528 peak=113311744 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture max=67108864 current=14909440 peak=35438592 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
 ### stress_host_oom
 end
 ### stress_browser_processes
-utc=2026-09-26T03:44:09Z
-      1       0 Ss       280 docker-init
-      7       1 Sl       280 MainThread
-    377       7 Ssl       61 chrome-headless
-    380     377 S         61 chrome-headless
-    381     377 S         61 chrome-headless
-    383     381 S         61 chrome-headless
-    399     380 Sl        61 chrome-headless
-    401     377 Sl        61 chrome-headless
-    483       0 Rs         0 ps
+utc=2026-09-26T06:57:00Z
+      1       0 Ss        84 docker-init
+      7       1 Sl        84 MainThread
+    218       7 Ssl       23 chrome-headless
+    221     218 S         23 chrome-headless
+    222     218 S         23 chrome-headless
+    224     222 S         23 chrome-headless
+    240     221 Sl        23 chrome-headless
+    242     218 Sl        23 chrome-headless
+    305       0 Rs         0 ps
 ### stress_retrieval_log
-{"utc":"2026-09-26T03:44:00.605Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"be760090-17b0-4589-b17a-54fa56d870df","logical_id":"m2-stress-be4c0110-cb5e-47d4-8fa7-c06aadaa0b27","purpose":"page","url_hmac":"c12eaf03ad008f1b051add3ceabf6064","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":933,"ms":1871}
+{"utc":"2026-09-26T06:56:51.643Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"b059d98c-3f16-45e3-a367-6f668f3ea0af","logical_id":"m2-stress-5a31a194-9ace-4bef-ad53-cb0d00c320b9","purpose":"page","url_hmac":"8132a47d664b42fb519583401ef3d6dc","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":933,"ms":1821}
 ### stress_fixture_log
-{"utc":"2026-09-26T03:43:58.761Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/stress.html","query":"?mb=512","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:43:58.858Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/stress.html","query":"?mb=512","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:49.632Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=20000&hold=1","status":200,"ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:49.837Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/stress.html","query":"?mb=512","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:49.917Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/stress.html","query":"?mb=512","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
 ### stress_browser_log
-{"utc":"2026-09-26T03:44:00.601Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"39b305b0-4b86-418f-ac3f-ea90045a1508","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":1824,"pages_served":2}
+{"utc":"2026-09-26T06:56:51.638Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"8330ae51-f3a5-42b5-9e35-b588985459b9","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":1783,"pages_served":2}
 ### stress_attempts
-m2-stress-be4c0110-cb5e-47d4-8fa7-c06aadaa0b27	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T03:43:58.750Z	2026-09-26T03:43:58.765Z	js_shell	200	933		2
-m2-stress-be4c0110-cb5e-47d4-8fa7-c06aadaa0b27	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T03:43:58.766Z	2026-09-26T03:44:00.603Z	rendered	200	933	1	2
+m2-stress-5a31a194-9ace-4bef-ad53-cb0d00c320b9	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:56:49.826Z	2026-09-26T06:56:49.840Z	js_shell	200	933		2
+m2-stress-5a31a194-9ace-4bef-ad53-cb0d00c320b9	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:56:49.842Z	2026-09-26T06:56:51.640Z	rendered	200	933	1	2
 ### stress_permits
 browser	0	t	
 url	0	t	
 url	1	t	
 ### stress_health
-retrieval-service running healthy restarts=0
-fixture-m2 running healthy restarts=0
 browser-worker running healthy restarts=0
 firecrawl-core running healthy restarts=0
 access-gateway running healthy restarts=0
+retrieval-service running healthy restarts=0
 nuq-postgres running healthy restarts=0
 rabbitmq running healthy restarts=0
 redis running healthy restarts=0
+fixture-m2 running healthy restarts=0
 fixture running healthy restarts=0
 ### stress_cgroups_end
-retrieval-service max=469762048 current=30031872 peak=48709632 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture-m2 max=201326592 current=15974400 peak=35078144 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-browser-worker max=1610612736 current=149749760 peak=710836224 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-firecrawl-core max=2415919104 current=1816264704 peak=1914109952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-access-gateway max=167772160 current=14385152 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-nuq-postgres max=671088640 current=134004736 peak=149553152 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-rabbitmq max=536870912 current=136871936 peak=210026496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-redis max=335544320 current=8634368 peak=16400384 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture max=67108864 current=18710528 peak=37994496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-host_mem_available_mib=5145
+browser-worker max=1610612736 current=178208768 peak=738443264 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+firecrawl-core max=2415919104 current=1786511360 peak=1910046720 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+access-gateway max=167772160 current=22233088 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+retrieval-service max=469762048 current=68632576 peak=101777408 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+nuq-postgres max=671088640 current=150847488 peak=164200448 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+rabbitmq max=536870912 current=124338176 peak=209403904 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+redis max=335544320 current=8880128 peak=15269888 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture-m2 max=201326592 current=84246528 peak=113311744 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture max=67108864 current=14909440 peak=35438592 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+host_mem_available_mib=5152
 ### stress_browser_health
-{"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":2,"launches":3,"busy":false}
+{"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":2,"launches":2,"busy":false}
 ### stress_end
 end

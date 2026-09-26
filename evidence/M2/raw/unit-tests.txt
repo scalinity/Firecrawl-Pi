@@ -1,150 +1,396 @@
 ### meta
-utc=2026-09-26T03:46:10Z source_commit=e337f03277b46b2bab390630cbd3b08856b95817 image=fcpi/retrieval@sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a
+utc=2026-09-26T07:06:46Z source_commit=0dbbfdc2922cf8cdf412ccae2585a6ea240f751a image=fcpi/retrieval@sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35 test_postgres=postgres@sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761
 ### tap
 TAP version 13
-# Subtest: a public name with any private answer is refused, and a DNS failure is typed
-ok 1 - a public name with any private answer is refused, and a DNS failure is typed
+# Subtest: a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4)
+ok 1 - a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4)
   ---
-  duration_ms: 13.574985
+  duration_ms: 876.451473
+  type: 'test'
+  ...
+# Subtest: downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1)
+ok 2 - downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1)
+  ---
+  duration_ms: 1271.434996
+  type: 'test'
+  ...
+# Subtest: a download's final URL is one a response header can carry (review finding S10)
+ok 3 - a download's final URL is one a response header can carry (review finding S10)
+  ---
+  duration_ms: 5.142371
+  type: 'test'
+  ...
+# Subtest: a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)
+ok 4 - a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)
+  ---
+  duration_ms: 302.306234
+  type: 'test'
+  ...
+# Subtest: the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target
+ok 5 - the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target
+  ---
+  duration_ms: 659.241287
+  type: 'test'
+  ...
+# Subtest: a pacing wait leaves no abort listener behind on the caller's signal (review finding S7)
+ok 6 - a pacing wait leaves no abort listener behind on the caller's signal (review finding S7)
+  ---
+  duration_ms: 22.95375
+  type: 'test'
+  ...
+# Subtest: a database error while the browser attempt is paced still frees every permit and hold (review finding W3)
+ok 7 - a database error while the browser attempt is paced still frees every permit and hold (review finding W3)
+  ---
+  duration_ms: 7.872929
+  type: 'test'
+  ...
+# Subtest: a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6)
+ok 8 - a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6)
+  ---
+  duration_ms: 10.499559
+  type: 'test'
+  ...
+# Subtest: a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE
+ok 9 - a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE
+  ---
+  duration_ms: 10.305563
+  type: 'test'
+  ...
+# Subtest: a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser
+ok 10 - a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser
+  ---
+  duration_ms: 1247.46855
+  type: 'test'
+  ...
+# Subtest: a pacing refusal is the attempt's recorded outcome and reaches no target
+ok 11 - a pacing refusal is the attempt's recorded outcome and reaches no target
+  ---
+  duration_ms: 2.0335
+  type: 'test'
+  ...
+# Subtest: a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5)
+ok 12 - a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5)
+  ---
+  duration_ms: 0.780665
+  type: 'test'
+  ...
+# Subtest: requests are validated and bodies decoded by their declared charset
+ok 13 - requests are validated and bodies decoded by their declared charset
+  ---
+  duration_ms: 1.818238
+  type: 'test'
+  ...
+# Subtest: an oversized worker reply is SIZE_LIMIT, declared or chunked; a normal one is parsed
+ok 14 - an oversized worker reply is SIZE_LIMIT, declared or chunked; a normal one is parsed
+  ---
+  duration_ms: 108.5623
+  type: 'test'
+  ...
+# Subtest: a public name with any private answer is refused, and a DNS failure is typed
+ok 15 - a public name with any private answer is refused, and a DNS failure is typed
+  ---
+  duration_ms: 14.314482
   type: 'test'
   ...
 # Subtest: DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
-ok 2 - DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
+ok 16 - DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
   ---
-  duration_ms: 32.730099
+  duration_ms: 32.783829
   type: 'test'
   ...
 # Subtest: a fixture name must resolve inside its own subnet
-ok 3 - a fixture name must resolve inside its own subnet
+ok 17 - a fixture name must resolve inside its own subnet
   ---
-  duration_ms: 1.041158
+  duration_ms: 1.231568
   type: 'test'
   ...
 # Subtest: a redirect is validated at every hop: into private space it is refused before any connection
-ok 4 - a redirect is validated at every hop: into private space it is refused before any connection
+ok 18 - a redirect is validated at every hop: into private space it is refused before any connection
   ---
-  duration_ms: 35.682443
+  duration_ms: 52.881101
   type: 'test'
   ...
 # Subtest: bodies are bounded before and after decoding
-ok 5 - bodies are bounded before and after decoding
+ok 19 - bodies are bounded before and after decoding
   ---
-  duration_ms: 98.561131
+  duration_ms: 97.92668
   type: 'test'
   ...
 # Subtest: a slow target ends at the deadline
-ok 6 - a slow target ends at the deadline
+ok 20 - a slow target ends at the deadline
   ---
-  duration_ms: 602.92327
+  duration_ms: 602.390802
   type: 'test'
   ...
 # Subtest: a cookie set on a redirect comes back on the next hop to the same host
-ok 7 - a cookie set on a redirect comes back on the next hop to the same host
+ok 21 - a cookie set on a redirect comes back on the next hop to the same host
   ---
-  duration_ms: 6.647287
+  duration_ms: 6.343954
+  type: 'test'
+  ...
+# Subtest: a Secure cookie is sent only over https, and an http response cannot set one (review finding S4)
+ok 22 - a Secure cookie is sent only over https, and an http response cannot set one (review finding S4)
+  ---
+  duration_ms: 0.438836
+  type: 'test'
+  ...
+# Subtest: TLS to an IP literal names no server (review finding S4)
+ok 23 - TLS to an IP literal names no server (review finding S4)
+  ---
+  duration_ms: 7.603027
+  type: 'test'
+  ...
+# Subtest: a HEAD redirected by 303 stays a HEAD (review finding S8)
+ok 24 - a HEAD redirected by 303 stays a HEAD (review finding S8)
+  ---
+  duration_ms: 5.933345
   type: 'test'
   ...
 # Subtest: caller credentials go only to the first origin
-ok 8 - caller credentials go only to the first origin
+ok 25 - caller credentials go only to the first origin
   ---
-  duration_ms: 5.362663
+  duration_ms: 8.10461
+  type: 'test'
+  ...
+# Subtest: a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body UNSUPPORTED_CONTENT (review finding W10)
+ok 26 - a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body UNSUPPORTED_CONTENT (review finding W10)
+  ---
+  duration_ms: 57.499122
+  type: 'test'
+  ...
+# Subtest: a HEAD or a redirect is not refused for the length it declares (review finding W11)
+ok 27 - a HEAD or a redirect is not refused for the length it declares (review finding W11)
+  ---
+  duration_ms: 10.599786
+  type: 'test'
+  ...
+# Subtest: the environment: unknown keys, the flags that must stay false, the permit counts
+ok 28 - the environment: unknown keys, the flags that must stay false, the permit counts
+  ---
+  duration_ms: 8.203837
+  type: 'test'
+  ...
+# Subtest: a permit lease shorter than an acquisition, or a token hash of the wrong length, fails at startup (review finding S3)
+ok 29 - a permit lease shorter than an acquisition, or a token hash of the wrong length, fails at startup (review finding S3)
+  ---
+  duration_ms: 1.824587
+  type: 'test'
+  ...
+# Subtest: the local-network file must name at least one real network
+ok 30 - the local-network file must name at least one real network
+  ---
+  duration_ms: 3.343789
+  type: 'test'
+  ...
+# Subtest: a public page's requests cannot reach a fixture host (review finding S1)
+ok 31 - a public page's requests cannot reach a fixture host (review finding S1)
+  ---
+  duration_ms: 37.244743
+  type: 'test'
+  ...
+# Subtest: a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2)
+ok 32 - a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2)
+  ---
+  duration_ms: 13.433812
+  type: 'test'
+  ...
+# Subtest: no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named
+ok 33 - no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named
+  ---
+  duration_ms: 16.302079
+  type: 'test'
+  ...
+# Subtest: a session past its request or byte cap is refused and marked capped (review finding W6)
+ok 34 - a session past its request or byte cap is refused and marked capped (review finding W6)
+  ---
+  duration_ms: 15.374766
+  type: 'test'
+  ...
+# Subtest: the proxy answers 503 while the local-network list is not loaded (review finding W7)
+ok 35 - the proxy answers 503 while the local-network list is not loaded (review finding W7)
+  ---
+  duration_ms: 4.728595
+  type: 'test'
+  ...
+# Subtest: malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9)
+ok 36 - malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9)
+  ---
+  duration_ms: 11.622256
   type: 'test'
   ...
 # Subtest: static pages are adequate, short ones too; script-rendered ones are JS shells
-ok 9 - static pages are adequate, short ones too; script-rendered ones are JS shells
+ok 37 - static pages are adequate, short ones too; script-rendered ones are JS shells
   ---
-  duration_ms: 7.22383
+  duration_ms: 6.211446
   type: 'test'
   ...
 # Subtest: interstitials, sign-in gates and refusals are typed failures
-ok 10 - interstitials, sign-in gates and refusals are typed failures
+ok 38 - interstitials, sign-in gates and refusals are typed failures
   ---
-  duration_ms: 0.644951
+  duration_ms: 0.644029
   type: 'test'
   ...
 # Subtest: missing pages and target errors keep the native result; binaries are binaries
-ok 11 - missing pages and target errors keep the native result; binaries are binaries
+ok 39 - missing pages and target errors keep the native result; binaries are binaries
   ---
-  duration_ms: 0.43743
+  duration_ms: 0.354026
   type: 'test'
   ...
 # Subtest: direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
-ok 12 - direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
+ok 40 - direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
   ---
-  duration_ms: 1.682295
+  duration_ms: 1.525459
   type: 'test'
   ...
 # Subtest: the deployed policy loads; a looser or unknown one does not
-ok 13 - the deployed policy loads; a looser or unknown one does not
+ok 41 - the deployed policy loads; a looser or unknown one does not
   ---
-  duration_ms: 2.333838
+  duration_ms: 1.857107
+  type: 'test'
+  ...
+# Subtest: classification stays linear on unclosed and repeated markup (review finding C1)
+ok 42 - classification stays linear on unclosed and repeated markup (review finding C1)
+  ---
+  duration_ms: 519.170723
+  type: 'test'
+  ...
+# Subtest: the linear reader keeps what the regexes kept
+ok 43 - the linear reader keeps what the regexes kept
+  ---
+  duration_ms: 0.586447
+  type: 'test'
+  ...
+# Subtest: only structure makes a shell that fails after rendering; a short scripted page does not (review finding C5)
+ok 44 - only structure makes a shell that fails after rendering; a short scripted page does not (review finding C5)
+  ---
+  duration_ms: 0.693449
   type: 'test'
   ...
 # Subtest: IPv4 special-purpose ranges are never public
-ok 14 - IPv4 special-purpose ranges are never public
+ok 45 - IPv4 special-purpose ranges are never public
   ---
-  duration_ms: 6.294858
+  duration_ms: 5.154272
+  type: 'test'
+  ...
+# Subtest: fixture hosts count only for work that began at a fixture (review finding S1)
+ok 46 - fixture hosts count only for work that began at a fixture (review finding S1)
+  ---
+  duration_ms: 8.953721
   type: 'test'
   ...
 # Subtest: the host's own LAN is refused even on a globally routable prefix
-ok 15 - the host's own LAN is refused even on a globally routable prefix
+ok 47 - the host's own LAN is refused even on a globally routable prefix
   ---
-  duration_ms: 0.596561
+  duration_ms: 0.484535
   type: 'test'
   ...
 # Subtest: IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
-ok 16 - IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
+ok 48 - IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
   ---
-  duration_ms: 16.093306
+  duration_ms: 3.362872
   type: 'test'
   ...
 # Subtest: schemes, credentials, ports and ambiguous numeric hosts
-ok 17 - schemes, credentials, ports and ambiguous numeric hosts
+ok 49 - schemes, credentials, ports and ambiguous numeric hosts
   ---
-  duration_ms: 2.54271
+  duration_ms: 1.00272
   type: 'test'
   ...
 # Subtest: literal addresses are judged by class
-ok 18 - literal addresses are judged by class
+ok 50 - literal addresses are judged by class
   ---
-  duration_ms: 1.421625
+  duration_ms: 0.584318
   type: 'test'
   ...
 # Subtest: local and reserved names are refused before any lookup
-ok 19 - local and reserved names are refused before any lookup
+ok 51 - local and reserved names are refused before any lookup
   ---
-  duration_ms: 0.927157
+  duration_ms: 0.83275
   type: 'test'
   ...
 # Subtest: Firecrawl Cloud destinations are refused
-ok 20 - Firecrawl Cloud destinations are refused
+ok 52 - Firecrawl Cloud destinations are refused
   ---
-  duration_ms: 0.457671
+  duration_ms: 0.249652
   type: 'test'
   ...
 # Subtest: the fixture exception is exact: its host, its port, plain http
-ok 21 - the fixture exception is exact: its host, its port, plain http
+ok 53 - the fixture exception is exact: its host, its port, plain http
   ---
-  duration_ms: 0.404004
+  duration_ms: 0.718603
   type: 'test'
   ...
 # Subtest: ordinary public URLs pass, with a trailing dot normalised
-ok 22 - ordinary public URLs pass, with a trailing dot normalised
+ok 54 - ordinary public URLs pass, with a trailing dot normalised
   ---
-  duration_ms: 1.183622
+  duration_ms: 0.944434
   type: 'test'
   ...
-1..22
-# tests 22
+# Subtest: without the host's local-network list no address is public (review finding W7)
+ok 55 - without the host's local-network list no address is public (review finding W7)
+  ---
+  duration_ms: 0.41135
+  type: 'test'
+  ...
+# Subtest: the platform's daily cap holds under concurrent pacers of different domains (review finding W4)
+ok 56 - the platform's daily cap holds under concurrent pacers of different domains (review finding W4)
+  ---
+  duration_ms: 86.028914
+  type: 'test'
+  ...
+# Subtest: permits: slot 0 is a slot, a full kind answers null, an expired lease is free again (review finding W9)
+ok 57 - permits: slot 0 is a slot, a full kind answers null, an expired lease is free again (review finding W9)
+  ---
+  duration_ms: 54.158258
+  type: 'test'
+  ...
+# Subtest: ten concurrent reservations on one logical page get exactly four attempts
+ok 58 - ten concurrent reservations on one logical page get exactly four attempts
+  ---
+  duration_ms: 37.140906
+  type: 'test'
+  ...
+# Subtest: a restart reclaims every lease and domain hold (review finding W3)
+ok 59 - a restart reclaims every lease and domain hold (review finding W3)
+  ---
+  duration_ms: 37.492304
+  type: 'test'
+  ...
+# Subtest: cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does not seed the bare one (review finding W14)
+ok 60 - cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does not seed the bare one (review finding W14)
+  ---
+  duration_ms: 55.205808
+  type: 'test'
+  ...
+# Subtest: the pool connects within 5 s and bounds each statement at 10 s (review finding S13)
+ok 61 - the pool connects within 5 s and bounds each statement at 10 s (review finding S13)
+  ---
+  duration_ms: 17.234983
+  type: 'test'
+  ...
+# Subtest: the prune removes only pacing rows that hold nothing a decision reads, and pacing recreates them (review finding S5)
+ok 62 - the prune removes only pacing rows that hold nothing a decision reads, and pacing recreates them (review finding S5)
+  ---
+  duration_ms: 45.82902
+  type: 'test'
+  ...
+# Subtest: releasing a domain restarts its navigation gap
+ok 63 - releasing a domain restarts its navigation gap
+  ---
+  duration_ms: 29.86379
+  type: 'test'
+  ...
+1..63
+# tests 63
 # suites 0
-# pass 22
+# pass 63
 # fail 0
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 923.219447
+# duration_ms 4633.300948
 test_exit=0
 ### transient
-leftover_transient_containers=0
+leftover_transient_containers=0 leftover_transient_networks=0
 ### end
 end

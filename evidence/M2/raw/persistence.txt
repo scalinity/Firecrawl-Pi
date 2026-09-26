@@ -1,50 +1,52 @@
 ### meta
-2026-09-26T04:17:43Z
-source_commit=8ca9d7c0998110f25bc1e1a2a79ce2b8000fe6ca
-sentinel=m2-sentinel-9182d332-a441-43d1-8b1f-6942a092cc65
+2026-09-26T06:49:15Z
+source_commit=af647bd35aaf7413298fb06d50a521fdc1be5673
+sentinel=m2-sentinel-b5c776cf-9885-47ac-a66b-66f6465bdb2f
 ### write
+NOTICE:  schema "fcpi_m2_sentinel" already exists, skipping
+NOTICE:  relation "sentinel" already exists, skipping
 CREATE SCHEMA
 CREATE TABLE
-postgres_written=m2-sentinel-9182d332-a441-43d1-8b1f-6942a092cc65
+postgres_written=m2-sentinel-b5c776cf-9885-47ac-a66b-66f6465bdb2f
 INSERT 0 1
 redis_set=OK
-rabbitmq_write={"utc":"2026-09-26T04:17:44.397Z","queue":"fcpi.m1.sentinel","messages_before":1,"purged":1,"published":"m2-sentinel-9182d332-a441-43d1-8b1f-6942a092cc65","confirmed":true}
-retrieval_rows acquisitions=204 attempts=262 domains=6 direct_navs=256 newest_attempt=2026-09-26T04:16:34.824Z
+rabbitmq_write={"utc":"2026-09-26T06:49:16.521Z","queue":"fcpi.m1.sentinel","messages_before":1,"purged":1,"published":"m2-sentinel-b5c776cf-9885-47ac-a66b-66f6465bdb2f","confirmed":true}
+retrieval_rows acquisitions=422 attempts=536 domains=6 direct_navs=529 newest_attempt=2026-09-26T06:47:56.488Z
 ### before
-nuq-postgres 337596f9f81ac8f3813f03b732d07983b493c17aeda7052bb773fea2b2a15291
-redis 1cc51bbd3aa4c12ecd47ff8d1e0dfdea8760ad27c5df7d0fd5ca413343e6d6b9
-rabbitmq e07fe2995f6190856e92d6411cf9cf87f327a8bfad540335fe02f35f5414927b
-firecrawl-core 133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6
-access-gateway e103e97a7ccbb8b9d1d8e4502b42eee4b3072d52d45e7e6c41405ed2089c2fac
-fixture 2af6c86896fe1dc413577146f156e19ed5a83922d0b7b004e99651237eb3de2a
-retrieval-service 789acf53f8c1b09c37b922c82bf08fe568aa0868f03d56ba9d3d8486bd7f5bbc
-browser-worker 0bcab4d8b470cc37ffcd5f021e31cfd6d9191f27bb1db3b9e34a018014caf354
-fixture-m2 45f36bca9eb30d713164c09fb4e934973767a628596dc9413f6b2c513b6c44d2
-rabbitmq_node=rabbit@rabbitmq
-### recreate
- Container fcpi-nuq-postgres-1 Waiting 
- Container fcpi-fixture-m2-1 Waiting 
- Container fcpi-fixture-1 Waiting 
- Container fcpi-fixture-m2-1 Healthy 
- Container fcpi-rabbitmq-1 Healthy 
- Container fcpi-fixture-1 Healthy 
- Container fcpi-redis-1 Healthy 
- Container fcpi-browser-worker-1 Healthy 
- Container fcpi-retrieval-service-1 Healthy 
- Container fcpi-nuq-postgres-1 Healthy 
- Container fcpi-access-gateway-1 Healthy 
- Container fcpi-firecrawl-core-1 Healthy 
-recreate_exit=0 elapsed_s=89
-### after
 nuq-postgres f80a5a4059813705055c45bb23a95e768562f03332052dda4d8edc491c2813c8
 redis a151753f2dbf02698703538b7a978c886f3c2931813299ebc132f944ecd8ccb3
 rabbitmq 2ead5d891f455e178e6ffe89d49d1067b091d5d86360fe7abc08c6f1d9a622cf
-firecrawl-core c3924a28969c7d09d9396ca10782ad0851cd4fc808733417b24ac3f641227f34
+firecrawl-core a304dc10fd8aa406e1054a918e7448e6106452d343cd34e13a6268e726a20380
 access-gateway 48bd04bb5bb2d18795459b2cb369e89eb018e3647634b2ebf5ebde61c497977e
 fixture 69b0c621b67f33622e19842e18935705bd87db6ae7c7d3351c5accc4faa1d787
-retrieval-service c162836be86fd4afaffd2034ae99753ba513541b9f77478d9989d06c5a4d843d
-browser-worker 13d2d7063b803a6a066cf7b09b79b0ed61a76a4b42e9ef46c6716f7c8f55a5be
+retrieval-service acb08bc33ab37e31cdc0cfec7d8a2faa89c0bc9680d89194af0bee695d2e9188
+browser-worker 16d6c03ef59b50c6e30eed7174435af79b9911b17709090b6f9b00d5ffb87a3e
 fixture-m2 27de601ca3d1a49508eed2350c6e1200e0a07705dd2a20cec5df050cd08dd41f
+rabbitmq_node=rabbit@rabbitmq
+### recreate
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-fixture-1 Waiting 
+ Container fcpi-access-gateway-1 Waiting 
+ Container fcpi-rabbitmq-1 Healthy 
+ Container fcpi-fixture-m2-1 Healthy 
+ Container fcpi-fixture-1 Healthy 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-redis-1 Healthy 
+ Container fcpi-browser-worker-1 Healthy 
+ Container fcpi-nuq-postgres-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+recreate_exit=0 elapsed_s=87
+### after
+nuq-postgres 6754247261be22977ec22ee95d44298c0dfe71378d61e8dc35944a23514178da
+redis 19cc3883ab3db5a3238d5d01ad633d6ea3329c02f598a9477cc1839571ae6976
+rabbitmq d05608a74210d4100374bdb34be7685d383a965988b928162195a707869a65a8
+firecrawl-core 06c2350db422048cdde1d73808cbf762675685d31773b1dbae62ebdbb74ed07c
+access-gateway f147a4423b3f3ccc977da882c02c16822f573d13cdd564e1488cb83550ad0400
+fixture f0840942baf596af52e894a76deaa9f9a81d351d4c049023e088763c15547df1
+retrieval-service 031d4b4248281736df7936981f1b7aa24e60388189fef09f4d65e2758ef27704
+browser-worker be136258f9d5f4f6b75570ac7a0c4610fa3c3039759108f9f2478febff01c9e8
+fixture-m2 5f892079b8d60a48b0d3c7e575928f335516cee2a84fa2cfd7ac2c443976ef12
 rabbitmq_node=rabbit@rabbitmq
 access-gateway running healthy
 browser-worker running healthy
@@ -56,10 +58,10 @@ rabbitmq running healthy
 redis running healthy
 retrieval-service running healthy
 ### read
-postgres_read=m2-sentinel-9182d332-a441-43d1-8b1f-6942a092cc65
-redis_read=m2-sentinel-9182d332-a441-43d1-8b1f-6942a092cc65
-rabbitmq_read={"utc":"2026-09-26T04:19:23.069Z","queue":"fcpi.m1.sentinel","messages_before":1,"messages":["m2-sentinel-9182d332-a441-43d1-8b1f-6942a092cc65"]}
-retrieval_rows acquisitions=204 attempts=262 domains=6 direct_navs=256 newest_attempt=2026-09-26T04:16:34.824Z
+postgres_read=m2-sentinel-b5c776cf-9885-47ac-a66b-66f6465bdb2f
+redis_read=m2-sentinel-b5c776cf-9885-47ac-a66b-66f6465bdb2f
+rabbitmq_read={"utc":"2026-09-26T06:50:53.753Z","queue":"fcpi.m1.sentinel","messages_before":1,"messages":["m2-sentinel-b5c776cf-9885-47ac-a66b-66f6465bdb2f"]}
+retrieval_rows acquisitions=422 attempts=536 domains=6 direct_navs=529 newest_attempt=2026-09-26T06:47:56.488Z
 permits=browser:0:true url:0:true url:1:true
 0:0 700 /srv/firecrawl-pi/data
 5432:5432 700 /srv/firecrawl-pi/data/postgres

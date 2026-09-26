@@ -1,8 +1,25 @@
 ### meta
-utc=2026-09-26T04:46:10Z label=before-kill-test instances=1 source_commit=0862d73e6ae51d46687989794028d23b285b4bd1
-### instance_96af8aadfdf6
-id=96af8aadfdf6fba811ad6f9144583ae5bb3bc673d856b0b1863a2ebaab5783db image=sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c created=2026-09-26T04:41:27.888174392Z started=2026-09-26T04:41:31.071542105Z finished=0001-01-01T00:00:00Z running=true restarts=0 log_driver=json-file
-log_lines=49 log_sha256=86b5c2a6e4fa291255ed65d4f4e8669e99280ccea2be7f906064ddaaef36e42d
+utc=2026-09-26T07:01:44Z label=before-kill-test instances=1 source_commit=5afbbe90ffb7db5b1e481f057fa187d292e3b42d
+### instance_ef81828d6536
+id=ef81828d65363460489e1221831377ea9218c1382499d7145cea5bba1f59f7cd image=sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d created=2026-09-26T06:54:01.263811311Z started=2026-09-26T06:54:03.034468501Z finished=0001-01-01T00:00:00Z running=true restarts=0 log_driver=json-file
+log_lines=2447 log_sha256=cefb8b5a1b895cba276475e166a38649d031c145491098ea2eb3e4ceb9860924
+pattern=firecrawl\.dev count=14
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=integrations\. count=0
+pattern=duckduckgo count=0
+pattern=posthog count=0
+pattern=sentry\.io count=0
+pattern=getaddrinfo count=77
+pattern=EAI_AGAIN count=77
+pattern=ENOTFOUND count=0
+pattern=ENETUNREACH count=0
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=77 dns_unexplained=0
+control=Starting services count=1
+newest_line_utc=2026-09-26T07:01:41Z
+### stored_06c2350db422
+id=06c2350db422048cdde1d73808cbf762675685d31773b1dbae62ebdbb74ed07c saved_utc=2026-09-26T06:53:58Z
+log_lines=109 log_sha256=4d22f5d3edecd7471a1f01ccd8d2be5d7a9281d61cb6bd5d9df9ce8ed10ba5e3
 pattern=firecrawl\.dev count=0
 pattern=firecrawl\.com count=0
 pattern=mendable count=0
@@ -16,7 +33,24 @@ pattern=ENOTFOUND count=0
 pattern=ENETUNREACH count=0
 classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
 control=Starting services count=1
-newest_line_utc=2026-09-26T04:45:50Z
+newest_line_utc=2026-09-26T06:53:44Z
+### stored_0b74c9db4de9
+id=0b74c9db4de97c4e3853b9fb4599da4b1e1024955dbcce42f6fb3487c6b5a2fb saved_utc=2026-09-26T06:37:17Z
+log_lines=2036 log_sha256=5a048300bb5294970823a89f5c947df018cc850fac9be89187e7d11668cd362e
+pattern=firecrawl\.dev count=14
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=integrations\. count=0
+pattern=duckduckgo count=0
+pattern=posthog count=0
+pattern=sentry\.io count=0
+pattern=getaddrinfo count=0
+pattern=EAI_AGAIN count=0
+pattern=ENOTFOUND count=0
+pattern=ENETUNREACH count=0
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+newest_line_utc=2026-09-26T06:36:23Z
 ### stored_1258584d74c2
 id=1258584d74c25f3f7fb12d5ded4d79e89792de01c25f6b607c4b29db96159d2b saved_utc=2026-09-26T03:01:45Z
 log_lines=412 log_sha256=91dbfc4531768d11fec5495a1800504601d24051efa42b848689fe8efbc47d1e
@@ -85,6 +119,40 @@ pattern=ENETUNREACH count=0
 classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
 control=Starting services count=1
 newest_line_utc=2026-09-26T03:20:33Z
+### stored_96af8aadfdf6
+id=96af8aadfdf6fba811ad6f9144583ae5bb3bc673d856b0b1863a2ebaab5783db saved_utc=2026-09-26T06:25:53Z
+log_lines=865 log_sha256=911b36bb1c4a1c58bf9ec229ab7b4ab5a7614d0d995d19a7ffe0ee528efa8cc8
+pattern=firecrawl\.dev count=0
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=integrations\. count=0
+pattern=duckduckgo count=0
+pattern=posthog count=0
+pattern=sentry\.io count=0
+pattern=getaddrinfo count=0
+pattern=EAI_AGAIN count=0
+pattern=ENOTFOUND count=0
+pattern=ENETUNREACH count=0
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=7
+newest_line_utc=2026-09-26T06:25:40Z
+### stored_a304dc10fd8a
+id=a304dc10fd8aa406e1054a918e7448e6106452d343cd34e13a6268e726a20380 saved_utc=2026-09-26T06:49:14Z
+log_lines=2694 log_sha256=4d04847230a9ab8628ab2af9aaecd50fd72e6865abd55128c146ff4218f0dd7d
+pattern=firecrawl\.dev count=14
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=integrations\. count=0
+pattern=duckduckgo count=0
+pattern=posthog count=0
+pattern=sentry\.io count=0
+pattern=getaddrinfo count=77
+pattern=EAI_AGAIN count=77
+pattern=ENOTFOUND count=0
+pattern=ENETUNREACH count=0
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=77 dns_unexplained=0
+control=Starting services count=3
+newest_line_utc=2026-09-26T06:49:11Z
 ### stored_c3924a28969c
 id=c3924a28969c7d09d9396ca10782ad0851cd4fc808733417b24ac3f641227f34 saved_utc=2026-09-26T04:41:26Z
 log_lines=650 log_sha256=d54776f1a8d7d42607dc1b3e6c3fbac9f8b64bf219b79dbe607b2e7e7615b1aa

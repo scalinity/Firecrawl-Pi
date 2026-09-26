@@ -1,58 +1,59 @@
 ### browser-down_meta
-utc=2026-09-26T03:39:17.587Z source_commit=da878cd073eb1ea34cd7fce196c70a4534ff627a
-firecrawl-core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 started=2026-09-26T03:30:35.718535339Z restarts=0
-retrieval-service=1df1f4705b9106f64c990febda1e2ac69aa6cf71ead8781737e3e546183bb98c image=sha256:98c1da919bd0ee05c1c56e4ff1496dded4fad25ae55a2ddb8631b8b3f5598941 started=2026-09-26T03:38:43.732574394Z restarts=0
-fixture-m2=3f80eca0081fdec16d707a1c4aaac164044e4e684a3572ac999e8177ae47d4bd image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T03:34:59.020491077Z restarts=0
-browser-worker=c17ec6bdbe3e502b4f97bd3451ae3bc6edcda7257d25752c2714a460ae090d4a image=sha256:eb2d8bf6abc39bd1224655b45a938f9a7302bb03fa212d8e9e2ba5afbdd687ef started=2026-09-26T03:36:52.390416062Z restarts=0
+utc=2026-09-26T06:58:06.203Z source_commit=5afbbe90ffb7db5b1e481f057fa187d292e3b42d
+firecrawl-core=ef81828d65363460489e1221831377ea9218c1382499d7145cea5bba1f59f7cd image=sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d started=2026-09-26T06:54:03.034468501Z restarts=0
+retrieval-service=031d4b4248281736df7936981f1b7aa24e60388189fef09f4d65e2758ef27704 image=sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35 started=2026-09-26T06:50:20.227821603Z restarts=0
+fixture-m2=5f892079b8d60a48b0d3c7e575928f335516cee2a84fa2cfd7ac2c443976ef12 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T06:50:15.779802108Z restarts=0
+browser-worker=64c0fc1d9bfd8749afa553a9e887b31b19525dbb7037e4463133784fb338b100 image=sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c started=2026-09-26T06:55:36.291482211Z restarts=0
 ### browser-down_browser_stop
  Container fcpi-browser-worker-1 Stopped 
 browser_state=exited
 ### browser-down_driver
-{"utc":"2026-09-26T03:39:18.547Z","case":"I01-static-browser-down","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/short.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dbcb-c06a-768e-9aeb-8946c4826ea0","sentinels":["fcpi-m2-short-3b8e"],"markdown_chars":68,"warning":null,"ms":109}
-{"utc":"2026-09-26T03:39:29.088Z","case":"I02-js-browser-down","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/js.html","http":500,"success":false,"code":"SCRAPE_FCPI_RETRIEVAL","error":"Retrieval failed: BROWSER_UNAVAILABLE. the browser worker could not be reached","statusCode":null,"scrapeId":null,"sentinels":[],"markdown_chars":0,"warning":null,"ms":10541}
-{"utc":"2026-09-26T03:39:29.088Z","case":"end"}
+{"utc":"2026-09-26T06:58:07.092Z","case":"I01-static-browser-down","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/short.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a0dc81-c441-75e7-9a37-eb7d7b5ed84f","sentinels":["fcpi-m2-short-3b8e"],"markdown_chars":68,"warning":null,"ms":119}
+{"utc":"2026-09-26T06:58:17.645Z","case":"I02-js-browser-down","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/js.html","http":500,"success":false,"code":"SCRAPE_FCPI_RETRIEVAL","error":"Retrieval failed: BROWSER_UNAVAILABLE. the browser worker could not be reached","statusCode":null,"scrapeId":null,"sentinels":[],"markdown_chars":0,"warning":null,"ms":10552}
+{"utc":"2026-09-26T06:58:17.645Z","case":"end"}
 driver_exit=0
 ### browser-down_browser_start
  Container fcpi-browser-worker-1 Healthy 
 ### browser-down_retrieval_log
-{"utc":"2026-09-26T03:39:18.529Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"9421330b-12af-4712-918d-51eabef8368a","logical_id":"01a0dbcb-c06a-768e-9aeb-8946c4826ea0","purpose":"page","url_hmac":"63df2b05566f9854487c42717cabf5cc","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":233,"ms":16}
-{"utc":"2026-09-26T03:39:29.075Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"a282cc32-854a-4268-833b-4059d2a2ff5a","logical_id":"01a0dbcb-c098-70ef-9307-13de6f3c2ec6","purpose":"page","url_hmac":"1b4f20efb8f5c20e154723d978879f66","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"js_shell","failure":"BROWSER_UNAVAILABLE","bytes":721,"ms":10519}
+{"utc":"2026-09-26T06:58:07.072Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"ab7396fe-13fd-4003-a4e0-4e027be7066a","logical_id":"01a0dc81-c441-75e7-9a37-eb7d7b5ed84f","purpose":"page","url_hmac":"293fa0f64ce4dc4d581ae03f22ad4db8","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":233,"ms":25}
+{"utc":"2026-09-26T06:58:17.625Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"f3b938f9-4bd5-4eac-ae7f-0b5c2b124b99","logical_id":"01a0dc81-c47a-7634-a7a6-b2a373fd3fb2","purpose":"page","url_hmac":"7ab438787391285d1c72d1e7658e3f77","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"js_shell","failure":"BROWSER_UNAVAILABLE","bytes":721,"ms":10520}
 ### browser-down_fixture_log
-{"utc":"2026-09-26T03:39:18.524Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/short.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:39:18.568Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:58:07.067Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/short.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:58:07.117Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":null,"status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:58:25.633Z","host":"127.0.0.1:8080","method":"GET","path":"/short.html","query":null,"status":200,"from":"127.0.0.1","ua":"node","cookie":null}
 ### browser-down_browser_log
-{"utc":"2026-09-26T03:39:17.962Z","service":"browser","build":"0.2.0","event":"browser_disconnected"}
-{"utc":"2026-09-26T03:39:17.966Z","service":"browser","build":"0.2.0","event":"browser_retired","reason":"shutdown","killed":0}
-{"utc":"2026-09-26T03:39:29.979Z","service":"browser","build":"0.2.0","event":"listening","listen":"10.231.2.20:3320","extras":false}
+{"utc":"2026-09-26T06:58:06.573Z","service":"browser","build":"0.2.0","event":"browser_disconnected"}
+{"utc":"2026-09-26T06:58:06.576Z","service":"browser","build":"0.2.0","event":"browser_retired","reason":"shutdown","killed":0}
+{"utc":"2026-09-26T06:58:18.662Z","service":"browser","build":"0.2.0","event":"listening","listen":"10.231.2.20:3320","extras":false}
 ### browser-down_attempts
-01a0dbcb-c06a-768e-9aeb-8946c4826ea0	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T03:39:18.517Z	2026-09-26T03:39:18.528Z	adequate	200	233		1
-01a0dbcb-c098-70ef-9307-13de6f3c2ec6	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T03:39:18.561Z	2026-09-26T03:39:18.571Z	js_shell	200	721		2
-01a0dbcb-c098-70ef-9307-13de6f3c2ec6	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T03:39:18.572Z	2026-09-26T03:39:29.071Z	BROWSER_UNAVAILABLE		0		2
+01a0dc81-c441-75e7-9a37-eb7d7b5ed84f	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:58:07.052Z	2026-09-26T06:58:07.071Z	adequate	200	233		1
+01a0dc81-c47a-7634-a7a6-b2a373fd3fb2	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:58:07.109Z	2026-09-26T06:58:07.121Z	js_shell	200	721		2
+01a0dc81-c47a-7634-a7a6-b2a373fd3fb2	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:58:07.122Z	2026-09-26T06:58:17.624Z	BROWSER_UNAVAILABLE		0		2
 ### browser-down_permits
 browser	0	t	
 url	0	t	
 url	1	t	
 ### browser-down_health
-retrieval-service running healthy restarts=0
 browser-worker running healthy restarts=0
-fixture-m2 running healthy restarts=0
 firecrawl-core running healthy restarts=0
 access-gateway running healthy restarts=0
+retrieval-service running healthy restarts=0
 nuq-postgres running healthy restarts=0
 rabbitmq running healthy restarts=0
 redis running healthy restarts=0
+fixture-m2 running healthy restarts=0
 fixture running healthy restarts=0
 ### browser-down_cgroups_end
-retrieval-service max=469762048 current=27328512 peak=47300608 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-browser-worker max=1610612736 current=92471296 peak=113688576 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture-m2 max=201326592 current=15515648 peak=34881536 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-firecrawl-core max=2415919104 current=1812168704 peak=1914109952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-access-gateway max=167772160 current=14286848 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-nuq-postgres max=671088640 current=131596288 peak=147259392 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-rabbitmq max=536870912 current=135053312 peak=210026496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-redis max=335544320 current=9682944 peak=16400384 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture max=67108864 current=18006016 peak=37994496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-host_mem_available_mib=5169
+browser-worker max=1610612736 current=95076352 peak=116801536 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+firecrawl-core max=2415919104 current=1809399808 peak=1910046720 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+access-gateway max=167772160 current=15351808 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+retrieval-service max=469762048 current=71991296 peak=101777408 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+nuq-postgres max=671088640 current=151764992 peak=164200448 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+rabbitmq max=536870912 current=125665280 peak=209403904 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+redis max=335544320 current=9191424 peak=15302656 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture-m2 max=201326592 current=112672768 peak=183042048 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture max=67108864 current=15007744 peak=35438592 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+host_mem_available_mib=5147
 ### browser-down_browser_health
 {"ok":true,"browser":"idle","version":null,"pagesServed":0,"launches":0,"busy":false}
 ### browser-down_end

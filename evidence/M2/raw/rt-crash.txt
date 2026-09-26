@@ -1,73 +1,74 @@
 ### crash_meta
-utc=2026-09-26T03:42:59.693Z source_commit=9674939e965efed927b6b2bd1da9b791d769b40d
-firecrawl-core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 started=2026-09-26T03:30:35.718535339Z restarts=0
-retrieval-service=b3318567209d9a96c9166352b9947ead46923534d01340186e58aa1d801f2a9b image=sha256:b18d8be958316157a78f0144bce802d908066976e92b6d1ff1002cf5e5356eb3 started=2026-09-26T03:42:20.038709195Z restarts=0
-fixture-m2=3f584f92fdcc356e196cb6fe62d52bd896612cfaaa2a454dc26cfed27a70c4b9 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T03:42:19.536774382Z restarts=0
-browser-worker=c17ec6bdbe3e502b4f97bd3451ae3bc6edcda7257d25752c2714a460ae090d4a image=sha256:eb2d8bf6abc39bd1224655b45a938f9a7302bb03fa212d8e9e2ba5afbdd687ef started=2026-09-26T03:39:29.412972342Z restarts=0
+utc=2026-09-26T06:56:29.136Z source_commit=5afbbe90ffb7db5b1e481f057fa187d292e3b42d
+firecrawl-core=ef81828d65363460489e1221831377ea9218c1382499d7145cea5bba1f59f7cd image=sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d started=2026-09-26T06:54:03.034468501Z restarts=0
+retrieval-service=031d4b4248281736df7936981f1b7aa24e60388189fef09f4d65e2758ef27704 image=sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35 started=2026-09-26T06:50:20.227821603Z restarts=0
+fixture-m2=5f892079b8d60a48b0d3c7e575928f335516cee2a84fa2cfd7ac2c443976ef12 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T06:50:15.779802108Z restarts=0
+browser-worker=64c0fc1d9bfd8749afa553a9e887b31b19525dbb7037e4463133784fb338b100 image=sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c started=2026-09-26T06:55:36.291482211Z restarts=0
 ### crash_driver
-{"utc":"2026-09-26T03:43:08.075Z","case":"A08-crash-render","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/js-hold.html?crash=1","logicalId":"m2-crash-359a2c1d-6a0e-4f0c-ab40-f49e6938fb39","http":200,"ok":false,"attemptsUsed":2,"strategies":["direct_http","direct_browser"],"targetStatus":200,"verdict":"js_shell","failure":"BROWSER_CRASHED","retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T03:43:00.033Z","ms":8042}
-{"utc":"2026-09-26T03:43:09.806Z","case":"A08b-after-crash","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/js.html?after=crash","logicalId":"m2-crash-2408df96-fcb4-4f92-a1dc-6f8d60a77279","http":200,"ok":true,"attemptsUsed":2,"strategies":["direct_http","direct_browser"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":["fcpi-m2-js-5c1e"],"subresources":{"requests":1,"blocked":0,"overLimit":0},"proxyDenied":[],"started":"2026-09-26T03:43:08.075Z","ms":1731}
-{"utc":"2026-09-26T03:43:09.806Z","case":"end"}
+{"utc":"2026-09-26T06:56:37.511Z","case":"A08-crash-render","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/js-hold.html?crash=1","logicalId":"m2-crash-b167ce3a-3477-460d-8510-8279d3d8951d","http":200,"ok":false,"attemptsUsed":2,"strategies":["direct_http","direct_browser"],"targetStatus":200,"verdict":"js_shell","failure":"BROWSER_CRASHED","retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T06:56:29.468Z","ms":8043}
+{"utc":"2026-09-26T06:56:39.214Z","case":"A08b-after-crash","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/js.html?after=crash","logicalId":"m2-crash-742c1979-b313-486c-87a3-cecc91ae5843","http":200,"ok":true,"attemptsUsed":2,"strategies":["direct_http","direct_browser"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":["fcpi-m2-js-5c1e"],"subresources":{"requests":1,"blocked":0,"overLimit":0,"offHost":0},"proxyDenied":[],"started":"2026-09-26T06:56:37.511Z","ms":1703}
+{"utc":"2026-09-26T06:56:39.214Z","case":"end"}
 driver_exit=0
 ### crash_kill
-killed_at=03:43:07 chrome_processes=8
+killed_at=06:56:37 chrome_processes=8
 kill_exit=137
 ### crash_browser_processes
-utc=2026-09-26T03:43:09Z
-      1       0 Ss       220 docker-init
-      7       1 Sl       220 MainThread
-    377       7 Ssl        1 chrome-headless
-    380     377 S          1 chrome-headless
-    381     377 S          1 chrome-headless
-    383     381 S          1 chrome-headless
-    399     380 Sl         1 chrome-headless
-    401     377 Sl         1 chrome-headless
-    439       0 Rs         0 ps
+utc=2026-09-26T06:56:44Z
+      1       0 Ss        68 docker-init
+      7       1 Sl        68 MainThread
+    218       7 Ssl        6 chrome-headless
+    221     218 S          6 chrome-headless
+    222     218 S          6 chrome-headless
+    224     222 S          6 chrome-headless
+    240     221 Sl         6 chrome-headless
+    242     218 Sl         6 chrome-headless
+    289       0 Rs         0 ps
 ### crash_retrieval_log
-{"utc":"2026-09-26T03:43:08.062Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"1a4b5d0a-64aa-4c67-860f-64f718b1c5eb","logical_id":"m2-crash-359a2c1d-6a0e-4f0c-ab40-f49e6938fb39","purpose":"page","url_hmac":"ec878369ab518ecd342d17798f863cb1","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"js_shell","failure":"BROWSER_CRASHED","bytes":697,"ms":7954}
-{"utc":"2026-09-26T03:43:09.800Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"fd25bc60-8cbf-4a86-a041-5d62cc91d5ba","logical_id":"m2-crash-2408df96-fcb4-4f92-a1dc-6f8d60a77279","purpose":"page","url_hmac":"e6c15227f1175df7214aa31e91f1ee55","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":721,"ms":1720}
+{"utc":"2026-09-26T06:56:37.498Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"90503f4b-f552-4613-96dc-1ddc2a8f326a","logical_id":"m2-crash-b167ce3a-3477-460d-8510-8279d3d8951d","purpose":"page","url_hmac":"9cadb0ae7dff04a131810434ce484d4b","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"js_shell","failure":"BROWSER_CRASHED","bytes":697,"ms":7953}
+{"utc":"2026-09-26T06:56:39.206Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"8b1fa674-5a78-40ea-80fa-3ab9b8d4813b","logical_id":"m2-crash-742c1979-b313-486c-87a3-cecc91ae5843","purpose":"page","url_hmac":"207eaf09721e0b0247b75de38b02de25","attempts_used":2,"strategies":["direct_http","direct_browser"],"target_status":200,"verdict":"adequate","failure":null,"bytes":721,"ms":1691}
 ### crash_fixture_log
-{"utc":"2026-09-26T03:43:00.120Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js-hold.html","query":"?crash=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:43:00.178Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js-hold.html","query":"?crash=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:43:06.463Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=20000&hold=1","status":200,"ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:43:08.091Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":"?after=crash","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:43:08.263Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":"?after=crash","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:29.555Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js-hold.html","query":"?crash=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:29.613Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js-hold.html","query":"?crash=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:30.775Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=20000&hold=1","status":200,"ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:37.248Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=30000&cancel=http","status":200,"ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:37.528Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":"?after=crash","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:56:37.660Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":"?after=crash","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
 ### crash_browser_log
-{"utc":"2026-09-26T03:43:08.057Z","service":"browser","build":"0.2.0","event":"browser_disconnected"}
-{"utc":"2026-09-26T03:43:08.058Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"1af3ecdb-d490-430d-92a3-d8f7f7c8e408","ok":false,"failure":"BROWSER_CRASHED","status":null,"requests":2,"blocked":0,"over_limit":0,"ms":7925,"pages_served":9}
-{"utc":"2026-09-26T03:43:08.163Z","service":"browser","build":"0.2.0","event":"browser_launched","version":"153.0.8010.12","ms":58,"launches":3}
-{"utc":"2026-09-26T03:43:09.795Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"2f4d1cd0-e1b5-4f51-a3d1-d7031bc79dd9","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":1690,"pages_served":1}
+{"utc":"2026-09-26T06:56:37.494Z","service":"browser","build":"0.2.0","event":"browser_disconnected"}
+{"utc":"2026-09-26T06:56:37.495Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"c75d15ad-7f5c-43e2-84af-0c2a9d96b27a","ok":false,"failure":"BROWSER_CRASHED","status":null,"requests":2,"blocked":0,"over_limit":0,"ms":7928,"pages_served":11}
+{"utc":"2026-09-26T06:56:37.600Z","service":"browser","build":"0.2.0","event":"browser_launched","version":"153.0.8010.12","ms":59,"launches":2}
+{"utc":"2026-09-26T06:56:39.202Z","service":"browser","build":"0.2.0","event":"render","attempt_id":"bd0075bf-6f2a-4739-89ab-ef6fdad696d3","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":1661,"pages_served":1}
 ### crash_attempts
-m2-crash-359a2c1d-6a0e-4f0c-ab40-f49e6938fb39	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T03:43:00.113Z	2026-09-26T03:43:00.122Z	js_shell	200	697		2
-m2-crash-359a2c1d-6a0e-4f0c-ab40-f49e6938fb39	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T03:43:00.124Z	2026-09-26T03:43:08.061Z	BROWSER_CRASHED		697	2	2
-m2-crash-2408df96-fcb4-4f92-a1dc-6f8d60a77279	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T03:43:08.084Z	2026-09-26T03:43:08.093Z	js_shell	200	721		2
-m2-crash-2408df96-fcb4-4f92-a1dc-6f8d60a77279	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T03:43:08.096Z	2026-09-26T03:43:09.798Z	rendered	200	721	1	2
+m2-crash-b167ce3a-3477-460d-8510-8279d3d8951d	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:56:29.549Z	2026-09-26T06:56:29.557Z	js_shell	200	697		2
+m2-crash-b167ce3a-3477-460d-8510-8279d3d8951d	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:56:29.560Z	2026-09-26T06:56:37.496Z	BROWSER_CRASHED		697	2	2
+m2-crash-742c1979-b313-486c-87a3-cecc91ae5843	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:56:37.521Z	2026-09-26T06:56:37.529Z	js_shell	200	721		2
+m2-crash-742c1979-b313-486c-87a3-cecc91ae5843	2	page	direct_browser	m2.fixture.fcpi.test	2026-09-26T06:56:37.531Z	2026-09-26T06:56:39.204Z	rendered	200	721	1	2
 ### crash_permits
 browser	0	t	
 url	0	t	
 url	1	t	
 ### crash_health
-retrieval-service running healthy restarts=0
-fixture-m2 running healthy restarts=0
 browser-worker running healthy restarts=0
 firecrawl-core running healthy restarts=0
 access-gateway running healthy restarts=0
+retrieval-service running healthy restarts=0
 nuq-postgres running healthy restarts=0
 rabbitmq running healthy restarts=0
 redis running healthy restarts=0
+fixture-m2 running healthy restarts=0
 fixture running healthy restarts=0
 ### crash_cgroups_end
-retrieval-service max=469762048 current=29982720 peak=47874048 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture-m2 max=201326592 current=15630336 peak=35078144 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-browser-worker max=1610612736 current=142475264 peak=186548224 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-firecrawl-core max=2415919104 current=1814102016 peak=1914109952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-access-gateway max=167772160 current=14336000 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-nuq-postgres max=671088640 current=133349376 peak=149553152 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-rabbitmq max=536870912 current=135626752 peak=210026496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-redis max=335544320 current=8634368 peak=16400384 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture max=67108864 current=18006016 peak=37994496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-host_mem_available_mib=5134
+browser-worker max=1610612736 current=171786240 peak=271417344 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+firecrawl-core max=2415919104 current=1786773504 peak=1910046720 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+access-gateway max=167772160 current=15319040 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+retrieval-service max=469762048 current=68567040 peak=101777408 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+nuq-postgres max=671088640 current=147734528 peak=164200448 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+rabbitmq max=536870912 current=124567552 peak=209403904 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+redis max=335544320 current=7847936 peak=15269888 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture-m2 max=201326592 current=84197376 peak=113311744 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture max=67108864 current=14909440 peak=35438592 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+host_mem_available_mib=5157
 ### crash_browser_health
-{"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":1,"launches":3,"busy":false}
+{"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":1,"launches":2,"busy":false}
 ### crash_end
 end

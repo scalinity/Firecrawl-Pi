@@ -1,52 +1,53 @@
 ### permits_meta
-utc=2026-09-26T03:35:14.036Z source_commit=dc7124851475e00013b486170c821d31e5b93da2
-firecrawl-core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 started=2026-09-26T03:30:35.718535339Z restarts=0
-retrieval-service=f98b579950ec811959627cb1deb8370416b202e1f08867de7789f83d92e2a1d6 image=sha256:f074c4cec095e95d003a4b34b0c5711adc6b172fdb40cd677f31968d8e68a671 started=2026-09-26T03:34:59.520681358Z restarts=0
-fixture-m2=3f80eca0081fdec16d707a1c4aaac164044e4e684a3572ac999e8177ae47d4bd image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T03:34:59.020491077Z restarts=0
+utc=2026-09-26T06:55:20.356Z source_commit=5afbbe90ffb7db5b1e481f057fa187d292e3b42d
+firecrawl-core=ef81828d65363460489e1221831377ea9218c1382499d7145cea5bba1f59f7cd image=sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d started=2026-09-26T06:54:03.034468501Z restarts=0
+retrieval-service=031d4b4248281736df7936981f1b7aa24e60388189fef09f4d65e2758ef27704 image=sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35 started=2026-09-26T06:50:20.227821603Z restarts=0
+fixture-m2=5f892079b8d60a48b0d3c7e575928f335516cee2a84fa2cfd7ac2c443976ef12 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-09-26T06:50:15.779802108Z restarts=0
 browser-worker=
 absent
 ### permits_driver
-{"utc":"2026-09-26T03:35:18.540Z","case":"A02-permits-1","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/slow?ms=4000&permit=1","logicalId":"m2-permit-36d6b4a2-05ea-4c98-aa0d-ed038231abdc","http":200,"ok":true,"attemptsUsed":1,"strategies":["direct_http"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T03:35:14.412Z","ms":4128}
-{"utc":"2026-09-26T03:35:18.543Z","case":"A02-permits-2","kind":"rs","url_label":"http://permit.fixture.fcpi.test:8080/slow?ms=4000&permit=2","logicalId":"m2-permit-8c5e25f1-6870-4044-b318-b9beb68efcd6","http":200,"ok":true,"attemptsUsed":1,"strategies":["direct_http"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T03:35:14.472Z","ms":4071}
-{"utc":"2026-09-26T03:35:22.563Z","case":"A02-permits-3","kind":"rs","url_label":"http://permit2.fixture.fcpi.test:8080/slow?ms=4000&permit=3","logicalId":"m2-permit-94120f91-19a7-46cf-9cfc-73f5d2e57514","http":200,"ok":true,"attemptsUsed":1,"strategies":["direct_http"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T03:35:14.473Z","ms":8090}
-{"utc":"2026-09-26T03:35:22.563Z","case":"end"}
+{"utc":"2026-09-26T06:55:24.845Z","case":"A02-permits-1","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/slow?ms=4000&permit=1","logicalId":"m2-permit-40606df2-5213-4ad6-90a5-e7627c9f597b","http":200,"ok":true,"attemptsUsed":1,"strategies":["direct_http"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T06:55:20.722Z","ms":4123}
+{"utc":"2026-09-26T06:55:24.849Z","case":"A02-permits-2","kind":"rs","url_label":"http://permit.fixture.fcpi.test:8080/slow?ms=4000&permit=2","logicalId":"m2-permit-acb24e5c-be8d-4918-9982-5732d57d666d","http":200,"ok":true,"attemptsUsed":1,"strategies":["direct_http"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T06:55:20.793Z","ms":4056}
+{"utc":"2026-09-26T06:55:28.868Z","case":"A02-permits-3","kind":"rs","url_label":"http://permit2.fixture.fcpi.test:8080/slow?ms=4000&permit=3","logicalId":"m2-permit-9e99fa38-58af-472e-8a25-901396c2d8bb","http":200,"ok":true,"attemptsUsed":1,"strategies":["direct_http"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":[],"subresources":null,"proxyDenied":[],"started":"2026-09-26T06:55:20.794Z","ms":8074}
+{"utc":"2026-09-26T06:55:28.868Z","case":"end"}
 driver_exit=0
 ### permits_retrieval_log
-{"utc":"2026-09-26T03:35:18.526Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"25778fc1-5403-44c3-818d-a5823f50b3f2","logical_id":"m2-permit-36d6b4a2-05ea-4c98-aa0d-ed038231abdc","purpose":"page","url_hmac":"e35cda2bdeb3827b3d83aa4d9c44e602","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":192,"ms":4035}
-{"utc":"2026-09-26T03:35:18.532Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"23aa987d-cfbb-4dff-8651-e1e1a1ba32eb","logical_id":"m2-permit-8c5e25f1-6870-4044-b318-b9beb68efcd6","purpose":"page","url_hmac":"f7bcf73af7cb9684380acf246083a2ba","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":192,"ms":4037}
-{"utc":"2026-09-26T03:35:22.559Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"0afc3f71-f036-460a-80f4-a4ba6b53b260","logical_id":"m2-permit-94120f91-19a7-46cf-9cfc-73f5d2e57514","purpose":"page","url_hmac":"2e538dc1ed5aeb516f2caed4bd3a4a52","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":192,"ms":8063}
+{"utc":"2026-09-26T06:55:24.833Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"dfc0ad6f-256c-44d0-89a2-be7aeb0166fb","logical_id":"m2-permit-40606df2-5213-4ad6-90a5-e7627c9f597b","purpose":"page","url_hmac":"678319e86b3655390731ad150e8fd9ed","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":192,"ms":4021}
+{"utc":"2026-09-26T06:55:24.843Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"1e95dcba-634d-4506-bdd3-f0d4c14e77a6","logical_id":"m2-permit-acb24e5c-be8d-4918-9982-5732d57d666d","purpose":"page","url_hmac":"a30fe1b6d4dc65e74ef78b031594438d","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":192,"ms":4027}
+{"utc":"2026-09-26T06:55:28.865Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"7334c23c-2172-434e-a93d-43073d128946","logical_id":"m2-permit-9e99fa38-58af-472e-8a25-901396c2d8bb","purpose":"page","url_hmac":"444953153124bd4d8d366c708a18bc56","attempts_used":1,"strategies":["direct_http"],"target_status":200,"verdict":"adequate","failure":null,"bytes":192,"ms":8047}
 ### permits_fixture_log
-{"utc":"2026-09-26T03:35:18.519Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=4000&permit=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:35:18.524Z","host":"permit.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=4000&permit=2","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
-{"utc":"2026-09-26T03:35:22.553Z","host":"permit2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=4000&permit=3","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:55:24.136Z","host":"127.0.0.1:8080","method":"GET","path":"/short.html","query":null,"status":200,"from":"127.0.0.1","ua":"node","cookie":null}
+{"utc":"2026-09-26T06:55:24.830Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=4000&permit=1","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:55:24.839Z","host":"permit.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=4000&permit=2","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-09-26T06:55:28.859Z","host":"permit2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=4000&permit=3","status":200,"from":"10.231.3.3","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
 ### permits_browser_log
 ### permits_attempts
-m2-permit-36d6b4a2-05ea-4c98-aa0d-ed038231abdc	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T03:35:14.497Z	2026-09-26T03:35:18.524Z	adequate	200	192		1
-m2-permit-8c5e25f1-6870-4044-b318-b9beb68efcd6	1	page	direct_http	permit.fixture.fcpi.test	2026-09-26T03:35:14.514Z	2026-09-26T03:35:18.530Z	adequate	200	192		1
-m2-permit-94120f91-19a7-46cf-9cfc-73f5d2e57514	1	page	direct_http	permit2.fixture.fcpi.test	2026-09-26T03:35:18.538Z	2026-09-26T03:35:22.557Z	adequate	200	192		1
+m2-permit-40606df2-5213-4ad6-90a5-e7627c9f597b	1	page	direct_http	m2.fixture.fcpi.test	2026-09-26T06:55:20.817Z	2026-09-26T06:55:24.832Z	adequate	200	192		1
+m2-permit-acb24e5c-be8d-4918-9982-5732d57d666d	1	page	direct_http	permit.fixture.fcpi.test	2026-09-26T06:55:20.832Z	2026-09-26T06:55:24.842Z	adequate	200	192		1
+m2-permit-9e99fa38-58af-472e-8a25-901396c2d8bb	1	page	direct_http	permit2.fixture.fcpi.test	2026-09-26T06:55:24.850Z	2026-09-26T06:55:28.862Z	adequate	200	192		1
 ### permits_permits
 browser	0	t	
 url	0	t	
 url	1	t	
 ### permits_health
-retrieval-service running healthy restarts=0
-fixture-m2 running healthy restarts=0
 firecrawl-core running healthy restarts=0
 access-gateway running healthy restarts=0
+retrieval-service running healthy restarts=0
 nuq-postgres running healthy restarts=0
 rabbitmq running healthy restarts=0
 redis running healthy restarts=0
+fixture-m2 running healthy restarts=0
 fixture running healthy restarts=0
 ### permits_cgroups_end
-retrieval-service max=469762048 current=26542080 peak=45531136 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture-m2 max=201326592 current=14254080 peak=34881536 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-firecrawl-core max=2415919104 current=1808121856 peak=1914109952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-access-gateway max=167772160 current=14204928 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-nuq-postgres max=671088640 current=136577024 peak=147259392 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-rabbitmq max=536870912 current=135413760 peak=210026496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-redis max=335544320 current=8732672 peak=16400384 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-fixture max=67108864 current=18251776 peak=37994496 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
-host_mem_available_mib=5295
+firecrawl-core max=2415919104 current=1782562816 peak=1910046720 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+access-gateway max=167772160 current=15302656 peak=27901952 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+retrieval-service max=469762048 current=67059712 peak=101777408 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+nuq-postgres max=671088640 current=152567808 peak=164200448 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+rabbitmq max=536870912 current=124502016 peak=209403904 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+redis max=335544320 current=7864320 peak=15269888 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture-m2 max=201326592 current=83476480 peak=113311744 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+fixture max=67108864 current=14860288 peak=35438592 low 0 high 0 max 0 oom 0 oom_kill 0 oom_group_kill 0 
+host_mem_available_mib=5314
 ### permits_browser_health
 unreachable
 ### permits_end

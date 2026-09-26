@@ -284,7 +284,7 @@
         "retries": 3,
         "start_period": "30s"
       },
-      "image": "fcpi/browser@sha256:cd83da63af0f9f5039c4b41a8832d84f72b1ba47f19cb410aa39a2a356de4824",
+      "image": "fcpi/browser@sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c",
       "init": true,
       "logging": {
         "driver": "json-file",
@@ -389,7 +389,7 @@
         "retries": 3,
         "start_period": "3m0s"
       },
-      "image": "fcpi/firecrawl-api@sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c",
+      "image": "fcpi/firecrawl-api@sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
       "logging": {
         "driver": "json-file",
         "options": {
@@ -904,7 +904,7 @@
         "retries": 3,
         "start_period": "30s"
       },
-      "image": "fcpi/retrieval@sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a",
+      "image": "fcpi/retrieval@sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
       "logging": {
         "driver": "json-file",
         "options": {
@@ -961,8 +961,8 @@
         },
         {
           "type": "bind",
-          "source": "/etc/firecrawl-pi/egress-local.cidrs",
-          "target": "/srv/local/egress-local.cidrs",
+          "source": "/etc/firecrawl-pi/egress-local",
+          "target": "/srv/local",
           "read_only": true,
           "bind": {
             "create_host_path": false
