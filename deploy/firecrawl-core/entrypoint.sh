@@ -14,7 +14,9 @@ POSTGRES_PASSWORD=$(secret core_postgres_password)
 NUQ_RABBITMQ_URL=$(secret core_nuq_rabbitmq_url)
 REDIS_URL=$(secret core_redis_url)
 REDIS_RATE_LIMIT_URL=$REDIS_URL
+# The pi-resilient engine's credential for the retrieval service (M2).
+PI_RETRIEVAL_TOKEN=$(secret core_retrieval_token)
 HOME=/tmp
-export POSTGRES_PASSWORD NUQ_RABBITMQ_URL REDIS_URL REDIS_RATE_LIMIT_URL HOME
+export POSTGRES_PASSWORD NUQ_RABBITMQ_URL REDIS_URL REDIS_RATE_LIMIT_URL PI_RETRIEVAL_TOKEN HOME
 exec setpriv --reuid=3002 --regid=3002 --clear-groups --inh-caps=-all --ambient-caps=-all --no-new-privs \
   docker-entrypoint.sh "$@"

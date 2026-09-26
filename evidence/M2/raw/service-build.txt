@@ -1,0 +1,151 @@
+### meta
+utc=2026-09-26T02:59:56Z
+source_commit=77e9c73d60b16521bcc0657f7d28c551d8edd61c
+builder=github.com/docker/buildx v0.37.1 0b265a9f62db554fa9aba6dd19e1bd5704bc7d8a
+mem_available_mib_before=5333
+### build_retrieval
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 621B done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.6s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [1/5] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#4 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.1s done
+#4 ...
+
+#5 [internal] load build context
+#5 transferring context: 82.33kB done
+#5 DONE 0.1s
+
+#4 [1/5] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#4 DONE 1.3s
+
+#6 [2/5] WORKDIR /srv/retrieval
+#6 DONE 0.6s
+
+#7 [3/5] COPY package.json package-lock.json ./
+#7 DONE 0.3s
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 1.943 
+#8 1.943 added 16 packages, and audited 17 packages in 1s
+#8 1.944 
+#8 1.944 found 0 vulnerabilities
+#8 1.946 npm notice
+#8 1.946 npm notice New major version of npm available! 10.9.9 -> 12.1.0
+#8 1.946 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0
+#8 1.946 npm notice To update run: npm install -g npm@12.1.0
+#8 1.946 npm notice
+#8 2.105 npm warn using --force Recommended protections disabled.
+#8 2.323 v22.23.3
+#8 2.676 fcpi-retrieval@0.2.0 /srv/retrieval
+#8 2.676 +-- pg@8.23.0
+#8 2.676 | +-- pg-cloudflare@1.4.0
+#8 2.676 | +-- pg-connection-string@2.14.0
+#8 2.676 | +-- UNMET OPTIONAL DEPENDENCY pg-native@>=3.0.1
+#8 2.676 | +-- pg-pool@3.14.0
+#8 2.676 | | `-- pg@8.23.0 deduped
+#8 2.676 | +-- pg-protocol@1.16.0
+#8 2.676 | +-- pg-types@2.2.0
+#8 2.676 | | +-- pg-int8@1.0.1
+#8 2.676 | | +-- postgres-array@2.0.0
+#8 2.676 | | +-- postgres-bytea@1.0.1
+#8 2.676 | | +-- postgres-date@1.0.7
+#8 2.676 | | `-- postgres-interval@1.2.0
+#8 2.676 | |   `-- xtend@4.0.2
+#8 2.676 | `-- pgpass@1.0.5
+#8 2.676 |   `-- split2@4.2.0
+#8 2.676 `-- tldts@7.4.15
+#8 2.676   `-- tldts-core@7.4.15
+#8 2.676 
+#8 DONE 3.2s
+
+#9 [5/5] COPY src ./src
+#9 DONE 0.3s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 0.9s done
+#10 exporting manifest sha256:7e4b449ea126a1e5cb2564f91616f38040186ac9734cdf20871a5c86d1d08fee 0.0s done
+#10 exporting config sha256:be46e86eb1eb02d8bba54fba67efc14475e87485ea3864502cd16b4de07be22a 0.0s done
+#10 naming to docker.io/fcpi/retrieval:m2 done
+#10 unpacking to docker.io/fcpi/retrieval:m2
+#10 unpacking to docker.io/fcpi/retrieval:m2 0.4s done
+#10 DONE 1.4s
+build_exit=0 elapsed_s=8 mem_available_mib=5206
+### build_browser
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.13kB done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for mcr.microsoft.com/playwright@sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717
+#2 DONE 0.5s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [1/5] FROM mcr.microsoft.com/playwright@sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717
+#4 resolve mcr.microsoft.com/playwright@sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717 0.1s done
+#4 ...
+
+#5 [internal] load build context
+#5 transferring context: 14.64kB done
+#5 DONE 0.2s
+
+#4 [1/5] FROM mcr.microsoft.com/playwright@sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717
+#4 DONE 0.6s
+
+#6 [2/5] WORKDIR /srv/browser
+#6 DONE 1.3s
+
+#7 [3/5] COPY package.json package-lock.json ./
+#7 DONE 0.2s
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 1.959 
+#8 1.959 added 1 package, and audited 2 packages in 1s
+#8 1.960 
+#8 1.960 found 0 vulnerabilities
+#8 1.962 npm notice
+#8 1.962 npm notice New major version of npm available! 11.19.0 -> 12.1.0
+#8 1.962 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.1.0
+#8 1.962 npm notice To update run: npm install -g npm@12.1.0
+#8 1.962 npm notice
+#8 2.088 npm warn using --force Recommended protections disabled.
+#8 2.287 v24.20.0
+#8 2.622 fcpi-browser@0.2.0 /srv/browser
+#8 2.622 └── playwright-core@1.63.0
+#8 2.622 
+#8 DONE 3.0s
+
+#9 [5/5] COPY src ./src
+#9 DONE 0.4s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 1.5s done
+#10 exporting manifest sha256:6a7b8ac91541ef7e612aa14086cdae265a08223ede7daf1ec818588e23f0b0b9 0.1s done
+#10 exporting config sha256:39b89b276c7d7c7cf98ec019ed27452d3ee12414ecdc8db3fbce9da3cc03dec6 0.1s done
+#10 naming to docker.io/fcpi/browser:m2
+#10 naming to docker.io/fcpi/browser:m2 0.0s done
+#10 unpacking to docker.io/fcpi/browser:m2
+#10 unpacking to docker.io/fcpi/browser:m2 0.4s done
+#10 DONE 2.0s
+build_exit=0 elapsed_s=9 mem_available_mib=5410
+### images
+fcpi/retrieval:m2 id=sha256:7e4b449ea126a1e5cb2564f91616f38040186ac9734cdf20871a5c86d1d08fee os=linux arch=arm64 size=354913933 user=3310:3310
+fcpi/browser:m2 id=sha256:6a7b8ac91541ef7e612aa14086cdae265a08223ede7daf1ec818588e23f0b0b9 os=linux arch=arm64 size=3500875407 user=3320:3320
+leftover_transient_containers=0
+### end
+end

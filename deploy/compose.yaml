@@ -1,4 +1,4 @@
-# FCPI curated Compose (M1: durable, private core; fixture-only profile).
+# FCPI curated Compose (M1: durable, private core; M2: guarded retrieval and a sandboxed browser).
 # Start and stop through systemd (fcpi-stack.service). The fail-closed data check
 # (deploy/host/fcpi-data-check.sh) runs before every start of the stack and, through a
 # docker.service drop-in, before every dockerd start, which is when restart policies
@@ -6,8 +6,11 @@
 # Every image is pinned by its linux/arm64 manifest digest; the NuQ image is built on
 # the Pi from deploy/nuq-postgres and referenced by its built digest.
 # Host publication: the access gateway on 127.0.0.1:3380 only. Networks: fcpi_access
-# (publication; gateway only), fcpi_api (gateway <-> core), fcpi_core (core and data
-# services), fcpi_fixture (core and fixture); the last three internal and isolated.
+# (publication; gateway only), fcpi_api (gateway <-> core), fcpi_core (core, data services and the
+# retrieval service), fcpi_acquire (core <-> retrieval service), fcpi_browser (retrieval service <->
+# browser worker), fcpi_fixture (retrieval service and the fixtures), all internal and isolated;
+# and fcpi_egress (the retrieval service alone), the only way out, guarded by fcpi_guard.
+# The core has no route out: every acquisition goes through the retrieval service (M2).
 # Every bind mount sets create_host_path: false, so a missing data path fails the
 # start instead of being recreated on the root card.
 name: fcpi
@@ -53,7 +56,7 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     # postgres_core_role_password: the core's own role, created at initdb by
     # 020-fcpi-core-role.sh (the image's entrypoint ignores the .psql file it reads).
-    secrets: [postgres_password, postgres_core_role_password]
+    secrets: [postgres_password, postgres_core_role_password, postgres_retrieval_role_password]
     volumes:
       - type: bind
         source: /srv/firecrawl-pi/data/postgres
@@ -67,6 +70,18 @@ services:
       - type: bind
         source: /opt/firecrawl-pi/deploy/nuq-postgres/fcpi-core-role.psql
         target: /docker-entrypoint-initdb.d/fcpi-core-role.psql
+        read_only: true
+        bind: { create_host_path: false }
+      # M2: the retrieval service's schema and role (DML only), for a new data directory;
+      # scripts/m2/pi-retrieval-db.sh applies the same file to an existing one.
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/nuq-postgres/initdb/030-fcpi-retrieval.sh
+        target: /docker-entrypoint-initdb.d/030-fcpi-retrieval.sh
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/nuq-postgres/fcpi-retrieval-schema.sql
+        target: /docker-entrypoint-initdb.d/fcpi-retrieval-schema.psql
         read_only: true
         bind: { create_host_path: false }
     tmpfs:
@@ -175,9 +190,11 @@ services:
     logging: *logging-dep
 
   firecrawl-core:
-    image: ghcr.io/firecrawl/firecrawl@sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af
+    # The project build: upstream 7666c1f9 plus patches/ (patches/series.json), built for
+    # linux/arm64 by scripts/m2/build-api-image.sh and loaded by digest (review Q7, D6).
+    image: fcpi/firecrawl-api@sha256:8886231320087abb96ad36b969d4e05a1d0d9e957b127403f6f5d68747e1bb8b
     platform: linux/arm64
-    pull_policy: missing
+    pull_policy: never
     hostname: firecrawl-core
     restart: unless-stopped
     entrypoint: ["/fcpi/entrypoint.sh"]
@@ -191,17 +208,20 @@ services:
       POSTGRES_PORT: "5432"
       POSTGRES_USER: fcpi_core          # DML on NuQ's tables only; not a superuser (deploy/nuq-postgres/fcpi-core-role.psql)
       POSTGRES_DB: postgres
-      SCRAPE_MAX_ATTEMPTS: "1"          # spec §29; M2's adapter owns retries
-      # The fetch engine refuses private addresses unless this is true; the only private
-      # targets reachable are the internal fixture network and data services, and the
-      # gateway admits fixture origins only. Webhook delivery is off, so the flag's
-      # webhook meaning is inert.
-      ALLOW_LOCAL_WEBHOOKS: "true"
+      SCRAPE_MAX_ATTEMPTS: "1"          # spec §29; the retrieval service owns retries
+      # The pi-resilient profile (patches/0003): every acquisition goes to the retrieval service,
+      # whose credential the entrypoint loads from core_retrieval_token. ALLOW_LOCAL_WEBHOOKS is
+      # unset: the private fixture is reached only through the service's fixture allowlist
+      # (review finding R4), and config.ts refuses the profile if the flag is set.
+      PI_RETRIEVAL_URL: http://retrieval-service:3310
+      # Search asks the service's SearXNG-compatible route (a fixture backend until M5);
+      # patches/0005 removes the direct DuckDuckGo fallback.
+      SEARXNG_ENDPOINT: http://retrieval-service:3310/searxng
       DISABLE_WEBHOOK_DELIVERY: "true"
       NODE_OPTIONS: --max-old-space-size=256
       # Deliberately unset: USE_GO_MARKDOWN_PARSER (the Go library stays inert),
       # BULL_AUTH_KEY (queue admin disabled), SEARXNG_ENDPOINT (M5), every Cloud key.
-    secrets: [core_postgres_password, core_redis_url, core_nuq_rabbitmq_url]
+    secrets: [core_postgres_password, core_redis_url, core_nuq_rabbitmq_url, core_retrieval_token]
     volumes:
       - type: bind
         source: /opt/firecrawl-pi/deploy/firecrawl-core/entrypoint.sh
@@ -231,7 +251,9 @@ services:
       nuq-postgres: { condition: service_healthy }
       redis: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
-    networks: [core, fixture, api]
+      retrieval-service: { condition: service_healthy }
+    # Not on fcpi_fixture since M2: the fixture is reached only through the retrieval service.
+    networks: [core, api, acquire]
     logging: *logging-app
 
   access-gateway:
@@ -246,7 +268,8 @@ services:
       PI_GATEWAY_LISTEN_PORT: "3300"
       PI_CORE_URL: http://firecrawl-core:3002
       PI_GATEWAY_TOKEN_HASHES_FILE: /run/secrets/gateway_token_hashes
-      PI_PERMITTED_TARGET_ORIGINS: http://m1.fixture.fcpi.test:8080
+      # Fixture origins only: opening general targets is M3's gateway work (services/access).
+      PI_PERMITTED_TARGET_ORIGINS: http://m1.fixture.fcpi.test:8080,http://m2.fixture.fcpi.test:8080,http://pace.fixture.fcpi.test:8080
     secrets: [gateway_token_hashes]
     volumes:
       - type: bind
@@ -314,6 +337,144 @@ services:
         aliases: [m1.fixture.fcpi.test]
     logging: *logging-dep
 
+  # M2: the only acquisition path (spec §8.3). Its credential checks, SSRF rules, pacing, permits
+  # and attempt budgets are in services/retrieval; it alone sits on fcpi_egress, whose DNS upstream
+  # is that bridge's host address (the host's resolver), so no lookup leaves through the host's own
+  # namespace past the guard (evidence/M1/closeout/CLOSEOUT.md).
+  retrieval-service:
+    image: fcpi/retrieval@sha256:7e4b449ea126a1e5cb2564f91616f38040186ac9734cdf20871a5c86d1d08fee
+    platform: linux/arm64
+    pull_policy: never
+    hostname: retrieval-service
+    restart: unless-stopped
+    user: "3310:3310"
+    environment:
+      PI_RETRIEVAL_LISTEN: 10.231.5.10:3310
+      PI_RETRIEVAL_PROXY_LISTEN: 10.231.2.10:3312
+      PI_EGRESS_POLICY_FILE: /srv/policy/egress.json
+      PI_EGRESS_LOCAL_CIDRS_FILE: /srv/local/egress-local.cidrs
+      PI_RESOLVER: 10.231.6.1
+      PI_BROWSER_URL: http://10.231.2.20:3320
+      PI_CREDENTIALS_DIR: /run/secrets
+      PI_POSTGRES_HOST: nuq-postgres
+      PI_POSTGRES_DB: postgres
+      PI_POSTGRES_USER: fcpi_retrieval
+      PI_MAX_URL_ACQUISITIONS: "2"
+      PI_MAX_BROWSER_PAGES: "1"
+      PI_PAID_DISPATCH_ENABLED: "false"
+      PI_CLOUD_ACCESS_ENABLED: "false"
+      PI_BROWSER_EXTRAS_ENABLED: "false"
+    secrets: [retrieval_postgres_password, retrieval_core_token_sha256, retrieval_browser_token]
+    volumes:
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/policies/egress.json
+        target: /srv/policy/egress.json
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /etc/firecrawl-pi/egress-local.cidrs
+        target: /srv/local/egress-local.cidrs
+        read_only: true
+        bind: { create_host_path: false }
+    dns: [10.231.6.1]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 448m
+    memswap_limit: 448m
+    cpus: 0.6
+    pids_limit: 128
+    stop_grace_period: 20s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://10.231.5.10:3310/healthz',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      nuq-postgres: { condition: service_healthy }
+    networks:
+      acquire: { ipv4_address: 10.231.5.10 }
+      browser: { ipv4_address: 10.231.2.10 }
+      core: {}
+      fixture: {}
+      egress: {}
+    logging: *logging-app
+
+  # M2: bounded Chromium (spec §12), non-root with the sandbox on under the project seccomp profile
+  # (Docker's default plus chroot, clone and unshare; scripts/m2/build-seccomp.mjs). Its network is
+  # internal and holds only itself and the retrieval service, whose proxy is its one way out.
+  browser-worker:
+    image: fcpi/browser@sha256:6a7b8ac91541ef7e612aa14086cdae265a08223ede7daf1ec818588e23f0b0b9
+    platform: linux/arm64
+    pull_policy: never
+    hostname: browser-worker
+    restart: unless-stopped
+    user: "3320:3320"
+    init: true
+    environment:
+      PI_BROWSER_LISTEN: 10.231.2.20:3320
+      PI_CREDENTIALS_DIR: /run/secrets
+      PI_BROWSER_EXTRAS_ENABLED: "false"
+      HOME: /tmp
+    secrets: [browser_token_sha256]
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    shm_size: 256m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+      - seccomp=/opt/firecrawl-pi/deploy/browser/seccomp.json
+    mem_limit: 1536m
+    memswap_limit: 1536m
+    cpus: 1.5
+    pids_limit: 512
+    stop_grace_period: 15s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://10.231.2.20:3320/healthz',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      browser: { ipv4_address: 10.231.2.20 }
+    logging: *logging-app
+
+  # M2's controlled targets (tests/fixtures/m2/server.mjs), on the internal fixture network under
+  # the names the retrieval service's policy lists. Its larger cap holds the size-limit fixtures.
+  fixture-m2:
+    image: node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+    platform: linux/arm64
+    pull_policy: missing
+    hostname: fixture-m2
+    restart: unless-stopped
+    user: "8080:8080"
+    command: ["node", "/fixtures/m2/server.mjs"]
+    volumes:
+      - type: bind
+        source: /opt/firecrawl-pi/tests/fixtures
+        target: /fixtures
+        read_only: true
+        bind: { create_host_path: false }
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 192m
+    memswap_limit: 192m
+    cpus: 0.2
+    pids_limit: 32
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/short.html',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      fixture:
+        aliases: [m2.fixture.fcpi.test, pace.fixture.fcpi.test]
+    logging: *logging-dep
+
 networks:
   # Not internal: port publishing needs a non-internal bridge. Only the gateway joins it.
   access:
@@ -353,6 +514,37 @@ networks:
       com.docker.network.bridge.gateway_mode_ipv4: isolated
     ipam:
       config: [{ subnet: 10.231.4.0/24 }]
+  # M2: the core-to-retrieval-service link, internal and isolated.
+  acquire:
+    name: fcpi_acquire
+    internal: true
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: fcpi-acquire
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+    ipam:
+      config: [{ subnet: 10.231.5.0/24 }]
+  # M2: the browser worker and the retrieval service's proxy, internal and isolated: Chromium has
+  # no route anywhere else, so WebRTC, direct UDP or a service worker cannot bypass the proxy.
+  browser:
+    name: fcpi_browser
+    internal: true
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: fcpi-browser
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+    ipam:
+      config: [{ subnet: 10.231.2.0/24 }]
+  # M2: the retrieval service's way out, and the only non-internal network besides the gateway's.
+  # fcpi_guard admits new TCP connections to public addresses on 80 and 443 and DNS to the host
+  # address 10.231.6.1; the rest is dropped and counted (deploy/host/fcpi-guard.nft).
+  egress:
+    name: fcpi_egress
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: fcpi-egress
+    ipam:
+      config: [{ subnet: 10.231.6.0/24, gateway: 10.231.6.1 }]
 
 # Files under /etc/firecrawl-pi/secrets (directory 0700, files 0600), created by
 # scripts/m1/pi-init.sh; names, owners and modes are listed in deploy/secrets.template.
@@ -365,3 +557,10 @@ secrets:
   core_redis_url: { file: /etc/firecrawl-pi/secrets/core_redis_url }
   core_nuq_rabbitmq_url: { file: /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url }
   gateway_token_hashes: { file: /etc/firecrawl-pi/secrets/gateway_token_hashes }
+  # M2 (scripts/m2/pi-init-m2.sh)
+  postgres_retrieval_role_password: { file: /etc/firecrawl-pi/secrets/postgres_retrieval_role_password }
+  retrieval_postgres_password: { file: /etc/firecrawl-pi/secrets/retrieval_postgres_password }
+  core_retrieval_token: { file: /etc/firecrawl-pi/secrets/core_retrieval_token }
+  retrieval_core_token_sha256: { file: /etc/firecrawl-pi/secrets/retrieval_core_token_sha256 }
+  retrieval_browser_token: { file: /etc/firecrawl-pi/secrets/retrieval_browser_token }
+  browser_token_sha256: { file: /etc/firecrawl-pi/secrets/browser_token_sha256 }
