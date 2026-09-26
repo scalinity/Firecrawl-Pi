@@ -633,7 +633,12 @@ const checks = {
     expected: "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed; the loaded guard holds the repository guard file's three tailnet rules, and over the tailnet no port the host listens on answers except :8443 (the control)",
     run() {
       const status = `${RAW}tailscale-status.txt`, check = `${RAW}tailnet-check.txt`;
-      if (!has(status) || !has(check)) return { blocked: true, actual: `Tailscale is installed on the Pi (${(read(`${RAW}tailscale-install.txt`).match(/installed=(\S+)/) ?? [])[1]}); awaiting the account association and the workstation's tailnet membership (${!has(status) ? "no Pi status" : "no workstation check"})` };
+      // A credential block is a recorded state (the Pi's Tailscale awaiting its login or approval), never
+      // the mere absence of evidence, which is NOT_RUN.
+      if (!has(status)) return { notRun: true, actual: "evidence missing: tailscale-status.txt (the Pi's Tailscale state was not collected)" };
+      const backend = (read(status).match(/\bbackend=(\S+)/) ?? [])[1];
+      if (/^(NeedsLogin|NeedsMachineAuth)$/.test(backend ?? "")) return { blocked: true, actual: `the Pi's Tailscale is ${backend}: awaiting the owner's approval of its login` };
+      if (!has(check)) return { notRun: true, actual: `evidence missing: tailnet-check.txt (the Pi's Tailscale is ${backend ?? "unknown"}; the workstation check was not run)` };
       const ins = read(`${RAW}tailscale-install.txt`), s = S(status), ts = kv((s.tailscale ?? []).flatMap((l) => l.split(" ")));
       const serve = jsonLines(s.serve)[0] ?? {};
       const web = serve.web ?? [];
@@ -693,7 +698,8 @@ for (const id of wanted) {
     else {
       rec.config_or_fixture_hash = c.inputs.length ? hashOf(c.inputs) : null;
       const r = c.run();
-      if (r.blocked) Object.assign(rec, { state: "BLOCKED_CREDENTIAL", actual: r.actual, exit_code: null });
+      if (r.notRun) Object.assign(rec, { state: "NOT_RUN", actual: r.actual, exit_code: null });
+      else if (r.blocked) Object.assign(rec, { state: "BLOCKED_CREDENTIAL", actual: r.actual, exit_code: null });
       else Object.assign(rec, { state: r.ok ? "PASS" : "FAIL", actual: r.actual, exit_code: r.ok ? 0 : 1 });
       if (r.configHash) rec.config_or_fixture_hash = r.configHash;
     }
