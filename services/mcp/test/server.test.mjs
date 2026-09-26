@@ -38,6 +38,7 @@ const fake = createServer((req, res) => {
       if (/hugemeta/.test(rec.body.url)) return send(200, { success: true, data: { markdown: "# small", metadata: Object.fromEntries(Array.from({ length: 3000 }, (_, i) => [`og:tag${i}`, "v".repeat(100)])) } });
       return send(200, { success: true, data: { markdown: "# fixture page", metadata: { sourceURL: rec.body.url, statusCode: 200 } } });
     }
+    if (req.method === "POST" && u.pathname === "/v2/crawl" && /dropme/.test(rec.body.url)) return req.socket.destroy();   // recorded, answer lost
     if (req.method === "POST" && u.pathname === "/v2/crawl") return send(200, { success: true, id: JOB, url: `http://${req.headers.host}/v2/crawl/${JOB}` });
     if (req.method === "GET" && u.pathname === `/v2/crawl/${JOB}`) return send(200, { success: true, status: "completed", completed: 2, total: 2, creditsUsed: 2, expiresAt: "2026-10-03T00:00:00.000Z", data: [{ markdown: "a" }, { markdown: "b" }] });
     if (req.method === "GET" && u.pathname === "/platform/v1/status") return send(200, { success: true, service: "access-gateway" });
@@ -256,4 +257,21 @@ test("an answer still over the limit after every cut is refused as RESULT_TOO_LA
   assert.ok(Buffer.byteLength(r.last.result.content[0].text) < 1024);
   await sleep(100);
   assert.ok(logs.some((l) => l.event === "tool" && l.outcome === "too_large"));
+});
+
+test("every submission carries an idempotency key, and a lost answer returns it for the retry", async () => {
+  const k = await call("firecrawl_crawl", { url: "https://example.com/keyless", limit: 2 });
+  const sent = seen.filter((s) => s.url === "/v2/crawl").at(-1).headers["x-idempotency-key"];
+  assert.match(sent, /^mcp:[0-9a-f-]{36}$/);
+  assert.equal(payload(k).idempotencyKey, sent);
+  const lost = await call("firecrawl_crawl", { url: "https://example.com/dropme", limit: 2 });
+  assert.equal(lost.last.result.isError, true);
+  assert.equal(payload(lost).error.code, "SUBMISSION_UNCERTAIN");
+  const key = payload(lost).error.idempotencyKey;
+  assert.match(key, /^mcp:[0-9a-f-]{36}$/);
+  assert.equal(seen.filter((s) => s.url === "/v2/crawl").at(-1).headers["x-idempotency-key"], key, "the key given back is the one the gateway received");
+  await call("firecrawl_crawl", { url: "https://example.com/dropme", limit: 2, idempotencyKey: key });
+  assert.equal(seen.filter((s) => s.url === "/v2/crawl").at(-1).headers["x-idempotency-key"], key, "the retry carries the same key");
+  await sleep(100);
+  assert.ok(logs.some((l) => l.event === "tool" && l.outcome === "uncertain"));
 });

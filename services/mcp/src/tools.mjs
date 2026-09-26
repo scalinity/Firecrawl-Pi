@@ -114,7 +114,7 @@ const errorOf = (r) => ({ error: { httpStatus: r.status, code: r.json?.code ?? n
 function shape(kind, tool, r, args, m, omitted) {
   const budget = m.mcp.limits.toolTextMaxBytes;
   const ok = r.status >= 200 && r.status < 300 && r.json && r.json.success !== false;
-  if (!ok) return { isError: true, payload: errorOf(r) };
+  if (!ok) { const e = errorOf(r); if (kind === "submit") e.error.idempotencyKey = args.idempotencyKey ?? null; return { isError: true, payload: e }; }
   const b = r.json;
   switch (kind) {
     case "sync": {
@@ -133,7 +133,7 @@ function shape(kind, tool, r, args, m, omitted) {
       if (cuts) payload.truncated = { fields: cuts, note: "The page exceeded the tool payload limit, so the fields named here were cut. Ask for fewer formats (markdown alone is smallest), or scrape it as a batch job and read it page by page." };
       return { payload };
     }
-    case "submit": return { payload: { id: b.id, results: b.url ?? null, ...(b.invalidURLs ? { invalidURLs: b.invalidURLs } : {}),
+    case "submit": return { payload: { id: b.id, results: b.url ?? null, idempotencyKey: args.idempotencyKey ?? null, ...(b.invalidURLs ? { invalidURLs: b.invalidURLs } : {}),
       next: `Poll it with ${tool.route === "crawl.submit" ? "firecrawl_check_crawl_status" : "firecrawl_batch_status"} and this id; its receipt is firecrawl_get_result.` } };
     case "status": {
       const skip = args.skip ?? 0, data = Array.isArray(b.data) ? b.data : [];

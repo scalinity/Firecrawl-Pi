@@ -51,12 +51,19 @@ async function runTool(t, args, extra, era) {
     // streams (request-scoped SSE) instead of arriving as one JSON body.
     const progressToken = extra.mcpReq?._meta?.progressToken;
     if (t.long && progressToken !== undefined) await extra.mcpReq.notify({ method: "notifications/progress", params: { progressToken, progress: 0, message: `Sent to ${t.route.method} ${t.route.path}; waiting for the gateway.` } });
+    // Every submission carries an idempotency key (spec §16.2, §17.3): the caller's own, or one made here.
+    // The gateway commits a receipt before it answers, so an answer lost on its way back leaves a job the
+    // caller cannot see; retried under the same key, the call returns that job instead of starting another.
+    if (t.kind === "submit") args = { ...args, idempotencyKey: args.idempotencyKey ?? `mcp:${randomUUID()}` };
     const q = t.request(args);
     let r;
     try { r = await rest.call({ ...q, token: auth.token, host: auth.extra.host, signal }); }
     catch (e) {
       const downstream = { route: t.route.id, status: null, code: e.code ?? "UNAVAILABLE", request_id: null };
       if (e.code === "ABORTED") { finish(null, downstream, "cancelled"); throw e; }
+      if (t.kind === "submit" && e.code !== "TOO_LARGE") {
+        return finish(text({ error: { code: "SUBMISSION_UNCERTAIN", idempotencyKey: args.idempotencyKey, message: `The gateway's answer was lost (${e.message}), so whether it recorded this job is unknown. Call ${t.name} again with the same arguments and this idempotencyKey: it returns the job if it was recorded and starts it once if it was not.` } }, true), downstream, "uncertain");
+      }
       const message = e.code === "TOO_LARGE" ? `The gateway's answer is larger than this service carries (${L.restResponseMaxBytes} bytes). ${t.kind === "status" ? "Read fewer documents at a time (limit=1)." : "Ask for fewer formats."}` : `The gateway did not answer: ${e.message}.`;
       return finish(text({ error: { code: e.code === "TOO_LARGE" ? "RESULT_TOO_LARGE" : "GATEWAY_UNAVAILABLE", message } }, true), downstream, "failed");
     }

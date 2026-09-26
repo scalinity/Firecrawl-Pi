@@ -2,8 +2,9 @@
 // §20.1). Each call carries the caller's own bearer token, so the gateway authenticates, scopes and
 // owner-binds it exactly as it would a REST client's; and the Host the caller used, so the result
 // addresses the gateway returns name the origin the caller reached it at. A keep-alive pool is the
-// only state shared between requests (spec §17.2). An aborted MCP request aborts its REST call, and
-// the gateway, seeing its client go, cancels the core request behind it.
+// only state shared between requests (spec §17.2). An aborted MCP request aborts its REST call; on a
+// synchronous route the gateway, seeing its client go, cancels the core request behind it, while a job
+// submission the gateway has already recorded stays recorded (its key finds it again).
 import { request, Agent } from "node:http";
 
 export class RestError extends Error {
