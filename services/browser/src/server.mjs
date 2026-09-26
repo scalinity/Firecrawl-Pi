@@ -218,10 +218,13 @@ http.createServer((req, res) => {
   let n = 0;
   req.on("data", (c) => { n += c.length; if (n > 1024 * 1024) req.destroy(); else chunks.push(c); });
   req.on("end", async () => {
-    let body;
-    try { body = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { return send(res, 400, { error: "bad_request" }); }
-    if (typeof body.url !== "string" || !body.proxy?.server || !body.proxy?.username || !body.proxy?.password) return send(res, 400, { error: "bad_request" });
+    // Checked and set with no await between, so two requests whose bodies end together cannot
+    // both start a render (CWE-362; review finding W5); the check above only rejects early.
+    if (busy) return send(res, 429, { ok: false, failure: { class: "RESOURCE_BUSY", detail: "a render is in progress" } });
     busy = true;
+    let body;
+    try { body = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { busy = false; return send(res, 400, { error: "bad_request" }); }
+    if (typeof body.url !== "string" || !body.proxy?.server || !body.proxy?.username || !body.proxy?.password) { busy = false; return send(res, 400, { error: "bad_request" }); }
     const started = Date.now();
     const cancel = new AbortController();
     res.on("close", () => { if (!res.writableFinished) cancel.abort(); });
