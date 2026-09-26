@@ -1,0 +1,150 @@
+### meta
+utc=2026-09-26T03:46:10Z source_commit=e337f03277b46b2bab390630cbd3b08856b95817 image=fcpi/retrieval@sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a
+### tap
+TAP version 13
+# Subtest: a public name with any private answer is refused, and a DNS failure is typed
+ok 1 - a public name with any private answer is refused, and a DNS failure is typed
+  ---
+  duration_ms: 13.574985
+  type: 'test'
+  ...
+# Subtest: DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
+ok 2 - DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
+  ---
+  duration_ms: 32.730099
+  type: 'test'
+  ...
+# Subtest: a fixture name must resolve inside its own subnet
+ok 3 - a fixture name must resolve inside its own subnet
+  ---
+  duration_ms: 1.041158
+  type: 'test'
+  ...
+# Subtest: a redirect is validated at every hop: into private space it is refused before any connection
+ok 4 - a redirect is validated at every hop: into private space it is refused before any connection
+  ---
+  duration_ms: 35.682443
+  type: 'test'
+  ...
+# Subtest: bodies are bounded before and after decoding
+ok 5 - bodies are bounded before and after decoding
+  ---
+  duration_ms: 98.561131
+  type: 'test'
+  ...
+# Subtest: a slow target ends at the deadline
+ok 6 - a slow target ends at the deadline
+  ---
+  duration_ms: 602.92327
+  type: 'test'
+  ...
+# Subtest: a cookie set on a redirect comes back on the next hop to the same host
+ok 7 - a cookie set on a redirect comes back on the next hop to the same host
+  ---
+  duration_ms: 6.647287
+  type: 'test'
+  ...
+# Subtest: caller credentials go only to the first origin
+ok 8 - caller credentials go only to the first origin
+  ---
+  duration_ms: 5.362663
+  type: 'test'
+  ...
+# Subtest: static pages are adequate, short ones too; script-rendered ones are JS shells
+ok 9 - static pages are adequate, short ones too; script-rendered ones are JS shells
+  ---
+  duration_ms: 7.22383
+  type: 'test'
+  ...
+# Subtest: interstitials, sign-in gates and refusals are typed failures
+ok 10 - interstitials, sign-in gates and refusals are typed failures
+  ---
+  duration_ms: 0.644951
+  type: 'test'
+  ...
+# Subtest: missing pages and target errors keep the native result; binaries are binaries
+ok 11 - missing pages and target errors keep the native result; binaries are binaries
+  ---
+  duration_ms: 0.43743
+  type: 'test'
+  ...
+# Subtest: direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
+ok 12 - direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
+  ---
+  duration_ms: 1.682295
+  type: 'test'
+  ...
+# Subtest: the deployed policy loads; a looser or unknown one does not
+ok 13 - the deployed policy loads; a looser or unknown one does not
+  ---
+  duration_ms: 2.333838
+  type: 'test'
+  ...
+# Subtest: IPv4 special-purpose ranges are never public
+ok 14 - IPv4 special-purpose ranges are never public
+  ---
+  duration_ms: 6.294858
+  type: 'test'
+  ...
+# Subtest: the host's own LAN is refused even on a globally routable prefix
+ok 15 - the host's own LAN is refused even on a globally routable prefix
+  ---
+  duration_ms: 0.596561
+  type: 'test'
+  ...
+# Subtest: IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
+ok 16 - IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
+  ---
+  duration_ms: 16.093306
+  type: 'test'
+  ...
+# Subtest: schemes, credentials, ports and ambiguous numeric hosts
+ok 17 - schemes, credentials, ports and ambiguous numeric hosts
+  ---
+  duration_ms: 2.54271
+  type: 'test'
+  ...
+# Subtest: literal addresses are judged by class
+ok 18 - literal addresses are judged by class
+  ---
+  duration_ms: 1.421625
+  type: 'test'
+  ...
+# Subtest: local and reserved names are refused before any lookup
+ok 19 - local and reserved names are refused before any lookup
+  ---
+  duration_ms: 0.927157
+  type: 'test'
+  ...
+# Subtest: Firecrawl Cloud destinations are refused
+ok 20 - Firecrawl Cloud destinations are refused
+  ---
+  duration_ms: 0.457671
+  type: 'test'
+  ...
+# Subtest: the fixture exception is exact: its host, its port, plain http
+ok 21 - the fixture exception is exact: its host, its port, plain http
+  ---
+  duration_ms: 0.404004
+  type: 'test'
+  ...
+# Subtest: ordinary public URLs pass, with a trailing dot normalised
+ok 22 - ordinary public URLs pass, with a trailing dot normalised
+  ---
+  duration_ms: 1.183622
+  type: 'test'
+  ...
+1..22
+# tests 22
+# suites 0
+# pass 22
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 923.219447
+test_exit=0
+### transient
+leftover_transient_containers=0
+### end
+end
