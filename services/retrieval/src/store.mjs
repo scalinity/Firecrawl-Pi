@@ -122,6 +122,10 @@ export class Store {
   // and the domain is held by `holder` until released or holdMs passes.
   async paceDirect(domain, holder, limits, holdMs, fixture) {
     return this.#tx(async (c) => {
+      // The platform's daily cap is counted across all domains, so concurrent pacers of different
+      // domains are serialised on one advisory lock before counting; otherwise each could see 199 and
+      // go (CWE-362; review finding W4). Fixture navigations are outside the cap and do not wait.
+      if (!fixture) await c.query("SELECT pg_advisory_xact_lock(hashtext('fcpi.direct_nav.day'))");
       await c.query("INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT DO NOTHING", [domain]);
       const s = (await c.query(
         "SELECT holder, hold_until, last_nav_at, cooldown_until, cooldown_s, now() AS now FROM fcpi_retrieval.domain_state WHERE domain = $1 FOR UPDATE", [domain])).rows[0];
