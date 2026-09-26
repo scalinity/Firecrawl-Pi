@@ -118,7 +118,9 @@ async function capture(page, fullPage) {
   return { mime: "image/png", width: viewport.width, height, truncated: fullPage && dims.h > 20000, bytes: buf.length, base64: buf.toString("base64") };
 }
 
-async function render(r) {
+// signal: aborted when the retrieval service stops waiting (its caller went away); the render then
+// ends at once, through the same close-or-retire path as a deadline.
+async function render(r, signal) {
   const started = Date.now();
   const deadline = started + Math.min(Number(r.deadlineMs) || 0, r.limits?.contextMaxMs ?? CONTEXT_MAX_MS, CONTEXT_MAX_MS);
   const wantsExtras = !!r.hooks?.screenshot || (r.hooks?.actions ?? []).length > 0;
@@ -131,14 +133,16 @@ async function render(r) {
     userAgent: r.userAgent, viewport: { width: 1280, height: 800 }, serviceWorkers: "block", acceptDownloads: false,
     ignoreHTTPSErrors: false, javaScriptEnabled: true, locale: "en-US",
   });
-  // A context never outlives its deadline: past it, the context is closed from here, and past
-  // the grace period the whole browser is retired.
-  let expired = false;
-  const killer = setTimeout(async () => {
-    expired = true;
+  // A context never outlives its deadline or its caller: past either, the context is closed from
+  // here, and past the grace period the whole browser is retired.
+  let expired = false, cancelled = false;
+  const closeNow = async () => {
     const closed = await Promise.race([context.close().then(() => true, () => true), new Promise((res) => setTimeout(() => res(false), CLOSE_GRACE_MS))]);
     if (!closed) await retire("context did not close");
-  }, Math.max(deadline - Date.now(), 1));
+  };
+  const killer = setTimeout(() => { expired = true; closeNow(); }, Math.max(deadline - Date.now(), 1));
+  const onAbort = () => { cancelled = true; clearTimeout(killer); closeNow(); };
+  if (signal?.aborted) onAbort(); else signal?.addEventListener("abort", onAbort, { once: true });
   try {
     await context.route("**/*", (route) => {
       const req = route.request();
@@ -165,10 +169,11 @@ async function render(r) {
       timings: { totalMs: Date.now() - started }, browser: { version: browser?.version() ?? null, pagesServed: pagesServed + 1, launches },
     };
   } catch (e) {
-    const cls = e.failureClass ?? (expired ? "TIMEOUT" : browser === null ? "BROWSER_CRASHED" : /Timeout/i.test(e.name) ? "TIMEOUT" : /net::ERR_/.test(e.message) ? "NAVIGATION_FAILED" : "BROWSER_ERROR");
+    const cls = e.failureClass ?? (cancelled ? "CANCELLED" : expired ? "TIMEOUT" : browser === null ? "BROWSER_CRASHED" : /Timeout/i.test(e.name) ? "TIMEOUT" : /net::ERR_/.test(e.message) ? "NAVIGATION_FAILED" : "BROWSER_ERROR");
     return { ok: false, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300) }, subresources: counters, timings: { totalMs: Date.now() - started } };
   } finally {
     clearTimeout(killer);
+    signal?.removeEventListener("abort", onAbort);
     pagesServed++;
     const closed = await Promise.race([context.close().then(() => true, () => true), new Promise((res) => setTimeout(() => res(false), CLOSE_GRACE_MS))]);
     if (!closed) await retire("context did not close");
@@ -202,8 +207,10 @@ http.createServer((req, res) => {
     if (typeof body.url !== "string" || !body.proxy?.server || !body.proxy?.username || !body.proxy?.password) return send(res, 400, { error: "bad_request" });
     busy = true;
     const started = Date.now();
+    const cancel = new AbortController();
+    res.on("close", () => { if (!res.writableFinished) cancel.abort(); });
     try {
-      const out = await render(body);
+      const out = await render(body, cancel.signal);
       log({ event: "render", attempt_id: body.attemptId, ok: out.ok, failure: out.failure?.class ?? null, status: out.status ?? null, requests: out.subresources?.requests ?? 0,
         blocked: out.subresources?.blocked ?? 0, over_limit: out.subresources?.overLimit ?? 0, ms: Date.now() - started, pages_served: pagesServed });
       send(res, 200, out);

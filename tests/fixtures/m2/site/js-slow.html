@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>FCPI M2 slow JS fixture</title></head>
+<body>
+<main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main>
+<script>
+  // Renders 20 s after load: long enough for a test to cancel the render half-way.
+  setTimeout(() => {
+    document.getElementById("root").innerHTML = "<h1>Rendered late</h1><p>This article appears twenty seconds after the page loads.</p><p>Sentinel: <strong>fcpi-m2-jsslow-1f6d</strong></p>";
+  }, 20000);
+</script>
+</body>
+</html>

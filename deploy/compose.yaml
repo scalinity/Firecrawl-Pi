@@ -269,7 +269,7 @@ services:
       PI_CORE_URL: http://firecrawl-core:3002
       PI_GATEWAY_TOKEN_HASHES_FILE: /run/secrets/gateway_token_hashes
       # Fixture origins only: opening general targets is M3's gateway work (services/access).
-      PI_PERMITTED_TARGET_ORIGINS: http://m1.fixture.fcpi.test:8080,http://m2.fixture.fcpi.test:8080,http://pace.fixture.fcpi.test:8080
+      PI_PERMITTED_TARGET_ORIGINS: http://m1.fixture.fcpi.test:8080,http://m2.fixture.fcpi.test:8080,http://pace.fixture.fcpi.test:8080,http://cool.fixture.fcpi.test:8080
     secrets: [gateway_token_hashes]
     volumes:
       - type: bind
@@ -472,7 +472,9 @@ services:
       start_period: 10s
     networks:
       fixture:
-        aliases: [m2.fixture.fcpi.test, pace.fixture.fcpi.test]
+        # m2: the main fixture name; pace: the default direct limits (spec §10.2); cool: 429 cooldowns,
+        # which persist per domain and would otherwise hold back every later test on m2.
+        aliases: [m2.fixture.fcpi.test, pace.fixture.fcpi.test, cool.fixture.fcpi.test]
     logging: *logging-dep
 
 networks:
