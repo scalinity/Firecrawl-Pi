@@ -21,12 +21,17 @@ function processes() {
     try {
       const st = readFileSync(`/proc/${pid}/status`, "utf8");
       const g = (k) => (st.match(new RegExp(`^${k}:\\s*(.*)$`, "m")) ?? [])[1] ?? "";
-      const argv = readFileSync(`/proc/${pid}/cmdline`, "utf8").split("\0").filter(Boolean);
-      const type = (argv.find((a) => a.startsWith("--type=")) ?? "").slice(7) || (/chrome/.test(argv[0] ?? "") ? "browser" : "");
+      // Chromium rewrites its argv into one space-joined string, so flags are matched in the
+      // whole command line, not per argument.
+      const cmd = readFileSync(`/proc/${pid}/cmdline`, "utf8").split("\0").filter(Boolean).join(" ");
+      const exe = (cmd.split(" ")[0] ?? "").split("/").pop();
+      const type = (cmd.match(/ --type=(\S+)/) ?? [])[1] ?? (/^chrome/.test(exe) ? "browser" : "");
+      // CapEff is relative to the process's own user namespace: a sandbox zygote holds
+      // CAP_SYS_ADMIN only inside the namespace it created, never on the host.
       return JSON.stringify({
-        pid: Number(pid), exe: (argv[0] ?? "").split("/").pop(), type, uid: g("Uid").split(/\s+/)[0],
+        pid: Number(pid), exe, type, uid: g("Uid").split(/\s+/)[0],
         nspid_depth: g("NSpid").split(/\s+/).filter(Boolean).length, seccomp: g("Seccomp"), seccomp_filters: Number(g("Seccomp_filters")),
-        no_new_privs: g("NoNewPrivs"), cap_eff: g("CapEff"), no_sandbox_flag: argv.includes("--no-sandbox"), disable_setuid_sandbox: argv.includes("--disable-setuid-sandbox"),
+        no_new_privs: g("NoNewPrivs"), cap_eff: g("CapEff"), no_sandbox_flag: / --no-sandbox( |$)/.test(cmd), disable_setuid_sandbox: / --disable-setuid-sandbox( |$)/.test(cmd),
       });
     } catch (e) { return JSON.stringify({ pid: Number(pid), error: e.code }); }
   });
