@@ -388,12 +388,15 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; refusals=${b.map((x) => `${x.case}:${x.status}`).join(",")}; MCP records for the gateway's refusals=${pv?.mcp_records} of ${pv?.request_ids} (window exchanges ${pv?.mcp_exchanges_in_window}); answers checked for CORS=${all.length}` };
     } },
   A02: { name: "tool-payload-bounded-and-marked", inputs: [`${RAW}e2e-wire.txt`],
-    expected: "a 100 KiB page in three formats (over the 256 KiB tool payload) comes back as one tool result of at most 262,144 bytes, not an error, naming each cut field with its original and returned size, the original sizes adding past the limit, with the page's sentinel still in its markdown",
+    expected: "a 100 KiB page in three formats (over the 256 KiB tool payload) comes back as one tool result of at most 262,144 bytes, not an error, naming each cut field with its original and returned size; the bytes returned plus the bytes cut (a lower bound on the whole answer, since JSON escaping only adds bytes) exceed the limit, so the page really was over it; the page's sentinel is still in its markdown",
     run() {
       const b = one(E("wire").bound, "big_page"), cuts = b?.truncated ?? {};
-      const orig = Object.values(cuts).reduce((a, c) => a + (c.originalBytes ?? 0), 0);
-      const ok = b?.status === 200 && b.is_error === null && b.text_bytes > 0 && b.text_bytes <= 262144 && Object.keys(cuts).length >= 1 && Object.values(cuts).every((c) => c.returnedBytes < c.originalBytes) && orig > 262144 && sentinelOf(b.sentinel, "big");
-      return { ok, actual: `text bytes=${b?.text_bytes}; cut fields=${JSON.stringify(cuts)}; sentinel=${b?.sentinel}` };
+      // Only the fields cut are listed, so their original sizes alone need not pass the limit: what was
+      // returned plus what was removed must.
+      const removed = Object.values(cuts).reduce((a, c) => a + ((c.originalBytes ?? 0) - (c.returnedBytes ?? 0)), 0);
+      const ok = b?.status === 200 && b.is_error === null && b.text_bytes > 0 && b.text_bytes <= 262144 && Object.keys(cuts).length >= 1 &&
+        Object.values(cuts).every((c) => Number.isFinite(c.originalBytes) && Number.isFinite(c.returnedBytes) && c.returnedBytes < c.originalBytes) && b.text_bytes + removed > 262144 && sentinelOf(b.sentinel, "big");
+      return { ok, actual: `text bytes=${b?.text_bytes}; bytes cut=${removed}; returned plus cut=${(b?.text_bytes ?? 0) + removed}; cut fields=${JSON.stringify(cuts)}; sentinel=${b?.sentinel}` };
     } },
 
   // ================================================================ observability
