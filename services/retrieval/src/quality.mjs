@@ -20,23 +20,74 @@ const LOGIN_PATH = /\/(log-?in|sign-?in|auth|session|account\/log-?in|users\/sig
 export const isTextual = (contentType) => !contentType || TEXT_TYPES.test(contentType);
 export const isHtml = (contentType) => !contentType || HTML_TYPES.test(contentType);
 
-// The visible text of an HTML document: scripts, styles, templates, SVG and noscript removed.
+// Markup is read in one left-to-right pass: every search starts where the previous one ended, so
+// the cost is linear in the document's length whatever the markup. Lazy regexes over unclosed
+// markup cost openers × length and let one page stall the service's event loop (CWE-1333).
+const HIDDEN = ["script", "style", "noscript", "template", "svg", "head"];
+const CLOSER = Object.fromEntries(HIDDEN.map((t) => [t, new RegExp(`</${t}\\s*>`, "gi")]));
+const TAG = /^<(\/?)([a-z][a-z0-9-]*)/i;
+
+// Calls onText(start, end) for each run of text outside tags and hidden elements, and
+// onHidden(tag, start, end) with each hidden element's content. A hidden element that never
+// closes is read as an ordinary tag, and later openers of that tag are not searched again.
+function walk(html, onText, onHidden) {
+  const unclosed = new Set();
+  let i = 0;
+  while (i < html.length) {
+    const lt = html.indexOf("<", i);
+    if (lt < 0) { onText(i, html.length); return; }
+    onText(i, lt);
+    if (html.startsWith("<!--", lt)) {
+      const e = html.indexOf("-->", lt + 4);
+      i = e < 0 ? html.length : e + 3;
+      continue;
+    }
+    const m = TAG.exec(html.slice(lt, lt + 64));
+    const markup = m || html[lt + 1] === "!" || html[lt + 1] === "?";
+    if (!markup) { onText(lt, lt + 1); i = lt + 1; continue; } // a "<" that starts no tag is text
+    const gt = html.indexOf(">", lt + 1);
+    if (gt < 0) return; // an unterminated tag runs to the end of the document
+    i = gt + 1;
+    const name = m && !m[1] ? m[2].toLowerCase() : null;
+    if (!name || !(name in CLOSER) || unclosed.has(name) || html[gt - 1] === "/") continue;
+    const close = CLOSER[name];
+    close.lastIndex = i;
+    const found = close.exec(html);
+    if (!found) { unclosed.add(name); continue; }
+    onHidden?.(name, i, found.index);
+    i = close.lastIndex;
+  }
+}
+
+// The visible text of an HTML document: scripts, styles, templates, SVG, noscript, the head and
+// comments removed.
 export function visibleText(html) {
-  return html
-    .replace(/<(script|style|noscript|template|svg|head)\b[\s\S]*?<\/\1\s*>/gi, " ")
-    .replace(/<!--[\s\S]*?-->/g, " ")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/&(nbsp|#160);/gi, " ")
-    .replace(/\s+/g, " ")
-    .trim();
+  const parts = [];
+  walk(html, (a, b) => { if (b > a) parts.push(html.slice(a, b)); }, null);
+  return parts.join(" ").replace(/&(nbsp|#160);/gi, " ").replace(/\s+/g, " ").trim();
+}
+
+// An application mount point (div or main with one of the usual ids) that is empty, or holds only
+// a noscript notice. Each [^<>] stops at the next tag and the notice is read in a bounded window,
+// so no candidate scans past its own element.
+const MOUNT = /<(div|main)\b[^<>]*\bid=["'](root|app|__next|__nuxt|svelte|content)["'][^<>]*>/gi;
+function emptyMountIn(html) {
+  MOUNT.lastIndex = 0;
+  for (let m; (m = MOUNT.exec(html)); ) {
+    const rest = html.slice(MOUNT.lastIndex, MOUNT.lastIndex + 4096);
+    const inner = /^\s*(?:<noscript\b[^<>]*>[^<]{0,2000}<\/noscript>\s*)?<\/(div|main)\s*>/i.exec(rest);
+    if (inner && inner[1].toLowerCase() === m[1].toLowerCase()) return true;
+  }
+  return false;
 }
 
 export function htmlSignals(html) {
   const scripts = (html.match(/<script\b/gi) ?? []).length;
-  const noscript = [...html.matchAll(/<noscript\b[^>]*>([\s\S]*?)<\/noscript>/gi)].map((m) => m[1]).join(" ");
-  const emptyMount = /<(div|main)\b[^>]*\bid=["'](root|app|__next|__nuxt|svelte|content)["'][^>]*>\s*(<noscript\b[\s\S]*?<\/noscript>\s*)?<\/\1>/i.test(html);
-  const loading = /\bclass=["'][^"']*\b(loading|spinner|skeleton)\b/i.test(html);
-  return { scripts, noscriptAsksForJs: /(enable|requires?|needs?|turn on)[^<]{0,40}javascript|javascript[^<]{0,40}(required|disabled|enable)/i.test(noscript), emptyMount, loading };
+  const notices = [];
+  walk(html, () => {}, (tag, a, b) => { if (tag === "noscript" && notices.length < 16) notices.push(html.slice(a, Math.min(b, a + 4096))); });
+  const noscript = notices.join(" ");
+  const loading = /\bclass=["'][^"'<>]*\b(loading|spinner|skeleton)\b/i.test(html);
+  return { scripts, noscriptAsksForJs: /(enable|requires?|needs?|turn on)[^<]{0,40}javascript|javascript[^<]{0,40}(required|disabled|enable)/i.test(noscript), emptyMount: emptyMountIn(html), loading };
 }
 
 // status: final HTTP status; contentType; body: string for textual types; finalUrl, requestedUrl.
@@ -56,7 +107,7 @@ export function classify({ status, contentType, body, finalUrl, requestedUrl, re
   if (!html) return { verdict: "adequate", reasons: ["non-HTML text"] };
   // An authentication gate reached by redirect: a different final URL on a login path, carrying a
   // password field. Never retried or escalated (spec §9.2).
-  if (finalUrl !== requestedUrl && LOGIN_PATH.test(new URL(finalUrl).pathname) && /<input\b[^>]*type=["']?password/i.test(text)) {
+  if (finalUrl !== requestedUrl && LOGIN_PATH.test(new URL(finalUrl).pathname) && /<input\b[^<>]*type=["']?password/i.test(text)) {
     return { verdict: "auth_gate", failure: { class: "AUTH_REQUIRED", detail: "the target redirected to a sign-in page", retryable: false, retryAfter: null } };
   }
   const visible = visibleText(text);

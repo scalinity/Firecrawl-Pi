@@ -78,3 +78,24 @@ test("the deployed policy loads; a looser or unknown one does not", () => {
   assert.throws(() => loadPolicy(mutate((j) => { j.fixtures[0].cidr = "0.0.0.0/0"; })));
   assert.throws(() => loadPolicy(mutate((j) => { j.search.backend = "https://searx.example.com/search"; })));
 });
+
+test("classification stays linear on unclosed and repeated markup (review finding C1)", () => {
+  const login = { ...page, finalUrl: "http://m2.fixture.fcpi.test:8080/login", requestedUrl: "http://m2.fixture.fcpi.test:8080/p" };
+  for (const [name, p] of [["comments", { ...page, body: "<!--".repeat(1 << 18) }], ["tags", { ...page, body: "<a".repeat(1 << 19) }],
+    ["noscript", { ...page, body: "<noscript>".repeat(1 << 17) }], ["style", { ...page, body: "<style>".repeat(200000) }],
+    ["mounts", { ...page, body: '<div id="root"><noscript>'.repeat(60000) }], ["inputs", { ...login, body: "<input ".repeat(200000) }],
+    ["classes", { ...page, body: '<p class="x'.repeat(100000) }]]) {
+    const t = Date.now();
+    classify(p);
+    assert.ok(Date.now() - t < 1500, `${name} took ${Date.now() - t} ms`);
+  }
+});
+
+test("the linear reader keeps what the regexes kept", async () => {
+  const { visibleText } = await import("../src/quality.mjs");
+  assert.equal(visibleText("<p>a</p><style>x{}</style><p>b</p><!-- c --><script>d()</script>e"), "a b e");
+  assert.equal(visibleText("<style>never closed <p>still read</p>"), "never closed still read"); // as the regexes left it
+  assert.equal(visibleText("<p>3 < 5 and 6 > 2</p>"), "3 < 5 and 6 > 2");
+  assert.equal(visibleText('<svg viewBox="0 0 1 1"/><p>after the icon</p>'), "after the icon");
+  assert.equal(visibleText("<!DOCTYPE html><head><title>T</title></head><body>body text</body>"), "body text");
+});
