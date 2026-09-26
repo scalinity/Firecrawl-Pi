@@ -1,32 +1,40 @@
 ### meta
-2026-09-25T23:12:52Z
-source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+2026-09-26T00:13:52Z
+source_commit=f4d0cae68307060a47e706d13be8dd3a54829978
 ### drop_in
 exec_start_pre=path=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh path=/usr/sbin/nft 
 drop_in_sha256=8ae20be1cd61fb13b7c676e6fad6ba9d24699ea392e5aad010dad492f2143694 repo_sha256=8ae20be1cd61fb13b7c676e6fad6ba9d24699ea392e5aad010dad492f2143694
-guard_drop_in_sha256=f004b18203ec15d05c3d6f075c40b788b75625baed68fbf9e9a3ae8c35463cfd guard_repo_sha256=f004b18203ec15d05c3d6f075c40b788b75625baed68fbf9e9a3ae8c35463cfd
+guard_drop_in_sha256=1f705fde68a689241e248882710b9367c44f89742ae7ba908e80e1de3645472f guard_repo_sha256=1f705fde68a689241e248882710b9367c44f89742ae7ba908e80e1de3645472f
 restart=always restart_usec=2s start_limit_burst=3 start_limit_interval=1min
 ### before
 running_containers=6 writers=31
 restart_policies=unless-stopped 
 ### stop_dockerd_alone
 docker=inactive fcpi_stack=active writers=0
-manifest=8831ef40f8ce8b3fe493b36f0b144e1848d15649b9574b04ff25a2a8da1f50cd
+manifest=ac0715d641306ee02bb4ac6392f434b47aa73a6805b3f50eb5ab2170a2a21f2e
 ### gated_start
 Job for docker.service failed because the control process exited with error code.
 start_exit=1
-docker=activating result=exit-code dockerd_processes=0
-check_failures=1
+docker=failed result=exit-code dockerd_processes=0
+check_failures=3
 writers=0
 manifest_unchanged=yes
 ### start_limit
-observed_s=180 reached_failed=no active_state=activating sub_state=auto-restart-queued result=exit-code nrestarts=1
-states_seen=activating/auto-restart activating/auto-restart-queued
+observed_s=6 reached_failed=yes active_state=failed sub_state=failed result=exit-code nrestarts=3
+states_seen=activating/auto-restart activating/start-pre failed/failed
 max_dockerd_processes=0 max_writers=0
+check_failures_total=3
+### start_limit_timeline
+t+0 docker=activating/auto-restart nrestarts=0 fcpi_stack=active/exited compose_processes=0 jobs=
+t+2 docker=activating/start-pre nrestarts=1 fcpi_stack=active/exited compose_processes=0 jobs=
+t+3 docker=activating/auto-restart nrestarts=1 fcpi_stack=active/exited compose_processes=0 jobs=
+t+4 docker=activating/start-pre nrestarts=2 fcpi_stack=active/exited compose_processes=0 jobs=
+t+5 docker=activating/auto-restart nrestarts=2 fcpi_stack=active/exited compose_processes=0 jobs=
+t+6 docker=failed/failed nrestarts=3 fcpi_stack=active/exited compose_processes=0 jobs=
 ### restored_start
 start_exit=0
 docker=active result=success fcpi_stack=active
-revived_healthy=6 writers=32
+revived_healthy=6 writers=33
 manager_env_PI_CONFIG_FILE=0
 guard_table=present guard_rules=4
 end

@@ -1,4 +1,4 @@
-# collected 2026-09-25T23:17:28Z by scripts/m1/pi-nft-ruleset.sh at source commit 0db5a8d0cdcc12aa018a829ce1952dbdd919e797: nft -s list ruleset
+# collected 2026-09-26T00:15:53Z by scripts/m1/pi-nft-ruleset.sh at source commit f4d0cae68307060a47e706d13be8dd3a54829978: nft -s list ruleset
 table ip nat {
 	chain PREROUTING {
 		type nat hook prerouting priority dstnat; policy accept;
@@ -25,10 +25,10 @@ table ip filter {
 		counter jump DOCKER-CT
 		counter jump DOCKER-INTERNAL
 		counter jump DOCKER-BRIDGE
-		iifname "fcpi-fixture" oifname "fcpi-fixture" counter accept
 		iifname "fcpi-access" counter accept
 		iifname "fcpi-core" oifname "fcpi-core" counter accept
 		iifname "fcpi-api" oifname "fcpi-api" counter accept
+		iifname "fcpi-fixture" oifname "fcpi-fixture" counter accept
 		iifname "docker0" counter accept
 	}
 
@@ -58,12 +58,12 @@ table ip filter {
 	}
 
 	chain DOCKER-INTERNAL {
+		ip saddr != 10.231.3.0/24 oifname "fcpi-fixture" counter drop
+		ip daddr != 10.231.3.0/24 iifname "fcpi-fixture" counter drop
 		ip saddr != 10.231.4.0/24 oifname "fcpi-api" counter drop
 		ip daddr != 10.231.4.0/24 iifname "fcpi-api" counter drop
 		ip saddr != 10.231.1.0/24 oifname "fcpi-core" counter drop
 		ip daddr != 10.231.1.0/24 iifname "fcpi-core" counter drop
-		ip saddr != 10.231.3.0/24 oifname "fcpi-fixture" counter drop
-		ip daddr != 10.231.3.0/24 iifname "fcpi-fixture" counter drop
 	}
 }
 table ip6 nat {

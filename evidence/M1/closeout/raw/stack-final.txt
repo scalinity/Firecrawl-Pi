@@ -1,77 +1,78 @@
 ### meta
-2026-09-25T23:17:02Z
-source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+2026-09-26T00:15:28Z
+source_commit=f4d0cae68307060a47e706d13be8dd3a54829978
 host_page_size=16384 kernel=6.18.34+rpt-rpi-2712 uname_m=aarch64
 boot_id_sha256=54a9acdff6a286e4c17c12dd682e946792c0509d39ce5a30bde1abf66db07ffe
 binfmt_misc_handlers=python3.13
 ### containers
-nuq-postgres name=fcpi-nuq-postgres-1 image=sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180 platform=linux/arm64 state=running health=healthy restarts=0 user=5432:5432 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-25T23:15:57.453204088Z
+nuq-postgres name=fcpi-nuq-postgres-1 image=sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180 platform=linux/arm64 state=running health=healthy restarts=0 user=5432:5432 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:34.632175482Z
 nuq-postgres uname_m=aarch64
-redis name=fcpi-redis-1 image=sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44 platform=linux/arm64 state=running health=healthy restarts=0 user=6379:6379 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-25T23:15:57.470939912Z
+redis name=fcpi-redis-1 image=sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44 platform=linux/arm64 state=running health=healthy restarts=0 user=6379:6379 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:34.819082929Z
 redis uname_m=aarch64
-rabbitmq name=fcpi-rabbitmq-1 image=sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8 platform=linux/arm64 state=running health=healthy restarts=0 user=5672:5672 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-25T23:15:57.48316306Z
+rabbitmq name=fcpi-rabbitmq-1 image=sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8 platform=linux/arm64 state=running health=healthy restarts=0 user=5672:5672 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:35.032602288Z
 rabbitmq uname_m=aarch64
-firecrawl-core name=fcpi-firecrawl-core-1 image=sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af platform=linux/arm64 state=running health=healthy restarts=0 user= readonly_rootfs=true privileged=false network_mode=fcpi_api cap_drop=ALL cap_add=CAP_SETGID,CAP_SETUID security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-25T23:15:57.359131219Z
+firecrawl-core name=fcpi-firecrawl-core-1 image=sha256:6157ce24e6867f013704c1cf2b752ec1ea7a3f730da09014b511d1049c8651af platform=linux/arm64 state=running health=healthy restarts=0 user= readonly_rootfs=true privileged=false network_mode=fcpi_api cap_drop=ALL cap_add=CAP_SETGID,CAP_SETUID security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:45.702794228Z
 firecrawl-core uname_m=aarch64
-access-gateway name=fcpi-access-gateway-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=3380:3380 readonly_rootfs=true privileged=false network_mode=fcpi_access cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-25T23:15:57.418576145Z
+access-gateway name=fcpi-access-gateway-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=3380:3380 readonly_rootfs=true privileged=false network_mode=fcpi_access cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:46.048999259Z
 access-gateway uname_m=aarch64
-fixture name=fcpi-fixture-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-25T23:15:57.366616341Z
+fixture name=fcpi-fixture-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-09-26T00:14:34.432153681Z
 fixture uname_m=aarch64
 ### process_elf
-nuq-postgres pid=529019 uid=5432 e_machine=183 comm=postgres args=postgres -c shared_buffers=128MB -c work_mem=4MB -c max_connections=32 -c max_wal_size=1GB
-nuq-postgres pid=529224 uid=5432 e_machine=183 comm=postgres args=postgres: checkpointer                                                                    
-nuq-postgres pid=529225 uid=5432 e_machine=183 comm=postgres args=postgres: background writer                                                               
-nuq-postgres pid=529227 uid=5432 e_machine=183 comm=postgres args=postgres: walwriter                                                                       
-nuq-postgres pid=529228 uid=5432 e_machine=183 comm=postgres args=postgres: autovacuum launcher                                                             
-nuq-postgres pid=529229 uid=5432 e_machine=183 comm=postgres args=postgres: pg_cron launcher                                                                
-nuq-postgres pid=529230 uid=5432 e_machine=183 comm=postgres args=postgres: logical replication launcher                                                    
-nuq-postgres pid=529457 uid=5432 e_machine=183 comm=postgres args=postgres: fcpi_core postgres 10.231.1.4(39026) idle                                       
-redis pid=529112 uid=6379 e_machine=183 comm=redis-server args=redis-server 0.0.0.0:6379                    
-rabbitmq pid=529109 uid=5672 e_machine=183 comm=beam.smp args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/beam.smp -W w -MBas ageffcbf -MHas ageffcbf -MBl
-rabbitmq pid=529267 uid=5672 e_machine=183 comm=erl_child_setup args=erl_child_setup 1024 
-rabbitmq pid=529416 uid=5672 e_machine=183 comm=inet_gethost args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/inet_gethost 4 
-rabbitmq pid=529417 uid=5672 e_machine=183 comm=inet_gethost args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/inet_gethost 4 
-rabbitmq pid=529427 uid=5672 e_machine=183 comm=epmd args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/epmd -daemon 
-rabbitmq pid=529655 uid=5672 e_machine=183 comm=sh args=/bin/sh -s rabbit_disk_monitor 
-firecrawl-core pid=528909 uid=3002 e_machine=183 comm=node args=node dist/src/harness.js --start-docker 
-firecrawl-core pid=529308 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/index.js 
-firecrawl-core pid=529309 uid=3002 e_machine=183 comm=node args=node dist/src/index.js 
-firecrawl-core pid=529310 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/queue-worker.js 
-firecrawl-core pid=529311 uid=3002 e_machine=183 comm=node args=node dist/src/services/queue-worker.js 
-firecrawl-core pid=529312 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/extract-worker.js 
-firecrawl-core pid=529313 uid=3002 e_machine=183 comm=node args=node dist/src/services/extract-worker.js 
-firecrawl-core pid=529314 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-worker.js 
-firecrawl-core pid=529317 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-worker.js 
-firecrawl-core pid=529322 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-prefetch-worker.js 
-firecrawl-core pid=529337 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-prefetch-worker.js 
-firecrawl-core pid=529338 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-reconciler-worker.js 
-firecrawl-core pid=529339 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-reconciler-worker.js 
-access-gateway pid=529002 uid=3380 e_machine=183 comm=node args=node /srv/access/server.mjs 
-fixture pid=528917 uid=8080 e_machine=183 comm=node args=node /fixture/server.mjs 
+nuq-postgres pid=595807 uid=5432 e_machine=183 comm=postgres args=postgres -c shared_buffers=128MB -c work_mem=4MB -c max_connections=32 -c max_wal_size=1GB
+nuq-postgres pid=595866 uid=5432 e_machine=183 comm=postgres args=postgres: checkpointer                                                                    
+nuq-postgres pid=595869 uid=5432 e_machine=183 comm=postgres args=postgres: background writer                                                               
+nuq-postgres pid=595874 uid=5432 e_machine=183 comm=postgres args=postgres: walwriter                                                                       
+nuq-postgres pid=595875 uid=5432 e_machine=183 comm=postgres args=postgres: autovacuum launcher                                                             
+nuq-postgres pid=595876 uid=5432 e_machine=183 comm=postgres args=postgres: pg_cron launcher                                                                
+nuq-postgres pid=595877 uid=5432 e_machine=183 comm=postgres args=postgres: logical replication launcher                                                    
+nuq-postgres pid=596441 uid=5432 e_machine=183 comm=postgres args=postgres: fcpi_core postgres 10.231.1.4(46358) idle                                       
+nuq-postgres pid=596444 uid=5432 e_machine=183 comm=postgres args=postgres: fcpi_core postgres 10.231.1.4(46366) idle                                       
+redis pid=595879 uid=6379 e_machine=183 comm=redis-server args=redis-server 0.0.0.0:6379                    
+rabbitmq pid=595941 uid=5672 e_machine=183 comm=beam.smp args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/beam.smp -W w -MBas ageffcbf -MHas ageffcbf -MBl
+rabbitmq pid=595975 uid=5672 e_machine=183 comm=erl_child_setup args=erl_child_setup 1024 
+rabbitmq pid=596020 uid=5672 e_machine=183 comm=inet_gethost args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/inet_gethost 4 
+rabbitmq pid=596021 uid=5672 e_machine=183 comm=inet_gethost args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/inet_gethost 4 
+rabbitmq pid=596031 uid=5672 e_machine=183 comm=epmd args=/opt/erlang/lib/erlang/erts-15.2.7.13/bin/epmd -daemon 
+rabbitmq pid=596146 uid=5672 e_machine=183 comm=sh args=/bin/sh -s rabbit_disk_monitor 
+firecrawl-core pid=596199 uid=3002 e_machine=183 comm=node args=node dist/src/harness.js --start-docker 
+firecrawl-core pid=596301 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/index.js 
+firecrawl-core pid=596302 uid=3002 e_machine=183 comm=node args=node dist/src/index.js 
+firecrawl-core pid=596303 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/queue-worker.js 
+firecrawl-core pid=596304 uid=3002 e_machine=183 comm=node args=node dist/src/services/queue-worker.js 
+firecrawl-core pid=596305 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/extract-worker.js 
+firecrawl-core pid=596307 uid=3002 e_machine=183 comm=node args=node dist/src/services/extract-worker.js 
+firecrawl-core pid=596308 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-worker.js 
+firecrawl-core pid=596314 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-worker.js 
+firecrawl-core pid=596320 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-prefetch-worker.js 
+firecrawl-core pid=596330 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-prefetch-worker.js 
+firecrawl-core pid=596332 uid=3002 e_machine=183 comm=sh args=sh -c node dist/src/services/worker/nuq-reconciler-worker.js 
+firecrawl-core pid=596333 uid=3002 e_machine=183 comm=node args=node dist/src/services/worker/nuq-reconciler-worker.js 
+access-gateway pid=596280 uid=3380 e_machine=183 comm=node args=node /srv/access/server.mjs 
+fixture pid=595739 uid=8080 e_machine=183 comm=node args=node /fixture/server.mjs 
 ### core_processes
-1 0 3002 60096 node dist/src/harness.js --start-docker
-20 1 3002 1504 sh -c node dist/src/index.js
-21 20 3002 367536 node dist/src/index.js
-22 1 3002 1488 sh -c node dist/src/services/queue-worker.js
-23 22 3002 364976 node dist/src/services/queue-worker.js
-24 1 3002 1488 sh -c node dist/src/services/extract-worker.js
-25 24 3002 352400 node dist/src/services/extract-worker.js
-26 1 3002 1504 sh -c node dist/src/services/worker/nuq-worker.js
-29 26 3002 361104 node dist/src/services/worker/nuq-worker.js
-34 1 3002 1488 sh -c node dist/src/services/worker/nuq-prefetch-worker.js
-49 34 3002 85568 node dist/src/services/worker/nuq-prefetch-worker.js
-50 1 3002 1488 sh -c node dist/src/services/worker/nuq-reconciler-worker.js
-51 50 3002 351248 node dist/src/services/worker/nuq-reconciler-worker.js
+1 0 3002 71776 node dist/src/harness.js --start-docker
+20 1 3002 1488 sh -c node dist/src/index.js
+21 20 3002 361984 node dist/src/index.js
+22 1 3002 1504 sh -c node dist/src/services/queue-worker.js
+23 22 3002 363664 node dist/src/services/queue-worker.js
+24 1 3002 1472 sh -c node dist/src/services/extract-worker.js
+26 24 3002 357168 node dist/src/services/extract-worker.js
+27 1 3002 1488 sh -c node dist/src/services/worker/nuq-worker.js
+33 27 3002 360288 node dist/src/services/worker/nuq-worker.js
+39 1 3002 1488 sh -c node dist/src/services/worker/nuq-prefetch-worker.js
+49 39 3002 106800 node dist/src/services/worker/nuq-prefetch-worker.js
+50 1 3002 1504 sh -c node dist/src/services/worker/nuq-reconciler-worker.js
+51 50 3002 358048 node dist/src/services/worker/nuq-reconciler-worker.js
 ### cgroups
-nuq-postgres memory.max=671088640 memory.swap.max=0 cpu.max=75000/100000 pids.max=128 memory.current=108380160 memory.peak=120586240 anon=11075584 file=94470144 shmem=92323840 pids.current=8
-redis memory.max=335544320 memory.swap.max=0 cpu.max=35000/100000 pids.max=64 memory.current=8781824 memory.peak=14729216 anon=6012928 file=16384 shmem=0 pids.current=6
-rabbitmq memory.max=536870912 memory.swap.max=0 cpu.max=50000/100000 pids.max=256 memory.current=123650048 memory.peak=152584192 anon=96731136 file=14598144 shmem=13991936 pids.current=29
-firecrawl-core memory.max=2415919104 memory.swap.max=0 cpu.max=225000/100000 pids.max=512 memory.current=1749712896 memory.peak=1917566976 anon=1609564160 file=16384 shmem=0 pids.current=93
-access-gateway memory.max=167772160 memory.swap.max=0 cpu.max=30000/100000 pids.max=64 memory.current=13746176 memory.peak=26656768 anon=11763712 file=0 shmem=0 pids.current=7
-fixture memory.max=67108864 memory.swap.max=0 cpu.max=10000/100000 pids.max=32 memory.current=15220736 memory.peak=33439744 anon=12140544 file=0 shmem=0 pids.current=11
+nuq-postgres memory.max=671088640 memory.swap.max=0 cpu.max=75000/100000 pids.max=128 memory.current=110657536 memory.peak=127139840 anon=13615104 file=92962816 shmem=92323840 pids.current=9
+redis memory.max=335544320 memory.swap.max=0 cpu.max=35000/100000 pids.max=64 memory.current=7716864 memory.peak=13828096 anon=5980160 file=16384 shmem=0 pids.current=6
+rabbitmq memory.max=536870912 memory.swap.max=0 cpu.max=50000/100000 pids.max=256 memory.current=123207680 memory.peak=153632768 anon=97222656 file=14516224 shmem=13991936 pids.current=29
+firecrawl-core memory.max=2415919104 memory.swap.max=0 cpu.max=225000/100000 pids.max=512 memory.current=1794818048 memory.peak=1976188928 anon=1647198208 file=16384 shmem=0 pids.current=93
+access-gateway memory.max=167772160 memory.swap.max=0 cpu.max=30000/100000 pids.max=64 memory.current=13746176 memory.peak=26361856 anon=11763712 file=0 shmem=0 pids.current=7
+fixture memory.max=67108864 memory.swap.max=0 cpu.max=10000/100000 pids.max=32 memory.current=15171584 memory.peak=34406400 anon=13074432 file=0 shmem=0 pids.current=11
 ### host_memory
 MemTotal:        8255888 kB
-MemAvailable:    5568208 kB
+MemAvailable:    5468336 kB
 SwapTotal:       2097136 kB
 SwapFree:        2097120 kB
 ### published
@@ -84,8 +85,8 @@ tcp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=22))
 tcp 0.0.0.0:80 users:(("pihole-FTL",pid=966,fd=35))
 tcp 0.0.0.0:8080 users:(("python",pid=978,fd=3))
 tcp 0.0.0.0:9001 users:(("mosquitto",pid=959,fd=9))
-tcp 127.0.0.1:3380 users:(("docker-proxy",pid=529166,fd=8))
-tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=7),("systemd",pid=1,fd=159))
+tcp 127.0.0.1:3380 users:(("docker-proxy",pid=596357,fd=8))
+tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=7),("systemd",pid=1,fd=112))
 tcp [::]:22 users:(("sshd",pid=973,fd=7))
 tcp [::]:443 users:(("pihole-FTL",pid=966,fd=38))
 tcp [::]:53 users:(("pihole-FTL",pid=966,fd=24))
@@ -100,7 +101,7 @@ udp 0.0.0.0:37382 users:(("avahi-daemon",pid=592,fd=14))
 udp 0.0.0.0:53 users:(("pihole-FTL",pid=966,fd=21))
 udp 0.0.0.0:5353 users:(("avahi-daemon",pid=592,fd=12))
 udp 0.0.0.0:59635 users:(("pihole-FTL",pid=966,fd=42))
-udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=8),("systemd",pid=1,fd=161))
+udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=933,fd=8),("systemd",pid=1,fd=113))
 ### networks
 fcpi_access internal=false subnet=10.231.0.0/24 gateway_mode_ipv4=nat bridge=fcpi-access ipv6=false members=fcpi-access-gateway-1
 fcpi_api internal=true subnet=10.231.4.0/24 gateway_mode_ipv4=isolated bridge=fcpi-api ipv6=false members=fcpi-access-gateway-1,fcpi-firecrawl-core-1
@@ -111,15 +112,15 @@ bridge fcpi-api addresses=
 bridge fcpi-core addresses=
 bridge fcpi-fixture addresses=
 ### core_health
-{"utc":"2026-09-25T23:17:06.535Z","api_liveness":{"status":200,"body":"{\"status\":\"ok\"}"},"api_readiness":{"status":200,"body":"{\"status\":\"ok\"}"},"extract_worker":{"status":200,"body":"{\"ok\":true}"},"queue_worker":{"status":200,"body":"{\"ok\":true}"},"nuq_reconciler":{"status":200,"body":"OK"},"nuq_prefetch_worker":{"status":200,"body":"OK"},"nuq_worker_0":{"status":200,"body":"OK"}}
+{"utc":"2026-09-26T00:15:32.247Z","api_liveness":{"status":200,"body":"{\"status\":\"ok\"}"},"api_readiness":{"status":200,"body":"{\"status\":\"ok\"}"},"queue_worker":{"status":200,"body":"{\"ok\":true}"},"nuq_reconciler":{"status":200,"body":"OK"},"extract_worker":{"status":200,"body":"{\"ok\":true}"},"nuq_prefetch_worker":{"status":200,"body":"OK"},"nuq_worker_0":{"status":200,"body":"OK"}}
 ### postgres_health
 select_1=1
 version=PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
 pg_cron_launcher_backends=1
 cron_jobs=36
-cron_runs_last_10min_succeeded=94
+cron_runs_last_10min_succeeded=91
 cron_runs_last_10min_failed=0
-connections=9 max_connections=32
+connections=10 max_connections=32
 cron.database_name=postgres source=configuration file
 data_directory=/var/lib/postgresql/data source=override
 fsync=on source=command line
@@ -135,11 +136,11 @@ process_uid=5432
 health_user_ping=PONG
 health_user_info_denied=NOPERM User health has no permissions to run the 'info' command
 no_auth_ping=NOAUTH Authentication required.
-rdb_changes_since_last_save:3888
+rdb_changes_since_last_save:4190
 aof_enabled:1
 aof_last_bgrewrite_status:ok
 aof_last_write_status:ok
-used_memory_human:1.35M
+used_memory_human:1.34M
 maxmemory_human:192.00M
 maxmemory_policy:noeviction
 mem_allocator:jemalloc-5.3.0
@@ -172,7 +173,7 @@ valid_token_non_fixture_target status=403 www_authenticate= body={"success":null
 valid_token_internal_target status=403 www_authenticate= body={"success":null,"error":"target_not_permitted","code":null,"markdown":null,"statusCode":null}
 valid_token_fixture_scrape status=200 www_authenticate= body={"success":true,"error":null,"code":null,"markdown":"b64:U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","statusCode":200}
 ### direct_scrape
-{"utc_start":"2026-09-25T23:17:26.346Z","endpoint":"v2","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0dadc-0114-75ef-a1e8-428ac206f38a","source_status":200,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":119}
+{"utc_start":"2026-09-26T00:15:52.123Z","endpoint":"v2","url":"http://m1.fixture.fcpi.test:8080/static.html","http_status":200,"success":true,"scrape_id":"01a0db11-7f84-7792-8101-4121f8d1b728","source_status":200,"title":"FCPI M1 static fixture","markdown_b64":"U3RhdGljIGZpeHR1cmUKPT09PT09PT09PT09PT0KClRoaXMgcGFnZSBpcyB0aGUgY29udHJvbGxlZCBzdGF0aWMgdGFyZ2V0IGZvciBtaWxlc3RvbmUgTTEuCgpDaGVja3MKLS0tLS0tCgoqICAgSGVhZGluZ3MsIHBhcmFncmFwaHMgYW5kIGxpc3RzIHN1cnZpdmUgY29udmVyc2lvbi4KKiAgIFNjcmlwdHMsIHN0eWxlcywgbmF2aWdhdGlvbiBhbmQgZm9vdGVycyBhcmUgcmVtb3ZlZC4KClJlbGF0aXZlIGxpbms6IFtkb2NzIHBhZ2VdKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvcGFnZS5odG1sKQoKTXVsdGktbGluZSBsaW5rOiBbbGluZSBvbmUgIFwKbGluZSB0d29dKGh0dHA6Ly9tMS5maXh0dXJlLmZjcGkudGVzdDo4MDgwL2RvY3MvdHdvLmh0bWwpCgpTZW50aW5lbDogKipmY3BpLW0xLXN0YXRpYy03ZjNhKio=","error":null,"www_authenticate":null,"elapsed_ms":113}
 ### egress_structure
 fcpi-firecrawl-core-1 default_route=no nameserver=127.0.0.11,
 fcpi-fixture-1 default_route=no nameserver=127.0.0.11,
@@ -181,8 +182,8 @@ fcpi-redis-1 default_route=no nameserver=127.0.0.11,
 fcpi-rabbitmq-1 default_route=no nameserver=127.0.0.11,
 fcpi-access-gateway-1 default_route=yes nameserver=127.0.0.11,
 ### egress_probes
-core {"utc":"2026-09-25T23:17:27.349Z","dns":{"api.firecrawl.dev":{"error":"EAI_AGAIN"},"www.firecrawl.dev":{"error":"EAI_AGAIN"},"integrations.firecrawl.dev":{"error":"EAI_AGAIN"},"html.duckduckgo.com":{"error":"EAI_AGAIN"},"example.com":{"error":"EAI_AGAIN"}},"tcp":{"1.1.1.1:443":{"what":"public address","error":"ENETUNREACH"},"<pi-lan-address>:22":{"what":"host LAN address (sshd)","error":"ENETUNREACH"},"<pi-lan-address>:53":{"what":"host LAN address (Pi-hole DNS)","error":"ENETUNREACH"},"10.231.0.1:53":{"what":"host address on the fcpi-access bridge (not a core network)","error":"ENETUNREACH"}}}
-fixture {"utc":"2026-09-25T23:17:27.723Z","dns":{"api.firecrawl.dev":{"error":"EAI_AGAIN"},"www.firecrawl.dev":{"error":"EAI_AGAIN"},"integrations.firecrawl.dev":{"error":"EAI_AGAIN"},"html.duckduckgo.com":{"error":"EAI_AGAIN"},"example.com":{"error":"EAI_AGAIN"}},"tcp":{"1.1.1.1:443":{"what":"public address","error":"ENETUNREACH"},"<pi-lan-address>:22":{"what":"host LAN address (sshd)","error":"ENETUNREACH"},"<pi-lan-address>:53":{"what":"host LAN address (Pi-hole DNS)","error":"ENETUNREACH"},"10.231.0.1:53":{"what":"host address on the fcpi-access bridge (not a core network)","error":"ENETUNREACH"}}}
+core {"utc":"2026-09-26T00:15:53.139Z","dns":{"api.firecrawl.dev":{"error":"EAI_AGAIN"},"www.firecrawl.dev":{"error":"EAI_AGAIN"},"integrations.firecrawl.dev":{"error":"EAI_AGAIN"},"html.duckduckgo.com":{"error":"EAI_AGAIN"},"example.com":{"error":"EAI_AGAIN"}},"tcp":{"1.1.1.1:443":{"what":"public address","error":"ENETUNREACH"},"<pi-lan-address>:22":{"what":"host LAN address (sshd)","error":"ENETUNREACH"},"<pi-lan-address>:53":{"what":"host LAN address (Pi-hole DNS)","error":"ENETUNREACH"},"10.231.0.1:53":{"what":"host address on the fcpi-access bridge (not a core network)","error":"ENETUNREACH"}}}
+fixture {"utc":"2026-09-26T00:15:53.514Z","dns":{"api.firecrawl.dev":{"error":"EAI_AGAIN"},"www.firecrawl.dev":{"error":"EAI_AGAIN"},"integrations.firecrawl.dev":{"error":"EAI_AGAIN"},"html.duckduckgo.com":{"error":"EAI_AGAIN"},"example.com":{"error":"EAI_AGAIN"}},"tcp":{"1.1.1.1:443":{"what":"public address","error":"ENETUNREACH"},"<pi-lan-address>:22":{"what":"host LAN address (sshd)","error":"ENETUNREACH"},"<pi-lan-address>:53":{"what":"host LAN address (Pi-hole DNS)","error":"ENETUNREACH"},"10.231.0.1:53":{"what":"host address on the fcpi-access bridge (not a core network)","error":"ENETUNREACH"}}}
 host_control_example_com=resolves
 ### core_log_scan
 pattern=firecrawl\.dev count=0
@@ -194,6 +195,6 @@ pattern=posthog count=0
 pattern=sentry\.io count=0
 pattern=ENETUNREACH count=0
 pattern=integrations\. count=0
-control=Starting services count=2
-log_lines=138 since=2026-09-25T23:15:57.359131219Z
+control=Starting services count=4
+log_lines=240 since=2026-09-26T00:14:45.702794228Z
 end

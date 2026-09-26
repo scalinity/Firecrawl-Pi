@@ -1,6 +1,6 @@
 ### meta
-2026-09-25T23:10:44Z
-source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+2026-09-25T23:59:50Z
+source_commit=43157fb62e3eb9682648f2ba554308267fd46546
 image=node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
 ### run
 node_version=v22.23.3
@@ -8,91 +8,91 @@ TAP version 13
 # Subtest: missing token: 401 with the gateway's own challenge, nothing forwarded
 ok 1 - missing token: 401 with the gateway's own challenge, nothing forwarded
   ---
-  duration_ms: 89.568685
+  duration_ms: 90.196615
   type: 'test'
   ...
 # Subtest: wrong token and malformed schemes: 401, never the upstream challenge
 ok 2 - wrong token and malformed schemes: 401, never the upstream challenge
   ---
-  duration_ms: 7.842341
+  duration_ms: 7.732193
   type: 'test'
   ...
 # Subtest: authenticated fixture scrape is forwarded without the client's token or extra headers
 ok 3 - authenticated fixture scrape is forwarded without the client's token or extra headers
   ---
-  duration_ms: 10.224842
+  duration_ms: 10.169248
   type: 'test'
   ...
 # Subtest: /admin/* is never routed, even authenticated
 ok 4 - /admin/* is never routed, even authenticated
   ---
-  duration_ms: 11.378407
+  duration_ms: 11.897756
   type: 'test'
   ...
 # Subtest: routes outside the allowlist are 404 and not forwarded
 ok 5 - routes outside the allowlist are 404 and not forwarded
   ---
-  duration_ms: 5.583619
+  duration_ms: 5.702836
   type: 'test'
   ...
 # Subtest: non-fixture targets are refused before forwarding
 ok 6 - non-fixture targets are refused before forwarding
   ---
-  duration_ms: 7.047816
+  duration_ms: 7.216738
   type: 'test'
   ...
 # Subtest: bodies over 1 MiB are refused with 413
 ok 7 - bodies over 1 MiB are refused with 413
   ---
-  duration_ms: 12.60499
+  duration_ms: 9.174744
   type: 'test'
   ...
 # Subtest: a chunked body over 1 MiB (no Content-Length) gets a 413 response, not a reset
 ok 8 - a chunked body over 1 MiB (no Content-Length) gets a 413 response, not a reset
   ---
-  duration_ms: 10.061452
+  duration_ms: 8.833713
   type: 'test'
   ...
 # Subtest: an upstream that dies after its headers ends the client response instead of hanging it
 ok 9 - an upstream that dies after its headers ends the client response instead of hanging it
   ---
-  duration_ms: 58.8519
+  duration_ms: 57.910457
   type: 'test'
   ...
 # Subtest: an unreachable upstream gets the gateway's own 502
 ok 10 - an unreachable upstream gets the gateway's own 502
   ---
-  duration_ms: 84.022769
+  duration_ms: 81.075073
   type: 'test'
   ...
 # Subtest: a silent upstream gets 504 once the upstream timeout passes
 ok 11 - a silent upstream gets 504 once the upstream timeout passes
   ---
-  duration_ms: 382.187521
+  duration_ms: 383.625488
   type: 'test'
   ...
 # Subtest: a query string is never forwarded upstream
 ok 12 - a query string is never forwarded upstream
   ---
-  duration_ms: 5.141671
+  duration_ms: 4.903405
   type: 'test'
   ...
 # Subtest: an absolute-form request target is not routed
 ok 13 - an absolute-form request target is not routed
   ---
-  duration_ms: 3.220063
+  duration_ms: 3.371539
   type: 'test'
   ...
 # Subtest: Content-Length together with Transfer-Encoding is rejected and never forwarded
 ok 14 - Content-Length together with Transfer-Encoding is rejected and never forwarded
   ---
-  duration_ms: 3.301342
+  duration_ms: 2.825252
   type: 'test'
   ...
 # Subtest: unknown PI_* configuration keys stop startup
 ok 15 - unknown PI_* configuration keys stop startup
   ---
-  duration_ms: 60.436894
+  duration_ms: 66.262789
   type: 'test'
   ...
 1..15
@@ -103,7 +103,7 @@ ok 15 - unknown PI_* configuration keys stop startup
 # cancelled 0
 # skipped 0
 # todo 0
-# duration_ms 881.535582
+# duration_ms 860.219565
 exit=0
 leftover_transient_containers=0
 end

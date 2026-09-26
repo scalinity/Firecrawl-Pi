@@ -1,0 +1,26 @@
+### meta
+2026-09-26T00:07:37Z
+source_commit=91e491f7b730fe88693344683b503b9b7bb90b29
+postgres_image=fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180
+rabbitmq_image=rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8
+### postgres_initdb
+ready_after_s=2
+initdb_scripts=running /docker-entrypoint-initdb.d/010-nuq.sql;sourcing /docker-entrypoint-initdb.d/020-fcpi-core-role.sh;ignoring /docker-entrypoint-initdb.d/fcpi-core-role.psql;
+init_errors=0
+role=fcpi_core super=false createrole=false createdb=false replication=false bypassrls=false
+superuser_has_password=f
+fcpi_core_has_password=t
+nuq_owner=postgres
+nuq_tables=4
+fcpi_core_owned_objects=0
+fcpi_core_privileges=DELETE,INSERT,SELECT,UPDATE
+fcpi_core_tables_with_dml=4
+cron_job_owners=postgres:36
+### rabbitmq_first_boot
+ready_after_s=2
+users=fcpi[] 
+default_user_tags_env={ok,[]}
+### cleanup
+leftover_transient_containers=0
+leftover_secret_dir=no
+end

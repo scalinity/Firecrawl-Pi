@@ -1,0 +1,14 @@
+### apply_gateway_dns
+2026-09-25T23:56:56Z
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=10 create_host_path=false
+ Container fcpi-nuq-postgres-1 Waiting 
+ Container fcpi-redis-1 Waiting 
+ Container fcpi-fixture-1 Healthy 
+ Container fcpi-redis-1 Healthy 
+ Container fcpi-rabbitmq-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+ Container fcpi-nuq-postgres-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+up_exit=0
+gateway_dns=["192.0.2.1"]
+end

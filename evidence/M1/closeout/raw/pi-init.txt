@@ -1,6 +1,6 @@
 ### meta
-2026-09-25T23:07:38Z
-source_commit=0db5a8d0cdcc12aa018a829ce1952dbdd919e797
+2026-09-25T23:55:18Z
+source_commit=7b85385d4bb31615c5e15b980ddc17b035195e73
 ### directories
 kept    /etc/firecrawl-pi/
 kept    /etc/firecrawl-pi/secrets/
@@ -22,11 +22,12 @@ kept    /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie
 ### systemd_units
 kept    /etc/systemd/system/fcpi-data-check.service
 kept    /etc/systemd/system/fcpi-stack.service
+installed /etc/firecrawl-pi/fcpi-guard.nft
 kept    /etc/systemd/system/docker.service.d/10-fcpi-data-check.conf
 installed /etc/systemd/system/docker.service.d/20-fcpi-guard.conf
 loaded  inet fcpi_guard
 installed /etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf
-reloaded NetworkManager configuration
+NetworkManager unmanaged-devices=interface-name:veth*,interface-name:fcpi-*,interface-name:docker0
 docker ExecStartPre=path=/opt/firecrawl-pi/deploy/host/fcpi-data-check.sh path=/usr/sbin/nft 
 fcpi-stack enabled=enabled
 ### inventory

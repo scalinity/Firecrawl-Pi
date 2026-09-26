@@ -114,6 +114,9 @@
           "required": true
         }
       },
+      "dns": [
+        "192.0.2.1"
+      ],
       "entrypoint": null,
       "environment": {
         "PI_CORE_URL": "http://firecrawl-core:3002",

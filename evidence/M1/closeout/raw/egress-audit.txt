@@ -1,5 +1,5 @@
-read 2026-09-25T23:17:38Z
-ipv4_from_internal_subnets family=bridge packets=12811 bytes=3953178
+read 2026-09-26T00:15:55Z
+ipv4_from_internal_subnets family=bridge packets=29534 bytes=9100427
 ipv4_from_internal_to_off_subnet family=bridge packets=0 bytes=0
 ipv6_beyond_link_scope_on_any_bridge family=bridge packets=0 bytes=0
 info_ipv6_link_scope_on_any_bridge family=bridge packets=0 bytes=0

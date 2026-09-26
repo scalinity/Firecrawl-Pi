@@ -1,0 +1,6 @@
+### restore_fcpi_stack
+2026-09-26T00:13:40Z
+before=failed
+after=active healthy=6
+unit_wants=network-online.target docker.service unit_requires=sysinit.target system.slice fcpi-data-check.service
+end

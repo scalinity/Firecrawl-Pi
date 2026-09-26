@@ -20,36 +20,11 @@ vethf7312d1 ethernet connected (externally)
 wlan0 wifi connected
 end
 ### after_meta
-2026-09-25T23:07:47Z
-conf_sha256=1f8fa86b712d74fead70fbd2ec8240315a19b5ae5547a6b55d1cd32f0a45a612
-repo_conf_sha256=1f8fa86b712d74fead70fbd2ec8240315a19b5ae5547a6b55d1cd32f0a45a612
+2026-09-25T23:55:19Z
+conf_sha256=8bcf36f77ceb88ebb4ca6dfaa41ff7f654e39053e741ce5c33523c50210e0ce7
+repo_conf_sha256=8bcf36f77ceb88ebb4ca6dfaa41ff7f654e39053e741ce5c33523c50210e0ce7
+effective_unmanaged_devices=interface-name:veth*,interface-name:fcpi-*,interface-name:docker0
 ### after_devices
-docker0 bridge unmanaged
-fcpi-access bridge unmanaged
-fcpi-api bridge unmanaged
-fcpi-core bridge unmanaged
-fcpi-fixture bridge unmanaged
-veth07ad8ed ethernet unmanaged
-veth1d9246e ethernet unmanaged
-veth336092f ethernet unmanaged
-veth39e430b ethernet unmanaged
-veth3fe5250 ethernet unmanaged
-veth4470f72 ethernet unmanaged
-veth795b0e4 ethernet unmanaged
-veth9bec10b ethernet unmanaged
-vethf7312d1 ethernet unmanaged
-wlan0 wifi connected
-end
-### window_meta
-2026-09-25T23:17:29Z
-conf_sha256=1f8fa86b712d74fead70fbd2ec8240315a19b5ae5547a6b55d1cd32f0a45a612
-repo_conf_sha256=1f8fa86b712d74fead70fbd2ec8240315a19b5ae5547a6b55d1cd32f0a45a612
-### window_journal
-since=2026-09-25 23:08:07
-docker_interface_activations=0
-docker_interface_dhcp_transactions=0
-wlan0_state_changes=0
-### window_devices
 docker0 bridge unmanaged
 fcpi-access bridge unmanaged
 fcpi-api bridge unmanaged
@@ -64,5 +39,34 @@ veth987644a ethernet unmanaged
 vetha4e1739 ethernet unmanaged
 vethd5fa338 ethernet unmanaged
 vethecdc9a8 ethernet unmanaged
+wlan0 wifi connected
+end
+### window_meta
+2026-09-26T00:15:54Z
+conf_sha256=8bcf36f77ceb88ebb4ca6dfaa41ff7f654e39053e741ce5c33523c50210e0ce7
+repo_conf_sha256=8bcf36f77ceb88ebb4ca6dfaa41ff7f654e39053e741ce5c33523c50210e0ce7
+effective_unmanaged_devices=interface-name:veth*,interface-name:fcpi-*,interface-name:docker0
+### window_journal
+since=2026-09-25 23:07:38
+journal_lines=238
+docker_interface_lines=236
+docker_interface_activations=0
+docker_interface_dhcp_transactions=0
+wlan0_state_changes=0
+### window_devices
+docker0 bridge unmanaged
+fcpi-access bridge unmanaged
+fcpi-api bridge unmanaged
+fcpi-core bridge unmanaged
+fcpi-fixture bridge unmanaged
+veth3501354 ethernet unmanaged
+veth83ce3f4 ethernet unmanaged
+veth871236e ethernet unmanaged
+vetha26ac95 ethernet unmanaged
+vetha3d6d0d ethernet unmanaged
+vethdf1c183 ethernet unmanaged
+vethe9de8ae ethernet unmanaged
+vethef195ac ethernet unmanaged
+vethf63bae7 ethernet unmanaged
 wlan0 wifi connected
 end

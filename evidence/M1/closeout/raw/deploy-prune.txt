@@ -1,15 +1,15 @@
 ### meta
-2026-09-25T23:06:00Z
-head=0c454c509eee6ad33e4114ae5a9e18a51675f9d4
-archive_files=231
+2026-09-25T23:54:59Z
+head=7b85385d4bb31615c5e15b980ddc17b035195e73
+archive_files=255
 probe_tracked=no
 ### plant
-planted=yes pi_files=210
+planted=yes pi_files=233
 ### deploy
 removed ./tests/closeout-stale/probe.txt
 removed-dir ./tests/closeout-stale
-deployed commit 0c454c509eee6ad33e4114ae5a9e18a51675f9d4 (231 files, hashes verified, 1 stale files removed) to <pi-ssh-target>:/opt/firecrawl-pi
+deployed commit 7b85385d4bb31615c5e15b980ddc17b035195e73 (255 files, hashes verified, 1 stale files removed) to <pi-ssh-target>:/opt/firecrawl-pi
 deploy_exit=0
 ### after
-stale_file_present=no stale_dir_present=no source_commit=0c454c509eee6ad33e4114ae5a9e18a51675f9d4 pi_files=232
+stale_file_present=no stale_dir_present=no source_commit=7b85385d4bb31615c5e15b980ddc17b035195e73 pi_files=256
 end
