@@ -76,7 +76,10 @@ const cases = {
     ["tcp 10.231.6.1:80 (host web listener on the bridge, guard input)", "fail", () => tcp("10.231.6.1", 80)],
     ["tcp 169.254.169.254:80 (metadata, guard special)", "fail", () => tcp("169.254.169.254", 80)],
     ["tcp 192.168.1.1:80 (private, guard special)", "fail", () => tcp("192.168.1.1", 80)],
-    ["tcp 10.231.1.5:6379 (redis, guard special)", "fail", () => tcp("10.231.1.5", 6379)],
+    // The service is a member of fcpi_core (its PostgreSQL store), so a data-network address is
+    // reached over that bridge; the guard's special-range rule is shown on a project address
+    // on no attached network, which leaves by the default route.
+    ["tcp 10.231.9.9:80 (private, no attached network, guard special)", "fail", () => tcp("10.231.9.9", 80)],
     ["tcp 1.1.1.1:22 (public, non-web port, guard other)", "fail", () => tcp("1.1.1.1", 22)],
     ["tcp [2606:4700:4700::1111]:443 (IPv6)", "fail", () => tcp("2606:4700:4700::1111", 443)],
     ["control dns pi.hole via 10.231.6.1 (answered by the host resolver itself)", "ok", () => dnsVia("10.231.6.1", "pi.hole")],

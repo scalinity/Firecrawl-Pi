@@ -16,7 +16,8 @@ sec() { printf '### %s\n' "$1"; }
 LAN=$(sed -n "s/^PI_LAN_ADDRESS=//p" "$REPO/scripts/m1/pi-target.conf")
 [ -n "$LAN" ] || { echo "no PI_LAN_ADDRESS" >&2; exit 1; }
 redact() { sed "s/${LAN//./\\.}/<pi-lan-address>/g"; }
-counters() { sudo -n nft list table inet fcpi_guard | grep -oE 'counter packets [0-9]+ bytes [0-9]+ comment "[a-z0-9_]+"' | awk '{print $7, "packets=" $3}' | tr -d '"'; }
+# One line per counted guard rule: its comment and packet count (the verdict sits between them).
+counters() { sudo -n nft list table inet fcpi_guard | grep 'counter packets' | sed -E 's/.*counter packets ([0-9]+) bytes [0-9]+.*comment "([a-z0-9_]+)".*/\2 packets=\1/'; }
 
 sec meta
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit)"
