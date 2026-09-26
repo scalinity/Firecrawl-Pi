@@ -56,8 +56,8 @@ function piView(label, since) {
   const ml = logs("mcp-gateway", since).filter((l) => l.client === label);
   const gl = logs("access-gateway", since).filter((l) => l.client === label);
   out("pi_view", { client: label,
-    exchanges: ml.filter((l) => l.event === "exchange").map((l) => ({ http_method: l.http_method, mcp_method: l.mcp_method, protocol_version: l.protocol_version, status: l.status, content_type: l.content_type, session_header_sent: l.session_header_sent })),
-    tools: ml.filter((l) => l.event === "tool").map((l) => ({ era: l.era, protocol_version: l.protocol_version, tool: l.tool, job: l.job, outcome: l.outcome, downstream_status: l.downstream?.status ?? null })),
+    exchanges: ml.filter((l) => l.event === "exchange").map((l) => ({ client_info: l.client_info ?? null, http_method: l.http_method, mcp_method: l.mcp_method, protocol_version: l.protocol_version, status: l.status, content_type: l.content_type, session_header_sent: l.session_header_sent })),
+    tools: ml.filter((l) => l.event === "tool").map((l) => ({ client_info: l.client_info ?? null, era: l.era, protocol_version: l.protocol_version, tool: l.tool, job: l.job, outcome: l.outcome, downstream_status: l.downstream?.status ?? null })),
     gateway: gl.map((l) => ({ method: l.method, route: l.route, status: l.status, mcp_method: l.mcp_method ?? null })) });
 }
 // Codex's server, exactly as deploy/clients/codex.config.toml states it (the template the owner copies),
