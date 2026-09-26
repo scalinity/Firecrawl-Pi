@@ -120,7 +120,7 @@ test("the catalog is deterministic and sorted, and cacheable privately for 60 s"
   const a = await modern("tools/list"), b = await modern("tools/list", {}, { id: 9 });
   const names = a.last.result.tools.map((t) => t.name);
   assert.deepEqual(names, [...names].sort());
-  assert.equal(names.length, 9);
+  assert.equal(names.length, JSON.parse(readFileSync(MANIFEST_PATH, "utf8")).mcp.tools.length);
   assert.deepEqual(a.last.result.tools, b.last.result.tools);
   assert.equal(a.last.result.ttlMs, 60000);
   assert.equal(a.last.result.cacheScope, "private");
@@ -171,7 +171,7 @@ test("2025-11-25 through the stateless fallback: initialize, then calls with no 
   assert.equal(init.last.result.protocolVersion, LEGACY);
   assert.deepEqual(init.last.result.capabilities.tools, { listChanged: false });
   const list = await http("POST", { headers: h({ "mcp-protocol-version": LEGACY }), body: { jsonrpc: "2.0", id: 1, method: "tools/list" } });
-  assert.equal(list.last.result.tools.length, 9);
+  assert.equal(list.last.result.tools.length, JSON.parse(readFileSync(MANIFEST_PATH, "utf8")).mcp.tools.length);
   const r = await http("POST", { headers: h({ "mcp-protocol-version": LEGACY }), body: { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "firecrawl_scrape", arguments: { url: "https://example.com/legacy" } } } });
   assert.equal(JSON.parse(r.last.result.content[0].text).data.markdown, "# fixture page");
   assert.equal(r.last.result.resultType, undefined, "2025-era results carry no resultType");

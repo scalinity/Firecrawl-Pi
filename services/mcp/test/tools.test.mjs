@@ -62,6 +62,8 @@ test("id tools take a UUID; status tools page within the MCP bounds", () => {
   assert.deepEqual(T.firecrawl_check_crawl_status.request({ id }), { method: "GET", path: `/v2/crawl/${id}?skip=0&limit=${MANIFEST.mcp.limits.statusPageDefault}` });
   assert.deepEqual(T.firecrawl_batch_status.request({ id, skip: 7, limit: 2 }), { method: "GET", path: `/v2/batch/scrape/${id}?skip=7&limit=2` });
   assert.deepEqual(T.firecrawl_cancel_crawl.request({ id }), { method: "DELETE", path: `/v2/crawl/${id}` });
+  assert.deepEqual(T.firecrawl_cancel_batch.request({ id }), { method: "DELETE", path: `/v2/batch/scrape/${id}` });
+  assert.equal(T.firecrawl_cancel_batch.config.annotations.destructiveHint, true);
   assert.deepEqual(T.firecrawl_get_result.request({ id }), { method: "GET", path: `/platform/v1/jobs/${id}` });
   assert.deepEqual(T.firecrawl_capabilities.config.inputSchema, { type: "object", properties: {}, additionalProperties: false });
 });
