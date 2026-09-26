@@ -6,6 +6,8 @@
 # network attachments, default route and DNS settings, since every container on a non-internal
 # network must name its own DNS upstream (CLAUDE.md §33.1). The LAN address is replaced by
 # <pi-lan-address> in everything printed. Changes nothing.
+#   ssh … 'bash -s -- counters' < scripts/m2/pi-egress-probe.sh prints only the guard's counters: the
+#   snapshot that opens a verification window (verifier X01 compares it with the probe at its close).
 set -uo pipefail
 export LC_ALL=C
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -23,7 +25,10 @@ redact() { sed "s/${LAN//./\\.}/<pi-lan-address>/g${WAN:+; s/${WAN//./\\.}/<pi-w
 counters() { sudo -n nft list table inet fcpi_guard | grep 'counter packets' | sed -E 's/.*counter packets ([0-9]+) bytes [0-9]+.*comment "([a-z0-9_]+)".*/\2 packets=\1/'; }
 
 sec meta
-echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) wan_configured=$([ -n "$WAN" ] && echo yes || echo no)"
+# dockerd's start reloads the guard and resets its counters; the same value at both ends of a window
+# shows the counters were not reset within it.
+echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) wan_configured=$([ -n "$WAN" ] && echo yes || echo no) docker_active_since=$(systemctl show docker.service -p ActiveEnterTimestampMonotonic --value)"
+if [ "${1:-}" = counters ]; then sec counters; counters; sec end; echo end; exit 0; fi
 
 sec attachments
 for c in $(D ps -q --filter label=com.docker.compose.project=fcpi); do

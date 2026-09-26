@@ -60,6 +60,9 @@ function phase(name) {
     hostOom: p("host_oom"), kill: p("kill"), meta: p("meta"),
   };
 }
+// Every one of the nine services has a readable oom_kill before and after: otherwise "no cgroup's
+// oom_kill rose" would be vacuous (review finding W15).
+const cgroupsComplete = (ph) => ["cgroupsBefore", "cgroupsAfter"].every((k) => Object.keys(ph[k]).length >= 9 && Object.values(ph[k]).every((v) => Number.isFinite(v.oom_kill)));
 const permitsFree = (ph) => ph.permits.length === 3 && ph.permits.every((r) => r[2] === "t");
 const healthy = (ph) => ph.health.length >= 8 && ph.health.every((h) => h.state === "running" && h.health === "healthy");
 const byLogical = (ph, id) => ph.attempts.filter((a) => a.logical === id);
@@ -380,15 +383,20 @@ const checks = {
       const p = phase("ssrf");
       const core = Object.values(p.cases).filter((c) => c.kind === "core");
       const direct = Object.values(p.cases).filter((c) => c.kind === "rs" && c.case !== "SR00-control");
-      const coreBad = core.filter((c) => c.success !== false || !(c.http === 400 || /SSRF_DENIED|CLOUD_DENIED/.test(c.error ?? ""))).map((c) => c.case);
+      // Refused by the core's own URL check (400 BAD_REQUEST) or by the service with its class.
+      const coreBad = core.filter((c) => c.success !== false || !((c.http === 400 && c.code === "BAD_REQUEST") || /SSRF_DENIED|CLOUD_DENIED/.test(c.error ?? ""))).map((c) => c.case);
+      // Every attempt of the phase is accounted for: the control's one adequate fetch and the seven
+      // redirect cases, each refused at its hop; no other case spent an attempt.
+      const byOutcome = p.attempts.reduce((m, a) => ((m[a.outcome] = (m[a.outcome] ?? 0) + 1), m), {});
+      const accounted = p.attempts.length === 8 && byOutcome.adequate === 1 && (byOutcome.SSRF_DENIED ?? 0) + (byOutcome.CLOUD_DENIED ?? 0) === 7;
       const directBad = direct.filter((c) => c.ok !== false || !["SSRF_DENIED", "CLOUD_DENIED"].includes(c.failure) || c.attemptsUsed !== 0).map((c) => c.case);
       const redirects = core.filter((c) => /^S(09|1[0-4]|19)-redirect/.test(c.case));
       const redirectHits = p.fixture.filter((h) => h.path === "/redirect").length;
       const control = p.cases["SR00-control"];
       const unit = sections(`${RAW}unit-tests.txt`).tap ?? [];
       const unitOk = unit.some((l) => /DNS rebinding/.test(l) && l.startsWith("ok ")) && unit.includes("# fail 0");
-      const ok = core.length >= 18 && direct.length >= 18 && coreBad.length === 0 && directBad.length === 0 && redirects.length === 7 && redirectHits >= 7 && control?.ok === true && control.sentinels.includes("fcpi-m2-short-3b8e") && unitOk;
-      return { ok, actual: `through core=${core.length} not refused=${coreBad.join(",") || "none"}; direct=${direct.length} not refused=${directBad.join(",") || "none"}; redirect cases=${redirects.length}, fixture served /redirect=${redirectHits}; control=${control?.ok}; unit DNS rebinding and suite=${unitOk}` };
+      const ok = accounted && core.length >= 18 && direct.length >= 18 && coreBad.length === 0 && directBad.length === 0 && redirects.length === 7 && redirectHits >= 7 && control?.ok === true && control.sentinels.includes("fcpi-m2-short-3b8e") && unitOk;
+      return { ok, actual: `attempts accounted=${accounted} (${JSON.stringify(byOutcome)}); through core=${core.length} not refused=${coreBad.join(",") || "none"}; direct=${direct.length} not refused=${directBad.join(",") || "none"}; redirect cases=${redirects.length}, fixture served /redirect=${redirectHits}; control=${control?.ok}; unit DNS rebinding and suite=${unitOk}` };
     } },
   S02: { name: "browser-subresources-denied", inputs: [`${RAW}rt-browser.txt`],
     expected: "each of the subresource fixture's 13 private, loopback, metadata, LAN-range, numeric, Cloud and project-internal requests is refused at the proxy by host, with the attempt id on every log line; the pixel, the positive control, reaches the fixture; the page renders",
@@ -465,8 +473,10 @@ const checks = {
       const listedAt = Date.parse(((p.s["crash_browser_processes"] ?? []).find((l) => l.startsWith("utc=")) ?? "").slice(4));
       const killedAt = Date.parse(`${(p.meta.find((l) => l.startsWith("utc=")) ?? "").slice(4, 14)}T${k.killed_at}Z`);
       const olderThanKill = p.processes.filter((x) => /chrome/.test(x.comm) && listedAt - x.etimes * 1000 < killedAt - 1000);
-      const ok = +k.chrome_processes > 0 && crash?.failure === "BROWSER_CRASHED" && after?.ok === true && olderThanKill.length === 0 && permitsFree(p) && healthy(p) && p.health.every((h) => h.svc !== "browser-worker" || h.restarts === 0);
-      return { ok, actual: `killed ${k.chrome_processes} chrome processes at ${k.killed_at}; crash=${crash?.failure}; next render ok=${after?.ok}; chrome older than the kill=${olderThanKill.length}; permits free=${permitsFree(p)}; all healthy=${healthy(p)}` };
+      // Each input must be there: a missing list or time would make "older than the kill" vacuous.
+      const inputs = p.processes.length > 0 && Number.isFinite(listedAt) && Number.isFinite(killedAt);
+      const ok = inputs && +k.chrome_processes > 0 && crash?.failure === "BROWSER_CRASHED" && after?.ok === true && olderThanKill.length === 0 && permitsFree(p) && healthy(p) && p.health.every((h) => h.svc !== "browser-worker" || h.restarts === 0);
+      return { ok, actual: `inputs present=${inputs}; killed ${k.chrome_processes} chrome processes at ${k.killed_at}; crash=${crash?.failure}; next render ok=${after?.ok}; chrome older than the kill=${olderThanKill.length}; permits free=${permitsFree(p)}; all healthy=${healthy(p)}` };
     } },
   C03: { name: "browser-down-isolated", inputs: [`${RAW}rt-browser-down.txt`],
     expected: "with the browser worker stopped, a static page still succeeds and a script page fails as its own tier (BROWSER_UNAVAILABLE); the worker comes back",
@@ -506,7 +516,7 @@ const checks = {
       const rose = Object.keys(p.cgroupsAfter).filter((s) => p.cgroupsAfter[s].oom_kill > (p.cgroupsBefore[s]?.oom_kill ?? 0));
       const minAvail = Math.min(...p.samples.map((x) => +x.mem_available_mib));
       const c = p.cases["A10-stress-within-cap"];
-      const ok = c?.ok === true && c.sentinels.includes("fcpi-m2-stress-8c3a") && Object.keys(p.cgroupsBefore).length >= 9 && rose.length === 0 && p.samples.length >= 3 && minAvail >= 1024;
+      const ok = cgroupsComplete(p) && c?.ok === true && c.sentinels.includes("fcpi-m2-stress-8c3a") && rose.length === 0 && p.samples.length >= 3 && minAvail >= 1024;
       return { ok, actual: `render ok=${c?.ok}; oom_kill rose in=${rose.join(",") || "none"}; samples=${p.samples.length}, min MemAvailable=${minAvail} MiB; browser peak=${(p.cgroupsAfter["browser-worker"]?.peak / MIB).toFixed(0)} MiB` };
     } },
   M04: { name: "over-cap-browser-contained", inputs: [`${RAW}rt-overcap.txt`],
@@ -517,7 +527,7 @@ const checks = {
       const memcg = p.hostOom.some((l) => /CONSTRAINT_MEMCG/.test(l)) && p.hostOom.some((l) => /Killed process \d+ \(chrome-headless/.test(l));
       const minAvail = Math.min(...p.samples.map((x) => +x.mem_available_mib));
       const core5 = ["nuq-postgres", "redis", "rabbitmq", "firecrawl-core", "access-gateway"].every((s) => p.health.some((h) => h.svc === s && h.health === "healthy"));
-      const ok = p.cases["A11-over-cap"]?.failure === "RENDERER_CRASHED" && JSON.stringify(rose) === JSON.stringify(["browser-worker"]) && memcg && p.cgroupsAfter["browser-worker"]?.peak === 1536 * MIB &&
+      const ok = cgroupsComplete(p) && p.cases["A11-over-cap"]?.failure === "RENDERER_CRASHED" && JSON.stringify(rose) === JSON.stringify(["browser-worker"]) && memcg && p.cgroupsAfter["browser-worker"]?.peak === 1536 * MIB &&
         core5 && p.cases["A11b-after-over-cap"]?.ok === true && minAvail >= 1024;
       return { ok, actual: `failure=${p.cases["A11-over-cap"]?.failure}; oom_kill rose in=${rose.join(",") || "none"}; kernel memcg kill=${memcg}; browser peak=${p.cgroupsAfter["browser-worker"]?.peak / MIB} MiB; data services, core and gateway healthy=${core5}; next render=${p.cases["A11b-after-over-cap"]?.ok}; min MemAvailable=${minAvail} MiB` };
     } },
@@ -577,8 +587,8 @@ const checks = {
     } },
 
   // ============================================================== egress, Cloud and exposure
-  X01: { name: "zero-firecrawl-cloud-attempts", inputs: [`${RAW}egress-probe.txt`, `${RAW}guard.txt`, `${RAW}rt-ssrf.txt`],
-    expected: "every core instance's saved log (scripts/m2/pi-core-logs.sh, R7) classifies each Cloud line as a refusal, a refused job's line or a request echo, and each name-resolution failure as a project service, with its harness-start positive control; the Cloud test targets were refused by policy (the positive control that they were asked); the guard counted no accepted web connection on the egress bridge, so no Cloud or other public web connection was made",
+  X01: { name: "zero-firecrawl-cloud-attempts", inputs: [`${RAW}egress-probe.txt`, `${RAW}guard-window-open.txt`, `${RAW}rt-ssrf.txt`],
+    expected: "every core instance's saved log (scripts/m2/pi-core-logs.sh, R7) classifies each Cloud line as a refusal, a refused job's line or a request echo, and each name-resolution failure as a project service, with its harness-start positive control; the Cloud test targets were refused by policy (the positive control that they were asked); across the whole fixture window, from a guard-counter snapshot taken before its first phase to the egress probe after its last, the guard accepted no web connection on the egress bridge, so no Cloud or other public web connection was made",
     run() {
       const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard", `${RAW}`], { encoding: "utf8" }).split("\n").filter((f) => /core-logs-.*\.txt$/.test(f));
       const recs = [];
@@ -592,10 +602,20 @@ const checks = {
       const unclassifiedWithCloud = recs.filter((r) => !r.c && r.cloudCount > 0 && !latest.some((x) => x.sec.slice(-12) === r.sec.slice(-12)));
       const ssrf = phase("ssrf");
       const refusedCloud = Object.values(ssrf.cases).filter((c) => /CLOUD_DENIED/.test(c.error ?? "") || c.failure === "CLOUD_DENIED").length;
-      const web = (f, sec) => +((sections(f)[sec] ?? []).find((l) => l.startsWith("egress_web_accepted")) ?? "=-1").split("=")[1];
-      const webAccepted = [web(`${RAW}egress-probe.txt`, "guard_after"), web(`${RAW}guard.txt`, "after_counters")];
-      const ok = latest.length >= 4 && bad.length === 0 && unclassifiedWithCloud.length === 0 && refusedCloud >= 3 && webAccepted.every((x) => x === 0);
-      return { ok, actual: `instance records classified=${latest.length} across ${files.length} captures; with unexplained lines or no control=${bad.map((r) => `${r.f}#${r.sec}`).join(",") || "none"}; unclassified with Cloud lines=${unclassifiedWithCloud.length}; Cloud targets refused by policy=${refusedCloud}; guard web accepts=${webAccepted.join(",")}` };
+      // The window: the counters at its opening, the egress probe at its close; every fixture phase and
+      // NuQ test lies between (their meta times), and no dockerd start reloaded the guard in between.
+      const web = (f, sec) => +((sections(f)[sec] ?? []).find((l) => l.startsWith("egress_web_accepted")) ?? "=NaN").split("=")[1];
+      const utcOf = (f) => Date.parse(((sections(f).meta ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]);
+      const open = utcOf(`${RAW}guard-window-open.txt`), close = utcOf(`${RAW}egress-probe.txt`);
+      const phases = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard", `${RAW}`], { encoding: "utf8" }).split("\n")
+        .filter((f) => /\/(rt-[a-z-]+|nuq-(broker|kill|stall))\.txt$/.test(f));
+      const times = phases.map((f) => Date.parse(((Object.entries(sections(f)).find(([k]) => /_meta$/.test(k))?.[1] ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]));
+      const inside = times.length >= 10 && times.every((t) => Number.isFinite(t) && t > open && t < close);
+      const dockerd = (f) => ((sections(f).meta ?? []).join(" ").match(/docker_active_since=(\S+)/) ?? [])[1];
+      const sameGuard = !!dockerd(`${RAW}guard-window-open.txt`) && dockerd(`${RAW}guard-window-open.txt`) === dockerd(`${RAW}egress-probe.txt`);
+      const delta = web(`${RAW}egress-probe.txt`, "guard_after") - web(`${RAW}guard-window-open.txt`, "counters");
+      const ok = latest.length >= 4 && bad.length === 0 && unclassifiedWithCloud.length === 0 && refusedCloud >= 3 && inside && sameGuard && delta === 0;
+      return { ok, actual: `instance records classified=${latest.length} across ${files.length} captures; with unexplained lines or no control=${bad.map((r) => `${r.f}#${r.sec}`).join(",") || "none"}; unclassified with Cloud lines=${unclassifiedWithCloud.length}; Cloud targets refused by policy=${refusedCloud}; fixture window holds ${phases.length} phase records=${inside}, guard not reloaded=${sameGuard}, web accepts in the window=${delta}` };
     } },
   X02: { name: "core-has-no-direct-egress", inputs: [`${RAW}egress-probe.txt`, `${RAW}stack.txt`],
     expected: "every network the core joins is internal and it has no default route; from inside it, public names do not resolve and no public, LAN or egress-bridge address connects, while the retrieval service (its only way out) answers",
@@ -649,7 +669,8 @@ const checks = {
       const R = json(`${EV}rendered-compose.json`);
       const setters = Object.entries(R.services).filter(([, v]) => v.environment && "ALLOW_LOCAL_WEBHOOKS" in v.environment).map(([k]) => k);
       const coreNets = Object.keys(R.services["firecrawl-core"]?.networks ?? {});
-      const refuse = /ALLOW_LOCAL_WEBHOOKS/.test(read("patches/0003-pi-resilient-engine-adapter.patch"));
+      // The refusal itself: the added conflict entry in config.ts's superRefine, not any mention of the flag.
+      const refuse = read("patches/0003-pi-resilient-engine-adapter.patch").split("\n").includes(`+      ["ALLOW_LOCAL_WEBHOOKS", value.ALLOW_LOCAL_WEBHOOKS === true],`);
       const spec = read("docs/FIRECRAWL_PI_SPEC.md");
       const specStale = /M1 fixture-only profile sets it true/.test(spec) || /M2 removes it/.test(spec);
       const ok = setters.length === 0 && !coreNets.includes("fixture") && refuse && !specStale;
