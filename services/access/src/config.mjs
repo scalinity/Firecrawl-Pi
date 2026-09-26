@@ -49,7 +49,7 @@ export function loadConfig(env) {
     if (!env[k]) throw new Error(`${k} is required`);
   }
   const manifest = JSON.parse(readFileSync(env.PI_CAPABILITIES_FILE, "utf8"));
-  checkManifest(manifest);
+  checkManifest(manifest, { mcp: !!env.PI_MCP_URL });
   // The MCP service (M4): a fixed http origin on the internal network the two share. Absent, /mcp is no route.
   const mcpUrl = env.PI_MCP_URL ? new URL(env.PI_MCP_URL) : null;
   if (mcpUrl && (mcpUrl.protocol !== "http:" || mcpUrl.pathname !== "/" || mcpUrl.search || mcpUrl.username || mcpUrl.password)) throw new Error("PI_MCP_URL must be an http origin");
@@ -74,7 +74,7 @@ export function loadConfig(env) {
 }
 
 // The manifest's limits are checked here, so a mistyped cap stops startup instead of opening a gap.
-export function checkManifest(m) {
+export function checkManifest(m, { mcp = false } = {}) {
   if (m.schema !== "fcpi.capabilities/v1") throw new Error("capability manifest: unknown schema");
   const L = m.limits;
   const pos = (v, name, max = Infinity) => { if (!Number.isInteger(v) || v < 1 || v > max) throw new Error(`capability manifest: ${name} must be an integer from 1 to ${max}`); };
@@ -100,7 +100,9 @@ export function checkManifest(m) {
   if (crawl.limit.max > 200 || crawl.maxDiscoveryDepth.max > 3) throw new Error("capability manifest: crawl limits exceed spec §23.1's hard caps");
   if (m.bodies.map.fields.limit.max > 1000) throw new Error("capability manifest: map limit exceeds spec §23.1's 1,000");
   for (const r of m.routes) if (!m.scopes.includes(r.scope)) throw new Error(`capability manifest: route ${r.id} names unknown scope ${r.scope}`);
-  // The MCP section: the gateway serves its path and enforces its in-flight cap and exchange deadline.
+  // The MCP section, only when the gateway serves /mcp (PI_MCP_URL set): its path, in-flight cap and
+  // exchange deadline. Without it, nothing in that section can stop the REST routes from starting.
+  if (!mcp) return;
   if (m.mcp?.path !== "/mcp") throw new Error("capability manifest: mcp.path must be /mcp");
   pos(m.mcp.limits?.maxInFlight, "mcp.limits.maxInFlight", 64);
   pos(m.mcp.limits?.exchangeTimeoutMs, "mcp.limits.exchangeTimeoutMs", 600000);

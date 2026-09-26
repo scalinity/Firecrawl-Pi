@@ -149,3 +149,16 @@ test("the exchange deadline ends an MCP request that never answers, and cuts one
     assert.equal(quick.inFlight, 0);
   } finally { g.close(); }
 });
+
+test("the manifest's MCP section is checked only when the gateway serves /mcp", async () => {
+  const { checkManifest } = await import("../src/config.mjs");
+  const { readFileSync } = await import("node:fs");
+  const m = JSON.parse(readFileSync(process.env.FCPI_TEST_MANIFEST ?? new URL("../../../deploy/policies/capabilities.json", import.meta.url), "utf8"));
+  checkManifest(m, { mcp: true });
+  const broken = structuredClone(m); broken.mcp.limits.maxInFlight = 0;
+  assert.throws(() => checkManifest(broken, { mcp: true }), /mcp\.limits\.maxInFlight/);
+  checkManifest(broken);                 // REST alone: the MCP section cannot stop it
+  const none = structuredClone(m); delete none.mcp;
+  checkManifest(none);
+  assert.throws(() => checkManifest(none, { mcp: true }), /mcp\.path/);
+});
