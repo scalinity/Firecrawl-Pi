@@ -14,8 +14,9 @@ const SETTABLE = new Set(["upstream_id", "submitter", "dispatch_attempts", "next
   "cancel_sent_at", "finished_at", "results_expire_at", "upstream_status", "completed", "total", "credits_used", "errors", "error_code", "error", "http_status"]);
 
 // An SQL expression for a transition field, told apart from a JSON value by a symbol no value carries.
+// Each $? in it takes the next of its params as a query parameter, so no value is written into SQL.
 const SQL = Symbol("sql");
-const sql = (text) => ({ [SQL]: text });
+const sql = (text, params = []) => ({ [SQL]: text, params });
 
 export class AdmissionError extends Error {
   constructor(status, code, message, retryAfter) { super(message); this.status = status; this.code = code; this.retryAfter = retryAfter; }
@@ -49,7 +50,11 @@ export function makeStore(cfg, log = () => {}) {
     const sets = ["state = $2", "updated_at = now()"], vals = [id, to];
     for (const [k, v] of Object.entries(fields)) {
       if (!SETTABLE.has(k)) throw new Error(`store: ${k} is not settable`);
-      if (v && typeof v === "object" && SQL in v) sets.push(`${k} = ${v[SQL]}`);
+      if (v && typeof v === "object" && SQL in v) {
+        let text = v[SQL];
+        for (const p of v.params) { vals.push(p); text = text.replace("$?", () => `$${vals.length}`); }
+        sets.push(`${k} = ${text}`);
+      }
       else { vals.push(v && typeof v === "object" ? JSON.stringify(v) : v); sets.push(`${k} = $${vals.length}`); }
     }
     const row = (await c.query(`UPDATE fcpi_platform.job SET ${sets.join(", ")} WHERE id = $1 RETURNING *`, vals)).rows[0];
@@ -57,7 +62,7 @@ export function makeStore(cfg, log = () => {}) {
     return row;
   }
   const moveTx = (id, from, to, fields, detail) => tx((c) => move(c, id, from, to, fields, detail));
-  const retention = sql(`now() + interval '${L.results.retentionDays} days'`);
+  const retention = sql("now() + $? * interval '1 day'", [L.results.retentionDays]);
 
   return {
     pool,
@@ -84,13 +89,13 @@ export function makeStore(cfg, log = () => {}) {
         if (Number(used) >= quotaBytes) throw new AdmissionError(503, "STORAGE_QUOTA", "The result store is at its quota; new jobs are refused until retention frees space.", 300);
         const id = randomUUID();
         const job = (await c.query(`INSERT INTO fcpi_platform.job (id, principal, client_label, kind, state, submission_key, request_hash, request, units, metadata_expire_at)
-          VALUES ($1, $2, $3, $4, 'RECEIVED', $5, $6, $7, $8, now() + interval '${L.results.metadataDays} days') RETURNING *`,
-          [id, principal, clientLabel, kind, `fcpi:${id}`, hash, JSON.stringify(body), units])).rows[0];
+          VALUES ($1, $2, $3, $4, 'RECEIVED', $5, $6, $7, $8, now() + $9 * interval '1 day') RETURNING *`,
+          [id, principal, clientLabel, kind, `fcpi:${id}`, hash, JSON.stringify(body), units, L.results.metadataDays])).rows[0];
         await c.query("INSERT INTO fcpi_platform.job_event (job_id, from_state, to_state, detail) VALUES ($1, NULL, 'RECEIVED', $2)", [id, `admitted by ${clientLabel}`]);
         if (idemKey) await c.query(`INSERT INTO fcpi_platform.idempotency (principal, operation, key, request_hash, job_id, expires_at)
-          VALUES ($1, $2, $3, $4, $5, now() + interval '${L.results.idempotencyHours} hours')
+          VALUES ($1, $2, $3, $4, $5, now() + $6 * interval '1 hour')
           ON CONFLICT (principal, operation, key) DO UPDATE SET request_hash = EXCLUDED.request_hash, job_id = EXCLUDED.job_id, created_at = now(), expires_at = EXCLUDED.expires_at`,
-          [principal, kind, idemKey, hash, id]);
+          [principal, kind, idemKey, hash, id, L.results.idempotencyHours]);
         return { job, existing: false };
       });
     },
@@ -116,7 +121,7 @@ export function makeStore(cfg, log = () => {}) {
       });
     },
     markSubmitted: (id, upstreamId, deadlineMinutes, detail) => moveTx(id, ["SUBMITTING", "SUBMISSION_UNCERTAIN"], "QUEUED",
-      { upstream_id: upstreamId, submitted_at: sql("now()"), deadline: sql(`now() + interval '${Number(deadlineMinutes)} minutes'`) }, detail),
+      { upstream_id: upstreamId, submitted_at: sql("now()"), deadline: sql("now() + $? * interval '1 minute'", [deadlineMinutes]) }, detail),
     markRejected: (id, httpStatus, code, message) => moveTx(id, ["SUBMITTING"], "FAILED",
       { http_status: httpStatus, error_code: code, error: message, finished_at: sql("now()"), results_expire_at: retention }, `rejected upstream: ${code}`),
     // Back to the queue: the request certainly never reached the core, or an uncertain one was

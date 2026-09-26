@@ -726,6 +726,22 @@ test("retention: expired results leave the manifest and their files go; old meta
   assert.equal((await h.db.query("SELECT count(*)::int AS n FROM fcpi_platform.idempotency WHERE key = $1", [key])).rows[0].n, 0);
 });
 
+test("the ledger's times follow the manifest: deadline, results retention, metadata retention and idempotency window", async () => {
+  const h = await harness();
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody(), headers: { "x-idempotency-key": "k-ledger-times" } });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  h.core.complete(up, 1);
+  await waitFor(async () => (await h.job(r.json.id)).state === "SUCCEEDED", 15000, "archived");
+  const t = (await h.db.query(`SELECT extract(epoch FROM j.deadline - j.submitted_at) AS deadline, extract(epoch FROM j.results_expire_at - j.finished_at) AS results,
+      extract(epoch FROM j.metadata_expire_at - j.created_at) AS metadata, extract(epoch FROM i.expires_at - i.created_at) AS idem
+    FROM fcpi_platform.job j JOIN fcpi_platform.idempotency i ON i.job_id = j.id WHERE j.id = $1`, [r.json.id])).rows[0];
+  const L = MANIFEST.limits, near = (v, s) => Math.abs(Number(v) - s) < 5;
+  assert.ok(near(t.deadline, L.crawl.deadlineMinutes * 60), `deadline ${t.deadline}`);
+  assert.ok(near(t.results, L.results.retentionDays * 86400), `results ${t.results}`);
+  assert.ok(near(t.metadata, L.results.metadataDays * 86400), `metadata ${t.metadata}`);
+  assert.ok(near(t.idem, L.results.idempotencyHours * 3600), `idempotency ${t.idem}`);
+});
+
 test("an origin from the host-side file is served, and names the URLs the gateway returns", async () => {
   const dir = mkdtempSync(join(tmpdir(), "fcpi-origins-"));
   writeFileSync(join(dir, "served-origins"), "# the tailnet origin\nhttps://gw.example-tailnet.ts.net:8443\n");
