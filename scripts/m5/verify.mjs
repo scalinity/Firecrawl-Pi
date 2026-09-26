@@ -213,7 +213,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; series ${s.series_sha256.slice(0, 8)} tree ${s.result_tree.slice(0, 8)}` };
     } },
   G02: { name: "suites-pass-in-the-running-images", inputs: [`${RAW}suites.txt`, `${EV}rendered-compose.json`],
-    expected: "inside the images the stack runs: the retrieval service's suite (at least 95 tests, the ledger's SQL among them against a throwaway PostgreSQL, none skipped), the gateway's extraction-runner and json-format tests (at least 16), the MCP service's suites, the gateway's unit suites, M3's 40-test contract suite and M4's gateway-level /mcp contract suite all pass with none failing, and no throwaway container or network is left",
+    expected: "inside the images the stack runs: the retrieval service's suite (at least 95 tests, the ledger's SQL among them against a throwaway PostgreSQL, none skipped), the gateway's extraction-runner and json-format tests (at least 16), the MCP service's suites, the gateway's unit suites, M3's 40-test contract suite and M4's gateway-level /mcp contract suite and the gateway ledger's version-1 to version-2 migration test all pass with none failing, and no throwaway container or network is left",
     run() {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
       const t = (k) => tapCounts(s[k]), exit0 = (k) => (s[k] ?? []).includes("test_exit=0");
@@ -225,6 +225,7 @@ const checks = {
         mcp: t("mcp_tap").tests >= 41 && t("mcp_tap").fail === 0 && exit0("mcp_tap"), gateway_unit: t("gateway_unit_tap").tests >= 30 && t("gateway_unit_tap").fail === 0 && exit0("gateway_unit_tap"),
         m3_contract: t("gateway_contract_tap").tests === 40 && t("gateway_contract_tap").pass === 40 && exit0("gateway_contract_tap"),
         m4_contract: t("gateway_mcp_contract_tap").tests >= 3 && t("gateway_mcp_contract_tap").fail === 0 && exit0("gateway_mcp_contract_tap"),
+        ledger_migration: t("ledger_migration_tap").tests === 1 && t("ledger_migration_tap").fail === 0 && exit0("ledger_migration_tap"),
         grammars: t("grammars_tap").tests >= 3 && t("grammars_tap").fail === 0, no_leftovers: tr.leftover_transient_containers === "0" && tr.leftover_transient_networks === "0" };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; retrieval ${t("retrieval_tap").pass}/${t("retrieval_tap").tests} (skipped ${skipped}), gateway-m5 ${t("gateway_m5_tap").pass}/${t("gateway_m5_tap").tests}, mcp ${t("mcp_tap").pass}/${t("mcp_tap").tests}, gateway unit ${t("gateway_unit_tap").pass}/${t("gateway_unit_tap").tests}, M3 contract ${t("gateway_contract_tap").pass}/${t("gateway_contract_tap").tests}, M4 contract ${t("gateway_mcp_contract_tap").pass}/${t("gateway_mcp_contract_tap").tests}` };
     } },

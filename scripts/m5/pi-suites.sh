@@ -29,6 +29,13 @@ D run "${RUN[@]}" --network "$N" --user 3310:3310 -e FCPI_TEST_PG="$N-pg" \
   -v "$REPO/deploy/policies:/srv/retrieval/policy:ro" -v "$REPO/deploy/nuq-postgres/fcpi-retrieval-schema.sql:/srv/retrieval/schema.sql:ro" \
   "$RI" sh -c 'node --version; node --test --test-timeout=120000 test/*.test.mjs' 2>&1
 echo "test_exit=$?"
+# The gateway ledger's version-1 to version-2 migration, in the gateway image against the same throwaway database.
+echo "### ledger_migration_tap"
+D run "${RUN[@]}" --network "$N" --user 3380:3380 -e FCPI_TEST_PG="$N-pg" -e FCPI_GATEWAY_DIR=/srv/access -e FCPI_TEST_SCHEMA=/srv/schema.sql \
+  -v "$REPO/tests/contracts/m5-ledger-migration.test.mjs:/srv/contracts/m5-ledger-migration.test.mjs:ro" \
+  -v "$REPO/deploy/nuq-postgres/fcpi-platform-schema.sql:/srv/schema.sql:ro" \
+  "$GI" node --test --test-reporter=tap --test-timeout=60000 /srv/contracts/m5-ledger-migration.test.mjs 2>&1
+echo "test_exit=$?"
 D rm -f "$N-pg" >/dev/null 2>&1; D network rm "$N" >/dev/null 2>&1
 echo "### gateway_m5_tap"
 D run "${RUN[@]}" --network none --user 3380:3380 -v "$REPO/services/access/test:/srv/access/test:ro" "$GI" node --test --test-reporter=tap --test-timeout=60000 test/extract.test.mjs test/jsonscrape.test.mjs 2>&1
