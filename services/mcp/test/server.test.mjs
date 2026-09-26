@@ -275,3 +275,29 @@ test("every submission carries an idempotency key, and a lost answer returns it 
   await sleep(100);
   assert.ok(logs.some((l) => l.event === "tool" && l.outcome === "uncertain"));
 });
+
+test("past maxToolCalls a tool call is refused as OVERLOADED at once, and the running one completes", async () => {
+  const { mkdtempSync, writeFileSync, readFileSync } = await import("node:fs");
+  const { tmpdir } = await import("node:os");
+  const { join } = await import("node:path");
+  const m = JSON.parse(readFileSync(MANIFEST_PATH, "utf8"));
+  m.mcp.limits.maxToolCalls = 1;
+  const p = join(mkdtempSync(join(tmpdir(), "fcpi-mcp-")), "capabilities.json");
+  writeFileSync(p, JSON.stringify(m));
+  const one = spawn(process.execPath, [SERVER], { env: { PATH: process.env.PATH, PI_MCP_LISTEN_PORT: "0", PI_MCP_REST_URL: `http://127.0.0.1:${fake.address().port}`, PI_CAPABILITIES_FILE: p, PI_CLOUD_ACCESS_ENABLED: "false" }, stdio: ["ignore", "pipe", "inherit"] });
+  try {
+    const onePort = await new Promise((resolve, reject) => { let b = ""; one.stdout.on("data", (c) => { b += c; const m2 = b.match(/"event":"listening"[^\n]*"port":(\d+)/); if (m2) resolve(Number(m2[1])); }); one.on("exit", (c) => reject(new Error(`exited ${c}`))); });
+    const saved = port;
+    port = onePort;
+    try {
+      const slow = call("firecrawl_scrape", { url: "https://example.com/slow" });
+      await sleep(300);
+      const t0 = Date.now();
+      const refused = await call("firecrawl_scrape", { url: "https://example.com/x" });
+      assert.ok(Date.now() - t0 < 1000, "refused at once");
+      assert.equal(payload(refused).error.code, "OVERLOADED");
+      assert.equal(payload(refused).error.retryAfterSeconds, 5);
+      assert.equal((await slow).last.result.isError, undefined, "the running call completes");
+    } finally { port = saved; }
+  } finally { one.kill(); }
+});

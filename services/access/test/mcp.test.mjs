@@ -24,6 +24,7 @@ upstream.server = createServer((req, res) => {
       return;
     }
     if (upstream.mode === "hang") return;          // never answers: the client gives up
+    if (upstream.mode === "headers-then-hang") { res.writeHead(200, { "content-type": "text/event-stream" }); res.write(": started\n\n"); return; }
     res.writeHead(200, { "content-type": "application/json", "mcp-session-id": "must-not-pass" });
     res.end('{"jsonrpc":"2.0","id":1,"result":{}}');
   });
@@ -54,6 +55,9 @@ function post(server, { headers = {}, body = '{"jsonrpc":"2.0","id":1,"method":"
       const chunks = [], times = [];
       res.on("data", (c) => { chunks.push(c); times.push(Date.now()); onFirstChunk?.(); onFirstChunk = null; });
       res.on("end", () => resolve({ status: res.statusCode, headers: res.headers, text: Buffer.concat(chunks).toString(), times }));
+      // A stream the gateway cuts never ends: it is reported as cut, with what arrived.
+      res.on("aborted", () => resolve({ status: res.statusCode, cut: true, text: Buffer.concat(chunks).toString(), times }));
+      res.on("error", () => resolve({ status: res.statusCode, cut: true, text: Buffer.concat(chunks).toString(), times }));
     });
     req.on("error", (e) => (abortAfterMs ? resolve({ aborted: true }) : reject(e)));
     if (abortAfterMs) setTimeout(() => req.destroy(), abortAfterMs);
@@ -123,4 +127,25 @@ test("past the in-flight cap the gateway answers 503 OVERLOADED without forwardi
   await Promise.all(held);
   await sleep(100);
   assert.equal(proxy.inFlight, 0);
+});
+
+test("the exchange deadline ends an MCP request that never answers, and cuts one that stops mid-stream", async () => {
+  const quick = makeMcpProxy({ url: new URL(`http://127.0.0.1:${upstream.server.address().port}`), limits: { maxInFlight: 2, exchangeTimeoutMs: 300 }, readBody, send });
+  const g = await gateway(quick);
+  try {
+    upstream.mode = "hang";
+    const t0 = Date.now();
+    const r = await post(g);
+    assert.equal(r.status, 503);
+    assert.equal(JSON.parse(r.text).code, "MCP_UNAVAILABLE");
+    assert.ok(Date.now() - t0 < 2000);
+    upstream.mode = "headers-then-hang";
+    const cut = await post(g);
+    assert.equal(cut.status, 200);
+    assert.equal(cut.cut, true, "the stream was started, then cut");
+    assert.match(cut.text, /: started/);
+    await sleep(100);
+    assert.equal(logged.at(-1).status, 502);
+    assert.equal(quick.inFlight, 0);
+  } finally { g.close(); }
 });

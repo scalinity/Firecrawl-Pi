@@ -3,8 +3,9 @@
 #   ssh … 'bash -s' < scripts/m4/pi-mcp-tests.sh
 #   - the MCP service's unit and integration tests in the image deploy/compose.yaml names for
 #     mcp-gateway: the real server against a fake gateway over raw HTTP, both eras, loopback only;
-#   - the access gateway's unit tests (the /mcp proxy's among them) and M3's contract suite, unchanged,
-#     in the image compose.yaml names for access-gateway, with a throwaway PostgreSQL (the pinned
+#   - the access gateway's unit tests (the /mcp proxy's among them), M3's contract suite unchanged, and
+#     M4's gateway-level /mcp contract suite, in the image compose.yaml names for access-gateway,
+#     with a throwaway PostgreSQL (the pinned
 #     postgres base, data in tmpfs, trust authentication) on an internal network of its own.
 # The tests and the manifest are the deployed commit's, mounted read-only; test containers have no
 # capabilities, a read-only root with a tmpfs /tmp and the service's uid. Every throwaway container and
@@ -33,7 +34,7 @@ mcp_run() {
     "$MCP" "$@" 2>&1
   echo "test_exit=$?"
 }
-mcp_run mcp_tap node --test --test-reporter=tap --test-timeout=60000 test/tools.test.mjs test/server.test.mjs
+mcp_run mcp_tap node --test --test-reporter=tap --test-timeout=60000 test/tools.test.mjs test/server.test.mjs test/rest.test.mjs
 
 D network create --internal --label fcpi.transient=m4-tests "$N" >/dev/null
 D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=m4-tests --tmpfs /var/lib/postgresql/data --tmpfs /var/run/postgresql \
@@ -48,6 +49,7 @@ gw_run() {
     -e FCPI_TEST_MANIFEST=/srv/policy/capabilities.json -e FCPI_TEST_SCHEMA=/srv/schema.sql \
     -v "$REPO/services/access/test:/srv/access/test:ro" \
     -v "$REPO/tests/contracts/m3-gateway.test.mjs:/srv/contracts/m3-gateway.test.mjs:ro" \
+    -v "$REPO/tests/contracts/m4-gateway-mcp.test.mjs:/srv/contracts/m4-gateway-mcp.test.mjs:ro" \
     -v "$REPO/deploy/policies/capabilities.json:/srv/policy/capabilities.json:ro" \
     -v "$REPO/deploy/nuq-postgres/fcpi-platform-schema.sql:/srv/schema.sql:ro" \
     "$GW" "$@" 2>&1
@@ -55,6 +57,7 @@ gw_run() {
 }
 gw_run gateway_unit_tap node --test --test-reporter=tap --test-timeout=60000 test/validate.test.mjs test/auth.test.mjs test/archive.test.mjs test/mcp.test.mjs
 gw_run gateway_contract_tap node --test --test-reporter=tap --test-timeout=120000 /srv/contracts/m3-gateway.test.mjs
+gw_run gateway_mcp_contract_tap node --test --test-reporter=tap --test-timeout=120000 /srv/contracts/m4-gateway-mcp.test.mjs
 echo "node_versions=mcp:$(D run --rm --network none --label fcpi.transient=m4-tests "$MCP" node --version 2>&1),gateway:$(D run --rm --network none --label fcpi.transient=m4-tests "$GW" node --version 2>&1)"
 D rm -f "$N-pg" >/dev/null 2>&1; D network rm "$N" >/dev/null 2>&1
 echo "### transient"
