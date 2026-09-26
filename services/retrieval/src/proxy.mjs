@@ -71,7 +71,17 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       up.on("response", (ur) => {
         const out = {};
         for (const [k, v] of Object.entries(ur.headers)) if (!HOP.has(k)) out[k] = v;
-        res.writeHead(ur.statusCode, out);
+        // A target controls its status line; one Node refuses to write (below 100, above 599)
+        // would throw in this callback, outside any handler, and end the service (review C2).
+        try {
+          if (!(ur.statusCode >= 100 && ur.statusCode <= 599)) throw new Denied("PROXY_ERROR", `upstream status ${ur.statusCode}`);
+          res.writeHead(ur.statusCode, out);
+        } catch (e) {
+          refuse(s, host, e instanceof Denied ? e : new Denied("PROXY_ERROR", e.message));
+          ur.destroy(); up.destroy();
+          if (!res.headersSent) res.writeHead(502, { connection: "close" }).end(); else res.destroy();
+          return;
+        }
         ur.on("data", (c) => count(s, c.length, up, res.socket));
         ur.pipe(res);
       });
