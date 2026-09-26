@@ -1,0 +1,159 @@
+fcpi patch 0008: native document parsing first, typed refusals and the budgeted complex-document fallback
+Upstream 7666c1f9 with patches 0001-0007, apps/api/src/scraper/scrapeURL/engines/pdf.
+
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pdf/index.ts b/apps/api/src/scraper/scrapeURL/engines/pdf/index.ts
+index 4ebf2bb..f60b415 100644
+--- a/apps/api/src/scraper/scrapeURL/engines/pdf/index.ts
++++ b/apps/api/src/scraper/scrapeURL/engines/pdf/index.ts
+@@ -42,6 +42,8 @@ import { scrapePDFWithParsePDF } from "./pdfParse";
+ import { captureExceptionWithZdrCheck } from "../../../../services/sentry";
+ import { isPdfBuffer, PDF_SNIFF_WINDOW } from "./pdfUtils";
+ import { comparePdfOutputs } from "./shadowComparison";
++import { usePiResilient } from "../pi-resilient/fetch";
++import { scrapePDFPiResilient } from "./piResilient";
+ 
+ /** Check if the PDF is eligible for Rust extraction, returning a rejection reason or null. */
+ function getIneligibleReason(
+@@ -129,6 +131,12 @@ export async function scrapePDF(meta: Meta): Promise<EngineScrapeResult> {
+         );
+ 
+   try {
++    // fcpi: the pi-resilient profile's document policy (native first, typed refusals, the budgeted
++    // complex-document fallback); upstream's engines below stay as they are for other profiles.
++    if (usePiResilient) {
++      return await scrapePDFPiResilient(meta, response, tempFilePath);
++    }
++
+     // Validate the downloaded file is actually a PDF by checking magic bytes
+     const header = Buffer.alloc(PDF_SNIFF_WINDOW);
+     const fh = await open(tempFilePath, "r");
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts b/apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts
+new file mode 100644
+index 0000000..875101b
+--- /dev/null
++++ b/apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts
+@@ -0,0 +1,124 @@
++// fcpi: document parsing in the pi-resilient profile (FIRECRAWL_PI_SPEC.md §15). The PDF is the one the
++// retrieval service acquired (a prefetch; its size is capped there at 25 MiB). It is parsed natively
++// first, with upstream's own Rust parser, and only a document that parser cannot read well goes to the
++// retrieval service's complex-document parser (POST /internal/parse), which holds the provider's
++// credential and budget. Every refusal is a typed PiRetrievalError, never empty success:
++//   DOCUMENT_ENCRYPTED       a password-protected PDF (this deployment does not decrypt documents)
++//   DOCUMENT_MALFORMED       bytes that are no readable PDF structure
++//   UNSUPPORTED_CONTENT      declared a PDF, bytes that are not one
++//   DOCUMENT_TOO_MANY_PAGES  more than 100 pages
++//   PARSER_REQUIRED (and the parser's own classes, BUDGET_EXHAUSTED among them)
++//                            a scan-only or text-poor document with no parser able to take it
++// A complex layout (tables, columns) asks for the parser too, and keeps the native text when none can
++// take it: that text is usable, and the parser would only improve it.
++import * as undici from "undici";
++import { readFile } from "node:fs/promises";
++import { processPdf } from "@mendable/firecrawl-rs";
++import type { Meta } from "../..";
++import type { EngineScrapeResult } from "..";
++import { config } from "../../../../config";
++import { PiRetrievalError } from "../../error";
++import { safeMarkdownToHtml } from "./markdownToHtml";
++import { isPdfBuffer } from "./pdfUtils";
++
++const MAX_PAGES = 100;
++// Fewer visible characters than this per page is not a usable text layer.
++const MIN_CHARS_PER_PAGE = 20;
++
++export async function scrapePDFPiResilient(
++  meta: Meta,
++  response: { url?: string; status: number },
++  tempFilePath: string,
++): Promise<EngineScrapeResult> {
++  const bytes = await readFile(tempFilePath);
++  const url = response.url ?? meta.rewrittenUrl ?? meta.url;
++  if (!isPdfBuffer(bytes)) {
++    throw new PiRetrievalError("UNSUPPORTED_CONTENT", "The document was declared a PDF, but its bytes are not one.");
++  }
++  // The trailer names the security handler; an encrypted PDF is refused before any parser sees it.
++  if (/\/Encrypt\s+\d+\s+\d+\s+R/.test(bytes.subarray(Math.max(0, bytes.length - 4096)).toString("latin1"))) {
++    throw new PiRetrievalError("DOCUMENT_ENCRYPTED", "The PDF is password-protected; this deployment does not decrypt documents.");
++  }
++  let native: ReturnType<typeof processPdf>;
++  try {
++    native = processPdf(tempFilePath, undefined, { scrapeId: meta.id, url });
++  } catch (error) {
++    const message = String((error as Error)?.message ?? error).split("\n")[0];
++    if (/encrypt/i.test(message)) {
++      throw new PiRetrievalError("DOCUMENT_ENCRYPTED", "The PDF is password-protected; this deployment does not decrypt documents.");
++    }
++    throw new PiRetrievalError("DOCUMENT_MALFORMED", `The PDF could not be read: ${message.slice(0, 200)}`);
++  }
++  const pages = native.pageCount;
++  if (pages > MAX_PAGES) {
++    throw new PiRetrievalError("DOCUMENT_TOO_MANY_PAGES", `The PDF has ${pages} pages; at most ${MAX_PAGES} are parsed (spec §15).`);
++  }
++  const text = (native.markdown ?? "").trim();
++  const reason =
++    native.pdfType === "Scanned" || native.pdfType === "ImageBased"
++      ? "scan_only"
++      : text.length / Math.max(pages, 1) < MIN_CHARS_PER_PAGE
++        ? "native_quality"
++        : native.isComplex
++          ? "complex_layout"
++          : null;
++  meta.logger.info("fcpi document parse", { pages, pdfType: native.pdfType, confidence: native.confidence, isComplex: native.isComplex, nativeChars: text.length, fallbackReason: reason });
++  let markdown = text;
++  let parser = "native";
++  if (reason) {
++    const r = await askParser(meta, bytes, pages, reason);
++    if (r.ok) {
++      markdown = r.markdown;
++      parser = r.parser;
++    } else if (reason !== "complex_layout") {
++      throw new PiRetrievalError(r.failure.class, r.failure.detail, r.failure.retryable, r.failure.retryAfter);
++    } else {
++      meta.logger.warn("fcpi complex layout kept its native text", { failure: r.failure.class });
++    }
++  }
++  meta.logger.info("fcpi document parsed", { parser, pages, chars: markdown.length });
++  return {
++    url,
++    statusCode: response.status,
++    markdown,
++    html: await safeMarkdownToHtml(markdown, meta.logger, meta.id),
++    pdfMetadata: { numPages: pages, totalPages: pages, title: native.title ?? undefined },
++    contentType: "application/pdf",
++    proxyUsed: "basic",
++  };
++}
++
++type Failure = { class: string; detail: string; retryable: boolean; retryAfter: number | null };
++
++async function askParser(
++  meta: Meta,
++  bytes: Buffer,
++  pages: number,
++  reason: string,
++): Promise<{ ok: true; markdown: string; parser: string } | { ok: false; failure: Failure }> {
++  let res: undici.Response;
++  try {
++    // No abort signal: a parse that outlives this scrape still finishes and is cached in the
++    // retrieval service, so a retry is answered from the cache instead of paying twice.
++    res = await undici.fetch(`${config.PI_RETRIEVAL_URL}/internal/parse`, {
++      method: "POST",
++      headers: {
++        authorization: `Bearer ${config.PI_RETRIEVAL_TOKEN}`,
++        "content-type": "application/pdf",
++        "x-fcpi-logical-id": `doc:${meta.id}`,
++        "x-fcpi-owner": String(meta.internalOptions.teamId ?? ""),
++        "x-fcpi-pages": String(pages),
++        "x-fcpi-reason": reason,
++      },
++      body: bytes,
++    });
++  } catch {
++    return { ok: false, failure: { class: "PARSER_UNAVAILABLE", detail: "The retrieval service's parser could not be reached.", retryable: true, retryAfter: null } };
++  }
++  const body = (await res.json().catch(() => null)) as any;
++  if (res.status === 200 && body?.ok === true && typeof body.markdown === "string") {
++    return { ok: true, markdown: body.markdown, parser: String(body.parser) };
++  }
++  const f = body?.failure;
++  return { ok: false, failure: { class: f?.class ?? "PARSER_ERROR", detail: f?.detail ?? `The parser answered HTTP ${res.status}.`, retryable: f?.retryable ?? res.status >= 500, retryAfter: f?.retryAfter ?? null } };
++}

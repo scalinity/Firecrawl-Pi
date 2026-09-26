@@ -1,0 +1,206 @@
+fcpi patch 0007: a search failure reaches the caller typed, never as an empty result (review finding S6)
+Upstream 7666c1f9 with patches 0001-0006, apps/api/src/search/v2 and apps/api/src/controllers/v2/search.ts.
+
+diff --git a/apps/api/src/controllers/v2/search.ts b/apps/api/src/controllers/v2/search.ts
+index e0f70f3..6dc859f 100644
+--- a/apps/api/src/controllers/v2/search.ts
++++ b/apps/api/src/controllers/v2/search.ts
+@@ -36,6 +36,7 @@ import {
+   formatTypesOf,
+ } from "../../lib/key-restriction";
+ import { wantsDeveloperCategory } from "../../search/developer";
++import { PiSearchError } from "../../search/v2/searxng";
+ 
+ export async function searchController(
+   req: RequestWithAuth<{}, SearchResponse, SearchRequest>,
+@@ -318,8 +319,12 @@ export async function searchController(
+       scrapeful: result.shouldScrape,
+     });
+ 
++    // fcpi: a partial result says which engines did not answer.
++    const partialWarning = result.response.warning;
++    delete result.response.warning;
+     return res.status(200).json({
+       success: true,
++      ...(partialWarning ? { warning: partialWarning } : {}),
+       data: result.response,
+       creditsUsed: result.totalCredits,
+       id: jobId,
+@@ -341,6 +346,16 @@ export async function searchController(
+       });
+     }
+ 
++    // fcpi: the search backend's typed failure, with its own status (review finding S6).
++    if (error instanceof PiSearchError) {
++      if (error.retryAfter !== null) res.setHeader("Retry-After", String(error.retryAfter));
++      return res.status(error.status).json({
++        success: false,
++        code: error.failureClass,
++        error: error.detail,
++      } as any);
++    }
++
+     if (error instanceof ScrapeJobTimeoutError) {
+       return res.status(408).json({
+         success: false,
+diff --git a/apps/api/src/lib/entities.ts b/apps/api/src/lib/entities.ts
+index 130add8..4e80e57 100644
+--- a/apps/api/src/lib/entities.ts
++++ b/apps/api/src/lib/entities.ts
+@@ -165,6 +165,9 @@ export type SearchResultType = "web" | "images" | "news";
+ 
+ export interface SearchV2Response {
+   web?: WebSearchResult[];
++  // fcpi: the engines that did not answer a search that still has an answer (the pi-resilient
++  // profile's partial result); the controller moves it to the response's top-level warning.
++  warning?: string;
+   images?: ImageSearchResult[];
+   news?: NewsSearchResult[];
+   developer?: WebSearchResult[];
+diff --git a/apps/api/src/search/v2/index.ts b/apps/api/src/search/v2/index.ts
+index a4a0d95..fd95c34 100644
+--- a/apps/api/src/search/v2/index.ts
++++ b/apps/api/src/search/v2/index.ts
+@@ -1,7 +1,7 @@
+ import { SearchV2Response, SearchResultType } from "../../lib/entities";
+ import { config } from "../../config";
+ import { fire_engine_search_v2 } from "./fireEngine-v2";
+-import { searxng_search } from "./searxng";
++import { searxng_search, PiSearchError } from "./searxng";
+ import { ddgSearch } from "./ddgsearch";
+ import { Logger } from "winston";
+ 
+@@ -53,6 +53,20 @@ export async function search({
+       return results;
+     }
+ 
++    // fcpi: in the pi-resilient profile the SearXNG route's answer is final: results, a true empty
++    // list or a typed failure (review finding S6); nothing below it runs.
++    if (config.PI_RETRIEVAL_URL) {
++      logger.info("Using the pi-resilient search route");
++      return await searxng_search(query, {
++        num_results,
++        tbs,
++        filter,
++        lang,
++        country,
++        location,
++      });
++    }
++
+     if (config.SEARXNG_ENDPOINT) {
+       logger.info("Using searxng search");
+       const results = await searxng_search(query, {
+@@ -86,6 +100,8 @@ export async function search({
+     // Fallback to empty response
+     return {};
+   } catch (error) {
++    // fcpi: a typed search failure is the caller's answer, not an empty result.
++    if (error instanceof PiSearchError) throw error;
+     logger.error(`Error in search function`, { error });
+     return {};
+   }
+diff --git a/apps/api/src/search/v2/searxng.ts b/apps/api/src/search/v2/searxng.ts
+index 445c007..5d4fd25 100644
+--- a/apps/api/src/search/v2/searxng.ts
++++ b/apps/api/src/search/v2/searxng.ts
+@@ -1,4 +1,5 @@
+ import axios from "axios";
++import * as undici from "undici";
+ import { config } from "../../config";
+ import { SearchV2Response, WebSearchResult } from "../../lib/entities";
+ import { logger } from "../../lib/logger";
+@@ -13,10 +14,93 @@ interface SearchOptions {
+   page?: number;
+ }
+ 
++// fcpi: a search failure in the pi-resilient profile, named by the retrieval service, which answers
++// the SearXNG-compatible route (FIRECRAWL_PI_SPEC.md §13). It reaches the caller as a typed error
++// with its HTTP status, never as an empty result (review finding S6).
++export class PiSearchError extends Error {
++  constructor(
++    public failureClass: string,
++    public detail: string,
++    public status: number,
++    public retryable: boolean,
++    public retryAfter: number | null,
++  ) {
++    super(`Search failed: ${failureClass}. ${detail}`);
++  }
++}
++
++// fcpi: the pi-resilient profile's search: one request to the retrieval service's route, whose answer
++// is results, a true empty list, or a typed failure. Nothing here turns a failure into no results.
++async function piSearxngSearch(
++  q: string,
++  options: SearchOptions,
++): Promise<SearchV2Response> {
++  if (Math.max(options.num_results, 0) === 0) return { web: [] };
++  const url = new URL(
++    config.SEARXNG_ENDPOINT!.replace(/\/$/, "") + "/search",
++  );
++  url.searchParams.set("q", q);
++  url.searchParams.set("format", "json");
++  url.searchParams.set("pageno", String(options.page ?? 1));
++  if (options.lang) url.searchParams.set("language", options.lang);
++  let res: undici.Response;
++  try {
++    res = await undici.fetch(url, {
++      headers: { accept: "application/json" },
++      signal: AbortSignal.timeout(15_000),
++    });
++  } catch {
++    throw new PiSearchError(
++      "SEARCH_BACKEND_UNAVAILABLE",
++      "The retrieval service's search route could not be reached.",
++      503,
++      true,
++      null,
++    );
++  }
++  const body = (await res.json().catch(() => null)) as any;
++  if (res.status !== 200) {
++    const f = body?.failure;
++    throw new PiSearchError(
++      f?.class ?? "SEARCH_BACKEND_ERROR",
++      f?.detail ?? `The retrieval service answered HTTP ${res.status}.`,
++      res.status,
++      f?.retryable ?? res.status >= 500,
++      f?.retryAfter ?? null,
++    );
++  }
++  if (!body || !Array.isArray(body.results)) {
++    throw new PiSearchError(
++      "SEARCH_BACKEND_ERROR",
++      "The retrieval service's search answer has no results list.",
++      502,
++      true,
++      null,
++    );
++  }
++  const web: WebSearchResult[] = body.results
++    .slice(0, Math.max(options.num_results, 0))
++    .map((a: any) => ({ url: a.url, title: a.title, description: a.content }));
++  const failed = Array.isArray(body.unresponsive_engines)
++    ? body.unresponsive_engines
++    : [];
++  return {
++    web,
++    ...(failed.length > 0
++      ? {
++          warning: `Partial search result: ${failed.length} engine(s) did not answer (${failed
++            .map((u: any) => `${u.engine}: ${u.reason || "no reason"}`)
++            .join("; ")}).`,
++        }
++      : {}),
++  };
++}
++
+ export async function searxng_search(
+   q: string,
+   options: SearchOptions,
+ ): Promise<SearchV2Response> {
++  if (config.PI_RETRIEVAL_URL) return piSearxngSearch(q, options);
+   const resultsPerPage = 20;
+   const requestedResults = Math.max(options.num_results, 0);
+   const startPage = options.page ?? 1;

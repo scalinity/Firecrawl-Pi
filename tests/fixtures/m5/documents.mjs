@@ -21,7 +21,10 @@ export const SENTINELS = {
 // ---- a minimal PDF writer ---------------------------------------------------------------------------
 function pdf(objects, { trailerExtra = "" } = {}) {
   // objects: array of strings or Buffers, object i+1 in order; object 1 is the catalog.
-  const parts = [Buffer.from("%PDF-1.4\n%\xe2\xe3\xcf\xd3\n", "latin1")];
+  // The comment line after the header sets where the xref and startxref fall: the pdf.js 1.10 that the pinned
+  // core's pdf-parse bundles refuses some files by those positions alone, as "bad XRef entry" (measured
+  // on the pinned image; evidence/M5/INTERPRETATION.md), and each fixture must test the class it names.
+  const parts = [Buffer.from(`%PDF-1.4\n%\xe2\xe3\xcf\xd3\n%${"fcpi-m5-fixture-padding ".repeat(120)}\n`, "latin1")];
   const offsets = [];
   let len = parts[0].length;
   objects.forEach((o, i) => {

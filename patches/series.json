@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "1b98286b4a16c6e9f831bc628ede1e8c3d680f48",
-  "series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+  "result_tree": "2f0203b9d601a0422afd570256ae3cf0bbc88ec2",
+  "series_sha256": "a67d9cabc254c5e7232aaa8606163d4a2bc2e014efb838436a9be87ce816249a",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -99,6 +99,34 @@
       "tests": [
         "M2-D01 build reproducibility"
       ]
+    },
+    {
+      "file": "0007-typed-search-failures.patch",
+      "sha256": "6fd5710c8b1029b00fe0d6e0e3315601ccd2ad5e6b55a4c4a35bb65ced4ca699",
+      "reason": "A search backend failure became an empty result at three layers: searxng_search and search both returned {} on any error, and patch 0005 returned {} when SearXNG had no results (review finding S6, spec §13).",
+      "symbols": [
+        "apps/api/src/search/v2/searxng.ts PiSearchError (new), piSearxngSearch (new), searxng_search",
+        "apps/api/src/search/v2/index.ts search",
+        "apps/api/src/controllers/v2/search.ts searchController",
+        "apps/api/src/lib/entities.ts SearchV2Response.warning"
+      ],
+      "tests": [
+        "M5-S01 typed search outcomes against the real SearXNG",
+        "M5-S02 search through REST and MCP alike"
+      ]
+    },
+    {
+      "file": "0008-document-policy-and-parser-fallback.patch",
+      "sha256": "4d2dceb7475a98d9629f4f976c0cf887c7845ad5ecb9e0232b00511a4aafbbf9",
+      "reason": "Native PDF parsing returned empty markdown as success for a scan-only document, had no page cap, and fell back to a pdf-parse whose bundled pdf.js 1.10 refuses some valid files; spec §15 asks for native parsing first, typed refusals and a budgeted complex-document fallback.",
+      "symbols": [
+        "apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts scrapePDFPiResilient (new), askParser (new)",
+        "apps/api/src/scraper/scrapeURL/engines/pdf/index.ts scrapePDF"
+      ],
+      "tests": [
+        "M5-D01 every document class through the core",
+        "M5-D02 the complex-document fallback and its credits"
+      ]
     }
   ],
   "coverage": [
@@ -135,7 +163,7 @@
     {
       "path": "PDF and document downloads",
       "reaches": "the adapter returns the bytes and hands them to scrapePDF / scrapeDocument as a prefetch; any remaining engine download uses downloadFile.ts",
-      "covered_by": "0003, 0004",
+      "covered_by": "0003, 0004; 0008 parses the acquired PDF natively and sends only what it cannot read well to the retrieval service's /internal/parse",
       "call_site": "apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts; apps/api/src/scraper/scrapeURL/engines/utils/downloadFile.ts"
     },
     {
@@ -147,7 +175,7 @@
     {
       "path": "search queries",
       "reaches": "search/index.ts, search/v2/index.ts -> searxng_search at SEARXNG_ENDPOINT, the retrieval service's SearXNG-compatible route",
-      "covered_by": "0005 removes the DuckDuckGo fallback; deploy/compose.yaml points SEARXNG_ENDPOINT at the retrieval service",
+      "covered_by": "0005 removes the DuckDuckGo fallback; 0007 makes the retrieval service's answer final and a failure typed; deploy/compose.yaml points SEARXNG_ENDPOINT at the retrieval service, which asks SearXNG",
       "call_site": "apps/api/src/search/v2/searxng.ts searxng_search"
     },
     {
