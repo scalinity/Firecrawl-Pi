@@ -39,7 +39,8 @@
     { "host": "m1.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "m2.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "pace.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "direct" },
-    { "host": "cool.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" }
+    { "host": "cool.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "permit.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" }
   ],
   "search": {
     "backend": "http://m2.fixture.fcpi.test:8080/search"

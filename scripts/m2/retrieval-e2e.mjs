@@ -128,7 +128,9 @@ if (groups.has("pacing")) {
 
 if (groups.has("permits")) {
   // At most two URL acquisitions at once (spec §23.1): three slow targets asked together.
-  await Promise.all([1, 2, 3].map((n) => acquire(`A02-permits-${n}`, { logicalAcquisitionId: `m2-permit-${randomUUID()}`, url: `${M2}/slow?ms=4000&permit=${n}` })));
+  // Three domains, so per-domain pacing (one in flight each) does not serialise them first.
+  const hosts = ["m2", "cool", "permit"];
+  await Promise.all(hosts.map((h, i) => acquire(`A02-permits-${i + 1}`, { logicalAcquisitionId: `m2-permit-${randomUUID()}`, url: `http://${h}.fixture.fcpi.test:8080/slow?ms=4000&permit=${i + 1}` })));
 }
 
 if (groups.has("cancel")) {
@@ -163,7 +165,7 @@ if (groups.has("paths")) {
     return { http: r.status, json: await r.json().catch(() => null) };
   };
   const t0 = Date.now();
-  const c = await post("/v2/crawl", { url: `${M2}/static.html`, limit: 4, sitemap: "include", scrapeOptions: { formats: ["markdown"] } });
+  const c = await post("/v2/crawl", { url: `${M2}/`, limit: 4, sitemap: "include", scrapeOptions: { formats: ["markdown"] } });
   let status = null;
   for (let i = 0; i < 90 && c.json?.id; i++) {
     await sleep(2000);
@@ -174,7 +176,7 @@ if (groups.has("paths")) {
   out({ case: "P01-crawl", kind: "core", http: c.http, crawlId: c.json?.id ?? null, error: c.json?.error ?? null, status: status?.status ?? null, completed: status?.completed ?? null,
     total: status?.total ?? null, pages: (status?.data ?? []).map((d) => ({ url: d.metadata?.sourceURL ?? d.metadata?.url, scrapeId: d.metadata?.scrapeId ?? null, statusCode: d.metadata?.statusCode ?? null,
       sentinels: [...(d.markdown ?? "").matchAll(/fcpi-m[12]-[a-z]+-[0-9a-f]{4}/g)].map((m) => m[0]) })), ms: Date.now() - t0 });
-  const m = await post("/v2/map", { url: `${M2}/sitemap-index.xml`, sitemap: "only", limit: 50 });
+  const m = await post("/v2/map", { url: `${M2}/`, sitemap: "only", limit: 50 });
   out({ case: "P02-map-gz-sitemap", kind: "core", http: m.http, success: m.json?.success ?? null, error: m.json?.error ?? null, links: (m.json?.links ?? []).map((l) => l.url ?? l) });
   const s = await post("/v2/search", { query: "fcpi fixture", limit: 2, scrapeOptions: { formats: ["markdown"] } });
   const web = s.json?.data?.web ?? s.json?.data ?? [];

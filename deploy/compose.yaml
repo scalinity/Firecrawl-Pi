@@ -474,7 +474,8 @@ services:
       fixture:
         # m2: the main fixture name; pace: the default direct limits (spec §10.2); cool: 429 cooldowns,
         # which persist per domain and would otherwise hold back every later test on m2.
-        aliases: [m2.fixture.fcpi.test, pace.fixture.fcpi.test, cool.fixture.fcpi.test]
+        # permit: a third fixture domain, so the global URL permits bind before per-domain pacing does.
+        aliases: [m2.fixture.fcpi.test, pace.fixture.fcpi.test, cool.fixture.fcpi.test, permit.fixture.fcpi.test]
     logging: *logging-dep
 
 networks:
