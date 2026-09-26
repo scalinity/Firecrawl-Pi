@@ -210,7 +210,8 @@ const PHASES = {
     const hits = fixtureLog(since2).filter((l) => (l.query ?? "").includes("refused="));
     out("refused_effects", { attempts_before: a1, attempts_after: attemptsCount(), jobs_before: j1, jobs_after: jobsCount(), fixture_hits_for_refused: hits.length, positive_control_attempts_from_scrape: a1 - a0,
       fixture_hits_since_scrape: fixtureLog(since).filter((l) => l.path === "/p01").length });
-    // Limits.
+    // Limits: each refused whole, with no receipt left behind.
+    const jl = jobsCount();
     out("limits", { case: "body_over_1mib", ...brief(await post("scrape", { url: `${FX}/p01`, pad: "x".repeat(1048600) })) });
     out("limits", { case: "batch_26_urls", ...brief(await post("batch", { urls: Array.from({ length: 26 }, (_, i) => `${FX}/p01?i=${i}`) })) });
     out("limits", { case: "crawl_limit_201", ...brief(await post("crawl", { url: `${FX}/`, limit: 201 })) });
@@ -218,6 +219,7 @@ const PHASES = {
     out("limits", { case: "map_limit_1001", ...brief(await post("map", { url: `${FX}/`, limit: 1001 })) });
     out("limits", { case: "wait_for_15001", ...brief(await post("scrape", { url: `${FX}/p01`, waitFor: 15001 })) });
     out("limits", { case: "header_over_16kib", ...(await http("GET", "/platform/v1/status", { tok: "m3a", headers: { "x-pad": "y".repeat(17000) } }).then((r) => brief(r), (e) => ({ error: e.message }))) });
+    out("limits_effects", { jobs_before: jl, jobs_after: jobsCount() });
     // Synchronous overload: six held scrapes at once; the gateway admits four.
     const held = await Promise.all(Array.from({ length: 6 }, (_, i) => post("scrape", { url: `${FX}/delay?ms=6000&n=${i}&t=${Date.now()}` })));
     out("sync_overload", { statuses: held.map((r) => r.status), codes: held.map((r) => r.json?.code ?? null), retry_after: held.map((r) => r.headers["retry-after"] ?? null) });

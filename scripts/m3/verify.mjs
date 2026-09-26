@@ -260,11 +260,14 @@ const checks = {
       return { ok, actual: `unauthenticated=${unOk}; scopes=${scOk}; owner isolation over ${ow.length} routes=${owOk}; revocation refused after ${one(rv, "after")?.ms_until_refused} ms (restarts ${restart.split(" ")[0]})=${rvOk}; no Cloud challenge=${noCloud}` };
     } },
   A04: { name: "request-limits-and-overload", inputs: [`${RAW}e2e-sync.txt`, `${RAW}e2e-overload.txt`, `${RAW}e2e-auth.txt`],
-    expected: "a body over 1 MiB is 413, a 26-URL batch, a crawl limit of 201 or depth 4, a map limit of 1001 and a waitFor of 15001 are 400, headers over 16 KiB are 431; of six held synchronous scrapes four run and two get 503 OVERLOADED, each with a positive Retry-After, and a later one runs; with 430 page units open a 200-page crawl is 503 OVERLOADED, and with 20 open jobs the next is 503 OVERLOADED, both with Retry-After, and every job queued for the test was cancelled without reaching the core; past the failure budget unknown tokens get 429 while a valid token still gets 200",
+    expected: "a body over 1 MiB is 413 BODY_TOO_LARGE, a 26-URL batch, a crawl limit of 201 or depth 4, a map limit of 1001 and a waitFor of 15001 are 400 BAD_REQUEST, headers over 16 KiB are 431, and none of them leaves a receipt; of six held synchronous scrapes four run and two get 503 OVERLOADED, each with a positive Retry-After, and a later one runs; with 430 page units open a 200-page crawl is 503 OVERLOADED, and with 20 open jobs the next is 503 OVERLOADED, both with Retry-After, and every job queued for the test was cancelled without reaching the core; past the failure budget unknown tokens get 429 while a valid token still gets 200",
     run() {
       const sy = E("sync"), ov = E("overload"), au = E("auth");
       const L = sy.limits ?? [], st = (c) => one(L, c)?.status;
-      const limits = st("body_over_1mib") === 413 && ["batch_26_urls", "crawl_limit_201", "crawl_depth_4", "map_limit_1001", "wait_for_15001"].every((c) => st(c) === 400) && st("header_over_16kib") === 431;
+      // Each limit is refused with its exact code, and none of them left a receipt.
+      const code = (c) => one(L, c)?.code, fxL = sy.limits_effects?.[0];
+      const limits = st("body_over_1mib") === 413 && code("body_over_1mib") === "BODY_TOO_LARGE" && ["batch_26_urls", "crawl_limit_201", "crawl_depth_4", "map_limit_1001", "wait_for_15001"].every((c) => st(c) === 400 && code(c) === "BAD_REQUEST") &&
+        st("header_over_16kib") === 431 && !!fxL && Number.isInteger(fxL.jobs_before) && fxL.jobs_before === fxL.jobs_after;
       const so = (sy.sync_overload ?? []).find((r) => r.statuses), after = one(sy.sync_overload, "after_release");
       const sync = so && so.statuses.filter((x) => x === 200).length === 4 && so.statuses.filter((x) => x === 503).length === 2 && so.codes.filter((c) => c === "OVERLOADED").length === 2 &&
         so.retry_after.filter((_, i) => so.statuses[i] === 503).length === 2 && so.retry_after.filter((_, i) => so.statuses[i] === 503).every((x) => Number(x) > 0) && after?.status === 200;
