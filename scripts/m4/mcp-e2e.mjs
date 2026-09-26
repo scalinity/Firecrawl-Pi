@@ -541,6 +541,8 @@ let code = 0;
 try {
   if (phase !== "tailnet") { await openTunnel(); out("forward", { pid: tunnel.pid }); }
   seen.length = 0; looked.length = 0;
+  // A sample before the phase does any work, so a container restart anywhere in it shows (M01).
+  resources(`start-${phase}`);
   await PHASES[phase]();
   if (phase !== "tailnet") out("connections", { hosts: [...new Set(seen)], total: seen.length, lookups: [...new Set(looked)] });
   if (!["restart", "stopped"].includes(phase)) resources(`end-${phase}`);

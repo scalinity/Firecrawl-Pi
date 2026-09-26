@@ -539,18 +539,28 @@ const checks = {
       return { ok: unpinned.length === 0 && bad(cond).length === 0 && Object.keys(R.services).length === 11, actual: `services=${Object.keys(R.services).length}; unpinned=${unpinned.join(",") || "none"}; lock disagrees on=${bad(cond).join(",") || "none"}` };
     } },
   M01: { name: "memory-within-caps", inputs: [`${RAW}stack.txt`].concat(PHASES.map((p) => `${RAW}e2e-${p}.txt`)),
-    expected: "sampled at the end of every phase and before the MCP container's restart and stop: the MCP service's peak stays under its 192 MiB cap, the gateway's under 160 MiB and the core's under 2,304 MiB, none records an OOM kill, the host's OOM-kill count does not change across the samples and MemAvailable stays at 1 GiB or more; at the end no project cgroup records an OOM kill and every one has memory.swap.max 0, so no container can swap past its cap",
+    expected: "sampled at the start and end of every phase and before the MCP container's restart and stop: the MCP service's peak stays under its 192 MiB cap, the gateway's under 160 MiB and the core's under 2,304 MiB, none records an OOM kill, the host's OOM-kill count does not change across the samples and MemAvailable stays at 1 GiB or more; no container restarted unseen, which would have reset its peak and OOM count: in time order, the core's and the gateway's start times never change between two samples, and the MCP service's changes exactly across its deliberate restart and stop (the control that a restart shows); at the end no project cgroup records an OOM kill and every one has memory.swap.max 0, so no container can swap past its cap",
     run() {
-      const all = samples();
-      const unsampled = PHASES.filter((p) => !all.some((s) => s.run === p));
+      const all = samples().sort((a, b) => Date.parse(a.utc) - Date.parse(b.utc));
+      const unsampled = PHASES.filter((p) => !all.some((s) => s.run === p && s.label === `start-${p}`) || !all.some((s) => s.run === p && /^end-/.test(s.label)));
+      // Consecutive samples: a start time that moves outside the MCP service's two deliberate steps is a
+      // restart M01's peaks cannot see; across those steps the MCP service's must move.
+      const DELIBERATE = new Set(["before-mcp-restart>end-restart", "before-mcp-stop>end-stopped"]);
+      const restarts = [], controls = [];
+      for (let i = 1; i < all.length; i++) {
+        const [a, b] = [all[i - 1], all[i]], pair = `${a.label}>${b.label}`;
+        for (const k of ["core", "gateway"]) if (a[k]?.started_at !== b[k]?.started_at) restarts.push(`${k} ${pair}`);
+        const mcpMoved = a.mcp?.started_at !== b.mcp?.started_at;
+        if (DELIBERATE.has(pair)) controls.push(mcpMoved); else if (mcpMoved) restarts.push(`mcp ${pair}`);
+      }
       const within = (c, capMib) => !!c && +c.max === capMib * MIB && Number.isFinite(c.peak) && c.peak < +c.max && c.oom_kill === 0;
       const over = all.filter((s) => !(within(s.mcp, 192) && within(s.gateway, 160) && within(s.core, 2304) && s.mem_available_kib >= 1024 * 1024)).map((s) => `${s.run}/${s.label}`);
       const hostOoms = new Set(all.map((s) => s.vmstat_oom_kill));
       const cg = Object.fromEntries((S(`${RAW}stack.txt`).cgroups ?? []).filter((l) => / memory\.max=/.test(l)).map((l) => [l.split(" ")[0], kv(l.split(" ").slice(1))]));
       const peak = (k) => Math.max(...all.map((s) => s[k]?.peak ?? 0)) / MIB;
-      const ok = unsampled.length === 0 && all.length >= 8 && all.some((s) => s.label === "before-mcp-restart") && all.some((s) => s.label === "before-mcp-stop") && over.length === 0 && hostOoms.size === 1 && Number.isInteger([...hostOoms][0]) &&
+      const ok = unsampled.length === 0 && all.length >= 14 && restarts.length === 0 && controls.length === 2 && controls.every(Boolean) && over.length === 0 && hostOoms.size === 1 && Number.isInteger([...hostOoms][0]) &&
         Object.keys(cg).length === 11 && Object.values(cg).every((v) => v.oom_kill === "0") && Object.values(cg).every((v) => v["memory.swap.max"] === "0");
-      return { ok, actual: `samples=${all.length}, phases without one=${unsampled.join(",") || "none"}, over a cap or low on memory=${over.join(",") || "none"}; highest peaks: MCP ${peak("mcp").toFixed(1)} MiB, gateway ${peak("gateway").toFixed(1)} MiB, core ${peak("core").toFixed(0)} MiB; host OOM-kill counts seen=${[...hostOoms].join(",")}; cgroup OOM kills at the end=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}; swap not capped at the end=${Object.entries(cg).filter(([, v]) => v["memory.swap.max"] !== "0").map(([k]) => k).join(",") || "none"}` };
+      return { ok, actual: `samples=${all.length}, phases without one=${unsampled.join(",") || "none"}, restarts unseen by the peaks=${restarts.join(",") || "none"}, deliberate MCP restarts seen=${controls.filter(Boolean).length} of ${controls.length}, over a cap or low on memory=${over.join(",") || "none"}; highest peaks: MCP ${peak("mcp").toFixed(1)} MiB, gateway ${peak("gateway").toFixed(1)} MiB, core ${peak("core").toFixed(0)} MiB; host OOM-kill counts seen=${[...hostOoms].join(",")}; cgroup OOM kills at the end=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}; swap not capped at the end=${Object.entries(cg).filter(([, v]) => v["memory.swap.max"] !== "0").map(([k]) => k).join(",") || "none"}` };
     } },
 
   // ================================================================ the held live step: real target clients
