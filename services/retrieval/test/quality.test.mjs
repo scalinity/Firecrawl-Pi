@@ -99,3 +99,16 @@ test("the linear reader keeps what the regexes kept", async () => {
   assert.equal(visibleText('<svg viewBox="0 0 1 1"/><p>after the icon</p>'), "after the icon");
   assert.equal(visibleText("<!DOCTYPE html><head><title>T</title></head><body>body text</body>"), "body text");
 });
+
+test("only structure makes a shell that fails after rendering; a short scripted page does not (review finding C5)", () => {
+  const status = '<head><title>Status</title><script src="/analytics.js"></script></head><body><p>All systems operational.</p></body>';
+  const gallery = '<script src="/g.js"></script><h1>Gallery</h1><img src="1.jpg"><img src="2.jpg"><img src="3.jpg">';
+  for (const body of [status, gallery]) {
+    const v = classify({ ...page, body });
+    assert.equal(v.verdict, "js_shell");  // may earn the one browser attempt
+    assert.equal(v.structural, false);    // but never fails the rendered page
+  }
+  assert.equal(classify({ ...page, body: site("js.html") }).structural, true);
+  assert.equal(classify({ ...page, body: site("js-slow.html") }).structural, true);
+  assert.equal(classify({ ...page, body: '<script src="/a.js"></script><div class="spinner loading"></div><p>Loading</p>' }).structural, true);
+});

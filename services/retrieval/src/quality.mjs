@@ -113,8 +113,11 @@ export function classify({ status, contentType, body, finalUrl, requestedUrl, re
   const visible = visibleText(text);
   const s = htmlSignals(text);
   const reasons = [`visible_chars=${visible.length}`, `scripts=${s.scripts}`];
-  if (s.noscriptAsksForJs && visible.length < 500) return { verdict: "js_shell", reasons: [...reasons, "noscript asks for JavaScript"] };
-  if (s.emptyMount && s.scripts > 0 && visible.length < 500) return { verdict: "js_shell", reasons: [...reasons, "empty application mount point"] };
-  if (s.scripts > 0 && visible.length < 200 && (s.loading || visible.length < 40)) return { verdict: "js_shell", reasons: [...reasons, "scripted page with almost no text"] };
+  // structural: the page itself says its content is rendered by script. Length alone (a short
+  // page that carries a script) may earn the one browser attempt, but never fails a rendered page
+  // (spec §9.2, §9.4).
+  if (s.noscriptAsksForJs && visible.length < 500) return { verdict: "js_shell", structural: true, reasons: [...reasons, "noscript asks for JavaScript"] };
+  if (s.emptyMount && s.scripts > 0 && visible.length < 500) return { verdict: "js_shell", structural: true, reasons: [...reasons, "empty application mount point"] };
+  if (s.scripts > 0 && visible.length < 200 && (s.loading || visible.length < 40)) return { verdict: "js_shell", structural: s.loading, reasons: [...reasons, s.loading ? "scripted page showing a loading placeholder" : "scripted page with almost no text"] };
   return { verdict: "adequate", reasons };
 }

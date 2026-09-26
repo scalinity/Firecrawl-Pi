@@ -113,6 +113,9 @@ if (groups.has("browser")) {
   await scrape("C06-cookie-js", `${M2}/cookie-js`);
   // Content written 20 s after load: still a shell when the render settles, so no content.
   await scrape("C27-js-late", `${M2}/js-slow.html`);
+  // Short, and image-led, pages that carry a script: rendered once, and returned as the page.
+  await scrape("C28-short-scripted", `${M2}/short-scripted.html`);
+  await scrape("C29-gallery", `${M2}/gallery.html`);
   await scrape("S15-subresources", `${M2}/subresources.html`);
   // The same page asked of the service directly, which returns each refused subresource by host.
   await acquire("S15b-subresources-direct", { logicalAcquisitionId: `m2-subres-${randomUUID()}`, url: `${M2}/subresources.html?direct=1` });

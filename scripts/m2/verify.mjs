@@ -337,7 +337,7 @@ const checks = {
       return { ok: bad.length === 0, actual: `failing=${bad.join(",") || "none"}; renders logged=${p.browser.filter((e) => e.event === "render" && e.ok).length}` };
     } },
   R03: { name: "content-classified", inputs: [`${RAW}rt-static.txt`, `${RAW}rt-browser.txt`],
-    expected: "short content is adequate (no escalation); a bot interstitial is BLOCKED_PUBLIC_CONTENT; sign-in redirects and 401 are AUTH_REQUIRED; 403 is ACCESS_DENIED; 404 and 503 keep the target's status; 429 is RATE_LIMITED with Retry-After and the next request to that domain is refused during the cooldown without reaching it; an empty page is adequate at the service; a page still a shell after rendering is RENDER_INCOMPLETE",
+    expected: "short content is adequate (no escalation); a bot interstitial is BLOCKED_PUBLIC_CONTENT; sign-in redirects and 401 are AUTH_REQUIRED; 403 is ACCESS_DENIED; 404 and 503 keep the target's status; 429 is RATE_LIMITED with Retry-After and the next request to that domain is refused during the cooldown without reaching it; an empty page is adequate at the service; a page still a shell after rendering is RENDER_INCOMPLETE, while a short scripted page and an image-led one come back as the page",
     run() {
       const st = phase("static"), br = phase("browser");
       const err = (c) => c?.error ?? "";
@@ -349,6 +349,8 @@ const checks = {
         cooldown: /cooling down/.test(err(st.cases["C21-429-cooldown"])) && !st.fixture.some((h) => h.host?.startsWith("cool.") && h.path === "/short.html"),
         empty: st.attempts.some((a) => a.outcome === "adequate" && a.status === "200" && a.bytes === "0"),
         shellAfterRender: /RENDER_INCOMPLETE/.test(err(br.cases["C27-js-late"])) && br.attempts.some((a) => a.outcome === "RENDER_INCOMPLETE"),
+        shortScripted: br.cases["C28-short-scripted"]?.success === true && br.cases["C28-short-scripted"].sentinels.includes("fcpi-m2-shortjs-4d2e"),
+        gallery: br.cases["C29-gallery"]?.success === true && br.cases["C29-gallery"].sentinels.includes("fcpi-m2-gallery-9a1b"),
       };
       const bad = Object.entries(cond).filter(([, v]) => !v).map(([k]) => k);
       return { ok: bad.length === 0, actual: `failing=${bad.join(",") || "none"}` };

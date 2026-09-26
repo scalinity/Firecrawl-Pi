@@ -150,13 +150,15 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return fail(paced.failure); }
         const r = await browser.render({ attemptId, url: req.url, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal });
         const verdict = r.ok ? classify({ status: r.status, contentType: r.contentType ?? "text/html", body: r.html, finalUrl: r.finalUrl, requestedUrl: req.url }) : null;
-        // A page still a script shell after its one browser attempt is no content (spec §9.4).
-        const failure = !r.ok ? r.failure : verdict.failure ?? (verdict.verdict === "js_shell"
+        // A page whose own structure still says "rendered by script" after its one browser attempt
+        // is no content (spec §9.4); a page that is merely short is the page (review finding C5).
+        const shell = verdict?.verdict === "js_shell" && verdict.structural === true;
+        const failure = !r.ok ? r.failure : verdict.failure ?? (shell
           ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null);
         await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
         if (failure) return fail(failure);
         return finish({ ok: true, body: r.html, finalUrl: r.finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
-          bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] },
+          bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
           subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [] });
       } finally {
         await store.releaseDomain(paced.domain, attemptId);
