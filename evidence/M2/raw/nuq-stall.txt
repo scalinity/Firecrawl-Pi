@@ -1,0 +1,31 @@
+### stall_meta
+utc=2026-09-26T03:58:40.955Z source_commit=2cd4601a30dbcf2451f834368d8bd6f418fe6cc9
+core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+### stall_submit
+{"http":200,"success":true,"batchId":"01a0dbdd-7e20-73c9-9c42-4498a211f4ba","error":null}
+job=01a0dbdd-7e2b-72af-85f8-5140cd1a06fc
+worker_pid=34
+### stall_stall_1
+stopped utc=2026-09-26T03:58:42.116Z exit=0 attempts=1
+row 01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	active	0	03:58:41	f	
+requeued utc=2026-09-26T03:59:45.425Z attempts=2 row 01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	active	1	03:59:44	f	
+continued utc=2026-09-26T03:59:45.573Z exit=0
+### stall_stall_2
+stopped utc=2026-09-26T03:59:45.725Z exit=0 attempts=3
+row 01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	active	1	03:59:44	f	
+requeued utc=2026-09-26T04:01:01.534Z attempts=4 row 01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	active	2	04:00:59	f	
+continued utc=2026-09-26T04:01:01.701Z exit=0
+### stall_final
+utc=2026-09-26T04:01:01.803Z 01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	failed	2		f	SCRAPE_FCPI_RETRIEVAL|{"stack":"Error: Retrieval failed: DEADLINE_EXCEEDED. the logical page's 90 s acquisition deadline has passed\n    at scrapeURLWithPiResil
+### stall_attempts
+01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	1	direct_http	target_error	503	03:58:41.804
+01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	2	direct_http	target_error	503	03:58:44.315
+01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	3	direct_http	target_error	503	03:59:45.629
+01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	4	direct_http	target_error	503	03:59:48.405
+01a0dbdd-7e2b-72af-85f8-5140cd1a06fc	4
+### stall_acquisitions
+{"utc":"2026-09-26T03:58:45.829Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"a0a324f9-f133-4455-8fa7-24eb7d812a4a","logical_id":"01a0dbdd-7e2b-72af-85f8-5140cd1a06fc","purpose":"page","url_hmac":"ba7fffe9224e272dc75c24ea0b484a22","attempts_used":2,"strategies":["direct_http","direct_http"],"target_status":503,"verdict":"target_error","failure":null,"bytes":192,"ms":4035}
+{"utc":"2026-09-26T03:59:49.921Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"ae42447f-a981-4636-b0f5-1129a60183eb","logical_id":"01a0dbdd-7e2b-72af-85f8-5140cd1a06fc","purpose":"page","url_hmac":"ba7fffe9224e272dc75c24ea0b484a22","attempts_used":4,"strategies":["direct_http","direct_http"],"target_status":503,"verdict":"target_error","failure":null,"bytes":192,"ms":4306}
+{"utc":"2026-09-26T04:01:01.751Z","service":"retrieval","build":"0.2.0","event":"acquisition","request_id":"373f9605-a266-41d2-8230-1785ab9d601c","logical_id":"01a0dbdd-7e2b-72af-85f8-5140cd1a06fc","purpose":"page","url_hmac":"ba7fffe9224e272dc75c24ea0b484a22","attempts_used":4,"strategies":[],"target_status":0,"verdict":null,"failure":"DEADLINE_EXCEEDED","bytes":0,"ms":12}
+### stall_fixture_hits
+hits=4
