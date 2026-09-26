@@ -28,7 +28,8 @@ export async function openArchive(root) {
       // An existing copy is touched, so a sweep cannot take it as an hour-old orphan before its row commits.
       if (existsSync(final)) { const t = new Date(); await utimes(final, t, t); return { sha256: sha, bytes: buf.length }; }
       const dir = join(results, sha.slice(0, 2));
-      await mkdir(dir, { recursive: true, mode: 0o700 });
+      // A shard created here has its own entry in results/ made durable too, before a row can name a file in it.
+      if (await mkdir(dir, { recursive: true, mode: 0o700 })) await fsyncDir(results);
       const t = join(tmp, `${randomUUID()}.part`);
       const h = await open(t, "wx", 0o600);
       try { await h.writeFile(buf); await h.sync(); } finally { await h.close(); }
