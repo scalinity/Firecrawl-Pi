@@ -345,3 +345,17 @@ test("a call that fails while its answer is shaped still leaves a tool record, a
   const after = await call("firecrawl_capabilities", {});
   assert.equal(after.last.result.isError, undefined, "no slot is left held");
 });
+
+test("a client's own name and version are logged, descriptive and sanitised, in both eras", async () => {
+  await call("firecrawl_capabilities", {});
+  const initId = randomUUID();
+  const init = await http("POST", { headers: { ...identity(), "x-request-id": initId }, body: { jsonrpc: "2.0", id: 0, method: "initialize", params: { protocolVersion: LEGACY, capabilities: {}, clientInfo: { name: "legacy-product", version: "2.1.283" } } } });
+  const hostile = await http("POST", { headers: identity(), body: { jsonrpc: "2.0", id: 0, method: "initialize", params: { protocolVersion: LEGACY, capabilities: {}, clientInfo: { name: "<script>" + "x".repeat(300), version: "1" } } } });
+  assert.equal(init.status, 200); assert.equal(hostile.status, 200);
+  await sleep(150);
+  assert.deepEqual(logs.filter((l) => l.event === "tool" && l.tool === "firecrawl_capabilities").at(-1).client_info, { name: "fcpi-test", version: "1" });
+  const ex = (id) => logs.find((l) => l.event === "exchange" && l.request_id === id);
+  assert.deepEqual(ex(initId)?.client_info, { name: "legacy-product", version: "2.1.283" });
+  assert.ok(logs.some((l) => l.event === "exchange" && l.client_info?.name === "invalid"));
+  assert.ok(!JSON.stringify(logs).includes("<script>"));
+});

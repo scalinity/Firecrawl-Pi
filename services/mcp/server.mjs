@@ -35,6 +35,10 @@ let toolCalls = 0;
 // as the gateway logs Mcp-Method: a client cannot put arbitrary text into the log.
 const LOGGED = { method: /^[a-z/_]{1,64}$/, name: /^[A-Za-z0-9_./-]{1,128}$/, version: /^\d{4}-\d{2}-\d{2}$/ };
 const logged = (v, re) => (v === undefined || v === null ? null : re.test(String(v)) ? String(v) : "invalid");
+// A client's own name and version (clientInfo): descriptive only, never identity (spec §20.3), logged so a
+// real client shows by name beside its token's label.
+const INFO = /^[A-Za-z0-9 ._@\/+:-]{1,64}$/;
+const clientInfo = (i) => (i && typeof i === "object" ? { name: logged(i.name, INFO), version: logged(i.version, INFO) } : null);
 
 const text = (payload, isError) => ({ content: [{ type: "text", text: JSON.stringify(payload) }], ...(isError ? { isError: true } : {}) });
 
@@ -42,7 +46,7 @@ async function runTool(t, args, extra, era) {
   const t0 = Date.now();
   const auth = extra.http?.authInfo;
   const hdr = (k) => extra.http?.req?.headers?.get?.(k) ?? null;
-  const rec = { event: "tool", request_id: auth?.extra?.requestId ?? null, era, protocol_version: logged(hdr("mcp-protocol-version"), LOGGED.version), jsonrpc_id: extra.mcpReq?.id ?? null,
+  const rec = { event: "tool", request_id: auth?.extra?.requestId ?? null, era, protocol_version: logged(hdr("mcp-protocol-version"), LOGGED.version), jsonrpc_id: extra.mcpReq?.id ?? null, client_info: clientInfo(extra.mcpReq?.envelope?.["io.modelcontextprotocol/clientInfo"]),
     tool: t.name, client: auth?.clientId ?? null, principal: auth?.extra?.principal ?? null };
   // The job a call names or starts (spec §24: job id when applicable), never its arguments.
   let job = typeof args?.id === "string" ? args.id : null;
@@ -99,11 +103,18 @@ async function runTool(t, args, extra, era) {
   } finally { toolCalls -= 1; }
 }
 
+// The instance serving each request, by the gateway's request id, until that request closes: a 2025-era
+// initialize names its client only to the instance that serves it, and the exchange record reads it there.
+// Nothing outlives its own request, so this is not session state.
+const serving = new Map();
+
 // One McpServer per HTTP request: the same factory serves both eras.
 const factory = (ctx) => {
-  log({ event: "serve", request_id: ctx.authInfo?.extra?.requestId ?? null, era: ctx.era });
+  const requestId = ctx.authInfo?.extra?.requestId ?? null;
+  log({ event: "serve", request_id: requestId, era: ctx.era });
   const s = new McpServer(SERVER_INFO, { capabilities: { tools: { listChanged: false } }, instructions: INSTRUCTIONS, cacheHints: { "tools/list": HINT, "server/discover": HINT } });
   for (const t of tools) s.registerTool(t.name, t.config, (args, extra) => runTool(t, args, extra, ctx.era));
+  if (requestId) serving.set(requestId, s);
   return s;
 };
 
@@ -137,9 +148,14 @@ const server = createServer({ maxHeaderSize: 16384 }, (req, res) => {
     sessionHeader = Object.keys(o).some((k) => k.toLowerCase() === "mcp-session-id") || res.hasHeader("mcp-session-id");
     return writeHead.call(this, s, hs, ...rest);
   };
-  res.on("close", () => log({ event: "exchange", request_id: h["x-request-id"], http_method: req.method, mcp_method: logged(h["mcp-method"], LOGGED.method), mcp_name: logged(h["mcp-name"], LOGGED.name),
+  res.on("close", () => {
+    const inst = serving.get(h["x-request-id"]);
+    serving.delete(h["x-request-id"]);
+    exchangeLog(inst);
+  });
+  const exchangeLog = (inst) => log({ event: "exchange", request_id: h["x-request-id"], client_info: clientInfo(inst?.server?.getClientVersion?.()), http_method: req.method, mcp_method: logged(h["mcp-method"], LOGGED.method), mcp_name: logged(h["mcp-name"], LOGGED.name),
     protocol_version: logged(h["mcp-protocol-version"], LOGGED.version), status, content_type: contentType, session_header_sent: sessionHeader, completed: res.writableFinished,
-    client: h["x-fcpi-client"], principal: h["x-fcpi-principal"], ms: Date.now() - t0 }));
+    client: h["x-fcpi-client"], principal: h["x-fcpi-principal"], ms: Date.now() - t0 });
   node(req, res);
 });
 
