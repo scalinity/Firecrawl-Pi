@@ -29,6 +29,11 @@ PG_CORE=$(ip_on nuq-postgres fcpi_core); PG_PLATFORM=$(ip_on nuq-postgres fcpi_p
 REDIS=$(ip_on redis fcpi_core); RMQ=$(ip_on rabbitmq fcpi_core)
 RS_ACQ=10.231.5.10; BW=10.231.2.20; FX3=$(ip_on fixture-m3 fcpi_fixture); GW_ACCESS=$(ip_on access-gateway fcpi_access)
 ACCESS_GW=10.231.0.1
+# An address that did not resolve (a renamed service or network) would make its target ":<port>", which
+# probes the prober's own loopback and reads as denied: stop instead.
+for v in CORE_API CORE_CORE PG_CORE PG_PLATFORM REDIS RMQ FX3 GW_ACCESS; do
+  [ -n "${!v}" ] || { echo "pi-port-probe: no address for $v (a service or network was renamed?)" >&2; exit 1; }
+done
 
 sec meta
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) probe_image=$IMG"

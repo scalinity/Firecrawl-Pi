@@ -399,7 +399,7 @@ const checks = {
       return { ok: live && contract, actual: `live routes with spoofed headers answered as unknown=${ow.filter((r) => r.beta_spoofed_headers.body_sha256 === r.unknown.body_sha256).length}/${ow.length}; contract header test passed=${contract}` };
     } },
   N03: { name: "internal-ports-denied-from-every-vantage", inputs: [`${RAW}port-probe.txt`, `${RAW}lan-probe.txt`],
-    expected: "from the gateway (the permitted vantage) the core's API and PostgreSQL open (the positive controls) and nothing else but the core's own harness ports on fcpi_api: Redis, RabbitMQ, the retrieval service (/internal/acquire too), the browser worker and the fixture are unresolved or dropped, as are the host's listeners through the bridge; a container on the publication bridge reaches only the gateway's port; a container on Docker's default bridge reaches no project service (the host's sshd is its control); on the host only 127.0.0.1:3380 is open; from the LAN every project port is closed while sshd (the control) is open; the guard counted the dropped attempts; no throwaway container is left",
+    expected: "every probe names a host and every resolved address is a project address; from the gateway (the permitted vantage) the core's API and PostgreSQL open (the positive controls) and nothing else but the core's own harness ports on fcpi_api: Redis, RabbitMQ, the retrieval service (/internal/acquire too), the browser worker and the fixture are unresolved or dropped, as are the host's listeners through the bridge; a container on the publication bridge reaches only the gateway's port; a container on Docker's default bridge reaches no project service (the host's sshd is its control); on the host only 127.0.0.1:3380 is open; from the LAN every project port is closed while sshd (the control) is open; the guard counted the dropped attempts; no throwaway container is left",
     run() {
       const s = S(`${RAW}port-probe.txt`), recs = ["gateway", "access_peer", "default_bridge", "host"].flatMap((k) => jsonLines(s[k]));
       const by = (role) => Object.fromEntries(recs.filter((r) => r.role === role).map((r) => [r.label, r.outcome]));
@@ -415,8 +415,13 @@ const checks = {
       const drops = (ctr("guard_after").access_forward_out_dropped ?? 0) > (ctr("guard_before").access_forward_out_dropped ?? Infinity) && (ctr("guard_after").access_input_new_dropped ?? 0) > (ctr("guard_before").access_input_new_dropped ?? Infinity);
       const lan = S(`${RAW}lan-probe.txt`);
       const lanOk = (lan.project_ports ?? []).filter((l) => /^port=/.test(l)).length >= 19 && !(lan.project_ports ?? []).some((l) => / open$/.test(l)) && (lan.control ?? []).includes("port=22 open");
-      const ok = gateway && peer && bridge && host && drops && lanOk && (s.transient ?? []).includes("leftover_transient_containers=0");
-      return { ok, actual: `gateway opens=${gOpen.join(",")}; access peer=${peer}; default bridge=${bridge}; host=${host} (${Object.keys(h).length} probes); guard counted drops=${drops}; LAN closed ${(lan.project_ports ?? []).filter((l) => / closed$/.test(l)).length} with control=${(lan.control ?? []).includes("port=22 open")}` };
+      // Every probe named a host (an empty one probes the prober's own loopback and reads as denied), and
+      // every address the collector resolved is a project address.
+      const targets = recs.length >= 60 && recs.every((r) => /^[A-Za-z0-9.-]+:\d+$/.test(r.target ?? ""));
+      const addr = kv(((s.meta ?? []).find((l) => l.startsWith("addresses ")) ?? "").split(" ").slice(1));
+      const addrs = ["core_api", "core_core", "pg_core", "pg_platform", "redis", "rabbitmq", "retrieval", "browser", "fixture_m3", "gateway_access"].every((k) => /^10\.231\.\d+\.\d+$/.test(addr[k] ?? ""));
+      const ok = targets && addrs && gateway && peer && bridge && host && drops && lanOk && (s.transient ?? []).includes("leftover_transient_containers=0");
+      return { ok, actual: `probes=${recs.length} with named hosts=${targets}, project addresses=${addrs}; gateway opens=${gOpen.join(",")}; access peer=${peer}; default bridge=${bridge}; host=${host} (${Object.keys(h).length} probes); guard counted drops=${drops}; LAN closed ${(lan.project_ports ?? []).filter((l) => / closed$/.test(l)).length} with control=${(lan.control ?? []).includes("port=22 open")}` };
     } },
   N04: { name: "published-ports-loopback-only", inputs: [`${RAW}stack.txt`],
     expected: "the only project publication is the gateway on 127.0.0.1:3380, the one docker-proxy listener on the host; the gateway answers without a token 401",
