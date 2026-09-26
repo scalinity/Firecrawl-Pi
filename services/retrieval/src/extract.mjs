@@ -30,7 +30,7 @@ export class ExtractionFailure extends Error {
 const fail = (c, d, x) => new ExtractionFailure(c, d, x);
 // Refusals that hold for every later call as much as this one: the job stops at the first.
 const STOPPING = new Set(["MODEL_NOT_ALLOWED", "RATE_CARD_MISSING", "PAID_DISPATCH_DISABLED", "BLOCKED_CREDENTIAL", "BUDGET_EXHAUSTED",
-  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_UNCERTAIN", "EXTRACTION_UNCERTAIN", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
+  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_RATE_LIMITED", "PROVIDER_UNCERTAIN", "EXTRACTION_UNCERTAIN", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
 
 export function canonical(v) {
   if (Array.isArray(v)) return `[${v.map(canonical).join(",")}]`;

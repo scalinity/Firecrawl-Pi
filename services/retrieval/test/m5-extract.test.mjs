@@ -118,6 +118,16 @@ test("three provider failures open the breaker: the next call is refused without
   } finally { await r.srv.close(); }
 });
 
+test("a rate limit stops the extraction's later units: the provider is asked once (review S8)", async () => {
+  const r = await rig();
+  try {
+    const out = await r.extract(req({ prompt: "fcpi-mode=http-429", documents: [DOC(), { ...DOC(), url: "http://m5.fixture.fcpi.test:8080/extract/second.html" }] }));
+    assert.equal(r.calls(), 1);
+    assert.deepEqual(out.units.map((u) => u.failure?.class), ["PROVIDER_RATE_LIMITED", "PROVIDER_RATE_LIMITED"]);
+    assert.equal(out.failure.retryAfter, 7);
+  } finally { await r.srv.close(); }
+});
+
 test("a half-open probe that ends without a verdict hands the probe back (review W10)", async () => {
   const r = await rig({ mutate: (b) => { b.breaker.openMs = 1000; } });
   try {
