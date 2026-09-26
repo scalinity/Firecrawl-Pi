@@ -121,8 +121,11 @@ function shape(kind, tool, r, args, m, omitted) {
       if (tool.route === "map") {
         const payload = { links: b.links ?? [] };
         const total = payload.links.length;
-        while (bytes(payload) > budget && payload.links.length) payload.links = payload.links.slice(0, Math.floor(payload.links.length / 2));
-        if (payload.links.length < total) payload.truncated = { links: { originalCount: total, returnedCount: payload.links.length }, note: "The link list exceeded the tool payload limit; give a smaller limit or a search term." };
+        // Measured with the marker in place, so the marker cannot push the answer past the limit.
+        while (bytes(payload) > budget && payload.links.length) {
+          payload.links = payload.links.slice(0, Math.floor(payload.links.length / 2));
+          payload.truncated = { links: { originalCount: total, returnedCount: payload.links.length }, note: "The link list exceeded the tool payload limit; give a smaller limit or a search term." };
+        }
         return { payload };
       }
       const payload = { data: b.data ?? null };

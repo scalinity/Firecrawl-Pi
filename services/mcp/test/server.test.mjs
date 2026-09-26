@@ -35,6 +35,7 @@ const fake = createServer((req, res) => {
     if (req.method === "POST" && u.pathname === "/v2/scrape") {
       if (/slow/.test(rec.body.url)) { await sleep(3000); return send(200, { success: true, data: { markdown: "late" } }); }
       if (/big/.test(rec.body.url)) return send(200, { success: true, data: { markdown: "x".repeat(700000), metadata: { sourceURL: rec.body.url } } });
+      if (/hugemeta/.test(rec.body.url)) return send(200, { success: true, data: { markdown: "# small", metadata: Object.fromEntries(Array.from({ length: 3000 }, (_, i) => [`og:tag${i}`, "v".repeat(100)])) } });
       return send(200, { success: true, data: { markdown: "# fixture page", metadata: { sourceURL: rec.body.url, statusCode: 200 } } });
     }
     if (req.method === "POST" && u.pathname === "/v2/crawl") return send(200, { success: true, id: JOB, url: `http://${req.headers.host}/v2/crawl/${JOB}` });
@@ -246,4 +247,13 @@ test("the log records era, method, tool, client and the gateway's answer, and no
   assert.ok(logs.some((l) => l.event === "tool" && l.era === "legacy" && l.protocol_version === LEGACY));
   assert.ok(logs.some((l) => l.event === "exchange" && l.status === 400 && l.mcp_method === "tools/call"));
   assert.ok(logs.filter((l) => l.event === "exchange").every((l) => l.session_header_sent !== true));
+});
+
+test("an answer still over the limit after every cut is refused as RESULT_TOO_LARGE, never sent whole", async () => {
+  const r = await call("firecrawl_scrape", { url: "https://example.com/hugemeta" });
+  assert.equal(r.last.result.isError, true);
+  assert.equal(payload(r).error.code, "RESULT_TOO_LARGE");
+  assert.ok(Buffer.byteLength(r.last.result.content[0].text) < 1024);
+  await sleep(100);
+  assert.ok(logs.some((l) => l.event === "tool" && l.outcome === "too_large"));
 });

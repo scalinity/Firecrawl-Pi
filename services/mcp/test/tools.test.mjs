@@ -145,3 +145,20 @@ test("fitDocument halves a link list when no string field is left to cut", () =>
   assert.ok(Buffer.byteLength(JSON.stringify(payload)) <= 20000);
   assert.equal(cuts.links.originalCount, 5000);
 });
+
+test("a map answer cut to fit stays under the limit with its marker in place", () => {
+  const T = byName(makeTools(m()));
+  // Adversarial by construction: a title length at which 500 links fit the limit but 500 links and the
+  // marker do not, so halving from 1,000 lands exactly where a marker added afterwards would overflow.
+  const mk = (n, len, pad = 0) => Array.from({ length: n }, (_, i) => ({ url: `https://example.com/${String(i).padStart(4, "0")}`, title: "t".repeat(len + (i === 0 ? pad : 0)) }));
+  const B = MANIFEST.mcp.limits.toolTextMaxBytes, size = (n, len, pad) => Buffer.byteLength(JSON.stringify({ links: mk(n, len, pad) }));
+  const len = Math.floor((B - 60 - size(500, 0)) / 500), pad = B - 60 - size(500, len);
+  assert.equal(size(500, len, pad), B - 60, "500 links leave 60 bytes, less than the marker needs");
+  const links = mk(1000, len, pad);
+  const r = T.firecrawl_map.shape({ status: 200, json: { success: true, links }, headers: {} }, {});
+  assert.ok(Buffer.byteLength(JSON.stringify(r.payload)) <= MANIFEST.mcp.limits.toolTextMaxBytes, `${Buffer.byteLength(JSON.stringify(r.payload))} bytes`);
+  assert.equal(r.payload.truncated.links.originalCount, 1000);
+  assert.equal(r.payload.truncated.links.returnedCount, r.payload.links.length);
+  const small = T.firecrawl_map.shape({ status: 200, json: { success: true, links: links.slice(0, 3) }, headers: {} }, {});
+  assert.equal(small.payload.truncated, undefined);
+});

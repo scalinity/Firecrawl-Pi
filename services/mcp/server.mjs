@@ -62,7 +62,14 @@ async function runTool(t, args, extra, era) {
     }
     const { payload, isError } = t.shape(r, args);
     if (t.kind === "submit" && typeof payload?.id === "string") job = payload.id;
-    return finish(text(payload, isError), { route: t.route.id, status: r.status, code: r.json?.code ?? null, request_id: r.headers["x-request-id"] ?? null }, isError ? "error" : "ok");
+    const downstream = { route: t.route.id, status: r.status, code: r.json?.code ?? null, request_id: r.headers["x-request-id"] ?? null };
+    const out = text(payload, isError);
+    // The payload bound, once, for every answer (spec §16.3): shaping cuts the fields it knows how to cut;
+    // an answer still over the limit (its bulk in a field such as metadata) is refused, never sent whole.
+    if (Buffer.byteLength(out.content[0].text) > L.toolTextMaxBytes) {
+      return finish(text({ error: { code: "RESULT_TOO_LARGE", message: `The answer exceeds the ${L.toolTextMaxBytes}-byte tool payload limit in fields this service does not cut${t.kind === "status" ? "; the document is served whole by the job's REST results route" : ""}.` } }, true), downstream, "too_large");
+    }
+    return finish(out, downstream, isError ? "error" : "ok");
   } finally { toolCalls -= 1; }
 }
 
