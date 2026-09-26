@@ -132,6 +132,16 @@ async function pollExtract(id, tok = "m5", ms = 420000) {
   }
 }
 const docOf = (r) => r.json?.data ?? null;
+// A memory sample (scripts/m5/pi-resources.sh), taken before each stop that would start a new cgroup.
+const resources = (label) => { try { out("resources", JSON.parse(pi(`bash /opt/firecrawl-pi/scripts/m5/pi-resources.sh ${label}`))); } catch (e) { out("error", { message: `resources ${label}: ${e.message}` }); } };
+async function catalog() {
+  const r = await http("POST", "/mcp", { headers: { "mcp-protocol-version": MODERN, "mcp-method": "tools/list" }, body: { jsonrpc: "2.0", id: 1, method: "tools/list", params: { _meta: META } } });
+  const tools = r.json?.result?.tools ?? [];
+  out("mcp_catalog", { status: r.status, tools: tools.map((t) => t.name), sha256: sha(JSON.stringify(tools)), search_schema_required: tools.find((t) => t.name === "firecrawl_search")?.inputSchema?.required ?? null,
+    extract_urls_max: tools.find((t) => t.name === "firecrawl_extract")?.inputSchema?.properties?.urls?.maxItems ?? null,
+    scrape_json_format: JSON.stringify(tools.find((t) => t.name === "firecrawl_scrape")?.inputSchema?.properties?.formats ?? null).includes('"const":"json"'),
+    batch_json_format: JSON.stringify(tools.find((t) => t.name === "firecrawl_batch_scrape")?.inputSchema?.properties?.formats ?? null).includes('"const":"json"') });
+}
 
 // ---- the fixture phase ---------------------------------------------------------------------------------------
 async function fixturePhase() {
@@ -139,6 +149,8 @@ async function fixturePhase() {
   out("meta", { phase, pi_utc: since, deployed_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), selection_before: JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show")) });
   select("fixture", "fcpi-fixture-model", "fcpi-fixture-parser");
   D(`exec ${cname("fixture-m5")} node -e "fetch('http://127.0.0.1:8080/__reset',{method:'POST'}).then(()=>{})"`);
+  resources("fixture-start");
+  await catalog();
   const nonce = randomUUID().slice(0, 8);
 
   // S01/S02: search's four outcomes against the real SearXNG, through REST and MCP.
@@ -164,6 +176,7 @@ async function fixturePhase() {
   t = await tool("firecrawl_search", { query: q("fcpi-fail mcp") });
   out("search", { case: "mcp_engines_failed", isError: t.isError, code: t.payload?.error?.code ?? null, httpStatus: t.payload?.error?.httpStatus ?? null });
   // The backend stopped: typed, never empty; map (sitemap and links) still works (AC05).
+  resources("before-searxng-stop");
   D(`stop ${cname("searxng")}`);
   r = await rest("POST", "/v2/search", { query: q("backend down") });
   out("search", { case: "backend_down", ...brief(r), searxng: health("searxng") });
@@ -266,9 +279,13 @@ async function fixturePhase() {
   r = await rest("POST", "/v2/scrape", { url: `${FX2}/static.html`, formats: ["markdown"] });
   out("isolation", { case: "scrape_while_model_breaker_open", ...brief(r), markdown: typeof docOf(r)?.markdown === "string" && docOf(r).markdown.length > 0 });
   out("ledger", { point: "extraction", rows: ledger(m0) });
+  resources("after-extraction");
   out("provider_stats", { point: "after_extraction", ...stats() });
 
-  // D01/D02: every document class, native first, the fixture parser behind it.
+  // D01/D02: every document class, native first, the fixture parser behind it. The parse cache is keyed by
+  // the document's bytes, so an earlier pass's fixture parses would answer this one's without an upload:
+  // the fixture parser's rows (and only those) are cleared first, and the count is recorded.
+  out("documents", { case: "fixture_parse_cache_cleared", rows: +sql("WITH d AS (DELETE FROM fcpi_retrieval.parse_cache WHERE parser = 'fcpi-fixture-parser' RETURNING 1) SELECT count(*) FROM d")[0] });
   const d0 = piNow();
   const scrape = async (c, path, formats = ["markdown"]) => {
     const rr = await rest("POST", "/v2/scrape", { url: `${FX5}${path}`, formats });
@@ -312,6 +329,7 @@ async function fixturePhase() {
   out("production", { case: "platform_status", providers: status.json?.providers ?? null, routes: status.json?.capabilities?.routes ?? null });
 
   // I01: ordinary acquisition with search, the model and the parser all unavailable (AC23).
+  resources("before-isolation-searxng-stop");
   D(`stop ${cname("searxng")}`);
   r = await rest("POST", "/v2/search", { query: q("isolation") });
   out("isolation", { case: "search_down", ...brief(r) });
@@ -328,6 +346,7 @@ async function fixturePhase() {
   out("isolation", { case: "map", ...brief(r), links: Array.isArray(r.json?.links) ? r.json.links.length : null });
   D(`start ${cname("searxng")}`);
   await waitHealthy("searxng");
+  resources("fixture-end");
   out("connections", { hosts: [...new Set(seen)].sort(), lookups: [...new Set(looked)].filter((h) => h !== "localhost").sort() });
   out("meta_end", { pi_utc: piNow(), selection_after: JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show")) });
 }
@@ -375,6 +394,7 @@ async function livePhase() {
     }
   } else out("live_parser", { case: "blocked", credential: providers.providers?.llamaparse?.credential ?? null, paidDispatch: paid, parserCaps: providers.caps?.parser ?? null });
   out("ledger", { point: "live", rows: ledger(m0) });
+  resources("live-end");
   out("connections", { hosts: [...new Set(seen)].sort(), lookups: [...new Set(looked)].filter((h) => h !== "localhost").sort() });
   out("meta_end", { pi_utc: piNow(), selection_after: JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show")) });
 }
