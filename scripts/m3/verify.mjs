@@ -29,6 +29,9 @@ const target = () => {
   return t;
 };
 const ssh = (cmd) => { const t = target(); return execFileSync("ssh", ["-i", t.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", t.PI_SSH_TARGET, cmd], { encoding: "utf8" }); };
+// The Pi's identifiers and this machine's paths, replaced; the key path first, since it holds $HOME.
+const hideIds = (s, t) => [[t.PI_SSH_KEY, "<pi-ssh-key>"], [t.PI_SSH_TARGET, "<pi-ssh-target>"], [t.PI_LAN_ADDRESS, "<pi-lan-address>"], [process.env.HOME, "<home>"]]
+  .reduce((x, [a, b]) => (a ? x.split(a).join(b) : x), s);
 const digestOf = (ref) => (ref.match(/@(sha256:[0-9a-f]{64})$/) ?? [])[1] ?? null;
 const composeImage = (svc) => json(`${EV}rendered-compose.json`).services[svc]?.image ?? "";
 const S = (f) => sections(f);
@@ -689,8 +692,8 @@ for (const id of wanted) {
     Object.assign(rec, { state: "FAIL", actual: `check raised: ${e.message}`, exit_code: 2, classification: "verifier-error" });
   }
   rec.image_digests_platform = has(`${EV}rendered-compose.json`) ? { platform: "linux/arm64", gateway: digestOf(composeImage("access-gateway")), api: digestOf(composeImage("firecrawl-core")), retrieval: digestOf(composeImage("retrieval-service")), browser: digestOf(composeImage("browser-worker")) } : null;
-  // An error text can carry the SSH command; the Pi's identifiers never enter the record.
-  { const t = target(); rec.actual = String(rec.actual).split(t.PI_SSH_TARGET).join("<pi-ssh-target>").split(t.PI_LAN_ADDRESS).join("<pi-lan-address>"); }
+  // An error text can carry the SSH command: its key path, the target, the LAN address and $HOME never enter the record.
+  rec.actual = hideIds(String(rec.actual), target());
   rec.evidence_path = OUT;
   results[rec.test_id] = rec;
   console.log(`${rec.test_id} ${rec.state.padEnd(18)} ${c.name}${rec.state !== "PASS" ? `  — ${rec.actual.slice(0, 240)}` : ""}`);

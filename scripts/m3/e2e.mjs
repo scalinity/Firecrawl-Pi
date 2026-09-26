@@ -27,10 +27,14 @@ const now = () => new Date().toISOString();
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 
 // ---- output ----------------------------------------------------------------------------------------
+// An error text can carry the SSH command: its key path, the target, the LAN address and $HOME are
+// replaced in everything printed (the key path first, since it holds $HOME).
+const hideIds = (s) => [[T.PI_SSH_KEY, "<pi-ssh-key>"], [T.PI_SSH_TARGET, "<pi-ssh-target>"], [T.PI_LAN_ADDRESS, "<pi-lan-address>"], [process.env.HOME, "<home>"]]
+  .reduce((x, [a, b]) => (a ? x.split(a).join(b) : x), s);
 let current = null;
 function out(section, rec) {
   if (section !== current) { process.stdout.write(`### ${section}\n`); current = section; }
-  process.stdout.write(`${JSON.stringify({ utc: now(), ...rec })}\n`);
+  process.stdout.write(`${hideIds(JSON.stringify({ utc: now(), ...rec }))}\n`);
 }
 // A gateway answer, as recorded: status, code, the challenge, any CORS header, the body's hash and a bounded summary.
 const brief = (r, extra = {}) => ({ status: r.status, code: r.json?.code ?? null, error: r.json?.error ? String(r.json.error).slice(0, 200) : null,
