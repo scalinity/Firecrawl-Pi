@@ -13,6 +13,9 @@ After=fcpi-data-check.service docker.service network-online.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
+# The host's connected networks, for the guard and the retrieval service (M2); a failure does not
+# stop the stack, because the retrieval service then refuses to acquire (fcpi-egress-local.sh).
+ExecStartPre=-/etc/firecrawl-pi/fcpi-egress-local.sh
 # `up --wait` returns once every service is healthy; a failed health wait fails the start.
 ExecStart=/usr/bin/docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml up -d --wait --wait-timeout 900
 # `stop` (not `down`): containers and networks stay, and restart policies do not revive

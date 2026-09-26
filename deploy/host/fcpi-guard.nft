@@ -1,24 +1,52 @@
-# FCPI access-bridge guard. scripts/m1/pi-init.sh installs it as
+# FCPI bridge guard. scripts/m1/pi-init.sh (and from M2 scripts/m2/pi-init-m2.sh) installs it as
 # /etc/firecrawl-pi/fcpi-guard.nft, and docker.service's ExecStartPre
 # (deploy/host/docker.service.d/20-fcpi-guard.conf) loads it before every dockerd start,
 # so no container runs without it, and a failed load keeps dockerd down.
-# fcpi-access is the only non-internal project bridge. It carries the gateway's loopback
-# publication, which docker-proxy reaches from the host, so the only traffic it needs is
-# the replies to those host-initiated connections. Everything else is dropped and counted:
-# forwarding in either direction (no route out through the bridge's NAT) and new
-# connections from the bridge to any host listener.
+# fcpi-access carries the gateway's loopback publication, which docker-proxy reaches from the
+# host, so the only traffic it needs is the replies to those host-initiated connections.
+# Everything else on it is dropped and counted: forwarding in either direction (no route out
+# through the bridge's NAT) and new connections from the bridge to any host listener.
+# fcpi-egress is the retrieval service's way out (M2): new TCP connections to ports 80 and 443 of
+# public addresses, and their replies; DNS to the host's resolver on the bridge's own address;
+# nothing else. The retrieval service validates every target itself (spec §20.2); this is the
+# network's own floor under it.
 # The first two lines make the load idempotent: the table is replaced in one transaction.
 table inet fcpi_guard
 delete table inet fcpi_guard
 table inet fcpi_guard {
+  # Non-public IPv4 destinations (the IANA special-purpose ranges).
+  set egress_special_v4 {
+    type ipv4_addr; flags interval;
+    elements = { 0.0.0.0/8, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12,
+                 192.0.0.0/24, 192.0.2.0/24, 192.31.196.0/24, 192.52.193.0/24, 192.88.99.0/24,
+                 192.168.0.0/16, 192.175.48.0/24, 198.18.0.0/15, 198.51.100.0/24, 203.0.113.0/24,
+                 224.0.0.0/4, 240.0.0.0/4 }
+  }
+  # The host's own connected networks, which may use globally routable ranges. Filled at every
+  # dockerd and stack start by /etc/firecrawl-pi/fcpi-egress-local.sh; empty until then.
+  set egress_local_v4 {
+    type ipv4_addr; flags interval;
+  }
   chain forward {
     type filter hook forward priority filter - 10; policy accept;
     iifname "fcpi-access" counter drop comment "access_forward_out_dropped"
     oifname "fcpi-access" counter drop comment "access_forward_in_dropped"
+    iifname "fcpi-egress" meta nfproto ipv6 counter drop comment "egress_ipv6_dropped"
+    iifname "fcpi-egress" ip daddr @egress_special_v4 counter drop comment "egress_special_dropped"
+    iifname "fcpi-egress" ip daddr @egress_local_v4 counter drop comment "egress_local_dropped"
+    iifname "fcpi-egress" ct state established,related accept
+    iifname "fcpi-egress" ct state new tcp dport { 80, 443 } counter accept comment "egress_web_accepted"
+    iifname "fcpi-egress" counter drop comment "egress_other_dropped"
+    oifname "fcpi-egress" ct state established,related accept
+    oifname "fcpi-egress" counter drop comment "egress_in_dropped"
   }
   chain input {
     type filter hook input priority filter - 10; policy accept;
     iifname "fcpi-access" ct state established,related accept
     iifname "fcpi-access" counter drop comment "access_input_new_dropped"
+    iifname "fcpi-egress" ct state established,related accept
+    iifname "fcpi-egress" ip daddr 10.231.6.1 udp dport 53 counter accept comment "egress_dns_udp_accepted"
+    iifname "fcpi-egress" ip daddr 10.231.6.1 tcp dport 53 counter accept comment "egress_dns_tcp_accepted"
+    iifname "fcpi-egress" counter drop comment "egress_input_dropped"
   }
 }
