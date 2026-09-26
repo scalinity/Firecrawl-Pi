@@ -78,6 +78,9 @@ const lines = posts.map((e) => {
   return JSON.stringify({
     id: e.id.$t, published: e.published.$t, title: e.title.$t, url: (e.link.find((l) => l.rel === "alternate") ?? {}).href ?? null,
     linux: (text.match(/(\d+\.\d+\.\d+\.\d+)[^.]{0,60}?Linux/) ?? [])[1] ?? null,
+    // The first Chrome version the post names, for posts that name no Linux build (Android,
+    // Extended Stable, other wordings); the verifier uses it only where linux is null.
+    version_first: (text.match(/\b(\d{2,3}\.0\.\d{4}\.\d{1,3})\b/) ?? [])[1] ?? null,
     security_fixes: Number((text.match(/includes (\d+) security fix/) ?? [])[1] ?? NaN) || null,
     content_sha256: sha256(html),
     in_the_wild_sentences: itw,
