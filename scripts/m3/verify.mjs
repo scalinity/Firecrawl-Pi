@@ -83,13 +83,20 @@ const RULES = [
   ["fcpi-client-token", /\bfcpi_[a-z0-9]+_[0-9a-f]{32,}\b/],
   // M3: a tailnet name by its shape (<label>.ts.net), since the live name is not always known.
   ["tailnet-name", /\b[a-z0-9-]+\.ts\.net\b/i],
+  // M3: a tailnet node's address, IPv4 in 100.64.0.0/10 (a network with its mask, as the guard names it, is
+  // not an address) or a node address in Tailscale's fd7a:115c:a1e0::/48 (two groups after ::; the prefix alone
+  // and ::1 are not a node's).
+  ["tailnet-address", /(?<![\d.])100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\.\d{1,3}\.\d{1,3}(?![\d.\/])|\bfd7a:115c:a1e0::[0-9a-f]{1,4}:[0-9a-f]{1,4}\b/i],
 ];
 // Literal strings allowed outside the controls: scripts/m2/verify.mjs's list, and M3's synthetic tailnet names
 // (the contract suite's origins, the SSRF test's host and the review's placeholder).
 const ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00:02", "02:00:00:00:00:99",
   "amqp://fcpi:%s@", "amqp://fcpi:$rmqpw@", String.raw`amqp://fcpi:\\(.*\\)@`, "http://user:pw@",
   "password: r.proxy.password", "password: cred.password", "password = randomBytes", "password: readSecret",
-  "example-tailnet.ts.net", "other-tailnet.ts.net", "pi.ts.net", "tailXXXX.ts.net"]);
+  "example-tailnet.ts.net", "other-tailnet.ts.net", "pi.ts.net", "tailXXXX.ts.net",
+  // Not a tailnet node: Tailscale's service address (every tailnet's), the CGNAT network's base, and the SSRF
+  // tests' synthetic boundaries.
+  "100.100.100.100", "100.64.0.0", "100.64.0.1", "100.127.255.254"]);
 const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie"];
 function scan(files, ids, rules = RULES, allow = ALLOW) {
   const hits = [];

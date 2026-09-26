@@ -1,3 +1,5 @@
-# M3's positive control for scripts/m3/verify.mjs X05: a synthetic tailnet name, which the
-# tailnet-name rule must find. The name is made up; X05 leaves this file out of its scan.
+# M3's positive controls for scripts/m3/verify.mjs X05: a synthetic tailnet name and tailnet addresses, which the
+# tailnet-name and tailnet-address rules must find. They are made up; X05 leaves this file out of its scan.
 origin=https://fcpi.tail0f0f0f.ts.net:8443
+listener=100.101.102.103:41641
+listener_v6=[fd7a:115c:a1e0::ab12:cd34]:49128

@@ -66,7 +66,8 @@ for s in "${SERVICES[@]}"; do
   D inspect "$(cid "$s")" | jq -r --arg s "$s" '.[0].NetworkSettings.Ports // {} | to_entries[] | select(.value != null) | .value[] as $b | "\($s) \(.key) -> \($b.HostIp):\($b.HostPort)"'
 done
 echo "--- host listeners (ss -Hltnup)"
-sudo -n ss -Hltnup | awk '{print $1, $5, $7}' | sort
+# Tailscale's addresses identify the owner's tailnet node: replaced here, as the snapshot does.
+sudo -n ss -Hltnup | awk '{print $1, $5, $7}' | sort | sed -E 's#100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.[0-9]{1,3}\.[0-9]{1,3}([^0-9/.]|$)#<tailnet-address>\2#g; s#fd7a:115c:a1e0:[0-9a-f:]*[0-9a-f]#<tailnet-address-v6>#g'
 
 sec networks
 for n in "${NETWORKS[@]}"; do
