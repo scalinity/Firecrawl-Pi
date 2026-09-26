@@ -192,7 +192,7 @@ services:
   firecrawl-core:
     # The project build: upstream 7666c1f9 plus patches/ (patches/series.json), built for
     # linux/arm64 by scripts/m2/build-api-image.sh and loaded by digest (review Q7, D6).
-    image: fcpi/firecrawl-api@sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c
+    image: fcpi/firecrawl-api@sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d
     platform: linux/arm64
     pull_policy: never
     hostname: firecrawl-core
