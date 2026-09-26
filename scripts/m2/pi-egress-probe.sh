@@ -19,7 +19,8 @@ LAN=$(sed -n "s/^PI_LAN_ADDRESS=//p" "$REPO/scripts/m1/pi-target.conf")
 [ -n "$LAN" ] || { echo "no PI_LAN_ADDRESS" >&2; exit 1; }
 # The router's public address, when configured as local (scripts/m2/pi-wan-address.sh): passed to
 # the retrieval probe, never printed.
-WAN=$(sudo -n sed -n "s#^\([0-9.]*\)/32$#\1#p" /etc/firecrawl-pi/egress-local.extra 2>/dev/null | head -1)
+# Single quotes: in double quotes bash would expand the pattern's $# (the argument count).
+WAN=$(sudo -n sed -n 's#^\([0-9.]*\)/32$#\1#p' /etc/firecrawl-pi/egress-local.extra 2>/dev/null | head -1)
 redact() { sed "s/${LAN//./\\.}/<pi-lan-address>/g${WAN:+; s/${WAN//./\\.}/<pi-wan-address>/g}"; }
 # One line per counted guard rule: its comment and packet count (the verdict sits between them).
 counters() { sudo -n nft list table inet fcpi_guard | grep 'counter packets' | sed -E 's/.*counter packets ([0-9]+) bytes [0-9]+.*comment "([a-z0-9_]+)".*/\2 packets=\1/'; }
