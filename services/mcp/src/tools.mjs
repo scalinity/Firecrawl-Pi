@@ -13,7 +13,9 @@ const fieldsOf = (m, body) => ({ ...(body.extends ? m.fieldsets[body.extends] : 
 
 // One manifest field as JSON Schema. A type the manifest adds later and this does not know stops
 // startup, so a tool never advertises a looser schema than the gateway enforces.
-function fieldSchema(spec, m) {
+// ctx.objects: whether this tool's route takes object formats (M5: the json format, on scrape alone, as the
+// gateway refuses it elsewhere).
+function fieldSchema(spec, m, ctx = {}) {
   switch (spec.type) {
     case "boolean": return { type: "boolean" };
     case "const": return { const: spec.value };
@@ -23,17 +25,23 @@ function fieldSchema(spec, m) {
     case "string": return { type: "string", maxLength: spec.maxLength };
     case "strings": case "regexes": return { type: "array", items: { type: "string", minLength: 1, maxLength: spec.maxLength }, maxItems: spec.maxItems };
     case "url": return { type: "string", minLength: 1, maxLength: 2048 };
-    case "urls": return { type: "array", items: { type: "string", minLength: 1, maxLength: 2048 }, minItems: 1, maxItems: m.limits.batch.maxUrls };
-    case "formats": return { type: "array", items: { type: "string", enum: [...m.formats.allowed] }, minItems: 1, maxItems: 10 };
-    case "object": return objectSchema(fieldsOf(m, { extends: spec.fieldset, fields: {} }), m);
+    case "urls": return { type: "array", items: { type: "string", minLength: 1, maxLength: 2048 }, minItems: 1, maxItems: ctx.maxUrls ?? m.limits.batch.maxUrls };
+    case "formats": {
+      const objects = ctx.objects ? Object.entries(m.formats.objects ?? {}) : [];
+      const names = m.formats.allowed.filter((n) => !(m.formats.objects ?? {})[n]);
+      const items = objects.length ? { anyOf: [{ type: "string", enum: names }, ...objects.map(([name, opts]) => objectSchema(opts, m, { type: { const: name } }, ctx, ["type"]))] } : { type: "string", enum: names };
+      return { type: "array", items, minItems: 1, maxItems: 10 };
+    }
+    case "schema": return { type: "object", description: "A JSON Schema for the data to extract: an object schema built from type, properties, required, items, enum, anyOf, description and title; no $ref, no pattern." };
+    case "object": return objectSchema(fieldsOf(m, { extends: spec.fieldset, fields: {} }), m, {}, {});
     default: throw new Error(`capability manifest: field type ${spec.type} has no MCP schema`);
   }
 }
-function objectSchema(fields, m, extra = {}) {
-  const properties = {}, required = [];
+function objectSchema(fields, m, extra = {}, ctx = {}, extraRequired = []) {
+  const properties = {}, required = [...extraRequired];
   for (const [k, spec] of Object.entries(fields)) {
     if (spec.type === "replaced") continue;          // set by the gateway (the submission marker), never by a caller
-    properties[k] = fieldSchema(spec, m);
+    properties[k] = fieldSchema(spec, m, ctx);
     if (spec.required) required.push(k);
   }
   Object.assign(properties, extra);
@@ -50,19 +58,20 @@ function kindOf(route) {
   if (route.mode === "sync") return "sync";
   if (route.mode === "async") return "submit";
   if (/^(crawl|batch)\.status$/.test(route.id)) return "status";
+  if (route.id === "extract.status") return "extractStatus";
   if (/^(crawl|batch)\.cancel$/.test(route.id)) return "cancel";
   throw new Error(`capability manifest: route ${route.id} has no MCP mapping`);
 }
 function inputSchema(kind, route, m) {
   const L = m.mcp.limits;
   switch (kind) {
-    case "sync": return objectSchema(fieldsOf(m, m.bodies[route.body]), m);
-    case "submit": return objectSchema(fieldsOf(m, m.bodies[route.body]), m, { idempotencyKey: idemKey });
+    case "sync": return objectSchema(fieldsOf(m, m.bodies[route.body]), m, {}, { objects: route.id === "scrape" });
+    case "submit": return objectSchema(fieldsOf(m, m.bodies[route.body]), m, { idempotencyKey: idemKey }, { maxUrls: route.kind === "extract" ? m.limits.extract.maxUrls : m.limits.batch.maxUrls });
     case "status": return { type: "object", properties: { id: idOnly().properties.id,
       skip: { type: "integer", minimum: 0, maximum: 1000000000, default: 0, description: "How many documents to skip: 0, or the nextSkip of the previous answer." },
       limit: { type: "integer", minimum: 1, maximum: L.statusPageMax, default: L.statusPageDefault, description: "At most this many documents in this answer (fewer when the payload limit is reached)." } },
       required: ["id"], additionalProperties: false };
-    case "cancel": case "receipt": return idOnly();
+    case "cancel": case "receipt": case "extractStatus": return idOnly();
     case "capabilities": return { type: "object", properties: {}, additionalProperties: false };
   }
 }
@@ -73,7 +82,7 @@ function request(kind, route, args, m) {
     case "submit": { const { idempotencyKey, ...body } = args; return { method: "POST", path: route.path, body, idemKey: idempotencyKey }; }
     case "status": return { method: "GET", path: `${fill(route.path, args.id)}?skip=${args.skip ?? 0}&limit=${args.limit ?? m.mcp.limits.statusPageDefault}` };
     case "cancel": return { method: "DELETE", path: fill(route.path, args.id) };
-    case "receipt": return { method: "GET", path: fill(route.path, args.id) };
+    case "receipt": case "extractStatus": return { method: "GET", path: fill(route.path, args.id) };
     case "capabilities": return { method: "GET", path: route.path };
   }
 }
@@ -135,13 +144,25 @@ function shape(kind, tool, r, args, m, omitted) {
         }
         return { payload };
       }
-      const payload = { data: b.data ?? null };
+      if (tool.route === "search") {
+        // Results in order until the payload limit; a single result too large alone is cut field by field.
+        const payload = { data: b.data ?? {}, ...(b.warning ? { warning: b.warning } : {}) };
+        const web = Array.isArray(payload.data.web) ? payload.data.web : [];
+        const total = web.length;
+        while (bytes(payload) > budget && payload.data.web?.length > 1) {
+          payload.data.web = payload.data.web.slice(0, Math.floor(payload.data.web.length / 2));
+          payload.truncated = { results: { originalCount: total, returnedCount: payload.data.web.length }, note: "The results exceeded the tool payload limit; ask for fewer results or fewer scrape formats." };
+        }
+        if (bytes(payload) > budget && payload.data.web?.length === 1) payload.truncated = { ...payload.truncated, fields: fitDocument(payload, payload.data.web[0], budget - 512) };
+        return { payload };
+      }
+      const payload = { data: b.data ?? null, ...(b.fcpi ? { fcpi: b.fcpi } : {}) };
       const cuts = payload.data && typeof payload.data === "object" ? fitDocument(payload, payload.data, budget - 512) : null;
       if (cuts) payload.truncated = { fields: cuts, note: "The page exceeded the tool payload limit, so the fields named here were cut. Ask for fewer formats (markdown alone is smallest), or scrape it as a batch job and read it page by page." };
       return { payload };
     }
     case "submit": return { payload: { id: b.id, results: b.url ?? null, idempotencyKey: args.idempotencyKey ?? null, ...(b.invalidURLs ? { invalidURLs: b.invalidURLs } : {}),
-      next: `Poll it with ${tool.route === "crawl.submit" ? "firecrawl_check_crawl_status" : "firecrawl_batch_status"} and this id; its receipt is firecrawl_get_result.` } };
+      next: `Poll it with ${{ "crawl.submit": "firecrawl_check_crawl_status", "batch.submit": "firecrawl_batch_status", "extract.submit": "firecrawl_extract_status" }[tool.route]} and this id; its receipt is firecrawl_get_result.` } };
     case "status": {
       const skip = args.skip ?? 0, data = Array.isArray(b.data) ? b.data : [];
       const payload = { id: args.id, status: b.status, completed: b.completed ?? 0, total: b.total ?? 0, creditsUsed: b.creditsUsed ?? 0, expiresAt: b.expiresAt ?? null,
@@ -168,6 +189,16 @@ function shape(kind, tool, r, args, m, omitted) {
       return { payload };
     }
     case "cancel": return { payload: { id: args.id, status: b.status ?? "cancelled" } };
+    case "extractStatus": {
+      // The extracted data is bounded by the adapter (192 KiB); the per-unit detail is cut first if needed.
+      const { success, ...rest } = b;
+      const payload = { id: args.id, ...rest };
+      if (bytes(payload) > budget && payload.fcpi?.units) {
+        const n = payload.fcpi.units.length;
+        payload.fcpi = { ...payload.fcpi, units: payload.fcpi.units.filter((u) => !u.ok).slice(0, 20), unitsCut: { originalCount: n } };
+      }
+      return { payload };
+    }
     case "receipt": return { payload: b.job };
     case "capabilities": {
       const { success, ...status } = b;

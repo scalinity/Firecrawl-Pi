@@ -239,9 +239,9 @@ test("a result over the payload limit is cut and marked, never silently", async 
   assert.equal(payload(r).truncated.fields.markdown.originalBytes, 700000);
 });
 
-test("capabilities list the omitted tools with their reasons", async () => {
+test("capabilities list the omitted tools with their reasons (since M5, none)", async () => {
   const r = await call("firecrawl_capabilities", {});
-  assert.deepEqual(payload(r).mcp.omitted.map((o) => o.name), ["firecrawl_search", "firecrawl_extract", "firecrawl_extract_status"]);
+  assert.deepEqual(payload(r).mcp.omitted, []);
 });
 
 test("the log records era, method, tool, client and the gateway's answer, and nothing secret or targeted", async () => {

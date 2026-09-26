@@ -26,7 +26,13 @@ test("a sync tool's schema is its route's body: the same fields, bounds and enum
   assert.equal(s.additionalProperties, false);
   assert.deepEqual(s.required, ["url"]);
   assert.equal(s.properties.origin, undefined, "the submission marker is the gateway's, never a caller's");
-  assert.deepEqual(s.properties.formats.items.enum, MANIFEST.formats.allowed);
+  // M5: the scrape tool's formats are the names, or the json object with its schema (the only object format).
+  assert.deepEqual(s.properties.formats.items.anyOf[0].enum, MANIFEST.formats.allowed.filter((n) => !MANIFEST.formats.objects[n]));
+  const json = s.properties.formats.items.anyOf[1];
+  assert.deepEqual(json.properties.type, { const: "json" });
+  assert.deepEqual(json.required, ["type", "schema"]);
+  assert.equal(json.additionalProperties, false);
+  assert.equal(json.properties.prompt.maxLength, MANIFEST.formats.objects.json.prompt.maxLength);
   assert.deepEqual(s.properties.proxy.enum, MANIFEST.fieldsets.scrapeOptions.proxy.values);
   assert.deepEqual(s.properties.mobile, { const: false });
   assert.equal(s.properties.timeout.maximum, MANIFEST.fieldsets.scrapeOptions.timeout.max);
@@ -72,7 +78,7 @@ test("annotations are the manifest's, and only submit and sync tools report prog
   const T = byName(makeTools(m()));
   assert.equal(T.firecrawl_cancel_crawl.config.annotations.destructiveHint, true);
   assert.equal(T.firecrawl_scrape.config.annotations.readOnlyHint, true);
-  assert.deepEqual(makeTools(m()).filter((t) => t.long).map((t) => t.name), ["firecrawl_batch_scrape", "firecrawl_crawl", "firecrawl_map", "firecrawl_scrape"]);
+  assert.deepEqual(makeTools(m()).filter((t) => t.long).map((t) => t.name), ["firecrawl_batch_scrape", "firecrawl_crawl", "firecrawl_extract", "firecrawl_map", "firecrawl_scrape", "firecrawl_search"]);
 });
 
 test("the manifest checks refuse a tool on an unknown route and an omission the gateway serves", () => {
@@ -87,12 +93,51 @@ test("the manifest checks refuse a tool on an unknown route and an omission the 
   assert.throws(() => checkMcpManifest(d), /stateless/);
 });
 
-test("capabilities name the omitted tools with their not_enabled reasons", () => {
+test("capabilities name the omitted tools with their not_enabled reasons; since M5 the manifest omits none", () => {
   const T = byName(makeTools(m()));
   const r = T.firecrawl_capabilities.shape({ status: 200, json: { success: true, service: "access-gateway" }, headers: {} }, {});
-  assert.deepEqual(r.payload.mcp.omitted.map((o) => o.name), ["firecrawl_search", "firecrawl_extract", "firecrawl_extract_status"]);
-  assert.equal(r.payload.mcp.omitted[0].reason, MANIFEST.not_enabled.find((x) => x.path === "/v2/search").reason);
+  assert.deepEqual(r.payload.mcp.omitted, []);
   assert.equal(r.payload.success, undefined);
+  const x = m();
+  x.not_enabled.push({ method: "POST", path: "/v2/something", reason: "a reason" });
+  x.mcp.omitted = [{ name: "firecrawl_something", method: "POST", path: "/v2/something" }];
+  const r2 = byName(makeTools(x)).firecrawl_capabilities.shape({ status: 200, json: { success: true }, headers: {} }, {});
+  assert.deepEqual(r2.payload.mcp.omitted, [{ name: "firecrawl_something", reason: "a reason" }]);
+});
+
+// ---- M5: search and extraction -------------------------------------------------------------------------
+test("search and extract tools: their schemas are their routes' bodies, json only on scrape, extract bounded to its own URL limit", () => {
+  const T = byName(makeTools(m()));
+  const s = T.firecrawl_search.config.inputSchema;
+  assert.deepEqual(s.required, ["query"]);
+  assert.equal(s.properties.limit.maximum, 10);
+  for (const k of ["tbs", "country", "categories", "sources"]) assert.equal(s.properties[k], undefined, k);
+  assert.deepEqual(s.properties.scrapeOptions.properties.formats.items.enum, MANIFEST.formats.allowed.filter((n) => n !== "json"), "no json format on search's scraped results");
+  const e = T.firecrawl_extract.config.inputSchema;
+  assert.deepEqual(e.required.sort(), ["schema", "urls"]);
+  assert.equal(e.properties.urls.maxItems, MANIFEST.limits.extract.maxUrls);
+  assert.equal(e.properties.schema.type, "object");
+  assert.ok(e.properties.idempotencyKey);
+  for (const k of ["enableWebSearch", "allowExternalLinks", "agent"]) assert.equal(e.properties[k], undefined, k);
+  assert.equal(T.firecrawl_batch_scrape.config.inputSchema.properties.urls.maxItems, MANIFEST.limits.batch.maxUrls);
+  assert.deepEqual(T.firecrawl_extract_status.config.inputSchema.required, ["id"]);
+});
+
+test("search results fit the payload limit, a search failure is a tool error, and an extraction is polled with its own tool", () => {
+  const T = byName(makeTools(m()));
+  const web = Array.from({ length: 10 }, (_, i) => ({ url: `https://r.example/${i}`, title: "t", description: "d", markdown: "m".repeat(60000) }));
+  const r = T.firecrawl_search.shape({ status: 200, json: { success: true, data: { web }, warning: "Partial search result: 1 engine(s) did not answer (bing: timeout)." }, headers: {} }, {});
+  assert.ok(Buffer.byteLength(JSON.stringify(r.payload)) <= MANIFEST.mcp.limits.toolTextMaxBytes);
+  assert.equal(r.payload.truncated.results.originalCount, 10);
+  assert.match(r.payload.warning, /Partial/);
+  const f = T.firecrawl_search.shape({ status: 502, json: { success: false, code: "SEARCH_ENGINES_FAILED", error: "no search engine answered" }, headers: { "retry-after": "60" } }, {});
+  assert.equal(f.isError, true);
+  assert.equal(f.payload.error.code, "SEARCH_ENGINES_FAILED");
+  assert.equal(f.payload.error.retryAfterSeconds, 60);
+  const sub = T.firecrawl_extract.shape({ status: 200, json: { success: true, id: "0190f1a0-0000-7000-8000-000000000000", urlTrace: [] }, headers: {} }, { idempotencyKey: "k-12345678" });
+  assert.match(sub.payload.next, /firecrawl_extract_status/);
+  const st = T.firecrawl_extract_status.shape({ status: 200, json: { success: true, status: "completed", data: { a: 1 }, sources: { "$": ["https://a.example/"] }, fcpi: { units: [] } }, headers: {} }, { id: "x" });
+  assert.deepEqual(st.payload, { id: "x", status: "completed", data: { a: 1 }, sources: { "$": ["https://a.example/"] }, fcpi: { units: [] } });
 });
 
 test("gateway refusals become tool errors carrying the gateway's code and message", () => {
