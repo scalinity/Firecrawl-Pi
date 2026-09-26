@@ -62,6 +62,8 @@ function decoderFor(encoding) {
 // One request to one pinned address. Resolves { status, headers, body (Buffer), wireBytes }.
 function requestOnce({ target, address, method, headers, maxBytes, deadline, signal, onPeer }) {
   return new Promise((resolve, reject) => {
+    // An abort listener added to an already-aborted signal never fires, so it is checked first.
+    if (signal?.aborted) return reject(new Denied("CANCELLED", "the caller cancelled the acquisition"));
     const remaining = deadline - Date.now();
     if (remaining <= 0) return reject(new Denied("DEADLINE_EXCEEDED", "no time left for the request"));
     const tls = target.url.protocol === "https:";
@@ -128,6 +130,7 @@ export async function guardedFetch({ url, method = "GET", headers, maxBytes, dea
   let extra = callerHeaders(headers);
   const firstOrigin = new URL(url).origin;
   for (let hop = 0; ; hop++) {
+    if (signal?.aborted) throw new Denied("CANCELLED", "the caller cancelled the acquisition");
     const target = parseTarget(current, policy);
     const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
     await onHop?.({ hop, target, address });

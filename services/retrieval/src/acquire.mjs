@@ -17,7 +17,10 @@ const HMAC_KEY = randomBytes(32); // per process: log correlation without a gues
 export const urlHmac = (url) => createHmac("sha256", HMAC_KEY).update(url).digest("hex").slice(0, 32);
 // Pacing and cooldowns are keyed by registrable domain; a fixture by its exact host.
 export const domainOf = (t) => (t.fixture ? t.host : (getDomain(t.host) ?? t.host));
-const sleep = (ms, signal) => new Promise((r) => { const t = setTimeout(r, ms); signal?.addEventListener("abort", () => { clearTimeout(t); r(); }, { once: true }); });
+// A caller that has gone away cancels the acquisition at the next step, not at its deadline: every
+// wait resolves at once for an aborted signal, and each step checks it (review finding W2).
+const CANCELLED = Object.freeze({ class: "CANCELLED", detail: "the caller cancelled the acquisition", retryable: false, retryAfter: null });
+const sleep = (ms, signal) => new Promise((r) => { if (signal?.aborted) return r(); const t = setTimeout(r, ms); signal?.addEventListener("abort", () => { clearTimeout(t); r(); }, { once: true }); });
 
 export function validateAcquireRequest(b) {
   const bad = (why) => { throw new Denied("INVALID_REQUEST", why); };
@@ -56,6 +59,7 @@ export function makePacer({ store, getPolicy, resolvePublic, lookupFixture }) {
   // acquisition and is freed explicitly, or by expiry if this process dies holding it.
   async function holdPermit(kind, holder, slots, deadline, signal) {
     for (;;) {
+      if (signal?.aborted) return false;
       if ((await store.takePermit(kind, holder, slots, getPolicy().permitLeaseMs)) !== null) return true;
       if (Date.now() + 250 > deadline || signal?.aborted) return false;
       await sleep(250, signal);
@@ -66,6 +70,7 @@ export function makePacer({ store, getPolicy, resolvePublic, lookupFixture }) {
     const domain = domainOf(target);
     const limits = target.fixture?.limits === "fixture" ? policy.fixtureLimits : policy.direct;
     for (;;) {
+      if (signal?.aborted) return { domain, failure: CANCELLED };
       const d = await store.paceDirect(domain, holder, limits, policy.attempts.browserAttemptMs, !!target.fixture);
       if (d.go) return { domain };
       if (d.failure) return { domain, failure: d.failure };
@@ -121,12 +126,13 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
     if (Date.now() >= deadline) return fail({ class: "DEADLINE_EXCEEDED", detail: "the logical page's 90 s acquisition deadline has passed", retryable: false });
 
     const holder = randomUUID();
-    if (!(await holdPermit("url", holder, permits.url, deadline, signal))) return fail({ class: "RESOURCE_BUSY", detail: "no URL acquisition permit before the deadline", retryable: true });
+    if (!(await holdPermit("url", holder, permits.url, deadline, signal))) return fail(signal?.aborted ? CANCELLED : { class: "RESOURCE_BUSY", detail: "no URL acquisition permit before the deadline", retryable: true });
     try {
       const jar = new CookieJar();
       let httpRes = null, sameTierRetried = false;
       // Direct HTTP, with at most one same-tier retry for a transient target failure.
       for (;;) {
+        if (signal?.aborted) return fail(CANCELLED); // no attempt is reserved for a caller that left
         const attemptId = randomUUID();
         const ordinal = await store.reserveAttempt({ logicalId: req.logicalAcquisitionId, attemptId, requestId: req.requestId, purpose: req.purpose, strategy: "direct_http", domain: target.host, maxAttempts: policy.attempts.maxPerPage });
         if (ordinal === null) return fail({ class: "ATTEMPT_BUDGET_EXHAUSTED", detail: `the page's ${policy.attempts.maxPerPage} attempts are spent` });
@@ -161,6 +167,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
 
       // One browser attempt for a JS shell (spec §9.1), on the same permitted direct egress. It
       // renders where the direct attempt ended, a chain already paced hop by hop.
+      if (signal?.aborted) return fail(CANCELLED);
       const renderUrl = httpRes.finalUrl;
       const renderTarget = parseTarget(renderUrl, policy);
       const attemptId = randomUUID();
@@ -170,7 +177,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       const browserDeadline = Math.min(deadline, Date.now() + policy.attempts.browserAttemptMs);
       if (!(await holdPermit("browser", attemptId, permits.browser, browserDeadline, signal))) {
         await store.finishAttempt(attemptId, { outcome: "RESOURCE_BUSY" });
-        return fail({ class: "RESOURCE_BUSY", detail: "no browser permit before the deadline", retryable: true });
+        return fail(signal?.aborted ? CANCELLED : { class: "RESOURCE_BUSY", detail: "no browser permit before the deadline", retryable: true });
       }
       const paced = await pace(renderTarget, attemptId, browserDeadline, signal);
       try {
@@ -239,7 +246,7 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
     await store.openAcquisition(logicalId, urlHmac(b.url), new Date(deadline));
     // A download is one of the global URL acquisitions, like a page (spec §23.1).
     const holder = randomUUID();
-    if (!(await holdPermit("url", holder, permits.url, deadline, signal))) throw new Denied("RESOURCE_BUSY", "no URL acquisition permit before the deadline", { retryable: true });
+    if (!(await holdPermit("url", holder, permits.url, deadline, signal))) throw signal?.aborted ? new Denied("CANCELLED", CANCELLED.detail) : new Denied("RESOURCE_BUSY", "no URL acquisition permit before the deadline", { retryable: true });
     try {
       const attemptId = randomUUID();
       const ordinal = await store.reserveAttempt({ logicalId, attemptId, requestId: b.requestId, purpose: b.purpose, strategy: "direct_http", domain: target.host, maxAttempts: policy.attempts.maxPerPage });

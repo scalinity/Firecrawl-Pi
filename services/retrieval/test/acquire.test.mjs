@@ -113,3 +113,18 @@ test("downloads and searches hold a URL permit, and repeated downloads of one UR
     assert.equal(store.permits.size, 0);
   } finally { f.s.close(); }
 });
+
+test("a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)", async () => {
+  const t = await serve((req, res) => res.writeHead(503, { "content-type": "text/html" }).end("<p>down</p>"));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    const ac = new AbortController();
+    const started = acquirerFor(store, policy)(body(`http://t.fixture.fcpi.test:${t.port}/`, "cancel-1"), ac.signal);
+    setTimeout(() => ac.abort(), 300); // after the first 503, inside the same-tier retry's back-off
+    const r = await started;
+    assert.equal(r.failure.class, "CANCELLED");
+    assert.equal(store.acq.get("cancel-1").attempts, 1);
+    assert.equal(t.hits.length, 1);
+    assert.equal(store.permits.size, 0);
+  } finally { t.s.close(); }
+});
