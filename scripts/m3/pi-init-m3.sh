@@ -62,7 +62,7 @@ sec artifacts
 dir $DATA/artifacts 3380:3380 0700
 sudo -n cat "$DATA/.fcpi-data-id" | put "$DATA/artifacts/.fcpi-artifact-root" 3380:3380 0600
 [ "$(sudo -n cat "$DATA/artifacts/.fcpi-artifact-root")" = "$(sudo -n cat "$DATA/.fcpi-data-id")" ] || die "the artifact marker does not hold this data mount's ID"
-echo "artifact_root_on_data_mount=$(findmnt -n -o UUID --target $DATA/artifacts)"
+echo "artifact_root_filesystem_uuid=$(sudo -n findmnt -n -o UUID --target $DATA/artifacts)"
 
 sec inventory
 sudo -n sh -c "stat -c '%u:%g %a %n' $S/gateway_postgres_password $S/postgres_gateway_role_password $S/gateway $S/gateway/clients $S/clients $DATA/artifacts $DATA/artifacts/.fcpi-artifact-root"
