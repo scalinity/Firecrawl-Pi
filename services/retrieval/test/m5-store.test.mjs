@@ -66,6 +66,10 @@ test("a retried call key finds its reservation; a released one may be reserved a
     await store.releaseBudget(first.reservation.id, "not sent");
     const again = await store.reserveBudget(base({ callKey: key }));
     assert.ok(again.reservation && again.reservation.id !== first.reservation.id);
+    // The released attempt is kept, with what it was released for (review S4).
+    const kept = (await store.reservationsFor("L")).find((x) => x.call_key === `${key}#released-${first.reservation.id}`);
+    assert.equal(kept?.state, "RELEASED");
+    assert.equal(kept?.detail, "not sent");
     // Two concurrent reservations of one key: one reserves, the other finds it.
     const k2 = "L:1:extract";
     const pair = await Promise.all([store.reserveBudget(base({ callKey: k2 })), store.reserveBudget(base({ callKey: k2 }))]);

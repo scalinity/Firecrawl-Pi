@@ -191,9 +191,10 @@ export class Store {
     try {
       return await this.#tx(async (c) => {
         const prior = (await c.query("SELECT * FROM fcpi_retrieval.budget_reservation WHERE call_key = $1 FOR UPDATE", [r.callKey])).rows[0];
-        // A released call never reached the provider and cost nothing: a retry may reserve it again.
+        // A released call never reached the provider and cost nothing: a retry may reserve it again. The
+        // released row is kept under a suffixed key, so what it was released for stays readable (review S4).
         if (prior && prior.state !== "RELEASED") return { existing: prior };
-        if (prior) await c.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE id = $1", [prior.id]);
+        if (prior) await c.query("UPDATE fcpi_retrieval.budget_reservation SET call_key = call_key || '#released-' || id WHERE id = $1", [prior.id]);
         const notices = [];
         for (const p of periods) {
           const start = p.period === "day" ? r.day : r.month;
