@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FCPI M2 subresource fixture</title>
+<!-- Every subresource below except the pixel points at a private, loopback, link-local, metadata or
+     project-internal address, or a local name. The retrieval service's proxy must refuse each one,
+     and none may reach its target; the pixel is the positive control that does arrive. -->
+<link rel="stylesheet" href="http://nuq-postgres:5432/style.css">
+<script src="http://[::1]:3002/x.js"></script>
+<script src="http://127.0.0.1:3002/v0/health/liveness"></script>
+</head>
+<body>
+<main>
+<h1>Subresource fixture</h1>
+<p>This page asks the browser for resources on addresses a target must never reach.</p>
+<p>Sentinel: <strong>fcpi-m2-subresources-6f0b</strong></p>
+<img src="http://m2.fixture.fcpi.test:8080/pixel.png" alt="positive control">
+<img src="http://10.231.1.5:6379/redis.png" alt="">
+<img src="http://169.254.169.254/latest/meta-data/" alt="">
+<img src="http://192.168.1.1/router.png" alt="">
+<img src="http://[::ffff:127.0.0.1]:3002/mapped.png" alt="">
+<img src="http://0x7f000001/hex.png" alt="">
+<img src="http://2130706433/decimal.png" alt="">
+<img src="https://api.firecrawl.dev/v1/scrape" alt="">
+<iframe src="http://10.231.2.1:8080/frame.html"></iframe>
+</main>
+<script>
+  // Script-issued requests take the same path and meet the same refusal.
+  fetch("http://10.231.1.4:5672/").catch(() => {});
+  try { new WebSocket("ws://127.0.0.1:3002/"); } catch (e) {}
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>FCPI M2 memory stress fixture</title></head>
+<body>
+<main id="content"><p class="loading">Allocating…</p></main>
+<script>
+  // Allocates and touches `mb` MiB of typed arrays in 16 MiB steps, then writes the article.
+  // A value inside the browser's memory cap is the stress case; a value above it must end in the
+  // browser's own cgroup being the one that runs out (review finding R6).
+  const mb = Number(new URLSearchParams(location.search).get("mb") ?? "256");
+  const held = [];
+  for (let i = 0; i < mb / 16; i++) { const a = new Uint8Array(16 * 1024 * 1024); for (let j = 0; j < a.length; j += 4096) a[j] = 1; held.push(a); }
+  document.getElementById("content").innerHTML = "<h1>Stress complete</h1><p>Allocated " + mb + " MiB in the renderer.</p><p>Sentinel: <strong>fcpi-m2-stress-8c3a</strong></p>";
+  window.__held = held;
+</script>
+</body>
+</html>
