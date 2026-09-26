@@ -3,8 +3,10 @@
 // be listed in the budget policy with a rate card in effect; without its credential the answer is
 // PARSER_REQUIRED, never empty success. Credits (pages × the rate card's credits per page) are reserved
 // before the upload and settled from the pages the provider returned. Results are cached by the
-// document's bytes, the parser, its tier and version, and the owner; the uploaded file is deleted from
-// the provider when its job names it.
+// document's bytes, the parser, its tier and version, and the owner the core names, which is its team
+// id: upstream runs every client as one team, so the cache is shared across the deployment's clients
+// until M7 brings per-principal cache keys. The uploaded file is deleted from the provider when its job
+// names it.
 //
 // The provider's contract is LlamaParse's REST API v2: POST /api/v2/parse/upload (multipart: file and a
 // JSON configuration) starts a job; GET /api/v2/parse/{id}?expand=markdown answers { job: { status },
