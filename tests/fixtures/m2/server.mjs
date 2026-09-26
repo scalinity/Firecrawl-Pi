@@ -79,7 +79,9 @@ async function answer(req, url) {
   }
   if (p === "/slow") {
     await new Promise((r) => setTimeout(r, Math.min(Number(url.searchParams.get("ms") ?? 1000), 120000)));
-    return [200, { "content-type": "text/html; charset=utf-8" }, html("Slow fixture", "<main><h1>Slow</h1><p>This page answered after a deliberate delay.</p></main>")];
+    // status=503 (or another 5xx) makes a slow target error, which costs a same-tier retry.
+    const code = [500, 502, 503, 504].includes(Number(url.searchParams.get("status"))) ? Number(url.searchParams.get("status")) : 200;
+    return [code, { "content-type": "text/html; charset=utf-8" }, html("Slow fixture", "<main><h1>Slow</h1><p>This page answered after a deliberate delay.</p></main>")];
   }
   if (p === "/pixel.png") return [200, { "content-type": "image/png" }, Buffer.from("89504e470d0a1a0a0000000d4948445200000001000000010806000000", "hex")];
   if (p.endsWith(".html")) {
