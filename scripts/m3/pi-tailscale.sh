@@ -70,7 +70,7 @@ case "${1:-}" in
     echo "### origins_file"
     sudo -n sh -c "stat -c '%u:%g %a' $ORIGINS; grep -v '^#' $ORIGINS" | redact | sed -E 's#https://[^.]+\.#https://<machine>.#'
     echo "### resolv"
-    echo "resolv_conf_sha256=$(sha256sum /etc/resolv.conf | cut -c1-64) nameservers=$(awk '/^nameserver/ {print $2}' /etc/resolv.conf | tr '\n' , | sed 's/,$//')"
+    echo "resolv_conf_sha256=$(sha256sum /etc/resolv.conf | cut -c1-64) nameservers=$(grep -c '^nameserver' /etc/resolv.conf)"
     echo "### listeners"
     sudo -n ss -Hltnup | awk '/tailscaled/ {print $1, $5}' | sed -E 's/100\.[0-9]+\.[0-9]+\.[0-9]+/<tailnet-address>/; s/\[fd7a:[^]]*\]/[<tailnet-address-v6>]/'
     echo "end"
