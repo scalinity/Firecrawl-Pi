@@ -12,7 +12,7 @@ import { spawn } from "node:child_process";
 import { connect } from "node:net";
 import { createHash, randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, renameSync, rmSync, statfsSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, renameSync, rmSync, statfsSync, readdirSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -690,6 +690,40 @@ test("a job the core forgets before finishing fails as UPSTREAM_STATE_LOST; resu
   const g = await h.call("GET", `/v2/crawl/${r.json.id}`, { token: T.a });
   assert.equal(g.status, 410);
   assert.equal(g.json.code, "EXPIRED");
+});
+
+test("retention: expired results leave the manifest and their files go; old metadata goes whole with its events; expired idempotency keys go", async () => {
+  const h = await harness();
+  const key = `k-retention-${randomUUID()}`;
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody(), headers: { "x-idempotency-key": key } });
+  const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
+  h.core.complete(up, 2);
+  await waitFor(async () => (await h.job(r.json.id)).state === "SUCCEEDED", 15000, "archived");
+  const shas = (await h.db.query("SELECT sha256 FROM fcpi_platform.job_document WHERE job_id = $1", [r.json.id])).rows.map((x) => x.sha256);
+  const files = () => readdirSync(join(h.dir, "art", "results"), { recursive: true }).filter((f) => shas.some((s) => f.endsWith(`${s}.json`)));
+  assert.equal(files().length, 2);
+  // Results past retention: the job is EXPIRED, its manifest rows go, and its files once they are an hour old.
+  await h.db.query("UPDATE fcpi_platform.job SET results_expire_at = now() - interval '1 second' WHERE id = $1", [r.json.id]);
+  const old = new Date(Date.now() - 2 * 3600000);
+  for (const f of files()) utimesSync(join(h.dir, "art", "results", f), old, old);
+  await h.kill(); await h.start();
+  await waitFor(async () => (await h.job(r.json.id)).state === "EXPIRED", 10000, "expired");
+  await waitFor(() => files().length === 0, 10000, "files swept");
+  assert.equal((await h.db.query("SELECT count(*)::int AS n FROM fcpi_platform.job_document WHERE job_id = $1", [r.json.id])).rows[0].n, 0);
+  // Metadata past its thirty days: the row, its events and its documents go in one statement, so a
+  // failure part-way (here: no right to delete documents) leaves all of them.
+  await h.db.query("UPDATE fcpi_platform.job SET metadata_expire_at = now() - interval '1 second' WHERE id = $1", [r.json.id]);
+  await h.db.query("UPDATE fcpi_platform.idempotency SET expires_at = now() - interval '1 second' WHERE key = $1", [key]);
+  await h.db.query("REVOKE DELETE ON fcpi_platform.job_document FROM fcpi_gateway");
+  await h.kill(); await h.start();
+  await waitFor(() => h.logs.some((l) => l.action === "sweep_failed"), 10000, "the sweep failing");
+  assert.ok(await h.job(r.json.id), "the job row stays when its documents cannot be deleted");
+  assert.ok((await h.events(r.json.id)).length > 0, "and so do its events");
+  await h.db.query("GRANT DELETE ON fcpi_platform.job_document TO fcpi_gateway");
+  await h.kill(); await h.start();
+  await waitFor(async () => !(await h.job(r.json.id)), 10000, "metadata deleted");
+  assert.equal((await h.events(r.json.id)).length, 0);
+  assert.equal((await h.db.query("SELECT count(*)::int AS n FROM fcpi_platform.idempotency WHERE key = $1", [key])).rows[0].n, 0);
 });
 
 test("an origin from the host-side file is served, and names the URLs the gateway returns", async () => {

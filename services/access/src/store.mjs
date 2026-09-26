@@ -171,13 +171,13 @@ export function makeStore(cfg, log = () => {}) {
         await c.query("DELETE FROM fcpi_platform.job_document WHERE job_id = $1", [id]);
         await move(c, id, FINISHED, "EXPIRED", {}, "results passed their retention");
       });
-      const old = await q("DELETE FROM fcpi_platform.job WHERE metadata_expire_at < now() AND NOT (state = ANY($1)) RETURNING id", [OPEN]);
-      for (const { id } of old.rows) {
-        await q("DELETE FROM fcpi_platform.job_event WHERE job_id = $1", [id]);
-        await q("DELETE FROM fcpi_platform.job_document WHERE job_id = $1", [id]);
-      }
+      // One statement, so a job's row, events and documents go together or not at all.
+      const old = await q(`WITH old AS (DELETE FROM fcpi_platform.job WHERE metadata_expire_at < now() AND NOT (state = ANY($1)) RETURNING id),
+          ev AS (DELETE FROM fcpi_platform.job_event WHERE job_id IN (SELECT id FROM old)),
+          doc AS (DELETE FROM fcpi_platform.job_document WHERE job_id IN (SELECT id FROM old))
+        SELECT count(*)::int AS n FROM old`, [OPEN]);
       const keys = await q("DELETE FROM fcpi_platform.idempotency WHERE expires_at < now()");
-      return { expired: expired.length, deleted: old.rowCount, keys: keys.rowCount };
+      return { expired: expired.length, deleted: old.rows[0].n, keys: keys.rowCount };
     },
     async summary() {
       const states = Object.fromEntries((await q("SELECT state, count(*)::int AS n FROM fcpi_platform.job GROUP BY state")).rows.map((r) => [r.state, r.n]));
