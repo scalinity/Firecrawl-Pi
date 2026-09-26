@@ -102,9 +102,9 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
       breaker.neutral();
       throw fail("PROVIDER_REJECTED", `${pp.provider} rejected the ${what} (HTTP ${status})`);
     };
-    // 1. Upload and start the job.
+    // 1. Upload and start the job, held to the pages the reservation covers.
     const form = multipart([{ name: "file", filename: "document.pdf", type: "application/pdf", value: bytes },
-      { name: "configuration", value: JSON.stringify({ tier: pp.tier, version: pp.version, page_ranges: { max_pages: P.maxPages } }) }]);
+      { name: "configuration", value: JSON.stringify({ tier: pp.tier, version: pp.version, page_ranges: { max_pages: pages } }) }]);
     let up;
     try { up = await call("POST", "/api/v2/parse/upload", form.body, { "content-type": form.contentType }); } catch (e) { if (e instanceof ProviderError) await settleOrThrow(e); throw e; }
     if (up.status !== 200) await refused(up.status, "upload");
@@ -158,8 +158,10 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     breaker.success();
     const pagesOut = Array.isArray(body?.markdown?.pages) ? body.markdown.pages : [];
     const markdown = pagesOut.map((p) => (typeof p.markdown === "string" ? p.markdown : "")).join("\n\n").trim();
-    const credits = Math.min(pagesOut.length, pages) * card.creditsPerPage;
-    await store.settleBudget(res.id, credits, { usage: { pages: pagesOut.length }, result: { markdown, pages: pagesOut.length }, detail: `job ${jobId}` });
+    // Settled at the pages the provider returned, even past the reservation, and said so (review W1).
+    const credits = pagesOut.length * card.creditsPerPage;
+    await store.settleBudget(res.id, credits, { usage: { pages: pagesOut.length }, result: { markdown, pages: pagesOut.length },
+      detail: `job ${jobId}${credits > amount ? `; settled above the reservation by ${credits - amount}` : ""}` });
     const fileOutcome = await removeFile();
     log({ event: "parse", logical_id: logicalId, parser: name, outcome: "COMPLETED", reason, pages: pagesOut.length, reserved_credits: amount, credits, file: fileOutcome, ms: Date.now() - started });
     if (!markdown) throw fail("PARSE_EMPTY", `the provider returned no text for ${pagesOut.length} pages`);

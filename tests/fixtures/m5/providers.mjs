@@ -117,7 +117,9 @@ export async function parserHandler(req, res) {
     const pages = Math.max(1, (file.toString("latin1").match(/\/Type \/Page\b(?!s)/g) ?? []).length);
     const scanned = /\/Subtype \/Image/.test(file.toString("latin1")) && !/BT /.test(file.toString("latin1"));
     const id = `pjb-${randomUUID()}`, fileId = `file-${randomUUID()}`;
-    jobs.set(id, { mode, pages: Math.min(pages, config.page_ranges?.max_pages ?? pages), scanned, fileId, polls: 0, tier: config.tier });
+    // "ignore-max-pages" parses every page whatever the configuration asked, as a provider counting pages
+    // differently would.
+    jobs.set(id, { mode, pages: mode === "ignore-max-pages" ? pages : Math.min(pages, config.page_ranges?.max_pages ?? pages), scanned, fileId, polls: 0, tier: config.tier, maxPages: config.page_ranges?.max_pages ?? null });
     return json(res, 200, { id, status: "PENDING" });
   }
   let m;

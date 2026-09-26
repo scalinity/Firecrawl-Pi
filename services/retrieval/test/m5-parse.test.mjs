@@ -64,6 +64,26 @@ test("limits are checked before any spend: pages, size, type", async () => {
   } finally { await r.srv.close(); }
 });
 
+test("the provider is held to the reserved pages, and pages past them are settled and said so (review W1)", async () => {
+  const r = await rig();
+  try {
+    // The core counted one page; the document holds three. The upload asks for one, and one is billed.
+    const held = await r.parse(req(docs.manyPagesPdfBytes(3), { reason: "complex_layout" }));
+    assert.equal(held.pages, 1);
+    assert.equal(held.credits, 3);
+    // A provider that parses all three anyway is settled at all three, above the reservation.
+    const over = Buffer.concat([docs.manyPagesPdfBytes(3), Buffer.from("%fcpi-parser-mode=ignore-max-pages\n")]);
+    const out = await r.parse(req(over, { reason: "complex_layout" }));
+    assert.equal(out.pages, 3);
+    assert.equal(out.credits, 9);
+    const row = [...r.store.rows.values()].at(-1);
+    assert.equal(row.reserved, 3);
+    assert.equal(row.actual, 9);
+    assert.match(row.detail, /settled above the reservation by 6/);
+    assert.equal(r.store.used("fixture_parser"), 12);
+  } finally { await r.srv.close(); }
+});
+
 test("an upload answered without a job id counts against the breaker; its credits stay reserved (review W10)", async () => {
   const r = await rig();
   try {
