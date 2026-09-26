@@ -213,14 +213,14 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; series ${s.series_sha256.slice(0, 8)} tree ${s.result_tree.slice(0, 8)}` };
     } },
   G02: { name: "suites-pass-in-the-running-images", inputs: [`${RAW}suites.txt`, `${EV}rendered-compose.json`],
-    expected: "inside the images the stack runs: the retrieval service's suite (at least 95 tests, the ledger's SQL among them against a throwaway PostgreSQL, none skipped), the gateway's extraction-runner and json-format tests (at least 16), the MCP service's suites, the gateway's unit suites, M3's 40-test contract suite and M4's gateway-level /mcp contract suite and the gateway ledger's version-1 to version-2 migration test all pass with none failing, and no throwaway container or network is left",
+    expected: "inside the images the stack runs: the retrieval service's suite (at least 114 tests, the ledger's SQL among them against a throwaway PostgreSQL, none skipped), the gateway's extraction-runner and json-format tests (at least 16), the MCP service's suites, the gateway's unit suites, M3's 40-test contract suite and M4's gateway-level /mcp contract suite and the gateway ledger's version-1 to version-2 migration test all pass with none failing, and no throwaway container or network is left",
     run() {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
       const t = (k) => tapCounts(s[k]), exit0 = (k) => (s[k] ?? []).includes("test_exit=0");
       const skipped = +(((s.retrieval_tap ?? []).find((l) => l.startsWith("# skipped ")) ?? "# skipped 1").split(" ")[2]);
       const tr = kv((s.transient ?? []).flatMap((l) => l.split(" ")));
       const cond = { images: m.retrieval_image === composeImage("retrieval-service") && m.gateway_image === composeImage("access-gateway") && m.mcp_image === composeImage("mcp-gateway"),
-        retrieval: t("retrieval_tap").tests >= 95 && t("retrieval_tap").fail === 0 && skipped === 0 && exit0("retrieval_tap"),
+        retrieval: t("retrieval_tap").tests >= 114 && t("retrieval_tap").fail === 0 && skipped === 0 && exit0("retrieval_tap"),
         gateway_m5: t("gateway_m5_tap").tests >= 16 && t("gateway_m5_tap").fail === 0 && exit0("gateway_m5_tap"),
         mcp: t("mcp_tap").tests >= 41 && t("mcp_tap").fail === 0 && exit0("mcp_tap"), gateway_unit: t("gateway_unit_tap").tests >= 30 && t("gateway_unit_tap").fail === 0 && exit0("gateway_unit_tap"),
         m3_contract: t("gateway_contract_tap").tests === 40 && t("gateway_contract_tap").pass === 40 && exit0("gateway_contract_tap"),
