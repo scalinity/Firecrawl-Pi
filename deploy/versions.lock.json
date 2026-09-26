@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-26T21:56:15Z",
+  "generated_utc": "2026-09-26T22:11:50Z",
   "generated_by": "scripts/m5/build-lock.mjs (M5), from the lock M4 closed with at 10cdc59; entries owned by later milestones are as M4 wrote them",
-  "repository_sha": "7e7c3eb94373e4f3e15e3069fd6d8693f270d42e",
+  "repository_sha": "8903e1e47885bede933a84bb69ea75089b027685",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -382,7 +382,7 @@
       },
       "settings": {
         "path": "deploy/searxng/settings.yml",
-        "sha256": "4a13562c8b3f355e2789c64d92ba0feac104050ccac9260668818dfea5a0ea20",
+        "sha256": "8bc4fc61f7c3c813012e02f57d25aac29b4c98fef27b6fe1844da6bf0955e305",
         "entrypoint": "deploy/searxng/entrypoint.sh",
         "entrypoint_sha256": "a87c687c0ffd6d8742176ebd53b02edb83fa0e3b7aa00a5dad333bf01ef01429"
       },
@@ -550,7 +550,7 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, and since M5 the search, model and parser adapters and their budgets",
       "status": "selected",
-      "image_id": "sha256:0782026f3f9e202462919d5f034f5070fcdc3e08494148ceee1f1e061b4c7211",
+      "image_id": "sha256:e243ad1ba5c87e3ee2bea8561f98771d8a9394e8f30fb27cd875d6c8678881a6",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
@@ -558,7 +558,7 @@
       },
       "evidence": "evidence/M5/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "248c9275e92b5d28d0931c45d0921b1393de2176",
+      "built_from_commit": "0165ae044682a25554fe4de8c19e8b6e7f2a2337",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -645,10 +645,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with search, the json format and extraction jobs since M5",
       "status": "selected",
-      "image_id": "sha256:bdfc078b88085c47f269e55ae2bc6f2311f6b9345d08896fcfce818e3f573cb6",
+      "image_id": "sha256:928379fba0749ef05cc747f79abe699de2275d13c9ef95a7b9517c2f3c42983e",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "248c9275e92b5d28d0931c45d0921b1393de2176",
+      "built_from_commit": "0165ae044682a25554fe4de8c19e8b6e7f2a2337",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -720,10 +720,10 @@
     "mcp_gateway": {
       "role": "The MCP service image (built on the Pi, natively linux/arm64), with the search and extraction tools since M5",
       "status": "selected",
-      "image_id": "sha256:47fffaac82d2676e456454972d8b00478a8480f2adaf5ba047e7e9c7b474f544",
+      "image_id": "sha256:5470828c7ccc468d616fc00932648fceaf447e2772ab3d976aad5007a1cdc0c9",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "248c9275e92b5d28d0931c45d0921b1393de2176",
+      "built_from_commit": "0165ae044682a25554fe4de8c19e8b6e7f2a2337",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
