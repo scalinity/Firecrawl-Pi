@@ -162,8 +162,10 @@ async function status(ctx, route, id) {
   let bytes = 0;
   for (const row of rows) { if (page.length && bytes + row.bytes > L.results.pageMaxBytes) break; page.push(row); bytes += row.bytes; }
   const next = skip + page.length < job.archived ? self(skip + page.length) : undefined;
-  const rejected = job.state === "FAILED" && !job.upstream_id;
-  const head = { success: !rejected, status: nativeStatus(job.state), completed: job.archived, total: job.total ?? job.archived, creditsUsed: job.credits_used ?? 0,
+  // Always success true: a finished job's outcome is its status ("failed" with its error). The official
+  // client throws on success false and retries it as an unknown error until the job expires
+  // (apps/js-sdk/firecrawl/src/v2/utils/errorHandler.ts), even for a job the core refused.
+  const head = { success: true, status: nativeStatus(job.state), completed: job.archived, total: job.total ?? job.archived, creditsUsed: job.credits_used ?? 0,
     expiresAt, ...(next ? { next } : {}), ...(job.error ? { error: job.error } : {}), createdAt: iso(job.created_at), completedAt: iso(job.finished_at) };
   const res = ctx.res;
   res.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-request-id": ctx.id });

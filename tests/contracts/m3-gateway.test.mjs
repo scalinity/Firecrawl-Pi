@@ -625,6 +625,20 @@ test("a submission the core refuses is FAILED and answered like upstream's refus
   assert.match(r.json.error, /includePaths/);
   const j = (await h.db.query("SELECT * FROM fcpi_platform.job")).rows[0];
   assert.equal(j.state, "FAILED");
+  // Refused after the acknowledgement (it waited behind another job): its status is success true with
+  // status "failed", which the official client ends on, rather than success false, which it retries.
+  h.core.mode = "ok";
+  const first = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 2 }) });
+  const later = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 3 }) });
+  assert.equal(later.status, 200);
+  h.core.mode = "reject";
+  h.core.complete(await h.core.upstreamOf(first.json.id), 1);
+  await waitFor(async () => (await h.job(later.json.id)).state === "FAILED", 15000, "refused after the acknowledgement");
+  const st = await h.call("GET", `/v2/crawl/${later.json.id}`, { token: T.a });
+  assert.equal(st.status, 200);
+  assert.equal(st.json.success, true);
+  assert.equal(st.json.status, "failed");
+  assert.match(st.json.error, /includePaths/);
 });
 
 test("open-job admission caps answer 503 OVERLOADED with Retry-After", async () => {
