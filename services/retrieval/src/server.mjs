@@ -8,13 +8,13 @@
 // worker's forward proxy (src/proxy.mjs) listens on the browser network alone.
 import http from "node:http";
 import { readFileSync } from "node:fs";
-import { createHash, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { loadEnv, loadPolicy, loadLocalCidrs, readSecret, parseSha256 } from "./policy.mjs";
 import { Store } from "./store.mjs";
 import { makePublicResolver } from "./resolve.mjs";
 import { ProxySessions, startProxy } from "./proxy.mjs";
 import { makeBrowserClient } from "./browser.mjs";
-import { makeAcquirer, makeFetcher, makeSearcher } from "./acquire.mjs";
+import { makeAcquirer, makeFetcher, makeSearcher, makeUrlHmac } from "./acquire.mjs";
 import { Denied } from "./ssrf.mjs";
 
 const env = loadEnv(process.env);
@@ -52,8 +52,12 @@ const sessions = new ProxySessions();
 startProxy({ listen: env.proxyListen, sessions, getPolicy, resolvePublic, log });
 const browser = makeBrowserClient({ url: env.browserUrl, token: readSecret(env.credentialsDir, "retrieval_browser_token"),
   proxyServer: `http://${env.proxyListen.host}:${env.proxyListen.port}`, sessions, getPolicy });
-const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, log });
-const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, log });
+// The URL-hash key, derived under its own label from the browser credential, whose plaintext only
+// this service holds (the worker keeps its SHA-256): stable across restarts, changed only with that
+// credential, and no further secret to keep.
+const urlHmac = makeUrlHmac(createHmac("sha256", readSecret(env.credentialsDir, "retrieval_browser_token")).update("fcpi.retrieval.url-hmac.v1").digest());
+const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log });
+const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log });
 const search = makeSearcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, log });
 
 const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, INVALID_URL: 400, INVALID_REQUEST: 400, RATE_LIMITED: 429, PROXY_REQUIRED: 429,

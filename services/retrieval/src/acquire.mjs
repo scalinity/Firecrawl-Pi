@@ -5,7 +5,7 @@
 // URL permits, the browser attempt also holds the browser permit, and every direct navigation is
 // paced per registrable domain. There is no proxy or enhanced tier before M6/M7: work that would
 // need one fails as PROXY_REQUIRED or BLOCKED_PUBLIC_CONTENT instead of using the home connection.
-import { randomUUID, createHmac, randomBytes, createHash } from "node:crypto";
+import { randomUUID, createHmac, createHash } from "node:crypto";
 import { getDomain } from "tldts";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { guardedFetch, CookieJar, USER_AGENT } from "./httpfetch.mjs";
@@ -13,8 +13,10 @@ import { classify, isTextual } from "./quality.mjs";
 
 const PURPOSES = new Set(["page", "robots", "sitemap"]);
 const EXPECTS = new Set(["html", "pdf", "document"]);
-const HMAC_KEY = randomBytes(32); // per process: log correlation without a guessable URL hash (spec §25)
-export const urlHmac = (url) => createHmac("sha256", HMAC_KEY).update(url).digest("hex").slice(0, 32);
+// A URL is logged and stored only as a keyed hash (spec §25). The key is the service's own and
+// lasts across restarts (server.mjs), so the rows and log lines of one URL can be correlated
+// whenever they were written (review finding S5).
+export const makeUrlHmac = (key) => (url) => createHmac("sha256", key).update(url).digest("hex").slice(0, 32);
 // Pacing and cooldowns are keyed by registrable domain; a fixture by its exact host.
 export const domainOf = (t) => (t.fixture ? t.host : (getDomain(t.host) ?? t.host));
 // A caller that has gone away cancels the acquisition at the next step, not at its deadline: every
@@ -111,7 +113,7 @@ export function makePacer({ store, getPolicy, resolvePublic, lookupFixture, log 
   return { holdPermit, pace, pacedFetch };
 }
 
-export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, log }) {
+export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, urlHmac, log }) {
   const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
 
   return async function acquire(body, signal) {
@@ -254,7 +256,7 @@ export function fetchLogicalId(b, now = Date.now()) {
   const key = createHash("sha256").update(`${b.purpose} ${b.method === "HEAD" ? "HEAD" : "GET"} ${b.url}`).digest("hex").slice(0, 32);
   return `fetch:${key}:${Math.floor(now / FETCH_WINDOW_MS)}`;
 }
-export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, log }) {
+export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, urlHmac, log }) {
   const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
   return async function fetchOnce(b, signal) {
     const policy = getPolicy();

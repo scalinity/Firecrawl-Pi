@@ -8,7 +8,7 @@ import http from "node:http";
 import { BlockList } from "node:net";
 import { getEventListeners } from "node:events";
 import { paceDecision, nextCooldown } from "../src/store.mjs";
-import { makeAcquirer, makeFetcher, makePacer } from "../src/acquire.mjs";
+import { makeAcquirer, makeFetcher, makePacer, makeUrlHmac } from "../src/acquire.mjs";
 
 export class FakeStore {
   constructor() { this.acq = new Map(); this.attempts = []; this.permits = new Map(); this.domains = new Map(); this.navs = []; this.cooled = []; }
@@ -54,6 +54,7 @@ export class FakeStore {
   }
 }
 
+const urlHmac = makeUrlHmac(Buffer.alloc(32, 7));
 const lan = new BlockList();
 lan.addSubnet("45.33.20.0", 24, "ipv4");
 export function policyFor(fixtures, direct = { perDomainInFlight: 1, minNavigationGapMs: 400, perDomainPerHour: 20, platformPerDay: 200 }) {
@@ -72,7 +73,7 @@ export function serve(handler) {
 const page = (res, body = "<main><h1>Article</h1><p>A plain page with enough text to be an article of its own.</p></main>") =>
   res.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(`<!doctype html><title>t</title>${body}`);
 export const acquirerFor = (store, policy, browser = { render: async () => ({ ok: false, failure: { class: "BROWSER_UNAVAILABLE", detail: "none" } }) }) =>
-  makeAcquirer({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], browser, log: () => {} });
+  makeAcquirer({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], browser, urlHmac, log: () => {} });
 export const body = (url, id = `l-${Math.random()}`) => ({ requestId: `r-${Math.random()}`, logicalAcquisitionId: id, url, deadline: new Date(Date.now() + 30000).toISOString(), purpose: "page", expect: "html" });
 
 test("a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4)", async () => {
@@ -101,7 +102,7 @@ test("downloads and searches hold a URL permit, and repeated downloads of one UR
   const f = await serve((req, res) => res.writeHead(200, { "content-type": "application/xml" }).end("<urlset/>"));
   try {
     const store = new FakeStore(), policy = policyFor([["f.fixture.fcpi.test", f.port, "fixture"]]);
-    const fetchOnce = makeFetcher({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
+    const fetchOnce = makeFetcher({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], urlHmac, log: () => {} });
     const req = () => ({ requestId: `r-${Math.random()}`, url: `http://f.fixture.fcpi.test:${f.port}/sitemap.xml.gz`, purpose: "sitemap", deadline: new Date(Date.now() + 1500).toISOString() });
     // Both permits held elsewhere: the download waits for one, and gives up at its deadline.
     await store.takePermit("url", "page-1", 2); await store.takePermit("url", "page-2", 2);
@@ -119,7 +120,7 @@ test("a download's final URL is one a response header can carry (review finding 
   const f = await serve((req, res) => res.writeHead(200, { "content-type": "application/pdf" }).end("%PDF-"));
   try {
     const store = new FakeStore(), policy = policyFor([["f.fixture.fcpi.test", f.port, "fixture"]]);
-    const fetchOnce = makeFetcher({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
+    const fetchOnce = makeFetcher({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], urlHmac, log: () => {} });
     const r = await fetchOnce({ requestId: "r-s10", url: `http://f.fixture.fcpi.test:${f.port}/doc-€.pdf`, purpose: "document" });
     assert.equal(r.finalUrl, `http://f.fixture.fcpi.test:${f.port}/doc-%E2%82%AC.pdf`);
     assert.doesNotThrow(() => http.validateHeaderValue("x-fcpi-final-url", r.finalUrl));
@@ -229,6 +230,13 @@ test("a pacing refusal is the attempt's recorded outcome and reaches no target",
     assert.equal(store.attempts.at(-1).outcome, "RATE_LIMITED");
     assert.equal(t.hits.length, 0);
   } finally { t.s.close(); }
+});
+
+test("a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5)", () => {
+  const url = "https://example.com/a?b=c";
+  assert.equal(makeUrlHmac(Buffer.alloc(32, 7))(url), urlHmac(url));
+  assert.notEqual(makeUrlHmac(Buffer.alloc(32, 8))(url), urlHmac(url));
+  assert.match(urlHmac(url), /^[0-9a-f]{32}$/);
 });
 
 test("requests are validated and bodies decoded by their declared charset", async () => {
