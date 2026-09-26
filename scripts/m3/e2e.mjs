@@ -32,9 +32,9 @@ function out(section, rec) {
   if (section !== current) { process.stdout.write(`### ${section}\n`); current = section; }
   process.stdout.write(`${JSON.stringify({ utc: now(), ...rec })}\n`);
 }
-// A gateway answer, as recorded: status, code, the challenge, the body's hash and a bounded summary.
+// A gateway answer, as recorded: status, code, the challenge, any CORS header, the body's hash and a bounded summary.
 const brief = (r, extra = {}) => ({ status: r.status, code: r.json?.code ?? null, error: r.json?.error ? String(r.json.error).slice(0, 200) : null,
-  www_authenticate: r.headers["www-authenticate"] ?? null, retry_after: r.headers["retry-after"] ?? null, body_sha256: sha(r.text), ...extra });
+  www_authenticate: r.headers["www-authenticate"] ?? null, retry_after: r.headers["retry-after"] ?? null, acao: r.headers["access-control-allow-origin"] ?? null, body_sha256: sha(r.text), ...extra });
 
 // ---- the Pi ----------------------------------------------------------------------------------------
 const pi = (cmd, input) => execFileSync("ssh", [...SSH, T.PI_SSH_TARGET, cmd], { encoding: "utf8", input, maxBuffer: 64 * 1024 * 1024 });
@@ -158,10 +158,10 @@ const PHASES = {
     for (const [c2, host, headers] of [["host_foreign", "evil.example", {}], ["host_rebinding_name", "attacker.example:3380", {}], ["host_localhost_alias", "localhost:3380", {}], ["host_loopback", HOST, {}],
       ["origin_foreign", HOST, { origin: "https://evil.example" }], ["origin_null", HOST, { origin: "null" }], ["origin_absent", HOST, {}]]) {
       const x = await http("GET", "/platform/v1/status", { tok: "m3a", host, headers });
-      out("host_origin", { case: c2, ...brief(x), acao: x.headers["access-control-allow-origin"] ?? null });
+      out("host_origin", { case: c2, ...brief(x) });
     }
     const pre = await http("OPTIONS", "/v2/scrape", { headers: { origin: "https://evil.example", "access-control-request-method": "POST" } });
-    out("host_origin", { case: "preflight_foreign", ...brief(pre), acao: pre.headers["access-control-allow-origin"] ?? null });
+    out("host_origin", { case: "preflight_foreign", ...brief(pre) });
     // Upstream's Cloud challenge and admin routes stay out of reach.
     out("routes", { case: "admin_authenticated", ...brief(await http("POST", "/admin/integration/create-user", { tok: "m3a", body: {} })) });
     out("routes", { case: "search_not_enabled", ...brief(await http("POST", "/v2/search", { tok: "m3a", body: { query: "x" } })) });

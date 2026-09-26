@@ -3,8 +3,10 @@
 // reach a client (FIRECRAWL_PI_SPEC.md §20.3, §20.4).
 import { request as httpRequest } from "node:http";
 
-// Response headers never passed on: hop-by-hop headers and upstream's Cloud-pointing challenge.
-const HOP = new Set(["connection", "keep-alive", "transfer-encoding", "upgrade", "proxy-authenticate", "proxy-authorization", "te", "trailer", "www-authenticate"]);
+// The only upstream response headers passed on. Everything else stays behind: hop-by-hop headers,
+// upstream's Cloud-pointing challenge, and the `Access-Control-Allow-Origin: *` its cors() middleware
+// adds to every answer (apps/api/src/index.ts), since the gateway sends no CORS headers.
+const PASS = new Set(["content-type", "content-length", "retry-after"]);
 
 export class UpstreamError extends Error {
   // delivered: false when no connection to the core was ever established, so the request cannot
@@ -68,7 +70,7 @@ export function makeUpstream(cfg) {
     const up = httpRequest({ ...base, method: "POST", path, timeout: cfg.coreTimeoutMs,
       headers: { "content-type": "application/json", "content-length": data.length, accept: "application/json" } }, (ur) => {
       const headers = { ...extraHeaders };
-      for (const [k, v] of Object.entries(ur.headers)) if (!HOP.has(k)) headers[k] = v;
+      for (const [k, v] of Object.entries(ur.headers)) if (PASS.has(k)) headers[k] = v;
       res.writeHead(ur.statusCode, headers);
       ur.pipe(res);
       ur.on("end", () => finish(ur.statusCode));

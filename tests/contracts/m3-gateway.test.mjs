@@ -64,7 +64,8 @@ function fakeCore(dbName) {
       if (req.method === "GET" && u.pathname === "/v0/health/liveness") return send(200, { status: "ok" });
       if (req.method === "POST" && (u.pathname === "/v2/scrape" || u.pathname === "/v2/map")) {
         if (/slow/.test(body?.url ?? "")) await sleep(1500);
-        const cloud = { "www-authenticate": 'Bearer resource_metadata="https://www.firecrawl.dev/.well-known/oauth-protected-resource"' };
+        // As the pinned core answers: its Cloud challenge, and cors()'s wildcard on every response.
+        const cloud = { "www-authenticate": 'Bearer resource_metadata="https://www.firecrawl.dev/.well-known/oauth-protected-resource"', "access-control-allow-origin": "*", "x-powered-by": "Express" };
         return send(200, u.pathname === "/v2/scrape" ? { success: true, data: { markdown: "# fixture", metadata: { sourceURL: body.url } } } : { success: true, links: [{ url: body.url }] }, cloud);
       }
       if (req.method === "POST" && (m = u.pathname.match(/^\/v2\/(crawl|batch\/scrape)$/))) {
@@ -210,11 +211,17 @@ test("a valid token scrapes; upstream's Cloud challenge is stripped; only the ga
     headers: { "x-fcpi-principal": "pb", "x-forwarded-for": "10.0.0.1", "x-idempotency-key": "spoofed-key-1", cookie: "c=1", "x-fcpi-request-id": "spoof" } });
   assert.equal(r.status, 200);
   assert.equal(r.headers["www-authenticate"], undefined);
+  assert.equal(r.headers["access-control-allow-origin"], undefined, "no CORS header, although the core sends one");
+  assert.equal(r.headers["x-powered-by"], undefined);
+  assert.match(r.headers["content-type"], /^application\/json/);
   assert.match(r.headers["x-request-id"], /^[0-9a-f-]{36}$/);
   const up = H.core.requests.at(-1);
   assert.equal(up.url, "/v2/scrape");
   assert.deepEqual(Object.keys(up.headers).sort(), ["accept", "connection", "content-length", "content-type", "host"]);
   assert.deepEqual(up.body, { url: "http://m3.fixture.fcpi.test:8080/p01" }, "only accepted options, origin dropped");
+  const map = await H.call("POST", "/v2/map", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/" } });
+  assert.equal(map.status, 200);
+  assert.equal(map.headers["access-control-allow-origin"], undefined);
 });
 
 test("Host must be a served origin and a browser Origin is refused", async () => {

@@ -352,13 +352,17 @@ const checks = {
     } },
 
   // ================================================================ network boundary
-  N01: { name: "host-and-origin-validated", inputs: [`${RAW}e2e-auth.txt`],
-    expected: "a foreign Host and a rebinding-style Host are 421 MISDIRECTED; the served loopback origins are 200; a foreign or null browser Origin (and a foreign preflight) is 403 ORIGIN_NOT_ALLOWED; no Origin is 200; no response carries Access-Control-Allow-Origin",
+  N01: { name: "host-and-origin-validated", inputs: [`${RAW}e2e-auth.txt`, `${RAW}e2e-sync.txt`],
+    expected: "a foreign Host and a rebinding-style Host are 421 MISDIRECTED; the served loopback origins are 200; a foreign or null browser Origin (and a foreign preflight) is 403 ORIGIN_NOT_ALLOWED; no Origin is 200; no response carries Access-Control-Allow-Origin, including the scrape and map answers forwarded from the core (whose cors() middleware sets it on every answer), each recorded with the header's value",
     run() {
       const H = E("auth").host_origin ?? [], st = (c) => one(H, c)?.status;
-      const ok = st("host_foreign") === 421 && st("host_rebinding_name") === 421 && st("host_localhost_alias") === 200 && st("host_loopback") === 200 && st("origin_foreign") === 403 && st("origin_null") === 403 &&
-        st("origin_absent") === 200 && st("preflight_foreign") === 403 && H.length === 8 && H.every((r) => r.acao === null);
-      return { ok, actual: H.map((r) => `${r.case}=${r.status}`).join(" ") + `; ACAO sent=${H.some((r) => r.acao !== null)}` };
+      const sy = E("sync"), fwd = [...(sy.scrape ?? []), ...(sy.map ?? [])];
+      // Each record must carry the field: an answer recorded without it proves nothing about the header.
+      const noAcao = (r) => "acao" in r && r.acao === null;
+      const hostOk = st("host_foreign") === 421 && st("host_rebinding_name") === 421 && st("host_localhost_alias") === 200 && st("host_loopback") === 200 && st("origin_foreign") === 403 && st("origin_null") === 403 &&
+        st("origin_absent") === 200 && st("preflight_foreign") === 403 && H.length === 8 && H.every(noAcao);
+      const fwdOk = fwd.length === 3 && fwd.every((r) => r.status === 200 && noAcao(r));
+      return { ok: hostOk && fwdOk, actual: H.map((r) => `${r.case}=${r.status}`).join(" ") + `; ACAO on gateway answers=${H.some((r) => !noAcao(r))}; forwarded answers=${fwd.map((r) => r.status).join(",")}, ACAO on them=${fwd.map((r) => r.acao ?? "absent").join(",")}` };
     } },
   N02: { name: "spoofed-principal-headers-have-no-effect", inputs: [`${RAW}e2e-auth.txt`, `${RAW}gateway-tests.txt`],
     expected: "live: another principal sending x-fcpi-principal, x-fcpi-owner, x-forwarded-user, x-forwarded-for and x-real-ip naming the owner still gets exactly the unknown-id answer on every job route; contract: the core receives only the gateway's own headers (no authorization, cookie, forwarded, idempotency or x-fcpi-* header) and no query string",
