@@ -28,7 +28,7 @@ now() { date -u +%Y-%m-%dT%H:%M:%S.%3NZ; }
 CORE=$(cid firecrawl-core); PG=$(cid nuq-postgres); RMQ=$(D ps -aq --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=rabbitmq)
 RS=$(cid retrieval-service); FX=$(cid fixture-m2)
 M2=http://m2.fixture.fcpi.test:8080
-sql() { D exec -i "$PG" psql -U postgres -d postgres -At -F $'\t' -X -c "$1"; }
+sql() { D exec "$PG" psql -U postgres -d postgres -At -F $'\t' -X -c "$1"; }
 core_state() { D inspect -f 'status={{.State.Status}} health={{if .State.Health}}{{.State.Health.Status}}{{end}} restarts={{.RestartCount}} started={{.State.StartedAt}} policy={{.HostConfig.RestartPolicy.Name}}' "$CORE"; }
 listen_consumers() { D exec "$RMQ" rabbitmqctl -q list_queues -p / name consumers 2>/dev/null | awk '$1 ~ /^nuq\.queue_scrape\.listen\./ {n++; c+=$2} END {printf "listen_queues=%d consumers=%d\n", n, c}'; }
 worker_pid() { D exec --user 3002 "$CORE" pgrep -f '^node dist/src/services/worker/nuq-worker.js' 2>/dev/null | head -1; }

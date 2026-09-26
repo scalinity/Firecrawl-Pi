@@ -1,0 +1,27 @@
+### kill_meta
+utc=2026-09-26T04:02:34.149Z source_commit=2cd4601a30dbcf2451f834368d8bd6f418fe6cc9
+core=133df1fb31c8b22269ff61a227f7f91819488752bad59eaf3dfbad8c2be1bee6 image=sha256:766ee451edf17f005fe74232a43ff175bbd2200627d91b461aaaf6a90a3f6d53 status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+### kill_client_start
+job=01a0dbe1-0d11-72ac-8811-cb45b32c35a3 utc=2026-09-26T04:02:34.894Z
+01a0dbe1-0d11-72ac-8811-cb45b32c35a3	active	0	04:02:34	t	
+### kill_kill
+worker_pid=34 utc=2026-09-26T04:02:38.039Z
+kill_exit=0
+### kill_core_observed
+t+2s status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+t+4s status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+t+6s status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+t+8s status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+t+10s status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+t+12s status=running health=healthy restarts=0 started=2026-09-26T03:30:35.718535339Z policy=unless-stopped
+### kill_client_result
+{"case":"B02-client","started":"2026-09-26T04:02:34.294Z","http":408,"success":false,"error":"Scrape timed out after waiting in the concurrency limit queue","sentinels":[],"ms":60121}
+exec_exit=0
+### kill_core_ready
+utc=2026-09-26T04:03:59.546Z core status=running health=healthy restarts=1 started=2026-09-26T04:03:35.008974451Z policy=unless-stopped
+### kill_job_observed
+t+3s 01a0dbe1-0d11-72ac-8811-cb45b32c35a3	failed	1		t	SCRAPE_TIMEOUT|{"stack":"Error: The scrape operation timed out before completing. This happens when a page takes too long to load, render, or process. Possible 
+### kill_attempts
+01a0dbe1-0d11-72ac-8811-cb45b32c35a3	1	direct_http	CANCELLED		04:02:34.773
+### kill_fixture_hits
+hits=1
