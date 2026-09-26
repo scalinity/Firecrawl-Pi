@@ -57,7 +57,15 @@ sec installed_files_sha256
 
 sec after
 echo "leftover_transient_containers=$(sudo -n docker ps -a --filter label=fcpi.transient --format '{{.ID}}' | wc -l)"
-echo "uid_3320_processes=$(ps -eo uid= | awk '$1==3320' | wc -l)"
+# A running browser-worker service shares uid 3320: its own processes, in its cgroup, are not the proof's.
+worker=$(sudo -n docker ps -q --no-trunc --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=browser-worker)
+stray=0 own=0
+for p in $(pgrep -u 3320 || true); do
+  cg=$(cat /proc/$p/cgroup 2>/dev/null) || continue
+  if [ -n "$worker" ] && printf '%s' "$cg" | grep -q "docker-$worker.scope"; then own=$((own + 1)); else stray=$((stray + 1)); fi
+done
+echo "uid_3320_processes=$stray"
+echo "worker_service_processes=$own"
 echo "chrome_processes_on_host=$(pgrep -c -f 'chrome-headless-shell|chrome-linux-arm64/chrome' || true)"
 rm -rf "$WORK"
 echo "work_dir_removed=$([ -e "$WORK" ] && echo no || echo yes)"
