@@ -153,8 +153,10 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         if (!r.ok) return fail(r.failure);
         const verdict = classify({ status: r.status, contentType: r.contentType ?? "text/html", body: r.html, finalUrl: r.finalUrl, requestedUrl: req.url });
         if (verdict.failure) return fail(verdict.failure);
+        // A page still a script shell after its one browser attempt is no content (spec §9.4).
+        if (verdict.verdict === "js_shell") return fail({ class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` });
         return finish({ ok: true, body: r.html, finalUrl: r.finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
-          bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "js_shell_after_render" : verdict.verdict, reasons: verdict.reasons ?? [] },
+          bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] },
           subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [] });
       } finally {
         await store.releaseDomain(paced.domain, attemptId);
