@@ -371,9 +371,10 @@ services:
         target: /srv/policy/egress.json
         read_only: true
         bind: { create_host_path: false }
+      # The directory, so the service's reload sees each atomic replacement of the file (a new inode).
       - type: bind
-        source: /etc/firecrawl-pi/egress-local.cidrs
-        target: /srv/local/egress-local.cidrs
+        source: /etc/firecrawl-pi/egress-local
+        target: /srv/local
         read_only: true
         bind: { create_host_path: false }
     dns: [10.231.6.1]

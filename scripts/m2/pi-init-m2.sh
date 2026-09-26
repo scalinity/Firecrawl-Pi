@@ -84,10 +84,12 @@ sudo -n systemctl daemon-reload
 sudo -n /usr/sbin/nft -f $ETC/fcpi-guard.nft || die "loading inet fcpi_guard failed"
 echo "loaded  inet fcpi_guard"
 sudo -n $ETC/fcpi-egress-local.sh || die "fcpi-egress-local.sh failed"
+# The list lives in its own directory, which the service mounts; nothing reads a file at the top level.
+sudo -n rm -f $ETC/egress-local.cidrs
 echo "docker ExecStartPre=$(systemctl show -p ExecStartPre --value docker.service | grep -o 'path=[^ ;]*' | tr '\n' ' ')"
 echo "fcpi-stack ExecStartPre=$(systemctl show -p ExecStartPre --value fcpi-stack.service | grep -o 'path=[^ ;]*' | tr '\n' ' ')"
 echo "guard_rules=$(sudo -n nft -j list table inet fcpi_guard | jq '[.nftables[] | select(.rule)] | length') local_v4_elements=$(sudo -n nft -j list set inet fcpi_guard egress_local_v4 | jq '[.nftables[] | select(.set) | .set.elem // [] | length] | add')"
 
 sec inventory
-sudo -n sh -c "stat -c '%u:%g %a %n' $S/retrieval_postgres_password $S/postgres_retrieval_role_password $S/core_retrieval_token $S/retrieval_core_token_sha256 $S/retrieval_browser_token $S/browser_token_sha256 $ETC/fcpi-guard.nft $ETC/fcpi-egress-local.sh $ETC/egress-local.cidrs"
+sudo -n sh -c "stat -c '%u:%g %a %n' $S/retrieval_postgres_password $S/postgres_retrieval_role_password $S/core_retrieval_token $S/retrieval_core_token_sha256 $S/retrieval_browser_token $S/browser_token_sha256 $ETC/fcpi-guard.nft $ETC/fcpi-egress-local.sh $ETC/egress-local $ETC/egress-local/egress-local.cidrs"
 echo end

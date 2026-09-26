@@ -24,8 +24,14 @@ printf '# The router'"'"'s public address, measured %s by scripts/m2/pi-wan-addr
 sudo -n chmod 0644 "$EXTRA.tmp" && sudo -n mv -f "$EXTRA.tmp" "$EXTRA"
 sudo -n /etc/firecrawl-pi/fcpi-egress-local.sh
 echo "### check"
-echo "in_cidrs_file=$(grep -qxF "$wan/32" /etc/firecrawl-pi/egress-local.cidrs && echo yes || echo no)"
+echo "in_cidrs_file=$(grep -qxF "$wan/32" /etc/firecrawl-pi/egress-local/egress-local.cidrs && echo yes || echo no)"
 echo "in_guard_set=$(sudo -n nft get element inet fcpi_guard egress_local_v4 "{ $wan }" >/dev/null 2>&1 && echo yes || echo no)"
+# The service mounts the list's directory, so it sees the file just rewritten, not the one it
+# started with (review finding S9): its copy hashes the same as the host's.
+rs=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=retrieval-service)
+host_h=$(sudo -n sha256sum /etc/firecrawl-pi/egress-local/egress-local.cidrs | cut -c1-64)
+svc_h=$([ -n "$rs" ] && sudo -n docker exec "$rs" sha256sum /srv/local/egress-local.cidrs 2>/dev/null | cut -c1-64)
+echo "service_sees_rewrite=$([ -n "$svc_h" ] && [ "$svc_h" = "$host_h" ] && echo yes || echo no)"
 unset wan
 echo "### end"
 echo end

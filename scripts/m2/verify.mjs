@@ -649,12 +649,12 @@ const checks = {
       return { ok, actual: `router public address probed=${wanOk} (configured=${wanOn}); non-internal=${nonInternal.join(",")}; own DNS on them=${dnsSet}; browser/retrieval/fixture as expected=${["browser", "retrieval", "fixture"].map((r) => probes[r]?.all_as_expected).join("/")}; guard deltas special=${d("egress_special_dropped")} local=${d("egress_local_dropped")} other=${d("egress_other_dropped")} input=${d("egress_input_dropped")} web_accepted=${d("egress_web_accepted")}` };
     } },
   X11: { name: "router-public-address-is-host-local", inputs: [`${RAW}wan-address.txt`, "evidence/M0/audit.json"],
-    expected: "the router's public address (review finding W8), measured once as M0 measured it and printed only as a hash, is in the retrieval service's local-network file and the guard's host-local set",
+    expected: "the router's public address (review finding W8), measured once as M0 measured it and printed only as a hash, is in the retrieval service's local-network file and the guard's host-local set; the service's mounted copy is the file just rewritten (review finding S9)",
     run() {
       const w = kv((sections(`${RAW}wan-address.txt`).measure ?? []).join(" ").split(" ")), c = kv(sections(`${RAW}wan-address.txt`).check);
       const sameAsM0 = w.wan_sha256 === json("evidence/M0/audit.json").network.egress_ip_sha256;
-      const ok = w.measured === "yes" && /^[0-9a-f]{64}$/.test(w.wan_sha256 ?? "") && c.in_cidrs_file === "yes" && c.in_guard_set === "yes";
-      return { ok, actual: `measured=${w.measured}; same address as M0=${sameAsM0}; in the local-network file=${c.in_cidrs_file}; in the guard set=${c.in_guard_set}` };
+      const ok = w.measured === "yes" && /^[0-9a-f]{64}$/.test(w.wan_sha256 ?? "") && c.in_cidrs_file === "yes" && c.in_guard_set === "yes" && c.service_sees_rewrite === "yes";
+      return { ok, actual: `measured=${w.measured}; same address as M0=${sameAsM0}; in the local-network file=${c.in_cidrs_file}; in the guard set=${c.in_guard_set}; service sees the rewrite=${c.service_sees_rewrite}` };
     } },
   X04: { name: "access-bridge-guard-still-holds", inputs: [`${RAW}guard.txt`, "deploy/host/fcpi-guard.nft"],
     expected: "the guard table is loaded from the file the repository holds; from inside the gateway, the host's bridge address, its LAN sshd and a public address do not connect (M1's V20 probe)",

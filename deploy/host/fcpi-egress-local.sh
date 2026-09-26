@@ -5,8 +5,10 @@
 # its installed copy /etc/firecrawl-pi/fcpi-egress-local.sh:
 #   1. reads the kernel's connected routes (scope link, IPv4 and IPv6), leaving out Docker's and
 #      the project's own bridges and veths, which the special-purpose ranges already cover;
-#   2. writes them to /etc/firecrawl-pi/egress-local.cidrs (0644), atomically, for the retrieval
-#      service, which refuses every acquisition while that file names no network;
+#   2. writes them to /etc/firecrawl-pi/egress-local/egress-local.cidrs (0644), atomically, for the
+#      retrieval service, which refuses every acquisition while that file names no network. The
+#      service mounts the directory, not the file: the rename gives the file a new inode, which a
+#      single-file mount would never show (review finding S9);
 #   3. replaces the guard's egress_local_v4 set with the IPv4 ones, in one nft transaction.
 # Networks in /etc/firecrawl-pi/egress-local.extra (one CIDR per line, # comments) are added to both:
 # the router's public address, which many routers answer or hairpin from the LAN side, goes there
@@ -14,7 +16,9 @@
 # The file persists across boots, so the bind mount always has a source; this run refreshes it.
 set -eu
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-OUT=/etc/firecrawl-pi/egress-local.cidrs
+DIR=/etc/firecrawl-pi/egress-local
+OUT=$DIR/egress-local.cidrs
+mkdir -p "$DIR" && chmod 0755 "$DIR"
 # Connected routes print as "<prefix> dev <interface> …"; routes via a gateway do not.
 connected='$1 ~ /\// && $2 == "dev" && $3 !~ /^(docker0|br-|veth|fcpi-)/ && $1 !~ /^fe80:/ {print $1}'
 v4=$(ip -4 -o route show table main scope link | awk "$connected" | sort -u)
