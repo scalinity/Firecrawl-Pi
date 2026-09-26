@@ -58,7 +58,7 @@ index 130add8..4e80e57 100644
    news?: NewsSearchResult[];
    developer?: WebSearchResult[];
 diff --git a/apps/api/src/search/v2/index.ts b/apps/api/src/search/v2/index.ts
-index a4a0d95..fd95c34 100644
+index a4a0d95..79b5f91 100644
 --- a/apps/api/src/search/v2/index.ts
 +++ b/apps/api/src/search/v2/index.ts
 @@ -1,7 +1,7 @@
@@ -70,28 +70,41 @@ index a4a0d95..fd95c34 100644
  import { ddgSearch } from "./ddgsearch";
  import { Logger } from "winston";
  
-@@ -53,6 +53,20 @@ export async function search({
+@@ -53,6 +53,33 @@ export async function search({
        return results;
      }
  
 +    // fcpi: in the pi-resilient profile the SearXNG route's answer is final: results, a true empty
-+    // list or a typed failure (review finding S6); nothing below it runs.
++    // list or a typed failure (review finding S6); nothing below it runs, and no error of this branch
++    // reaches the catch-all below as an empty result.
 +    if (config.PI_RETRIEVAL_URL) {
 +      logger.info("Using the pi-resilient search route");
-+      return await searxng_search(query, {
-+        num_results,
-+        tbs,
-+        filter,
-+        lang,
-+        country,
-+        location,
-+      });
++      try {
++        return await searxng_search(query, {
++          num_results,
++          tbs,
++          filter,
++          lang,
++          country,
++          location,
++        });
++      } catch (error) {
++        if (error instanceof PiSearchError) throw error;
++        logger.error("The pi-resilient search route failed", { error });
++        throw new PiSearchError(
++          "SEARCH_BACKEND_ERROR",
++          "The search route failed unexpectedly.",
++          502,
++          true,
++          null,
++        );
++      }
 +    }
 +
      if (config.SEARXNG_ENDPOINT) {
        logger.info("Using searxng search");
        const results = await searxng_search(query, {
-@@ -86,6 +100,8 @@ export async function search({
+@@ -86,6 +113,8 @@ export async function search({
      // Fallback to empty response
      return {};
    } catch (error) {
@@ -101,7 +114,7 @@ index a4a0d95..fd95c34 100644
      return {};
    }
 diff --git a/apps/api/src/search/v2/searxng.ts b/apps/api/src/search/v2/searxng.ts
-index 445c007..5d4fd25 100644
+index 445c007..770645a 100644
 --- a/apps/api/src/search/v2/searxng.ts
 +++ b/apps/api/src/search/v2/searxng.ts
 @@ -1,4 +1,5 @@
@@ -110,7 +123,7 @@ index 445c007..5d4fd25 100644
  import { config } from "../../config";
  import { SearchV2Response, WebSearchResult } from "../../lib/entities";
  import { logger } from "../../lib/logger";
-@@ -13,10 +14,93 @@ interface SearchOptions {
+@@ -13,10 +14,112 @@ interface SearchOptions {
    page?: number;
  }
  
@@ -136,6 +149,15 @@ index 445c007..5d4fd25 100644
 +  options: SearchOptions,
 +): Promise<SearchV2Response> {
 +  if (Math.max(options.num_results, 0) === 0) return { web: [] };
++  if (!config.SEARXNG_ENDPOINT) {
++    throw new PiSearchError(
++      "SEARCH_BACKEND_UNAVAILABLE",
++      "No search route is configured (SEARXNG_ENDPOINT is unset).",
++      503,
++      false,
++      null,
++    );
++  }
 +  const url = new URL(
 +    config.SEARXNG_ENDPOINT!.replace(/\/$/, "") + "/search",
 +  );
@@ -149,7 +171,17 @@ index 445c007..5d4fd25 100644
 +      headers: { accept: "application/json" },
 +      signal: AbortSignal.timeout(15_000),
 +    });
-+  } catch {
++  } catch (error) {
++    // The route answers within its own 10-second deadline; no answer in 15 seconds is a timeout.
++    if ((error as Error)?.name === "TimeoutError") {
++      throw new PiSearchError(
++        "SEARCH_TIMEOUT",
++        "The retrieval service's search route did not answer within 15 seconds.",
++        504,
++        true,
++        null,
++      );
++    }
 +    throw new PiSearchError(
 +      "SEARCH_BACKEND_UNAVAILABLE",
 +      "The retrieval service's search route could not be reached.",

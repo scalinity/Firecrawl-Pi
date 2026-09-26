@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "2f0203b9d601a0422afd570256ae3cf0bbc88ec2",
-  "series_sha256": "a67d9cabc254c5e7232aaa8606163d4a2bc2e014efb838436a9be87ce816249a",
+  "result_tree": "36917fb853bcef10761a491ff063eda8251dd7be",
+  "series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -102,7 +102,7 @@
     },
     {
       "file": "0007-typed-search-failures.patch",
-      "sha256": "6fd5710c8b1029b00fe0d6e0e3315601ccd2ad5e6b55a4c4a35bb65ced4ca699",
+      "sha256": "d8ac7472c2b3e29307f527791bea9a12f3daa826438c5b2e57e9746a7f42b47b",
       "reason": "A search backend failure became an empty result at three layers: searxng_search and search both returned {} on any error, and patch 0005 returned {} when SearXNG had no results (review finding S6, spec §13).",
       "symbols": [
         "apps/api/src/search/v2/searxng.ts PiSearchError (new), piSearxngSearch (new), searxng_search",
