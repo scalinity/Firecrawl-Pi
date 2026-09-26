@@ -74,7 +74,12 @@ function codexServer() {
   if (!out.some((x) => x.startsWith("mcp_servers.fcpi.url=")) || !out.some((x) => x.startsWith("mcp_servers.fcpi.bearer_token_env_var="))) throw new Error("the Codex template lacks url or bearer_token_env_var");
   return out;
 }
-const answerLine = (s) => (String(s ?? "").match(/SENTINEL=\S+ CRAWL=\S+ DOCS=\S+/) ?? [null])[0];
+// The answer line, normalised: a model may wrap a value in backticks or end the line with a period, and a
+// correct answer should not fail for it; each value must still be exactly the kind it names.
+const answerLine = (s) => {
+  const m = String(s ?? "").match(/SENTINEL=`?(fcpi-m3-[a-z0-9]+-[0-9a-f]{4})`?\s+CRAWL=`?([a-z]+)`?\s+DOCS=`?(\d+)/);
+  return m ? `SENTINEL=${m[1]} CRAWL=${m[2]} DOCS=${m[3]}` : null;
+};
 
 out("meta", { platform: process.platform, deployed_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), pi_utc: piNow(), endpoint: "https://<pi-tailnet-name-host>:8443/mcp" });
 let code = 0;
