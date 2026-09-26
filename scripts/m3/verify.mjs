@@ -54,7 +54,7 @@ const MAP12 = [FX, ...GRAPH.slice(1)];
 const tapCounts = (lines) => { const n = (k) => +((lines.find((l) => l.startsWith(`# ${k} `)) ?? "").split(" ")[2]); return { tests: n("tests"), pass: n("pass"), fail: n("fail"), skipped: n("skipped"), cancelled: n("cancelled") }; };
 
 // ---- redaction (M2's rules, M3's live secrets) ------------------------------------------------------
-const M0_CONTROL = "tests/contracts/m0-redaction-control.txt", M1_CONTROL = "tests/contracts/m1-redaction-control.txt";
+const M0_CONTROL = "tests/contracts/m0-redaction-control.txt", M1_CONTROL = "tests/contracts/m1-redaction-control.txt", M3_CONTROL = "tests/contracts/m3-redaction-control.txt";
 const RULES = [
   ["private-key", /-----BEGIN [A-Z ]*PRIVATE KEY-----/],
   ["github-token", /\b(gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{20,})/],
@@ -71,11 +71,15 @@ const RULES = [
   ["url-empty-user-credentials", /[a-z][a-z0-9+.-]*:\/\/:[A-Za-z0-9._~%+-]{8,}@/i],
   ["rabbitmq-default-pass", /\bdefault_pass\s*=\s*(?!%s|<)\S{8,}/],
   ["fcpi-client-token", /\bfcpi_[a-z0-9]+_[0-9a-f]{32,}\b/],
+  // M3: a tailnet name by its shape (<label>.ts.net), since the live name is not always known.
+  ["tailnet-name", /\b[a-z0-9-]+\.ts\.net\b/i],
 ];
-// Literal strings allowed outside the controls (scripts/m2/verify.mjs's list; M3 adds none).
+// Literal strings allowed outside the controls: scripts/m2/verify.mjs's list, and M3's synthetic tailnet names
+// (the contract suite's origins, the SSRF test's host and the review's placeholder).
 const ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00:02", "02:00:00:00:00:99",
   "amqp://fcpi:%s@", "amqp://fcpi:$rmqpw@", String.raw`amqp://fcpi:\\(.*\\)@`, "http://user:pw@",
-  "password: r.proxy.password", "password: cred.password", "password = randomBytes", "password: readSecret"]);
+  "password: r.proxy.password", "password: cred.password", "password = randomBytes", "password: readSecret",
+  "example-tailnet.ts.net", "other-tailnet.ts.net", "pi.ts.net", "tailXXXX.ts.net"]);
 const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie"];
 function scan(files, ids, rules = RULES, allow = ALLOW) {
   const hits = [];
@@ -528,11 +532,12 @@ const checks = {
       const ok = unexplained.length === 0 && !!boot(B) && boot(B) === boot(A) && tablesOk;
       return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; ruleset tables=${tables.join(",")}` };
     } },
-  X05: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, "scripts/m1/pi-target.conf", "evidence/M0/audit.json"], live: true,
-    expected: "the positive controls fire every rule; then no rule matches in any tracked or new repository file; no file holds any of the fourteen live secrets (M2's nine, the gateway's PostgreSQL password and the four live client tokens), compared by SHA-256 computed on the Pi; no file added or changed since M3 began holds the Pi's LAN address, its /24 network or its SSH target",
+  X05: { name: "secret-and-identifier-redaction-scan", inputs: [M0_CONTROL, M1_CONTROL, M3_CONTROL, "scripts/m1/pi-target.conf", "evidence/M0/audit.json"], live: true,
+    expected: "the positive controls fire every rule (M3's adds a synthetic tailnet name); then no rule matches in any tracked or new repository file, a tailnet name included; no file holds any of the fourteen live secrets (M2's nine, the gateway's PostgreSQL password and the four live client tokens), compared by SHA-256 computed on the Pi; no file added or changed since M3 began holds the Pi's LAN address, its /24 network or its SSH target",
     run() {
       const c = [...scan([M0_CONTROL], { m0: { egress: sha256("192.0.2.77"), serial: sha256("0123456789abcdef"), machineId: sha256("0123456789abcdef0123456789abcdef"), macs: new Set([sha256("02:00:00:00:00:01")]) } }, RULES, new Set()),
-        ...scan([M1_CONTROL], { secrets: new Set([sha256("0f".repeat(32)), sha256("ABCDEFGHIJKLMNOP".repeat(4))]) }, RULES, new Set())];
+        ...scan([M1_CONTROL], { secrets: new Set([sha256("0f".repeat(32)), sha256("ABCDEFGHIJKLMNOP".repeat(4))]) }, RULES, new Set()),
+        ...scan([M3_CONTROL], {}, RULES, new Set())];
       const fired = new Set(c.map((h) => h.split(" ").pop()));
       const silent = [...RULES.map(([n]) => n), ...HASH_RULES].filter((r) => !fired.has(r));
       if (silent.length) return { ok: false, actual: `positive controls: rules that did not fire: ${silent.join(", ")}` };
@@ -542,7 +547,7 @@ const checks = {
         h "$(cat $S/retrieval_postgres_password)"; h "$(cat $S/core_retrieval_token)"; h "$(cat $S/retrieval_browser_token)"; \
         h "$(cat $S/gateway_postgres_password)"; for t in owner m3a m3b m3ro; do h "$(tr -d "\\n" < $S/clients/$t.token)"; done'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
       if (hashes.length !== 14 || new Set(hashes).size !== 14 || hashes.includes(sha256(""))) return { ok: false, actual: `expected 14 distinct non-empty live secret hashes from the Pi, got ${hashes.length} (${new Set(hashes).size} distinct)` };
-      const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard"], { encoding: "utf8" }).split("\n").filter((f) => f && f !== M0_CONTROL && f !== M1_CONTROL && has(f) && !/\.(pdf|png|gz)$/.test(f));
+      const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard"], { encoding: "utf8" }).split("\n").filter((f) => f && ![M0_CONTROL, M1_CONTROL, M3_CONTROL].includes(f) && has(f) && !/\.(pdf|png|gz)$/.test(f));
       const audit = json("evidence/M0/audit.json");
       const m0 = { egress: audit.network.egress_ip_sha256, serial: audit.identity.board_serial_sha256, machineId: audit.identity.machine_id_sha256, macs: new Set([...Object.values(audit.identity.mac_sha256), sha256("00:00:00:00:00:00")]) };
       const hits = scan(files, { m0, secrets: new Set(hashes) });

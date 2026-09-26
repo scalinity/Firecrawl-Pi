@@ -12,7 +12,8 @@ import { execFileSync } from "node:child_process";
 const T = Object.fromEntries(readFileSync(new URL("../m1/pi-target.conf", import.meta.url), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
 const origin = execFileSync("ssh", ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", T.PI_SSH_TARGET, "sudo -n grep -v '^#' /etc/firecrawl-pi/secrets/gateway/served-origins"], { encoding: "utf8" }).trim();
 const u = new URL(origin);
-const hide = (s) => String(s).split(u.hostname).join("<pi-tailnet-name-host>").split(u.hostname.slice(u.hostname.indexOf(".") + 1)).join("<pi-tailnet-name>");
+// By shape, not by the name just read, so a name that differs from the origins file's is hidden too.
+const hide = (s) => String(s).replace(/[a-z0-9-]+\.[a-z0-9-]+\.ts\.net/gi, "<pi-tailnet-name-host>").replace(/[a-z0-9-]+\.ts\.net/gi, "<pi-tailnet-name>");
 const token = readFileSync(0, "utf8").trim();
 const out = (rec) => process.stdout.write(`${hide(JSON.stringify({ utc: new Date().toISOString(), ...rec }))}\n`);
 

@@ -22,7 +22,9 @@ die() { echo "pi-tailscale: $*" >&2; exit 1; }
 . /etc/os-release
 CODENAME=$VERSION_CODENAME
 name() { sudo -n tailscale status --json | jq -r '.Self.DNSName // empty' | sed 's/\.$//'; }
-redact() { local n; n=$(name 2>/dev/null || true); local t=${n#*.}; if [ -n "$t" ] && [ "$t" != "$n" ]; then sed "s/${t//./\\.}/<pi-tailnet-name>/g"; else cat; fi; }
+# Tailnet names are replaced by their shape, not by the live name: after a logout or with a stale
+# origins file the live name is unknown or different, and the evidence must still carry none.
+redact() { sed -E 's/[A-Za-z0-9-]+\.[A-Za-z0-9-]+\.ts\.net/<pi-tailnet-name-host>/g; s/[A-Za-z0-9-]+\.ts\.net/<pi-tailnet-name>/g'; }
 
 case "${1:-}" in
   install)
@@ -65,6 +67,8 @@ case "${1:-}" in
     echo "origin=https://<pi-tailnet-name-host>:$PORT gateway=$(sudo -n docker inspect -f '{{.State.Health.Status}}' fcpi-access-gateway-1)"
     ;;
   status)
+    # All of it passes through redact, so no line can carry a tailnet name out.
+    {
     echo "### meta"
     echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat /opt/firecrawl-pi/.fcpi-source-commit)"
     echo "### keyring"
@@ -77,12 +81,13 @@ case "${1:-}" in
     echo "### serve"
     sudo -n tailscale serve status --json 2>/dev/null | jq -c '{tcp: (.TCP // {} | keys), web: (.Web // {} | to_entries | map({host_port: (.key | sub("^[^:]*"; "<pi-tailnet-name-host>")), handlers: (.value.Handlers | to_entries | map({(.key): .value.Proxy}) | add)})), funnel: (.AllowFunnel // {} | length)}'
     echo "### origins_file"
-    sudo -n sh -c "stat -c '%u:%g %a' $ORIGINS; grep -v '^#' $ORIGINS" | redact | sed -E 's#https://[^.]+\.#https://<machine>.#'
+    sudo -n sh -c "stat -c '%u:%g %a' $ORIGINS; grep -v '^#' $ORIGINS"
     echo "### resolv"
     echo "resolv_conf_sha256=$(sha256sum /etc/resolv.conf | cut -c1-64) nameservers=$(grep -c '^nameserver' /etc/resolv.conf)"
     echo "### listeners"
     sudo -n ss -Hltnup | awk '/tailscaled/ {print $1, $5}' | sed -E 's/100\.[0-9]+\.[0-9]+\.[0-9]+/<tailnet-address>/; s/\[fd7a:[^]]*\]/[<tailnet-address-v6>]/'
     echo "end"
+    } | redact
     ;;
   *) die "usage: pi-tailscale.sh install|up|serve|status" ;;
 esac
