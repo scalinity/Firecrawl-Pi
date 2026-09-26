@@ -1,0 +1,68 @@
+{
+  "schema": "fcpi.budget-policy/v1",
+  "comment": "Provider spending (FIRECRAWL_PI_SPEC.md §14, §15, §28.3; PI_BUDGET_POLICY_FILE). Every paid cap is zero until the owner approves one; PI_PAID_DISPATCH_ENABLED must also be true before a paid provider is called. Amounts are integers: micro-USD (1e-6 USD) or parser credits. A model or parser the policy does not list is refused; one without a rate card in effect is refused (fail closed). Fixture providers are unpaid and draw on their own categories, so the accounting runs end to end without money.",
+  "notifyAtFraction": 0.8,
+  "categories": {
+    "llm": { "paid": true, "unit": "micro_usd", "caps": { "day": 0, "month": 0 } },
+    "parser": { "paid": true, "unit": "credits", "caps": { "month": 0 } },
+    "fixture": { "paid": false, "unit": "micro_usd", "caps": { "day": 5000000 } },
+    "fixture_race": { "paid": false, "unit": "micro_usd", "caps": { "day": 100000 } },
+    "fixture_parser": { "paid": false, "unit": "credits", "caps": { "day": 3000 } }
+  },
+  "paidTotal": { "unit": "micro_usd", "caps": { "day": 0 } },
+  "providers": {
+    "openai": { "kind": "model", "baseUrl": "https://api.openai.com/v1", "credential": "openai_api_key", "paid": true, "maxTokensParam": "max_completion_tokens", "store": false },
+    "fixture-model": { "kind": "model", "baseUrl": "http://model.fixture.fcpi.test:8080/v1", "credential": null, "paid": false, "maxTokensParam": "max_completion_tokens", "store": false },
+    "llamaparse": { "kind": "parser", "baseUrl": "https://api.cloud.llamaindex.ai", "credential": "llamaparse_api_key", "paid": true },
+    "fixture-parser": { "kind": "parser", "baseUrl": "http://parser.fixture.fcpi.test:8080", "credential": null, "paid": false }
+  },
+  "models": {
+    "gpt-4.1-mini-2025-04-14": { "provider": "openai", "category": "llm" },
+    "fcpi-fixture-model": { "provider": "fixture-model", "category": "fixture" },
+    "fcpi-fixture-race": { "provider": "fixture-model", "category": "fixture_race" },
+    "fcpi-fixture-stale": { "provider": "fixture-model", "category": "fixture" }
+  },
+  "parsers": {
+    "llamaparse-cost-effective": { "provider": "llamaparse", "category": "parser", "tier": "cost_effective", "version": "latest" },
+    "fcpi-fixture-parser": { "provider": "fixture-parser", "category": "fixture_parser", "tier": "cost_effective", "version": "fixture-1" }
+  },
+  "rateCards": [
+    { "id": "openai/gpt-4.1-mini-2025-04-14@2026-09-26", "subject": "gpt-4.1-mini-2025-04-14", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "inputPerMTok": 400000, "cachedInputPerMTok": 100000, "outputPerMTok": 1600000,
+      "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini, observed 2026-09-26 (spec O11)" },
+    { "id": "fixture/fcpi-fixture-model@2026-09-26", "subject": "fcpi-fixture-model", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "inputPerMTok": 400000, "cachedInputPerMTok": 100000, "outputPerMTok": 1600000, "source": "fixture: GPT-4.1 Mini's prices, no money" },
+    { "id": "fixture/fcpi-fixture-race@2026-09-26", "subject": "fcpi-fixture-race", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "inputPerMTok": 400000, "cachedInputPerMTok": 100000, "outputPerMTok": 1600000, "source": "fixture: GPT-4.1 Mini's prices, no money" },
+    { "id": "fixture/fcpi-fixture-stale@2026-01-01", "subject": "fcpi-fixture-stale", "effectiveFrom": "2026-01-01", "effectiveTo": "2026-02-01",
+      "inputPerMTok": 400000, "cachedInputPerMTok": 100000, "outputPerMTok": 1600000, "source": "fixture: a rate card no longer in effect" },
+    { "id": "llamaparse/cost_effective@2026-09-26", "subject": "llamaparse-cost-effective", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "creditsPerPage": 3, "microUsdPerCredit": 1250,
+      "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ and https://www.llamaindex.ai/pricing, observed 2026-09-22 (spec O12, O13)" },
+    { "id": "fixture/fcpi-fixture-parser@2026-09-26", "subject": "fcpi-fixture-parser", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "creditsPerPage": 3, "microUsdPerCredit": 0, "source": "fixture: LlamaParse's credits per page, no money" }
+  ],
+  "extraction": {
+    "defaultModel": "gpt-4.1-mini-2025-04-14",
+    "maxInputTokens": 32000,
+    "maxOutputTokens": 4000,
+    "maxRepairs": 1,
+    "maxDocuments": 10,
+    "maxDocumentBytes": 1048576,
+    "maxChunks": 12,
+    "maxSchemaBytes": 16384,
+    "maxSchemaDepth": 6,
+    "maxSchemaProperties": 100,
+    "maxPromptChars": 4000,
+    "requestTimeoutMs": 60000,
+    "resultMaxBytes": 262144
+  },
+  "parsing": {
+    "defaultParser": "llamaparse-cost-effective",
+    "maxPages": 100,
+    "maxBytes": 26214400,
+    "cacheDays": 7,
+    "jobTimeoutMs": 120000
+  },
+  "breaker": { "failures": 3, "windowMs": 60000, "openMs": 300000 }
+}

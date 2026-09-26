@@ -169,6 +169,118 @@ export class Store {
     });
   }
 
+  // ---- provider budgets (spec §28.3) ---------------------------------------------------------------
+  // Reserves `amount` for one provider call before dispatch, against every period cap of its category
+  // and, for a paid USD category, the paid total's daily cap. One transaction: each period row is
+  // updated only while reserved + settled + amount stays within its cap, and PostgreSQL re-checks that
+  // condition against the newest row version when concurrent callers queue on the row lock, so no race
+  // passes a cap. Returns { reservation } for a new one, { existing } when the call key was already
+  // reserved (a retried request), or { exhausted: { category, period, cap, used } }.
+  async reserveBudget(r) {
+    const periods = [...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap })),
+      ...(r.paidTotalCap !== null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap }] : [])];
+    const EXHAUSTED = Symbol("exhausted");
+    try {
+      return await this.#tx(async (c) => {
+        const prior = (await c.query("SELECT * FROM fcpi_retrieval.budget_reservation WHERE call_key = $1 FOR UPDATE", [r.callKey])).rows[0];
+        // A released call never reached the provider and cost nothing: a retry may reserve it again.
+        if (prior && prior.state !== "RELEASED") return { existing: prior };
+        if (prior) await c.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE id = $1", [prior.id]);
+        const notices = [];
+        for (const p of periods) {
+          const start = p.period === "day" ? r.day : r.month;
+          await c.query("INSERT INTO fcpi_retrieval.budget_usage (category, period, period_start) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING", [p.category, p.period, start]);
+          const u = await c.query(
+            `UPDATE fcpi_retrieval.budget_usage SET reserved = reserved + $4
+             WHERE category = $1 AND period = $2 AND period_start = $3 AND reserved + settled + $4 <= $5
+             RETURNING reserved, settled, notified`, [p.category, p.period, start, r.amount, p.cap]);
+          if (u.rowCount === 0) {
+            const used = (await c.query("SELECT reserved + settled AS used FROM fcpi_retrieval.budget_usage WHERE category = $1 AND period = $2 AND period_start = $3", [p.category, p.period, start])).rows[0];
+            throw Object.assign(new Error("exhausted"), { [EXHAUSTED]: { category: p.category, period: p.period, cap: p.cap, used: Number(used?.used ?? 0) } });
+          }
+          const row = u.rows[0], total = Number(row.reserved) + Number(row.settled);
+          // The notification threshold (spec §28.3: notify at 80%): crossed once per period row.
+          if (!row.notified && p.cap > 0 && total >= r.notifyAt * p.cap) {
+            await c.query("UPDATE fcpi_retrieval.budget_usage SET notified = true WHERE category = $1 AND period = $2 AND period_start = $3", [p.category, p.period, start]);
+            notices.push({ category: p.category, period: p.period, used: total, cap: p.cap });
+          }
+        }
+        const reservation = (await c.query(
+          `INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, state, day_start, month_start, paid_total)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'RESERVED', $12, $13, $14) RETURNING *`,
+          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap !== null])).rows[0];
+        return { reservation, notices };
+      });
+    } catch (e) {
+      if (e[EXHAUSTED]) return { exhausted: e[EXHAUSTED] };
+      // Two callers raced on one call key: the loser reads the winner's row.
+      if (e.code === "23505") return { existing: (await this.pool.query("SELECT * FROM fcpi_retrieval.budget_reservation WHERE call_key = $1", [r.callKey])).rows[0] };
+      throw e;
+    }
+  }
+
+  // Moves a reservation out of RESERVED/UNCERTAIN: settled at its measured amount (with the call's
+  // usage and stored result), or released when the call demonstrably never reached the provider.
+  // The period rows give back the reservation and take the actual amount in the same transaction.
+  async #close(id, to, actual, fields = {}) {
+    return this.#tx(async (c) => {
+      const res = (await c.query("SELECT * FROM fcpi_retrieval.budget_reservation WHERE id = $1 FOR UPDATE", [id])).rows[0];
+      if (!res || !["RESERVED", "UNCERTAIN"].includes(res.state)) return null;
+      const rows = [...(await c.query("SELECT period FROM fcpi_retrieval.budget_usage WHERE category = $1 AND ((period = 'day' AND period_start = $2) OR (period = 'month' AND period_start = $3))",
+        [res.category, res.day_start, res.month_start])).rows.map((x) => ({ category: res.category, period: x.period })),
+        ...(res.paid_total ? [{ category: "_paid_total", period: "day" }] : [])];
+      for (const p of rows) {
+        await c.query(`UPDATE fcpi_retrieval.budget_usage SET reserved = GREATEST(reserved - $4, 0), settled = settled + $5
+          WHERE category = $1 AND period = $2 AND period_start = $3`, [p.category, p.period, p.period === "day" ? res.day_start : res.month_start, res.reserved, actual]);
+      }
+      return (await c.query(`UPDATE fcpi_retrieval.budget_reservation SET state = $2, actual = $3, usage = $4, result = $5, detail = $6, settled_at = now() WHERE id = $1 RETURNING *`,
+        [id, to, actual, fields.usage ? JSON.stringify(fields.usage) : null, fields.result === undefined ? null : JSON.stringify(fields.result), fields.detail ?? null])).rows[0];
+    });
+  }
+  settleBudget(id, actual, fields) { return this.#close(id, "SETTLED", actual, fields); }
+  releaseBudget(id, detail) { return this.#close(id, "RELEASED", 0, { detail }); }
+  // An outcome nobody can know (the request was sent and no answer came): the whole reservation stays
+  // counted, and the call key is never sent again (spec §24.2).
+  async markBudgetUncertain(id, detail) {
+    await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = $2 WHERE id = $1 AND state = 'RESERVED'", [id, detail]);
+  }
+  async budgetUsage(day, month) {
+    return (await this.pool.query("SELECT category, period, period_start::text AS period_start, reserved::float8 AS reserved, settled::float8 AS settled FROM fcpi_retrieval.budget_usage WHERE (period = 'day' AND period_start = $1) OR (period = 'month' AND period_start = $2) ORDER BY category, period",
+      [day, month])).rows;
+  }
+  async reservationsFor(logicalId) {
+    return (await this.pool.query("SELECT call_key, category, provider, subject, kind, unit, rate_card, reserved::float8 AS reserved, actual::float8 AS actual, state, usage, detail FROM fcpi_retrieval.budget_reservation WHERE logical_id = $1 ORDER BY created_at", [logicalId])).rows;
+  }
+
+  // ---- search (spec §13) ----------------------------------------------------------------------------
+  async searchCacheGet(key) {
+    return (await this.pool.query("SELECT response FROM fcpi_retrieval.search_cache WHERE key = $1 AND expires_at > now()", [key])).rows[0]?.response ?? null;
+  }
+  async searchCachePut(key, response, ttlS) {
+    await this.pool.query(`INSERT INTO fcpi_retrieval.search_cache (key, response, expires_at) VALUES ($1, $2, now() + $3 * interval '1 second')
+      ON CONFLICT (key) DO UPDATE SET response = EXCLUDED.response, created_at = now(), expires_at = EXCLUDED.expires_at`, [key, JSON.stringify(response), ttlS]);
+  }
+  // Admits one query to the backend if fewer than `perHour` went in the last hour, and counts it; the
+  // count and the insert are serialised on an advisory lock, so concurrent queries cannot pass the cap.
+  async admitSearchQuery(perHour) {
+    return this.#tx(async (c) => {
+      await c.query("SELECT pg_advisory_xact_lock(hashtext('fcpi.search.hour'))");
+      const n = Number((await c.query("SELECT count(*) FROM fcpi_retrieval.search_query WHERE at > now() - interval '1 hour'")).rows[0].count);
+      if (n >= perHour) return { admitted: false, count: n };
+      await c.query("INSERT INTO fcpi_retrieval.search_query (outcome) VALUES ('sent')");
+      return { admitted: true, count: n + 1 };
+    });
+  }
+
+  // ---- complex-document parses (spec §15) ------------------------------------------------------------
+  async parseCacheGet(key) {
+    return (await this.pool.query("SELECT pages, markdown FROM fcpi_retrieval.parse_cache WHERE key = $1 AND expires_at > now()", [key])).rows[0] ?? null;
+  }
+  async parseCachePut({ key, owner, bytesSha256, parser, pages, markdown, days }) {
+    await this.pool.query(`INSERT INTO fcpi_retrieval.parse_cache (key, owner, bytes_sha256, parser, pages, markdown, expires_at) VALUES ($1, $2, $3, $4, $5, $6, now() + $7 * interval '1 day')
+      ON CONFLICT (key) DO UPDATE SET markdown = EXCLUDED.markdown, pages = EXCLUDED.pages, created_at = now(), expires_at = EXCLUDED.expires_at`, [key, owner, bytesSha256, parser, pages, markdown, days]);
+  }
+
   // Bounded history: attempt rows and navigation counts older than their use are removed, and so is
   // a domain's pacing row once it holds nothing a decision reads: no live hold, no cooldown ended
   // within the hour that doubling looks back over, no navigation within direct_nav's two days
@@ -180,6 +292,12 @@ export class Store {
          AND (cooldown_until IS NULL OR cooldown_until < now() - interval '1 hour') AND (last_nav_at IS NULL OR last_nav_at < now() - interval '2 days')`);
     await this.pool.query("DELETE FROM fcpi_retrieval.attempt WHERE started_at < now() - interval '30 days'");
     await this.pool.query("DELETE FROM fcpi_retrieval.acquisition WHERE updated_at < now() - interval '30 days'");
+    await this.pool.query("DELETE FROM fcpi_retrieval.search_cache WHERE expires_at < now()");
+    await this.pool.query("DELETE FROM fcpi_retrieval.search_query WHERE at < now() - interval '2 days'");
+    await this.pool.query("DELETE FROM fcpi_retrieval.parse_cache WHERE expires_at < now()");
+    // Usage records outlive the 30 days of job metadata (spec §21.3) so a month's spend stays explainable;
+    // an unsettled reservation is never pruned, since it still counts against its cap.
+    await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED')");
   }
 
   async close() { await this.pool.end(); }

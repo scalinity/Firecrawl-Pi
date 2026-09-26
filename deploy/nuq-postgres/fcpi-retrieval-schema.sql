@@ -64,6 +64,78 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.direct_nav (
 CREATE INDEX IF NOT EXISTS direct_nav_domain_at ON fcpi_retrieval.direct_nav (domain, at);
 CREATE INDEX IF NOT EXISTS direct_nav_at ON fcpi_retrieval.direct_nav (at);
 
+-- M5: provider spending (spec §28.3). One row per budget category and period (a day or a month, UTC)
+-- holds what is reserved and what is settled; a reservation is one conditional UPDATE per period row,
+-- so concurrent callers cannot pass a cap. Amounts are integers in the category's unit (micro-USD, or
+-- parser credits).
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.budget_usage (
+  category      text NOT NULL,
+  period        text NOT NULL CHECK (period IN ('day', 'month')),
+  period_start  date NOT NULL,
+  reserved      bigint NOT NULL DEFAULT 0 CHECK (reserved >= 0),
+  settled       bigint NOT NULL DEFAULT 0 CHECK (settled >= 0),
+  notified      boolean NOT NULL DEFAULT false,
+  PRIMARY KEY (category, period, period_start)
+);
+-- One row per provider call, reserved before dispatch. call_key names the call inside its logical unit
+-- (the logical id, the chunk and whether it is the extraction or its one repair), so a retried request
+-- finds the call it already paid for: a SETTLED row's stored result is reused, a RESERVED or UNCERTAIN
+-- one is never sent again.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.budget_reservation (
+  id            uuid PRIMARY KEY,
+  call_key      text NOT NULL UNIQUE,
+  logical_id    text NOT NULL,
+  category      text NOT NULL,
+  provider      text NOT NULL,
+  subject       text NOT NULL,
+  kind          text NOT NULL CHECK (kind IN ('extract', 'repair', 'parse')),
+  unit          text NOT NULL CHECK (unit IN ('micro_usd', 'credits')),
+  rate_card     text NOT NULL,
+  request_hash  text NOT NULL,
+  reserved      bigint NOT NULL CHECK (reserved > 0),
+  actual        bigint CHECK (actual >= 0),
+  state         text NOT NULL CHECK (state IN ('RESERVED', 'SETTLED', 'RELEASED', 'UNCERTAIN')),
+  day_start     date NOT NULL,
+  month_start   date NOT NULL,
+  paid_total    boolean NOT NULL,
+  usage         jsonb,
+  result        jsonb,
+  detail        text,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  settled_at    timestamptz
+);
+CREATE INDEX IF NOT EXISTS budget_reservation_logical ON fcpi_retrieval.budget_reservation (logical_id);
+CREATE INDEX IF NOT EXISTS budget_reservation_created ON fcpi_retrieval.budget_reservation (created_at);
+
+-- M5: search (spec §13): identical normalized queries answered from here for 15 minutes; a backend or
+-- engine failure is never stored. One row per query sent to the backend, for the hourly cap.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_cache (
+  key         text PRIMARY KEY,
+  response    jsonb NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  expires_at  timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS search_cache_expires ON fcpi_retrieval.search_cache (expires_at);
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_query (
+  at       timestamptz NOT NULL DEFAULT now(),
+  outcome  text NOT NULL
+);
+CREATE INDEX IF NOT EXISTS search_query_at ON fcpi_retrieval.search_query (at);
+
+-- M5: complex-document parses (spec §15), cached by the document's bytes, the parser, its version and
+-- options, and the owner.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.parse_cache (
+  key           text PRIMARY KEY,
+  owner         text NOT NULL,
+  bytes_sha256  text NOT NULL,
+  parser        text NOT NULL,
+  pages         integer NOT NULL CHECK (pages >= 0),
+  markdown      text NOT NULL,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  expires_at    timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS parse_cache_expires ON fcpi_retrieval.parse_cache (expires_at);
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'fcpi_retrieval') THEN
