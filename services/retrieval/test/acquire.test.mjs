@@ -115,6 +115,17 @@ test("downloads and searches hold a URL permit, and repeated downloads of one UR
   } finally { f.s.close(); }
 });
 
+test("a download's final URL is one a response header can carry (review finding S10)", async () => {
+  const f = await serve((req, res) => res.writeHead(200, { "content-type": "application/pdf" }).end("%PDF-"));
+  try {
+    const store = new FakeStore(), policy = policyFor([["f.fixture.fcpi.test", f.port, "fixture"]]);
+    const fetchOnce = makeFetcher({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
+    const r = await fetchOnce({ requestId: "r-s10", url: `http://f.fixture.fcpi.test:${f.port}/doc-€.pdf`, purpose: "document" });
+    assert.equal(r.finalUrl, `http://f.fixture.fcpi.test:${f.port}/doc-%E2%82%AC.pdf`);
+    assert.doesNotThrow(() => http.validateHeaderValue("x-fcpi-final-url", r.finalUrl));
+  } finally { f.s.close(); }
+});
+
 test("a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)", async () => {
   const t = await serve((req, res) => res.writeHead(503, { "content-type": "text/html" }).end("<p>down</p>"));
   try {

@@ -242,7 +242,9 @@ export function retryAfterSeconds(v) {
 
 // POST /internal/fetch: one direct attempt for an auxiliary download (sitemap, document,
 // discovery), under the same target, pacing, permit and size rules, without the quality check or
-// the browser. Resolves { status, headers, body, finalUrl } or throws Denied.
+// the browser. Resolves { status, headers, body, finalUrl } or throws Denied; finalUrl is the
+// serialized URL, which a response header can carry (a raw one may hold characters it cannot:
+// review finding S10).
 // Its logical id is the caller's, or one derived from the purpose, method, URL and a ten-minute
 // window, so repeated downloads of one URL (upstream retries, NuQ requeues, a second crawl of the
 // same site) share one budget of attempts (review finding W1).
@@ -284,7 +286,7 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
       await store.finishAttempt(attemptId, { outcome: "fetched", targetStatus: r.status, bytes: r.bytes });
       if (r.status === 429) await store.coolDown(domainOf(parseTarget(r.finalUrl, policy)), retryAfterSeconds(r.headers["retry-after"]));
       log({ event: "fetch", request_id: b.requestId, purpose: b.purpose, url_hmac: urlHmac(b.url), target_status: r.status, bytes: r.bytes });
-      return r;
+      return { ...r, finalUrl: new URL(r.finalUrl).href };
     } finally {
       await releaseAll(log, [() => store.releasePermit("url", holder)]);
     }
