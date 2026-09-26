@@ -1,0 +1,21 @@
+### after_meta
+2026-09-26T04:19:43Z
+source_commit=8ca9d7c0998110f25bc1e1a2a79ce2b8000fe6ca
+guard_table=present
+guard_file_sha256=f7bb2865dd6d4c98afa0a81f816dfa70c2cf8131ab93b2f69af5e002e5747f1b guard_repo_sha256=f7bb2865dd6d4c98afa0a81f816dfa70c2cf8131ab93b2f69af5e002e5747f1b
+### after_probe
+gateway {"utc":"2026-09-26T04:19:43.902Z","tcp":{"host_bridge_53":{"connected":false,"error":"timeout"},"host_lan_22":{"connected":false,"error":"timeout"},"public_443":{"connected":false,"error":"timeout"}},"dns_example_com":{"resolved":false,"error":"timeout"}}
+### after_counters
+access_forward_out_dropped packets=7
+access_forward_in_dropped packets=0
+egress_ipv6_dropped packets=0
+egress_special_dropped packets=15
+egress_local_dropped packets=0
+egress_web_accepted packets=0
+egress_other_dropped packets=6
+egress_in_dropped packets=0
+access_input_new_dropped packets=6
+egress_dns_udp_accepted packets=2
+egress_dns_tcp_accepted packets=2
+egress_input_dropped packets=48
+end

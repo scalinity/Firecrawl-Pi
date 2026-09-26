@@ -17,6 +17,9 @@ const role = process.env.ROLE;
 const lan = process.env.PI_LAN_ADDRESS;
 if (!/^\d{1,3}(\.\d{1,3}){3}$/.test(lan ?? "")) throw new Error("PI_LAN_ADDRESS must be the host LAN IPv4 address");
 
+// Another address on the host's LAN (/24), never printed: traffic to it is forwarded, so it meets
+// the guard's host-local rule, where traffic to the host's own address is delivered to the host.
+const neighbour = lan.replace(/\.\d+$/, lan.endsWith(".1") ? ".2" : ".1");
 const tcp = (host, port, ms = 3000) => new Promise((resolve) => {
   const s = connect({ host, port, timeout: ms });
   s.on("connect", () => { s.destroy(); resolve({ ok: true }); });
@@ -70,8 +73,9 @@ const cases = {
     })],
   ],
   retrieval: [
-    ["tcp lan:22 (host LAN, guard egress_local)", "fail", () => tcp(lan, 22)],
-    ["tcp lan:80 (host LAN web port, guard egress_local)", "fail", () => tcp(lan, 80)],
+    ["tcp lan:22 (the host's own LAN address, guard input)", "fail", () => tcp(lan, 22)],
+    ["tcp lan:80 (the host's own LAN address, guard input)", "fail", () => tcp(lan, 80)],
+    ["tcp lan-neighbour:80 (another host on the LAN, guard egress_local)", "fail", () => tcp(neighbour, 80)],
     ["tcp 10.231.6.1:22 (host on the bridge, guard input)", "fail", () => tcp("10.231.6.1", 22)],
     ["tcp 10.231.6.1:80 (host web listener on the bridge, guard input)", "fail", () => tcp("10.231.6.1", 80)],
     ["tcp 169.254.169.254:80 (metadata, guard special)", "fail", () => tcp("169.254.169.254", 80)],
