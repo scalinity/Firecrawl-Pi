@@ -25,9 +25,10 @@ redact() { sed "s/${LAN//./\\.}/<pi-lan-address>/g${WAN:+; s/${WAN//./\\.}/<pi-w
 counters() { sudo -n nft list table inet fcpi_guard | grep 'counter packets' | sed -E 's/.*counter packets ([0-9]+) bytes [0-9]+.*comment "([a-z0-9_]+)".*/\2 packets=\1/'; }
 
 sec meta
-# dockerd's start reloads the guard and resets its counters; the same value at both ends of a window
-# shows the counters were not reset within it.
-echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) wan_configured=$([ -n "$WAN" ] && echo yes || echo no) docker_active_since=$(systemctl show docker.service -p ActiveEnterTimestampMonotonic --value)"
+# Every load of the guard (dockerd's start, or pi-init) deletes and recreates its table, which resets
+# the counters and gives the table a new handle: the same handle at both ends of a window shows the
+# counters were not reset within it.
+echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) wan_configured=$([ -n "$WAN" ] && echo yes || echo no) guard_table_handle=$(sudo -n nft -a list table inet fcpi_guard | sed -n '1s/.*# handle \([0-9]*\).*/\1/p')"
 if [ "${1:-}" = counters ]; then sec counters; counters; sec end; echo end; exit 0; fi
 
 sec attachments

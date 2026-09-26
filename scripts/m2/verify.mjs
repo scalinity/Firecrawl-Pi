@@ -590,7 +590,7 @@ const checks = {
 
   // ============================================================== egress, Cloud and exposure
   X01: { name: "zero-firecrawl-cloud-attempts", inputs: [`${RAW}egress-probe.txt`, `${RAW}guard-window-open.txt`, `${RAW}rt-ssrf.txt`],
-    expected: "every core instance's saved log (scripts/m2/pi-core-logs.sh, R7) classifies each Cloud line as a refusal, a refused job's line or a request echo, and each name-resolution failure as a project service, with its harness-start positive control; the Cloud test targets were refused by policy (the positive control that they were asked); across the whole fixture window, from a guard-counter snapshot taken before its first phase to the egress probe after its last, the guard accepted no web connection on the egress bridge, so no Cloud or other public web connection was made",
+    expected: "every core instance's saved log (scripts/m2/pi-core-logs.sh, R7) classifies each Cloud line as a refusal, a refused job's line or a request echo, and each name-resolution failure as a project service, with its harness-start positive control; the Cloud test targets were refused by policy (the positive control that they were asked); across the whole fixture window, from a guard-counter snapshot taken before its first phase to the egress probe after its last, with the guard's table not reloaded between them, the guard accepted no web connection on the egress bridge, so no Cloud or other public web connection was made",
     run() {
       const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard", `${RAW}`], { encoding: "utf8" }).split("\n").filter((f) => /core-logs-.*\.txt$/.test(f));
       const recs = [];
@@ -604,20 +604,21 @@ const checks = {
       const unclassifiedWithCloud = recs.filter((r) => !r.c && r.cloudCount > 0 && !latest.some((x) => x.sec.slice(-12) === r.sec.slice(-12)));
       const ssrf = phase("ssrf");
       const refusedCloud = Object.values(ssrf.cases).filter((c) => /CLOUD_DENIED/.test(c.error ?? "") || c.failure === "CLOUD_DENIED").length;
-      // The window: the counters at its opening, the egress probe at its close; every fixture phase and
-      // NuQ test lies between (their meta times), and no dockerd start reloaded the guard in between.
+      // The window: the counters at its opening, the egress probe at its close; every retrieval phase
+      // and NuQ test of the final corpus lies between (their meta times), and the guard was not
+      // reloaded in between (the same table handle at both ends).
       const web = (f, sec) => +((sections(f)[sec] ?? []).find((l) => l.startsWith("egress_web_accepted")) ?? "=NaN").split("=")[1];
       const utcOf = (f) => Date.parse(((sections(f).meta ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]);
       const open = utcOf(`${RAW}guard-window-open.txt`), close = utcOf(`${RAW}egress-probe.txt`);
-      const phases = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard", `${RAW}`], { encoding: "utf8" }).split("\n")
-        .filter((f) => /\/(rt-[a-z-]+|nuq-(broker|kill|stall))\.txt$/.test(f));
-      const times = phases.map((f) => Date.parse(((Object.entries(sections(f)).find(([k]) => /_meta$/.test(k))?.[1] ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]));
-      const inside = times.length >= 10 && times.every((t) => Number.isFinite(t) && t > open && t < close);
-      const dockerd = (f) => ((sections(f).meta ?? []).join(" ").match(/docker_active_since=(\S+)/) ?? [])[1];
-      const sameGuard = !!dockerd(`${RAW}guard-window-open.txt`) && dockerd(`${RAW}guard-window-open.txt`) === dockerd(`${RAW}egress-probe.txt`);
+      const phases = [...["static", "ssrf", "browser", "browser-down", "budget", "pacing", "permits", "permits-before-chromium", "cancel", "crash", "stress", "overcap", "paths"].map((p) => `${RAW}rt-${p}.txt`),
+        ...["broker", "kill", "stall"].map((t) => `${RAW}nuq-${t}.txt`)];
+      const times = phases.map((f) => has(f) ? Date.parse(((Object.entries(sections(f)).find(([k]) => /_meta$/.test(k))?.[1] ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]) : NaN);
+      const inside = times.every((t) => Number.isFinite(t) && t > open && t < close);
+      const handle = (f) => ((sections(f).meta ?? []).join(" ").match(/guard_table_handle=(\d+)/) ?? [])[1];
+      const sameGuard = !!handle(`${RAW}guard-window-open.txt`) && handle(`${RAW}guard-window-open.txt`) === handle(`${RAW}egress-probe.txt`);
       const delta = web(`${RAW}egress-probe.txt`, "guard_after") - web(`${RAW}guard-window-open.txt`, "counters");
       const ok = latest.length >= 4 && bad.length === 0 && unclassifiedWithCloud.length === 0 && refusedCloud >= 3 && inside && sameGuard && delta === 0;
-      return { ok, actual: `instance records classified=${latest.length} across ${files.length} captures; with unexplained lines or no control=${bad.map((r) => `${r.f}#${r.sec}`).join(",") || "none"}; unclassified with Cloud lines=${unclassifiedWithCloud.length}; Cloud targets refused by policy=${refusedCloud}; fixture window holds ${phases.length} phase records=${inside}, guard not reloaded=${sameGuard}, web accepts in the window=${delta}` };
+      return { ok, actual: `instance records classified=${latest.length} across ${files.length} captures; with unexplained lines or no control=${bad.map((r) => `${r.f}#${r.sec}`).join(",") || "none"}; unclassified with Cloud lines=${unclassifiedWithCloud.length}; Cloud targets refused by policy=${refusedCloud}; all ${phases.length} phase records inside the window=${inside}, guard not reloaded=${sameGuard}, web accepts in the window=${delta}` };
     } },
   X02: { name: "core-has-no-direct-egress", inputs: [`${RAW}egress-probe.txt`, `${RAW}stack.txt`],
     expected: "every network the core joins is internal and it has no default route; from inside it, public names do not resolve and no public, LAN or egress-bridge address connects, while the retrieval service (its only way out) answers",
