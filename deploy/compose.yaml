@@ -1,5 +1,6 @@
 # FCPI curated Compose (M1: durable, private core; M2: guarded retrieval and a sandboxed browser;
-# M3: the authorized REST gateway with its durable job ledger; M4: the stateless MCP service behind it).
+# M3: the authorized REST gateway with its durable job ledger; M4: the stateless MCP service behind it;
+# M5: private SearXNG, and the search, model and parser adapters in the retrieval service).
 # Start and stop through systemd (fcpi-stack.service). The fail-closed data check
 # (deploy/host/fcpi-data-check.sh) runs before every start of the stack and, through a
 # docker.service drop-in, before every dockerd start, which is when restart policies
@@ -10,7 +11,8 @@
 # (publication; gateway only), fcpi_api (gateway <-> core), fcpi_platform (gateway <-> PostgreSQL),
 # fcpi_core (core, data services and the retrieval service), fcpi_acquire (core <-> retrieval service),
 # fcpi_browser (retrieval service <-> browser worker), fcpi_fixture (retrieval service and the
-# fixtures), fcpi_mcp (gateway <-> MCP service; M4), all internal and isolated;
+# fixtures), fcpi_mcp (gateway <-> MCP service; M4), fcpi_search (retrieval service <-> SearXNG; M5),
+# fcpi_model (gateway <-> the retrieval service's extraction listener; M5), all internal and isolated;
 # and fcpi_egress (the retrieval service alone), the only way out, guarded by fcpi_guard.
 # The core has no route out: every acquisition goes through the retrieval service (M2).
 # Every bind mount sets create_host_path: false, so a missing data path fails the
@@ -229,8 +231,9 @@ services:
       # unset: the private fixture is reached only through the service's fixture allowlist
       # (review finding R4), and config.ts refuses the profile if the flag is set.
       PI_RETRIEVAL_URL: http://retrieval-service:3310
-      # Search asks the service's SearXNG-compatible route (a fixture backend until M5);
-      # patches/0005 removes the direct DuckDuckGo fallback.
+      # Search asks the service's SearXNG-compatible route, which asks the private SearXNG (M5);
+      # patches/0005 removes the direct DuckDuckGo fallback and 0007 types every search failure.
+      # No OPENAI_*, MODEL_* or parser variable: no native model path is enabled (spec §14).
       SEARXNG_ENDPOINT: http://retrieval-service:3310/searxng
       DISABLE_WEBHOOK_DELIVERY: "true"
       NODE_OPTIONS: --max-old-space-size=256
@@ -300,7 +303,9 @@ services:
       PI_POSTGRES_USER: fcpi_gateway
       PI_CLOUD_ACCESS_ENABLED: "false"
       PI_MCP_URL: http://10.231.8.20:3400
-    secrets: [gateway_postgres_password]
+      # M5: the retrieval service's extraction listener on fcpi_model, for the json format and /v2/extract.
+      PI_EXTRACT_URL: http://10.231.9.20:3314
+    secrets: [gateway_postgres_password, gateway_retrieval_token]
     volumes:
       - type: bind
         source: /opt/firecrawl-pi/deploy/policies/capabilities.json
@@ -347,12 +352,14 @@ services:
     # Not on fcpi_core: the one host-published container reaches the core's API (fcpi_api) and
     # PostgreSQL alone (fcpi_platform), as its own DML-only role; no Redis, RabbitMQ, retrieval
     # service or Prometheus. M4: fcpi_mcp at a fixed address, where the MCP service calls its REST
-    # routes and it proxies /mcp to the MCP service.
+    # routes and it proxies /mcp to the MCP service. M5: fcpi_model, where it reaches the retrieval service's
+    # extraction listener, and nothing else of that service.
     networks:
       access: {}
       api: {}
       platform: {}
       mcp: { ipv4_address: 10.231.8.10 }
+      model: { ipv4_address: 10.231.9.10 }
     logging: *logging-app
 
   # M4: the MCP service (services/mcp, spec §17): the official SDK's stateless request factory. It is
@@ -460,7 +467,17 @@ services:
       PI_PAID_DISPATCH_ENABLED: "false"
       PI_CLOUD_ACCESS_ENABLED: "false"
       PI_BROWSER_EXTRAS_ENABLED: "false"
-    secrets: [retrieval_postgres_password, retrieval_core_token_sha256, retrieval_browser_token]
+      # M5: SearXNG on fcpi_search, the search proxy SearXNG's engines leave through, the gateway's
+      # extraction listener on fcpi_model, the budget policy, the provider credentials (a directory, so a key
+      # placed there later needs no recreation; an absent key is BLOCKED_CREDENTIAL or PARSER_REQUIRED) and
+      # the host's selection of engines, model and parser.
+      PI_SEARCH_URL: http://10.231.10.20:8080/search
+      PI_SEARCH_PROXY_LISTEN: 10.231.10.10:3313
+      PI_EXTRACT_LISTEN: 10.231.9.20:3314
+      PI_BUDGET_POLICY_FILE: /srv/policy/budget.json
+      PI_PROVIDERS_DIR: /run/providers
+      PI_SELECTION_FILE: /srv/selection/selection.json
+    secrets: [retrieval_postgres_password, retrieval_core_token_sha256, retrieval_browser_token, retrieval_gateway_token_sha256, retrieval_searxng_proxy_sha256]
     volumes:
       - type: bind
         source: /opt/firecrawl-pi/deploy/policies/egress.json
@@ -471,6 +488,21 @@ services:
       - type: bind
         source: /etc/firecrawl-pi/egress-local
         target: /srv/local
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/policies/budget.json
+        target: /srv/policy/budget.json
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /etc/firecrawl-pi/secrets/providers
+        target: /run/providers
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /etc/firecrawl-pi/selection
+        target: /srv/selection
         read_only: true
         bind: { create_host_path: false }
     dns: [10.231.6.1]
@@ -496,7 +528,56 @@ services:
       core: {}
       fixture: {}
       egress: {}
+      search: { ipv4_address: 10.231.10.10 }
+      model: { ipv4_address: 10.231.9.20 }
     logging: *logging-app
+
+  # M5: private SearXNG (spec §13), JSON only, one worker, no limiter. Its only network is fcpi_search, whose
+  # other member is the retrieval service: every engine request leaves through that service's search proxy
+  # (deploy/searxng/settings.yml), which the host's selection limits to the fixture engine or the live
+  # engines' hosts. Non-root, read-only root, settings rendered to a tmpfs by deploy/searxng/entrypoint.sh.
+  searxng:
+    image: searxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19
+    platform: linux/arm64
+    pull_policy: missing
+    hostname: searxng
+    restart: unless-stopped
+    user: "3330:3330"
+    entrypoint: ["/fcpi/entrypoint.sh"]
+    environment:
+      GRANIAN_WORKERS: "1"
+      GRANIAN_HOST: 0.0.0.0
+      GRANIAN_PORT: "8080"
+    secrets:
+      - { source: searxng_secret_key, target: searxng_secret_key }
+      - { source: searxng_proxy_password, target: searxng_proxy_password }
+    volumes:
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/searxng
+        target: /fcpi
+        read_only: true
+        bind: { create_host_path: false }
+    tmpfs:
+      - /etc/searxng:uid=3330,gid=3330,mode=0700,size=1m
+      - /var/cache/searxng:uid=3330,gid=3330,mode=0700,size=32m
+      - /tmp:size=16m
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 320m
+    memswap_limit: 320m
+    cpus: 0.4
+    pids_limit: 64
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    networks:
+      search: { ipv4_address: 10.231.10.20 }
+    logging: *logging-dep
 
   # M2: bounded Chromium (spec §12), non-root with the sandbox on under the project seccomp profile
   # (Docker's default plus chroot, clone and unshare; scripts/m2/build-seccomp.mjs). Its network is
@@ -610,6 +691,41 @@ services:
         aliases: [m3.fixture.fcpi.test]
     logging: *logging-dep
 
+  # M5's controlled documents and fixture providers (tests/fixtures/m5/server.mjs): every document class of
+  # spec §15, the OpenAI-compatible model, the LlamaParse-compatible parser and the engine behind
+  # SearXNG's "fcpi fixture", under the fixture names the retrieval service's policy lists.
+  fixture-m5:
+    image: node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+    platform: linux/arm64
+    pull_policy: missing
+    hostname: fixture-m5
+    restart: unless-stopped
+    user: "8080:8080"
+    command: ["node", "/fixtures/m5/server.mjs"]
+    volumes:
+      - type: bind
+        source: /opt/firecrawl-pi/tests/fixtures
+        target: /fixtures
+        read_only: true
+        bind: { create_host_path: false }
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 128m
+    memswap_limit: 128m
+    cpus: 0.2
+    pids_limit: 32
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/healthz',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      fixture:
+        aliases: [m5.fixture.fcpi.test, model.fixture.fcpi.test, parser.fixture.fcpi.test, search.fixture.fcpi.test]
+    logging: *logging-dep
+
 networks:
   # Not internal: port publishing needs a non-internal bridge. Only the gateway joins it.
   access:
@@ -690,6 +806,26 @@ networks:
       com.docker.network.bridge.gateway_mode_ipv4: isolated
     ipam:
       config: [{ subnet: 10.231.8.0/24 }]
+  # M5: the retrieval service's search proxy and SearXNG, internal and isolated: SearXNG has no other route.
+  search:
+    name: fcpi_search
+    internal: true
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: fcpi-search
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+    ipam:
+      config: [{ subnet: 10.231.10.0/24 }]
+  # M5: the gateway and the retrieval service's extraction listener, internal and isolated; nothing else joins.
+  model:
+    name: fcpi_model
+    internal: true
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: fcpi-model
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+    ipam:
+      config: [{ subnet: 10.231.9.0/24 }]
   # M2: the retrieval service's way out, and the only non-internal network besides the gateway's.
   # fcpi_guard admits new TCP connections to public addresses on 80 and 443 and DNS to the host
   # address 10.231.6.1; the rest is dropped and counted (deploy/host/fcpi-guard.nft).
@@ -721,3 +857,9 @@ secrets:
   # M3 (scripts/m3/pi-init-m3.sh)
   gateway_postgres_password: { file: /etc/firecrawl-pi/secrets/gateway_postgres_password }
   postgres_gateway_role_password: { file: /etc/firecrawl-pi/secrets/postgres_gateway_role_password }
+  # M5 (scripts/m5/pi-init-m5.sh)
+  gateway_retrieval_token: { file: /etc/firecrawl-pi/secrets/gateway_retrieval_token }
+  retrieval_gateway_token_sha256: { file: /etc/firecrawl-pi/secrets/retrieval_gateway_token_sha256 }
+  retrieval_searxng_proxy_sha256: { file: /etc/firecrawl-pi/secrets/retrieval_searxng_proxy_sha256 }
+  searxng_proxy_password: { file: /etc/firecrawl-pi/secrets/searxng_proxy_password }
+  searxng_secret_key: { file: /etc/firecrawl-pi/secrets/searxng_secret_key }

@@ -1,0 +1,64 @@
+# FCPI's private SearXNG (FIRECRAWL_PI_SPEC.md §13): JSON output only, a small engine set, no limiter, no
+# public UI, one application worker. deploy/searxng/entrypoint.sh copies this file to the container's
+# tmpfs and appends the outgoing section, which carries the search proxy's credential; the server's
+# secret key comes from SEARXNG_SECRET. Every engine request leaves through the retrieval service's search
+# proxy, the container's only route: while the host's selection is "fixture" that proxy lets only the
+# fixture engine through, and while it is "live" only the live engines' hosts (deploy/policies/egress.json).
+use_default_settings:
+  engines:
+    # The live engine set (policy search.engines.live), kept from SearXNG's defaults; the fixture engine
+    # is defined below.
+    keep_only:
+      - duckduckgo
+      - bing
+      - brave
+
+general:
+  instance_name: "fcpi"
+  enable_metrics: false
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "auto"
+  # An engine that fails is suspended briefly rather than for SearXNG's default hours, so a transient
+  # block does not hide the engine through a whole acceptance window.
+  ban_time_on_fail: 5
+  max_ban_time_on_fail: 120
+  suspended_times:
+    SearxEngineAccessDenied: 300
+    SearxEngineCaptcha: 600
+    SearxEngineTooManyRequests: 300
+    cf_SearxEngineCaptcha: 600
+    cf_SearxEngineAccessDenied: 300
+    recaptcha_SearxEngineCaptcha: 600
+  # JSON only: the retrieval service is the one client, and no HTML page is served.
+  formats:
+    - json
+
+server:
+  port: 8080
+  bind_address: "0.0.0.0"
+  base_url: false
+  limiter: false
+  public_instance: false
+  image_proxy: false
+  method: "GET"
+
+valkey:
+  url: false
+
+engines:
+  # The controlled engine (tests/fixtures/m5/providers.mjs searchHandler), reached through the search
+  # proxy like every other engine, for the fixture phase's results, empty answers and failures.
+  - name: fcpi fixture
+    engine: json_engine
+    shortcut: fcpif
+    categories: [general]
+    search_url: http://search.fixture.fcpi.test:8080/search?q={query}
+    results_query: results
+    url_query: url
+    title_query: title
+    content_query: content
+    timeout: 3.0
+    disabled: false
