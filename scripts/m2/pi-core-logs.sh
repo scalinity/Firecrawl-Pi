@@ -22,6 +22,33 @@ for id in $ids; do
   for pat in 'firecrawl\.dev' 'firecrawl\.com' 'mendable' 'integrations\.' 'duckduckgo' 'posthog' 'sentry\.io' 'getaddrinfo' 'EAI_AGAIN' 'ENOTFOUND' 'ENETUNREACH'; do
     echo "pattern=$pat count=$(sudo -n grep -ciE "$pat" "$f" || true)"
   done
+  # Every Cloud match is classified. Explained: a refusal (CLOUD_DENIED), a line of a job that
+  # was refused (its scrapeId or jobId is on a refusal line), or the core's echo of the URL it
+  # was asked for ('Scraping URL "…"'). Every name-resolution failure must name a project
+  # service (as a broker outage produces). Anything else is printed, cut, as unexplained.
+  sudo -n sed -E 's/\x1b\[[0-9;]*m//g' "$f" | awk '
+    # The ids a line names, space-separated (no regex intervals: mawk lacks them).
+    function ids(s,   out, m) { out = ""; while (match(s, /(scrapeId|jobId)":"[0-9a-f-]+/)) { m = substr(s, RSTART, RLENGTH); sub(/.*":"/, "", m); out = out " " m; s = substr(s, RSTART + RLENGTH) } return out }
+    BEGIN { cloud = "firecrawl\\.(dev|com)|mendable"; dns = "getaddrinfo|EAI_AGAIN|ENOTFOUND"
+            internal = "\"hostname\":\"(rabbitmq|redis|nuq-postgres|retrieval-service|access-gateway)\"" }
+    { line[NR] = $0 }
+    /CLOUD_DENIED/ { k = split(ids($0), a, " "); for (j = 1; j <= k; j++) id[a[j]] = 1 }
+    END {
+      for (i = 1; i <= NR; i++) {
+        l = line[i]
+        if (tolower(l) ~ cloud) {
+          c = "unexplained"
+          if (l ~ /CLOUD_DENIED/) c = "refusal"
+          else if (l ~ /Scraping URL "/) c = "request_echo"
+          else { k = split(ids(l), a, " "); for (j = 1; j <= k; j++) if (a[j] in id) { c = "refused_job"; break } }
+          n["cloud_" c]++; if (c == "unexplained") u[++nu] = l
+        }
+        if (l ~ dns) { c = (l ~ internal) ? "internal" : "unexplained"; n["dns_" c]++; if (c == "unexplained") u[++nu] = l }
+      }
+      printf "classified cloud_refusal=%d cloud_refused_job=%d cloud_request_echo=%d cloud_unexplained=%d dns_internal=%d dns_unexplained=%d\n",
+        n["cloud_refusal"], n["cloud_refused_job"], n["cloud_request_echo"], n["cloud_unexplained"], n["dns_internal"], n["dns_unexplained"]
+      for (i = 1; i <= nu; i++) print "unexplained " substr(u[i], 1, 300)
+    }'
   # Positive controls: a line every harness start prints, and the instance's newest log line, so
   # a failed or truncated capture cannot pass as "no Cloud lines".
   echo "control=Starting services count=$(sudo -n grep -c 'Starting services' "$f" || true)"
