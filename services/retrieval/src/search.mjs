@@ -47,8 +47,10 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log })
     const inbound = new URL(inboundUrl, "http://x");
     const q = inbound.searchParams.get("q") ?? "";
     if (!q.trim() || q.length > 500) throw new Denied("INVALID_REQUEST", "the query must be 1-500 characters");
+    // Only the first page: SearXNG skips engines that cannot page for a later one without naming them, so an
+    // empty later page could not be told from a true empty answer. The core asks for page 1 alone (review S14).
     const pageno = Number(inbound.searchParams.get("pageno") ?? "1");
-    if (!Number.isInteger(pageno) || pageno < 1 || pageno > 5) throw new Denied("INVALID_REQUEST", "pageno must be 1-5");
+    if (pageno !== 1) throw new Denied("INVALID_REQUEST", "only the first page of results is served (pageno=1)");
     const language = inbound.searchParams.get("language") || "auto";
     if (!/^[A-Za-z-]{1,16}$/.test(language)) throw new Denied("INVALID_REQUEST", "language must be a language tag");
     const selection = getSelection().search;

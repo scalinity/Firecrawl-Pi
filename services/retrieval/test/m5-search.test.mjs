@@ -92,6 +92,14 @@ test("the hourly cap refuses before the backend, and invalid queries are refused
   } finally { await r.srv.close(); }
 });
 
+test("only the first page is served: a later one could look like a true empty answer (review S14)", async () => {
+  const r = await rig();
+  try {
+    const search = makeSearcher({ store: r.store, getPolicy: () => POLICY, getSelection: () => ({ search: "live" }), searchUrl: "http://127.0.0.1:1/search", log: () => {} });
+    await assert.rejects(search("/searxng/search?q=widgets&format=json&pageno=2"), (x) => x.failureClass === "INVALID_REQUEST" && /first page/.test(x.detail));
+  } finally { await r.srv.close(); }
+});
+
 test("the engines are the selection's, never the caller's; the query is logged only as a hash", async () => {
   const r = await rig("fixture");
   try {
