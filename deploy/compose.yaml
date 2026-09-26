@@ -220,7 +220,7 @@ services:
       DISABLE_WEBHOOK_DELIVERY: "true"
       NODE_OPTIONS: --max-old-space-size=256
       # Deliberately unset: USE_GO_MARKDOWN_PARSER (the Go library stays inert),
-      # BULL_AUTH_KEY (queue admin disabled), SEARXNG_ENDPOINT (M5), every Cloud key.
+      # BULL_AUTH_KEY (queue admin disabled), every Cloud key.
     secrets: [core_postgres_password, core_redis_url, core_nuq_rabbitmq_url, core_retrieval_token]
     volumes:
       - type: bind

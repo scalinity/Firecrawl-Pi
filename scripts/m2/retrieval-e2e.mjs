@@ -110,6 +110,8 @@ if (groups.has("browser")) {
   await scrape("C04-delayed", `${M2}/delayed.html`);
   await scrape("C06-cookie-js", `${M2}/cookie-js`);
   await scrape("S15-subresources", `${M2}/subresources.html`);
+  // The same page asked of the service directly, which returns each refused subresource by host.
+  await acquire("S15b-subresources-direct", { logicalAcquisitionId: `m2-subres-${randomUUID()}`, url: `${M2}/subresources.html?direct=1` });
 }
 
 if (groups.has("browser-down")) {
