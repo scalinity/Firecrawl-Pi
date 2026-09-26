@@ -142,6 +142,11 @@ if (groups.has("pacing")) {
   const P = "http://pace.fixture.fcpi.test:8080";
   for (const n of [1, 2, 3]) await acquire(`A03-pace-sequential-${n}`, { logicalAcquisitionId: `m2-pace-${randomUUID()}`, url: `${P}/short.html?seq=${n}` });
   await Promise.all([1, 2].map((n) => acquire(`A04-pace-concurrent-${n}`, { logicalAcquisitionId: `m2-pace-${randomUUID()}`, url: `${P}/short.html?conc=${n}` })));
+  // Pages on m2 that redirect into pace are paced, held and counted there too (review finding C4):
+  // one alone, then two at once.
+  const via = (n) => acquire(`A04b-pace-via-redirect-${n}`, { logicalAcquisitionId: `m2-pace-${randomUUID()}`, url: `${M2}/redirect?to=${encodeURIComponent(`${P}/short.html?via=${n}`)}` });
+  await via(1);
+  await Promise.all([via(2), via(3)]);
   for (let n = 1; n <= 20; n++) {
     const j = await acquire(`A05-pace-cap-${n}`, { logicalAcquisitionId: `m2-pace-${randomUUID()}`, url: `${P}/short.html?cap=${n}` });
     if (j?.failure?.class === "PROXY_REQUIRED") break;

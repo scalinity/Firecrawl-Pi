@@ -130,7 +130,10 @@ async function render(r, signal) {
   if (wantsExtras && !EXTRAS) return { ok: false, failure: { class: "UNSUPPORTED_CAPABILITY", detail: "screenshots and actions are not enabled in this release" } };
   const maxSub = Math.min(Number(r.limits?.maxSubresources) || 200, 200);
   await ensureBrowser();
-  const counters = { requests: 0, blocked: 0, overLimit: 0 };
+  const counters = { requests: 0, blocked: 0, overLimit: 0, offHost: 0 };
+  // The render starts where the direct attempt's paced chain ended; the main frame may not move to
+  // another host, whose navigation no pacing decision covered (review finding C4).
+  const startHost = new URL(r.url).host;
   const context = await browser.newContext({
     proxy: { server: r.proxy.server, username: r.proxy.username, password: r.proxy.password },
     userAgent: r.userAgent, viewport: { width: 1280, height: 800 }, serviceWorkers: "block", acceptDownloads: false,
@@ -150,6 +153,9 @@ async function render(r, signal) {
     await context.route("**/*", (route) => {
       const req = route.request();
       counters.requests++;
+      let mainFrameNavigation = false;
+      try { mainFrameNavigation = req.isNavigationRequest() && !req.frame().parentFrame(); } catch { /* no frame: not a navigation */ }
+      if (mainFrameNavigation && new URL(req.url()).host !== startHost) { counters.offHost++; return route.abort("blockedbyclient"); }
       if (req.resourceType() === "media" || !/^https?:$/.test(new URL(req.url()).protocol)) { counters.blocked++; return route.abort("blockedbyclient"); }
       if (counters.requests > maxSub) { counters.overLimit++; return route.abort("blockedbyclient"); }
       return route.continue();

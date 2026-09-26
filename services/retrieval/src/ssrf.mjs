@@ -4,10 +4,13 @@
 import { BlockList, isIP } from "node:net";
 
 export class Denied extends Error {
-  constructor(failureClass, detail) {
+  // extra: { retryable, retryAfter } when the refusal is a pacing or rate-limit decision.
+  constructor(failureClass, detail, extra = {}) {
     super(`${failureClass}: ${detail}`);
     this.failureClass = failureClass;
     this.detail = detail;
+    this.retryable = extra.retryable ?? false;
+    this.retryAfter = extra.retryAfter ?? null;
   }
 }
 

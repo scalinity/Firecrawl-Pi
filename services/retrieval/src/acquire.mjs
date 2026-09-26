@@ -15,6 +15,8 @@ const PURPOSES = new Set(["page", "robots", "sitemap"]);
 const EXPECTS = new Set(["html", "pdf", "document"]);
 const HMAC_KEY = randomBytes(32); // per process: log correlation without a guessable URL hash (spec §25)
 export const urlHmac = (url) => createHmac("sha256", HMAC_KEY).update(url).digest("hex").slice(0, 32);
+// Pacing and cooldowns are keyed by registrable domain; a fixture by its exact host.
+export const domainOf = (t) => (t.fixture ? t.host : (getDomain(t.host) ?? t.host));
 const sleep = (ms, signal) => new Promise((r) => { const t = setTimeout(r, ms); signal?.addEventListener("abort", () => { clearTimeout(t); r(); }, { once: true }); });
 
 export function validateAcquireRequest(b) {
@@ -46,21 +48,13 @@ function decodeText(buf, contentType) {
   return buf.toString("utf8");
 }
 
-export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, log }) {
-  // Wait for a permit until the deadline; the lease covers the longest acquisition, and is freed
-  // explicitly, or by expiry if this process dies holding it.
-  async function holdPermit(kind, holder, slots, deadline, signal) {
-    for (;;) {
-      if ((await store.takePermit(kind, holder, slots, getPolicy().permitLeaseMs)) !== null) return true;
-      if (Date.now() + 250 > deadline || signal?.aborted) return false;
-      await sleep(250, signal);
-    }
-  }
-
-  // Pace one direct navigation; resolves null when it may go, or a failure.
+// Direct-egress pacing shared by every acquisition path (spec §10.2, §23.1): pace() takes one
+// navigation's decision; pacedFetch() paces every hop of a redirect chain, so a redirect to
+// another registrable domain meets that domain's gap, hold and caps (review finding C4).
+export function makePacer({ store, getPolicy, resolvePublic, lookupFixture }) {
   async function pace(target, holder, deadline, signal) {
     const policy = getPolicy();
-    const domain = target.fixture ? target.host : (getDomain(target.host) ?? target.host);
+    const domain = domainOf(target);
     const limits = target.fixture?.limits === "fixture" ? policy.fixtureLimits : policy.direct;
     for (;;) {
       const d = await store.paceDirect(domain, holder, limits, policy.attempts.browserAttemptMs, !!target.fixture);
@@ -68,6 +62,37 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       if (d.failure) return { domain, failure: d.failure };
       if (Date.now() + d.waitMs > deadline || signal?.aborted) return { domain, failure: { class: "DEADLINE_EXCEEDED", detail: "the domain's pacing would pass the deadline", retryable: true, retryAfter: null } };
       await sleep(d.waitMs, signal);
+    }
+  }
+  // firstDomain: the domain the caller already paced for hop 0. Each later hop to another domain
+  // releases the previous hold and is paced itself; the last hold is released on return.
+  async function pacedFetch(firstDomain, args, holder, deadline, signal) {
+    let held = firstDomain;
+    try {
+      return await guardedFetch({ ...args, policy: getPolicy(), resolvePublic, lookupFixture, signal, onHop: async ({ hop, target: t }) => {
+        if (hop === 0 || domainOf(t) === held) return;
+        if (held) await store.releaseDomain(held, holder);
+        held = null;
+        const p = await pace(t, holder, deadline, signal);
+        if (p.failure) throw new Denied(p.failure.class, `redirect to ${p.domain}: ${p.failure.detail}`, p.failure);
+        held = p.domain;
+      } });
+    } finally {
+      if (held) await store.releaseDomain(held, holder);
+    }
+  }
+  return { pace, pacedFetch };
+}
+
+export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, log }) {
+  const { pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
+  // Wait for a permit until the deadline; the lease covers the longest acquisition, and is freed
+  // explicitly, or by expiry if this process dies holding it.
+  async function holdPermit(kind, holder, slots, deadline, signal) {
+    for (;;) {
+      if ((await store.takePermit(kind, holder, slots, getPolicy().permitLeaseMs)) !== null) return true;
+      if (Date.now() + 250 > deadline || signal?.aborted) return false;
+      await sleep(250, signal);
     }
   }
 
@@ -109,16 +134,14 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const paced = await pace(target, attemptId, deadline, signal);
         if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return fail(paced.failure); }
         try {
-          httpRes = await guardedFetch({ url: req.url, headers: req.headers, maxBytes: policy.maxBodyBytes, deadline: Math.min(deadline, Date.now() + policy.attempts.httpAttemptMs),
-            policy, resolvePublic, lookupFixture, jar, signal });
+          httpRes = await pacedFetch(paced.domain, { url: req.url, headers: req.headers, maxBytes: policy.maxBodyBytes,
+            deadline: Math.min(deadline, Date.now() + policy.attempts.httpAttemptMs), jar }, attemptId, deadline, signal);
         } catch (e) {
           await store.finishAttempt(attemptId, { outcome: e.failureClass ?? "ERROR" });
           if (!(e instanceof Denied)) throw e;
           const transient = e.failureClass === "TARGET_UNREACHABLE";
           if (transient && !sameTierRetried && Date.now() + 3000 < deadline) { sameTierRetried = true; await sleep(700 + Math.floor(Math.random() * 600), signal); continue; }
-          return fail({ class: e.failureClass, detail: e.detail, retryable: transient || e.failureClass === "TIMEOUT" });
-        } finally {
-          await store.releaseDomain(paced.domain, attemptId);
+          return fail({ class: e.failureClass, detail: e.detail, retryable: e.retryable || transient || e.failureClass === "TIMEOUT", retryAfter: e.retryAfter });
         }
         const ct = httpRes.headers["content-type"] ?? null;
         const text = isTextual(ct) ? decodeText(httpRes.body, ct) : null;
@@ -127,7 +150,8 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         await store.finishAttempt(attemptId, { outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: httpRes.status, bytes: httpRes.bytes });
         Object.assign(result, { finalUrl: httpRes.finalUrl, targetStatus: httpRes.status, contentType: ct, bytes: httpRes.bytes, redirects: httpRes.redirects.map((r) => ({ url: r.url, status: r.status })), quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
         if (verdict.verdict === "target_error" && !sameTierRetried && Date.now() + 3000 < deadline) { sameTierRetried = true; await sleep(700 + Math.floor(Math.random() * 600), signal); continue; }
-        if (verdict.verdict === "rate_limited") await store.coolDown(target.fixture ? target.host : (getDomain(target.host) ?? target.host), verdict.failure.retryAfter);
+        // The cooldown belongs to the host that answered 429, wherever the chain began.
+        if (verdict.verdict === "rate_limited") await store.coolDown(domainOf(parseTarget(httpRes.finalUrl, policy)), verdict.failure.retryAfter);
         if (verdict.failure) return fail(verdict.failure);
         if (verdict.verdict !== "js_shell" || req.purpose !== "page" || req.expect !== "html" || req.fast) {
           return finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: httpRes.body.toString("base64") }) });
@@ -135,7 +159,10 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         break;
       }
 
-      // One browser attempt for a JS shell (spec §9.1), on the same permitted direct egress.
+      // One browser attempt for a JS shell (spec §9.1), on the same permitted direct egress. It
+      // renders where the direct attempt ended, a chain already paced hop by hop.
+      const renderUrl = httpRes.finalUrl;
+      const renderTarget = parseTarget(renderUrl, policy);
       const attemptId = randomUUID();
       const ordinal = await store.reserveAttempt({ logicalId: req.logicalAcquisitionId, attemptId, requestId: req.requestId, purpose: req.purpose, strategy: "direct_browser", domain: target.host, maxAttempts: policy.attempts.maxPerPage });
       if (ordinal === null) return fail({ class: "ATTEMPT_BUDGET_EXHAUSTED", detail: `the page's ${policy.attempts.maxPerPage} attempts are spent before its browser attempt` });
@@ -145,10 +172,17 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         await store.finishAttempt(attemptId, { outcome: "RESOURCE_BUSY" });
         return fail({ class: "RESOURCE_BUSY", detail: "no browser permit before the deadline", retryable: true });
       }
-      const paced = await pace(target, attemptId, browserDeadline, signal);
+      const paced = await pace(renderTarget, attemptId, browserDeadline, signal);
       try {
         if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return fail(paced.failure); }
-        const r = await browser.render({ attemptId, url: req.url, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal });
+        const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal });
+        // The worker refuses main-frame navigations to another host, but a server redirect only the
+        // browser followed is not seen until it happened: it is counted against its domain.
+        if (r.finalUrl && r.finalUrl !== renderUrl) {
+          let t = null;
+          try { t = parseTarget(r.finalUrl, policy); } catch { /* refused by the proxy already */ }
+          if (t && domainOf(t) !== paced.domain) { await store.recordNavigation(domainOf(t), !!t.fixture); log({ event: "browser_redirect_counted", attempt_id: attemptId, domain: domainOf(t) }); }
+        }
         const verdict = r.ok ? classify({ status: r.status, contentType: r.contentType ?? "text/html", body: r.html, finalUrl: r.finalUrl, requestedUrl: req.url }) : null;
         // A page whose own structure still says "rendered by script" after its one browser attempt
         // is no content (spec §9.4); a page that is merely short is the page (review finding C5).
@@ -156,6 +190,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const failure = !r.ok ? r.failure : verdict.failure ?? (shell
           ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null);
         await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
+        if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(r.finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }
         if (failure) return fail(failure);
         return finish({ ok: true, body: r.html, finalUrl: r.finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
           bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
@@ -181,6 +216,7 @@ export function retryAfterSeconds(v) {
 // discovery), under the same target, pacing and size rules, without the quality check or the
 // browser. Resolves { status, headers, body, finalUrl } or throws Denied.
 export function makeFetcher({ store, getPolicy, getLocalReady, resolvePublic, lookupFixture, log }) {
+  const { pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture });
   return async function fetchOnce(b, signal) {
     const policy = getPolicy();
     if (!b || typeof b.url !== "string" || typeof b.requestId !== "string") throw new Denied("INVALID_REQUEST", "url and requestId are required");
@@ -195,25 +231,17 @@ export function makeFetcher({ store, getPolicy, getLocalReady, resolvePublic, lo
     const attemptId = randomUUID();
     const ordinal = await store.reserveAttempt({ logicalId, attemptId, requestId: b.requestId, purpose: b.purpose, strategy: "direct_http", domain: target.host, maxAttempts: 1 });
     if (ordinal === null) throw new Denied("ATTEMPT_BUDGET_EXHAUSTED", "this download was already attempted");
-    const domain = target.fixture ? target.host : (getDomain(target.host) ?? target.host);
-    const limits = target.fixture?.limits === "fixture" ? policy.fixtureLimits : policy.direct;
-    for (;;) {
-      const d = await store.paceDirect(domain, attemptId, limits, 30000, !!target.fixture);
-      if (d.go) break;
-      if (d.failure) { await store.finishAttempt(attemptId, { outcome: d.failure.class }); throw new Denied(d.failure.class, d.failure.detail); }
-      if (Date.now() + d.waitMs > deadline) { await store.finishAttempt(attemptId, { outcome: "DEADLINE_EXCEEDED" }); throw new Denied("DEADLINE_EXCEEDED", "pacing would pass the deadline"); }
-      await sleep(d.waitMs, signal);
-    }
+    const paced = await pace(target, attemptId, deadline, signal);
+    if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); throw new Denied(paced.failure.class, paced.failure.detail, paced.failure); }
     try {
-      const r = await guardedFetch({ url: b.url, method, headers: b.headers, maxBytes, deadline, policy, resolvePublic, lookupFixture, signal });
+      const r = await pacedFetch(paced.domain, { url: b.url, method, headers: b.headers, maxBytes, deadline }, attemptId, deadline, signal);
       await store.finishAttempt(attemptId, { outcome: "fetched", targetStatus: r.status, bytes: r.bytes });
+      if (r.status === 429) await store.coolDown(domainOf(parseTarget(r.finalUrl, policy)), retryAfterSeconds(r.headers["retry-after"]));
       log({ event: "fetch", request_id: b.requestId, purpose: b.purpose, url_hmac: urlHmac(b.url), target_status: r.status, bytes: r.bytes });
       return r;
     } catch (e) {
       await store.finishAttempt(attemptId, { outcome: e.failureClass ?? "ERROR" });
       throw e;
-    } finally {
-      await store.releaseDomain(domain, attemptId);
     }
   };
 }

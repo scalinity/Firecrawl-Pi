@@ -134,6 +134,12 @@ export class Store {
     });
   }
 
+  // A navigation that happened without a pacing decision (a redirect only the browser followed):
+  // counted, so the domain's and the platform's caps stay true.
+  async recordNavigation(domain, fixture) {
+    await this.pool.query("INSERT INTO fcpi_retrieval.direct_nav (domain, fixture) VALUES ($1, $2)", [domain, fixture]);
+  }
+
   async releaseDomain(domain, holder) {
     await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE domain = $1 AND holder = $2", [domain, holder]);
   }

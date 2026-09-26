@@ -101,7 +101,7 @@ const server = http.createServer(async (req, res) => {
       ...(r.headers["content-length"] ? { "x-fcpi-target-content-length": String(r.body.length) } : {}) });
     res.end(r.body);
   } catch (e) {
-    if (e instanceof Denied) return send(res, STATUS[e.failureClass] ?? 502, { failure: { class: e.failureClass, detail: e.detail, retryable: false, retryAfter: null } });
+    if (e instanceof Denied) return send(res, STATUS[e.failureClass] ?? 502, { failure: { class: e.failureClass, detail: e.detail, retryable: e.retryable, retryAfter: e.retryAfter } });
     log({ event: "error", path, error: e.message });
     if (!res.headersSent) send(res, 500, { failure: { class: "RETRIEVAL_ERROR", detail: "internal error", retryable: true, retryAfter: null } });
     else res.destroy();

@@ -427,14 +427,15 @@ const checks = {
       return { ok, actual: `attempt rows=${rows.length}; fixture requests=${hits}; stalls=${stalls}; runs=${acq.length}, attempts after each=${acq.map((a) => a.attempts_used).join(",")}; final=${final.split("\t")[1]}` };
     } },
   A03: { name: "direct-traffic-within-limits", inputs: [`${RAW}rt-pacing.txt`],
-    expected: "on a domain with the default direct limits, the target sees navigations at least 2 s apart (10 ms tolerance for arrival jitter), one at a time, and no more than 20 in the hour; the 21st is refused PROXY_REQUIRED at once instead of waiting",
+    expected: "on a domain with the default direct limits, the target sees navigations at least 2 s apart (10 ms tolerance for arrival jitter), one at a time, and no more than 20 in the hour, counting the three that arrive by redirect from another domain; the 21st is refused PROXY_REQUIRED at once instead of waiting",
     run() {
       const p = phase("pacing");
       const t = p.fixture.filter((h) => h.host?.startsWith("pace.")).map((h) => Date.parse(h.utc)).sort((a, b) => a - b);
       const gaps = t.slice(1).map((x, i) => x - t[i]);
       const refused = Object.values(p.cases).filter((c) => c.failure === "PROXY_REQUIRED");
-      const ok = t.length === 20 && Math.min(...gaps) >= 1990 && refused.length === 1 && refused[0].ms < 1000;
-      return { ok, actual: `target requests=${t.length}; min gap=${Math.min(...gaps)} ms; refused=${refused.length} (${refused[0]?.ms} ms)` };
+      const viaRedirect = p.fixture.filter((h) => h.host?.startsWith("pace.") && /via=/.test(h.query ?? "")).length;
+      const ok = t.length === 20 && viaRedirect === 3 && Math.min(...gaps) >= 1990 && refused.length === 1 && refused[0].ms < 1000;
+      return { ok, actual: `target requests=${t.length} (by redirect ${viaRedirect}); min gap=${Math.min(...gaps)} ms; refused=${refused.length} (${refused[0]?.ms} ms)` };
     } },
   A04: { name: "global-url-permits", inputs: [`${RAW}rt-permits.txt`],
     expected: "three slow acquisitions on three domains asked together: two run at once and the third waits for a permit; all permits are free afterwards",
