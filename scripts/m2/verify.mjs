@@ -555,7 +555,7 @@ const checks = {
       return { ok, actual: `first consumer at t+${t}s (${first}); scrape after=${after?.success}` };
     } },
   N03: { name: "worker-killed-mid-job-recorded", inputs: [`${RAW}nuq-kill.txt`],
-    expected: "the worker is killed while its job's acquisition runs; the record shows what follows: the harness ends ('nuq-worker-0 failed with exit code 137'), Docker restarts the core, the client's answer, the acquisition cancelled at the service, the job's requeue and end; no more than four attempts; the core is healthy again",
+    expected: "the worker is killed while a synchronous job's acquisition runs; the record shows what follows: the harness ends ('nuq-worker-0 failed with exit code 137'), Docker restarts the core, the client's answer, the acquisition cancelled at the service, the job's requeue and end; killed again during a batch job, that job is requeued (stalls 1 or more) and completes in the restarted core; each within four attempts, the batch job's fixture requests equal to its attempts; the core is healthy again",
     run() {
       const s = S(`${RAW}nuq-kill.txt`);
       const log = s.kill_core_log ?? [];
@@ -564,10 +564,13 @@ const checks = {
       const rows = (s.kill_attempts ?? []).filter((l) => l.split("\t").length >= 5);
       const job = (s.kill_job_observed ?? []).pop() ?? "";
       const health = (s.kill_health ?? []).find((l) => l.startsWith("firecrawl-core ")) ?? "";
+      const arows = (s.kill_async_attempts ?? []).filter((l) => l.split("\t").length >= 5);
+      const ajob = (s.kill_async_job_observed ?? []).pop() ?? "";
+      const ahits = +((s.kill_async_fixture_hits ?? []).join("").match(/hits=(\d+)/) ?? [])[1];
       const cond = { killed: (s.kill_kill ?? []).some((l) => l === "kill_exit=0"), harness: log.some((l) => /nuq-worker-0 failed with exit code 137/.test(l)), client: !!client,
-        cancelled: rows.length >= 1 && rows[0].split("\t")[3] === "CANCELLED", budget: rows.length <= 4, ended: /\t(completed|failed)\t/.test(job), recovered: /health=healthy/.test(ready) || /running healthy/.test(health) };
+        cancelled: rows.length >= 1 && rows[0].split("\t")[3] === "CANCELLED", budget: rows.length <= 4, ended: /\t(completed|failed)\t/.test(job), asyncCompleted: /\tcompleted\t[1-9]\d*\t/.test(ajob) && arows.length >= 2 && arows.length <= 4 && ahits === arows.length && (s.kill_async_kill ?? []).some((l) => l === "kill_exit=0"), recovered: /health=healthy/.test(ready) || /running healthy/.test(health) };
       const bad = Object.entries(cond).filter(([, x]) => !x).map(([k]) => k);
-      return { ok: bad.length === 0, actual: `failing=${bad.join(",") || "none"}; client=${client?.http ?? client?.error} after ${client?.ms} ms; attempts=${rows.length} (${rows.map((r) => r.split("\t")[3]).join(",")}); job=${job.split("\t")[1]} stalls=${job.split("\t")[2]}; core=${health.split(" ").slice(1).join(" ")}` };
+      return { ok: bad.length === 0, actual: `failing=${bad.join(",") || "none"}; client=${client?.http ?? client?.error} after ${client?.ms} ms; attempts=${rows.length} (${rows.map((r) => r.split("\t")[3]).join(",")}); job=${job.split("\t")[1]} stalls=${job.split("\t")[2]}; batch job=${ajob.split("\t")[1]} stalls=${ajob.split("\t")[2]} attempts=${arows.map((r) => r.split("\t")[3]).join(",")} requests=${ahits}; core=${health.split(" ").slice(1).join(" ")}` };
     } },
 
   // ============================================================== egress, Cloud and exposure

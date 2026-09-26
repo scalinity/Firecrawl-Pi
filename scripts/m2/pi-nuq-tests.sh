@@ -9,7 +9,10 @@
 #           (nuq.queue_scrape.listen.*) must have one consumer within 60 s and a synchronous
 #           scrape must complete through it. The core must not restart. The policy is restored.
 #   kill    M2-B02. The NuQ worker is killed during a synchronous scrape of a slow page, and what
-#           the client, the core and the job go through is recorded until the job ends.
+#           the client, the core and the job go through is recorded until the job ends. The API
+#           drains that request until its timeout before the harness exits, so the requeued job
+#           meets its own deadline; a second case kills the worker during a batch job (no waiter
+#           to drain), whose requeued run completes.
 #   stall   M2-R3. A batch scrape of a slow page that answers 503 is stalled twice by freezing the
 #           NuQ worker until NuQ's lock reaper requeues the job. Its logical page may see at most
 #           four acquisition attempts in total (without one budget, three runs would make six).
@@ -134,6 +137,38 @@ kill)
   [ -n "$job" ] && sql "SELECT logical_id, ordinal, strategy, coalesce(outcome,''), coalesce(target_status::text,''), to_char(started_at AT TIME ZONE 'UTC','HH24:MI:SS.MS') FROM fcpi_retrieval.attempt WHERE logical_id = '$job' ORDER BY ordinal;"
   sec fixture_hits
   echo "hits=$(D logs --since "$start" "$FX" 2>&1 | grep -c "$marker")"
+  # The batch case: no synchronous waiter, so the harness exits at once and the reaper's requeue
+  # reaches the restarted worker within the job's deadline.
+  amarker=b02b-$(cat /proc/sys/kernel/random/uuid)
+  sec async_submit
+  D exec -e URL="$M2/slow?ms=15000&$amarker=1" "$CORE" node -e '
+fetch("http://127.0.0.1:3002/v2/batch/scrape", { method: "POST", headers: { "content-type": "application/json" },
+  body: JSON.stringify({ urls: [process.env.URL], formats: ["markdown"], timeout: 300000 }) })
+  .then(async (r) => { const j = await r.json(); console.log(JSON.stringify({ http: r.status, success: j.success, batchId: j.id ?? null, error: j.error ?? null })); });' 2>&1
+  ajob=""
+  for _ in $(seq 1 60); do ajob=$(sql "SELECT id FROM nuq.queue_scrape WHERE data->>'url' LIKE '%$amarker%' AND status = 'active' LIMIT 1;"); [ -n "$ajob" ] && break; sleep 0.5; done
+  echo "job=${ajob:-none} utc=$(now)"
+  sleep 3
+  sec async_kill
+  restarts_before=$(D inspect -f '{{.RestartCount}}' "$CORE")
+  pid=$(worker_pid); echo "worker_pid=${pid:-none} utc=$(now)"
+  [ -n "$pid" ] && D exec --user 3002 "$CORE" kill -KILL "$pid"; echo "kill_exit=$?"
+  sec async_core_ready
+  for _ in $(seq 1 150); do
+    [ "$(D inspect -f '{{.RestartCount}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' "$CORE")" = "$((restarts_before + 1)) healthy" ] && break; sleep 2
+  done
+  echo "utc=$(now) core $(core_state)"
+  sec async_job_observed
+  for i in $(seq 1 80); do
+    [ -n "$ajob" ] || break
+    row=$(job_row "$ajob"); echo "t+$((i*3))s $row"
+    case $row in *$'\t'completed$'\t'*|*$'\t'failed$'\t'*) break ;; esac
+    sleep 3
+  done
+  sec async_attempts
+  [ -n "$ajob" ] && sql "SELECT logical_id, ordinal, strategy, coalesce(outcome,''), coalesce(target_status::text,''), to_char(started_at AT TIME ZONE 'UTC','HH24:MI:SS.MS') FROM fcpi_retrieval.attempt WHERE logical_id = '$ajob' ORDER BY ordinal;"
+  sec async_fixture_hits
+  echo "hits=$(D logs --since "$start" "$FX" 2>&1 | grep -c "$amarker")"
   ;;
 stall)
   # NuQ's prefetch worker takes a requeued job again at once (active, with a new lock) and hands
