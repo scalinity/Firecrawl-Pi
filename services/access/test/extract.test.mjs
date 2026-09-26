@@ -118,3 +118,30 @@ test("a page's markdown is cut to the extraction limit as it lands, archived and
   const result = JSON.parse((await r.archive.read(r.store.docs.find((d) => d.docKey === "result").sha256)).toString());
   assert.equal(result.warnings.filter((w) => /cut at 1048576 bytes/.test(w)).length, 2);
 });
+
+test("a page's failure is archived, so a resumed job sends the same documents rather than scraping it again (review W13)", async () => {
+  let up = false, second = false;
+  const r = await rig({ job: { request: REQ },
+    core: (b) => (b.url.endsWith("/2") && !second ? { status: 200, json: { success: true, data: { markdown: "busy", metadata: { url: b.url, statusCode: 503 } } } } : page(b.url, "Price: 1")),
+    extract: (body) => { if (!up) throw new ExtractorError("connect ECONNREFUSED", { code: "ECONNREFUSED", delivered: false }); return ok(body); } });
+  await r.run();
+  assert.equal(r.store.job.state, "RUNNING");
+  // The target would answer now, but the job keeps the outcome it recorded: same documents, same request.
+  up = true; second = true;
+  await r.run();
+  assert.equal(r.calls.scrape.length, 2, "nothing scraped the second time");
+  assert.deepEqual(r.calls.extract.at(-1).documents.map((d) => d.url), ["https://a.example/1"]);
+  assert.equal(r.store.finished.to, "PARTIAL");
+  assert.deepEqual(r.store.finished.errors.errors.map((e) => e.code), ["TARGET_HTTP_503"]);
+});
+
+test("a call still in flight at the extraction service keeps the job RUNNING, and the next round finishes it (review W13)", async () => {
+  let n = 0;
+  const r = await rig({ job: { request: REQ }, core: (b) => page(b.url, "Price: 1"),
+    extract: (body) => (n++ === 0 ? { status: 409, json: { ok: false, units: [], failure: { class: "EXTRACTION_IN_FLIGHT", detail: "still being made", retryable: true, retryAfter: 30 } } } : ok(body)) });
+  await r.run();
+  assert.equal(r.store.job.state, "RUNNING");
+  assert.equal(r.logs.at(-1).action, "extraction_deferred");
+  await r.run();
+  assert.equal(r.store.finished.to, "SUCCEEDED");
+});

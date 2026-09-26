@@ -58,7 +58,7 @@ export class FakeLedger {
       u.reserved += r.amount; this.usage.set(k, u);
     }
     const row = { id: r.id, call_key: r.callKey, logical_id: r.logicalId, category: r.category, provider: r.provider, subject: r.subject, kind: r.kind, request_hash: r.requestHash,
-      reserved: r.amount, actual: null, state: "RESERVED", day_start: r.day, month_start: r.month, paid_total: r.paidTotalCap !== null, result: null, usage: null };
+      reserved: r.amount, actual: null, state: "RESERVED", day_start: r.day, month_start: r.month, paid_total: r.paidTotalCap !== null, result: null, usage: null, created_at: new Date() };
     this.rows.set(r.callKey, row);
     return { reservation: row, notices: [] };
   }

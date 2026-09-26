@@ -30,7 +30,7 @@ export class ExtractionFailure extends Error {
 const fail = (c, d, x) => new ExtractionFailure(c, d, x);
 // Refusals that hold for every later call as much as this one: the job stops at the first.
 const STOPPING = new Set(["MODEL_NOT_ALLOWED", "RATE_CARD_MISSING", "PAID_DISPATCH_DISABLED", "BLOCKED_CREDENTIAL", "BUDGET_EXHAUSTED",
-  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_RATE_LIMITED", "PROVIDER_UNCERTAIN", "EXTRACTION_UNCERTAIN", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
+  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_RATE_LIMITED", "PROVIDER_UNCERTAIN", "EXTRACTION_UNCERTAIN", "EXTRACTION_IN_FLIGHT", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
 
 export function canonical(v) {
   if (Array.isArray(v)) return `[${v.map(canonical).join(",")}]`;
@@ -39,6 +39,9 @@ export function canonical(v) {
 }
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 const MIN_REQUEST_MS = 1000;
+// The longest an extraction runs (the engine's deadline cap): a reservation still RESERVED within this and
+// one request timeout of its creation may belong to a call still waiting or in flight.
+const LONGEST_EXTRACTION_MS = 900000;
 
 // One active model request for the whole service (spec §14), waited for until the caller's deadline.
 export function makeGate() {
@@ -99,6 +102,10 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       if (r.existing.state === "SETTLED" && r.existing.result) {
         log({ event: "model_call", logical_id: logicalId, call: callKey, reused: true, cost_micro_usd: Number(r.existing.actual) });
         return { ...r.existing.result, usage: r.existing.usage, cost: Number(r.existing.actual), reused: true, reservationId: r.existing.id };
+      }
+      // A call another request is still making: its answer will be stored, so a later retry reuses it (review W13).
+      if (r.existing.state === "RESERVED" && Date.now() - Date.parse(r.existing.created_at) < LONGEST_EXTRACTION_MS + budget.extraction.requestTimeoutMs) {
+        throw fail("EXTRACTION_IN_FLIGHT", `call ${callKey} is still being made by an earlier request; retry once it has settled`, { retryable: true, retryAfter: 30 });
       }
       throw fail("EXTRACTION_UNCERTAIN", `call ${callKey} was sent before and its outcome is unknown (${r.existing.state}); it is not sent again`);
     }

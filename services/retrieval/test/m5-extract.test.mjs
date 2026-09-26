@@ -142,6 +142,23 @@ test("no request is started with less than a second of the deadline left, and th
   } finally { await r.srv.close(); }
 });
 
+test("a unit retried while its call is still in flight is EXTRACTION_IN_FLIGHT, retryable, then reuses the answer (review W13)", async () => {
+  const r = await rig();
+  try {
+    const q = req({ prompt: "fcpi-mode=delay" });
+    const first = r.extract(q);
+    await new Promise((res) => setTimeout(res, 500));
+    const second = await r.extract(q);
+    assert.equal(second.failure.class, "EXTRACTION_IN_FLIGHT");
+    assert.equal(second.failure.retryable, true);
+    assert.equal((await first).ok, true);
+    const third = await r.extract(q);
+    assert.equal(third.ok, true);
+    assert.equal(third.usage.reused, 1);
+    assert.equal(r.calls(), 1);
+  } finally { await r.srv.close(); }
+});
+
 test("a rate limit stops the extraction's later units: the provider is asked once (review S8)", async () => {
   const r = await rig();
   try {

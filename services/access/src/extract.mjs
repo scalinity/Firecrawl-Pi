@@ -19,6 +19,10 @@ export function cutText(s, max) {
   return { text: Buffer.from(s).subarray(0, max).toString("utf8").replace(/\uFFFD$/, ""), cut: true };
 }
 
+// The extraction service's refusals that a later round resolves (a call still in flight, the service not
+// ready or failing internally): the job stays RUNNING and is tried again until its deadline (review W13).
+const TRANSIENT = new Set(["EXTRACTION_IN_FLIGHT", "RETRIEVAL_NOT_READY", "RETRIEVAL_ERROR"]);
+
 export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log }) {
   const instance = randomUUID();
   const L = cfg.manifest.limits;
@@ -27,20 +31,32 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
   const say = (o) => log({ event: "extract_job", instance, ...o });
   const note = (job, url, code, error, i) => ({ id: `fcpi:${job.id}:${code}:${i}`, timestamp: new Date().toISOString(), url, code, error: String(error ?? "").slice(0, 2000) });
 
+  // A page's outcome is archived either way, as its text or as its failure, so a resumed job sends the
+  // same documents and its stored model answers stay reusable (review W13).
+  async function recordFailure(job, i, failure) {
+    const put = await archive.put(Buffer.from(JSON.stringify({ failure })));
+    await store.addDocuments(job.id, [{ ordinal: i + 1, docKey: `failure:${i}`, sha256: put.sha256, bytes: put.bytes }]);
+    return { failure };
+  }
   async function scrapeOne(job, url, i, have) {
     const key = `source:${i}`;
     const row = have.find((r) => r.doc_key === key);
     if (row) return { doc: JSON.parse((await archive.read(row.sha256)).toString("utf8")) };
+    const failed = have.find((r) => r.doc_key === `failure:${i}`);
+    if (failed) return { failure: JSON.parse((await archive.read(failed.sha256)).toString("utf8")).failure };
     const so = job.request.scrapeOptions ?? {};
     // markdown alone: the model reads text, and the other formats would only cost memory here.
     const body = { ...so, url, formats: ["markdown"], timeout: Math.min(so.timeout ?? L.extract.scrapeTimeoutMs, L.extract.scrapeTimeoutMs), origin: job.submission_key };
     let r;
     try { r = await upstream.call("POST", "/v2/scrape", { body, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
-    catch (e) { return { failure: { code: `UPSTREAM_${e.code}`, error: `the core did not answer the scrape (${e.code})`, retry: !e.delivered } }; }
-    if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return { failure: { code: String(r.json?.code ?? `HTTP_${r.status}`).slice(0, 64), error: r.json?.error ?? `the core answered ${r.status}` } };
+    catch (e) {
+      const failure = { code: `UPSTREAM_${e.code}`, error: `the core did not answer the scrape (${e.code})` };
+      return e.delivered ? recordFailure(job, i, failure) : { failure: { ...failure, retry: true } };
+    }
+    if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return recordFailure(job, i, { code: String(r.json?.code ?? `HTTP_${r.status}`).slice(0, 64), error: r.json?.error ?? `the core answered ${r.status}` });
     // A target that answered an error (404, 500 …) gave an error page, not the page asked for: no extraction from it.
     const targetStatus = Number(r.json.data.metadata?.statusCode ?? 200);
-    if (targetStatus >= 400) return { failure: { code: `TARGET_HTTP_${targetStatus}`, error: `the page answered HTTP ${targetStatus}` } };
+    if (targetStatus >= 400) return recordFailure(job, i, { code: `TARGET_HTTP_${targetStatus}`, error: `the page answered HTTP ${targetStatus}` });
     // Only the page's text, cut where the adapter would cut it, and its metadata are kept.
     const md = cutText(r.json.data.markdown, L.extract.maxDocumentBytes);
     const doc = { markdown: md.text, metadata: r.json.data.metadata ?? {}, ...(md.cut ? { cutAt: L.extract.maxDocumentBytes } : {}) };
@@ -86,6 +102,8 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     }
     const j = x.json ?? {};
     const failure = x.status === 200 && j.ok ? null : (j.failure ?? { class: `EXTRACTOR_HTTP_${x.status}`, detail: `the extraction service answered ${x.status}` });
+    const transient = [failure, ...(j.units ?? []).map((u) => u.failure)].find((f) => f && TRANSIENT.has(f.class));
+    if (transient) { say({ job: job.id, action: "extraction_deferred", reason: transient.class }); return false; }
     // The units and usage are kept whether or not any unit succeeded: they say what was tried and what it cost.
     const cutWarnings = docs.filter((d) => d.cutAt).map((d) => `${d.url}: the page's markdown was cut at ${d.cutAt} bytes before extraction`);
     const result = { data: failure ? null : j.data ?? null, sources: j.sources ?? {}, warnings: [...cutWarnings, ...(j.warnings ?? [])], missingRequired: j.missingRequired ?? [],
