@@ -132,7 +132,20 @@ function ruleSet(path) {
   return out;
 }
 const MODULE_ALLOW = /^(bridge|stp|llc|veth|overlay|br_netfilter|ip_set|xt_[a-z_]+|xt_[A-Z]+|x_tables|nf_[a-z0-9_]+|nft_[a-z0-9_]+|ip6?_tables|ip6?table_[a-z]+|iptable_[a-z]+|ipt_[A-Z]+|xfrm_algo|xfrm_user|nf_tables|nfnetlink)$/;
-function attribute(sec, line, ids) {
+// The owner's own work on the Pi in the window (scripts/m4/pi-owner-session.sh): an apt upgrade, an editor
+// server on loopback. A line is the owner's only when that record names its cause.
+function ownerContext() {
+  if (!has(`${RAW}owner-session.txt`)) return null;
+  const s = S(`${RAW}owner-session.txt`), journal = s.journal ?? [];
+  return { apt: (s.apt_runs ?? []).some((l) => /^Commandline: apt (upgrade|full-upgrade)\b/.test(l)), dm: journal.some((l) => /kernel: device-mapper: ioctl/.test(l)),
+    tracefs: journal.some((l) => /kernel: NOTICE: Automounting of tracing/.test(l)),
+    ports: new Set((s.loopback_listeners ?? []).filter((l) => /exe=<owner-home>\/\.cursor-server\//.test(l)).flatMap((l) => (l.match(/ports=(.*)$/)?.[1] ?? "").trim().split(/\s+/))) };
+}
+function attribute(sec, line, ids, owner = null) {
+  if (sec === "lsmod" && /^dm_mod \d+$/.test(line) && owner?.dm && owner.apt) return "the owner's apt upgrade: device-mapper loaded by its hooks (raw/owner-session.txt)";
+  if (sec === "findmnt" && /^\/sys\/kernel\/debug\/tracing tracefs tracefs /.test(line) && owner?.tracefs) return "the owner's session: tracefs automounted (raw/owner-session.txt)";
+  { const m = line.match(/^tcp (127\.0\.0\.1:\d+) users:\(\("MainThread",pid,fd\)\)$/); if (sec === "ss_listen" && m && owner?.ports.has(m[1])) return "the owner's editor server on loopback (raw/owner-session.txt)"; }
+  { const m = line.match(/^udp (?:0\.0\.0\.0|\*):(\d+) users:\(\("pihole-FTL",pid,fd\)\)$/); if (sec === "ss_listen" && m && +m[1] >= 32768) return "Pi-hole's own ephemeral upstream socket, rotated by Pi-hole"; }
   if (sec === "systemd_running" && /^session-\d+\.scope$/.test(line)) return "own SSH session scope";
   if (sec === "systemd_running") { const m = line.match(/^docker-([0-9a-f]{64})\.scope$/); if (m && ids.has(m[1])) return "scope of an fcpi container"; }
   if (sec === "docker_ps") { const f = line.split("\t"); if (f.length === 4 && /^fcpi-/.test(f[1]) && ids.has(f[0])) return "fcpi container"; }
@@ -413,7 +426,8 @@ const checks = {
         const c = lines.find((l) => l.startsWith("classified ")); const ctl = +((lines.find((l) => l.startsWith("control=")) ?? "").match(/count=(\d+)/) ?? [])[1];
         return { c: c ? kv(c.split(" ").slice(1)) : null, ctl };
       });
-      const reach = kv(S(`${RAW}stack.txt`).mcp_reach ?? []);
+      // key=value with ':' in the keys (host:port), so split at the first '=' rather than through kv().
+      const reach = Object.fromEntries((S(`${RAW}stack.txt`).mcp_reach ?? []).filter((l) => l.includes("=")).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1)]));
       const reachOk = reach.default_route === "no" && reach["gateway_tcp_10.231.8.10:3300"] === "open" && Object.entries(reach).filter(([k]) => k.startsWith("public_tcp_")).every(([, v]) => v !== "open") &&
         Object.entries(reach).filter(([k]) => k.startsWith("public_tcp_")).length === 2 && ["api.firecrawl.dev", "firecrawl.dev", "example.com"].every((h) => reach[`dns_${h}`] && !reach[`dns_${h}`].startsWith("resolved"));
       const cloudIn = (sec) => (S(`${RAW}stack.txt`)[sec] ?? []).filter((l) => /^pattern=(firecrawl\\\.(dev|com)|mendable)/.test(l)).map((l) => kv(l.split(" ")).count);
@@ -436,7 +450,7 @@ const checks = {
       const pub = (st.published ?? []).filter((l) => /->/.test(l));
       const cg = kv(((st.cgroups ?? []).find((l) => l.startsWith("mcp-gateway ")) ?? "").split(" ").slice(1));
       const R = json(`${EV}rendered-compose.json`).services;
-      const img = kv(st.mcp_image ?? []);
+      const img = kv((st.mcp_image ?? []).flatMap((l) => l.split(" ")));
       const cond = { network: /internal=true/.test(net ?? "") && /gateway_mode_ipv4=isolated/.test(net) && /members=fcpi-access-gateway-1,fcpi-mcp-gateway-1$/.test(net) && /subnet=10\.231\.8\.0\/24/.test(net), no_bridge_address: bridge === "bridge fcpi-mcp addresses=",
         mcp_nets: same(Object.keys(R["mcp-gateway"].networks ?? {}), ["mcp"]) && R["mcp-gateway"].networks.mcp.ipv4_address === "10.231.8.20" && img.ipv4 === "10.231.8.20",
         gateway_nets: same(Object.keys(R["access-gateway"].networks ?? {}).sort(), ["access", "api", "mcp", "platform"]) && R["access-gateway"].networks.mcp.ipv4_address === "10.231.8.10",
@@ -445,8 +459,8 @@ const checks = {
         mounts: img.mounts === "/srv/policy/capabilities.json:ro", memory: cg["memory.max"] === String(192 * MIB) && cg["memory.swap.max"] === "0" };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${net}; publications=${pub.join(";")}` };
     } },
-  X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`, "evidence/M3/raw/nft-ruleset.txt"],
-    expected: "every line differing between M4's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset) or to the collector's own SSH session; no unrelated line is removed or changed; the boot ID is unchanged; rule by rule against M3's recorded ruleset, every change is Docker's for the new fcpi-mcp bridge, and the installed guard is the repository's",
+  X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`, "evidence/M3/raw/nft-ruleset.txt", `${RAW}owner-session.txt`],
+    expected: "every line differing between M4's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset) or to the collector's own SSH session, or to the owner's own work on the Pi that raw/owner-session.txt records (an apt upgrade, an editor server) and Pi-hole's own rotating upstream sockets; no unrelated line is removed or changed; the boot ID is unchanged; rule by rule against M3's recorded ruleset, every change is Docker's for the new fcpi-mcp bridge, and the installed guard is the repository's",
     run() {
       const [B, A] = [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`];
       const psIds = (f) => (read(f).match(/^### docker_ps\n([\s\S]*?)\n### /m)?.[1] ?? "").split("\n").map((l) => l.split("\t")[0]).filter((x) => /^[0-9a-f]{64}$/.test(x));
@@ -455,13 +469,14 @@ const checks = {
       const K = (f) => keyedSnapshot(f).map(([s, l]) => `${s}\t${norm(s, l)}`);
       const b = K(B), a = K(A);
       const removed = b.filter((l) => !a.includes(l)), added = a.filter((l) => !b.includes(l));
-      const unexplained = [], why = {}, rows = { project: [], unrelated: [] };
+      const owner = ownerContext();
+      const unexplained = [], why = {}, rows = { project: [], owner: [], unrelated: [] };
       for (const [kind, list] of [["removed", removed], ["added", added]]) for (const l of list) {
         const [sec, line] = [l.slice(0, l.indexOf("\t")), l.slice(l.indexOf("\t") + 1)];
-        const w = attribute(sec, line, ids);
-        const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains/.test(w));
+        const w = attribute(sec, line, ids, owner);
+        const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains|Pi-hole's own|the owner's editor server/.test(w));
         if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else why[w] = (why[w] ?? 0) + 1;
-        rows[acceptable ? "project" : "unrelated"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
+        rows[!acceptable ? "unrelated" : /owner|Pi-hole/.test(w) ? "owner" : "project"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
       }
       const hdr = kv(((read(`${RAW}nft-ruleset.txt`).match(/^# guard_file_sha256=.*$/m) ?? [""])[0]).slice(2).split(" "));
       const guardOk = hdr.guard_file_sha256 === sha256File("deploy/host/fcpi-guard.nft");
@@ -475,7 +490,7 @@ const checks = {
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), ["# M4 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m4/verify.mjs X04)",
         `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : "CHANGED or MISSING"}`,
-        `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project,
+        `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## the owner's own work on the Pi and Pi-hole's own socket rotation (${rows.owner.length}; raw/owner-session.txt)`, ...rows.owner, `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project,
         `## ruleset changes since M3's recorded ruleset (${ruleChanges.length}; Docker's for fcpi-mcp unless listed as unattributed)`, ...ruleChanges.map((r) => r.replace(/\t/g, " ")), ""].join("\n"));
       const ok = unexplained.length === 0 && !!boot(B) && boot(B) === boot(A) && guardOk && rulesTied && r3.size > 50 && r4.size > 50 && unattributed.length === 0 && ruleChanges.length >= 1 && tablesOk;
       return { ok, actual: `added=${added.length} removed=${removed.length}; attributed ${JSON.stringify(why)}; unexplained=${unexplained.length}${unexplained.length ? " [" + unexplained.slice(0, 8).join("; ") + "]" : ""}; boot_id_equal=${boot(B) === boot(A)}; rules changed since M3=${ruleChanges.length}, unattributed=${unattributed.length}${unattributed.length ? " [" + unattributed.slice(0, 6).join("; ") + "]" : ""}; guard is the repository's=${guardOk}; ruleset tied to AFTER=${rulesTied}` };
@@ -521,7 +536,7 @@ const checks = {
       return { ok: unpinned.length === 0 && bad(cond).length === 0 && Object.keys(R.services).length === 11, actual: `services=${Object.keys(R.services).length}; unpinned=${unpinned.join(",") || "none"}; lock disagrees on=${bad(cond).join(",") || "none"}` };
     } },
   M01: { name: "memory-within-caps", inputs: [`${RAW}stack.txt`].concat(PHASES.map((p) => `${RAW}e2e-${p}.txt`)),
-    expected: "sampled at the end of every phase and before the MCP container's restart and stop: the MCP service's peak stays under its 192 MiB cap, the gateway's under 160 MiB and the core's under 2,304 MiB, none records an OOM kill, the host's OOM-kill count does not change across the samples and MemAvailable stays at 1 GiB or more; at the end no project cgroup records an OOM kill",
+    expected: "sampled at the end of every phase and before the MCP container's restart and stop: the MCP service's peak stays under its 192 MiB cap, the gateway's under 160 MiB and the core's under 2,304 MiB, none records an OOM kill, the host's OOM-kill count does not change across the samples and MemAvailable stays at 1 GiB or more; at the end no project cgroup records an OOM kill and every one has memory.swap.max 0, so no container can swap past its cap",
     run() {
       const all = samples();
       const unsampled = PHASES.filter((p) => !all.some((s) => s.run === p));
@@ -531,8 +546,8 @@ const checks = {
       const cg = Object.fromEntries((S(`${RAW}stack.txt`).cgroups ?? []).filter((l) => / memory\.max=/.test(l)).map((l) => [l.split(" ")[0], kv(l.split(" ").slice(1))]));
       const peak = (k) => Math.max(...all.map((s) => s[k]?.peak ?? 0)) / MIB;
       const ok = unsampled.length === 0 && all.length >= 8 && all.some((s) => s.label === "before-mcp-restart") && all.some((s) => s.label === "before-mcp-stop") && over.length === 0 && hostOoms.size === 1 && Number.isInteger([...hostOoms][0]) &&
-        Object.keys(cg).length === 11 && Object.values(cg).every((v) => v.oom_kill === "0");
-      return { ok, actual: `samples=${all.length}, phases without one=${unsampled.join(",") || "none"}, over a cap or low on memory=${over.join(",") || "none"}; highest peaks: MCP ${peak("mcp").toFixed(1)} MiB, gateway ${peak("gateway").toFixed(1)} MiB, core ${peak("core").toFixed(0)} MiB; host OOM-kill counts seen=${[...hostOoms].join(",")}; cgroup OOM kills at the end=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}` };
+        Object.keys(cg).length === 11 && Object.values(cg).every((v) => v.oom_kill === "0") && Object.values(cg).every((v) => v["memory.swap.max"] === "0");
+      return { ok, actual: `samples=${all.length}, phases without one=${unsampled.join(",") || "none"}, over a cap or low on memory=${over.join(",") || "none"}; highest peaks: MCP ${peak("mcp").toFixed(1)} MiB, gateway ${peak("gateway").toFixed(1)} MiB, core ${peak("core").toFixed(0)} MiB; host OOM-kill counts seen=${[...hostOoms].join(",")}; cgroup OOM kills at the end=${Object.entries(cg).filter(([, v]) => v.oom_kill !== "0").map(([k]) => k).join(",") || "none"}; swap not capped at the end=${Object.entries(cg).filter(([, v]) => v["memory.swap.max"] !== "0").map(([k]) => k).join(",") || "none"}` };
     } },
 
   // ================================================================ the held live step: real target clients
