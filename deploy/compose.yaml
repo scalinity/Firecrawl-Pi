@@ -1,4 +1,5 @@
-# FCPI curated Compose (M1: durable, private core; M2: guarded retrieval and a sandboxed browser).
+# FCPI curated Compose (M1: durable, private core; M2: guarded retrieval and a sandboxed browser;
+# M3: the authorized REST gateway with its durable job ledger).
 # Start and stop through systemd (fcpi-stack.service). The fail-closed data check
 # (deploy/host/fcpi-data-check.sh) runs before every start of the stack and, through a
 # docker.service drop-in, before every dockerd start, which is when restart policies
@@ -6,9 +7,10 @@
 # Every image is pinned by its linux/arm64 manifest digest; the NuQ image is built on
 # the Pi from deploy/nuq-postgres and referenced by its built digest.
 # Host publication: the access gateway on 127.0.0.1:3380 only. Networks: fcpi_access
-# (publication; gateway only), fcpi_api (gateway <-> core), fcpi_core (core, data services and the
-# retrieval service), fcpi_acquire (core <-> retrieval service), fcpi_browser (retrieval service <->
-# browser worker), fcpi_fixture (retrieval service and the fixtures), all internal and isolated;
+# (publication; gateway only), fcpi_api (gateway <-> core), fcpi_platform (gateway <-> PostgreSQL),
+# fcpi_core (core, data services and the retrieval service), fcpi_acquire (core <-> retrieval service),
+# fcpi_browser (retrieval service <-> browser worker), fcpi_fixture (retrieval service and the
+# fixtures), all internal and isolated;
 # and fcpi_egress (the retrieval service alone), the only way out, guarded by fcpi_guard.
 # The core has no route out: every acquisition goes through the retrieval service (M2).
 # Every bind mount sets create_host_path: false, so a missing data path fails the
@@ -56,7 +58,7 @@ services:
       POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
     # postgres_core_role_password: the core's own role, created at initdb by
     # 020-fcpi-core-role.sh (the image's entrypoint ignores the .psql file it reads).
-    secrets: [postgres_password, postgres_core_role_password, postgres_retrieval_role_password]
+    secrets: [postgres_password, postgres_core_role_password, postgres_retrieval_role_password, postgres_gateway_role_password]
     volumes:
       - type: bind
         source: /srv/firecrawl-pi/data/postgres
@@ -84,6 +86,18 @@ services:
         target: /docker-entrypoint-initdb.d/fcpi-retrieval-schema.psql
         read_only: true
         bind: { create_host_path: false }
+      # M3: the platform ledger's schema and the gateway's role (DML only), for a new data
+      # directory; scripts/m3/pi-platform-db.sh applies the same file to an existing one.
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/nuq-postgres/initdb/040-fcpi-platform.sh
+        target: /docker-entrypoint-initdb.d/040-fcpi-platform.sh
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/nuq-postgres/fcpi-platform-schema.sql
+        target: /docker-entrypoint-initdb.d/fcpi-platform-schema.psql
+        read_only: true
+        bind: { create_host_path: false }
     tmpfs:
       - /var/run/postgresql:mode=1777,size=4m
       - /tmp:size=64m
@@ -101,7 +115,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 120s
-    networks: [core]
+    # fcpi_platform (M3) holds only the gateway beside it.
+    networks: [core, platform]
     logging: *logging-dep
 
   redis:
@@ -256,26 +271,51 @@ services:
     networks: [core, api, acquire]
     logging: *logging-app
 
+  # M3: the authenticated REST boundary and job ledger (services/access), built on the Pi from the
+  # deployed commit (scripts/m3/pi-build-gateway.sh) on the digest-pinned node base. Targets are no
+  # longer limited to fixtures here: every acquisition passes the retrieval service's policy (M2).
   access-gateway:
-    image: node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+    image: fcpi/access-gateway@sha256:0000000000000000000000000000000000000000000000000000000000000000
     platform: linux/arm64
-    pull_policy: missing
+    pull_policy: never
     hostname: access-gateway
     restart: unless-stopped
     user: "3380:3380"
-    command: ["node", "/srv/access/server.mjs"]
     environment:
       PI_GATEWAY_LISTEN_PORT: "3300"
       PI_CORE_URL: http://firecrawl-core:3002
-      PI_GATEWAY_TOKEN_HASHES_FILE: /run/secrets/gateway_token_hashes
-      # Fixture origins only: opening general targets is M3's gateway work (services/access).
-      PI_PERMITTED_TARGET_ORIGINS: http://m1.fixture.fcpi.test:8080,http://m2.fixture.fcpi.test:8080,http://pace.fixture.fcpi.test:8080,http://cool.fixture.fcpi.test:8080
-    secrets: [gateway_token_hashes]
+      PI_CORE_TIMEOUT_MS: "110000"      # spec §9.3: the 90 s acquisition inside a 110 s gateway deadline
+      PI_GATEWAY_CLIENTS_FILE: /srv/clients/clients
+      # The origins the gateway is served at: its loopback publication, as the host and an SSH
+      # forward to it present it. A Tailscale Serve origin is added here when that path exists.
+      PI_ALLOWED_HOSTS: http://127.0.0.1:3380,http://localhost:3380
+      PI_ALLOWED_ORIGINS: ""
+      PI_CAPABILITIES_FILE: /srv/policy/capabilities.json
+      PI_ARTIFACT_ROOT: /srv/artifacts
+      PI_CREDENTIALS_DIR: /run/secrets
+      PI_POSTGRES_HOST: nuq-postgres
+      PI_POSTGRES_DB: postgres
+      PI_POSTGRES_USER: fcpi_gateway
+      PI_CLOUD_ACCESS_ENABLED: "false"
+    secrets: [gateway_postgres_password]
     volumes:
       - type: bind
-        source: /opt/firecrawl-pi/services/access
-        target: /srv/access
+        source: /opt/firecrawl-pi/deploy/policies/capabilities.json
+        target: /srv/policy/capabilities.json
         read_only: true
+        bind: { create_host_path: false }
+      # The client registry (hashes, principals and scopes), replaced atomically by
+      # scripts/m3/pi-client-token.sh; the directory is mounted so the gateway sees each new file.
+      - type: bind
+        source: /etc/firecrawl-pi/secrets/gateway
+        target: /srv/clients
+        read_only: true
+        bind: { create_host_path: false }
+      # Archived results (spec §21.2): the one writable path, on the data mount; the gateway refuses
+      # to start unless it holds the marker scripts/m3/pi-init-m3.sh writes.
+      - type: bind
+        source: /srv/firecrawl-pi/data/artifacts
+        target: /srv/artifacts
         bind: { create_host_path: false }
     ports:
       - "127.0.0.1:3380:3300"
@@ -291,6 +331,7 @@ services:
     memswap_limit: 160m
     cpus: 0.3
     pids_limit: 64
+    stop_grace_period: 20s
     healthcheck:
       test: ["CMD", "node", "-e", "require('net').connect(3300,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))"]
       interval: 30s
@@ -299,9 +340,11 @@ services:
       start_period: 20s
     depends_on:
       firecrawl-core: { condition: service_started }
-    # Not on fcpi_core: the one host-published container reaches the core and nothing else
-    # internal (no PostgreSQL, Redis, RabbitMQ or Prometheus).
-    networks: [access, api]
+      nuq-postgres: { condition: service_healthy }
+    # Not on fcpi_core: the one host-published container reaches the core's API (fcpi_api) and
+    # PostgreSQL alone (fcpi_platform), as its own DML-only role; no Redis, RabbitMQ, retrieval
+    # service or Prometheus.
+    networks: [access, api, platform]
     logging: *logging-app
 
   # The controlled static target of the M1 fixture-only profile.
@@ -480,6 +523,40 @@ services:
         aliases: [m2.fixture.fcpi.test, pace.fixture.fcpi.test, cool.fixture.fcpi.test, permit.fixture.fcpi.test, permit2.fixture.fcpi.test]
     logging: *logging-dep
 
+  # M3's controlled site graph (tests/fixtures/m3/server.mjs): crawls, batches, maps, cancellation and
+  # held synchronous requests, under the one fixture name the retrieval service's policy adds for it.
+  fixture-m3:
+    image: node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+    platform: linux/arm64
+    pull_policy: missing
+    hostname: fixture-m3
+    restart: unless-stopped
+    user: "8080:8080"
+    command: ["node", "/fixture/server.mjs"]
+    volumes:
+      - type: bind
+        source: /opt/firecrawl-pi/tests/fixtures/m3
+        target: /fixture
+        read_only: true
+        bind: { create_host_path: false }
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 64m
+    memswap_limit: 64m
+    cpus: 0.1
+    pids_limit: 32
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8080/robots.txt',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      fixture:
+        aliases: [m3.fixture.fcpi.test]
+    logging: *logging-dep
+
 networks:
   # Not internal: port publishing needs a non-internal bridge. Only the gateway joins it.
   access:
@@ -540,6 +617,16 @@ networks:
       com.docker.network.bridge.gateway_mode_ipv4: isolated
     ipam:
       config: [{ subnet: 10.231.2.0/24 }]
+  # M3: the gateway's path to PostgreSQL (the platform ledger), internal and isolated; nothing else joins.
+  platform:
+    name: fcpi_platform
+    internal: true
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: fcpi-platform
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+    ipam:
+      config: [{ subnet: 10.231.7.0/24 }]
   # M2: the retrieval service's way out, and the only non-internal network besides the gateway's.
   # fcpi_guard admits new TCP connections to public addresses on 80 and 443 and DNS to the host
   # address 10.231.6.1; the rest is dropped and counted (deploy/host/fcpi-guard.nft).
@@ -561,7 +648,6 @@ secrets:
   redis_users_acl: { file: /etc/firecrawl-pi/secrets/redis_users_acl }
   core_redis_url: { file: /etc/firecrawl-pi/secrets/core_redis_url }
   core_nuq_rabbitmq_url: { file: /etc/firecrawl-pi/secrets/core_nuq_rabbitmq_url }
-  gateway_token_hashes: { file: /etc/firecrawl-pi/secrets/gateway_token_hashes }
   # M2 (scripts/m2/pi-init-m2.sh)
   postgres_retrieval_role_password: { file: /etc/firecrawl-pi/secrets/postgres_retrieval_role_password }
   retrieval_postgres_password: { file: /etc/firecrawl-pi/secrets/retrieval_postgres_password }
@@ -569,3 +655,6 @@ secrets:
   retrieval_core_token_sha256: { file: /etc/firecrawl-pi/secrets/retrieval_core_token_sha256 }
   retrieval_browser_token: { file: /etc/firecrawl-pi/secrets/retrieval_browser_token }
   browser_token_sha256: { file: /etc/firecrawl-pi/secrets/browser_token_sha256 }
+  # M3 (scripts/m3/pi-init-m3.sh)
+  gateway_postgres_password: { file: /etc/firecrawl-pi/secrets/gateway_postgres_password }
+  postgres_gateway_role_password: { file: /etc/firecrawl-pi/secrets/postgres_gateway_role_password }
