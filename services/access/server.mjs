@@ -113,7 +113,9 @@ function submissionAnswer(ctx, route, job, invalidURLs, keyed) {
     ...(route.kind === "extract" ? { urlTrace: [], ...(invalidURLs.length ? { invalidURLs } : {}) } : {}) });
 }
 
+const extractionUnavailable = (ctx) => ctx.send(503, { success: false, code: "EXTRACTION_UNAVAILABLE", error: "Extraction is not configured in this deployment (PI_EXTRACT_URL is unset); every other route is unaffected." });
 async function submit(ctx, route) {
+  if (route.kind === "extract" && !extractor) return extractionUnavailable(ctx);
   const raw = await readJson(ctx.req);
   const { body, units, invalidURLs } = validateBody(route.body, raw, M);
   const idemKey = ctx.req.headers["x-idempotency-key"];
@@ -308,7 +310,7 @@ async function sync(ctx, route) {
   const { body } = validateBody(route.body, raw, M);
   // M5: a scrape asking for the json format is scraped, then extracted (below).
   const json = route.id === "scrape" ? (body.formats ?? []).find((f) => typeof f === "object" && f.type === "json") : null;
-  if (json) return scrapeWithJson(ctx, body, json);
+  if (json) return extractor ? scrapeWithJson(ctx, body, json) : extractionUnavailable(ctx);
   if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   syncInFlight += 1;
   upstream.forward(ctx.res, route.path, body, (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });

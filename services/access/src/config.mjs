@@ -56,10 +56,10 @@ export function loadConfig(env) {
   const mcpUrl = env.PI_MCP_URL ? new URL(env.PI_MCP_URL) : null;
   if (mcpUrl && (mcpUrl.protocol !== "http:" || mcpUrl.pathname !== "/" || mcpUrl.search || mcpUrl.username || mcpUrl.password)) throw new Error("PI_MCP_URL must be an http origin");
   // The extraction service (M5): a fixed http origin on fcpi_model, reached with the gateway's own credential.
-  // Absent, extraction jobs and the json format cannot run, so the manifest's extract route refuses to start.
+  // Absent, the json format and extraction answer 503 EXTRACTION_UNAVAILABLE and every other route serves as
+  // before: an unconfigured provider must not take REST down with it (spec §20, AC23).
   const extractUrl = env.PI_EXTRACT_URL ? new URL(env.PI_EXTRACT_URL) : null;
   if (extractUrl && (extractUrl.protocol !== "http:" || extractUrl.pathname !== "/" || extractUrl.search || !/^\d+\.\d+\.\d+\.\d+$/.test(extractUrl.hostname))) throw new Error("PI_EXTRACT_URL must be an http origin at a fixed address");
-  if (!extractUrl && manifest.routes.some((r) => r.kind === "extract")) throw new Error("the manifest enables extraction, and PI_EXTRACT_URL is not set");
   const extractToken = extractUrl ? readFileSync(`${env.PI_CREDENTIALS_DIR}/gateway_retrieval_token`, "utf8").trim() : null;
   if (extractUrl && !/^[\x21-\x7e]{32,512}$/.test(extractToken)) throw new Error("gateway_retrieval_token must be 32-512 printable characters");
   const pw = readFileSync(`${env.PI_CREDENTIALS_DIR}/gateway_postgres_password`, "utf8").trim();

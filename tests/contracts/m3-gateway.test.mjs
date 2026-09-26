@@ -262,7 +262,8 @@ test("a missing scope is 403; admin, unlisted and absolute-form paths are 404; k
   assert.equal(s.status, 403);
   assert.equal(s.json.code, "INSUFFICIENT_SCOPE");
   for (const p of ["/admin/integration/create-user", "//v2/scrape", "/%76%32/scrape", "/v2/scrape/../crawl", "/v0/health/liveness"]) assert.equal((await H.call("POST", p, { token: T.a, body: {} })).status, 404, p);
-  assert.equal((await H.call("POST", "/v2/search", { token: T.a, body: { query: "x" } })).status, 501);
+  // Since M5 search and extraction are served; /v2/parse stays not enabled.
+  assert.equal((await H.call("POST", "/v2/parse", { token: T.a, body: { url: "https://example.com/a.pdf" } })).status, 501);
   assert.equal((await H.call("GET", "/v2/crawl/ongoing", { token: T.a })).status, 501);
   for (const m of ["POST", "DELETE"]) {
     const i = await H.call(m, `/v2/scrape/${randomUUID()}/interact`, { token: T.a, body: {} });
@@ -871,7 +872,8 @@ test("the platform status reports the core, the ledger and the capabilities", as
   assert.equal(s.json.core.live, true);
   assert.equal(s.json.ledger.ok, true);
   assert.ok(s.json.capabilities.routes.includes("POST /v2/crawl"));
-  assert.ok(s.json.capabilities.notEnabled.includes("POST /v2/search"));
+  assert.ok(s.json.capabilities.notEnabled.includes("POST /v2/parse"));
+  assert.ok(s.json.capabilities.routes.includes("POST /v2/search") && s.json.capabilities.routes.includes("POST /v2/extract"));
 });
 
 test("shutdown claims nothing: a job that comes due while open requests finish is left for the next process", async () => {
