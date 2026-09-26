@@ -14,26 +14,9 @@ const M1_STATIC = join(HERE, "..", "m1", "site", "static.html");
 const PORT = Number(process.env.FIXTURE_PORT ?? 8080);
 const ORIGIN = "http://m2.fixture.fcpi.test:8080";
 
-// A minimal valid one-page PDF whose text layer says the sentinel.
-function pdf() {
-  const text = "fcpi-m2-pdf-4e7a";
-  const objs = [
-    "<< /Type /Catalog /Pages 2 0 R >>",
-    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
-    null,
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
-  ];
-  const stream = `BT /F1 18 Tf 72 700 Td (${text}) Tj ET`;
-  objs[3] = `<< /Length ${stream.length} >>\nstream\n${stream}\nendstream`;
-  let out = "%PDF-1.4\n";
-  const offsets = [];
-  objs.forEach((o, i) => { offsets.push(out.length); out += `${i + 1} 0 obj\n${o}\nendobj\n`; });
-  const xref = out.length;
-  out += `xref\n0 ${objs.length + 1}\n0000000000 65535 f \n${offsets.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("")}`;
-  out += `trailer\n<< /Size ${objs.length + 1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
-  return Buffer.from(out, "latin1");
-}
+// A one-page PDF saying the sentinel fcpi-m2-pdf-4e7a, rendered from text by macOS's CUPS filter
+// (site/doc.pdf); its metadata holds only the producer and two dates.
+const pdf = () => readFile(join(SITE, "doc.pdf"));
 
 const html = (title, body, extraHead = "") => `<!doctype html>\n<html lang="en"><head><meta charset="utf-8"><title>${title}</title>${extraHead}</head><body>${body}</body></html>\n`;
 
@@ -59,8 +42,8 @@ const routes = {
   "/login": () => [200, { "content-type": "text/html; charset=utf-8" }, html("Sign in", "<main><h1>Sign in</h1><form method=\"post\"><input name=\"user\"><input type=\"password\" name=\"pw\"><button>Sign in</button></form></main>")],
   "/forbidden": () => [403, { "content-type": "text/html; charset=utf-8" }, html("Forbidden", "<p>You do not have access to this resource.</p>")],
   "/challenge": () => [200, { "content-type": "text/html; charset=utf-8" }, html("Just a moment...", "<div id=\"challenge-running\">Checking your browser before accessing the site.</div><script src=\"/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1\"></script>")],
-  "/pdf": () => [200, { "content-type": "application/pdf" }, pdf()],
-  "/doc.pdf": () => [200, { "content-type": "application/pdf" }, pdf()],
+  "/pdf": async () => [200, { "content-type": "application/pdf" }, await pdf()],
+  "/doc.pdf": async () => [200, { "content-type": "application/pdf" }, await pdf()],
   "/robots.txt": () => [200, { "content-type": "text/plain" }, `User-agent: *\nDisallow: /private/\nSitemap: ${ORIGIN}/sitemap.xml\n`],
   "/sitemap.xml": () => [200, { "content-type": "application/xml" }, `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<url><loc>${ORIGIN}/static.html</loc></url>\n<url><loc>${ORIGIN}/short.html</loc></url>\n</urlset>\n`],
   "/sitemap-index.xml": () => [200, { "content-type": "application/xml" }, `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n<sitemap><loc>${ORIGIN}/sitemap-gz.xml.gz</loc></sitemap>\n</sitemapindex>\n`],
