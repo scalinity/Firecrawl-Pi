@@ -486,6 +486,21 @@ test("a job the core forgets before finishing fails as UPSTREAM_STATE_LOST; resu
   assert.equal(g.json.code, "EXPIRED");
 });
 
+test("an origin from the host-side file is served, and names the URLs the gateway returns", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "fcpi-origins-"));
+  writeFileSync(join(dir, "served-origins"), "# the tailnet origin\nhttps://gw.example-tailnet.ts.net:8443\n");
+  const h = await harness({ extraEnv: { PI_ALLOWED_HOSTS_FILE: join(dir, "served-origins") } });
+  const host = "gw.example-tailnet.ts.net:8443";
+  assert.equal((await h.call("GET", "/platform/v1/status", { token: T.a, host })).status, 200);
+  assert.equal((await h.call("GET", "/platform/v1/status", { token: T.a, host: "gw.other-tailnet.ts.net:8443" })).status, 421);
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody(), host });
+  assert.equal(r.json.url, `https://${host}/v2/crawl/${r.json.id}`);
+  const absent = await harness({ extraEnv: { PI_ALLOWED_HOSTS_FILE: join(dir, "absent") } });
+  assert.equal((await absent.call("GET", "/platform/v1/status", { token: T.a, host })).status, 421);
+  assert.equal((await absent.call("GET", "/platform/v1/status", { token: T.a })).status, 200);
+  rmSync(dir, { recursive: true });
+});
+
 test("the platform status reports the core, the ledger and the capabilities", async () => {
   const s = await H.call("GET", "/platform/v1/status", { token: T.ro });
   assert.equal(s.status, 200);

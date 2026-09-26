@@ -287,8 +287,10 @@ services:
       PI_CORE_TIMEOUT_MS: "110000"      # spec §9.3: the 90 s acquisition inside a 110 s gateway deadline
       PI_GATEWAY_CLIENTS_FILE: /srv/clients/clients
       # The origins the gateway is served at: its loopback publication, as the host and an SSH
-      # forward to it present it. A Tailscale Serve origin is added here when that path exists.
+      # forward to it present it; and, from the host-side file scripts/m3/pi-tailscale.sh writes,
+      # the Tailscale Serve origin, whose tailnet name stays out of the repository.
       PI_ALLOWED_HOSTS: http://127.0.0.1:3380,http://localhost:3380
+      PI_ALLOWED_HOSTS_FILE: /srv/clients/served-origins
       PI_ALLOWED_ORIGINS: ""
       PI_CAPABILITIES_FILE: /srv/policy/capabilities.json
       PI_ARTIFACT_ROOT: /srv/artifacts

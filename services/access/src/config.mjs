@@ -1,10 +1,10 @@
 // The gateway's configuration (FIRECRAWL_PI_SPEC.md §29): read once at startup, every value checked,
 // and any unknown PI_* key stops the process. Limits come from the capability manifest, the one
 // statement of the contract; this file only locates it.
-import { readFileSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 
 const KNOWN = new Set([
-  "PI_GATEWAY_LISTEN_PORT", "PI_CORE_URL", "PI_CORE_TIMEOUT_MS", "PI_GATEWAY_CLIENTS_FILE", "PI_ALLOWED_HOSTS",
+  "PI_GATEWAY_LISTEN_PORT", "PI_CORE_URL", "PI_CORE_TIMEOUT_MS", "PI_GATEWAY_CLIENTS_FILE", "PI_ALLOWED_HOSTS", "PI_ALLOWED_HOSTS_FILE",
   "PI_ALLOWED_ORIGINS", "PI_CAPABILITIES_FILE", "PI_ARTIFACT_ROOT", "PI_CREDENTIALS_DIR", "PI_POSTGRES_HOST",
   "PI_POSTGRES_DB", "PI_POSTGRES_USER", "PI_GATEWAY_SUBMIT_TIMEOUT_MS", "PI_GATEWAY_SUBMIT_SETTLE_MS",
   "PI_GATEWAY_POLL_MS", "PI_CLOUD_ACCESS_ENABLED",
@@ -38,6 +38,12 @@ export function loadConfig(env) {
   if (core.protocol !== "http:" || core.pathname !== "/" || core.search) throw new Error("PI_CORE_URL must be an http origin");
   const hosts = servedOrigins(env.PI_ALLOWED_HOSTS, "PI_ALLOWED_HOSTS");
   if (!hosts.size) throw new Error("PI_ALLOWED_HOSTS must list the origins the gateway is served at");
+  // Origins that name the owner's own infrastructure (the tailnet's host name) live in a host-side
+  // file, one per line, so they never enter the repository. An absent file adds none.
+  if (env.PI_ALLOWED_HOSTS_FILE && existsSync(env.PI_ALLOWED_HOSTS_FILE)) {
+    const lines = readFileSync(env.PI_ALLOWED_HOSTS_FILE, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+    for (const [h, o] of servedOrigins(lines.join(","), "PI_ALLOWED_HOSTS_FILE")) hosts.set(h, o);
+  }
   const browserOrigins = new Set(servedOrigins(env.PI_ALLOWED_ORIGINS, "PI_ALLOWED_ORIGINS").values());
   for (const k of ["PI_GATEWAY_CLIENTS_FILE", "PI_CAPABILITIES_FILE", "PI_ARTIFACT_ROOT", "PI_CREDENTIALS_DIR", "PI_POSTGRES_HOST", "PI_POSTGRES_DB", "PI_POSTGRES_USER"]) {
     if (!env[k]) throw new Error(`${k} is required`);
