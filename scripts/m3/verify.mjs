@@ -645,6 +645,12 @@ const checks = {
         const [t, c, rule] = r.split("\t");
         if (t === "inet fcpi_guard") return guardOk ? "the repository's guard" : null;
         if (/^ip6? mangle$/.test(t) || /^ts-/.test(c) || /\bjump ts-(input|forward|postrouting)\b/.test(rule)) return "Tailscale's";
+        // A base chain Tailscale created to hang its jumps on (Docker uses no INPUT chain, nor ip6 nat here):
+        // its definition counts as Tailscale's only when every rule in it is such a jump.
+        if (/^type \S+ hook /.test(rule)) {
+          const body = [...r3].filter((x) => x.startsWith(`${t}\t${c}\t`) && !/\ttype \S+ hook /.test(x));
+          if (body.length && body.every((x) => /\bjump ts-(input|forward|postrouting)\b/.test(x))) return "Tailscale's";
+        }
         if (/"fcpi-platform"|10\.231\.7\.0\/24/.test(rule)) return "Docker's for fcpi-platform";
         return null;
       };
