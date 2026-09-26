@@ -155,3 +155,17 @@ test("a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body 
     await assert.rejects(go("/gz"), (e) => e.failureClass === "UNSUPPORTED_CONTENT");
   } finally { s.close(); }
 });
+
+test("a HEAD or a redirect is not refused for the length it declares (review finding W11)", async () => {
+  const { s, port } = await serve((req, res) => {
+    if (req.url === "/moved") { res.writeHead(302, { location: "/doc", "content-length": String(5 << 20) }); res.end(); return; }
+    res.writeHead(200, { "content-type": "application/pdf", "content-length": String(5 << 20) });
+    if (req.method === "HEAD") res.end(); else { res.flushHeaders(); setTimeout(() => res.destroy(), 100); }
+  });
+  try {
+    const go = (p, method = "GET") => guardedFetch({ url: `http://fx.fixture.fcpi.test:${port}${p}`, method, maxBytes: 1 << 20, deadline: soon(), policy: fixturePolicy(port), lookupFixture });
+    assert.equal((await go("/doc", "HEAD")).status, 200);
+    assert.equal((await go("/moved", "HEAD")).status, 200);
+    await assert.rejects(go("/doc"), (e) => e.failureClass === "SIZE_LIMIT");
+  } finally { s.close(); }
+});

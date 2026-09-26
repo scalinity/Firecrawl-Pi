@@ -96,13 +96,15 @@ function requestOnce({ target, address, method, headers, maxBytes, deadline, sig
       fail(new Denied("TARGET_UNREACHABLE", `${target.host}: ${code || e.message}`));
     });
     req.on("response", (res) => {
-      const declared = Number(res.headers["content-length"] ?? NaN);
-      if (Number.isFinite(declared) && declared > maxBytes) { done(); return fail(new Denied("SIZE_LIMIT", `declared length ${declared} exceeds ${maxBytes}`)); }
+      // A response whose body is not read (HEAD, a redirect, 204/304) is not judged by the length it
+      // declares: a HEAD of a large document or a redirect advertising a body is fine (review W11).
       if (method === "HEAD" || REDIRECTS.has(res.statusCode) || res.statusCode === 204 || res.statusCode === 304) {
         res.resume();
         res.on("end", () => { done(); if (!settled) { settled = true; resolve({ status: res.statusCode, headers: res.headers, body: Buffer.alloc(0), wireBytes: 0 }); } });
         return;
       }
+      const declared = Number(res.headers["content-length"] ?? NaN);
+      if (Number.isFinite(declared) && declared > maxBytes) { done(); return fail(new Denied("SIZE_LIMIT", `declared length ${declared} exceeds ${maxBytes}`)); }
       let decoder;
       try { decoder = decoderFor(res.headers["content-encoding"]); } catch (e) { done(); return fail(e); }
       let wire = 0, out = 0;
