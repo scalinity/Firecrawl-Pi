@@ -1,5 +1,5 @@
 # FCPI curated Compose (M1: durable, private core; M2: guarded retrieval and a sandboxed browser;
-# M3: the authorized REST gateway with its durable job ledger).
+# M3: the authorized REST gateway with its durable job ledger; M4: the stateless MCP service behind it).
 # Start and stop through systemd (fcpi-stack.service). The fail-closed data check
 # (deploy/host/fcpi-data-check.sh) runs before every start of the stack and, through a
 # docker.service drop-in, before every dockerd start, which is when restart policies
@@ -10,7 +10,7 @@
 # (publication; gateway only), fcpi_api (gateway <-> core), fcpi_platform (gateway <-> PostgreSQL),
 # fcpi_core (core, data services and the retrieval service), fcpi_acquire (core <-> retrieval service),
 # fcpi_browser (retrieval service <-> browser worker), fcpi_fixture (retrieval service and the
-# fixtures), all internal and isolated;
+# fixtures), fcpi_mcp (gateway <-> MCP service; M4), all internal and isolated;
 # and fcpi_egress (the retrieval service alone), the only way out, guarded by fcpi_guard.
 # The core has no route out: every acquisition goes through the retrieval service (M2).
 # Every bind mount sets create_host_path: false, so a missing data path fails the
@@ -299,6 +299,7 @@ services:
       PI_POSTGRES_DB: postgres
       PI_POSTGRES_USER: fcpi_gateway
       PI_CLOUD_ACCESS_ENABLED: "false"
+      PI_MCP_URL: http://10.231.8.20:3400
     secrets: [gateway_postgres_password]
     volumes:
       - type: bind
@@ -345,8 +346,55 @@ services:
       nuq-postgres: { condition: service_healthy }
     # Not on fcpi_core: the one host-published container reaches the core's API (fcpi_api) and
     # PostgreSQL alone (fcpi_platform), as its own DML-only role; no Redis, RabbitMQ, retrieval
-    # service or Prometheus.
-    networks: [access, api, platform]
+    # service or Prometheus. M4: fcpi_mcp at a fixed address, where the MCP service calls its REST
+    # routes and it proxies /mcp to the MCP service.
+    networks:
+      access: {}
+      api: {}
+      platform: {}
+      mcp: { ipv4_address: 10.231.8.10 }
+    logging: *logging-app
+
+  # M4: the MCP service (services/mcp, spec §17): the official SDK's stateless request factory. It is
+  # on fcpi_mcp alone, internal and isolated, so the gateway is the only thing it can reach and the
+  # only thing that can reach it. Fixed addresses both ways: the gateway's resolver sends names it
+  # does not own to a dropped upstream, so looking up a stopped service by name would hang where a
+  # fixed address fails fast. No depends_on either way: REST never waits for MCP, and MCP starts
+  # whether or not REST answers yet.
+  mcp-gateway:
+    image: fcpi/mcp-gateway@sha256:0000000000000000000000000000000000000000000000000000000000000000
+    platform: linux/arm64
+    pull_policy: never
+    hostname: mcp-gateway
+    restart: unless-stopped
+    user: "3400:3400"
+    environment:
+      PI_MCP_LISTEN_PORT: "3400"
+      PI_MCP_REST_URL: http://10.231.8.10:3300
+      PI_CAPABILITIES_FILE: /srv/policy/capabilities.json
+      PI_CLOUD_ACCESS_ENABLED: "false"
+    volumes:
+      - type: bind
+        source: /opt/firecrawl-pi/deploy/policies/capabilities.json
+        target: /srv/policy/capabilities.json
+        read_only: true
+        bind: { create_host_path: false }
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 192m
+    memswap_limit: 192m
+    cpus: 0.3
+    pids_limit: 64
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3400/health',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      mcp: { ipv4_address: 10.231.8.20 }
     logging: *logging-app
 
   # The controlled static target of the M1 fixture-only profile.
@@ -629,6 +677,16 @@ networks:
       com.docker.network.bridge.gateway_mode_ipv4: isolated
     ipam:
       config: [{ subnet: 10.231.7.0/24 }]
+  # M4: the gateway and the MCP service, internal and isolated; nothing else joins.
+  mcp:
+    name: fcpi_mcp
+    internal: true
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.name: fcpi-mcp
+      com.docker.network.bridge.gateway_mode_ipv4: isolated
+    ipam:
+      config: [{ subnet: 10.231.8.0/24 }]
   # M2: the retrieval service's way out, and the only non-internal network besides the gateway's.
   # fcpi_guard admits new TCP connections to public addresses on 80 and 443 and DNS to the host
   # address 10.231.6.1; the rest is dropped and counted (deploy/host/fcpi-guard.nft).
