@@ -6,8 +6,9 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
 import { BlockList } from "node:net";
+import { getEventListeners } from "node:events";
 import { paceDecision, nextCooldown } from "../src/store.mjs";
-import { makeAcquirer, makeFetcher } from "../src/acquire.mjs";
+import { makeAcquirer, makeFetcher, makePacer } from "../src/acquire.mjs";
 
 export class FakeStore {
   constructor() { this.acq = new Map(); this.attempts = []; this.permits = new Map(); this.domains = new Map(); this.navs = []; this.cooled = []; }
@@ -127,6 +128,17 @@ test("a caller that leaves during a retry's back-off gets CANCELLED and no furth
     assert.equal(t.hits.length, 1);
     assert.equal(store.permits.size, 0);
   } finally { t.s.close(); }
+});
+
+test("a pacing wait leaves no abort listener behind on the caller's signal (review finding S7)", async () => {
+  let waits = 20;
+  const store = { paceDirect: async () => (waits-- > 0 ? { waitMs: 1 } : { go: true }) };
+  const policy = policyFor([["t.fixture.fcpi.test", 1, "fixture"]]);
+  const { pace } = makePacer({ store, getPolicy: () => policy, log: () => {} });
+  const ac = new AbortController();
+  const p = await pace({ host: "t.fixture.fcpi.test", fixture: policy.fixtures[0] }, "h", Date.now() + 5000, ac.signal);
+  assert.equal(p.failure, undefined);
+  assert.equal(getEventListeners(ac.signal, "abort").length, 0);
 });
 
 test("a database error while the browser attempt is paced still frees every permit and hold (review finding W3)", async () => {

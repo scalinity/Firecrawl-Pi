@@ -20,7 +20,13 @@ export const domainOf = (t) => (t.fixture ? t.host : (getDomain(t.host) ?? t.hos
 // A caller that has gone away cancels the acquisition at the next step, not at its deadline: every
 // wait resolves at once for an aborted signal, and each step checks it (review finding W2).
 const CANCELLED = Object.freeze({ class: "CANCELLED", detail: "the caller cancelled the acquisition", retryable: false, retryAfter: null });
-const sleep = (ms, signal) => new Promise((r) => { if (signal?.aborted) return r(); const t = setTimeout(r, ms); signal?.addEventListener("abort", () => { clearTimeout(t); r(); }, { once: true }); });
+// The abort listener goes when the wait ends either way, so a long pacing loop adds none per turn.
+const sleep = (ms, signal) => new Promise((r) => {
+  if (signal?.aborted) return r();
+  const end = () => { clearTimeout(t); signal?.removeEventListener("abort", end); r(); };
+  const t = setTimeout(end, ms);
+  signal?.addEventListener("abort", end, { once: true });
+});
 
 export function validateAcquireRequest(b) {
   const bad = (why) => { throw new Denied("INVALID_REQUEST", why); };
