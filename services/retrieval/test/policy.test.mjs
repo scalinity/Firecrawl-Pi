@@ -2,7 +2,8 @@
 // (review finding W9).
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { loadEnv, loadLocalCidrs } from "../src/policy.mjs";
+import { readFileSync } from "node:fs";
+import { loadEnv, loadLocalCidrs, loadPolicy, parseSha256 } from "../src/policy.mjs";
 
 const env = { PI_RETRIEVAL_LISTEN: "10.231.5.10:3310", PI_RETRIEVAL_PROXY_LISTEN: "10.231.2.10:3312", PI_EGRESS_POLICY_FILE: "/p", PI_EGRESS_LOCAL_CIDRS_FILE: "/l",
   PI_RESOLVER: "10.231.6.1", PI_BROWSER_URL: "http://10.231.2.20:3320", PI_CREDENTIALS_DIR: "/run/secrets", PI_POSTGRES_HOST: "nuq-postgres", PI_POSTGRES_DB: "postgres", PI_POSTGRES_USER: "fcpi_retrieval" };
@@ -14,6 +15,16 @@ test("the environment: unknown keys, the flags that must stay false, the permit 
   assert.throws(() => loadEnv({ ...env, PI_MAX_URL_ACQUISITIONS: "3" }), /spec §23.1/);
   assert.throws(() => loadEnv({ ...env, PI_RESOLVER: "dns.example" }), /IPv4/);
   assert.throws(() => loadEnv({ ...env, PI_RETRIEVAL_LISTEN: "0.0.0.0" }), /ip:port/);
+});
+
+test("a permit lease shorter than an acquisition, or a token hash of the wrong length, fails at startup (review finding S3)", () => {
+  const deployed = JSON.parse(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
+  assert.equal(loadPolicy(JSON.stringify(deployed)).permitLeaseMs, 120000);
+  assert.throws(() => loadPolicy(JSON.stringify({ ...deployed, permitLeaseMs: 119999 })), /acquisitionDeadlineMs \+ 30000/);
+  const hex = "ab".repeat(32);
+  assert.equal(parseSha256(`sha256:${hex}`, "t").length, 32);
+  assert.equal(parseSha256(hex, "t").length, 32);
+  for (const bad of [`sha256:${hex}0`, `sha256:${hex.slice(2)}`, "sha256:", `sha256:${"zz".repeat(32)}`]) assert.throws(() => parseSha256(bad, "t"), /not a SHA-256/);
 });
 
 test("the local-network file must name at least one real network", () => {

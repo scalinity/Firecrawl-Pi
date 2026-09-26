@@ -70,6 +70,9 @@ export function loadPolicy(text) {
   int(p.attempts.httpAttemptMs, 1000, 15000, "attempts.httpAttemptMs");
   int(p.attempts.browserAttemptMs, 1000, 30000, "attempts.browserAttemptMs");
   int(p.permitLeaseMs, 1000, 180000, "permitLeaseMs");
+  // A lease must outlast the longest acquisition and its release, or it could lapse under a live
+  // holder and admit one more acquisition than the permits allow (review finding S3).
+  if (p.permitLeaseMs < p.attempts.acquisitionDeadlineMs + 30000) throw new Error("permitLeaseMs must be at least attempts.acquisitionDeadlineMs + 30000");
   exactKeys(p.browser, ["maxSubresources", "maxSubresourceBytes", "contextMaxMs"], "browser");
   int(p.browser.maxSubresources, 1, 200, "browser.maxSubresources");
   int(p.browser.maxSubresourceBytes, 1024, 25 * 1024 * 1024, "browser.maxSubresourceBytes");
@@ -105,6 +108,15 @@ export function loadLocalCidrs(text) {
   }
   if (n === 0) throw new Error("the local CIDR file names no network");
   return { list, count: n };
+}
+
+// A credential's SHA-256 as stored ("sha256:" and 64 hex digits, or the digits alone). Anything
+// else fails at startup, not as a 500 on every request: timingSafeEqual throws on a length mismatch
+// (review finding S3).
+export function parseSha256(value, name) {
+  const m = /^(?:sha256:)?([0-9a-f]{64})$/i.exec(value);
+  if (!m) throw new Error(`secret ${name} is not a SHA-256 hex digest`);
+  return Buffer.from(m[1], "hex");
 }
 
 export function readSecret(dir, name) {

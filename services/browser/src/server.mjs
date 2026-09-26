@@ -28,7 +28,10 @@ const CONTEXT_MAX_MS = 120000;
 // A rendered document is bounded like a direct body (25 MiB): a script can build any DOM without
 // touching the network, so the proxy's byte count alone does not limit it.
 const HTML_MAX_CHARS = 25 * 1024 * 1024;
-const tokenHash = Buffer.from(readFileSync(`${process.env.PI_CREDENTIALS_DIR}/browser_token_sha256`, "utf8").trim().replace(/^sha256:/, ""), "hex");
+// A hash of the wrong length would make timingSafeEqual throw on every request: fail at startup.
+const tokenHex = readFileSync(`${process.env.PI_CREDENTIALS_DIR}/browser_token_sha256`, "utf8").trim().replace(/^sha256:/, "");
+if (!/^[0-9a-f]{64}$/i.test(tokenHex)) throw new Error("browser_token_sha256 is not a SHA-256 hex digest");
+const tokenHash = Buffer.from(tokenHex, "hex");
 const BUILD = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "browser", build: BUILD, ...o }));
 

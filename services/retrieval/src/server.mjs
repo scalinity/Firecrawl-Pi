@@ -9,7 +9,7 @@
 import http from "node:http";
 import { readFileSync } from "node:fs";
 import { createHash, timingSafeEqual } from "node:crypto";
-import { loadEnv, loadPolicy, loadLocalCidrs, readSecret } from "./policy.mjs";
+import { loadEnv, loadPolicy, loadLocalCidrs, readSecret, parseSha256 } from "./policy.mjs";
 import { Store } from "./store.mjs";
 import { makePublicResolver } from "./resolve.mjs";
 import { ProxySessions, startProxy } from "./proxy.mjs";
@@ -38,7 +38,7 @@ setInterval(reloadLocal, 60000).unref();
 const getPolicy = () => ({ ...basePolicy, localCidrs: localCidrs?.list });
 const getLocalReady = () => localCidrs !== null;
 
-const coreTokenHash = Buffer.from(readSecret(env.credentialsDir, "retrieval_core_token_sha256").replace(/^sha256:/, ""), "hex");
+const coreTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_core_token_sha256"), "retrieval_core_token_sha256");
 const store = new Store({ ...env.postgres, password: readSecret(env.credentialsDir, "retrieval_postgres_password") });
 let storeReady = false;
 (async function connect() {
