@@ -30,7 +30,7 @@ sudo -n journalctl --list-boots --no-pager 2>/dev/null | awk 'NR>1 && ($1=="-1" 
 done
 
 sec current
-echo "boot_id_sha256=$(sha256sum </proc/sys/kernel/random/boot_id | cut -c1-64) kernel=$(uname -r) page_size=$(getconf PAGESIZE) up_since_utc=$(date -u -d "$(uptime -s)" +%Y-%m-%dT%H:%M:%SZ)"
+echo "boot_id_sha256=$(sha256sum </proc/sys/kernel/random/boot_id | cut -c1-64) kernel=$(uname -r) page_size=$(getconf PAGESIZE) up_since_utc=$(date -u -d "@$(( $(date +%s) - $(cut -d. -f1 /proc/uptime) ))" +%Y-%m-%dT%H:%M:%SZ)"
 echo "rsts=$(vcgencmd get_rsts 2>/dev/null | cut -d= -f2) throttled_this_boot=$(vcgencmd get_throttled 2>/dev/null | cut -d= -f2)"
 echo "$(systemctl show -p RuntimeWatchdogUSec -p RebootWatchdogUSec | paste -sd' ' -)"
 
