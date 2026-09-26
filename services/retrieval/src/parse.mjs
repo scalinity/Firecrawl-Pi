@@ -35,10 +35,13 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
   const breakerOf = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
 
   // A parse that took a half-open breaker's one probe and ended with no verdict hands the probe back (review W10).
-  return async function parse(args, signal) {
+  async function parse(args, signal) {
     const hold = {};
     try { return await parseOnce(args, signal, hold); } finally { if (hold.probe && hold.breaker.probing) hold.breaker.neutral(); }
-  };
+  }
+  // Each parser provider's breaker, for readiness and the providers' status (review W6).
+  parse.breakerState = (name) => breakers.get(name)?.state() ?? "closed";
+  return parse;
   async function parseOnce({ logicalId, owner, bytes, pages, reason }, signal, hold) {
     const budget = getBudget(), P = budget.parsing;
     const name = getSelection().parser ?? P.defaultParser;

@@ -120,6 +120,9 @@ test("an upload answered without a job id counts against the breaker; its credit
     const uploads = r.stats().uploads;
     await assert.rejects(r.parse(req(docs.scanPdfBytes())), (e) => e.failureClass === "PROVIDER_UNAVAILABLE");
     assert.equal(r.stats().uploads, uploads, "the open breaker sent nothing");
+    // Readiness reads the parser's own breaker (review W6).
+    assert.equal(r.parse.breakerState("fixture-parser"), "open");
+    assert.equal(r.parse.breakerState("llamaparse"), "closed");
     assert.deepEqual(r.store.states(), ["UNCERTAIN", "UNCERTAIN", "UNCERTAIN"]);
   } finally { await r.srv.close(); }
 });

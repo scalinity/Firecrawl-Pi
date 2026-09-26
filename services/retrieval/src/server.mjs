@@ -99,6 +99,8 @@ const common = { store, getBudget, paidDispatch: env.paidDispatch, providersDir:
 const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
+// A provider's breaker lives in the adapter of its kind (review W6).
+const breakerState = (name, p) => (p.kind === "parser" ? parse.breakerState(name) : adapter.breakerState(name));
 log({ event: "budget_loaded", budget_sha256: budgetSha256, paid_dispatch: env.paidDispatch, models: Object.keys(budget.models), parsers: Object.keys(budget.parsers) });
 
 const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, INVALID_URL: 400, INVALID_REQUEST: 400, RATE_LIMITED: 429, PROXY_REQUIRED: 429,
@@ -145,7 +147,7 @@ async function providerStatus() {
     budgetPolicySha256: budgetSha256,
     providers: Object.fromEntries(Object.entries(budget.providers).map(([name, p]) => [name, { kind: p.kind, paid: p.paid,
       credential: p.credential ? (readCredential(env.providersDir, p.credential) ? "present" : "absent") : "not_required",
-      breaker: p.kind === "model" ? adapter.breakerState(name) : "see parser" }])),
+      breaker: breakerState(name, p) }])),
     budgets: usage,
     caps: Object.fromEntries(Object.entries(budget.categories).map(([k, c]) => [k, { paid: c.paid, unit: c.unit, caps: c.caps }])),
   };
@@ -180,7 +182,7 @@ const server = http.createServer(async (req, res) => {
       const ok = storeReady && getLocalReady();
       // Search, models and parsers are optional to acquisition: reported, never folded into ok (spec §20, AC23).
       return send(res, ok ? 200 : 503, { ok, store: storeReady, local_networks: getLocalReady(), browser: b.ok === true ? "up" : "down",
-        search_selection: selection.search, providers: Object.fromEntries(Object.keys(budget.providers).map((n) => [n, adapter.breakerState(n)])) });
+        search_selection: selection.search, providers: Object.fromEntries(Object.entries(budget.providers).map(([n, p]) => [n, breakerState(n, p)])) });
     }
     if (req.method === "GET" && path === "/searxng/search") {
       if (!storeReady) return notReady(res);
