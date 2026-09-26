@@ -22,11 +22,15 @@ ids() { for s in "${SERVICES[@]}"; do echo "$s $(D inspect -f '{{.Id}}' "$(cid "
 pgq() { D exec -i "$(cid nuq-postgres)" psql -U postgres -d postgres -At -X "$@"; }
 ledger() {
   pgq <<'SQL'
+-- Every ledger table's rows are hashed, events and idempotency keys included, not only counted.
 SELECT 'ledger jobs=' || (SELECT count(*) FROM fcpi_platform.job) || ' events=' || (SELECT count(*) FROM fcpi_platform.job_event)
   || ' idempotency=' || (SELECT count(*) FROM fcpi_platform.idempotency) || ' documents=' || (SELECT count(*) FROM fcpi_platform.job_document)
+  || ' documents_distinct_sha256=' || (SELECT count(DISTINCT sha256) FROM fcpi_platform.job_document)
   || ' rows_sha256=' || encode(sha256(convert_to(
        coalesce((SELECT string_agg(id || '|' || state || '|' || coalesce(upstream_id::text, '') || '|' || archived, ',' ORDER BY id) FROM fcpi_platform.job), '') || '#' ||
-       coalesce((SELECT string_agg(job_id || '|' || ordinal || '|' || sha256, ',' ORDER BY job_id, ordinal) FROM fcpi_platform.job_document), ''), 'UTF8')), 'hex');
+       coalesce((SELECT string_agg(job_id || '|' || ordinal || '|' || sha256, ',' ORDER BY job_id, ordinal) FROM fcpi_platform.job_document), '') || '#' ||
+       coalesce((SELECT string_agg(id || '|' || job_id || '|' || coalesce(from_state, '') || '|' || to_state || '|' || coalesce(detail, '') || '|' || at, ',' ORDER BY id) FROM fcpi_platform.job_event), '') || '#' ||
+       coalesce((SELECT string_agg(principal || '|' || operation || '|' || key || '|' || request_hash || '|' || job_id || '|' || expires_at, ',' ORDER BY principal, operation, key) FROM fcpi_platform.idempotency), ''), 'UTF8')), 'hex');
 SELECT 'retrieval_rows acquisitions=' || (SELECT count(*) FROM fcpi_retrieval.acquisition) || ' attempts=' || (SELECT count(*) FROM fcpi_retrieval.attempt);
 SQL
 }

@@ -509,7 +509,7 @@ const checks = {
       return { ok, actual: `phases inside the window=${inside}; guard not reloaded=${sameGuard}; web accepts in the window=${delta}; core instance records=${recs.length}, with unexplained lines or no control=${badLogs.map((r) => r.k).join(",") || "none"}; gateway log requests=${glk.request_records} Cloud lines=${pat("firecrawl\\.dev") + pat("firecrawl\\.com") + pat("mendable")}; client sockets=${JSON.stringify(sk?.hosts)} lookups=${JSON.stringify(sk?.lookups)}` };
     } },
   X02: { name: "persistence-across-force-recreate", inputs: [`${RAW}persistence.txt`, `${RAW}e2e-after-recreate.txt`],
-    expected: "after `up -d --force-recreate` with no volume removed, all ten services run healthy in new containers; the PostgreSQL, Redis and RabbitMQ sentinels read back; the ledger's rows (receipts, events, idempotency keys, document manifest) hash the same; the archive keeps every file, each hashing to its name; the client registry is unchanged; afterwards the gateway still accepts a token and serves the archived crawl and batch with the same document hashes; the core's log was saved first",
+    expected: "after `up -d --force-recreate` with no volume removed, all ten services run healthy in new containers; the PostgreSQL, Redis and RabbitMQ sentinels read back; the ledger's rows (receipts, every event, every idempotency key, the document manifest) hash the same; the archive keeps every file, at least one and at least one per distinct document the manifest names, each hashing to its name; the sentinel is a real value; the client registry is unchanged; afterwards the gateway still accepts a token and serves the archived crawl and batch with the same document hashes; the core's log was saved first",
     run() {
       const s = S(`${RAW}persistence.txt`), V = kv((s.meta ?? []).join(" ").split(" ")).sentinel;
       const ids = (sec) => Object.fromEntries((s[sec] ?? []).filter((l) => /^[a-z0-9-]+ [0-9a-f]{64}$/.test(l)).map((l) => l.split(" ")));
@@ -521,7 +521,12 @@ const checks = {
       const r = kv(s.read);
       const ar = E("after-recreate");
       const served = (ar.served_after_recreate ?? []).length === 2 && ar.served_after_recreate.every((x) => x.docs > 0 && JSON.stringify(x.served_sha256) === JSON.stringify(x.recorded_before_sha256));
-      const ok = replaced && healthy && /recreate_exit=0/.test((s.recreate ?? []).join(" ")) && r.postgres_read === V && r.redis_read === V && (r.rabbitmq_read ?? "").includes(V) &&
+      // The sentinel is a real value (two missing ones compare equal), and the archive holds files: at least
+      // one per distinct document the manifest names.
+      const sentinel = /^fcpi-m3-persist-[0-9a-f]{12}$/.test(V ?? "");
+      const lw = kv(pick("write", "ledger ").split(" ").slice(1)), files = +((pick("write", "archive files=").match(/files=(\d+)/) ?? [])[1]);
+      const archiveFull = files > 0 && Number.isInteger(+lw.documents_distinct_sha256) && files >= +lw.documents_distinct_sha256 && +lw.events > 0 && +lw.idempotency > 0;
+      const ok = sentinel && archiveFull && replaced && healthy && /recreate_exit=0/.test((s.recreate ?? []).join(" ")) && r.postgres_read === V && r.redis_read === V && (r.rabbitmq_read ?? "").includes(V) &&
         same("ledger ") && same("archive files=") && pick("read", "archive files_whose_content_differs_from_name=") === "archive files_whose_content_differs_from_name=0" && same("registry ") &&
         (s.core_logs_before ?? []).some((l) => l.startsWith("classified ")) && one(ar.tokens, "still_valid")?.status === 200 && served && endOk(ar);
       return { ok, actual: `replaced=${replaced}; healthy=${healthy}; sentinels pg=${r.postgres_read === V} redis=${r.redis_read === V} rabbitmq=${(r.rabbitmq_read ?? "").includes(V)}; ledger same=${same("ledger ")}; archive same=${same("archive files=")}; registry same=${same("registry ")}; served after=${served}` };
