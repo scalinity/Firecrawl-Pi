@@ -5,7 +5,7 @@
 // FCPI_TEST_MANIFEST and FCPI_TEST_SCHEMA locate deploy/policies/capabilities.json and
 // deploy/nuq-postgres/fcpi-platform-schema.sql when the repository layout is not around the test.
 // Without FCPI_TEST_PG the suite fails rather than skips.
-import { test, before, after } from "node:test";
+import { test, before, after, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, request } from "node:http";
 import { spawn } from "node:child_process";
@@ -114,28 +114,41 @@ function fakeCore(dbName) {
 }
 
 // ---- a harness: database, artifact root, clients, fake core and gateway --------------------------------
+// The running test's harnesses, stopped when it ends (afterEach): the suite holds one test's
+// connections at a time (PostgreSQL allows 100), and a failed test leaves no gateway, fake core or
+// open connection behind. H, which many tests share, is stopped after the last one.
 const harnesses = [];
-async function harness({ manifest = testManifest(), settleMs = 800, extraEnv = {} } = {}) {
+async function harness({ manifest = testManifest(), settleMs = 800, extraEnv = {}, shared = false } = {}) {
   const dbName = `fcpi_test_${randomUUID().replace(/-/g, "").slice(0, 12)}`;
+  // Registered before anything can fail, so whatever was made gets cleaned up.
+  const h = { dbName, gw: null, port: 0, logs: [] };
+  h.stop = async () => {
+    h.gw?.kill("SIGKILL");
+    await h.core?.stop().catch(() => {});
+    await h.core?.db?.end().catch(() => {});
+    await h.db?.end().catch(() => {});
+    if (h.dir) rmSync(h.dir, { recursive: true, force: true });
+    const r = await admin("postgres");
+    try { await r.query(`DROP DATABASE IF EXISTS ${dbName} WITH (FORCE)`); } finally { await r.end(); }
+  };
+  if (!shared) harnesses.push(h);
   const root = await admin("postgres");
-  await root.query(`CREATE DATABASE ${dbName}`);
-  await root.end();
-  const db = await admin(dbName);
+  try { await root.query(`CREATE DATABASE ${dbName}`); } finally { await root.end(); }
+  const db = h.db = await admin(dbName);
   await db.query(`CREATE SCHEMA nuq; CREATE SCHEMA fcpi_retrieval;
     CREATE TABLE nuq.queue_scrape (id uuid PRIMARY KEY, data jsonb, created_at timestamptz NOT NULL DEFAULT now(), group_id uuid);
     CREATE TABLE nuq.queue_scrape_backlog (id uuid PRIMARY KEY, data jsonb, created_at timestamptz NOT NULL DEFAULT now(), group_id uuid);`);
   await db.query(SCHEMA);
-  const dir = mkdtempSync(join(tmpdir(), "fcpi-m3-"));
+  const dir = h.dir = mkdtempSync(join(tmpdir(), "fcpi-m3-"));
   writeFileSync(join(dir, "manifest.json"), JSON.stringify(manifest));
   writeFileSync(join(dir, "clients"), clientsText([["a", "pa", ALL], ["b", "pb", ALL], ["ro", "pa", "read"], ["rev", "pa", ALL]]));
   const art = join(dir, "art"); const cred = join(dir, "cred");
   mkdirSync(art); mkdirSync(cred);
   writeFileSync(join(art, ".fcpi-artifact-root"), "test\n");
   writeFileSync(join(cred, "gateway_postgres_password"), "p".repeat(40));
-  const core = fakeCore(dbName);
+  const core = h.core = fakeCore(dbName);
   await core.connectDb();
   await core.start();
-  const h = { db, dir, core, dbName, gw: null, port: 0, logs: [] };
   h.env = () => ({ PATH: process.env.PATH, PI_GATEWAY_LISTEN_PORT: "0", PI_CORE_URL: `http://127.0.0.1:${core.port}`, PI_CORE_TIMEOUT_MS: "5000",
     PI_GATEWAY_CLIENTS_FILE: join(dir, "clients"), PI_ALLOWED_HOSTS: `${ORIGIN},http://localhost:3380`, PI_CAPABILITIES_FILE: join(dir, "manifest.json"),
     PI_ARTIFACT_ROOT: art, PI_CREDENTIALS_DIR: cred, PI_POSTGRES_HOST: PGHOST, PI_POSTGRES_DB: dbName, PI_POSTGRES_USER: "fcpi_gateway",
@@ -145,9 +158,7 @@ async function harness({ manifest = testManifest(), settleMs = 800, extraEnv = {
   h.call = (method, path, opts = {}) => call(h.port, method, path, opts);
   h.job = async (id) => (await db.query("SELECT * FROM fcpi_platform.job WHERE id = $1", [id])).rows[0];
   h.events = async (id) => (await db.query("SELECT from_state, to_state, detail FROM fcpi_platform.job_event WHERE job_id = $1 ORDER BY at, id", [id])).rows;
-  h.stop = async () => { h.gw?.kill("SIGKILL"); await core.stop().catch(() => {}); await core.db.end(); await db.end(); rmSync(dir, { recursive: true, force: true }); const r = await admin("postgres"); await r.query(`DROP DATABASE IF EXISTS ${dbName} WITH (FORCE)`); await r.end(); };
   await h.start();
-  harnesses.push(h);
   return h;
 }
 
@@ -199,9 +210,10 @@ const crawlBody = (extra = {}) => ({ url: "http://m3.fixture.fcpi.test:8080/", .
 let H;
 before(async () => {
   assert.ok(PGHOST, "FCPI_TEST_PG must name the throwaway PostgreSQL (host[:port])");
-  H = await harness();
+  H = await harness({ shared: true });
 });
-after(async () => { for (const h of harnesses) await h.stop().catch(() => {}); });
+afterEach(async () => { for (const h of harnesses.splice(0)) await h.stop().catch(() => {}); });
+after(async () => { await H?.stop().catch(() => {}); });
 
 // ---- authentication, Host, Origin, routes ------------------------------------------------------------
 test("missing and malformed tokens get 401 with the gateway's own challenge; nothing reaches the core", async () => {
