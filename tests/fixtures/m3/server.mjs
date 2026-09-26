@@ -8,7 +8,7 @@
 //   /slow/        index of 30 pages that each answer after 2 s: a crawl long enough to cancel
 //   /missing      404; /gate 401 (an authentication gate, a per-item failure)
 //   /delay?ms=N   a page that answers after N ms (at most 20 s): holds synchronous requests open
-//   /big          (M4) a 600 KiB page of text paragraphs: larger than an MCP tool payload may carry
+//   /big?kb=N     (M4) a page of N KiB of text paragraphs (1-2048, default 600): larger than an MCP tool payload may carry
 import { createServer } from "node:http";
 import { createHash } from "node:crypto";
 
@@ -52,8 +52,9 @@ async function answer(url) {
     return [200, "text/html; charset=utf-8", page("FCPI M3 delayed", `<h1>Delayed page</h1><p>Answered after a deliberate delay.</p><p>Sentinel: <strong>${sentinel("delay")}</strong></p>`)];
   }
   if (p === "/big") {
+    const kb = Math.min(Math.max(Number(url.searchParams.get("kb") ?? 600) || 600, 1), 2048);
     const para = (i) => `<p>Paragraph ${i} of the large page: ${"lorem ipsum dolor sit amet ".repeat(20)}</p>`;
-    return [200, "text/html; charset=utf-8", page("FCPI M3 big", `<h1>Large page</h1><p>Sentinel: <strong>${sentinel("big")}</strong></p>${Array.from({ length: 1100 }, (_, i) => para(i)).join("")}`)];
+    return [200, "text/html; charset=utf-8", page("FCPI M3 big", `<h1>Large page</h1><p>Sentinel: <strong>${sentinel("big")}</strong></p>${Array.from({ length: Math.ceil((kb * 1024) / 580) }, (_, i) => para(i)).join("")}`)];
   }
   return [404, "text/html; charset=utf-8", page("Not found", "<p>No such page.</p>")];
 }
