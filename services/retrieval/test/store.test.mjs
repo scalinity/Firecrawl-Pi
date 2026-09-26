@@ -18,7 +18,7 @@ async function fresh() {
   await admin.query(readFileSync(new URL("../schema.sql", import.meta.url), "utf8"));
   await admin.query("TRUNCATE fcpi_retrieval.acquisition, fcpi_retrieval.attempt, fcpi_retrieval.permit, fcpi_retrieval.domain_state, fcpi_retrieval.direct_nav");
   await admin.end();
-  const store = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval", password: "unused-under-trust" });
+  const store = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval" }); // trust authentication: no password
   await store.ready({ url: 2, browser: 1 });
   return store;
 }
@@ -64,7 +64,7 @@ test("a restart reclaims every lease and domain hold (review finding W3)", opts,
   await store.takePermit("url", crypto.randomUUID(), 2, 600000);
   await store.paceDirect("held.example", crypto.randomUUID(), direct, 600000, false);
   await store.close();
-  const again = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval", password: "unused-under-trust" });
+  const again = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval" }); // trust authentication: no password
   try {
     await again.ready({ url: 2, browser: 1 });
     assert.equal(Number((await sql("SELECT count(*) FROM fcpi_retrieval.permit WHERE holder IS NOT NULL"))[0].count), 0);
