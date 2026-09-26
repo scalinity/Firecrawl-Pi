@@ -25,6 +25,14 @@ export class ProxySessions {
     this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, maxRequests, fixture, bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
     return { username: attemptId, password };
   }
+  // A standing session for a service rather than an attempt (M5: SearXNG's engine requests): its
+  // credential's SHA-256 comes from a secret file, it does not expire, and allow(target) decides each
+  // request by the host's current selection. Each of its requests is logged by host (logEach), so every
+  // search-engine connection is attributable.
+  fixed(username, passwordSha256, { allow, fixture }) {
+    this.#s.set(username, { attemptId: username, hash: passwordSha256, expiresAt: Infinity, maxBytes: Infinity, maxRequests: Infinity, fixture, allow, logEach: true,
+      bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
+  }
   auth(header) {
     const m = /^Basic ([A-Za-z0-9+/=]+)$/.exec(header ?? "");
     if (!m) return null;
@@ -42,6 +50,8 @@ export class ProxySessions {
     return { requests: s.requests, bytes: s.bytes, capped: s.capped, denied: s.denied };
   }
   sweep() { for (const [id, s] of this.#s) if (Date.now() > s.expiresAt + 5000) this.close(id); }
+  // A standing session's counters since the last read, for the service's status.
+  counters(id) { const s = this.#s.get(id); if (!s) return null; const c = { requests: s.requests, bytes: s.bytes, denied: s.denied.length }; s.denied = s.denied.slice(-50); return c; }
 }
 
 export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupFixture, log }) {
@@ -66,9 +76,11 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     let host = "?";
     try { host = new URL(req.url).host || "?"; } catch {}
     try {
-      const policy = scopeFixtures(s.fixture, getPolicy());
+      const policy = scopeFixtures(typeof s.fixture === "function" ? s.fixture() : s.fixture, getPolicy());
       const target = parseTarget(req.url, policy);
+      if (s.allow && !s.allow(target)) throw new Denied("DESTINATION_NOT_ALLOWED", `${target.host} is not a destination this session may reach`);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
+      if (s.logEach) res.on("close", () => log({ event: "proxy_request", session: s.attemptId, method: req.method, target_host: target.host, status: res.statusCode }));
       const headers = {};
       for (const [k, v] of Object.entries(req.headers)) if (!HOP.has(k)) headers[k] = v;
       headers.connection = "close";
@@ -118,10 +130,17 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     if (overRequests(s)) { refuse(s, req.url, new Denied("RESOURCE_LIMIT", `more than ${s.maxRequests} requests`)); clientSocket.end("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\nfcpi: RESOURCE_LIMIT\n"); return; }
     const [host, port] = [req.url.slice(0, req.url.lastIndexOf(":")), req.url.slice(req.url.lastIndexOf(":") + 1)];
     try {
-      const policy = scopeFixtures(s.fixture, getPolicy());
+      const policy = scopeFixtures(typeof s.fixture === "function" ? s.fixture() : s.fixture, getPolicy());
       const target = parseTarget(`https://${host}${port === "443" ? "" : `:${port}`}/`, policy);
+      if (s.allow && !s.allow(target)) throw new Denied("DESTINATION_NOT_ALLOWED", `${target.host} is not a destination this session may reach`);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
       const upstream = net.connect({ host: target.host, port: 443, lookup: pinnedLookup(address) });
+      if (s.logEach) {
+        let up = 0, down = 0;
+        upstream.on("data", (c) => { down += c.length; });
+        clientSocket.on("data", (c) => { up += c.length; });
+        upstream.once("close", () => log({ event: "proxy_request", session: s.attemptId, method: "CONNECT", target_host: target.host, bytes_out: up, bytes_in: down }));
+      }
       s.sockets.add(upstream).add(clientSocket);
       upstream.on("error", () => clientSocket.destroy());
       upstream.once("connect", () => {

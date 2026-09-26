@@ -42,9 +42,35 @@
     { "host": "cool.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "permit.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "permit2.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
-    { "host": "m3.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" }
+    { "host": "m3.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m5.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "model.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "parser.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "search.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" }
   ],
   "search": {
-    "backend": "http://m2.fixture.fcpi.test:8080/search"
+    "engines": {
+      "fixture": [
+        "fcpi fixture"
+      ],
+      "live": [
+        "duckduckgo",
+        "bing",
+        "brave"
+      ]
+    },
+    "engineHosts": {
+      "live": [
+        "duckduckgo.com",
+        "html.duckduckgo.com",
+        "lite.duckduckgo.com",
+        "www.bing.com",
+        "search.brave.com"
+      ]
+    },
+    "perHour": 60,
+    "cacheSeconds": 900,
+    "deadlineMs": 10000,
+    "maxResults": 20
   }
 }

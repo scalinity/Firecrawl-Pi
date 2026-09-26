@@ -164,12 +164,16 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           if (transient && !sameTierRetried && Date.now() + 3000 < deadline) { sameTierRetried = true; await sleep(700 + Math.floor(Math.random() * 600), signal); continue; }
           return fail({ class: e.failureClass, detail: e.detail, retryable: e.retryable || transient || e.failureClass === "TIMEOUT", retryAfter: e.retryAfter });
         }
-        const ct = httpRes.headers["content-type"] ?? null;
+        // The bytes decide the type where they are unambiguous (spec §15: MIME from bytes as well as
+        // headers): a PDF served as text is a PDF, and an HTML page served as a PDF is HTML.
+        const declared = httpRes.headers["content-type"] ?? null;
+        const ct = sniffContentType(httpRes.body, declared);
+        if (ct !== declared) result.contentTypeDeclared = declared;
         const text = isTextual(ct) ? decodeText(httpRes.body, ct) : null;
         const verdict = classify({ status: httpRes.status, contentType: ct, body: text, finalUrl: httpRes.finalUrl, requestedUrl: req.url,
           retryAfter: retryAfterSeconds(httpRes.headers["retry-after"]) });
         await store.finishAttempt(attemptId, { outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: httpRes.status, bytes: httpRes.bytes });
-        Object.assign(result, { finalUrl: httpRes.finalUrl, targetStatus: httpRes.status, contentType: ct, bytes: httpRes.bytes, redirects: httpRes.redirects.map((r) => ({ url: r.url, status: r.status })), quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
+        Object.assign(result, { finalUrl: httpRes.finalUrl, targetStatus: httpRes.status, contentType: ct ?? null, bytes: httpRes.bytes, redirects: httpRes.redirects.map((r) => ({ url: r.url, status: r.status })), quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
         if (verdict.verdict === "target_error" && !sameTierRetried && Date.now() + 3000 < deadline) { sameTierRetried = true; await sleep(700 + Math.floor(Math.random() * 600), signal); continue; }
         // The cooldown belongs to the host that answered 429, wherever the chain began.
         if (verdict.verdict === "rate_limited") await store.coolDown(domainOf(parseTarget(httpRes.finalUrl, policy)), verdict.failure.retryAfter);
@@ -235,6 +239,15 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
   };
 }
 
+// The content type the body's own bytes show, where they settle it; the declared type otherwise.
+const PDF_MAGIC = Buffer.from("%PDF-");
+export function sniffContentType(body, declared) {
+  const head = body.subarray(0, 1024);
+  if (head.includes(PDF_MAGIC)) return "application/pdf";
+  if (declared && /^application\/pdf\b/i.test(declared) && /^\s*(<!doctype html|<html|<head|<body)/i.test(head.toString("latin1"))) return "text/html";
+  return declared;
+}
+
 export function retryAfterSeconds(v) {
   if (!v) return null;
   if (/^\d+$/.test(v)) return Number(v);
@@ -289,34 +302,6 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
       if (r.status === 429) await store.coolDown(domainOf(parseTarget(r.finalUrl, policy)), retryAfterSeconds(r.headers["retry-after"]));
       log({ event: "fetch", request_id: b.requestId, purpose: b.purpose, url_hmac: urlHmac(b.url), target_status: r.status, bytes: r.bytes });
       return { ...r, finalUrl: new URL(r.finalUrl).href };
-    } finally {
-      await releaseAll(log, [() => store.releasePermit("url", holder)]);
-    }
-  };
-}
-
-// GET /searxng/search: the core's search, answered from the policy's search backend (a fixture in
-// M2) under a URL permit and the same pacing as every other request (review finding W1). Only the
-// query and the paging/format parameters SearXNG defines are passed on.
-export function makeSearcher({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, log }) {
-  const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
-  return async function search(inboundUrl, signal) {
-    const policy = getPolicy();
-    if (policy.search.backend === null) throw new Denied("SEARCH_UNAVAILABLE", "no search backend in this release");
-    if (!getLocalReady()) throw new Denied("RETRIEVAL_NOT_READY", "the host's local-network list is not loaded", { retryable: true });
-    const inbound = new URL(inboundUrl, "http://x");
-    const out = new URL(policy.search.backend);
-    for (const k of ["q", "format", "pageno", "language", "time_range", "categories", "engines"]) if (inbound.searchParams.has(k)) out.searchParams.set(k, inbound.searchParams.get(k));
-    const target = parseTarget(out.toString(), policy);
-    const deadline = Date.now() + 10000;
-    const holder = randomUUID();
-    if (!(await holdPermit("url", holder, permits.url, deadline, signal))) throw new Denied("RESOURCE_BUSY", "no URL acquisition permit before the deadline", { retryable: true });
-    try {
-      const paced = await pace(target, holder, deadline, signal);
-      if (paced.failure) throw new Denied(paced.failure.class, paced.failure.detail, paced.failure);
-      const r = await pacedFetch(paced.domain, { url: out.toString(), maxBytes: 1024 * 1024, deadline }, holder, deadline, signal);
-      log({ event: "search", backend_host: out.hostname, target_status: r.status, bytes: r.bytes });
-      return r;
     } finally {
       await releaseAll(log, [() => store.releasePermit("url", holder)]);
     }

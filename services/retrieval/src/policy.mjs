@@ -8,7 +8,17 @@ import { BlockList, isIP } from "node:net";
 
 const ENV_KEYS = new Set(["PI_RETRIEVAL_LISTEN", "PI_RETRIEVAL_PROXY_LISTEN", "PI_EGRESS_POLICY_FILE", "PI_EGRESS_LOCAL_CIDRS_FILE",
   "PI_RESOLVER", "PI_BROWSER_URL", "PI_CREDENTIALS_DIR", "PI_POSTGRES_HOST", "PI_POSTGRES_DB", "PI_POSTGRES_USER",
-  "PI_BROWSER_EXTRAS_ENABLED", "PI_PAID_DISPATCH_ENABLED", "PI_CLOUD_ACCESS_ENABLED", "PI_MAX_URL_ACQUISITIONS", "PI_MAX_BROWSER_PAGES"]);
+  "PI_BROWSER_EXTRAS_ENABLED", "PI_PAID_DISPATCH_ENABLED", "PI_CLOUD_ACCESS_ENABLED", "PI_MAX_URL_ACQUISITIONS", "PI_MAX_BROWSER_PAGES",
+  // M5: search, extraction and parsing.
+  "PI_SEARCH_URL", "PI_SEARCH_PROXY_LISTEN", "PI_EXTRACT_LISTEN", "PI_BUDGET_POLICY_FILE", "PI_PROVIDERS_DIR", "PI_SELECTION_FILE"]);
+
+// An internal service's URL: http at a fixed address, since a name would be looked up through the
+// egress bridge's resolver rather than Docker's.
+function fixedHttp(v, key) {
+  const u = new URL(v);
+  if (u.protocol !== "http:" || !/^\d+\.\d+\.\d+\.\d+$/.test(u.hostname) || u.username || u.password) throw new Error(`${key} must be an http URL at a fixed address`);
+  return u.toString();
+}
 
 export function loadEnv(env) {
   const unknown = Object.keys(env).filter((k) => k.startsWith("PI_") && !ENV_KEYS.has(k));
@@ -16,8 +26,10 @@ export function loadEnv(env) {
   const need = (k) => { if (!env[k]) throw new Error(`${k} is required`); return env[k]; };
   const listen = (v) => { const m = /^(\d+\.\d+\.\d+\.\d+):(\d+)$/.exec(v); if (!m) throw new Error(`listen address ${v} is not ip:port`); return { host: m[1], port: Number(m[2]) }; };
   const exactlyFalse = (k) => { if ((env[k] ?? "false") !== "false") throw new Error(`${k} must be false in this release`); };
-  // Paid dispatch, Cloud access and the browser extras stay off until their milestones (M5-M7).
-  exactlyFalse("PI_PAID_DISPATCH_ENABLED");
+  // Cloud access stays off in every release; the browser extras until M7. Paid dispatch is a switch the
+  // owner turns on only with an approved budget (spec §28.3); anything but "true" or "false" stops startup.
+  const paid = env.PI_PAID_DISPATCH_ENABLED ?? "false";
+  if (paid !== "true" && paid !== "false") throw new Error("PI_PAID_DISPATCH_ENABLED must be true or false");
   exactlyFalse("PI_CLOUD_ACCESS_ENABLED");
   exactlyFalse("PI_BROWSER_EXTRAS_ENABLED");
   const urlPermits = Number(env.PI_MAX_URL_ACQUISITIONS ?? 2), browserPermits = Number(env.PI_MAX_BROWSER_PAGES ?? 1);
@@ -30,6 +42,10 @@ export function loadEnv(env) {
     browserUrl: new URL(need("PI_BROWSER_URL")), credentialsDir: need("PI_CREDENTIALS_DIR"),
     postgres: { host: need("PI_POSTGRES_HOST"), database: need("PI_POSTGRES_DB"), user: need("PI_POSTGRES_USER") },
     permits: { url: urlPermits, browser: browserPermits },
+    paidDispatch: paid === "true",
+    searchUrl: fixedHttp(need("PI_SEARCH_URL"), "PI_SEARCH_URL"),
+    searchProxyListen: listen(need("PI_SEARCH_PROXY_LISTEN")), extractListen: listen(need("PI_EXTRACT_LISTEN")),
+    budgetFile: need("PI_BUDGET_POLICY_FILE"), providersDir: need("PI_PROVIDERS_DIR"), selectionFile: need("PI_SELECTION_FILE"),
   };
 }
 
@@ -87,11 +103,21 @@ export function loadPolicy(text) {
     if (!/^10\.231\.\d+\.0\/24$/.test(f.cidr)) throw new Error(`fixture ${f.host} must name a project /24`);
     if (!["fixture", "direct"].includes(f.limits)) throw new Error(`fixture ${f.host} limits must be fixture or direct`);
   }
-  exactKeys(p.search, ["backend"], "search");
-  if (p.search.backend !== null) {
-    const u = new URL(p.search.backend);
-    if (!p.fixtures.some((f) => f.host === u.hostname)) throw new Error("search.backend is a fixture host in this release (SearXNG arrives in M5)");
+  // Search (spec §13): the engine sets the host's selection chooses between, the hosts the live set may
+  // reach through the search proxy, and the backend's limits, which may be tightened, never loosened.
+  exactKeys(p.search, ["engines", "engineHosts", "perHour", "cacheSeconds", "deadlineMs", "maxResults"], "search");
+  exactKeys(p.search.engines, ["fixture", "live"], "search.engines");
+  for (const k of ["fixture", "live"]) {
+    const l = p.search.engines[k];
+    if (!Array.isArray(l) || l.length === 0 || l.length > 6 || l.some((e) => typeof e !== "string" || !/^[a-z0-9 ._-]{1,40}$/.test(e))) throw new Error(`search.engines.${k} must list 1 to 6 engine names`);
   }
+  exactKeys(p.search.engineHosts, ["live"], "search.engineHosts");
+  const hosts = p.search.engineHosts.live;
+  if (!Array.isArray(hosts) || hosts.length === 0 || hosts.some((h) => typeof h !== "string" || !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(h) || /\.fixture\.fcpi\.test$/.test(h))) throw new Error("search.engineHosts.live must list public host names");
+  int(p.search.perHour, 1, 60, "search.perHour");
+  int(p.search.cacheSeconds, 0, 900, "search.cacheSeconds");
+  int(p.search.deadlineMs, 1000, 10000, "search.deadlineMs");
+  int(p.search.maxResults, 1, 20, "search.maxResults");
   return p;
 }
 
@@ -124,3 +150,18 @@ export function readSecret(dir, name) {
   if (!v) throw new Error(`secret ${name} is empty`);
   return v;
 }
+
+// The host's provider selection (PI_SELECTION_FILE, written by scripts/m5/pi-selection.sh): which engine set
+// search uses (fixture, or live, whose egress stays held until the review is addressed), which listed
+// model extraction uses by default, and which listed parser takes complex documents. Absent, search stays
+// on the fixture set and the policies' defaults apply. It chooses only among what the committed policies
+// list, so it widens nothing.
+export function loadSelection(text, policy, budget) {
+  const s = JSON.parse(text);
+  exactKeys(s, ["search", "extractionModel", "parser"], "selection");
+  if (!["fixture", "live"].includes(s.search)) throw new Error("selection.search must be fixture or live");
+  if (!Object.hasOwn(budget.models, s.extractionModel)) throw new Error("selection.extractionModel must be a model the budget policy lists");
+  if (!Object.hasOwn(budget.parsers, s.parser)) throw new Error("selection.parser must be a parser the budget policy lists");
+  return s;
+}
+export const defaultSelection = (budget) => ({ search: "fixture", extractionModel: budget.extraction.defaultModel, parser: budget.parsing.defaultParser });
