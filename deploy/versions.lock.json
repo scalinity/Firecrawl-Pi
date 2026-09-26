@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-26T04:44:18Z",
+  "generated_utc": "2026-09-26T07:05:52Z",
   "generated_by": "scripts/m2/build-lock.mjs (M2), from the lock M1 closed with at 191c146; entries owned by later milestones are as M1 wrote them",
-  "repository_sha": "45bb7ddb99a0553e9389dafcf9e77175eb68a366",
+  "repository_sha": "5afbbe90ffb7db5b1e481f057fa187d292e3b42d",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -455,10 +455,10 @@
     "firecrawl_api_patched": {
       "role": "The API image the stack runs from M2: the pinned commit with patches/ applied (review finding Q7, decision D6)",
       "status": "selected",
-      "image_id": "sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c",
+      "image_id": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
       "platform": "linux/arm64",
       "source_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "patch_series_sha256": "90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
       "runtime_configuration": {
         "NUQ_WORKER_COUNT": "1",
         "USE_DB_AUTHENTICATION": "false",
@@ -474,7 +474,7 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64)",
       "status": "selected",
-      "image_id": "sha256:ee5b84da35c419b6cf4c1d5b47c5a437e123539e9894407486fe87d6ddc1725a",
+      "image_id": "sha256:4abda4b8000cf1a82ae8aa951976ac8d3c3ad837ddb45a8e203c080ad62dac35",
       "platform": "linux/arm64",
       "base_manifest_digest": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
       "dockerfile": {
@@ -486,7 +486,7 @@
     "browser_worker": {
       "role": "The browser-worker image (built on the Pi, natively linux/arm64)",
       "status": "selected",
-      "image_id": "sha256:cd83da63af0f9f5039c4b41a8832d84f72b1ba47f19cb410aa39a2a356de4824",
+      "image_id": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c",
       "platform": "linux/arm64",
       "base_manifest_digest": "sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717",
       "dockerfile": {
@@ -1206,9 +1206,9 @@
   "patches": {
     "status": "resolved",
     "upstream_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-    "series_sha256": "90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea",
+    "series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
     "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
-    "result_tree": "cd46160c40afa42ab7c56232ecbeaf1549654b92",
+    "result_tree": "1b98286b4a16c6e9f831bc628ede1e8c3d680f48",
     "patches": [
       {
         "file": "0001-nuq-sender-survives-broker-outage.patch",
@@ -1217,12 +1217,12 @@
       },
       {
         "file": "0002-nuq-listener-restarts-after-broker-outage.patch",
-        "sha256": "2fa40cc3914827e34ee2226c61fb35ed7fdd11417d3620f7d6e719edf5d92c01",
+        "sha256": "8489318e6fdac6bbb7ff250ee8855c65a8fb81156d9ec55c5cf331f353dffc9b",
         "reason": "After a broker restart the listener was never re-established while the process survived (review finding R1, upstream #4244 / PR #4263)."
       },
       {
         "file": "0003-pi-resilient-engine-adapter.patch",
-        "sha256": "abff6860fea1bca80e251269cca023bf05c528318339c43649d0c93615035fdd",
+        "sha256": "da924612efbdd8d516d61b41a815144f0ad7baa35989c7fc30d0c5ff98c9a757",
         "reason": "The engine registration and result translation spec §8.1 requires; every page acquisition goes to the retrieval service."
       },
       {
@@ -1285,14 +1285,14 @@
       ]
     },
     "firecrawl_api_image_patched": {
-      "image_id": "sha256:9bd930e537ad682f44b1049712839519573d441bb630ace1655e814f6d984b1c",
+      "image_id": "sha256:b0859fcacf44b0b5c96eb334a39431c3936c839acc79383dffff3ac1c31ab13d",
       "built_on": "the workstation's Colima VM, natively linux/arm64 (decision D6)",
-      "built_utc": "2026-09-26T04:24:44Z",
-      "repository_commit": "83b3dad09dbd9d58d686101dc9f8b2a5459fd36e",
+      "built_utc": "2026-09-26T06:21:16Z",
+      "repository_commit": "0890682b37a3f825c9a3854aafaaec0b5c7c40a2",
       "code_dirty": false,
       "no_cache": true,
-      "patch_series_sha256": "90534819230adce18b3b20d3b6cd43bc0be11f6a47d349d6cd36d6cce87b13ea",
-      "result_tree": "cd46160c40afa42ab7c56232ecbeaf1549654b92",
+      "patch_series_sha256": "c176f8c9c1bb5e67bc0c89ad0b09ca227151a78ba4627e52086bd8f2d8c2c333",
+      "result_tree": "1b98286b4a16c6e9f831bc628ede1e8c3d680f48",
       "go_version": "go version go1.27.1 linux/arm64",
       "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
       "node": "v22.23.3",
