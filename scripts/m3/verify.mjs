@@ -50,7 +50,9 @@ function records(path) {
 }
 const E = (name) => records(`${RAW}e2e-${name}.txt`);
 const one = (recs, c) => (recs ?? []).find((r) => r.case === c) ?? null;
-const endOk = (e) => e.end?.[0]?.exit === 0 && !e.error;
+// One run per transcript: exactly one meta and one end record, the end with exit 0, and no error. A
+// transcript appended to (>>) holds two runs, which would otherwise read as one.
+const endOk = (e) => e.meta?.length === 1 && e.end?.length === 1 && e.end[0].exit === 0 && !e.error;
 // Ids recorded side by side: the same job means two equal UUIDs, another job two different UUIDs, so a
 // missing id (two undefined values compare equal) passes neither.
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
