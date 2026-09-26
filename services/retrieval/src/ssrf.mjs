@@ -75,10 +75,12 @@ export function embeddedIpv4(addr) {
 
 // "public", or the reason the address is refused. localCidrs are the host's own connected
 // networks (deployment configuration): the LAN this host sits on may use a range that is
-// globally routable, so the special-purpose lists alone do not cover it.
-export function classifyAddress(addr, localCidrs = new BlockList()) {
+// globally routable, so the special-purpose lists alone do not cover it. Without that list no
+// address is public: every path fails closed until it is loaded (CWE-636; review finding W7).
+export function classifyAddress(addr, localCidrs) {
   const family = isIP(addr);
   if (family === 0) return "not-an-address";
+  if (!(localCidrs instanceof BlockList)) return "local-networks-not-loaded";
   const type = family === 4 ? "ipv4" : "ipv6";
   if (localCidrs.check(addr, type)) return "host-local-network";
   if (family === 6) {

@@ -95,3 +95,9 @@ test("ordinary public URLs pass, with a trailing dot normalised", () => {
   assert.equal(parseTarget("http://example.com./", policy).host, "example.com");
   assert.equal(parseTarget("https://EXAMPLE.com/", policy).port, 443);
 });
+
+test("without the host's local-network list no address is public (review finding W7)", () => {
+  assert.equal(classifyAddress("8.8.8.8"), "local-networks-not-loaded");
+  assert.equal(classifyAddress("2606:4700:4700::1111", undefined), "local-networks-not-loaded");
+  assert.throws(() => parseTarget("http://8.8.8.8/", { ...policy, localCidrs: undefined }), (e) => e.failureClass === "SSRF_DENIED");
+});

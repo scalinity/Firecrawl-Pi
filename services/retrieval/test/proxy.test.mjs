@@ -89,3 +89,17 @@ test("a session past its request or byte cap is refused and marked capped (revie
     });
   } finally { big.close(); }
 });
+
+test("the proxy answers 503 while the local-network list is not loaded (review finding W7)", async () => {
+  const good = http.createServer((q, r) => r.end("fine")).listen(0, "127.0.0.1");
+  await listening(good);
+  const sessions = new ProxySessions();
+  const proxy = startProxy({ listen: { host: "127.0.0.1", port: 0 }, sessions, getPolicy: () => ({ ...policyFor(good.address().port), localCidrs: undefined }),
+    resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
+  await listening(proxy);
+  try {
+    const cred = sessions.open("not-ready", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+    assert.equal((await viaProxy(proxy.address().port, `http://fx.fixture.fcpi.test:${good.address().port}/`, cred)).status, 503);
+    assert.deepEqual(sessions.close("not-ready").denied.map((d) => d.class), ["RETRIEVAL_NOT_READY"]);
+  } finally { proxy.close(); good.close(); }
+});

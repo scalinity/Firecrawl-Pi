@@ -59,6 +59,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     const s = sessions.auth(req.headers["proxy-authorization"]);
     if (!s) { res.writeHead(407, { "proxy-authenticate": 'Basic realm="fcpi"', connection: "close" }).end(); return; }
     s.requests++;
+    if (!getPolicy().localCidrs) { refuse(s, req.url, new Denied("RETRIEVAL_NOT_READY", "the host's local-network list is not loaded")); res.writeHead(503, { connection: "close" }).end("fcpi: RETRIEVAL_NOT_READY\n"); return; }
     if (overRequests(s)) { refuse(s, req.url, new Denied("RESOURCE_LIMIT", `more than ${s.maxRequests} requests`)); res.writeHead(403, { connection: "close" }).end("fcpi: RESOURCE_LIMIT\n"); return; }
     // The refused request is named by the host and port it asked for, even when it fails to parse.
     let host = "?";
@@ -106,6 +107,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     const s = sessions.auth(req.headers["proxy-authorization"]);
     if (!s) { clientSocket.end('HTTP/1.1 407 Proxy Authentication Required\r\nProxy-Authenticate: Basic realm="fcpi"\r\nConnection: close\r\n\r\n'); return; }
     s.requests++;
+    if (!getPolicy().localCidrs) { refuse(s, req.url, new Denied("RETRIEVAL_NOT_READY", "the host's local-network list is not loaded")); clientSocket.end("HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\nfcpi: RETRIEVAL_NOT_READY\n"); return; }
     if (overRequests(s)) { refuse(s, req.url, new Denied("RESOURCE_LIMIT", `more than ${s.maxRequests} requests`)); clientSocket.end("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\nfcpi: RESOURCE_LIMIT\n"); return; }
     const [host, port] = [req.url.slice(0, req.url.lastIndexOf(":")), req.url.slice(req.url.lastIndexOf(":") + 1)];
     try {
