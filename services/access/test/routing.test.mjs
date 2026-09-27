@@ -19,11 +19,11 @@ test("a crawl past 20 pages, or a batch past 20 URLs, is bulk and asks for the r
   const crawl = { url: "https://example.org/", limit: 50 };
   assert.equal(pagesOf("crawl", crawl), 50);
   assert.equal(isBulk("crawl", crawl, M), true);
-  assert.deepEqual(routeBody("crawl", crawl, M), { body: { ...crawl, scrapeOptions: { proxy: "stealth" } }, bulk: true });
+  assert.deepEqual(routeBody("crawl", crawl, M), { body: { ...crawl, scrapeOptions: { proxy: "stealth" } }, bulk: true, needsRoute: true });
   // Scrape options the caller gave are kept beside the route.
   assert.deepEqual(routeBody("crawl", { ...crawl, scrapeOptions: { formats: ["markdown"] } }, M).body.scrapeOptions, { formats: ["markdown"], proxy: "stealth" });
   const small = { url: "https://example.org/", limit: 20 };
-  assert.deepEqual(routeBody("crawl", small, M), { body: small, bulk: false });
+  assert.deepEqual(routeBody("crawl", small, M), { body: small, bulk: false, needsRoute: false });
   const batch = { urls: Array.from({ length: 21 }, (_, i) => `https://example.org/${i}`) };
   assert.equal(routeBody("batch", batch, M).body.proxy, "stealth");
   assert.equal(routeBody("batch", { urls: batch.urls.slice(0, 20) }, M).bulk, false);
@@ -34,7 +34,7 @@ test("a crawl with no limit takes the manifest's default of 20 pages, and is not
   const { body, units } = validateBody("crawl", { url: "https://example.org/" }, M);
   assert.equal(body.limit, 20);
   assert.equal(units, 20);
-  assert.deepEqual(routeBody("crawl", body, M), { body, bulk: false });
+  assert.deepEqual(routeBody("crawl", body, M), { body, bulk: false, needsRoute: false });
 });
 
 test("a local-only (basic) bulk job is refused outright", () => {
@@ -50,4 +50,13 @@ test("a crawl holds its start URL's domain, a batch every URL's; an unavailable 
   assert.equal(r.body.code, "PROXY_REQUIRED");
   assert.equal(r.body.route.residential, "BLOCKED_CREDENTIAL");
   assert.equal(routeRefusal(null).body.route.residential, "ROUTE_SERVICE_UNREACHABLE");
+});
+
+test("a job of any size whose pages ask for the residential route needs it, and holds its domains; auto and basic small jobs do not (review W7)", () => {
+  const small = { url: "https://example.org/", limit: 5 };
+  assert.equal(routeBody("crawl", { ...small, scrapeOptions: { proxy: "stealth" } }, M).needsRoute, true);
+  assert.equal(routeBody("batch", { urls: ["https://a.example/"], proxy: "stealth" }, M).needsRoute, true);
+  assert.equal(routeBody("crawl", small, M).needsRoute, false);
+  assert.equal(routeBody("crawl", { ...small, scrapeOptions: { proxy: "basic" } }, M).needsRoute, false);
+  assert.equal(routeBody("crawl", { url: "https://example.org/", limit: 21 }, M).needsRoute, true);
 });

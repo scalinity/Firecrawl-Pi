@@ -12,12 +12,13 @@
 // Reconciliation. An uncertain job is looked up by its marker in NuQ's job data: found → mapped to
 // the earliest upstream group (any later duplicate is cancelled); not found once the settle window
 // has passed → back to RECEIVED, and only then submitted again. Nothing is resubmitted blindly.
-// Route holds (M6, src/routing.mjs). A bulk job's domains are held on the residential route just before it is
+// Route holds (M6, src/routing.mjs). The domains of a job that needs the residential route (a bulk job, or one whose
+// pages ask for it) are held on that route just before it is
 // submitted; a hold refused (the route lost since admission) fails the job as PROXY_REQUIRED unsent, and an
 // unreachable retrieval service leaves it RECEIVED for the next round. The hold is released when the job ends, and
 // lapses on its own after limits.proxy.holdMinutes.
 import { randomUUID } from "node:crypto";
-import { isBulk, holdUrls } from "./routing.mjs";
+import { needsRoute, holdUrls } from "./routing.mjs";
 
 const PATH = { crawl: "/v2/crawl", batch: "/v2/batch/scrape" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -33,13 +34,13 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
   const serial = (fn) => { const p = chain.then(fn, fn); chain = p.catch(() => {}); return p; };
   const say = (o) => log({ event: "job", instance, ...o });
   // Best effort: a hold not released lapses at its end.
-  const release = (job) => { if (routes && isBulk(job.kind, job.request, cfg.manifest)) routes.release(job.id).catch((e) => say({ job: job.id, action: "route_release_failed", reason: e.code })); };
+  const release = (job) => { if (routes && needsRoute(job.kind, job.request, cfg.manifest)) routes.release(job.id).catch((e) => say({ job: job.id, action: "route_release_failed", reason: e.code })); };
 
   async function dispatchOne() {
     const job = await store.claimNext(instance);
     if (!job) return null;
     say({ job: job.id, kind: job.kind, action: "submit", attempt: job.dispatch_attempts });
-    if (isBulk(job.kind, job.request, cfg.manifest)) {
+    if (needsRoute(job.kind, job.request, cfg.manifest)) {
       let h = null;
       try { h = routes ? await routes.hold(job.id, holdUrls(job.kind, job.request), L.proxy.holdMinutes) : null; }
       catch (e) { await store.markRequeued(job.id, `the route hold could not be placed (${e.code}): the retrieval service was not reached`); say({ job: job.id, action: "requeued", reason: `route hold ${e.code}` }); return job.id; }

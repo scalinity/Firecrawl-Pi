@@ -9,7 +9,8 @@
 //     admission, and fails with PROXY_REQUIRED at dispatch if the route was lost meanwhile. It never runs on the
 //     home connection instead.
 // A bulk job that asks for direct egress only (proxy: "basic") is refused outright: local-only never passes the
-// direct limits.
+// direct limits. A job of any size whose pages ask for the residential route (proxy: "stealth") is held and checked
+// the same way, since its robots.txt, sitemaps and discovery fetches carry no route of their own (review W7).
 import { RequestError } from "./validate.mjs";
 
 export function pagesOf(kind, body) {
@@ -18,22 +19,25 @@ export function pagesOf(kind, body) {
   return 1;
 }
 export const isBulk = (kind, body, M) => (kind === "crawl" || kind === "batch") && pagesOf(kind, body) > M.limits.proxy.bulkPages;
+const askedRoute = (kind, body) => (kind === "crawl" ? body.scrapeOptions?.proxy : body.proxy);
+// A job whose pages take the residential route, and whose domains are therefore held on it for the job's life.
+export const needsRoute = (kind, body, M) => (kind === "crawl" || kind === "batch") && (isBulk(kind, body, M) || askedRoute(kind, body) === "stealth");
 
-// The body with its route decided: a bulk job's pages ask for the residential route. Returns { body, bulk }.
+// The body with its route decided: a bulk job's pages ask for the residential route. Returns { body, bulk, needsRoute }.
 export function routeBody(kind, body, M) {
-  if (!isBulk(kind, body, M)) return { body, bulk: false };
-  const asked = kind === "crawl" ? body.scrapeOptions?.proxy : body.proxy;
+  if (!isBulk(kind, body, M)) return { body, bulk: false, needsRoute: needsRoute(kind, body, M) };
+  const asked = askedRoute(kind, body);
   if (asked === "basic") {
     throw new RequestError(400, "PROXY_REQUIRED", `A job of more than ${M.limits.proxy.bulkPages} pages needs the residential route from the start (spec §10.2); proxy 'basic' asks for direct egress only.`);
   }
-  if (kind === "crawl") return { body: { ...body, scrapeOptions: { ...(body.scrapeOptions ?? {}), proxy: "stealth" } }, bulk: true };
-  return { body: { ...body, proxy: "stealth" }, bulk: true };
+  if (kind === "crawl") return { body: { ...body, scrapeOptions: { ...(body.scrapeOptions ?? {}), proxy: "stealth" } }, bulk: true, needsRoute: true };
+  return { body: { ...body, proxy: "stealth" }, bulk: true, needsRoute: true };
 }
 
-// The URLs whose domains a bulk job holds on the residential route.
+// The URLs whose domains a job that needs the residential route holds on it.
 export const holdUrls = (kind, request) => (kind === "crawl" ? [request.url] : request.urls);
 
-// The refusal a caller gets when the residential route cannot be had for a bulk job.
+// The refusal a caller gets when the residential route cannot be had for a job that needs it.
 export function routeRefusal(residential) {
   const reason = residential?.reason ?? "ROUTE_SERVICE_UNREACHABLE";
   return { status: 429, body: { success: false, code: "PROXY_REQUIRED", error: `This job needs the residential route from the start, which is unavailable (${reason}); nothing was accepted or sent.`, route: { residential: reason } },

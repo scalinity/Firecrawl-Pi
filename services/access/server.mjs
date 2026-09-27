@@ -124,14 +124,14 @@ async function submit(ctx, route) {
   const raw = await readJson(ctx.req);
   const v = validateBody(route.body, raw, M);
   const { units, invalidURLs } = v;
-  // A bulk job needs the residential route from the start: refused before any receipt when it cannot be had.
-  const { body, bulk } = routeBody(route.kind, v.body, M);
-  if (bulk) {
+  // A job that needs the residential route (bulk, or asking for it) is refused before any receipt when it cannot be had.
+  const { body, needsRoute } = routeBody(route.kind, v.body, M);
+  if (needsRoute) {
     const r = extractor ? await extractor.routes().catch(() => null) : null;
     const residential = r?.status === 200 ? r.json?.residential : null;
     if (!residential?.available) {
       const x = routeRefusal(residential);
-      log({ event: "bulk_refused", request_id: ctx.id, kind: route.kind, units, reason: x.body.route.residential });
+      log({ event: "route_refused", request_id: ctx.id, kind: route.kind, units, reason: x.body.route.residential });
       return ctx.send(x.status, x.body, x.retryAfter ? { "retry-after": String(x.retryAfter) } : {});
     }
   }
