@@ -141,6 +141,56 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.parse_cache (
 );
 CREATE INDEX IF NOT EXISTS parse_cache_expires ON fcpi_retrieval.parse_cache (expires_at);
 
+-- M6: residential proxy spending shares the ledger: a reservation per attempt (kind proxy), and the difference a
+-- provider's own usage report shows over what was measured locally (kind reconcile).
+ALTER TABLE fcpi_retrieval.budget_reservation DROP CONSTRAINT IF EXISTS budget_reservation_kind_check;
+ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile'));
+
+-- M6: domain routing (spec §9.5), at most 5,000 rows keyed by registrable domain (a fixture by its host): a learned
+-- residential preference with its set time, expiry and probe, the script-shell learning, and outcome counters. A
+-- provider's failure never writes here.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.domain_route (
+  domain              text PRIMARY KEY,
+  preferred           text CHECK (preferred IN ('residential')),
+  set_at              timestamptz,
+  expires_at          timestamptz,
+  probe_at            timestamptz,
+  challenges          integer NOT NULL DEFAULT 0 CHECK (challenges >= 0),
+  js_count            integer NOT NULL DEFAULT 0 CHECK (js_count >= 0),
+  prefer_browser      boolean NOT NULL DEFAULT false,
+  browser_expires_at  timestamptz,
+  successes           bigint NOT NULL DEFAULT 0,
+  failures            bigint NOT NULL DEFAULT 0,
+  last_success_at     timestamptz,
+  last_failure_at     timestamptz,
+  last_failure_class  text,
+  last_reason         text,
+  updated_at          timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS domain_route_updated_at ON fcpi_retrieval.domain_route (updated_at);
+-- M6: a job's explicit, finite route hold (spec §10.2): while it lasts, the domain's acquisitions need the
+-- residential route. Placed and released by the gateway for bulk jobs.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.route_hold (
+  domain      text NOT NULL,
+  job_id      text NOT NULL,
+  reason      text NOT NULL,
+  until       timestamptz NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (domain, job_id)
+);
+-- M6: each reconciliation of locally measured proxy bytes against the provider's usage report for one UTC day.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.proxy_reconciliation (
+  id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  provider              text NOT NULL,
+  day                   date NOT NULL,
+  local_bytes           bigint NOT NULL,
+  provider_bytes        bigint NOT NULL,
+  adjustment_micro_usd  bigint NOT NULL DEFAULT 0,
+  uncertain_settled     integer NOT NULL DEFAULT 0,
+  detail                text,
+  at                    timestamptz NOT NULL DEFAULT now()
+);
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'fcpi_retrieval') THEN

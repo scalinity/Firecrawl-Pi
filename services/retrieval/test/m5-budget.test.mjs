@@ -107,14 +107,14 @@ test("inherited names are not schema properties, and __proto__ is refused as a n
 test("the egress policy's search section and the host selection are validated", () => {
   const egress = readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8");
   const p = loadPolicy(egress);
-  assert.deepEqual(p.search.engines.fixture, ["fcpi fixture", "fcpi fixture b"]);
+  assert.deepEqual(p.search.engines.fixture, ["fcpi fixture", "fcpi fixture b", "fcpi fixture r"]);
   assert.equal(p.search.perHour, 60);
   const e = (f) => { const j = JSON.parse(egress); f(j); return JSON.stringify(j); };
   assert.throws(() => loadPolicy(e((j) => { j.search.perHour = 61; })), /perHour/);
   assert.throws(() => loadPolicy(e((j) => { j.search.deadlineMs = 20000; })), /deadlineMs/);
   assert.throws(() => loadPolicy(e((j) => { j.search.engineHosts.live.push("search.fixture.fcpi.test"); })), /public host/);
   const b = loadBudgetPolicy(RAW);
-  assert.deepEqual(defaultSelection(b), { search: "fixture", extractionModel: "gpt-4.1-mini-2025-04-14", parser: "llamaparse-cost-effective" });
+  assert.deepEqual(defaultSelection(b), { search: "fixture", extractionModel: "gpt-4.1-mini-2025-04-14", parser: "llamaparse-cost-effective", proxy: "decodo-residential" });
   assert.equal(loadSelection(JSON.stringify({ search: "live", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b).search, "live");
   assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "gpt-4o", parser: "fcpi-fixture-parser" }), p, b), /extractionModel/);
   assert.throws(() => loadSelection(JSON.stringify({ search: "everything", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b), /search/);

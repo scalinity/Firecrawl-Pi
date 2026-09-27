@@ -57,8 +57,10 @@ export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy
 
   async function render(args) {
     const policy = getPolicy();
-    // The main document and its redirects pass the proxy too, hence the margin over the subresources.
-    const cred = sessions.open(args.attemptId, { expiresAt: args.deadline, maxBytes: policy.browser.maxSubresourceBytes, maxRequests: policy.browser.maxSubresources + 20, fixture: args.fixture === true });
+    // The main document and its redirects pass the proxy too, hence the margin over the subresources. On the
+    // residential route (M6) the session chains through the attempt's leg, and its bytes stop at the leg's reservation.
+    const maxBytes = args.upstream ? Math.min(policy.browser.maxSubresourceBytes, args.upstream.meter.cap) : policy.browser.maxSubresourceBytes;
+    const cred = sessions.open(args.attemptId, { expiresAt: args.deadline, maxBytes, maxRequests: policy.browser.maxSubresources + 20, fixture: args.fixture === true, upstream: args.upstream ?? null });
     let result;
     try { result = await call(args, cred); } finally { result = { ...result, proxy: sessions.close(args.attemptId) }; }
     return result;

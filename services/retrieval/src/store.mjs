@@ -3,20 +3,23 @@
 // the attempt log, the global permits and direct-egress pacing. Every decision that must hold
 // across concurrent callers, restarts and NuQ requeues is one transaction here.
 import pg from "pg";
+import { observe } from "./route.mjs";
 
-// Direct-egress pacing (spec §10.2), as a pure function so the limits can be checked without a
-// database. Returns { go: true } | { waitMs } | { failure }.
-export function paceDecision({ now, state, hourCount, dayCount, limits }) {
+// Per-domain pacing (spec §10.2), as a pure function so the limits can be checked without a database. Returns
+// { go: true } | { waitMs } | { failure }. The cooldown, the one navigation in flight and the gap hold on every
+// route, since pacing applies across all egress IPs and clients; the hourly and daily caps count the home
+// connection's navigations alone (direct: false for a residential navigation).
+export function paceDecision({ now, state, hourCount, dayCount, limits, direct = true }) {
   if (state.cooldown_until && state.cooldown_until > now) {
     const retryAfter = Math.ceil((state.cooldown_until - now) / 1000);
     return { failure: { class: "RATE_LIMITED", detail: "the domain is cooling down after a rate limit", retryable: true, retryAfter } };
   }
   // The caps come before any wait, so work the policy will refuse fails at once.
-  if (limits.perDomainPerHour !== null && hourCount >= limits.perDomainPerHour) {
-    return { failure: { class: "PROXY_REQUIRED", detail: `${limits.perDomainPerHour} direct navigations to this domain in the last hour; more needs approved proxy egress (M6)`, retryable: true, retryAfter: null } };
+  if (direct && limits.perDomainPerHour !== null && hourCount >= limits.perDomainPerHour) {
+    return { failure: { class: "PROXY_REQUIRED", detail: `${limits.perDomainPerHour} direct navigations to this domain in the last hour; more needs approved proxy egress`, retryable: true, retryAfter: null, directCap: "domain_hour" } };
   }
-  if (limits.platformPerDay !== null && dayCount >= limits.platformPerDay) {
-    return { failure: { class: "PROXY_REQUIRED", detail: `${limits.platformPerDay} direct navigations across the platform today; more needs approved proxy egress (M6)`, retryable: true, retryAfter: null } };
+  if (direct && limits.platformPerDay !== null && dayCount >= limits.platformPerDay) {
+    return { failure: { class: "PROXY_REQUIRED", detail: `${limits.platformPerDay} direct navigations across the platform today; more needs approved proxy egress`, retryable: true, retryAfter: null, directCap: "platform_day" } };
   }
   if (state.holder && state.hold_until && state.hold_until > now) return { waitMs: Math.min(state.hold_until - now, 250) };
   if (state.last_nav_at && limits.minNavigationGapMs > 0) {
@@ -101,6 +104,12 @@ export class Store {
     });
   }
 
+  // An attempt whose direct navigation the caps refused moves to the residential route under the same reservation
+  // of the page's budget, so a cap never costs the page one of its four attempts.
+  async setAttemptStrategy(attemptId, strategy) {
+    await this.pool.query("UPDATE fcpi_retrieval.attempt SET strategy = $2 WHERE attempt_id = $1", [attemptId, strategy]);
+  }
+
   async finishAttempt(attemptId, { outcome, targetStatus = null, bytes = null, subresources = null }) {
     await this.pool.query(
       `UPDATE fcpi_retrieval.attempt SET finished_at = now(), outcome = $2, target_status = $3, bytes = $4, subresources = $5 WHERE attempt_id = $1`,
@@ -123,14 +132,16 @@ export class Store {
     await this.pool.query("UPDATE fcpi_retrieval.permit SET holder = NULL, lease_until = NULL WHERE kind = $1 AND holder = $2", [kind, holder]);
   }
 
-  // One pacing decision for a direct navigation to `domain`; on { go } the navigation is recorded
-  // and the domain is held by `holder` until released or holdMs passes.
-  async paceDirect(domain, holder, limits, holdMs, fixture) {
+  // One pacing decision for a navigation to `domain`; on { go } the navigation is recorded and the domain is
+  // held by `holder` until released or holdMs passes. tier "residential" (M6) shares the domain's hold, gap and
+  // cooldown with direct navigations, and is not counted against the home connection's caps.
+  async paceDirect(domain, holder, limits, holdMs, fixture, tier = "direct") {
+    const direct = tier === "direct";
     return this.#tx(async (c) => {
       // The platform's daily cap is counted across all domains, so concurrent pacers of different
       // domains are serialised on one advisory lock before counting; otherwise each could see 199 and
       // go (CWE-362; review finding W4). Fixture navigations are outside the cap and do not wait.
-      if (!fixture) await c.query("SELECT pg_advisory_xact_lock(hashtext('fcpi.direct_nav.day'))");
+      if (!fixture && direct) await c.query("SELECT pg_advisory_xact_lock(hashtext('fcpi.direct_nav.day'))");
       // One statement creates or locks the row, so the prune cannot remove it between the two.
       const s = (await c.query(
         `INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT (domain) DO UPDATE SET domain = EXCLUDED.domain
@@ -139,12 +150,12 @@ export class Store {
         "SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE domain = $1 AND at > now() - interval '1 hour'", [domain])).rows[0].count);
       const dayCount = Number((await c.query(
         "SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE NOT fixture AND at > now() - interval '1 day'")).rows[0].count);
-      const d = paceDecision({ now: s.now, state: s, hourCount, dayCount, limits });
+      const d = paceDecision({ now: s.now, state: s, hourCount, dayCount, limits, direct });
       if (!d.go) return d;
       await c.query(
         "UPDATE fcpi_retrieval.domain_state SET holder = $2, hold_until = now() + ($3::int * interval '1 millisecond'), last_nav_at = now() WHERE domain = $1",
         [domain, holder, holdMs]);
-      await c.query("INSERT INTO fcpi_retrieval.direct_nav (domain, fixture) VALUES ($1, $2)", [domain, fixture]);
+      if (direct) await c.query("INSERT INTO fcpi_retrieval.direct_nav (domain, fixture) VALUES ($1, $2)", [domain, fixture]);
       return d;
     });
   }
@@ -260,8 +271,51 @@ export class Store {
   releaseBudget(id, detail) { return this.#close(id, "RELEASED", 0, { detail }); }
   // An outcome nobody can know (the request was sent and no answer came): the whole reservation stays
   // counted, and the call key is never sent again (spec §24.2).
-  async markBudgetUncertain(id, detail) {
-    await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = $2 WHERE id = $1 AND state = 'RESERVED'", [id, detail]);
+  async markBudgetUncertain(id, detail, usage = null) {
+    await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = $2, usage = COALESCE($3, usage) WHERE id = $1 AND state = 'RESERVED'", [id, detail, usage ? JSON.stringify(usage) : null]);
+  }
+
+  // ---- proxy usage reconciliation (M6, reconcile.mjs) -------------------------------------------------------
+  // One provider's proxy rows of one UTC day: the bytes settled and the bytes measured by the rows still UNCERTAIN.
+  async proxyDay(provider, day) {
+    const r = (await this.pool.query(`SELECT COALESCE(sum((usage->>'bytes')::bigint) FILTER (WHERE state = 'SETTLED'), 0)::float8 AS settled,
+        COALESCE(sum((usage->>'bytes')::bigint) FILTER (WHERE state = 'UNCERTAIN'), 0)::float8 AS uncertain, count(*) FILTER (WHERE state = 'UNCERTAIN')::int AS n_uncertain
+      FROM fcpi_retrieval.budget_reservation WHERE provider = $1 AND kind = 'proxy' AND day_start = $2`, [provider, day])).rows[0];
+    return { settledBytes: r.settled, uncertainBytes: r.uncertain, uncertain: r.n_uncertain };
+  }
+  // A charge the provider's report shows beyond what was measured: settled at once in its category (and the paid
+  // total's day for a paid provider), past any cap, since it was already incurred.
+  async recordAdjustment({ id, callKey, category, provider, subject, rateCard, amount, day, paidTotal, usage }) {
+    const month = `${day.slice(0, 7)}-01`;
+    await this.#tx(async (c) => {
+      const periods = [];
+      for (const [period, start] of [["day", day], ["month", month]]) {
+        const u = await c.query("UPDATE fcpi_retrieval.budget_usage SET settled = settled + $4 WHERE category = $1 AND period = $2 AND period_start = $3", [category, period, start, amount]);
+        if (u.rowCount) periods.push(period);
+      }
+      if (paidTotal) {
+        await c.query("INSERT INTO fcpi_retrieval.budget_usage (category, period, period_start) VALUES ('_paid_total', 'day', $1) ON CONFLICT DO NOTHING", [day]);
+        await c.query("UPDATE fcpi_retrieval.budget_usage SET settled = settled + $2 WHERE category = '_paid_total' AND period = 'day' AND period_start = $1", [day, amount]);
+      }
+      await c.query(`INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, actual, state, day_start, month_start, paid_total, periods, usage, detail, settled_at)
+        VALUES ($1, $2, $2, $3, $4, $5, 'reconcile', 'micro_usd', $6, 'reconcile', $7, $7, 'SETTLED', $8, $9, $10, $11, $12, 'the provider reported more bytes than were measured locally', now())`,
+        [id, callKey, category, provider, subject, rateCard, amount, day, month, paidTotal, periods, JSON.stringify(usage)]);
+    });
+  }
+  // Settles each UNCERTAIN proxy row of the day at the bytes it measured; costOf(bytes, subject) prices them.
+  async settleUncertainProxy(provider, day, costOf) {
+    const rows = (await this.pool.query("SELECT id, subject, (usage->>'bytes')::bigint AS bytes, reserved FROM fcpi_retrieval.budget_reservation WHERE provider = $1 AND kind = 'proxy' AND day_start = $2 AND state = 'UNCERTAIN'", [provider, day])).rows;
+    let n = 0;
+    for (const r of rows) {
+      const cost = costOf(Number(r.bytes ?? 0), r.subject);
+      if (cost === null) continue;
+      if (await this.settleBudget(r.id, Math.min(cost, Number(r.reserved)), { usage: { bytes: Number(r.bytes ?? 0), reconciled: true }, detail: "settled at its measured bytes by reconciliation" })) n++;
+    }
+    return n;
+  }
+  async recordReconciliation({ provider, day, localBytes, providerBytes, adjustment, settledUncertain, detail }) {
+    await this.pool.query("INSERT INTO fcpi_retrieval.proxy_reconciliation (provider, day, local_bytes, provider_bytes, adjustment_micro_usd, uncertain_settled, detail) VALUES ($1, $2, $3, $4, $5, $6, $7)",
+      [provider, day, localBytes, providerBytes, adjustment, settledUncertain, detail]);
   }
   async budgetUsage(day, month) {
     return (await this.pool.query("SELECT category, period, period_start::text AS period_start, reserved::float8 AS reserved, settled::float8 AS settled FROM fcpi_retrieval.budget_usage WHERE (period = 'day' AND period_start = $1) OR (period = 'month' AND period_start = $2) ORDER BY category, period",
@@ -300,6 +354,60 @@ export class Store {
       ON CONFLICT (key) DO UPDATE SET markdown = EXCLUDED.markdown, pages = EXCLUDED.pages, created_at = now(), expires_at = EXCLUDED.expires_at`, [key, owner, bytesSha256, parser, pages, markdown, days]);
   }
 
+  // ---- domain routing (spec §9.5) and route holds (spec §10.2) ------------------------------------------------
+  async routeRecord(domain) {
+    return (await this.pool.query("SELECT * FROM fcpi_retrieval.domain_route WHERE domain = $1", [domain])).rows[0] ?? null;
+  }
+  // The one cheaper probe after a residential preference expired: claimed by one acquisition at a time, for
+  // probeMinutes; true when this caller holds it.
+  async claimProbe(domain, probeMinutes) {
+    const r = await this.pool.query(`UPDATE fcpi_retrieval.domain_route SET probe_at = now(), updated_at = now()
+      WHERE domain = $1 AND preferred = 'residential' AND expires_at <= now() AND (probe_at IS NULL OR probe_at <= now() - ($2::int * interval '1 minute'))
+      RETURNING domain`, [domain, probeMinutes]);
+    return r.rowCount === 1;
+  }
+  // Applies one observation (route.mjs observe) and the outcome counters in one transaction. The table holds at
+  // most routing.maxRecords rows: a new row past the limit removes the least recently updated ones.
+  async learnRoute(domain, obs, routing, { success = null, failureClass = null } = {}) {
+    return this.#tx(async (c) => {
+      const cur = (await c.query("SELECT * FROM fcpi_retrieval.domain_route WHERE domain = $1 FOR UPDATE", [domain])).rows[0] ?? null;
+      const change = obs ? observe(cur, obs, routing) : null;
+      if (!cur && !change && success === null) return null;
+      const next = { ...(cur ?? { preferred: null, set_at: null, expires_at: null, probe_at: null, challenges: 0, js_count: 0, prefer_browser: false, browser_expires_at: null, successes: 0, failures: 0 }), ...(change ?? {}) };
+      if (success === true) { next.successes = Number(next.successes) + 1; next.last_success_at = new Date(); }
+      if (success === false) { next.failures = Number(next.failures) + 1; next.last_failure_at = new Date(); next.last_failure_class = failureClass; }
+      const row = (await c.query(
+        `INSERT INTO fcpi_retrieval.domain_route (domain, preferred, set_at, expires_at, probe_at, challenges, js_count, prefer_browser, browser_expires_at,
+           successes, failures, last_success_at, last_failure_at, last_failure_class, last_reason, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now())
+         ON CONFLICT (domain) DO UPDATE SET preferred = EXCLUDED.preferred, set_at = EXCLUDED.set_at, expires_at = EXCLUDED.expires_at, probe_at = EXCLUDED.probe_at,
+           challenges = EXCLUDED.challenges, js_count = EXCLUDED.js_count, prefer_browser = EXCLUDED.prefer_browser, browser_expires_at = EXCLUDED.browser_expires_at,
+           successes = EXCLUDED.successes, failures = EXCLUDED.failures, last_success_at = EXCLUDED.last_success_at, last_failure_at = EXCLUDED.last_failure_at,
+           last_failure_class = EXCLUDED.last_failure_class, last_reason = COALESCE(EXCLUDED.last_reason, fcpi_retrieval.domain_route.last_reason), updated_at = now()
+         RETURNING *`,
+        [domain, next.preferred ?? null, next.set_at ?? null, next.expires_at ?? null, next.probe_at ?? null, next.challenges ?? 0, next.js_count ?? 0, next.prefer_browser === true,
+          next.browser_expires_at ?? null, next.successes ?? 0, next.failures ?? 0, next.last_success_at ?? null, next.last_failure_at ?? null, next.last_failure_class ?? null, change?.reason ?? null])).rows[0];
+      if (!cur) await c.query("DELETE FROM fcpi_retrieval.domain_route WHERE domain IN (SELECT domain FROM fcpi_retrieval.domain_route ORDER BY updated_at DESC OFFSET $1)", [routing.maxRecords]);
+      return { row, change };
+    });
+  }
+  // A job's explicit, finite route hold: while it lasts every acquisition of those domains needs the residential
+  // route (spec §10.2: bulk work starts on approved proxy egress). until is capped by the caller.
+  async holdRoutes(jobId, domains, until, reason) {
+    await this.#tx(async (c) => {
+      for (const d of domains) {
+        await c.query(`INSERT INTO fcpi_retrieval.route_hold (domain, job_id, reason, until) VALUES ($1, $2, $3, $4)
+          ON CONFLICT (domain, job_id) DO UPDATE SET until = GREATEST(fcpi_retrieval.route_hold.until, EXCLUDED.until), reason = EXCLUDED.reason`, [d, jobId, reason, until]);
+      }
+    });
+  }
+  async releaseRoutes(jobId) {
+    return (await this.pool.query("DELETE FROM fcpi_retrieval.route_hold WHERE job_id = $1", [jobId])).rowCount;
+  }
+  async routeHeld(domain) {
+    return (await this.pool.query("SELECT job_id FROM fcpi_retrieval.route_hold WHERE domain = $1 AND until > now() LIMIT 1", [domain])).rowCount === 1;
+  }
+
   // Bounded history: attempt rows and navigation counts older than their use are removed, and so is
   // a domain's pacing row once it holds nothing a decision reads: no live hold, no cooldown ended
   // within the hour that doubling looks back over, no navigation within direct_nav's two days
@@ -314,6 +422,10 @@ export class Store {
     await this.pool.query("DELETE FROM fcpi_retrieval.search_cache WHERE expires_at < now()");
     await this.pool.query("DELETE FROM fcpi_retrieval.search_query WHERE at < now() - interval '2 days'");
     await this.pool.query("DELETE FROM fcpi_retrieval.parse_cache WHERE expires_at < now()");
+    // M6: holds past their end, and routing records that neither prefer anything nor were touched in seven days.
+    await this.pool.query("DELETE FROM fcpi_retrieval.route_hold WHERE until < now()");
+    await this.pool.query(`DELETE FROM fcpi_retrieval.domain_route WHERE updated_at < now() - interval '7 days'
+      AND (preferred IS NULL OR expires_at < now() - interval '7 days') AND NOT prefer_browser`);
     // Usage records outlive the 30 days of job metadata (spec §21.3) so a month's spend stays explainable;
     // an unsettled reservation is never pruned, since it still counts against its cap.
     await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED')");

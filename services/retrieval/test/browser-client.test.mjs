@@ -28,6 +28,6 @@ test("an oversized worker reply is SIZE_LIMIT, declared or chunked; a normal one
     const r = await client(s).render(args());
     assert.equal(r.ok, true);
     assert.equal(r.html, "<p>fine</p>");
-    assert.deepEqual(r.proxy, { requests: 0, bytes: 0, capped: false, denied: [] });
+    assert.deepEqual(r.proxy, { requests: 0, bytes: 0, capped: false, denied: [], upstreamFailure: null });
   } finally { s.close(); }
 });

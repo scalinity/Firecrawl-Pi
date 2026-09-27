@@ -1,20 +1,27 @@
 {
   "schema": "fcpi.budget-policy/v1",
-  "comment": "Provider spending (FIRECRAWL_PI_SPEC.md §14, §15, §28.3; PI_BUDGET_POLICY_FILE). Every paid cap is zero until the owner approves one; PI_PAID_DISPATCH_ENABLED must also be true before a paid provider is called. Amounts are integers: micro-USD (1e-6 USD) or parser credits. A model or parser the policy does not list is refused; one without a rate card in effect is refused (fail closed). Fixture providers are unpaid and draw on their own categories, so the accounting runs end to end without money.",
+  "comment": "Provider spending (FIRECRAWL_PI_SPEC.md §10, §14, §15, §28.3; PI_BUDGET_POLICY_FILE). Every paid cap is zero until the owner approves one; PI_PAID_DISPATCH_ENABLED must also be true before a paid provider is called. Amounts are integers: micro-USD (1e-6 USD) or parser credits. A model or parser the policy does not list is refused; one without a rate card in effect is refused (fail closed). Fixture providers are unpaid and draw on their own categories, so the accounting runs end to end without money.",
   "notifyAtFraction": 0.8,
   "categories": {
     "llm": { "paid": true, "unit": "micro_usd", "caps": { "day": 0, "month": 0 } },
     "parser": { "paid": true, "unit": "credits", "caps": { "month": 0 } },
     "fixture": { "paid": false, "unit": "micro_usd", "caps": { "day": 5000000 } },
     "fixture_race": { "paid": false, "unit": "micro_usd", "caps": { "day": 100000 } },
-    "fixture_parser": { "paid": false, "unit": "credits", "caps": { "day": 3000 } }
+    "fixture_parser": { "paid": false, "unit": "credits", "caps": { "day": 3000 } },
+    "proxy": { "paid": true, "unit": "micro_usd", "caps": { "day": 0, "month": 0 } },
+    "fixture_proxy": { "paid": false, "unit": "micro_usd", "caps": { "day": 20000000 } },
+    "fixture_proxy_race": { "paid": false, "unit": "micro_usd", "caps": { "day": 130000 } }
   },
   "paidTotal": { "unit": "micro_usd", "caps": { "day": 0 } },
   "providers": {
     "openai": { "kind": "model", "baseUrl": "https://api.openai.com/v1", "credential": "openai_api_key", "paid": true, "maxTokensParam": "max_completion_tokens", "store": false },
     "fixture-model": { "kind": "model", "baseUrl": "http://model.fixture.fcpi.test:8080/v1", "credential": null, "paid": false, "maxTokensParam": "max_completion_tokens", "store": false },
     "llamaparse": { "kind": "parser", "baseUrl": "https://api.cloud.llamaindex.ai", "credential": "llamaparse_api_key", "paid": true },
-    "fixture-parser": { "kind": "parser", "baseUrl": "http://parser.fixture.fcpi.test:8080", "credential": null, "paid": false }
+    "fixture-parser": { "kind": "parser", "baseUrl": "http://parser.fixture.fcpi.test:8080", "credential": null, "paid": false },
+    "decodo": { "kind": "proxy", "baseUrl": "http://gate.decodo.com:7000", "credential": "decodo_proxy", "paid": true, "session": "decodo",
+      "usageUrl": "https://api.decodo.com/api/v2/statistics/traffic", "usageCredential": "decodo_api_key" },
+    "fixture-proxy": { "kind": "proxy", "baseUrl": "http://proxy.fixture.fcpi.test:8081", "credential": "fixture_proxy", "paid": false, "session": "decodo",
+      "usageUrl": "http://proxy.fixture.fcpi.test:8081/__usage", "usageCredential": null }
   },
   "models": {
     "gpt-4.1-mini-2025-04-14": { "provider": "openai", "category": "llm" },
@@ -25,6 +32,11 @@
   "parsers": {
     "llamaparse-cost-effective": { "provider": "llamaparse", "category": "parser", "tier": "cost_effective", "version": "latest" },
     "fcpi-fixture-parser": { "provider": "fixture-parser", "category": "fixture_parser", "tier": "cost_effective", "version": "fixture-1" }
+  },
+  "proxies": {
+    "decodo-residential": { "provider": "decodo", "category": "proxy" },
+    "fcpi-fixture-proxy": { "provider": "fixture-proxy", "category": "fixture_proxy" },
+    "fcpi-fixture-proxy-race": { "provider": "fixture-proxy", "category": "fixture_proxy_race" }
   },
   "rateCards": [
     { "id": "openai/gpt-4.1-mini-2025-04-14@2026-09-26", "subject": "gpt-4.1-mini-2025-04-14", "effectiveFrom": "2026-09-26", "effectiveTo": null,
@@ -40,7 +52,14 @@
       "creditsPerPage": 3, "microUsdPerCredit": 1250,
       "source": "https://developers.llamaindex.ai/llamaparse/general/pricing/ and https://www.llamaindex.ai/pricing, observed 2026-09-22 (spec O12, O13)" },
     { "id": "fixture/fcpi-fixture-parser@2026-09-26", "subject": "fcpi-fixture-parser", "effectiveFrom": "2026-09-26", "effectiveTo": null,
-      "creditsPerPage": 3, "microUsdPerCredit": 0, "source": "fixture: LlamaParse's credits per page, no money" }
+      "creditsPerPage": 3, "microUsdPerCredit": 0, "source": "fixture: LlamaParse's credits per page, no money" },
+    { "id": "decodo/residential-payg@2026-09-26", "subject": "decodo-residential", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "microUsdPerGB": 4000000, "billing": "upload_plus_download_per_1e9_bytes",
+      "source": "https://decodo.com/proxies/residential-proxies/pricing, observed 2026-09-26 (spec O03): Pay As You Go $4.0/GB, bought one GB at a time; the page does not say whether a GB is 1e9 or 2^30 bytes or whether upload counts, so both directions are counted per 1e9 bytes, the larger reading" },
+    { "id": "fixture/fcpi-fixture-proxy@2026-09-26", "subject": "fcpi-fixture-proxy", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "microUsdPerGB": 4000000, "billing": "upload_plus_download_per_1e9_bytes", "source": "fixture: Decodo's price, no money" },
+    { "id": "fixture/fcpi-fixture-proxy-race@2026-09-26", "subject": "fcpi-fixture-proxy-race", "effectiveFrom": "2026-09-26", "effectiveTo": null,
+      "microUsdPerGB": 4000000, "billing": "upload_plus_download_per_1e9_bytes", "source": "fixture: Decodo's price, no money" }
   ],
   "extraction": {
     "defaultModel": "gpt-4.1-mini-2025-04-14",
@@ -63,6 +82,11 @@
     "maxBytes": 26214400,
     "cacheDays": 7,
     "jobTimeoutMs": 120000
+  },
+  "proxying": {
+    "defaultProxy": "decodo-residential",
+    "maxAttemptBytes": 10000000,
+    "maxTunnelBytes": 2000000
   },
   "breaker": { "failures": 3, "windowMs": 60000, "openMs": 300000 }
 }

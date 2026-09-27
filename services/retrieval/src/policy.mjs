@@ -50,7 +50,7 @@ export function loadEnv(env) {
 }
 
 const POLICY_KEYS = ["schema", "direct", "fixtureLimits", "ports", "maxRedirects", "maxBodyBytes", "attempts", "permitLeaseMs",
-  "browser", "cloudDenylist", "fixtures", "search"];
+  "browser", "cloudDenylist", "fixtures", "search", "residential", "routing"];
 const LIMIT_KEYS = ["perDomainInFlight", "minNavigationGapMs", "perDomainPerHour", "platformPerDay"];
 
 function exactKeys(obj, keys, where) {
@@ -105,7 +105,7 @@ export function loadPolicy(text) {
   }
   // Search (spec §13): the engine sets the host's selection chooses between, the hosts the live set may
   // reach through the search proxy, and the backend's limits, which may be tightened, never loosened.
-  exactKeys(p.search, ["engines", "engineHosts", "perHour", "cacheSeconds", "deadlineMs", "maxResults"], "search");
+  exactKeys(p.search, ["engines", "engineHosts", "engineRoutes", "perHour", "cacheSeconds", "deadlineMs", "maxResults"], "search");
   exactKeys(p.search.engines, ["fixture", "live"], "search.engines");
   for (const k of ["fixture", "live"]) {
     const l = p.search.engines[k];
@@ -118,6 +118,35 @@ export function loadPolicy(text) {
   int(p.search.cacheSeconds, 0, 900, "search.cacheSeconds");
   int(p.search.deadlineMs, 1000, 10000, "search.deadlineMs");
   int(p.search.maxResults, 1, 20, "search.maxResults");
+  // M6 (F11): how each engine host's traffic leaves. "residential" hosts go only through the residential proxy and are
+  // refused when it is unavailable, never sent from the home connection; every live host is named, and a fixture host
+  // may be named only if the policy lists it.
+  const routes = p.search.engineRoutes;
+  if (!routes || typeof routes !== "object" || Array.isArray(routes)) throw new Error("search.engineRoutes must be an object");
+  for (const [h, r] of Object.entries(routes)) {
+    if (!["direct", "residential"].includes(r)) throw new Error(`search.engineRoutes.${h} must be direct or residential`);
+    if (!hosts.includes(h) && !p.fixtures.some((f) => f.host === h)) throw new Error(`search.engineRoutes names ${h}, which is neither a live engine host nor a fixture`);
+  }
+  for (const h of hosts) if (!Object.hasOwn(routes, h)) throw new Error(`search.engineRoutes must name the live engine host ${h}`);
+  // M6: residential routing (spec §9.5, §10.2). proxyFirstDomains are the explicit, finite overrides: registrable domains
+  // (or fixture hosts) that start on the residential route. bulkPages is spec §10.2's threshold past which a job needs
+  // approved proxy egress from the start; holdMaxMinutes bounds a job's route hold.
+  exactKeys(p.residential, ["proxyFirstDomains", "sessionMinutes", "connectTimeoutMs", "bulkPages", "holdMaxMinutes"], "residential");
+  const R = p.residential;
+  if (!Array.isArray(R.proxyFirstDomains) || R.proxyFirstDomains.length > 500 || R.proxyFirstDomains.some((d) => typeof d !== "string" || !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(d))) throw new Error("residential.proxyFirstDomains must list at most 500 domain names");
+  int(R.sessionMinutes, 1, 1440, "residential.sessionMinutes");
+  int(R.connectTimeoutMs, 1000, 30000, "residential.connectTimeoutMs");
+  if (R.bulkPages !== 20) throw new Error("residential.bulkPages is spec §10.2's 20");
+  int(R.holdMaxMinutes, 10, 240, "residential.holdMaxMinutes");
+  // Spec §9.5's domain learning: at most 5,000 records, two consistent observations before a preference changes, a
+  // 24-hour preference extended by successes to at most seven days, and one bounded cheaper probe after it expires.
+  exactKeys(p.routing, ["maxRecords", "observationsToChange", "ttlHours", "maxTtlDays", "probeMinutes"], "routing");
+  const G = p.routing;
+  int(G.maxRecords, 1, 5000, "routing.maxRecords");
+  if (G.observationsToChange !== 2) throw new Error("routing.observationsToChange is spec §9.5's 2");
+  int(G.ttlHours, 1, 24, "routing.ttlHours");
+  int(G.maxTtlDays, 1, 7, "routing.maxTtlDays");
+  int(G.probeMinutes, 1, 60, "routing.probeMinutes");
   return p;
 }
 
@@ -158,10 +187,14 @@ export function readSecret(dir, name) {
 // list, so it widens nothing.
 export function loadSelection(text, policy, budget) {
   const s = JSON.parse(text);
-  exactKeys(s, ["search", "extractionModel", "parser"], "selection");
+  // M6's residential proxy choice is optional in the file: a selection written before M6 keeps the policy's default.
+  const { proxy, ...rest } = s;
+  exactKeys(rest, ["search", "extractionModel", "parser"], "selection");
+  if (proxy !== undefined && proxy !== null && !Object.hasOwn(budget.proxies, proxy)) throw new Error("selection.proxy must be a proxy the budget policy lists, or null");
+  s.proxy = proxy === undefined ? budget.proxying.defaultProxy : proxy;
   if (!["fixture", "live"].includes(s.search)) throw new Error("selection.search must be fixture or live");
   if (!Object.hasOwn(budget.models, s.extractionModel)) throw new Error("selection.extractionModel must be a model the budget policy lists");
   if (!Object.hasOwn(budget.parsers, s.parser)) throw new Error("selection.parser must be a parser the budget policy lists");
   return s;
 }
-export const defaultSelection = (budget) => ({ search: "fixture", extractionModel: budget.extraction.defaultModel, parser: budget.parsing.defaultParser });
+export const defaultSelection = (budget) => ({ search: "fixture", extractionModel: budget.extraction.defaultModel, parser: budget.parsing.defaultParser, proxy: budget.proxying.defaultProxy });

@@ -5,11 +5,17 @@
 // fetch, resolved once and connected to exactly the checked address; bytes are counted per
 // attempt and cut off at the page's limit. An unknown or expired credential gets 407; a refused
 // target gets 403 and is counted.
+// M6: a session may chain through the residential provider. A browser attempt on the residential route carries its
+// leg (upstream: the tunnel opener and the attempt's meter), so the page and every subresource leave under one
+// sticky session; SearXNG's standing session asks, per engine host, for a leg of its own (upstreamFor), so an engine
+// the policy routes residential never leaves from the home connection (F11). Every request is still validated and
+// resolved here first.
 import http from "node:http";
 import net from "node:net";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { parseTarget, Denied, scopeFixtures } from "./ssrf.mjs";
 import { resolveTarget, pinnedLookup } from "./resolve.mjs";
+import { uncounted } from "./residential.mjs";
 
 const HOP = new Set(["connection", "keep-alive", "proxy-authorization", "proxy-authenticate", "proxy-connection", "te", "trailer", "transfer-encoding", "upgrade"]);
 const digest = (s) => createHash("sha256").update(s).digest();
@@ -20,17 +26,19 @@ export class ProxySessions {
   // maxRequests bounds what the page may ask for through the proxy (WebSockets and preconnects never
   // reach the worker's own subresource count); a session past either cap is marked capped.
   // fixture: the page is a fixture, so its requests may reach fixture hosts; otherwise none may.
-  open(attemptId, { expiresAt, maxBytes, maxRequests = 250, fixture = false }) {
+  open(attemptId, { expiresAt, maxBytes, maxRequests = 250, fixture = false, upstream = null }) {
     const password = randomBytes(24).toString("hex");
-    this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, maxRequests, fixture, bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
+    this.#s.set(attemptId, { attemptId, hash: digest(password), expiresAt, maxBytes, maxRequests, fixture, upstream, upstreamFailure: null, bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
     return { username: attemptId, password };
   }
   // A standing session for a service rather than an attempt (M5: SearXNG's engine requests): its
   // credential's SHA-256 comes from a secret file, it does not expire, and allow(target) decides each
   // request by the host's current selection. Each of its requests is logged by host (logEach), so every
   // search-engine connection is attributable.
-  fixed(username, passwordSha256, { allow, fixture }) {
-    this.#s.set(username, { attemptId: username, hash: passwordSha256, expiresAt: Infinity, maxBytes: Infinity, maxRequests: Infinity, fixture, allow, logEach: true,
+  // upstreamFor(target): null for a direct connection, or a leg ({ open, meter, done }) for a residential one; it
+  // throws a Denied (PROXY_REQUIRED, BUDGET_EXHAUSTED) when the host must go residential and cannot.
+  fixed(username, passwordSha256, { allow, fixture, upstreamFor = null }) {
+    this.#s.set(username, { attemptId: username, hash: passwordSha256, expiresAt: Infinity, maxBytes: Infinity, maxRequests: Infinity, fixture, allow, upstreamFor, logEach: true,
       bytes: 0, requests: 0, capped: false, denied: [], sockets: new Set() });
   }
   auth(header) {
@@ -47,7 +55,7 @@ export class ProxySessions {
     if (!s) return null;
     this.#s.delete(attemptId);
     for (const sock of s.sockets) sock.destroy();
-    return { requests: s.requests, bytes: s.bytes, capped: s.capped, denied: s.denied };
+    return { requests: s.requests, bytes: s.bytes, capped: s.capped, denied: s.denied, upstreamFailure: s.upstreamFailure };
   }
   sweep() { for (const [id, s] of this.#s) if (Date.now() > s.expiresAt + 5000) this.close(id); }
 }
@@ -66,6 +74,21 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
   // Past the session's request cap every further request is refused (review finding W6).
   const overRequests = (s) => { if (s.requests <= s.maxRequests) return false; s.capped = true; return true; };
 
+  // The residential leg a request travels, if any: a browser attempt's own, or one the standing session asks for
+  // per host (which refuses, as PROXY_REQUIRED, a host that must go residential and cannot). done() settles a
+  // per-request leg's reservation once its connection has closed.
+  const legFor = async (s, target) => (s.upstream ? { ...s.upstream, done: null } : s.upstreamFor ? await s.upstreamFor(target) : null);
+  // The first provider refusal of an attempt is kept, so a render that failed on it is reported as the provider's.
+  const upstreamFailed = (s, e) => { if (e?.provider && !s.upstreamFailure) s.upstreamFailure = { class: e.failureClass, detail: e.detail, retryable: e.retryable, retryAfter: e.retryAfter }; };
+  const once = (fn) => { let done = false; return () => { if (!done && fn) { done = true; Promise.resolve(fn()).catch((e) => log({ event: "proxy_leg_settle_failed", error: e.message })); } }; };
+  async function openLeg(s, target, port) {
+    const leg = await legFor(s, target);
+    if (!leg) return { leg: null, raw: null, done: () => {} };
+    const done = once(leg.done);
+    try { return { leg, raw: await leg.open(target.host, port), done }; }
+    catch (e) { upstreamFailed(s, e); done(); throw e; }
+  }
+
   const server = http.createServer(async (req, res) => {
     const s = sessions.auth(req.headers["proxy-authorization"]);
     if (!s) { res.writeHead(407, { "proxy-authenticate": 'Basic realm="fcpi"', connection: "close" }).end(); return; }
@@ -80,15 +103,20 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       const target = parseTarget(req.url, policy);
       if (s.allow && !s.allow(target)) throw new Denied("DESTINATION_NOT_ALLOWED", `${target.host} is not a destination this session may reach`);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
-      if (s.logEach) res.on("close", () => log({ event: "proxy_request", session: s.attemptId, method: req.method, target_host: target.host, status: res.statusCode }));
+      const { leg, raw, done } = await openLeg(s, target, target.port);
+      if (s.logEach) res.on("close", () => log({ event: "proxy_request", session: s.attemptId, method: req.method, target_host: target.host, route: leg ? "residential" : "direct", status: res.statusCode }));
       const headers = {};
       for (const [k, v] of Object.entries(req.headers)) if (!HOP.has(k)) headers[k] = v;
       headers.connection = "close";
-      const up = http.request({ host: target.host, port: target.port, method: req.method, path: target.url.pathname + target.url.search, headers, lookup: pinnedLookup(address), agent: false });
+      // Through a leg the request rides the tunnel: no agent, since agent false would make Node build one that
+      // ignores createConnection and connects by itself.
+      const up = http.request({ host: target.host, port: target.port, method: req.method, path: target.url.pathname + target.url.search, headers,
+        ...(raw ? { createConnection: () => leg.meter.wrap(raw) } : { agent: false, lookup: pinnedLookup(address) }) });
       // Both ends belong to the session: closing it (render over, or a cap) tears down the request and
       // the browser's connection, not only the upstream half.
       s.sockets.add(up).add(res.socket);
-      up.on("socket", (sock) => sock.once("connect", () => { if (sock.remoteAddress !== address) up.destroy(new Denied("SSRF_DENIED", "peer changed")); }));
+      if (raw) s.sockets.add(raw);
+      else up.on("socket", (sock) => sock.once("connect", () => { if (sock.remoteAddress !== address) up.destroy(new Denied("SSRF_DENIED", "peer changed")); }));
       up.on("response", (ur) => {
         const out = {};
         for (const [k, v] of Object.entries(ur.headers)) if (!HOP.has(k)) out[k] = v;
@@ -110,17 +138,21 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
         ur.on("error", () => res.destroy());
         ur.pipe(res);
       });
-      up.on("error", () => { if (!res.headersSent) res.writeHead(502, { connection: "close" }).end(); else res.destroy(); });
-      res.on("close", () => { up.destroy(); s.sockets.delete(up); s.sockets.delete(res.socket); });
+      // Only a break this proxy did not cause leaves the charge unknown; tearing the request down at the browser's
+      // close is not one.
+      let closing = false;
+      up.on("error", () => { if (raw && !closing) leg.meter.errored = true; if (!res.headersSent) res.writeHead(502, { connection: "close" }).end(); else res.destroy(); });
+      res.on("close", () => { closing = true; up.destroy(); raw?.destroy(); s.sockets.delete(up); s.sockets.delete(res.socket); if (raw) s.sockets.delete(raw); done(); });
       req.pipe(up);
     } catch (e) {
       refuse(s, host, e);
-      res.writeHead(403, { "content-type": "text/plain", connection: "close" }).end(`fcpi: ${e.failureClass ?? "refused"}\n`);
+      const code = e.provider ? 502 : 403;
+      res.writeHead(code, { "content-type": "text/plain", connection: "close" }).end(`fcpi: ${e.failureClass ?? "refused"}\n`);
     }
   });
 
-  // HTTPS: a tunnel to port 443 of a validated, pinned address. The TLS session is the browser's
-  // own, end to end; the proxy sees only the host name it was asked for and the bytes.
+  // HTTPS: a tunnel to port 443 of a validated, pinned address, or through the residential provider. The TLS
+  // session is the browser's own, end to end; the proxy sees only the host name it was asked for and the bytes.
   server.on("connect", async (req, clientSocket, head) => {
     clientSocket.on("error", () => {});
     const s = sessions.auth(req.headers["proxy-authorization"]);
@@ -134,33 +166,46 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       const target = parseTarget(`https://${host}${port === "443" ? "" : `:${port}`}/`, policy);
       if (s.allow && !s.allow(target)) throw new Denied("DESTINATION_NOT_ALLOWED", `${target.host} is not a destination this session may reach`);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
-      const upstream = net.connect({ host: target.host, port: 443, lookup: pinnedLookup(address) });
+      const { leg, raw, done } = await openLeg(s, target, 443);
+      const upstream = raw ?? net.connect({ host: target.host, port: 443, lookup: pinnedLookup(address) });
+      const route = leg ? "residential" : "direct";
       if (s.logEach) {
         let up = 0, down = 0;
         upstream.on("data", (c) => { down += c.length; });
         clientSocket.on("data", (c) => { up += c.length; });
         // A tunnel is logged when it opens, so each engine connection is attributable at once (a client may keep
         // it open long after its last request), and again with its byte counts when it closes.
-        upstream.once("connect", () => log({ event: "proxy_request", session: s.attemptId, method: "CONNECT", target_host: target.host, status: 200 }));
-        upstream.once("close", () => log({ event: "proxy_tunnel_closed", session: s.attemptId, target_host: target.host, bytes_out: up, bytes_in: down }));
+        const opened = () => log({ event: "proxy_request", session: s.attemptId, method: "CONNECT", target_host: target.host, route, status: 200 });
+        if (raw) opened(); else upstream.once("connect", opened);
+        upstream.once("close", () => log({ event: "proxy_tunnel_closed", session: s.attemptId, target_host: target.host, route, bytes_out: up, bytes_in: down, ...(leg ? { provider_bytes: leg.meter.bytes } : {}) }));
       }
       s.sockets.add(upstream).add(clientSocket);
-      upstream.on("error", () => clientSocket.destroy());
-      upstream.once("connect", () => {
-        if (upstream.remoteAddress !== address) { upstream.destroy(); clientSocket.destroy(); return; }
+      const start = () => {
         clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
-        if (head?.length) upstream.write(head);
+        if (head?.length) { if (leg) leg.meter.add(head.length); upstream.write(head); }
+        // Through the provider every byte in either direction is billable, so it is metered as it passes.
+        if (leg) {
+          upstream.on("data", (c) => leg.meter.add(uncounted(upstream, c.length)));
+          clientSocket.on("data", (c) => leg.meter.add(c.length));
+        }
         upstream.on("data", (c) => count(s, c.length, upstream, clientSocket));
         clientSocket.on("data", (c) => count(s, c.length, upstream, clientSocket));
         upstream.pipe(clientSocket);
         clientSocket.pipe(upstream);
+      };
+      upstream.on("error", () => { if (leg) leg.meter.errored = true; clientSocket.destroy(); });
+      if (raw) start();
+      else upstream.once("connect", () => {
+        if (upstream.remoteAddress !== address) { upstream.destroy(); clientSocket.destroy(); return; }
+        start();
       });
-      const drop = () => { upstream.destroy(); clientSocket.destroy(); s.sockets.delete(upstream); s.sockets.delete(clientSocket); };
+      const drop = () => { upstream.destroy(); clientSocket.destroy(); s.sockets.delete(upstream); s.sockets.delete(clientSocket); done(); };
       clientSocket.on("close", drop);
       upstream.on("close", drop);
     } catch (e) {
       refuse(s, req.url, e);
-      clientSocket.end(`HTTP/1.1 403 Forbidden\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nfcpi: ${e.failureClass ?? "refused"}\n`);
+      const status = e.provider ? "502 Bad Gateway" : "403 Forbidden";
+      clientSocket.end(`HTTP/1.1 ${status}\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nfcpi: ${e.failureClass ?? "refused"}\n`);
     }
   });
 

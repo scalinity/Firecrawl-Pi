@@ -14,6 +14,8 @@ const CHALLENGE_MARKERS = [
   /\/cdn-cgi\/challenge-platform\//i, /\bcf-chl-(?:widget|opt|bypass)\b/i, /<title>\s*Just a moment\.\.\.\s*<\/title>/i,
   /\bid=["']challenge-(?:form|running|stage)["']/i, /\b_Incapsula_Resource\b/i, /\bgeo\.captcha-delivery\.com\b/i,
   /\bpx-captcha\b/i, /\bddos-guard\b[^<]{0,40}<\/title>/i, /<title>\s*Attention Required! \| Cloudflare\s*<\/title>/i,
+  // M6: search engines' own CAPTCHA pages (DuckDuckGo's anomaly check, Google's /sorry/ form) and AWS WAF's challenge.
+  /\bid=["']anomaly-modal["']/i, /\/anomaly\.js\b/i, /<form\b[^<>]*\baction=["'][^"']*\/sorry\/index\b/i, /\bid=["']captcha-form["']/i, /\bwindow\.gokuProps\b/,
 ];
 const LOGIN_PATH = /\/(log-?in|sign-?in|auth|session|account\/log-?in|users\/sign_in|accounts\/login)(\/|\?|$)/i;
 
@@ -99,7 +101,7 @@ export function classify({ status, contentType, body, finalUrl, requestedUrl, re
   const html = isHtml(contentType) && typeof body === "string";
   const challenge = html && CHALLENGE_MARKERS.some((re) => re.test(text));
   if (challenge) {
-    return { verdict: "challenge", failure: { class: "BLOCKED_PUBLIC_CONTENT", detail: "the target served a bot interstitial; escalation needs the residential proxy path (M6)", retryable: true, retryAfter: null } };
+    return { verdict: "challenge", failure: { class: "BLOCKED_PUBLIC_CONTENT", detail: "the target served a bot interstitial", retryable: true, retryAfter: null } };
   }
   if (status === 403) return { verdict: "access_denied", failure: { class: "ACCESS_DENIED", detail: "the target refused access (403)", retryable: false, retryAfter: null } };
   if (status >= 500) return { verdict: "target_error", reasons: [`status ${status}`] };

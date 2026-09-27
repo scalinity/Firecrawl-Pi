@@ -3,7 +3,7 @@
 // arithmetic of reservations and settlements; and a breaker per provider. The ledger itself is in
 // store.mjs, where every reservation is one transaction.
 const CAT_KEYS = ["paid", "unit", "caps"];
-const TOP_KEYS = ["schema", "comment", "notifyAtFraction", "categories", "paidTotal", "providers", "models", "parsers", "rateCards", "extraction", "parsing", "breaker"];
+const TOP_KEYS = ["schema", "comment", "notifyAtFraction", "categories", "paidTotal", "providers", "models", "parsers", "proxies", "rateCards", "extraction", "parsing", "proxying", "breaker"];
 const EXTRACTION_KEYS = ["defaultModel", "maxInputTokens", "maxOutputTokens", "maxRepairs", "maxDocuments", "maxDocumentBytes", "maxChunks", "maxSchemaBytes",
   "maxSchemaDepth", "maxSchemaProperties", "maxPromptChars", "requestTimeoutMs", "resultMaxBytes"];
 const PARSING_KEYS = ["defaultParser", "maxPages", "maxBytes", "cacheDays", "jobTimeoutMs"];
@@ -36,10 +36,25 @@ export function loadBudgetPolicy(text) {
   exact(p.paidTotal.caps, ["day"], "paidTotal.caps");
   nonNegInt(p.paidTotal.caps.day, "paidTotal.caps.day");
   for (const [name, v] of Object.entries(p.providers)) {
-    exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store"]);
-    if (!["model", "parser"].includes(v.kind)) throw new Error(`provider ${name}.kind must be model or parser`);
+    exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "session"]);
+    if (!["model", "parser", "proxy"].includes(v.kind)) throw new Error(`provider ${name}.kind must be model, parser or proxy`);
     const u = new URL(v.baseUrl);
     const fixture = /\.fixture\.fcpi\.test$/.test(u.hostname);
+    // M6: a residential proxy speaks the HTTP proxy protocol at host:port and always authenticates, a fixture proxy
+    // included; its usage report, where one exists, is an https API (a fixture's is on the fixture network).
+    if (v.kind === "proxy") {
+      if (u.protocol !== "http:" || !u.port || u.pathname !== "/" || u.search || u.username) throw new Error(`provider ${name}: a proxy's baseUrl is http://host:port`);
+      if (v.paid === fixture) throw new Error(`provider ${name}: a paid proxy is a public service and an unpaid one a project fixture`);
+      if (typeof v.credential !== "string" || !/^[a-z0-9_]{3,64}$/.test(v.credential)) throw new Error(`provider ${name}.credential must be a file name`);
+      // How the sticky session is named in the proxy username; only Decodo's documented form is implemented.
+      if (v.session !== "decodo") throw new Error(`provider ${name}.session must be decodo`);
+      if (v.usageUrl !== undefined) {
+        const q = new URL(v.usageUrl);
+        if ((v.paid && q.protocol !== "https:") || (!v.paid && !/\.fixture\.fcpi\.test$/.test(q.hostname))) throw new Error(`provider ${name}.usageUrl must be https (a fixture's on the fixture network)`);
+        if (v.usageCredential !== null && !/^[a-z0-9_]{3,64}$/.test(v.usageCredential ?? "")) throw new Error(`provider ${name}.usageCredential must be a file name or null`);
+      }
+      continue;
+    }
     // A paid provider is a public https service with a credential; an unpaid one is a project fixture.
     if (v.paid && (u.protocol !== "https:" || fixture || typeof v.credential !== "string")) throw new Error(`provider ${name}: a paid provider is an https service with a credential`);
     if (!v.paid && (!fixture || u.protocol !== "http:" || v.credential !== null)) throw new Error(`provider ${name}: an unpaid provider must be a project fixture without a credential`);
@@ -59,18 +74,24 @@ export function loadBudgetPolicy(text) {
   };
   subjectOf("model", p.models);
   subjectOf("parser", p.parsers);
+  subjectOf("proxy", p.proxies);
   if (!Array.isArray(p.rateCards)) throw new Error("rateCards must be a list");
   const ids = new Set();
   for (const r of p.rateCards) {
-    const isParser = r.subject in p.parsers;
-    if (!(r.subject in p.models) && !isParser) throw new Error(`rate card ${r.id} names an unknown subject ${r.subject}`);
+    const isParser = Object.hasOwn(p.parsers, r.subject), isProxy = Object.hasOwn(p.proxies, r.subject);
+    if (!Object.hasOwn(p.models, r.subject) && !isParser && !isProxy) throw new Error(`rate card ${r.id} names an unknown subject ${r.subject}`);
     exact(r, isParser ? ["id", "subject", "effectiveFrom", "effectiveTo", "creditsPerPage", "microUsdPerCredit", "source"]
+      : isProxy ? ["id", "subject", "effectiveFrom", "effectiveTo", "microUsdPerGB", "billing", "source"]
       : ["id", "subject", "effectiveFrom", "effectiveTo", "inputPerMTok", "cachedInputPerMTok", "outputPerMTok", "source"], `rate card ${r.id}`);
     if (ids.has(r.id)) throw new Error(`rate card ${r.id} appears twice`);
     ids.add(r.id);
     if (!DATE.test(r.effectiveFrom) || (r.effectiveTo !== null && (!DATE.test(r.effectiveTo) || r.effectiveTo <= r.effectiveFrom))) throw new Error(`rate card ${r.id}: effective dates must be YYYY-MM-DD, the end after the start`);
     if (isParser) { posInt(r.creditsPerPage, 1, 1000, `rate card ${r.id}.creditsPerPage`); nonNegInt(r.microUsdPerCredit, `rate card ${r.id}.microUsdPerCredit`); }
-    else for (const k of ["inputPerMTok", "cachedInputPerMTok", "outputPerMTok"]) posInt(r[k], 1, 1e9, `rate card ${r.id}.${k}`);
+    else if (isProxy) {
+      // Bytes are priced per decimal GB (1e9 bytes, the larger count of the two readings of "GB"), both directions.
+      posInt(r.microUsdPerGB, 1, 1e9, `rate card ${r.id}.microUsdPerGB`);
+      if (r.billing !== "upload_plus_download_per_1e9_bytes") throw new Error(`rate card ${r.id}.billing must be upload_plus_download_per_1e9_bytes`);
+    } else for (const k of ["inputPerMTok", "cachedInputPerMTok", "outputPerMTok"]) posInt(r[k], 1, 1e9, `rate card ${r.id}.${k}`);
   }
   // Two cards for one subject may not both be in effect on any day.
   for (const a of p.rateCards) for (const b of p.rateCards) {
@@ -99,6 +120,12 @@ export function loadBudgetPolicy(text) {
   posInt(p.parsing.maxBytes, 1024, 25 * 1048576, "parsing.maxBytes");
   posInt(p.parsing.cacheDays, 1, 30, "parsing.cacheDays");
   posInt(p.parsing.jobTimeoutMs, 1000, 600000, "parsing.jobTimeoutMs");
+  // M6: the residential proxy the deployment uses unless the host's selection names another, and the byte caps that
+  // bound each reservation (spec §28.3: reserve a conservative maximum before dispatch).
+  exact(p.proxying, ["defaultProxy", "maxAttemptBytes", "maxTunnelBytes"], "proxying");
+  if (p.proxying.defaultProxy !== null && !Object.hasOwn(p.proxies, p.proxying.defaultProxy)) throw new Error("proxying.defaultProxy must be a listed proxy or null");
+  posInt(p.proxying.maxAttemptBytes, 65536, 64 * 1048576, "proxying.maxAttemptBytes");
+  posInt(p.proxying.maxTunnelBytes, 65536, 16 * 1048576, "proxying.maxTunnelBytes");
   exact(p.breaker, ["failures", "windowMs", "openMs"], "breaker");
   posInt(p.breaker.failures, 1, 20, "breaker.failures");
   posInt(p.breaker.windowMs, 1000, 3600000, "breaker.windowMs");
@@ -117,6 +144,9 @@ export function rateCardFor(policy, subject, now = new Date()) {
   const { day } = periodStarts(now);
   return policy.rateCards.find((r) => r.subject === subject && r.effectiveFrom <= day && (r.effectiveTo === null || day < r.effectiveTo)) ?? null;
 }
+
+// Micro-USD for proxied bytes, rounded up so settlement never undercounts.
+export const proxyCost = (card, bytes) => Math.ceil((bytes * card.microUsdPerGB) / 1e9);
 
 // Micro-USD for a model call, rounded up so settlement never undercounts.
 export function modelCost(card, { promptTokens, cachedTokens = 0, completionTokens }) {

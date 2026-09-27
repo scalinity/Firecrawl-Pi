@@ -65,8 +65,9 @@ function decoderFor(encoding) {
   }
 }
 
-// One request to one pinned address. Resolves { status, headers, body (Buffer), wireBytes }.
-function requestOnce({ target, address, method, headers, maxBytes, deadline, signal }) {
+// One request to one pinned address, or (M6) over a socket already open to the target: a residential tunnel,
+// counted and TLS-wrapped by its opener (residential.mjs). Resolves { status, headers, body (Buffer), wireBytes }.
+function requestOnce({ target, address, method, headers, maxBytes, deadline, signal, socket = null }) {
   return new Promise((resolve, reject) => {
     // An abort listener added to an already-aborted signal never fires, so it is checked first.
     if (signal?.aborted) return reject(new Denied("CANCELLED", "the caller cancelled the acquisition"));
@@ -75,28 +76,32 @@ function requestOnce({ target, address, method, headers, maxBytes, deadline, sig
     const tls = target.url.protocol === "https:";
     let settled = false;
     const fail = (e) => { if (!settled) { settled = true; req.destroy(); reject(e); } };
-    const req = (tls ? https : http).request({
-      host: target.host, port: target.port, method, path: target.url.pathname + target.url.search,
+    const common = { host: target.host, port: target.port, method, path: target.url.pathname + target.url.search,
       headers: { host: target.url.host, "user-agent": USER_AGENT, accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "accept-encoding": "gzip, deflate, br", ...headers },
-      // TLS names the server only for a host name: SNI carries no address (RFC 6066; DEP0123).
-      lookup: pinnedLookup(address), agent: false, ...(tls ? { ...(isIP(target.host) ? {} : { servername: target.host }), rejectUnauthorized: true } : {}),
-    });
+        "accept-encoding": "gzip, deflate, br", ...headers } };
+    const req = socket
+      // The tunnel's opener already validated the target, pinned the proxy's address and verified TLS. No agent:
+      // agent false would make Node build one, which ignores createConnection and connects by itself.
+      ? http.request({ ...common, createConnection: () => socket })
+      : (tls ? https : http).request({ ...common, agent: false,
+        // TLS names the server only for a host name: SNI carries no address (RFC 6066; DEP0123).
+        lookup: pinnedLookup(address), ...(tls ? { ...(isIP(target.host) ? {} : { servername: target.host }), rejectUnauthorized: true } : {}) });
     const timer = setTimeout(() => fail(new Denied("TIMEOUT", `no complete response within ${remaining} ms`)), remaining);
     const onAbort = () => fail(new Denied("CANCELLED", "the caller cancelled the acquisition"));
     signal?.addEventListener("abort", onAbort, { once: true });
     const done = () => { clearTimeout(timer); signal?.removeEventListener("abort", onAbort); };
-    req.on("socket", (socket) => {
+    if (!socket) req.on("socket", (s) => {
       const check = () => {
         // The peer must be the address that was validated; anything else is refused.
-        if (socket.remoteAddress && socket.remoteAddress !== address) fail(new Denied("SSRF_DENIED", `connected peer ${socket.remoteAddress} is not the validated ${address}`));
+        if (s.remoteAddress && s.remoteAddress !== address) fail(new Denied("SSRF_DENIED", `connected peer ${s.remoteAddress} is not the validated ${address}`));
       };
-      if (socket.remoteAddress) check(); else socket.once("connect", check);
+      if (s.remoteAddress) check(); else s.once("connect", check);
     });
     req.on("error", (e) => {
       done();
       if (e instanceof Denied) return fail(e);
       const code = e.code ?? "";
+      if (code === "FCPI_PROXY_BYTES") return fail(new Denied("SIZE_LIMIT", "the attempt passed its proxy byte budget"));
       if (TLS_ERRORS.has(code)) return fail(new Denied("TLS_FAILURE", `${target.host}: ${code}`));
       if (NET_ERRORS.has(code)) return fail(new Denied("TARGET_UNREACHABLE", `${target.host}: ${code}`));
       fail(new Denied("TARGET_UNREACHABLE", `${target.host}: ${code || e.message}`));
@@ -126,15 +131,16 @@ function requestOnce({ target, address, method, headers, maxBytes, deadline, sig
       // network's (a reset mid-body), which is transient (review finding W10).
       decoder?.on("error", () => { done(); fail(new Denied("UNSUPPORTED_CONTENT", "the body could not be decoded")); });
       sink.on("end", () => { done(); if (!settled) { settled = true; resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks), wireBytes: wire }); } });
-      res.on("error", (e) => { done(); fail(new Denied("TARGET_UNREACHABLE", `${target.host}: ${e.code ?? e.message}`)); });
+      res.on("error", (e) => { done(); fail(e.code === "FCPI_PROXY_BYTES" ? new Denied("SIZE_LIMIT", "the attempt passed its proxy byte budget") : new Denied("TARGET_UNREACHABLE", `${target.host}: ${e.code ?? e.message}`)); });
     });
     req.end();
   });
 }
 
 // Fetch a URL under the policy. Resolves { finalUrl, status, headers, body, bytes, redirects }.
-// Throws Denied for every refusal or network failure; the class says which.
-export async function guardedFetch({ url, method = "GET", headers, maxBytes, deadline, policy, resolvePublic, lookupFixture, jar = new CookieJar(), signal, onHop }) {
+// Throws Denied for every refusal or network failure; the class says which. via (M6): the residential transport
+// (residential.mjs via()); each hop is still validated and resolved here first, then travels its own tunnel.
+export async function guardedFetch({ url, method = "GET", headers, maxBytes, deadline, policy, resolvePublic, lookupFixture, jar = new CookieJar(), signal, onHop, via = null }) {
   const redirects = [];
   let current = url, verb = method;
   let extra = callerHeaders(headers);
@@ -150,7 +156,8 @@ export async function guardedFetch({ url, method = "GET", headers, maxBytes, dea
     const sent = { ...extra };
     if (target.url.origin !== firstOrigin) for (const k of ORIGIN_BOUND) delete sent[k];
     if (cookie) sent.cookie = sent.cookie ? `${sent.cookie}; ${cookie}` : cookie;
-    const res = await requestOnce({ target, address, method: verb, headers: sent, maxBytes, deadline, signal });
+    const socket = via ? await via.open(target, { deadline, signal }) : null;
+    const res = await requestOnce({ target, address, method: verb, headers: sent, maxBytes, deadline, signal, socket });
     jar.store(target.url, res.headers["set-cookie"]);
     redirects.push({ url: current, status: res.status, address });
     if (REDIRECTS.has(res.status) && res.headers.location) {

@@ -1,0 +1,132 @@
+// The forward and search proxies chaining through the residential provider (src/proxy.mjs, M6): a browser attempt's
+// page and subresources leave under its one session and meter; SearXNG's residential-routed hosts get a leg per
+// tunnel, and are refused (never sent directly) when the route cannot be had (F11); a provider's refusal of a
+// browser request is kept as the attempt's provider failure.
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import http from "node:http";
+import net from "node:net";
+import { createHash } from "node:crypto";
+import { ProxySessions, startProxy } from "../src/proxy.mjs";
+import { Meter } from "../src/residential.mjs";
+import { Denied } from "../src/ssrf.mjs";
+import { startFixture, rig, m6Policy } from "./m6-helpers.mjs";
+
+const listening = (srv) => new Promise((r) => (srv.listening ? r() : srv.once("listening", r)));
+async function withProxy(fx, fn, { resolvePublic = async () => [] } = {}) {
+  const sessions = new ProxySessions(), logs = [];
+  const proxy = startProxy({ listen: { host: "127.0.0.1", port: 0 }, sessions, getPolicy: () => m6Policy(fx), resolvePublic, lookupFixture: async () => ["127.0.0.1"], log: (o) => logs.push(o) });
+  await listening(proxy);
+  try { return await fn({ port: proxy.address().port, sessions, logs }); } finally { proxy.closeAllConnections?.(); proxy.close(); }
+}
+const auth = (cred) => `Basic ${Buffer.from(`${cred.username}:${cred.password}`).toString("base64")}`;
+const get = (port, url, cred) => new Promise((resolve, reject) => {
+  http.request({ host: "127.0.0.1", port, path: url, headers: { "proxy-authorization": auth(cred) }, agent: false }, (res) => {
+    let b = ""; res.on("data", (c) => (b += c)); res.on("end", () => resolve({ status: res.statusCode, body: b }));
+  }).on("error", reject).end();
+});
+// A CONNECT through the proxy, then one plain request over the tunnel (a stand-in for a TLS session's bytes).
+const connectGet = (port, host, targetPort, path, cred) => new Promise((resolve, reject) => {
+  const s = net.connect(port, "127.0.0.1", () => s.write(`CONNECT ${host}:443 HTTP/1.1\r\nHost: ${host}:443\r\nProxy-Authorization: ${auth(cred)}\r\n\r\n`));
+  let buf = "", stage = 0;
+  s.on("data", (c) => {
+    buf += c;
+    if (stage === 0 && buf.includes("\r\n\r\n")) {
+      const status = Number(buf.split(" ")[1]);
+      if (status !== 200) { s.destroy(); return resolve({ status }); }
+      stage = 1; buf = "";
+      s.write(`GET ${path} HTTP/1.1\r\nHost: ${host}:${targetPort}\r\nConnection: close\r\n\r\n`);
+    }
+  });
+  s.on("end", () => resolve({ status: 200, body: buf }));
+  s.on("error", reject);
+});
+
+test("a residential browser session tunnels the page and every subresource under one session and one meter", async () => {
+  const fx = await startFixture();
+  try {
+    const { residential } = rig(fx);
+    const st = residential.state();
+    const meter = new Meter(10_000_000);
+    await withProxy(fx, async ({ port, sessions }) => {
+      const upstream = { meter, open: (host, p) => residential.tunnel(st, { host, port: p, sessionId: "attemptsession1", deadline: Date.now() + 10000, meter }) };
+      const cred = sessions.open("a1", { expiresAt: Date.now() + 20000, maxBytes: meter.cap, fixture: true, upstream });
+      const base = `http://m6.fixture.fcpi.test:${fx.targetPort}`;
+      const pageR = await get(port, `${base}/subres`, cred);
+      assert.equal(pageR.status, 200);
+      for (const p of ["/px/1.gif", "/px/2.gif", "/px/app.js"]) assert.equal((await get(port, `${base}${p}`, cred)).status, 200);
+      const closed = sessions.close("a1");
+      assert.equal(closed.upstreamFailure, null);
+    });
+    const hits = fx.state.hits.filter((h) => h.path === "/subres" || h.path.startsWith("/px/"));
+    assert.equal(hits.length, 4);
+    assert.ok(hits.every((h) => h.via === "proxy"), "every request of the page came through the provider");
+    assert.deepEqual([...new Set(fx.state.tunnels.map((t) => t.exit))], ["exit-1"], "one sticky exit for the page and its subresources");
+    await new Promise((r) => setTimeout(r, 50));
+    const relayed = fx.state.tunnels.reduce((n, t) => n + t.up + t.down, 0);
+    assert.ok(meter.bytes >= relayed, `metered ${meter.bytes} < relayed ${relayed}`);
+  } finally { await fx.close(); }
+});
+
+test("a provider refusal of a browser request is a 502 and the attempt's provider failure", async () => {
+  const fx = await startFixture();
+  try {
+    const { residential } = rig(fx);
+    const st = residential.state();
+    const meter = new Meter(10_000_000);
+    fx.state.mode = "402";
+    await withProxy(fx, async ({ port, sessions }) => {
+      const upstream = { meter, open: (host, p) => residential.tunnel(st, { host, port: p, sessionId: "s2", deadline: Date.now() + 10000, meter }) };
+      const cred = sessions.open("a2", { expiresAt: Date.now() + 20000, maxBytes: meter.cap, fixture: true, upstream });
+      assert.equal((await get(port, `http://m6.fixture.fcpi.test:${fx.targetPort}/static`, cred)).status, 502);
+      assert.equal(sessions.close("a2").upstreamFailure.class, "PROVIDER_BILLING");
+    });
+    assert.equal(fx.state.hits.length, 0);
+  } finally { await fx.close(); }
+});
+
+test("F11: a search host routed residential goes through the provider when it can, and is refused when it cannot, never sent directly", async () => {
+  const fx = await startFixture();
+  fx.state.portOverride = fx.targetPort;
+  const ENGINE = "engine-r.example.com"; // validated as a public name; the fixture proxy delivers its tunnels to the loopback target
+  const pw = createHash("sha256").update("pw").digest(), cred = { username: "searxng", password: "pw" };
+  try {
+    const legs = [];
+    const { residential } = rig(fx);
+    const upstreamFor = async (t) => {
+      if (t.host !== ENGINE) return null;
+      const st = await residential.availability(2_000_000);
+      if (!st.available) throw new Denied("PROXY_REQUIRED", `engine host ${t.host} is routed residential, and the residential route is unavailable (${st.reason})`);
+      const meter = new Meter(2_000_000);
+      return { meter, open: (host, p) => residential.tunnel(st, { host, port: p, sessionId: "search1", deadline: Date.now() + 10000, meter }), done: () => legs.push(meter.bytes) };
+    };
+    await withProxy(fx, async ({ port, sessions, logs }) => {
+      // SearXNG's standing session, its credential checked by SHA-256 as the service's secret file gives it.
+      sessions.fixed("searxng", pw, { fixture: () => false, allow: () => true, upstreamFor });
+      const c = await connectGet(port, ENGINE, 443, "/echo", cred);
+      assert.equal(c.status, 200, JSON.stringify(logs));
+      assert.match(c.body, /"via":"proxy"/);
+      assert.ok(logs.some((l) => l.event === "proxy_request" && l.method === "CONNECT" && l.route === "residential"));
+    }, { resolvePublic: async () => ["93.184.216.34"] });
+    await new Promise((r) => setTimeout(r, 50));
+    assert.equal(legs.length, 1, "the residential tunnel settled once");
+    assert.ok(legs[0] > 0);
+
+    // Without the route: the residential host is refused and the target sees nothing.
+    const none = rig(fx, { cred: null });
+    const before = fx.state.hits.length;
+    const upstreamForNone = async (t) => {
+      const st = await none.residential.availability(2_000_000);
+      if (t.host === ENGINE && !st.available) throw new Denied("PROXY_REQUIRED", `unavailable (${st.reason})`);
+      return null;
+    };
+    await withProxy(fx, async ({ port, sessions, logs }) => {
+      sessions.fixed("searxng", pw, { fixture: () => false, allow: () => true, upstreamFor: upstreamForNone });
+      const r = await connectGet(port, ENGINE, 443, "/echo", cred);
+      assert.equal(r.status, 403);
+      assert.ok(logs.some((l) => l.event === "proxy_denied" && l.failure === "PROXY_REQUIRED"));
+    }, { resolvePublic: async () => ["93.184.216.34"] });
+    assert.equal(fx.state.hits.length, before);
+    assert.equal(fx.state.tunnels.length, 1);
+  } finally { await fx.close(); }
+});

@@ -46,13 +46,22 @@
     { "host": "m5.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "model.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "parser.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
-    { "host": "search.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" }
+    { "host": "search.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m6.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m6pace.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "direct" },
+    { "host": "m6hard.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m6learn.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m6bulk.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m6cool.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "searchr.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "proxy.fixture.fcpi.test", "port": 8081, "cidr": "10.231.3.0/24", "limits": "fixture" }
   ],
   "search": {
     "engines": {
       "fixture": [
         "fcpi fixture",
-        "fcpi fixture b"
+        "fcpi fixture b",
+        "fcpi fixture r"
       ],
       "live": [
         "duckduckgo",
@@ -69,9 +78,31 @@
         "search.brave.com"
       ]
     },
+    "engineRoutes": {
+      "duckduckgo.com": "residential",
+      "html.duckduckgo.com": "residential",
+      "lite.duckduckgo.com": "residential",
+      "search.brave.com": "residential",
+      "www.bing.com": "direct",
+      "searchr.fixture.fcpi.test": "residential"
+    },
     "perHour": 60,
     "cacheSeconds": 900,
     "deadlineMs": 10000,
     "maxResults": 20
+  },
+  "residential": {
+    "proxyFirstDomains": ["m6hard.fixture.fcpi.test"],
+    "sessionMinutes": 5,
+    "connectTimeoutMs": 10000,
+    "bulkPages": 20,
+    "holdMaxMinutes": 90
+  },
+  "routing": {
+    "maxRecords": 5000,
+    "observationsToChange": 2,
+    "ttlHours": 24,
+    "maxTtlDays": 7,
+    "probeMinutes": 5
   }
 }

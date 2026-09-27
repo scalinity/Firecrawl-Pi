@@ -12,23 +12,28 @@
 // On the gateway's listener (fcpi_model, M5), the gateway's credential:
 //   POST /internal/extract   one structured extraction over documents the gateway scraped (src/extract.mjs)
 //   GET  /internal/providers the providers' states, credentials present (yes/no), the selection and budgets
+//   GET  /internal/routes    M6: whether the residential route can be had now, and why not
+//   POST /internal/route-hold, /internal/route-release   M6: a bulk job's finite route hold on its domains
+//   POST /internal/proxy/reconcile   M6: reconcile one proxy provider's day against its usage report (src/reconcile.mjs)
 // The browser worker's forward proxy listens on the browser network alone, SearXNG's search proxy on the
 // search network alone (src/proxy.mjs). Credentials are compared by SHA-256.
 import http from "node:http";
 import { readFileSync } from "node:fs";
-import { createHash, createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual, randomUUID } from "node:crypto";
 import { loadEnv, loadPolicy, loadLocalCidrs, loadSelection, defaultSelection, readSecret, parseSha256 } from "./policy.mjs";
 import { loadBudgetPolicy, periodStarts } from "./budget.mjs";
 import { Store } from "./store.mjs";
 import { makePublicResolver } from "./resolve.mjs";
 import { ProxySessions, startProxy } from "./proxy.mjs";
 import { makeBrowserClient } from "./browser.mjs";
-import { makeAcquirer, makeFetcher, makeUrlHmac } from "./acquire.mjs";
+import { makeAcquirer, makeFetcher, makeUrlHmac, domainOf } from "./acquire.mjs";
+import { makeResidential, Meter } from "./residential.mjs";
+import { reconcileDay } from "./reconcile.mjs";
 import { makeSearcher } from "./search.mjs";
 import { makeModelAdapter, makeExtractor, ExtractionFailure } from "./extract.mjs";
 import { makeParser } from "./parse.mjs";
 import { readCredential } from "./provider.mjs";
-import { Denied, hostMatches } from "./ssrf.mjs";
+import { Denied, hostMatches, parseTarget } from "./ssrf.mjs";
 
 const env = loadEnv(process.env);
 const BUILD = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
@@ -76,32 +81,61 @@ let storeReady = false;
 setInterval(() => store.prune().catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();
 
 const resolvePublic = makePublicResolver({ server: env.resolver });
+// M6: the residential proxy route (spec §10), shared by pages, auxiliary downloads, the browser and search.
+const residential = makeResidential({ getBudget, getPolicy, getSelection, providersDir: env.providersDir, paidDispatch: env.paidDispatch, store, resolvePublic, log });
 const sessions = new ProxySessions();
 startProxy({ listen: env.proxyListen, sessions, getPolicy, resolvePublic, log });
-// SearXNG's engine requests: fixture engines while the selection is "fixture", only the live engines'
-// hosts while it is "live".
-const searchSessions = new ProxySessions();
-searchSessions.fixed("searxng", parseSha256(readSecret(env.credentialsDir, "retrieval_searxng_proxy_sha256"), "retrieval_searxng_proxy_sha256"), {
-  fixture: () => selection.search === "fixture",
-  allow: (t) => (selection.search === "fixture" ? !!t.fixture : !t.fixture && basePolicy.search.engineHosts.live.some((h) => hostMatches(t.host, h))),
-});
-startProxy({ listen: env.searchProxyListen, sessions: searchSessions, getPolicy, resolvePublic, log });
-const browser = makeBrowserClient({ url: env.browserUrl, token: readSecret(env.credentialsDir, "retrieval_browser_token"),
-  proxyServer: `http://${env.proxyListen.host}:${env.proxyListen.port}`, sessions, getPolicy });
 // The URL-hash key, derived under its own label from the browser credential, whose plaintext only
 // this service holds (the worker keeps its SHA-256): stable across restarts, changed only with that
 // credential, and no further secret to keep.
 const urlHmac = makeUrlHmac(createHmac("sha256", readSecret(env.credentialsDir, "retrieval_browser_token")).update("fcpi.retrieval.url-hmac.v1").digest());
-const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log });
-const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log });
+// SearXNG's engine requests: fixture engines while the selection is "fixture", only the live engines'
+// hosts while it is "live". M6 (F11): a host the policy routes residential gets a leg of its own per tunnel, its
+// maximum reserved first and settled at the bytes it carried, under a session sticky per host for ten minutes; when
+// the residential route cannot be had the request is refused (PROXY_REQUIRED), never sent from the home connection.
+const searchSessions = new ProxySessions();
+async function searchUpstream(t) {
+  if (basePolicy.search.engineRoutes[t.host] !== "residential") return null;
+  const bytes = budget.proxying.maxTunnelBytes;
+  const st = await residential.availability(bytes);
+  if (!st.available) throw new Denied("PROXY_REQUIRED", `engine host ${t.host} is routed residential, and the residential route is unavailable (${st.reason})`);
+  const window = Math.floor(Date.now() / 600000);
+  const r = await residential.reserve(st, { callKey: `proxy:search:${randomUUID()}`, logicalId: `search:${urlHmac(t.host)}:${window}`, bytes });
+  if (r.failure) throw new Denied(r.failure.class, `engine host ${t.host}: ${r.failure.detail}`);
+  const meter = new Meter(bytes), sessionId = urlHmac(`fcpi.residential.search.v1|${t.host}|${window}`).slice(0, 24);
+  return { meter, open: (host, port) => residential.tunnel(st, { host, port, sessionId, deadline: Date.now() + 15000, meter }), done: () => residential.settle(st, r.reservation, meter, `search tunnel to ${t.host}`) };
+}
+searchSessions.fixed("searxng", parseSha256(readSecret(env.credentialsDir, "retrieval_searxng_proxy_sha256"), "retrieval_searxng_proxy_sha256"), {
+  fixture: () => selection.search === "fixture",
+  allow: (t) => (selection.search === "fixture" ? !!t.fixture : !t.fixture && basePolicy.search.engineHosts.live.some((h) => hostMatches(t.host, h))),
+  upstreamFor: searchUpstream,
+});
+startProxy({ listen: env.searchProxyListen, sessions: searchSessions, getPolicy, resolvePublic, log });
+const browser = makeBrowserClient({ url: env.browserUrl, token: readSecret(env.credentialsDir, "retrieval_browser_token"),
+  proxyServer: `http://${env.proxyListen.host}:${env.proxyListen.port}`, sessions, getPolicy });
+
+const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log, residential, getBudget });
+const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log, residential, getBudget });
 const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log });
 const common = { store, getBudget, paidDispatch: env.paidDispatch, providersDir: env.providersDir, getPolicy, resolvePublic, log };
 const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
 // A provider's breaker lives in the adapter of its kind (review W6).
-const breakerState = (name, p) => (p.kind === "parser" ? parse.breakerState(name) : adapter.breakerState(name));
-log({ event: "budget_loaded", budget_sha256: budgetSha256, paid_dispatch: env.paidDispatch, models: Object.keys(budget.models), parsers: Object.keys(budget.parsers) });
+const breakerState = (name, p) => (p.kind === "parser" ? parse.breakerState(name) : p.kind === "proxy" ? residential.breakerState(name) : adapter.breakerState(name));
+log({ event: "budget_loaded", budget_sha256: budgetSha256, paid_dispatch: env.paidDispatch, models: Object.keys(budget.models), parsers: Object.keys(budget.parsers), proxies: Object.keys(budget.proxies) });
+// The residential route as others see it: no secret, only whether it can be used now and why not.
+const routeView = (st) => ({ available: st.available, reason: st.reason, subject: st.subject ?? null, provider: st.providerName ?? null, paid: st.paid ?? null, ...(st.retryAfter ? { retryAfter: st.retryAfter } : {}) });
+// Hourly, the selected paid proxy's yesterday and today are reconciled against its usage report, when it has one
+// and its report's credential is present (spec §10.3).
+setInterval(async () => {
+  const st = residential.state();
+  if (!st.providerName || !st.paid || !st.provider?.usageUrl || !readCredential(env.providersDir, st.provider.usageCredential)) return;
+  for (const day of [periodStarts(new Date(Date.now() - 86400e3)).day, periodStarts().day]) {
+    await reconcileDay({ store, getBudget, providersDir: env.providersDir, providerName: st.providerName, day, getPolicy, resolvePublic, log })
+      .catch((e) => log({ event: "proxy_reconcile_failed", provider: st.providerName, day, error: e.code ?? e.message }));
+  }
+}, 3600000).unref();
 
 const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, INVALID_URL: 400, INVALID_REQUEST: 400, RATE_LIMITED: 429, PROXY_REQUIRED: 429,
   RESOURCE_BUSY: 429, TIMEOUT: 504, DEADLINE_EXCEEDED: 504, SIZE_LIMIT: 413, ATTEMPT_BUDGET_EXHAUSTED: 409, RETRIEVAL_NOT_READY: 503,
@@ -182,7 +216,7 @@ const server = http.createServer(async (req, res) => {
       const ok = storeReady && getLocalReady();
       // Search, models and parsers are optional to acquisition: reported, never folded into ok (spec §20, AC23).
       return send(res, ok ? 200 : 503, { ok, store: storeReady, local_networks: getLocalReady(), browser: b.ok === true ? "up" : "down",
-        search_selection: selection.search, providers: Object.fromEntries(Object.entries(budget.providers).map(([n, p]) => [n, breakerState(n, p)])) });
+        search_selection: selection.search, providers: Object.fromEntries(Object.entries(budget.providers).map(([n, p]) => [n, breakerState(n, p)])), residential: routeView(residential.state()) });
     }
     if (req.method === "GET" && path === "/searxng/search") {
       if (!storeReady) return notReady(res);
@@ -219,6 +253,27 @@ const extractServer = http.createServer(async (req, res) => {
   try {
     if (!authorized(req, gatewayTokenHash)) return send(res, 401, { error: "unauthorized" });
     if (req.method === "GET" && path === "/internal/providers") return send(res, 200, await providerStatus());
+    if (req.method === "GET" && path === "/internal/routes") {
+      if (!storeReady) return notReady(res);
+      return send(res, 200, { residential: routeView(await residential.availability()), bulkPages: basePolicy.residential.bulkPages, holdMaxMinutes: basePolicy.residential.holdMaxMinutes });
+    }
+    if (req.method === "POST" && (path === "/internal/route-hold" || path === "/internal/route-release" || path === "/internal/proxy/reconcile")) {
+      if (!storeReady) return notReady(res);
+      const b = await readJson(req, 65536);
+      if (path === "/internal/proxy/reconcile") return send(res, 200, await reconcileDay({ store, getBudget, providersDir: env.providersDir, providerName: String(b.provider ?? ""), day: String(b.day ?? ""), getPolicy, resolvePublic, log }));
+      if (typeof b.jobId !== "string" || !/^[A-Za-z0-9:_-]{1,128}$/.test(b.jobId)) throw new Denied("INVALID_REQUEST", "jobId must be 1-128 letters, digits, colons, dashes or underscores");
+      if (path === "/internal/route-release") { const n = await store.releaseRoutes(b.jobId); log({ event: "route_released", job_id: b.jobId, rows: n }); return send(res, 200, { released: n }); }
+      // A hold is placed only while the route can be had: a job that would need it now is refused instead.
+      if (!Array.isArray(b.urls) || b.urls.length === 0 || b.urls.length > 200) throw new Denied("INVALID_REQUEST", "urls must list 1 to 200 URLs");
+      const minutes = Math.min(Number.isInteger(b.minutes) && b.minutes > 0 ? b.minutes : basePolicy.residential.holdMaxMinutes, basePolicy.residential.holdMaxMinutes);
+      const domains = [...new Set(b.urls.map((u) => domainOf(parseTarget(String(u), getPolicy()))))];
+      const st = await residential.availability();
+      if (!st.available) { log({ event: "route_hold_refused", job_id: b.jobId, reason: st.reason }); return send(res, 409, { held: false, residential: routeView(st), failure: { class: "PROXY_REQUIRED", detail: `the residential route is unavailable (${st.reason})`, retryable: false, retryAfter: st.retryAfter ?? null } }); }
+      const until = new Date(Date.now() + minutes * 60000);
+      await store.holdRoutes(b.jobId, domains, until, String(b.reason ?? "bulk").slice(0, 64));
+      log({ event: "route_held", job_id: b.jobId, domains: domains.length, until: until.toISOString(), reason: String(b.reason ?? "bulk").slice(0, 64) });
+      return send(res, 200, { held: true, domains: domains.length, until: until.toISOString() });
+    }
     if (path !== "/internal/extract") return send(res, 404, { error: "not_found" });
     if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed" });
     if (!storeReady) return notReady(res);
