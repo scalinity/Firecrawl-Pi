@@ -55,7 +55,8 @@ const jobs = makeJobs({ cfg, store, upstream, archive, routes: extractor, log: (
 const extractJobs = extractor ? makeExtractJobs({ cfg, store, upstream, archive, extractor, log: (o) => log({ build: cfg.build, ...o }) }) : null;
 // M7: the webhook outbox's delivery round (it needs the retrieval service, which alone may reach a receiver), and changes.
 const outbox = extractor ? makeOutbox({ store, extractor, limits: L, log: (o) => log({ build: cfg.build, ...o }) }) : null;
-const changes = makeChanges({ cfg, store, upstream, archive, originFor, quotaBytes });
+// quotaBytes is defined below; the route reads it at call time.
+const changes = makeChanges({ cfg, store, upstream, archive, originFor, quotaBytes: () => quotaBytes() });
 const PATH = { ...jobs.PATH, extract: "/v2/extract" };
 const started = Date.now();
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
