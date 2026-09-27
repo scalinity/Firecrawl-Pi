@@ -185,14 +185,14 @@ async function fixturePhase(before) {
   out("production", { case: "route_state", readyz: readyz().residential, routes: internal("GET", "/internal/routes").json, providers: (await rest("GET", "/platform/v1/status")).json?.providers?.providers?.decodo ?? null });
   let a = await acquisition("m6.fixture.fcpi.test", "stealth", () => scrape(`${FX()}/static?a=${nonce}`, { proxy: "stealth" }));
   out("production", { case: "stealth_proxy_required", ...brief(a.r), acquisitions: a.acq, hits: hitSummary(a.hits), tunnels: a.tunnels.length });
+  const jobs0 = Number(sql("SELECT count(*) FROM fcpi_platform.job")[0]);
   a = await acquisition("m6bulk.fixture.fcpi.test", "bulk crawl", () => rest("POST", "/v2/crawl", { url: `${FX("m6bulk")}/bulk/`, limit: 50 }));
   out("production", { case: "bulk_crawl_refused", ...brief(a.r), acquisitions: a.acq, hits: hitSummary(a.hits), tunnels: a.tunnels.length });
   a = await acquisition("m6bulk.fixture.fcpi.test", "bulk batch", () => rest("POST", "/v2/batch/scrape", { urls: Array.from({ length: 21 }, (_, i) => `${FX("m6bulk")}/bulk/p${i + 1}?b=${nonce}`) }));
   out("production", { case: "bulk_batch_refused", ...brief(a.r), acquisitions: a.acq, hits: hitSummary(a.hits) });
   a = await acquisition("m6bulk.fixture.fcpi.test", "basic bulk", () => rest("POST", "/v2/crawl", { url: `${FX("m6bulk")}/bulk/`, limit: 30, scrapeOptions: { proxy: "basic" } }));
   out("production", { case: "basic_bulk_refused", ...brief(a.r), hits: hitSummary(a.hits) });
-  const jobsBefore = sql("SELECT count(*) FROM fcpi_platform.job")[0];
-  out("production", { case: "no_receipts", jobs: Number(jobsBefore) });
+  out("production", { case: "no_receipts", jobs_before: jobs0, jobs_after: Number(sql("SELECT count(*) FROM fcpi_platform.job")[0]) });
   a = await acquisition("m6hard.fixture.fcpi.test", "proxy-first", () => scrape(`${FX("m6hard")}/static?a=${nonce}`));
   out("production", { case: "proxy_first_required", ...brief(a.r), acquisitions: a.acq, hits: hitSummary(a.hits) });
   a = await acquisition("m6.fixture.fcpi.test", "challenge", () => scrape(`${FX()}/challenge?a=${nonce}`));
@@ -201,7 +201,7 @@ async function fixturePhase(before) {
   a = await acquisition("m6.fixture.fcpi.test", "static", () => scrape(`${FX()}/static?a=${nonce}`));
   out("production", { case: "static_direct", ...brief(a.r), markdown: /directly/.test(docOf(a.r)?.markdown ?? ""), proxyUsed: docOf(a.r)?.metadata?.proxyUsed ?? null, acquisitions: a.acq, hits: hitSummary(a.hits) });
   a = await acquisition("m6bulk.fixture.fcpi.test", "small crawl", async () => { const s = await rest("POST", "/v2/crawl", { url: `${FX("m6bulk")}/bulk/`, limit: 5 }); return s.json?.id ? pollJob("crawl", s.json.id) : s; });
-  out("production", { case: "small_crawl_direct", ...brief(a.r), status_field: a.r.json?.status ?? null, documents: a.r.json?.data?.length ?? null, hits: hitSummary(a.hits), tunnels: a.tunnels.length });
+  out("production", { case: "small_crawl_direct", ...brief(a.r), status_field: a.r.json?.status ?? null, documents: a.r.json?.data?.length ?? null, acquisitions: a.acq, hits: hitSummary(a.hits), tunnels: a.tunnels.length });
 
   // ---- B: the fixture proxy selected.
   select("fixture", MODEL, PARSER, "fcpi-fixture-proxy");
@@ -216,8 +216,11 @@ async function fixturePhase(before) {
   out("subresources", { case: "residential_browser", ...brief(a.r), markdown: /Scripted page with subresources/.test(docOf(a.r)?.markdown ?? ""), proxyUsed: docOf(a.r)?.metadata?.proxyUsed ?? null,
     acquisitions: a.acq, hits: hitSummary(a.hits), tunnels: tunnelSummary(a.tunnels) });
   // B3: escalation, automatic: HTTP to browser to the residential browser; and HTTP straight to residential HTTP.
+  // Each on a name of its own under m6esc, which must learn nothing between them: the first two challenges would set
+  // a preference, so the preference is cleared after each (the learning itself is B5's, on m6learn).
   for (const [c, path] of [["js_challenge", "/js-challenge"], ["challenge_403", "/challenge"], ["challenge_200", "/challenge200"]]) {
-    a = await acquisition("m6.fixture.fcpi.test", c, () => scrape(`${FX()}${path}?x=${nonce}`));
+    sql("DELETE FROM fcpi_retrieval.domain_route WHERE domain = 'm6esc.fixture.fcpi.test'");
+    a = await acquisition("m6esc.fixture.fcpi.test", c, () => scrape(`${FX("m6esc")}${path}?x=${nonce}`));
     out("escalation", { case: c, ...brief(a.r), markdown: (docOf(a.r)?.markdown ?? "").slice(0, 160), proxyUsed: docOf(a.r)?.metadata?.proxyUsed ?? null, acquisitions: a.acq, hits: hitSummary(a.hits), tunnels: tunnelSummary(a.tunnels) });
   }
   // B4: spec §9.2's rules; none of them reaches the provider.
@@ -231,7 +234,7 @@ async function fixturePhase(before) {
   const L = [];
   for (let i = 1; i <= 3; i++) {
     a = await acquisition("m6learn.fixture.fcpi.test", `learn ${i}`, () => scrape(`${FX("m6learn")}/challenge?l=${nonce}-${i}`));
-    L.push({ n: i, ...brief(a.r), acquisitions: a.acq, route: routeRow("m6learn.fixture.fcpi.test") });
+    L.push({ n: i, ...brief(a.r), acquisitions: a.acq, hits: hitSummary(a.hits), route: routeRow("m6learn.fixture.fcpi.test") });
   }
   for (const x of L) out("learning", { case: `observation_${x.n}`, ...x });
   sql("UPDATE fcpi_retrieval.domain_route SET expires_at = now() - interval '1 minute', probe_at = NULL WHERE domain = 'm6learn.fixture.fcpi.test'");
@@ -256,7 +259,7 @@ async function fixturePhase(before) {
   r = batchId ? await pollJob("batch", batchId) : r;
   await sleep(5000);
   bs1 = fxStats();
-  out("bulk", { case: "batch_finished", ...brief(r), status_field: r.json?.status ?? null, documents: r.json?.data?.length ?? null, hits: hitSummary(bs1.hits.slice(bbs0.hits.length).filter((h) => h.host === "m6bulk.fixture.fcpi.test")),
+  out("bulk", { case: "batch_finished", ...brief(r), status_field: r.json?.status ?? null, documents: r.json?.data?.length ?? null, acquisitions: attempts("m6bulk.fixture.fcpi.test", bb0), hits: hitSummary(bs1.hits.slice(bbs0.hits.length).filter((h) => h.host === "m6bulk.fixture.fcpi.test")),
     holds_after: sql(`SELECT count(*) FROM fcpi_retrieval.route_hold WHERE domain = 'm6bulk.fixture.fcpi.test'`).map(Number)[0] });
   // B7: pacing across clients and routes: two tokens, direct and residential alternately, one domain with the 2 s gap.
   const p0 = piNow(), ps0 = fxStats();
