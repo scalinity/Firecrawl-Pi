@@ -228,6 +228,20 @@ test("a settlement that fails after a paid answer leaves the charge UNCERTAIN, n
   } finally { await fx.close(); }
 });
 
+test("the enhanced dispatch holds its domain for the provider's request timeout, past a browser attempt's", async () => {
+  const fx = await startM7();
+  try {
+    const holds = [];
+    class Recording extends M6Store { async paceDirect(domain, holder, limits, holdMs, fixture, tier) { holds.push({ tier, holdMs }); return super.paceDirect(domain, holder, limits, holdMs, fixture, tier); } }
+    const { acquire, budget, policy } = rig(fx, { store: new Recording() });
+    await acquire(req(at(fx, "/tough")));
+    assert.equal(budget.enhancing.requestTimeoutMs > policy.attempts.browserAttemptMs, true, "the case the hold covers");
+    assert.deepEqual(holds.map((h) => h.tier), ["direct", "enhanced"]);
+    assert.equal(holds[0].holdMs, policy.attempts.browserAttemptMs);
+    assert.equal(holds[1].holdMs, budget.enhancing.requestTimeoutMs);
+  } finally { await fx.close(); }
+});
+
 test("the tier's refusals come before any reservation: no credential, a paid provider without paid dispatch, a zero cap, no enhancer", async () => {
   const fx = await startM7();
   try {

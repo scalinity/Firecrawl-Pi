@@ -157,13 +157,13 @@ export function makePacer({ store, getPolicy, resolvePublic, lookupFixture, log 
       await sleep(250, signal);
     }
   }
-  async function pace(target, holder, deadline, signal, tier = "direct") {
+  async function pace(target, holder, deadline, signal, tier = "direct", holdMs = getPolicy().attempts.browserAttemptMs) {
     const policy = getPolicy();
     const domain = domainOf(target);
     const limits = target.fixture?.limits === "fixture" ? policy.fixtureLimits : policy.direct;
     for (;;) {
       if (signal?.aborted) return { domain, failure: CANCELLED };
-      const d = await store.paceDirect(domain, holder, limits, policy.attempts.browserAttemptMs, !!target.fixture, tier);
+      const d = await store.paceDirect(domain, holder, limits, holdMs, !!target.fixture, tier);
       if (d.go) return { domain };
       if (d.failure) return { domain, failure: d.failure };
       if (Date.now() + d.waitMs > deadline || signal?.aborted) return { domain, failure: { class: "DEADLINE_EXCEEDED", detail: "the domain's pacing would pass the deadline", retryable: true, retryAfter: null } };
@@ -512,7 +512,8 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           const ordinal = await store.reserveAttempt({ logicalId: req.logicalAcquisitionId, attemptId, requestId: req.requestId, purpose: req.purpose, strategy: "enhanced", domain: target.host, maxAttempts: policy.attempts.maxPerPage });
           if (ordinal === null) return { fail: { class: "ATTEMPT_BUDGET_EXHAUSTED", detail: `the page's ${policy.attempts.maxPerPage} attempts are spent before its enhanced dispatch` } };
           note(attemptId, ordinal, "enhanced");
-          paced = await pace(target, attemptId, deadline, signal, "enhanced");
+          // The domain is held for the whole dispatch, which may outlast a browser attempt (review S9).
+          paced = await pace(target, attemptId, deadline, signal, "enhanced", Math.max(policy.attempts.browserAttemptMs, getBudget?.()?.enhancing?.requestTimeoutMs ?? 0));
           if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return { fail: paced.failure }; }
         }
         const finishAttempt = (o) => (attemptId ? store.finishAttempt(attemptId, o) : null);
