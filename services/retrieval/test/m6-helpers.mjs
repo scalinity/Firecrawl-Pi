@@ -61,13 +61,13 @@ export class M6Store extends FakeStore {
 export const urlHmac = makeUrlHmac(Buffer.alloc(32, 9));
 
 // A residential route and an acquirer over the fixture. selection.proxy picks the subject (null: none).
-export function rig(fx, { proxy = "fcpi-fixture-proxy", cred = CRED, policy = m6Policy(fx), budget = m6Budget(fx), paidDispatch = false, browser, store = new M6Store(), logs = [] } = {}) {
+export function rig(fx, { proxy = "fcpi-fixture-proxy", cred = CRED, policy = m6Policy(fx), budget = m6Budget(fx), paidDispatch = false, browser, store = new M6Store(), logs = [], resolvePublic = async () => [] } = {}) {
   const dir = providersDir(cred === null ? {} : { fixture_proxy: cred });
   const log = (o) => logs.push(o);
   const getPolicy = () => policy, getBudget = () => budget, getSelection = () => ({ proxy });
   const lookupFixture = async () => ["127.0.0.1"];
-  const residential = makeResidential({ getBudget, getPolicy, getSelection, providersDir: dir, paidDispatch, store, resolvePublic: async () => [], lookupFixture, log });
-  const common = { store, getPolicy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture, urlHmac, log, residential, getBudget };
+  const residential = makeResidential({ getBudget, getPolicy, getSelection, providersDir: dir, paidDispatch, store, resolvePublic, lookupFixture, log });
+  const common = { store, getPolicy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic, lookupFixture, urlHmac, log, residential, getBudget };
   const acquire = makeAcquirer({ ...common, browser: browser ?? { render: async () => ({ ok: false, failure: { class: "BROWSER_UNAVAILABLE", detail: "none" } }) } });
   const fetchOnce = makeFetcher(common);
   return { store, residential, acquire, fetchOnce, logs, policy, budget };

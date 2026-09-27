@@ -20,6 +20,13 @@ const TLS_ERRORS = new Set(["CERT_HAS_EXPIRED", "UNABLE_TO_VERIFY_LEAF_SIGNATURE
   "SELF_SIGNED_CERT_IN_CHAIN", "UNABLE_TO_GET_ISSUER_CERT_LOCALLY", "CERT_NOT_YET_VALID", "ERR_SSL_WRONG_VERSION_NUMBER", "EPROTO"]);
 const NET_ERRORS = new Set(["ECONNREFUSED", "ECONNRESET", "EHOSTUNREACH", "ENETUNREACH", "ETIMEDOUT", "EPIPE", "ECONNABORTED", "EAI_AGAIN", "HPE_INVALID_CONSTANT"]);
 
+// A transport error as the failure class a caller acts on: a certificate or TLS protocol fault, or an unreachable target.
+export function transportFailure(e, host) {
+  const code = e.code ?? "";
+  if (TLS_ERRORS.has(code)) return new Denied("TLS_FAILURE", `${host}: ${code}`);
+  return new Denied("TARGET_UNREACHABLE", `${host}: ${NET_ERRORS.has(code) ? code : code || e.message}`);
+}
+
 export function callerHeaders(headers) {
   const out = {};
   let size = 0;

@@ -341,3 +341,20 @@ test("a credential whose name would change the session username is refused, and 
     assert.equal(JSON.stringify(await good.residential.availability()).includes(CRED.split(":")[1]), false);
   } finally { await fx.close(); }
 });
+
+test("a target that never answers the TLS hello through the tunnel ends as TIMEOUT within the attempt, not at the provider's leisure (review W3)", async () => {
+  const fx = await startFixture();
+  const net = await import("node:net");
+  const silent = net.createServer((s) => { s.on("error", () => {}); }).listen(0, "127.0.0.1");
+  await new Promise((r) => silent.once("listening", r));
+  fx.state.portOverride = silent.address().port;
+  try {
+    const { acquire, store } = rig(fx, { resolvePublic: async () => ["93.184.216.34"] });
+    const t0 = Date.now();
+    const r = await acquire(req("https://silent.example.org/", { route: "stealth" }));
+    assert.equal(r.failure.class, "TIMEOUT");
+    assert.ok(Date.now() - t0 < 12000, `${Date.now() - t0} ms`);
+    const [row] = store.ledger.rows.values();
+    assert.equal(row.state, "SETTLED", "the attempt's reservation settled at what the tunnel carried");
+  } finally { silent.close(); await fx.close(); }
+});

@@ -33,6 +33,7 @@ import { readCredential } from "./provider.mjs";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { resolveTarget } from "./resolve.mjs";
 import { sessionUsername } from "./route.mjs";
+import { transportFailure } from "./httpfetch.mjs";
 
 const HEAD_MAX = 16384;
 const PROVIDER_STATUS = { 407: "PROVIDER_AUTH_FAILED", 402: "PROVIDER_BILLING", 429: "PROVIDER_RATE_LIMITED" };
@@ -252,7 +253,8 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
   }
 
   // The transport guardedFetch uses for a residential attempt: each hop opens its own tunnel on the attempt's leg, and
-  // an https target gets its own TLS session over it, verified against the target's name.
+  // an https target gets its own TLS session over it, verified against the target's name. The handshake is bounded by
+  // the hop's deadline and ends at the caller's cancel, as the direct path's request timer bounds its own (review W3).
   function via(l) {
     return {
       async open(target, { deadline, signal }) {
@@ -260,8 +262,15 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
         if (target.url.protocol !== "https:") return counted;
         return new Promise((resolve, reject) => {
           const s = tls.connect({ socket: counted, ...(net.isIP(target.host) ? {} : { servername: target.host }), rejectUnauthorized: true });
-          const bad = (e) => { s.destroy(); reject(new Denied("TLS_FAILURE", `${target.host}: ${e.code ?? e.message}`)); };
-          s.once("secureConnect", () => { s.off("error", bad); resolve(s); });
+          let done = false;
+          const finish = (fn, v) => { if (done) return; done = true; clearTimeout(timer); signal?.removeEventListener("abort", onAbort); s.off("error", bad); fn(v); };
+          const fail = (err) => { s.destroy(); finish(reject, err); };
+          const bad = (e) => fail(transportFailure(e, target.host));
+          const onAbort = () => fail(new Denied("CANCELLED", "the caller cancelled the acquisition"));
+          const timer = setTimeout(() => fail(new Denied("TIMEOUT", `no TLS handshake with ${target.host} before the deadline`)), Math.max(0, deadline - Date.now()));
+          if (signal?.aborted) return onAbort();
+          signal?.addEventListener("abort", onAbort, { once: true });
+          s.once("secureConnect", () => finish(resolve, s));
           s.once("error", bad);
         });
       },
