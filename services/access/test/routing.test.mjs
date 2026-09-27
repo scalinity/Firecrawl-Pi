@@ -7,7 +7,7 @@ import { routeBody, isBulk, holdUrls, pagesOf, routeRefusal } from "../src/routi
 import { checkManifest } from "../src/config.mjs";
 import { RequestError } from "../src/validate.mjs";
 
-const M = JSON.parse(readFileSync(new URL("../../../deploy/policies/capabilities.json", import.meta.url), "utf8"));
+const M = JSON.parse(readFileSync(process.env.FCPI_TEST_MANIFEST ?? new URL("../../../deploy/policies/capabilities.json", import.meta.url), "utf8"));
 
 test("the manifest's bulk threshold is spec §10.2's 20, and a hold outlasts a job", () => {
   checkManifest(M);

@@ -367,7 +367,9 @@ export class Store {
     return r.rowCount === 1;
   }
   // Applies one observation (route.mjs observe) and the outcome counters in one transaction. The table holds at
-  // most routing.maxRecords rows: a new row past the limit removes the least recently updated ones.
+  // most routing.maxRecords rows: a new row past the limit removes the least recently updated ones. last_reason
+  // keeps the reason of the last change to what the record decides (the preference, the challenge count, the browser
+  // start); an extension of an existing preference leaves it, so the record still says why the preference exists.
   async learnRoute(domain, obs, routing, { success = null, failureClass = null } = {}) {
     return this.#tx(async (c) => {
       const cur = (await c.query("SELECT * FROM fcpi_retrieval.domain_route WHERE domain = $1 FOR UPDATE", [domain])).rows[0] ?? null;
@@ -386,7 +388,8 @@ export class Store {
            last_failure_class = EXCLUDED.last_failure_class, last_reason = COALESCE(EXCLUDED.last_reason, fcpi_retrieval.domain_route.last_reason), updated_at = now()
          RETURNING *`,
         [domain, next.preferred ?? null, next.set_at ?? null, next.expires_at ?? null, next.probe_at ?? null, next.challenges ?? 0, next.js_count ?? 0, next.prefer_browser === true,
-          next.browser_expires_at ?? null, next.successes ?? 0, next.failures ?? 0, next.last_success_at ?? null, next.last_failure_at ?? null, next.last_failure_class ?? null, change?.reason ?? null])).rows[0];
+          next.browser_expires_at ?? null, next.successes ?? 0, next.failures ?? 0, next.last_success_at ?? null, next.last_failure_at ?? null, next.last_failure_class ?? null,
+          change && ["preferred", "challenges", "prefer_browser", "js_count"].some((k) => k in change) ? change.reason : null])).rows[0];
       if (!cur) await c.query("DELETE FROM fcpi_retrieval.domain_route WHERE domain IN (SELECT domain FROM fcpi_retrieval.domain_route ORDER BY updated_at DESC OFFSET $1)", [routing.maxRecords]);
       return { row, change };
     });

@@ -85,7 +85,9 @@ const CHALLENGE = page("Just a moment...", `<div id="challenge-running"></div><s
 // no "</script>" of its own: to the classifier it is only a script shell, as a real one would be.
 const SHELL = (html) => `<!doctype html><html><head><meta charset="utf-8"><title>Loading</title></head><body><div id="root"></div><script>document.getElementById("root").outerHTML = atob("${Buffer.from(html).toString("base64")}");</script></body></html>`;
 
-// The targets, on every m6*.fixture.fcpi.test name (and searchr, the residential fixture search engine).
+// The targets, on every m6*.fixture.fcpi.test name (and searchr, the residential fixture search engine). Each name
+// has a job of its own in the evidence (m6esc for escalation, m6learn for learning, m6cool for a cooldown, m6pace
+// for pacing, m6bulk for bulk jobs, m6hard as the proxy-first domain), so one case's learning never steers another.
 export function makeTarget(state) {
   return http.createServer((req, res) => {
     const via = state.proxiedPorts.has(req.socket.remotePort) ? "proxy" : "direct";

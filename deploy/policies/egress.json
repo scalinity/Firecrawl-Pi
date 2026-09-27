@@ -53,6 +53,7 @@
     { "host": "m6learn.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "m6bulk.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "m6cool.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m6esc.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "searchr.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "proxy.fixture.fcpi.test", "port": 8081, "cidr": "10.231.3.0/24", "limits": "fixture" }
   ],

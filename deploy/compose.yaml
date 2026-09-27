@@ -762,7 +762,7 @@ services:
     networks:
       fixture:
         aliases: [m6.fixture.fcpi.test, m6pace.fixture.fcpi.test, m6hard.fixture.fcpi.test, m6learn.fixture.fcpi.test, m6bulk.fixture.fcpi.test,
-          m6cool.fixture.fcpi.test, searchr.fixture.fcpi.test, proxy.fixture.fcpi.test]
+          m6cool.fixture.fcpi.test, m6esc.fixture.fcpi.test, searchr.fixture.fcpi.test, proxy.fixture.fcpi.test]
     logging: *logging-dep
 
 networks:
