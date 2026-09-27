@@ -27,7 +27,7 @@ import { makePublicResolver } from "./resolve.mjs";
 import { ProxySessions, startProxy } from "./proxy.mjs";
 import { makeBrowserClient } from "./browser.mjs";
 import { makeAcquirer, makeFetcher, makeUrlHmac, domainOf } from "./acquire.mjs";
-import { makeResidential, Meter } from "./residential.mjs";
+import { makeResidential } from "./residential.mjs";
 import { reconcileDay } from "./reconcile.mjs";
 import { makeSearcher } from "./search.mjs";
 import { makeModelAdapter, makeExtractor, ExtractionFailure } from "./extract.mjs";
@@ -94,17 +94,7 @@ const urlHmac = makeUrlHmac(createHmac("sha256", readSecret(env.credentialsDir, 
 // maximum reserved first and settled at the bytes it carried, under a session sticky per host for ten minutes; when
 // the residential route cannot be had the request is refused (PROXY_REQUIRED), never sent from the home connection.
 const searchSessions = new ProxySessions();
-async function searchUpstream(t) {
-  if (basePolicy.search.engineRoutes[t.host] !== "residential") return null;
-  const bytes = budget.proxying.maxTunnelBytes;
-  const st = await residential.availability(bytes);
-  if (!st.available) throw new Denied("PROXY_REQUIRED", `engine host ${t.host} is routed residential, and the residential route is unavailable (${st.reason})`);
-  const window = Math.floor(Date.now() / 600000);
-  const r = await residential.reserve(st, { callKey: `proxy:search:${randomUUID()}`, logicalId: `search:${urlHmac(t.host)}:${window}`, bytes });
-  if (r.failure) throw new Denied(r.failure.class, `engine host ${t.host}: ${r.failure.detail}`);
-  const meter = new Meter(bytes), sessionId = urlHmac(`fcpi.residential.search.v1|${t.host}|${window}`).slice(0, 24);
-  return { ...residential.leg(st, { meter, sessionId, deadline: Date.now() + 15000 }), done: () => residential.settle(st, r.reservation, meter, `search tunnel to ${t.host}`) };
-}
+const searchUpstream = residential.searchUpstream({ engineRoutes: basePolicy.search.engineRoutes, liveHosts: basePolicy.search.engineHosts.live, key: urlHmac });
 searchSessions.fixed("searxng", parseSha256(readSecret(env.credentialsDir, "retrieval_searxng_proxy_sha256"), "retrieval_searxng_proxy_sha256"), {
   fixture: () => selection.search === "fixture",
   allow: (t) => (selection.search === "fixture" ? !!t.fixture : !t.fixture && basePolicy.search.engineHosts.live.some((h) => hostMatches(t.host, h))),

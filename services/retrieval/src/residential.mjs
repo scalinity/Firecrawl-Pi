@@ -32,7 +32,7 @@ import { Duplex } from "node:stream";
 import { randomUUID } from "node:crypto";
 import { Breaker, rateCardFor, proxyCost, periodStarts } from "./budget.mjs";
 import { readCredential } from "./provider.mjs";
-import { parseTarget, Denied } from "./ssrf.mjs";
+import { parseTarget, Denied, hostMatches } from "./ssrf.mjs";
 import { resolveTarget } from "./resolve.mjs";
 import { sessionUsername } from "./route.mjs";
 import { transportFailure } from "./httpfetch.mjs";
@@ -295,7 +295,31 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     };
   }
 
-  return { state, availability, reserve, settle, markUncertain, tunnel, leg, via, breakerState: (name) => breakerFor(name).state(), breakers: () => Object.fromEntries([...breakers].map(([k, b]) => [k, b.state()])) };
+  // SearXNG's search proxy asks this for each engine host (M5's F11): null for a direct connection, or a leg of its own
+  // per tunnel, its maximum reserved first and settled at the bytes it carried (done), under a session sticky per host
+  // for ten minutes; a host that must go residential and cannot is refused (PROXY_REQUIRED), never sent from the home
+  // connection. A host's route is looked up as the proxy's allow-list matches hosts, and a live engine host the policy
+  // does not name goes residential, the safe side (review S4).
+  function searchUpstream({ engineRoutes, liveHosts, key }) {
+    const routeOf = (host) => {
+      const named = Object.entries(engineRoutes).find(([h]) => hostMatches(host, h));
+      if (named) return named[1];
+      return liveHosts.some((h) => hostMatches(host, h)) ? "residential" : "direct";
+    };
+    return async (t) => {
+      if (routeOf(t.host) !== "residential") return null;
+      const bytes = getBudget().proxying.maxTunnelBytes;
+      const st = await availability(bytes);
+      if (!st.available) throw new Denied("PROXY_REQUIRED", `engine host ${t.host} is routed residential, and the residential route is unavailable (${st.reason})`);
+      const window = Math.floor(Date.now() / 600000);
+      const r = await reserve(st, { callKey: `proxy:search:${randomUUID()}`, logicalId: `search:${key(t.host)}:${window}`, bytes });
+      if (r.failure) throw new Denied(r.failure.class, `engine host ${t.host}: ${r.failure.detail}`);
+      const meter = new Meter(bytes), sessionId = key(`fcpi.residential.search.v1|${t.host}|${window}`).slice(0, 24);
+      return { ...leg(st, { meter, sessionId, deadline: Date.now() + 15000 }), done: () => settle(st, r.reservation, meter, `search tunnel to ${t.host}`) };
+    };
+  }
+
+  return { state, availability, reserve, settle, markUncertain, tunnel, leg, via, searchUpstream, breakerState: (name) => breakerFor(name).state(), breakers: () => Object.fromEntries([...breakers].map(([k, b]) => [k, b.state()])) };
 }
 
 // A session id for one logical acquisition: letters and digits only, stable across its attempts, and not the
