@@ -85,6 +85,9 @@ test("captures become owner-bound artifacts with the PNG's own dimensions; a cli
   assert.deepEqual([out[0].width, out[0].height, out[0].truncated], [1280, 800, false]);
   assert.deepEqual([out[1].width, out[1].height, out[1].truncated], [1280, 20000, true]);
   assert.ok(rows.every((r) => r.principal === "owner"));
+  // A page that understated its height is still marked clipped: the image is at the clip height (review S6).
+  const liar = await storeCaptures({ screenshot: `data:image/png;base64,${tall.toString("base64")}` }, { principal: "owner", origin: "https://gw.example", archive, store, quotaBytes: 1e9 });
+  assert.equal(liar[0].truncated, true);
   await assert.rejects(storeCaptures({ screenshot: "data:image/png;base64,QUJD" }, { principal: "o", origin: "x", archive, store, quotaBytes: 1e9 }), (e) => e.code === "CAPTURE_INVALID");
   await assert.rejects(storeCaptures({ screenshot: `data:image/png;base64,${shot.toString("base64")}` }, { principal: "o", origin: "x", archive, store, quotaBytes: 10 }), (e) => e.code === "STORAGE_QUOTA");
 });

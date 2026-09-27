@@ -9,6 +9,8 @@ import { randomUUID } from "node:crypto";
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const DATA_URL = /^data:(image\/png)((?:;[a-z-]+=[a-z0-9-]+)*);base64,([A-Za-z0-9+/]*={0,2})$/;
 export const ARTIFACT_MAX_BYTES = 10 * 1048576;
+// The browser worker clips a full-page capture at this height (services/browser/src/server.mjs).
+export const CAPTURE_MAX_HEIGHT = 20000;
 
 // The PNG's width and height from its IHDR chunk, or null when the bytes are not a PNG.
 export function pngSize(buf) {
@@ -42,7 +44,10 @@ export async function storeCaptures(doc, { principal, origin, archive, store, qu
     if (used + c.buf.length > quotaBytes || !(await archive.hasRoom(c.buf.length))) throw Object.assign(new Error("the result store is at its quota or free-space floor"), { code: "STORAGE_QUOTA" });
     const put = await archive.put(c.buf);
     used += put.bytes;
-    const row = await store.addArtifact({ id: randomUUID(), principal, sha256: put.sha256, bytes: put.bytes, mime: c.mime, width: size.width, height: size.height, truncated: c.truncated });
+    // The page reports its own height to the worker, so a hostile one could hide a clip: an image at the clip height is
+    // marked truncated whatever the page said (review S6).
+    const truncated = c.truncated || size.height >= CAPTURE_MAX_HEIGHT;
+    const row = await store.addArtifact({ id: randomUUID(), principal, sha256: put.sha256, bytes: put.bytes, mime: c.mime, width: size.width, height: size.height, truncated });
     const url = `${origin}/platform/v1/artifacts/${row.id}`;
     slot.set(url);
     out.push({ source: slot.source, url, id: row.id, mime: row.mime, bytes: row.bytes, width: row.width, height: row.height, truncated: row.truncated, sha256: row.sha256,
