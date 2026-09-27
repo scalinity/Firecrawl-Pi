@@ -149,6 +149,7 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
           return e.code === "CANCELLED" ? failure("CANCELLED", "the caller cancelled the acquisition") : failure("PROVIDER_UNREACHABLE", e.message, { retryable: true, provider: true });
         }
         await store.markBudgetUncertain(res.id, `${e.code}: ${e.message}`);
+        log({ event: "enhanced", logical_id: logicalId, provider: st.providerName, subject: st.subject, mode, provider_status: null, provider_request_id: null, ms: Date.now() - started, outcome: "UNCERTAIN", error: e.code });
         return failure("ENHANCED_UNCERTAIN", `the enhanced request may have been processed and no answer came (${e.code}); its ${amount} micro-USD stay reserved and it is not sent again`, { provider: true });
       }
       const requestId = String(resp.headers["zyte-request-id"] ?? resp.headers["x-request-id"] ?? "").slice(0, 128) || null;
