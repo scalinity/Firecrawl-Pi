@@ -226,7 +226,7 @@
     "admission": { "maxOpenJobs": 20, "maxOpenUnits": 500, "activeUpstreamJobs": 1, "maxSyncInFlight": 4, "maxStatusReadsInFlight": 2 },
     "results": { "pageDefaultLimit": 100, "pageMaxLimit": 100, "pageMaxBytes": 10485760, "retentionDays": 7, "metadataDays": 30, "idempotencyHours": 24, "archiveResponseMaxBytes": 16777216 },
     "cache": { "lifetimeSeconds": 3600 },
-    "extras": { "responseMaxBytes": 33554432, "inFlight": 1 },
+    "extras": { "responseMaxBytes": 25165824, "inFlight": 1 },
     "webhooks": { "maxAttempts": 5, "retryBaseSeconds": 10, "pollSeconds": 5, "signature": "x-fcpi-signature: v1=HMAC-SHA256(secret, <x-fcpi-timestamp>.<x-fcpi-event-id>.<body>), hex", "receiverGuidance": "verify the signature; refuse a timestamp more than 300 s from your clock; acknowledge an event id already seen without acting again (delivery is at least once)" },
     "auth": { "failuresPerMinute": 30 }
   },

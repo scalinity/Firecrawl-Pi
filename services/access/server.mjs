@@ -426,7 +426,8 @@ async function cachedScrape(ctx, route, body) {
 }
 
 // M7: a scrape with a screenshot or actions (spec §12). Its answer carries the captures, so it is buffered (at most
-// limits.extras.responseMaxBytes, limits.extras.inFlight at a time, within the gateway's memory) and every capture is
+// limits.extras.responseMaxBytes: the worker's 16 MiB of captures as base64 and the page, limits.extras.inFlight at a
+// time, within the gateway's memory; measured with the incompressible fixture, review W10) and every capture is
 // stored as an artifact of the caller's principal before the answer leaves; it is never cached.
 async function scrapeWithExtras(ctx, route, body) {
   if (extrasInFlight >= L.extras.inFlight || syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
@@ -436,8 +437,9 @@ async function scrapeWithExtras(ctx, route, body) {
     try { r = await upstream.call("POST", route.path, { body: coreBody(ctx, route, body), timeoutMs: cfg.coreTimeoutMs, maxBytes: L.extras.responseMaxBytes }); }
     catch (e) {
       // Never 502 for the gateway's own failure: a client library retries 502 by resubmitting.
+      // An answer past the bound will be past it again: 422, not a status that invites the same scrape once more.
       const code = e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : e.code === "TOO_LARGE" ? "RESULT_TOO_LARGE" : "UPSTREAM_UNAVAILABLE";
-      return ctx.send(e.code === "TIMEOUT" ? 504 : 503, { success: false, code, error: code === "RESULT_TOO_LARGE" ? `The answer with its captures exceeds ${L.extras.responseMaxBytes} bytes.` : "The core did not answer." });
+      return ctx.send(e.code === "TIMEOUT" ? 504 : e.code === "TOO_LARGE" ? 422 : 503, { success: false, code, error: code === "RESULT_TOO_LARGE" ? `The answer with its captures exceeds ${L.extras.responseMaxBytes} bytes.` : "The core did not answer." });
     }
     if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 503 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
     let artifacts;

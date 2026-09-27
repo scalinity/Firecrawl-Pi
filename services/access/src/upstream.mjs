@@ -39,10 +39,17 @@ export function makeUpstream(cfg) {
           if (size > maxBytes) { done(reject, new UpstreamError(`upstream response exceeds ${maxBytes} bytes`, { delivered: true, code: "TOO_LARGE" })); res.destroy(); } else chunks.push(c);
         });
         res.on("end", () => {
-          const buf = Buffer.concat(chunks);
+          // The chunks, then the joined buffer, are let go before the parse, so an answer is held at most twice at once
+          // (text and parsed object), not four times (review W10).
+          let buf = Buffer.concat(chunks, size);
+          chunks.length = 0;
+          const bytes = buf.length;
+          let text = bytes ? buf.toString("utf8") : null;
+          buf = null;
           let json = null;
-          try { json = buf.length ? JSON.parse(buf.toString("utf8")) : null; } catch { /* not JSON */ }
-          done(resolve, { status: res.statusCode, json, bytes: buf.length });
+          try { json = text ? JSON.parse(text) : null; } catch { /* not JSON */ }
+          text = null;
+          done(resolve, { status: res.statusCode, json, bytes });
         });
         res.on("error", (e) => done(reject, new UpstreamError(e.message, { delivered: true, code: "RESET" })));
         res.on("aborted", () => done(reject, new UpstreamError("upstream response aborted", { delivered: true, code: "RESET" })));

@@ -255,6 +255,9 @@ async function fixturePhase(before) {
   await shot("full_page", `/bands?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }] });
   const tall = await shot("full_page_clipped", `/tall?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }] });
   await shot("actions", `/actions?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "wait", selector: "#arrived" }, { type: "click", selector: "#more" }, { type: "scroll", direction: "down" }, { type: "scrape" }, { type: "screenshot" }] });
+  // The extras bound, measured: two captures of incompressible pixels, near the worker's 16 MiB of captures (review W10).
+  await shot("noise_worst_case", `/noise?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }], actions: [{ type: "screenshot" }] });
+  resources("extras-worst-case");
   await shot("samehost_click", `/samehost?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "click", selector: "#next" }, { type: "wait", milliseconds: 500 }, { type: "scrape" }] });
   await shot("offhost_click", `/offhost?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "click", selector: "#away" }, { type: "scrape" }] });
   // Refused before any work: outside the subset, past its bounds.
