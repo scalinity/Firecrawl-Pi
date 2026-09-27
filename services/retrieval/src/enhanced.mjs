@@ -165,7 +165,7 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
         }
         await store.markBudgetUncertain(res.id, `${e.code}: ${e.message}`);
         log({ event: "enhanced", logical_id: logicalId, provider: st.providerName, subject: st.subject, mode, provider_status: null, provider_request_id: null, ms: Date.now() - started, outcome: "UNCERTAIN", error: e.code });
-        return failure("ENHANCED_UNCERTAIN", `the enhanced request may have been processed and no answer came (${e.code}); its ${amount} micro-USD stay reserved and it is not sent again`, { provider: true });
+        return { ...failure("ENHANCED_UNCERTAIN", `the enhanced request may have been processed and no answer came (${e.code}); its ${amount} micro-USD stay reserved and it is not sent again`, { provider: true }), charge: { state: "UNCERTAIN", reserved: amount, actual: null } };
       }
       const requestId = String(resp.headers["zyte-request-id"] ?? resp.headers["x-request-id"] ?? "").slice(0, 128) || null;
       const say = (o) => log({ event: "enhanced", logical_id: logicalId, provider: st.providerName, subject: st.subject, mode, provider_status: resp.status, provider_request_id: requestId, ms: Date.now() - started, ...o });
@@ -175,7 +175,7 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
           verdict = "failure";
           await store.markBudgetUncertain(res.id, `the provider answered ${resp.status}`);
           say({ outcome: "UNCERTAIN" });
-          return failure("ENHANCED_UNCERTAIN", `the enhanced provider answered HTTP ${resp.status}; whether it ran is unknown, so its ${amount} micro-USD stay reserved`, { provider: true });
+          return { ...failure("ENHANCED_UNCERTAIN", `the enhanced provider answered HTTP ${resp.status}; whether it ran is unknown, so its ${amount} micro-USD stay reserved`, { provider: true }), charge: { state: "UNCERTAIN", reserved: amount, actual: null } };
         }
         const [cls, detail, v, retryable] = free;
         verdict = v;

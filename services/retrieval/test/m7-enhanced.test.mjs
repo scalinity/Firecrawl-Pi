@@ -178,6 +178,8 @@ test("a request with no answer leaves its charge UNCERTAIN and the page's dispat
     const d = await enhanced.dispatch({ logicalId: "silent", target, url: at(fx, "/article"), mode: "browser", deadline: Date.now() + 30000 });
     assert.equal(d.failure.class, "ENHANCED_UNCERTAIN");
     assert.equal(store.ledger.rows.get("enhanced:silent").state, "UNCERTAIN");
+    // The charge travels with the failure: the acquisition's record counts the reservation, not zero (review W4).
+    assert.deepEqual(d.charge, { state: "UNCERTAIN", reserved: 16080, actual: null });
     fx.state.mode = "ok";
     const calls = fx.state.calls.length;
     const again = await enhanced.dispatch({ logicalId: "silent", target, url: at(fx, "/article"), mode: "browser", deadline: Date.now() + 30000 });
@@ -189,6 +191,17 @@ test("a request with no answer leaves its charge UNCERTAIN and the page's dispat
     assert.equal(store.ledger.rows.get("enhanced:garbled").state, "SETTLED");
     assert.equal(store.ledger.rows.get("enhanced:garbled").actual, 1270);
   } finally { await fx.close(); }
+  const fx2 = await startM7();
+  try {
+    const { acquire, logs } = rig(fx2, { mutate: (b) => { b.enhancing.requestTimeoutMs = 1500; } });
+    fx2.state.mode = "blackhole";
+    const r = await acquire(req(at(fx2, "/article"), { route: "enhanced" }));
+    assert.equal(r.failure.class, "ENHANCED_UNCERTAIN");
+    assert.equal(r.costEstimate, 0.00127, "the uncertain reservation is the acquisition's cost");
+    const line = logs.filter((l) => l.event === "acquisition").at(-1);
+    assert.equal(line.enhanced_state, "UNCERTAIN");
+    assert.equal(line.enhanced_micro_usd, 1270);
+  } finally { await fx2.close(); }
 });
 
 test("the tier's refusals come before any reservation: no credential, a paid provider without paid dispatch, a zero cap, no enhancer", async () => {
