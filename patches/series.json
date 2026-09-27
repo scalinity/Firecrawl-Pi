@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "7ff39ea66087d072c51f7652406ac136045325d9",
-  "series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
+  "result_tree": "6c27ad04a656824bdc2c5b39362aa5acd4f9b82e",
+  "series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -138,6 +138,23 @@
       "tests": [
         "M6-R01 routes through the core",
         "M6-B01 a bulk crawl's pages on the residential route"
+      ]
+    },
+    {
+      "file": "0010-enhanced-route-browser-extras-and-owner.patch",
+      "sha256": "ba5886138f2100b8aeefa75ea4c3b489c1a6c6c815053c3498e53f13be34f800",
+      "reason": "The enhanced proxy option was refused and screenshots and actions were unregistered, so M7 could offer neither (spec §11, §12); an engine result with target status 401, 403 or 429 would start upstream's AddFeatureError retry outside the page's budget; and the parse cache's owner was the core's single team id (M5 review S1).",
+      "symbols": [
+        "apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts piResilientFeatures (actions, screenshot served), hooksFor (new), scrapeURLWithPiResilient (enhanced route, hooks sent, captures returned, 401/403/429 refused, principal from fcpiOwner)",
+        "apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts fcpiOwnerOf (new)",
+        "apps/api/src/main/runWebScraper.ts startWebScraperPipeline (internalOptions.fcpiOwner)",
+        "apps/api/src/scraper/scrapeURL/index.ts InternalOptions (fcpiOwner)",
+        "apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts askParser (x-fcpi-owner)"
+      ],
+      "tests": [
+        "M7-E01 the waterfall through the core ends at one enhanced dispatch",
+        "M7-B01 screenshots and actions through the core",
+        "M7-C02 the parse cache is owner-scoped"
       ]
     }
   ],

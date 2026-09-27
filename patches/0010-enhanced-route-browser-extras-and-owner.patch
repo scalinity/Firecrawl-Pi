@@ -1,0 +1,279 @@
+fcpi patch 0010: enhanced route, browser extras and the principal's owner tag (FIRECRAWL_PI_SPEC.md §11, §12, §21.3)
+Upstream 7666c1f9, after 0001-0009. The pi-resilient adapter accepts the enhanced proxy option and sends it as the
+acquisition's route; registers the screenshot and actions features, sends them to the retrieval service held to the
+safe subset, and returns each capture as a data URL for the gateway to store as an artifact; refuses any result that
+carries target status 401, 403 or 429, so upstream's AddFeatureError retry cannot start outside the page's budget; and
+reports the enhanced strategy as proxyUsed stealth. runWebScraper carries the gateway's owner tag from the job's origin
+into internalOptions.fcpiOwner, which the adapter sends as the acquisition's principal and the PDF engine as the
+parse request's owner (M5 review S1).
+
+diff --git a/apps/api/src/main/runWebScraper.ts b/apps/api/src/main/runWebScraper.ts
+index c52d15f..5f5436a 100644
+--- a/apps/api/src/main/runWebScraper.ts
++++ b/apps/api/src/main/runWebScraper.ts
+@@ -4,6 +4,7 @@ import { configDotenv } from "dotenv";
+ import { scrapeURL, ScrapeUrlResponse } from "../scraper/scrapeURL";
+ import type { NuQJob } from "../services/worker/nuq";
+ import { CostTracking } from "../lib/cost-tracking";
++import { fcpiOwnerOf } from "../scraper/scrapeURL/engines/pi-resilient/fetch";
+ configDotenv();
+ 
+ export async function startWebScraperPipeline({
+@@ -31,6 +32,11 @@ export async function startWebScraperPipeline({
+       ...job.data.internalOptions,
+       // In-flight jobs enqueued before orgId existed may omit it.
+       orgId: job.data.internalOptions?.orgId ?? null,
++      // fcpi: the principal's tag the gateway wrote into the origin (a batch page carries it in
++      // its scrapeOptions), for the retrieval service's owner-scoped caches.
++      fcpiOwner: fcpiOwnerOf(
++        job.data.origin ?? (job.data.scrapeOptions as { origin?: unknown })?.origin,
++      ),
+     },
+     team_id: job.data.team_id,
+     bull_job_id: job.id,
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts b/apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts
+index 875101b..e081677 100644
+--- a/apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts
++++ b/apps/api/src/scraper/scrapeURL/engines/pdf/piResilient.ts
+@@ -106,7 +106,7 @@ async function askParser(
+         authorization: `Bearer ${config.PI_RETRIEVAL_TOKEN}`,
+         "content-type": "application/pdf",
+         "x-fcpi-logical-id": `doc:${meta.id}`,
+-        "x-fcpi-owner": String(meta.internalOptions.teamId ?? ""),
++        "x-fcpi-owner": meta.internalOptions.fcpiOwner ?? "",
+         "x-fcpi-pages": String(pages),
+         "x-fcpi-reason": reason,
+       },
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts
+index 7f82192..40f4eff 100644
+--- a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts
++++ b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/fetch.ts
+@@ -81,3 +81,12 @@ export async function piFetch(
+   });
+   return out;
+ }
++
++// fcpi (M7; M5 review S1): the gateway's tag for the client's principal (16 hex digits), which it
++// writes into each job's origin as "fcpi:<tag>:..."; runWebScraper carries it to the adapter and
++// the parser request as internalOptions.fcpiOwner, for the retrieval service's owner-scoped caches.
++export function fcpiOwnerOf(origin: unknown): string | undefined {
++  return typeof origin === "string"
++    ? (/^fcpi:([0-9a-f]{16}):/.exec(origin)?.[1] ?? undefined)
++    : undefined;
++}
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
+index b582538..8bb68f6 100644
+--- a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
++++ b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
+@@ -14,20 +14,21 @@ import { AddFeatureError, PiRetrievalError } from "../../error";
+ import { specialtyScrapeCheck } from "../utils/specialtyHandler";
+ import { scrapePDF } from "../pdf";
+ import { scrapeDocument } from "../document";
++import { hasFormatOfType } from "../../../../lib/format-utils";
+ 
+ // Defined in ./fetch, a leaf module, so the download helpers can use it without an import cycle.
+ export { usePiResilient } from "./fetch";
+ 
+-// The features this deployment really serves. Screenshots and actions have result hooks in
+-// the retrieval and browser services but stay unregistered until M7; geo stays unregistered;
+-// skipTlsVerification is refused, because TLS is always verified (spec §9.2). The stealth proxy is
+-// the retrieval service's residential route (M6): the scrape's proxy option is sent as the
+-// acquisition's route, and the service decides egress under its policy.
++// The features this deployment really serves. Geo stays unregistered; skipTlsVerification is
++// refused, because TLS is always verified (spec §9.2). The stealth proxy is the retrieval service's
++// residential route (M6), and the enhanced proxy its enhanced provider (M7): the scrape's proxy
++// option is sent as the acquisition's route, and the service decides egress under its policy. M7:
++// screenshots and the safe action subset (hooksFor) are rendered by the service's browser worker.
+ export const piResilientFeatures: { [F in FeatureFlag]: boolean } = {
+-  actions: false,
++  actions: true,
+   waitFor: true,
+-  screenshot: false,
+-  "screenshot@fullScreen": false,
++  screenshot: true,
++  "screenshot@fullScreen": true,
+   pdf: true,
+   document: true,
+   audio: false,
+@@ -45,6 +46,59 @@ export const piResilientFeatures: { [F in FeatureFlag]: boolean } = {
+ // The service's own ceiling is 90 s from a logical page's first attempt (spec §9.3).
+ const MAX_ACQUISITION_MS = 90_000;
+ 
++// M7: the screenshot format and the page actions, held to the subset the retrieval service serves
++// (spec §12): wait, click, scroll, screenshot and scrape; a capture's quality, a viewport, clicking
++// every match, typing, key presses, scripts and PDFs are refused here by name, before anything is
++// acquired. The service checks the list again and bounds it (ten actions, 15 s of waiting).
++type Hook = { type: string; [k: string]: unknown };
++function hooksFor(meta: Meta): { screenshot: { fullPage: boolean } | null; actions: Hook[] } | null {
++  const refuse = (what: string) => {
++    throw new PiRetrievalError(
++      "UNSUPPORTED_CAPABILITY",
++      `${what} is not offered in this deployment; the action subset is wait, click, scroll, screenshot and scrape.`,
++    );
++  };
++  const shot = hasFormatOfType(meta.options.formats, "screenshot");
++  if (shot && (shot.quality !== undefined || shot.viewport !== undefined)) {
++    refuse("A screenshot's quality or viewport");
++  }
++  const actions = (meta.options.actions ?? []).map((a): Hook => {
++    switch (a.type) {
++      case "wait":
++        return a.selector !== undefined
++          ? { type: "wait", selector: a.selector }
++          : { type: "wait", milliseconds: a.milliseconds };
++      case "click":
++        if (a.all) refuse("Clicking every match");
++        return { type: "click", selector: a.selector };
++      case "scroll":
++        return {
++          type: "scroll",
++          direction: a.direction ?? "down",
++          ...(a.selector !== undefined ? { selector: a.selector } : {}),
++        };
++      case "screenshot":
++        if (a.quality !== undefined || a.viewport !== undefined) {
++          refuse("A screenshot's quality or viewport");
++        }
++        return { type: "screenshot", fullPage: a.fullPage === true };
++      case "scrape":
++        return { type: "scrape" };
++      default:
++        return refuse(`The ${a.type} action`) as never;
++    }
++  });
++  if (!shot && actions.length === 0) return null;
++  return { screenshot: shot ? { fullPage: shot.fullPage === true } : null, actions };
++}
++
++// A capture as the data URL the document carries; the gateway stores it as an owner-bound artifact
++// and replaces it with that artifact's address. A full-page capture clipped at 20,000 px says so
++// in a data URL parameter (RFC 2397), so it is never passed off as the whole page.
++type Capture = { mime: string; truncated: boolean; base64: string };
++const dataUrl = (c: Capture) =>
++  `data:${c.mime}${c.truncated ? ";truncated=true" : ""};base64,${c.base64}`;
++
+ function purposeOf(meta: Meta): "page" | "robots" | "sitemap" {
+   if (meta.internalOptions.teamId === "robots-txt") return "robots";
+   if (meta.internalOptions.teamId === "sitemap") return "sitemap";
+@@ -73,15 +127,23 @@ export async function scrapeURLWithPiResilient(
+     );
+   }
+ 
+-  // The route the retrieval service is asked for (FIRECRAWL_PI_SPEC.md §10.2): auto, basic
+-  // (direct only) or stealth (the residential route). Enhanced retrieval is not offered before M7.
++  // The route the retrieval service is asked for (FIRECRAWL_PI_SPEC.md §10.2, §11): auto, basic
++  // (direct only), stealth (the residential route) or enhanced (the enhanced provider alone, M7).
++  // Upstream adds the stealthProxy flag for "enhanced" as for "stealth" (scrapeURL/index.ts
++  // buildFeatureFlags), which this adapter serves, so the option reaches here unchanged.
+   const route = meta.options.proxy ?? "auto";
+-  if (route !== "auto" && route !== "basic" && route !== "stealth") {
++  if (
++    route !== "auto" &&
++    route !== "basic" &&
++    route !== "stealth" &&
++    route !== "enhanced"
++  ) {
+     throw new PiRetrievalError(
+       "UNSUPPORTED_CAPABILITY",
+       `The ${route} proxy is not offered in this deployment.`,
+     );
+   }
++  const hooks = hooksFor(meta);
+ 
+   const remaining = Math.min(
+     meta.abort.scrapeTimeout() ?? MAX_ACQUISITION_MS,
+@@ -99,7 +161,7 @@ export async function scrapeURLWithPiResilient(
+       purpose === "page"
+         ? meta.id
+         : `${meta.id}|${createHash("sha256").update(url).digest("hex").slice(0, 16)}`,
+-    principalId: meta.internalOptions.teamId ?? null,
++    principalId: meta.internalOptions.fcpiOwner ?? null,
+     jobId: meta.id,
+     crawlId: meta.internalOptions.crawlId ?? null,
+     url,
+@@ -114,6 +176,7 @@ export async function scrapeURLWithPiResilient(
+     waitFor: meta.options.waitFor ?? 0,
+     fast: meta.featureFlags.has("useFastMode"),
+     route,
++    ...(hooks ? { hooks } : {}),
+   };
+ 
+   let response: undici.Response;
+@@ -162,6 +225,8 @@ export async function scrapeURLWithPiResilient(
+     bodyBase64?: string;
+     bytes: number;
+     quality?: { verdict: string };
++    screenshot?: Capture | null;
++    actions?: { screenshots: Capture[]; scrapes: { url: string; html: string }[] } | null;
+     failure?: {
+       class: string;
+       detail: string;
+@@ -191,11 +256,23 @@ export async function scrapeURLWithPiResilient(
+     };
+     throw new PiRetrievalError(f.class, f.detail, f.retryable, f.retryAfter);
+   }
++  // An engine result with 401, 403 or 429 would start upstream's own AddFeatureError retry
++  // (scrapeURL/index.ts, isLikelyProxyError) outside the page's budget. The service never returns
++  // one as content; this refuses it all the same.
++  if ([401, 403, 429].includes(result.targetStatus)) {
++    throw new PiRetrievalError(
++      "RETRIEVAL_CONTRACT",
++      `The retrieval service returned target status ${result.targetStatus} as content.`,
++    );
++  }
+ 
+   const contentType = result.contentType ?? undefined;
+-  // Firecrawl's own field has two values: the residential route answered, or it did not. The
+-  // strategy itself (direct_http, residential_browser, …) is in the service's record.
+-  const proxyUsed: "basic" | "stealth" = result.finalStrategy?.startsWith("residential") ? "stealth" : "basic";
++  // Firecrawl's own field has two values: a proxied route answered, or it did not. The strategy
++  // itself (direct_http, residential_browser, enhanced, …) is in the service's record.
++  const proxyUsed: "basic" | "stealth" =
++    result.finalStrategy?.startsWith("residential") || result.finalStrategy === "enhanced"
++      ? "stealth"
++      : "basic";
+   // PDFs, documents and other binary types follow upstream's content-type rules; the file is
+   // the one this acquisition returned, handed to the parser as a prefetch.
+   if (result.bodyBase64 !== undefined) {
+@@ -232,12 +309,28 @@ export async function scrapeURLWithPiResilient(
+     );
+   }
+ 
++  if (hooks?.screenshot && !result.screenshot) {
++    throw new PiRetrievalError("BROWSER_ERROR", "The render returned no screenshot.");
++  }
+   return {
+     url: result.finalUrl,
+     html: result.body ?? "",
+     statusCode: result.targetStatus,
+     contentType,
+     proxyUsed,
++    ...(hooks?.screenshot && result.screenshot
++      ? { screenshot: dataUrl(result.screenshot) }
++      : {}),
++    ...(hooks && hooks.actions.length > 0
++      ? {
++          actions: {
++            screenshots: (result.actions?.screenshots ?? []).map(dataUrl),
++            scrapes: result.actions?.scrapes ?? [],
++            javascriptReturns: [],
++            pdfs: [],
++          },
++        }
++      : {}),
+   };
+ }
+ 
+diff --git a/apps/api/src/scraper/scrapeURL/index.ts b/apps/api/src/scraper/scrapeURL/index.ts
+index bd20271..db464a9 100644
+--- a/apps/api/src/scraper/scrapeURL/index.ts
++++ b/apps/api/src/scraper/scrapeURL/index.ts
+@@ -476,6 +476,8 @@ async function buildMetaObject(
+ export type InternalOptions = {
+   teamId: string;
+   crawlId?: string;
++  // fcpi: the gateway's tag for the client's principal, from the job's origin (runWebScraper).
++  fcpiOwner?: string;
+ 
+   priority?: number; // Passed along to fire-engine
+   forceEngine?: Engine | Engine[];
