@@ -550,7 +550,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; mcp tools=${cat?.tools?.length}; scrape proxy ${JSON.stringify(cat?.scrape_proxy_enum)}; actions ${JSON.stringify(cat?.scrape_actions)}` };
     } },
   L02: { name: "public-sample-documented", inputs: [`${RAW}e2e-live.txt`],
-    expected: "the declared public sample (twenty URLs over at least five domains, fixed in scripts/m7/e2e.mjs before any result) was requested once each through the production selection and every result is recorded with its outcome; the usable-retrieval rate is computed per class and in all, a result being usable when it returned 200 with markdown; the rate is documented as the tiers this deployment may use now, not a claim about the web",
+    expected: "the declared public sample (twenty URLs over at least five domains, fixed in scripts/m7/e2e.mjs before any result) was requested once each through the production selection, which the live phase set and recorded (live search, the budget's default proxy and enhancer), and every result is recorded with its outcome; the usable-retrieval rate is computed per class and in all, a result being usable when it returned 200 with markdown; the rate is documented as the tiers this deployment may use now, not a claim about the web",
     run() {
       const p = LIVE().public_sample ?? [];
       const d = one(p, "declared"), rs = p.filter((r) => r.case === "result");
@@ -561,7 +561,9 @@ const checks = {
       const why = (r) => (/Retrieval failed: ([A-Z_]+)\./.exec(r.error ?? "") ?? [])[1] ?? r.code ?? (r.status === 200 ? `markdown ${r.markdown_chars} chars` : `HTTP ${r.status}`);
       const fails = rs.filter((r) => !usable(r)).map((r) => `${new URL(r.url).hostname} (${r.class}): ${why(r)}`);
       const declaredUrls = (d.urls ?? []).map((u) => u.url);
-      const cond = { declared: declaredUrls.length === 20 && d.domains >= 5, all_recorded: rs.length === 20 && same(rs.map((r) => r.url), declaredUrls) };
+      const B = json("deploy/policies/budget.json"), sel = one(p, "selection");
+      const cond = { declared: declaredUrls.length === 20 && d.domains >= 5, all_recorded: rs.length === 20 && same(rs.map((r) => r.url), declaredUrls),
+        production: sel?.applied === true && sel.search === "live" && sel.proxy === B.proxying.defaultProxy && sel.enhanced === B.enhancing.defaultEnhancer };
       const total = rs.filter(usable).length;
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; usable ${total}/${rs.length} (${Math.round((100 * total) / Math.max(1, rs.length))}%); ${Object.entries(byClass).map(([k, v]) => `${k} ${v.usable}/${v.n}`).join(", ")}; not usable: ${fails.join(", ") || "none"}` };
     } },

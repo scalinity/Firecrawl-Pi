@@ -74,7 +74,9 @@ const jsonLog = (svc, since) => pi(`sudo -n docker logs ${since ? `--since ${sin
 const selection = () => JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show"));
 function select(search, model, parser, proxy, enhanced) {
   const r = pi(`bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh ${search} ${model} ${parser} ${proxy} ${enhanced}`).trim();
-  out("selection", { search, model, parser, proxy, enhanced, applied: /^selection applied/.test(r) });
+  const applied = /^selection applied/.test(r);
+  out("selection", { search, model, parser, proxy, enhanced, applied });
+  return applied;
 }
 // A fixture's control port, inside its container (the only place it is served).
 const ctl = (svc, method, path) => JSON.parse(D(`exec ${cname(svc)} node -e "fetch('http://127.0.0.1:8082${path}',{method:'${method}'}).then(r=>r.text()).then(t=>process.stdout.write(t))"`));
@@ -507,7 +509,10 @@ async function livePhase(before) {
     out("live_enhanced", { case: "permitted_target", ...brief(r), markdown: (docOf(r)?.markdown ?? "").slice(0, 200), proxyUsed: docOf(r)?.metadata?.proxyUsed ?? null,
       ledger: sql(`SELECT row_to_json(r) FROM (SELECT provider, subject, reserved, actual, state, usage FROM fcpi_retrieval.budget_reservation WHERE kind = 'enhanced' AND provider = 'zyte' AND created_at >= :'since') r`, { since }).map((l) => JSON.parse(l)) });
   }
-  // The public sample, through the production selection as the owner left it.
+  // The public sample, through the production selection: live search and the budget's default proxy and enhancer, set
+  // here rather than taken as found, since a run cut off before its restore can leave the fixture selection behind.
+  const prod = { search: "live", proxy: BUDGET.proxying?.defaultProxy ?? "none", enhanced: BUDGET.enhancing?.defaultEnhancer ?? "none" };
+  out("public_sample", { case: "selection", ...prod, applied: select(prod.search, MODEL, PARSER, prod.proxy, prod.enhanced) });
   out("public_sample", { case: "declared", urls: SAMPLE.map(([c, url]) => ({ class: c, url })), domains: [...new Set(SAMPLE.map(([, u]) => new URL(u).hostname.replace(/^www\./, "")))].length });
   for (const [cls, url] of SAMPLE) {
     const r = await scrape(url, { formats: ["markdown"] });
