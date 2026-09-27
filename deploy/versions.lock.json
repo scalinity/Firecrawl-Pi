@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-27T03:01:05Z",
-  "generated_by": "scripts/m6/build-lock.mjs (M6), from the lock M5 closed with at e08c31f; entries owned by later milestones are as M5 wrote them",
-  "repository_sha": "8530c3d1c8d09f3ac2088f990dd36c3d8b3ffeaf",
+  "generated_utc": "2026-09-27T09:09:22Z",
+  "generated_by": "scripts/m7/build-lock.mjs (M7), from the lock M6 closed with at 0318b6e; entries owned by later milestones are as M6 wrote them",
+  "repository_sha": "5af987aafc1ffb069a4e853b40732c8f9777e0b4",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -529,12 +529,12 @@
       "status": "selected"
     },
     "firecrawl_api_patched": {
-      "role": "The API image the stack runs: the pinned commit with patches/ applied; since M6 patch 0009 carries the scrape's proxy option to the retrieval service as the acquisition's route",
+      "role": "The API image the stack runs: the pinned commit with patches/ applied; since M7 patch 0010 carries the enhanced route, screenshots and the action subset, and the principal's owner tag",
       "status": "selected",
-      "image_id": "sha256:5d503ca05aabc737a817cfb978ca5c07936249da0c535b64c9f7849f1950c2ec",
+      "image_id": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
       "platform": "linux/arm64",
       "source_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "patch_series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
       "runtime_configuration": {
         "NUQ_WORKER_COUNT": "1",
         "USE_DB_AUTHENTICATION": "false",
@@ -548,17 +548,17 @@
       }
     },
     "retrieval": {
-      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, and since M6 the residential proxy route, domain routing and proxy reconciliation",
+      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, and since M7 the enhanced provider, the browser extras and webhook delivery",
       "status": "selected",
-      "image_id": "sha256:6221e27c00afb4bf6198f9aacbdb66361fdb40e73d64736054ed5cf4367a5da6",
+      "image_id": "sha256:9c92d952c5701a35302614250d2cfd067a79c9c5a2c473bbceef2e83fb84651a",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "7ccd57a22212dd1b3d6d57b4ba93ca57c66912ad587e6af370818ef8986bb8cd"
       },
-      "evidence": "evidence/M6/raw/image-build.txt",
+      "evidence": "evidence/M7/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "8661527109b6b8716368b7f3bf9274be3ed8168c",
+      "built_from_commit": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -631,24 +631,35 @@
       }
     },
     "browser_worker": {
-      "role": "The browser-worker image (built on the Pi, natively linux/arm64)",
+      "role": "The browser-worker image (built on the Pi, natively linux/arm64), with the action subset and screenshots since M7",
       "status": "selected",
-      "image_id": "sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c",
+      "image_id": "sha256:6e3dd0270177b56a758f966e2ee32c37488ca03c33e77d0b62f5cfe3c02419f2",
       "platform": "linux/arm64",
       "base_manifest_digest": "sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717",
       "dockerfile": {
         "path": "deploy/browser/Dockerfile",
-        "sha256": "aa4317b5311b60763a4c3550e69817ddcc421ad5f701a0982afd3d4b15319d79"
+        "sha256": "96d50e27cba176c763d6daf99f9a26ccf1867a353f30706787e7fe3ad7ddb78f"
       },
-      "evidence": "evidence/M2/raw/service-build.txt"
+      "evidence": "evidence/M7/raw/image-build.txt",
+      "built_from_commit": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
+      "lockfile": {
+        "path": "services/browser/package-lock.json",
+        "sha256": "19ed0b8e6471eec482f1b5af8e18aea02536590382b580a9719b5fe027c8d5a8"
+      },
+      "packages": {
+        "playwright-core": {
+          "version": "1.63.0",
+          "integrity": "sha512-rYCsBF/M5HjUch52bbtVONEFjv6Xu8sm8h72dNlR5bzIE1fvC/bxgspzkjSfU+MweEMmPM8KJebG6nnyxo5mCg=="
+        }
+      }
     },
     "access_gateway": {
-      "role": "The access gateway image (built on the Pi, natively linux/arm64), with bulk jobs' residential route and route holds since M6",
+      "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection and the webhook outbox since M7",
       "status": "selected",
-      "image_id": "sha256:c8b7848e56310101f46bec518fece42d71aeca2c2dba769f0c60a65f33300b5c",
+      "image_id": "sha256:55a69dfa9368698117edaf7a5deec3143f6cdb6fdff96b2d9ca1c0ae9300b4fb",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "8661527109b6b8716368b7f3bf9274be3ed8168c",
+      "built_from_commit": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -715,15 +726,15 @@
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
         }
       },
-      "evidence": "evidence/M6/raw/image-build.txt"
+      "evidence": "evidence/M7/raw/image-build.txt"
     },
     "mcp_gateway": {
-      "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tools offer the stealth proxy option since M6",
+      "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tool offers the action subset, the screenshot format and the cache options since M7",
       "status": "selected",
-      "image_id": "sha256:da62ede10123a60531e6fae6ce5843ccadb578afcebd35b59d3f17d334f09673",
+      "image_id": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "8661527109b6b8716368b7f3bf9274be3ed8168c",
+      "built_from_commit": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
@@ -758,7 +769,7 @@
           "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="
         }
       },
-      "evidence": "evidence/M6/raw/image-build.txt"
+      "evidence": "evidence/M7/raw/image-build.txt"
     },
     "fixture_m6": {
       "role": "M6's controlled residential proxy and targets (tests/fixtures/m6), on the internal fixture network only",
@@ -770,6 +781,18 @@
         "server_sha256": "e60005f7925ae50cc8f241bb46a89a84657c3153c3db39fe22a5f5846c53036f",
         "fixture": "tests/fixtures/m6/fixture.mjs",
         "fixture_sha256": "6ab6fb6901684c79e8c16c7aaf20ea8b6dffc032905707c050863589b149d720"
+      }
+    },
+    "fixture_m7": {
+      "role": "M7's controlled enhanced provider, targets and webhook receiver (tests/fixtures/m7), on the internal fixture network only",
+      "status": "selected",
+      "image": "node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "platform": "linux/arm64",
+      "source": {
+        "server": "tests/fixtures/m7/server.mjs",
+        "server_sha256": "b1d8051ec3fbcbde94a42f3c9ca94e13075b57bae71d555e91ef9349f3395dc2",
+        "fixture": "tests/fixtures/m7/fixture.mjs",
+        "fixture_sha256": "ec53dc20432507fee1b00c403ba287d83b32e88679da50dbad93c8c192cfdb06"
       }
     }
   },
@@ -1483,9 +1506,9 @@
   "patches": {
     "status": "resolved",
     "upstream_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-    "series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
+    "series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
     "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
-    "result_tree": "7ff39ea66087d072c51f7652406ac136045325d9",
+    "result_tree": "6c27ad04a656824bdc2c5b39362aa5acd4f9b82e",
     "patches": [
       {
         "file": "0001-nuq-sender-survives-broker-outage.patch",
@@ -1531,6 +1554,11 @@
         "file": "0009-residential-route-option.patch",
         "sha256": "ba1e00400742cfb2b0e741aa329c836e442dd643d4f8c367c19942073d0dc5e5",
         "reason": "The scrape option proxy (auto, basic, stealth) never reached the retrieval service, so a caller could not ask for the residential route and a bulk job's pages could not start on it (spec §10.2); proxyUsed always said basic."
+      },
+      {
+        "file": "0010-enhanced-route-browser-extras-and-owner.patch",
+        "sha256": "ba5886138f2100b8aeefa75ea4c3b489c1a6c6c815053c3498e53f13be34f800",
+        "reason": "The enhanced proxy option was refused and screenshots and actions were unregistered, so M7 could offer neither (spec §11, §12); an engine result with target status 401, 403 or 429 would start upstream's AddFeatureError retry outside the page's budget; and the parse cache's owner was the core's single team id (M5 review S1)."
       }
     ],
     "manifest": "patches/series.json (symbols, tests and the call-site coverage of each traced path)"
@@ -1577,14 +1605,14 @@
       ]
     },
     "firecrawl_api_image_patched": {
-      "image_id": "sha256:5d503ca05aabc737a817cfb978ca5c07936249da0c535b64c9f7849f1950c2ec",
+      "image_id": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
       "built_on": "the workstation's Colima VM, natively linux/arm64 (decision D6)",
-      "built_utc": "2026-09-27T00:37:25Z",
-      "repository_commit": "968a77918a248231c2fcca896e6a4856b66c420a",
+      "built_utc": "2026-09-27T04:56:48Z",
+      "repository_commit": "281ee686ce1271438f33fada3d006b46093a2c89",
       "code_dirty": false,
       "no_cache": true,
-      "patch_series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
-      "result_tree": "7ff39ea66087d072c51f7652406ac136045325d9",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "result_tree": "6c27ad04a656824bdc2c5b39362aa5acd4f9b82e",
       "go_version": "go version go1.27.1 linux/arm64",
       "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
       "node": "v22.23.3",
@@ -1593,24 +1621,25 @@
       "provenance": false,
       "sbom": false,
       "evidence": "evidence/M2/raw/api-build.log",
-      "build_log": "evidence/M6/raw/api-build.log",
-      "transfer": "evidence/M6/raw/api-push.txt (docker save on the VM, docker load on the Pi, the image id compared)"
+      "build_log": "evidence/M7/raw/api-build.log",
+      "transfer": "evidence/M7/raw/api-push.txt (docker save on the VM, docker load on the Pi, the image id compared)"
     }
   },
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "325a57923db3d3d921b594df00eae4555da7ee2824213f177c76494f8aed4343",
+    "capabilities_sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
     "official_client_source": "apps/js-sdk/firecrawl/package.json in the pinned upstream tree (evidence/M3/raw/route-shapes.txt)",
-    "official_client_use": "contract tests from the workstation (scripts/m3/sdk-compat.mjs), installed outside the repository; not a deployed dependency"
+    "official_client_use": "contract tests from the workstation (scripts/m3/sdk-compat.mjs), installed outside the repository; not a deployed dependency",
+    "ledger_schema_version": 3
   },
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "8c3b9a627f27a703a52b85e4c500af1977d81c8a62192f84ae4a9cd052507e23",
+      "sha256": "5480507c7af1e37448c8ad2cc82d0a8fdc673f96d2580f8d5baaf6de2e2250b9",
       "paid_caps": {
         "llm": {
           "day": 0,
@@ -1620,6 +1649,10 @@
           "month": 0
         },
         "proxy": {
+          "day": 0,
+          "month": 0
+        },
+        "enhanced": {
           "day": 0,
           "month": 0
         }
@@ -1714,6 +1747,36 @@
         "microUsdPerGB": 4000000,
         "billing": "upload_plus_download_per_1e9_bytes",
         "source": "fixture: Decodo's price, no money"
+      },
+      {
+        "id": "zyte/api-payg@2026-09-27",
+        "subject": "zyte-api",
+        "effectiveFrom": "2026-09-27",
+        "effectiveTo": null,
+        "microUsdPerHttpRequest": 1270,
+        "microUsdPerBrowserRequest": 16080,
+        "billing": "successful_response_at_highest_tier",
+        "source": "https://www.zyte.com/pricing/ and https://docs.zyte.com/zyte-api/pricing.html, observed 2026-09-27 (spec O06, O07): pay as you go per 1,000 successful responses, HTTP $0.13-$1.27 and browser $1.01-$16.08 by website tier (1-5); only successful responses are charged, and no answer reports its tier, so each is charged at tier 5"
+      },
+      {
+        "id": "fixture/fcpi-fixture-zyte@2026-09-27",
+        "subject": "fcpi-fixture-zyte",
+        "effectiveFrom": "2026-09-27",
+        "effectiveTo": null,
+        "microUsdPerHttpRequest": 1270,
+        "microUsdPerBrowserRequest": 16080,
+        "billing": "successful_response_at_highest_tier",
+        "source": "fixture: Zyte's tier-5 prices, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-zyte-small@2026-09-27",
+        "subject": "fcpi-fixture-zyte-small",
+        "effectiveFrom": "2026-09-27",
+        "effectiveTo": null,
+        "microUsdPerHttpRequest": 1270,
+        "microUsdPerBrowserRequest": 16080,
+        "billing": "successful_response_at_highest_tier",
+        "source": "fixture: Zyte's tier-5 prices against a cap with room for one browser request, no money"
       }
     ],
     "models": {
@@ -1792,6 +1855,20 @@
         "usage_url": "http://proxy.fixture.fcpi.test:8081/__usage",
         "usage_credential_file": null,
         "session": "decodo"
+      },
+      "zyte": {
+        "kind": "enhanced",
+        "base_url": "https://api.zyte.com",
+        "paid": true,
+        "credential_file": "zyte_api_key",
+        "api": "zyte-v1"
+      },
+      "fixture-zyte": {
+        "kind": "enhanced",
+        "base_url": "http://zyte.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": "fixture_zyte",
+        "api": "zyte-v1"
       }
     },
     "search": {
@@ -1844,11 +1921,31 @@
       "defaultProxy": "decodo-residential",
       "maxAttemptBytes": 10000000,
       "maxTunnelBytes": 2000000
-    }
+    },
+    "enhancers": {
+      "zyte-api": {
+        "provider": "zyte",
+        "category": "enhanced"
+      },
+      "fcpi-fixture-zyte": {
+        "provider": "fixture-zyte",
+        "category": "fixture_enhanced"
+      },
+      "fcpi-fixture-zyte-small": {
+        "provider": "fixture-zyte",
+        "category": "fixture_enhanced_small"
+      }
+    },
+    "enhancing": {
+      "defaultEnhancer": "zyte-api",
+      "requestTimeoutMs": 40000,
+      "maxResponseBytes": 37748736
+    },
+    "enhanced_contract": "Zyte API, checked 2026-09-27: POST https://api.zyte.com/v1/extract, Basic authentication (key as user name), httpResponseBody or browserHtml; only successful responses charged; 520 a ban"
   },
   "egress": {
     "policy": "deploy/policies/egress.json",
-    "policy_sha256": "4c6cd17601fe6cb0491f1b7d1b880e7595a6583cdc2d99e35aead705722a0f75",
+    "policy_sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c",
     "residential": {
       "proxyFirstDomains": [
         "m6hard.fixture.fcpi.test"
@@ -1880,6 +1977,41 @@
     "guard": "deploy/host/fcpi-guard.nft",
     "guard_sha256": "147030152ec16c3fb044b6d33940c84a3da0fcaa3cf7f8011b09c4147683c38b",
     "proxy_port_rule": "tcp dport 7000 to public addresses, counted as egress_proxy_accepted",
-    "provider_contract": "Decodo residential, checked 2026-09-26: gate.decodo.com:7000, HTTP CONNECT, username user-<name>-session-<id>-sessionduration-<minutes>; usage by POST https://api.decodo.com/api/v2/statistics/traffic (bytes)"
+    "provider_contract": "Decodo residential, checked 2026-09-26: gate.decodo.com:7000, HTTP CONNECT, username user-<name>-session-<id>-sessionduration-<minutes>; usage by POST https://api.decodo.com/api/v2/statistics/traffic (bytes)",
+    "webhooks": {
+      "destinations": [
+        "http://hooks.fixture.fcpi.test:8080/receive"
+      ],
+      "timeoutMs": 10000
+    },
+    "fixtures": [
+      "m1.fixture.fcpi.test",
+      "m2.fixture.fcpi.test",
+      "pace.fixture.fcpi.test",
+      "cool.fixture.fcpi.test",
+      "permit.fixture.fcpi.test",
+      "permit2.fixture.fcpi.test",
+      "m3.fixture.fcpi.test",
+      "m5.fixture.fcpi.test",
+      "model.fixture.fcpi.test",
+      "parser.fixture.fcpi.test",
+      "search.fixture.fcpi.test",
+      "m6.fixture.fcpi.test",
+      "m6pace.fixture.fcpi.test",
+      "m6hard.fixture.fcpi.test",
+      "m6learn.fixture.fcpi.test",
+      "m6bulk.fixture.fcpi.test",
+      "m6cool.fixture.fcpi.test",
+      "m6esc.fixture.fcpi.test",
+      "searchr.fixture.fcpi.test",
+      "proxy.fixture.fcpi.test",
+      "m7.fixture.fcpi.test",
+      "m7esc.fixture.fcpi.test",
+      "m7shot.fixture.fcpi.test",
+      "m7chg.fixture.fcpi.test",
+      "m7cache.fixture.fcpi.test",
+      "zyte.fixture.fcpi.test",
+      "hooks.fixture.fcpi.test"
+    ]
   }
 }
