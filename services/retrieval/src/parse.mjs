@@ -3,9 +3,10 @@
 // be listed in the budget policy with a rate card in effect; without its credential the answer is
 // PARSER_REQUIRED, never empty success. Credits (pages × the rate card's credits per page) are reserved
 // before the upload and settled from the pages the provider returned. Results are cached by the
-// document's bytes, the parser, its tier and version, and the owner the core names, which is its team
-// id: upstream runs every client as one team, so the cache is shared across the deployment's clients
-// until M7 brings per-principal cache keys. The uploaded file is deleted from the provider when its job
+// document's bytes, the parser, its tier and version, and the owner: the gateway's tag for the client's principal,
+// which the gateway writes into each job's origin and the core carries to this request (patch 0010; M5 review S1). A
+// parse with no owner (a page that did not come through the gateway) neither reads nor fills the cache, so no
+// principal ever receives a parse another paid for. The uploaded file is deleted from the provider when its job
 // names it.
 //
 // The provider's contract is LlamaParse's REST API v2: POST /api/v2/parse/upload (multipart: file and a
@@ -59,8 +60,9 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     const card = rateCardFor(budget, name);
     if (!card) throw fail("RATE_CARD_MISSING", `no rate card for '${name}' is in effect today`);
     const docSha = sha(bytes);
-    const key = sha(canonical({ bytes: docSha, parser: name, tier: pp.tier, version: pp.version, owner: owner ?? "" }));
-    const hit = await store.parseCacheGet(key);
+    const scoped = typeof owner === "string" && /^[0-9a-f]{16}$/.test(owner) ? owner : null;
+    const key = sha(canonical({ bytes: docSha, parser: name, tier: pp.tier, version: pp.version, owner: scoped ?? "" }));
+    const hit = scoped ? await store.parseCacheGet(key) : null;
     if (hit) { log({ event: "parse", logical_id: logicalId, parser: name, cached: true, pages: hit.pages }); return { ok: true, parser: name, markdown: hit.markdown, pages: hit.pages, cached: true, credits: 0 }; }
     const cred = readCredential(providersDir, prov.credential);
     if (prov.credential && !cred) throw fail("PARSER_REQUIRED", `the document needs the complex-document parser (${reason.replace("_", " ")}), and ${pp.provider} has no credential in this deployment`);
@@ -184,7 +186,7 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     const fileOutcome = await removeFile();
     log({ event: "parse", logical_id: logicalId, parser: name, outcome: "COMPLETED", reason, pages: pagesOut.length, reserved_credits: amount, credits, file: fileOutcome, ms: Date.now() - started });
     if (!markdown) throw fail("PARSE_EMPTY", `the provider returned no text for ${pagesOut.length} pages`);
-    await store.parseCachePut({ key, owner: owner ?? "", bytesSha256: docSha, parser: name, pages: pagesOut.length, markdown, days: P.cacheDays });
+    if (scoped) await store.parseCachePut({ key, owner: scoped, bytesSha256: docSha, parser: name, pages: pagesOut.length, markdown, days: P.cacheDays });
     return { ok: true, parser: name, markdown, pages: pagesOut.length, cached: false, credits, file: fileOutcome };
   }
 }

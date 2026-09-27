@@ -18,7 +18,9 @@ async function rig({ parser = "fcpi-fixture-parser", mutate, paidDispatch = fals
     getPolicy: () => policyFor({ "parser.fixture.fcpi.test": srv.port }), resolvePublic: async () => { throw new Error("no public resolution"); }, lookupFixture, log: () => {} });
   return { srv, store, parse, stats: () => fixtures.providerStats().parser };
 }
-const req = (bytes, over = {}) => ({ logicalId: `scrape:${crypto.randomUUID()}`, owner: "owner-a", bytes, pages: 1, reason: "scan_only", ...over });
+// Owners are the gateway's tags for principals (sixteen hex digits; patch 0010).
+const OWNER_A = "a1a1a1a1a1a1a1a1", OWNER_B = "b2b2b2b2b2b2b2b2";
+const req = (bytes, over = {}) => ({ logicalId: `scrape:${crypto.randomUUID()}`, owner: OWNER_A, bytes, pages: 1, reason: "scan_only", ...over });
 
 test("a scan-only page is parsed, its credits settled from the pages returned, cached, and its upload deleted", async () => {
   const r = await rig();
@@ -35,8 +37,11 @@ test("a scan-only page is parsed, its credits settled from the pages returned, c
     assert.equal(again.cached, true);
     assert.equal(r.stats().uploads, 1, "the second parse of the same bytes was a cache hit");
     // Another owner's request for the same bytes is its own parse (the cache is owner-scoped).
-    await r.parse(req(bytes, { owner: "owner-b" }));
+    await r.parse(req(bytes, { owner: OWNER_B }));
     assert.equal(r.stats().uploads, 2);
+    // M7 (M5 review S1): a parse with no owner, or with anything but an owner tag, neither reads nor fills the cache.
+    for (const owner of [null, "", "team-1"]) assert.equal((await r.parse(req(bytes, { owner }))).cached, false);
+    assert.equal(r.stats().uploads, 5);
   } finally { await r.srv.close(); }
 });
 
@@ -99,7 +104,7 @@ test("a parse reused under its logical id must be the same request: another owne
   try {
     const q = req(docs.scanPdfBytes());
     await r.parse(q);
-    await assert.rejects(r.parse({ ...q, owner: "owner-b" }), (e) => e.failureClass === "LOGICAL_ID_CONFLICT");
+    await assert.rejects(r.parse({ ...q, owner: OWNER_B }), (e) => e.failureClass === "LOGICAL_ID_CONFLICT");
     assert.equal(r.stats().uploads, 1);
   } finally { await r.srv.close(); }
 });
