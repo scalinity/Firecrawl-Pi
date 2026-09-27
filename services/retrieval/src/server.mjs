@@ -282,6 +282,7 @@ const extractServer = http.createServer(async (req, res) => {
     // M7: webhook destinations are checked before a job naming one is accepted, and each outbox attempt is made here.
     if (req.method === "POST" && (path === "/internal/webhook/check" || path === "/internal/webhook/deliver")) {
       const b = await readJson(req, 131072);
+      if (!b || typeof b !== "object" || Array.isArray(b)) throw new Denied("INVALID_REQUEST", "the body must be a JSON object");
       if (path === "/internal/webhook/check") return send(res, 200, webhooks.check(b.url));
       return send(res, 200, await webhooks.deliver({ eventId: b.eventId, url: b.url, body: b.body }));
     }
