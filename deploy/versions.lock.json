@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-27T09:09:22Z",
+  "generated_utc": "2026-09-27T09:38:43Z",
   "generated_by": "scripts/m7/build-lock.mjs (M7), from the lock M6 closed with at 0318b6e; entries owned by later milestones are as M6 wrote them",
-  "repository_sha": "5af987aafc1ffb069a4e853b40732c8f9777e0b4",
+  "repository_sha": "ce09074978725c4a12ccff4a78153c0171d7bc69",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
