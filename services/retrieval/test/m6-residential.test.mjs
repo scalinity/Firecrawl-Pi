@@ -374,3 +374,34 @@ test("an exception between a reservation and its settlement still closes the leg
     assert.equal(fx.state.tunnels.length, 0);
   } finally { await fx.close(); }
 });
+
+test("only the provider's own failures count on its breaker: an exit's 502 and a deadline-cut timeout do not, and a half-open breaker admits one probe (review W1)", async () => {
+  const fx = await startFixture();
+  try {
+    const policy = m6Policy(fx);
+    policy.residential.connectTimeoutMs = 10000; // above the 5 s HTTP attempt, so a blackholed tunnel is cut by the deadline
+    const budget = m6Budget(fx, (b) => { b.breaker = { failures: 3, windowMs: 60000, openMs: 1000 }; });
+    const { acquire, residential } = rig(fx, { policy, budget });
+    fx.state.mode = "502";
+    for (let i = 0; i < 3; i++) {
+      const r = await acquire(req(`${base(fx)}/static?w=${i}`, { route: "stealth" }));
+      assert.equal(r.failure.class, "TARGET_UNREACHABLE");
+      assert.deepEqual(r.strategies, ["residential_http", "residential_http"], "one same-tier retry, as for any unreachable target");
+    }
+    assert.equal(residential.breakerState("fixture-proxy"), "closed");
+    fx.state.mode = "blackhole";
+    const d = await acquire(req(`${base(fx)}/static?w=d`, { route: "stealth" }));
+    assert.equal(d.failure.class, "DEADLINE_EXCEEDED");
+    assert.equal(residential.breakerState("fixture-proxy"), "closed");
+    // Three provider refusals open it; after openMs, one probe is let through and its success closes it.
+    fx.state.mode = "407";
+    for (let i = 0; i < 3; i++) await acquire(req(`${base(fx)}/static?o=${i}`, { route: "stealth" }));
+    assert.equal(residential.breakerState("fixture-proxy"), "open");
+    await new Promise((r) => setTimeout(r, 1100));
+    assert.equal(residential.breakerState("fixture-proxy"), "half_open");
+    fx.state.mode = "ok";
+    const probe = await acquire(req(`${base(fx)}/static?o=probe`, { route: "stealth" }));
+    assert.equal(probe.ok, true, JSON.stringify(probe.failure));
+    assert.equal(residential.breakerState("fixture-proxy"), "closed");
+  } finally { await fx.close(); }
+});

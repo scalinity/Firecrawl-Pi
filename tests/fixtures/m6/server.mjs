@@ -13,7 +13,7 @@ if (!/^[0-9a-f]{64}$/.test(credentialSha256)) throw new Error("fixture_proxy_sha
 // Targets are reached by name through Docker's resolver on the fixture network; the network has no route out.
 makeProxy(state, { credentialSha256, resolve: async (h) => (await lookup(h, { family: 4 })).address }).listen(8081, "0.0.0.0");
 makeTarget(state).listen(8080, "0.0.0.0");
-const MODES = new Set(["ok", "407", "402", "429", "503", "refuse", "blackhole"]);
+const MODES = new Set(["ok", "407", "402", "429", "502", "503", "refuse", "blackhole", "reset"]);
 http.createServer((req, res) => {
   const u = new URL(req.url, "http://x");
   const json = (o) => res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(o));

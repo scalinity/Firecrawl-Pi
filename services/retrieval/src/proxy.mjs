@@ -153,7 +153,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     } catch (e) {
       settleLeg();
       refuse(s, host, e);
-      const code = e.provider ? 502 : 403;
+      const code = e.provider || e.failureClass === "TARGET_UNREACHABLE" ? 502 : 403;
       res.writeHead(code, { "content-type": "text/plain", connection: "close" }).end(`fcpi: ${e.failureClass ?? "refused"}\n`);
     }
   });
@@ -214,7 +214,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     } catch (e) {
       settleLeg();
       refuse(s, req.url, e);
-      const status = e.provider ? "502 Bad Gateway" : "403 Forbidden";
+      const status = e.provider || e.failureClass === "TARGET_UNREACHABLE" ? "502 Bad Gateway" : "403 Forbidden";
       clientSocket.end(`HTTP/1.1 ${status}\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nfcpi: ${e.failureClass ?? "refused"}\n`);
     }
   });

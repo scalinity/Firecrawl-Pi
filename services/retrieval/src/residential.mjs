@@ -21,9 +21,11 @@
 // a target and never into a log.
 //
 // A failure before the tunnel is up is the provider's (spec §9.2): 407 PROVIDER_AUTH_FAILED, 402
-// PROVIDER_BILLING, 429 PROVIDER_RATE_LIMITED, any other answer PROVIDER_ERROR (an exit that cannot reach the
-// target answers the same way, and is not told apart), no answer PROVIDER_UNREACHABLE. Each counts on the
-// provider's breaker and never on the target's routing record.
+// PROVIDER_BILLING, 429 PROVIDER_RATE_LIMITED, 503 and other answers PROVIDER_ERROR, no connection or no answer
+// within the full connect timeout PROVIDER_UNREACHABLE. Each counts on the provider's breaker and never on the
+// target's routing record. Two outcomes are not the provider's and do not count (review W1): a 502 or 504 from the
+// exit, which could not reach the target (TARGET_UNREACHABLE), and a timeout cut short by the attempt's own
+// deadline (DEADLINE_EXCEEDED). Every tunnel is admitted by the breaker, so a half-open one lets one probe through.
 import net from "node:net";
 import tls from "node:tls";
 import { Duplex } from "node:stream";
@@ -202,24 +204,31 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     if (meter.capped) throw new Denied("SIZE_LIMIT", "the attempt passed its proxy byte budget");
     const cred = credentialOf(st.provider);
     if (!cred) throw new ProviderRefusal("BLOCKED_CREDENTIAL", "the proxy credential is absent or malformed", { retryable: false });
-    let ep;
-    try { ep = await endpointAddress(st.provider); }
-    catch (e) { breakerFor(st.providerName).failure(); throw new ProviderRefusal("PROVIDER_UNREACHABLE", `the proxy endpoint could not be resolved (${e.failureClass ?? e.message})`, { retryable: true }); }
     const policy = getPolicy();
     const timeoutMs = Math.min(policy.residential.connectTimeoutMs, deadline - Date.now());
     if (timeoutMs <= 0) throw new Denied("DEADLINE_EXCEEDED", "no time left to open the proxy tunnel");
+    const cutByDeadline = timeoutMs < policy.residential.connectTimeoutMs;
+    const b = breakerFor(st.providerName);
+    if (!b.admit()) throw new ProviderRefusal("PROVIDER_UNAVAILABLE", "the provider's breaker is open", { retryable: true, retryAfter: b.retryAfterS() });
+    let ep;
+    try { ep = await endpointAddress(st.provider); }
+    catch (e) { b.failure(); throw new ProviderRefusal("PROVIDER_UNREACHABLE", `the proxy endpoint could not be resolved (${e.failureClass ?? e.message})`, { retryable: true }); }
     const auth = Buffer.from(`${sessionUsername(cred.name, sessionId, policy.residential.sessionMinutes)}:${cred.password}`).toString("base64");
     return new Promise((resolve, reject) => {
       let settled = false, up = false;
       const socket = net.connect({ host: ep.address, port: ep.port });
       meter?.attach(socket);
       const fail = (e) => { if (settled) return; settled = true; clearTimeout(timer); signal?.removeEventListener("abort", onAbort); socket.destroy(); reject(e); };
-      const providerFail = (cls, detail, retryable) => { breakerFor(st.providerName).failure(); fail(new ProviderRefusal(cls, detail, { retryable })); };
-      const onAbort = () => fail(new Denied("CANCELLED", "the caller cancelled the acquisition"));
+      const providerFail = (cls, detail, retryable) => { if (!settled) b.failure(); fail(new ProviderRefusal(cls, detail, { retryable })); };
+      // An outcome that is not the provider's hands a half-open breaker's probe back without a verdict.
+      const otherFail = (e) => { if (!settled) b.neutral(); fail(e); };
+      const onAbort = () => otherFail(new Denied("CANCELLED", "the caller cancelled the acquisition"));
       signal?.addEventListener("abort", onAbort, { once: true });
-      const timer = setTimeout(() => providerFail("PROVIDER_UNREACHABLE", `the proxy did not open a tunnel within ${timeoutMs} ms`, true), timeoutMs);
+      const timer = setTimeout(() => (cutByDeadline
+        ? otherFail(new Denied("DEADLINE_EXCEEDED", `the attempt's deadline came ${timeoutMs} ms into opening the proxy tunnel`))
+        : providerFail("PROVIDER_UNREACHABLE", `the proxy did not open a tunnel within ${timeoutMs} ms`, true)), timeoutMs);
       socket.once("connect", () => {
-        if (socket.remoteAddress !== ep.address) return fail(new Denied("SSRF_DENIED", `connected peer ${socket.remoteAddress} is not the proxy's validated address`));
+        if (socket.remoteAddress !== ep.address) return otherFail(new Denied("SSRF_DENIED", `connected peer ${socket.remoteAddress} is not the proxy's validated address`));
         const req = `CONNECT ${host}:${port} HTTP/1.1\r\nHost: ${host}:${port}\r\nProxy-Authorization: Basic ${auth}\r\nProxy-Connection: keep-alive\r\n\r\n`;
         meter?.add(Buffer.byteLength(req));
         socket.write(req);
@@ -232,6 +241,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
         if (end < 0) { if (head.length > HEAD_MAX) providerFail("PROVIDER_ERROR", "the proxy's answer to CONNECT has no end of headers", false); return; }
         socket.off("data", onData);
         const status = Number((/^HTTP\/1\.[01] (\d{3})/.exec(head.subarray(0, end).toString("latin1")) ?? [])[1]);
+        if (status === 502 || status === 504) return otherFail(new Denied("TARGET_UNREACHABLE", `the proxy's exit could not reach ${host}:${port} (CONNECT answered ${status})`));
         if (status !== 200) return providerFail(PROVIDER_STATUS[status] ?? "PROVIDER_ERROR", `the proxy answered CONNECT with ${status || "an unreadable status"}`, status === 429 || status >= 500);
         // Bytes after the headers belong to the tunnel; they were counted above, so they are returned uncounted.
         const rest = head.subarray(end + 4);
@@ -241,7 +251,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
         settled = true; up = true;
         clearTimeout(timer);
         signal?.removeEventListener("abort", onAbort);
-        breakerFor(st.providerName).success();
+        b.success();
         resolve(meter.wrap(socket));
       };
       socket.on("data", onData);

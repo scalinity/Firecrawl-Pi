@@ -7,8 +7,8 @@
 // The proxy speaks Decodo's documented contract (help.decodo.com, residential "User:pass requests", checked
 // 2026-09-26): HTTP CONNECT, Basic Proxy-Authorization with the username
 // "user-<name>-session-<id>-sessionduration-<minutes>", one sticky exit per session id. The credential is checked by
-// the SHA-256 of "<name>:<password>". A mode switch makes it answer 407, 402, 429 or 503, refuse connections or
-// never answer, so every provider failure class can be produced. It counts the bytes of every tunnel in both
+// the SHA-256 of "<name>:<password>". A mode switch makes it answer 407, 402, 429, 502 or 503, refuse connections,
+// never answer, or reset a tunnel after its first bytes, so every provider failure class can be produced. It counts the bytes of every tunnel in both
 // directions, per session, and serves the day's total as a usage report (GET /__usage?day=), as a provider does.
 import http from "node:http";
 import net from "node:net";
@@ -45,7 +45,8 @@ export function makeProxy(state, { credentialSha256, resolve = async (h) => h })
     const [user, ...rest] = m ? Buffer.from(m[1], "base64").toString("utf8").split(":") : [];
     const u = USER.exec(user ?? "");
     if (!u || sha(`${u[1]}:${rest.join(":")}`) !== credentialSha256) return refuse(407, u ? "credential" : "username format");
-    if (state.mode !== "ok") return refuse(Number(state.mode), `mode ${state.mode}`);
+    if (state.mode !== "ok" && state.mode !== "reset") return refuse(Number(state.mode), `mode ${state.mode}`);
+    const resetAfterFirst = state.mode === "reset";
     const [session, minutes] = [u[2], Number(u[3])];
     if (!state.exits.has(session)) state.exits.set(session, `exit-${state.exits.size + 1}`);
     const [host, port] = [req.url.slice(0, req.url.lastIndexOf(":")), Number(req.url.slice(req.url.lastIndexOf(":") + 1))];
@@ -61,6 +62,8 @@ export function makeProxy(state, { credentialSha256, resolve = async (h) => h })
       client.on("data", (c) => { t.up += c.length; });
       upstream.on("data", (c) => { t.down += c.length; });
       client.pipe(upstream); upstream.pipe(client);
+      // A tunnel the provider breaks after it was up: the first answer bytes pass, then the connection is reset.
+      if (resetAfterFirst) upstream.once("data", () => setImmediate(() => client.resetAndDestroy()));
     });
     upstream.on("error", () => { if (!client.destroyed) refuse(502, "target unreachable"); });
     const close = () => {
