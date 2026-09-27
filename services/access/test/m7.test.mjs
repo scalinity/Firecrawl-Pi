@@ -177,16 +177,21 @@ test("change detection: new, same, then changed with a diff; an error page and a
 
 test("the outbox round: delivered, retried, dead after its attempts or at once for an unapproved destination, deferred without an attempt", async () => {
   const ev = (id, attempts = 0) => ({ id, type: "crawl.completed", destination: "http://hooks.fixture.fcpi.test:8080/receive", body: "{}", attempts });
-  const due = [ev("e1"), ev("e2"), ev("e3", 4), ev("e4"), ev("e5"), ev("e6")];
-  const calls = [];
-  const store = { claimWebhooks: async () => due.splice(0), webhookDelivered: async (id, s) => calls.push(["delivered", id, s]), webhookDefer: async (id) => calls.push(["defer", id]),
+  const due = [ev("e1"), ev("e2"), ev("e3", 4), ev("e4"), ev("e5"), ev("e6"), ev("e7"), ev("e8"), ev("e9", 4)];
+  const calls = [], leases = [];
+  const store = { claimWebhooks: async (n, lease) => { leases.push([n, lease]); return due.splice(0); }, webhookDelivered: async (id, s) => calls.push(["delivered", id, s]), webhookDefer: async (id) => calls.push(["defer", id]),
     webhookFailed: async (id, f) => calls.push(["failed", id, f.final, f.maxAttempts]) };
   const answers = { e1: { delivered: true, status: 200 }, e2: { delivered: false, status: 500, class: "WEBHOOK_REFUSED" }, e3: { delivered: false, status: 500, class: "WEBHOOK_REFUSED" },
     e4: { delivered: false, class: "WEBHOOK_DESTINATION_NOT_APPROVED" }, e5: { delivered: false, class: "WEBHOOKS_SUPPRESSED" } };
-  const extractor = { webhookDeliver: async ({ eventId }) => { if (eventId === "e6") throw Object.assign(new Error("x"), { code: "ECONNREFUSED" }); return { status: 200, json: answers[eventId] }; } };
+  // e7: the retrieval service not ready (503) waits; e8, e9: it fails with a 500 every time, which counts, so e9 ends DEAD (review S2).
+  const service = { e7: { status: 503, json: { error: "not_ready" } }, e8: { status: 500, json: { error: "internal" } }, e9: { status: 500, json: { error: "internal" } } };
+  const extractor = { webhookDeliver: async ({ eventId }) => { if (eventId === "e6") throw Object.assign(new Error("x"), { code: "ECONNREFUSED" }); return service[eventId] ?? { status: 200, json: answers[eventId] }; } };
   const logs = [];
   await makeOutbox({ store, extractor, limits: M.limits, log: (o) => logs.push(o) }).tick();
-  assert.deepEqual(calls, [["delivered", "e1", 200], ["failed", "e2", false, 5], ["failed", "e3", false, 5], ["failed", "e4", true, 5], ["defer", "e5"], ["defer", "e6"]]);
+  assert.deepEqual(calls, [["delivered", "e1", 200], ["failed", "e2", false, 5], ["failed", "e3", false, 5], ["failed", "e4", true, 5], ["defer", "e5"], ["defer", "e6"],
+    ["defer", "e7"], ["failed", "e8", false, 5], ["failed", "e9", false, 5]]);
+  assert.equal(logs.find((l) => l.id === "e9").action, "dead", "a service error on every attempt still ends DEAD");
+  assert.deepEqual(leases, [[5, 120]], "the lease covers five deliveries at their 20 s timeout");
   assert.equal(logs.find((l) => l.id === "e3").action, "dead", "the fifth failed attempt is the last");
   assert.equal(logs.find((l) => l.id === "e2").action, "retry");
 });

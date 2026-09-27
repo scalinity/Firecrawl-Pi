@@ -41,6 +41,7 @@ export function makeExtractor({ url, token }) {
     release: (jobId) => call("POST", "/internal/route-release", { jobId }, 10000),
     // M7: whether a webhook destination is approved, and one signed delivery attempt for the outbox (src/outbox.mjs).
     webhookCheck: (url) => call("POST", "/internal/webhook/check", { url }, 5000),
+    // 20 s: the outbox's lease covers a round of five at this timeout (outbox.mjs).
     webhookDeliver: ({ eventId, url, body }) => call("POST", "/internal/webhook/deliver", { eventId, url, body }, 20000),
   };
 }
