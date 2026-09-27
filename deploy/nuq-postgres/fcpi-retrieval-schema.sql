@@ -141,10 +141,12 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.parse_cache (
 );
 CREATE INDEX IF NOT EXISTS parse_cache_expires ON fcpi_retrieval.parse_cache (expires_at);
 
--- M6: residential proxy spending shares the ledger: a reservation per attempt (kind proxy), and the difference a
--- provider's own usage report shows over what was measured locally (kind reconcile).
+-- The ledger's kinds, in one definition so applying the file again never meets a row it would refuse: M6's residential
+-- proxy spending (a reservation per attempt, kind proxy, and the difference a provider's own usage report shows over
+-- what was measured locally, kind reconcile), and M7's enhanced provider, whose one dispatch per logical page is keyed by
+-- the page (kind enhanced), so a retried page finds the dispatch it already made instead of paying for another.
 ALTER TABLE fcpi_retrieval.budget_reservation DROP CONSTRAINT IF EXISTS budget_reservation_kind_check;
-ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile'));
+ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile', 'enhanced'));
 
 -- M6: domain routing (spec §9.5), at most 5,000 rows keyed by registrable domain (a fixture by its host): a learned
 -- residential preference with its set time, expiry and probe, the script-shell learning, and outcome counters. A
@@ -192,11 +194,6 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.proxy_reconciliation (
   detail                text,
   at                    timestamptz NOT NULL DEFAULT now()
 );
-
--- M7: the enhanced provider's one dispatch per logical page shares the ledger (kind enhanced); its call key is the
--- logical page's, so a retried page finds the dispatch it already made instead of paying for another.
-ALTER TABLE fcpi_retrieval.budget_reservation DROP CONSTRAINT IF EXISTS budget_reservation_kind_check;
-ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile', 'enhanced'));
 
 DO $$
 BEGIN

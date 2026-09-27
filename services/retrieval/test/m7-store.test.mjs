@@ -39,5 +39,10 @@ test("one logical page, eight racing callers: one enhanced reservation, the rest
     assert.deepEqual(again.existing.result.answer, answer);
     const [{ settled }] = (await store.budgetUsage(day, month)).filter((r) => r.category === "fixture_enhanced" && r.period === "day");
     assert.equal(settled, 16080, "the page was charged once");
+    // The schema is applied again at every bring-up (scripts/m2/pi-retrieval-db.sh): with an enhanced row present it must
+    // still apply, so the ledger's kinds are one definition that names them all.
+    const admin = new pg.Client({ host: HOST, user: "postgres", database: "postgres" });
+    await admin.connect();
+    try { await admin.query(readFileSync(new URL("../schema.sql", import.meta.url), "utf8")); } finally { await admin.end(); }
   } finally { await store.close(); }
 });
