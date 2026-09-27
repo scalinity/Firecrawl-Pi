@@ -170,16 +170,29 @@ function attribute(sec, line, ids, owner = null) {
 // what changed, as M4's X04 counts them: a module in both snapshots whose size differs, a mount whose target,
 // source and type are the same with only its options changed, a service's ephemeral UDP port chosen again at
 // its start, and a unit no longer running that neither snapshot lists as enabled.
-function rebootTie(bootB, bootA) {
-  if (!has(`${RAW}reboot.txt`) || !bootB || !bootA || bootB === bootA) return null;
-  const s = S(`${RAW}reboot.txt`);
+// One record's chain: its boots in order, the current one, whether every boot that ended ended as required.
+function chainOf(file) {
+  if (!has(file)) return null;
+  const s = S(file);
   const boots = (s.boots ?? []).map((l) => kv(l.split(" "))).sort((a, b) => +a.idx - +b.idx);
   const cur = kv(((s.current ?? [])[0] ?? "").split(" "));
   const ended = boots.slice(0, -1).map((b) => ({ b, e: kv(((s[`ended_${b.idx.replace("-", "")}`] ?? [])[0] ?? "").split(" ")) }));
   const orderly = ended.every(({ e }) => +e.shutdown_markers > 0 && e.watchdog_reboot === "yes" && /^\d{4}-/.test(e.loss_utc ?? "")
     && ["sudo_commands", "ssh_logins", "sessions", "console_logins", "undervoltage"].every((k) => e[k] === "0"));
-  const tied = boots.length >= 2 && boots[0].boot_id_sha256 === bootB && boots.at(-1).idx === "0" && boots.at(-1).boot_id_sha256 === bootA && cur.boot_id_sha256 === bootA && orderly;
-  return tied ? { kernel: cur.kernel, ended: ended.map(({ b }) => b.last).join(", ") } : null;
+  const whole = boots.length >= 1 && boots.at(-1).idx === "0" && boots.at(-1).boot_id_sha256 === cur.boot_id_sha256 && orderly;
+  return { first: boots[0]?.boot_id_sha256 ?? null, current: cur.boot_id_sha256 ?? null, kernel: cur.kernel, whole, ended: ended.map(({ b }) => b.last) };
+}
+// The close's record ties the chain when the journal still holds BEFORE's boot. Once the journal has rotated it out, a
+// record made earlier while it held it (raw/reboot-early.txt, with its provenance) ties BEFORE to the boot then
+// current, and the close's record must show that same boot still current and AFTER's: no reboot in between.
+function rebootTie(bootB, bootA) {
+  if (!bootB || !bootA || bootB === bootA) return null;
+  const late = chainOf(`${RAW}reboot.txt`), early = chainOf(`${RAW}reboot-early.txt`);
+  if (!late || late.current !== bootA) return null;
+  if (late.whole && late.first === bootB) return { kernel: late.kernel, ended: late.ended.join(", ") };
+  const provenance = has(`${RAW}reboot-early.txt`) && /^source=scripts\/m7\/pi-reboot-record\.sh run at \S+Z/.test((S(`${RAW}reboot-early.txt`).provenance ?? [])[0] ?? "");
+  if (early && provenance && early.whole && early.first === bootB && early.current === bootA) return { kernel: late.kernel, ended: `${early.ended.join(", ")} (recorded before the journal rotated; no reboot since)` };
+  return null;
 }
 function rebootAttribute(sec, line, kind, B, A) {
   const other = kind === "removed" ? A : B;
