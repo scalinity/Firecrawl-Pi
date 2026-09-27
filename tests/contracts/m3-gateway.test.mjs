@@ -73,7 +73,9 @@ function fakeCore(dbName) {
         if (/slow/.test(body?.url ?? "")) await sleep(1500);
         // As the pinned core answers: its Cloud challenge, and cors()'s wildcard on every response.
         const cloud = { "www-authenticate": 'Bearer resource_metadata="https://www.firecrawl.dev/.well-known/oauth-protected-resource"', "access-control-allow-origin": "*", "x-powered-by": "Express" };
-        return send(200, u.pathname === "/v2/scrape" ? { success: true, data: { markdown: "# fixture", metadata: { sourceURL: body.url } } } : { success: true, links: [{ url: body.url }] }, cloud);
+        // M7: a target URL's st parameter is the page's status, as the core reports it in metadata.statusCode.
+        let st = null; try { st = Number(new URL(body.url).searchParams.get("st")) || null; } catch { /* not a URL */ }
+        return send(200, u.pathname === "/v2/scrape" ? { success: true, data: { markdown: "# fixture", metadata: { sourceURL: body.url, ...(st ? { statusCode: st } : {}) } } } : { success: true, links: [{ url: body.url }] }, cloud);
       }
       if (req.method === "POST" && (m = u.pathname.match(/^\/v2\/(crawl|batch\/scrape)$/))) {
         const kind = m[1] === "crawl" ? "crawl" : "batch";
@@ -949,6 +951,37 @@ test("a ledger schema this build was not written for stops startup; an unreachab
   assert.equal(away.code, "running");
   assert.match(away.out, /"event":"ledger_unreachable_at_start"/);
   assert.doesNotMatch(away.out, /"event":"listening"/);
+});
+
+// ---- M7: the scrape cache -----------------------------------------------------------------------------------
+test("M7: a 2xx answer is stored marked as the hit it will be and sent back as stored; error pages and storeInCache false store nothing", async () => {
+  const scrapes = () => H.core.requests.filter((r) => r.method === "POST" && r.url === "/v2/scrape").length;
+  const cached = async () => Number((await H.db.query("SELECT count(*) AS n FROM fcpi_platform.page_cache")).rows[0].n);
+  const settle = async (n) => { for (let i = 0; i < 40 && (await cached()) < n; i++) await sleep(50); };
+  const url = `https://cache.example/p?st=200&n=${randomUUID()}`;
+  const n0 = scrapes(), c0 = await cached();
+  const miss = await H.call("POST", "/v2/scrape", { token: T.a, body: { url, maxAge: 600000 } });
+  assert.deepEqual([miss.status, miss.headers["x-fcpi-cache"], miss.json.data.metadata.cacheState], [200, "miss", undefined], "the miss's own answer is the core's");
+  await settle(c0 + 1);
+  assert.equal(await cached(), c0 + 1);
+  const hit = await H.call("POST", "/v2/scrape", { token: T.a, body: { url, maxAge: 600000 } });
+  assert.deepEqual([hit.status, hit.headers["x-fcpi-cache"], hit.json.data.metadata.cacheState], [200, "hit", "hit"]);
+  assert.match(hit.json.data.metadata.cachedAt, /^\d{4}-\d\d-\d\dT/);
+  assert.match(hit.headers["x-fcpi-cached-at"], /^\d{4}-\d\d-\d\dT/);
+  assert.equal(hit.json.data.markdown, "# fixture");
+  assert.equal(scrapes(), n0 + 1, "a hit never reaches the core");
+  // Another principal's same request is its own miss.
+  assert.equal((await H.call("POST", "/v2/scrape", { token: T.b, body: { url, maxAge: 600000 } })).headers["x-fcpi-cache"], "miss");
+  await settle(c0 + 2);
+  // Not stored: a 404 page, a 500 page, storeInCache false.
+  const c1 = await cached();
+  for (const [u, extra] of [[`https://cache.example/p?st=404&n=${randomUUID()}`, {}], [`https://cache.example/p?st=500&n=${randomUUID()}`, {}], [`https://cache.example/p?st=200&n=${randomUUID()}`, { storeInCache: false }]]) {
+    const r = await H.call("POST", "/v2/scrape", { token: T.a, body: { url: u, maxAge: 600000, ...extra } });
+    assert.equal(r.status, 200);
+    await sleep(300);
+    assert.equal((await H.call("POST", "/v2/scrape", { token: T.a, body: { url: u, maxAge: 600000, ...extra } })).headers["x-fcpi-cache"], "miss", u);
+  }
+  assert.equal(await cached(), c1);
 });
 
 test("configuration that is unknown, unsafe or missing its data mount stops startup", async () => {

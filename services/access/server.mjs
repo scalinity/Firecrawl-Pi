@@ -381,30 +381,42 @@ async function sync(ctx, route) {
 // same request (its hash without the cache options), and only when younger than the maxAge the caller gives (0, the
 // default, never reads). A successful answer whose page answered 2xx is stored for limits.cache.lifetimeSeconds unless
 // storeInCache is false; an error page, a failure or an answer past the archive's size is never stored. A hit reaches
-// neither the core nor any provider, so it costs no attempt and no money.
+// neither the core nor any provider, so it costs no attempt and no money. The answer is stored already marked as the hit
+// it will be (metadata.cacheState "hit", cachedAt), so a hit sends the stored bytes as they are, one buffer, within the
+// synchronous admission limit (review W9).
+const CACHE_MARK = Buffer.from('"cacheState":"hit"');
 async function cachedScrape(ctx, route, body) {
   const principal = ctx.client.principal, maxAge = body.maxAge ?? 0;
   const { maxAge: _a, storeInCache: _s, ...request } = body;
   const key = requestHash("scrape", request);
+  syncInFlight += 1;
   if (maxAge > 0) {
-    const hit = await store.cacheGet(principal, key, maxAge);
-    const doc = hit ? await archive.read(hit.sha256).then((b) => JSON.parse(b.toString("utf8")), () => null) : null;
-    if (doc?.data?.metadata) {
-      Object.assign(doc.data.metadata, { cacheState: "hit", cachedAt: iso(hit.created_at) });
+    let buf = null, hit = null;
+    try {
+      hit = await store.cacheGet(principal, key, maxAge);
+      buf = hit ? await archive.read(hit.sha256).catch(() => null) : null;
+    } catch (e) { syncInFlight -= 1; throw e; }
+    if (buf?.includes(CACHE_MARK)) {
       ctx.extra = { cache: "hit" };
-      return ctx.send(200, doc, { "x-fcpi-cache": "hit" });
+      ctx.res.writeHead(200, { "content-type": "application/json; charset=utf-8", "content-length": buf.length, "cache-control": "no-store", "x-request-id": ctx.id,
+        "x-fcpi-cache": "hit", "x-fcpi-cached-at": iso(hit.created_at) });
+      ctx.res.end(buf);
+      syncInFlight -= 1;
+      return ctx.logged(200);
     }
   }
-  syncInFlight += 1;
   ctx.extra = { cache: "miss" };
   const keep = body.storeInCache === false ? null : { maxBytes: L.results.archiveResponseMaxBytes, onComplete: async (status, buf) => {
     if (status !== 200 || !buf) return;
     let j = null;
     try { j = JSON.parse(buf.toString("utf8")); } catch { return; }
     const code = j?.data?.metadata?.statusCode;
-    if (j?.success !== true || !(code >= 200 && code < 300)) return;
-    if ((await store.archiveBytes()) + buf.length > (await quotaBytes()) || !(await archive.hasRoom(buf.length))) return;
-    const put = await archive.put(buf);
+    if (j?.success !== true || !(code >= 200 && code < 300) || !j.data?.metadata) return;
+    Object.assign(j.data.metadata, { cacheState: "hit", cachedAt: new Date().toISOString() });
+    const marked = Buffer.from(JSON.stringify(j));
+    j = null;
+    if ((await store.archiveBytes()) + marked.length > (await quotaBytes()) || !(await archive.hasRoom(marked.length))) return;
+    const put = await archive.put(marked);
     await store.cachePut(principal, key, put.sha256, put.bytes, L.cache.lifetimeSeconds);
     log({ event: "cache_stored", request_id: ctx.id, principal, bytes: put.bytes });
   } };
