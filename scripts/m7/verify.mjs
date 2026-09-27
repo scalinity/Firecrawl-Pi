@@ -179,19 +179,24 @@ function chainOf(file) {
   const ended = boots.slice(0, -1).map((b) => ({ b, e: kv(((s[`ended_${b.idx.replace("-", "")}`] ?? [])[0] ?? "").split(" ")) }));
   const orderly = ended.every(({ e }) => +e.shutdown_markers > 0 && e.watchdog_reboot === "yes" && /^\d{4}-/.test(e.loss_utc ?? "")
     && ["sudo_commands", "ssh_logins", "sessions", "console_logins", "undervoltage"].every((k) => e[k] === "0"));
-  const whole = boots.length >= 1 && boots.at(-1).idx === "0" && boots.at(-1).boot_id_sha256 === cur.boot_id_sha256 && orderly;
-  return { first: boots[0]?.boot_id_sha256 ?? null, current: cur.boot_id_sha256 ?? null, kernel: cur.kernel, whole, ended: ended.map(({ b }) => b.last) };
+  const ok = ({ e }) => +e.shutdown_markers > 0 && e.watchdog_reboot === "yes" && /^\d{4}-/.test(e.loss_utc ?? "")
+    && ["sudo_commands", "ssh_logins", "sessions", "console_logins", "undervoltage"].every((k) => e[k] === "0");
+  const ends = boots.length >= 1 && boots.at(-1).idx === "0" && boots.at(-1).boot_id_sha256 === cur.boot_id_sha256;
+  const whole = ends && orderly;
+  // From a given boot on: every boot after it that ended ended as required, and the chain reaches the current boot.
+  const wholeFrom = (hash) => { const i = boots.findIndex((b) => b.boot_id_sha256 === hash); return ends && i >= 0 && ended.slice(i).every(ok); };
+  return { first: boots[0]?.boot_id_sha256 ?? null, current: cur.boot_id_sha256 ?? null, kernel: cur.kernel, whole, wholeFrom, ended: ended.map(({ b }) => b.last) };
 }
 // The close's record ties the chain when the journal still holds BEFORE's boot. Once the journal has rotated it out, a
 // record made earlier while it held it (raw/reboot-early.txt, with its provenance) ties BEFORE to the boot then
-// current, and the close's record must show that same boot still current and AFTER's: no reboot in between.
+// current, and the close's record must tie that boot on to AFTER's: still current, or every reboot since as required.
 function rebootTie(bootB, bootA) {
   if (!bootB || !bootA || bootB === bootA) return null;
   const late = chainOf(`${RAW}reboot.txt`), early = chainOf(`${RAW}reboot-early.txt`);
   if (!late || late.current !== bootA) return null;
   if (late.whole && late.first === bootB) return { kernel: late.kernel, ended: late.ended.join(", ") };
   const provenance = has(`${RAW}reboot-early.txt`) && /^source=scripts\/m7\/pi-reboot-record\.sh run at \S+Z/.test((S(`${RAW}reboot-early.txt`).provenance ?? [])[0] ?? "");
-  if (early && provenance && early.whole && early.first === bootB && early.current === bootA) return { kernel: late.kernel, ended: `${early.ended.join(", ")} (recorded before the journal rotated; no reboot since)` };
+  if (early && provenance && early.whole && early.first === bootB && late.wholeFrom(early.current)) return { kernel: late.kernel, ended: `${early.ended.join(", ")} (recorded before the journal rotated)${late.ended.length ? `, then ${late.ended.join(", ")}` : ""}` };
   return null;
 }
 function rebootAttribute(sec, line, kind, B, A) {

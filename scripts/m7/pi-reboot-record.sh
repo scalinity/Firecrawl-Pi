@@ -30,6 +30,11 @@ for b in "${ALL[@]}"; do
   [ "$(hash_id "$id")" = "$BEFORE" ] && started=1
   [ $started = 1 ] && chain+=("$idx")
 done
+# The journal (capped) may have rotated the BEFORE boot out: then every boot it still holds, for a record made while it
+# held BEFORE's to be joined to (X04).
+before_found=yes
+if [ ${#chain[@]} = 0 ]; then before_found=no; for b in "${ALL[@]}"; do chain+=("${b%% *}"); done; fi
+echo "before_found=$before_found"
 
 sec boots
 for idx in "${chain[@]}"; do
