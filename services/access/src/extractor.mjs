@@ -1,6 +1,6 @@
 // The gateway's client for the retrieval service's extraction listener (FIRECRAWL_PI_SPEC.md §14, §20.1;
 // M5): one fixed address on fcpi_model, the gateway's own credential, and the documents the gateway
-// scraped through the core; M6 adds the residential route's state and bulk jobs' route holds. The model
+// scraped through the core; M6 adds the residential route's state and bulk jobs' route holds, M7 webhook delivery. The model
 // adapter, its provider credential and its budget are the retrieval service's; the gateway holds none of them.
 import { request } from "node:http";
 
@@ -39,5 +39,8 @@ export function makeExtractor({ url, token }) {
     routes: () => call("GET", "/internal/routes", undefined, 5000),
     hold: (jobId, urls, minutes) => call("POST", "/internal/route-hold", { jobId, urls, minutes, reason: "bulk" }, 10000),
     release: (jobId) => call("POST", "/internal/route-release", { jobId }, 10000),
+    // M7: whether a webhook destination is approved, and one signed delivery attempt for the outbox (src/outbox.mjs).
+    webhookCheck: (url) => call("POST", "/internal/webhook/check", { url }, 5000),
+    webhookDeliver: ({ eventId, url, body }) => call("POST", "/internal/webhook/deliver", { eventId, url, body }, 20000),
   };
 }

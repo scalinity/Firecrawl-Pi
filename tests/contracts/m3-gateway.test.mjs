@@ -15,13 +15,17 @@ import { createRequire } from "node:module";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, renameSync, rmSync, statfsSync, readdirSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GW_DIR = process.env.FCPI_GATEWAY_DIR ?? join(HERE, "../../services/access");
 const MANIFEST = JSON.parse(readFileSync(process.env.FCPI_TEST_MANIFEST ?? join(HERE, "../../deploy/policies/capabilities.json"), "utf8"));
 const SCHEMA = readFileSync(process.env.FCPI_TEST_SCHEMA ?? join(HERE, "../../deploy/nuq-postgres/fcpi-platform-schema.sql"), "utf8").split("\n").filter((l) => !l.startsWith("\\")).join("\n");
 const pg = createRequire(join(GW_DIR, "package.json"))("pg");
+// M7: the marker a job's upstream request carries is its submission key behind its principal's owner tag (src/auth.mjs); every
+// job in this suite that reaches the core is principal pa's.
+const { originFor } = await import(pathToFileURL(join(GW_DIR, "src/auth.mjs")).href);
+const marker = (id, principal = "pa") => originFor(principal, `fcpi:${id}`);
 const [PGHOST, PGPORT = "5432"] = (process.env.FCPI_TEST_PG ?? "").split(":");
 const HOST = "127.0.0.1:3380", ORIGIN = `http://${HOST}`;
 const tok = (label) => `fcpi_${label}_${createHash("sha256").update(label).digest("hex")}`;
@@ -243,7 +247,7 @@ test("a valid token scrapes; upstream's Cloud challenge is stripped; only the ga
   const up = H.core.requests.at(-1);
   assert.equal(up.url, "/v2/scrape");
   assert.deepEqual(Object.keys(up.headers).sort(), ["accept", "connection", "content-length", "content-type", "host"]);
-  assert.deepEqual(up.body, { url: "http://m3.fixture.fcpi.test:8080/p01" }, "only accepted options, origin dropped");
+  assert.deepEqual(up.body, { url: "http://m3.fixture.fcpi.test:8080/p01", origin: originFor("pa", "scrape") }, "only accepted options; the client's origin replaced by the principal's owner tag (M7)");
   const map = await H.call("POST", "/v2/map", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/" } });
   assert.equal(map.status, 200);
   assert.equal(map.headers["access-control-allow-origin"], undefined);
@@ -298,7 +302,7 @@ test("oversized bodies are 413 (declared and chunked); Content-Length with Trans
 
 test("refused options are answered before any receipt or upstream request", async () => {
   const n = H.core.requests.length, jobs = (await H.db.query("SELECT count(*)::int AS n FROM fcpi_platform.job")).rows[0].n;
-  for (const [path, body, opt] of [["/v2/scrape", { url: "https://example.com", formats: ["screenshot"] }, "formats.screenshot"], ["/v2/crawl", crawlBody({ webhook: "https://h.example" }), "webhook"],
+  for (const [path, body, opt] of [["/v2/batch/scrape", { urls: ["https://example.com"], formats: ["screenshot"] }, "formats.screenshot"], ["/v2/crawl", crawlBody({ webhook: { url: "https://h.example", headers: { a: "b" } } }), "webhook.headers"],
     ["/v2/batch/scrape", { urls: ["https://example.com"], appendToId: randomUUID() }, "appendToId"], ["/v2/crawl", crawlBody({ scrapeOptions: { actions: [{ type: "click", selector: "a" }] } }), "scrapeOptions.actions"],
     ["/v2/map", { url: "https://example.com", location: { country: "us" } }, "location"]]) {
     const r = await H.call("POST", path, { token: T.a, body });
@@ -328,7 +332,7 @@ test("a crawl is admitted, mapped, archived and paginated from the archive after
   assert.equal(r.json.url, `${ORIGIN}/v2/crawl/${r.json.id}`);
   const id = r.json.id;
   const sub = H.core.submissions().at(-1);
-  assert.equal(sub.body.origin, `fcpi:${id}`, "the submission key travels in origin");
+  assert.equal(sub.body.origin, marker(id), "the submission key travels in origin, behind the owner tag");
   assert.equal(sub.body.limit, 20, "a crawl without a limit takes the manifest's default, spec §10.2's bulk threshold");
   assert.equal(sub.body.maxDiscoveryDepth, 3);
   const up = await H.core.upstreamOf(id);
@@ -648,7 +652,7 @@ test("never delivered: with the core down the job is acknowledged, kept, and sub
   await h.start();
   await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(r.json.id)).state), 15000, "submitted after the core returned");
   assert.equal(h.core.submissions().length, 1);
-  assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [`fcpi:${r.json.id}`])).rows[0].n, 1);
+  assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [marker(r.json.id)])).rows[0].n, 1);
 });
 
 test("answer lost after the core created the job: reconciled by its submission key, never resubmitted", async () => {
@@ -698,7 +702,7 @@ test("gateway killed mid-submission that never reached the core: uncertain until
   assert.equal(during.json.receipt, `${ORIGIN}/platform/v1/jobs/${id}`);
   await waitFor(async () => ["QUEUED", "RUNNING"].includes((await h.job(id)).state), 15000, "resubmitted after the settle window");
   assert.equal(h.core.submissions().length, 2);
-  assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [`fcpi:${id}`])).rows[0].n, 1, "one upstream job carries the key");
+  assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [marker(id)])).rows[0].n, 1, "one upstream job carries the key");
   assert.deepEqual((await h.events(id)).map((e) => e.to_state).slice(0, 6), ["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN", "RECEIVED", "SUBMITTING", "QUEUED"]);
 });
 
@@ -720,7 +724,7 @@ test("the ledger fails after the core accepted a claimed job: the running gatewa
   assert.equal(h.gw.exitCode, null, "no restart");
   assert.deepEqual((await h.events(id)).map((e) => e.to_state).slice(0, 4), ["RECEIVED", "SUBMITTING", "SUBMISSION_UNCERTAIN", "QUEUED"]);
   assert.equal(h.core.submissions().length, 1, "no second submission");
-  assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [`fcpi:${id}`])).rows[0].n, 1);
+  assert.equal((await h.db.query("SELECT count(DISTINCT group_id)::int AS n FROM nuq.queue_scrape WHERE data->>'origin' = $1", [marker(id)])).rows[0].n, 1);
   await pending;
   // The upstream slot frees when the job ends, and the next job is submitted.
   await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 2 }) });
@@ -765,10 +769,10 @@ test("reconciliation that finds two upstream jobs for one submission keeps the e
   const id = (await h.db.query("SELECT id FROM fcpi_platform.job ORDER BY created_at DESC LIMIT 1")).rows[0].id;
   await h.kill();
   await pending;
-  const first = (await h.db.query("SELECT group_id FROM nuq.queue_scrape WHERE data->>'origin' = $1", [`fcpi:${id}`])).rows[0].group_id;
+  const first = (await h.db.query("SELECT group_id FROM nuq.queue_scrape WHERE data->>'origin' = $1", [marker(id)])).rows[0].group_id;
   // A later upstream job carrying the same marker, as a duplicate submission would leave.
   const dup = randomUUID();
-  await h.db.query("INSERT INTO nuq.queue_scrape (id, data, group_id, created_at) VALUES ($1, $2, $3, now() + interval '1 second')", [randomUUID(), { mode: "kickoff", origin: `fcpi:${id}`, crawl_id: dup }, dup]);
+  await h.db.query("INSERT INTO nuq.queue_scrape (id, data, group_id, created_at) VALUES ($1, $2, $3, now() + interval '1 second')", [randomUUID(), { mode: "kickoff", origin: marker(id), crawl_id: dup }, dup]);
   h.core.jobs.set(dup, { kind: "crawl", status: "scraping", docs: [], errors: [], body: {}, cancelled: false });
   h.core.mode = "ok";
   await h.start();
@@ -930,11 +934,11 @@ test("a ledger schema this build was not written for stops startup; an unreachab
     const t = setTimeout(() => { p.kill("SIGKILL"); resolve({ code: "running", out }); }, ms);
     p.on("exit", (code) => { clearTimeout(t); resolve({ code, out }); });
   });
-  // A ledger one version past the build's (version 2 since M5's extract kind).
-  await h.db.query("INSERT INTO fcpi_platform.schema_version (version) VALUES (3)");
+  // A ledger one version past the build's (version 3 since M7's artifacts, cache, page versions and outbox).
+  await h.db.query("INSERT INTO fcpi_platform.schema_version (version) VALUES (4)");
   const newer = await run(h.env());
   assert.equal(newer.code, 1);
-  assert.match(newer.out, /schema version is 3, this build needs 2; refusing to start/);
+  assert.match(newer.out, /schema version is 4, this build needs 3; refusing to start/);
   assert.doesNotMatch(newer.out, /"event":"listening"/);
   await h.db.query("DROP TABLE fcpi_platform.schema_version");
   const none = await run(h.env());

@@ -27,7 +27,9 @@
     { "id": "extract.status", "method": "GET", "path": "/v2/extract/{id}", "upstream": "gateway: services/access/src/extract.mjs", "scope": "read", "kind": "extract", "evidence": ["M5-E02"] },
     { "id": "platform.status", "method": "GET", "path": "/platform/v1/status", "scope": "read", "evidence": ["M3-C01"] },
     { "id": "platform.jobs", "method": "GET", "path": "/platform/v1/jobs", "scope": "read", "evidence": ["M3-C01"] },
-    { "id": "platform.job", "method": "GET", "path": "/platform/v1/jobs/{id}", "scope": "read", "evidence": ["M3-J01", "M3-J02"] }
+    { "id": "platform.job", "method": "GET", "path": "/platform/v1/jobs/{id}", "scope": "read", "evidence": ["M3-J01", "M3-J02"] },
+    { "id": "platform.artifact", "method": "GET", "path": "/platform/v1/artifacts/{id}", "scope": "read", "evidence": ["M7-B01", "M7-B03"] },
+    { "id": "platform.changes", "method": "POST", "path": "/platform/v1/changes", "scope": "scrape", "mode": "sync", "body": "changes", "evidence": ["M7-C03"] }
   ],
   "not_enabled": [
     { "method": "POST", "path": "/v2/parse", "reason": "document upload parsing is not offered; documents are parsed from URLs" },
@@ -42,15 +44,15 @@
   ],
   "scopes": ["read", "scrape", "map", "crawl", "batch", "cancel", "search", "extract"],
   "formats": {
-    "allowed": ["markdown", "html", "rawHtml", "links", "json"],
+    "allowed": ["markdown", "html", "rawHtml", "links", "json", "screenshot"],
+    "scrapeOnly": ["json", "screenshot"],
     "refused": {
-      "screenshot": "screenshots arrive with M7's verified browser extras",
       "summary": "summaries run a native model path this deployment does not enable; structured output is the json format (spec §14)",
       "question": "questions run a native model path this deployment does not enable; structured output is the json format (spec §14)",
       "highlights": "highlights run a native model path this deployment does not enable; structured output is the json format (spec §14)",
       "query": "queries run a native model path this deployment does not enable; structured output is the json format (spec §14)",
       "deterministicJson": "deterministic JSON runs a native model path this deployment does not enable; structured output is the json format (spec §14)",
-      "changeTracking": "change tracking arrives with M7",
+      "changeTracking": "Cloud's change tracking compares against its own index; this deployment's comparison of a page's normalized content is POST /platform/v1/changes",
       "images": "the images format is not verified in this deployment",
       "attributes": "the attributes format is not verified in this deployment",
       "branding": "the branding format is not offered",
@@ -60,7 +62,8 @@
       "video": "media extraction is not offered (spec §6)"
     },
     "objects": {
-      "json": { "schema": { "type": "schema", "required": true }, "prompt": { "type": "string", "maxLength": 4000 } }
+      "json": { "schema": { "type": "schema", "required": true }, "prompt": { "type": "string", "maxLength": 4000 } },
+      "screenshot": { "fullPage": { "type": "boolean" } }
     }
   },
   "fieldsets": {
@@ -74,7 +77,7 @@
       "removeBase64Images": { "type": "boolean" },
       "blockAds": { "type": "boolean" },
       "fastMode": { "type": "boolean" },
-      "proxy": { "type": "enum", "values": ["auto", "basic", "stealth"], "refused": { "enhanced": "enhanced retrieval arrives with M7" } },
+      "proxy": { "type": "enum", "values": ["auto", "basic", "stealth", "enhanced"] },
       "mobile": { "type": "const", "value": false },
       "skipTlsVerification": { "type": "const", "value": false }
     }
@@ -82,13 +85,22 @@
   "bodies": {
     "scrape": {
       "extends": "scrapeOptions",
-      "fields": { "url": { "type": "url", "required": true }, "origin": { "type": "replaced" } }
+      "fields": {
+        "url": { "type": "url", "required": true },
+        "actions": { "type": "actions", "maxItems": 10, "maxWaitMs": 15000, "selectorWaitMs": 5000,
+          "subset": { "wait": { "milliseconds": "milliseconds", "selector": "selector" }, "click": { "selector": "selector", "all": "boolean" }, "scroll": { "direction": "direction", "selector": "selector" }, "screenshot": { "fullPage": "boolean" }, "scrape": {} },
+          "refused": { "write": "typing into a page is not offered (spec §12: no credential filling or account changes)", "press": "key presses are not offered (spec §12)", "executeJavascript": "arbitrary JavaScript is not offered (spec §12)", "pdf": "printing a page to PDF is not offered", "click.all": "clicking every match is not offered; name one element", "screenshot.quality": "a capture is a lossless PNG; quality is not offered", "screenshot.viewport": "the viewport is fixed at 1280 x 800" } },
+        "maxAge": { "type": "integer", "min": 0, "max": 3600000 },
+        "storeInCache": { "type": "boolean" },
+        "origin": { "type": "replaced" }
+      }
     },
     "batch": {
       "extends": "scrapeOptions",
       "fields": {
         "urls": { "type": "urls", "required": true },
         "ignoreInvalidURLs": { "type": "boolean" },
+        "webhook": { "type": "webhook", "events": ["started", "completed", "failed"], "maxMetadataBytes": 4096, "refused": { "headers": "custom headers are not sent: every delivery is signed with the platform's key instead", "events.page": "per-page events are not sent; read the job's results" } },
         "origin": { "type": "replaced" }
       }
     },
@@ -108,6 +120,7 @@
         "regexOnFullURL": { "type": "boolean" },
         "delay": { "type": "number", "min": 0, "max": 60, "exclusiveMin": true },
         "scrapeOptions": { "type": "object", "fieldset": "scrapeOptions" },
+        "webhook": { "type": "webhook", "events": ["started", "completed", "failed"], "maxMetadataBytes": 4096, "refused": { "headers": "custom headers are not sent: every delivery is signed with the platform's key instead", "events.page": "per-page events are not sent; read the job's results" } },
         "origin": { "type": "replaced" }
       }
     },
@@ -153,6 +166,7 @@
         "ignoreInvalidURLs": { "type": "boolean" },
         "showSources": { "type": "boolean" },
         "scrapeOptions": { "type": "object", "fieldset": "scrapeOptions" },
+        "webhook": { "type": "webhook", "events": ["started", "completed", "failed"], "maxMetadataBytes": 4096, "refused": { "headers": "custom headers are not sent: every delivery is signed with the platform's key instead", "events.page": "per-page events are not sent; read the job's results" } },
         "origin": { "type": "replaced" }
       },
       "refused": {
@@ -162,23 +176,35 @@
         "limit": "extraction reads only the URLs given (spec §14)",
         "agent": "the Cloud agent product is not offered (spec §2.2)"
       }
+    },
+    "changes": {
+      "fields": {
+        "url": { "type": "url", "required": true },
+        "onlyMainContent": { "type": "boolean" },
+        "waitFor": { "type": "integer", "min": 0, "max": 15000 },
+        "proxy": { "type": "enum", "values": ["auto", "basic", "stealth", "enhanced"] },
+        "timeout": { "type": "integer", "min": 1000, "max": 90000 },
+        "origin": { "type": "replaced" }
+      }
     }
   },
   "refused": {
-    "actions": "page actions arrive with M7's verified safe subset",
+    "actions": "page actions are offered on /v2/scrape only, where each capture becomes an authorized artifact",
     "headers": "custom request headers to targets are not verified in this deployment",
-    "location": "geographic routing arrives with the proxy policy (M6)",
-    "webhook": "webhook delivery arrives with M7's signed outbox",
+    "location": "geographic routing is not offered: the residential route's geography stays unset (spec §10.2)",
+    "webhook": "webhooks are offered on crawl, batch and extract jobs, to approved destinations only",
     "appendToId": "appending to a batch is not offered: upstream runs every client as one team, so the gateway cannot scope it",
     "prompt": "prompt-generated crawl options run a native model path this deployment does not enable (spec §14)",
     "maxConcurrency": "the platform sets concurrency (spec §23.1)",
     "zeroDataRetention": "the platform's retention policy applies to every job (spec §21.3)",
     "integration": "integration tags are not recorded",
     "parsers": "parser selection is not verified in this deployment; PDFs are parsed by default",
-    "maxAge": "caching arrives with M7",
-    "minAge": "caching arrives with M7",
-    "storeInCache": "caching arrives with M7",
-    "lockdown": "caching arrives with M7",
+    "maxAge": "the cache serves /v2/scrape only",
+    "minAge": "a minimum cache age is not offered; ask for freshness with maxAge on /v2/scrape",
+    "storeInCache": "the cache serves /v2/scrape only",
+    "lockdown": "lockdown serves only from Cloud's index, which this deployment does not have",
+    "quality": "a capture is a lossless PNG; quality is not offered",
+    "viewport": "the viewport is fixed at 1280 x 800",
     "ignoreRobotsTxt": "robots.txt is always respected",
     "robotsUserAgent": "the crawler's robots.txt identity is fixed",
     "onlyCleanContent": "clean-content extraction is not verified in this deployment",
@@ -199,6 +225,9 @@
     "extract": { "maxUrls": 10, "deadlineMinutes": 20, "scrapeTimeoutMs": 60000, "maxDocumentBytes": 1048576 },
     "admission": { "maxOpenJobs": 20, "maxOpenUnits": 500, "activeUpstreamJobs": 1, "maxSyncInFlight": 4, "maxStatusReadsInFlight": 2 },
     "results": { "pageDefaultLimit": 100, "pageMaxLimit": 100, "pageMaxBytes": 10485760, "retentionDays": 7, "metadataDays": 30, "idempotencyHours": 24, "archiveResponseMaxBytes": 16777216 },
+    "cache": { "lifetimeSeconds": 3600 },
+    "extras": { "responseMaxBytes": 33554432, "inFlight": 1 },
+    "webhooks": { "maxAttempts": 5, "retryBaseSeconds": 30, "pollSeconds": 5, "signature": "x-fcpi-signature: v1=HMAC-SHA256(secret, <x-fcpi-timestamp>.<x-fcpi-event-id>.<body>), hex", "receiverGuidance": "verify the signature; refuse a timestamp more than 300 s from your clock; acknowledge an event id already seen without acting again (delivery is at least once)" },
     "auth": { "failuresPerMinute": 30 }
   },
   "mcp": {
@@ -208,7 +237,7 @@
     "limits": { "maxInFlight": 8, "maxToolCalls": 4, "exchangeTimeoutMs": 130000, "restTimeoutMs": 120000, "restResponseMaxBytes": 4194304, "toolTextMaxBytes": 262144, "statusPageDefault": 10, "statusPageMax": 20, "catalogTtlMs": 60000 },
     "tools": [
       { "name": "firecrawl_scrape", "route": "scrape", "title": "Scrape a page",
-        "description": "Fetch one public web page through the private Firecrawl platform and return its content in the requested formats. Waits for the page (up to 110 s). A result larger than the tool payload limit comes back as a marked excerpt with the sizes of what was cut.",
+        "description": "Fetch one public web page through the private Firecrawl platform and return its content in the requested formats. Waits for the page (up to 110 s). A result larger than the tool payload limit comes back as a marked excerpt with the sizes of what was cut. A screenshot, and each screenshot action, comes back as the address of an artifact only your token can read; maxAge (milliseconds) serves your own cached answer when it is younger than that; proxy enhanced asks for the budgeted enhanced provider alone.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true } },
       { "name": "firecrawl_map", "route": "map", "title": "Map a site's URLs",
         "description": "Discover the URLs of a public site from its sitemap and links, without scraping each page.",

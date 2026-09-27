@@ -74,3 +74,10 @@ export function makeFailureLimiter(perMinute) {
     },
   };
 }
+
+// M7 (M5 review S1): the tag the core and the retrieval service know a principal by, carried in the origin of every
+// request the gateway sends the core as "fcpi:<tag>:<rest>" (patch 0010 reads it). Sixteen hex digits of a labelled
+// SHA-256: the principal's name stays in the gateway, and caches keyed by the tag stay apart per principal. The gateway
+// replaces any client-sent origin, so no client can claim another's tag.
+export const ownerTag = (principal) => createHash("sha256").update(`fcpi.owner.v1|${principal}`).digest("hex").slice(0, 16);
+export const originFor = (principal, rest) => `fcpi:${ownerTag(principal)}:${rest}`;

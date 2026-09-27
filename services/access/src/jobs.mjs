@@ -4,7 +4,7 @@
 // lock cover everything else.
 //
 // Submission. A job is claimed (RECEIVED → SUBMITTING) and posted to the core with the job's
-// submission key in `origin`, over a connection of its own:
+// submission key in `origin` (M7: behind the principal's owner tag, markerOf), over a connection of its own:
 //   - no connection was ever made → it cannot have arrived: back to RECEIVED, retried later;
 //   - 200 with an id → QUEUED, mapped to that upstream id;
 //   - a 4xx other than 408/429 → the core refused it before creating anything: FAILED;
@@ -21,12 +21,16 @@
 // limits.proxy.holdMinutes.
 import { randomUUID } from "node:crypto";
 import { needsRoute, holdUrls } from "./routing.mjs";
+import { originFor } from "./auth.mjs";
 
 const PATH = { crawl: "/v2/crawl", batch: "/v2/batch/scrape" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const TERMINAL_UPSTREAM = new Set(["completed", "failed", "cancelled"]);
 // How long past its deadline an open job may hold the single upstream slot before it is closed.
 const STALL_GRACE_MINUTES = 30;
+// M7: the marker a job's upstream request carries in its origin: its submission key behind the principal's owner tag, which
+// the core carries to the retrieval service for its owner-scoped caches (patch 0010; M5 review S1).
+export const markerOf = (job) => originFor(job.principal, job.submission_key);
 
 export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) {
   const instance = randomUUID();
@@ -63,7 +67,9 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
     }
     let r;
     try {
-      r = await upstream.call("POST", PATH[job.kind], { body: { ...job.request, origin: job.submission_key }, timeoutMs: cfg.submitTimeoutMs, maxBytes: 1048576 });
+      // The webhook is the gateway's own outbox's (src/outbox.mjs), never the core's.
+      const { webhook: _hook, ...request } = job.request;
+      r = await upstream.call("POST", PATH[job.kind], { body: { ...request, origin: markerOf(job) }, timeoutMs: cfg.submitTimeoutMs, maxBytes: 1048576 });
     } catch (e) {
       if (!e.delivered) { await store.markRequeued(job.id, `not delivered (${e.code}): the core was never reached`); say({ job: job.id, action: "requeued", reason: e.code }); release(job); return job.id; }
       await store.markUncertain(job.id, `answer lost after connecting (${e.code})`);
@@ -97,7 +103,9 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
   }
 
   async function resolveOne(job) {
-    const groups = await store.markerGroups(job.submission_key);
+    // A job submitted before M7 carries its bare submission key; one since, the key behind its principal's owner tag.
+    let groups = await store.markerGroups(markerOf(job));
+    if (!groups.length) groups = await store.markerGroups(job.submission_key);
     if (groups.length) {
       const [keep, ...extra] = groups;
       await store.markSubmitted(job.id, keep.group_id, deadlineOf(job.kind), `reconciled: upstream ${keep.group_id} carries the submission key`);

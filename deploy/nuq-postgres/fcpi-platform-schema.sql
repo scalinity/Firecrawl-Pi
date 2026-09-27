@@ -103,6 +103,72 @@ ALTER TABLE fcpi_platform.job DROP CONSTRAINT IF EXISTS job_kind_check;
 ALTER TABLE fcpi_platform.job ADD CONSTRAINT job_kind_check CHECK (kind IN ('crawl', 'batch', 'extract'));
 INSERT INTO fcpi_platform.schema_version (version) VALUES (2) ON CONFLICT DO NOTHING;
 COMMIT;
+-- Version 3 (M7): four tables, each naming content-addressed files under the artifact root as job_document does, so
+-- the archive's sweep keeps what any of them names. The tables and the version move in one transaction.
+BEGIN;
+-- A capture a scrape returned (a screenshot), stored as an owner-bound artifact served at /platform/v1/artifacts/{id}
+-- until it expires (spec §12, §16.1).
+CREATE TABLE IF NOT EXISTS fcpi_platform.artifact (
+  id          uuid PRIMARY KEY,
+  principal   text NOT NULL,
+  sha256      text NOT NULL CHECK (sha256 ~ '^[0-9a-f]{64}$'),
+  bytes       integer NOT NULL CHECK (bytes > 0),
+  mime        text NOT NULL CHECK (mime IN ('image/png')),
+  width       integer NOT NULL CHECK (width > 0),
+  height      integer NOT NULL CHECK (height > 0),
+  truncated   boolean NOT NULL,
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  expires_at  timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS artifact_sha256 ON fcpi_platform.artifact (sha256);
+CREATE INDEX IF NOT EXISTS artifact_expires ON fcpi_platform.artifact (expires_at);
+-- A successful scrape's answer, served again to the same principal for the same request within its freshness (spec
+-- §21.3, AC21). key: the request's hash without its cache options.
+CREATE TABLE IF NOT EXISTS fcpi_platform.page_cache (
+  principal   text NOT NULL,
+  key         text NOT NULL CHECK (key ~ '^[0-9a-f]{64}$'),
+  sha256      text NOT NULL CHECK (sha256 ~ '^[0-9a-f]{64}$'),
+  bytes       integer NOT NULL CHECK (bytes > 0),
+  created_at  timestamptz NOT NULL DEFAULT now(),
+  expires_at  timestamptz NOT NULL,
+  PRIMARY KEY (principal, key)
+);
+CREATE INDEX IF NOT EXISTS page_cache_sha256 ON fcpi_platform.page_cache (sha256);
+-- The last successful version of a page a principal asked /platform/v1/changes about (spec §31.3): its markdown, and
+-- the hash of its normalized text that the next comparison is made against.
+CREATE TABLE IF NOT EXISTS fcpi_platform.page_version (
+  principal         text NOT NULL,
+  key               text NOT NULL CHECK (key ~ '^[0-9a-f]{64}$'),
+  url               text NOT NULL,
+  sha256            text NOT NULL CHECK (sha256 ~ '^[0-9a-f]{64}$'),
+  bytes             integer NOT NULL CHECK (bytes > 0),
+  normalized_sha256 text NOT NULL CHECK (normalized_sha256 ~ '^[0-9a-f]{64}$'),
+  scraped_at        timestamptz NOT NULL DEFAULT now(),
+  expires_at        timestamptz NOT NULL,
+  PRIMARY KEY (principal, key)
+);
+CREATE INDEX IF NOT EXISTS page_version_sha256 ON fcpi_platform.page_version (sha256);
+-- The webhook outbox (spec §31.3, AC20): one event per job and type, written in the transaction of the transition
+-- that raised it, delivered at least once by the gateway's outbox round, retried within a bound, then kept as DEAD.
+CREATE TABLE IF NOT EXISTS fcpi_platform.webhook_event (
+  id            uuid PRIMARY KEY,
+  job_id        uuid NOT NULL,
+  principal     text NOT NULL,
+  type          text NOT NULL,
+  destination   text NOT NULL,
+  body          text NOT NULL,
+  state         text NOT NULL CHECK (state IN ('PENDING', 'DELIVERED', 'DEAD')),
+  attempts      integer NOT NULL DEFAULT 0,
+  next_at       timestamptz NOT NULL DEFAULT now(),
+  last_status   integer,
+  last_error    text,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  delivered_at  timestamptz,
+  UNIQUE (job_id, type)
+);
+CREATE INDEX IF NOT EXISTS webhook_event_due ON fcpi_platform.webhook_event (next_at) WHERE state = 'PENDING';
+INSERT INTO fcpi_platform.schema_version (version) VALUES (3) ON CONFLICT DO NOTHING;
+COMMIT;
 
 DO $$
 BEGIN
@@ -139,7 +205,8 @@ GRANT EXECUTE ON FUNCTION fcpi_platform.upstream_groups_for_marker(text) TO fcpi
 
 REVOKE ALL ON SCHEMA fcpi_platform FROM PUBLIC;
 GRANT USAGE ON SCHEMA fcpi_platform TO fcpi_gateway;
-GRANT SELECT, INSERT, UPDATE, DELETE ON fcpi_platform.job, fcpi_platform.job_event, fcpi_platform.idempotency, fcpi_platform.job_document TO fcpi_gateway;
+GRANT SELECT, INSERT, UPDATE, DELETE ON fcpi_platform.job, fcpi_platform.job_event, fcpi_platform.idempotency, fcpi_platform.job_document,
+  fcpi_platform.artifact, fcpi_platform.page_cache, fcpi_platform.page_version, fcpi_platform.webhook_event TO fcpi_gateway;
 GRANT SELECT ON fcpi_platform.schema_version TO fcpi_gateway;
 -- The gateway reads nothing of NuQ's or the retrieval service's directly.
 REVOKE ALL ON SCHEMA nuq FROM fcpi_gateway;

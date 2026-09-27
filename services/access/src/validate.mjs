@@ -79,6 +79,8 @@ function checkField(name, spec, v, manifest, path) {
       return v;
     }
     case "urls": if (!Array.isArray(v)) throw bad(`'${where}' must be an array of URLs`); return v; // each URL is checked by validateBody
+    case "actions": return checkActions(v, spec, where);
+    case "webhook": return checkWebhook(v, spec, where);
     case "formats": return checkFormats(v, manifest);
     case "object": return checkObject(v, fieldsOf(manifest, { extends: spec.fieldset, fields: {} }), manifest, where);
     default: throw new Error(`capability manifest: unknown field type ${spec.type}`);
@@ -86,6 +88,65 @@ function checkField(name, spec, v, manifest, path) {
 }
 
 const fieldsOf = (manifest, body) => ({ ...(body.extends ? manifest.fieldsets[body.extends] : {}), ...body.fields });
+
+// M7: page actions, held to the manifest's subset (spec §12): each action's type and options are named there, and an
+// action outside it is refused by name before any work begins. Waits add up to at most spec.maxWaitMs, a selector wait
+// counting spec.selectorWaitMs. The retrieval service checks the list again.
+const unsupported = (option, msg) => new RequestError(400, "UNSUPPORTED_OPTION", msg, { option });
+function checkActions(v, spec, where) {
+  if (!Array.isArray(v)) throw bad(`'${where}' must be an array of actions`);
+  if (v.length > spec.maxItems) throw unsupported(where, `'${where}' may hold at most ${spec.maxItems} actions in this deployment.`);
+  let waited = 0;
+  return v.map((a, i) => {
+    const at = `${where}[${i}]`;
+    if (!a || typeof a !== "object" || Array.isArray(a) || typeof a.type !== "string") throw bad(`'${at}' must be an object with a type`);
+    const opts = own(spec.subset, a.type);
+    if (!opts) throw unsupported(`${where}.${a.type}`, `action '${a.type}' is not supported by this deployment: ${own(spec.refused, a.type) ?? `the subset is ${Object.keys(spec.subset).join(", ")}`}.`);
+    for (const k of Object.keys(a)) {
+      if (k === "type") continue;
+      if (!Object.hasOwn(opts, k)) throw unsupported(`${at}.${k}`, `'${at}.${k}' is not supported by this deployment: ${own(spec.refused, `${a.type}.${k}`) ?? `action '${a.type}' takes ${Object.keys(opts).join(", ") || "no options"}`}.`);
+      if (k === "all" && a.all === true) throw unsupported(`${at}.all`, `'${at}.all' is not supported by this deployment: ${own(spec.refused, "click.all")}.`);
+    }
+    const out = { type: a.type };
+    for (const [k, t] of Object.entries(opts)) {
+      if (a[k] === undefined) continue;
+      if (t === "selector" && (typeof a[k] !== "string" || !a[k] || a[k].length > 256)) throw bad(`'${at}.${k}' must be a CSS selector of 1-256 characters`);
+      if (t === "boolean" && typeof a[k] !== "boolean") throw bad(`'${at}.${k}' must be a boolean`);
+      if (t === "direction" && !["up", "down"].includes(a[k])) throw bad(`'${at}.${k}' must be up or down`);
+      if (t === "milliseconds" && (!Number.isInteger(a[k]) || a[k] < 1 || a[k] > spec.maxWaitMs)) throw bad(`'${at}.${k}' must be an integer from 1 to ${spec.maxWaitMs}`);
+      if (k !== "all") out[k] = a[k];
+    }
+    if (a.type === "wait") {
+      if ((out.milliseconds === undefined) === (out.selector === undefined)) throw bad(`'${at}': a wait takes milliseconds or a selector, not both`);
+      waited += out.milliseconds ?? spec.selectorWaitMs;
+    }
+    if (a.type === "click" && out.selector === undefined) throw bad(`'${at}.selector' is required`);
+    if (waited > spec.maxWaitMs) throw unsupported(where, `the actions wait ${waited} ms in all; at most ${spec.maxWaitMs} ms is offered (a selector wait counts ${spec.selectorWaitMs} ms).`);
+    return out;
+  });
+}
+
+// M7: a job's webhook (spec §31.3): the destination (which the retrieval service must approve before the job is
+// accepted), the caller's own metadata, returned in every event, and the events wanted. Custom headers are not sent:
+// every delivery is signed instead.
+function checkWebhook(v, spec, where) {
+  if (!v || typeof v !== "object" || Array.isArray(v)) throw bad(`'${where}' must be an object with a url`);
+  for (const k of Object.keys(v)) {
+    if (!["url", "metadata", "events"].includes(k)) throw unsupported(`${where}.${k}`, `'${where}.${k}' is not supported by this deployment: ${own(spec.refused, k) ?? "a webhook takes url, metadata and events"}.`);
+  }
+  if (typeof v.url !== "string" || v.url.length > 2048) throw bad(`'${where}.url' must be a URL of at most 2048 characters`);
+  const out = { url: v.url };
+  if (v.metadata !== undefined) {
+    if (!v.metadata || typeof v.metadata !== "object" || Array.isArray(v.metadata) || Buffer.byteLength(JSON.stringify(v.metadata)) > spec.maxMetadataBytes) throw bad(`'${where}.metadata' must be an object of at most ${spec.maxMetadataBytes} bytes`);
+    out.metadata = v.metadata;
+  }
+  if (v.events !== undefined) {
+    if (!Array.isArray(v.events) || v.events.length === 0 || v.events.some((e) => typeof e !== "string")) throw bad(`'${where}.events' must be a non-empty array`);
+    for (const e of v.events) if (!spec.events.includes(e)) throw unsupported(`${where}.events.${e}`, `webhook event '${e}' is not supported by this deployment: ${own(spec.refused, `events.${e}`) ?? `the events are ${spec.events.join(", ")}`}.`);
+    out.events = [...new Set(v.events)];
+  }
+  return out;
+}
 
 function checkObject(obj, fields, manifest, path = "", refused = {}) {
   if (!obj || typeof obj !== "object" || Array.isArray(obj)) throw bad(`${path ? `'${path}'` : "the body"} must be a JSON object`);
@@ -112,9 +173,12 @@ function checkObject(obj, fields, manifest, path = "", refused = {}) {
 export function validateBody(kind, raw, manifest) {
   const body = checkObject(raw, fieldsOf(manifest, manifest.bodies[kind]), manifest, "", manifest.bodies[kind].refused ?? {});
   // The json format runs through the gateway's extraction on /v2/scrape alone; anywhere else it would reach
-  // the core's own model path, which this deployment does not enable (spec §14).
-  const jsonAt = [body.formats, body.scrapeOptions?.formats].some((fs) => Array.isArray(fs) && fs.some((f) => typeof f === "object" && f.type === "json"));
-  if (jsonAt && kind !== "scrape") throw new RequestError(400, "UNSUPPORTED_OPTION", "format 'json' is offered on /v2/scrape; for many pages, use /v2/extract.", { option: "formats.json" });
+  // the core's own model path, which this deployment does not enable (spec §14). M7: a screenshot is stored as an
+  // owner-bound artifact by the /v2/scrape path alone, so it too is offered there only.
+  for (const name of manifest.formats.scrapeOnly ?? ["json"]) {
+    const at = [body.formats, body.scrapeOptions?.formats].some((fs) => Array.isArray(fs) && fs.some((f) => (typeof f === "object" ? f.type : f) === name));
+    if (at && kind !== "scrape") throw new RequestError(400, "UNSUPPORTED_OPTION", name === "json" ? "format 'json' is offered on /v2/scrape; for many pages, use /v2/extract." : `format '${name}' is offered on /v2/scrape only.`, { option: `formats.${name}` });
+  }
   if (kind === "batch") {
     const L = manifest.limits.batch;
     if (!Array.isArray(raw.urls) || raw.urls.length === 0) throw bad("'urls' must be a non-empty array");

@@ -119,6 +119,18 @@ export function checkManifest(m, { mcp = false } = {}) {
   pos(L.results.idempotencyHours, "limits.results.idempotencyHours", 72);
   pos(L.results.archiveResponseMaxBytes, "limits.results.archiveResponseMaxBytes", 32 * 1048576);
   pos(L.auth.failuresPerMinute, "limits.auth.failuresPerMinute", 600);
+  // M7: the scrape cache's lifetime (spec §21.3's one hour at most) bounds the freshness a caller may ask for; the
+  // browser extras' answers are buffered one at a time within the gateway's memory; the webhook outbox's retries are
+  // finite (spec §12, §31.3).
+  pos(L.cache?.lifetimeSeconds, "limits.cache.lifetimeSeconds", 3600);
+  const scrape = m.bodies.scrape.fields;
+  if (scrape.maxAge && scrape.maxAge.max > L.cache.lifetimeSeconds * 1000) throw new Error("capability manifest: scrape maxAge may not exceed the cache's lifetime");
+  if (scrape.actions && (scrape.actions.maxItems > 10 || scrape.actions.maxWaitMs > 15000)) throw new Error("capability manifest: actions exceed spec §12's ten actions and 15 s of waiting");
+  pos(L.extras?.responseMaxBytes, "limits.extras.responseMaxBytes", 48 * 1048576);
+  pos(L.extras?.inFlight, "limits.extras.inFlight", 2);
+  pos(L.webhooks?.maxAttempts, "limits.webhooks.maxAttempts", 10);
+  pos(L.webhooks?.retryBaseSeconds, "limits.webhooks.retryBaseSeconds", 600);
+  pos(L.webhooks?.pollSeconds, "limits.webhooks.pollSeconds", 60);
   const crawl = m.bodies.crawl.fields;
   if (crawl.limit.max > 200 || crawl.maxDiscoveryDepth.max > 3) throw new Error("capability manifest: crawl limits exceed spec §23.1's hard caps");
   if (m.bodies.map.fields.limit.max > 1000) throw new Error("capability manifest: map limit exceeds spec §23.1's 1,000");

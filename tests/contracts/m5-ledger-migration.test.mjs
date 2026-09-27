@@ -32,7 +32,7 @@ test("a version-1 ledger gains the extract kind and version 2 in place, and keep
     // Version 1's shape: crawl and batch jobs only, version 2 not yet recorded, and a job in the ledger.
     await db.query(`ALTER TABLE fcpi_platform.job DROP CONSTRAINT job_kind_check;
       ALTER TABLE fcpi_platform.job ADD CONSTRAINT job_kind_check CHECK (kind IN ('crawl', 'batch'));
-      DELETE FROM fcpi_platform.schema_version WHERE version = 2;`);
+      DELETE FROM fcpi_platform.schema_version WHERE version >= 2;`);
     const insert = (kind) => db.query(`INSERT INTO fcpi_platform.job (id, principal, client_label, kind, state, submission_key, request_hash, request, units, metadata_expire_at)
       VALUES ($1, 'p', 'l', $2, 'RECEIVED', $3, 'h', '{}', 1, now() + interval '30 days')`, [randomUUID(), kind, `fcpi:${randomUUID()}`]);
     await insert("crawl");
@@ -40,7 +40,8 @@ test("a version-1 ledger gains the extract kind and version 2 in place, and keep
     assert.equal((await db.query("SELECT max(version) AS v FROM fcpi_platform.schema_version")).rows[0].v, 1);
     // The schema applied again, as scripts/m3/pi-platform-db.sh applies it at every bring-up.
     await db.query(SCHEMA);
-    assert.equal((await db.query("SELECT max(version) AS v FROM fcpi_platform.schema_version")).rows[0].v, 2);
+    // Version 2 is recorded (later versions, M7's 3 among them, are recorded beside it).
+    assert.equal((await db.query("SELECT count(*)::int AS n FROM fcpi_platform.schema_version WHERE version = 2")).rows[0].n, 1);
     await insert("extract");
     assert.deepEqual((await db.query("SELECT kind FROM fcpi_platform.job ORDER BY kind")).rows.map((r) => r.kind), ["crawl", "extract"]);
   } finally {

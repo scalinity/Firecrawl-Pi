@@ -16,20 +16,21 @@ test("a scrape keeps accepted options, drops origin, and adds nothing", () => {
 });
 
 test("refused options name themselves and why, before anything else", () => {
-  refused(() => validateBody("scrape", { url: "https://example.com", actions: [] }, M), "UNSUPPORTED_OPTION", /actions.*M7/);
-  refused(() => validateBody("scrape", { url: "https://example.com", formats: ["screenshot"] }, M), "UNSUPPORTED_OPTION", /screenshot/);
+  // M7: actions and screenshots are offered on /v2/scrape only.
+  refused(() => validateBody("batch", { urls: ["https://example.com"], actions: [] }, M), "UNSUPPORTED_OPTION", /\/v2\/scrape only/);
+  refused(() => validateBody("batch", { urls: ["https://example.com"], formats: ["screenshot"] }, M), "UNSUPPORTED_OPTION", /screenshot/);
   refused(() => validateBody("scrape", { url: "https://example.com", formats: [{ type: "summary" }] }, M), "UNSUPPORTED_OPTION", /native model path/);
   refused(() => validateBody("batch", { urls: ["https://example.com"], appendToId: "0190f1a0-0000-7000-8000-000000000000" }, M), "UNSUPPORTED_OPTION", /one team/);
-  refused(() => validateBody("crawl", { url: "https://example.com", webhook: "https://hook.example" }, M), "UNSUPPORTED_OPTION", /outbox/);
+  refused(() => validateBody("scrape", { url: "https://example.com", webhook: { url: "https://hook.example" } }, M), "UNSUPPORTED_OPTION", /crawl, batch and extract/);
   refused(() => validateBody("crawl", { url: "https://example.com", scrapeOptions: { headers: { cookie: "x" } } }, M), "UNSUPPORTED_OPTION", /headers/);
   refused(() => validateBody("scrape", { url: "https://example.com", __agentInterop: {} }, M), "UNSUPPORTED_OPTION", /internal/);
   refused(() => validateBody("scrape", { url: "https://example.com", mobile: true }, M), "UNSUPPORTED_OPTION");
   refused(() => validateBody("scrape", { url: "https://example.com", skipTlsVerification: true }, M), "UNSUPPORTED_OPTION");
   refused(() => validateBody("crawl", { url: "https://example.com", ignoreRobotsTxt: true }, M), "UNSUPPORTED_OPTION", /robots/);
-  refused(() => validateBody("scrape", { url: "https://example.com", proxy: "enhanced" }, M), "UNSUPPORTED_OPTION", /M7/);
-  // M6: the residential route is offered.
+  // M6: the residential route is offered; M7: the enhanced provider too.
   assert.equal(validateBody("scrape", { url: "https://example.com", proxy: "stealth" }, M).body.proxy, "stealth");
-  refused(() => validateBody("crawl", { url: "https://example.com", scrapeOptions: { proxy: "enhanced" } }, M), "UNSUPPORTED_OPTION", /M7/);
+  assert.equal(validateBody("scrape", { url: "https://example.com", proxy: "enhanced" }, M).body.proxy, "enhanced");
+  assert.equal(validateBody("crawl", { url: "https://example.com", scrapeOptions: { proxy: "enhanced" } }, M).body.scrapeOptions.proxy, "enhanced");
   refused(() => validateBody("scrape", { url: "https://example.com", proxy: "turbo" }, M), "BAD_REQUEST");
 });
 
@@ -99,7 +100,7 @@ test("search: bounded query and limit, and every option the pinned client would 
   refused(() => validateBody("search", { query: "x", limit: 11 }, M), "BAD_REQUEST");
   refused(() => validateBody("search", { query: "x".repeat(501) }, M), "BAD_REQUEST");
   refused(() => validateBody("search", {}, M), "BAD_REQUEST", /query.*required/);
-  for (const [k, v, why] of [["tbs", "qdr:d", /time filters/], ["country", "de", /country/], ["categories", ["github"], /categories/], ["sources", [{ type: "news" }], /web results/], ["highlights", true, /Cloud index/], ["location", "Berlin", /M6/]]) {
+  for (const [k, v, why] of [["tbs", "qdr:d", /time filters/], ["country", "de", /country/], ["categories", ["github"], /categories/], ["sources", [{ type: "news" }], /web results/], ["highlights", true, /Cloud index/], ["location", "Berlin", /geography stays unset/]]) {
     refused(() => validateBody("search", { query: "x", [k]: v }, M), "UNSUPPORTED_OPTION", why);
   }
 });

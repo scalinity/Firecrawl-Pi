@@ -56,8 +56,10 @@ export function makeUpstream(cfg) {
 
   // A synchronous route: the answer is streamed back as it arrives (a scrape can carry megabytes).
   // Failures before upstream headers are the gateway's own 502/504; after them the client response
-  // can only be cut. A client that goes away cancels the upstream request.
-  function forward(res, path, body, log, extraHeaders) {
+  // can only be cut. A client that goes away cancels the upstream request. M7: keep, when given, is told the whole
+  // answer once it has been sent (keep.onComplete(status, buffer), the buffer null past keep.maxBytes), and nothing when
+  // the answer failed; the stream to the client is never held back for it.
+  function forward(res, path, body, log, extraHeaders, keep = null) {
     let settled = false, timedOut = false;
     const finish = (status) => { if (!settled) { settled = true; log(status); } };
     const fail = () => {
@@ -73,8 +75,11 @@ export function makeUpstream(cfg) {
       const headers = { ...extraHeaders };
       for (const [k, v] of Object.entries(ur.headers)) if (PASS.has(k)) headers[k] = v;
       res.writeHead(ur.statusCode, headers);
+      const kept = [];
+      let keptBytes = 0;
+      if (keep) ur.on("data", (c) => { keptBytes += c.length; if (keptBytes <= keep.maxBytes) kept.push(c); });
       ur.pipe(res);
-      ur.on("end", () => finish(ur.statusCode));
+      ur.on("end", () => { finish(ur.statusCode); if (keep) Promise.resolve(keep.onComplete(ur.statusCode, keptBytes <= keep.maxBytes ? Buffer.concat(kept) : null)).catch(() => {}); });
       ur.on("error", fail);
       ur.on("close", () => { if (!ur.complete) fail(); });
     });

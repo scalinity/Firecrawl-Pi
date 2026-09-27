@@ -10,6 +10,7 @@
 //      closes the job SUCCEEDED, PARTIAL (a page or unit failed) or FAILED, with the failures named.
 // A job past its deadline is closed FAILED. Nothing here chooses a model or holds a provider credential.
 import { randomUUID } from "node:crypto";
+import { originFor } from "./auth.mjs";
 
 // A page's markdown cut to `max` bytes, where the model adapter cuts it too (its budget policy's
 // maxDocumentBytes): the gateway keeps and sends nothing the model would not read (review W4).
@@ -46,7 +47,7 @@ export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log 
     if (failed) return { failure: JSON.parse((await archive.read(failed.sha256)).toString("utf8")).failure };
     const so = job.request.scrapeOptions ?? {};
     // markdown alone: the model reads text, and the other formats would only cost memory here.
-    const body = { ...so, url, formats: ["markdown"], timeout: Math.min(so.timeout ?? L.extract.scrapeTimeoutMs, L.extract.scrapeTimeoutMs), origin: job.submission_key };
+    const body = { ...so, url, formats: ["markdown"], timeout: Math.min(so.timeout ?? L.extract.scrapeTimeoutMs, L.extract.scrapeTimeoutMs), origin: originFor(job.principal, job.submission_key) };
     let r;
     try { r = await upstream.call("POST", "/v2/scrape", { body, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
     catch (e) {

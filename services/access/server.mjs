@@ -18,11 +18,16 @@
 //   - M6: a crawl or batch past the manifest's bulkPages asks for the residential route from the start, is
 //     refused as PROXY_REQUIRED when the route cannot be had, and holds its domains on that route for its life
 //     (src/routing.mjs).
+//   - M7: /v2/scrape serves screenshots and the safe action subset, each capture stored as an owner-bound artifact at
+//     /platform/v1/artifacts/{id} (src/artifacts.mjs), and a cache of successful answers per principal and request
+//     (maxAge, storeInCache); /platform/v1/changes compares a page with its last version (src/changes.mjs); crawl, batch
+//     and extract jobs may name an approved webhook, whose events the outbox delivers (src/outbox.mjs). Every request to
+//     the core carries the principal's owner tag in its origin.
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { pipeline } from "node:stream/promises";
 import { loadConfig } from "./src/config.mjs";
-import { makeRegistry, makeFailureLimiter } from "./src/auth.mjs";
+import { makeRegistry, makeFailureLimiter, originFor } from "./src/auth.mjs";
 import { validateBody, requestHash, RequestError } from "./src/validate.mjs";
 import { makeStore, AdmissionError, SCHEMA_VERSION } from "./src/store.mjs";
 import { openArchive } from "./src/archive.mjs";
@@ -33,6 +38,9 @@ import { makeExtractor } from "./src/extractor.mjs";
 import { makeExtractJobs } from "./src/extract.mjs";
 import { makeJsonScrape } from "./src/jsonscrape.mjs";
 import { routeBody, routeRefusal } from "./src/routing.mjs";
+import { storeCaptures } from "./src/artifacts.mjs";
+import { makeChanges } from "./src/changes.mjs";
+import { makeOutbox } from "./src/outbox.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -45,6 +53,9 @@ const upstream = makeUpstream(cfg);
 const extractor = cfg.extractUrl ? makeExtractor({ url: cfg.extractUrl, token: cfg.extractToken }) : null;
 const jobs = makeJobs({ cfg, store, upstream, archive, routes: extractor, log: (o) => log({ build: cfg.build, ...o }) });
 const extractJobs = extractor ? makeExtractJobs({ cfg, store, upstream, archive, extractor, log: (o) => log({ build: cfg.build, ...o }) }) : null;
+// M7: the webhook outbox's delivery round (it needs the retrieval service, which alone may reach a receiver), and changes.
+const outbox = extractor ? makeOutbox({ store, extractor, limits: L, log: (o) => log({ build: cfg.build, ...o }) }) : null;
+const changes = makeChanges({ cfg, store, upstream, archive, originFor });
 const PATH = { ...jobs.PATH, extract: "/v2/extract" };
 const started = Date.now();
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -55,7 +66,7 @@ const template = (p) => new RegExp(`^${p.replace(/[.*+?^$()|[\]\\]/g, "\\$&").re
 const ROUTES = M.routes.map((r) => ({ ...r, re: template(r.path) }));
 const DISABLED = M.not_enabled.map((r) => ({ ...r, re: template(r.path) }));
 
-let syncInFlight = 0, statusReads = 0;
+let syncInFlight = 0, statusReads = 0, extrasInFlight = 0;
 let quota = null;
 const quotaBytes = async () => (quota ??= await archive.quotaBytes());
 
@@ -139,6 +150,19 @@ async function submit(ctx, route) {
       const x = routeRefusal(residential);
       log({ event: "route_refused", request_id: ctx.id, kind: route.kind, units, reason: x.body.route.residential });
       return ctx.send(x.status, x.body, x.retryAfter ? { "retry-after": String(x.retryAfter) } : {});
+    }
+  }
+  // M7: a webhook's destination must be one the retrieval service approves (the egress policy's list), checked before
+  // any receipt is written; a retry of a job already accepted gets its receipt whatever the list says now.
+  if (body.webhook) {
+    const c = extractor ? await extractor.webhookCheck(body.webhook.url).catch(() => null) : { status: 200, json: { allowed: false, reason: "NO_DELIVERY_SERVICE" } };
+    if (c?.status !== 200 || typeof c.json?.allowed !== "boolean") {
+      return ctx.send(503, { success: false, code: "WEBHOOK_CHECK_UNAVAILABLE", error: "Whether the webhook destination is approved could not be checked; nothing was accepted." }, { "retry-after": "10" });
+    }
+    if (!c.json.allowed) {
+      const prior = idemKey !== undefined ? await store.idempotentJob({ principal: ctx.client.principal, kind: route.kind, idemKey, hash: requestHash(route.kind, body) }) : null;
+      if (prior?.job) { ctx.job = prior.job.id; return submissionAnswer(ctx, route, prior.job, invalidURLs, true); }
+      return ctx.send(400, { success: false, code: "UNSUPPORTED_OPTION", option: "webhook.url", error: `The webhook destination is not approved in this deployment (${c.json.reason}); nothing was accepted.` });
     }
   }
   let admitted;
@@ -291,18 +315,21 @@ async function extractStatus(ctx, route, id) {
 }
 
 // ---- platform routes --------------------------------------------------------------------------------
-const receipt = (ctx, job, events) => ({
+const receipt = (ctx, job, events, hooks) => ({
   id: job.id, kind: job.kind, state: job.state, createdAt: iso(job.created_at), updatedAt: iso(job.updated_at), submittedAt: iso(job.submitted_at),
   finishedAt: iso(job.finished_at), deadline: iso(job.deadline), resultsExpireAt: iso(job.results_expire_at), metadataExpireAt: iso(job.metadata_expire_at),
   submissionKey: job.submission_key, upstreamId: job.upstream_id, units: job.units, dispatchAttempts: job.dispatch_attempts,
   cancelRequestedAt: iso(job.cancel_requested_at), upstreamStatus: job.upstream_status, completed: job.completed, total: job.total, archived: job.archived,
   errorCount: job.errors?.errors?.length ?? 0, error: job.error ? { code: job.error_code, message: job.error, httpStatus: job.http_status } : null,
   results: `${ctx.origin}${PATH[job.kind]}/${job.id}`, ...(events ? { events: events.map((e) => ({ at: iso(e.at), from: e.from_state, to: e.to_state, detail: e.detail })) } : {}),
+  // M7: the job's webhook events and their delivery, a DEAD one among them with its last status and error (the dead letter).
+  ...(hooks ? { webhooks: hooks.map((h) => ({ eventId: h.id, type: h.type, state: h.state, attempts: h.attempts, lastStatus: h.last_status, lastError: h.last_error,
+    createdAt: iso(h.created_at), deliveredAt: iso(h.delivered_at) })) } : {}),
 });
 
 async function platformJob(ctx, route, id) {
   const job = await jobFor(ctx, route, id);
-  if (job) ctx.send(200, { success: true, job: receipt(ctx, job, await store.events(job.id)) });
+  if (job) ctx.send(200, { success: true, job: receipt(ctx, job, await store.events(job.id), job.request?.webhook ? await store.jobWebhooks(job.id) : null) });
 }
 async function platformJobs(ctx) {
   const sp = ctx.url.searchParams;
@@ -326,17 +353,110 @@ async function platformStatus(ctx) {
 
 // ---- synchronous routes -----------------------------------------------------------------------------
 const overloaded = (ctx) => ctx.send(503, { success: false, code: "OVERLOADED", error: `${syncInFlight} synchronous requests are already in flight (limit ${L.admission.maxSyncInFlight}); retry shortly.` }, { "retry-after": "5" });
+// What the core is sent for a synchronous route: the body without the gateway's own cache options, and the principal's
+// owner tag in its origin (M7).
+function coreBody(ctx, route, body) {
+  const { maxAge: _a, storeInCache: _s, ...rest } = body;
+  return { ...rest, origin: originFor(ctx.client.principal, route.id) };
+}
 async function sync(ctx, route) {
   const raw = await readJson(ctx.req);
   const { body } = validateBody(route.body, raw, M);
   // M5: a scrape asking for the json format is scraped, then extracted (below).
   const json = route.id === "scrape" ? (body.formats ?? []).find((f) => typeof f === "object" && f.type === "json") : null;
-  if (json) return extractor ? scrapeWithJson(ctx, body, json) : extractionUnavailable(ctx);
+  if (json) return extractor ? scrapeWithJson(ctx, coreBody(ctx, route, body), json) : extractionUnavailable(ctx);
   // Search that scrapes its results acquires those pages: a token needs the 'scrape' scope for it (review W7).
   if (route.id === "search" && body.scrapeOptions && !ctx.client.scopes.has("scrape")) return ctx.send(403, { success: false, code: "INSUFFICIENT_SCOPE", error: "Scraping search results needs the 'scrape' scope." });
+  // M7: a scrape with a screenshot or actions returns captures, stored as artifacts before the answer leaves (below).
+  const extras = route.id === "scrape" && ((body.formats ?? []).some((f) => (typeof f === "object" ? f.type : f) === "screenshot") || (body.actions ?? []).length > 0);
+  if (extras) return scrapeWithExtras(ctx, route, body);
+  if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
+  if (route.id === "scrape") return cachedScrape(ctx, route, body);
+  syncInFlight += 1;
+  upstream.forward(ctx.res, route.path, coreBody(ctx, route, body), (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
+}
+
+// M7: the scrape cache (spec §21.3, AC21). A cached answer is served only to the principal that stored it, only for the
+// same request (its hash without the cache options), and only when younger than the maxAge the caller gives (0, the
+// default, never reads). A successful answer whose page answered 2xx is stored for limits.cache.lifetimeSeconds unless
+// storeInCache is false; an error page, a failure or an answer past the archive's size is never stored. A hit reaches
+// neither the core nor any provider, so it costs no attempt and no money.
+async function cachedScrape(ctx, route, body) {
+  const principal = ctx.client.principal, maxAge = body.maxAge ?? 0;
+  const { maxAge: _a, storeInCache: _s, ...request } = body;
+  const key = requestHash("scrape", request);
+  if (maxAge > 0) {
+    const hit = await store.cacheGet(principal, key, maxAge);
+    const doc = hit ? await archive.read(hit.sha256).then((b) => JSON.parse(b.toString("utf8")), () => null) : null;
+    if (doc?.data?.metadata) {
+      Object.assign(doc.data.metadata, { cacheState: "hit", cachedAt: iso(hit.created_at) });
+      ctx.extra = { cache: "hit" };
+      return ctx.send(200, doc, { "x-fcpi-cache": "hit" });
+    }
+  }
+  syncInFlight += 1;
+  ctx.extra = { cache: "miss" };
+  const keep = body.storeInCache === false ? null : { maxBytes: L.results.archiveResponseMaxBytes, onComplete: async (status, buf) => {
+    if (status !== 200 || !buf) return;
+    let j = null;
+    try { j = JSON.parse(buf.toString("utf8")); } catch { return; }
+    const code = j?.data?.metadata?.statusCode;
+    if (j?.success !== true || !(code >= 200 && code < 300)) return;
+    if ((await store.archiveBytes()) + buf.length > (await quotaBytes()) || !(await archive.hasRoom(buf.length))) return;
+    const put = await archive.put(buf);
+    await store.cachePut(principal, key, put.sha256, put.bytes, L.cache.lifetimeSeconds);
+    log({ event: "cache_stored", request_id: ctx.id, principal, bytes: put.bytes });
+  } };
+  upstream.forward(ctx.res, route.path, coreBody(ctx, route, request), (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id, "x-fcpi-cache": "miss" }, keep);
+}
+
+// M7: a scrape with a screenshot or actions (spec §12). Its answer carries the captures, so it is buffered (at most
+// limits.extras.responseMaxBytes, limits.extras.inFlight at a time, within the gateway's memory) and every capture is
+// stored as an artifact of the caller's principal before the answer leaves; it is never cached.
+async function scrapeWithExtras(ctx, route, body) {
+  if (extrasInFlight >= L.extras.inFlight || syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
+  extrasInFlight += 1; syncInFlight += 1;
+  try {
+    let r;
+    try { r = await upstream.call("POST", route.path, { body: coreBody(ctx, route, body), timeoutMs: cfg.coreTimeoutMs, maxBytes: L.extras.responseMaxBytes }); }
+    catch (e) {
+      // Never 502 for the gateway's own failure: a client library retries 502 by resubmitting.
+      const code = e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : e.code === "TOO_LARGE" ? "RESULT_TOO_LARGE" : "UPSTREAM_UNAVAILABLE";
+      return ctx.send(e.code === "TIMEOUT" ? 504 : 503, { success: false, code, error: code === "RESULT_TOO_LARGE" ? `The answer with its captures exceeds ${L.extras.responseMaxBytes} bytes.` : "The core did not answer." });
+    }
+    if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 503 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
+    let artifacts;
+    try { artifacts = await storeCaptures(r.json.data, { principal: ctx.client.principal, origin: ctx.origin, archive, store, quotaBytes: await quotaBytes() }); }
+    catch (e) {
+      if (e.code === "STORAGE_QUOTA") return ctx.send(503, { success: false, code: "STORAGE_QUOTA", error: "The result store is at its quota; the captures were not kept." }, { "retry-after": "300" });
+      if (!e.code) throw e;
+      return ctx.send(500, { success: false, code: e.code, error: `The gateway could not store a capture: ${e.message}.` });
+    }
+    ctx.extra = { artifacts: artifacts.length };
+    ctx.send(200, { ...r.json, fcpi: { ...(r.json.fcpi ?? {}), artifacts } });
+  } finally { extrasInFlight -= 1; syncInFlight -= 1; }
+}
+
+// M7: a stored capture, to its principal only; another principal's answers as an unknown one does (spec §16.1).
+async function artifact(ctx, route, id) {
+  if (!UUID.test(id)) throw new RequestError(400, "BAD_REQUEST", "Invalid artifact ID format. It must be a valid UUID.");
+  const a = await store.getArtifact(id.toLowerCase(), ctx.client.principal);
+  if (!a) return ctx.send(404, { success: false, code: "NOT_FOUND", error: "Artifact not found" });
+  if (a.expired) return ctx.send(410, { success: false, code: "EXPIRED", error: `This artifact passed its retention on ${iso(a.expires_at)}.` });
+  const buf = await archive.read(a.sha256);
+  ctx.res.writeHead(200, { "content-type": a.mime, "content-length": buf.length, "cache-control": "private, no-store", "x-content-type-options": "nosniff", "x-request-id": ctx.id,
+    "x-fcpi-width": String(a.width), "x-fcpi-height": String(a.height), "x-fcpi-truncated": String(a.truncated), "x-fcpi-expires-at": iso(a.expires_at) });
+  ctx.res.end(buf);
+  ctx.logged(200);
+}
+
+// M7: change detection (src/changes.mjs), inside the synchronous admission limit.
+async function platformChanges(ctx, route) {
+  const raw = await readJson(ctx.req);
+  const { body } = validateBody(route.body, raw, M);
   if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   syncInFlight += 1;
-  upstream.forward(ctx.res, route.path, body, (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
+  try { await changes(ctx, body); } finally { syncInFlight -= 1; }
 }
 
 // The json format (src/jsonscrape.mjs), inside the synchronous admission limit.
@@ -351,7 +471,8 @@ async function scrapeWithJson(ctx, body, json) {
 const mcp = cfg.mcpUrl ? makeMcpProxy({ url: cfg.mcpUrl, limits: M.mcp.limits, readBody, send: (ctx, status, body, extra) => ctx.send(status, body, extra) }) : null;
 
 const HANDLERS = { scrape: sync, map: sync, search: sync, "extract.submit": submit, "extract.status": extractStatus, "crawl.submit": submit, "batch.submit": submit, "crawl.status": status, "batch.status": status, "crawl.errors": errors,
-  "batch.errors": errors, "crawl.cancel": cancel, "batch.cancel": cancel, "platform.status": platformStatus, "platform.jobs": platformJobs, "platform.job": platformJob };
+  "batch.errors": errors, "crawl.cancel": cancel, "batch.cancel": cancel, "platform.status": platformStatus, "platform.jobs": platformJobs, "platform.job": platformJob,
+  "platform.artifact": artifact, "platform.changes": platformChanges };
 
 // ---- the server -------------------------------------------------------------------------------------
 const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
@@ -421,10 +542,12 @@ server.listen(cfg.port, "0.0.0.0", () => {
   log({ event: "listening", build: cfg.build, instance: jobs.instance, port: server.address().port, clients: registry.size, hosts: [...cfg.hosts.values()], routes: ROUTES.length });
   jobs.start().catch((e) => log({ event: "jobs_start_failed", error: e.message }));
   extractJobs?.start();
+  outbox?.start();
 });
 // Shutdown: job rounds stop at once, then open requests finish (Docker allows 20 s), then the pool closes.
 for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => {
   jobs.stop();
   extractJobs?.stop();
-  server.close(async () => { await jobs.stop(); await extractJobs?.stop(); await store.close().catch(() => {}); process.exit(0); });
+  outbox?.stop();
+  server.close(async () => { await jobs.stop(); await extractJobs?.stop(); await outbox?.stop(); await store.close().catch(() => {}); process.exit(0); });
 });

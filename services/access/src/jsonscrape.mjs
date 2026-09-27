@@ -4,6 +4,7 @@
 // with the adapter's typed class and status; a requested format is never silently dropped (spec §9.4), and
 // a part of the page the model could not read is named, not passed off as values the page lacks.
 import { cutText } from "./extract.mjs";
+import { originFor } from "./auth.mjs";
 
 export function makeJsonScrape({ cfg, M, upstream, extractor }) {
   return async function jsonScrape(ctx, body, json) {
@@ -13,7 +14,7 @@ export function makeJsonScrape({ cfg, M, upstream, extractor }) {
     const wanted = body.formats.filter((f) => typeof f === "string");
     const formats = [...new Set([...wanted, "markdown"])];
     let r;
-    try { r = await upstream.call("POST", "/v2/scrape", { body: { ...body, formats }, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
+    try { r = await upstream.call("POST", "/v2/scrape", { body: { ...body, formats, origin: originFor(ctx.client.principal, "scrape") }, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
     catch (e) { return ctx.send(e.code === "TIMEOUT" ? 504 : 502, { success: false, code: e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: e.code === "TIMEOUT" ? "The core did not answer in time." : "The core is unavailable." }); }
     if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 502 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
     const doc = r.json.data;
