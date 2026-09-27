@@ -376,7 +376,11 @@ export class Store {
   // start); an extension of an existing preference leaves it, so the record still says why the preference exists.
   async learnRoute(domain, obs, routing, { success = null, failureClass = null } = {}) {
     return this.#tx(async (c) => {
-      const cur = (await c.query("SELECT * FROM fcpi_retrieval.domain_route WHERE domain = $1 FOR UPDATE", [domain])).rows[0] ?? null;
+      // The row exists before it is locked, so concurrent first observations of a domain queue on it instead of each
+      // starting from nothing and one overwriting the other (review S5).
+      const created = (await c.query("INSERT INTO fcpi_retrieval.domain_route (domain) VALUES ($1) ON CONFLICT DO NOTHING", [domain])).rowCount === 1;
+      const locked = (await c.query("SELECT * FROM fcpi_retrieval.domain_route WHERE domain = $1 FOR UPDATE", [domain])).rows[0];
+      const cur = created ? null : locked;
       const change = obs ? observe(cur, obs, routing) : null;
       if (!cur && !change && success === null) return null;
       const next = { ...(cur ?? { preferred: null, set_at: null, expires_at: null, probe_at: null, challenges: 0, js_count: 0, prefer_browser: false, browser_expires_at: null, successes: 0, failures: 0 }), ...(change ?? {}) };
@@ -394,7 +398,10 @@ export class Store {
         [domain, next.preferred ?? null, next.set_at ?? null, next.expires_at ?? null, next.probe_at ?? null, next.challenges ?? 0, next.js_count ?? 0, next.prefer_browser === true,
           next.browser_expires_at ?? null, next.successes ?? 0, next.failures ?? 0, next.last_success_at ?? null, next.last_failure_at ?? null, next.last_failure_class ?? null,
           change && ["preferred", "challenges", "prefer_browser", "js_count"].some((k) => k in change) ? change.reason : null])).rows[0];
-      if (!cur) await c.query("DELETE FROM fcpi_retrieval.domain_route WHERE domain IN (SELECT domain FROM fcpi_retrieval.domain_route ORDER BY updated_at DESC OFFSET $1)", [routing.maxRecords]);
+      // Past the bound, rows that decide nothing go first, the least recently updated of them; a learned preference is
+      // evicted only when preferences alone fill the table (review S5).
+      if (created) await c.query(`DELETE FROM fcpi_retrieval.domain_route WHERE domain IN (SELECT domain FROM fcpi_retrieval.domain_route
+        ORDER BY (preferred IS NOT NULL OR prefer_browser) DESC, updated_at DESC OFFSET $1)`, [routing.maxRecords]);
       return { row, change };
     });
   }

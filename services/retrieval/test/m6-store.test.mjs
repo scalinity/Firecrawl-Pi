@@ -41,12 +41,16 @@ test("routing records: two challenges set a preference; auth outcomes only count
     const g = await store.routeRecord("gate.example");
     assert.equal(g.preferred, null);
     assert.equal(g.last_failure_class, "AUTH_REQUIRED");
-    // maxRecords 3: a fourth domain removes the least recently updated.
+    // maxRecords 3: a fourth domain removes the least recently updated row that decides nothing, never the learned block.
     await store.learnRoute("b.example", null, routing, { success: true });
     await store.learnRoute("c.example", null, routing, { success: true });
     const [{ n }] = await sql("SELECT count(*)::int AS n FROM fcpi_retrieval.domain_route");
     assert.equal(n, 3);
-    assert.equal(await store.routeRecord("a.example"), null, "the oldest row went");
+    assert.equal(await store.routeRecord("gate.example"), null, "the oldest row without a preference went");
+    assert.equal((await store.routeRecord("a.example")).preferred, "residential", "the learned block stays (review S5)");
+    // Two first observations at once queue on the row: both count, and the second sets the preference (review S5).
+    await Promise.all([store.learnRoute("z.example", obs, routing, {}), store.learnRoute("z.example", obs, routing, {})]);
+    assert.equal((await store.routeRecord("z.example")).preferred, "residential");
   } finally { await store.close(); }
 });
 
