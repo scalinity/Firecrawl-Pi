@@ -9,7 +9,10 @@
 # fcpi-egress is the retrieval service's way out (M2): new TCP connections to ports 80 and 443 of
 # public addresses, and their replies; DNS to the host's resolver on the bridge's own address;
 # nothing else. The retrieval service validates every target itself (spec §20.2); this is the
-# network's own floor under it.
+# network's own floor under it. M6: new TCP connections to port 7000 of public addresses are the
+# residential proxy's (Decodo's documented endpoint, gate.decodo.com:7000), counted apart from web
+# egress so every proxy connection is attributable; the service connects there to its configured
+# provider only.
 # tailscale0 is the tailnet (M3): the Tailscale client serves the access gateway alone (spec §20.1),
 # so a tailnet peer may open connections only to Serve's :8443. New connections to any other host
 # listener that arrive on it are dropped and counted; replies to the host's own connections pass.
@@ -40,6 +43,7 @@ table inet fcpi_guard {
     iifname "fcpi-egress" ip daddr @egress_local_v4 counter drop comment "egress_local_dropped"
     iifname "fcpi-egress" ct state established,related accept
     iifname "fcpi-egress" ct state new tcp dport { 80, 443 } counter accept comment "egress_web_accepted"
+    iifname "fcpi-egress" ct state new tcp dport 7000 counter accept comment "egress_proxy_accepted"
     iifname "fcpi-egress" counter drop comment "egress_other_dropped"
     oifname "fcpi-egress" ct state established,related accept
     oifname "fcpi-egress" counter drop comment "egress_in_dropped"

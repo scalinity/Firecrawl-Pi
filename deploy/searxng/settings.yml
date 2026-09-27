@@ -88,3 +88,17 @@ engines:
     timeout: 3.0
     disabled: false
     enable_http: true
+  # M6 (F11): the controlled engine the policy routes residential (search.engineRoutes), as Brave and DuckDuckGo are:
+  # the search proxy sends it only through the residential proxy and refuses it when that route is unavailable.
+  - name: fcpi fixture r
+    engine: json_engine
+    shortcut: fcpifr
+    categories: [general]
+    search_url: http://searchr.fixture.fcpi.test:8080/search?q={query}
+    results_query: results
+    url_query: url
+    title_query: title
+    content_query: content
+    timeout: 5.0
+    disabled: false
+    enable_http: true
