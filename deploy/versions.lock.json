@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-26T22:11:50Z",
-  "generated_by": "scripts/m5/build-lock.mjs (M5), from the lock M4 closed with at 10cdc59; entries owned by later milestones are as M4 wrote them",
-  "repository_sha": "8903e1e47885bede933a84bb69ea75089b027685",
+  "generated_utc": "2026-09-27T03:01:05Z",
+  "generated_by": "scripts/m6/build-lock.mjs (M6), from the lock M5 closed with at e08c31f; entries owned by later milestones are as M5 wrote them",
+  "repository_sha": "8530c3d1c8d09f3ac2088f990dd36c3d8b3ffeaf",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -382,7 +382,7 @@
       },
       "settings": {
         "path": "deploy/searxng/settings.yml",
-        "sha256": "8bc4fc61f7c3c813012e02f57d25aac29b4c98fef27b6fe1844da6bf0955e305",
+        "sha256": "e7b1548ceebe4f916cc3fe458e4d35fbe488839cba526cd9e4c643fd8641d1fd",
         "entrypoint": "deploy/searxng/entrypoint.sh",
         "entrypoint_sha256": "a87c687c0ffd6d8742176ebd53b02edb83fa0e3b7aa00a5dad333bf01ef01429"
       },
@@ -529,12 +529,12 @@
       "status": "selected"
     },
     "firecrawl_api_patched": {
-      "role": "The API image the stack runs: the pinned commit with patches/ applied, patches 0007 (typed search failures) and 0008 (the document policy) since M5",
+      "role": "The API image the stack runs: the pinned commit with patches/ applied; since M6 patch 0009 carries the scrape's proxy option to the retrieval service as the acquisition's route",
       "status": "selected",
-      "image_id": "sha256:4ae6468ffc4d2632544ba427ac66c9b142b6c1d008c83ee08530253da6dc96b3",
+      "image_id": "sha256:5d503ca05aabc737a817cfb978ca5c07936249da0c535b64c9f7849f1950c2ec",
       "platform": "linux/arm64",
       "source_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "patch_series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
+      "patch_series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
       "runtime_configuration": {
         "NUQ_WORKER_COUNT": "1",
         "USE_DB_AUTHENTICATION": "false",
@@ -548,17 +548,17 @@
       }
     },
     "retrieval": {
-      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, and since M5 the search, model and parser adapters and their budgets",
+      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, and since M6 the residential proxy route, domain routing and proxy reconciliation",
       "status": "selected",
-      "image_id": "sha256:e243ad1ba5c87e3ee2bea8561f98771d8a9394e8f30fb27cd875d6c8678881a6",
+      "image_id": "sha256:6221e27c00afb4bf6198f9aacbdb66361fdb40e73d64736054ed5cf4367a5da6",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "7ccd57a22212dd1b3d6d57b4ba93ca57c66912ad587e6af370818ef8986bb8cd"
       },
-      "evidence": "evidence/M5/raw/image-build.txt",
+      "evidence": "evidence/M6/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "0165ae044682a25554fe4de8c19e8b6e7f2a2337",
+      "built_from_commit": "8661527109b6b8716368b7f3bf9274be3ed8168c",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -643,12 +643,12 @@
       "evidence": "evidence/M2/raw/service-build.txt"
     },
     "access_gateway": {
-      "role": "The access gateway image (built on the Pi, natively linux/arm64), with search, the json format and extraction jobs since M5",
+      "role": "The access gateway image (built on the Pi, natively linux/arm64), with bulk jobs' residential route and route holds since M6",
       "status": "selected",
-      "image_id": "sha256:928379fba0749ef05cc747f79abe699de2275d13c9ef95a7b9517c2f3c42983e",
+      "image_id": "sha256:c8b7848e56310101f46bec518fece42d71aeca2c2dba769f0c60a65f33300b5c",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "0165ae044682a25554fe4de8c19e8b6e7f2a2337",
+      "built_from_commit": "8661527109b6b8716368b7f3bf9274be3ed8168c",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -715,15 +715,15 @@
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
         }
       },
-      "evidence": "evidence/M5/raw/image-build.txt"
+      "evidence": "evidence/M6/raw/image-build.txt"
     },
     "mcp_gateway": {
-      "role": "The MCP service image (built on the Pi, natively linux/arm64), with the search and extraction tools since M5",
+      "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tools offer the stealth proxy option since M6",
       "status": "selected",
-      "image_id": "sha256:5470828c7ccc468d616fc00932648fceaf447e2772ab3d976aad5007a1cdc0c9",
+      "image_id": "sha256:da62ede10123a60531e6fae6ce5843ccadb578afcebd35b59d3f17d334f09673",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "0165ae044682a25554fe4de8c19e8b6e7f2a2337",
+      "built_from_commit": "8661527109b6b8716368b7f3bf9274be3ed8168c",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
@@ -758,7 +758,19 @@
           "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="
         }
       },
-      "evidence": "evidence/M5/raw/image-build.txt"
+      "evidence": "evidence/M6/raw/image-build.txt"
+    },
+    "fixture_m6": {
+      "role": "M6's controlled residential proxy and targets (tests/fixtures/m6), on the internal fixture network only",
+      "status": "selected",
+      "image": "node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "platform": "linux/arm64",
+      "source": {
+        "server": "tests/fixtures/m6/server.mjs",
+        "server_sha256": "e60005f7925ae50cc8f241bb46a89a84657c3153c3db39fe22a5f5846c53036f",
+        "fixture": "tests/fixtures/m6/fixture.mjs",
+        "fixture_sha256": "6ab6fb6901684c79e8c16c7aaf20ea8b6dffc032905707c050863589b149d720"
+      }
     }
   },
   "browser": {
@@ -1471,9 +1483,9 @@
   "patches": {
     "status": "resolved",
     "upstream_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-    "series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
+    "series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
     "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
-    "result_tree": "36917fb853bcef10761a491ff063eda8251dd7be",
+    "result_tree": "7ff39ea66087d072c51f7652406ac136045325d9",
     "patches": [
       {
         "file": "0001-nuq-sender-survives-broker-outage.patch",
@@ -1514,6 +1526,11 @@
         "file": "0008-document-policy-and-parser-fallback.patch",
         "sha256": "4d2dceb7475a98d9629f4f976c0cf887c7845ad5ecb9e0232b00511a4aafbbf9",
         "reason": "Native PDF parsing returned empty markdown as success for a scan-only document, had no page cap, and fell back to a pdf-parse whose bundled pdf.js 1.10 refuses some valid files; spec §15 asks for native parsing first, typed refusals and a budgeted complex-document fallback."
+      },
+      {
+        "file": "0009-residential-route-option.patch",
+        "sha256": "ba1e00400742cfb2b0e741aa329c836e442dd643d4f8c367c19942073d0dc5e5",
+        "reason": "The scrape option proxy (auto, basic, stealth) never reached the retrieval service, so a caller could not ask for the residential route and a bulk job's pages could not start on it (spec §10.2); proxyUsed always said basic."
       }
     ],
     "manifest": "patches/series.json (symbols, tests and the call-site coverage of each traced path)"
@@ -1560,14 +1577,14 @@
       ]
     },
     "firecrawl_api_image_patched": {
-      "image_id": "sha256:4ae6468ffc4d2632544ba427ac66c9b142b6c1d008c83ee08530253da6dc96b3",
+      "image_id": "sha256:5d503ca05aabc737a817cfb978ca5c07936249da0c535b64c9f7849f1950c2ec",
       "built_on": "the workstation's Colima VM, natively linux/arm64 (decision D6)",
-      "built_utc": "2026-09-26T21:09:33Z",
-      "repository_commit": "73ec6c6e22f7481779142f467cb98eed0b8420ce",
+      "built_utc": "2026-09-27T00:37:25Z",
+      "repository_commit": "968a77918a248231c2fcca896e6a4856b66c420a",
       "code_dirty": false,
       "no_cache": true,
-      "patch_series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
-      "result_tree": "36917fb853bcef10761a491ff063eda8251dd7be",
+      "patch_series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
+      "result_tree": "7ff39ea66087d072c51f7652406ac136045325d9",
       "go_version": "go version go1.27.1 linux/arm64",
       "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
       "node": "v22.23.3",
@@ -1576,14 +1593,14 @@
       "provenance": false,
       "sbom": false,
       "evidence": "evidence/M2/raw/api-build.log",
-      "build_log": "evidence/M5/raw/api-build.log",
-      "transfer": "evidence/M5/raw/api-push.txt (docker save on the VM, docker load on the Pi, the image id compared)"
+      "build_log": "evidence/M6/raw/api-build.log",
+      "transfer": "evidence/M6/raw/api-push.txt (docker save on the VM, docker load on the Pi, the image id compared)"
     }
   },
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "96c2766771a3b86ad1d658a71a80e21db2762b7036d537070aabe4605dc4e82f",
+    "capabilities_sha256": "325a57923db3d3d921b594df00eae4555da7ee2824213f177c76494f8aed4343",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
@@ -1593,13 +1610,17 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "2530424b1a0643b0421f934819555406545759dd5b5417cbc4e635303b8f94f4",
+      "sha256": "8c3b9a627f27a703a52b85e4c500af1977d81c8a62192f84ae4a9cd052507e23",
       "paid_caps": {
         "llm": {
           "day": 0,
           "month": 0
         },
         "parser": {
+          "month": 0
+        },
+        "proxy": {
+          "day": 0,
           "month": 0
         }
       },
@@ -1666,6 +1687,33 @@
         "creditsPerPage": 3,
         "microUsdPerCredit": 0,
         "source": "fixture: LlamaParse's credits per page, no money"
+      },
+      {
+        "id": "decodo/residential-payg@2026-09-26",
+        "subject": "decodo-residential",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "microUsdPerGB": 4000000,
+        "billing": "upload_plus_download_per_1e9_bytes",
+        "source": "https://decodo.com/proxies/residential-proxies/pricing, observed 2026-09-26 (spec O03): Pay As You Go $4.0/GB, bought one GB at a time; the page does not say whether a GB is 1e9 or 2^30 bytes or whether upload counts, so both directions are counted per 1e9 bytes, the larger reading"
+      },
+      {
+        "id": "fixture/fcpi-fixture-proxy@2026-09-26",
+        "subject": "fcpi-fixture-proxy",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "microUsdPerGB": 4000000,
+        "billing": "upload_plus_download_per_1e9_bytes",
+        "source": "fixture: Decodo's price, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-proxy-race@2026-09-26",
+        "subject": "fcpi-fixture-proxy-race",
+        "effectiveFrom": "2026-09-26",
+        "effectiveTo": null,
+        "microUsdPerGB": 4000000,
+        "billing": "upload_plus_download_per_1e9_bytes",
+        "source": "fixture: Decodo's price, no money"
       }
     ],
     "models": {
@@ -1726,13 +1774,32 @@
         "base_url": "http://parser.fixture.fcpi.test:8080",
         "paid": false,
         "credential_file": null
+      },
+      "decodo": {
+        "kind": "proxy",
+        "base_url": "http://gate.decodo.com:7000",
+        "paid": true,
+        "credential_file": "decodo_proxy",
+        "usage_url": "https://api.decodo.com/api/v2/statistics/traffic",
+        "usage_credential_file": "decodo_api_key",
+        "session": "decodo"
+      },
+      "fixture-proxy": {
+        "kind": "proxy",
+        "base_url": "http://proxy.fixture.fcpi.test:8081",
+        "paid": false,
+        "credential_file": "fixture_proxy",
+        "usage_url": "http://proxy.fixture.fcpi.test:8081/__usage",
+        "usage_credential_file": null,
+        "session": "decodo"
       }
     },
     "search": {
       "engines": {
         "fixture": [
           "fcpi fixture",
-          "fcpi fixture b"
+          "fcpi fixture b",
+          "fcpi fixture r"
         ],
         "live": [
           "duckduckgo",
@@ -1749,7 +1816,70 @@
       ],
       "per_hour": 60,
       "cache_seconds": 900,
-      "deadline_ms": 10000
+      "deadline_ms": 10000,
+      "engine_routes": {
+        "duckduckgo.com": "residential",
+        "html.duckduckgo.com": "residential",
+        "lite.duckduckgo.com": "residential",
+        "search.brave.com": "residential",
+        "www.bing.com": "direct",
+        "searchr.fixture.fcpi.test": "residential"
+      }
+    },
+    "proxies": {
+      "decodo-residential": {
+        "provider": "decodo",
+        "category": "proxy"
+      },
+      "fcpi-fixture-proxy": {
+        "provider": "fixture-proxy",
+        "category": "fixture_proxy"
+      },
+      "fcpi-fixture-proxy-race": {
+        "provider": "fixture-proxy",
+        "category": "fixture_proxy_race"
+      }
+    },
+    "proxying": {
+      "defaultProxy": "decodo-residential",
+      "maxAttemptBytes": 10000000,
+      "maxTunnelBytes": 2000000
     }
+  },
+  "egress": {
+    "policy": "deploy/policies/egress.json",
+    "policy_sha256": "4c6cd17601fe6cb0491f1b7d1b880e7595a6583cdc2d99e35aead705722a0f75",
+    "residential": {
+      "proxyFirstDomains": [
+        "m6hard.fixture.fcpi.test"
+      ],
+      "sessionMinutes": 5,
+      "connectTimeoutMs": 10000,
+      "bulkPages": 20,
+      "holdMaxMinutes": 90
+    },
+    "routing": {
+      "maxRecords": 5000,
+      "observationsToChange": 2,
+      "ttlHours": 24,
+      "maxTtlDays": 7,
+      "probeMinutes": 5
+    },
+    "direct": {
+      "perDomainInFlight": 1,
+      "minNavigationGapMs": 2000,
+      "perDomainPerHour": 20,
+      "platformPerDay": 200
+    },
+    "attempts": {
+      "maxPerPage": 4,
+      "acquisitionDeadlineMs": 90000,
+      "httpAttemptMs": 15000,
+      "browserAttemptMs": 30000
+    },
+    "guard": "deploy/host/fcpi-guard.nft",
+    "guard_sha256": "147030152ec16c3fb044b6d33940c84a3da0fcaa3cf7f8011b09c4147683c38b",
+    "proxy_port_rule": "tcp dport 7000 to public addresses, counted as egress_proxy_accepted",
+    "provider_contract": "Decodo residential, checked 2026-09-26: gate.decodo.com:7000, HTTP CONNECT, username user-<name>-session-<id>-sessionduration-<minutes>; usage by POST https://api.decodo.com/api/v2/statistics/traffic (bytes)"
   }
 }
