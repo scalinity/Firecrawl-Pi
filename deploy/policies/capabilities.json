@@ -74,7 +74,7 @@
       "removeBase64Images": { "type": "boolean" },
       "blockAds": { "type": "boolean" },
       "fastMode": { "type": "boolean" },
-      "proxy": { "type": "enum", "values": ["auto", "basic"], "refused": { "stealth": "residential and stealth routing arrive with the proxy policy (M6)", "enhanced": "enhanced retrieval arrives with M7" } },
+      "proxy": { "type": "enum", "values": ["auto", "basic", "stealth"], "refused": { "enhanced": "enhanced retrieval arrives with M7" } },
       "mobile": { "type": "const", "value": false },
       "skipTlsVerification": { "type": "const", "value": false }
     }
@@ -195,6 +195,7 @@
     "bodyBytes": 1048576,
     "crawl": { "deadlineMinutes": 30 },
     "batch": { "maxUrls": 25, "hardMaxUrls": 100, "deadlineMinutes": 30 },
+    "proxy": { "bulkPages": 20, "holdMinutes": 60 },
     "extract": { "maxUrls": 10, "deadlineMinutes": 20, "scrapeTimeoutMs": 60000, "maxDocumentBytes": 1048576 },
     "admission": { "maxOpenJobs": 20, "maxOpenUnits": 500, "activeUpstreamJobs": 1, "maxSyncInFlight": 4, "maxStatusReadsInFlight": 2 },
     "results": { "pageDefaultLimit": 100, "pageMaxLimit": 100, "pageMaxBytes": 10485760, "retentionDays": 7, "metadataDays": 30, "idempotencyHours": 24, "archiveResponseMaxBytes": 16777216 },

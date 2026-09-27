@@ -26,7 +26,9 @@ test("refused options name themselves and why, before anything else", () => {
   refused(() => validateBody("scrape", { url: "https://example.com", mobile: true }, M), "UNSUPPORTED_OPTION");
   refused(() => validateBody("scrape", { url: "https://example.com", skipTlsVerification: true }, M), "UNSUPPORTED_OPTION");
   refused(() => validateBody("crawl", { url: "https://example.com", ignoreRobotsTxt: true }, M), "UNSUPPORTED_OPTION", /robots/);
-  refused(() => validateBody("scrape", { url: "https://example.com", proxy: "stealth" }, M), "UNSUPPORTED_OPTION", /M6/);
+  refused(() => validateBody("scrape", { url: "https://example.com", proxy: "enhanced" }, M), "UNSUPPORTED_OPTION", /M7/);
+  // M6: the residential route is offered.
+  assert.equal(validateBody("scrape", { url: "https://example.com", proxy: "stealth" }, M).body.proxy, "stealth");
   refused(() => validateBody("crawl", { url: "https://example.com", scrapeOptions: { proxy: "enhanced" } }, M), "UNSUPPORTED_OPTION", /M7/);
   refused(() => validateBody("scrape", { url: "https://example.com", proxy: "turbo" }, M), "BAD_REQUEST");
 });

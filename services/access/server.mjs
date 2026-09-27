@@ -15,6 +15,9 @@
 //   - M5: /v2/search is a synchronous route like scrape; the json scrape format and /v2/extract jobs send
 //     pages the core scraped to the retrieval service's budgeted model adapter (src/extractor.mjs,
 //     src/extract.mjs), whose failures reach the caller typed.
+//   - M6: a crawl or batch past the manifest's bulkPages asks for the residential route from the start, is
+//     refused as PROXY_REQUIRED when the route cannot be had, and holds its domains on that route for its life
+//     (src/routing.mjs).
 import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { pipeline } from "node:stream/promises";
@@ -29,6 +32,7 @@ import { makeMcpProxy } from "./src/mcp.mjs";
 import { makeExtractor } from "./src/extractor.mjs";
 import { makeExtractJobs } from "./src/extract.mjs";
 import { makeJsonScrape } from "./src/jsonscrape.mjs";
+import { routeBody, routeRefusal } from "./src/routing.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -38,8 +42,8 @@ const failures = makeFailureLimiter(L.auth.failuresPerMinute);
 const archive = await openArchive(cfg.artifactRoot);
 const store = makeStore(cfg, log);
 const upstream = makeUpstream(cfg);
-const jobs = makeJobs({ cfg, store, upstream, archive, log: (o) => log({ build: cfg.build, ...o }) });
 const extractor = cfg.extractUrl ? makeExtractor({ url: cfg.extractUrl, token: cfg.extractToken }) : null;
+const jobs = makeJobs({ cfg, store, upstream, archive, routes: extractor, log: (o) => log({ build: cfg.build, ...o }) });
 const extractJobs = extractor ? makeExtractJobs({ cfg, store, upstream, archive, extractor, log: (o) => log({ build: cfg.build, ...o }) }) : null;
 const PATH = { ...jobs.PATH, extract: "/v2/extract" };
 const started = Date.now();
@@ -118,7 +122,19 @@ const extractionUnavailable = (ctx) => ctx.send(503, { success: false, code: "EX
 async function submit(ctx, route) {
   if (route.kind === "extract" && !extractor) return extractionUnavailable(ctx);
   const raw = await readJson(ctx.req);
-  const { body, units, invalidURLs } = validateBody(route.body, raw, M);
+  const v = validateBody(route.body, raw, M);
+  const { units, invalidURLs } = v;
+  // A bulk job needs the residential route from the start: refused before any receipt when it cannot be had.
+  const { body, bulk } = routeBody(route.kind, v.body, M);
+  if (bulk) {
+    const r = extractor ? await extractor.routes().catch(() => null) : null;
+    const residential = r?.status === 200 ? r.json?.residential : null;
+    if (!residential?.available) {
+      const x = routeRefusal(residential);
+      log({ event: "bulk_refused", request_id: ctx.id, kind: route.kind, units, reason: x.body.route.residential });
+      return ctx.send(x.status, x.body, x.retryAfter ? { "retry-after": String(x.retryAfter) } : {});
+    }
+  }
   const idemKey = ctx.req.headers["x-idempotency-key"];
   if (idemKey !== undefined && !/^[A-Za-z0-9._:-]{8,128}$/.test(idemKey)) throw new RequestError(400, "BAD_REQUEST", "x-idempotency-key must be 8-128 characters of letters, digits and ._:-");
   let admitted;

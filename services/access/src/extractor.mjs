@@ -1,7 +1,7 @@
 // The gateway's client for the retrieval service's extraction listener (FIRECRAWL_PI_SPEC.md §14, §20.1;
 // M5): one fixed address on fcpi_model, the gateway's own credential, and the documents the gateway
-// scraped through the core. The model adapter, its provider credential and its budget are the retrieval
-// service's; the gateway holds none of them.
+// scraped through the core; M6 adds the residential route's state and bulk jobs' route holds. The model
+// adapter, its provider credential and its budget are the retrieval service's; the gateway holds none of them.
 import { request } from "node:http";
 
 export class ExtractorError extends Error {
@@ -35,5 +35,9 @@ export function makeExtractor({ url, token }) {
   return {
     extract: (body, timeoutMs) => call("POST", "/internal/extract", body, timeoutMs),
     providers: () => call("GET", "/internal/providers", undefined, 5000),
+    // M6: the residential route's availability, and a bulk job's route hold on its domains (src/routing.mjs).
+    routes: () => call("GET", "/internal/routes", undefined, 5000),
+    hold: (jobId, urls, minutes) => call("POST", "/internal/route-hold", { jobId, urls, minutes, reason: "bulk" }, 10000),
+    release: (jobId) => call("POST", "/internal/route-release", { jobId }, 10000),
   };
 }

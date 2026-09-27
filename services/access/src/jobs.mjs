@@ -12,7 +12,12 @@
 // Reconciliation. An uncertain job is looked up by its marker in NuQ's job data: found → mapped to
 // the earliest upstream group (any later duplicate is cancelled); not found once the settle window
 // has passed → back to RECEIVED, and only then submitted again. Nothing is resubmitted blindly.
+// Route holds (M6, src/routing.mjs). A bulk job's domains are held on the residential route just before it is
+// submitted; a hold refused (the route lost since admission) fails the job as PROXY_REQUIRED unsent, and an
+// unreachable retrieval service leaves it RECEIVED for the next round. The hold is released when the job ends, and
+// lapses on its own after limits.proxy.holdMinutes.
 import { randomUUID } from "node:crypto";
+import { isBulk, holdUrls } from "./routing.mjs";
 
 const PATH = { crawl: "/v2/crawl", batch: "/v2/batch/scrape" };
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -20,18 +25,32 @@ const TERMINAL_UPSTREAM = new Set(["completed", "failed", "cancelled"]);
 // How long past its deadline an open job may hold the single upstream slot before it is closed.
 const STALL_GRACE_MINUTES = 30;
 
-export function makeJobs({ cfg, store, upstream, archive, log }) {
+export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) {
   const instance = randomUUID();
   const L = cfg.manifest.limits;
   const deadlineOf = (kind) => (kind === "crawl" ? L.crawl.deadlineMinutes : L.batch.deadlineMinutes);
   let chain = Promise.resolve();
   const serial = (fn) => { const p = chain.then(fn, fn); chain = p.catch(() => {}); return p; };
   const say = (o) => log({ event: "job", instance, ...o });
+  // Best effort: a hold not released lapses at its end.
+  const release = (job) => { if (routes && isBulk(job.kind, job.request, cfg.manifest)) routes.release(job.id).catch((e) => say({ job: job.id, action: "route_release_failed", reason: e.code })); };
 
   async function dispatchOne() {
     const job = await store.claimNext(instance);
     if (!job) return null;
     say({ job: job.id, kind: job.kind, action: "submit", attempt: job.dispatch_attempts });
+    if (isBulk(job.kind, job.request, cfg.manifest)) {
+      let h = null;
+      try { h = routes ? await routes.hold(job.id, holdUrls(job.kind, job.request), L.proxy.holdMinutes) : null; }
+      catch (e) { await store.markRequeued(job.id, `the route hold could not be placed (${e.code}): the retrieval service was not reached`); say({ job: job.id, action: "requeued", reason: `route hold ${e.code}` }); return job.id; }
+      if (h?.status !== 200 || h.json?.held !== true) {
+        const why = h?.json?.residential?.reason ?? (routes ? `HTTP ${h?.status}` : "ROUTE_SERVICE_UNCONFIGURED");
+        await store.markRejected(job.id, 429, "PROXY_REQUIRED", `This job needs the residential route from the start, which is unavailable (${why}); it was not sent.`);
+        say({ job: job.id, action: "rejected", reason: "PROXY_REQUIRED", route: why });
+        return job.id;
+      }
+      say({ job: job.id, action: "route_held", until: h.json.until, domains: h.json.domains });
+    }
     let r;
     try {
       r = await upstream.call("POST", PATH[job.kind], { body: { ...job.request, origin: job.submission_key }, timeoutMs: cfg.submitTimeoutMs, maxBytes: 1048576 });
@@ -48,6 +67,7 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     } else if (r.status >= 400 && r.status < 500 && r.status !== 408 && r.status !== 429) {
       await store.markRejected(job.id, r.status, String(r.json?.code ?? "UPSTREAM_REJECTED").slice(0, 64), String(r.json?.error ?? `the core answered ${r.status}`).slice(0, 2000));
       say({ job: job.id, action: "rejected", status: r.status });
+      release(job);
     } else if (r.status === 408 || r.status === 429) {
       await store.markRequeued(job.id, `the core answered ${r.status} before creating the job`);
     } else {
@@ -100,7 +120,7 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     const entry = { id: `fcpi:${job.id}:ARCHIVE_INCOMPLETE:0`, timestamp: new Date().toISOString(), url: "", code: "ARCHIVE_INCOMPLETE", error: msg };
     const done = await store.finish(job.id, n ? "PARTIAL" : "FAILED", { status: job.upstream_status, completed: job.completed, total: job.total, creditsUsed: job.credits_used,
       errors: { errors: [entry], robotsBlocked: [] }, errorCode: "ARCHIVE_INCOMPLETE", error: msg }, msg);
-    if (done) say({ job: job.id, action: "closed_incomplete", state: done.state, archived: n });
+    if (done) { say({ job: job.id, action: "closed_incomplete", state: done.state, archived: n }); release(job); }
   }
 
   async function pollOne(job) {
@@ -111,7 +131,7 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     }
     let s;
     try { s = await statusOf(job); } catch (e) { say({ job: job.id, action: "poll_failed", reason: e.code }); return; }
-    if (s.status === 404) { await store.failLost(job.id, "UPSTREAM_STATE_LOST", "The core no longer knows this job and it had not finished; its state cannot be reconstructed."); return; }
+    if (s.status === 404) { await store.failLost(job.id, "UPSTREAM_STATE_LOST", "The core no longer knows this job and it had not finished; its state cannot be reconstructed."); release(job); return; }
     if (s.status !== 200 || !s.json) return;
     const st = { status: s.json.status, completed: s.json.completed ?? 0, total: s.json.total ?? 0, creditsUsed: s.json.creditsUsed ?? null };
     await store.progress(job.id, st);
@@ -144,7 +164,7 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
         say({ job: job.id, action: "archive_interrupted", reason: e.code });
         return; // the next poll resumes
       }
-      if (r.status === 404) { await store.failLost(job.id, "UPSTREAM_STATE_LOST", "The core forgot this job before its results were archived."); return; }
+      if (r.status === 404) { await store.failLost(job.id, "UPSTREAM_STATE_LOST", "The core forgot this job before its results were archived."); release(job); return; }
       const docs = Array.isArray(r.json?.data) ? r.json.data : null;
       if (r.status !== 200 || !docs) { say({ job: job.id, action: "archive_interrupted", reason: `status ${r.status}` }); return; }
       // Upstream's `next` carries the position after this page: it counts finished pages that have no
@@ -200,6 +220,7 @@ export function makeJobs({ cfg, store, upstream, archive, log }) {
     else if (errors.errors.length) to = "PARTIAL";
     await store.finish(job.id, to, { ...st, errors, errorCode: code, error: message }, `upstream ${st.status}; ${have.size} documents archived, ${errors.errors.length} per-item errors`);
     say({ job: job.id, action: "finished", state: to, archived: have.size, errors: errors.errors.length });
+    release(job);
   }
 
   // At the start of every round, SUBMITTING rows become uncertain: no dispatch is in flight between
