@@ -254,7 +254,7 @@ const checks = {
       const skipped = +(((s.retrieval_tap ?? []).find((l) => l.startsWith("# skipped ")) ?? "# skipped 1").split(" ")[2]);
       // One test of each M6 suite, by title: the routing rules, the residential route, the proxies' chaining, the store's SQL.
       const m6suites = ["two consistent challenges on the direct route set a 24-hour residential preference", "a stealth request travels one tunnel under a sticky session",
-        "F11: a search host routed residential goes through the provider", "eight concurrent proxy reservations on a cap with room for three"].every((t) => (s.retrieval_tap ?? []).some((l) => l.startsWith("ok ") && l.includes(t)));
+        "F11: the real search leg sends a residential-routed engine through the provider", "eight concurrent proxy reservations on a cap with room for three"].every((t) => (s.retrieval_tap ?? []).some((l) => l.startsWith("ok ") && l.includes(t)));
       const tr = kv((s.transient ?? []).flatMap((l) => l.split(" ")));
       const cond = { images: m.retrieval_image === composeImage("retrieval-service") && m.gateway_image === composeImage("access-gateway") && m.mcp_image === composeImage("mcp-gateway"),
         retrieval: t("retrieval_tap").tests >= 143 && t("retrieval_tap").fail === 0 && skipped === 0 && exit0("retrieval_tap"), m6_suites_ran: m6suites,
