@@ -104,7 +104,7 @@ async function settle(page, budgetMs) {
 // the page's own limit. Returns { screenshot, actions: { screenshots, scrapes } }.
 const EXTRAS_MAX_BYTES = 16 * 1024 * 1024;
 const SELECTOR_WAIT_MS = 5000;
-async function runHooks(page, hooks, deadline, maxHtml) {
+async function runHooks(page, hooks, deadline, maxHtml, startHost) {
   const out = { screenshot: null, actions: { screenshots: [], scrapes: [] } };
   const fail = (cls, why) => Object.assign(new Error(why), { failureClass: cls });
   let captured = 0, scraped = 0;
@@ -123,8 +123,12 @@ async function runHooks(page, hooks, deadline, maxHtml) {
       else if (a.type === "wait") await page.waitForTimeout(Math.min(Number(a.milliseconds) || 0, 15000, left()));
       else if (a.type === "click") {
         await page.click(String(a.selector), { timeout: Math.min(5000, left()) });
-        // A click that navigates (on this host: the route refuses any other) is let load before the next step.
+        // A click that navigates on this host is let load before the next step. One that would take the page to another
+        // host is refused by the route, which leaves Chromium on its own error page: the action failed, and says so.
         await page.waitForLoadState("load", { timeout: Math.min(5000, left()) }).catch(() => {});
+        let host = null;
+        try { host = new URL(page.url()).host; } catch { /* not a URL */ }
+        if (host !== startHost) throw fail("ACTION_FAILED", `action ${i + 1} (click) tried to take the page to another host, which is refused`);
       } else if (a.type === "scroll") {
         const dy = a.direction === "up" ? -800 : 800;
         if (typeof a.selector === "string") await page.locator(a.selector).first().evaluate((el, d) => el.scrollBy(0, d), dy, { timeout: Math.min(5000, left()) });
@@ -214,7 +218,7 @@ async function render(r, signal) {
     if (Number(r.waitForMs) > 0) await page.waitForTimeout(Math.min(Number(r.waitForMs), settleBudget));
     await settle(page, Math.max(Math.min(settleBudget, deadline - Date.now() - 1000), 0));
     const maxHtml = Math.min(Number(r.limits?.maxHtmlChars) || HTML_MAX_CHARS, HTML_MAX_CHARS);
-    const extras = wantsExtras ? await runHooks(page, r.hooks, deadline, maxHtml) : { screenshot: null, actions: null };
+    const extras = wantsExtras ? await runHooks(page, r.hooks, deadline, maxHtml, startHost) : { screenshot: null, actions: null };
     const redirects = [];
     for (let q = response?.request().redirectedFrom(); q; q = q.redirectedFrom()) redirects.unshift({ url: q.url() });
     // Measured inside the renderer, in this container's own cgroup, so an oversized document never
