@@ -47,6 +47,13 @@ const NO_ENHANCED = Object.freeze({ state: () => ({ available: false, reason: "N
 // success that carries one all the same.
 const RETRY_STATUSES = new Set([401, 403, 429]);
 const RETRYABLE_ROUTE = new Set(["PROVIDER_UNAVAILABLE", "BUDGET_EXHAUSTED"]);
+// A success carrying 401, 403 or 429 would reopen upstream's own retry outside the budget (RETRY_STATUSES): it is made a
+// failure, its content dropped. The last guard, behind quality.mjs, which already fails each of them.
+export function refuseRetryStatus(result) {
+  if (!result.ok || !RETRY_STATUSES.has(result.targetStatus)) return result;
+  for (const k of ["body", "bodyBase64", "screenshot", "actions"]) delete result[k];
+  return Object.assign(result, { ok: false, failure: { class: "RETRIEVAL_CONTRACT", detail: `a result with target status ${result.targetStatus} is never returned as content`, retryable: false, retryAfter: null } });
+}
 export const RESIDENTIAL_SKIPPABLE = new Set(["NO_PROXY_SELECTED", "BLOCKED_CREDENTIAL", "PAID_DISPATCH_DISABLED", "PROVIDER_UNAVAILABLE"]);
 export const proxyRequired = (st, why) => ({ class: "PROXY_REQUIRED", detail: `${why} needs the residential route, which is unavailable (${st.reason})`,
   retryable: RETRYABLE_ROUTE.has(st.reason), retryAfter: st.retryAfter ?? null, route: { residential: st.reason } });
@@ -234,11 +241,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
     const spent = []; // the residential legs of this call, settled
     const finish = (extra) => {
       Object.assign(result, extra);
-      // A success carrying 401, 403 or 429 would reopen upstream's own retry outside the budget (RETRY_STATUSES).
-      if (result.ok && RETRY_STATUSES.has(result.targetStatus)) {
-        for (const k of ["body", "bodyBase64", "screenshot", "actions"]) delete result[k];
-        Object.assign(result, { ok: false, failure: { class: "RETRIEVAL_CONTRACT", detail: `a result with target status ${result.targetStatus} is never returned as content`, retryable: false, retryAfter: null } });
-      }
+      refuseRetryStatus(result);
       result.initialStrategy = result.strategies[0] ?? null;
       result.finalStrategy = result.strategies.at(-1) ?? null;
       let micro = 0;

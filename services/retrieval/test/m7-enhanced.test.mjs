@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { loadBudgetPolicy } from "../src/budget.mjs";
 import { makeEnhanced, readAnswer, REUSE_MAX_BYTES } from "../src/enhanced.mjs";
 import { makeResidential } from "../src/residential.mjs";
-import { makeAcquirer, makeUrlHmac, validateHooks, ACTIONS, SELECTOR_WAIT_MS } from "../src/acquire.mjs";
+import { makeAcquirer, makeUrlHmac, validateHooks, ACTIONS, SELECTOR_WAIT_MS, refuseRetryStatus } from "../src/acquire.mjs";
 import { Denied, parseTarget } from "../src/ssrf.mjs";
 import { policyFor } from "./acquire-helpers.mjs";
 import { providersDir } from "./m5-helpers.mjs";
@@ -434,4 +434,15 @@ test("the action subset is one definition: the capability manifest's subset and 
   const waits = (ms) => ({ actions: [{ type: "wait", milliseconds: ms }] });
   assert.equal(validateHooks(waits(spec.maxWaitMs)).actions[0].milliseconds, spec.maxWaitMs);
   assert.throws(() => validateHooks(waits(spec.maxWaitMs + 1)));
+});
+
+test("a success carrying 401, 403 or 429 is never returned as content: upstream's AddFeatureError retry stays unreachable (review W13)", () => {
+  for (const status of [401, 403, 429]) {
+    const r = refuseRetryStatus({ ok: true, targetStatus: status, body: "<main>content</main>", screenshot: { base64: "x" }, actions: { scrapes: [] }, failure: null });
+    assert.deepEqual([r.ok, r.failure.class, "body" in r, "screenshot" in r, "actions" in r], [false, "RETRIEVAL_CONTRACT", false, false, false], String(status));
+  }
+  // Every other status, and a failure, pass as they are.
+  assert.equal(refuseRetryStatus({ ok: true, targetStatus: 404, body: "gone" }).body, "gone");
+  assert.equal(refuseRetryStatus({ ok: true, targetStatus: 200, body: "ok" }).ok, true);
+  assert.equal(refuseRetryStatus({ ok: false, targetStatus: 403, failure: { class: "ACCESS_DENIED" } }).failure.class, "ACCESS_DENIED");
 });
