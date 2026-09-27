@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { routeBody, isBulk, holdUrls, pagesOf, routeRefusal } from "../src/routing.mjs";
 import { checkManifest } from "../src/config.mjs";
-import { RequestError } from "../src/validate.mjs";
+import { RequestError, validateBody } from "../src/validate.mjs";
 
 const M = JSON.parse(readFileSync(process.env.FCPI_TEST_MANIFEST ?? new URL("../../../deploy/policies/capabilities.json", import.meta.url), "utf8"));
 
@@ -28,6 +28,13 @@ test("a crawl past 20 pages, or a batch past 20 URLs, is bulk and asks for the r
   assert.equal(routeBody("batch", batch, M).body.proxy, "stealth");
   assert.equal(routeBody("batch", { urls: batch.urls.slice(0, 20) }, M).bulk, false);
   assert.equal(isBulk("scrape", { url: "https://example.org/" }, M), false);
+});
+
+test("a crawl with no limit takes the manifest's default of 20 pages, and is not bulk: it runs without the residential route", () => {
+  const { body, units } = validateBody("crawl", { url: "https://example.org/" }, M);
+  assert.equal(body.limit, 20);
+  assert.equal(units, 20);
+  assert.deepEqual(routeBody("crawl", body, M), { body, bulk: false });
 });
 
 test("a local-only (basic) bulk job is refused outright", () => {

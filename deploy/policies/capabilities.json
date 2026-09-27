@@ -95,7 +95,7 @@
     "crawl": {
       "fields": {
         "url": { "type": "url", "required": true },
-        "limit": { "type": "integer", "min": 1, "max": 200, "default": 50 },
+        "limit": { "type": "integer", "min": 1, "max": 200, "default": 20 },
         "maxDiscoveryDepth": { "type": "integer", "min": 0, "max": 3, "default": 3 },
         "includePaths": { "type": "regexes", "maxItems": 50, "maxLength": 512 },
         "excludePaths": { "type": "regexes", "maxItems": 50, "maxLength": 512 },

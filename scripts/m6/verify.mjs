@@ -83,7 +83,9 @@ const ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00
   // retrieval tests' fixture credentials are synthetic values of the shape a provider key has.
   "http://searxng:${pw}@", "sk-test-not-a-real-key-0000000000",
   // M6: the proxy credential parser splits the file's value; the variable holds no value of its own.
-  "password: text.slice"]);
+  "password: text.slice",
+  // M6: the evidence driver's ledger race opens the deployed Store with the service's own secret file, read inside its container.
+  "password: readFileSync"]);
 const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie"];
 function scan(files, ids, rules = RULES, allow = ALLOW) {
   const hits = [];
@@ -250,7 +252,9 @@ const checks = {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
       const t = (k) => tapCounts(s[k]), exit0 = (k) => (s[k] ?? []).includes("test_exit=0");
       const skipped = +(((s.retrieval_tap ?? []).find((l) => l.startsWith("# skipped ")) ?? "# skipped 1").split(" ")[2]);
-      const m6suites = ["m6-route", "m6-residential", "m6-proxy", "m6-store"].every((f) => (s.retrieval_tap ?? []).some((l) => l.includes(`test/${f}.test.mjs`)));
+      // One test of each M6 suite, by title: the routing rules, the residential route, the proxies' chaining, the store's SQL.
+      const m6suites = ["two consistent challenges on the direct route set a 24-hour residential preference", "a stealth request travels one tunnel under a sticky session",
+        "F11: a search host routed residential goes through the provider", "eight concurrent proxy reservations on a cap with room for three"].every((t) => (s.retrieval_tap ?? []).some((l) => l.startsWith("ok ") && l.includes(t)));
       const tr = kv((s.transient ?? []).flatMap((l) => l.split(" ")));
       const cond = { images: m.retrieval_image === composeImage("retrieval-service") && m.gateway_image === composeImage("access-gateway") && m.mcp_image === composeImage("mcp-gateway"),
         retrieval: t("retrieval_tap").tests >= 143 && t("retrieval_tap").fail === 0 && skipped === 0 && exit0("retrieval_tap"), m6_suites_ran: m6suites,
@@ -533,7 +537,7 @@ const checks = {
       const guardOk = hdr.guard_file_sha256 === sha256File("deploy/host/fcpi-guard.nft");
       const r5 = ruleSet("evidence/M5/raw/nft-ruleset.txt"), r6 = ruleSet(`${RAW}nft-ruleset.txt`);
       const ruleChanges = [...[...r6].filter((r) => !r5.has(r)).map((r) => `+ ${r}`), ...[...r5].filter((r) => !r6.has(r)).map((r) => `- ${r}`)];
-      const unattributed = ruleChanges.filter((ch) => !/^\+ inet fcpi_guard\tforward\tiifname "fcpi-egress" ct state new tcp dport 7000 counter packets \d+ bytes \d+ accept comment "egress_proxy_accepted"$/.test(ch)).map((ch) => ch.replace(/\t/g, " ").slice(0, 110));
+      const unattributed = ruleChanges.filter((ch) => !/^\+ inet fcpi_guard\tforward\tiifname "fcpi-egress" ct state new tcp dport 7000 counter( packets \d+ bytes \d+)? accept comment "egress_proxy_accepted"$/.test(ch)).map((ch) => ch.replace(/\t/g, " ").slice(0, 110));
       const afterHash = (read(A).match(/^nft_ruleset_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       const rulesTied = /^[0-9a-f]{64}$/.test(hdr.ruleset_sha256 ?? "") && hdr.ruleset_sha256 === afterHash;
       writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), ["# M6 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m6/verify.mjs X04)",
