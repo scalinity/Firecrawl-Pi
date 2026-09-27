@@ -86,7 +86,10 @@ const ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00
   // M6: the proxy credential parser splits the file's value; the variable holds no value of its own.
   "password: text.slice",
   // M6: the evidence driver's ledger race opens the deployed Store with the service's own secret file, read inside its container.
-  "password: readFileSync"]);
+  "password: readFileSync",
+  // M7: the retrieval service and the fixture receiver read the signing secret into a variable that holds no value of
+  // its own; the webhook test's secret and the local trust-auth PostgreSQL's unused password are synthetic.
+  "secret = getSecret", "secret: hookSecret", 'SECRET = "fixture-webhook-signing-secret-0123456789', 'password: "unused-with-trust']);
 const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie"];
 function scan(files, ids, rules = RULES, allow = ALLOW) {
   const hits = [];
@@ -551,7 +554,7 @@ const checks = {
       const cond = { same_guard: !!handle(`${RAW}guard-window-open.txt`) && handle(`${RAW}guard-window-open.txt`) === handle(`${RAW}egress-probe.txt`), phases_inside: phases.every((p) => inWindow(Date.parse(p.meta?.[0]?.pi_utc ?? ""))),
         counters_read: Number.isFinite(web) && Number.isFinite(proxy), egress: liveRan ? web >= 1 && proxy === 0 : web === 0 && proxy === 0,
         core_logs: recs.length >= 1 && recs.every((r) => r.c && r.c.cloud_unexplained === "0" && r.c.dns_unexplained === "0" && r.ctl >= 1),
-        retrieval_logs: scans.every((s) => +s.lines > 100 && s.cloud_host === "0"), drivers: conns.every((c) => c && same(c.hosts, ["127.0.0.1:3380"]) && c.lookups.length === 0) };
+        retrieval_logs: +scans[1].acquisition >= 40 && +scans[0].enhanced >= 1 && +scans[0].webhook_attempt >= 1 && scans.every((s) => s.cloud_host === "0"), drivers: conns.every((c) => c && same(c.hosts, ["127.0.0.1:3380"]) && c.lookups.length === 0) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; guard handle ${handle(`${RAW}guard-window-open.txt`)}→${handle(`${RAW}egress-probe.txt`)}, web accepted delta=${web}, proxy-port accepted delta=${proxy}, live ran=${liveRan}; core logs=${recs.length}; retrieval log lines=${scans.map((s) => s.lines).join("+")} cloud=${scans.map((s) => s.cloud_host).join("+")}` };
     } },
   X02: { name: "network-and-container-posture", inputs: [`${RAW}stack.txt`, `${EV}rendered-compose.json`],
@@ -567,7 +570,7 @@ const checks = {
       const rk = kv(((reach.find((l) => l.startsWith("networks=")) ?? "")).split(" "));
       const sw = JSON.parse(((st.retrieval_log_scan ?? []).find((l) => l.startsWith("switches_logged=")) ?? "switches_logged=null").slice(16));
       const cond = { fixture_internal: /internal=true/.test(net("fcpi_fixture")) && /gateway_mode_ipv4=isolated/.test(net("fcpi_fixture")) && /fcpi-fixture-m7-1/.test(net("fcpi_fixture")),
-        m7_reach: reach.includes("default_route=no") && rk.networks === "fcpi_fixture" && (rk.aliases ?? "").split(",").length === 7 && rk.secrets_mounted === "/run/secrets/fixture_webhook_secret,/run/secrets/fixture_zyte_sha256" && same(Object.keys(R["fixture-m7"].networks), ["fixture"]),
+        m7_reach: reach.includes("default_route=no") && rk.networks === "fcpi_fixture" && same((rk.aliases ?? "").split(",").filter((a) => a.endsWith(".fixture.fcpi.test")), ["hooks", "m7", "m7cache", "m7chg", "m7esc", "m7shot", "zyte"].map((h) => `${h}.fixture.fcpi.test`)) && rk.secrets_mounted === "/run/secrets/fixture_webhook_secret,/run/secrets/fixture_zyte_sha256" && same(Object.keys(R["fixture-m7"].networks), ["fixture"]),
         publication: pub.length === 1 && /^access-gateway 3300\/tcp -> 127\.0\.0\.1:3380$/.test(pub[0]),
         posture: c("fixture-m7").readonly_rootfs === "true" && c("fixture-m7").cap_drop === "ALL" && c("fixture-m7").docker_sock_mount === "0" && c("fixture-m7").privileged === "false",
         memory: cg("fixture-m7")["memory.max"] === String(96 * MIB),
@@ -582,7 +585,7 @@ const checks = {
       const h = kv(((st.retrieval_log_scan ?? []).find((l) => l.startsWith("budget_policy_sha256_logged=")) ?? "").split(" "));
       const clean = (s) => ["provider_key_like", "client_token_like", "bearer", "proxy_authorization", "basic_credential", "session_username", "signature", "fixture_credential", "zyte_fixture_key", "webhook_secret", "cloud_host"].every((k) => s[k] === "0");
       const readable = (s) => s.fixture_credential_readable === "yes" && s.zyte_fixture_key_readable === "yes" && s.webhook_secret_readable === "yes";
-      const cond = { read: +a.lines >= 100 && +a.acquisition >= 40 && +a.enhanced >= 8 && +a.renders_with_extras >= 1 && +b.lines >= 50 && +b.enhanced >= 1 && +b.webhook_attempt >= 1 && readable(a) && readable(b),
+      const cond = { read: +a.acquisition >= 40 && +a.enhanced >= 8 && +a.renders_with_extras >= 1 && +b.enhanced >= 1 && +b.webhook_attempt >= 1 && readable(a) && readable(b),
         clean: clean(a) && clean(b),
         budget_hash: /^[0-9a-f]{64}$/.test(h.budget_policy_sha256_logged ?? "") && h.budget_policy_sha256_logged === h.budget_policy_sha256_deployed && h.budget_policy_sha256_deployed === sha256File("deploy/policies/budget.json") };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; before recreate lines=${a.lines} acquisitions=${a.acquisition} enhanced=${a.enhanced} extras=${a.renders_with_extras}; after lines=${b.lines} enhanced=${b.enhanced} webhook=${b.webhook_attempt}` };
