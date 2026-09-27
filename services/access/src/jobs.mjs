@@ -13,10 +13,11 @@
 // the earliest upstream group (any later duplicate is cancelled); not found once the settle window
 // has passed → back to RECEIVED, and only then submitted again. Nothing is resubmitted blindly.
 // Route holds (M6, src/routing.mjs). The domains of a job that needs the residential route (a bulk job, or one whose
-// pages ask for it) are held on that route just before it is
-// submitted; a hold refused (the route lost since admission) fails the job as PROXY_REQUIRED unsent, and an
-// unreachable retrieval service leaves it RECEIVED for the next round. The hold is released when the job ends, and
-// lapses on its own after limits.proxy.holdMinutes.
+// pages ask for it) are held on that route just before it is submitted. Only the retrieval service's refusal (409,
+// the route lost since admission) fails the job as PROXY_REQUIRED unsent; an unreachable service or a 5xx (a restart,
+// a database fault) leaves it RECEIVED for the next round, and any other answer is the gateway's own error
+// (ROUTE_HOLD_INVALID) (review W5). The hold is released when the job ends, and lapses on its own after
+// limits.proxy.holdMinutes.
 import { randomUUID } from "node:crypto";
 import { needsRoute, holdUrls } from "./routing.mjs";
 
@@ -44,10 +45,16 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
       let h = null;
       try { h = routes ? await routes.hold(job.id, holdUrls(job.kind, job.request), L.proxy.holdMinutes) : null; }
       catch (e) { await store.markRequeued(job.id, `the route hold could not be placed (${e.code}): the retrieval service was not reached`); say({ job: job.id, action: "requeued", reason: `route hold ${e.code}` }); return job.id; }
-      if (h?.status !== 200 || h.json?.held !== true) {
-        const why = h?.json?.residential?.reason ?? (routes ? `HTTP ${h?.status}` : "ROUTE_SERVICE_UNCONFIGURED");
+      if (!routes || (h.status === 409 && h.json?.held === false)) {
+        const why = h?.json?.residential?.reason ?? "ROUTE_SERVICE_UNCONFIGURED";
         await store.markRejected(job.id, 429, "PROXY_REQUIRED", `This job needs the residential route from the start, which is unavailable (${why}); it was not sent.`);
         say({ job: job.id, action: "rejected", reason: "PROXY_REQUIRED", route: why });
+        return job.id;
+      }
+      if (h.status >= 500) { await store.markRequeued(job.id, `the route hold was not placed: the retrieval service answered ${h.status}`); say({ job: job.id, action: "requeued", reason: `route hold ${h.status}` }); return job.id; }
+      if (h.status !== 200 || h.json?.held !== true) {
+        await store.markRejected(job.id, 502, "ROUTE_HOLD_INVALID", `The retrieval service refused the route hold (HTTP ${h.status}); this is the gateway's own error, and the job was not sent.`);
+        say({ job: job.id, action: "rejected", reason: "ROUTE_HOLD_INVALID", status: h.status });
         return job.id;
       }
       say({ job: job.id, action: "route_held", until: h.json.until, domains: h.json.domains });
