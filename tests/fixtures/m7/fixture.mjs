@@ -157,7 +157,8 @@ export function makeReceiver(state, { secret, now = () => Math.floor(Date.now() 
       const body = Buffer.concat(chunks);
       const rec = { at: new Date().toISOString(), eventId: req.headers["x-fcpi-event-id"] ?? null, timestamp: req.headers["x-fcpi-timestamp"] ?? null, verdict: null };
       state.hooks.received.push(rec);
-      state.hooks.last = { headers: { "x-fcpi-event-id": rec.eventId, "x-fcpi-timestamp": rec.timestamp, "x-fcpi-signature": req.headers["x-fcpi-signature"] ?? "", "content-type": "application/json" }, body: body.toString("utf8") };
+      // The last delivery the receiver accepted, which the control port can send again (a replay, stale or tampered).
+      const seen = { headers: { "x-fcpi-event-id": rec.eventId, "x-fcpi-timestamp": rec.timestamp, "x-fcpi-signature": req.headers["x-fcpi-signature"] ?? "", "content-type": "application/json" }, body: body.toString("utf8") };
       const done = (status, verdict) => { rec.verdict = verdict; res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify({ verdict })); };
       const v = verify({ secret, eventId: rec.eventId, timestamp: rec.timestamp, signature: req.headers["x-fcpi-signature"], body, now: now() });
       if (v) return done(401, v);
@@ -166,6 +167,7 @@ export function makeReceiver(state, { secret, now = () => Math.floor(Date.now() 
       let event = null;
       try { event = JSON.parse(body.toString("utf8")); } catch { /* counted as accepted all the same */ }
       state.hooks.accepted.set(rec.eventId, { at: rec.at, type: event?.type ?? null, id: event?.id ?? null });
+      state.hooks.last = seen;
       done(200, "accepted");
     });
   });

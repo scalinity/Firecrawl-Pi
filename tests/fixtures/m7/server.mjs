@@ -3,7 +3,7 @@
 //          webhook receiver (hooks.fixture.fcpi.test, POST /receive), told apart by the request's Host
 //   127.0.0.1:8082  control, reached only with docker exec: GET /__stats, POST /__reset, POST /__mode?m=<ok|520|521|429|
 //          500|401|502|blackhole|malformed>, POST /__version?path=/doc&v=<n>, POST /__hooks/fail?n=<n>,
-//          POST /__replay?as=<same|stale|tampered> (the receiver's last delivery sent to it again, changed as named)
+//          POST /__replay?as=<same|stale|tampered> (the receiver's last accepted delivery sent to it again, changed as named)
 // The provider's key is checked by its SHA-256 (a Compose secret); the receiver holds the webhook signing secret itself,
 // as a receiver must. A request that came through the M6 fixture proxy is told apart by its peer address, the proxy
 // container's, resolved from its fixture name.
@@ -58,7 +58,7 @@ http.createServer(async (req, res) => {
     state.versions.set(u.searchParams.get("path"), Number(u.searchParams.get("v"))); return json({ versions: Object.fromEntries(state.versions) });
   }
   if (u.pathname === "/__hooks/fail" && /^\d{1,2}$/.test(u.searchParams.get("n") ?? "")) { state.hooks.failNext = Number(u.searchParams.get("n")); return json({ failNext: state.hooks.failNext }); }
-  // The receiver's last delivery sent to it again: as it was (a replay within the tolerance, acknowledged as a duplicate),
+  // The receiver's last accepted delivery sent to it again: as it was (a replay within the tolerance, acknowledged as a duplicate),
   // with a timestamp an hour old and its signature recomputed (stale), or with its body changed (tampered).
   if (u.pathname === "/__replay" && state.hooks.last) {
     const as = u.searchParams.get("as");
