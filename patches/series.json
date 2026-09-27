@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "36917fb853bcef10761a491ff063eda8251dd7be",
-  "series_sha256": "33c9333a3ab97946fe3af0f67938bb9fb50b0d67cce3a454e1237a9e9a26510a",
+  "result_tree": "7ff39ea66087d072c51f7652406ac136045325d9",
+  "series_sha256": "4e802a789ebcbe58d991f92c051622c7c338d17af4c2dec059691c1b341bedbb",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -126,6 +126,18 @@
       "tests": [
         "M5-D01 every document class through the core",
         "M5-D02 the complex-document fallback and its credits"
+      ]
+    },
+    {
+      "file": "0009-residential-route-option.patch",
+      "sha256": "ba1e00400742cfb2b0e741aa329c836e442dd643d4f8c367c19942073d0dc5e5",
+      "reason": "The scrape option proxy (auto, basic, stealth) never reached the retrieval service, so a caller could not ask for the residential route and a bulk job's pages could not start on it (spec §10.2); proxyUsed always said basic.",
+      "symbols": [
+        "apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts piResilientFeatures (stealthProxy served), scrapeURLWithPiResilient (route sent, enhanced refused, proxyUsed from the final strategy)"
+      ],
+      "tests": [
+        "M6-R01 routes through the core",
+        "M6-B01 a bulk crawl's pages on the residential route"
       ]
     }
   ],

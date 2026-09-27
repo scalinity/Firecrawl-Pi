@@ -1,0 +1,108 @@
+diff --git a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
+index c9f9e23a8f95f02771a8d06b270b26f1c5f5d1f2..b58253828e58066bc156c9caaf1a97f29f62dc7e 100644
+--- a/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
++++ b/apps/api/src/scraper/scrapeURL/engines/pi-resilient/index.ts
+@@ -19,8 +19,10 @@ import { scrapeDocument } from "../document";
+ export { usePiResilient } from "./fetch";
+ 
+ // The features this deployment really serves. Screenshots and actions have result hooks in
+-// the retrieval and browser services but stay unregistered until M7; proxies, geo and stealth
+-// arrive with M6; skipTlsVerification is refused, because TLS is always verified (spec §9.2).
++// the retrieval and browser services but stay unregistered until M7; geo stays unregistered;
++// skipTlsVerification is refused, because TLS is always verified (spec §9.2). The stealth proxy is
++// the retrieval service's residential route (M6): the scrape's proxy option is sent as the
++// acquisition's route, and the service decides egress under its policy.
+ export const piResilientFeatures: { [F in FeatureFlag]: boolean } = {
+   actions: false,
+   waitFor: true,
+@@ -35,7 +37,7 @@ export const piResilientFeatures: { [F in FeatureFlag]: boolean } = {
+   mobile: false,
+   skipTlsVerification: false,
+   useFastMode: true,
+-  stealthProxy: false,
++  stealthProxy: true,
+   branding: false,
+   disableAdblock: true,
+ };
+@@ -71,6 +73,16 @@ export async function scrapeURLWithPiResilient(
+     );
+   }
+ 
++  // The route the retrieval service is asked for (FIRECRAWL_PI_SPEC.md §10.2): auto, basic
++  // (direct only) or stealth (the residential route). Enhanced retrieval is not offered before M7.
++  const route = meta.options.proxy ?? "auto";
++  if (route !== "auto" && route !== "basic" && route !== "stealth") {
++    throw new PiRetrievalError(
++      "UNSUPPORTED_CAPABILITY",
++      `The ${route} proxy is not offered in this deployment.`,
++    );
++  }
++
+   const remaining = Math.min(
+     meta.abort.scrapeTimeout() ?? MAX_ACQUISITION_MS,
+     MAX_ACQUISITION_MS,
+@@ -101,6 +113,7 @@ export async function scrapeURLWithPiResilient(
+     headers: meta.options.headers ?? {},
+     waitFor: meta.options.waitFor ?? 0,
+     fast: meta.featureFlags.has("useFastMode"),
++    route,
+   };
+ 
+   let response: undici.Response;
+@@ -141,6 +154,7 @@ export async function scrapeURLWithPiResilient(
+     attemptId: string;
+     attemptsUsed: number;
+     strategy: string | null;
++    finalStrategy?: string | null;
+     finalUrl: string;
+     targetStatus: number;
+     contentType: string | null;
+@@ -161,6 +175,7 @@ export async function scrapeURLWithPiResilient(
+     attemptId: result.attemptId,
+     attemptsUsed: result.attemptsUsed,
+     strategy: result.strategy,
++    route,
+     targetStatus: result.targetStatus,
+     bytes: result.bytes,
+     verdict: result.quality?.verdict ?? null,
+@@ -178,6 +193,9 @@ export async function scrapeURLWithPiResilient(
+   }
+ 
+   const contentType = result.contentType ?? undefined;
++  // Firecrawl's own field has two values: the residential route answered, or it did not. The
++  // strategy itself (direct_http, residential_browser, …) is in the service's record.
++  const proxyUsed: "basic" | "stealth" = result.finalStrategy?.startsWith("residential") ? "stealth" : "basic";
+   // PDFs, documents and other binary types follow upstream's content-type rules; the file is
+   // the one this acquisition returned, handed to the parser as a prefetch.
+   if (result.bodyBase64 !== undefined) {
+@@ -195,13 +213,16 @@ export async function scrapeURLWithPiResilient(
+       );
+     } catch (error) {
+       if (error instanceof AddFeatureError && error.pdfPrefetch) {
+-        return await scrapePDF({ ...meta, pdfPrefetch: error.pdfPrefetch });
++        return { ...(await scrapePDF({ ...meta, pdfPrefetch: error.pdfPrefetch })), proxyUsed };
+       }
+       if (error instanceof AddFeatureError && error.documentPrefetch) {
+-        return await scrapeDocument({
+-          ...meta,
+-          documentPrefetch: error.documentPrefetch,
+-        });
++        return {
++          ...(await scrapeDocument({
++            ...meta,
++            documentPrefetch: error.documentPrefetch,
++          })),
++          proxyUsed,
++        };
+       }
+       throw error;
+     }
+@@ -216,7 +237,7 @@ export async function scrapeURLWithPiResilient(
+     html: result.body ?? "",
+     statusCode: result.targetStatus,
+     contentType,
+-    proxyUsed: "basic",
++    proxyUsed,
+   };
+ }
+ 
