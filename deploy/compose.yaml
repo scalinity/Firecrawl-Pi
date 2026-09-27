@@ -1,6 +1,7 @@
 # FCPI curated Compose (M1: durable, private core; M2: guarded retrieval and a sandboxed browser;
 # M3: the authorized REST gateway with its durable job ledger; M4: the stateless MCP service behind it;
-# M5: private SearXNG, and the search, model and parser adapters in the retrieval service).
+# M5: private SearXNG, and the search, model and parser adapters in the retrieval service; M6: the residential route;
+# M7: the enhanced provider, the browser extras and webhook delivery in the retrieval service).
 # Start and stop through systemd (fcpi-stack.service). The fail-closed data check
 # (deploy/host/fcpi-data-check.sh) runs before every start of the stack and, through a
 # docker.service drop-in, before every dockerd start, which is when restart policies
@@ -466,7 +467,10 @@ services:
       PI_MAX_BROWSER_PAGES: "1"
       PI_PAID_DISPATCH_ENABLED: "false"
       PI_CLOUD_ACCESS_ENABLED: "false"
-      PI_BROWSER_EXTRAS_ENABLED: "false"
+      # M7: screenshots and the safe action subset (a switch, so the optional capability can be turned off alone), and
+      # webhook delivery for the gateway's outbox ("suppressed" holds every event unsent, as a restore does).
+      PI_BROWSER_EXTRAS_ENABLED: "true"
+      PI_WEBHOOK_DELIVERY: "enabled"
       # M5: SearXNG on fcpi_search, the search proxy SearXNG's engines leave through, the gateway's
       # extraction listener on fcpi_model, the budget policy, the provider credentials (a directory, so a key
       # placed there later needs no recreation; an absent key is BLOCKED_CREDENTIAL or PARSER_REQUIRED) and
@@ -477,7 +481,7 @@ services:
       PI_BUDGET_POLICY_FILE: /srv/policy/budget.json
       PI_PROVIDERS_DIR: /run/providers
       PI_SELECTION_FILE: /srv/selection/selection.json
-    secrets: [retrieval_postgres_password, retrieval_core_token_sha256, retrieval_browser_token, retrieval_gateway_token_sha256, retrieval_searxng_proxy_sha256]
+    secrets: [retrieval_postgres_password, retrieval_core_token_sha256, retrieval_browser_token, retrieval_gateway_token_sha256, retrieval_searxng_proxy_sha256, webhook_signing_secret]
     volumes:
       - type: bind
         source: /opt/firecrawl-pi/deploy/policies/egress.json
@@ -593,7 +597,7 @@ services:
     environment:
       PI_BROWSER_LISTEN: 10.231.2.20:3320
       PI_CREDENTIALS_DIR: /run/secrets
-      PI_BROWSER_EXTRAS_ENABLED: "false"
+      PI_BROWSER_EXTRAS_ENABLED: "true"
       HOME: /tmp
     secrets: [browser_token_sha256]
     tmpfs:
@@ -765,6 +769,47 @@ services:
           m6cool.fixture.fcpi.test, m6esc.fixture.fcpi.test, searchr.fixture.fcpi.test, proxy.fixture.fcpi.test]
     logging: *logging-dep
 
+  # M7's controlled enhanced provider, targets and webhook receiver (tests/fixtures/m7/server.mjs): a provider on :8080
+  # that speaks Zyte API's documented contract (Basic authentication, /v1/extract, a target's status in a 200, 520 for a
+  # ban) and fetches targets itself on this network; targets that answer it, the M6 fixture proxy and a direct request
+  # differently; screenshot, action and change pages; and a receiver that checks each delivery's signature, timestamp
+  # and event id as a receiver should. Control on the container's loopback, reached only with docker exec.
+  fixture-m7:
+    image: node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+    platform: linux/arm64
+    pull_policy: missing
+    hostname: fixture-m7
+    restart: unless-stopped
+    user: "8080:8080"
+    command: ["node", "/fixtures/m7/server.mjs"]
+    secrets: [fixture_zyte_sha256, fixture_webhook_secret]
+    volumes:
+      - type: bind
+        source: /opt/firecrawl-pi/tests/fixtures
+        target: /fixtures
+        read_only: true
+        bind: { create_host_path: false }
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 96m
+    memswap_limit: 96m
+    cpus: 0.2
+    pids_limit: 32
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8082/healthz',{signal:AbortSignal.timeout(3000)}).then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    depends_on:
+      fixture-m6: { condition: service_healthy }
+    networks:
+      fixture:
+        aliases: [m7.fixture.fcpi.test, m7esc.fixture.fcpi.test, m7shot.fixture.fcpi.test, m7chg.fixture.fcpi.test, m7cache.fixture.fcpi.test,
+          zyte.fixture.fcpi.test, hooks.fixture.fcpi.test]
+    logging: *logging-dep
+
 networks:
   # Not internal: port publishing needs a non-internal bridge. Only the gateway joins it.
   access:
@@ -904,3 +949,8 @@ secrets:
   searxng_secret_key: { file: /etc/firecrawl-pi/secrets/searxng_secret_key }
   # M6: the fixture proxy's credential, as its SHA-256 (the credential itself is in the providers directory).
   fixture_proxy_sha256: { file: /etc/firecrawl-pi/secrets/fixture_proxy_sha256 }
+  # M7 (scripts/m7/pi-init-m7.sh): the webhook signing secret (the retrieval service signs with it; the fixture receiver
+  # holds its own copy of the one value, as a receiver must), and the fixture enhanced provider's key as its SHA-256.
+  webhook_signing_secret: { file: /etc/firecrawl-pi/secrets/webhook_signing_secret }
+  fixture_webhook_secret: { file: /etc/firecrawl-pi/secrets/fixture_webhook_secret }
+  fixture_zyte_sha256: { file: /etc/firecrawl-pi/secrets/fixture_zyte_sha256 }

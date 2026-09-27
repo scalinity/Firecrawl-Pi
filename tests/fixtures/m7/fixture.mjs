@@ -61,6 +61,9 @@ export function makeZyte(state, { keySha256, resolve = async () => "127.0.0.1", 
         if (!got) { call.status = 421; return answer(421, { status: 421, type: "/website/domain-unreachable" }); }
         if (![301, 302, 303, 307, 308].includes(got.status) || !got.headers.location) break;
         u = new URL(got.headers.location, u);
+        // A redirect off the fixture network is reported as where the answer ended, never resolved or fetched: the
+        // fixture sends no query for a public name (a Cloud host among them).
+        if (!/\.fixture\.fcpi\.test$/.test(u.hostname)) { got = { status: 200, headers: { "content-type": "text/html" }, body: Buffer.from("<main><p>fixture: the redirect's end, not fetched</p></main>") }; break; }
       }
       call.status = 200;
       if (body.browserHtml) {
@@ -118,9 +121,12 @@ export function makeTarget(state, { isProxied = () => false } = {}) {
       case "/cached": return html(200, page("Cache fixture", `<p>${"A page for the cache to hold. ".repeat(8)}</p>`));
       case "/err500": return html(500, page("Server error", "<p>Something went wrong.</p>"));
       case "/err404": return html(404, page("Not found", "<p>No such page.</p>"));
-      // Changes: a document whose text is its current version, set through the control port.
+      // Changes: a document whose text is its current version, set through the control port; version 0 makes it an error
+      // page and version -1 a bot interstitial at the same URL, neither of which may replace the stored version.
       case "/doc": {
         const v = state.versions.get(path) ?? 1;
+        if (v === 0) return html(500, page("Server error", "<p>Something went wrong.</p>"));
+        if (v === -1) return html(403, CHALLENGE);
         return html(200, page("Change fixture", `<p>Release notes, version ${v}.</p><p>${"Stable paragraph that does not change. ".repeat(6)}</p>${v >= 2 ? `<p>Added in version ${v}: a new line of text.</p>` : ""}`));
       }
       case "/doc-challenge": return html(403, CHALLENGE);

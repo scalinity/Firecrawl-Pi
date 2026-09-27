@@ -1,0 +1,9 @@
+# Webhook suppression (FIRECRAWL_PI_SPEC.md §31.3; M7): laid over deploy/compose.yaml for a restore, a rollback or any
+# window in which no event may leave, it changes one setting of one service. The retrieval service then refuses every
+# delivery attempt as WEBHOOKS_SUPPRESSED, and the gateway's outbox keeps each event PENDING, counting no attempt, until
+# the service runs without this file again.
+#   sudo docker compose -p fcpi -f deploy/compose.yaml -f deploy/compose.webhooks-suppressed.yaml up -d --no-deps --force-recreate retrieval-service
+services:
+  retrieval-service:
+    environment:
+      PI_WEBHOOK_DELIVERY: "suppressed"
