@@ -71,11 +71,15 @@ export class Meter {
     this.bytes += n;
     if (this.bytes > this.cap && !this.capped) { this.capped = true; for (const s of this.sockets) { s.fcpiCapped = true; s.destroy(); } }
   }
+  // A tunnel opened after the cap tripped is cut at once, like the ones open when it tripped (review W2).
   attach(socket) {
-    this.sockets.add(socket);
     this.tunnels++;
+    if (this.capped) { socket.fcpiCapped = true; socket.destroy(); return; }
+    this.sockets.add(socket);
     socket.once("close", () => this.sockets.delete(socket));
   }
+  // Ends every tunnel still open, so nothing crosses after the count is read (review S7).
+  closeAll() { for (const s of this.sockets) s.destroy(); }
   // A Duplex over an established tunnel that counts what crosses it, for an HTTP request, a TLS session or a pipe.
   // An error on the tunnel itself (a reset by the provider, not this service's own destroy) leaves the charge unknown.
   wrap(raw) {
@@ -157,16 +161,20 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     return { reservation: r.reservation, amount };
   }
 
-  // Settles at the measured bytes; a tunnel that broke after it was up leaves the charge unknown, so the whole
-  // reservation stays counted (UNCERTAIN) until provider usage reconciles it (reconcile.mjs).
+  // Settles at the measured bytes, the tunnels closed first so nothing crosses after the count; a tunnel that broke
+  // after it was up leaves the charge unknown, so the whole reservation stays counted (UNCERTAIN) until provider usage
+  // reconciles it (reconcile.mjs). The measured charge is recorded as it is, above the reservation too (by at most the
+  // chunk that tripped the cap): hiding it would leave the ledger short of the provider's bill (review W2).
   async function settle(st, reservation, meter, detail) {
+    meter.closeAll();
     const bytes = meter.bytes, actual = proxyCost(st.card, bytes);
     if (meter.errored) {
       await store.markBudgetUncertain(reservation.id, `a tunnel broke after it was up; ${bytes} bytes measured locally (${detail})`, { bytes, tunnels: meter.tunnels, capped: meter.capped });
       return { state: "UNCERTAIN", bytes, actual: null, reserved: Number(reservation.reserved) };
     }
-    const row = await store.settleBudget(reservation.id, Math.min(actual, Number(reservation.reserved)), { usage: { bytes, tunnels: meter.tunnels, capped: meter.capped }, detail });
-    return { state: row?.state ?? "SETTLED", bytes, actual: Math.min(actual, Number(reservation.reserved)), reserved: Number(reservation.reserved) };
+    const above = actual > Number(reservation.reserved);
+    const row = await store.settleBudget(reservation.id, actual, { usage: { bytes, tunnels: meter.tunnels, capped: meter.capped }, detail: above ? `${detail}; settled above its reservation of ${reservation.reserved} micro-USD` : detail });
+    return { state: row?.state ?? "SETTLED", bytes, actual, reserved: Number(reservation.reserved), above };
   }
 
   // The provider endpoint's one address: a fixture proxy inside its fixture subnet, a public one by the service's
@@ -182,6 +190,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
   // (never the raw socket). Rejects with a ProviderRefusal (the provider's failure) or a Denied (cancel, deadline).
   async function tunnel(st, { host, port, sessionId, deadline, signal, meter }) {
     if (signal?.aborted) throw new Denied("CANCELLED", "the caller cancelled the acquisition");
+    if (meter.capped) throw new Denied("SIZE_LIMIT", "the attempt passed its proxy byte budget");
     const cred = credentialOf(st.provider);
     if (!cred) throw new ProviderRefusal("BLOCKED_CREDENTIAL", "the proxy credential is absent or malformed", { retryable: false });
     let ep;

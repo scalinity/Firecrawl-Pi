@@ -368,13 +368,14 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; gaps ms=${gaps.join(",")}; routes=${[...new Set((p?.hits ?? []).map((h) => h.via))].join(",")}; race granted ${granted} of 8 (expected ${rc?.expected_granted}, cap ${rc?.cap}, used before ${rc?.used_before}), released ${rel?.released?.length}` };
     } },
   R09: { name: "proxy-reservations-settlement-and-hard-cap", inputs: [`${RAW}e2e-fixture.txt`, "deploy/policies/budget.json", `${EV}rendered-compose.json`],
-    expected: "every residential attempt reserved one attempt's maximum (10 MB at $4/GB, 40,000 micro-USD) and every search tunnel its own (2 MB, 8,000) before anything was sent; every settled row's actual is the rate card's price for its measured bytes and never above its reservation; the residential echo's settled bytes are at least what the fixture proxy relayed for its session; the 12 MB page past its reservation is SIZE_LIMIT with its charge within the reservation; no proxy row exists for the production phase; the paid proxy caps are zero and paid dispatch is off",
+    expected: "every residential attempt reserved one attempt's maximum (10 MB at $4/GB, 40,000 micro-USD) and every search tunnel its own (2 MB, 8,000) before anything was sent; every settled row's actual is the rate card's price for its measured bytes, above its reservation only for an attempt cut at its cap and then by at most one chunk; the residential echo's settled bytes are at least what the fixture proxy relayed for its session; the 12 MB page past its reservation is SIZE_LIMIT after one attempt; no proxy row exists for the production phase; the paid proxy caps are zero and paid dispatch is off",
     run() {
       const rows = (FX().ledger?.[0]?.rows ?? []).filter((r) => r.kind === "proxy");
       const budget = json("deploy/policies/budget.json"), R = json(`${EV}rendered-compose.json`);
       const reservedOk = rows.length >= 20 && rows.every((r) => Number(r.reserved) === (r.call_key.startsWith("proxy:search:") ? TUNNEL_RESERVATION : ATTEMPT_RESERVATION) || r.call_key.startsWith("e2e-race-"));
       const settled = rows.filter((r) => r.state === "SETTLED");
-      const priced = settled.length >= 15 && settled.every((r) => Number(r.actual) <= Number(r.reserved) && (r.usage?.reconciled ? true : Number(r.actual) === Math.min(microFor(r.usage?.bytes ?? -1), Number(r.reserved))));
+      const priced = settled.length >= 15 && settled.every((r) => (r.usage?.reconciled ? Number(r.actual) <= Number(r.reserved) : Number(r.actual) === microFor(r.usage?.bytes ?? -1))
+        && (Number(r.actual) <= Number(r.reserved) || (r.usage?.capped === true && Number(r.actual) - Number(r.reserved) <= microFor(1048576))));
       const eg = one(FX().egress, "residential"), echoTunnel = (eg?.tunnels ?? [])[0];
       const echoRow = rows.find((r) => r.usage && eg && Date.parse(r.created_at) >= Date.parse(eg.utc) - 30000 && Date.parse(r.created_at) <= Date.parse(eg.utc) && r.state === "SETTLED");
       const sz = one(FX().size_limit, "past_reservation");

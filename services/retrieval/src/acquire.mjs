@@ -242,7 +242,10 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         try {
           httpRes = await pacedFetch(paced.domain, { url: req.url, headers: req.headers, maxBytes: leg ? Math.min(policy.maxBodyBytes, leg.meter.cap) : policy.maxBodyBytes,
             deadline: Math.min(deadline, Date.now() + policy.attempts.httpAttemptMs), jar, via: leg ? residential.via(leg) : null }, attemptId, deadline, signal, tier);
-        } catch (e) {
+        } catch (err) {
+          // A cut at the attempt's byte reservation may surface through TLS as a reset; it is the cap, whatever the
+          // error says, and never earns a same-tier retry (review S12).
+          const e = leg?.meter.capped ? new Denied("SIZE_LIMIT", "the attempt passed its proxy byte budget") : err;
           const s = leg ? await settle(leg, `failed: ${e.failureClass ?? "ERROR"}`) : null;
           await store.finishAttempt(attemptId, { outcome: e.failureClass ?? "ERROR", bytes: s?.bytes ?? null });
           if (!(e instanceof Denied)) throw e;
@@ -328,7 +331,8 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           const shell = verdict?.verdict === "js_shell" && verdict.structural === true;
           // A render that hit its subresource, request or byte cap loaded only part of the page: that is
           // a resource-limit result, not a success (spec §12; review finding W6).
-          const limited = r.ok && (r.subresources?.overLimit > 0 || r.proxy?.capped === true)
+          // A residential render whose leg passed its byte reservation loaded only part of the page too (review W2).
+          const limited = r.ok && (r.subresources?.overLimit > 0 || r.proxy?.capped === true || leg?.meter.capped === true)
             ? { class: "RESOURCE_LIMIT", detail: `the page passed its browser budget (${r.subresources?.requests ?? 0} subresources, ${r.proxy?.requests ?? 0} proxied requests, ${r.proxy?.bytes ?? 0} bytes)`, retryable: false, retryAfter: null } : null;
           // A render that failed because the provider refused its tunnels is the provider's failure, not the page's.
           const providerFailure = !r.ok && r.proxy?.upstreamFailure ? { ...r.proxy.upstreamFailure, provider: true } : null;
@@ -470,7 +474,8 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
       let r;
       try {
         r = await pacedFetch(paced.domain, { url: b.url, method, headers: b.headers, maxBytes: leg ? Math.min(maxBytes, leg.meter.cap) : maxBytes, deadline, via: leg ? residential.via(leg) : null }, attemptId, deadline, signal, tier);
-      } catch (e) {
+      } catch (err) {
+        const e = leg?.meter.capped ? new Denied("SIZE_LIMIT", "the download passed its proxy byte budget") : err;
         const s = leg ? await legs.close(leg, `failed: ${e.failureClass ?? "ERROR"}`) : null;
         leg = null;
         await store.finishAttempt(attemptId, { outcome: e.failureClass ?? "ERROR", bytes: s?.bytes ?? null });

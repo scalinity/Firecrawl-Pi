@@ -190,14 +190,19 @@ test("a proxy that cannot be reached or never answers is PROVIDER_UNREACHABLE wi
   } finally { await fx.close(); }
 });
 
-test("an attempt past its byte reservation is cut off: SIZE_LIMIT, and the charge never passes what was reserved", async () => {
+test("an attempt past its byte reservation is cut off as SIZE_LIMIT with no retry, and its true charge is recorded, above the reservation by at most the chunk that tripped it (review W2, S8)", async () => {
   const fx = await startFixture();
   try {
     const { acquire, store } = rig(fx, { policy: Object.assign(m6Policy(fx), { maxBodyBytes: 20_000_000 }) });
     const r = await acquire(req(`${base(fx)}/big`, { route: "stealth" }));
     assert.equal(r.failure.class, "SIZE_LIMIT");
+    assert.deepEqual(r.strategies, ["residential_http"], "a cut at the cap earns no same-tier retry");
     const [row] = store.ledger.rows.values();
-    assert.ok(row.actual <= row.reserved);
+    assert.equal(row.state, "SETTLED");
+    assert.ok(row.usage.bytes > 10_000_000 && row.usage.bytes < 10_000_000 + 1_048_576, `${row.usage.bytes} bytes`);
+    assert.equal(row.actual, Math.ceil((row.usage.bytes * 4_000_000) / 1e9));
+    assert.ok(row.actual > row.reserved);
+    assert.match(row.detail, /above its reservation/);
   } finally { await fx.close(); }
 });
 
@@ -281,13 +286,44 @@ test("eight simultaneous reservations against a cap with room for three: three g
   } finally { await fx.close(); }
 });
 
-test("the meter counts through TLS-sized chunks, stops at its cap and reports a broken tunnel", async () => {
+test("the meter trips at its cap, and a tunnel attached after it tripped is cut at once (review W2)", async () => {
   const m = new Meter(100);
+  const sock = () => { const s = { destroyed: false, destroy() { this.destroyed = true; }, once() {} }; return s; };
+  const early = sock();
+  m.attach(early);
   m.add(60);
   assert.equal(m.capped, false);
   m.add(50);
   assert.equal(m.capped, true);
   assert.equal(m.bytes, 110);
+  assert.equal(early.destroyed, true);
+  const late = sock();
+  m.attach(late);
+  assert.equal(late.destroyed, true);
+  assert.equal(m.tunnels, 2);
+});
+
+test("a residential render whose leg passed its reservation is RESOURCE_LIMIT, not a success, and no tunnel opens after the cap (review W2)", async () => {
+  const fx = await startFixture();
+  try {
+    const http = await import("node:http");
+    // A browser stand-in: the page's big subresource trips the cap; the page itself still "renders", as Chromium would.
+    let lateRefused = null;
+    const browser = { render: async ({ url, upstream }) => {
+      const u = new URL(url);
+      await new Promise((resolve) => upstream.open(u.hostname, Number(u.port)).then((s) => {
+        http.request({ host: u.hostname, port: u.port, path: "/big", createConnection: () => s }, (res) => { res.on("data", () => {}); res.on("close", resolve); res.on("error", resolve); }).on("error", resolve).end();
+      }, resolve));
+      lateRefused = await upstream.open(u.hostname, Number(u.port)).then(() => null, (e) => e.failureClass);
+      return { ok: true, status: 200, html: "<html><body><main><h1>Partial page</h1><p>" + "text ".repeat(200) + "</p></main></body></html>", finalUrl: url, contentType: "text/html",
+        subresources: { requests: 1, overLimit: 0 }, proxy: { requests: 2, bytes: 1000, capped: false, denied: [] } };
+    } };
+    const { acquire } = rig(fx, { browser, policy: Object.assign(m6Policy(fx), { maxBodyBytes: 20_000_000 }) });
+    const r = await acquire(req(`${base(fx)}/js-subres`, { route: "stealth" }));
+    assert.equal(r.failure?.class, "RESOURCE_LIMIT");
+    assert.deepEqual(r.strategies, ["residential_http", "residential_browser"]);
+    assert.equal(lateRefused, "SIZE_LIMIT");
+  } finally { await fx.close(); }
 });
 
 test("a credential whose name would change the session username is refused, and the route's state never carries the password (review S18, S2)", async () => {
