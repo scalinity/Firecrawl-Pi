@@ -76,10 +76,11 @@ function decoderFor(encoding) {
 // counted and TLS-wrapped by its opener (residential.mjs). Resolves { status, headers, body (Buffer), wireBytes }.
 function requestOnce({ target, address, method, headers, maxBytes, deadline, signal, socket = null }) {
   return new Promise((resolve, reject) => {
-    // An abort listener added to an already-aborted signal never fires, so it is checked first.
-    if (signal?.aborted) return reject(new Denied("CANCELLED", "the caller cancelled the acquisition"));
+    // An abort listener added to an already-aborted signal never fires, so it is checked first. A tunnel opened for
+    // this request is closed with it (review S13).
+    if (signal?.aborted) { socket?.destroy(); return reject(new Denied("CANCELLED", "the caller cancelled the acquisition")); }
     const remaining = deadline - Date.now();
-    if (remaining <= 0) return reject(new Denied("DEADLINE_EXCEEDED", "no time left for the request"));
+    if (remaining <= 0) { socket?.destroy(); return reject(new Denied("DEADLINE_EXCEEDED", "no time left for the request")); }
     const tls = target.url.protocol === "https:";
     let settled = false;
     const fail = (e) => { if (!settled) { settled = true; req.destroy(); reject(e); } };

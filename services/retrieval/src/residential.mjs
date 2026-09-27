@@ -166,8 +166,13 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
   // after it was up leaves the charge unknown, so the whole reservation stays counted (UNCERTAIN) until provider usage
   // reconciles it (reconcile.mjs). The measured charge is recorded as it is, above the reservation too (by at most the
   // chunk that tripped the cap): hiding it would leave the ledger short of the provider's bill (review W2).
+  // A leg that never opened a tunnel sent nothing the provider could bill: its reservation is released (review W9).
   async function settle(st, reservation, meter, detail) {
     meter.closeAll();
+    if (meter.tunnels === 0) {
+      const row = await store.releaseBudget(reservation.id, `nothing was sent (${detail})`);
+      return { state: row?.state ?? "RELEASED", bytes: 0, actual: 0, reserved: Number(reservation.reserved) };
+    }
     const bytes = meter.bytes, actual = proxyCost(st.card, bytes);
     if (meter.errored) {
       await store.markBudgetUncertain(reservation.id, `a tunnel broke after it was up; ${bytes} bytes measured locally (${detail})`, { bytes, tunnels: meter.tunnels, capped: meter.capped });
@@ -177,6 +182,9 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     const row = await store.settleBudget(reservation.id, actual, { usage: { bytes, tunnels: meter.tunnels, capped: meter.capped }, detail: above ? `${detail}; settled above its reservation of ${reservation.reserved} micro-USD` : detail });
     return { state: row?.state ?? "SETTLED", bytes, actual, reserved: Number(reservation.reserved), above };
   }
+
+  // The charge of a leg whose settlement could not be completed is unknown: the whole reservation stays counted.
+  const markUncertain = (reservation, meter, detail) => store.markBudgetUncertain(reservation.id, detail, { bytes: meter.bytes, tunnels: meter.tunnels, capped: meter.capped });
 
   // The provider endpoint's one address: a fixture proxy inside its fixture subnet, a public one by the service's
   // resolver with every answer public, neither ever a Cloud destination.
@@ -277,7 +285,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     };
   }
 
-  return { state, availability, reserve, settle, tunnel, leg, via, breakerState: (name) => breakerFor(name).state(), breakers: () => Object.fromEntries([...breakers].map(([k, b]) => [k, b.state()])) };
+  return { state, availability, reserve, settle, markUncertain, tunnel, leg, via, breakerState: (name) => breakerFor(name).state(), breakers: () => Object.fromEntries([...breakers].map(([k, b]) => [k, b.state()])) };
 }
 
 // A session id for one logical acquisition: letters and digits only, stable across its attempts, and not the

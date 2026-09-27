@@ -358,3 +358,19 @@ test("a target that never answers the TLS hello through the tunnel ends as TIMEO
     assert.equal(row.state, "SETTLED", "the attempt's reservation settled at what the tunnel carried");
   } finally { silent.close(); await fx.close(); }
 });
+
+test("an exception between a reservation and its settlement still closes the leg: released when nothing was sent (review W9)", async () => {
+  const fx = await startFixture();
+  try {
+    const store = new M6Store();
+    const real = store.paceDirect.bind(store);
+    store.paceDirect = async (...a) => { if (a[5] === "residential") throw Object.assign(new Error("connection terminated"), { code: "57P01" }); return real(...a); };
+    const { acquire } = rig(fx, { store });
+    await assert.rejects(acquire(req(`${base(fx)}/static`, { route: "stealth" })), /connection terminated/);
+    const rows = [...store.ledger.rows.values()];
+    assert.equal(rows.length, 1);
+    assert.equal(rows[0].state, "RELEASED");
+    assert.equal(store.ledger.used("fixture_proxy"), 0, "the reservation no longer counts against the cap");
+    assert.equal(fx.state.tunnels.length, 0);
+  } finally { await fx.close(); }
+});

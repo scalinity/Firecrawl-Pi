@@ -97,12 +97,22 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     // The refused request is named by the host and port it asked for, even when it fails to parse.
     let host = "?";
     try { host = new URL(req.url).host || "?"; } catch {}
+    // A leg opened for this request is settled whatever happens after it (review S14; its done() runs once).
+    let settleLeg = () => {};
+    // The browser's connection belongs to the session before the leg is awaited, so closing the session ends it; it
+    // leaves the set when it closes, since a standing session never closes (its set would only grow).
+    const client = res.socket;
+    s.sockets.add(client);
+    client.once("close", () => s.sockets.delete(client));
     try {
       const policy = scopeFixtures(typeof s.fixture === "function" ? s.fixture() : s.fixture, getPolicy());
       const target = parseTarget(req.url, policy);
       if (s.allow && !s.allow(target)) throw new Denied("DESTINATION_NOT_ALLOWED", `${target.host} is not a destination this session may reach`);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
       const { leg, raw, done } = await openLeg(s, target, target.port);
+      settleLeg = done;
+      // The browser left while the tunnel opened: nothing will use it.
+      if (res.socket?.destroyed) { raw?.destroy(); done(); return; }
       if (s.logEach) res.on("close", () => log({ event: "proxy_request", session: s.attemptId, method: req.method, target_host: target.host, route: leg ? "residential" : "direct", status: res.statusCode }));
       const headers = {};
       for (const [k, v] of Object.entries(req.headers)) if (!HOP.has(k)) headers[k] = v;
@@ -141,6 +151,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       res.on("close", () => { up.destroy(); raw?.destroy(); s.sockets.delete(up); s.sockets.delete(res.socket); if (raw) s.sockets.delete(raw); done(); });
       req.pipe(up);
     } catch (e) {
+      settleLeg();
       refuse(s, host, e);
       const code = e.provider ? 502 : 403;
       res.writeHead(code, { "content-type": "text/plain", connection: "close" }).end(`fcpi: ${e.failureClass ?? "refused"}\n`);
@@ -157,12 +168,18 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
     if (!getPolicy().localCidrs) { refuse(s, req.url, new Denied("RETRIEVAL_NOT_READY", "the host's local-network list is not loaded")); clientSocket.end("HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\n\r\nfcpi: RETRIEVAL_NOT_READY\n"); return; }
     if (overRequests(s)) { refuse(s, req.url, new Denied("RESOURCE_LIMIT", `more than ${s.maxRequests} requests`)); clientSocket.end("HTTP/1.1 403 Forbidden\r\nConnection: close\r\n\r\nfcpi: RESOURCE_LIMIT\n"); return; }
     const [host, port] = [req.url.slice(0, req.url.lastIndexOf(":")), req.url.slice(req.url.lastIndexOf(":") + 1)];
+    let settleLeg = () => {};
+    // The browser's connection belongs to the session before the leg is awaited (review S14), and leaves it on close.
+    s.sockets.add(clientSocket);
+    clientSocket.once("close", () => s.sockets.delete(clientSocket));
     try {
       const policy = scopeFixtures(typeof s.fixture === "function" ? s.fixture() : s.fixture, getPolicy());
       const target = parseTarget(`https://${host}${port === "443" ? "" : `:${port}`}/`, policy);
       if (s.allow && !s.allow(target)) throw new Denied("DESTINATION_NOT_ALLOWED", `${target.host} is not a destination this session may reach`);
       const address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
       const { leg, raw, done } = await openLeg(s, target, 443);
+      settleLeg = done;
+      if (clientSocket.destroyed) { raw?.destroy(); done(); return; }
       const upstream = raw ?? net.connect({ host: target.host, port: 443, lookup: pinnedLookup(address) });
       const route = leg ? "residential" : "direct";
       if (s.logEach) {
@@ -195,6 +212,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       clientSocket.on("close", drop);
       upstream.on("close", drop);
     } catch (e) {
+      settleLeg();
       refuse(s, req.url, e);
       const status = e.provider ? "502 Bad Gateway" : "403 Forbidden";
       clientSocket.end(`HTTP/1.1 ${status}\r\nContent-Type: text/plain\r\nConnection: close\r\n\r\nfcpi: ${e.failureClass ?? "refused"}\n`);

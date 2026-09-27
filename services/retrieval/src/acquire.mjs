@@ -137,8 +137,21 @@ function makeLegs({ residential, urlHmac, getBudget }) {
     if (r.failure) return { failure: r.failure };
     return { leg: { ...residential.leg(st, { meter: new Meter(bytes), sessionId: sessionIdFor(urlHmac, logicalId), deadline, signal }), reservation: r.reservation, attemptId } };
   }
-  const close = (leg, detail) => residential.settle(leg.st, leg.reservation, leg.meter, detail);
-  return { open, close };
+  // Settles a leg once, whoever asks: an explicit settlement and the finally that guards it share one result. A
+  // settlement that fails leaves the reservation UNCERTAIN, still counted, rather than RESERVED for good (review W9).
+  function close(leg, detail) {
+    leg.closed ??= residential.settle(leg.st, leg.reservation, leg.meter, detail).catch(async (e) => {
+      await residential.markUncertain(leg.reservation, leg.meter, `its settlement failed (${e.code ?? e.message}); ${detail}`).catch(() => {});
+      throw e;
+    });
+    return leg.closed;
+  }
+  // Every leg a call opened and has not settled - an exception came between the reservation and its settlement - is
+  // settled when the call ends (review W9).
+  async function closeOpen(opened, log) {
+    for (const leg of opened) if (!leg.closed) await close(leg, "interrupted before its settlement").catch((e) => log?.({ event: "leg_settle_failed", error: e.code ?? e.message }));
+  }
+  return { open, close, closeOpen };
 }
 
 export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, urlHmac, log, residential = NO_ROUTE, getBudget = null }) {
@@ -183,6 +196,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
 
     const holder = randomUUID();
     if (!(await holdPermit("url", holder, permits.url, deadline, signal))) return fail(signal?.aborted ? CANCELLED : { class: "RESOURCE_BUSY", detail: "no URL acquisition permit before the deadline", retryable: true });
+    const openedLegs = [];
     try {
       const domain = domainOf(target);
       const [record, held] = await Promise.all([store.routeRecord(domain), store.routeHeld(domain)]);
@@ -201,11 +215,14 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       const page = req.purpose === "page" && req.expect === "html" && !req.fast;
       const retried = { direct: false, residential: false };
       const note = (attemptId, ordinal, strategy) => { result.attemptId = attemptId; result.attemptsUsed = ordinal; result.strategies.push(strategy); result.strategy = strategy; };
+      const opened = openedLegs;
       const settle = async (leg, detail) => {
+        const first = !leg.closed;
         const s = await legs.close(leg, detail);
-        spent.push({ attemptId: leg.attemptId, subject: leg.st.subject, provider: leg.st.providerName, rateCard: leg.st.card.id, bytes: s.bytes, reserved: s.reserved, actual: s.actual, state: s.state, tunnels: leg.meter.tunnels });
+        if (first) spent.push({ attemptId: leg.attemptId, subject: leg.st.subject, provider: leg.st.providerName, rateCard: leg.st.card.id, bytes: s.bytes, reserved: s.reserved, actual: s.actual, state: s.state, tunnels: leg.meter.tunnels });
         return s;
       };
+      const track = (leg) => { opened.push(leg); return leg; };
 
       // One HTTP attempt on `tier`. Returns { done }, { fail }, { retry }, { browser, renderUrl } or { escalate }.
       async function httpStep(tier) {
@@ -221,7 +238,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           if (paced.failure?.directCap && req.route === "auto") {
             const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: `past the direct limits (${paced.failure.directCap}), this acquisition`, deadline, signal });
             if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
-            leg = o.leg; tier = "residential";
+            leg = track(o.leg); tier = "residential";
             await store.setAttemptStrategy(attemptId, "residential_http");
             result.strategies[result.strategies.length - 1] = result.strategy = "residential_http";
             result.route.escalations.push(`direct_cap:${paced.failure.directCap}`);
@@ -230,7 +247,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         } else {
           const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: "this attempt", deadline, signal });
           if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
-          leg = o.leg;
+          leg = track(o.leg);
           paced = await pace(target, attemptId, deadline, signal, "residential");
         }
         if (paced.failure) {
@@ -302,7 +319,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           if (tier === "residential") {
             const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: "this browser attempt", deadline: browserDeadline, signal });
             if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
-            leg = o.leg;
+            leg = track(o.leg);
           }
           // Paced inside the try, so a database error while pacing still frees the browser permit.
           paced = await pace(renderTarget, attemptId, browserDeadline, signal, tier);
@@ -380,6 +397,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         throw new Error("acquire: a step returned no outcome");
       }
     } finally {
+      await legs.closeOpen(openedLegs, log);
       await releaseAll(log, [() => store.releasePermit("url", holder)]);
     }
   };
@@ -489,6 +507,7 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
         route_reason: start.reason, proxy_bytes: s?.bytes ?? 0, proxy_micro_usd: s ? (s.actual ?? s.reserved) : 0 });
       return { ...r, finalUrl: new URL(r.finalUrl).href };
     } finally {
+      if (leg) await legs.closeOpen([leg], log);
       await releaseAll(log, [() => store.releasePermit("url", holder)]);
     }
   };
