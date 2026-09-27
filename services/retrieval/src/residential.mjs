@@ -41,11 +41,13 @@ export class ProviderRefusal extends Denied {
   constructor(failureClass, detail, extra = {}) { super(failureClass, detail, extra); this.provider = true; }
 }
 
-// The credential file: "<proxy username>:<password>", the username without Decodo's "user-" prefix.
+// The credential file: "<proxy username>:<password>", the username without Decodo's "user-" prefix, letters, digits
+// and underscores only (review S18: anything else would change the session username's meaning).
 export function parseProxyCredential(text) {
   const i = text?.indexOf(":") ?? -1;
   if (i <= 0 || i === text.length - 1) return null;
-  return { name: text.slice(0, i), password: text.slice(i + 1) };
+  const name = text.slice(0, i);
+  return /^[A-Za-z0-9_]+$/.test(name) ? { name, password: text.slice(i + 1) } : null;
 }
 
 // Counts every byte a tunnel carries in both directions on the connection to the provider, the CONNECT exchange
@@ -53,10 +55,11 @@ export function parseProxyCredential(text) {
 // serves one attempt (all its tunnels: redirects, a browser's subresources) and records whether any tunnel broke
 // after it was up, the case whose charge cannot be known locally (spec §28.3: it stays reserved whole).
 // Bytes are counted in JavaScript, where they pass: Node's HTTP and TLS layers may read a socket's handle
-// directly, past its data events, so a consumer never gets the raw socket, only wrap(raw).
+// directly, past its data events, so no consumer ever gets the raw socket: tunnel() returns only the metered stream,
+// which also records a break of the tunnel after it was up (review W11).
 // The part of a chunk read from a tunnel that is not yet counted: the bytes the CONNECT reader already counted and
 // returned to the socket come first.
-export function uncounted(raw, n) {
+function uncounted(raw, n) {
   const skip = Math.min(raw.fcpiUncounted ?? 0, n);
   if (skip) raw.fcpiUncounted -= skip;
   return n - skip;
@@ -73,7 +76,8 @@ export class Meter {
     this.tunnels++;
     socket.once("close", () => this.sockets.delete(socket));
   }
-  // A Duplex over an established tunnel that counts what crosses it, for an HTTP request or a TLS session.
+  // A Duplex over an established tunnel that counts what crosses it, for an HTTP request, a TLS session or a pipe.
+  // An error on the tunnel itself (a reset by the provider, not this service's own destroy) leaves the charge unknown.
   wrap(raw) {
     const meter = this;
     const d = new Duplex({
@@ -84,7 +88,7 @@ export class Meter {
     });
     raw.on("data", (c) => { meter.add(uncounted(raw, c.length)); if (!d.push(c)) raw.pause(); });
     raw.on("end", () => d.push(null));
-    raw.on("error", (e) => d.destroy(e));
+    raw.on("error", (e) => { meter.errored = true; d.destroy(e); });
     raw.on("close", () => { if (raw.fcpiCapped) d.destroy(Object.assign(new Error("the attempt passed its proxy byte budget"), { code: "FCPI_PROXY_BYTES" })); else d.destroy(); });
     for (const k of ["setNoDelay", "setKeepAlive", "setTimeout", "ref", "unref"]) d[k] = () => d;
     return d;
@@ -94,6 +98,16 @@ export class Meter {
 export function makeResidential({ getBudget, getPolicy, getSelection, providersDir, paidDispatch, store, resolvePublic, lookupFixture, log }) {
   const breakers = new Map();
   const breakerFor = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
+  // The provider's credential, read at most every five seconds (review S3; a key placed later is seen within that),
+  // and kept here: the route's state carries only whether it is present (review S2).
+  const creds = new Map();
+  function credentialOf(provider) {
+    const c = creds.get(provider.credential);
+    if (c && Date.now() - c.at < 5000) return c.value;
+    const value = parseProxyCredential(readCredential(providersDir, provider.credential));
+    creds.set(provider.credential, { at: Date.now(), value });
+    return value;
+  }
 
   // The selected proxy and whatever stops it being used, checks 1-5 (synchronous, no reservation).
   function state() {
@@ -104,11 +118,10 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     const card = rateCardFor(budget, subject);
     if (!card) return { ...base, available: false, reason: "RATE_CARD_MISSING" };
     if (provider.paid && !paidDispatch) return { ...base, card, available: false, reason: "PAID_DISPATCH_DISABLED" };
-    const cred = parseProxyCredential(readCredential(providersDir, provider.credential));
-    if (!cred) return { ...base, card, available: false, reason: "BLOCKED_CREDENTIAL" };
+    if (!credentialOf(provider)) return { ...base, card, available: false, reason: "BLOCKED_CREDENTIAL" };
     const b = breakerFor(s.provider);
     if (b.state() === "open") return { ...base, card, available: false, reason: "PROVIDER_UNAVAILABLE", retryAfter: b.retryAfterS() };
-    return { ...base, card, cred, available: true, reason: null };
+    return { ...base, card, credential: "present", available: true, reason: null };
   }
 
   // Check 6 as well: the category's remaining room for one attempt, read from the ledger (a zero cap has none).
@@ -165,17 +178,19 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     return { address: await resolveTarget(target, { resolvePublic, policy, lookupFixture }), host: u.hostname, port };
   }
 
-  // A tunnel to host:port through the selected provider, under one sticky session; resolves the connected socket,
-  // attached to the meter. Rejects with a ProviderRefusal (the provider's failure) or a Denied (cancel, deadline).
+  // A tunnel to host:port through the selected provider, under one sticky session; resolves the metered stream over it
+  // (never the raw socket). Rejects with a ProviderRefusal (the provider's failure) or a Denied (cancel, deadline).
   async function tunnel(st, { host, port, sessionId, deadline, signal, meter }) {
     if (signal?.aborted) throw new Denied("CANCELLED", "the caller cancelled the acquisition");
+    const cred = credentialOf(st.provider);
+    if (!cred) throw new ProviderRefusal("BLOCKED_CREDENTIAL", "the proxy credential is absent or malformed", { retryable: false });
     let ep;
     try { ep = await endpointAddress(st.provider); }
     catch (e) { breakerFor(st.providerName).failure(); throw new ProviderRefusal("PROVIDER_UNREACHABLE", `the proxy endpoint could not be resolved (${e.failureClass ?? e.message})`, { retryable: true }); }
     const policy = getPolicy();
     const timeoutMs = Math.min(policy.residential.connectTimeoutMs, deadline - Date.now());
     if (timeoutMs <= 0) throw new Denied("DEADLINE_EXCEEDED", "no time left to open the proxy tunnel");
-    const auth = Buffer.from(`${sessionUsername(st.cred.name, sessionId, policy.residential.sessionMinutes)}:${st.cred.password}`).toString("base64");
+    const auth = Buffer.from(`${sessionUsername(cred.name, sessionId, policy.residential.sessionMinutes)}:${cred.password}`).toString("base64");
     return new Promise((resolve, reject) => {
       let settled = false, up = false;
       const socket = net.connect({ host: ep.address, port: ep.port });
@@ -209,24 +224,30 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
         clearTimeout(timer);
         signal?.removeEventListener("abort", onAbort);
         breakerFor(st.providerName).success();
-        resolve(socket);
+        resolve(meter.wrap(socket));
       };
       socket.on("data", onData);
+      // Once the tunnel is up, its errors are the metered stream's (wrap records them).
       socket.on("error", (e) => {
-        if (up) { if (meter) meter.errored = true; return; }
+        if (up) return;
         providerFail("PROVIDER_UNREACHABLE", `the proxy could not be reached (${e.code ?? e.message})`, true);
       });
       socket.once("close", () => { if (!settled) providerFail("PROVIDER_UNREACHABLE", "the proxy closed the connection before answering CONNECT", true); });
     });
   }
 
-  // The transport guardedFetch uses for a residential attempt: each hop opens its own tunnel under the attempt's
-  // session and meter, and an https target gets its own TLS session over it, verified against the target's name.
-  function via(st, { meter, sessionId }) {
+  // One attempt's leg, the only shape every consumer uses (review W11): its meter, and open(host, port) for each
+  // tunnel under the attempt's session, bounded by the attempt's deadline and signal unless a hop passes its own.
+  function leg(st, { meter, sessionId, deadline, signal }) {
+    return { st, meter, sessionId, open: (host, port, o = {}) => tunnel(st, { host, port, sessionId, deadline: o.deadline ?? deadline, signal: o.signal ?? signal, meter }) };
+  }
+
+  // The transport guardedFetch uses for a residential attempt: each hop opens its own tunnel on the attempt's leg, and
+  // an https target gets its own TLS session over it, verified against the target's name.
+  function via(l) {
     return {
       async open(target, { deadline, signal }) {
-        const raw = await tunnel(st, { host: target.host, port: target.port, sessionId, deadline, signal, meter });
-        const counted = meter.wrap(raw);
+        const counted = await l.open(target.host, target.port, { deadline, signal });
         if (target.url.protocol !== "https:") return counted;
         return new Promise((resolve, reject) => {
           const s = tls.connect({ socket: counted, ...(net.isIP(target.host) ? {} : { servername: target.host }), rejectUnauthorized: true });
@@ -238,7 +259,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     };
   }
 
-  return { state, availability, reserve, settle, tunnel, via, breakerState: (name) => breakerFor(name).state(), breakers: () => Object.fromEntries([...breakers].map(([k, b]) => [k, b.state()])) };
+  return { state, availability, reserve, settle, tunnel, leg, via, breakerState: (name) => breakerFor(name).state(), breakers: () => Object.fromEntries([...breakers].map(([k, b]) => [k, b.state()])) };
 }
 
 // A session id for one logical acquisition: letters and digits only, stable across its attempts, and not the

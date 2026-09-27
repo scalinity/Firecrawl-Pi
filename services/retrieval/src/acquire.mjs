@@ -125,17 +125,17 @@ export function makePacer({ store, getPolicy, resolvePublic, lookupFixture, log 
   return { holdPermit, pace, pacedFetch };
 }
 
-// The residential leg of one attempt: the route's state, the reservation of its maximum spend, the meter its
-// tunnels count into and the sticky session it names. open() refuses (PROXY_REQUIRED, BUDGET_EXHAUSTED) before
-// anything is sent; close() settles at the measured bytes.
+// The residential leg of one attempt: the route's state, the reservation of its maximum spend, and residential.leg's
+// meter, sticky session and tunnel opener, bounded by the attempt's deadline and signal. open() refuses
+// (PROXY_REQUIRED, BUDGET_EXHAUSTED) before anything is sent; close() settles at the measured bytes.
 function makeLegs({ residential, urlHmac, getBudget }) {
-  async function open({ logicalId, attemptId, why }) {
+  async function open({ logicalId, attemptId, why, deadline, signal }) {
     const st = await residential.availability();
     if (!st.available) return { failure: proxyRequired(st, why) };
     const bytes = getBudget().proxying.maxAttemptBytes;
     const r = await residential.reserve(st, { callKey: `proxy:${attemptId}`, logicalId, bytes });
     if (r.failure) return { failure: r.failure };
-    return { leg: { st, reservation: r.reservation, meter: new Meter(bytes), sessionId: sessionIdFor(urlHmac, logicalId), attemptId } };
+    return { leg: { ...residential.leg(st, { meter: new Meter(bytes), sessionId: sessionIdFor(urlHmac, logicalId), deadline, signal }), reservation: r.reservation, attemptId } };
   }
   const close = (leg, detail) => residential.settle(leg.st, leg.reservation, leg.meter, detail);
   return { open, close };
@@ -219,7 +219,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           // The direct limits are spent: an "auto" request moves this same attempt to the residential route, or
           // stops; the home connection is never used past them (spec §10.2).
           if (paced.failure?.directCap && req.route === "auto") {
-            const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: `past the direct limits (${paced.failure.directCap}), this acquisition` });
+            const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: `past the direct limits (${paced.failure.directCap}), this acquisition`, deadline, signal });
             if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
             leg = o.leg; tier = "residential";
             await store.setAttemptStrategy(attemptId, "residential_http");
@@ -228,7 +228,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             paced = await pace(target, attemptId, deadline, signal, "residential");
           }
         } else {
-          const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: "this attempt" });
+          const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: "this attempt", deadline, signal });
           if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
           leg = o.leg;
           paced = await pace(target, attemptId, deadline, signal, "residential");
@@ -241,7 +241,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         let httpRes;
         try {
           httpRes = await pacedFetch(paced.domain, { url: req.url, headers: req.headers, maxBytes: leg ? Math.min(policy.maxBodyBytes, leg.meter.cap) : policy.maxBodyBytes,
-            deadline: Math.min(deadline, Date.now() + policy.attempts.httpAttemptMs), jar, via: leg ? residential.via(leg.st, leg) : null }, attemptId, deadline, signal, tier);
+            deadline: Math.min(deadline, Date.now() + policy.attempts.httpAttemptMs), jar, via: leg ? residential.via(leg) : null }, attemptId, deadline, signal, tier);
         } catch (e) {
           const s = leg ? await settle(leg, `failed: ${e.failureClass ?? "ERROR"}`) : null;
           await store.finishAttempt(attemptId, { outcome: e.failureClass ?? "ERROR", bytes: s?.bytes ?? null });
@@ -297,7 +297,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         let paced = null, leg = null;
         try {
           if (tier === "residential") {
-            const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: "this browser attempt" });
+            const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: "this browser attempt", deadline: browserDeadline, signal });
             if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
             leg = o.leg;
           }
@@ -309,9 +309,8 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             return { fail: paced.failure };
           }
           // Every request the page makes - the document, its redirects and subresources - leaves through this
-          // service's forward proxy; on the residential route each is tunnelled under the attempt's one session.
-          const upstream = leg ? { meter: leg.meter, open: (host, port) => residential.tunnel(leg.st, { host, port, sessionId: leg.sessionId, deadline: browserDeadline, signal, meter: leg.meter }) } : null;
-          const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal, fixture: !!renderTarget.fixture, upstream });
+          // service's forward proxy; on the residential route each is tunnelled on the attempt's leg, under one session.
+          const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal, fixture: !!renderTarget.fixture, upstream: leg });
           const s = leg ? await settle(leg, `rendered ${r.status ?? r.failure?.class ?? ""}`) : null;
           // A result without its final URL (a worker fault) is read as ending where it began, not
           // parsed as a URL it is not.
@@ -451,14 +450,14 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
       if (tier === "direct") {
         paced = await pace(target, attemptId, deadline, signal, "direct");
         if (paced.failure?.directCap) {
-          const o = await legs.open({ logicalId, attemptId, why: `past the direct limits (${paced.failure.directCap}), this ${b.purpose} download` });
+          const o = await legs.open({ logicalId, attemptId, why: `past the direct limits (${paced.failure.directCap}), this ${b.purpose} download`, deadline, signal });
           if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); throw new Denied(o.failure.class, o.failure.detail, o.failure); }
           leg = o.leg; tier = "residential";
           await store.setAttemptStrategy(attemptId, "residential_http");
           paced = await pace(target, attemptId, deadline, signal, "residential");
         }
       } else {
-        const o = await legs.open({ logicalId, attemptId, why: `this ${b.purpose} download` });
+        const o = await legs.open({ logicalId, attemptId, why: `this ${b.purpose} download`, deadline, signal });
         if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); throw new Denied(o.failure.class, o.failure.detail, o.failure); }
         leg = o.leg;
         paced = await pace(target, attemptId, deadline, signal, "residential");
@@ -470,7 +469,7 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
       }
       let r;
       try {
-        r = await pacedFetch(paced.domain, { url: b.url, method, headers: b.headers, maxBytes: leg ? Math.min(maxBytes, leg.meter.cap) : maxBytes, deadline, via: leg ? residential.via(leg.st, leg) : null }, attemptId, deadline, signal, tier);
+        r = await pacedFetch(paced.domain, { url: b.url, method, headers: b.headers, maxBytes: leg ? Math.min(maxBytes, leg.meter.cap) : maxBytes, deadline, via: leg ? residential.via(leg) : null }, attemptId, deadline, signal, tier);
       } catch (e) {
         const s = leg ? await legs.close(leg, `failed: ${e.failureClass ?? "ERROR"}`) : null;
         leg = null;

@@ -6,16 +6,15 @@
 // attempt and cut off at the page's limit. An unknown or expired credential gets 407; a refused
 // target gets 403 and is counted.
 // M6: a session may chain through the residential provider. A browser attempt on the residential route carries its
-// leg (upstream: the tunnel opener and the attempt's meter), so the page and every subresource leave under one
-// sticky session; SearXNG's standing session asks, per engine host, for a leg of its own (upstreamFor), so an engine
-// the policy routes residential never leaves from the home connection (F11). Every request is still validated and
-// resolved here first.
+// leg (upstream: residential.leg's meter and tunnel opener, whose streams are already metered), so the page and
+// every subresource leave under one sticky session; SearXNG's standing session asks, per engine host, for a leg of
+// its own (upstreamFor), so an engine the policy routes residential never leaves from the home connection (F11).
+// Every request is still validated and resolved here first.
 import http from "node:http";
 import net from "node:net";
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { parseTarget, Denied, scopeFixtures } from "./ssrf.mjs";
 import { resolveTarget, pinnedLookup } from "./resolve.mjs";
-import { uncounted } from "./residential.mjs";
 
 const HOP = new Set(["connection", "keep-alive", "proxy-authorization", "proxy-authenticate", "proxy-connection", "te", "trailer", "transfer-encoding", "upgrade"]);
 const digest = (s) => createHash("sha256").update(s).digest();
@@ -77,7 +76,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
   // The residential leg a request travels, if any: a browser attempt's own, or one the standing session asks for
   // per host (which refuses, as PROXY_REQUIRED, a host that must go residential and cannot). done() settles a
   // per-request leg's reservation once its connection has closed.
-  const legFor = async (s, target) => (s.upstream ? { ...s.upstream, done: null } : s.upstreamFor ? await s.upstreamFor(target) : null);
+  const legFor = async (s, target) => (s.upstream ? { open: s.upstream.open, meter: s.upstream.meter, done: null } : s.upstreamFor ? await s.upstreamFor(target) : null);
   // The first provider refusal of an attempt is kept, so a render that failed on it is reported as the provider's.
   const upstreamFailed = (s, e) => { if (e?.provider && !s.upstreamFailure) s.upstreamFailure = { class: e.failureClass, detail: e.detail, retryable: e.retryable, retryAfter: e.retryAfter }; };
   const once = (fn) => { let done = false; return () => { if (!done && fn) { done = true; Promise.resolve(fn()).catch((e) => log({ event: "proxy_leg_settle_failed", error: e.message })); } }; };
@@ -111,7 +110,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       // Through a leg the request rides the tunnel: no agent, since agent false would make Node build one that
       // ignores createConnection and connects by itself.
       const up = http.request({ host: target.host, port: target.port, method: req.method, path: target.url.pathname + target.url.search, headers,
-        ...(raw ? { createConnection: () => leg.meter.wrap(raw) } : { agent: false, lookup: pinnedLookup(address) }) });
+        ...(raw ? { createConnection: () => raw } : { agent: false, lookup: pinnedLookup(address) }) });
       // Both ends belong to the session: closing it (render over, or a cap) tears down the request and
       // the browser's connection, not only the upstream half.
       s.sockets.add(up).add(res.socket);
@@ -138,11 +137,8 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
         ur.on("error", () => res.destroy());
         ur.pipe(res);
       });
-      // Only a break this proxy did not cause leaves the charge unknown; tearing the request down at the browser's
-      // close is not one.
-      let closing = false;
-      up.on("error", () => { if (raw && !closing) leg.meter.errored = true; if (!res.headersSent) res.writeHead(502, { connection: "close" }).end(); else res.destroy(); });
-      res.on("close", () => { closing = true; up.destroy(); raw?.destroy(); s.sockets.delete(up); s.sockets.delete(res.socket); if (raw) s.sockets.delete(raw); done(); });
+      up.on("error", () => { if (!res.headersSent) res.writeHead(502, { connection: "close" }).end(); else res.destroy(); });
+      res.on("close", () => { up.destroy(); raw?.destroy(); s.sockets.delete(up); s.sockets.delete(res.socket); if (raw) s.sockets.delete(raw); done(); });
       req.pipe(up);
     } catch (e) {
       refuse(s, host, e);
@@ -177,23 +173,19 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
         // it open long after its last request), and again with its byte counts when it closes.
         const opened = () => log({ event: "proxy_request", session: s.attemptId, method: "CONNECT", target_host: target.host, route, status: 200 });
         if (raw) opened(); else upstream.once("connect", opened);
-        upstream.once("close", () => log({ event: "proxy_tunnel_closed", session: s.attemptId, target_host: target.host, route, bytes_out: up, bytes_in: down, ...(leg ? { provider_bytes: leg.meter.bytes } : {}) }));
+        upstream.once("close", () => log({ event: "proxy_tunnel_closed", session: s.attemptId, target_host: target.host, route, bytes_out: up, bytes_in: down, ...(leg?.meter ? { provider_bytes: leg.meter.bytes } : {}) }));
       }
       s.sockets.add(upstream).add(clientSocket);
       const start = () => {
         clientSocket.write("HTTP/1.1 200 Connection Established\r\n\r\n");
-        if (head?.length) { if (leg) leg.meter.add(head.length); upstream.write(head); }
-        // Through the provider every byte in either direction is billable, so it is metered as it passes.
-        if (leg) {
-          upstream.on("data", (c) => leg.meter.add(uncounted(upstream, c.length)));
-          clientSocket.on("data", (c) => leg.meter.add(c.length));
-        }
+        // Through the provider the stream is the leg's metered one, so every byte either way is counted as it passes.
+        if (head?.length) upstream.write(head);
         upstream.on("data", (c) => count(s, c.length, upstream, clientSocket));
         clientSocket.on("data", (c) => count(s, c.length, upstream, clientSocket));
         upstream.pipe(clientSocket);
         clientSocket.pipe(upstream);
       };
-      upstream.on("error", () => { if (leg) leg.meter.errored = true; clientSocket.destroy(); });
+      upstream.on("error", () => clientSocket.destroy());
       if (raw) start();
       else upstream.once("connect", () => {
         if (upstream.remoteAddress !== address) { upstream.destroy(); clientSocket.destroy(); return; }

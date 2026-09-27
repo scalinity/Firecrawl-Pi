@@ -230,7 +230,7 @@ test("HTTP to browser to residential browser: a script shell renders on the same
       const body = await new Promise((resolve, reject) => {
         const go = (socket) => http.request({ host: u.hostname, port: u.port, path: u.pathname, ...(socket ? { createConnection: () => socket } : { agent: false, lookup: pinnedLookup("127.0.0.1") }) },
           (res) => { let b = ""; res.on("data", (c) => (b += c)); res.on("end", () => resolve(b)); }).on("error", reject).end();
-        if (upstream) upstream.open(u.hostname, Number(u.port)).then((raw) => go(upstream.meter.wrap(raw)), reject); else go(null);
+        if (upstream) upstream.open(u.hostname, Number(u.port)).then(go, reject); else go(null);
       });
       const inner = /atob\("([^"]+)"\)/.exec(body);
       const html = inner ? `<html><body>${Buffer.from(inner[1], "base64").toString()}</body></html>` : body;
@@ -288,4 +288,20 @@ test("the meter counts through TLS-sized chunks, stops at its cap and reports a 
   m.add(50);
   assert.equal(m.capped, true);
   assert.equal(m.bytes, 110);
+});
+
+test("a credential whose name would change the session username is refused, and the route's state never carries the password (review S18, S2)", async () => {
+  const fx = await startFixture();
+  try {
+    const bad = rig(fx, { cred: "user-sp1-session-x:0123456789abcdef" });
+    assert.equal(bad.residential.state().reason, "BLOCKED_CREDENTIAL");
+    const r = await bad.acquire(req(`${base(fx)}/static`, { route: "stealth" }));
+    assert.equal(r.failure.class, "PROXY_REQUIRED");
+    assert.equal(fx.state.tunnels.length, 0);
+    const good = rig(fx);
+    const st = good.residential.state();
+    assert.equal(st.available, true);
+    assert.ok(!JSON.stringify(st).includes(CRED.split(":")[1]), "no password in the route state");
+    assert.equal(JSON.stringify(await good.residential.availability()).includes(CRED.split(":")[1]), false);
+  } finally { await fx.close(); }
 });

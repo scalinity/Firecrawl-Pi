@@ -49,7 +49,7 @@ test("a residential browser session tunnels the page and every subresource under
     const st = residential.state();
     const meter = new Meter(10_000_000);
     await withProxy(fx, async ({ port, sessions }) => {
-      const upstream = { meter, open: (host, p) => residential.tunnel(st, { host, port: p, sessionId: "attemptsession1", deadline: Date.now() + 10000, meter }) };
+      const upstream = residential.leg(st, { meter, sessionId: "attemptsession1", deadline: Date.now() + 10000 });
       const cred = sessions.open("a1", { expiresAt: Date.now() + 20000, maxBytes: meter.cap, fixture: true, upstream });
       const base = `http://m6.fixture.fcpi.test:${fx.targetPort}`;
       const pageR = await get(port, `${base}/subres`, cred);
@@ -76,7 +76,7 @@ test("a provider refusal of a browser request is a 502 and the attempt's provide
     const meter = new Meter(10_000_000);
     fx.state.mode = "402";
     await withProxy(fx, async ({ port, sessions }) => {
-      const upstream = { meter, open: (host, p) => residential.tunnel(st, { host, port: p, sessionId: "s2", deadline: Date.now() + 10000, meter }) };
+      const upstream = residential.leg(st, { meter, sessionId: "s2", deadline: Date.now() + 10000 });
       const cred = sessions.open("a2", { expiresAt: Date.now() + 20000, maxBytes: meter.cap, fixture: true, upstream });
       assert.equal((await get(port, `http://m6.fixture.fcpi.test:${fx.targetPort}/static`, cred)).status, 502);
       assert.equal(sessions.close("a2").upstreamFailure.class, "PROVIDER_BILLING");
@@ -98,7 +98,7 @@ test("F11: a search host routed residential goes through the provider when it ca
       const st = await residential.availability(2_000_000);
       if (!st.available) throw new Denied("PROXY_REQUIRED", `engine host ${t.host} is routed residential, and the residential route is unavailable (${st.reason})`);
       const meter = new Meter(2_000_000);
-      return { meter, open: (host, p) => residential.tunnel(st, { host, port: p, sessionId: "search1", deadline: Date.now() + 10000, meter }), done: () => legs.push(meter.bytes) };
+      return { ...residential.leg(st, { meter, sessionId: "search1", deadline: Date.now() + 10000 }), done: () => legs.push(meter.bytes) };
     };
     await withProxy(fx, async ({ port, sessions, logs }) => {
       // SearXNG's standing session, its credential checked by SHA-256 as the service's secret file gives it.

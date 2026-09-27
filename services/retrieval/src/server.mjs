@@ -103,7 +103,7 @@ async function searchUpstream(t) {
   const r = await residential.reserve(st, { callKey: `proxy:search:${randomUUID()}`, logicalId: `search:${urlHmac(t.host)}:${window}`, bytes });
   if (r.failure) throw new Denied(r.failure.class, `engine host ${t.host}: ${r.failure.detail}`);
   const meter = new Meter(bytes), sessionId = urlHmac(`fcpi.residential.search.v1|${t.host}|${window}`).slice(0, 24);
-  return { meter, open: (host, port) => residential.tunnel(st, { host, port, sessionId, deadline: Date.now() + 15000, meter }), done: () => residential.settle(st, r.reservation, meter, `search tunnel to ${t.host}`) };
+  return { ...residential.leg(st, { meter, sessionId, deadline: Date.now() + 15000 }), done: () => residential.settle(st, r.reservation, meter, `search tunnel to ${t.host}`) };
 }
 searchSessions.fixed("searxng", parseSha256(readSecret(env.credentialsDir, "retrieval_searxng_proxy_sha256"), "retrieval_searxng_proxy_sha256"), {
   fixture: () => selection.search === "fixture",
