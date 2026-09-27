@@ -56,7 +56,9 @@ dns.lookup = function (host, ...rest) { looked.push(String(host)); return origLo
 const pi = (cmd, input) => execFileSync("ssh", [...SSH, T.PI_SSH_TARGET, cmd], { encoding: "utf8", input, maxBuffer: 64 * 1024 * 1024 });
 const D = (args) => pi(`sudo -n docker ${args}`);
 const cname = (svc) => `fcpi-${svc}-1`;
-const sql = (q) => pi(`sudo -n docker exec -i ${cname("nuq-postgres")} psql -U postgres -d postgres -q -At -X -v ON_ERROR_STOP=1`, q).trim().split("\n").filter(Boolean);
+// Values reach the query as psql variables (:'name' quotes each as a literal), never spliced into its text.
+const psqlSet = (vars) => Object.entries(vars).map(([k, v]) => `\\set ${k} '${String(v).replace(/\\/g, "\\\\").replace(/'/g, "''")}'\n`).join("");
+const sql = (q, vars = {}) => pi(`sudo -n docker exec -i ${cname("nuq-postgres")} psql -U postgres -d postgres -q -At -X -v ON_ERROR_STOP=1`, psqlSet(vars) + q).trim().split("\n").filter(Boolean);
 const tokens = {};
 const token = (label) => (tokens[label] ??= pi(`sudo -n cat /etc/firecrawl-pi/secrets/clients/${label}.token`).trim());
 const health = (svc) => D(`inspect -f '{{.State.Status}} {{if .State.Health}}{{.State.Health.Status}}{{end}}' ${cname(svc)}`).trim();
@@ -97,9 +99,9 @@ const race = (x) => JSON.parse(pi(`sudo -n docker exec -i ${cname("retrieval-ser
 // Each acquisition of a domain since `since`, from the attempt log: its strategies, outcomes and statuses in order.
 const attempts = (domain, since) => sql(`SELECT row_to_json(r) FROM (SELECT logical_id, array_agg(strategy ORDER BY ordinal) AS strategies, array_agg(outcome ORDER BY ordinal) AS outcomes,
   array_agg(target_status ORDER BY ordinal) AS statuses, array_agg(bytes ORDER BY ordinal) AS bytes, min(started_at) AS started FROM fcpi_retrieval.attempt
-  WHERE domain = '${domain}' AND started_at >= '${since}' GROUP BY logical_id ORDER BY min(started_at)) r`).map((l) => JSON.parse(l));
-const routeRow = (domain) => { const r = sql(`SELECT row_to_json(d) FROM (SELECT *, round(extract(epoch FROM expires_at - set_at))::int AS ttl_s FROM fcpi_retrieval.domain_route WHERE domain = '${domain}') d`); return r.length ? JSON.parse(r[0]) : null; };
-const proxyLedger = (since) => sql(`SELECT row_to_json(r) FROM (SELECT call_key, logical_id, category, provider, subject, kind, rate_card, reserved, actual, state, usage, detail, created_at, settled_at FROM fcpi_retrieval.budget_reservation WHERE kind IN ('proxy', 'reconcile') AND created_at >= '${since}' ORDER BY created_at) r`).map((l) => JSON.parse(l));
+  WHERE domain = :'domain' AND started_at >= :'since' GROUP BY logical_id ORDER BY min(started_at)) r`, { domain, since }).map((l) => JSON.parse(l));
+const routeRow = (domain) => { const r = sql(`SELECT row_to_json(d) FROM (SELECT *, round(extract(epoch FROM expires_at - set_at))::int AS ttl_s FROM fcpi_retrieval.domain_route WHERE domain = :'domain') d`, { domain }); return r.length ? JSON.parse(r[0]) : null; };
+const proxyLedger = (since) => sql(`SELECT row_to_json(r) FROM (SELECT call_key, logical_id, category, provider, subject, kind, rate_card, reserved, actual, state, usage, detail, created_at, settled_at FROM fcpi_retrieval.budget_reservation WHERE kind IN ('proxy', 'reconcile') AND created_at >= :'since' ORDER BY created_at) r`, { since }).map((l) => JSON.parse(l));
 const usageRows = () => sql(`SELECT row_to_json(u) FROM (SELECT category, period, period_start::text, reserved, settled FROM fcpi_retrieval.budget_usage WHERE period_start >= (now() at time zone 'utc')::date - 31 AND category IN ('proxy', 'fixture_proxy', 'fixture_proxy_race', '_paid_total') ORDER BY 1, 2, 3) u`).map((l) => JSON.parse(l));
 const resources = (label) => { try { out("resources", JSON.parse(pi(`bash /opt/firecrawl-pi/scripts/m6/pi-resources.sh ${label}`))); } catch (e) { out("error", { message: `resources ${label}: ${e.message}` }); } };
 
