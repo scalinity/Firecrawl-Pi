@@ -34,6 +34,18 @@ function fieldSchema(spec, m, ctx = {}) {
     }
     case "schema": return { type: "object", description: "A JSON Schema for the data to extract: an object schema built from type, properties, required, items, enum, anyOf, description and title; no $ref, no pattern." };
     case "object": return objectSchema(fieldsOf(m, { extends: spec.fieldset, fields: {} }), m, {}, {});
+    // M7: the action subset, one object schema per action (click's "all", which the gateway accepts only as false, is
+    // left out), and a job's webhook.
+    case "actions": {
+      const opt = { milliseconds: { type: "integer", minimum: 1, maximum: spec.maxWaitMs }, selector: { type: "string", minLength: 1, maxLength: 256 },
+        boolean: { type: "boolean" }, direction: { type: "string", enum: ["up", "down"] } };
+      const items = Object.entries(spec.subset).map(([type, opts]) => ({ type: "object", required: ["type"], additionalProperties: false,
+        properties: { type: { const: type }, ...Object.fromEntries(Object.entries(opts).filter(([k]) => !(type === "click" && k === "all")).map(([k, t]) => [k, opt[t]])) } }));
+      return { type: "array", items: { anyOf: items }, maxItems: spec.maxItems,
+        description: `At most ${spec.maxItems} actions and ${spec.maxWaitMs} ms of waiting (a selector wait counts ${spec.selectorWaitMs} ms); each screenshot comes back as the address of an authorized artifact.` };
+    }
+    case "webhook": return { type: "object", required: ["url"], additionalProperties: false, description: "An approved destination for the job's signed events; see the capabilities' limits.webhooks.",
+      properties: { url: { type: "string", minLength: 1, maxLength: 2048 }, metadata: { type: "object" }, events: { type: "array", minItems: 1, items: { type: "string", enum: [...spec.events] } } } };
     default: throw new Error(`capability manifest: field type ${spec.type} has no MCP schema`);
   }
 }

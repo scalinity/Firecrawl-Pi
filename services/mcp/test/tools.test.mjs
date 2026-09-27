@@ -112,7 +112,7 @@ test("search and extract tools: their schemas are their routes' bodies, json onl
   assert.deepEqual(s.required, ["query"]);
   assert.equal(s.properties.limit.maximum, 10);
   for (const k of ["tbs", "country", "categories", "sources"]) assert.equal(s.properties[k], undefined, k);
-  assert.deepEqual(s.properties.scrapeOptions.properties.formats.items.enum, MANIFEST.formats.allowed.filter((n) => n !== "json"), "no json format on search's scraped results");
+  assert.deepEqual(s.properties.scrapeOptions.properties.formats.items.enum, MANIFEST.formats.allowed.filter((n) => !MANIFEST.formats.scrapeOnly.includes(n)), "no scrape-only format (json, M7's screenshot) on search's scraped results");
   const e = T.firecrawl_extract.config.inputSchema;
   assert.deepEqual(e.required.sort(), ["schema", "urls"]);
   assert.equal(e.properties.urls.maxItems, MANIFEST.limits.extract.maxUrls);
@@ -230,4 +230,23 @@ test("a running job's page resumes after what it returned; a finished job's last
   assert.equal(empty.payload.nextSkip, 0);
   const done = T.firecrawl_check_crawl_status.shape({ status: 200, json: { success: true, status: "completed", completed: 2, total: 2, data: [{ markdown: "a" }, { markdown: "b" }] }, headers: {} }, { id, skip: 0 });
   assert.equal(done.payload.nextSkip, null);
+});
+
+test("M7: the scrape tool takes the action subset, the screenshot format and the cache options; jobs take a webhook; nothing looser than the gateway", () => {
+  const T = byName(makeTools(m()));
+  const s = T.firecrawl_scrape.config.inputSchema.properties;
+  const actions = s.actions.items.anyOf.map((a) => a.properties.type.const);
+  assert.deepEqual(actions, ["wait", "click", "scroll", "screenshot", "scrape"]);
+  assert.equal(s.actions.maxItems, 10);
+  assert.equal(s.actions.items.anyOf.find((a) => a.properties.type.const === "click").properties.all, undefined, "click's all is left out");
+  assert.ok(s.formats.items.anyOf.some((f) => f.properties?.type?.const === "screenshot" && f.properties.fullPage?.type === "boolean"));
+  assert.deepEqual([s.maxAge.maximum, s.storeInCache.type], [3600000, "boolean"]);
+  assert.ok(s.proxy.enum.includes("enhanced"));
+  for (const t of ["firecrawl_crawl", "firecrawl_batch_scrape", "firecrawl_extract"]) {
+    const w = T[t].config.inputSchema.properties.webhook;
+    assert.deepEqual(w.required, ["url"], t);
+    assert.deepEqual(w.properties.events.items.enum, ["started", "completed", "failed"], t);
+    assert.equal(w.additionalProperties, false, t);
+  }
+  assert.equal(T.firecrawl_crawl.config.inputSchema.properties.scrapeOptions.properties.actions, undefined, "actions are on scrape alone");
 });
