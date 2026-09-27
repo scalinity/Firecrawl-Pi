@@ -442,3 +442,19 @@ test("a direct browser attempt at the direct cap moves to the residential browse
     assert.deepEqual(r.route.escalations, ["learned_js", "direct_cap:domain_hour"]);
   } finally { await fx.close(); }
 });
+
+test("an auxiliary download past the direct limits is refused, never moved to the paid route, and one of a held domain takes it (review W7)", async () => {
+  const fx = await startFixture();
+  try {
+    const direct = { perDomainInFlight: 1, minNavigationGapMs: 0, perDomainPerHour: 1, platformPerDay: 200 };
+    const { fetchOnce, store } = rig(fx, { policy: m6Policy(fx, { direct }) });
+    const url = `${base(fx, "m6pace.fixture.fcpi.test")}/robots.txt`;
+    assert.equal((await fetchOnce({ url, requestId: "d1", purpose: "sitemap" })).status, 200);
+    await assert.rejects(fetchOnce({ url: `${url}?2`, requestId: "d2", purpose: "sitemap" }), (e) => e.failureClass === "PROXY_REQUIRED");
+    assert.equal(fx.state.tunnels.length, 0, "no residential tunnel for a download past the direct limits");
+    assert.equal(store.ledger.rows.size, 0);
+    store.holds.set("m6pace.fixture.fcpi.test", Date.now() + 60000);
+    assert.equal((await fetchOnce({ url: `${url}?3`, requestId: "d3", purpose: "sitemap" })).status, 200);
+    assert.equal(fx.state.hits.at(-1).via, "proxy");
+  } finally { await fx.close(); }
+});

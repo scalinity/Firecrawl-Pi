@@ -444,9 +444,10 @@ export function retryAfterSeconds(v) {
 
 // POST /internal/fetch: one attempt for an auxiliary download (sitemap, document, discovery), under the
 // same target, pacing, permit, size and route rules, without the quality check or the browser. A domain held
-// for a bulk job, listed proxy-first or learned to block the home connection is fetched on the residential
-// route or refused as PROXY_REQUIRED, like a page; an auxiliary download is never the probe after a preference
-// expires. Resolves { status, headers, body, finalUrl } or throws Denied; finalUrl is the serialized URL,
+// for a job, listed proxy-first or learned to block the home connection is fetched on the residential route or
+// refused as PROXY_REQUIRED, like a page; an auxiliary download is never the probe after a preference expires.
+// The request carries no route of its own (the core sends none), so it never escalates to the paid route: past
+// the direct limits it is refused as PROXY_REQUIRED, and a basic job's downloads never pay (review W7). Resolves { status, headers, body, finalUrl } or throws Denied; finalUrl is the serialized URL,
 // which a response header can carry (a raw one may hold characters it cannot: review finding S10).
 // Its logical id is the caller's, or one derived from the purpose, method, URL and a ten-minute
 // window, so repeated downloads of one URL (upstream retries, NuQ requeues, a second crawl of the
@@ -490,13 +491,6 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
       let paced;
       if (tier === "direct") {
         paced = await pace(target, attemptId, deadline, signal, "direct");
-        if (paced.failure?.directCap) {
-          const o = await legs.open({ logicalId, attemptId, why: `past the direct limits (${paced.failure.directCap}), this ${b.purpose} download`, deadline, signal });
-          if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); throw new Denied(o.failure.class, o.failure.detail, o.failure); }
-          leg = o.leg; tier = "residential";
-          await store.setAttemptStrategy(attemptId, "residential_http");
-          paced = await pace(target, attemptId, deadline, signal, "residential");
-        }
       } else {
         const o = await legs.open({ logicalId, attemptId, why: `this ${b.purpose} download`, deadline, signal });
         if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); throw new Denied(o.failure.class, o.failure.detail, o.failure); }
