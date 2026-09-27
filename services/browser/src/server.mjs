@@ -173,7 +173,10 @@ async function render(r, signal) {
   if (wantsExtras && !EXTRAS) return { ok: false, failure: { class: "UNSUPPORTED_CAPABILITY", detail: "screenshots and actions are not enabled in this release" } };
   const maxSub = Math.min(Number(r.limits?.maxSubresources) || 200, 200);
   await ensureBrowser();
-  const counters = { requests: 0, blocked: 0, overLimit: 0, offHost: 0 };
+  // actionNavigations: main-frame loads the actions started (a same-host click that opens a new document), reported so the
+  // retrieval service counts each against the domain as it counts the first (review W6).
+  const counters = { requests: 0, blocked: 0, overLimit: 0, offHost: 0, actionNavigations: 0 };
+  let inActions = false;
   // The render starts where the direct attempt's paced chain ended; the main frame may not move to
   // another host, whose navigation no pacing decision covered (review finding C4).
   const startHost = new URL(r.url).host;
@@ -203,6 +206,7 @@ async function render(r, signal) {
       let mainFrameNavigation = false;
       try { mainFrameNavigation = req.isNavigationRequest() && !req.frame().parentFrame(); } catch { /* no frame: not a navigation */ }
       if (mainFrameNavigation && new URL(req.url()).host !== startHost) { counters.offHost++; return route.abort("blockedbyclient"); }
+      if (mainFrameNavigation && inActions) counters.actionNavigations++;
       if (req.resourceType() === "media" || !/^https?:$/.test(new URL(req.url()).protocol)) { counters.blocked++; return route.abort("blockedbyclient"); }
       if (counters.requests > maxSub) { counters.overLimit++; return route.abort("blockedbyclient"); }
       return route.continue();
@@ -218,7 +222,9 @@ async function render(r, signal) {
     if (Number(r.waitForMs) > 0) await page.waitForTimeout(Math.min(Number(r.waitForMs), settleBudget));
     await settle(page, Math.max(Math.min(settleBudget, deadline - Date.now() - 1000), 0));
     const maxHtml = Math.min(Number(r.limits?.maxHtmlChars) || HTML_MAX_CHARS, HTML_MAX_CHARS);
+    inActions = wantsExtras;
     const extras = wantsExtras ? await runHooks(page, r.hooks, deadline, maxHtml, startHost) : { screenshot: null, actions: null };
+    inActions = false;
     const redirects = [];
     for (let q = response?.request().redirectedFrom(); q; q = q.redirectedFrom()) redirects.unshift({ url: q.url() });
     // Measured inside the renderer, in this container's own cgroup, so an oversized document never

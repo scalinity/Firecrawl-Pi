@@ -140,6 +140,8 @@ export function makeTarget(state, { isProxied = () => false } = {}) {
 <div id="late"></div><div style="height:3000px"></div><div id="bottom"></div></main>
 <script>setTimeout(function(){var p=document.createElement('p');p.id='arrived';p.textContent='Late element arrived.';document.getElementById('late').appendChild(p);},1500);
 window.addEventListener('scroll',function(){if(!document.getElementById('scrolled')){var p=document.createElement('p');p.id='scrolled';p.textContent='Content loaded on scroll.';document.getElementById('bottom').appendChild(p);}});</script></body></html>`);
+      // A click that loads another document on the same host: allowed, and counted against the domain (review W6).
+      case "/samehost": return html(200, `<!doctype html><html><head><meta charset="utf-8"><title>Same host</title></head><body><main><h1>Same-host link</h1><p>${"Ordinary text on this page. ".repeat(10)}</p><a id="next" href="/article">next</a></main></body></html>`);
       // A click that would take the page to another host, which the browser worker refuses.
       case "/offhost": return html(200, `<!doctype html><html><head><meta charset="utf-8"><title>Off host</title></head><body><main><h1>Off-host link</h1><p>${"Ordinary text on this page. ".repeat(10)}</p><a id="away" href="http://m7.fixture.fcpi.test:8080/article">elsewhere</a></main></body></html>`);
       default: return html(404, page("Not found", "<p>No such fixture page.</p>"));

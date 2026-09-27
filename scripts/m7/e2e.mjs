@@ -255,6 +255,7 @@ async function fixturePhase(before) {
   await shot("full_page", `/bands?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }] });
   const tall = await shot("full_page_clipped", `/tall?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }] });
   await shot("actions", `/actions?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "wait", selector: "#arrived" }, { type: "click", selector: "#more" }, { type: "scroll", direction: "down" }, { type: "scrape" }, { type: "screenshot" }] });
+  await shot("samehost_click", `/samehost?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "click", selector: "#next" }, { type: "wait", milliseconds: 500 }, { type: "scrape" }] });
   await shot("offhost_click", `/offhost?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "click", selector: "#away" }, { type: "scrape" }] });
   // Refused before any work: outside the subset, past its bounds.
   for (const [c, body] of [["execute_javascript", { actions: [{ type: "executeJavascript", script: "1" }] }], ["write", { actions: [{ type: "write", text: "x" }] }], ["press", { actions: [{ type: "press", key: "Enter" }] }],
@@ -462,6 +463,7 @@ async function fixturePhase(before) {
   out("retrieval_events", { acquisitions: events.filter((l) => l.event === "acquisition").map((l) => ({ logical_id: l.logical_id, attempts_used: l.attempts_used, strategies: l.strategies, initial_strategy: l.initial_strategy ?? null, final_strategy: l.final_strategy ?? null,
       route_requested: l.route_requested ?? null, failure: l.failure, enhanced_mode: l.enhanced_mode ?? null, enhanced_state: l.enhanced_state ?? null, enhanced_reused: l.enhanced_reused ?? null, enhanced_micro_usd: l.enhanced_micro_usd ?? null, hooks: l.hooks ?? null })),
     enhanced: events.filter((l) => l.event === "enhanced").map((l) => ({ logical_id: l.logical_id, mode: l.mode, provider_status: l.provider_status, outcome: l.outcome, target_status: l.target_status ?? null, micro_usd: l.micro_usd ?? null })),
+    action_navigations: events.filter((l) => l.event === "browser_action_navigations_counted").map((l) => ({ attempt_id: l.attempt_id, count: l.count })),
     webhook_attempts: events.filter((l) => l.event === "webhook_attempt").map((l) => ({ status: l.status, delivered: l.delivered, failure: l.failure ?? null })) });
   resources("fixture-end");
   out("connections", { hosts: [...new Set(seen)].sort(), lookups: [...new Set(looked)].filter((h) => h !== "localhost").sort() });

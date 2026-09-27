@@ -458,6 +458,13 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             try { t = parseTarget(finalUrl, policy); } catch { /* refused by the proxy already */ }
             if (t && domainOf(t) !== paced.domain) { await store.recordNavigation(domainOf(t), !!t.fixture); log({ event: "browser_redirect_counted", attempt_id: attemptId, domain: domainOf(t) }); }
           }
+          // Documents the page's actions loaded (a same-host click) left after the attempt's one paced navigation: on the
+          // direct route each is counted against the domain's caps, as the first was (review W6).
+          const actionNavs = Number.isInteger(r.subresources?.actionNavigations) ? r.subresources.actionNavigations : 0;
+          if (tier === "direct" && actionNavs > 0) {
+            for (let i = 0; i < actionNavs; i++) await store.recordNavigation(paced.domain, !!renderTarget.fixture);
+            log({ event: "browser_action_navigations_counted", attempt_id: attemptId, count: actionNavs });
+          }
           const verdict = r.ok ? classify({ status: r.status, contentType: r.contentType ?? "text/html", body: r.html, finalUrl, requestedUrl: req.url }) : null;
           // A page whose own structure still says "rendered by script" after its one browser attempt
           // is no content (spec §9.4); a page that is merely short is the page (review finding C5).

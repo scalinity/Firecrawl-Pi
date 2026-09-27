@@ -390,6 +390,14 @@ test("screenshots and actions: validated to the subset, refused for the enhanced
     assert.deepEqual(shot.strategies, ["direct_browser"], "a page with extras is rendered from the start");
     assert.equal(shot.screenshot.base64, "iVBORw==");
     assert.deepEqual(renders.at(-1).hooks, { screenshot: { fullPage: false }, actions: [] });
+    // Documents the actions loaded on the direct route count against the domain as the first navigation does (review W6).
+    const navving = { render: async (a) => ({ ...(await browser.render(a)), subresources: { requests: 3, blocked: 0, overLimit: 0, offHost: 0, actionNavigations: 2 } }) };
+    const nav = rig(fx, { browser: navving, extras: true });
+    const before = nav.store.navs.filter((n) => n.recorded).length;
+    const clicked = await nav.acquire(req(at(fx, "/article"), { hooks: { actions: [{ type: "click", selector: "a" }] } }));
+    assert.equal(clicked.ok, true, JSON.stringify(clicked.failure));
+    assert.deepEqual(nav.store.navs.filter((n) => n.recorded).slice(before).map((n) => n.domain), ["m7esc.fixture.fcpi.test", "m7esc.fixture.fcpi.test"]);
+    assert.equal(nav.logs.filter((l) => l.event === "browser_action_navigations_counted").at(-1).count, 2);
     // Challenged in the browser, with no residential route: the enhanced tier is not asked for a page with extras.
     const cbrowser = { render: async (a) => ({ ok: true, status: 403, finalUrl: a.url, html: '<title>Just a moment...</title><div id="challenge-running"></div>', screenshot: null, actions: null }) };
     const c = rig(fx, { browser: cbrowser, extras: true });
