@@ -279,7 +279,7 @@ services:
   # deployed commit (scripts/m3/pi-build-gateway.sh) on the digest-pinned node base. Targets are no
   # longer limited to fixtures here: every acquisition passes the retrieval service's policy (M2).
   access-gateway:
-    image: fcpi/access-gateway@sha256:03155a9fc85bcf16812edc003202cc21432730a17b707603f9dc71920ae49b39
+    image: fcpi/access-gateway@sha256:8f92d2e592742c0b19745bca1e1d458b372a4437db90428803793003d23993d4
     platform: linux/arm64
     pull_policy: never
     hostname: access-gateway
@@ -370,7 +370,7 @@ services:
   # fixed address fails fast. No depends_on either way: REST never waits for MCP, and MCP starts
   # whether or not REST answers yet.
   mcp-gateway:
-    image: fcpi/mcp-gateway@sha256:df064319eed07ca16282c5cc4fe5b83a4b4b6d2f28c67912fcfac32f01d49566
+    image: fcpi/mcp-gateway@sha256:bfede4179ae2500cab978b9626622113fce44c4bbf840da65b7eac402c972e0d
     platform: linux/arm64
     pull_policy: never
     hostname: mcp-gateway
@@ -446,7 +446,7 @@ services:
   # is that bridge's host address (the host's resolver), so no lookup leaves through the host's own
   # namespace past the guard (evidence/M1/closeout/CLOSEOUT.md).
   retrieval-service:
-    image: fcpi/retrieval@sha256:7fd9175a168f7e80bc881078269b98c7acb22a2047adb85725e14435f50347a5
+    image: fcpi/retrieval@sha256:40ace92a7ebf2fa7895d7007c281abdccee115b40b8dbbce2a6516b6e0489d16
     platform: linux/arm64
     pull_policy: never
     hostname: retrieval-service
@@ -587,7 +587,7 @@ services:
   # (Docker's default plus chroot, clone and unshare; scripts/m2/build-seccomp.mjs). Its network is
   # internal and holds only itself and the retrieval service, whose proxy is its one way out.
   browser-worker:
-    image: fcpi/browser@sha256:d519d02727c35eda89117c62b932904841979eafefb4aa0b76941d5ecc05bd60
+    image: fcpi/browser@sha256:3de3c4eb8d469653132344fc7cf398071042f6d5e16bc125bc6c7ec323ba736d
     platform: linux/arm64
     pull_policy: never
     hostname: browser-worker
