@@ -397,7 +397,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; viewport ${pv?.width}x${pv?.height} ${pv ? pv.at(640, 400) : ""}; full ${pf?.width}x${pf?.height}; clipped ${tallDims?.w}x${tallDims?.h} truncated=${art(tl)?.meta?.truncated}; residential ${JSON.stringify(strat(rs))}; mcp urls=${mc?.artifact_urls?.length}` };
     } },
   B02: { name: "action-subset-correct-bounded-and-refused-outside-it", inputs: [`${RAW}e2e-fixture.txt`],
-    expected: "on the action page, a selector wait, a click, a scroll, a content capture and a screenshot run in order: the capture holds the late element, the section the click revealed and the content the scroll loaded, and the screenshot is an artifact of 1280 x 800; a click on a link to another host leaves the page where it was and the other host is never requested; executeJavascript, write, press, pdf, clicking every match, eleven actions, 16 s of waits, a screenshot's quality and a screenshot on a batch are each refused 400 UNSUPPORTED_OPTION naming the option, before any attempt or target request",
+    expected: "on the action page, a selector wait, a click, a scroll, a content capture and a screenshot run in order: the capture holds the late element, the section the click revealed and the content the scroll loaded, and the screenshot is an artifact of 1280 x 800; a click on a link to another host fails the render as ACTION_FAILED (the page may not leave its host) and the other host is never requested; executeJavascript, write, press, pdf, clicking every match, eleven actions, 16 s of waits, a screenshot's quality and a screenshot on a batch are each refused 400 UNSUPPORTED_OPTION naming the option, before any attempt or target request",
     run() {
       const x = FX().extras ?? [], r = FX().extras_refused ?? [];
       const ac = one(x, "actions"), oh = one(x, "offhost_click");
@@ -407,9 +407,9 @@ const checks = {
       const refusedOk = names.every((n) => { const c = one(r, n); return c?.status === 400 && c.code === "UNSUPPORTED_OPTION" && !!c.option && (c.acquisitions ?? []).length === 0 && (c.hits ?? []).length === 0; });
       const cond = { actions: ok200(ac) && !!s0 && s0.has_late && s0.has_click_text && s0.has_scrolled && ac.action_screenshots?.length === 1 && /\/platform\/v1\/artifacts\//.test(ac.action_screenshots[0]) && !!ps && ps.width === 1280 && ps.height === 800,
         one_attempt: same(strat(ac), [["direct_browser"]]),
-        offhost: ok200(oh) && /\/offhost\?/.test(oh.scrapes?.[0]?.url ?? "") && !(oh.hits ?? []).some((h) => h.host === "m7" && h.path === "/article"),
+        offhost: oh?.class === "ACTION_FAILED" && /another host/.test(oh.error ?? "") && !(oh.hits ?? []).some((h) => h.host === "m7" && h.path === "/article"),
         refused: refusedOk };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; capture ${JSON.stringify(s0 ?? null)}; offhost ${oh?.scrapes?.[0]?.url}; refused ${names.map((n) => `${n}:${one(r, n)?.status}/${one(r, n)?.option}`).join(",")}` };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; capture ${JSON.stringify(s0 ?? null)}; offhost ${oh?.class}; refused ${names.map((n) => `${n}:${one(r, n)?.status}/${one(r, n)?.option}`).join(",")}` };
     } },
   B03: { name: "artifacts-owner-bound-and-expiring", inputs: [`${RAW}e2e-fixture.txt`],
     expected: "an artifact is served to its principal (200), and answers another principal's token exactly as an unknown id does (404 NOT_FOUND), a request with no token 401, a malformed id 400, and once past its retention 410 EXPIRED",
@@ -712,7 +712,7 @@ const series = json("patches/series.json");
 for (const id of wanted) {
   const c = checks[id];
   if (!c) throw new Error(`unknown check ${id}`);
-  const rec = { test_id: `M7-`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, expected: c.expected,
+  const rec = { test_id: `M7-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, expected: c.expected,
     evidence_class: ["E05", "L02"].includes(id) ? "live" : "fixture-or-host" };
   try {
     const missing = c.inputs.filter((p) => !has(p));
@@ -736,7 +736,7 @@ for (const id of wanted) {
   results[rec.test_id] = rec;
   console.log(`${rec.test_id} ${rec.state.padEnd(18)} ${c.name}${rec.state !== "PASS" ? `  — ${rec.actual.slice(0, 260)}` : ""}`);
 }
-const ordered = listed.map((id) => results[`M7-`] ?? { test_id: `M7-`, name: checks[id].name, state: "NOT_RUN", actual: "never run", evidence_path: OUT });
+const ordered = listed.map((id) => results[`M7-${id}`] ?? { test_id: `M7-${id}`, name: checks[id].name, state: "NOT_RUN", actual: "never run", evidence_path: OUT });
 writeFileSync(resolve(ROOT, OUT), JSON.stringify({ schema: "fcpi.m7.verification/v1", runner: "scripts/m7/verify.mjs",
   repository_sha_note: "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (E05, L02) from the fixture and host checks.",
   results: ordered }, null, 2) + "\n");

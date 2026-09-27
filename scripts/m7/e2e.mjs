@@ -105,7 +105,7 @@ const enhancedLedger = (since) => sql(`SELECT row_to_json(r) FROM (SELECT call_k
 const usageRows = () => sql(`SELECT row_to_json(u) FROM (SELECT category, period, period_start::text, reserved, settled FROM fcpi_retrieval.budget_usage WHERE period_start >= (now() at time zone 'utc')::date - 31 AND category IN ('enhanced', 'fixture_enhanced', 'fixture_enhanced_small', '_paid_total') ORDER BY 1, 2, 3) u`).map((l) => JSON.parse(l));
 const routeRow = (domain) => { const r = sql(`SELECT row_to_json(d) FROM (SELECT preferred, challenges, failures, last_failure_class FROM fcpi_retrieval.domain_route WHERE domain = :'domain') d`, { domain }); return r.length ? JSON.parse(r[0]) : null; };
 const resources = (label) => { try { out("resources", JSON.parse(pi(`bash /opt/firecrawl-pi/scripts/m7/pi-resources.sh ${label}`))); } catch (e) { out("error", { message: `resources ${label}: ${e.message}` }); } };
-const chrome = () => { const b = cname("browser-worker"); return { processes: +D(`exec --user 3320 ${b} sh -c 'pgrep -c -f chrome-headless-shell || true'`).trim(), health: JSON.parse(D(`exec ${b} node -e "fetch('http://10.231.2.20:3320/healthz').then(r=>r.text()).then(t=>process.stdout.write(t))"`)) }; };
+const chrome = () => { const b = cname("browser-worker"); return { processes: +D(`exec --user 3320 ${b} sh -c 'pgrep -c -f [c]hrome-headless-shell || true'`).trim(), health: JSON.parse(D(`exec ${b} node -e "fetch('http://10.231.2.20:3320/healthz').then(r=>r.text()).then(t=>process.stdout.write(t))"`)) }; };
 
 // ---- the forward and HTTP ---------------------------------------------------------------------------------
 let tunnel = null;
@@ -287,7 +287,8 @@ async function fixturePhase(before) {
   const t = await acquisition("m2.fixture.fcpi.test", () => rest("POST", "/v2/scrape", { url: `http://m2.fixture.fcpi.test:8080/js-hold.html?t=${nonce}`, formats: ["markdown"], waitFor: 15000, actions: [{ type: "wait", milliseconds: 15000 }] }));
   await sleep(3000);
   const c1 = chrome();
-  const killer = (async () => { await sleep(8000); const n = D(`exec --user 3320 ${cname("browser-worker")} sh -c 'pgrep -c -f chrome-headless-shell || true'`).trim(); D(`exec --user 3320 ${cname("browser-worker")} sh -c 'pkill -KILL -f chrome-headless-shell || true'`); return +n; })();
+  // Caught here, so a failed kill is recorded, never an unhandled rejection that would skip the driver's restoring finally.
+  const killer = (async () => { await sleep(8000); const n = D(`exec --user 3320 ${cname("browser-worker")} sh -c 'pgrep -c -f [c]hrome-headless-shell || true'`).trim(); D(`exec --user 3320 ${cname("browser-worker")} sh -c 'pkill -KILL -f [c]hrome-headless-shell || true'`); return +n; })().catch((e) => ({ error: e.message.split("\n")[0] }));
   const k = await acquisition("m2.fixture.fcpi.test", () => rest("POST", "/v2/scrape", { url: `http://m2.fixture.fcpi.test:8080/js-hold.html?k=${nonce}`, formats: ["markdown", "screenshot"] }));
   const killed = await killer;
   await sleep(3000);

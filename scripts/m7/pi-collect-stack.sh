@@ -164,7 +164,7 @@ sec browser_image
 BW=$(name browser-worker)
 img=$(D inspect -f '{{.Image}}' "$BW")
 D image inspect "$img" --format '{{range .Config.Env}}{{println .}}{{end}}' | grep '^FCPI_SOURCE_COMMIT=' | sed 's/^/image_/'
-echo "chrome_processes=$(D exec --user 3320 "$BW" sh -c 'pgrep -c -f chrome-headless-shell || true') health=$(D exec "$BW" node -e "fetch('http://10.231.2.20:3320/healthz').then(r=>r.text()).then(t=>process.stdout.write(t),()=>process.stdout.write('unreachable'))")"
+echo "chrome_processes=$(D exec --user 3320 "$BW" sh -c 'pgrep -c -f [c]hrome-headless-shell || true') health=$(D exec "$BW" node -e "fetch('http://10.231.2.20:3320/healthz').then(r=>r.text()).then(t=>process.stdout.write(t),()=>process.stdout.write('unreachable'))")"
 # M6 and M7: the fixtures' reach: on the internal fixture network alone, with no default route.
 for f in fixture-m6 fixture-m7; do
   sec "${f//-/_}_reach"
