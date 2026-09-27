@@ -3,7 +3,7 @@
 // arithmetic of reservations and settlements; and a breaker per provider. The ledger itself is in
 // store.mjs, where every reservation is one transaction.
 const CAT_KEYS = ["paid", "unit", "caps"];
-const TOP_KEYS = ["schema", "comment", "notifyAtFraction", "categories", "paidTotal", "providers", "models", "parsers", "proxies", "rateCards", "extraction", "parsing", "proxying", "breaker"];
+const TOP_KEYS = ["schema", "comment", "notifyAtFraction", "categories", "paidTotal", "providers", "models", "parsers", "proxies", "enhancers", "rateCards", "extraction", "parsing", "proxying", "enhancing", "breaker"];
 const EXTRACTION_KEYS = ["defaultModel", "maxInputTokens", "maxOutputTokens", "maxRepairs", "maxDocuments", "maxDocumentBytes", "maxChunks", "maxSchemaBytes",
   "maxSchemaDepth", "maxSchemaProperties", "maxPromptChars", "requestTimeoutMs", "resultMaxBytes"];
 const PARSING_KEYS = ["defaultParser", "maxPages", "maxBytes", "cacheDays", "jobTimeoutMs"];
@@ -36,10 +36,20 @@ export function loadBudgetPolicy(text) {
   exact(p.paidTotal.caps, ["day"], "paidTotal.caps");
   nonNegInt(p.paidTotal.caps.day, "paidTotal.caps.day");
   for (const [name, v] of Object.entries(p.providers)) {
-    exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "usageDedicated", "session"]);
-    if (!["model", "parser", "proxy"].includes(v.kind)) throw new Error(`provider ${name}.kind must be model, parser or proxy`);
+    exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "usageDedicated", "session", "api"]);
+    if (!["model", "parser", "proxy", "enhanced"].includes(v.kind)) throw new Error(`provider ${name}.kind must be model, parser, proxy or enhanced`);
     const u = new URL(v.baseUrl);
     const fixture = /\.fixture\.fcpi\.test$/.test(u.hostname);
+    // M7: an enhanced-retrieval provider always authenticates, a fixture one included, so the credential's path is
+    // exercised end to end; a paid one is a public https service and an unpaid one a project fixture. Only Zyte API's
+    // documented contract is implemented (enhanced.mjs).
+    if (v.kind === "enhanced") {
+      if (v.paid === fixture) throw new Error(`provider ${name}: a paid enhanced provider is a public service and an unpaid one a project fixture`);
+      if ((v.paid && u.protocol !== "https:") || (!v.paid && u.protocol !== "http:") || u.pathname !== "/" || u.search || u.username) throw new Error(`provider ${name}: an enhanced provider's baseUrl is an origin (https, or http for a fixture)`);
+      if (typeof v.credential !== "string" || !/^[a-z0-9_]{3,64}$/.test(v.credential)) throw new Error(`provider ${name}.credential must be a file name`);
+      if (v.api !== "zyte-v1") throw new Error(`provider ${name}.api must be zyte-v1`);
+      continue;
+    }
     // M6: a residential proxy speaks the HTTP proxy protocol at host:port and always authenticates, a fixture proxy
     // included; its usage report, where one exists, is an https API (a fixture's is on the fixture network).
     if (v.kind === "proxy") {
@@ -77,14 +87,23 @@ export function loadBudgetPolicy(text) {
   subjectOf("model", p.models);
   subjectOf("parser", p.parsers);
   subjectOf("proxy", p.proxies);
+  subjectOf("enhanced", p.enhancers);
   if (!Array.isArray(p.rateCards)) throw new Error("rateCards must be a list");
   const ids = new Set();
   for (const r of p.rateCards) {
-    const isParser = Object.hasOwn(p.parsers, r.subject), isProxy = Object.hasOwn(p.proxies, r.subject);
-    if (!Object.hasOwn(p.models, r.subject) && !isParser && !isProxy) throw new Error(`rate card ${r.id} names an unknown subject ${r.subject}`);
+    const isParser = Object.hasOwn(p.parsers, r.subject), isProxy = Object.hasOwn(p.proxies, r.subject), isEnhancer = Object.hasOwn(p.enhancers, r.subject);
+    if (!Object.hasOwn(p.models, r.subject) && !isParser && !isProxy && !isEnhancer) throw new Error(`rate card ${r.id} names an unknown subject ${r.subject}`);
     exact(r, isParser ? ["id", "subject", "effectiveFrom", "effectiveTo", "creditsPerPage", "microUsdPerCredit", "source"]
       : isProxy ? ["id", "subject", "effectiveFrom", "effectiveTo", "microUsdPerGB", "billing", "source"]
+      : isEnhancer ? ["id", "subject", "effectiveFrom", "effectiveTo", "microUsdPerHttpRequest", "microUsdPerBrowserRequest", "billing", "source"]
       : ["id", "subject", "effectiveFrom", "effectiveTo", "inputPerMTok", "cachedInputPerMTok", "outputPerMTok", "source"], `rate card ${r.id}`);
+    // M7: Zyte prices a request by the target's tier, which no answer reports; the card holds the highest tier's price for
+    // each request type, and a successful response is charged at it (spec §28.3: a conservative maximum).
+    if (isEnhancer) {
+      posInt(r.microUsdPerHttpRequest, 1, 1e6, `rate card ${r.id}.microUsdPerHttpRequest`);
+      posInt(r.microUsdPerBrowserRequest, 1, 1e6, `rate card ${r.id}.microUsdPerBrowserRequest`);
+      if (r.billing !== "successful_response_at_highest_tier") throw new Error(`rate card ${r.id}.billing must be successful_response_at_highest_tier`);
+    }
     if (ids.has(r.id)) throw new Error(`rate card ${r.id} appears twice`);
     ids.add(r.id);
     if (!DATE.test(r.effectiveFrom) || (r.effectiveTo !== null && (!DATE.test(r.effectiveTo) || r.effectiveTo <= r.effectiveFrom))) throw new Error(`rate card ${r.id}: effective dates must be YYYY-MM-DD, the end after the start`);
@@ -93,7 +112,7 @@ export function loadBudgetPolicy(text) {
       // Bytes are priced per decimal GB (1e9 bytes, the larger count of the two readings of "GB"), both directions.
       posInt(r.microUsdPerGB, 1, 1e9, `rate card ${r.id}.microUsdPerGB`);
       if (r.billing !== "upload_plus_download_per_1e9_bytes") throw new Error(`rate card ${r.id}.billing must be upload_plus_download_per_1e9_bytes`);
-    } else for (const k of ["inputPerMTok", "cachedInputPerMTok", "outputPerMTok"]) posInt(r[k], 1, 1e9, `rate card ${r.id}.${k}`);
+    } else if (!isEnhancer) for (const k of ["inputPerMTok", "cachedInputPerMTok", "outputPerMTok"]) posInt(r[k], 1, 1e9, `rate card ${r.id}.${k}`);
   }
   // Two cards for one subject may not both be in effect on any day.
   for (const a of p.rateCards) for (const b of p.rateCards) {
@@ -128,6 +147,12 @@ export function loadBudgetPolicy(text) {
   if (p.proxying.defaultProxy !== null && !Object.hasOwn(p.proxies, p.proxying.defaultProxy)) throw new Error("proxying.defaultProxy must be a listed proxy or null");
   posInt(p.proxying.maxAttemptBytes, 65536, 64 * 1048576, "proxying.maxAttemptBytes");
   posInt(p.proxying.maxTunnelBytes, 65536, 16 * 1048576, "proxying.maxTunnelBytes");
+  // M7: the enhanced provider used unless the host's selection names another (null: none), spec §9.3's 40 s ceiling for
+  // its one dispatch, and the largest answer read from it (its body arrives base64-encoded).
+  exact(p.enhancing, ["defaultEnhancer", "requestTimeoutMs", "maxResponseBytes"], "enhancing");
+  if (p.enhancing.defaultEnhancer !== null && !Object.hasOwn(p.enhancers, p.enhancing.defaultEnhancer)) throw new Error("enhancing.defaultEnhancer must be a listed enhancer or null");
+  posInt(p.enhancing.requestTimeoutMs, 1000, 40000, "enhancing.requestTimeoutMs");
+  posInt(p.enhancing.maxResponseBytes, 65536, 48 * 1048576, "enhancing.maxResponseBytes");
   exact(p.breaker, ["failures", "windowMs", "openMs"], "breaker");
   posInt(p.breaker.failures, 1, 20, "breaker.failures");
   posInt(p.breaker.windowMs, 1000, 3600000, "breaker.windowMs");

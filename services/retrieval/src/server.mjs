@@ -15,6 +15,8 @@
 //   GET  /internal/routes    M6: whether the residential route can be had now, and why not
 //   POST /internal/route-hold, /internal/route-release   M6: a bulk job's finite route hold on its domains
 //   POST /internal/proxy/reconcile   M6: reconcile one proxy provider's day against its usage report (src/reconcile.mjs)
+//   POST /internal/webhook/check, /internal/webhook/deliver   M7: whether a webhook destination is approved, and one signed
+//                           delivery attempt for the gateway's outbox (src/webhook.mjs)
 // The browser worker's forward proxy listens on the browser network alone, SearXNG's search proxy on the
 // search network alone (src/proxy.mjs). Credentials are compared by SHA-256.
 import http from "node:http";
@@ -32,6 +34,8 @@ import { reconcileDay } from "./reconcile.mjs";
 import { makeSearcher } from "./search.mjs";
 import { makeModelAdapter, makeExtractor, ExtractionFailure } from "./extract.mjs";
 import { makeParser } from "./parse.mjs";
+import { makeEnhanced } from "./enhanced.mjs";
+import { makeWebhooks } from "./webhook.mjs";
 import { readCredential } from "./provider.mjs";
 import { Denied, hostMatches, parseTarget } from "./ssrf.mjs";
 
@@ -104,7 +108,9 @@ startProxy({ listen: env.searchProxyListen, sessions: searchSessions, getPolicy,
 const browser = makeBrowserClient({ url: env.browserUrl, token: readSecret(env.credentialsDir, "retrieval_browser_token"),
   proxyServer: `http://${env.proxyListen.host}:${env.proxyListen.port}`, sessions, getPolicy });
 
-const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log, residential, getBudget });
+// M7: the enhanced provider, the waterfall's last tier (spec §11), and the browser extras behind their switch.
+const enhanced = makeEnhanced({ getBudget, getPolicy, getSelection, providersDir: env.providersDir, paidDispatch: env.paidDispatch, store, resolvePublic, log });
+const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log, residential, getBudget, enhanced, extras: env.browserExtras });
 const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log, residential, getBudget });
 const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log });
 const common = { store, getBudget, paidDispatch: env.paidDispatch, providersDir: env.providersDir, getPolicy, resolvePublic, log };
@@ -112,8 +118,11 @@ const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
 // A provider's breaker lives in the adapter of its kind (review W6).
-const breakerState = (name, p) => (p.kind === "parser" ? parse.breakerState(name) : p.kind === "proxy" ? residential.breakerState(name) : adapter.breakerState(name));
-log({ event: "budget_loaded", budget_sha256: budgetSha256, paid_dispatch: env.paidDispatch, models: Object.keys(budget.models), parsers: Object.keys(budget.parsers), proxies: Object.keys(budget.proxies) });
+const breakerState = (name, p) => (p.kind === "parser" ? parse.breakerState(name) : p.kind === "proxy" ? residential.breakerState(name) : p.kind === "enhanced" ? enhanced.breakerState(name) : adapter.breakerState(name));
+// M7: webhook delivery for the gateway's outbox (src/webhook.mjs); the signing secret is read at each use, so one placed
+// later needs no restart.
+const webhooks = makeWebhooks({ getPolicy, resolvePublic, getSecret: () => readCredential(env.credentialsDir, "webhook_signing_secret"), delivery: env.webhookDelivery, log });
+log({ event: "budget_loaded", budget_sha256: budgetSha256, paid_dispatch: env.paidDispatch, models: Object.keys(budget.models), parsers: Object.keys(budget.parsers), proxies: Object.keys(budget.proxies), enhancers: Object.keys(budget.enhancers), browser_extras: env.browserExtras, webhook_delivery: env.webhookDelivery });
 // The residential route as others see it: no secret, only whether it can be used now and why not.
 const routeView = (st) => ({ available: st.available, reason: st.reason, subject: st.subject ?? null, provider: st.providerName ?? null, paid: st.paid ?? null, ...(st.retryAfter ? { retryAfter: st.retryAfter } : {}) });
 // Hourly, the selected paid proxy's last closed UTC day is reconciled against its usage report, when paid dispatch is
@@ -139,7 +148,9 @@ const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, I
   SCHEMA_INVALID: 400, SCHEMA_TOO_LARGE: 400, SCHEMA_TOO_DEEP: 400, SCHEMA_UNSUPPORTED: 400, INPUT_TOO_LARGE: 413, NO_CONTENT: 422, RESULT_TOO_LARGE: 413,
   DOCUMENT_TOO_LARGE: 413, DOCUMENT_TOO_MANY_PAGES: 413, UNSUPPORTED_CONTENT: 415, PARSE_FAILED: 502, PARSE_EMPTY: 502,
   // M6: proxy reconciliation
-  RECONCILE_IN_FLIGHT: 409, RECONCILE_SCOPE_UNKNOWN: 409 };
+  RECONCILE_IN_FLIGHT: 409, RECONCILE_SCOPE_UNKNOWN: 409,
+  // M7: browser extras
+  UNSUPPORTED_CAPABILITY: 422 };
 const send = (res, status, body, extra = {}) => {
   const buf = Buffer.from(JSON.stringify(body));
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": buf.length, "cache-control": "no-store", ...extra });
@@ -209,7 +220,8 @@ const server = http.createServer(async (req, res) => {
       const ok = storeReady && getLocalReady();
       // Search, models and parsers are optional to acquisition: reported, never folded into ok (spec §20, AC23).
       return send(res, ok ? 200 : 503, { ok, store: storeReady, local_networks: getLocalReady(), browser: b.ok === true ? "up" : "down",
-        search_selection: selection.search, providers: Object.fromEntries(Object.entries(budget.providers).map(([n, p]) => [n, breakerState(n, p)])), residential: routeView(residential.state()) });
+        search_selection: selection.search, providers: Object.fromEntries(Object.entries(budget.providers).map(([n, p]) => [n, breakerState(n, p)])), residential: routeView(residential.state()),
+        enhanced: routeView(enhanced.state()), browser_extras: env.browserExtras, webhook_delivery: env.webhookDelivery });
     }
     if (req.method === "GET" && path === "/searxng/search") {
       if (!storeReady) return notReady(res);
@@ -248,7 +260,7 @@ const extractServer = http.createServer(async (req, res) => {
     if (req.method === "GET" && path === "/internal/providers") return send(res, 200, await providerStatus());
     if (req.method === "GET" && path === "/internal/routes") {
       if (!storeReady) return notReady(res);
-      return send(res, 200, { residential: routeView(await residential.availability()), bulkPages: basePolicy.residential.bulkPages, holdMaxMinutes: basePolicy.residential.holdMaxMinutes });
+      return send(res, 200, { residential: routeView(await residential.availability()), enhanced: routeView(await enhanced.availability()), bulkPages: basePolicy.residential.bulkPages, holdMaxMinutes: basePolicy.residential.holdMaxMinutes });
     }
     if (req.method === "POST" && (path === "/internal/route-hold" || path === "/internal/route-release" || path === "/internal/proxy/reconcile")) {
       if (!storeReady) return notReady(res);
@@ -266,6 +278,12 @@ const extractServer = http.createServer(async (req, res) => {
       await store.holdRoutes(b.jobId, domains, until, String(b.reason ?? "bulk").slice(0, 64));
       log({ event: "route_held", job_id: b.jobId, domains: domains.length, until: until.toISOString(), reason: String(b.reason ?? "bulk").slice(0, 64) });
       return send(res, 200, { held: true, domains: domains.length, until: until.toISOString() });
+    }
+    // M7: webhook destinations are checked before a job naming one is accepted, and each outbox attempt is made here.
+    if (req.method === "POST" && (path === "/internal/webhook/check" || path === "/internal/webhook/deliver")) {
+      const b = await readJson(req, 131072);
+      if (path === "/internal/webhook/check") return send(res, 200, webhooks.check(b.url));
+      return send(res, 200, await webhooks.deliver({ eventId: b.eventId, url: b.url, body: b.body }));
     }
     if (path !== "/internal/extract") return send(res, 404, { error: "not_found" });
     if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed" });

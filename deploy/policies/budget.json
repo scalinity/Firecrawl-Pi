@@ -10,7 +10,10 @@
     "fixture_parser": { "paid": false, "unit": "credits", "caps": { "day": 3000 } },
     "proxy": { "paid": true, "unit": "micro_usd", "caps": { "day": 0, "month": 0 } },
     "fixture_proxy": { "paid": false, "unit": "micro_usd", "caps": { "day": 20000000 } },
-    "fixture_proxy_race": { "paid": false, "unit": "micro_usd", "caps": { "day": 130000 } }
+    "fixture_proxy_race": { "paid": false, "unit": "micro_usd", "caps": { "day": 130000 } },
+    "enhanced": { "paid": true, "unit": "micro_usd", "caps": { "day": 0, "month": 0 } },
+    "fixture_enhanced": { "paid": false, "unit": "micro_usd", "caps": { "day": 5000000 } },
+    "fixture_enhanced_small": { "paid": false, "unit": "micro_usd", "caps": { "day": 20000 } }
   },
   "paidTotal": { "unit": "micro_usd", "caps": { "day": 0 } },
   "providers": {
@@ -21,7 +24,9 @@
     "decodo": { "kind": "proxy", "baseUrl": "http://gate.decodo.com:7000", "credential": "decodo_proxy", "paid": true, "session": "decodo",
       "usageUrl": "https://api.decodo.com/api/v2/statistics/traffic", "usageCredential": "decodo_api_key", "usageDedicated": false },
     "fixture-proxy": { "kind": "proxy", "baseUrl": "http://proxy.fixture.fcpi.test:8081", "credential": "fixture_proxy", "paid": false, "session": "decodo",
-      "usageUrl": "http://proxy.fixture.fcpi.test:8081/__usage", "usageCredential": null, "usageDedicated": true }
+      "usageUrl": "http://proxy.fixture.fcpi.test:8081/__usage", "usageCredential": null, "usageDedicated": true },
+    "zyte": { "kind": "enhanced", "baseUrl": "https://api.zyte.com", "credential": "zyte_api_key", "paid": true, "api": "zyte-v1" },
+    "fixture-zyte": { "kind": "enhanced", "baseUrl": "http://zyte.fixture.fcpi.test:8080", "credential": "fixture_zyte", "paid": false, "api": "zyte-v1" }
   },
   "models": {
     "gpt-4.1-mini-2025-04-14": { "provider": "openai", "category": "llm" },
@@ -37,6 +42,11 @@
     "decodo-residential": { "provider": "decodo", "category": "proxy" },
     "fcpi-fixture-proxy": { "provider": "fixture-proxy", "category": "fixture_proxy" },
     "fcpi-fixture-proxy-race": { "provider": "fixture-proxy", "category": "fixture_proxy_race" }
+  },
+  "enhancers": {
+    "zyte-api": { "provider": "zyte", "category": "enhanced" },
+    "fcpi-fixture-zyte": { "provider": "fixture-zyte", "category": "fixture_enhanced" },
+    "fcpi-fixture-zyte-small": { "provider": "fixture-zyte", "category": "fixture_enhanced_small" }
   },
   "rateCards": [
     { "id": "openai/gpt-4.1-mini-2025-04-14@2026-09-26", "subject": "gpt-4.1-mini-2025-04-14", "effectiveFrom": "2026-09-26", "effectiveTo": null,
@@ -59,7 +69,14 @@
     { "id": "fixture/fcpi-fixture-proxy@2026-09-26", "subject": "fcpi-fixture-proxy", "effectiveFrom": "2026-09-26", "effectiveTo": null,
       "microUsdPerGB": 4000000, "billing": "upload_plus_download_per_1e9_bytes", "source": "fixture: Decodo's price, no money" },
     { "id": "fixture/fcpi-fixture-proxy-race@2026-09-26", "subject": "fcpi-fixture-proxy-race", "effectiveFrom": "2026-09-26", "effectiveTo": null,
-      "microUsdPerGB": 4000000, "billing": "upload_plus_download_per_1e9_bytes", "source": "fixture: Decodo's price, no money" }
+      "microUsdPerGB": 4000000, "billing": "upload_plus_download_per_1e9_bytes", "source": "fixture: Decodo's price, no money" },
+    { "id": "zyte/api-payg@2026-09-27", "subject": "zyte-api", "effectiveFrom": "2026-09-27", "effectiveTo": null,
+      "microUsdPerHttpRequest": 1270, "microUsdPerBrowserRequest": 16080, "billing": "successful_response_at_highest_tier",
+      "source": "https://www.zyte.com/pricing/ and https://docs.zyte.com/zyte-api/pricing.html, observed 2026-09-27 (spec O06, O07): pay as you go per 1,000 successful responses, HTTP $0.13-$1.27 and browser $1.01-$16.08 by website tier (1-5); only successful responses are charged, and no answer reports its tier, so each is charged at tier 5" },
+    { "id": "fixture/fcpi-fixture-zyte@2026-09-27", "subject": "fcpi-fixture-zyte", "effectiveFrom": "2026-09-27", "effectiveTo": null,
+      "microUsdPerHttpRequest": 1270, "microUsdPerBrowserRequest": 16080, "billing": "successful_response_at_highest_tier", "source": "fixture: Zyte's tier-5 prices, no money" },
+    { "id": "fixture/fcpi-fixture-zyte-small@2026-09-27", "subject": "fcpi-fixture-zyte-small", "effectiveFrom": "2026-09-27", "effectiveTo": null,
+      "microUsdPerHttpRequest": 1270, "microUsdPerBrowserRequest": 16080, "billing": "successful_response_at_highest_tier", "source": "fixture: Zyte's tier-5 prices against a cap with room for one browser request, no money" }
   ],
   "extraction": {
     "defaultModel": "gpt-4.1-mini-2025-04-14",
@@ -87,6 +104,11 @@
     "defaultProxy": "decodo-residential",
     "maxAttemptBytes": 10000000,
     "maxTunnelBytes": 2000000
+  },
+  "enhancing": {
+    "defaultEnhancer": "zyte-api",
+    "requestTimeoutMs": 40000,
+    "maxResponseBytes": 37748736
   },
   "breaker": { "failures": 3, "windowMs": 60000, "openMs": 300000 }
 }

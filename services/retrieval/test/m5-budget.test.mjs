@@ -114,7 +114,7 @@ test("the egress policy's search section and the host selection are validated", 
   assert.throws(() => loadPolicy(e((j) => { j.search.deadlineMs = 20000; })), /deadlineMs/);
   assert.throws(() => loadPolicy(e((j) => { j.search.engineHosts.live.push("search.fixture.fcpi.test"); })), /public host/);
   const b = loadBudgetPolicy(RAW);
-  assert.deepEqual(defaultSelection(b), { search: "fixture", extractionModel: "gpt-4.1-mini-2025-04-14", parser: "llamaparse-cost-effective", proxy: "decodo-residential" });
+  assert.deepEqual(defaultSelection(b), { search: "fixture", extractionModel: "gpt-4.1-mini-2025-04-14", parser: "llamaparse-cost-effective", proxy: "decodo-residential", enhanced: "zyte-api" });
   assert.equal(loadSelection(JSON.stringify({ search: "live", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b).search, "live");
   assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "gpt-4o", parser: "fcpi-fixture-parser" }), p, b), /extractionModel/);
   assert.throws(() => loadSelection(JSON.stringify({ search: "everything", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b), /search/);

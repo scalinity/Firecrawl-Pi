@@ -4,12 +4,15 @@
 // A request's route is the caller's scrape option, carried by the core (patch 0009):
 //   basic    direct egress only ("local-only"): never escalates to a paid route, never passes the direct limits;
 //   stealth  the residential route from the start, and nothing else;
+//   enhanced M7: the enhanced provider from the start, one dispatch, and nothing else (a known difficult target);
 //   auto     the cheapest permitted route: direct, unless the domain is held for a bulk job, listed proxy-first,
 //            or has learned that it blocks the home connection; residential after a public-content challenge on
-//            the direct route, or once the direct limits for the domain or the platform are spent.
+//            the direct route, or once the direct limits for the domain or the platform are spent; and (M7) the
+//            enhanced provider once, after a challenge on the residential route or on the direct one when the
+//            residential route cannot be had.
 // Whatever the route, work that needs the residential route and cannot have it fails as PROXY_REQUIRED: it is
 // never sent from the home connection instead (spec §10.2).
-export const ROUTES = new Set(["auto", "basic", "stealth"]);
+export const ROUTES = new Set(["auto", "basic", "stealth", "enhanced"]);
 
 const hours = (h) => h * 3600e3;
 const minutes = (m) => m * 60e3;
@@ -21,6 +24,7 @@ const t = (d) => (d ? new Date(d).getTime() : null);
 export function startTier({ route, record, held, proxyFirst, now = Date.now(), routing }) {
   if (route === "basic") return { tier: "direct", reason: "local_only" };
   if (route === "stealth") return { tier: "residential", reason: "requested" };
+  if (route === "enhanced") return { tier: "enhanced", reason: "requested" };
   if (held) return { tier: "residential", reason: "bulk_hold" };
   if (proxyFirst) return { tier: "residential", reason: "proxy_first_domain" };
   if (record?.preferred === "residential") {

@@ -55,7 +55,14 @@
     { "host": "m6cool.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "m6esc.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
     { "host": "searchr.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
-    { "host": "proxy.fixture.fcpi.test", "port": 8081, "cidr": "10.231.3.0/24", "limits": "fixture" }
+    { "host": "proxy.fixture.fcpi.test", "port": 8081, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m7.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m7esc.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m7shot.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m7chg.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "m7cache.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "zyte.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" },
+    { "host": "hooks.fixture.fcpi.test", "port": 8080, "cidr": "10.231.3.0/24", "limits": "fixture" }
   ],
   "search": {
     "engines": {
@@ -105,5 +112,9 @@
     "ttlHours": 24,
     "maxTtlDays": 7,
     "probeMinutes": 5
+  },
+  "webhooks": {
+    "destinations": ["http://hooks.fixture.fcpi.test:8080/receive"],
+    "timeoutMs": 10000
   }
 }

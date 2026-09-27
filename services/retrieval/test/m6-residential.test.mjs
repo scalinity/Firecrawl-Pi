@@ -125,7 +125,11 @@ test("auto without the route answers a challenge as BLOCKED_PUBLIC_CONTENT; basi
     const always = await up.acquire(req(`${base(fx)}/always-challenge`));
     assert.equal(always.failure.class, "BLOCKED_PUBLIC_CONTENT");
     assert.deepEqual(always.strategies, ["direct_http", "residential_http"]);
-    assert.match(always.failure.detail, /enhanced retrieval is not available \(M7\)/);
+    // M7: past the residential route an auto page asks for the enhanced tier, which this rig does not select.
+    assert.match(always.failure.detail, /enhanced provider is unavailable \(NO_ENHANCER_SELECTED\)/);
+    const stealth = await up.acquire(req(`${base(fx)}/always-challenge`, { route: "stealth" }));
+    assert.deepEqual(stealth.strategies, ["residential_http"]);
+    assert.match(stealth.failure.detail, /a stealth request goes no further/);
   } finally { await fx.close(); }
 });
 

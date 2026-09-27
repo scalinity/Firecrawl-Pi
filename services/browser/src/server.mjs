@@ -7,8 +7,8 @@
 //     subresources are counted and capped per page;
 //   - a context that does not close within 5 s, or a browser that dies, has its process tree
 //     killed and the browser relaunched before the next render;
-//   - screenshot and action hooks exist in the render contract but are refused unless
-//     PI_BROWSER_EXTRAS_ENABLED is true, which stays false until M7 registers them.
+//   - M7: a render may carry a screenshot and the finite action subset (runHooks), served only while
+//     PI_BROWSER_EXTRAS_ENABLED is true; a context still never outlives the render's deadline.
 // POST /render (bearer credential of the retrieval service, compared by SHA-256), GET /healthz.
 import http from "node:http";
 import { readFileSync, readdirSync } from "node:fs";
@@ -96,35 +96,68 @@ async function settle(page, budgetMs) {
   }
 }
 
-async function runHooks(page, hooks) {
-  // Action subset (spec §12): wait, selector wait, scroll, click, screenshot; at most ten, with at
-  // most 15 s of explicit waiting. Anything else is an unsupported capability.
-  const out = { screenshot: null, actions: [] };
+// M7: the action subset (spec §12), run in order after the page settles, then the screenshot the formats asked for. The
+// retrieval service has already held the list to the subset (wait for milliseconds or a selector, click, scroll,
+// screenshot, scrape), at most ten, with at most 15 s of explicit waiting; this refuses anything else again and bounds
+// every step by the render's deadline. A step that cannot be done (a selector that never appears, a click with nothing
+// to click) fails the render as ACTION_FAILED. Captures hold at most EXTRAS_MAX_BYTES in all, content captures at most
+// the page's own limit. Returns { screenshot, actions: { screenshots, scrapes } }.
+const EXTRAS_MAX_BYTES = 16 * 1024 * 1024;
+const SELECTOR_WAIT_MS = 5000;
+async function runHooks(page, hooks, deadline, maxHtml) {
+  const out = { screenshot: null, actions: { screenshots: [], scrapes: [] } };
+  const fail = (cls, why) => Object.assign(new Error(why), { failureClass: cls });
+  let captured = 0, scraped = 0;
+  const left = () => { const ms = deadline - Date.now() - 1000; if (ms <= 0) throw fail("TIMEOUT", "the render's deadline came during its actions"); return ms; };
+  const shot = async (fullPage) => {
+    const c = await capture(page, fullPage, Math.min(left(), 10000));
+    captured += c.bytes;
+    if (captured > EXTRAS_MAX_BYTES) throw fail("RESOURCE_LIMIT", `the render's captures exceed ${EXTRAS_MAX_BYTES} bytes`);
+    return c;
+  };
   const actions = hooks?.actions ?? [];
-  if (actions.length > 10) throw Object.assign(new Error("more than 10 actions"), { failureClass: "UNSUPPORTED_CAPABILITY" });
-  let waited = 0;
-  for (const a of actions) {
-    if (a.type === "wait") { const ms = Math.min(Number(a.milliseconds) || 0, 15000 - waited); waited += ms; await page.waitForTimeout(ms); }
-    else if (a.type === "waitForSelector") await page.waitForSelector(String(a.selector), { timeout: Math.min(Number(a.timeout) || 5000, 15000) });
-    else if (a.type === "scroll") await page.mouse.wheel(0, a.direction === "up" ? -800 : 800);
-    else if (a.type === "click") await page.click(String(a.selector), { timeout: 5000 });
-    else if (a.type === "screenshot") out.actions.push({ type: "screenshot", ...(await capture(page, a.fullPage === true)) });
-    else throw Object.assign(new Error(`action ${a.type}`), { failureClass: "UNSUPPORTED_CAPABILITY" });
-    out.actions.push({ type: a.type, ok: true });
+  if (actions.length > 10) throw fail("UNSUPPORTED_CAPABILITY", "more than 10 actions");
+  for (const [i, a] of actions.entries()) {
+    try {
+      if (a.type === "wait" && typeof a.selector === "string") await page.waitForSelector(a.selector, { state: "attached", timeout: Math.min(SELECTOR_WAIT_MS, left()) });
+      else if (a.type === "wait") await page.waitForTimeout(Math.min(Number(a.milliseconds) || 0, 15000, left()));
+      else if (a.type === "click") {
+        await page.click(String(a.selector), { timeout: Math.min(5000, left()) });
+        // A click that navigates (on this host: the route refuses any other) is let load before the next step.
+        await page.waitForLoadState("load", { timeout: Math.min(5000, left()) }).catch(() => {});
+      } else if (a.type === "scroll") {
+        const dy = a.direction === "up" ? -800 : 800;
+        if (typeof a.selector === "string") await page.locator(a.selector).first().evaluate((el, d) => el.scrollBy(0, d), dy, { timeout: Math.min(5000, left()) });
+        else await page.mouse.wheel(0, dy);
+        await page.waitForTimeout(Math.min(250, left())); // the page's own scroll handlers run
+      } else if (a.type === "screenshot") out.actions.screenshots.push(await shot(a.fullPage === true));
+      else if (a.type === "scrape") {
+        const html = await page.content();
+        scraped += html.length;
+        if (scraped > maxHtml) throw fail("SIZE_LIMIT", `the render's content captures exceed ${maxHtml} characters`);
+        out.actions.scrapes.push({ url: page.url(), html });
+      } else throw fail("UNSUPPORTED_CAPABILITY", `action ${String(a.type).slice(0, 40)}`);
+    } catch (e) {
+      if (e.failureClass) throw e;
+      if (/Target (page|closed)|has been closed/i.test(e.message)) throw e; // the deadline or the caller closed the context
+      throw fail("ACTION_FAILED", `action ${i + 1} (${a.type}) could not be done: ${String(e.message).split("\n")[0].slice(0, 200)}`);
+    }
   }
-  if (hooks?.screenshot) out.screenshot = await capture(page, hooks.screenshot.fullPage === true);
+  if (hooks?.screenshot) out.screenshot = await shot(hooks.screenshot.fullPage === true);
   return out;
 }
 
-// A PNG of the viewport or the full page up to 20,000 px high and 10 MiB (spec §12); a clipped
-// capture says so.
-async function capture(page, fullPage) {
-  const dims = await page.evaluate(() => ({ w: document.documentElement.scrollWidth, h: document.documentElement.scrollHeight }));
+// A PNG of the viewport, or of the full page up to 20,000 px high, at most 10 MiB (spec §12). A full-page capture of a
+// taller page is clipped at 20,000 px and says so (truncated); it is never passed off as the whole page.
+async function capture(page, fullPage, timeout) {
   const viewport = page.viewportSize();
-  const height = fullPage ? Math.min(dims.h, 20000) : viewport.height;
-  const buf = await page.screenshot({ type: "png", clip: { x: 0, y: 0, width: viewport.width, height }, fullPage, timeout: 10000 });
-  if (buf.length > 10 * 1024 * 1024) throw Object.assign(new Error("screenshot exceeds 10 MiB"), { failureClass: "RESOURCE_LIMIT" });
-  return { mime: "image/png", width: viewport.width, height, truncated: fullPage && dims.h > 20000, bytes: buf.length, base64: buf.toString("base64") };
+  const pageHeight = await page.evaluate(() => Math.max(document.documentElement.scrollHeight, document.body?.scrollHeight ?? 0));
+  const height = fullPage ? Math.max(1, Math.min(pageHeight, 20000)) : viewport.height;
+  const buf = fullPage
+    ? await page.screenshot({ type: "png", fullPage: true, clip: { x: 0, y: 0, width: viewport.width, height }, timeout })
+    : await page.screenshot({ type: "png", timeout });
+  if (buf.length > 10 * 1024 * 1024) throw Object.assign(new Error("a screenshot exceeds 10 MiB"), { failureClass: "RESOURCE_LIMIT" });
+  return { mime: "image/png", width: viewport.width, height, truncated: fullPage && pageHeight > 20000, bytes: buf.length, base64: buf.toString("base64") };
 }
 
 // signal: aborted when the retrieval service stops waiting (its caller went away); the render then
@@ -180,12 +213,12 @@ async function render(r, signal) {
     const settleBudget = Math.max(Math.min(deadline - Date.now() - 1000, 8000 + (Number(r.waitForMs) || 0)), 0);
     if (Number(r.waitForMs) > 0) await page.waitForTimeout(Math.min(Number(r.waitForMs), settleBudget));
     await settle(page, Math.max(Math.min(settleBudget, deadline - Date.now() - 1000), 0));
-    const extras = wantsExtras ? await runHooks(page, r.hooks) : { screenshot: null, actions: null };
+    const maxHtml = Math.min(Number(r.limits?.maxHtmlChars) || HTML_MAX_CHARS, HTML_MAX_CHARS);
+    const extras = wantsExtras ? await runHooks(page, r.hooks, deadline, maxHtml) : { screenshot: null, actions: null };
     const redirects = [];
     for (let q = response?.request().redirectedFrom(); q; q = q.redirectedFrom()) redirects.unshift({ url: q.url() });
     // Measured inside the renderer, in this container's own cgroup, so an oversized document never
     // crosses into the retrieval service or the core (review finding C3).
-    const maxHtml = Math.min(Number(r.limits?.maxHtmlChars) || HTML_MAX_CHARS, HTML_MAX_CHARS);
     const chars = await page.evaluate(() => document.documentElement?.outerHTML.length ?? 0);
     if (chars > maxHtml) return { ok: false, failure: { class: "SIZE_LIMIT", detail: `rendered document of ${chars} characters exceeds ${maxHtml}` }, subresources: counters, timings: { totalMs: Date.now() - started } };
     const html = await page.content();
@@ -196,7 +229,9 @@ async function render(r, signal) {
     };
   } catch (e) {
     const cls = e.failureClass ?? (cancelled ? "CANCELLED" : expired ? "TIMEOUT" : browser === null ? "BROWSER_CRASHED" : crashed ? "RENDERER_CRASHED" : /Timeout/i.test(e.name) ? "TIMEOUT" : /net::ERR_/.test(e.message) ? "NAVIGATION_FAILED" : "BROWSER_ERROR");
-    return { ok: false, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300) }, subresources: counters, timings: { totalMs: Date.now() - started } };
+    // M7: an action that could not be done, or extras past their bounds, will not go better on a second try.
+    const final = ["ACTION_FAILED", "UNSUPPORTED_CAPABILITY", "RESOURCE_LIMIT", "SIZE_LIMIT"].includes(cls);
+    return { ok: false, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300), ...(final ? { retryable: false } : {}) }, subresources: counters, timings: { totalMs: Date.now() - started } };
   } finally {
     clearTimeout(killer);
     signal?.removeEventListener("abort", onAbort);

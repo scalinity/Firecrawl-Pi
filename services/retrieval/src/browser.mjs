@@ -17,6 +17,9 @@ async function readCapped(res, cap) {
   }
 }
 
+// M7: the most the captures of one render may hold in all, decoded (the worker enforces it; spec §12 bounds each at 10 MiB).
+export const EXTRAS_MAX_BYTES = 16 * 1048576;
+
 export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy }) {
   async function health() {
     try {
@@ -25,7 +28,7 @@ export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy
     } catch { return { ok: false }; }
   }
 
-  async function call({ attemptId, url: target, deadline, waitFor, userAgent, signal }, cred) {
+  async function call({ attemptId, url: target, deadline, waitFor, userAgent, signal, hooks }, cred) {
     const policy = getPolicy();
     const remaining = deadline - Date.now();
     try {
@@ -36,16 +39,16 @@ export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy
           attemptId, url: target, deadlineMs: Math.max(remaining - 500, 1000), waitForMs: waitFor, userAgent,
           proxy: { server: proxyServer, username: cred.username, password: cred.password },
           limits: { maxSubresources: policy.browser.maxSubresources, contextMaxMs: policy.browser.contextMaxMs, maxHtmlChars: policy.maxBodyBytes },
-          // Result-contract hooks (spec §12): part of the worker's contract, never filled while the
-          // extras stay unregistered (M7).
-          hooks: { screenshot: null, actions: [] },
+          // M7: the screenshot and the action subset, already validated to spec §12's bounds (acquire.mjs).
+          hooks: hooks ?? { screenshot: null, actions: [] },
         }),
         signal: AbortSignal.any([AbortSignal.timeout(Math.max(remaining + 5000, 6000)), ...(signal ? [signal] : [])]),
       });
       if (res.status !== 200) return { ok: false, failure: { class: "BROWSER_UNAVAILABLE", detail: `the browser worker answered HTTP ${res.status}`, retryable: true, retryAfter: null } };
       // The worker bounds the document; this bounds its reply too, before parsing, however the
-      // worker behaves (JSON escaping may double the characters, plus the result's other fields).
-      const text = await readCapped(res, 2 * policy.maxBodyBytes + 1024 * 1024);
+      // worker behaves (JSON escaping may double the characters, plus the result's other fields). M7: a render with extras
+      // may also carry its captures (at most EXTRAS_MAX_BYTES, base64) and its content captures (as long as the page).
+      const text = await readCapped(res, (hooks ? 4 : 2) * policy.maxBodyBytes + (hooks ? Math.ceil((EXTRAS_MAX_BYTES * 4) / 3) : 0) + 1024 * 1024);
       if (text === null) return { ok: false, failure: { class: "SIZE_LIMIT", detail: "the browser worker's reply exceeds the page limit", retryable: false, retryAfter: null } };
       const r = JSON.parse(text);
       return r.ok === true ? r : { ...r, ok: false, failure: { retryable: true, retryAfter: null, ...r.failure } };

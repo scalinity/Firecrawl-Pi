@@ -10,7 +10,9 @@ const ENV_KEYS = new Set(["PI_RETRIEVAL_LISTEN", "PI_RETRIEVAL_PROXY_LISTEN", "P
   "PI_RESOLVER", "PI_BROWSER_URL", "PI_CREDENTIALS_DIR", "PI_POSTGRES_HOST", "PI_POSTGRES_DB", "PI_POSTGRES_USER",
   "PI_BROWSER_EXTRAS_ENABLED", "PI_PAID_DISPATCH_ENABLED", "PI_CLOUD_ACCESS_ENABLED", "PI_MAX_URL_ACQUISITIONS", "PI_MAX_BROWSER_PAGES",
   // M5: search, extraction and parsing.
-  "PI_SEARCH_URL", "PI_SEARCH_PROXY_LISTEN", "PI_EXTRACT_LISTEN", "PI_BUDGET_POLICY_FILE", "PI_PROVIDERS_DIR", "PI_SELECTION_FILE"]);
+  "PI_SEARCH_URL", "PI_SEARCH_PROXY_LISTEN", "PI_EXTRACT_LISTEN", "PI_BUDGET_POLICY_FILE", "PI_PROVIDERS_DIR", "PI_SELECTION_FILE",
+  // M7: webhook delivery.
+  "PI_WEBHOOK_DELIVERY"]);
 
 // An internal service's URL: http at a fixed address, since a name would be looked up through the
 // egress bridge's resolver rather than Docker's.
@@ -26,12 +28,15 @@ export function loadEnv(env) {
   const need = (k) => { if (!env[k]) throw new Error(`${k} is required`); return env[k]; };
   const listen = (v) => { const m = /^(\d+\.\d+\.\d+\.\d+):(\d+)$/.exec(v); if (!m) throw new Error(`listen address ${v} is not ip:port`); return { host: m[1], port: Number(m[2]) }; };
   const exactlyFalse = (k) => { if ((env[k] ?? "false") !== "false") throw new Error(`${k} must be false in this release`); };
-  // Cloud access stays off in every release; the browser extras until M7. Paid dispatch is a switch the
-  // owner turns on only with an approved budget (spec §28.3); anything but "true" or "false" stops startup.
-  const paid = env.PI_PAID_DISPATCH_ENABLED ?? "false";
-  if (paid !== "true" && paid !== "false") throw new Error("PI_PAID_DISPATCH_ENABLED must be true or false");
+  // Cloud access stays off in every release. Paid dispatch is a switch the owner turns on only with an approved
+  // budget (spec §28.3). M7: the browser extras (screenshots and the action subset) are a switch too, so the optional
+  // capability can be turned off without touching basic retrieval; webhook delivery is "enabled" or "suppressed"
+  // (a restore or rollback holds every event unsent). Anything else stops startup.
+  const flag = (k, fallback, values) => { const v = env[k] ?? fallback; if (!values.includes(v)) throw new Error(`${k} must be ${values.join(" or ")}`); return v; };
+  const paid = flag("PI_PAID_DISPATCH_ENABLED", "false", ["true", "false"]);
   exactlyFalse("PI_CLOUD_ACCESS_ENABLED");
-  exactlyFalse("PI_BROWSER_EXTRAS_ENABLED");
+  const extras = flag("PI_BROWSER_EXTRAS_ENABLED", "false", ["true", "false"]);
+  const webhooks = flag("PI_WEBHOOK_DELIVERY", "suppressed", ["enabled", "suppressed"]);
   const urlPermits = Number(env.PI_MAX_URL_ACQUISITIONS ?? 2), browserPermits = Number(env.PI_MAX_BROWSER_PAGES ?? 1);
   if (!(urlPermits >= 1 && urlPermits <= 2) || browserPermits !== 1) throw new Error("PI_MAX_URL_ACQUISITIONS must be 1 or 2 and PI_MAX_BROWSER_PAGES 1 (spec §23.1)");
   const resolver = need("PI_RESOLVER");
@@ -42,7 +47,7 @@ export function loadEnv(env) {
     browserUrl: new URL(need("PI_BROWSER_URL")), credentialsDir: need("PI_CREDENTIALS_DIR"),
     postgres: { host: need("PI_POSTGRES_HOST"), database: need("PI_POSTGRES_DB"), user: need("PI_POSTGRES_USER") },
     permits: { url: urlPermits, browser: browserPermits },
-    paidDispatch: paid === "true",
+    paidDispatch: paid === "true", browserExtras: extras === "true", webhookDelivery: webhooks,
     searchUrl: fixedHttp(need("PI_SEARCH_URL"), "PI_SEARCH_URL"),
     searchProxyListen: listen(need("PI_SEARCH_PROXY_LISTEN")), extractListen: listen(need("PI_EXTRACT_LISTEN")),
     budgetFile: need("PI_BUDGET_POLICY_FILE"), providersDir: need("PI_PROVIDERS_DIR"), selectionFile: need("PI_SELECTION_FILE"),
@@ -50,7 +55,7 @@ export function loadEnv(env) {
 }
 
 const POLICY_KEYS = ["schema", "direct", "fixtureLimits", "ports", "maxRedirects", "maxBodyBytes", "attempts", "permitLeaseMs",
-  "browser", "cloudDenylist", "fixtures", "search", "residential", "routing"];
+  "browser", "cloudDenylist", "fixtures", "search", "residential", "routing", "webhooks"];
 const LIMIT_KEYS = ["perDomainInFlight", "minNavigationGapMs", "perDomainPerHour", "platformPerDay"];
 
 function exactKeys(obj, keys, where) {
@@ -147,6 +152,20 @@ export function loadPolicy(text) {
   int(G.ttlHours, 1, 24, "routing.ttlHours");
   int(G.maxTtlDays, 1, 7, "routing.maxTtlDays");
   int(G.probeMinutes, 1, 60, "routing.probeMinutes");
+  // M7: the only URLs a webhook may be delivered to (spec §31.3): each an exact http(s) URL without credentials, query
+  // or fragment, a public name or a listed fixture host; empty, no job may ask for a webhook. Delivery follows no
+  // redirect and is bounded in time and answer size.
+  exactKeys(p.webhooks, ["destinations", "timeoutMs"], "webhooks");
+  const W = p.webhooks;
+  if (!Array.isArray(W.destinations) || W.destinations.length > 20) throw new Error("webhooks.destinations must list at most 20 URLs");
+  for (const d of W.destinations) {
+    let u;
+    try { u = new URL(d); } catch { throw new Error(`webhooks.destinations: ${d} is not a URL`); }
+    if (!["http:", "https:"].includes(u.protocol) || u.username || u.password || u.search || u.hash || u.href !== d) throw new Error(`webhooks.destinations: ${d} must be an exact http(s) URL without credentials, query or fragment`);
+    const fixture = p.fixtures.some((f) => f.host === u.hostname && f.port === Number(u.port || (u.protocol === "https:" ? 443 : 80)));
+    if (/\.fixture\.fcpi\.test$/.test(u.hostname) ? !fixture : u.protocol !== "https:") throw new Error(`webhooks.destinations: ${d} must be https, or a listed fixture`);
+  }
+  int(W.timeoutMs, 1000, 15000, "webhooks.timeoutMs");
   return p;
 }
 
@@ -187,14 +206,18 @@ export function readSecret(dir, name) {
 // list, so it widens nothing.
 export function loadSelection(text, policy, budget) {
   const s = JSON.parse(text);
-  // M6's residential proxy choice is optional in the file: a selection written before M6 keeps the policy's default.
-  const { proxy, ...rest } = s;
+  // M6's residential proxy and M7's enhanced provider are optional in the file: a selection written before them keeps
+  // the policy's default.
+  const { proxy, enhanced, ...rest } = s;
   exactKeys(rest, ["search", "extractionModel", "parser"], "selection");
   if (proxy !== undefined && proxy !== null && !Object.hasOwn(budget.proxies, proxy)) throw new Error("selection.proxy must be a proxy the budget policy lists, or null");
+  if (enhanced !== undefined && enhanced !== null && !Object.hasOwn(budget.enhancers, enhanced)) throw new Error("selection.enhanced must be an enhancer the budget policy lists, or null");
   s.proxy = proxy === undefined ? budget.proxying.defaultProxy : proxy;
+  s.enhanced = enhanced === undefined ? budget.enhancing.defaultEnhancer : enhanced;
   if (!["fixture", "live"].includes(s.search)) throw new Error("selection.search must be fixture or live");
   if (!Object.hasOwn(budget.models, s.extractionModel)) throw new Error("selection.extractionModel must be a model the budget policy lists");
   if (!Object.hasOwn(budget.parsers, s.parser)) throw new Error("selection.parser must be a parser the budget policy lists");
   return s;
 }
-export const defaultSelection = (budget) => ({ search: "fixture", extractionModel: budget.extraction.defaultModel, parser: budget.parsing.defaultParser, proxy: budget.proxying.defaultProxy });
+export const defaultSelection = (budget) => ({ search: "fixture", extractionModel: budget.extraction.defaultModel, parser: budget.parsing.defaultParser, proxy: budget.proxying.defaultProxy,
+  enhanced: budget.enhancing.defaultEnhancer });

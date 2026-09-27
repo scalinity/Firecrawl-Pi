@@ -193,6 +193,11 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.proxy_reconciliation (
   at                    timestamptz NOT NULL DEFAULT now()
 );
 
+-- M7: the enhanced provider's one dispatch per logical page shares the ledger (kind enhanced); its call key is the
+-- logical page's, so a retried page finds the dispatch it already made instead of paying for another.
+ALTER TABLE fcpi_retrieval.budget_reservation DROP CONSTRAINT IF EXISTS budget_reservation_kind_check;
+ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile', 'enhanced'));
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'fcpi_retrieval') THEN

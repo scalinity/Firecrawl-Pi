@@ -7,7 +7,10 @@
 // navigation is paced per registrable domain on every route. A residential attempt first reserves its maximum
 // proxy spend and settles at the bytes its tunnels carried (residential.mjs). Work that needs the residential
 // route and cannot have it fails as PROXY_REQUIRED, and a challenge nothing further may answer as
-// BLOCKED_PUBLIC_CONTENT: neither is ever retried from the home connection. Enhanced retrieval is M7's.
+// BLOCKED_PUBLIC_CONTENT: neither is ever retried from the home connection. M7: an auto page challenged on the residential
+// route (or on the direct one, when the residential route cannot be had) gets one enhanced dispatch, the waterfall's last
+// tier (enhanced.mjs), and a request may ask for that tier alone; a page may carry screenshots and the safe action subset,
+// which only a local or residential browser attempt serves.
 import { randomUUID, createHmac, createHash } from "node:crypto";
 import { getDomain } from "tldts";
 import { parseTarget, Denied } from "./ssrf.mjs";
@@ -15,6 +18,7 @@ import { guardedFetch, CookieJar, USER_AGENT } from "./httpfetch.mjs";
 import { classify, isTextual } from "./quality.mjs";
 import { ROUTES, startTier, startsInBrowser } from "./route.mjs";
 import { Meter, sessionIdFor } from "./residential.mjs";
+import { finalTarget } from "./enhanced.mjs";
 
 const PURPOSES = new Set(["page", "robots", "sitemap"]);
 const EXPECTS = new Set(["html", "pdf", "document"]);
@@ -36,6 +40,12 @@ const sleep = (ms, signal) => new Promise((r) => {
 });
 // Without a residential provider wired in (unit tests of the direct path), the route is simply unavailable.
 const NO_ROUTE = Object.freeze({ state: () => ({ available: false, reason: "NO_PROXY_SELECTED" }), availability: async () => ({ available: false, reason: "NO_PROXY_SELECTED" }) });
+// M7: without an enhanced provider wired in (unit tests of the earlier tiers), that tier is simply unavailable.
+const NO_ENHANCED = Object.freeze({ state: () => ({ available: false, reason: "NO_ENHANCER_SELECTED" }), availability: async () => ({ available: false, reason: "NO_ENHANCER_SELECTED" }) });
+// An engine result with one of these statuses would restart upstream's own AddFeatureError retry outside the page's budget
+// (7666c1f apps/api/src/scraper/scrapeURL/index.ts:631-645): quality.mjs makes each a failure, and finish() refuses any
+// success that carries one all the same.
+const RETRY_STATUSES = new Set([401, 403, 429]);
 const RETRYABLE_ROUTE = new Set(["PROVIDER_UNAVAILABLE", "BUDGET_EXHAUSTED"]);
 export const proxyRequired = (st, why) => ({ class: "PROXY_REQUIRED", detail: `${why} needs the residential route, which is unavailable (${st.reason})`,
   retryable: RETRYABLE_ROUTE.has(st.reason), retryAfter: st.retryAfter ?? null, route: { residential: st.reason } });
@@ -54,10 +64,64 @@ export function validateAcquireRequest(b) {
   out.deadline = d;
   if (!PURPOSES.has(out.purpose)) bad("purpose must be page, robots or sitemap");
   if (!EXPECTS.has(out.expect)) bad("expect must be html, pdf or document");
-  if (!ROUTES.has(out.route)) bad("route must be auto, basic or stealth");
+  if (!ROUTES.has(out.route)) bad("route must be auto, basic, stealth or enhanced");
   if (typeof out.headers !== "object" || Array.isArray(out.headers)) bad("headers must be an object");
   if (!Number.isInteger(out.waitFor) || out.waitFor < 0 || out.waitFor > 15000) bad("waitFor must be 0..15000 ms (spec §12)");
+  out.hooks = validateHooks(b.hooks, bad);
   return out;
+}
+
+// M7: the browser extras (spec §12): a screenshot of the viewport or the full page, and the finite read-oriented action
+// subset: wait (milliseconds or a selector), click and scroll for public navigation or expansion, a screenshot, and a
+// capture of the page's content. At most ten actions and 15 s of explicit waiting, a selector wait counting its 5 s
+// timeout. Returns null when nothing is asked. A malformed hook is INVALID_REQUEST; a hook outside the subset is
+// UNSUPPORTED_CAPABILITY, before anything is acquired.
+export const ACTIONS = { wait: ["milliseconds", "selector"], click: ["selector"], scroll: ["direction", "selector"], screenshot: ["fullPage"], scrape: [] };
+export const SELECTOR_WAIT_MS = 5000;
+export function validateHooks(h, bad = (why) => { throw new Denied("INVALID_REQUEST", why); }) {
+  if (h === undefined || h === null) return null;
+  const unsupported = (why) => { throw new Denied("UNSUPPORTED_CAPABILITY", why); };
+  if (typeof h !== "object" || Array.isArray(h)) bad("hooks must be an object");
+  const keys = Object.keys(h).filter((k) => !["screenshot", "actions"].includes(k));
+  if (keys.length) bad(`hooks: unknown ${keys.join(", ")}`);
+  const selector = (v, where) => { if (typeof v !== "string" || !v || v.length > 256) bad(`${where} must be a CSS selector of 1-256 characters`); return v; };
+  let screenshot = null;
+  if (h.screenshot !== undefined && h.screenshot !== null) {
+    if (typeof h.screenshot !== "object" || Array.isArray(h.screenshot) || Object.keys(h.screenshot).some((k) => k !== "fullPage")) unsupported("a screenshot takes only fullPage");
+    if (h.screenshot.fullPage !== undefined && typeof h.screenshot.fullPage !== "boolean") bad("screenshot.fullPage must be a boolean");
+    screenshot = { fullPage: h.screenshot.fullPage === true };
+  }
+  const actions = h.actions ?? [];
+  if (!Array.isArray(actions)) bad("hooks.actions must be a list");
+  if (actions.length > 10) unsupported(`at most 10 actions are offered, not ${actions.length}`);
+  let waited = 0;
+  const out = actions.map((a, i) => {
+    const where = `actions[${i}]`;
+    if (!a || typeof a !== "object" || Array.isArray(a) || typeof a.type !== "string") bad(`${where} must be an object with a type`);
+    if (!Object.hasOwn(ACTIONS, a.type)) unsupported(`action ${JSON.stringify(a.type).slice(0, 40)} is not offered: the subset is ${Object.keys(ACTIONS).join(", ")}`);
+    const extra = Object.keys(a).filter((k) => k !== "type" && !ACTIONS[a.type].includes(k));
+    if (extra.length) unsupported(`${where} (${a.type}) does not take ${extra.join(", ")}`);
+    switch (a.type) {
+      case "wait": {
+        if ((a.milliseconds === undefined) === (a.selector === undefined)) bad(`${where}: a wait takes milliseconds or a selector, not both`);
+        if (a.selector !== undefined) { waited += SELECTOR_WAIT_MS; return { type: "wait", selector: selector(a.selector, `${where}.selector`) }; }
+        if (!Number.isInteger(a.milliseconds) || a.milliseconds < 1 || a.milliseconds > 15000) bad(`${where}.milliseconds must be 1..15000`);
+        waited += a.milliseconds;
+        return { type: "wait", milliseconds: a.milliseconds };
+      }
+      case "click": return { type: "click", selector: selector(a.selector, `${where}.selector`) };
+      case "scroll": {
+        if (a.direction !== undefined && !["up", "down"].includes(a.direction)) bad(`${where}.direction must be up or down`);
+        return { type: "scroll", direction: a.direction ?? "down", ...(a.selector !== undefined ? { selector: selector(a.selector, `${where}.selector`) } : {}) };
+      }
+      case "screenshot":
+        if (a.fullPage !== undefined && typeof a.fullPage !== "boolean") bad(`${where}.fullPage must be a boolean`);
+        return { type: "screenshot", fullPage: a.fullPage === true };
+      default: return { type: "scrape" };
+    }
+  });
+  if (waited > 15000) unsupported(`the actions wait ${waited} ms in all; at most 15000 ms is offered (a selector wait counts ${SELECTOR_WAIT_MS} ms)`);
+  return screenshot || out.length ? { screenshot, actions: out } : null;
 }
 
 export function decodeText(buf, contentType) {
@@ -154,7 +218,8 @@ function makeLegs({ residential, urlHmac, getBudget }) {
   return { open, close, closeOpen };
 }
 
-export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, urlHmac, log, residential = NO_ROUTE, getBudget = null }) {
+export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, urlHmac, log, residential = NO_ROUTE, getBudget = null,
+  enhanced = NO_ENHANCED, extras = false }) {
   const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
   const legs = makeLegs({ residential, urlHmac, getBudget });
 
@@ -164,23 +229,35 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
     const req = validateAcquireRequest(body);
     const result = { ok: false, logicalAcquisitionId: req.logicalAcquisitionId, attemptId: null, attemptsUsed: 0, strategy: null, strategies: [],
       initialStrategy: null, finalStrategy: null, route: { requested: req.route, start: null, reason: null, escalations: [] },
-      finalUrl: req.url, targetStatus: 0, contentType: null, bytes: 0, redirects: [], quality: null, failure: null, costEstimate: 0, provider: null, proxy: null };
+      finalUrl: req.url, targetStatus: 0, contentType: null, bytes: 0, redirects: [], quality: null, failure: null, costEstimate: 0, provider: null, proxy: null, enhanced: null };
     const spent = []; // the residential legs of this call, settled
     const finish = (extra) => {
       Object.assign(result, extra);
+      // A success carrying 401, 403 or 429 would reopen upstream's own retry outside the budget (RETRY_STATUSES).
+      if (result.ok && RETRY_STATUSES.has(result.targetStatus)) {
+        for (const k of ["body", "bodyBase64", "screenshot", "actions"]) delete result[k];
+        Object.assign(result, { ok: false, failure: { class: "RETRIEVAL_CONTRACT", detail: `a result with target status ${result.targetStatus} is never returned as content`, retryable: false, retryAfter: null } });
+      }
       result.initialStrategy = result.strategies[0] ?? null;
       result.finalStrategy = result.strategies.at(-1) ?? null;
+      let micro = 0;
       if (spent.length) {
-        const micro = spent.reduce((n, s) => n + (s.actual ?? s.reserved), 0);
+        micro = spent.reduce((n, s) => n + (s.actual ?? s.reserved), 0);
         result.proxy = { subject: spent[0].subject, provider: spent[0].provider, bytes: spent.reduce((n, s) => n + s.bytes, 0), microUsd: micro, legs: spent };
         result.provider = spent[0].provider;
-        result.costEstimate = micro / 1e6;
       }
+      // M7: an enhanced dispatch's charge (its reservation while its outcome is unknown); a reused answer costs nothing more.
+      const e = result.enhanced;
+      const enhancedMicro = e?.charge && !e.charge.reused ? (e.charge.actual ?? e.charge.reserved ?? 0) : 0;
+      if (e) result.provider = e.provider;
+      result.costEstimate = (micro + enhancedMicro) / 1e6;
       log({ event: "acquisition", request_id: req.requestId, logical_id: req.logicalAcquisitionId, purpose: req.purpose, url_hmac: urlHmac(req.url),
         attempts_used: result.attemptsUsed, strategies: result.strategies, initial_strategy: result.initialStrategy, final_strategy: result.finalStrategy,
         route_requested: req.route, route_start: result.route.start, route_reason: result.route.reason, escalations: result.route.escalations,
         target_status: result.targetStatus, verdict: result.quality?.verdict ?? null, failure: result.failure?.class ?? null, bytes: result.bytes,
-        proxy_bytes: result.proxy?.bytes ?? 0, proxy_micro_usd: result.proxy?.microUsd ?? 0, proxy_states: spent.map((s) => s.state), ms: Date.now() - started });
+        proxy_bytes: result.proxy?.bytes ?? 0, proxy_micro_usd: result.proxy?.microUsd ?? 0, proxy_states: spent.map((s) => s.state),
+        enhanced_mode: e?.mode ?? null, enhanced_state: e?.charge?.state ?? (e ? "NOT_CHARGED" : null), enhanced_reused: e?.charge?.reused === true, enhanced_micro_usd: enhancedMicro,
+        hooks: req.hooks ? { screenshot: !!req.hooks.screenshot, actions: req.hooks.actions.length } : null, ms: Date.now() - started });
       return result;
     };
     const fail = (f) => finish({ ok: false, failure: { retryable: false, retryAfter: null, ...f } });
@@ -188,6 +265,15 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
     let target;
     try { target = parseTarget(req.url, policy); } catch (e) { if (e instanceof Denied) return fail({ class: e.failureClass, detail: e.detail }); throw e; }
     if (!getLocalReady()) return fail({ class: "RETRIEVAL_NOT_READY", detail: "the host's local-network list is not loaded", retryable: true });
+    // M7: the browser extras run only in a local or residential browser attempt on a page, while the switch allows them;
+    // the enhanced provider is never asked for them (spec §11). Refused before anything is reserved.
+    const hooks = req.hooks;
+    if (hooks) {
+      const why = !extras ? "screenshots and actions are turned off in this deployment (PI_BROWSER_EXTRAS_ENABLED=false)"
+        : req.purpose !== "page" || req.expect !== "html" ? "screenshots and actions apply to an HTML page only"
+        : req.route === "enhanced" ? "the enhanced provider is not asked for screenshots or actions (spec §11)" : null;
+      if (why) return fail({ class: "UNSUPPORTED_CAPABILITY", detail: why });
+    }
 
     const acq = await store.openAcquisition(req.logicalAcquisitionId, urlHmac(req.url), new Date(Math.min(req.deadline, Date.now() + policy.attempts.acquisitionDeadlineMs)));
     const deadline = Math.min(acq.deadline.getTime(), acq.first_seen.getTime() + policy.attempts.acquisitionDeadlineMs);
@@ -208,6 +294,14 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       if (start.tier === "residential") {
         const st = await residential.availability();
         if (!st.available) return fail(proxyRequired(st, `this acquisition (${start.reason})`));
+      }
+      // M7: a request for the enhanced provider is refused the same way when that tier cannot be had.
+      // Its mode: a rendered answer for a domain learned to need a browser, the raw response otherwise (spec §11).
+      const startMode = req.purpose === "page" && req.expect === "html" && !req.fast && startsInBrowser(record) ? "browser" : "http";
+      if (start.tier === "enhanced") {
+        const st = await enhanced.availability(startMode);
+        if (!st.available) return fail({ class: "ENHANCED_REQUIRED", detail: `this acquisition asks for the enhanced provider, which is unavailable (${st.reason})`,
+          retryable: ["PROVIDER_UNAVAILABLE", "BUDGET_EXHAUSTED"].includes(st.reason), retryAfter: st.retryAfter ?? null, route: { enhanced: st.reason } });
       }
       // Observations are learned under the domain that answered, after any redirect, as the 429 cooldown is (review W6);
       // the probe after an expired preference is the requested domain's, so it counts only when that domain answered.
@@ -299,8 +393,8 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const answered = answering(httpRes.finalUrl), probed = probe && tier === "direct" && answered === domain;
         if (verdict.verdict === "challenge") {
           await learn(answered, { tier, mode: "http", outcome: "challenge", probe: probed }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
-          if (tier === "direct" && req.route === "auto") return { escalate: true, mode: "http", from: "direct_http", detail: "the target served a bot interstitial to the direct route", tier };
-          return { fail: { ...verdict.failure, detail: tier === "residential" ? "the target served a bot interstitial on the residential route; enhanced retrieval is not available (M7)" : "the target served a bot interstitial, and a local-only (basic) request does not escalate" }, tier };
+          if (req.route === "auto") return { escalate: true, mode: "http", from: `${tier}_http`, to: tier === "direct" ? "residential" : "enhanced", detail: `the target served a bot interstitial to the ${tier} route`, tier };
+          return { fail: { ...verdict.failure, detail: tier === "residential" ? "the target served a bot interstitial on the residential route, and a stealth request goes no further" : "the target served a bot interstitial, and a local-only (basic) request does not escalate" }, tier };
         }
         if (verdict.failure) { await learn(answered, null, { success: false, failureClass: verdict.failure.class }); return { fail: verdict.failure, tier }; }
         if (verdict.verdict !== "js_shell" || !page) {
@@ -348,7 +442,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           }
           // Every request the page makes - the document, its redirects and subresources - leaves through this
           // service's forward proxy; on the residential route each is tunnelled on the attempt's leg, under one session.
-          const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal, fixture: !!renderTarget.fixture, upstream: leg });
+          const r = await browser.render({ attemptId, url: renderUrl, deadline: browserDeadline, waitFor: req.waitFor, userAgent: USER_AGENT, signal, fixture: !!renderTarget.fixture, upstream: leg, hooks });
           const s = leg ? await settle(leg, `rendered ${r.status ?? r.failure?.class ?? ""}`) : null;
           // A result without its final URL (a worker fault) is read as ending where it began, not
           // parsed as a URL it is not.
@@ -371,15 +465,17 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             ? { class: "RESOURCE_LIMIT", detail: `the page passed its browser budget (${r.subresources?.requests ?? 0} subresources, ${r.proxy?.requests ?? 0} proxied requests, ${r.proxy?.bytes ?? 0} bytes)`, retryable: false, retryAfter: null } : null;
           // A render that failed because the provider refused its tunnels is the provider's failure, not the page's.
           const providerFailure = !r.ok && r.proxy?.upstreamFailure ? { ...r.proxy.upstreamFailure, provider: true } : null;
-          const failure = providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? (shell
+          // M7: a render asked for a screenshot that came back without one did not do what was asked.
+          const noShot = r.ok && hooks?.screenshot && !r.screenshot?.base64 ? { class: "BROWSER_ERROR", detail: "the render returned no screenshot" } : null;
+          const failure = providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? noShot ?? (shell
             ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null));
           await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: s?.bytes ?? r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
           if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }
           const answered = answering(finalUrl), probed = probe && tier === "direct" && answered === domain;
           if (verdict?.verdict === "challenge") {
             await learn(answered, { tier, mode: "browser", outcome: "challenge", probe: probed }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
-            if (tier === "direct" && req.route === "auto") return { escalate: true, mode: "browser", from: "direct_browser", detail: "the rendered page was a bot interstitial on the direct route", renderUrl };
-            return { fail: { ...verdict.failure, detail: tier === "residential" ? "the rendered page was a bot interstitial on the residential route; enhanced retrieval is not available (M7)" : "the rendered page was a bot interstitial, and a local-only (basic) request does not escalate" } };
+            if (req.route === "auto") return { escalate: true, mode: "browser", from: `${tier}_browser`, to: tier === "direct" ? "residential" : "enhanced", detail: `the rendered page was a bot interstitial on the ${tier} route`, renderUrl };
+            return { fail: { ...verdict.failure, detail: tier === "residential" ? "the rendered page was a bot interstitial on the residential route, and a stealth request goes no further" : "the rendered page was a bot interstitial, and a local-only (basic) request does not escalate" } };
           }
           if (failure) {
             if (!failure.provider && verdict?.failure) await learn(answered, null, { success: false, failureClass: failure.class });
@@ -389,28 +485,85 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           if (shellTier === tier) await learn(answered, { tier, mode: "browser", outcome: "js_rendered" });
           return { done: finish({ ok: true, body: r.html, finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
             bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
-            subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [] }) };
+            subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [], ...(hooks ? { screenshot: r.screenshot ?? null, actions: r.actions ?? null } : {}) }) };
         } finally {
           await releaseAll(log, [paced && (() => store.releaseDomain(paced.domain, attemptId)), () => store.releasePermit("browser", attemptId)]);
         }
       }
 
+      // M7: the page's one enhanced dispatch (spec §11), in `mode` (http: the raw response; browser: rendered HTML). The
+      // attempt is reserved like any other, so it is one of the page's four; the dispatch's own reservation is keyed by the
+      // logical page (enhanced.mjs), so no retry of the page ever pays for a second. The domain is paced as on every route.
+      // Its answer is judged by the same quality rules: the provider's 200 proves nothing about the target (spec §11).
+      // Provider failures teach the domain nothing, and nothing further is tried after this tier.
+      async function enhancedStep(zmode) {
+        const attemptId = randomUUID();
+        const ordinal = await store.reserveAttempt({ logicalId: req.logicalAcquisitionId, attemptId, requestId: req.requestId, purpose: req.purpose, strategy: "enhanced", domain: target.host, maxAttempts: policy.attempts.maxPerPage });
+        if (ordinal === null) return { fail: { class: "ATTEMPT_BUDGET_EXHAUSTED", detail: `the page's ${policy.attempts.maxPerPage} attempts are spent before its enhanced dispatch` } };
+        note(attemptId, ordinal, "enhanced");
+        const paced = await pace(target, attemptId, deadline, signal, "enhanced");
+        if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return { fail: paced.failure }; }
+        let d;
+        try { d = await enhanced.dispatch({ logicalId: req.logicalAcquisitionId, target, url: req.url, mode: zmode, deadline, signal }); }
+        finally { await releaseAll(log, [() => store.releaseDomain(paced.domain, attemptId)]); }
+        const st = enhanced.state();
+        result.enhanced = { provider: st.providerName ?? null, subject: st.subject ?? null, mode: zmode, charge: d.charge ?? null };
+        if (d.failure) { await store.finishAttempt(attemptId, { outcome: d.failure.class }); return { fail: d.failure }; }
+        const a = d.answer;
+        const refused = finalTarget(a.finalUrl, policy);
+        if (refused) { await store.finishAttempt(attemptId, { outcome: refused.class }); return { fail: refused }; }
+        const buf = a.bodyBase64 !== undefined ? Buffer.from(a.bodyBase64, "base64") : null;
+        const ct = buf ? sniffContentType(buf, a.contentType) : a.contentType;
+        const text = buf ? (isTextual(ct) ? decodeText(buf, ct) : null) : a.html;
+        const verdict = classify({ status: a.status, contentType: ct, body: text, finalUrl: a.finalUrl, requestedUrl: req.url });
+        const bytes = buf ? buf.length : Buffer.byteLength(a.html);
+        await store.finishAttempt(attemptId, { outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: a.status, bytes });
+        Object.assign(result, { finalUrl: a.finalUrl, targetStatus: a.status, contentType: ct ?? null, bytes, redirects: [], quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
+        if (verdict.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(a.finalUrl, policy)), verdict.failure.retryAfter); } catch { /* refused above */ } }
+        if (verdict.verdict === "challenge") return { fail: { ...verdict.failure, retryable: false, detail: "the enhanced provider's answer was itself a bot interstitial; nothing further is tried" } };
+        if (verdict.failure) return { fail: verdict.failure };
+        // A script shell the provider returned unrendered needed a browser; one dispatch is all a page gets.
+        if (verdict.verdict === "js_shell" && page && (zmode === "http" || verdict.structural === true)) {
+          return { fail: { class: "RENDER_INCOMPLETE", detail: `the enhanced ${zmode} answer was a script shell (${(verdict.reasons ?? []).join("; ")})` } };
+        }
+        return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: a.bodyBase64 }), quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] } }) };
+      }
+
       let tier = start.tier, renderUrl = req.url, shellTier = null;
-      let mode = page && startsInBrowser(record) ? "browser" : "http";
-      if (mode === "browser") result.route.escalations.push("learned_js");
+      // A page with screenshots or actions is rendered from the start; a domain learned to need a browser starts in one.
+      let mode = start.tier === "enhanced" ? startMode : hooks ? "browser" : page && startsInBrowser(record) ? "browser" : "http";
+      if (hooks) result.route.escalations.push("browser_extras");
+      else if (mode === "browser") result.route.escalations.push("learned_js");
       for (;;) {
         if (signal?.aborted) return fail(CANCELLED); // no attempt is reserved for a caller that left
-        const s = mode === "http" ? await httpStep(tier) : await browserStep(tier, renderUrl, shellTier);
+        const s = tier === "enhanced" ? await enhancedStep(mode) : mode === "http" ? await httpStep(tier) : await browserStep(tier, renderUrl, shellTier);
         if (s.done) return s.done;
         if (s.fail) return fail(s.fail);
         tier = s.tier ?? tier;
         if (s.retry) { await sleep(700 + Math.floor(Math.random() * 600), signal); continue; }
         if (s.browser) { mode = "browser"; renderUrl = s.renderUrl; shellTier = tier; continue; }
         if (s.escalate) {
-          const st = await residential.availability();
-          if (!st.available) return fail({ class: "BLOCKED_PUBLIC_CONTENT", detail: `${s.detail}; the residential route is unavailable (${st.reason})`, retryable: false, route: { residential: st.reason } });
-          result.route.escalations.push(`${s.from}->residential_${s.mode}`);
-          tier = "residential"; mode = s.mode; renderUrl = s.renderUrl ?? renderUrl;
+          // A direct challenge moves to the residential route when it can be had; past it (or without it), an auto page
+          // without browser extras gets its one enhanced dispatch (the orchestrator may skip a stage, spec §9.3).
+          const routeState = {};
+          if (s.to === "residential") {
+            const st = await residential.availability();
+            if (st.available) {
+              result.route.escalations.push(`${s.from}->residential_${s.mode}`);
+              tier = "residential"; mode = s.mode; renderUrl = s.renderUrl ?? renderUrl;
+              continue;
+            }
+            routeState.residential = st.reason;
+          }
+          const why = hooks ? "a page with screenshots or actions is not sent to the enhanced provider" : null;
+          const est = why ? null : await enhanced.availability(s.mode);
+          if (!est?.available) {
+            if (est) routeState.enhanced = est.reason;
+            const unavailable = [routeState.residential && `the residential route is unavailable (${routeState.residential})`, est && `the enhanced provider is unavailable (${est.reason})`, why].filter(Boolean).join("; ");
+            return fail({ class: "BLOCKED_PUBLIC_CONTENT", detail: `${s.detail}; ${unavailable}`, retryable: false, route: routeState });
+          }
+          result.route.escalations.push(`${s.from}->enhanced_${s.mode}`);
+          tier = "enhanced"; mode = s.mode;
           continue;
         }
         throw new Error("acquire: a step returned no outcome");
