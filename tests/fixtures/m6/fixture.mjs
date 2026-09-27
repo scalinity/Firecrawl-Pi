@@ -109,6 +109,9 @@ export function makeTarget(state) {
       case "/always-challenge": return html(403, CHALLENGE);
       // HTTP sees a script shell on both routes; the rendered page is a challenge directly and an article proxied.
       case "/js-challenge": return html(200, SHELL(via === "proxy" ? `<main><h1>Rendered through the proxy</h1><p>${"Rendered residential content. ".repeat(12)}</p></main>` : `<div id="challenge-running"></div><script src="/cdn-cgi/challenge-platform/h/b/orchestrate/jsch/v1"></script>`));
+      // A script shell whose rendered page loads two images from its own host: in a residential browser attempt the
+      // page and both images must come through the provider under the attempt's one session.
+      case "/js-subres": return html(200, SHELL(`<main><h1>Scripted page with subresources</h1><p>${"Rendered content with images of its own. ".repeat(10)}</p><img src="/px/1.gif"><img src="/px/2.gif"></main>`));
       // A page with subresources on its own host: each is fetched under the attempt's one proxy session.
       case "/subres": return html(200, page("Subresources", `<p>${"A page that loads its own images and a script. ".repeat(8)}</p><img src="/px/1.gif"><img src="/px/2.gif"><script src="/px/app.js"></script>`));
       case "/px/1.gif": case "/px/2.gif": return res.writeHead(200, { "content-type": "image/gif" }).end(Buffer.from("R0lGODlhAQABAAAAACw=", "base64"));
