@@ -41,7 +41,8 @@ D run --rm --network none --read-only --cap-drop ALL --security-opt no-new-privi
   -e FCPI_REPO_ROOT=/srv/repo -v "$REPO:/srv/repo:ro" "$MCP" node --test --test-reporter=tap /srv/repo/tests/contracts/m4-grammars.test.mjs 2>&1
 echo "test_exit=$?"
 
-D network create --internal --label fcpi.transient=m4-tests "$N" >/dev/null
+# The bridge is named fcpi-*, which NetworkManager leaves unmanaged (CLAUDE.md §33.1), not Docker's default br-<id>.
+D network create --internal -o com.docker.network.bridge.name=fcpi-t$$ --label fcpi.transient=m4-tests "$N" >/dev/null
 D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=m4-tests --tmpfs /var/lib/postgresql/data --tmpfs /var/run/postgresql \
   -e POSTGRES_HOST_AUTH_METHOD=trust "$PGIMG" >/dev/null
 for _ in $(seq 1 90); do D exec "$N-pg" pg_isready -h 127.0.0.1 -U postgres -q 2>/dev/null && break; sleep 1; done

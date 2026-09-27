@@ -21,7 +21,9 @@ trap 'D rm -f "$N-pg" >/dev/null 2>&1; D network rm "$N" >/dev/null 2>&1' EXIT
 echo "### meta"
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) retrieval_image=$RI gateway_image=$GI mcp_image=$MI test_postgres=$PGIMG"
 RUN=(--rm --read-only --cap-drop ALL --security-opt no-new-privileges:true --tmpfs /tmp:size=64m --label fcpi.transient=m7-suites)
-D network create --internal --label fcpi.transient=m7-suites "$N" >/dev/null
+# The bridge is named fcpi-*, which NetworkManager leaves unmanaged (CLAUDE.md §33.1); Docker's default br-<id> it would
+# take over and activate.
+D network create --internal -o com.docker.network.bridge.name=fcpi-s$$ --label fcpi.transient=m7-suites "$N" >/dev/null
 D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=m7-suites --tmpfs /var/lib/postgresql/data --tmpfs /var/run/postgresql -e POSTGRES_HOST_AUTH_METHOD=trust "$PGIMG" >/dev/null
 for _ in $(seq 1 90); do D exec "$N-pg" pg_isready -U postgres -q 2>/dev/null && break; sleep 1; done
 sleep 1
