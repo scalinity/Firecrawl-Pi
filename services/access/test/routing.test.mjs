@@ -40,6 +40,13 @@ test("a crawl with no limit takes the manifest's default of 20 pages, and is not
 test("a local-only (basic) bulk job is refused outright", () => {
   assert.throws(() => routeBody("crawl", { url: "https://example.org/", limit: 21, scrapeOptions: { proxy: "basic" } }, M), (e) => e instanceof RequestError && e.code === "PROXY_REQUIRED" && e.status === 400);
   assert.throws(() => routeBody("batch", { urls: Array.from({ length: 21 }, (_, i) => `https://e.org/${i}`), proxy: "basic" }, M), /direct egress only/);
+  // M7 review W15: a bulk job asking for the enhanced provider is refused by name, never rewritten to stealth.
+  assert.throws(() => routeBody("crawl", { url: "https://example.org/", limit: 21, scrapeOptions: { proxy: "enhanced" } }, M), (e) => e instanceof RequestError && e.code === "UNSUPPORTED_OPTION" && e.extra.option === "scrapeOptions.proxy");
+  assert.throws(() => routeBody("batch", { urls: Array.from({ length: 21 }, (_, i) => `https://e.org/${i}`), proxy: "enhanced" }, M), (e) => e.code === "UNSUPPORTED_OPTION" && e.extra.option === "proxy");
+  // A small enhanced job holds its domains on the residential route, so its auxiliary downloads never leave direct.
+  const small = { url: "https://example.org/", limit: 5, scrapeOptions: { proxy: "enhanced" } };
+  assert.deepEqual(routeBody("crawl", small, M), { body: small, bulk: false, needsRoute: true });
+  assert.equal(routeBody("batch", { urls: ["https://e.org/1"], proxy: "enhanced" }, M).needsRoute, true);
 });
 
 test("a crawl holds its start URL's domain, a batch every URL's; an unavailable route is a 429 naming why", () => {

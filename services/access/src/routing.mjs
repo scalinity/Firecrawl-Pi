@@ -9,8 +9,11 @@
 //     admission, and fails with PROXY_REQUIRED at dispatch if the route was lost meanwhile. It never runs on the
 //     home connection instead.
 // A bulk job that asks for direct egress only (proxy: "basic") is refused outright: local-only never passes the
-// direct limits. A job of any size whose pages ask for the residential route (proxy: "stealth") is held and checked
-// the same way, since its robots.txt, sitemaps and discovery fetches carry no route of their own (review W7).
+// direct limits. M7: so is a bulk job that asks for the enhanced provider (proxy: "enhanced"), which is one paid
+// dispatch per page, not a bulk route; its option is never rewritten. A job of any size whose pages ask for the
+// residential route (proxy: "stealth") or the enhanced provider, a caller's mark of a difficult target, is held and
+// checked the same way, since its robots.txt, sitemaps and discovery fetches carry no route of their own and would
+// otherwise leave from the home connection (review W7, M7 review W15).
 import { RequestError } from "./validate.mjs";
 
 export function pagesOf(kind, body) {
@@ -21,7 +24,7 @@ export function pagesOf(kind, body) {
 export const isBulk = (kind, body, M) => (kind === "crawl" || kind === "batch") && pagesOf(kind, body) > M.limits.proxy.bulkPages;
 const askedRoute = (kind, body) => (kind === "crawl" ? body.scrapeOptions?.proxy : body.proxy);
 // A job whose pages take the residential route, and whose domains are therefore held on it for the job's life.
-export const needsRoute = (kind, body, M) => (kind === "crawl" || kind === "batch") && (isBulk(kind, body, M) || askedRoute(kind, body) === "stealth");
+export const needsRoute = (kind, body, M) => (kind === "crawl" || kind === "batch") && (isBulk(kind, body, M) || ["stealth", "enhanced"].includes(askedRoute(kind, body)));
 
 // The body with its route decided: a bulk job's pages ask for the residential route. Returns { body, bulk, needsRoute }.
 export function routeBody(kind, body, M) {
@@ -29,6 +32,9 @@ export function routeBody(kind, body, M) {
   const asked = askedRoute(kind, body);
   if (asked === "basic") {
     throw new RequestError(400, "PROXY_REQUIRED", `A job of more than ${M.limits.proxy.bulkPages} pages needs the residential route from the start (spec §10.2); proxy 'basic' asks for direct egress only.`);
+  }
+  if (asked === "enhanced") {
+    throw new RequestError(400, "UNSUPPORTED_OPTION", `A job of more than ${M.limits.proxy.bulkPages} pages takes the residential route (spec §10.2); proxy 'enhanced' is one paid dispatch per page and is not offered for bulk jobs.`, { option: kind === "crawl" ? "scrapeOptions.proxy" : "proxy" });
   }
   if (kind === "crawl") return { body: { ...body, scrapeOptions: { ...(body.scrapeOptions ?? {}), proxy: "stealth" } }, bulk: true, needsRoute: true };
   return { body: { ...body, proxy: "stealth" }, bulk: true, needsRoute: true };
