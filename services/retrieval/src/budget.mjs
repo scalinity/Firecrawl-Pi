@@ -36,7 +36,7 @@ export function loadBudgetPolicy(text) {
   exact(p.paidTotal.caps, ["day"], "paidTotal.caps");
   nonNegInt(p.paidTotal.caps.day, "paidTotal.caps.day");
   for (const [name, v] of Object.entries(p.providers)) {
-    exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "session"]);
+    exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "usageDedicated", "session"]);
     if (!["model", "parser", "proxy"].includes(v.kind)) throw new Error(`provider ${name}.kind must be model, parser or proxy`);
     const u = new URL(v.baseUrl);
     const fixture = /\.fixture\.fcpi\.test$/.test(u.hostname);
@@ -52,6 +52,8 @@ export function loadBudgetPolicy(text) {
         const q = new URL(v.usageUrl);
         if ((v.paid && q.protocol !== "https:") || (!v.paid && !/\.fixture\.fcpi\.test$/.test(q.hostname))) throw new Error(`provider ${name}.usageUrl must be https (a fixture's on the fixture network)`);
         if (v.usageCredential !== null && !/^[a-z0-9_]{3,64}$/.test(v.usageCredential ?? "")) throw new Error(`provider ${name}.usageCredential must be a file name or null`);
+        // Whether the report covers this deployment alone: only then is it reconciled (reconcile.mjs).
+        if (typeof v.usageDedicated !== "boolean") throw new Error(`provider ${name}.usageDedicated must be true or false`);
       }
       continue;
     }

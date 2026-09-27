@@ -458,3 +458,15 @@ test("an auxiliary download past the direct limits is refused, never moved to th
     assert.equal(fx.state.hits.at(-1).via, "proxy");
   } finally { await fx.close(); }
 });
+
+test("a usage report not declared to cover this deployment alone is not reconciled (review W13)", async () => {
+  const fx = await startFixture();
+  try {
+    const { reconcileDay } = await import("../src/reconcile.mjs");
+    const budget = m6Budget(fx, (b) => { b.providers["fixture-proxy"].usageDedicated = false; });
+    const store = { proxyDay: async () => { throw new Error("the ledger must not be read"); } };
+    await assert.rejects(reconcileDay({ store, getBudget: () => budget, providersDir: "/nonexistent", providerName: "fixture-proxy", day: "2026-09-26", getPolicy: () => m6Policy(fx), resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} }),
+      (e) => e.failureClass === "RECONCILE_SCOPE_UNKNOWN");
+    assert.throws(() => m6Budget(fx, (b) => { delete b.providers["fixture-proxy"].usageDedicated; }), /usageDedicated/);
+  } finally { await fx.close(); }
+});

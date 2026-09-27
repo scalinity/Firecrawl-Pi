@@ -139,7 +139,7 @@ const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, I
   SCHEMA_INVALID: 400, SCHEMA_TOO_LARGE: 400, SCHEMA_TOO_DEEP: 400, SCHEMA_UNSUPPORTED: 400, INPUT_TOO_LARGE: 413, NO_CONTENT: 422, RESULT_TOO_LARGE: 413,
   DOCUMENT_TOO_LARGE: 413, DOCUMENT_TOO_MANY_PAGES: 413, UNSUPPORTED_CONTENT: 415, PARSE_FAILED: 502, PARSE_EMPTY: 502,
   // M6: proxy reconciliation
-  RECONCILE_IN_FLIGHT: 409 };
+  RECONCILE_IN_FLIGHT: 409, RECONCILE_SCOPE_UNKNOWN: 409 };
 const send = (res, status, body, extra = {}) => {
   const buf = Buffer.from(JSON.stringify(body));
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": buf.length, "cache-control": "no-store", ...extra });

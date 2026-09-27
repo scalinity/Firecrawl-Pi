@@ -6,8 +6,9 @@
 //     reconciliation charged count as measured, so running again charges only what the report added since (review C1);
 //   - either way, each UNCERTAIN reservation of that day is settled at the bytes it measured, since the report
 //     now covers its unknown part; a charge is never lowered below what was measured.
-// The report must cover this deployment alone (a dedicated proxy sub-user): other traffic on the account would be
-// charged here too, which errs on the side of overcounting.
+// The report must cover this deployment alone: Decodo's traffic report is the account's, with no per-user filter in its
+// documented request, so a provider is reconciled only when its policy entry declares usageDedicated (an account this
+// deployment alone uses); otherwise other traffic on the account would be charged here (review W13).
 import { randomUUID } from "node:crypto";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
 import { proxyCost, rateCardFor } from "./budget.mjs";
@@ -44,6 +45,7 @@ export async function reconcileDay({ store, getBudget, providersDir, providerNam
   if (!DAY.test(day)) throw new Error("day must be YYYY-MM-DD");
   const budget = getBudget(), provider = budget.providers[providerName];
   if (!provider || provider.kind !== "proxy" || !provider.usageUrl) throw new Error(`${providerName} is not a proxy with a usage report`);
+  if (provider.usageDedicated !== true) throw new Denied("RECONCILE_SCOPE_UNKNOWN", `${providerName}'s usage report covers its whole account; reconcile only an account this deployment alone uses (usageDedicated in the budget policy)`);
   // A proxy row still RESERVED has bytes the report may already hold and the ledger does not: reconciling now would
   // charge them here and again when the row settles, so the day waits until nothing is in flight.
   const before = await store.proxyDay(providerName, day);
@@ -60,7 +62,7 @@ export async function reconcileDay({ store, getBudget, providersDir, providerNam
     const card = rateCardFor(budget, subject, new Date(`${day}T12:00:00Z`));
     if (!card) throw new Error(`no rate card for ${subject} on ${day}`);
     adjustment = proxyCost(card, reported - measured);
-    if (adjustment > 0) await store.recordAdjustment({ id: randomUUID(), callKey: `reconcile:${providerName}:${day}:${randomUUID()}`, category: s.category, provider: providerName, subject,
+    if (adjustment > 0) await store.recordAdjustment({ id: randomUUID(), callKey: `reconcile:${providerName}:${day}:${randomUUID()}`, category: s.category, periods: Object.keys(budget.categories[s.category].caps), provider: providerName, subject,
       rateCard: card.id, amount: adjustment, day, paidTotal: provider.paid, usage: { bytes: reported - measured, reportedBytes: reported, measuredBytes: measured } });
   }
   const settledUncertain = await store.settleUncertainProxy(providerName, day, (bytes, subject) => {

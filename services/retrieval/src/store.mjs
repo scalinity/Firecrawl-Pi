@@ -287,15 +287,17 @@ export class Store {
       FROM fcpi_retrieval.budget_reservation WHERE provider = $1 AND kind IN ('proxy', 'reconcile') AND day_start = $2`, [provider, day])).rows[0];
     return { settledBytes: r.settled, uncertainBytes: r.uncertain, adjustedBytes: r.adjusted, uncertain: r.n_uncertain, reserved: r.n_reserved };
   }
-  // A charge the provider's report shows beyond what was measured: settled at once in its category (and the paid
-  // total's day for a paid provider), past any cap, since it was already incurred.
-  async recordAdjustment({ id, callKey, category, provider, subject, rateCard, amount, day, paidTotal, usage }) {
+  // A charge the provider's report shows beyond what was measured: settled at once in each period its category caps
+  // (and the paid total's day for a paid provider), past any cap, since it was already incurred. A period with no
+  // usage row yet gets one, so a day nothing was reserved on still sees the charge (review W8).
+  async recordAdjustment({ id, callKey, category, provider, subject, rateCard, amount, day, paidTotal, usage, periods: capped }) {
     const month = `${day.slice(0, 7)}-01`;
     await this.#tx(async (c) => {
       const periods = [];
-      for (const [period, start] of [["day", day], ["month", month]]) {
-        const u = await c.query("UPDATE fcpi_retrieval.budget_usage SET settled = settled + $4 WHERE category = $1 AND period = $2 AND period_start = $3", [category, period, start, amount]);
-        if (u.rowCount) periods.push(period);
+      for (const [period, start] of [["day", day], ["month", month]].filter(([p]) => capped.includes(p))) {
+        await c.query("INSERT INTO fcpi_retrieval.budget_usage (category, period, period_start) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING", [category, period, start]);
+        await c.query("UPDATE fcpi_retrieval.budget_usage SET settled = settled + $4 WHERE category = $1 AND period = $2 AND period_start = $3", [category, period, start, amount]);
+        periods.push(period);
       }
       if (paidTotal) {
         await c.query("INSERT INTO fcpi_retrieval.budget_usage (category, period, period_start) VALUES ('_paid_total', 'day', $1) ON CONFLICT DO NOTHING", [day]);

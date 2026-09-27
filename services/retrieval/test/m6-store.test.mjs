@@ -117,7 +117,7 @@ test("reconciliation: an adjustment settles past the cap, uncertain rows settle 
     await store.markBudgetUncertain(b.reservation.id, "broke", { bytes: 50000 });
     const d = await store.proxyDay("fixture-proxy", day);
     assert.deepEqual([d.settledBytes, d.uncertainBytes, d.uncertain], [100000, 50000, 1]);
-    await store.recordAdjustment({ id: randomUUID(), callKey: `reconcile:fixture-proxy:${day}:x`, category: "fixture_proxy", provider: "fixture-proxy", subject: "fcpi-fixture-proxy",
+    await store.recordAdjustment({ id: randomUUID(), callKey: `reconcile:fixture-proxy:${day}:x`, category: "fixture_proxy", periods: ["day"], provider: "fixture-proxy", subject: "fcpi-fixture-proxy",
       rateCard: "fixture/fcpi-fixture-proxy@2026-09-26", amount: 90000, day, paidTotal: false, usage: { reportedBytes: 1, measuredBytes: 0 } });
     const n = await store.settleUncertainProxy("fixture-proxy", day, (bytes) => Math.ceil(bytes * 4000000 / 1e9));
     assert.equal(n, 1);
@@ -156,4 +156,15 @@ test("reconciling a day twice charges its difference once; a later report charge
     await store.reserveBudget({ ...base, id: randomUUID(), callKey: "proxy:b", logicalId: "b", amount: 40000 });
     await assert.rejects(reconcileDay(args), (e) => e.failureClass === "RECONCILE_IN_FLIGHT");
   } finally { await fx.close(); await store.close(); }
+});
+
+test("an adjustment on a day nothing was reserved creates its usage rows, so the caps see the charge (review W8)", opts, async () => {
+  const store = await fresh();
+  try {
+    const day = "2026-09-01";
+    await store.recordAdjustment({ id: randomUUID(), callKey: `reconcile:decodo:${day}:w8`, category: "proxy", periods: ["day", "month"], provider: "decodo", subject: "decodo-residential",
+      rateCard: "decodo/residential-payg@2026-09-26", amount: 12345, day, paidTotal: true, usage: { bytes: 3086250, reportedBytes: 3086250, measuredBytes: 0 } });
+    const rows = await sql("SELECT category, period, settled::int FROM fcpi_retrieval.budget_usage ORDER BY category, period");
+    assert.deepEqual(rows.map((r) => `${r.category}/${r.period}=${r.settled}`), ["_paid_total/day=12345", "proxy/day=12345", "proxy/month=12345"]);
+  } finally { await store.close(); }
 });

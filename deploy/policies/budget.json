@@ -19,9 +19,9 @@
     "llamaparse": { "kind": "parser", "baseUrl": "https://api.cloud.llamaindex.ai", "credential": "llamaparse_api_key", "paid": true },
     "fixture-parser": { "kind": "parser", "baseUrl": "http://parser.fixture.fcpi.test:8080", "credential": null, "paid": false },
     "decodo": { "kind": "proxy", "baseUrl": "http://gate.decodo.com:7000", "credential": "decodo_proxy", "paid": true, "session": "decodo",
-      "usageUrl": "https://api.decodo.com/api/v2/statistics/traffic", "usageCredential": "decodo_api_key" },
+      "usageUrl": "https://api.decodo.com/api/v2/statistics/traffic", "usageCredential": "decodo_api_key", "usageDedicated": false },
     "fixture-proxy": { "kind": "proxy", "baseUrl": "http://proxy.fixture.fcpi.test:8081", "credential": "fixture_proxy", "paid": false, "session": "decodo",
-      "usageUrl": "http://proxy.fixture.fcpi.test:8081/__usage", "usageCredential": null }
+      "usageUrl": "http://proxy.fixture.fcpi.test:8081/__usage", "usageCredential": null, "usageDedicated": true }
   },
   "models": {
     "gpt-4.1-mini-2025-04-14": { "provider": "openai", "category": "llm" },
