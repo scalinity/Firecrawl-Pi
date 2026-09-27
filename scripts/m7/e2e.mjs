@@ -314,19 +314,23 @@ async function fixturePhase(before) {
   await cc("other_principal_miss", u, { maxAge: 600000 }, "m7other");
   await cc("other_options_miss", u, { maxAge: 600000, formats: ["html"] });
   await cc("max_age_zero_miss", u, {});
+  // A plain scrape, asking nothing of the cache, stores nothing (review S3): a later read of it misses.
+  await cc("plain_first", cacheAt(`/cached?p=${nonce}`), {});
+  await sleep(1500);
+  await cc("plain_not_kept", cacheAt(`/cached?p=${nonce}`), { maxAge: 600000 });
   await cc("store_false_first", cacheAt(`/cached?s=${nonce}`), { storeInCache: false });
   await cc("store_false_not_kept", cacheAt(`/cached?s=${nonce}`), { maxAge: 600000 });
-  await cc("error_500_first", cacheAt(`/err500?c=${nonce}`), {});
+  await cc("error_500_first", cacheAt(`/err500?c=${nonce}`), { storeInCache: true });
   await sleep(1500);
   await cc("error_500_not_kept", cacheAt(`/err500?c=${nonce}`), { maxAge: 600000 });
-  await cc("error_404_first", cacheAt(`/err404?c=${nonce}`), {});
+  await cc("error_404_first", cacheAt(`/err404?c=${nonce}`), { storeInCache: true });
   await sleep(1500);
   await cc("error_404_not_kept", cacheAt(`/err404?c=${nonce}`), { maxAge: 600000 });
   sql("UPDATE fcpi_platform.page_cache SET expires_at = now() - interval '1 second' WHERE principal = 'm7'");
   await cc("expired_miss", u, { maxAge: 600000 });
   // A cached enhanced answer costs nothing again.
   const eu = cacheAt(`/cached?enh=${nonce}`), led0 = enhancedLedger(since).length;
-  await cc("enhanced_first", eu, { proxy: "enhanced" });
+  await cc("enhanced_first", eu, { proxy: "enhanced", storeInCache: true });
   await sleep(1500);
   await cc("enhanced_hit", eu, { proxy: "enhanced", maxAge: 600000 });
   out("cache", { case: "enhanced_ledger", rows_before: led0, rows_after: enhancedLedger(since).length });

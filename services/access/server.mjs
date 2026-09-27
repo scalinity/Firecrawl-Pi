@@ -379,8 +379,10 @@ async function sync(ctx, route) {
 
 // M7: the scrape cache (spec §21.3, AC21). A cached answer is served only to the principal that stored it, only for the
 // same request (its hash without the cache options), and only when younger than the maxAge the caller gives (0, the
-// default, never reads). A successful answer whose page answered 2xx is stored for limits.cache.lifetimeSeconds unless
-// storeInCache is false; an error page, a failure or an answer past the archive's size is never stored. A hit reaches
+// default, never reads). A successful answer whose page answered 2xx is stored for limits.cache.lifetimeSeconds when the
+// caller asks for the cache (storeInCache true, or a maxAge, unless storeInCache is false): a plain scrape writes nothing
+// to the Pi's storage that nothing would read (review S3). An error page, a failure or an answer past the archive's size
+// is never stored. A hit reaches
 // neither the core nor any provider, so it costs no attempt and no money. The answer is stored already marked as the hit
 // it will be (metadata.cacheState "hit", cachedAt), so a hit sends the stored bytes as they are, one buffer, within the
 // synchronous admission limit (review W9).
@@ -406,7 +408,7 @@ async function cachedScrape(ctx, route, body) {
     }
   }
   ctx.extra = { cache: "miss" };
-  const keep = body.storeInCache === false ? null : { maxBytes: L.results.archiveResponseMaxBytes, onComplete: async (status, buf) => {
+  const keep = !(body.storeInCache === true || (maxAge > 0 && body.storeInCache !== false)) ? null : { maxBytes: L.results.archiveResponseMaxBytes, onComplete: async (status, buf) => {
     if (status !== 200 || !buf) return;
     let j = null;
     try { j = JSON.parse(buf.toString("utf8")); } catch { return; }

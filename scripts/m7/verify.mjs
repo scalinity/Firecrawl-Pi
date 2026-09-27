@@ -439,13 +439,13 @@ const checks = {
 
   // ================================================================ cache and changes (AC21)
   C01: { name: "cache-scope-freshness-expiry-and-billing", inputs: [`${RAW}e2e-fixture.txt`],
-    expected: "a successful 2xx scrape is stored and the same principal's same request within maxAge is a hit (cacheState hit, no attempt, no target request); another principal, other options, maxAge 0, a request stored with storeInCache false, a 500 page, a 404 page and an expired entry are each a miss that reaches the target; a cached enhanced answer is served again with no provider request and no new ledger row",
+    expected: "a successful 2xx scrape is stored and the same principal's same request within maxAge is a hit (cacheState hit, no attempt, no target request); another principal, other options, maxAge 0, a plain scrape that asked nothing of the cache, a request with storeInCache false, a 500 page, a 404 page and an expired entry are each a miss that reaches the target; a cached enhanced answer is served again with no provider request and no new ledger row",
     run() {
       const c = FX().cache ?? [], k = (n) => one(c, n);
       const miss = (r) => ok200(r) && r.cache === "miss" && r.hits >= 1;
       const cond = { stored_then_hit: miss(k("first_miss_stored")) && ok200(k("hit")) && k("hit").cache === "hit" && k("hit").cacheState === "hit" && k("hit").hits === 0 && k("hit").acquisitions === 0,
         scope: miss(k("other_principal_miss")) && miss(k("other_options_miss")) && miss(k("max_age_zero_miss")),
-        not_stored: miss(k("store_false_first")) && miss(k("store_false_not_kept")),
+        not_stored: miss(k("store_false_first")) && miss(k("store_false_not_kept")) && miss(k("plain_first")) && miss(k("plain_not_kept")),
         errors_not_cached: k("error_500_first")?.statusCode === 500 && miss(k("error_500_not_kept")) && k("error_404_first")?.statusCode === 404 && miss(k("error_404_not_kept")),
         expiry: miss(k("expired_miss")),
         billing: ok200(k("enhanced_first")) && k("enhanced_first").calls === 1 && ok200(k("enhanced_hit")) && k("enhanced_hit").cache === "hit" && k("enhanced_hit").calls === 0 && k("enhanced_hit").hits === 0

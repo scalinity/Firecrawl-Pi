@@ -954,7 +954,7 @@ test("a ledger schema this build was not written for stops startup; an unreachab
 });
 
 // ---- M7: the scrape cache -----------------------------------------------------------------------------------
-test("M7: a 2xx answer is stored marked as the hit it will be and sent back as stored; error pages and storeInCache false store nothing", async () => {
+test("M7: a 2xx answer is stored marked as the hit it will be and sent back as stored; error pages, storeInCache false and a plain scrape store nothing", async () => {
   const scrapes = () => H.core.requests.filter((r) => r.method === "POST" && r.url === "/v2/scrape").length;
   const cached = async () => Number((await H.db.query("SELECT count(*) AS n FROM fcpi_platform.page_cache")).rows[0].n);
   const settle = async (n) => { for (let i = 0; i < 40 && (await cached()) < n; i++) await sleep(50); };
@@ -975,13 +975,19 @@ test("M7: a 2xx answer is stored marked as the hit it will be and sent back as s
   await settle(c0 + 2);
   // Not stored: a 404 page, a 500 page, storeInCache false.
   const c1 = await cached();
-  for (const [u, extra] of [[`https://cache.example/p?st=404&n=${randomUUID()}`, {}], [`https://cache.example/p?st=500&n=${randomUUID()}`, {}], [`https://cache.example/p?st=200&n=${randomUUID()}`, { storeInCache: false }]]) {
-    const r = await H.call("POST", "/v2/scrape", { token: T.a, body: { url: u, maxAge: 600000, ...extra } });
+  for (const [u, extra] of [[`https://cache.example/p?st=404&n=${randomUUID()}`, { maxAge: 600000 }], [`https://cache.example/p?st=500&n=${randomUUID()}`, { storeInCache: true }], [`https://cache.example/p?st=200&n=${randomUUID()}`, { maxAge: 600000, storeInCache: false }],
+    [`https://cache.example/p?st=200&n=${randomUUID()}`, {}]]) {
+    const r = await H.call("POST", "/v2/scrape", { token: T.a, body: { url: u, ...extra } });
     assert.equal(r.status, 200);
     await sleep(300);
-    assert.equal((await H.call("POST", "/v2/scrape", { token: T.a, body: { url: u, maxAge: 600000, ...extra } })).headers["x-fcpi-cache"], "miss", u);
+    assert.equal((await H.call("POST", "/v2/scrape", { token: T.a, body: { url: u, ...extra, maxAge: 600000 } })).headers["x-fcpi-cache"], "miss", u);
   }
   assert.equal(await cached(), c1);
+  // Asked for with storeInCache alone, a 2xx answer is stored (review S3: a plain scrape, the last case above, is not).
+  const kept = `https://cache.example/p?st=200&n=${randomUUID()}`;
+  await H.call("POST", "/v2/scrape", { token: T.a, body: { url: kept, storeInCache: true } });
+  await settle(c1 + 1);
+  assert.equal((await H.call("POST", "/v2/scrape", { token: T.a, body: { url: kept, maxAge: 600000 } })).headers["x-fcpi-cache"], "hit");
 });
 
 test("configuration that is unknown, unsafe or missing its data mount stops startup", async () => {
