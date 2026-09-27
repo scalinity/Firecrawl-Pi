@@ -132,10 +132,11 @@ export function makeTarget(state, { isProxied = () => false } = {}) {
       case "/doc-challenge": return html(403, CHALLENGE);
       // Screenshots: three horizontal bands 1000 px tall each (red, green, blue), 1280 px wide.
       case "/bands": return html(200, `<!doctype html><html><head><meta charset="utf-8"><title>Bands</title><style>html,body{margin:0;padding:0}div{width:1280px;height:1000px}</style></head><body><div style="background:#ff0000"></div><div style="background:#00ff00"></div><div style="background:#0000ff"></div><p style="margin:0;height:0;overflow:hidden">${"Band fixture text. ".repeat(20)}</p></body></html>`);
-      // Incompressible pixels (review W10): a page 1,800 px tall of random noise, so its captures are near the worker's
-      // capture limit and the gateway's memory is measured at the extras bound, not at a gradient's few kilobytes.
-      case "/noise": return html(200, `<!doctype html><html><head><meta charset="utf-8"><title>Noise</title><style>html,body{margin:0}canvas{display:block}</style></head><body><canvas id="n" width="1280" height="1800"></canvas><p>${"Noise fixture text. ".repeat(20)}</p>
-<script>const c=document.getElementById("n").getContext("2d"),img=c.createImageData(1280,1800),d=img.data;for(let o=0;o<d.length;o+=65536)crypto.getRandomValues(d.subarray(o,Math.min(o+65536,d.length)));for(let i=3;i<d.length;i+=4)d[i]=255;c.putImageData(img,0,0);</script></body></html>`);
+      // Incompressible pixels (review W10): random noise h px tall (default 1,800; 100 to 6,000), about 3.84 kB of PNG per
+      // row, so a capture's size is chosen by its height and the memory of every hop is measured at the extras bound.
+      case "/noise": { const h = Math.min(6000, Math.max(100, Number(url.searchParams.get("h")) || 1800));
+        return html(200, `<!doctype html><html><head><meta charset="utf-8"><title>Noise</title><style>html,body{margin:0}canvas{display:block}</style></head><body><canvas id="n" width="1280" height="${h}"></canvas><p>${"Noise fixture text. ".repeat(20)}</p>
+<script>const c=document.getElementById("n").getContext("2d"),img=c.createImageData(1280,${h}),d=img.data;for(let o=0;o<d.length;o+=65536)crypto.getRandomValues(d.subarray(o,Math.min(o+65536,d.length)));for(let i=3;i<d.length;i+=4)d[i]=255;c.putImageData(img,0,0);</script></body></html>`); }
       // A page 25,000 px tall: a full-page capture stops at 20,000 px and says so.
       case "/tall": return html(200, `<!doctype html><html><head><meta charset="utf-8"><title>Tall</title><style>html,body{margin:0}</style></head><body><div style="width:1280px;height:25000px;background:linear-gradient(#ffffff,#000000)"><p>${"Tall fixture text. ".repeat(30)}</p></div></body></html>`);
       // Actions: a button that reveals a section, an element that appears after 1.5 s, and content added on scroll.
