@@ -122,3 +122,33 @@ test("F11: the real search leg sends a residential-routed engine through the pro
     assert.equal(none.store.ledger.rows.size, 0);
   } finally { await fx.close(); }
 });
+
+test("a residential browser tunnel the provider breaks after it was up ends the request, and leaves the attempt's charge UNCERTAIN, still counted (review W12)", async () => {
+  const fx = await startFixture();
+  try {
+    const { residential, store } = rig(fx);
+    const st = residential.state();
+    const { reservation } = await residential.reserve(st, { callKey: "proxy:broken-1", logicalId: "broken-1", bytes: 1_000_000 });
+    const meter = new Meter(1_000_000);
+    fx.state.mode = "reset";
+    await withProxy(fx, async ({ port, sessions }) => {
+      const upstream = residential.leg(st, { meter, sessionId: "brokensession1", deadline: Date.now() + 10000 });
+      const cred = sessions.open("a3", { expiresAt: Date.now() + 20000, maxBytes: meter.cap, fixture: true, upstream });
+      // The first answer bytes cross, then the provider resets the tunnel: the browser's answer is cut by a reset, never
+      // ended as though whole and never left hanging.
+      const r = await new Promise((resolve) => {
+        http.request({ host: "127.0.0.1", port, path: `http://m6.fixture.fcpi.test:${fx.targetPort}/big`, headers: { "proxy-authorization": auth(cred) }, agent: false }, (res) => {
+          res.on("data", () => {}); res.on("end", () => resolve({ ended: true, status: res.statusCode })); res.on("error", (e) => resolve({ error: e.code }));
+        }).on("error", (e) => resolve({ error: e.code })).end();
+      });
+      assert.equal(r.error, "ECONNRESET", `the broken tunnel's answer was not cut: ${JSON.stringify(r)}`);
+      sessions.close("a3");
+    });
+    assert.equal(meter.errored, true, "the break is recorded on the attempt's meter");
+    assert.ok(meter.bytes > 0 && meter.tunnels === 1);
+    const s = await residential.settle(st, reservation, meter, "broken tunnel test");
+    assert.equal(s.state, "UNCERTAIN");
+    assert.equal(store.ledger.rows.get("proxy:broken-1").state, "UNCERTAIN", "the whole reservation stays counted until the provider's report reconciles it");
+    assert.equal(residential.breakerState(st.providerName), "closed", "a tunnel broken after it was up is not a provider outage on its own");
+  } finally { await fx.close(); }
+});

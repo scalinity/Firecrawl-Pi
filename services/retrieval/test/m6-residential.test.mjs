@@ -470,3 +470,35 @@ test("a usage report not declared to cover this deployment alone is not reconcil
     assert.throws(() => m6Budget(fx, (b) => { delete b.providers["fixture-proxy"].usageDedicated; }), /usageDedicated/);
   } finally { await fx.close(); }
 });
+
+test("Decodo's usage report: the day asked for with the API key, bytes read from metadata.total_rx_tx; a refused key, a missing total and an absent key are typed failures (review W12)", async () => {
+  const { providerDayBytes } = await import("../src/reconcile.mjs");
+  const { serve, policyFor } = await import("./acquire-helpers.mjs");
+  const { providersDir } = await import("./m5-helpers.mjs");
+  let answer = () => [200, { metadata: { total_rx_tx: 123456789 } }];
+  const seen = [];
+  const api = await serve((q, res) => {
+    let b = ""; q.on("data", (c) => (b += c)); q.on("end", () => {
+      seen.push({ method: q.method, path: q.url, auth: q.headers.authorization, body: b ? JSON.parse(b) : null });
+      const [status, json] = answer(); res.writeHead(status, { "content-type": "application/json" }).end(JSON.stringify(json));
+    });
+  });
+  try {
+    const provider = { usageUrl: `http://usage.fixture.fcpi.test:${api.port}/api/v2/statistics/traffic`, usageCredential: "decodo_api" };
+    const policy = policyFor([["usage.fixture.fcpi.test", api.port, "fixture"]]);
+    const call = (dir) => providerDayBytes({ provider, providersDir: dir, day: "2026-09-25", getPolicy: () => policy, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"] });
+    const dir = providersDir({ decodo_api: "decodo-api-key-for-tests" });
+    assert.equal(await call(dir), 123456789);
+    assert.deepEqual(seen[0], { method: "POST", path: "/api/v2/statistics/traffic", auth: "decodo-api-key-for-tests",
+      body: { proxyType: "residential_proxies", startDate: "2026-09-25 00:00:00", endDate: "2026-09-25 23:59:59", groupBy: "day", limit: 500, page: 1, sortBy: "grouping_key", sortOrder: "asc" } });
+    answer = () => [401, { error: "unauthorized" }];
+    await assert.rejects(call(dir), (e) => e.code === "PROVIDER_AUTH_FAILED" && e.sent === true);
+    answer = () => [200, { metadata: {} }];
+    await assert.rejects(call(dir), (e) => e.code === "PROVIDER_ERROR" && /total_rx_tx/.test(e.message));
+    answer = () => [200, { metadata: { total_rx_tx: -5 } }];
+    await assert.rejects(call(dir), (e) => e.code === "PROVIDER_ERROR");
+    const n = seen.length;
+    await assert.rejects(call(providersDir({})), (e) => e.code === "BLOCKED_CREDENTIAL" && e.sent === false);
+    assert.equal(seen.length, n, "nothing is sent without the key");
+  } finally { api.s.close(); }
+});
