@@ -405,3 +405,40 @@ test("only the provider's own failures count on its breaker: an exit's 502 and a
     assert.equal(residential.breakerState("fixture-proxy"), "closed");
   } finally { await fx.close(); }
 });
+
+test("a challenge met after a redirect is learned under the domain that served it, not the one the request started at (review W6)", async () => {
+  const fx = await startFixture();
+  try {
+    const { acquire, store } = rig(fx);
+    const to = encodeURIComponent(`${base(fx, "m6learn.fixture.fcpi.test")}/challenge`);
+    for (let i = 0; i < 2; i++) await acquire(req(`${base(fx, "m6hard.fixture.fcpi.test")}/go?to=${to}&i=${i}`, { route: "basic" }));
+    assert.equal(store.routes.get("m6learn.fixture.fcpi.test")?.preferred, "residential");
+    assert.equal(store.routes.get("m6hard.fixture.fcpi.test")?.preferred ?? null, null);
+  } finally { await fx.close(); }
+});
+
+test("a direct browser attempt at the direct cap moves to the residential browser, as the HTTP step does (review S17)", async () => {
+  const fx = await startFixture();
+  try {
+    const http = await import("node:http");
+    const { pinnedLookup } = await import("../src/resolve.mjs");
+    const browser = { render: async ({ url, upstream }) => {
+      const u = new URL(url);
+      const body = await new Promise((resolve, reject) => {
+        const go = (socket) => http.request({ host: u.hostname, port: u.port, path: u.pathname, ...(socket ? { createConnection: () => socket } : { agent: false, lookup: pinnedLookup("127.0.0.1") }) },
+          (res) => { let b = ""; res.on("data", (c) => (b += c)); res.on("end", () => resolve(b)); }).on("error", reject).end();
+        if (upstream) upstream.open(u.hostname, Number(u.port)).then(go, reject); else go(null);
+      });
+      const inner = /atob\("([^"]+)"\)/.exec(body);
+      return { ok: true, status: 200, html: `<html><body>${inner ? Buffer.from(inner[1], "base64").toString() : body}</body></html>`, finalUrl: url, contentType: "text/html", subresources: { requests: 0, overLimit: 0 }, proxy: { requests: 1, bytes: 1, capped: false, denied: [] } };
+    } };
+    const direct = { perDomainInFlight: 1, minNavigationGapMs: 0, perDomainPerHour: 1, platformPerDay: 200 };
+    const { acquire, store } = rig(fx, { browser, policy: m6Policy(fx, { direct }) });
+    store.routes.set("m6pace.fixture.fcpi.test", { preferred: null, challenges: 0, js_count: 0, prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
+    store.navs.push({ domain: "m6pace.fixture.fcpi.test", fixture: true, at: new Date(), tier: "direct" });
+    const r = await acquire(req(`${base(fx, "m6pace.fixture.fcpi.test")}/js-subres`));
+    assert.equal(r.ok, true, JSON.stringify(r.failure));
+    assert.deepEqual(r.strategies, ["residential_browser"]);
+    assert.deepEqual(r.route.escalations, ["learned_js", "direct_cap:domain_hour"]);
+  } finally { await fx.close(); }
+});

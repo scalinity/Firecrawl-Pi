@@ -209,8 +209,22 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const st = await residential.availability();
         if (!st.available) return fail(proxyRequired(st, `this acquisition (${start.reason})`));
       }
-      const learn = (obs, outcome) => store.learnRoute(domain, obs, policy.routing, outcome)
-        .catch((e) => log({ event: "route_learn_failed", domain_hash: urlHmac(domain), error: e.code ?? e.message }));
+      // Observations are learned under the domain that answered, after any redirect, as the 429 cooldown is (review W6);
+      // the probe after an expired preference is the requested domain's, so it counts only when that domain answered.
+      const learn = (d, obs, outcome) => store.learnRoute(d, obs, policy.routing, outcome)
+        .catch((e) => log({ event: "route_learn_failed", domain_hash: urlHmac(d), error: e.code ?? e.message }));
+      const answering = (url) => { try { return domainOf(parseTarget(url, policy)); } catch { return domain; } };
+      // The direct limits are spent: an auto request moves this same attempt to the residential route, or stops; the
+      // home connection is never used past them (spec §10.2). One helper for the HTTP and browser steps (review S1, S17).
+      async function escalateAtCap(attemptId, mode, cap, legDeadline) {
+        const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: `past the direct limits (${cap.directCap}), this acquisition`, deadline: legDeadline, signal });
+        if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { failure: o.failure }; }
+        const leg = track(o.leg);
+        await store.setAttemptStrategy(attemptId, `residential_${mode}`);
+        result.strategies[result.strategies.length - 1] = result.strategy = `residential_${mode}`;
+        result.route.escalations.push(`direct_cap:${cap.directCap}`);
+        return { leg };
+      }
       const jar = new CookieJar();
       const page = req.purpose === "page" && req.expect === "html" && !req.fast;
       const retried = { direct: false, residential: false };
@@ -233,15 +247,10 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         let leg = null, paced;
         if (tier === "direct") {
           paced = await pace(target, attemptId, deadline, signal, "direct");
-          // The direct limits are spent: an "auto" request moves this same attempt to the residential route, or
-          // stops; the home connection is never used past them (spec §10.2).
           if (paced.failure?.directCap && req.route === "auto") {
-            const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: `past the direct limits (${paced.failure.directCap}), this acquisition`, deadline, signal });
-            if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
-            leg = track(o.leg); tier = "residential";
-            await store.setAttemptStrategy(attemptId, "residential_http");
-            result.strategies[result.strategies.length - 1] = result.strategy = "residential_http";
-            result.route.escalations.push(`direct_cap:${paced.failure.directCap}`);
+            const e = await escalateAtCap(attemptId, "http", paced.failure, deadline);
+            if (e.failure) return { fail: e.failure };
+            leg = e.leg; tier = "residential";
             paced = await pace(target, attemptId, deadline, signal, "residential");
           }
         } else {
@@ -287,14 +296,17 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         // The cooldown belongs to the host that answered 429, wherever the chain began, and holds on every route:
         // a rate limit is respected, never rotated around (spec §9.2).
         if (verdict.verdict === "rate_limited") await store.coolDown(domainOf(parseTarget(httpRes.finalUrl, policy)), verdict.failure.retryAfter);
+        const answered = answering(httpRes.finalUrl), probed = probe && tier === "direct" && answered === domain;
         if (verdict.verdict === "challenge") {
-          await learn({ tier, mode: "http", outcome: "challenge", probe: probe && tier === "direct" }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
+          await learn(answered, { tier, mode: "http", outcome: "challenge", probe: probed }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
           if (tier === "direct" && req.route === "auto") return { escalate: true, mode: "http", from: "direct_http", detail: "the target served a bot interstitial to the direct route", tier };
           return { fail: { ...verdict.failure, detail: tier === "residential" ? "the target served a bot interstitial on the residential route; enhanced retrieval is not available (M7)" : "the target served a bot interstitial, and a local-only (basic) request does not escalate" }, tier };
         }
-        if (verdict.failure) { await learn(null, { success: false, failureClass: verdict.failure.class }); return { fail: verdict.failure, tier }; }
+        if (verdict.failure) { await learn(answered, null, { success: false, failureClass: verdict.failure.class }); return { fail: verdict.failure, tier }; }
         if (verdict.verdict !== "js_shell" || !page) {
-          if (verdict.verdict !== "not_found" && verdict.verdict !== "target_error") await learn({ tier, mode: "http", outcome: "adequate", probe: probe && tier === "direct" }, { success: true });
+          // A script shell returned unrendered (fast mode, a non-page purpose) still needed a browser: it teaches nothing
+          // that would undo the browser learning (review S15).
+          if (!["not_found", "target_error", "js_shell"].includes(verdict.verdict)) await learn(answered, { tier, mode: "http", outcome: "adequate", probe: probed }, { success: true });
           return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: httpRes.body.toString("base64") }) }) };
         }
         return { browser: true, renderUrl: httpRes.finalUrl, tier };
@@ -323,6 +335,12 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           }
           // Paced inside the try, so a database error while pacing still frees the browser permit.
           paced = await pace(renderTarget, attemptId, browserDeadline, signal, tier);
+          if (paced.failure?.directCap && req.route === "auto" && tier === "direct") {
+            const e = await escalateAtCap(attemptId, "browser", paced.failure, browserDeadline);
+            if (e.failure) return { fail: e.failure };
+            leg = e.leg; tier = "residential";
+            paced = await pace(renderTarget, attemptId, browserDeadline, signal, "residential");
+          }
           if (paced.failure) {
             if (leg) await settle(leg, `not sent: ${paced.failure.class}`);
             await store.finishAttempt(attemptId, { outcome: paced.failure.class });
@@ -357,17 +375,18 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null));
           await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: s?.bytes ?? r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
           if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }
+          const answered = answering(finalUrl), probed = probe && tier === "direct" && answered === domain;
           if (verdict?.verdict === "challenge") {
-            await learn({ tier, mode: "browser", outcome: "challenge", probe: probe && tier === "direct" }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
+            await learn(answered, { tier, mode: "browser", outcome: "challenge", probe: probed }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
             if (tier === "direct" && req.route === "auto") return { escalate: true, mode: "browser", from: "direct_browser", detail: "the rendered page was a bot interstitial on the direct route", renderUrl };
             return { fail: { ...verdict.failure, detail: tier === "residential" ? "the rendered page was a bot interstitial on the residential route; enhanced retrieval is not available (M7)" : "the rendered page was a bot interstitial, and a local-only (basic) request does not escalate" } };
           }
           if (failure) {
-            if (!failure.provider && verdict?.failure) await learn(null, { success: false, failureClass: failure.class });
+            if (!failure.provider && verdict?.failure) await learn(answered, null, { success: false, failureClass: failure.class });
             return { fail: failure };
           }
-          await learn({ tier, mode: "browser", outcome: "adequate", probe: probe && tier === "direct" }, { success: true });
-          if (shellTier === tier) await learn({ tier, mode: "browser", outcome: "js_rendered" });
+          await learn(answered, { tier, mode: "browser", outcome: "adequate", probe: probed }, { success: true });
+          if (shellTier === tier) await learn(answered, { tier, mode: "browser", outcome: "js_rendered" });
           return { done: finish({ ok: true, body: r.html, finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
             bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
             subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [] }) };

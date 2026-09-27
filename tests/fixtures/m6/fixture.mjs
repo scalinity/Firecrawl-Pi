@@ -104,6 +104,8 @@ export function makeTarget(state) {
       return res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ results: [{ url: `https://example.org/residential-engine/${encodeURIComponent(q)}`, title: `Residential engine result (${via})`, content: `answered ${via}` }] }));
     }
     switch (path) {
+      // A redirect to another fixture name, for learning under the domain that answered.
+      case "/go": { const to = new URL(req.url, "http://x").searchParams.get("to") ?? ""; return /^http:\/\/[a-z0-9]+\.fixture\.fcpi\.test:\d+\//.test(to) ? res.writeHead(302, { location: to }).end() : html(400, page("Bad redirect", "<p>to must be a fixture URL</p>")); }
       case "/echo": return res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ via, host }));
       case "/echo.html": return html(200, ARTICLE(`by the ${via} route`));
       case "/static": return html(200, ARTICLE(via === "proxy" ? "through the proxy" : "directly"));
