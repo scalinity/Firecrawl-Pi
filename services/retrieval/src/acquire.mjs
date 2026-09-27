@@ -47,6 +47,7 @@ const NO_ENHANCED = Object.freeze({ state: () => ({ available: false, reason: "N
 // success that carries one all the same.
 const RETRY_STATUSES = new Set([401, 403, 429]);
 const RETRYABLE_ROUTE = new Set(["PROVIDER_UNAVAILABLE", "BUDGET_EXHAUSTED"]);
+export const RESIDENTIAL_SKIPPABLE = new Set(["NO_PROXY_SELECTED", "BLOCKED_CREDENTIAL", "PAID_DISPATCH_DISABLED", "PROVIDER_UNAVAILABLE"]);
 export const proxyRequired = (st, why) => ({ class: "PROXY_REQUIRED", detail: `${why} needs the residential route, which is unavailable (${st.reason})`,
   retryable: RETRYABLE_ROUTE.has(st.reason), retryAfter: st.retryAfter ?? null, route: { residential: st.reason } });
 
@@ -553,6 +554,9 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
               tier = "residential"; mode = s.mode; renderUrl = s.renderUrl ?? renderUrl;
               continue;
             }
+            // Only a residential stage that is not configured, switched off or out of service is skipped. A spend limit or
+            // an unknown price ends the page: no implicit higher-cost fallback (spec §9.2, §9.3).
+            if (!RESIDENTIAL_SKIPPABLE.has(st.reason)) return fail(proxyRequired(st, `this acquisition (${s.detail})`));
             routeState.residential = st.reason;
           }
           const why = hooks ? "a page with screenshots or actions is not sent to the enhanced provider" : null;

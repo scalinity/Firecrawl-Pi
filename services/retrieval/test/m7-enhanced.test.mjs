@@ -235,6 +235,24 @@ test("the full waterfall: direct, residential, then the one enhanced dispatch, w
   } finally { await Promise.all([fx.close(), m6.close()]); }
 });
 
+test("a residential route refused by its spend limit ends the page: the enhanced provider is not the fallback for a spent budget", async () => {
+  const fx = await startM7();
+  const m6 = await startM6();
+  m6.state.portOverride = fx.targetPort;
+  try {
+    const { acquire, store } = rig(fx, { m6, proxy: "fcpi-fixture-proxy", mutate: (b) => { b.categories.fixture_proxy.caps.day = 0; } });
+    const r = await acquire(req(at(fx, "/tough")));
+    assert.equal(r.failure.class, "PROXY_REQUIRED");
+    assert.match(r.failure.detail, /BUDGET_EXHAUSTED/);
+    assert.deepEqual(r.strategies, ["direct_http"]);
+    assert.equal(rows(store).length, 0, "no enhanced reservation");
+    assert.equal(fx.state.calls.length, 0, "nothing sent to the enhanced provider");
+    // Control: the same page with no residential route selected skips that stage and gets its one dispatch.
+    const skip = await rig(fx).acquire(req(at(fx, "/tough")));
+    assert.deepEqual(skip.strategies, ["direct_http", "enhanced"]);
+  } finally { await Promise.all([fx.close(), m6.close()]); }
+});
+
 test("the page's attempts are shared: a page whose earlier attempts spent the budget gets no enhanced dispatch", async () => {
   const fx = await startM7();
   try {
