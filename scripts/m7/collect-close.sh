@@ -22,4 +22,7 @@ R=$root/evidence/M7/raw
 since=$(sed -n 2p "$root/evidence/M7/snapshot-before.txt")
 [[ $since =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:]{8}Z$ ]] || { echo "no BEFORE snapshot time" >&2; exit 1; }
 "${SSH[@]}" "bash -s -- $since" <"$root/scripts/m4/pi-owner-session.sh" >"$R/owner-session.txt"
-echo "collected: suites, stack, core logs, egress probe, rendered compose, ruleset, AFTER snapshot, owner session"
+# Every reboot since the BEFORE snapshot, from the journal, so X04 can tie a changed boot ID (none: the current boot alone).
+before_boot=$(sed -n 's/^boot_id_sha256=//p' "$root/evidence/M7/snapshot-before.txt")
+"${SSH[@]}" "bash -s -- $before_boot" <"$root/scripts/m7/pi-reboot-record.sh" >"$R/reboot.txt"
+echo "collected: suites, stack, core logs, egress probe, rendered compose, ruleset, AFTER snapshot, owner session, reboots"

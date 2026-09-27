@@ -163,24 +163,31 @@ function attribute(sec, line, ids, owner = null) {
   return null;
 }
 
-// A reboot during the window (raw/reboot.txt, M4's recorder; raw/reboot-cause.txt names its cause, as M5's did
-// for the host's own Wi-Fi watchdog): the record must tie BEFORE's boot to the journal's previous boot and
-// AFTER's to the current one. Only then does a line the reboot itself changed count as attributed, each by
+// Reboots between the snapshots (raw/reboot.txt, scripts/m7/pi-reboot-record.sh, M4's recorder for a chain of boots):
+// the record must hold every boot from BEFORE's to AFTER's, AFTER's the current one, and each boot that ended must
+// have ended in an orderly shutdown the host's own Wi-Fi watchdog started after a Wi-Fi loss, with no local action
+// after the loss and no undervoltage. Only then does a line the reboots changed count as attributed, each by
 // what changed, as M4's X04 counts them: a module in both snapshots whose size differs, a mount whose target,
 // source and type are the same with only its options changed, a service's ephemeral UDP port chosen again at
 // its start, and a unit no longer running that neither snapshot lists as enabled.
 function rebootTie(bootB, bootA) {
   if (!has(`${RAW}reboot.txt`) || !bootB || !bootA || bootB === bootA) return null;
   const s = S(`${RAW}reboot.txt`);
-  const boots = Object.fromEntries((s.boots ?? []).map((l) => kv(l.split(" "))).map((b) => [b.idx, b]));
+  const boots = (s.boots ?? []).map((l) => kv(l.split(" "))).sort((a, b) => +a.idx - +b.idx);
   const cur = kv(((s.current ?? [])[0] ?? "").split(" "));
-  const tied = boots["-1"]?.boot_id_sha256 === bootB && boots["0"]?.boot_id_sha256 === bootA && cur.boot_id_sha256 === bootA;
-  return tied ? { kernel: cur.kernel, ended: boots["-1"].last } : null;
+  const ended = boots.slice(0, -1).map((b) => ({ b, e: kv(((s[`ended_${b.idx.replace("-", "")}`] ?? [])[0] ?? "").split(" ")) }));
+  const orderly = ended.every(({ e }) => +e.shutdown_markers > 0 && e.watchdog_reboot === "yes" && /^\d{4}-/.test(e.loss_utc ?? "")
+    && ["sudo_commands", "ssh_logins", "sessions", "console_logins", "undervoltage"].every((k) => e[k] === "0"));
+  const tied = boots.length >= 2 && boots[0].boot_id_sha256 === bootB && boots.at(-1).idx === "0" && boots.at(-1).boot_id_sha256 === bootA && cur.boot_id_sha256 === bootA && orderly;
+  return tied ? { kernel: cur.kernel, ended: ended.map(({ b }) => b.last).join(", ") } : null;
 }
 function rebootAttribute(sec, line, kind, B, A) {
   const other = kind === "removed" ? A : B;
   const inOther = (pred) => other.some(([s, l]) => s === sec && l !== line && pred(l));
   if (sec === "lsmod") { const n = line.split(" ")[0]; if (inOther((l) => l.split(" ")[0] === n)) return "the reboot: a module in both snapshots, loaded again at boot"; }
+  // The socket-diagnostics modules load on demand when ss asks for sockets (the snapshot's own ss_listen does): an earlier
+  // boot had them, a boot the snapshot has not yet run ss in may not.
+  if (sec === "lsmod" && kind === "removed" && /^(inet|tcp|udp|raw|unix|netlink|af_packet)_diag$/.test(line.split(" ")[0])) return "the reboot: a socket-diagnostics module ss loaded on demand in the earlier boot";
   if (sec === "findmnt") { const [t, src, fs] = line.split(" "); if (inOther((l) => { const f = l.split(" "); return f[0] === t && f[1] === src && f[2] === fs; })) return "the reboot: a mount made again at boot, only its options changed"; }
   { const m = line.match(/^udp (?:0\.0\.0\.0|\*):(\d+) users:\(\("([^"]+)",pid,fd\)\)$/);
     if (sec === "ss_listen" && m && +m[1] >= 32768 && inOther((l) => l.startsWith("udp ") && l.includes(`(("${m[2]}",`))) return "the reboot: a service's ephemeral UDP port, chosen again at its start"; }
@@ -608,7 +615,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; samples=${xs.length}; peak fractions=${JSON.stringify(Object.fromEntries(Object.entries(peaks).map(([k, v]) => [k, +v.toFixed(3)])))}; min MemAvailable=${Math.round(avail / 1024)} MiB` };
     } },
   X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`, "evidence/M6/raw/nft-ruleset.txt"],
-    expected: "every line differing between M7's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset), the collector's own SSH session, or the owner's own work that raw/owner-session.txt records; no unrelated line is removed or changed; the boot ID is unchanged, or changed only across a reboot raw/reboot.txt ties to both snapshots; rule by rule against M6's recorded ruleset, nothing changed (M7 needs no new egress), and the installed guard is the repository's",
+    expected: "every line differing between M7's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes, root filesystems and namespaces, kernel modules for the runtime, the ruleset), the collector's own SSH session, or the owner's own work that raw/owner-session.txt records; no unrelated line is removed or changed; the boot ID is unchanged, or changed only across reboots raw/reboot.txt ties to both snapshots, each an orderly shutdown the host's own Wi-Fi watchdog started after a Wi-Fi loss, with no local action after the loss and no undervoltage; rule by rule against M6's recorded ruleset, nothing changed (M7 needs no new egress), and the installed guard is the repository's",
     run() {
       const [B, A] = [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`];
       const boot = (f) => (read(f).match(/^boot_id_sha256=([0-9a-f]{64})$/m) ?? [])[1];
@@ -637,7 +644,7 @@ const checks = {
       const afterHash = (read(A).match(/^nft_ruleset_sha256=([0-9a-f]{64})$/m) ?? [])[1];
       const rulesTied = /^[0-9a-f]{64}$/.test(hdr.ruleset_sha256 ?? "") && hdr.ruleset_sha256 === afterHash;
       writeFileSync(resolve(ROOT, `${EV}snapshot-diff.txt`), ["# M7 BEFORE/AFTER snapshot diff (section-keyed; written by scripts/m7/verify.mjs X04)",
-        `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : tie ? `changed across the reboot raw/reboot.txt ties to both snapshots (the earlier boot ended ${tie.ended})` : "CHANGED or MISSING"}`,
+        `# before: ${read(B).split("\n")[1]}  after: ${read(A).split("\n")[1]}`, `# boot_id: ${boot(B) && boot(B) === boot(A) ? "unchanged (no reboot)" : tie ? `changed across the reboots raw/reboot.txt ties to both snapshots (the earlier boots ended ${tie.ended})` : "CHANGED or MISSING"}`,
         `## changes to unrelated state (${rows.unrelated.length})`, ...rows.unrelated, `## the owner's own work on the Pi and Pi-hole's own socket rotation (${rows.owner.length}; raw/owner-session.txt)`, ...rows.owner,
         `## the reboot's own changes (${rows.reboot.length})`, ...rows.reboot,
         `## project changes and the collector's own SSH sessions (${rows.project.length})`, ...rows.project,
