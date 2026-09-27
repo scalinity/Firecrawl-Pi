@@ -76,6 +76,7 @@ export class FakeLedger {
   async settleBudget(id, actual, f) { return this.#move(id, "SETTLED", actual, f); }
   async releaseBudget(id, detail) { return this.#move(id, "RELEASED", 0, { detail }); }
   async markBudgetUncertain(id, detail) { const r = this.#byId(id); if (r?.state === "RESERVED") Object.assign(r, { state: "UNCERTAIN", detail }); }
+  async reservationByCallKey(k) { const r = this.rows.get(k); return r && r.state !== "RELEASED" ? r : null; }
   async parseCacheGet(k) { return this.cache.get(k) ?? null; }
   async parseCachePut(p) { this.cache.set(p.key, { pages: p.pages, markdown: p.markdown }); }
   used(category, period = "day") { let n = 0; for (const [k, u] of this.usage) if (k.startsWith(`${category}|${period}|`)) n += u.reserved + u.settled; return n; }

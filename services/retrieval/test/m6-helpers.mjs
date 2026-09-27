@@ -48,6 +48,7 @@ export class M6Store extends FakeStore {
   settleBudget(...a) { return this.ledger.settleBudget(...a); }
   releaseBudget(...a) { return this.ledger.releaseBudget(...a); }
   markBudgetUncertain(...a) { return this.ledger.markBudgetUncertain(...a); }
+  reservationByCallKey(k) { return this.ledger.reservationByCallKey(k); }
   async budgetUsage(day, month) {
     const out = [];
     for (const [k, u] of this.ledger.usage) {

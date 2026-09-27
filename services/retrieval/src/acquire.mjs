@@ -41,7 +41,7 @@ const sleep = (ms, signal) => new Promise((r) => {
 // Without a residential provider wired in (unit tests of the direct path), the route is simply unavailable.
 const NO_ROUTE = Object.freeze({ state: () => ({ available: false, reason: "NO_PROXY_SELECTED" }), availability: async () => ({ available: false, reason: "NO_PROXY_SELECTED" }) });
 // M7: without an enhanced provider wired in (unit tests of the earlier tiers), that tier is simply unavailable.
-const NO_ENHANCED = Object.freeze({ state: () => ({ available: false, reason: "NO_ENHANCER_SELECTED" }), availability: async () => ({ available: false, reason: "NO_ENHANCER_SELECTED" }) });
+const NO_ENHANCED = Object.freeze({ state: () => ({ available: false, reason: "NO_ENHANCER_SELECTED" }), availability: async () => ({ available: false, reason: "NO_ENHANCER_SELECTED" }), prior: async () => null });
 // An engine result with one of these statuses would restart upstream's own AddFeatureError retry outside the page's budget
 // (7666c1f apps/api/src/scraper/scrapeURL/index.ts:631-645): quality.mjs makes each a failure, and finish() refuses any
 // success that carries one all the same.
@@ -291,15 +291,18 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       if (start.probe && !(await store.claimProbe(domain, policy.routing.probeMinutes))) start = { tier: "residential", reason: "probe_in_progress" };
       Object.assign(result.route, { start: start.tier, reason: start.reason });
       const probe = start.probe === true;
+      // A page whose one enhanced dispatch was already made goes straight to its outcome: a kept answer is the page's without
+      // another attempt or another request to the target, and an uncertain one ends the page (review W3).
+      const made = !hooks && (req.route === "auto" || req.route === "enhanced") ? await enhanced.prior(req.logicalAcquisitionId) : null;
       // A route that needs the residential proxy is refused before any attempt when the proxy cannot be had.
-      if (start.tier === "residential") {
+      if (start.tier === "residential" && !made) {
         const st = await residential.availability();
         if (!st.available) return fail(proxyRequired(st, `this acquisition (${start.reason})`));
       }
       // M7: a request for the enhanced provider is refused the same way when that tier cannot be had.
       // Its mode: a rendered answer for a domain learned to need a browser, the raw response otherwise (spec §11).
       const startMode = req.purpose === "page" && req.expect === "html" && !req.fast && startsInBrowser(record) ? "browser" : "http";
-      if (start.tier === "enhanced") {
+      if (start.tier === "enhanced" && !made) {
         const st = await enhanced.availability(startMode);
         if (!st.available) return fail({ class: "ENHANCED_REQUIRED", detail: `this acquisition asks for the enhanced provider, which is unavailable (${st.reason})`,
           retryable: ["PROVIDER_UNAVAILABLE", "BUDGET_EXHAUSTED"].includes(st.reason), retryAfter: st.retryAfter ?? null, route: { enhanced: st.reason } });
@@ -497,28 +500,37 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       // logical page (enhanced.mjs), so no retry of the page ever pays for a second. The domain is paced as on every route.
       // Its answer is judged by the same quality rules: the provider's 200 proves nothing about the target (spec §11).
       // Provider failures teach the domain nothing, and nothing further is tried after this tier.
-      async function enhancedStep(zmode) {
-        const attemptId = randomUUID();
-        const ordinal = await store.reserveAttempt({ logicalId: req.logicalAcquisitionId, attemptId, requestId: req.requestId, purpose: req.purpose, strategy: "enhanced", domain: target.host, maxAttempts: policy.attempts.maxPerPage });
-        if (ordinal === null) return { fail: { class: "ATTEMPT_BUDGET_EXHAUSTED", detail: `the page's ${policy.attempts.maxPerPage} attempts are spent before its enhanced dispatch` } };
-        note(attemptId, ordinal, "enhanced");
-        const paced = await pace(target, attemptId, deadline, signal, "enhanced");
-        if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return { fail: paced.failure }; }
+      // reuse: the page's dispatch was already made (enhanced.prior); its outcome is read back without an attempt, pacing or
+      // any request to the target or the provider (review W3).
+      async function enhancedStep(zmode, reuse = false) {
+        let attemptId = null, paced = null;
+        if (reuse) {
+          result.strategies.push("enhanced"); result.strategy = "enhanced";
+          result.route.escalations.push("enhanced_reused");
+        } else {
+          attemptId = randomUUID();
+          const ordinal = await store.reserveAttempt({ logicalId: req.logicalAcquisitionId, attemptId, requestId: req.requestId, purpose: req.purpose, strategy: "enhanced", domain: target.host, maxAttempts: policy.attempts.maxPerPage });
+          if (ordinal === null) return { fail: { class: "ATTEMPT_BUDGET_EXHAUSTED", detail: `the page's ${policy.attempts.maxPerPage} attempts are spent before its enhanced dispatch` } };
+          note(attemptId, ordinal, "enhanced");
+          paced = await pace(target, attemptId, deadline, signal, "enhanced");
+          if (paced.failure) { await store.finishAttempt(attemptId, { outcome: paced.failure.class }); return { fail: paced.failure }; }
+        }
+        const finishAttempt = (o) => (attemptId ? store.finishAttempt(attemptId, o) : null);
         let d;
         try { d = await enhanced.dispatch({ logicalId: req.logicalAcquisitionId, target, url: req.url, mode: zmode, deadline, signal }); }
-        finally { await releaseAll(log, [() => store.releaseDomain(paced.domain, attemptId)]); }
+        finally { if (paced) await releaseAll(log, [() => store.releaseDomain(paced.domain, attemptId)]); }
         const st = enhanced.state();
         result.enhanced = { provider: st.providerName ?? null, subject: st.subject ?? null, mode: zmode, charge: d.charge ?? null };
-        if (d.failure) { await store.finishAttempt(attemptId, { outcome: d.failure.class }); return { fail: d.failure }; }
+        if (d.failure) { await finishAttempt({ outcome: d.failure.class }); return { fail: d.failure }; }
         const a = d.answer;
         const refused = finalTarget(a.finalUrl, policy);
-        if (refused) { await store.finishAttempt(attemptId, { outcome: refused.class }); return { fail: refused }; }
+        if (refused) { await finishAttempt({ outcome: refused.class }); return { fail: refused }; }
         const buf = a.bodyBase64 !== undefined ? Buffer.from(a.bodyBase64, "base64") : null;
         const ct = buf ? sniffContentType(buf, a.contentType) : a.contentType;
         const text = buf ? (isTextual(ct) ? decodeText(buf, ct) : null) : a.html;
         const verdict = classify({ status: a.status, contentType: ct, body: text, finalUrl: a.finalUrl, requestedUrl: req.url, retryAfter: retryAfterSeconds(a.retryAfter) });
         const bytes = buf ? buf.length : Buffer.byteLength(a.html);
-        await store.finishAttempt(attemptId, { outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: a.status, bytes });
+        await finishAttempt({ outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: a.status, bytes });
         Object.assign(result, { finalUrl: a.finalUrl, targetStatus: a.status, contentType: ct ?? null, bytes, redirects: [], quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
         if (verdict.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(a.finalUrl, policy)), verdict.failure.retryAfter); } catch { /* refused above */ } }
         if (verdict.verdict === "challenge") return { fail: { ...verdict.failure, retryable: false, detail: "the enhanced provider's answer was itself a bot interstitial; nothing further is tried" } };
@@ -530,6 +542,10 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: a.bodyBase64 }), quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] } }) };
       }
 
+      if (made) {
+        const s = await enhancedStep(made.mode ?? startMode, true);
+        return s.done ?? fail(s.fail);
+      }
       let tier = start.tier, renderUrl = req.url, shellTier = null;
       // A page with screenshots or actions is rendered from the start; a domain learned to need a browser starts in one.
       let mode = start.tier === "enhanced" ? startMode : hooks ? "browser" : page && startsInBrowser(record) ? "browser" : "http";

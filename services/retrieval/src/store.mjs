@@ -275,6 +275,12 @@ export class Store {
     await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = $2, usage = COALESCE($3, usage) WHERE id = $1 AND state = 'RESERVED'", [id, detail, usage ? JSON.stringify(usage) : null]);
   }
 
+  // A call's reservation by its key, unless it was released (a released call never reached the provider; its row is kept
+  // under a suffixed key, so it is not found here anyway).
+  async reservationByCallKey(callKey) {
+    return (await this.pool.query("SELECT * FROM fcpi_retrieval.budget_reservation WHERE call_key = $1 AND state <> 'RELEASED'", [callKey])).rows[0] ?? null;
+  }
+
   // ---- proxy usage reconciliation (M6, reconcile.mjs) -------------------------------------------------------
   // One provider's rows of one UTC day: the bytes its proxy rows settled and measured while UNCERTAIN, the bytes earlier
   // reconciliations already charged (review C1: they are covered, never charged again), and how many proxy rows are

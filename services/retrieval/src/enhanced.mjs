@@ -94,11 +94,22 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
     return st;
   }
 
-  // An earlier dispatch of this page, found by its call key: its kept answer, or why it cannot be used again.
-  function earlier(row) {
+  // An earlier dispatch of this page, found by its call key: its kept answer, or why it cannot be used again. The answer
+  // is the page's only for the request it was made for (URL and mode); for another it is refused, never sent again (review S1).
+  function earlier(row, requestHash) {
+    if (row.state === "SETTLED" && row.result?.answer && row.request_hash !== requestHash) return failure("ENHANCED_ALREADY_DISPATCHED", "this page's one enhanced dispatch was made for a different request (URL or mode); it is not sent again");
     if (row.state === "SETTLED" && row.result?.answer) return { reused: true, answer: row.result.answer, charge: { state: "SETTLED", reserved: Number(row.reserved), actual: Number(row.actual), reused: true } };
     if (row.state === "SETTLED") return failure("ENHANCED_ALREADY_DISPATCHED", "this page's one enhanced dispatch was made and its answer was not kept; it is not sent again");
-    return failure("ENHANCED_UNCERTAIN", `this page's one enhanced dispatch was sent and its outcome is ${row.state === "RESERVED" ? "still in flight" : "unknown"}; it is not sent again`);
+    return { ...failure("ENHANCED_UNCERTAIN", `this page's one enhanced dispatch was sent and its outcome is ${row.state === "RESERVED" ? "still in flight" : "unknown"}; it is not sent again`),
+      charge: { state: "UNCERTAIN", reserved: Number(row.reserved), actual: null, reused: true } };
+  }
+  const callKeyOf = (logicalId) => `enhanced:${logicalId}`;
+  const requestHashOf = (mode, url) => createHash("sha256").update(`${mode}\n${url}`).digest("hex");
+  // The page's earlier dispatch, if it made one (a released reservation never reached the provider and is none). Its mode is
+  // the one it was sent in, from its usage record.
+  async function prior(logicalId) {
+    const row = await store.reservationByCallKey(callKeyOf(logicalId));
+    return row ? { row, mode: row.usage?.mode ?? null } : null;
   }
 
   // The page's one dispatch. target: the validated target of the requested URL; mode: http | browser. Resolves
@@ -106,6 +117,11 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
   // { reused: true, answer, charge }, or { failure } (with unavailable: the state, when the tier could not be had).
   async function dispatch({ logicalId, target, url, mode, deadline, signal }) {
     const budget = getBudget(), E = budget.enhancing, policy = getPolicy();
+    const requestHash = requestHashOf(mode, url);
+    // An earlier dispatch of the page is found before any availability check: its kept answer is reused whatever the cap,
+    // the breaker or the paid switch now say, since reusing it sends and costs nothing (review W3).
+    const before = await store.reservationByCallKey(callKeyOf(logicalId));
+    if (before) return earlier(before, requestHash);
     const st = await availability(mode);
     if (!st.available) return { ...failure("ENHANCED_REQUIRED", `the enhanced provider is unavailable (${st.reason})`, { retryable: ["PROVIDER_UNAVAILABLE", "BUDGET_EXHAUSTED"].includes(st.reason), retryAfter: st.retryAfter ?? null }), unavailable: st };
     // The target is validated and resolved as for a direct fetch before the provider is asked for it: the provider is
@@ -119,12 +135,11 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
     try {
       const amount = priceOf(st.card, mode);
       const { day, month } = periodStarts();
-      const requestHash = createHash("sha256").update(`${mode}\n${url}`).digest("hex");
-      const r = await store.reserveBudget({ id: randomUUID(), callKey: `enhanced:${logicalId}`, logicalId, category: st.categoryName, provider: st.providerName, subject: st.subject,
+      const r = await store.reserveBudget({ id: randomUUID(), callKey: callKeyOf(logicalId), logicalId, category: st.categoryName, provider: st.providerName, subject: st.subject,
         kind: "enhanced", unit: "micro_usd", rateCard: st.card.id, requestHash, amount, caps: st.category.caps, paidTotalCap: st.paid ? budget.paidTotal.caps.day : null, paidTotalRate: 1,
         day, month, notifyAt: budget.notifyAtFraction });
       for (const n of r.notices ?? []) log({ event: "budget_notice", category: n.category, period: n.period, used: n.used, cap: n.cap });
-      if (r.existing) return earlier(r.existing);
+      if (r.existing) return earlier(r.existing, requestHash);
       if (r.exhausted) return failure("BUDGET_EXHAUSTED", `the ${r.exhausted.category} ${r.exhausted.period} cap (${r.exhausted.cap} micro-USD) has no room for this dispatch's ${amount} micro-USD`);
       const res = r.reservation;
       const key = readCredential(providersDir, st.provider.credential);
@@ -191,7 +206,7 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
     }
   }
 
-  return { state, availability, dispatch, breakerState: (name) => breakerFor(name).state() };
+  return { state, availability, prior, dispatch, breakerState: (name) => breakerFor(name).state() };
 }
 
 // Reads the provider's 200 answer; throws on anything the contract does not allow.

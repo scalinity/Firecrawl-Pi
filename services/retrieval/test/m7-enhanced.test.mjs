@@ -98,6 +98,51 @@ test("an HTTP dispatch settles at the card's highest tier, keeps its answer, and
   } finally { await fx.close(); }
 });
 
+test("a kept answer is reused before any availability check: at a spent cap, after the paid switch, and for an auto page without walking the waterfall again", async () => {
+  const fx = await startM7();
+  try {
+    // The category holds exactly one HTTP dispatch: the page's own charge fills it.
+    const { acquire, enhanced, store, policy } = rig(fx, { mutate: (b) => { b.categories.fixture_enhanced.caps.day = 1270; } });
+    const body = req(at(fx, "/article"), { route: "enhanced" });
+    const first = await acquire(body);
+    assert.equal(first.ok, true, JSON.stringify(first.failure));
+    assert.equal((await enhanced.availability("http")).reason, "BUDGET_EXHAUSTED");
+    const again = await acquire({ ...body, requestId: "r-again" });
+    assert.equal(again.ok, true, JSON.stringify(again.failure));
+    assert.deepEqual(again.route.escalations, ["enhanced_reused"]);
+    assert.equal(again.enhanced.charge.reused, true);
+    assert.equal(again.costEstimate, 0, "a reused answer costs nothing more");
+    assert.equal(again.attemptsUsed, first.attemptsUsed, "no attempt spent on a reuse");
+    assert.equal(fx.state.calls.length, 1);
+    // The same answer for another URL under the same page is refused, never sent (review S1).
+    const other = await enhanced.dispatch({ logicalId: body.logicalAcquisitionId, target: parseTarget(at(fx, "/tough"), policy), url: at(fx, "/tough"), mode: "http", deadline: Date.now() + 30000 });
+    assert.equal(other.failure.class, "ENHANCED_ALREADY_DISPATCHED");
+    assert.match(other.failure.detail, /different request/);
+    assert.equal(fx.state.calls.length, 1);
+    assert.equal(rows(store).length, 1);
+  } finally { await fx.close(); }
+  const fx2 = await startM7();
+  try {
+    // An auto page that reached its dispatch: a retry reads the kept answer back, with no direct attempt at the target.
+    const { acquire, store } = rig(fx2);
+    const body = req(at(fx2, "/tough"));
+    const first = await acquire(body);
+    assert.deepEqual(first.strategies, ["direct_http", "enhanced"]);
+    const hits = fx2.state.hits.length;
+    const again = await acquire({ ...body, requestId: "r-auto-again" });
+    assert.equal(again.ok, true, JSON.stringify(again.failure));
+    assert.deepEqual(again.strategies, ["enhanced"]);
+    assert.equal(again.finalStrategy, "enhanced");
+    assert.equal(fx2.state.hits.length, hits, "the target is not asked again");
+    assert.equal(fx2.state.calls.length, 1);
+    // With the enhancer deselected since, the kept answer is still the page's: reuse sends nothing and needs no tier.
+    const off = await rig(fx2, { enhancer: null, store }).acquire({ ...body, requestId: "r-auto-off" });
+    assert.equal(off.ok, true, JSON.stringify(off.failure));
+    assert.deepEqual(off.route.escalations, ["enhanced_reused"]);
+    assert.equal(fx2.state.calls.length, 1);
+  } finally { await fx2.close(); }
+});
+
 test("each provider failure class: released and free, counted on the breaker or not, and an unknown outcome stays reserved and is never resent", async () => {
   const fx = await startM7();
   try {
