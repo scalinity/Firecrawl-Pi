@@ -43,6 +43,9 @@ table inet fcpi_guard {
     iifname "fcpi-egress" ip daddr @egress_local_v4 counter drop comment "egress_local_dropped"
     iifname "fcpi-egress" ct state established,related accept
     iifname "fcpi-egress" ct state new tcp dport { 80, 443 } counter accept comment "egress_web_accepted"
+    # The floor is by port, as for 80 and 443: any process on the egress bridge may reach port 7000 of any public
+    # address. Which endpoint a residential tunnel opens is the retrieval service's decision (the provider's
+    # configured endpoint, resolved and pinned); this counter keeps proxy connections apart from web egress.
     iifname "fcpi-egress" ct state new tcp dport 7000 counter accept comment "egress_proxy_accepted"
     iifname "fcpi-egress" counter drop comment "egress_other_dropped"
     oifname "fcpi-egress" ct state established,related accept
