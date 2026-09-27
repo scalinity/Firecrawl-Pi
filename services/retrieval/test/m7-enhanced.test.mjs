@@ -9,7 +9,7 @@ import { readFileSync } from "node:fs";
 import { loadBudgetPolicy } from "../src/budget.mjs";
 import { makeEnhanced, readAnswer, REUSE_MAX_BYTES } from "../src/enhanced.mjs";
 import { makeResidential } from "../src/residential.mjs";
-import { makeAcquirer, makeUrlHmac, validateHooks } from "../src/acquire.mjs";
+import { makeAcquirer, makeUrlHmac, validateHooks, ACTIONS, SELECTOR_WAIT_MS } from "../src/acquire.mjs";
 import { Denied, parseTarget } from "../src/ssrf.mjs";
 import { policyFor } from "./acquire-helpers.mjs";
 import { providersDir } from "./m5-helpers.mjs";
@@ -417,4 +417,21 @@ test("readAnswer holds the provider to its contract", () => {
   assert.throws(() => readAnswer({ url: "ftp://x/", statusCode: 200, browserHtml: "" }, "browser", 100), /http\(s\)/);
   assert.throws(() => readAnswer({ url: "https://x/", statusCode: 0, browserHtml: "" }, "browser", 100), /statusCode/);
   assert.ok(REUSE_MAX_BYTES >= 1048576);
+});
+
+test("the action subset is one definition: the capability manifest's subset and bounds are what the retrieval service accepts (review S7)", () => {
+  const spec = JSON.parse(readFileSync(new URL("../policy/capabilities.json", import.meta.url), "utf8")).bodies.scrape.fields.actions;
+  // The gateway accepts click.all only as false and strips it; every other option reaches the retrieval service by name.
+  const gatewayOnly = { click: ["all"] };
+  assert.deepEqual(Object.keys(spec.subset).sort(), Object.keys(ACTIONS).sort());
+  for (const [type, opts] of Object.entries(spec.subset)) {
+    assert.deepEqual(Object.keys(opts).filter((o) => !(gatewayOnly[type] ?? []).includes(o)).sort(), [...ACTIONS[type]].sort(), type);
+  }
+  assert.equal(spec.selectorWaitMs, SELECTOR_WAIT_MS);
+  const scrolls = (n) => ({ actions: Array.from({ length: n }, () => ({ type: "scroll", direction: "down" })) });
+  assert.equal(validateHooks(scrolls(spec.maxItems)).actions.length, spec.maxItems);
+  assert.throws(() => validateHooks(scrolls(spec.maxItems + 1)), (e) => e.failureClass === "UNSUPPORTED_CAPABILITY");
+  const waits = (ms) => ({ actions: [{ type: "wait", milliseconds: ms }] });
+  assert.equal(validateHooks(waits(spec.maxWaitMs)).actions[0].milliseconds, spec.maxWaitMs);
+  assert.throws(() => validateHooks(waits(spec.maxWaitMs + 1)));
 });
