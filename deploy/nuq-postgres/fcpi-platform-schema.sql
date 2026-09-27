@@ -167,6 +167,11 @@ CREATE TABLE IF NOT EXISTS fcpi_platform.webhook_event (
   UNIQUE (job_id, type)
 );
 CREATE INDEX IF NOT EXISTS webhook_event_due ON fcpi_platform.webhook_event (next_at) WHERE state = 'PENDING';
+-- An event's type is one the gateway raises and its attempts never negative, as the other tables constrain their values;
+-- dropped and added again, so a ledger already at version 3 gets them too.
+ALTER TABLE fcpi_platform.webhook_event DROP CONSTRAINT IF EXISTS webhook_event_type_check, DROP CONSTRAINT IF EXISTS webhook_event_attempts_check;
+ALTER TABLE fcpi_platform.webhook_event ADD CONSTRAINT webhook_event_type_check CHECK (type ~ '^(crawl|batch_scrape|extract)\.(started|completed|failed)$'),
+  ADD CONSTRAINT webhook_event_attempts_check CHECK (attempts >= 0);
 INSERT INTO fcpi_platform.schema_version (version) VALUES (3) ON CONFLICT DO NOTHING;
 COMMIT;
 

@@ -50,6 +50,14 @@ test("a version-2 ledger gains M7's four tables and version 3 in place, keeps it
     const ev = (eid) => db.query("INSERT INTO fcpi_platform.webhook_event (id, job_id, principal, type, destination, body, state) VALUES ($1, $2, 'p', 'crawl.completed', 'http://h/', '{}', 'PENDING')", [eid, id]);
     await ev(randomUUID());
     await assert.rejects(ev(randomUUID()), /duplicate key/);
+    // Its type is one the gateway raises and its attempts never negative (review S8); the schema still applies again
+    // over a table that has the checks, and the event already stored satisfies them.
+    const odd = (type, attempts = 0) => db.query("INSERT INTO fcpi_platform.webhook_event (id, job_id, principal, type, destination, body, state, attempts) VALUES ($1, $2, 'p', $3, 'http://h/', '{}', 'PENDING', $4)", [randomUUID(), id, type, attempts]);
+    await assert.rejects(odd("crawl.exploded"), /webhook_event_type_check/);
+    await assert.rejects(odd("crawl.started", -1), /webhook_event_attempts_check/);
+    await odd("batch_scrape.started");
+    await db.query(SCHEMA);
+    await assert.rejects(odd("extract.page"), /webhook_event_type_check/);
   } finally {
     await db.end();
     await root.query(`DROP DATABASE IF EXISTS ${name} WITH (FORCE)`);
