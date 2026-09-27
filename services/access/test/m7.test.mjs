@@ -115,13 +115,13 @@ test("change detection: normalized text, a bounded line diff, and the key of equ
   assert.notEqual(versionKey({ url }), versionKey({ url, onlyMainContent: false }));
 });
 
-function changesRig() {
+function changesRig({ quota = 1e9 } = {}) {
   const files = new Map(), versions = new Map(), sent = [];
   const archive = { put: async (b) => { const sha = createHash("sha256").update(b).digest("hex"); files.set(sha, Buffer.from(b)); return { sha256: sha, bytes: b.length }; }, read: async (sha) => files.get(sha), hasRoom: async () => true };
-  const store = { versionGet: async (p, k) => versions.get(`${p}|${k}`) ?? null, versionPut: async (v) => versions.set(`${v.principal}|${v.key}`, { ...v, normalized_sha256: v.normalizedSha256, scraped_at: new Date() }) };
+  const store = { archiveBytes: async () => [...files.values()].reduce((n, b) => n + b.length, 0), versionGet: async (p, k) => versions.get(`${p}|${k}`) ?? null, versionPut: async (v) => versions.set(`${v.principal}|${v.key}`, { ...v, normalized_sha256: v.normalizedSha256, scraped_at: new Date() }) };
   let answer = null;
   const upstream = { call: async (_m, _p, o) => { sent.push(o.body); return answer; } };
-  const changes = makeChanges({ cfg: { coreTimeoutMs: 1000 }, store, upstream, archive, originFor });
+  const changes = makeChanges({ cfg: { coreTimeoutMs: 1000 }, store, upstream, archive, originFor, quotaBytes: async () => quota });
   const run = async (principal, body) => { let out; await changes({ client: { principal }, send: (status, b) => { out = { status, b }; } }, body); return out; };
   return { run, sent, versions, set: (a) => { answer = a; } };
 }
@@ -156,6 +156,14 @@ test("change detection: new, same, then changed with a diff; an error page and a
   }
   r.set(page("# Notes\n\nversion 2\nadded line\n"));
   assert.equal((await r.run("owner", { url })).b.changeStatus, "same");
+  // At the result quota a version is not stored, and the one before it stays (review W12).
+  const full = changesRig({ quota: 30 });
+  full.set(page("# Notes\n\nversion 1\n"));
+  assert.equal((await full.run("owner", { url })).b.changeStatus, "new");
+  full.set(page("# Notes\n\nversion 1 grew longer\n"));
+  const refused = await full.run("owner", { url });
+  assert.deepEqual([refused.status, refused.b.code], [503, "STORAGE_QUOTA"]);
+  assert.equal(full.versions.size, 1);
 });
 
 test("the outbox round: delivered, retried, dead after its attempts or at once for an unapproved destination, deferred without an attempt", async () => {

@@ -48,7 +48,7 @@ export function lineDiff(before, after) {
 // are compared (spec §31.3).
 export const versionKey = (body) => sha(canonical({ url: body.url, onlyMainContent: body.onlyMainContent ?? true, waitFor: body.waitFor ?? 0, proxy: body.proxy ?? "auto" }));
 
-export function makeChanges({ cfg, store, upstream, archive, originFor }) {
+export function makeChanges({ cfg, store, upstream, archive, originFor, quotaBytes }) {
   return async function changes(ctx, body) {
     const key = versionKey(body);
     const { timeout, ...opts } = body;
@@ -78,7 +78,11 @@ export function makeChanges({ cfg, store, upstream, archive, originFor }) {
       if (changeStatus === "changed") diff = lineDiff(normalize((await archive.read(prev.sha256)).toString("utf8")), norm);
     }
     const buf = Buffer.from(markdown);
-    if (!(await archive.hasRoom(buf.length))) return ctx.send(503, { success: false, code: "STORAGE_QUOTA", error: "The result store is at its free-space floor; the version was not stored." }, { "retry-after": "300" });
+    // A version counts toward the result quota like every other archived result, so it is checked against both the quota
+    // and the free-space floor (review W12).
+    if ((await store.archiveBytes()) + buf.length > (await quotaBytes()) || !(await archive.hasRoom(buf.length))) {
+      return ctx.send(503, { success: false, code: "STORAGE_QUOTA", error: "The result store is at its quota or free-space floor; the version was not stored." }, { "retry-after": "300" });
+    }
     const put = await archive.put(buf);
     await store.versionPut({ principal: ctx.client.principal, key, url: body.url, sha256: put.sha256, bytes: put.bytes, normalizedSha256: nsha });
     ctx.send(200, { success: true, changeStatus, url: body.url, finalUrl: doc.metadata?.url ?? body.url, statusCode: status, contentSha256: nsha,
