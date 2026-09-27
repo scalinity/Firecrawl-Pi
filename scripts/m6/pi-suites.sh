@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # M6's suites ON the Pi, inside the images the stack runs: the retrieval service's (M6's routing, residential
 # route, proxy chaining and store SQL beside every earlier suite, the SQL against a throwaway PostgreSQL on an
-# internal network of its own), the gateway ledger's migration, the gateway's M5 and M6 suites (bulk routing),
+# internal network of its own), the gateway ledger's migration, the gateway's M5 and M6 suites (bulk routing, the job runner's route holds),
 # then M4's runner unchanged (scripts/m4/pi-mcp-tests.sh: the MCP service's suites, the gateway's unit suites,
 # M3's and M4's gateway contract suites and the grammars), since M6 changes all three services. The
 # tests, fixtures, policies and schema are the deployed commit's, mounted read-only; each test container has
@@ -40,7 +40,7 @@ echo "test_exit=$?"
 D rm -f "$N-pg" >/dev/null 2>&1; D network rm "$N" >/dev/null 2>&1
 echo "### gateway_m6_tap"
 D run "${RUN[@]}" --network none --user 3380:3380 -e FCPI_TEST_MANIFEST=/srv/policy/capabilities.json -v "$REPO/services/access/test:/srv/access/test:ro" \
-  -v "$REPO/deploy/policies/capabilities.json:/srv/policy/capabilities.json:ro" "$GI" node --test --test-reporter=tap --test-timeout=60000 test/extract.test.mjs test/jsonscrape.test.mjs test/routing.test.mjs 2>&1
+  -v "$REPO/deploy/policies/capabilities.json:/srv/policy/capabilities.json:ro" "$GI" node --test --test-reporter=tap --test-timeout=60000 test/extract.test.mjs test/jsonscrape.test.mjs test/routing.test.mjs test/jobs.test.mjs 2>&1
 echo "test_exit=$?"
 bash "$REPO/scripts/m4/pi-mcp-tests.sh" | sed -e 's/^### meta$/### m4_runner_meta/' -e '/^### end$/d' -e '/^end$/d'
 echo "### transient"
