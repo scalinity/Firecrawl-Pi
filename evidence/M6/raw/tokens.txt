@@ -1,0 +1,4 @@
+created m6 principal=m6-owner scopes=read,scrape,map,crawl,batch,cancel,search,extract token_file=/etc/firecrawl-pi/secrets/clients/m6.token
+created m6other principal=m6-other scopes=read,scrape,crawl,batch token_file=/etc/firecrawl-pi/secrets/clients/m6other.token
+m6 principal=m6-owner scopes=read,scrape,map,crawl,batch,cancel,search,extract
+m6other principal=m6-other scopes=read,scrape,crawl,batch

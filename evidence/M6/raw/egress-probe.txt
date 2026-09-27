@@ -1,0 +1,73 @@
+### meta
+utc=2026-09-27T03:00:01Z source_commit=8530c3d1c8d09f3ac2088f990dd36c3d8b3ffeaf wan_configured=yes guard_table_handle=17
+### attachments
+access-gateway networks=fcpi_access,fcpi_api,fcpi_mcp,fcpi_model,fcpi_platform dns=192.0.2.1 network_mode=fcpi_access
+firecrawl-core networks=fcpi_acquire,fcpi_api,fcpi_core dns= network_mode=fcpi_acquire
+retrieval-service networks=fcpi_acquire,fcpi_browser,fcpi_core,fcpi_egress,fcpi_fixture,fcpi_model,fcpi_search dns=10.231.6.1 network_mode=fcpi_acquire
+nuq-postgres networks=fcpi_core,fcpi_platform dns= network_mode=fcpi_core
+rabbitmq networks=fcpi_core dns= network_mode=fcpi_core
+redis networks=fcpi_core dns= network_mode=fcpi_core
+searxng networks=fcpi_search dns= network_mode=fcpi_search
+fixture-m6 networks=fcpi_fixture dns= network_mode=fcpi_fixture
+browser-worker networks=fcpi_browser dns= network_mode=fcpi_browser
+mcp-gateway networks=fcpi_mcp dns= network_mode=fcpi_mcp
+fixture-m2 networks=fcpi_fixture dns= network_mode=fcpi_fixture
+fixture-m3 networks=fcpi_fixture dns= network_mode=fcpi_fixture
+fixture-m5 networks=fcpi_fixture dns= network_mode=fcpi_fixture
+fixture networks=fcpi_fixture dns= network_mode=fcpi_fixture
+network fcpi_access internal=false subnet=10.231.0.0/24 gateway=10.231.0.1 bridge=fcpi-access gateway_mode_ipv4=nat ipv6=false
+network fcpi_acquire internal=true subnet=10.231.5.0/24 gateway= bridge=fcpi-acquire gateway_mode_ipv4=isolated ipv6=false
+network fcpi_api internal=true subnet=10.231.4.0/24 gateway= bridge=fcpi-api gateway_mode_ipv4=isolated ipv6=false
+network fcpi_browser internal=true subnet=10.231.2.0/24 gateway= bridge=fcpi-browser gateway_mode_ipv4=isolated ipv6=false
+network fcpi_core internal=true subnet=10.231.1.0/24 gateway= bridge=fcpi-core gateway_mode_ipv4=isolated ipv6=false
+network fcpi_egress internal=false subnet=10.231.6.0/24 gateway=10.231.6.1 bridge=fcpi-egress gateway_mode_ipv4=nat ipv6=false
+network fcpi_fixture internal=true subnet=10.231.3.0/24 gateway= bridge=fcpi-fixture gateway_mode_ipv4=isolated ipv6=false
+network fcpi_mcp internal=true subnet=10.231.8.0/24 gateway= bridge=fcpi-mcp gateway_mode_ipv4=isolated ipv6=false
+network fcpi_model internal=true subnet=10.231.9.0/24 gateway= bridge=fcpi-model gateway_mode_ipv4=isolated ipv6=false
+network fcpi_platform internal=true subnet=10.231.7.0/24 gateway= bridge=fcpi-platform gateway_mode_ipv4=isolated ipv6=false
+network fcpi_search internal=true subnet=10.231.10.0/24 gateway= bridge=fcpi-search gateway_mode_ipv4=isolated ipv6=false
+firecrawl-core default_route=no resolv_nameservers=127.0.0.11
+browser-worker default_route=no resolv_nameservers=127.0.0.11
+retrieval-service default_route=yes resolv_nameservers=127.0.0.11
+fixture-m2 default_route=no resolv_nameservers=127.0.0.11
+access-gateway default_route=yes resolv_nameservers=127.0.0.11
+### guard_before
+egress_local_v4_elements=2
+access_forward_out_dropped packets=28
+access_forward_in_dropped packets=0
+egress_ipv6_dropped packets=0
+egress_special_dropped packets=6
+egress_local_dropped packets=9
+egress_web_accepted packets=0
+egress_proxy_accepted packets=0
+egress_other_dropped packets=3
+egress_in_dropped packets=0
+access_input_new_dropped packets=0
+egress_dns_udp_accepted packets=1
+egress_dns_tcp_accepted packets=1
+egress_input_dropped packets=12
+tailnet_serve_accepted packets=0
+tailnet_input_dropped packets=0
+### probes
+{"utc":"2026-09-27T03:00:03.119Z","role":"core","probes":[{"label":"dns api.firecrawl.dev","expect":"fail","ok":false,"error":"EAI_AGAIN","as_expected":true},{"label":"dns html.duckduckgo.com","expect":"fail","ok":false,"error":"EAI_AGAIN","as_expected":true},{"label":"dns example.com","expect":"fail","ok":false,"error":"EAI_AGAIN","as_expected":true},{"label":"tcp 1.1.1.1:443 (public)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp lan:22","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp lan:53","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp 10.231.6.1:53 (egress bridge host address)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp 10.231.2.10:3312 (browser proxy, another network)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"control tcp 10.231.5.10:3310 (retrieval service)","expect":"ok","ok":true,"as_expected":true},{"label":"control http retrieval-service:3310/healthz","expect":"ok","ok":true,"status":200,"as_expected":true}],"all_as_expected":true}
+{"utc":"2026-09-27T03:00:03.289Z","role":"browser","probes":[{"label":"dns example.com","expect":"fail","ok":false,"error":"EAI_AGAIN","as_expected":true},{"label":"dns api.firecrawl.dev","expect":"fail","ok":false,"error":"EAI_AGAIN","as_expected":true},{"label":"tcp 1.1.1.1:443 (public)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp lan:22","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp 10.231.5.10:3310 (retrieval service's API, another network)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp 10.231.1.5:6379 (redis)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"control tcp 10.231.2.10:3312 (proxy)","expect":"ok","ok":true,"as_expected":true},{"label":"control http via proxy without credential (407)","expect":"ok","ok":true,"status":407,"as_expected":true}],"all_as_expected":true}
+{"utc":"2026-09-27T03:00:36.508Z","role":"retrieval","probes":[{"label":"tcp lan:22 (the host's own LAN address, guard input)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp lan:80 (the host's own LAN address, guard input)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp lan-neighbour:80 (another host on the LAN, guard egress_local)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp wan:80 (the router's public address, guard egress_local)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp wan:443 (the router's public address, guard egress_local)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp 10.231.6.1:22 (host on the bridge, guard input)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp 10.231.6.1:80 (host web listener on the bridge, guard input)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp 169.254.169.254:80 (metadata, guard special)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp 192.168.1.1:80 (private, guard special)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp 10.231.9.9:80 (private, no attached network, guard special)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp 1.1.1.1:22 (public, non-web port, guard other)","expect":"fail","ok":false,"error":"TIMEOUT","as_expected":true},{"label":"tcp [2606:4700:4700::1111]:443 (IPv6)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"control dns pi.hole via 10.231.6.1 (answered by the host resolver itself)","expect":"ok","ok":true,"addresses":1,"as_expected":true},{"label":"control tcp 10.231.6.1:53 (host resolver over TCP)","expect":"ok","ok":true,"as_expected":true}],"all_as_expected":true}
+{"utc":"2026-09-27T03:00:37.024Z","role":"fixture","probes":[{"label":"dns example.com","expect":"fail","ok":false,"error":"EAI_AGAIN","as_expected":true},{"label":"tcp 1.1.1.1:443 (public)","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"tcp lan:22","expect":"fail","ok":false,"error":"ENETUNREACH","as_expected":true},{"label":"control tcp 127.0.0.1:8080 (itself)","expect":"ok","ok":true,"as_expected":true}],"all_as_expected":true}
+### guard_after
+access_forward_out_dropped packets=28
+access_forward_in_dropped packets=0
+egress_ipv6_dropped packets=0
+egress_special_dropped packets=12
+egress_local_dropped packets=18
+egress_web_accepted packets=0
+egress_proxy_accepted packets=0
+egress_other_dropped packets=6
+egress_in_dropped packets=0
+access_input_new_dropped packets=0
+egress_dns_udp_accepted packets=2
+egress_dns_tcp_accepted packets=2
+egress_input_dropped packets=24
+tailnet_serve_accepted packets=0
+tailnet_input_dropped packets=0
+### end
+end

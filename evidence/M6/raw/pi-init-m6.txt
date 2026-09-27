@@ -1,0 +1,16 @@
+### meta
+utc=2026-09-27T00:43:49Z source_commit=67ea2ab24953bbd37391d73d4bd843d4d095cda1
+### secrets
+created /etc/firecrawl-pi/secrets/providers/fixture_proxy
+created /etc/firecrawl-pi/secrets/fixture_proxy_sha256
+fixture_proxy_pair=match
+### guard
+installed /etc/firecrawl-pi/fcpi-guard.nft
+fcpi-egress-local: ipv4=2 ipv6=0
+guard_rules=20 proxy_rule=1 local_v4_elements=2 handle=15
+### inventory
+3310:3310 600 /etc/firecrawl-pi/secrets/providers/fixture_proxy
+8080:8080 600 /etc/firecrawl-pi/secrets/fixture_proxy_sha256
+0:0 644 /etc/firecrawl-pi/fcpi-guard.nft
+providers_present=fixture_proxy 
+end

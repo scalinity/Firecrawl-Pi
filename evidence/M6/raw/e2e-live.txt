@@ -1,0 +1,14 @@
+### meta
+{"utc":"2026-09-27T02:56:52.342Z","phase":"live","pi_utc":"2026-09-27T02:56:51.900Z","deployed_commit":"8530c3d1c8d09f3ac2088f990dd36c3d8b3ffeaf","selection_before":{"search":"live","extractionModel":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective","proxy":"decodo-residential"},"providers":{"selection":{"search":"live","extractionModel":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective","proxy":"decodo-residential","source":"file"},"paidDispatch":false,"budgetPolicySha256":"8c3b9a627f27a703a52b85e4c500af1977d81c8a62192f84ae4a9cd052507e23","providers":{"openai":{"kind":"model","paid":true,"credential":"absent","breaker":"closed"},"fixture-model":{"kind":"model","paid":false,"credential":"not_required","breaker":"closed"},"llamaparse":{"kind":"parser","paid":true,"credential":"absent","breaker":"closed"},"fixture-parser":{"kind":"parser","paid":false,"credential":"not_required","breaker":"closed"},"decodo":{"kind":"proxy","paid":true,"credential":"absent","breaker":"closed"},"fixture-proxy":{"kind":"proxy","paid":false,"credential":"present","breaker":"open"}},"budgets":[{"category":"fixture_proxy","period":"day","period_start":"2026-09-27","reserved":0,"settled":162320},{"category":"fixture_proxy_race","period":"day","period_start":"2026-09-27","reserved":0,"settled":0}],"caps":{"llm":{"paid":true,"unit":"micro_usd","caps":{"day":0,"month":0}},"parser":{"paid":true,"unit":"credits","caps":{"month":0}},"fixture":{"paid":false,"unit":"micro_usd","caps":{"day":5000000}},"fixture_race":{"paid":false,"unit":"micro_usd","caps":{"day":100000}},"fixture_parser":{"paid":false,"unit":"credits","caps":{"day":3000}},"proxy":{"paid":true,"unit":"micro_usd","caps":{"day":0,"month":0}},"fixture_proxy":{"paid":false,"unit":"micro_usd","caps":{"day":20000000}},"fixture_proxy_race":{"paid":false,"unit":"micro_usd","caps":{"day":130000}}}}}
+### live_egress
+{"utc":"2026-09-27T02:56:52.342Z","case":"blocked","credential":"absent","paidDispatch":false,"proxyCaps":{"day":0,"month":0},"reason":"no Decodo credential with an approved budget and paid dispatch; no live proxy request was made"}
+### live_search
+{"utc":"2026-09-27T02:56:52.342Z","case":"blocked","reason":"the residential engines need the live proxy"}
+### connections
+{"utc":"2026-09-27T02:56:52.342Z","hosts":["127.0.0.1:3380"],"lookups":[]}
+### meta_end
+{"utc":"2026-09-27T02:56:52.522Z","pi_utc":"2026-09-27T02:56:52.518Z"}
+### selection
+{"utc":"2026-09-27T02:56:53.430Z","search":"live","model":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective","proxy":"decodo-residential","applied":true}
+### end
+{"utc":"2026-09-27T02:56:53.625Z","exit":0,"selection_after":{"search":"live","extractionModel":"gpt-4.1-mini-2025-04-14","parser":"llamaparse-cost-effective","proxy":"decodo-residential"}}

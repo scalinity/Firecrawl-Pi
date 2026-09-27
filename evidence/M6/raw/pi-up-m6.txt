@@ -1,0 +1,90 @@
+### meta
+utc=2026-09-27T01:12:41Z source_commit=4cd5ee564b08d9bf23e8af2ae8182464886d78e8
+### data_check
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=27 create_host_path=false
+### config
+compose_config=valid
+### retrieval_schema
+NOTICE:  schema "fcpi_retrieval" already exists, skipping
+NOTICE:  relation "acquisition" already exists, skipping
+NOTICE:  relation "acquisition_updated_at" already exists, skipping
+NOTICE:  relation "attempt" already exists, skipping
+NOTICE:  relation "attempt_started_at" already exists, skipping
+NOTICE:  relation "permit" already exists, skipping
+NOTICE:  relation "domain_state" already exists, skipping
+NOTICE:  relation "direct_nav" already exists, skipping
+NOTICE:  relation "direct_nav_domain_at" already exists, skipping
+NOTICE:  relation "direct_nav_at" already exists, skipping
+NOTICE:  relation "budget_usage" already exists, skipping
+NOTICE:  relation "budget_reservation" already exists, skipping
+NOTICE:  relation "budget_reservation_logical" already exists, skipping
+NOTICE:  relation "budget_reservation_created" already exists, skipping
+NOTICE:  column "periods" of relation "budget_reservation" already exists, skipping
+NOTICE:  column "paid_total_rate" of relation "budget_reservation" already exists, skipping
+NOTICE:  relation "search_cache" already exists, skipping
+NOTICE:  relation "search_cache_expires" already exists, skipping
+NOTICE:  relation "search_query" already exists, skipping
+NOTICE:  relation "search_query_at" already exists, skipping
+NOTICE:  relation "parse_cache" already exists, skipping
+NOTICE:  relation "parse_cache_expires" already exists, skipping
+NOTICE:  relation "domain_route" already exists, skipping
+NOTICE:  relation "domain_route_updated_at" already exists, skipping
+NOTICE:  relation "route_hold" already exists, skipping
+NOTICE:  relation "proxy_reconciliation" already exists, skipping
+### schema
+applied=yes
+m6_tables=domain_route,proxy_reconciliation,route_hold
+kind_check=CHECK ((kind = ANY (ARRAY['extract'::text, 'repair'::text, 'parse'::text, 'proxy'::text, 'reconcile'::text])))
+### platform_schema
+NOTICE:  schema "fcpi_platform" already exists, skipping
+NOTICE:  relation "job" already exists, skipping
+NOTICE:  relation "job_open" already exists, skipping
+NOTICE:  relation "job_principal_created" already exists, skipping
+NOTICE:  relation "job_results_expire" already exists, skipping
+NOTICE:  relation "job_event" already exists, skipping
+NOTICE:  relation "job_event_job" already exists, skipping
+NOTICE:  relation "idempotency" already exists, skipping
+NOTICE:  relation "job_document" already exists, skipping
+NOTICE:  relation "job_document_sha256" already exists, skipping
+NOTICE:  relation "schema_version" already exists, skipping
+platform_schema=applied
+### up
+ Container fcpi-fixture-m3-1 Healthy 
+ Container fcpi-fixture-m5-1 Healthy 
+ Container fcpi-fixture-1 Healthy 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-rabbitmq-1 Healthy 
+ Container fcpi-browser-worker-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+### swap
+access-gateway memory.swap.max=0
+firecrawl-core memory.swap.max=0
+retrieval-service memory.swap.max=0
+nuq-postgres memory.swap.max=0
+rabbitmq memory.swap.max=0
+redis memory.swap.max=0
+searxng memory.swap.max=0
+fixture-m6 memory.swap.max=0
+browser-worker memory.swap.max=0
+mcp-gateway memory.swap.max=0
+fixture-m5 memory.swap.max=0
+fixture-m3 memory.swap.max=0
+fixture memory.swap.max=0
+fixture-m2 memory.swap.max=0
+### ps
+access-gateway running healthy fcpi/access-gateway@sha256:a700a83e911b98ed90140fa2b108178e2f9539b907005e3bd515840d893c0660
+browser-worker running healthy fcpi/browser@sha256:06db3f1a9d79b1c5fd925dd2d569de9e03dfd4766b2a9157f3bb43f71785f60c
+firecrawl-core running healthy fcpi/firecrawl-api@sha256:5d503ca05aabc737a817cfb978ca5c07936249da0c535b64c9f7849f1950c2ec
+fixture running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m2 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m3 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m5 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m6 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+mcp-gateway running healthy fcpi/mcp-gateway@sha256:b27f94d7067ac49b4fc366a7eaa023838869d362643d8268b94fd23218e317a0
+nuq-postgres running healthy fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180
+rabbitmq running healthy rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8
+redis running healthy redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44
+retrieval-service running healthy fcpi/retrieval@sha256:0c92cd4a0ab85238eeb3aae7e28babe580103f57baa061f006e544521867007e
+searxng running healthy searxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19
+end
