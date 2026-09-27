@@ -57,9 +57,9 @@ test("keys and values named after inherited object members are unknown, not mani
 
 test("crawl and map get the platform's defaults; a crawl's units are its limit", () => {
   const c = validateBody("crawl", { url: "https://example.com" }, M);
-  assert.equal(c.body.limit, 50);
+  assert.equal(c.body.limit, 20);
   assert.equal(c.body.maxDiscoveryDepth, 3);
-  assert.equal(c.units, 50);
+  assert.equal(c.units, 20);
   assert.equal(validateBody("map", { url: "https://example.com" }, M).body.limit, 1000);
 });
 
