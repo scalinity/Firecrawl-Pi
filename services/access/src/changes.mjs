@@ -63,12 +63,14 @@ export function makeChanges({ cfg, store, upstream, archive, originFor }) {
     const doc = r.status === 200 && r.json?.success === true ? r.json.data : null;
     const status = doc?.metadata?.statusCode ?? null;
     const markdown = typeof doc?.markdown === "string" ? doc.markdown : null;
-    if (!doc || !(status >= 200 && status < 300) || markdown === null) {
+    // A page with no text (an image or canvas page, or one onlyMainContent emptied) has nothing to compare (review W5).
+    const norm = markdown === null ? "" : normalize(markdown);
+    if (!doc || !(status >= 200 && status < 300) || !norm) {
       // Not a version: the stored one stays, and nothing is reported as a change.
-      const why = !doc ? `the scrape failed (${r.json?.code ?? `HTTP ${r.status}`}: ${String(r.json?.error ?? "").slice(0, 300)})` : markdown === null ? "the page returned no markdown" : `the page answered ${status}`;
+      const why = !doc ? `the scrape failed (${r.json?.code ?? `HTTP ${r.status}`}: ${String(r.json?.error ?? "").slice(0, 300)})` : !(status >= 200 && status < 300) ? `the page answered ${status}` : markdown === null ? "the page returned no markdown" : "the page returned no text";
       return ctx.send(422, { success: false, code: "NOT_COMPARED", changeStatus: null, url: body.url, error: `No version was taken: ${why}. A failed or error page is never a change event; the previous version is kept.` });
     }
-    const norm = normalize(markdown), nsha = sha(norm);
+    const nsha = sha(norm);
     const prev = await store.versionGet(ctx.client.principal, key);
     let changeStatus = "new", diff = null;
     if (prev) {

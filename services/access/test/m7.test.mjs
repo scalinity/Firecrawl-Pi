@@ -147,6 +147,15 @@ test("change detection: new, same, then changed with a diff; an error page and a
   assert.match(changed.b.diff.text, /^\+ added line$/m);
   // Another principal's first look at the same page is its own "new".
   assert.equal((await r.run("guest", { url })).b.changeStatus, "new");
+  // A page with no text is not compared, a deterministic 422, not a retryable failure; the version stays (review W5).
+  for (const md of ["", "  \n\n\t  \n"]) {
+    r.set(page(md));
+    const empty = await r.run("owner", { url });
+    assert.deepEqual([empty.status, empty.b.code], [422, "NOT_COMPARED"]);
+    assert.match(empty.b.error, /no text/);
+  }
+  r.set(page("# Notes\n\nversion 2\nadded line\n"));
+  assert.equal((await r.run("owner", { url })).b.changeStatus, "same");
 });
 
 test("the outbox round: delivered, retried, dead after its attempts or at once for an unapproved destination, deferred without an attempt", async () => {
