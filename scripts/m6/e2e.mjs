@@ -243,7 +243,9 @@ async function fixturePhase(before) {
   out("learning", { case: "bound", rows: Number(sql("SELECT count(*) FROM fcpi_retrieval.domain_route")[0]), max: 5000 });
   // B6: a bulk crawl and a bulk batch: accepted, held, every request through the provider, the hold released.
   const b0 = piNow(), bs0 = fxStats();
-  let r = await rest("POST", "/v2/crawl", { url: `${FX("m6bulk")}/bulk/`, limit: 25 });
+  // Keyed, so the same request can be replayed once the route is gone (B11 continued).
+  const bulkBody = { url: `${FX("m6bulk")}/bulk/`, limit: 25 }, bulkKey = `m6-bulk-${nonce}`;
+  let r = await rest("POST", "/v2/crawl", bulkBody, { headers: { "x-idempotency-key": bulkKey } });
   const crawlId = r.json?.id;
   out("bulk", { case: "crawl_accepted", ...brief(r), id: crawlId ?? null, holds_during: sql(`SELECT count(*) FROM fcpi_retrieval.route_hold WHERE domain = 'm6bulk.fixture.fcpi.test' AND until > now()`).map(Number)[0] });
   r = crawlId ? await pollJob("crawl", crawlId) : r;
@@ -300,6 +302,11 @@ async function fixturePhase(before) {
   const n0 = fxStats();
   r = await rest("POST", "/v2/search", { query: `fcpi residential none ${nonce}`, limit: 5 });
   out("search", { case: "residential_engine_no_route", ...brief(r), results: (r.json?.data?.web ?? []).length, warning: r.json?.warning ?? null, hits: hitSummary(fxStats().hits.slice(n0.hits.length).filter((h) => h.host === "searchr.fixture.fcpi.test")) });
+  // Still without the route: B6's keyed bulk crawl replayed gets its receipt; the same crawl under a new key is refused.
+  const j0 = Number(sql("SELECT count(*) FROM fcpi_platform.job")[0]);
+  r = await rest("POST", "/v2/crawl", bulkBody, { headers: { "x-idempotency-key": bulkKey } });
+  const fresh = await rest("POST", "/v2/crawl", bulkBody, { headers: { "x-idempotency-key": `${bulkKey}-new` } });
+  out("bulk", { case: "replay_without_route", replay: { ...brief(r), id: r.json?.id ?? null }, fresh: brief(fresh), original_id: crawlId ?? null, jobs_before: j0, jobs_after: Number(sql("SELECT count(*) FROM fcpi_platform.job")[0]) });
   // B8: provider failures, then the breaker, then ordinary work beside it (AC23). Last: the breaker stays open five minutes.
   select("fixture", MODEL, PARSER, "fcpi-fixture-proxy");
   for (const m of ["407", "402", "blackhole"]) {

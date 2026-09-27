@@ -286,13 +286,13 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; strategies=${JSON.stringify(strat(r))}; hits=${(r?.hits ?? []).map((h) => `${h.path}@${h.via}`).join(",")}; tunnels=${(r?.tunnels ?? []).length} exits=${exits(r?.tunnels).join(",")}` };
     } },
   R03: { name: "protected-and-bulk-work-never-uses-home-egress", inputs: [`${RAW}e2e-fixture.txt`],
-    expected: "with the residential route unavailable (Decodo selected, paid dispatch off, no credential): a stealth scrape and a proxy-first domain are PROXY_REQUIRED with no attempt and no target request; a bulk crawl and a bulk batch are 429 PROXY_REQUIRED and a local-only bulk crawl 400 PROXY_REQUIRED, with no receipt and no target request; beside them an ordinary scrape and a five-page crawl reach the target directly (the controls); with the fixture proxy, a 25-page crawl and a 21-URL batch finish with every request of the bulk domain, robots.txt and sitemaps included, through the proxy under a route hold that is released at the end; with the route's budget exhausted and with its breaker open, stealth and bulk work are refused with no target request",
+    expected: "with the residential route unavailable (Decodo selected, paid dispatch off, no credential): a stealth scrape and a proxy-first domain are PROXY_REQUIRED with no attempt and no target request; a bulk crawl and a bulk batch are 429 PROXY_REQUIRED and a local-only bulk crawl 400 PROXY_REQUIRED, with no receipt and no target request; beside them an ordinary scrape and a five-page crawl reach the target directly (the controls); with the fixture proxy, a 25-page crawl and a 21-URL batch finish with every request of the bulk domain, robots.txt and sitemaps included, through the proxy under a route hold that is released at the end; once the route is gone again, that keyed crawl replayed returns its own receipt while the same crawl under a new key is 429 PROXY_REQUIRED, with no receipt added (review W4); with the route's budget exhausted and with its breaker open, stealth and bulk work are refused with no target request",
     run() {
       const p = FX().production ?? [], b = FX().bulk ?? [], bud = FX().budget ?? [], o = FX().outage ?? [];
       const none = (r) => r && (r.hits ?? []).length === 0 && (r.tunnels ?? 0) === 0;
       const st = one(p, "stealth_proxy_required"), pf = one(p, "proxy_first_required"), bc = one(p, "bulk_crawl_refused"), bb = one(p, "bulk_batch_refused"), bs = one(p, "basic_bulk_refused"), nr = one(p, "no_receipts");
       const sd = one(p, "static_direct"), sc = one(p, "small_crawl_direct");
-      const cf = one(b, "crawl_finished"), bf = one(b, "batch_finished"), ca = one(b, "crawl_accepted");
+      const cf = one(b, "crawl_finished"), bf = one(b, "batch_finished"), ca = one(b, "crawl_accepted"), rp = one(b, "replay_without_route");
       const ex = one(bud, "exhausted_stealth"), eb = one(bud, "exhausted_bulk"), br = one(o, "breaker_open_refused");
       const cond = {
         stealth_refused: st?.class === "PROXY_REQUIRED" && (st.acquisitions ?? []).length === 0 && none(st) && /PAID_DISPATCH_DISABLED|BLOCKED_CREDENTIAL/.test(st.error ?? ""),
@@ -302,6 +302,7 @@ const checks = {
         controls: ok200(sd) && sd.markdown === true && viaAll(sd.hits, "direct") && ok200(sc) && sc.status_field === "completed" && sc.documents === 5 && viaAll(sc.hits, "direct"),
         bulk_via_proxy: ok200(cf) && cf.status_field === "completed" && cf.documents === 25 && viaAll(cf.hits, "proxy") && (cf.hits ?? []).some((h) => h.path === "/robots.txt") && ca?.holds_during >= 1 && cf.holds_after === 0
           && ok200(bf) && bf.status_field === "completed" && bf.documents === 21 && viaAll(bf.hits, "proxy") && bf.holds_after === 0,
+        replay: !!ca?.id && rp?.original_id === ca.id && rp.replay?.status === 200 && rp.replay.id === ca.id && rp.fresh?.status === 429 && rp.fresh.code === "PROXY_REQUIRED" && rp.jobs_before === rp.jobs_after,
         exhausted: ex?.class === "PROXY_REQUIRED" && /BUDGET_EXHAUSTED/.test(ex.error ?? "") && none(ex) && eb?.status === 429 && /BUDGET_EXHAUSTED/.test(eb.error ?? "") && none(eb),
         breaker: br?.class === "PROXY_REQUIRED" && /PROVIDER_UNAVAILABLE/.test(br.error ?? "") && none(br) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; refusals: stealth ${st?.class}, proxy-first ${pf?.class}, bulk crawl ${bc?.status} ${bc?.code}, bulk batch ${bb?.status}, basic bulk ${bs?.status}; receipts ${nr?.jobs_before}→${nr?.jobs_after}; bulk crawl ${cf?.documents} docs, ${(cf?.hits ?? []).length} hits all via proxy=${viaAll(cf?.hits, "proxy")}; batch ${bf?.documents} docs` };

@@ -103,6 +103,15 @@ export function makeStore(cfg, log = () => {}) {
       });
     },
 
+    // The job an idempotency key already names for this principal and operation: { job }, { conflict } when the key
+    // was used with another request, or null. Read-only; admission itself still decides under its lock (M6 review W4).
+    async idempotentJob({ principal, kind, idemKey, hash }) {
+      const k = (await q("SELECT request_hash, job_id FROM fcpi_platform.idempotency WHERE principal = $1 AND operation = $2 AND key = $3 AND expires_at > now()", [principal, kind, idemKey])).rows[0];
+      if (!k) return null;
+      if (k.request_hash !== hash) return { conflict: true };
+      const job = (await q("SELECT * FROM fcpi_platform.job WHERE id = $1", [k.job_id])).rows[0];
+      return job ? { job } : null;
+    },
     getJob: async (id, principal) => (await q("SELECT * FROM fcpi_platform.job WHERE id = $1 AND principal = $2", [id, principal])).rows[0] ?? null,
     getJobAny: async (id) => (await q("SELECT * FROM fcpi_platform.job WHERE id = $1", [id])).rows[0] ?? null,
     events: async (id) => (await q("SELECT at, from_state, to_state, detail FROM fcpi_platform.job_event WHERE job_id = $1 ORDER BY at, id", [id])).rows,

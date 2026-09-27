@@ -126,17 +126,21 @@ async function submit(ctx, route) {
   const { units, invalidURLs } = v;
   // A job that needs the residential route (bulk, or asking for it) is refused before any receipt when it cannot be had.
   const { body, needsRoute } = routeBody(route.kind, v.body, M);
+  const idemKey = ctx.req.headers["x-idempotency-key"];
+  if (idemKey !== undefined && !/^[A-Za-z0-9._:-]{8,128}$/.test(idemKey)) throw new RequestError(400, "BAD_REQUEST", "x-idempotency-key must be 8-128 characters of letters, digits and ._:-");
   if (needsRoute) {
     const r = extractor ? await extractor.routes().catch(() => null) : null;
     const residential = r?.status === 200 ? r.json?.residential : null;
     if (!residential?.available) {
+      // A retry of a job already accepted gets its receipt, route or no route: only a new receipt is refused (review W4).
+      const prior = idemKey !== undefined ? await store.idempotentJob({ principal: ctx.client.principal, kind: route.kind, idemKey, hash: requestHash(route.kind, body) }) : null;
+      if (prior?.conflict) return ctx.send(409, { success: false, code: "IDEMPOTENCY_CONFLICT", error: "This idempotency key was used with a different request in the last 24 hours." });
+      if (prior?.job) { ctx.job = prior.job.id; return submissionAnswer(ctx, route, prior.job, invalidURLs, true); }
       const x = routeRefusal(residential);
       log({ event: "route_refused", request_id: ctx.id, kind: route.kind, units, reason: x.body.route.residential });
       return ctx.send(x.status, x.body, x.retryAfter ? { "retry-after": String(x.retryAfter) } : {});
     }
   }
-  const idemKey = ctx.req.headers["x-idempotency-key"];
-  if (idemKey !== undefined && !/^[A-Za-z0-9._:-]{8,128}$/.test(idemKey)) throw new RequestError(400, "BAD_REQUEST", "x-idempotency-key must be 8-128 characters of letters, digits and ._:-");
   let admitted;
   try {
     admitted = await store.admit({ principal: ctx.client.principal, clientLabel: ctx.client.label, kind: route.kind, body, hash: requestHash(route.kind, body), units, idemKey, quotaBytes: await quotaBytes() });
