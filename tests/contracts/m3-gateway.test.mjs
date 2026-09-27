@@ -146,6 +146,8 @@ async function harness({ manifest = testManifest(), settleMs = 800, extraEnv = {
   mkdirSync(art); mkdirSync(cred);
   writeFileSync(join(art, ".fcpi-artifact-root"), "test\n");
   writeFileSync(join(cred, "gateway_postgres_password"), "p".repeat(40));
+  // Read only when extraEnv names PI_EXTRACT_URL (a stand-in retrieval service, as fakeRoutes() gives).
+  writeFileSync(join(cred, "gateway_retrieval_token"), "r".repeat(40));
   const core = h.core = fakeCore(dbName);
   await core.connectDb();
   await core.start();
@@ -327,7 +329,7 @@ test("a crawl is admitted, mapped, archived and paginated from the archive after
   const id = r.json.id;
   const sub = H.core.submissions().at(-1);
   assert.equal(sub.body.origin, `fcpi:${id}`, "the submission key travels in origin");
-  assert.equal(sub.body.limit, 50);
+  assert.equal(sub.body.limit, 20, "a crawl without a limit takes the manifest's default, spec §10.2's bulk threshold");
   assert.equal(sub.body.maxDiscoveryDepth, 3);
   const up = await H.core.upstreamOf(id);
   assert.ok(up && up !== id, "the external id is not the upstream id");
@@ -506,9 +508,31 @@ test("status reads of a running job are bounded in size and in number", async ()
   assert.equal((await h.call("GET", `/v2/crawl/${r.json.id}?skip=1`, { token: T.a })).status, 200);
 });
 
-test("a page of a hundred archived documents is served whole, without piling listeners on the response", async () => {
-  const h = await harness();
+// A stand-in for the retrieval service's route endpoints (M6): the residential route available, every hold granted.
+async function fakeRoutes() {
+  const calls = [];
+  const s = createServer((req, res) => {
+    let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
+      calls.push({ method: req.method, path: req.url, auth: req.headers.authorization, body: b ? JSON.parse(b) : null });
+      const json = (o) => res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify(o));
+      if (req.url === "/internal/routes") return json({ residential: { available: true, reason: null }, bulkPages: 20, holdMaxMinutes: 90 });
+      if (req.url === "/internal/route-hold") return json({ held: true, domains: 1, until: new Date(Date.now() + 3600000).toISOString() });
+      if (req.url === "/internal/route-release") return json({ released: 1 });
+      res.writeHead(404).end();
+    });
+  });
+  await new Promise((r) => s.listen(0, "127.0.0.1", r));
+  return { calls, port: s.address().port, close: () => new Promise((r) => { s.closeAllConnections(); s.close(r); }) };
+}
+
+test("a page of a hundred archived documents is served whole, without piling listeners on the response", async (t) => {
+  // A crawl of 100 pages is a bulk job (spec §10.2): it is admitted only with the residential route, and holds its domain.
+  const routes = await fakeRoutes();
+  t.after(routes.close);
+  const h = await harness({ extraEnv: { PI_EXTRACT_URL: `http://127.0.0.1:${routes.port}/` } });
   const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 100 }) });
+  assert.equal(r.status, 200);
+  assert.equal(h.core.submissions().at(-1).body.scrapeOptions.proxy, "stealth", "a bulk job's pages ask for the residential route");
   const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
   h.core.complete(up, 100);
   await waitFor(async () => (await h.job(r.json.id)).state === "SUCCEEDED", 15000, "archived");
@@ -519,6 +543,10 @@ test("a page of a hundred archived documents is served whole, without piling lis
   assert.equal(new Set(p.json.data.map((d) => d.metadata.scrapeId)).size, 100);
   await sleep(200);
   assert.ok(!h.logs.some((l) => /MaxListenersExceededWarning/.test(l.stderr ?? "")), "no listener warning");
+  const hold = routes.calls.find((c) => c.path === "/internal/route-hold");
+  assert.equal(hold?.body.jobId, r.json.id);
+  assert.equal(hold.auth, `Bearer ${"r".repeat(40)}`);
+  await waitFor(() => routes.calls.some((c) => c.path === "/internal/route-release" && c.body.jobId === r.json.id), 5000, "the hold released");
 });
 
 test("the same idempotency key returns the same job; another request under it is 409; another principal's key is separate", async () => {
