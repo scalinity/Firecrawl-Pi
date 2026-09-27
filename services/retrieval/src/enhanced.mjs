@@ -180,7 +180,7 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
       }
       verdict = "success";
       const bytes = a.body ? a.body.length : Buffer.byteLength(a.html);
-      const answer = { status: a.status, finalUrl: a.finalUrl, contentType: a.contentType, ...(a.body ? { bodyBase64: a.body.toString("base64") } : { html: a.html }) };
+      const answer = { status: a.status, finalUrl: a.finalUrl, contentType: a.contentType, ...(a.retryAfter ? { retryAfter: a.retryAfter } : {}), ...(a.body ? { bodyBase64: a.body.toString("base64") } : { html: a.html }) };
       await store.settleBudget(res.id, amount, { usage: { requests: 1, mode, bytes, targetStatus: a.status, requestId },
         result: bytes <= REUSE_MAX_BYTES ? { answer } : { kept: false, bytes }, detail: `a successful ${mode} response, charged at the card's highest tier (the tier is not reported)` });
       say({ outcome: "SETTLED", target_status: a.status, bytes, micro_usd: amount });
@@ -209,8 +209,10 @@ export function readAnswer(j, mode, maxBodyBytes) {
   const body = Buffer.from(j.httpResponseBody, "base64");
   if (body.length > maxBodyBytes) throw new Error(`httpResponseBody exceeds ${maxBodyBytes} bytes`);
   const headers = Array.isArray(j.httpResponseHeaders) ? j.httpResponseHeaders : [];
-  const ct = headers.find((h) => h && typeof h.name === "string" && h.name.toLowerCase() === "content-type" && typeof h.value === "string");
-  return { status: j.statusCode, finalUrl: j.url, contentType: ct ? ct.value.slice(0, 256) : null, body };
+  const header = (n) => headers.find((h) => h && typeof h.name === "string" && h.name.toLowerCase() === n && typeof h.value === "string")?.value ?? null;
+  const ct = header("content-type"), ra = header("retry-after");
+  // The target's own Retry-After, relayed with its answer, is honoured as on any route (spec §9.3).
+  return { status: j.statusCode, finalUrl: j.url, contentType: ct ? ct.slice(0, 256) : null, body, ...(ra ? { retryAfter: ra.slice(0, 64) } : {}) };
 }
 
 // The final URL an enhanced answer ended at, checked like any target (the Cloud denylist, ports, literal addresses): an

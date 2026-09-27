@@ -180,7 +180,7 @@ test("an exhausted cap stops the next page's dispatch before it is sent, and con
 test("the waterfall: a direct challenge with no residential route goes straight to one enhanced dispatch; the provider's 200 is judged by the target's page", async () => {
   const fx = await startM7();
   try {
-    const { acquire } = rig(fx);
+    const { acquire, store } = rig(fx);
     const r = await acquire(req(at(fx, "/tough")));
     assert.equal(r.ok, true, JSON.stringify(r.failure));
     assert.deepEqual(r.strategies, ["direct_http", "enhanced"]);
@@ -203,6 +203,8 @@ test("the waterfall: a direct challenge with no residential route goes straight 
     assert.equal((await acquire(req(at(fx, "/login"), { route: "enhanced" }))).failure.class, "AUTH_REQUIRED");
     const slow = await acquire(req(at(fx, "/slow-down", "m7cache"), { route: "enhanced" }));
     assert.equal(slow.failure.class, "RATE_LIMITED");
+    // The target's own Retry-After, relayed by the provider, sets the cooldown, as on any route.
+    assert.deepEqual(store.cooled.at(-1), { domain: "m7cache.fixture.fcpi.test", sec: 30 });
     // An answer that ended at a Cloud host is refused, whatever it holds.
     const out = await acquire(req(at(fx, "/redirect-out", "m7"), { route: "enhanced" }));
     assert.equal(out.failure.class, "CLOUD_DENIED");

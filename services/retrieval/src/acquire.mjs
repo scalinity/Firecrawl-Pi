@@ -515,7 +515,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const buf = a.bodyBase64 !== undefined ? Buffer.from(a.bodyBase64, "base64") : null;
         const ct = buf ? sniffContentType(buf, a.contentType) : a.contentType;
         const text = buf ? (isTextual(ct) ? decodeText(buf, ct) : null) : a.html;
-        const verdict = classify({ status: a.status, contentType: ct, body: text, finalUrl: a.finalUrl, requestedUrl: req.url });
+        const verdict = classify({ status: a.status, contentType: ct, body: text, finalUrl: a.finalUrl, requestedUrl: req.url, retryAfter: retryAfterSeconds(a.retryAfter) });
         const bytes = buf ? buf.length : Buffer.byteLength(a.html);
         await store.finishAttempt(attemptId, { outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: a.status, bytes });
         Object.assign(result, { finalUrl: a.finalUrl, targetStatus: a.status, contentType: ct ?? null, bytes, redirects: [], quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
