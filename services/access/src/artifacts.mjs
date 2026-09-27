@@ -34,7 +34,9 @@ export async function storeCaptures(doc, { principal, origin, archive, store, qu
   const slots = [];
   if (typeof doc.screenshot === "string") slots.push({ get: () => doc.screenshot, set: (v) => { doc.screenshot = v; }, source: "screenshot" });
   (doc.actions?.screenshots ?? []).forEach((_, i) => slots.push({ get: () => doc.actions.screenshots[i], set: (v) => { doc.actions.screenshots[i] = v; }, source: `actions.screenshots[${i}]` }));
-  const out = [];
+  // Every capture is checked and written first; the rows then commit in one transaction. A file whose row never commits
+  // is referenced by nothing and goes with the archive's sweep (review S5).
+  const pending = [];
   let used = await store.archiveBytes();
   for (const slot of slots) {
     const c = parseCapture(slot.get());
@@ -47,11 +49,13 @@ export async function storeCaptures(doc, { principal, origin, archive, store, qu
     // The page reports its own height to the worker, so a hostile one could hide a clip: an image at the clip height is
     // marked truncated whatever the page said (review S6).
     const truncated = c.truncated || size.height >= CAPTURE_MAX_HEIGHT;
-    const row = await store.addArtifact({ id: randomUUID(), principal, sha256: put.sha256, bytes: put.bytes, mime: c.mime, width: size.width, height: size.height, truncated });
-    const url = `${origin}/platform/v1/artifacts/${row.id}`;
-    slot.set(url);
-    out.push({ source: slot.source, url, id: row.id, mime: row.mime, bytes: row.bytes, width: row.width, height: row.height, truncated: row.truncated, sha256: row.sha256,
-      expiresAt: new Date(row.expires_at).toISOString() });
+    pending.push({ slot, row: { id: randomUUID(), principal, sha256: put.sha256, bytes: put.bytes, mime: c.mime, width: size.width, height: size.height, truncated } });
   }
-  return out;
+  const rows = pending.length ? await store.addArtifacts(pending.map((p) => p.row)) : [];
+  return rows.map((row, i) => {
+    const url = `${origin}/platform/v1/artifacts/${row.id}`;
+    pending[i].slot.set(url);
+    return { source: pending[i].slot.source, url, id: row.id, mime: row.mime, bytes: row.bytes, width: row.width, height: row.height, truncated: row.truncated, sha256: row.sha256,
+      expiresAt: new Date(row.expires_at).toISOString() };
+  });
 }

@@ -225,9 +225,14 @@ export function makeStore(cfg, log = () => {}) {
     referenced: async (shas) => new Set((await q(CONTENT_TABLES.map((t) => `SELECT sha256 FROM fcpi_platform.${t} WHERE sha256 = ANY($1)`).join(" UNION "), [shas])).rows.map((r) => r.sha256)),
 
     // ---- M7: artifacts, the scrape cache, page versions and the webhook outbox ---------------------------
-    // Each row names a file the archive already holds (written and fsynced before the row commits).
-    addArtifact: async (a) => (await q(`INSERT INTO fcpi_platform.artifact (id, principal, sha256, bytes, mime, width, height, truncated, expires_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now() + $9 * interval '1 day') RETURNING *`, [a.id, a.principal, a.sha256, a.bytes, a.mime, a.width, a.height, a.truncated, L.results.retentionDays])).rows[0],
+    // Each row names a file the archive already holds (written and fsynced before the rows commit). One answer's artifacts
+    // commit together, so a capture that fails leaves none of its siblings behind (review S5).
+    addArtifacts: (list) => tx(async (c) => {
+      const rows = [];
+      for (const a of list) rows.push((await c.query(`INSERT INTO fcpi_platform.artifact (id, principal, sha256, bytes, mime, width, height, truncated, expires_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, now() + $9 * interval '1 day') RETURNING *`, [a.id, a.principal, a.sha256, a.bytes, a.mime, a.width, a.height, a.truncated, L.results.retentionDays])).rows[0]);
+      return rows;
+    }),
     // An artifact by id for its principal only: another principal's is not found, as an unknown one is.
     getArtifact: async (id, principal) => (await q("SELECT *, (expires_at < now()) AS expired FROM fcpi_platform.artifact WHERE id = $1 AND principal = $2", [id, principal])).rows[0] ?? null,
     // A cached answer no older than maxAgeMs, for this principal and request only.

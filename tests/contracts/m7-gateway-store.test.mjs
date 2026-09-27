@@ -112,7 +112,7 @@ test("the cache is read only by its principal, for its request, within the fresh
     await sql("UPDATE fcpi_platform.page_cache SET expires_at = now() - interval '1 second'");
     assert.equal(await store.cacheGet("owner", key, 3600000), null, "past its lifetime");
     const id = randomUUID();
-    await store.addArtifact({ id, principal: "owner", sha256: sha("2"), bytes: 10, mime: "image/png", width: 1280, height: 800, truncated: false });
+    await store.addArtifacts([{ id, principal: "owner", sha256: sha("2"), bytes: 10, mime: "image/png", width: 1280, height: 800, truncated: false }]);
     assert.equal((await store.getArtifact(id, "owner")).expired, false);
     assert.equal(await store.getArtifact(id, "guest"), null);
     await sql("UPDATE fcpi_platform.artifact SET expires_at = now() - interval '1 second'");
@@ -123,7 +123,7 @@ test("the cache is read only by its principal, for its request, within the fresh
 test("every content table is counted by the quota and kept by the archive's sweep; expired rows go at retention", async () => {
   const { store, sql, close } = await rig();
   try {
-    await store.addArtifact({ id: randomUUID(), principal: "o", sha256: sha("3"), bytes: 7, mime: "image/png", width: 1, height: 1, truncated: false });
+    await store.addArtifacts([{ id: randomUUID(), principal: "o", sha256: sha("3"), bytes: 7, mime: "image/png", width: 1, height: 1, truncated: false }]);
     await store.cachePut("o", sha("c"), sha("4"), 11, 3600);
     await store.versionPut({ principal: "o", key: sha("d"), url: "https://a.example/", sha256: sha("5"), bytes: 13, normalizedSha256: sha("6") });
     assert.equal(await store.archiveBytes(), 31);

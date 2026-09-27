@@ -76,7 +76,7 @@ test("captures become owner-bound artifacts with the PNG's own dimensions; a cli
   assert.equal(parseCapture(`data:image/png;truncated=true;base64,${tall.toString("base64")}`).truncated, true);
   const files = new Map(), rows = [];
   const archive = { put: async (b) => { const sha = createHash("sha256").update(b).digest("hex"); files.set(sha, b); return { sha256: sha, bytes: b.length }; }, hasRoom: async () => true };
-  const store = { archiveBytes: async () => 0, addArtifact: async (a) => { const r = { ...a, expires_at: new Date(Date.now() + 7 * 86400e3) }; rows.push(r); return r; } };
+  const store = { archiveBytes: async () => 0, addArtifacts: async (list) => list.map((a) => { const r = { ...a, expires_at: new Date(Date.now() + 7 * 86400e3) }; rows.push(r); return r; }) };
   const doc = { markdown: "m", screenshot: `data:image/png;base64,${shot.toString("base64")}`, actions: { screenshots: [`data:image/png;truncated=true;base64,${tall.toString("base64")}`], scrapes: [] } };
   const out = await storeCaptures(doc, { principal: "owner", origin: "https://gw.example", archive, store, quotaBytes: 1e9 });
   assert.equal(out.length, 2);
@@ -88,6 +88,11 @@ test("captures become owner-bound artifacts with the PNG's own dimensions; a cli
   // A page that understated its height is still marked clipped: the image is at the clip height (review S6).
   const liar = await storeCaptures({ screenshot: `data:image/png;base64,${tall.toString("base64")}` }, { principal: "owner", origin: "https://gw.example", archive, store, quotaBytes: 1e9 });
   assert.equal(liar[0].truncated, true);
+  // A capture that fails after a good one leaves no artifact of either (review S5).
+  const before = rows.length;
+  await assert.rejects(storeCaptures({ screenshot: `data:image/png;base64,${shot.toString("base64")}`, actions: { screenshots: ["data:image/png;base64,QUJD"] } },
+    { principal: "owner", origin: "https://gw.example", archive, store, quotaBytes: 1e9 }), (e) => e.code === "CAPTURE_INVALID");
+  assert.equal(rows.length, before);
   await assert.rejects(storeCaptures({ screenshot: "data:image/png;base64,QUJD" }, { principal: "o", origin: "x", archive, store, quotaBytes: 1e9 }), (e) => e.code === "CAPTURE_INVALID");
   await assert.rejects(storeCaptures({ screenshot: `data:image/png;base64,${shot.toString("base64")}` }, { principal: "o", origin: "x", archive, store, quotaBytes: 10 }), (e) => e.code === "STORAGE_QUOTA");
 });
