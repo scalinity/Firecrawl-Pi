@@ -1,0 +1,19 @@
+### meta
+utc=2026-09-27T05:01:22Z source_commit=487ea432425d0156b0370b4429f7b973ef7cee1d
+### secrets
+created /etc/firecrawl-pi/secrets/providers/fixture_zyte
+created /etc/firecrawl-pi/secrets/fixture_zyte_sha256
+fixture_zyte_pair=match
+created /etc/firecrawl-pi/secrets/webhook_signing_secret
+created /etc/firecrawl-pi/secrets/fixture_webhook_secret
+webhook_secret_pair=match
+### clients
+created client m7
+created client m7other
+### inventory
+3310:3310 600 /etc/firecrawl-pi/secrets/providers/fixture_zyte
+8080:8080 600 /etc/firecrawl-pi/secrets/fixture_zyte_sha256
+3310:3310 600 /etc/firecrawl-pi/secrets/webhook_signing_secret
+8080:8080 600 /etc/firecrawl-pi/secrets/fixture_webhook_secret
+providers_present=fixture_proxy fixture_zyte 
+end
