@@ -276,12 +276,16 @@ export class Store {
   }
 
   // ---- proxy usage reconciliation (M6, reconcile.mjs) -------------------------------------------------------
-  // One provider's proxy rows of one UTC day: the bytes settled and the bytes measured by the rows still UNCERTAIN.
+  // One provider's rows of one UTC day: the bytes its proxy rows settled and measured while UNCERTAIN, the bytes earlier
+  // reconciliations already charged (review C1: they are covered, never charged again), and how many proxy rows are
+  // still RESERVED, whose bytes the provider may already report but the ledger does not yet hold.
   async proxyDay(provider, day) {
-    const r = (await this.pool.query(`SELECT COALESCE(sum((usage->>'bytes')::bigint) FILTER (WHERE state = 'SETTLED'), 0)::float8 AS settled,
-        COALESCE(sum((usage->>'bytes')::bigint) FILTER (WHERE state = 'UNCERTAIN'), 0)::float8 AS uncertain, count(*) FILTER (WHERE state = 'UNCERTAIN')::int AS n_uncertain
-      FROM fcpi_retrieval.budget_reservation WHERE provider = $1 AND kind = 'proxy' AND day_start = $2`, [provider, day])).rows[0];
-    return { settledBytes: r.settled, uncertainBytes: r.uncertain, uncertain: r.n_uncertain };
+    const r = (await this.pool.query(`SELECT COALESCE(sum((usage->>'bytes')::bigint) FILTER (WHERE kind = 'proxy' AND state = 'SETTLED'), 0)::float8 AS settled,
+        COALESCE(sum((usage->>'bytes')::bigint) FILTER (WHERE kind = 'proxy' AND state = 'UNCERTAIN'), 0)::float8 AS uncertain,
+        COALESCE(sum((usage->>'bytes')::bigint) FILTER (WHERE kind = 'reconcile'), 0)::float8 AS adjusted,
+        count(*) FILTER (WHERE kind = 'proxy' AND state = 'UNCERTAIN')::int AS n_uncertain, count(*) FILTER (WHERE kind = 'proxy' AND state = 'RESERVED')::int AS n_reserved
+      FROM fcpi_retrieval.budget_reservation WHERE provider = $1 AND kind IN ('proxy', 'reconcile') AND day_start = $2`, [provider, day])).rows[0];
+    return { settledBytes: r.settled, uncertainBytes: r.uncertain, adjustedBytes: r.adjusted, uncertain: r.n_uncertain, reserved: r.n_reserved };
   }
   // A charge the provider's report shows beyond what was measured: settled at once in its category (and the paid
   // total's day for a paid provider), past any cap, since it was already incurred.

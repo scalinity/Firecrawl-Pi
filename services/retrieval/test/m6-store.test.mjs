@@ -124,3 +124,32 @@ test("reconciliation: an adjustment settles past the cap, uncertain rows settle 
     assert.deepEqual(states, ["proxy:SETTLED", "proxy:SETTLED", "reconcile:SETTLED"]);
   } finally { await store.close(); }
 });
+
+test("reconciling a day twice charges its difference once; a later report charges only what it added; a day in flight waits (review C1)", opts, async () => {
+  const { startFixture, m6Policy, m6Budget, CRED } = await import("./m6-helpers.mjs");
+  const { providersDir } = await import("./m5-helpers.mjs");
+  const { reconcileDay } = await import("../src/reconcile.mjs");
+  const store = await fresh();
+  const fx = await startFixture();
+  try {
+    const day = new Date().toISOString().slice(0, 10), month = `${day.slice(0, 7)}-01`;
+    const budget = m6Budget(fx), policy = m6Policy(fx);
+    const args = { store, getBudget: () => budget, providersDir: providersDir({ fixture_proxy: CRED }), providerName: "fixture-proxy", day, getPolicy: () => policy,
+      resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} };
+    const base = { provider: "fixture-proxy", subject: "fcpi-fixture-proxy", kind: "proxy", unit: "micro_usd", rateCard: "fixture/fcpi-fixture-proxy@2026-09-26", requestHash: "bytes:1", caps: { day: 20000000 }, paidTotalCap: null, paidTotalRate: 1, day, month, notifyAt: 0.8, category: "fixture_proxy" };
+    const a = await store.reserveBudget({ ...base, id: randomUUID(), callKey: "proxy:a", logicalId: "a", amount: 40000 });
+    await store.settleBudget(a.reservation.id, 400, { usage: { bytes: 100000 } });
+    fx.state.usageByDay.set(day, 1100000);
+    const first = await reconcileDay(args);
+    assert.equal(first.adjustmentMicroUsd, 4000);
+    const second = await reconcileDay(args);
+    assert.equal(second.adjustmentMicroUsd, 0, "the same report charges nothing the second time");
+    fx.state.usageByDay.set(day, 1350000);
+    const third = await reconcileDay(args);
+    assert.equal(third.adjustmentMicroUsd, 1000, "only the 250,000 bytes the report added");
+    const rows = await sql("SELECT (usage->>'bytes')::bigint AS b FROM fcpi_retrieval.budget_reservation WHERE kind = 'reconcile' ORDER BY created_at");
+    assert.deepEqual(rows.map((r) => Number(r.b)), [1000000, 250000]);
+    await store.reserveBudget({ ...base, id: randomUUID(), callKey: "proxy:b", logicalId: "b", amount: 40000 });
+    await assert.rejects(reconcileDay(args), (e) => e.failureClass === "RECONCILE_IN_FLIGHT");
+  } finally { await fx.close(); await store.close(); }
+});

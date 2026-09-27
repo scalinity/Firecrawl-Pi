@@ -126,12 +126,13 @@ const breakerState = (name, p) => (p.kind === "parser" ? parse.breakerState(name
 log({ event: "budget_loaded", budget_sha256: budgetSha256, paid_dispatch: env.paidDispatch, models: Object.keys(budget.models), parsers: Object.keys(budget.parsers), proxies: Object.keys(budget.proxies) });
 // The residential route as others see it: no secret, only whether it can be used now and why not.
 const routeView = (st) => ({ available: st.available, reason: st.reason, subject: st.subject ?? null, provider: st.providerName ?? null, paid: st.paid ?? null, ...(st.retryAfter ? { retryAfter: st.retryAfter } : {}) });
-// Hourly, the selected paid proxy's yesterday and today are reconciled against its usage report, when it has one
-// and its report's credential is present (spec §10.3).
+// Hourly, the selected paid proxy's last closed UTC day is reconciled against its usage report, when paid dispatch is
+// on, it has a report and the report's credential is present (spec §10.3). Only a closed day: today's report moves
+// while attempts are in flight (review C1); repeating the same day charges nothing new.
 setInterval(async () => {
   const st = residential.state();
-  if (!st.providerName || !st.paid || !st.provider?.usageUrl || !readCredential(env.providersDir, st.provider.usageCredential)) return;
-  for (const day of [periodStarts(new Date(Date.now() - 86400e3)).day, periodStarts().day]) {
+  if (!env.paidDispatch || !st.providerName || !st.paid || !st.provider?.usageUrl || !readCredential(env.providersDir, st.provider.usageCredential)) return;
+  for (const day of [periodStarts(new Date(Date.now() - 86400e3)).day]) {
     await reconcileDay({ store, getBudget, providersDir: env.providersDir, providerName: st.providerName, day, getPolicy, resolvePublic, log })
       .catch((e) => log({ event: "proxy_reconcile_failed", provider: st.providerName, day, error: e.code ?? e.message }));
   }
@@ -146,7 +147,9 @@ const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, I
   PARSER_REQUIRED: 422, PROVIDER_UNAVAILABLE: 503, PROVIDER_UNREACHABLE: 503, PROVIDER_UNCERTAIN: 502, PROVIDER_AUTH_FAILED: 502, PROVIDER_BILLING: 502,
   PROVIDER_RATE_LIMITED: 503, PROVIDER_ERROR: 502, PROVIDER_REJECTED: 502, EXTRACTION_UNCERTAIN: 409, EXTRACTION_IN_FLIGHT: 409, LOGICAL_ID_CONFLICT: 409,
   SCHEMA_INVALID: 400, SCHEMA_TOO_LARGE: 400, SCHEMA_TOO_DEEP: 400, SCHEMA_UNSUPPORTED: 400, INPUT_TOO_LARGE: 413, NO_CONTENT: 422, RESULT_TOO_LARGE: 413,
-  DOCUMENT_TOO_LARGE: 413, DOCUMENT_TOO_MANY_PAGES: 413, UNSUPPORTED_CONTENT: 415, PARSE_FAILED: 502, PARSE_EMPTY: 502 };
+  DOCUMENT_TOO_LARGE: 413, DOCUMENT_TOO_MANY_PAGES: 413, UNSUPPORTED_CONTENT: 415, PARSE_FAILED: 502, PARSE_EMPTY: 502,
+  // M6: proxy reconciliation
+  RECONCILE_IN_FLIGHT: 409 };
 const send = (res, status, body, extra = {}) => {
   const buf = Buffer.from(JSON.stringify(body));
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": buf.length, "cache-control": "no-store", ...extra });
