@@ -515,8 +515,10 @@ test("status reads of a running job are bounded in size and in number", async ()
 });
 
 // A stand-in for the retrieval service's route endpoints (M6): the residential route available, every hold granted.
+// M7: its webhook check answers as out.webhook says: "allow", "deny" or "down" (a 500).
 async function fakeRoutes() {
   const calls = [];
+  const out = { webhook: "allow" };
   const s = createServer((req, res) => {
     let b = ""; req.on("data", (c) => (b += c)); req.on("end", () => {
       calls.push({ method: req.method, path: req.url, auth: req.headers.authorization, body: b ? JSON.parse(b) : null });
@@ -524,12 +526,43 @@ async function fakeRoutes() {
       if (req.url === "/internal/routes") return json({ residential: { available: true, reason: null }, bulkPages: 20, holdMaxMinutes: 90 });
       if (req.url === "/internal/route-hold") return json({ held: true, domains: 1, until: new Date(Date.now() + 3600000).toISOString() });
       if (req.url === "/internal/route-release") return json({ released: 1 });
+      if (req.url === "/internal/webhook/check") {
+        if (out.webhook === "down") return res.writeHead(500).end();
+        return json(out.webhook === "allow" ? { allowed: true, reason: null, delivery: "enabled" } : { allowed: false, reason: "NOT_APPROVED" });
+      }
       res.writeHead(404).end();
     });
   });
   await new Promise((r) => s.listen(0, "127.0.0.1", r));
-  return { calls, port: s.address().port, close: () => new Promise((r) => { s.closeAllConnections(); s.close(r); }) };
+  return Object.assign(out, { calls, port: s.address().port, close: () => new Promise((r) => { s.closeAllConnections(); s.close(r); }) });
 }
+
+test("M7: a webhook destination is checked before any receipt; a retry of an accepted job gets its receipt whatever the check says now; a reused key is 409", async (t) => {
+  const routes = await fakeRoutes();
+  t.after(routes.close);
+  const h = await harness({ extraEnv: { PI_EXTRACT_URL: `http://127.0.0.1:${routes.port}/` } });
+  const hook = { url: "https://hooks.example/receive" }, key = `idem-${randomUUID()}`;
+  const withKey = (body) => ({ token: T.a, body, headers: { "x-idempotency-key": key } });
+  const first = await h.call("POST", "/v2/crawl", withKey(crawlBody({ limit: 5, webhook: hook })));
+  assert.equal(first.status, 200, first.text);
+  const n = h.core.submissions().length;
+  // The check cannot be made: a new job is refused, nothing written; the accepted job's retry gets its receipt (review S10).
+  routes.webhook = "down";
+  const down = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 5, webhook: hook }) });
+  assert.deepEqual([down.status, down.json.code, down.headers["retry-after"]], [503, "WEBHOOK_CHECK_UNAVAILABLE", "10"]);
+  const replayDown = await h.call("POST", "/v2/crawl", withKey(crawlBody({ limit: 5, webhook: hook })));
+  assert.deepEqual([replayDown.status, replayDown.json.id], [200, first.json.id]);
+  // The destination is no longer approved: a new job is refused by name; the retry still gets its receipt; the key
+  // reused for another request is 409, not the refusal.
+  routes.webhook = "deny";
+  const denied = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 5, webhook: hook }) });
+  assert.deepEqual([denied.status, denied.json.code, denied.json.option], [400, "UNSUPPORTED_OPTION", "webhook.url"]);
+  const replayDenied = await h.call("POST", "/v2/crawl", withKey(crawlBody({ limit: 5, webhook: hook })));
+  assert.deepEqual([replayDenied.status, replayDenied.json.id], [200, first.json.id]);
+  const conflict = await h.call("POST", "/v2/crawl", withKey(crawlBody({ limit: 6, webhook: hook })));
+  assert.deepEqual([conflict.status, conflict.json.code], [409, "IDEMPOTENCY_CONFLICT"]);
+  assert.equal(h.core.submissions().length, n, "nothing new reached the core");
+});
 
 test("a page of a hundred archived documents is served whole, without piling listeners on the response", async (t) => {
   // A crawl of 100 pages is a bulk job (spec §10.2): it is admitted only with the residential route, and holds its domain.

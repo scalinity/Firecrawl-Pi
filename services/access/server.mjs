@@ -140,14 +140,20 @@ async function submit(ctx, route) {
   const { body, needsRoute } = routeBody(route.kind, v.body, M);
   const idemKey = ctx.req.headers["x-idempotency-key"];
   if (idemKey !== undefined && !/^[A-Za-z0-9._:-]{8,128}$/.test(idemKey)) throw new RequestError(400, "BAD_REQUEST", "x-idempotency-key must be 8-128 characters of letters, digits and ._:-");
+  // Before any refusal that depends on the moment (the residential route, the webhook check): a retry of a job already
+  // accepted gets its receipt, and a key reused for another request 409; only a new receipt is refused (review W4, M7
+  // review S10). True when it answered.
+  const replayed = async () => {
+    const prior = idemKey !== undefined ? await store.idempotentJob({ principal: ctx.client.principal, kind: route.kind, idemKey, hash: requestHash(route.kind, body) }) : null;
+    if (prior?.conflict) { ctx.send(409, { success: false, code: "IDEMPOTENCY_CONFLICT", error: "This idempotency key was used with a different request in the last 24 hours." }); return true; }
+    if (prior?.job) { ctx.job = prior.job.id; await submissionAnswer(ctx, route, prior.job, invalidURLs, true); return true; }
+    return false;
+  };
   if (needsRoute) {
     const r = extractor ? await extractor.routes().catch(() => null) : null;
     const residential = r?.status === 200 ? r.json?.residential : null;
     if (!residential?.available) {
-      // A retry of a job already accepted gets its receipt, route or no route: only a new receipt is refused (review W4).
-      const prior = idemKey !== undefined ? await store.idempotentJob({ principal: ctx.client.principal, kind: route.kind, idemKey, hash: requestHash(route.kind, body) }) : null;
-      if (prior?.conflict) return ctx.send(409, { success: false, code: "IDEMPOTENCY_CONFLICT", error: "This idempotency key was used with a different request in the last 24 hours." });
-      if (prior?.job) { ctx.job = prior.job.id; return submissionAnswer(ctx, route, prior.job, invalidURLs, true); }
+      if (await replayed()) return;
       const x = routeRefusal(residential);
       log({ event: "route_refused", request_id: ctx.id, kind: route.kind, units, reason: x.body.route.residential });
       return ctx.send(x.status, x.body, x.retryAfter ? { "retry-after": String(x.retryAfter) } : {});
@@ -158,11 +164,11 @@ async function submit(ctx, route) {
   if (body.webhook) {
     const c = extractor ? await extractor.webhookCheck(body.webhook.url).catch(() => null) : { status: 200, json: { allowed: false, reason: "NO_DELIVERY_SERVICE" } };
     if (c?.status !== 200 || typeof c.json?.allowed !== "boolean") {
+      if (await replayed()) return;
       return ctx.send(503, { success: false, code: "WEBHOOK_CHECK_UNAVAILABLE", error: "Whether the webhook destination is approved could not be checked; nothing was accepted." }, { "retry-after": "10" });
     }
     if (!c.json.allowed) {
-      const prior = idemKey !== undefined ? await store.idempotentJob({ principal: ctx.client.principal, kind: route.kind, idemKey, hash: requestHash(route.kind, body) }) : null;
-      if (prior?.job) { ctx.job = prior.job.id; return submissionAnswer(ctx, route, prior.job, invalidURLs, true); }
+      if (await replayed()) return;
       return ctx.send(400, { success: false, code: "UNSUPPORTED_OPTION", option: "webhook.url", error: `The webhook destination is not approved in this deployment (${c.json.reason}); nothing was accepted.` });
     }
   }
