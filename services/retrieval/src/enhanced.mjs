@@ -142,64 +142,71 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
       if (r.existing) return earlier(r.existing, requestHash);
       if (r.exhausted) return failure("BUDGET_EXHAUSTED", `the ${r.exhausted.category} ${r.exhausted.period} cap (${r.exhausted.cap} micro-USD) has no room for this dispatch's ${amount} micro-USD`);
       const res = r.reservation;
-      const key = readCredential(providersDir, st.provider.credential);
-      const timeoutMs = Math.min(E.requestTimeoutMs, deadline - Date.now());
-      if (!key || timeoutMs < 1000) {
-        await store.releaseBudget(res.id, key ? "no time left to dispatch" : "the credential went away");
-        return key ? failure("DEADLINE_EXCEEDED", "no time left for the enhanced dispatch") : failure("ENHANCED_REQUIRED", "the enhanced provider is unavailable (BLOCKED_CREDENTIAL)");
-      }
-      // Once sent, the dispatch runs to its answer even if the caller leaves (no signal): the answer is settled and kept, so a
-      // retry of the page uses it instead of finding an UNCERTAIN charge and nothing to show for it.
-      const started = Date.now();
-      const request = mode === "browser" ? { url, browserHtml: true } : { url, httpResponseBody: true, httpResponseHeaders: true };
-      let resp;
+      // Anything thrown past the reservation leaves no row RESERVED for good: it is marked UNCERTAIN, counted and never resent
+      // (review W7); a row already settled, released or marked is left as it is.
       try {
-        resp = await providerRequest({ baseUrl: st.provider.baseUrl, path: "/v1/extract", method: "POST", body: Buffer.from(JSON.stringify(request)), timeoutMs, maxBytes: E.maxResponseBytes,
-          headers: { authorization: `Basic ${Buffer.from(`${key}:`).toString("base64")}`, "content-type": "application/json", accept: "application/json" }, getPolicy, resolvePublic, lookupFixture });
-      } catch (e) {
-        if (!(e instanceof ProviderError)) throw e;
-        verdict = e.code === "CANCELLED" ? "neutral" : "failure";
-        if (!e.sent) {
-          await store.releaseBudget(res.id, `not sent: ${e.code}`);
-          return e.code === "CANCELLED" ? failure("CANCELLED", "the caller cancelled the acquisition") : failure("PROVIDER_UNREACHABLE", e.message, { retryable: true, provider: true });
+        const key = readCredential(providersDir, st.provider.credential);
+        const timeoutMs = Math.min(E.requestTimeoutMs, deadline - Date.now());
+        if (!key || timeoutMs < 1000) {
+          await store.releaseBudget(res.id, key ? "no time left to dispatch" : "the credential went away");
+          return key ? failure("DEADLINE_EXCEEDED", "no time left for the enhanced dispatch") : failure("ENHANCED_REQUIRED", "the enhanced provider is unavailable (BLOCKED_CREDENTIAL)");
         }
-        await store.markBudgetUncertain(res.id, `${e.code}: ${e.message}`);
-        log({ event: "enhanced", logical_id: logicalId, provider: st.providerName, subject: st.subject, mode, provider_status: null, provider_request_id: null, ms: Date.now() - started, outcome: "UNCERTAIN", error: e.code });
-        return { ...failure("ENHANCED_UNCERTAIN", `the enhanced request may have been processed and no answer came (${e.code}); its ${amount} micro-USD stay reserved and it is not sent again`, { provider: true }), charge: { state: "UNCERTAIN", reserved: amount, actual: null } };
-      }
-      const requestId = String(resp.headers["zyte-request-id"] ?? resp.headers["x-request-id"] ?? "").slice(0, 128) || null;
-      const say = (o) => log({ event: "enhanced", logical_id: logicalId, provider: st.providerName, subject: st.subject, mode, provider_status: resp.status, provider_request_id: requestId, ms: Date.now() - started, ...o });
-      if (resp.status !== 200) {
-        const free = FREE[resp.status];
-        if (!free) {
+        // Once sent, the dispatch runs to its answer even if the caller leaves (no signal): the answer is settled and kept, so a
+        // retry of the page uses it instead of finding an UNCERTAIN charge and nothing to show for it.
+        const started = Date.now();
+        const request = mode === "browser" ? { url, browserHtml: true } : { url, httpResponseBody: true, httpResponseHeaders: true };
+        let resp;
+        try {
+          resp = await providerRequest({ baseUrl: st.provider.baseUrl, path: "/v1/extract", method: "POST", body: Buffer.from(JSON.stringify(request)), timeoutMs, maxBytes: E.maxResponseBytes,
+            headers: { authorization: `Basic ${Buffer.from(`${key}:`).toString("base64")}`, "content-type": "application/json", accept: "application/json" }, getPolicy, resolvePublic, lookupFixture });
+        } catch (e) {
+          if (!(e instanceof ProviderError)) throw e;
+          verdict = e.code === "CANCELLED" ? "neutral" : "failure";
+          if (!e.sent) {
+            await store.releaseBudget(res.id, `not sent: ${e.code}`);
+            return e.code === "CANCELLED" ? failure("CANCELLED", "the caller cancelled the acquisition") : failure("PROVIDER_UNREACHABLE", e.message, { retryable: true, provider: true });
+          }
+          await store.markBudgetUncertain(res.id, `${e.code}: ${e.message}`);
+          log({ event: "enhanced", logical_id: logicalId, provider: st.providerName, subject: st.subject, mode, provider_status: null, provider_request_id: null, ms: Date.now() - started, outcome: "UNCERTAIN", error: e.code });
+          return { ...failure("ENHANCED_UNCERTAIN", `the enhanced request may have been processed and no answer came (${e.code}); its ${amount} micro-USD stay reserved and it is not sent again`, { provider: true }), charge: { state: "UNCERTAIN", reserved: amount, actual: null } };
+        }
+        const requestId = String(resp.headers["zyte-request-id"] ?? resp.headers["x-request-id"] ?? "").slice(0, 128) || null;
+        const say = (o) => log({ event: "enhanced", logical_id: logicalId, provider: st.providerName, subject: st.subject, mode, provider_status: resp.status, provider_request_id: requestId, ms: Date.now() - started, ...o });
+        if (resp.status !== 200) {
+          const free = FREE[resp.status];
+          if (!free) {
+            verdict = "failure";
+            await store.markBudgetUncertain(res.id, `the provider answered ${resp.status}`);
+            say({ outcome: "UNCERTAIN" });
+            return { ...failure("ENHANCED_UNCERTAIN", `the enhanced provider answered HTTP ${resp.status}; whether it ran is unknown, so its ${amount} micro-USD stay reserved`, { provider: true }), charge: { state: "UNCERTAIN", reserved: amount, actual: null } };
+          }
+          const [cls, detail, v, retryable] = free;
+          verdict = v;
+          await store.releaseBudget(res.id, `provider answered ${resp.status} (not charged)`);
+          say({ outcome: cls });
+          return failure(cls, detail, { retryable, provider: v === "failure" });
+        }
+        // A 200 is a charged response, whatever it holds.
+        const charge = { state: "SETTLED", reserved: amount, actual: amount, requestId };
+        let a;
+        try { a = readAnswer(JSON.parse(resp.body.toString("utf8")), mode, policy.maxBodyBytes); } catch (e) { a = { error: e.message }; }
+        if (a.error) {
           verdict = "failure";
-          await store.markBudgetUncertain(res.id, `the provider answered ${resp.status}`);
-          say({ outcome: "UNCERTAIN" });
-          return { ...failure("ENHANCED_UNCERTAIN", `the enhanced provider answered HTTP ${resp.status}; whether it ran is unknown, so its ${amount} micro-USD stay reserved`, { provider: true }), charge: { state: "UNCERTAIN", reserved: amount, actual: null } };
+          await store.settleBudget(res.id, amount, { usage: { requests: 1, mode }, detail: `charged at the card's highest tier; the answer was unusable (${a.error})` });
+          say({ outcome: "MALFORMED" });
+          return { ...failure("PROVIDER_ERROR", `the enhanced provider's answer was unusable: ${a.error}`, { provider: true }), charge };
         }
-        const [cls, detail, v, retryable] = free;
-        verdict = v;
-        await store.releaseBudget(res.id, `provider answered ${resp.status} (not charged)`);
-        say({ outcome: cls });
-        return failure(cls, detail, { retryable, provider: v === "failure" });
+        verdict = "success";
+        const bytes = a.body ? a.body.length : Buffer.byteLength(a.html);
+        const answer = { status: a.status, finalUrl: a.finalUrl, contentType: a.contentType, ...(a.retryAfter ? { retryAfter: a.retryAfter } : {}), ...(a.body ? { bodyBase64: a.body.toString("base64") } : { html: a.html }) };
+        await store.settleBudget(res.id, amount, { usage: { requests: 1, mode, bytes, targetStatus: a.status, requestId },
+          result: bytes <= REUSE_MAX_BYTES ? { answer } : { kept: false, bytes }, detail: `a successful ${mode} response, charged at the card's highest tier (the tier is not reported)` });
+        say({ outcome: "SETTLED", target_status: a.status, bytes, micro_usd: amount });
+        return { answer, charge };
+      } catch (e) {
+        await store.markBudgetUncertain(res.id, `interrupted: ${e.code ?? e.message}`).catch(() => {});
+        throw e;
       }
-      // A 200 is a charged response, whatever it holds.
-      const charge = { state: "SETTLED", reserved: amount, actual: amount, requestId };
-      let a;
-      try { a = readAnswer(JSON.parse(resp.body.toString("utf8")), mode, policy.maxBodyBytes); } catch (e) { a = { error: e.message }; }
-      if (a.error) {
-        verdict = "failure";
-        await store.settleBudget(res.id, amount, { usage: { requests: 1, mode }, detail: `charged at the card's highest tier; the answer was unusable (${a.error})` });
-        say({ outcome: "MALFORMED" });
-        return { ...failure("PROVIDER_ERROR", `the enhanced provider's answer was unusable: ${a.error}`, { provider: true }), charge };
-      }
-      verdict = "success";
-      const bytes = a.body ? a.body.length : Buffer.byteLength(a.html);
-      const answer = { status: a.status, finalUrl: a.finalUrl, contentType: a.contentType, ...(a.retryAfter ? { retryAfter: a.retryAfter } : {}), ...(a.body ? { bodyBase64: a.body.toString("base64") } : { html: a.html }) };
-      await store.settleBudget(res.id, amount, { usage: { requests: 1, mode, bytes, targetStatus: a.status, requestId },
-        result: bytes <= REUSE_MAX_BYTES ? { answer } : { kept: false, bytes }, detail: `a successful ${mode} response, charged at the card's highest tier (the tier is not reported)` });
-      say({ outcome: "SETTLED", target_status: a.status, bytes, micro_usd: amount });
-      return { answer, charge };
     } finally {
       // An outcome that is not the provider's hands a half-open breaker's probe back without a verdict.
       if (verdict === "success") b.success(); else if (verdict === "failure") b.failure(); else b.neutral();

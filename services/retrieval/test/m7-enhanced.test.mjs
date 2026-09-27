@@ -204,6 +204,25 @@ test("a request with no answer leaves its charge UNCERTAIN and the page's dispat
   } finally { await fx2.close(); }
 });
 
+test("a settlement that fails after a paid answer leaves the charge UNCERTAIN, never RESERVED, and the attempt finished", async () => {
+  const fx = await startM7();
+  try {
+    class Failing extends M6Store { async settleBudget() { throw Object.assign(new Error("connection lost"), { code: "57P01" }); } }
+    const store = new Failing();
+    const { acquire } = rig(fx, { store });
+    const body = req(at(fx, "/article"), { route: "enhanced" });
+    await assert.rejects(acquire(body), /connection lost/);
+    const [row] = rows(store);
+    assert.equal(row.state, "UNCERTAIN");
+    assert.match(row.detail, /interrupted: 57P01/);
+    assert.equal(store.attempts.at(-1).outcome, "INTERNAL_ERROR");
+    // The page is not sent again: its one dispatch's outcome is unknown.
+    const again = await acquire({ ...body, requestId: "r-after-throw" });
+    assert.equal(again.failure.class, "ENHANCED_UNCERTAIN");
+    assert.equal(fx.state.calls.length, 1);
+  } finally { await fx.close(); }
+});
+
 test("the tier's refusals come before any reservation: no credential, a paid provider without paid dispatch, a zero cap, no enhancer", async () => {
   const fx = await startM7();
   try {

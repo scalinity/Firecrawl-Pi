@@ -518,6 +518,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const finishAttempt = (o) => (attemptId ? store.finishAttempt(attemptId, o) : null);
         let d;
         try { d = await enhanced.dispatch({ logicalId: req.logicalAcquisitionId, target, url: req.url, mode: zmode, deadline, signal }); }
+        catch (e) { await Promise.resolve(finishAttempt({ outcome: "INTERNAL_ERROR" })).catch(() => {}); throw e; } // the attempt is not left open (review W7)
         finally { if (paced) await releaseAll(log, [() => store.releaseDomain(paced.domain, attemptId)]); }
         const st = enhanced.state();
         result.enhanced = { provider: st.providerName ?? null, subject: st.subject ?? null, mode: zmode, charge: d.charge ?? null };
