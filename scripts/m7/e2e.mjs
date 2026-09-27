@@ -261,6 +261,7 @@ async function fixturePhase(before) {
   for (const [c, body] of [["execute_javascript", { actions: [{ type: "executeJavascript", script: "1" }] }], ["write", { actions: [{ type: "write", text: "x" }] }], ["press", { actions: [{ type: "press", key: "Enter" }] }],
     ["pdf", { actions: [{ type: "pdf" }] }], ["click_all", { actions: [{ type: "click", selector: "a", all: true }] }], ["eleven_actions", { actions: Array.from({ length: 11 }, () => ({ type: "scroll" })) }],
     ["waits_past_15s", { actions: [{ type: "wait", milliseconds: 9000 }, { type: "wait", milliseconds: 7000 }] }], ["screenshot_quality", { formats: [{ type: "screenshot", quality: 80 }] }],
+    ["json_with_screenshot", { formats: [{ type: "json", schema: { type: "object", properties: { title: { type: "string" } } } }, "screenshot"] }],
     ["screenshot_on_batch", null]]) {
     const x = await acquisition("m7shot.fixture.fcpi.test", () => (body ? rest("POST", "/v2/scrape", { url: `${FX("m7shot")}/bands?r=${c}`, ...body })
       : rest("POST", "/v2/batch/scrape", { urls: [`${FX("m7shot")}/bands?r=${c}`], formats: ["screenshot"] })));

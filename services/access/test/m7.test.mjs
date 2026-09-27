@@ -34,6 +34,13 @@ test("the action subset: accepted and normalized, everything outside it refused 
     refused(() => validateBody("scrape", { url, actions: [a] }, M), "UNSUPPORTED_OPTION", re);
   }
   refused(() => validateBody("scrape", { url, actions: Array.from({ length: 11 }, () => ({ type: "scroll" })) }, M), "UNSUPPORTED_OPTION", /at most 10/);
+  // json with a screenshot or actions: refused by name, since its path stores no captures (review W2); each alone is accepted.
+  const J = { type: "json", schema: { type: "object", properties: { a: { type: "string" } } } };
+  refused(() => validateBody("scrape", { url, formats: [J, { type: "screenshot", fullPage: true }] }, M), "UNSUPPORTED_OPTION", /not offered with screenshots or actions/);
+  refused(() => validateBody("scrape", { url, formats: [J, "screenshot"] }, M), "UNSUPPORTED_OPTION", /not offered with screenshots or actions/);
+  refused(() => validateBody("scrape", { url, formats: [J], actions: [{ type: "scroll", direction: "down" }] }, M), "UNSUPPORTED_OPTION", /not offered with screenshots or actions/);
+  assert.equal(validateBody("scrape", { url, formats: [J] }, M).body.formats[0].type, "json");
+  assert.equal(validateBody("scrape", { url, formats: ["screenshot"], actions: [{ type: "scroll", direction: "down" }] }, M).body.actions.length, 1);
   refused(() => validateBody("scrape", { url, actions: [{ type: "wait", milliseconds: 9000 }, { type: "wait", milliseconds: 7000 }] }, M), "UNSUPPORTED_OPTION", /16000 ms/);
   refused(() => validateBody("scrape", { url, actions: [{ type: "wait", selector: "#a" }, { type: "wait", selector: "#b" }, { type: "wait", selector: "#c" }, { type: "wait", milliseconds: 1 }] }, M), "UNSUPPORTED_OPTION", /selector wait counts 5000/);
   refused(() => validateBody("scrape", { url, actions: [{ type: "wait", milliseconds: 5, selector: "#a" }] }, M), "BAD_REQUEST", /not both/);

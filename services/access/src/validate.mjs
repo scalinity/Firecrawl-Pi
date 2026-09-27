@@ -179,6 +179,14 @@ export function validateBody(kind, raw, manifest) {
     const at = [body.formats, body.scrapeOptions?.formats].some((fs) => Array.isArray(fs) && fs.some((f) => (typeof f === "object" ? f.type : f) === name));
     if (at && kind !== "scrape") throw new RequestError(400, "UNSUPPORTED_OPTION", name === "json" ? "format 'json' is offered on /v2/scrape; for many pages, use /v2/extract." : `format '${name}' is offered on /v2/scrape only.`, { option: `formats.${name}` });
   }
+  // The json format's path (scrape, then extract) stores no captures, so one scrape asks for json or for screenshots and
+  // actions, never both: nothing is dropped and no capture leaves unstored (review W2).
+  if (kind === "scrape") {
+    const types = (body.formats ?? []).map((f) => (typeof f === "object" ? f.type : f));
+    if (types.includes("json") && (types.includes("screenshot") || (body.actions ?? []).length > 0)) {
+      throw new RequestError(400, "UNSUPPORTED_OPTION", "format 'json' is not offered with screenshots or actions in one scrape; ask for them in separate requests.", { option: "formats.json" });
+    }
+  }
   if (kind === "batch") {
     const L = manifest.limits.batch;
     if (!Array.isArray(raw.urls) || raw.urls.length === 0) throw bad("'urls' must be a non-empty array");
