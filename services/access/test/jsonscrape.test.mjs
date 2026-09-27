@@ -63,3 +63,15 @@ test("typed failures keep their class, status and Retry-After; an unreachable se
   out = await rig({ core: () => ({ status: 403, json: { success: false, code: "SSRF_DENIED", error: "refused" } }), extract: () => answer() }).go();
   assert.deepEqual([out.status, out.body.code], [403, "SSRF_DENIED"]);
 });
+
+test("the gateway's own failures are never 502, which a client library retries by resubmitting (review W14)", async () => {
+  const unreachable = () => { throw Object.assign(new Error("connect ECONNREFUSED"), { code: "ECONNREFUSED" }); };
+  let out = await rig({ core: unreachable, extract: () => answer() }).go();
+  assert.deepEqual([out.status, out.body.code, out.headers["retry-after"]], [503, "UPSTREAM_UNAVAILABLE", "10"]);
+  out = await rig({ core: () => { throw Object.assign(new Error("upstream timeout"), { code: "TIMEOUT" }); }, extract: () => answer() }).go();
+  assert.deepEqual([out.status, out.body.code], [504, "UPSTREAM_TIMEOUT"]);
+  out = await rig({ core: () => ({ status: 200, json: { success: false } }), extract: () => answer() }).go();
+  assert.equal(out.status, 500);
+  out = await rig({ extract: () => ({ status: 200, json: { ok: false, failure: { class: "EXTRACTION_FAILED", detail: "no answer" } } }) }).go();
+  assert.deepEqual([out.status, out.body.code], [500, "EXTRACTION_FAILED"]);
+});

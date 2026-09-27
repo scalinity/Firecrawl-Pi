@@ -55,8 +55,9 @@ export function makeUpstream(cfg) {
   }
 
   // A synchronous route: the answer is streamed back as it arrives (a scrape can carry megabytes).
-  // Failures before upstream headers are the gateway's own 502/504; after them the client response
-  // can only be cut. A client that goes away cancels the upstream request. M7: keep, when given, is told the whole
+  // Failures before upstream headers are the gateway's own 503/504, never 502, which a client library retries by
+  // resubmitting (a new job, and for an enhanced scrape a second paid dispatch: review W14); after them the client
+  // response can only be cut. A client that goes away cancels the upstream request. M7: keep, when given, is told the whole
   // answer once it has been sent (keep.onComplete(status, buffer), the buffer null past keep.maxBytes), and nothing when
   // the answer failed; the stream to the client is never held back for it.
   function forward(res, path, body, log, extraHeaders, keep = null) {
@@ -64,9 +65,9 @@ export function makeUpstream(cfg) {
     const finish = (status) => { if (!settled) { settled = true; log(status); } };
     const fail = () => {
       if (settled) return;
-      const status = timedOut ? 504 : 502;
+      const status = timedOut ? 504 : 503;
       if (res.headersSent) res.destroy();
-      else sendJson(res, status, { success: false, code: timedOut ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: timedOut ? "The core did not answer in time." : "The core is unavailable." }, extraHeaders);
+      else sendJson(res, status, { success: false, code: timedOut ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: timedOut ? "The core did not answer in time." : "The core is unavailable." }, { ...extraHeaders, ...(timedOut ? {} : { "retry-after": "10" }) });
       finish(status);
     };
     const data = Buffer.from(JSON.stringify(body));

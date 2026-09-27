@@ -15,8 +15,9 @@ export function makeJsonScrape({ cfg, M, upstream, extractor }) {
     const formats = [...new Set([...wanted, "markdown"])];
     let r;
     try { r = await upstream.call("POST", "/v2/scrape", { body: { ...body, formats, origin: originFor(ctx.client.principal, "scrape") }, timeoutMs: cfg.coreTimeoutMs, maxBytes: 16 * 1048576 }); }
-    catch (e) { return ctx.send(e.code === "TIMEOUT" ? 504 : 502, { success: false, code: e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: e.code === "TIMEOUT" ? "The core did not answer in time." : "The core is unavailable." }); }
-    if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 502 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
+    // Never 502 for the gateway's own failure: a client library retries 502 by resubmitting (review W14).
+    catch (e) { return ctx.send(e.code === "TIMEOUT" ? 504 : 503, { success: false, code: e.code === "TIMEOUT" ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: e.code === "TIMEOUT" ? "The core did not answer in time." : "The core is unavailable." }, e.code === "TIMEOUT" ? {} : { "retry-after": "10" }); }
+    if (r.status !== 200 || r.json?.success !== true || !r.json?.data) return ctx.send(r.status === 200 ? 500 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` });
     const doc = r.json.data;
     // The extraction's deadline is what is left of the request's; the gateway waits five seconds past it, so an
     // answer the retrieval service sends at its deadline (a paid one, perhaps) still arrives (review W14).
@@ -31,7 +32,7 @@ export function makeJsonScrape({ cfg, M, upstream, extractor }) {
     const failure = x.status === 200 && x.json?.ok ? null : (x.json?.failure ?? null);
     if (failure || x.status !== 200) {
       const f = failure ?? { class: "EXTRACTION_FAILED", detail: `the extraction service answered ${x.status}` };
-      return ctx.send(x.status !== 200 ? x.status : 502, { success: false, code: f.class, error: `The page was scraped, but its json format failed: ${f.detail}` }, f.retryAfter ? { "retry-after": String(f.retryAfter) } : {});
+      return ctx.send(x.status !== 200 ? x.status : 500, { success: false, code: f.class, error: `The page was scraped, but its json format failed: ${f.detail}` }, f.retryAfter ? { "retry-after": String(f.retryAfter) } : {});
     }
     doc.json = x.json.data;
     if (!wanted.includes("markdown")) delete doc.markdown;

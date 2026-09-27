@@ -164,3 +164,20 @@ test("the outbox round: delivered, retried, dead after its attempts or at once f
   assert.equal(logs.find((l) => l.id === "e3").action, "dead", "the fifth failed attempt is the last");
   assert.equal(logs.find((l) => l.id === "e2").action, "retry");
 });
+
+test("forward: an unreachable core is the gateway's own 503 with Retry-After, never 502 (review W14)", async () => {
+  const { createServer, request } = await import("node:http");
+  const { makeUpstream } = await import("../src/upstream.mjs");
+  const up = makeUpstream({ core: new URL("http://127.0.0.1:1"), coreTimeoutMs: 2000 });
+  const logged = [];
+  const srv = createServer((req, res) => up.forward(res, "/v2/scrape", { url: "https://a.example/" }, (s) => logged.push(s), { "x-request-id": "r" }));
+  await new Promise((r) => srv.listen(0, "127.0.0.1", r));
+  try {
+    const got = await new Promise((resolve, reject) => {
+      const q = request({ host: "127.0.0.1", port: srv.address().port, method: "POST", path: "/" }, (res) => { let b = ""; res.on("data", (c) => { b += c; }); res.on("end", () => resolve({ status: res.statusCode, headers: res.headers, body: JSON.parse(b) })); });
+      q.on("error", reject); q.end();
+    });
+    assert.deepEqual([got.status, got.body.code, got.headers["retry-after"]], [503, "UPSTREAM_UNAVAILABLE", "10"]);
+    assert.deepEqual(logged, [503]);
+  } finally { await new Promise((r) => srv.close(r)); }
+});
