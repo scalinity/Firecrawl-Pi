@@ -84,7 +84,11 @@ test("an HTTP dispatch settles at the card's highest tier, keeps its answer, and
     const target = parseTarget(at(fx, "/article"), policy);
     const d = await enhanced.dispatch({ logicalId: "page-1", target, url: at(fx, "/article"), mode: "http", deadline: Date.now() + 30000 });
     assert.equal(d.answer.status, 200);
-    assert.match(Buffer.from(d.answer.bodyBase64, "base64").toString(), /through the enhanced provider|by the enhanced route/);
+    // The body stays a Buffer in the process; only the kept answer is stored as base64 (review W11).
+    assert.ok(Buffer.isBuffer(d.answer.body));
+    assert.match(d.answer.body.toString(), /through the enhanced provider|by the enhanced route/);
+    assert.equal(rows(store)[0].result.answer.bodyBase64, d.answer.body.toString("base64"));
+    assert.equal(rows(store)[0].result.answer.body, undefined);
     assert.equal(d.charge.actual, 1270);
     const [row] = rows(store);
     assert.equal(row.state, "SETTLED");
@@ -92,6 +96,7 @@ test("an HTTP dispatch settles at the card's highest tier, keeps its answer, and
     assert.equal(fx.state.calls.length, 1);
     const again = await enhanced.dispatch({ logicalId: "page-1", target, url: at(fx, "/article"), mode: "http", deadline: Date.now() + 30000 });
     assert.equal(again.reused, true);
+    assert.deepEqual(again.answer.body, d.answer.body, "a kept answer comes back as the same Buffer");
     assert.equal(fx.state.calls.length, 1, "a retried page never pays for a second dispatch");
     // The provider's request carried Basic authentication with the key; the target saw the provider, not this service.
     assert.equal(fx.state.hits.at(-1).via, "enhanced");

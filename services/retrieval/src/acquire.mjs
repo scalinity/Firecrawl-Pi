@@ -526,7 +526,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const a = d.answer;
         const refused = finalTarget(a.finalUrl, policy);
         if (refused) { await finishAttempt({ outcome: refused.class }); return { fail: refused }; }
-        const buf = a.bodyBase64 !== undefined ? Buffer.from(a.bodyBase64, "base64") : null;
+        const buf = a.body ?? null;
         const ct = buf ? sniffContentType(buf, a.contentType) : a.contentType;
         const text = buf ? (isTextual(ct) ? decodeText(buf, ct) : null) : a.html;
         const verdict = classify({ status: a.status, contentType: ct, body: text, finalUrl: a.finalUrl, requestedUrl: req.url, retryAfter: retryAfterSeconds(a.retryAfter) });
@@ -540,7 +540,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         if (verdict.verdict === "js_shell" && page && (zmode === "http" || verdict.structural === true)) {
           return { fail: { class: "RENDER_INCOMPLETE", detail: `the enhanced ${zmode} answer was a script shell (${(verdict.reasons ?? []).join("; ")})` } };
         }
-        return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: a.bodyBase64 }), quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] } }) };
+        return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: buf.toString("base64") }), quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] } }) };
       }
 
       if (made) {

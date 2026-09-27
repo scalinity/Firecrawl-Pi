@@ -98,11 +98,13 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
   // is the page's only for the request it was made for (URL and mode); for another it is refused, never sent again (review S1).
   function earlier(row, requestHash) {
     if (row.state === "SETTLED" && row.result?.answer && row.request_hash !== requestHash) return failure("ENHANCED_ALREADY_DISPATCHED", "this page's one enhanced dispatch was made for a different request (URL or mode); it is not sent again");
-    if (row.state === "SETTLED" && row.result?.answer) return { reused: true, answer: row.result.answer, charge: { state: "SETTLED", reserved: Number(row.reserved), actual: Number(row.actual), reused: true } };
+    if (row.state === "SETTLED" && row.result?.answer) return { reused: true, answer: fromKept(row.result.answer), charge: { state: "SETTLED", reserved: Number(row.reserved), actual: Number(row.actual), reused: true } };
     if (row.state === "SETTLED") return failure("ENHANCED_ALREADY_DISPATCHED", "this page's one enhanced dispatch was made and its answer was not kept; it is not sent again");
     return { ...failure("ENHANCED_UNCERTAIN", `this page's one enhanced dispatch was sent and its outcome is ${row.state === "RESERVED" ? "still in flight" : "unknown"}; it is not sent again`),
       charge: { state: "UNCERTAIN", reserved: Number(row.reserved), actual: null, reused: true } };
   }
+  // A kept answer's body is stored as base64 and handed back as a Buffer, like a fresh one.
+  const fromKept = ({ bodyBase64, ...rest }) => (bodyBase64 !== undefined ? { ...rest, body: Buffer.from(bodyBase64, "base64") } : rest);
   const callKeyOf = (logicalId) => `enhanced:${logicalId}`;
   const requestHashOf = (mode, url) => createHash("sha256").update(`${mode}\n${url}`).digest("hex");
   // The page's earlier dispatch, if it made one (a released reservation never reached the provider and is none). Its mode is
@@ -198,9 +200,12 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
         }
         verdict = "success";
         const bytes = a.body ? a.body.length : Buffer.byteLength(a.html);
-        const answer = { status: a.status, finalUrl: a.finalUrl, contentType: a.contentType, ...(a.retryAfter ? { retryAfter: a.retryAfter } : {}), ...(a.body ? { bodyBase64: a.body.toString("base64") } : { html: a.html }) };
+        // The body stays a Buffer in this process; only the kept answer (at most REUSE_MAX_BYTES) is stored as base64 (review W11).
+        const answer = { status: a.status, finalUrl: a.finalUrl, contentType: a.contentType, ...(a.retryAfter ? { retryAfter: a.retryAfter } : {}), ...(a.body ? { body: a.body } : { html: a.html }) };
+        const { body, ...meta } = answer;
+        const kept = bytes <= REUSE_MAX_BYTES ? { answer: body ? { ...meta, bodyBase64: body.toString("base64") } : answer } : { kept: false, bytes };
         await store.settleBudget(res.id, amount, { usage: { requests: 1, mode, bytes, targetStatus: a.status, requestId },
-          result: bytes <= REUSE_MAX_BYTES ? { answer } : { kept: false, bytes }, detail: `a successful ${mode} response, charged at the card's highest tier (the tier is not reported)` });
+          result: kept, detail: `a successful ${mode} response, charged at the card's highest tier (the tier is not reported)` });
         say({ outcome: "SETTLED", target_status: a.status, bytes, micro_usd: amount });
         return { answer, charge };
       } catch (e) {
