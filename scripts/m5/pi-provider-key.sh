@@ -12,7 +12,8 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 umask 077
 REPO=/opt/firecrawl-pi
 P=/etc/firecrawl-pi/secrets/providers
-names=$(jq -r '[.providers[] | .credential | select(. != null)] | .[]' "$REPO/deploy/policies/budget.json")
+# M6: a proxy provider names its proxy credential ("<username>:<password>") and its usage report's API key.
+names=$(jq -r '[.providers[] | (.credential, .usageCredential) | select(. != null)] | unique | .[]' "$REPO/deploy/policies/budget.json")
 if [ "${1:-}" = status ]; then
   for n in $names; do if sudo -n test -s "$P/$n"; then echo "$n=present"; else echo "$n=absent"; fi; done; exit 0
 fi
