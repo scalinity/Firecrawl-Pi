@@ -1,5 +1,5 @@
 // The job runner's route holds (src/jobs.mjs, M6): what each answer to a hold does to a job that needs the residential
-// route, and that a job going back to the queue gives its hold up (review W5, W12). A fake ledger, core and route
+// route, and that a job going back to the queue gives its hold up (review W5, S16, W12). A fake ledger, core and route
 // client stand in for PostgreSQL, the Firecrawl core and the retrieval service.
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -85,6 +85,31 @@ test("a held job the core accepts keeps its hold for its run", async () => {
   assert.deepEqual(names(calls), ["submitted"]);
   assert.equal(calls.holds, 1);
   assert.deepEqual(calls.releases, []);
+});
+
+test("a held job that goes back to the queue gives its hold up, so a job waiting there, or cancelled before submission, holds nothing (S16)", async () => {
+  // Not delivered: the core was never reached.
+  let h = harness({ hold: held, core: () => { throw Object.assign(new Error("refused"), { code: "ECONNREFUSED", delivered: false }); } });
+  await h.jobs.kick();
+  await flush();
+  assert.deepEqual(names(h.calls), ["requeued"]);
+  assert.deepEqual(h.calls.releases, ["job-1"]);
+  // The core answered 408 or 429 before creating the job.
+  for (const status of [408, 429]) {
+    h = harness({ hold: held, core: () => ({ status, json: {} }) });
+    await h.jobs.kick();
+    await flush();
+    assert.deepEqual(names(h.calls), ["requeued"], `HTTP ${status}`);
+    assert.deepEqual(h.calls.releases, ["job-1"]);
+  }
+  // Uncertain, and no upstream job carries its key once the settle window has passed.
+  const job = { id: "job-2", kind: "crawl", request: { url: "https://a.example/", limit: 30 }, submission_key: "fcpi:job-2", settled: true };
+  h = harness({ hold: held, core: accepted, uncertain: [job] });
+  await h.jobs.kick();
+  await flush();
+  assert.equal(h.calls.store[0][0], "requeued");
+  assert.equal(h.calls.store[0][1], "job-2");
+  assert.deepEqual(h.calls.releases.slice(0, 1), ["job-2"]);
 });
 
 test("a job that does not need the route is never held", async () => {

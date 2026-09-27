@@ -16,7 +16,8 @@
 // pages ask for it) are held on that route just before it is submitted. Only the retrieval service's refusal (409,
 // the route lost since admission) fails the job as PROXY_REQUIRED unsent; an unreachable service or a 5xx (a restart,
 // a database fault) leaves it RECEIVED for the next round, and any other answer is the gateway's own error
-// (ROUTE_HOLD_INVALID) (review W5). The hold is released when the job ends, and lapses on its own after
+// (ROUTE_HOLD_INVALID) (review W5). The hold is released when the job ends or goes back to the queue, so a job
+// waiting there, and one cancelled before submission, holds nothing (review S16); it lapses on its own after
 // limits.proxy.holdMinutes.
 import { randomUUID } from "node:crypto";
 import { needsRoute, holdUrls } from "./routing.mjs";
@@ -63,7 +64,7 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
     try {
       r = await upstream.call("POST", PATH[job.kind], { body: { ...job.request, origin: job.submission_key }, timeoutMs: cfg.submitTimeoutMs, maxBytes: 1048576 });
     } catch (e) {
-      if (!e.delivered) { await store.markRequeued(job.id, `not delivered (${e.code}): the core was never reached`); say({ job: job.id, action: "requeued", reason: e.code }); return job.id; }
+      if (!e.delivered) { await store.markRequeued(job.id, `not delivered (${e.code}): the core was never reached`); say({ job: job.id, action: "requeued", reason: e.code }); release(job); return job.id; }
       await store.markUncertain(job.id, `answer lost after connecting (${e.code})`);
       say({ job: job.id, action: "uncertain", reason: e.code });
       await resolveUncertain();
@@ -78,6 +79,7 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
       release(job);
     } else if (r.status === 408 || r.status === 429) {
       await store.markRequeued(job.id, `the core answered ${r.status} before creating the job`);
+      release(job);
     } else {
       await store.markUncertain(job.id, `the core answered ${r.status}`);
       say({ job: job.id, action: "uncertain", reason: `status ${r.status}` });
@@ -106,6 +108,7 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
     } else if (job.settled) {
       await store.markRequeued(job.id, `no upstream job carries the submission key ${cfg.submitSettleMs} ms after it was sent`);
       say({ job: job.id, action: "requeued_after_settle" });
+      release(job);
     }
   }
 
