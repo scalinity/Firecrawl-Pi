@@ -17,8 +17,9 @@ async function readCapped(res, cap) {
   }
 }
 
-// M7: the most the captures of one render may hold in all, decoded (the worker enforces it; spec §12 bounds each at 10 MiB).
-export const EXTRAS_MAX_BYTES = 16 * 1048576;
+// M7: the most the captures of one render may hold in all, decoded (the worker enforces it; spec §12 bounds each and all
+// of a page's together at 8 MiB, what every hop after it carries: the core's answer, the gateway's buffer).
+export const EXTRAS_MAX_BYTES = 8 * 1048576;
 
 export function makeBrowserClient({ url, token, proxyServer, sessions, getPolicy }) {
   async function health() {

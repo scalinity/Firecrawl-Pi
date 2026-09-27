@@ -102,7 +102,7 @@ async function settle(page, budgetMs) {
 // every step by the render's deadline. A step that cannot be done (a selector that never appears, a click with nothing
 // to click) fails the render as ACTION_FAILED. Captures hold at most EXTRAS_MAX_BYTES in all, content captures at most
 // the page's own limit. Returns { screenshot, actions: { screenshots, scrapes } }.
-const EXTRAS_MAX_BYTES = 16 * 1024 * 1024;
+const EXTRAS_MAX_BYTES = 8 * 1024 * 1024;
 const SELECTOR_WAIT_MS = 5000;
 async function runHooks(page, hooks, deadline, maxHtml, startHost) {
   const out = { screenshot: null, actions: { screenshots: [], scrapes: [] } };
@@ -151,7 +151,7 @@ async function runHooks(page, hooks, deadline, maxHtml, startHost) {
   return out;
 }
 
-// A PNG of the viewport, or of the full page up to 20,000 px high, at most 10 MiB (spec §12). A full-page capture of a
+// A PNG of the viewport, or of the full page up to 20,000 px high, at most 8 MiB (spec §12). A full-page capture of a
 // taller page is clipped at 20,000 px and says so (truncated); it is never passed off as the whole page.
 async function capture(page, fullPage, timeout) {
   const viewport = page.viewportSize();
@@ -160,7 +160,7 @@ async function capture(page, fullPage, timeout) {
   const buf = fullPage
     ? await page.screenshot({ type: "png", fullPage: true, clip: { x: 0, y: 0, width: viewport.width, height }, timeout })
     : await page.screenshot({ type: "png", timeout });
-  if (buf.length > 10 * 1024 * 1024) throw Object.assign(new Error("a screenshot exceeds 10 MiB"), { failureClass: "RESOURCE_LIMIT" });
+  if (buf.length > 8 * 1024 * 1024) throw Object.assign(new Error("a screenshot exceeds 8 MiB"), { failureClass: "RESOURCE_LIMIT" });
   return { mime: "image/png", width: viewport.width, height, truncated: fullPage && pageHeight > 20000, bytes: buf.length, base64: buf.toString("base64") };
 }
 

@@ -8,7 +8,7 @@ import { randomUUID } from "node:crypto";
 
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
 const DATA_URL = /^data:(image\/png)((?:;[a-z-]+=[a-z0-9-]+)*);base64,([A-Za-z0-9+/]*={0,2})$/;
-export const ARTIFACT_MAX_BYTES = 10 * 1048576;
+export const ARTIFACT_MAX_BYTES = 8 * 1048576;
 // The browser worker clips a full-page capture at this height (services/browser/src/server.mjs).
 export const CAPTURE_MAX_HEIGHT = 20000;
 

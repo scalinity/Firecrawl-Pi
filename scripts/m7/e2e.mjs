@@ -255,9 +255,11 @@ async function fixturePhase(before) {
   await shot("full_page", `/bands?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }] });
   const tall = await shot("full_page_clipped", `/tall?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }] });
   await shot("actions", `/actions?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "wait", selector: "#arrived" }, { type: "click", selector: "#more" }, { type: "scroll", direction: "down" }, { type: "scrape" }, { type: "screenshot" }] });
-  // The extras bound, measured: two captures of incompressible pixels, near the worker's 16 MiB of captures (review W10).
-  await shot("noise_worst_case", `/noise?f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }], actions: [{ type: "screenshot" }] });
+  // The extras bound, measured (review W10): two captures of incompressible pixels just under the worker's 8 MiB, and one
+  // just over it, refused as a resource limit with nothing crossing to the core.
+  await shot("noise_worst_case", `/noise?h=1150&f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }], actions: [{ type: "screenshot" }] });
   resources("extras-worst-case");
+  await shot("noise_over_limit", `/noise?h=2400&f=${nonce}`, { formats: ["markdown", { type: "screenshot", fullPage: true }] });
   await shot("samehost_click", `/samehost?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "click", selector: "#next" }, { type: "wait", milliseconds: 500 }, { type: "scrape" }] });
   await shot("offhost_click", `/offhost?f=${nonce}`, { formats: ["markdown"], actions: [{ type: "click", selector: "#away" }, { type: "scrape" }] });
   // Refused before any work: outside the subset, past its bounds.

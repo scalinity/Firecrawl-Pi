@@ -237,7 +237,10 @@ services:
       # No OPENAI_*, MODEL_* or parser variable: no native model path is enabled (spec §14).
       SEARXNG_ENDPOINT: http://retrieval-service:3310/searxng
       DISABLE_WEBHOOK_DELIVERY: "true"
-      NODE_OPTIONS: --max-old-space-size=256
+      # Each child's V8 heap ceiling, inside the container's unchanged memory cap (spec §22). Measured in M7: the API child
+      # holds 232 MiB live at rest, so 256 left about 24 MiB for a request and a scrape answer with a few MiB of captures
+      # exhausted it; 384 gives each child room while the cap still bounds them together.
+      NODE_OPTIONS: --max-old-space-size=384
       # Deliberately unset: USE_GO_MARKDOWN_PARSER (the Go library stays inert),
       # BULL_AUTH_KEY (queue admin disabled), every Cloud key.
     secrets: [core_postgres_password, core_redis_url, core_nuq_rabbitmq_url, core_retrieval_token]

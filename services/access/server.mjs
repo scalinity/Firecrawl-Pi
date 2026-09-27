@@ -432,7 +432,7 @@ async function cachedScrape(ctx, route, body) {
 }
 
 // M7: a scrape with a screenshot or actions (spec §12). Its answer carries the captures, so it is buffered (at most
-// limits.extras.responseMaxBytes: the worker's 16 MiB of captures as base64 and the page, limits.extras.inFlight at a
+// limits.extras.responseMaxBytes: the worker's 8 MiB of captures as base64 and the page, limits.extras.inFlight at a
 // time, within the gateway's memory; measured with the incompressible fixture, review W10) and every capture is
 // stored as an artifact of the caller's principal before the answer leaves; it is never cached.
 async function scrapeWithExtras(ctx, route, body) {

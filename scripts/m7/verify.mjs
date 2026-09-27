@@ -389,13 +389,16 @@ const checks = {
 
   // ================================================================ browser extras (AC11)
   B01: { name: "screenshots-correct-and-bounded", inputs: [`${RAW}e2e-fixture.txt`],
-    expected: "a viewport screenshot of the three-band page is a 1280 x 800 PNG, red where the first band is; a full-page one is 1280 x 3000 with red, green and blue at the bands' heights; a full-page capture of the 25,000 px page is 1280 x 20,000 and marked truncated in the answer and the artifact's headers; each capture came back as an artifact address, not image data, with its PNG's own dimensions, and was rendered in one direct_browser attempt; a stealth request's screenshot is rendered on the residential route; through MCP the screenshot is an artifact address too; two captures of incompressible pixels (at least 8 MiB between them, near the worker's 16 MiB) are stored whole, the case M01's gateway sample measures",
+    expected: "a viewport screenshot of the three-band page is a 1280 x 800 PNG, red where the first band is; a full-page one is 1280 x 3000 with red, green and blue at the bands' heights; a full-page capture of the 25,000 px page is 1280 x 20,000 and marked truncated in the answer and the artifact's headers; each capture came back as an artifact address, not image data, with its PNG's own dimensions, and was rendered in one direct_browser attempt; a stealth request's screenshot is rendered on the residential route; through MCP the screenshot is an artifact address too; two captures of incompressible pixels just under the worker's 8 MiB (6.5 to 8 MiB between them) are stored whole, the case M01's gateway sample measures, and one capture just over it is refused as RESOURCE_LIMIT with no artifact; and the core runs the whole window without a restart",
     run() {
       const x = FX().extras ?? [], c = (k) => one(x, k);
       const art = (r) => r?.artifacts?.[0] ?? null;
       const vp = c("viewport"), fp = c("full_page"), tl = c("full_page_clipped"), rs = c("residential_screenshot"), mc = c("mcp_screenshot"), nz = c("noise_worst_case");
       // The worst case the gateway's memory is measured at (review W10): two incompressible captures, stored whole.
-      const nzBytes = (nz?.artifacts ?? []).reduce((n, a) => n + (a.meta?.bytes ?? 0), 0);
+      const nzBytes = (nz?.artifacts ?? []).reduce((n, a) => n + (a.meta?.bytes ?? 0), 0), over = c("noise_over_limit");
+      // The core ran the whole window without a restart: the same container, started before the window opened.
+      const core = kv(((S(`${RAW}stack.txt`).containers ?? []).find((l) => l.startsWith("firecrawl-core name=")) ?? "").split(" "));
+      const opened = Date.parse(FX().meta?.[0]?.pi_utc ?? "");
       const pv = art(vp)?.fetched?.saved ? png(art(vp).fetched.saved) : null, pf = art(fp)?.fetched?.saved ? png(art(fp).fetched.saved) : null;
       const tall = art(tl)?.fetched;
       const tallDims = tall?.head_hex ? { w: parseInt(tall.head_hex.slice(32, 40), 16), h: parseInt(tall.head_hex.slice(40, 48), 16) } : null;
@@ -406,8 +409,10 @@ const checks = {
         one_browser_attempt: [vp, fp, tl].every((r) => same(strat(r), [["direct_browser"]])),
         residential: ok200(rs) && isUrl(rs.screenshot) && same(strat(rs), [["residential_browser"]]) && viaAll(rs.hits, "proxy"),
         mcp: mc?.status === 200 && mc.is_error !== true && mc.artifact_urls?.length === 1 && mc.has_data_url === false,
-        worst_case: ok200(nz) && (nz.artifacts ?? []).length === 2 && nzBytes >= 8 * 1048576 };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; viewport ${pv?.width}x${pv?.height} ${pv ? pv.at(640, 400) : ""}; full ${pf?.width}x${pf?.height}; clipped ${tallDims?.w}x${tallDims?.h} truncated=${art(tl)?.meta?.truncated}; residential ${JSON.stringify(strat(rs))}; mcp urls=${mc?.artifact_urls?.length}; worst case ${nz?.status} artifacts=${(nz?.artifacts ?? []).length} bytes=${nzBytes}` };
+        worst_case: ok200(nz) && (nz.artifacts ?? []).length === 2 && nzBytes >= 6.5 * 1048576 && nzBytes <= 8 * 1048576,
+        over_limit: over?.class === "RESOURCE_LIMIT" && (over.artifacts ?? []).length === 0,
+        core_stable: core.restarts === "0" && Date.parse(core.started_at ?? "") < opened };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; viewport ${pv?.width}x${pv?.height} ${pv ? pv.at(640, 400) : ""}; full ${pf?.width}x${pf?.height}; clipped ${tallDims?.w}x${tallDims?.h} truncated=${art(tl)?.meta?.truncated}; residential ${JSON.stringify(strat(rs))}; mcp urls=${mc?.artifact_urls?.length}; worst case ${nz?.status} artifacts=${(nz?.artifacts ?? []).length} bytes=${nzBytes}; over the bound ${over?.class}; core restarts=${core.restarts} started=${core.started_at}` };
     } },
   B02: { name: "action-subset-correct-bounded-and-refused-outside-it", inputs: [`${RAW}e2e-fixture.txt`],
     expected: "on the action page, a selector wait, a click, a scroll, a content capture and a screenshot run in order: the capture holds the late element, the section the click revealed and the content the scroll loaded, and the screenshot is an artifact of 1280 x 800; a click on a same-host link loads that document, which the retrieval service counts against the domain (the phase's only counted action navigation); a click on a link to another host fails the render as ACTION_FAILED (the page may not leave its host) and the other host is never requested; executeJavascript, write, press, pdf, clicking every match, eleven actions, 16 s of waits, a screenshot's quality, the json format with a screenshot and a screenshot on a batch are each refused 400 UNSUPPORTED_OPTION naming the option, before any attempt or target request",
