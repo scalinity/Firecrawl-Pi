@@ -256,8 +256,9 @@ services:
     cap_drop: [ALL]
     cap_add: [SETGID, SETUID]           # used once, by setpriv, to drop to uid 3002
     security_opt: [no-new-privileges:true]
-    mem_limit: 2304m
-    memswap_limit: 2304m
+    # Measured in M7 with 384 MiB heaps under the full evidence run: about 2.21 GB at peak (spec §22).
+    mem_limit: 2560m
+    memswap_limit: 2560m
     cpus: 2.25
     pids_limit: 512
     stop_grace_period: 45s
