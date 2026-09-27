@@ -54,7 +54,8 @@ export function makeJobs({ cfg, store, upstream, archive, log, routes = null }) 
       }
       if (h.status >= 500) { await store.markRequeued(job.id, `the route hold was not placed: the retrieval service answered ${h.status}`); say({ job: job.id, action: "requeued", reason: `route hold ${h.status}` }); return job.id; }
       if (h.status !== 200 || h.json?.held !== true) {
-        await store.markRejected(job.id, 502, "ROUTE_HOLD_INVALID", `The retrieval service refused the route hold (HTTP ${h.status}); this is the gateway's own error, and the job was not sent.`);
+        // 500, never 502: the failure is replayed to the client, and a client library retries 502 by resubmitting.
+        await store.markRejected(job.id, 500, "ROUTE_HOLD_INVALID", `The retrieval service refused the route hold (HTTP ${h.status}); this is the gateway's own error, and the job was not sent.`);
         say({ job: job.id, action: "rejected", reason: "ROUTE_HOLD_INVALID", status: h.status });
         return job.id;
       }

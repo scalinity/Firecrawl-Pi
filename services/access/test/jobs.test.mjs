@@ -65,7 +65,7 @@ test("any other hold answer is the gateway's own error (ROUTE_HOLD_INVALID), not
     const { jobs, calls } = harness({ hold, core: accepted });
     await jobs.kick();
     assert.deepEqual(names(calls), ["rejected"]);
-    assert.deepEqual(calls.store[0].slice(2, 4), [502, "ROUTE_HOLD_INVALID"]);
+    assert.deepEqual(calls.store[0].slice(2, 4), [500, "ROUTE_HOLD_INVALID"]);
     assert.equal(calls.upstream, 0);
   }
 });
