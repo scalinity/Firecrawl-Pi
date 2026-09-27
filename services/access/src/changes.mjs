@@ -17,10 +17,16 @@ export function normalize(markdown) {
 }
 
 // A line diff of two normalized texts, by longest common subsequence: "- " for a removed line, "+ " for an added one,
-// "  " for a kept one. Bounded: past DIFF_MAX_LINES lines on either side, only the counts of lines present on one side
-// alone are given (a multiset comparison), and the text is cut at DIFF_MAX_BYTES; both say so.
+// "  " for a kept one. The common head and tail are kept lines and only the lines between them are tabled, usually a
+// small part of a page (review S4). Bounded: past DIFF_MAX_LINES differing lines on either side, only the counts of
+// lines present on one side alone are given (a multiset comparison), and the text is cut at DIFF_MAX_BYTES; both say so.
 export function lineDiff(before, after) {
-  const a = before ? before.split("\n") : [], b = after ? after.split("\n") : [];
+  const all = before ? before.split("\n") : [], bll = after ? after.split("\n") : [];
+  let pre = 0;
+  while (pre < all.length && pre < bll.length && all[pre] === bll[pre]) pre++;
+  let suf = 0;
+  while (suf < all.length - pre && suf < bll.length - pre && all[all.length - 1 - suf] === bll[bll.length - 1 - suf]) suf++;
+  const a = all.slice(pre, all.length - suf), b = bll.slice(pre, bll.length - suf);
   if (a.length > DIFF_MAX_LINES || b.length > DIFF_MAX_LINES) {
     const count = (xs) => xs.reduce((m, x) => m.set(x, (m.get(x) ?? 0) + 1), new Map());
     const ca = count(a), cb = count(b);
@@ -32,13 +38,14 @@ export function lineDiff(before, after) {
   const n = a.length, m = b.length;
   const L = Array.from({ length: n + 1 }, () => new Uint16Array(m + 1));
   for (let i = n - 1; i >= 0; i--) for (let j = m - 1; j >= 0; j--) L[i][j] = a[i] === b[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
-  const out = [];
+  const out = all.slice(0, pre).map((l) => `  ${l}`);
   let i = 0, j = 0, added = 0, removed = 0;
   while (i < n || j < m) {
     if (i < n && j < m && a[i] === b[j]) { out.push(`  ${a[i]}`); i++; j++; }
     else if (j < m && (i >= n || L[i][j + 1] >= L[i + 1][j])) { out.push(`+ ${b[j]}`); j++; added++; }
     else { out.push(`- ${a[i]}`); i++; removed++; }
   }
+  for (const l of all.slice(all.length - suf)) out.push(`  ${l}`);
   let text = out.join("\n"), truncated = false;
   if (Buffer.byteLength(text) > DIFF_MAX_BYTES) { text = Buffer.from(text).subarray(0, DIFF_MAX_BYTES).toString("utf8").replace(/�$/, ""); truncated = true; }
   return { text, added, removed, truncated };

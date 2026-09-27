@@ -109,8 +109,17 @@ test("change detection: normalized text, a bounded line diff, and the key of equ
   const d = lineDiff("one\ntwo\nthree", "one\nthree\nfour");
   assert.deepEqual([d.added, d.removed, d.truncated], [1, 1, false]);
   assert.equal(d.text, "  one\n- two\n  three\n+ four");
-  const big = lineDiff(Array.from({ length: DIFF_MAX_LINES + 1 }, (_, i) => `l${i}`).join("\n"), "l0");
-  assert.deepEqual([big.text, big.removed, big.truncated], [null, DIFF_MAX_LINES, true]);
+  const big = lineDiff(Array.from({ length: DIFF_MAX_LINES + 2 }, (_, i) => `l${i}`).join("\n"), "l0");
+  assert.deepEqual([big.text, big.removed, big.truncated], [null, DIFF_MAX_LINES + 1, true]);
+  // A long page with one changed line: the common head and tail are trimmed first, so the diff is exact (review S4).
+  const long = Array.from({ length: 5000 }, (_, i) => `line ${i}`);
+  const edited = [...long.slice(0, 2500), "line 2500 edited", ...long.slice(2501)];
+  const one = lineDiff(long.join("\n"), edited.join("\n"));
+  assert.deepEqual([one.added, one.removed], [1, 1]);
+  assert.match(one.text ?? "", /^- line 2500$/m);
+  assert.match(one.text ?? "", /^\+ line 2500 edited$/m);
+  assert.equal(lineDiff("a\nb", "a\nb").text, "  a\n  b");
+  assert.equal(lineDiff("", "x").text, "+ x");
   assert.equal(versionKey({ url }), versionKey({ url, onlyMainContent: true, waitFor: 0, proxy: "auto" }));
   assert.notEqual(versionKey({ url }), versionKey({ url, onlyMainContent: false }));
 });
