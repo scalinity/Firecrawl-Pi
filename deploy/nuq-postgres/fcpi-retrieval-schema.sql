@@ -178,6 +178,8 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.route_hold (
   created_at  timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (domain, job_id)
 );
+-- M6: reconciliation reads one provider's proxy and reconcile rows of one day (review S10).
+CREATE INDEX IF NOT EXISTS budget_reservation_proxy_day ON fcpi_retrieval.budget_reservation (provider, day_start) WHERE kind IN ('proxy', 'reconcile');
 -- M6: each reconciliation of locally measured proxy bytes against the provider's usage report for one UTC day.
 CREATE TABLE IF NOT EXISTS fcpi_retrieval.proxy_reconciliation (
   id                    uuid PRIMARY KEY DEFAULT gen_random_uuid(),
