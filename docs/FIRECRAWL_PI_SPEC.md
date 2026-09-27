@@ -339,7 +339,7 @@ Cloud's documented enhanced-mode behavior describes one escalation on selected s
 
 ### 9.3 Concrete default limits
 
-A page has at most **four top-level retrieval attempts**, including any same-tier retry, and at most **one enhanced-provider dispatch**. The orchestrator can skip stages; it must not squeeze five attempts into a four-attempt limit. Provider-internal retries may be opaque and are reported as such, not falsely counted as known attempts.
+A page has at most **four top-level retrieval attempts**, including any same-tier retry, and at most **one enhanced-provider dispatch**. The orchestrator can skip stages; it must not squeeze five attempts into a four-attempt limit. A stage is skipped only when it is not configured, switched off or out of service (its provider's breaker open); a stage its spend limit refuses, or whose price is unknown, ends the page, since a spent budget is never a reason to try a dearer tier (§9.2). Provider-internal retries may be opaque and are reported as such, not falsely counted as known attempts.
 
 Default total acquisition deadline is **90 seconds**; per-attempt ceilings are HTTP 15 seconds, local/proxied browser 30 seconds, enhanced 40 seconds, always clamped to time remaining. Default gateway/MCP synchronous deadline is 110 seconds. Use asynchronous jobs for longer extraction/document workflows; do not stretch HTTP timeouts indefinitely.
 
@@ -409,7 +409,7 @@ Block audio/video, downloads, and known unnecessary large media by default. Pres
 
 The action subset is `wait`, selector wait, scroll, click for public navigation/expansion, screenshot, and content capture. At most 10 actions and 15 seconds of explicit waits; all activity shares the acquisition deadline. No arbitrary `executeJavascript`, shell, uploads, checkout, account changes, credential filling, or unrestricted cross-origin action chains. Browser input/execution features outside this subset fail with a precise unsupported-capability result.
 
-Screenshots are stored outside the database as bounded artifacts: viewport or full-page up to 20,000 px height and 10 MiB encoded output. Return dimensions, truncation status, MIME type, and authenticated artifact reference. Do not call a clipped image an unqualified full-page capture. Native output shape compatibility and MIME bytes must be tested.
+Screenshots are stored outside the database as bounded artifacts: viewport or full-page up to 20,000 px height and 8 MiB encoded output, with all of a page's captures together at most 8 MiB, the most every later hop (the core's answer, the gateway's buffer) was measured to carry; a capture past it is a resource-limit result. Return dimensions, truncation status, MIME type, and authenticated artifact reference. Do not call a clipped image an unqualified full-page capture. Native output shape compatibility and MIME bytes must be tested.
 
 ## 13. Search architecture
 
@@ -726,7 +726,7 @@ These are **initial engineering estimates and hard-cap proposals, not measuremen
 
 | Persistent service | Idle estimate MiB | Normal estimate MiB | Initial hard cap MiB | CPU behavior / initial quota | Storage / criticality |
 |---|---:|---:|---:|---|---|
-| Firecrawl API/harness/workers | 700 | 1,400 | 2,304 | Bursty parse/queue work; 2.25 CPU quota, higher scheduling weight than browser | Queue/results; high |
+| Firecrawl API/harness/workers | 700 | 1,400 | 2,560 | Bursty parse/queue work; 2.25 CPU quota, higher scheduling weight than browser | Queue/results; high |
 | Browser worker | 100 | 700 | 1,536 | Bursty JS; 1.5 CPU, lower relative weight | Bounded ephemeral writes; replaceable |
 | PostgreSQL | 128 | 256 | 640 | Small steady/background work; 0.75 CPU | Durable random writes; highest data priority |
 | Redis | 48 | 128 | 320 | Short latency-sensitive commands; 0.35 CPU | AOF writes; high |
@@ -735,7 +735,7 @@ These are **initial engineering estimates and hard-cap proposals, not measuremen
 | Access gateway | 35 | 65 | 160 | Short auth/admission work; 0.3 CPU | Metadata only; high |
 | MCP gateway | 40 | 80 | 192 | Short serialization work; 0.3 CPU | No protocol persistence; optional to REST |
 | Retrieval/provider service | 60 | 160 | 448 | Mostly I/O, bounded validation; 0.6 CPU | Metadata/artifacts; high |
-| **Container total** | **1,341** | **3,205** | **6,432** | Quotas are ceilings, not reserved physical cores | No assumption all peaks occur safely together |
+| **Container total** | **1,341** | **3,205** | **6,688** | Quotas are ceilings, not reserved physical cores | No assumption all peaks occur safely together |
 
 CPU quotas may sum above the Pi's four physical cores because they are independent ceilings, not reservations. Admission limits and scheduling weights prevent all CPU-heavy work from overlapping. Verify fair scheduling of database/API work during a Chromium stress fixture. `mem_reservation` is a soft preference, not a guarantee that the kernel will protect PostgreSQL.
 
@@ -743,7 +743,7 @@ Reserve at least **1 GiB measured available host memory under the normal mixed w
 
 Initial PostgreSQL tuning: 128 MiB shared buffers, 4 MiB work memory, 32 connections, pooled application connections, bounded maintenance work. These are project defaults requiring compatibility/performance tests, not universal optimal values. RabbitMQ uses an explicit memory alarm below its cap, initially 256 MiB; verify alarms/backpressure before enforcement. Avoid the management UI/plugin unless an actual diagnostic need warrants it.
 
-Begin with a 256 MiB JavaScript old-space ceiling **per Firecrawl child process**, then measure native/Go/Rust buffers and total harness RSS. A Node heap setting does not bound all container memory, and the harness may spawn several children. Raise a role-specific heap only with a tested rebalanced budget. Preserve graceful failures for oversized documents rather than allowing uncontrolled allocation.
+Each Firecrawl child process has a **384 MiB** JavaScript old-space ceiling, inside the core container's memory cap, since the API child holds about 232 MiB live at rest (measured on the Pi) and a scrape answer carrying captures needs room above that. Measure native/Go/Rust buffers and total harness RSS. A Node heap setting does not bound all container memory, and the harness may spawn several children. Raise a role-specific heap only with a tested rebalanced budget. Preserve graceful failures for oversized documents rather than allowing uncontrolled allocation.
 
 Use no swap allowance for Chromium above its memory cap. Do not introduce swap writes on microSD as a substitute for capacity. Preserve audited existing swap/zram unless a measured change is needed; a small zram safety net may be evaluated but does not increase the release's physical-memory budget. Schedule database maintenance, backups, and image builds outside acquisition bursts.
 
