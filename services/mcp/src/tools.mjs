@@ -104,18 +104,25 @@ const bytes = (v) => Buffer.byteLength(JSON.stringify(v));
 // Cuts the longest of a document's string fields (and its links list) until the whole payload fits,
 // recording each cut field's original and returned size. Returns the cuts, or null when nothing was cut.
 const CUTTABLE = ["rawHtml", "html", "markdown", "summary"];
+// The strings a document may be cut in: the page's own formats and M7's content captures (actions.scrapes[i].html),
+// each named as the answer's cuts name it (review W8).
+function cuttable(doc) {
+  const out = CUTTABLE.filter((f) => typeof doc[f] === "string" && doc[f].length > 0).map((f) => ({ name: f, get: () => doc[f], set: (v) => { doc[f] = v; } }));
+  (Array.isArray(doc.actions?.scrapes) ? doc.actions.scrapes : []).forEach((s, i) => {
+    if (typeof s?.html === "string" && s.html.length > 0) out.push({ name: `actions.scrapes[${i}].html`, get: () => s.html, set: (v) => { s.html = v; } });
+  });
+  return out;
+}
 export function fitDocument(payload, doc, budget) {
   const cuts = {};
-  for (let guard = 0; guard < 16 && bytes(payload) > budget; guard++) {
+  for (let guard = 0; guard < 32 && bytes(payload) > budget; guard++) {
     const over = bytes(payload) - budget;
-    const field = CUTTABLE.filter((f) => typeof doc[f] === "string" && doc[f].length > 0).sort((a, b) => Buffer.byteLength(doc[b]) - Buffer.byteLength(doc[a]))[0];
+    const field = cuttable(doc).sort((a, b) => Buffer.byteLength(b.get()) - Buffer.byteLength(a.get()))[0];
     if (field) {
-      const before = Buffer.byteLength(doc[field]);
-      cuts[field] ??= { originalBytes: before };
+      cuts[field.name] ??= { originalBytes: Buffer.byteLength(field.get()) };
       // Characters are at most 4 bytes and JSON escaping at most 6 per character: cut generously, then re-measure.
-      const keep = Math.max(0, doc[field].length - Math.ceil(over) - 256);
-      doc[field] = doc[field].slice(0, keep);
-      cuts[field].returnedBytes = Buffer.byteLength(doc[field]);
+      field.set(field.get().slice(0, Math.max(0, field.get().length - Math.ceil(over) - 256)));
+      cuts[field.name].returnedBytes = Buffer.byteLength(field.get());
       continue;
     }
     if (Array.isArray(doc.links) && doc.links.length) {

@@ -250,3 +250,13 @@ test("M7: the scrape tool takes the action subset, the screenshot format and the
   }
   assert.equal(T.firecrawl_crawl.config.inputSchema.properties.scrapeOptions.properties.actions, undefined, "actions are on scrape alone");
 });
+
+test("fitDocument cuts content captures too, largest first, and names each cut (M7 review W8)", () => {
+  const doc = { markdown: "", actions: { screenshots: [], scrapes: [{ url: "https://a.example/", html: "a".repeat(200000) }, { url: "https://a.example/", html: "b".repeat(200000) }] } };
+  const payload = { data: doc };
+  const cuts = fitDocument(payload, doc, 262144);
+  assert.ok(Buffer.byteLength(JSON.stringify(payload)) <= 262144, "the payload fits the tool limit");
+  assert.equal(cuts["actions.scrapes[0].html"].originalBytes, 200000);
+  assert.ok(cuts["actions.scrapes[0].html"].returnedBytes < 200000);
+  assert.equal(doc.actions.scrapes[1].html.length, 200000, "only as much as needed is cut");
+});
