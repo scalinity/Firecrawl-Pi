@@ -15,6 +15,10 @@ RUND=/run/firecrawl-pi
 ADMISSION=$RUND/admission/admission.json
 HOLDS=$RUND/holds
 OPS_TOKEN=/etc/firecrawl-pi/secrets/clients/ops.token
+# The backup repository's configuration: the owner's off-device repository, which the nightly backup, the weekly check
+# and the monthly restore test use; the fixture proof and the rehearsal name the on-card fixture repository's instead
+# (FCPI_BACKUP_ENV=/etc/firecrawl-pi/backup-fixture.env, scripts/m8/pi-backup-setup.sh).
+BACKUP_ENV=${FCPI_BACKUP_ENV:-/etc/firecrawl-pi/backup.env}
 GW=http://127.0.0.1:3380
 MODERN=2026-07-28
 # The services the supervisor may restart when Docker marks them unhealthy. The data services are never restarted by

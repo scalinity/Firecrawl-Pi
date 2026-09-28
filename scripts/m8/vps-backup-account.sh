@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # The off-device backup account (FIRECRAWL_PI_SPEC.md §26), ON the owner's VPS, as root, idempotent:
 #   ssh … 'sudo bash -s -- <Pi backup public key>' < scripts/m8/vps-backup-account.sh
-# A dedicated user, fcpi-backup, that can do one thing: SFTP inside /srv/fcpi-backup, whose only writable directory is
-# restic/ (the repository). No shell, no forwarding, no TTY, public-key login only, and only with the Pi's backup key
+# A dedicated user, fcpi-backup, that can do one thing: SFTP inside /srv/fcpi-backup, whose only writable directories are
+# restic/ (the repository) and heartbeat/ (the Pi's dated status for the VPS watchdog, scripts/m8/vps-watchdog.sh). No shell, no forwarding, no TTY, public-key login only, and only with the Pi's backup key
 # (scripts/m8/pi-backup-setup.sh sshkey), marked restrict. The sshd drop-in holds a Match block for that user alone,
 # is checked with sshd -t before sshd reloads, and is removed again if the check fails, so no other login changes.
 # Nothing else on the host is touched. Prints the account, the directory's free space and the host key's fingerprint.
@@ -13,6 +13,7 @@ U=fcpi-backup C=/srv/fcpi-backup D=/etc/ssh/sshd_config.d/60-fcpi-backup.conf
 id "$U" >/dev/null 2>&1 || useradd --system --home-dir "$C" --no-create-home --shell /usr/sbin/nologin "$U"
 install -d -m 0755 -o root -g root "$C"            # a chroot must be root's and not writable by the user
 install -d -m 0700 -o "$U" -g "$U" "$C/restic"
+install -d -m 0700 -o "$U" -g "$U" "$C/heartbeat"      # the Pi's dated status, which the VPS watchdog reads
 install -d -m 0755 -o root -g root /etc/ssh/fcpi-backup
 printf 'restrict %s\n' "$PUB" >/etc/ssh/fcpi-backup/authorized_keys
 chmod 0644 /etc/ssh/fcpi-backup/authorized_keys

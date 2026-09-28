@@ -14,6 +14,8 @@
 #   5. the copy is taken down and removed.
 # One JSON record per step under "### rehearsal"; scripts/m8/verify.mjs judges them.
 set -uo pipefail
+# The on-card fixture repository, not the owner's off-device one (scripts/ops/lib.sh BACKUP_ENV); the scripts it runs inherit it.
+export FCPI_BACKUP_ENV=/etc/firecrawl-pi/backup-fixture.env
 . /opt/firecrawl-pi/scripts/ops/lib.sh
 need_root
 R=/srv/firecrawl-pi/restore-test P=fcpi-restore
@@ -51,7 +53,7 @@ out migrated "$(jq -cn --argjson m "$mrc" --arg v "$v" --arg st "$(docker inspec
   --arg log "$(docker logs --since 30s "$gw" 2>&1 | grep -o "the ledger's schema version is [0-9]*, this build needs [0-9]*" | tail -1)" '{migration_exit:$m, schema_version:$v, gateway:$st, refusal:$log}')"
 # Roll back: stop the copy, restore the pre-migration database from the backup it was made from, start the baseline.
 docker compose -p "$P" -f "$R/compose.baseline.json" stop >/dev/null 2>&1
-. /etc/firecrawl-pi/backup.env; export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
+. "$BACKUP_ENV"; export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
 snap=$(jq -r .snapshot "$STATE/backup/last-restore-test.json")
 rm -rf "$R/pgrestore"; mkdir -m 0700 "$R/pgrestore"
 restic restore "$snap" --target "$R/pgrestore" --include /srv/firecrawl-pi/backup-staging/current/data/postgres >/dev/null 2>&1; rr=$?

@@ -8,10 +8,12 @@
 # is refused to another principal. Prints each command's record under its own section, with the repository's kind and
 # whether it is off the device (the fixture repository is not).
 set -uo pipefail
+# The on-card fixture repository, not the owner's off-device one (scripts/ops/lib.sh BACKUP_ENV); the scripts it runs inherit it.
+export FCPI_BACKUP_ENV=/etc/firecrawl-pi/backup-fixture.env
 . /opt/firecrawl-pi/scripts/ops/lib.sh
 need_root
 echo "### meta"
-echo "utc=$(utc) source_commit=$(source_commit) repository_kind=$(sed -n 's/^FCPI_RESTIC_REPOSITORY=\([a-z0-9]*\):.*/\1/p; s#^FCPI_RESTIC_REPOSITORY=/.*#local#p' /etc/firecrawl-pi/backup.env) offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' /etc/firecrawl-pi/backup.env)"
+echo "utc=$(utc) source_commit=$(source_commit) repository_kind=$(sed -n 's/^FCPI_RESTIC_REPOSITORY=\([a-z0-9]*\):.*/\1/p; s#^FCPI_RESTIC_REPOSITORY=/.*#local#p' "$BACKUP_ENV") offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' "$BACKUP_ENV")"
 # A screenshot of the M7 fixture first, so the backup holds a live artifact whose hash and access the restore test proves.
 echo "### artifact"
 OPS_TOKEN=/etc/firecrawl-pi/secrets/clients/soak.token GW_TIMEOUT=120 gw POST /v2/scrape "{\"url\":\"http://m7shot.fixture.fcpi.test:8080/bands?backup=$(date +%s)\",\"formats\":[\"screenshot\"]}"

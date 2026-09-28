@@ -2,8 +2,8 @@
 # The backup repository's configuration (FIRECRAWL_PI_SPEC.md §26), ON the Pi, as root:
 #   pi-backup-setup.sh fixture
 #       a restic repository on the Pi's own data filesystem (/srv/firecrawl-pi/backup-fixture-repo), for the fixture
-#       tests and the rehearsal only. It is on the same card as the data, so it is NOT the off-device backup spec §26
-#       requires, and /etc/firecrawl-pi/backup.env says so (FCPI_BACKUP_OFFDEVICE=no).
+#       tests and the rehearsal only, configured in its own /etc/firecrawl-pi/backup-fixture.env. It is on the same card
+#       as the data, so it is NOT the off-device backup spec §26 requires, and the file says so (FCPI_BACKUP_OFFDEVICE=no).
 #   pi-backup-setup.sh sshkey
 #       the backup's own SSH key (secrets/backup/ssh_ed25519, created once): prints its public half only, for the
 #       backup account on the off-device host (scripts/m8/vps-backup-account.sh).
@@ -55,10 +55,12 @@ case ${1:-} in
     echo "restic keys: $n0 -> $(restic key list --json | jq length); the recovery key opens the repository: $ok"; exit 0 ;;
 esac
 # The refusal comes before any repository is opened or initialised.
-case ${1:-} in fixture) want=/srv/firecrawl-pi/backup-fixture-repo ;; live) want=${2:-} ;; *) want="" ;; esac
-now_repo=$(sed -n 's/^FCPI_RESTIC_REPOSITORY=//p' /etc/firecrawl-pi/backup.env 2>/dev/null)
+# The fixture repository's configuration is its own file (the fixture proof and the rehearsal read it); backup.env is
+# the owner's off-device repository, which the nightly backup, the weekly check and the monthly restore test read.
+case ${1:-} in fixture) want=/srv/firecrawl-pi/backup-fixture-repo OUTF=/etc/firecrawl-pi/backup-fixture.env ;; live) want=${2:-} OUTF=/etc/firecrawl-pi/backup.env ;; *) want="" OUTF="" ;; esac
+now_repo=$(sed -n 's/^FCPI_RESTIC_REPOSITORY=//p' "${OUTF:-/dev/null}" 2>/dev/null)
 if [ -n "$want" ] && [ -n "$now_repo" ] && [ "$now_repo" != "$want" ] && [ "$switch" != true ]; then
-  die "backup.env already names another repository (offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' /etc/firecrawl-pi/backup.env)); kept as it is. Add --switch to replace it"
+  die "$OUTF already names another repository (offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' "$OUTF")); kept as it is. Add --switch to replace it"
 fi
 case ${1:-} in
   fixture)
@@ -87,5 +89,5 @@ FCPI_BACKUP_OFFDEVICE=yes"
     echo "restic keys: $(restic key list --json 2>/dev/null | jq length) (the recovery key is the owner's to add: scripts/m8/recovery-key.sh, from the workstation)" ;;
   *) die "usage: pi-backup-setup.sh fixture | sshkey | hostkey <host> [<port>] | live <repository> [<port>|<credentials file>] | recovery-add  [--switch]" ;;
 esac
-printf '%s\n' "$conf" | write_atomic /etc/firecrawl-pi/backup.env 0600
-echo "wrote /etc/firecrawl-pi/backup.env (offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' /etc/firecrawl-pi/backup.env))"
+printf '%s\n' "$conf" | write_atomic "$OUTF" 0600
+echo "wrote $OUTF (offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' "$OUTF"))"

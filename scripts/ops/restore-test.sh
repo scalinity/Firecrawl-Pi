@@ -36,8 +36,8 @@ if ! repo_lock; then
   line=$(jq -cn --arg utc "$(utc)" --arg m "$MODE" '{utc:$utc,result:"SKIPPED",mode:$m,error:"the repository lock stayed held: a backup, check or other restore test ran past the wait"}')
   append_line "$B/restore-history.jsonl" "$line"; echo "$line"; exit 3
 fi
-CONF=/etc/firecrawl-pi/backup.env
-[ -r "$CONF" ] || die "/etc/firecrawl-pi/backup.env is absent: no backup repository is configured"
+CONF=$BACKUP_ENV
+[ -r "$CONF" ] || die "$CONF is absent: no backup repository is configured"
 # shellcheck disable=SC1090
 . "$CONF"
 export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache

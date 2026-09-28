@@ -31,8 +31,8 @@ record() { # record <result> <json extra>
 }
 repo_lock || { record SKIPPED '{"error":"the repository lock stayed held: another backup, check or restore test ran past the wait"}'; exit 3; }
 RUN=$(date -u +%Y%m%dT%H%M%SZ)   # named when it starts, after any wait for the lock
-CONF=/etc/firecrawl-pi/backup.env
-[ -r "$CONF" ] || { record NOT_CONFIGURED '{"error":"/etc/firecrawl-pi/backup.env is absent: no backup repository is configured"}'; exit 3; }
+CONF=$BACKUP_ENV
+[ -r "$CONF" ] || { record NOT_CONFIGURED "$(jq -cn --arg c "$CONF" '{error:($c + " is absent: no backup repository is configured")}')"; exit 3; }
 # shellcheck disable=SC1090
 . "$CONF"
 : "${FCPI_RESTIC_REPOSITORY:?}" "${FCPI_RESTIC_PASSWORD_FILE:?}"
