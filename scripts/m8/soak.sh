@@ -83,7 +83,7 @@ while :; do
     17) scrape "{\"url\":\"http://m7shot.fixture.fcpi.test:8080/bands?soak=$m\",\"formats\":[\"screenshot\"]}"; rec "$m" screenshot "$(t 'okj ".data.screenshot != null"')" "$(code_of)" ;;
   esac
   if [ $((m % 60)) = 30 ]; then GW_TIMEOUT=120 gw POST /platform/v1/changes "{\"url\":\"http://m7chg.fixture.fcpi.test:8080/doc?soak=$RUN\"}"
-    rec "$m" changes "$(t 'okj ".changeStatus | IN("new","same","changed")"')" "$(code_of)"; fi
+    rec "$m" changes "$(t 'okj ".changeStatus | IN(\"new\",\"same\",\"changed\")"')" "$(code_of)"; fi
   poll
 done
 append_line "$LOG" "$(jq -cn --arg utc "$(utc)" --arg run "$RUN" '{utc:$utc,class:"end",run:$run}')"
