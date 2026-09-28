@@ -266,7 +266,7 @@ missing_mount)
   t1=$(now_s); systemctl reset-failed docker.service fcpi-stack.service; systemctl start docker.socket docker.service; systemctl start fcpi-stack.service
   s=$(until_ 600 ready)
   out recovered "$(jq -cn --argjson s "$s" --argjson t "$(( $(now_s) - t1 ))" --arg id "$(sha256sum "$PI_DATA_DIR/.fcpi-data-id" | cut -c1-64)" --arg id0 "$id0" --argjson b "$(brief)" --argjson sw "$(swap_all)" \
-    '{ready_after_s:$s, data_id_unchanged:($id == $id0), status:$b, swap:$sw}')" ;;
+    '{ready_after_s:$s, stack_start_to_ready_s:$t, data_id_unchanged:($id == $id0), status:$b, swap:$sw}')" ;;
 
 supervisor)
   m=$(svc mcp-gateway); n0=$(notices restart_budget_or_data_service); sup=$STATE/supervisor/restarts.jsonl
