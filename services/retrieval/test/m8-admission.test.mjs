@@ -48,7 +48,7 @@ test("the reader caches for its window, and an absent file is open", async () =>
   } finally { rmSync(dir, { recursive: true }); }
 });
 
-test("a paused browser ends the browser attempt as RESOURCE_BUSY before any render; open, the same page renders", async () => {
+test("a paused browser ends the page as RESOURCE_BUSY before any render or browser attempt; open, the same page renders", async () => {
   const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(SHELL));
   try {
     const policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
@@ -62,7 +62,8 @@ test("a paused browser ends the browser attempt as RESOURCE_BUSY before any rend
     assert.equal(held.ok, false);
     assert.equal(held.failure.class, "RESOURCE_BUSY");
     assert.match(held.failure.detail, /host paused browser work \(thermal\)/);
-    assert.equal(store.attempts.at(-1).outcome, "RESOURCE_BUSY");
+    assert.equal(store.attempts.filter((a) => a.strategy === "direct_browser").length, 0, "no browser attempt reserved: a pause spends none of the page's attempts");
+    assert.equal(store.attempts.filter((a) => a.strategy === "direct_http").length, 1, "the control: the HTTP attempt that found the shell is recorded");
     assert.equal(store.permits.size, 0, "no browser permit taken");
     const open = await make({ dispatch: "open", browser: "open", reasons: [], state: "fresh" })(body(`http://t.fixture.fcpi.test:${t.port}/`));
     assert.deepEqual([open.ok, open.strategies, renders], [true, ["direct_http", "direct_browser"], 1]);

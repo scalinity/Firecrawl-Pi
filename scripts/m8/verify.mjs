@@ -308,7 +308,7 @@ const checks = {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
       const t = (k) => tapCounts(s[k]), exit0 = (k) => (s[k] ?? []).includes("test_exit=0");
       const skipped = +(((s.retrieval_tap ?? []).find((l) => l.startsWith("# skipped ")) ?? "# skipped 1").split(" ")[2]);
-      const m8 = ["a paused browser ends the browser attempt as RESOURCE_BUSY before any render; open, the same page renders", "a stale, future-dated or unreadable file is open, so a stopped tick cannot stop the platform"]
+      const m8 = ["a paused browser ends the page as RESOURCE_BUSY before any render or browser attempt; open, the same page renders", "a stale, future-dated or unreadable file is open, so a stopped tick cannot stop the platform"]
         .every((x) => (s.retrieval_tap ?? []).some((l) => l.startsWith("ok ") && l.includes(x)));
       const hp = (s.gateway_contract_tap ?? []).some((l) => l.startsWith("ok ") && l.includes("M8: while the host holds dispatch"));
       const ops = kv((s.ops_syntax ?? []).filter((l) => /^files=/.test(l)).flatMap((l) => l.split(" ")));
