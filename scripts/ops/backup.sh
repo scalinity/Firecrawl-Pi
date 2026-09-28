@@ -76,9 +76,14 @@ inflight=$(pg "SELECT id, client_label, kind, state FROM fcpi_platform.job WHERE
 COMPOSE=(docker compose -p fcpi -f "$REPO/deploy/compose.yaml")
 APP="access-gateway mcp-gateway firecrawl-core retrieval-service browser-worker searxng"
 t_q0=$(now_s); drained=false; stopped=false
+# The services running before the backup, which resume starts again as they were: compose start never recreates a
+# container, so a deployed commit not yet cut over does not go live here and a service stopped on purpose stays stopped.
+was_running=$("${COMPOSE[@]}" ps --status running --services 2>/dev/null | tr '\n' ' ')
+[ -n "${was_running// /}" ] || was_running="$DATA_SERVICES $APP"
 resume() {
   if [ "$stopped" = true ]; then
-    "${COMPOSE[@]}" up -d --wait --wait-timeout 600 >/dev/null 2>&1 || "${COMPOSE[@]}" up -d >/dev/null 2>&1
+    # shellcheck disable=SC2086
+    "${COMPOSE[@]}" start --wait --wait-timeout 600 $was_running >/dev/null 2>&1 || "${COMPOSE[@]}" start $was_running >/dev/null 2>&1
     stopped=false
   fi
   hold_clear backup
@@ -115,11 +120,17 @@ fi
 # ---- 3. the snapshots ----------------------------------------------------------------------------------------------
 lock_sha=$(sha256sum "$REPO/deploy/versions.lock.json" | cut -c1-64)
 images=$(docker compose -p fcpi -f "$REPO/deploy/compose.yaml" config --format json 2>/dev/null | jq -c '.services | map_values(.image)')
+# The images the backed-up data was written by: a deployed tree not yet cut over differs from them, and the restore needs
+# to know.
+running_images=$(docker ps --filter label=com.docker.compose.project=fcpi --format '{{.Label "com.docker.compose.service"}}	{{.Image}}' \
+  | jq -Rsc 'split("\n") | map(select(. != "") | split("\t") | {key: .[0], value: .[1]}) | from_entries')
 schema=$(pg "SELECT max(version) FROM fcpi_platform.schema_version")
-jq -n --arg run "$RUN" --arg utc "$(utc)" --arg commit "$(source_commit)" --arg lock "$lock_sha" --argjson images "$images" --arg schema "$schema" \
+jq -n --arg run "$RUN" --arg utc "$(utc)" --arg commit "$(source_commit)" --arg lock "$lock_sha" --argjson images "$images" --argjson ri "${running_images:-null}" --arg schema "$schema" \
   --argjson c "$(printf '%s\n' "${canaries[@]}" | jq -sc 'map(select(. != null))')" --argjson a "$artifacts" --argjson i "$inflight" \
   --argjson q "$quiesce_s" --argjson dr "$drained" --arg boot "$(boot_hash)" \
-  '{run:$run,utc:$utc,source_commit:$commit,versions_lock_sha256:$lock,images:$images,platform_schema_version:($schema|tonumber? // null),
+  '{run:$run,utc:$utc,source_commit:$commit,versions_lock_sha256:$lock,images:$images,running_images:$ri,
+    deployed_matches_running:(if ($ri | type) == "object" then all($ri | to_entries[]; $images[.key] == null or $images[.key] == .value) else null end),
+    platform_schema_version:($schema|tonumber? // null),
     canaries:{results:$c,artifacts:$a,inflight:$i},quiesce_s:$q,drained:$dr,boot:$boot}' >"$S/backup-meta.json"
 (cd "$S" && find . -type f ! -name MANIFEST.sha256 -print0 | sort -z | xargs -0 sha256sum >MANIFEST.sha256)
 t_u0=$(now_s)
