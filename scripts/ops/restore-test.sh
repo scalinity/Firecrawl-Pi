@@ -125,7 +125,9 @@ rpg() { timeout 20 docker exec -i "$(docker ps -q --filter "label=com.docker.com
 hooks0=$(rpg "SELECT count(*) FILTER (WHERE state = 'DELIVERED') || '|' || coalesce(sum(attempts), 0) FROM fcpi_platform.webhook_event")
 
 REG=$R/secrets/secrets/gateway/clients TOK=$R/secrets/secrets/clients
-tokens=$(for f in "$TOK"/*.token; do [ -f "$f" ] && jq -cn --arg l "$(basename "$f" .token)" --arg t "$(cat "$f")" '{($l): $t}'; done | jq -sc 'add // {}')
+# The tokens are production's own (the secrets snapshot is): jq reads each from its file and the map travels on stdin,
+# so no token is ever on a command line (CLAUDE.md §33.2).
+tokens=$(for f in "$TOK"/*.token; do [ -f "$f" ] && jq -cn --arg l "$(basename "$f" .token)" --rawfile t "$f" '{($l): ($t | rtrimstr("\n"))}'; done | jq -sc 'add // {}')
 principal_of() { awk -v l="$1" '$1 == l {print $2}' "$REG"; }
 label_for() { awk -v p="$1" '$2 == p {print $1}' "$REG" | while read -r l; do [ -f "$TOK/$l.token" ] && { echo "$l"; break; }; done; }
 other_than() { awk -v p="$1" '$2 != p && $1 !~ /^#/ && NF >= 4 {print $1}' "$REG" | while read -r l; do [ -f "$TOK/$l.token" ] && { echo "$l"; break; }; done; }
@@ -153,7 +155,7 @@ add "$(jq -cn --arg v "$MODERN" --argjson m "$meta_mcp" '{id:"mcp-list",method:"
 add "$(jq -cn --arg v "$MODERN" --argjson m "$meta_mcp" '{id:"mcp-scrape",method:"POST",path:"/mcp",token:"ops",headers:{"mcp-protocol-version":$v,"mcp-method":"tools/call","mcp-name":"firecrawl_scrape"},
   body:{jsonrpc:"2.0",id:2,method:"tools/call",params:{name:"firecrawl_scrape",arguments:{url:"http://m1.fixture.fcpi.test:8080/static.html",formats:["markdown"]},_meta:$m}}}')"
 gwimg=$(jq -r '.services["access-gateway"].image' "$R/compose.json")
-plan=$(jq -cn --argjson t "$tokens" --argjson r "$reqs" '{base:"http://access-gateway:3300",host:"127.0.0.1:3380",tokens:$t,requests:$r}')
+plan=$(printf '%s' "$tokens" | jq -c --argjson r "$reqs" '{base:"http://access-gateway:3300",host:"127.0.0.1:3380",tokens:.,requests:$r}')
 res=$(printf '%s' "$plan" | docker run -i --rm --name "$P-check" --network fcpi_r_access --read-only --cap-drop ALL --security-opt no-new-privileges:true \
   --user 3380:3380 --label fcpi.transient=restore-test -v "$REPO/scripts/ops/restore-check.mjs:/check/restore-check.mjs:ro" --memory 128m --entrypoint node "$gwimg" /check/restore-check.mjs 2>&1)
 one() { jq -c --arg id "$1" 'select(.id == $id)' <<<"$res" 2>/dev/null | head -1; }
