@@ -623,7 +623,8 @@ const checks = {
         memory: minAvail >= 1024, queue: smp.every((s) => s.queue?.ok) && maxOld <= 300, disk: free1 >= free0 - 2 * 1024 * MIB, requests: reqs.length >= 2000 && unexplained.length === 0,
         // A class with no answer has no p95 (null), and null <= n is true in JavaScript: each must be measured.
         latency: Object.values(p95).every((v) => typeof v === "number") && p95.static <= 5000 && p95.js <= 20000 && p95.status <= 2000 && p95.mcp_list <= 2000,
-        swap: smp.every((s) => (s.containers ?? []).filter((c) => c.project === "fcpi" && c.state === "running").every((c) => c.swap_limited)) };
+        // A scope the tick could not read that minute (mem_current null) is not judged, as the tick does not judge it.
+        swap: smp.every((s) => (s.containers ?? []).filter((c) => c.project === "fcpi" && c.state === "running" && c.mem_current != null).every((c) => c.swap_limited)) };
       const classes = [...new Set(reqs.map((r) => r.class))].map((c) => `${c}:${reqs.filter((r) => r.class === c && r.ok).length}/${reqs.filter((r) => r.class === c).length}`).join(" ");
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; window ${w.start_utc}..${w.end_utc} (${(dur / 3600).toFixed(1)} h); samples=${smp.length}; requests ${classes}; failed=${failed.length} (held by a backup ${explained.length}; ${unexplained.slice(0, 5).map((r) => `${r.class} ${r.status} ${r.code}`).join("; ")}); missed minutes=${log.filter((r) => r.class === "missed").length}; min available ${minAvail} MiB; max oldest queued ${maxOld} s; p95 ms ${JSON.stringify(p95)}; disk free ${free0}→${free1}` };
     } },

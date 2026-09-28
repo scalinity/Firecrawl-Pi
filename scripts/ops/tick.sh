@@ -151,7 +151,8 @@ active=$(jq -c --argjson now "$NOW" --argjson mp "$MEM_PAUSE_MIB" --argjson dl "
     # Any flag of vcgencmd get_throttled, now or since boot (undervoltage, capping, throttling, soft temperature limit).
     (if ($throttled | test("^0x0*[1-9a-fA-F]")) then {key: "throttle_flag", detail: {throttled: $throttled}} else empty end),
     (if $dc then {key: "disk_critical", detail: {free: .disk.free, free_pct: .disk.free_pct}} elif $dl then {key: "disk_low", detail: {free: .disk.free, free_pct: .disk.free_pct}} else empty end),
-    (.containers[] | select(.project == "fcpi" and .state == "running" and (.swap_limited | not)) | {key: "swap_limit_lost:\(.service)", detail: {swap_max: .swap_max, parent_swap_max: .parent_swap_max}}),
+    # Only a scope that was read: a container Docker already reports running may not have its cgroup yet (a recreate).
+    (.containers[] | select(.project == "fcpi" and .state == "running" and .swap_max != null and (.swap_limited | not)) | {key: "swap_limit_lost:\(.service)", detail: {swap_max: .swap_max, parent_swap_max: .parent_swap_max}}),
     (($po.containers // {}) as $pc | .containers[] | select(.project == "fcpi" and ((.oom_kill // 0) > ($pc[.name] // (.oom_kill // 0)))) | {key: "oom_kill:\(.service)", detail: {oom_kill: .oom_kill}}),
     # Any kill under fcpi.slice, the main process of a container included; the services that restarted or show
     # OOMKilled this minute name the likely one.
