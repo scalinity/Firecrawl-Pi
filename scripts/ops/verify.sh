@@ -24,7 +24,7 @@ case $suite in
     bad=""; for f in "$REPO"/deploy/host/fcpi-*.service "$REPO"/deploy/host/fcpi-*.timer "$REPO"/deploy/host/fcpi.slice; do same "$f" "/etc/systemd/system/$(basename "$f")" || bad+="$(basename "$f") "; done
     same "$REPO/deploy/host/tmpfiles-fcpi.conf" /etc/tmpfiles.d/fcpi.conf || bad+="tmpfiles "
     [ -z "$bad" ]; chk units_installed $? "differ or absent: ${bad:-none}"
-    bad=""; for t in fcpi-tick.timer fcpi-probe.timer fcpi-backup.timer fcpi-backup-check.timer fcpi-restore-test.timer; do
+    bad=""; for t in fcpi-tick.timer fcpi-probe.timer fcpi-backup.timer fcpi-backup-check.timer fcpi-restore-test.timer fcpi-heartbeat.timer; do
       [ "$(systemctl is-enabled "$t" 2>/dev/null)" = enabled ] && [ "$(systemctl is-active "$t" 2>/dev/null)" = active ] || bad+="$t "; done
     for u in fcpi-boot-record.service fcpi-stack.service; do [ "$(systemctl is-enabled "$u" 2>/dev/null)" = enabled ] || bad+="$u "; done
     [ "$(systemctl is-active fcpi-stack.service)" = active ] || bad+="fcpi-stack-inactive "

@@ -1,0 +1,12 @@
+# Installed and enabled on the owner's VPS by scripts/m8/vps-watchdog-deploy.sh. Every minute at 50 s past, twenty seconds
+# after the Pi sends its heartbeat (fcpi-heartbeat.timer, at 30 s past).
+[Unit]
+Description=FCPI external watchdog every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:50
+AccuracySec=5s
+Persistent=false
+
+[Install]
+WantedBy=timers.target

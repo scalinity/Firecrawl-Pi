@@ -763,6 +763,24 @@ const checks = {
           && srv.some((m) => m.incident === iid && m.title === "Firecrawl Pi — Recovered" && (m.priority ?? 3) === 3) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${JSON.stringify(w)}; ${JSON.stringify(r)}` };
     } },
+  // Fails: the installed watchdog not the repository's, an incident not opened after the heartbeat stopped or not cleared
+  // after it returned, a second opened notice for one outage, a missing threshold of consecutive failures, a notice not
+  // on ntfy's server, or the watchdog finding itself offline.
+  N02: { name: "external-watchdog-notices-a-lost-heartbeat-once", inputs: [`${RAW}watchdog-live.txt`], evidenceClass: "live",
+    expected: "with the Pi's heartbeat stopped (the Pi still running), the VPS watchdog installed from the repository opens one heartbeat_missing incident after at least three consecutive missed checks and sends one urgent notice, sends nothing more while the outage lasts, and once the heartbeat returns clears it and sends one recovery notice with the outage's duration; ntfy's server holds exactly those two messages under one incident id",
+    run() {
+      const m = kv((S(`${RAW}watchdog-live.txt`).meta ?? []).flatMap((l) => l.split(" "))), r = records(`${RAW}watchdog-live.txt`);
+      const w = r.window?.[0], ev = r.events ?? [], srv = r.ntfy_server ?? [];
+      const op = ev.filter((e) => e.event === "opened"), cl = ev.filter((e) => e.event === "cleared"), iid = op[0]?.incident_id;
+      const cond = { installed_is_repository: /^[0-9a-f]{64}$/.test(m.watchdog_installed_sha256 ?? "") && m.watchdog_installed_sha256 === m.watchdog_repository_sha256,
+        opened_once: !!w?.opened && op.length === 1 && op[0].class === "heartbeat_missing" && op[0].consecutive_failures >= 3 && op[0].sent === true,
+        cleared_once: !!w?.cleared && cl.length === 1 && cl[0].incident_id === iid && cl[0].sent === true && cl[0].outage_s > 0,
+        observer_online: !ev.some((e) => e.event === "observer_offline"),
+        on_ntfy_server: !!iid && srv.filter((x) => x.incident === iid).length === 2
+          && srv.some((x) => x.incident === iid && x.title === "Firecrawl Pi — External Watchdog" && x.priority === 5)
+          && srv.some((x) => x.incident === iid && x.title === "Firecrawl Pi — Reachable Again" && (x.priority ?? 3) === 3) };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${JSON.stringify(w)}; events ${JSON.stringify(ev.map((e) => e.event))}; ntfy ${srv.length} messages` };
+    } },
 
   // ================================================================ upgrade and rollback (AC19)
   U01: { name: "upgrade-and-rollback-rehearsed-in-isolation", inputs: [`${RAW}rehearsal.txt`],
@@ -864,8 +882,11 @@ const checks = {
       const hits = scan(files, { m0, secrets: new Set(hashes) });
       const t = target(), lan = t.PI_LAN_ADDRESS, net = lan.replace(/\.\d+$/, ".0");
       const changed = [...new Set([...git("diff", "--name-only", `${M8_START}..HEAD`).split("\n"), ...git("ls-files", "--others", "--exclude-standard").split("\n")])].filter((f) => f && has(f) && !/\.(pdf|png|gz)$/.test(f));
-      const idHits = changed.filter((f) => { const x = read(f); return x.includes(lan) || x.includes(`${net}/`) || x.includes(t.PI_SSH_TARGET); });
-      return { ok: hits.length === 0 && idHits.length === 0, configHash: hashOf(files.filter((f) => f !== OUT)), actual: `controls fired all ${RULES.length + HASH_RULES.length} rules; files scanned=${files.length}; live secret hashes compared=${hashes.length} (provider files ${providerFiles}, password parts ${pairFiles}, client tokens ${tokenFiles}, backup keys ${backupKeys}); findings=${hits.length}${hits.length ? " [" + hits.slice(0, 12).join("; ") + "]" : ""}; M8 files with the LAN address, network or SSH target=${idHits.join(",") || "none"} (of ${changed.length})` };
+      // M8: the owner's VPS (the off-device backup and the watchdog), whose address lives outside the repository in
+      // ~/.config/firecrawl-pi/vps.conf, must not enter it either.
+      const vpsConf = resolve(process.env.HOME, ".config/firecrawl-pi/vps.conf"), vps = existsSync(vpsConf) ? (readFileSync(vpsConf, "utf8").match(/^VPS_SSH_TARGET=[^@\s]*@(\S+)$/m) ?? [])[1] : null;
+      const idHits = changed.filter((f) => { const x = read(f); return x.includes(lan) || x.includes(`${net}/`) || x.includes(t.PI_SSH_TARGET) || (!!vps && x.includes(vps)); });
+      return { ok: hits.length === 0 && idHits.length === 0, configHash: hashOf(files.filter((f) => f !== OUT)), actual: `controls fired all ${RULES.length + HASH_RULES.length} rules; files scanned=${files.length}; live secret hashes compared=${hashes.length} (provider files ${providerFiles}, password parts ${pairFiles}, client tokens ${tokenFiles}, backup keys ${backupKeys}); findings=${hits.length}${hits.length ? " [" + hits.slice(0, 12).join("; ") + "]" : ""}; M8 files with the LAN address, network, SSH target or the VPS address (checked: ${!!vps})=${idHits.join(",") || "none"} (of ${changed.length})` };
     } },
   L03: { name: "lock-and-compose-consistent", inputs: ["deploy/versions.lock.json", "deploy/compose.yaml", `${EV}rendered-compose.json`],
     expected: "every Compose image is pinned by digest for linux/arm64 across the fifteen services; the lock records the retrieval and gateway images the stack runs, M7's API, MCP and browser images, restic's package version and binary hash, fcpi.slice and the host units' hashes, and the capability manifest's hash",
@@ -942,6 +963,6 @@ for (const id of wanted) {
 }
 const ordered = listed.map((id) => results[`M8-${id}`] ?? { test_id: `M8-${id}`, name: checks[id].name, state: "NOT_RUN", actual: "never run", evidence_path: OUT });
 writeFileSync(resolve(ROOT, OUT), JSON.stringify({ schema: "fcpi.m8.verification/v1", runner: "scripts/m8/verify.mjs",
-  repository_sha_note: "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (K03, N01) from the fixture and host checks.",
+  repository_sha_note: "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (K03, N01, N02) from the fixture and host checks.",
   results: ordered }, null, 2) + "\n");
 process.exitCode = ordered.every((r) => r.state === "PASS" || r.state === "BLOCKED_CREDENTIAL") ? 0 : 1;

@@ -47,15 +47,15 @@ stat -c '%U:%G %a %n' /run/firecrawl-pi/admission /run/firecrawl-pi/admission/ad
 sec units
 changed=0
 for f in fcpi.slice fcpi-stack.service fcpi-tick.service fcpi-tick.timer fcpi-probe.service fcpi-probe.timer fcpi-boot-record.service \
-         fcpi-backup.service fcpi-backup.timer fcpi-backup-check.service fcpi-backup-check.timer fcpi-restore-test.service fcpi-restore-test.timer; do
+         fcpi-backup.service fcpi-backup.timer fcpi-backup-check.service fcpi-backup-check.timer fcpi-restore-test.service fcpi-restore-test.timer fcpi-heartbeat.service fcpi-heartbeat.timer; do
   if ! cmp -s $H/$f /etc/systemd/system/$f; then sudo -n install -m 0644 -o root -g root $H/$f /etc/systemd/system/$f; echo "installed $f"; changed=1; fi
 done
 [ $changed = 1 ] && sudo -n systemctl daemon-reload && echo "daemon-reload (lifts the swap limit of containers not yet under fcpi.slice until they are recreated)"
 sudo -n systemctl start fcpi.slice
-for t in fcpi-tick.timer fcpi-probe.timer fcpi-backup.timer fcpi-backup-check.timer fcpi-restore-test.timer; do sudo -n systemctl enable --now "$t" 2>&1 | grep -v '^Created symlink' || true; done
+for t in fcpi-tick.timer fcpi-probe.timer fcpi-backup.timer fcpi-backup-check.timer fcpi-restore-test.timer fcpi-heartbeat.timer; do sudo -n systemctl enable --now "$t" 2>&1 | grep -v '^Created symlink' || true; done
 sudo -n systemctl enable fcpi-boot-record.service 2>&1 | grep -v '^Created symlink' || true
 echo "fcpi.slice MemorySwapMax=$(systemctl show -p MemorySwapMax --value fcpi.slice) memory.swap.max=$(cat /sys/fs/cgroup/fcpi.slice/memory.swap.max)"
-systemctl is-enabled fcpi-tick.timer fcpi-probe.timer fcpi-backup.timer fcpi-backup-check.timer fcpi-restore-test.timer fcpi-boot-record.service | paste -sd' ' -
+systemctl is-enabled fcpi-tick.timer fcpi-probe.timer fcpi-backup.timer fcpi-backup-check.timer fcpi-restore-test.timer fcpi-heartbeat.timer fcpi-boot-record.service | paste -sd' ' -
 
 sec command
 sudo -n ln -sfn $REPO/scripts/fcpi /usr/local/bin/fcpi

@@ -1,0 +1,11 @@
+# Installed by scripts/m8/pi-init-m8.sh. The heartbeat the owner's VPS watchdog reads (scripts/ops/heartbeat.sh).
+[Unit]
+Description=FCPI heartbeat to the external watchdog
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/firecrawl-pi/scripts/fcpi heartbeat
+TimeoutStartSec=60
+Nice=5

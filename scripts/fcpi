@@ -21,7 +21,8 @@
 #   fcpi hold <name> <seconds> | fcpi hold <name> --clear
 #                                   pause new work by hand (the admission file), or release the pause
 #   fcpi help restore               the disaster-recovery procedure
-# Timers run: fcpi tick (every minute), fcpi probe (every five minutes), fcpi boot-record (at boot).
+# Timers run: fcpi tick (every minute), fcpi probe (every five minutes), fcpi heartbeat (every minute, to the VPS
+# watchdog), fcpi boot-record (at boot).
 set -uo pipefail
 HERE=$(dirname "$(readlink -f "$0")")
 # From any machine with Node (the workstation, an agent's host), with FCPI_BASE_URL in the environment, even empty:
@@ -33,6 +34,7 @@ cmd=${1:-help}; shift || true
 case $cmd in
   tick) exec bash "$HERE/ops/tick.sh" ;;
   probe) exec bash "$HERE/ops/probe.sh" ;;
+  heartbeat) exec bash "$HERE/ops/heartbeat.sh" ;;
   boot-record) exec bash "$HERE/ops/boot-record.sh" ;;
   status) exec bash "$HERE/ops/status.sh" "$@" ;;
   backup) exec bash "$HERE/ops/backup.sh" "$@" ;;

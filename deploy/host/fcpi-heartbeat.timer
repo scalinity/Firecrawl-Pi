@@ -1,0 +1,11 @@
+# Installed and enabled by scripts/m8/pi-init-m8.sh. Every minute, at 30 s past (between the tick's runs); the VPS watchdog
+# counts a heartbeat missed after about two and a half minutes, and opens its incident after three missed checks.
+[Unit]
+Description=FCPI heartbeat every minute
+
+[Timer]
+OnCalendar=*-*-* *:*:30
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

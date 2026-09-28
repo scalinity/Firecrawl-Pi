@@ -1,0 +1,10 @@
+# Installed on the owner's VPS by scripts/m8/vps-watchdog-deploy.sh. The external watchdog (fcpi-watchdog.sh).
+[Unit]
+Description=FCPI external watchdog of the Firecrawl Pi heartbeat
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/lib/fcpi-watchdog/fcpi-watchdog.sh
+TimeoutStartSec=50
