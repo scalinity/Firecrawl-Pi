@@ -31,6 +31,8 @@ case $suite in
     [ -z "$bad" ]; chk units_enabled_active $? "not enabled or not active: ${bad:-none}"
     s=$(cat /sys/fs/cgroup/fcpi.slice/memory.swap.max 2>/dev/null); p=$(systemctl show -p MemorySwapMax --value fcpi.slice)
     [ "$s" = 0 ] && [ "$p" = 0 ]; chk slice_swap_zero $? "memory.swap.max=$s MemorySwapMax=$p"
+    h=$(cat /sys/fs/cgroup/fcpi.slice/memory.high 2>/dev/null); hp=$(systemctl show -p MemoryHigh --value fcpi.slice)
+    [[ $h =~ ^[0-9]+$ ]] && [ "$h" = "$hp" ]; chk slice_memory_high $? "memory.high=$h MemoryHigh=$hp"
     ins=$(docker inspect $(docker ps -q --filter label=com.docker.compose.project=fcpi) 2>/dev/null | jq -r '.[] | "\(.Name) \(.HostConfig.CgroupParent) \(.Id)"')
     n=$(wc -l <<<"$ins"); out=$(awk '$2 != "fcpi.slice" {print $1}' <<<"$ins" | tr '\n' ' ')
     [ "$n" -ge 10 ] && [ -z "$out" ]; chk containers_in_slice $? "$n running, outside fcpi.slice: ${out:-none}"

@@ -630,7 +630,7 @@ const checks = {
   // Fails: a service whose peak reaches 90 % of its cap during the soak, or a spec §22 measured figure that differs from
   // the soak's.
   S02: { name: "memory-within-caps-and-measured-budget", inputs: [`${RAW}soak.txt`, "docs/FIRECRAWL_PI_SPEC.md"],
-    expected: "over the soak every project service's memory peak stays under 90 % of its cap; spec §22's measured column (idle as the soak's lowest current value, normal as its median, peak as its highest peak, in MiB) equals what the soak's samples give",
+    expected: "over the soak every project service's memory peak stays under 90 % of its cap and the project as a whole under fcpi.slice's MemoryHigh; spec §22's measured column (idle as the soak's lowest current value, normal as its median, peak as its highest peak, in MiB) equals what the soak's samples give",
     run() {
       const smp = SOAK().samples ?? [];
       const svc = {};
@@ -640,8 +640,11 @@ const checks = {
       const spec = read("docs/FIRECRAWL_PI_SPEC.md");
       const rows = [...spec.matchAll(/^\| `([a-z0-9-]+)` \| (\d[\d,]*) \| (\d[\d,]*) \| (\d[\d,]*) \|/gm)].map((r) => [r[1], [r[2], r[3], r[4]].map((x) => +x.replace(/,/g, ""))]);
       const mismatch = rows.filter(([k, [i, n, p]]) => !m[k] || m[k].idle !== i || m[k].normal !== n || m[k].peak !== p).map(([k]) => k);
-      const cond = { samples: smp.length >= 1000 && Object.keys(m).length >= 15, caps: over.length === 0, spec_rows: rows.length >= 9 && mismatch.length === 0 };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; over 90 %=${over.join(",") || "none"}; spec rows=${rows.length}, differing=${mismatch.join(",") || "none"}; measured ${JSON.stringify(m)}` };
+      // The project as a whole stays under fcpi.slice's MemoryHigh in every sample (each must carry the slice's reading).
+      const sl = smp.map((s) => s.slice ?? {}), slMax = Math.max(...sl.map((x) => x.mem_current ?? Infinity));
+      const cond = { samples: smp.length >= 1000 && Object.keys(m).length >= 15, caps: over.length === 0, spec_rows: rows.length >= 9 && mismatch.length === 0,
+        slice_under_high: sl.length > 0 && sl.every((x) => typeof x.mem_current === "number" && typeof x.mem_high === "number" && x.mem_current < x.mem_high) };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; project at most ${Math.round(slMax / MIB)} MiB against fcpi.slice MemoryHigh ${Math.round((sl[0]?.mem_high ?? NaN) / MIB)} MiB; over 90 %=${over.join(",") || "none"}; spec rows=${rows.length}, differing=${mismatch.join(",") || "none"}; measured ${JSON.stringify(m)}` };
     } },
   // Fails: the chosen write settings not in force in the final Compose file and the soak, or the A/B not measured on the
   // same workload, or the chosen settings writing more than the server-class ones.

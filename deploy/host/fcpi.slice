@@ -3,9 +3,15 @@
 # every daemon-reload, where the per-container swap limit Docker writes (memswap_limit equal to mem_limit) is not:
 # a reload lifts that to "max" until the container is recreated (M4 review finding F2). With the slice at 0, no
 # container of the project can swap to the host's zram whatever happens to its own scope.
+# MemoryHigh bounds the project as a whole, since the containers' own caps together exceed the host (spec §22's
+# 6,688 MiB): past it the kernel reclaims and slows the project, killing nothing, before the host's own services (about
+# 1,100 MiB in system.slice and user.slice) or spec §22's 1 GiB reserve are touched. 5,632 MiB is the Pi's 8,062 MiB
+# MemTotal less that reserve and those services, rounded down; the project peaked at 3,135 MiB when it was measured and
+# spec §22's normal estimate is 3,205 MiB. The tick samples the slice's use and peak against it.
 [Unit]
-Description=FCPI containers (no swap)
+Description=FCPI containers (no swap, one memory bound)
 Before=slices.target
 
 [Slice]
 MemorySwapMax=0
+MemoryHigh=5632M

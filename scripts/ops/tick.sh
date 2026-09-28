@@ -39,6 +39,9 @@ host_oom=$(awk '$1 == "oom_kill" {print $2}' /proc/vmstat)
 # The slice's own count covers every container under it: a container's scope count restarts at 0 when its restart
 # policy recreates the scope, and Docker clears State.OOMKilled at the restart, so neither sees a main process killed.
 slice_oom=$(awk '$1 == "oom_kill" {print $2}' /sys/fs/cgroup/fcpi.slice/memory.events 2>/dev/null)
+# The project as a whole against fcpi.slice's MemoryHigh: its memory now, its peak since the slice began, and the bound.
+slice_cur=$(cat /sys/fs/cgroup/fcpi.slice/memory.current 2>/dev/null) slice_peak=$(cat /sys/fs/cgroup/fcpi.slice/memory.peak 2>/dev/null)
+slice_high=$(cat /sys/fs/cgroup/fcpi.slice/memory.high 2>/dev/null)
 
 # A container removed between the listing and the inspection makes docker inspect print the rest and fail: whatever it
 # printed is merged into one list, so the list is always one JSON array.
@@ -79,9 +82,11 @@ sample=$(jq -cn --arg utc "$T" --arg boot "$(boot_hash)" --arg commit "$(source_
   --argjson swt "${swap_total:-0}" --argjson swf "${swap_free:-0}" --argjson temp "${temp_c:-null}" --argjson inj "$injected_temp" --arg thr "$throttled" \
   --argjson dsize "${d_size:-0}" --argjson davail "${d_avail:-0}" --argjson ditot "${d_itotal:-0}" --argjson diav "${d_iavail:-0}" \
   --arg card "$card_dev" --argjson cws "${card_wsect:-0}" --argjson hoom "${host_oom:-0}" \
+  --argjson scur "${slice_cur:-null}" --argjson speak "${slice_peak:-null}" --arg shigh "${slice_high:-}" \
   --argjson c "$containers" --argjson f "$foreign" --argjson q "$queue" --argjson adm "$(jq -c "{dispatch, browser, reasons}" "$ADMISSION" 2>/dev/null || echo null)" \
   '{utc:$utc, boot:$boot, commit:$commit, mem:{total_mib:$total, available_mib:$avail, swap_used_mib:($swt - $swf)},
     temp_c:$temp, injected_temp:$inj, throttled:$thr, host_oom_kill:$hoom,
+    slice:{mem_current:$scur, mem_peak:$speak, mem_high:(if ($shigh | test("^[0-9]+$")) then ($shigh | tonumber) else $shigh end)},
     disk:{size:$dsize, free:$davail, free_pct:(if $dsize > 0 then ($davail * 1000 / $dsize | floor) / 10 else null end),
       inodes_free_pct:(if $ditot > 0 then ($diav * 1000 / $ditot | floor) / 10 else null end)},
     card:{dev:$card, written_sectors:$cws}, containers:$c, foreign:$f, queue:$q, admission:$adm}')
