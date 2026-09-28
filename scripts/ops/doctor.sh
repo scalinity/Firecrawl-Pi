@@ -45,20 +45,31 @@ journalctl --no-pager --utc -o short-iso -n 300 -u fcpi-stack.service -u fcpi-ti
   systemctl list-timers 'fcpi-*' --no-pager 2>/dev/null; sha256sum "$REPO/deploy/versions.lock.json"; } >"$B/host.txt" 2>&1
 
 # The self-test: real secret values, each in its own file as a log line would carry it, which the check below must all
-# find: a client token, and a value from a file with no final newline (most secrets are written with printf '%s').
+# find: a client token, a value from a file with no final newline (most secrets are written with printf '%s'), and,
+# when a provider file holds a user:password pair, its password half alone.
 planted=0
 if [ "${1:-}" = --self-test ]; then
   tokf=$(find /etc/firecrawl-pi/secrets/clients -name '*.token' | head -1)
   nlf=$(find /etc/firecrawl-pi/secrets -type f -size -8k ! -path '*/clients/*' | sort | while read -r f; do
     [ "$(wc -l <"$f")" = 0 ] && [ "$(wc -c <"$f")" -ge 12 ] && { echo "$f"; break; }; done)
   for f in "$tokf" "$nlf"; do [ -n "$f" ] || continue; awk 1 "$f" | sed 's/^/leaked /' >"$B/containers/self-test-$planted.log"; planted=$((planted + 1)); done
+  pairf=$(grep -l : /etc/firecrawl-pi/secrets/providers/* 2>/dev/null | head -1)
+  if [ -n "$pairf" ]; then awk 1 "$pairf" | grep -v '://' | grep -m1 : | sed -E 's/^[^:]*:/leaked /' >"$B/containers/self-test-$planted.log"; planted=$((planted + 1)); fi
 fi
 # Enforced redaction: every secret value, searched for literally in every file. awk 1 ends each file's last line, so a
 # value written without a final newline is never joined to the next file's first line.
-pat=$(mktemp "$RUND/doctor-pat.XXXXXX"); chmod 0600 "$pat"
+pat=$(mktemp "$W/pat.XXXXXX"); chmod 0600 "$pat"
 find /etc/firecrawl-pi/secrets -type f -size -8k -print0 | xargs -0 -r awk 1 | awk 'length($0) >= 12' | sort -u >"$pat"
-# Values that are only part of a line (a URL with a password) are searched for by their secret part too.
-grep -Eo '://[^:/@]*:[^@]+@' "$pat" | sed -E 's#^://[^:]*:##; s#@$##' | awk 'length($0) >= 8' >>"$pat"
+# Values that are only part of a line are searched for by their secret part too: the password of a URL, the password
+# half of a user:password line, the value of a key = value line (RabbitMQ's default_pass), and the Basic (base64) form
+# of each user:password pair, as a proxy's Proxy-Authorization carries it.
+px=$(mktemp "$W/pat.XXXXXX"); chmod 0600 "$px"
+{ grep -Eo '://[^:/@]*:[^@]+@' "$pat" | sed -E 's#^://[^:]*:##; s#@$##'
+  grep -v '://' "$pat" | grep : | sed -E 's/^[^:]*://'
+  grep -E '^[^=]+=' "$pat" | sed -E 's/^[^=]*=[[:space:]]*//; s/[[:space:]]+$//'
+  grep -v '://' "$pat" | grep : | while IFS= read -r l; do printf '%s' "$l" | base64 -w0; echo; done
+} | awk 'length($0) >= 8' >"$px"
+cat "$px" >>"$pat"; rm -f "$px"
 hits=$(grep -rlF -f "$pat" "$B" 2>/dev/null | wc -l); npat=$(wc -l <"$pat")
 found=0; [ "$planted" -gt 0 ] && found=$(grep -lF -f "$pat" "$B"/containers/self-test-*.log 2>/dev/null | wc -l)
 rm -f "$pat"
