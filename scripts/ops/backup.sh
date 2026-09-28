@@ -37,11 +37,13 @@ export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_REST
 # Backend credentials, exported to restic alone.
 if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi
 OFFDEVICE=${FCPI_BACKUP_OFFDEVICE:-unknown}
+# The repository's kind (its scheme, or local for a path), never its address.
+case $RESTIC_REPOSITORY in /*) KIND=local ;; *) KIND=${RESTIC_REPOSITORY%%:*} ;; esac
 . /etc/firecrawl-pi/config.env
 DATA=${PI_DATA_DIR:?}
 STAGE_ROOT=/srv/firecrawl-pi/backup-staging
 [ "$(findmnt -no UUID --target "$STAGE_ROOT")" = "$PI_DATA_MOUNT_ID" ] || { record FAIL '{"error":"the staging area is not on the data filesystem"}'; exit 1; }
-restic cat config >/dev/null 2>&1 || { record FAIL "$(jq -cn --arg k "${RESTIC_REPOSITORY%%:*}" '{error:"the repository cannot be opened",repository_kind:$k}')"; exit 1; }
+restic cat config >/dev/null 2>&1 || { record FAIL "$(jq -cn --arg k "$KIND" '{error:"the repository cannot be opened",repository_kind:$k}')"; exit 1; }
 
 # Room for the copy: the three data directories twice over, plus 1 GiB.
 need=$(( $(du -sb "$DATA/postgres" "$DATA/redis" "$DATA/rabbitmq" | awk '{s += $1} END {print s}') * 2 + 1073741824 ))
@@ -129,7 +131,7 @@ out2=$(restic backup --json --tag fcpi-secrets --host fcpi-pi --stdin-filename f
 snap_sec=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <<<"$out2" 2>/dev/null)
 upload_s=$(( $(now_s) - t_u0 ))
 x=$(jq -cn --arg d "$snap_data" --arg s "$snap_sec" --argjson a "${added:-0}" --argjson q "$quiesce_s" --argjson u "$upload_s" --argjson dr "$drained" \
-  --arg k "${RESTIC_REPOSITORY%%:*}" --arg off "$OFFDEVICE" --argjson up "$up_ok" --arg commit "$(source_commit)" --arg lock "$lock_sha" \
+  --arg k "$KIND" --arg off "$OFFDEVICE" --argjson up "$up_ok" --arg commit "$(source_commit)" --arg lock "$lock_sha" \
   --argjson nc "${#canaries[@]}" --argjson ni "$(jq length <<<"$inflight")" \
   '{snapshot_data:$d,snapshot_secrets:$s,data_added:$a,quiesce_s:$q,upload_s:$u,drained:$dr,repository_kind:$k,offdevice:$off,
     stack_healthy_after:$up,source_commit:$commit,versions_lock_sha256:$lock,canary_results:$nc,inflight_jobs:$ni}')
