@@ -62,7 +62,8 @@ mcp_crash)
   s=$(until_ 180 'GW_TIMEOUT=10 mcp tools/list "{}"; [ "$GW_STATUS" = 200 ]')
   GW_TIMEOUT=60 mcp tools/call "$(jq -cn --arg id "$JOB" '{name:"firecrawl_check_crawl_status",arguments:{id:$id}}')"
   out mcp_after "$(jq -cn --argjson s "$s" --arg st "$GW_STATUS" --argjson r "$(restarts mcp-gateway)" --argjson r0 "$r0" --arg b "$GW_BODY" \
-    '{back_after_s:$s, restarts_delta:($r - $r0), handle_call_status:($st|tonumber), handle_call_ok:(($b | fromjson? // {}) | (.result != null and .result.isError != true))}')" ;;
+    '{back_after_s:$s, restarts_delta:($r - $r0), handle_call_status:($st|tonumber), handle_call_ok:(($b | fromjson? // {}) | (.result != null and .result.isError != true)),
+      handle_result:(($b | fromjson? // {}) | {isError: .result.isError, error: .error, text: ((.result.content[0].text // "") | .[0:160])})}')" ;;
 
 api_child_crash)
   crawl; out submitted "$(jq -c --arg j "$JOB" '{call: ., job: $j}' <<<"$CALL")"
@@ -78,15 +79,19 @@ api_child_crash)
   out job_after "$(jq -cn --argjson j "$(wait_job "$JOB" 600)" '{job:$j}')" ;;
 
 worker_child_crash)
-  c=$(svc firecrawl-core); r0=$(restarts firecrawl-core)
+  # A hung NuQ worker (SIGSTOP), the degraded state spec §24.1 names: its health endpoint stops answering while the API
+  # stays live. The harness does not see a stopped child, so recovery is the supervisor's restart of the core once
+  # Docker marks it unhealthy. (A worker killed outright makes the harness stop the whole core, as api_child_crash shows.)
+  c=$(svc firecrawl-core); r0=$(restarts firecrawl-core); sup0=$(jq -c 'select(.service == "firecrawl-core")' "$STATE/supervisor/restarts.jsonl" 2>/dev/null | wc -l)
   out before "$(jq -cn --argjson b "$(brief)" --arg t "$(docker top "$c" -eo pid,args | awk 'NR > 1 {$1=""; print}' | sort | uniq -c | tr -s ' ' | tr '\n' ';')" '{status:$b, processes:$t}')"
-  p=$(docker top "$c" -eo pid,args | awk 'NR > 1 && /nuq-worker|worker\.js|services\/worker/ && $2 == "node" {print $1}' | head -1)
+  p=$(docker top "$c" -eo pid,args | awk '$2 == "node" && $3 == "dist/src/services/worker/nuq-worker.js" && NF == 3 {print $1}' | head -1)
   [ -n "$p" ] || { out no_worker_process '{}'; exit 1; }
-  kill -9 "$p"
+  kill -STOP "$p"
   s=$(until_ 180 '[ "$(bash $REPO/scripts/ops/status.sh --json | jq -r ".core.worker")" = false ]')
   out detected "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{worker_down_seen_after_s:$s, status:$b}')"
   s=$(until_ 600 ready)
-  out recovered "$(jq -cn --argjson s "$s" --argjson r "$(restarts firecrawl-core)" --argjson r0 "$r0" --argjson b "$(brief)" '{ready_after_s:$s, container_restarts_delta:($r - $r0), status:$b}')"
+  out recovered "$(jq -cn --argjson s "$s" --argjson r "$(restarts firecrawl-core)" --argjson r0 "$r0" --argjson b "$(brief)" \
+    --argjson sup "$(( $(jq -c 'select(.service == "firecrawl-core")' "$STATE/supervisor/restarts.jsonl" 2>/dev/null | wc -l) - sup0 ))" '{ready_after_s:$s, container_restarts_delta:($r - $r0), supervisor_restarts:$sup, status:$b}')"
   crawl; out job_after "$(jq -cn --argjson j "$(wait_job "$JOB" 600)" '{job:$j}')" ;;
 
 postgres_down)
@@ -148,7 +153,7 @@ searxng_down)
   call POST /v2/search '{"query":"fcpi fault search","limit":3}'; out search_after "$(jq -c --argjson s "$s" --arg b "$GW_BODY" '. + {ready_after_s:$s, results: (($b | fromjson? // {}).data // null | tostring | length)}' <<<"$CALL")" ;;
 
 proxy_down)
-  bash "$REPO/scripts/m5/pi-selection.sh" fixture fcpi-fixture-model fcpi-fixture-parser fixture-proxy none >/dev/null
+  bash "$REPO/scripts/m5/pi-selection.sh" fixture fcpi-fixture-model fcpi-fixture-parser fcpi-fixture-proxy none >/dev/null
   "${C[@]}" stop fixture-m6 >/dev/null 2>&1
   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   call POST /v2/crawl '{"url":"http://m6bulk.fixture.fcpi.test:8080/","limit":25}'; j=$(jq -r '.id // empty' <<<"$GW_BODY"); out bulk_submit "$(jq -c --arg j "$j" '. + {job:$j}' <<<"$CALL")"

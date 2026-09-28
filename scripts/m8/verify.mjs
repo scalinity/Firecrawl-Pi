@@ -419,11 +419,11 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; during ${JSON.stringify(d)}; ${JSON.stringify(r)}; job ${JSON.stringify(j?.job)}` };
     } },
   I03: { name: "worker-death-shown-as-degraded-and-recovered", inputs: [`${RAW}faults.txt`],
-    expected: "the NuQ worker process killed: fcpi status shows the worker down while the API is still live (a live API with a dead worker is degraded, not healthy); the core recovers (the harness, or the supervisor's restart) within 600 s; a new crawl completes",
+    expected: "the NuQ worker hung (SIGSTOP): fcpi status shows the worker down while the API is still live (a live API with a dead worker is degraded, not healthy); the supervisor restarts the core once Docker marks it unhealthy, and it is ready within 600 s; a new crawl completes",
     run() {
       const x = step("worker_child_crash", "detected"), r = step("worker_child_crash", "recovered"), j = step("worker_child_crash", "job_after");
       const cond = { independent: x?.worker_down_seen_after_s >= 0 && x.status.worker === false && x.status.api === true && x.status.healthy === false,
-        recovered: r?.ready_after_s >= 0 && r.ready_after_s <= 600 && r.status.healthy, job: j?.job?.state === "SUCCEEDED" };
+        recovered: r?.ready_after_s >= 0 && r.ready_after_s <= 600 && r.status.healthy && r.supervisor_restarts >= 1, job: j?.job?.state === "SUCCEEDED" };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; detected ${JSON.stringify(x?.status)}; ${JSON.stringify({ ready_after_s: r?.ready_after_s, restarts: r?.container_restarts_delta })}` };
     } },
   I04: { name: "postgres-down-fails-closed-and-reconciles", inputs: [`${RAW}faults.txt`],
