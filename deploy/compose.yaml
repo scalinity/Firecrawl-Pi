@@ -41,8 +41,26 @@ services:
     user: "5432:5432"                  # dedicated uid; the image default (999) is pihole on this host
     # Command-line settings outrank nuq.sql's ALTER SYSTEM values in postgresql.auto.conf:
     # WAL sizing for the 64 GB card, spec §22 memory/connection limits, durability kept on.
+    # M8 (M1 review R15): nuq.sql's server-class background and WAL writer settings return to PostgreSQL's defaults on the
+    # microSD card, measured against them on the same paced workload (evidence/M8/raw/pg-writes.txt, verifier S03).
     command:
       - postgres
+      - -c
+      - bgwriter_delay=200ms
+      - -c
+      - bgwriter_lru_maxpages=100
+      - -c
+      - bgwriter_lru_multiplier=2.0
+      - -c
+      - wal_writer_delay=200ms
+      - -c
+      - wal_buffers=-1
+      - -c
+      - effective_io_concurrency=1
+      - -c
+      - maintenance_io_concurrency=10
+      - -c
+      - commit_delay=0
       - -c
       - shared_buffers=128MB
       - -c
