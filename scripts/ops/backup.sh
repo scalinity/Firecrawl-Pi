@@ -11,7 +11,8 @@
 #   3. after the stack is back: the staged copy, the content-addressed result store (immutable files, backed up live),
 #      the deployed tree and the host configuration go into one snapshot (tag fcpi-data); the secrets directory is
 #      streamed into a second (tag fcpi-secrets) by restic's own tar command, so no plaintext copy is ever staged;
-#   4. retention (seven daily, four weekly, three monthly) only after both snapshots succeed; the staging copy is
+#   4. retention (seven daily, four weekly, three monthly) only after both snapshots succeed, the data the forgotten
+#      snapshots alone held pruned weekly after a passing integrity check (fcpi backup-check); the staging copy is
 #      removed once uploaded.
 # Browser scratch, caches and full logs are not included. /var/lib/firecrawl-pi/backup/last.json records the last
 # success (fcpi status shows its age; the tick opens backup_stale past 26 hours); history.jsonl every attempt.
@@ -167,6 +168,6 @@ x=$(jq -cn --arg d "$snap_data" --arg s "$snap_sec" --argjson a "${added:-0}" --
 if [ -z "$snap_data" ] || [ -z "$snap_sec" ]; then record FAIL "$(jq -c '. + {error:"a snapshot did not complete; the staged copy is kept for the next run"}' <<<"$x")"; exit 1; fi
 
 # ---- 4. retention --------------------------------------------------------------------------------------------------
-restic forget --host fcpi-pi --keep-daily 7 --keep-weekly 4 --keep-monthly 3 --prune >"$B/restic-forget.log" 2>&1; fr=$?
+restic forget --host fcpi-pi --keep-daily 7 --keep-weekly 4 --keep-monthly 3 >"$B/restic-forget.log" 2>&1; fr=$?
 rm -rf "$S"
 record PASS "$(jq -c --argjson f "$fr" '. + {forget_exit:$f}' <<<"$x")"

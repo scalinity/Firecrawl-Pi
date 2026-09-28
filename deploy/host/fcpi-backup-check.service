@@ -1,4 +1,5 @@
-# Installed by scripts/m8/pi-init-m8.sh. restic's integrity check over a 5 % subset of the repository's data.
+# Installed by scripts/m8/pi-init-m8.sh. restic's integrity check over a 5 % subset of the repository's data, then the
+# prune of what the nightly retention forgot (only after a passing check, spec §26).
 [Unit]
 Description=FCPI backup repository check
 After=network-online.target

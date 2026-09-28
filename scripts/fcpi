@@ -11,7 +11,7 @@
 #   fcpi verify <ops|functional|services>
 #                                   a reproducible suite; results in /var/lib/firecrawl-pi/verify/<suite>-<UTC>.json
 #   fcpi backup                     coordinated encrypted backup (scripts/ops/backup.sh)
-#   fcpi backup-check               restic check of a 5 % data subset (weekly timer)
+#   fcpi backup-check               restic check of a 5 % data subset, then prune (weekly timer)
 #   fcpi restore-test [--snapshot <id>] [--keep]
 #                                   isolated restore and its proof (scripts/ops/restore-test.sh)
 #   fcpi upgrade --plan <commit> | fcpi rollback --plan
@@ -41,10 +41,12 @@ case $cmd in
     . /etc/firecrawl-pi/backup.env 2>/dev/null || die "no backup repository is configured"
     export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
     restic check --read-data-subset=5% >"$STATE/backup/check.log" 2>&1; rc=$?
-    line=$(jq -cn --arg u "$(utc)" --argjson rc $rc '{utc:$u,check_exit:$rc,result:(if $rc == 0 then "PASS" else "FAIL" end)}')
+    # Space the nightly retention forgot is reclaimed only after a passing check (spec §26).
+    prc=null; if [ $rc = 0 ]; then restic prune >>"$STATE/backup/check.log" 2>&1; prc=$?; fi
+    line=$(jq -cn --arg u "$(utc)" --argjson rc $rc --argjson prc "$prc" '{utc:$u,check_exit:$rc,prune_exit:$prc,result:(if $rc == 0 and $prc == 0 then "PASS" else "FAIL" end)}')
     printf '%s\n' "$line" | write_atomic "$STATE/backup/last-check.json" 0600; echo "$line"
     [ $rc = 0 ] || notice opened backup_check_failed "$line"
-    exit $rc ;;
+    [ "$(jq -r .result <<<"$line")" = PASS ] ;;
   foreign)
     # Containers outside Compose project fcpi (throwaway fcpi.transient ones aside), to the journal and stdout (M1 R12).
     f=$(docker ps -a --format '{{.Names}} {{.Label "com.docker.compose.project"}} {{.Label "fcpi.transient"}}' 2>/dev/null | awk '$2 != "fcpi" && $3 == "" {print $1}' | tr '\n' ' ')
