@@ -17,6 +17,10 @@ sudo -n sh $REPO/deploy/host/fcpi-data-check.sh
 sec config
 "${C[@]}" config -q && echo "compose_config=valid"
 sec up
+# A hold while every service is recreated, as a cutover takes one (spec §27): new work waits, and the tick does not
+# judge the stopped core, queue and probe as incidents.
+sudo -n "$REPO/scripts/fcpi" hold recreate 1200 >/dev/null
+trap 'sudo -n "$REPO/scripts/fcpi" hold recreate --clear >/dev/null' EXIT
 "${C[@]}" up -d --wait --wait-timeout 900 --force-recreate 2>&1 | tail -8
 sec swap
 for c in $(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi); do
