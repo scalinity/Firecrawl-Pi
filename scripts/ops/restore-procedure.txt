@@ -22,11 +22,22 @@ What you need, none of it on the Pi:
    Set PI_DATA_MOUNT_ID in /etc/firecrawl-pi/config.env to the new filesystem's UUID.
 5. Deploy the commit backup-meta.json names (scripts/m1/deploy.sh from the workstation) and run the milestone init
    scripts in order (scripts/m1/pi-init.sh ... scripts/m8/pi-init-m8.sh). They keep every existing secret and data
-   directory. Images: the project's own images are rebuilt from that commit (scripts/m2/build-api-image.sh on the
-   workstation, the pi-build-images scripts on the host); public images are pulled by the digests the version lock holds.
-6. Before starting: keep paid dispatch off (PI_PAID_DISPATCH_ENABLED=false) and webhook delivery suppressed
-   (deploy/compose.webhooks-suppressed.yaml) until provider spend newer than the backup is reconciled and the owner
-   has confirmed that no webhook sent after the backup would be sent twice. Then: systemctl start fcpi-stack.
+   directory. Images: the project's own (fcpi/*) are pinned by image digest, which a rebuild does not reproduce, so they
+   are loaded from the run's images snapshot (tag fcpi-images; the newest one at or before the run, taken whenever the
+   set changed) and checked against the Compose file's pins:
+     restic snapshots --tag fcpi-images                              # its time at or before the data snapshot's
+     restic dump <images snapshot> fcpi-images.tar | docker load
+     docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml config --images | xargs -n1 docker image inspect -f '{{.Id}}'
+   Public images are pulled by the digests the version lock holds. Only with no images snapshot: rebuild from the commit
+   (scripts/m2/build-api-image.sh on the workstation, the pi-build-images scripts on the host) and repin
+   deploy/compose.yaml to the new digests, a new commit, since the rebuilt digests differ.
+6. Start with webhook delivery suppressed and paid dispatch off (deploy/compose.yaml keeps PI_PAID_DISPATCH_ENABLED
+   "false"), and inspect the ledger before anything can leave:
+     docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml -f /opt/firecrawl-pi/deploy/compose.webhooks-suppressed.yaml \
+       up -d --wait --wait-timeout 900
+   The gateway's outbox then keeps every event PENDING. Once provider spend newer than the backup is reconciled and the
+   owner has confirmed that no webhook sent after the backup would be sent twice: systemctl start fcpi-stack, which
+   recreates the retrieval service without the override.
 7. Prove it: fcpi verify ops; fcpi verify functional; fcpi status. Jobs acknowledged after the backup's time are not
    in it: the recovery point is the backup's time (at most a day, spec §26).
 8. Take a new backup at once (fcpi backup), so the repository holds the recovered host's own first snapshot.

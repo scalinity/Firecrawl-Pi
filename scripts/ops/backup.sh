@@ -10,7 +10,8 @@
 #      cleanly, their data directories copied to the staging area, and everything started again whatever happened;
 #   3. after the stack is back: the staged copy, the content-addressed result store (immutable files, backed up live),
 #      the deployed tree and the host configuration go into one snapshot (tag fcpi-data); the secrets directory is
-#      streamed into a second (tag fcpi-secrets) by restic's own tar command, so no plaintext copy is ever staged;
+#      streamed into a second (tag fcpi-secrets) by restic's own tar command, so no plaintext copy is ever staged; to an
+#      off-device repository, the project's own images go into a third (tag fcpi-images) whenever their set changes;
 #   4. retention (seven daily, four weekly, three monthly) only after both snapshots succeed, the data the forgotten
 #      snapshots alone held pruned weekly after a passing integrity check (fcpi backup-check); the staging copy is
 #      removed once uploaded.
@@ -160,13 +161,30 @@ snap_data=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <
 added=$(jq -r 'select(.message_type == "summary") | .data_added // 0' <<<"$out" 2>/dev/null)
 out2=$(restic backup --json --tag fcpi-secrets --tag "fcpi-run=$RUN" --host fcpi-pi --stdin-filename fcpi-secrets.tar --stdin-from-command -- tar -C /etc/firecrawl-pi -cf - secrets 2>"$B/restic-secrets.err" | tail -1)
 snap_sec=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <<<"$out2" 2>/dev/null)
+# The project's own images (fcpi/*, built from source and pinned by image digest: a rebuild does not reproduce the
+# digest, so the recorded commit could not start on a replacement host without them), saved by docker save into a third
+# snapshot (tag fcpi-images) for the off-device repository only, and only when the set changed since the last one
+# (images.json); restic stores each unchanged layer once. The on-card fixture repository is no recovery from device
+# loss, and gigabytes of card writes there would buy nothing.
+own=$(jq -r '[.[] | select(startswith("fcpi/"))] | unique | .[]' <<<"$images" 2>/dev/null)
+snap_img=null
+if [ "$OFFDEVICE" = yes ] && [ -n "$own" ]; then
+  snap_img=$(jq -r --arg ids "$(printf '%s\n' "$own" | sort | paste -sd' ' -)" 'select(.ids == $ids) | .snapshot // empty' "$B/images.json" 2>/dev/null)
+  if [ -z "$snap_img" ]; then
+    # shellcheck disable=SC2086
+    out3=$(restic backup --json --tag fcpi-images --tag "fcpi-run=$RUN" --host fcpi-pi --stdin-filename fcpi-images.tar --stdin-from-command -- docker save $own 2>"$B/restic-images.err" | tail -1)
+    snap_img=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <<<"$out3" 2>/dev/null)
+    [ -n "$snap_img" ] && jq -cn --arg ids "$(printf '%s\n' "$own" | sort | paste -sd' ' -)" --arg s "$snap_img" '{ids:$ids,snapshot:$s}' | write_atomic "$B/images.json" 0600
+  fi
+fi
 upload_s=$(( $(now_s) - t_u0 ))
 x=$(jq -cn --arg d "$snap_data" --arg s "$snap_sec" --argjson a "${added:-0}" --argjson q "$quiesce_s" --argjson u "$upload_s" --argjson dr "$drained" \
   --arg k "$KIND" --arg off "$OFFDEVICE" --argjson up "$up_ok" --arg commit "$(source_commit)" --arg lock "$lock_sha" \
-  --argjson nc "${#canaries[@]}" --argjson ni "$(jq length <<<"$inflight")" --arg schema "$schema" \
+  --argjson nc "${#canaries[@]}" --argjson ni "$(jq length <<<"$inflight")" --arg schema "$schema" --arg img "$snap_img" \
   '{snapshot_data:$d,snapshot_secrets:$s,data_added:$a,quiesce_s:$q,quiesce_exceeded:($q > 300),upload_s:$u,drained:$dr,repository_kind:$k,offdevice:$off,
-    stack_healthy_after:$up,source_commit:$commit,versions_lock_sha256:$lock,platform_schema_version:($schema|tonumber? // null),canary_results:$nc,inflight_jobs:$ni}')
-if [ -z "$snap_data" ] || [ -z "$snap_sec" ]; then record FAIL "$(jq -c '. + {error:"a snapshot did not complete; the staged copy is kept for the next run"}' <<<"$x")"; exit 1; fi
+    stack_healthy_after:$up,source_commit:$commit,versions_lock_sha256:$lock,platform_schema_version:($schema|tonumber? // null),canary_results:$nc,inflight_jobs:$ni,
+    snapshot_images:(if $img == "null" then null else $img end)}')
+if [ -z "$snap_data" ] || [ -z "$snap_sec" ] || [ -z "$snap_img" ]; then record FAIL "$(jq -c '. + {error:"a snapshot did not complete; the staged copy is kept for the next run"}' <<<"$x")"; exit 1; fi
 
 # ---- 4. retention --------------------------------------------------------------------------------------------------
 restic forget --host fcpi-pi --keep-daily 7 --keep-weekly 4 --keep-monthly 3 >"$B/restic-forget.log" 2>&1; fr=$?
