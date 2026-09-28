@@ -81,7 +81,9 @@ const ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00
   "100.100.100.100", "100.64.0.0", "100.64.0.1", "100.127.255.254",
   "http://searxng:${pw}@", "sk-test-not-a-real-key-0000000000",
   "password: text.slice", "password: readFileSync",
-  "secret = getSecret", "secret: hookSecret", 'SECRET = "fixture-webhook-signing-secret-0123456789', 'password: "unused-with-trust']);
+  "secret = getSecret", "secret: hookSecret", 'SECRET = "fixture-webhook-signing-secret-0123456789', 'password: "unused-with-trust',
+  // M8: X05's own sed pattern that extracts the password part of the core's Redis URL on the Pi (code, not a value).
+  String.raw`redis://[^:]*:\\(.*\\)@`]);
 const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie", "live-secret-by-hash-base64"];
 function scan(files, ids, rules = RULES, allow = ALLOW) {
   const hits = [];
@@ -154,6 +156,8 @@ function attribute(sec, line, ids, owner = null) {
     if (m && ids.has(m[1])) return "fcpi container root filesystem";
   }
   if (sec === "lsmod" && MODULE_ALLOW.test(line.split(" ")[0])) return "kernel module for the container runtime or the guard's sets";
+  // The snapshot's own ss (its ss_listen section) loads the socket-diagnostics modules on demand when it asks for sockets.
+  if (sec === "lsmod" && /^(inet|tcp|udp|raw|unix|netlink|af_packet)_diag$/.test(line.split(" ")[0])) return "a socket-diagnostics module the snapshot's own ss loads on demand";
   if (sec === "firewall" && /^nft_ruleset_sha256=/.test(line)) return "nftables ruleset: every changed rule attributed in X04 (raw/nft-ruleset.txt)";
   if (sec === "nft_chains" && /^ip6? (filter|nat|raw) (DOCKER[-A-Z0-9]*|FORWARD|PREROUTING|OUTPUT|POSTROUTING) /.test(line)) return "Docker's chains";
   return null;
@@ -164,37 +168,52 @@ function chainOf(file) {
   const s = S(file);
   const boots = (s.boots ?? []).map((l) => kv(l.split(" "))).sort((a, b) => +a.idx - +b.idx);
   const cur = kv(((s.current ?? [])[0] ?? "").split(" "));
-  const ended = boots.slice(0, -1).map((b) => ({ b, e: kv(((s[`ended_${b.idx.replace("-", "")}`] ?? [])[0] ?? "").split(" ")) }));
+  const ended = boots.slice(0, -1).map((b) => { const sec = s[`ended_${b.idx.replace("-", "")}`] ?? [];
+    return { b, e: kv((sec[0] ?? "").split(" ")), steps: sec.slice(1).filter((l) => /net-watchdog\[\d+\]: recovery [1-3]\/3:/.test(l)).length }; });
   const ends = boots.length >= 1 && boots.at(-1).idx === "0" && boots.at(-1).boot_id_sha256 === cur.boot_id_sha256;
   const ready = kv(((s.readiness ?? [])[0] ?? "").split(" "));
   return { file, first: boots[0]?.boot_id_sha256 ?? null, current: cur.boot_id_sha256 ?? null, kernel: cur.kernel, ends, ended, ready, before_found: kv(s.meta ?? []).before_found };
 }
 // How one boot ended: an orderly shutdown the owner's Wi-Fi watchdog started after a Wi-Fi loss with no local action after
 // it and no undervoltage (M7's rule), or the reboot M8's own driver made (raw/faults.txt names both boots), orderly.
-const watchdogEnd = (e) => +e.shutdown_markers > 0 && e.watchdog_reboot === "yes" && /^\d{4}-/.test(e.loss_utc ?? "")
-  && ["sudo_commands", "ssh_logins", "sessions", "console_logins", "undervoltage"].every((k) => e[k] === "0");
+const noLocalAction = (e) => ["sudo_commands", "ssh_logins", "sessions", "console_logins", "undervoltage"].every((k) => e[k] === "0");
+// A boot that ended with no orderly shutdown while the owner's watchdog was working through its recovery steps (a driver
+// reload that hung the kernel ends in a hardware reset), with no local action and no undervoltage: the owner's host, as
+// the orderly watchdog reboot is.
+const watchdogReset = (x) => +x.e.shutdown_markers === 0 && x.steps >= 1 && noLocalAction(x.e);
+// The owner's watchdog's orderly reboot (its third recovery step), with no local action and no undervoltage. A boot that never
+// had Wi-Fi shows no loss event of its own, so the loss is not required once the watchdog's steps are recorded.
+const watchdogEnd = (e) => +e.shutdown_markers > 0 && e.watchdog_reboot === "yes" && noLocalAction(e);
+// The reboots M8's driver made: its faults.txt, and every durable driven-*.txt record it kept in reboots/.
 function drivenReboots() {
-  if (!has(`${RAW}faults.txt`)) return [];
-  return (FAULTS().reboot ?? []).map((r) => ({ from: r.boot_before, to: r.boot_after }));
+  const dir = `${EV}reboots/`;
+  const kept = has(dir) ? readdirSync(resolve(ROOT, dir)).filter((f) => /^driven-.*\.txt$/.test(f)).flatMap((f) => records(`${dir}${f}`).driven ?? []) : [];
+  const now = has(`${RAW}faults.txt`) ? FAULTS().reboot ?? [] : [];
+  return [...kept, ...now].map((r) => ({ from: r.boot_before, to: r.boot_after }));
 }
-// The boot records (evidence/M8/reboots/boot-*.txt, made at each boot) joined from bootB to bootA: every hop an ended boot
-// that ended as one of the two kinds above. Returns the hops, or null.
+// Every record in evidence/M8/reboots/ (the boot records made at each boot, boot-*.txt, and the recorder's chains of several
+// boots, reboot-*.txt) gives hops from one boot to the next; they are joined from bootB to bootA, every hop an ended boot
+// that ended as one of the kinds above. Returns the hops, or null.
 function bootChain(bootB, bootA) {
   if (!bootB || !bootA) return null;
   if (bootB === bootA) return [];
   const dir = `${EV}reboots/`;
-  const recs = has(dir) ? readdirSync(resolve(ROOT, dir)).filter((f) => /^boot-.*\.txt$/.test(f)).map((f) => chainOf(`${dir}${f}`)).filter((c) => c && c.ends) : [];
+  const recs = has(dir) ? readdirSync(resolve(ROOT, dir)).filter((f) => /\.txt$/.test(f)).map((f) => chainOf(`${dir}${f}`)).filter((c) => c && c.ends) : [];
+  // A record's boots in order: each ended one, then the current one; hop k runs from ended boot k to the boot after it.
+  const edges = recs.flatMap((r) => { const all = [...r.ended.map((x) => x.b), { boot_id_sha256: r.current }];
+    return r.ended.map((x, k) => ({ from: x.b.boot_id_sha256, to: all[k + 1].boot_id_sha256, x, file: r.file.split("/").pop() })); });
   const driven = drivenReboots();
   const hops = [];
   let at = bootB;
   for (let i = 0; i < 50 && at !== bootA; i++) {
-    const r = recs.find((c) => c.first === at && c.ended.length >= 1);
-    if (!r) return null;
-    const e = r.ended[0].e;
-    const kind = watchdogEnd(e) ? "watchdog" : (driven.some((d) => d.from === at && d.to === r.current) && +e.shutdown_markers > 0 ? "driven" : null);
+    const cands = edges.filter((h) => h.from === at);
+    if (!cands.length) return null;
+    const kindOf = (h) => (watchdogEnd(h.x.e) ? "watchdog" : watchdogReset(h.x) ? "watchdog_reset" : driven.some((d) => d.from === h.from && d.to === h.to) && +h.x.e.shutdown_markers > 0 ? "driven" : null);
+    const h = cands.find((c) => kindOf(c)) ?? cands[0];
+    const kind = kindOf(h);
     if (!kind) return null;
-    hops.push({ from: at, to: r.current, kind, last: r.ended[0].b.last, file: r.file.split("/").pop() });
-    at = r.current;
+    hops.push({ from: at, to: h.to, kind, last: h.x.b.last, file: h.file });
+    at = h.to;
   }
   return at === bootA ? hops : null;
 }
@@ -224,7 +243,7 @@ function snapshotDiff(B, A, tied) {
   for (const [kind, list] of [["removed", removed], ["added", added]]) for (const l of list) {
     const [sec, line] = [l.slice(0, l.indexOf("\t")), l.slice(l.indexOf("\t") + 1)];
     const w = attribute(sec, line, ids, owner) ?? (tied ? rebootAttribute(sec, line, kind, kb, ka) : null);
-    const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains|Pi-hole's own|the owner's editor server|M8's project unit|^the reboot: /.test(w));
+    const acceptable = w && (kind === "added" || /own SSH session|nftables|fcpi container|container network namespace|scope of an fcpi container|Docker's chains|Pi-hole's own|the owner's editor server|M8's project unit|socket-diagnostics module|^the reboot: /.test(w));
     if (!acceptable) unexplained.push(`${kind} ${sec}: ${line.slice(0, 90)}`); else why[w] = (why[w] ?? 0) + 1;
     rows[!acceptable ? "unrelated" : /^the reboot: /.test(w) ? "reboot" : /owner|Pi-hole/.test(w) ? "owner" : "project"].push(`${kind === "added" ? "+" : "-"} ${sec}\t${line}${w ? `\t# ${w}` : ""}`);
   }
@@ -248,7 +267,8 @@ const checks = {
       const chain = bootChain(bootOf(A7), bootOf(B8));
       const d = snapshotDiff(A7, B8, !!chain);
       const recs = readdirSync(resolve(ROOT, `${EV}reboots/`)).filter((f) => f.endsWith(".txt")).map((f) => chainOf(`${EV}reboots/${f}`));
-      const earliest = recs.filter(Boolean).sort((a, b) => a.file.localeCompare(b.file))[0];
+      const stamp = (f) => (f.match(/(\d{8}T\d{6}Z)/) ?? [])[1] ?? "";
+      const earliest = recs.filter(Boolean).sort((a, b) => stamp(a.file).localeCompare(stamp(b.file)))[0];
       return { ok: d.unexplained.length === 0 && (bootOf(A7) === bootOf(B8) || !!chain),
         actual: `boot changed=${bootOf(A7) !== bootOf(B8)}, tied=${!!chain}; the earliest M8 reboot record (${earliest?.file.split("/").pop() ?? "none"}) found M7 AFTER's boot in the journal=${earliest?.before_found ?? "?"}; added=${d.added.length} removed=${d.removed.length}; attributed ${JSON.stringify(d.why)}; unexplained=${d.unexplained.length}${d.unexplained.length ? " [" + d.unexplained.slice(0, 8).join("; ") + "]" : ""}` };
     } },

@@ -6,7 +6,7 @@
 // and parser for the cases that use them) is restored at the end. Output: the cases' sections verbatim, then "### reboot".
 //   node scripts/m8/faults.mjs [case …] > evidence/M8/raw/faults.txt      (all cases, in order, when none is named)
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -63,6 +63,12 @@ async function reboot() {
     } catch { /* not yet */ }
     await sleep(10000);
   }
+  // The reboot this driver made, kept as its own durable record beside the boot records (never overwritten), so the snapshot
+  // attribution can tie it whatever later runs replace faults.txt.
+  const EVD = process.env.FCPI_M8_EVIDENCE ?? "evidence/M8/", stamp = new Date(t0).toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z");
+  mkdirSync(join(EVD.startsWith("/") ? EVD : join(ROOT, EVD), "reboots"), { recursive: true });
+  writeFileSync(join(EVD.startsWith("/") ? EVD : join(ROOT, EVD), "reboots", `driven-${stamp}.txt`), `### driven\n${JSON.stringify({ utc: new Date(t0).toISOString(),
+    source: "scripts/m8/faults.mjs reboot (an orderly sudo systemctl reboot the driver made)", boot_before: bootBefore, boot_after: bootAfter, ssh_back_after_s: sshBackS, record_file: record?.file ?? null })}\n`, { flag: "wx" });
   say("reboot", { boot_before: bootBefore, boot_after: bootAfter, ssh_back_after_s: sshBackS, record_file: record?.file ?? null, record: record ? hide(record.text) : null,
     status_after: (() => { try { return JSON.parse(pi("sudo -n bash /opt/firecrawl-pi/scripts/ops/status.sh --json")); } catch { return null; } })() });
 }

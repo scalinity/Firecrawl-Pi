@@ -18,7 +18,7 @@ mkdir -p "$R" "${EV}reboots"
 "${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m8/pi-collect-stack.sh' >"$R/stack.txt"
 "${SSH[@]}" 'sudo -n /opt/firecrawl-pi/scripts/fcpi verify ops' >"$R/verify-ops.txt" 2>&1 || true
 "${SSH[@]}" 'sudo -n /opt/firecrawl-pi/scripts/fcpi status --json' >"$R/status.json" 2>&1 || true
-"${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m2/pi-core-logs.sh m8-final' >"$R/core-logs-final.txt"
+"${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m8/pi-core-logs.sh m8-final' >"$R/core-logs-final.txt"
 "${SSH[@]}" 'bash -s' <"$root/scripts/m2/pi-egress-probe.sh" >"$R/egress-probe.txt"
 "${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m1/pi-rendered-compose.sh' >"${EV}rendered-compose.json"
 "${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m3/pi-nft-ruleset.sh' >"$R/nft-ruleset.txt" 2>/dev/null
