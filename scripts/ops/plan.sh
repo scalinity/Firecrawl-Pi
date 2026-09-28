@@ -18,13 +18,18 @@ set -uo pipefail
 need_root
 RD=$STATE/releases; mkdir -p "$RD"
 images_of() { docker compose -f "$1/deploy/compose.yaml" config --format json 2>/dev/null | jq -c '.services | map_values(.image)'; }
+# Each service's configuration apart from its image (environment, mounts, limits, networks, health check), by hash.
+config_of() {
+  local r; r=$(docker compose -f "$1/deploy/compose.yaml" config --format json 2>/dev/null) || { echo '{}'; return; }
+  for svc in $(jq -r '.services | keys[]' <<<"$r"); do jq -cS --arg s "$svc" '.services[$s] | del(.image)' <<<"$r" | sha256sum | cut -c1-16 | jq -R --arg s "$svc" '{($s): .}'; done | jq -sc 'add // {}'
+}
 schema_max() { grep -o "schema_version (version) VALUES ([0-9]*)" "$1/deploy/nuq-postgres/fcpi-platform-schema.sql" | grep -o '[0-9]*)' | tr -d ')' | sort -n | tail -1; }
 h() { [ -e "$1" ] && sha256sum "$1" | cut -c1-64 || echo absent; }
 current_release() {
-  jq -n --arg utc "$(utc)" --arg commit "$(source_commit)" --arg lock "$(h "$REPO/deploy/versions.lock.json")" --argjson images "$(images_of "$REPO")" \
+  jq -n --arg utc "$(utc)" --arg commit "$(source_commit)" --arg lock "$(h "$REPO/deploy/versions.lock.json")" --argjson images "$(images_of "$REPO")" --argjson config "$(config_of "$REPO")" \
     --arg db "$(pg 'SELECT max(version) FROM fcpi_platform.schema_version')" --arg file "$(schema_max "$REPO")" \
     --arg backup "$(jq -r '.utc // empty' "$STATE/backup/last.json" 2>/dev/null)" --arg snap "$(jq -r '.snapshot_data // empty' "$STATE/backup/last.json" 2>/dev/null)" \
-    '{utc:$utc,commit:$commit,versions_lock_sha256:$lock,images:$images,ledger_schema_db:($db|tonumber? // null),ledger_schema_file:($file|tonumber? // null),
+    '{utc:$utc,commit:$commit,versions_lock_sha256:$lock,images:$images,config:$config,ledger_schema_db:($db|tonumber? // null),ledger_schema_file:($file|tonumber? // null),
       last_backup_before:(if $backup == "" then null else {utc:$backup,snapshot:$snap} end)}'
 }
 case ${1:-} in
@@ -35,10 +40,10 @@ case ${1:-} in
     [ "${2:-}" = --plan ] || die "usage: fcpi upgrade --plan <candidate tree>"
     C=${3:?usage: fcpi upgrade --plan <candidate tree>}; [ -f "$C/deploy/compose.yaml" ] && [ -f "$C/.fcpi-source-commit" ] || die "$C is not a staged candidate tree"
     cur=$(current_release)
-    jq -n --argjson cur "$cur" --argjson cand "$(images_of "$C")" --arg cc "$(cat "$C/.fcpi-source-commit")" --arg cl "$(h "$C/deploy/versions.lock.json")" \
+    jq -n --argjson cur "$cur" --argjson cand "$(images_of "$C")" --argjson ccfg "$(config_of "$C")" --arg cc "$(cat "$C/.fcpi-source-commit")" --arg cl "$(h "$C/deploy/versions.lock.json")" \
       --arg cs "$(schema_max "$C")" \
       --argjson pol "$(for f in budget.json egress.json capabilities.json; do jq -cn --arg f "$f" --arg a "$(h "$REPO/deploy/policies/$f")" --arg b "$(h "$C/deploy/policies/$f")" '{($f): ($a != $b)}'; done | jq -sc add)" \
-      --argjson units "$(for f in "$C"/deploy/host/*.service "$C"/deploy/host/*.timer "$C"/deploy/host/*.slice "$C"/deploy/host/*.nft "$C"/deploy/host/*.sh; do [ -e "$f" ] || continue; b=$(basename "$f"); jq -cn --arg f "$b" --arg a "$(h "$REPO/deploy/host/$b")" --arg b "$(h "$f")" '{($f): ($a != $b)}'; done | jq -sc 'add // {}')" '
+      --argjson units "$(for f in $( (cd "$C/deploy/host" && ls; cd "$REPO/deploy/host" && ls) 2>/dev/null | grep -E '\.(service|timer|slice|nft|sh|conf)$' | sort -u); do jq -cn --arg f "$f" --arg a "$(h "$REPO/deploy/host/$f")" --arg b "$(h "$C/deploy/host/$f")" '{($f): (if $a == $b then null elif $b == "absent" then "removed" elif $a == "absent" then "added" else "changed" end)}'; done | jq -sc 'add // {}')" '
       ($cur.images | keys + ($cand | keys) | unique) as $svcs
       | [ $svcs[] as $s | select($cur.images[$s] != $cand[$s]) | {service: $s, from: $cur.images[$s], to: $cand[$s]} ] as $moves
       | ($cs | tonumber? // null) as $cschema
@@ -46,7 +51,8 @@ case ${1:-} in
       | { plan: "upgrade", from_commit: $cur.commit, to_commit: $cc, version_lock_changes: ($cur.versions_lock_sha256 != $cl),
           image_changes: $moves, data_service_image_changes: $data,
           ledger_schema: {database: $cur.ledger_schema_db, candidate_reaches: $cschema, migrates: ($cschema != null and $cur.ledger_schema_db != null and $cschema > $cur.ledger_schema_db)},
-          policy_changes: ($pol | with_entries(select(.value)) | keys), host_unit_changes: ($units | with_entries(select(.value)) | keys),
+          configuration_changes: ([($cur.config | keys) + ($ccfg | keys) | unique | .[] as $s | select($cur.config[$s] != $ccfg[$s]) | $s]),
+          policy_changes: ($pol | with_entries(select(.value)) | keys), host_unit_changes: ($units | with_entries(select(.value != null))),
           schema_sensitive: (($cschema != null and $cur.ledger_schema_db != null and $cschema > $cur.ledger_schema_db) or ($data | length) > 0),
           last_backup: $cur.last_backup_before }
       | .rollback = (if .schema_sensitive then "restore the pre-upgrade backup (its data snapshot and secrets) together with a redeploy of \(.from_commit[0:12]); never start the older images on the migrated data"
@@ -65,6 +71,7 @@ case ${1:-} in
       ($cur.images | keys + ($prev.images | keys) | unique) as $svcs
       | { plan: "rollback", from_commit: $cur.commit, to_commit: $prev.commit, to_release: $pf,
           image_changes: [ $svcs[] as $s | select($cur.images[$s] != $prev.images[$s]) | {service: $s, from: $cur.images[$s], to: $prev.images[$s]} ],
+          configuration_changes: (if $prev.config then [($cur.config | keys) + ($prev.config | keys) | unique | .[] as $s | select($cur.config[$s] != $prev.config[$s]) | $s] else "unknown: that release recorded no configuration" end),
           ledger_schema: {now: $cur.ledger_schema_db, at_that_release: $prev.ledger_schema_db},
           data_restore_needed: (($cur.ledger_schema_db // 0) != ($prev.ledger_schema_db // 0)),
           backup_to_restore: (if ($cur.ledger_schema_db // 0) != ($prev.ledger_schema_db // 0) then $cur.last_backup_before else null end) }
