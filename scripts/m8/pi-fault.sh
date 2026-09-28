@@ -22,7 +22,7 @@ brief() { bash "$REPO/scripts/ops/status.sh" --json 2>/dev/null | jq -c '{health
 call() {
   OPS_TOKEN=$SOAK GW_TIMEOUT=${CT:-120} gw "$@"
   CALL=$(jq -cn --arg s "$GW_STATUS" --argjson ms "$GW_MS" --arg b "$GW_BODY" '($b | fromjson? // {}) as $j
-    | {status: ($s | tonumber), ms: $ms, code: ($j.code // null), class: (($j.error // "") | capture("Retrieval failed: (?<c>[A-Z_]+)")?.c // null), error: (($j.error // null) | if . then .[0:200] else . end)}')
+    | {status: ($s | tonumber), ms: $ms, code: ($j.code // null), class: ((($j.error // "") | capture("Retrieval failed: (?<c>[A-Z_]+)")? | .c) // null), error: (($j.error // null) | if . then .[0:200] else . end)}')
 }
 has() { grep -q -- "$1" <<<"$GW_BODY"; }
 static() { call POST /v2/scrape "{\"url\":\"$M1/static.html?f=$CASE-$RANDOM\",\"formats\":[\"markdown\"]}"; CALL=$(jq -c --argjson s "$(has fcpi-m1-static-7f3a && echo true || echo false)" '. + {sentinel: $s}' <<<"$CALL"); }
@@ -274,13 +274,20 @@ supervisor)
   out recovered "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{ready_after_s:$s, status:$b}')" ;;
 
 swap_reload)
+  # The positive control: a container recreated now has its scope's swap limit at 0, which the reload must lift. (Any
+  # reload lifts every scope: this project's own tools reload systemd when they install a unit, so most scopes stand at
+  # max already; the slice is what holds.)
+  docker compose -p fcpi -f "$REPO/deploy/compose.yaml" up -d --force-recreate --wait fixture >/dev/null 2>&1
+  fx=$(cid fixture); read -r fp fid < <(docker inspect -f '{{.HostConfig.CgroupParent}} {{.Id}}' "$fx")
+  fx0=$(cat "/sys/fs/cgroup/$fp/docker-$fid.scope/memory.swap.max"); sw0=$(swap_all)
   before=$(for c in $(docker ps -q --filter label=com.docker.compose.project=fcpi); do read -r p id < <(docker inspect -f '{{.HostConfig.CgroupParent}} {{.Id}}' "$c")
     echo "$(cat /sys/fs/cgroup/$p/docker-$id.scope/memory.swap.max) $(cat /sys/fs/cgroup/$p/docker-$id.scope/memory.max)"; done | sort | uniq -c | tr -s ' ' | tr '\n' ';')
   systemctl daemon-reload; sleep 2
   after=$(for c in $(docker ps -q --filter label=com.docker.compose.project=fcpi); do read -r p id < <(docker inspect -f '{{.HostConfig.CgroupParent}} {{.Id}}' "$c")
     echo "$(cat /sys/fs/cgroup/$p/docker-$id.scope/memory.swap.max) $(cat /sys/fs/cgroup/$p/docker-$id.scope/memory.max)"; done | sort | uniq -c | tr -s ' ' | tr '\n' ';')
   out reload "$(jq -cn --arg b "$before" --arg a "$after" --arg sl "$(cat /sys/fs/cgroup/fcpi.slice/memory.swap.max)" --arg prop "$(systemctl show -p MemorySwapMax --value fcpi.slice)" --argjson sw "$(swap_all)" \
-    '{scope_swap_and_memory_max_before:$b, after:$a, slice_swap_max:$sl, slice_property:$prop, effective:$sw}')" ;;
+    --argjson sw0 "$sw0" --arg fx0 "$fx0" --arg fx1 "$(cat "/sys/fs/cgroup/$fp/docker-$fid.scope/memory.swap.max")" \
+    '{scope_swap_and_memory_max_before:$b, after:$a, recreated_scope_before:$fx0, recreated_scope_after:$fx1, slice_swap_max:$sl, slice_property:$prop, effective_before:$sw0, effective:$sw}')" ;;
 
 foreign_container)
   n0=$(notices foreign_container)

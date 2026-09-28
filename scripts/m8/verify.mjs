@@ -322,7 +322,7 @@ const checks = {
   // Fails: a scope's swap limit not lifted by the reload (the positive control: F2's cause did happen), any container left
   // able to swap, the slice's limit not 0, or a memory limit lifted.
   H02: { name: "swap-denied-across-a-systemd-reload", inputs: [`${RAW}faults.txt`],
-    expected: "a systemctl daemon-reload lifts each container scope's memory.swap.max from 0 to max (M4's F2, the positive control) while fcpi.slice's stays 0 as its unit says, so every container's effective swap stays denied; every scope's memory.max is unchanged",
+    expected: "a container recreated just before has its scope's memory.swap.max at 0, and a systemctl daemon-reload lifts it to max (M4's F2, the positive control); fcpi.slice's stays 0 as its unit says, so every container's effective swap stays denied before and after; every scope's memory.max is unchanged",
     run() {
       const r = step("swap_reload", "reload");
       if (!r) return { ok: false, actual: "no swap_reload record" };
@@ -330,9 +330,9 @@ const checks = {
       const b = parse(r.scope_swap_and_memory_max_before), a = parse(r.after);
       const memB = Object.keys(b).map((k) => k.split(" ")[1]).sort(), memA = Object.keys(a).map((k) => k.split(" ")[1]).sort();
       const n = r.effective.containers;
-      const cond = { before_zero: Object.keys(b).every((k) => k.startsWith("0 ")), lifted_by_reload: Object.keys(a).some((k) => k.startsWith("max ")),
-        slice: r.slice_swap_max === "0" && r.slice_property === "0", effective: n >= 15 && r.effective.swap_allowed === 0, memory_unchanged: same([...new Set(memB)], [...new Set(memA)]) };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; scopes before ${r.scope_swap_and_memory_max_before} after ${r.after}; slice ${r.slice_swap_max} (${r.slice_property}); effective ${JSON.stringify(r.effective)}` };
+      const cond = { control_lifted: r.recreated_scope_before === "0" && r.recreated_scope_after === "max",
+        slice: r.slice_swap_max === "0" && r.slice_property === "0", effective: n >= 15 && r.effective.swap_allowed === 0 && r.effective_before?.swap_allowed === 0, memory_unchanged: same([...new Set(memB)], [...new Set(memA)]) };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; recreated scope ${r.recreated_scope_before}→${r.recreated_scope_after}; scopes before ${r.scope_swap_and_memory_max_before} after ${r.after}; slice ${r.slice_swap_max} (${r.slice_property}); effective ${JSON.stringify(r.effective)}` };
     } },
   // Fails: a container outside the project not named by the tick, fcpi foreign or fcpi status, more than one notice for
   // it, or a report left after it is removed.
