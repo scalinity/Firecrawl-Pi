@@ -40,7 +40,6 @@ case $cmd in
     need_root
     . /etc/firecrawl-pi/backup.env 2>/dev/null || die "no backup repository is configured"
     export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
-    if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi
     restic check --read-data-subset=5% >"$STATE/backup/check.log" 2>&1; rc=$?
     line=$(jq -cn --arg u "$(utc)" --argjson rc $rc '{utc:$u,check_exit:$rc,result:(if $rc == 0 then "PASS" else "FAIL" end)}')
     printf '%s\n' "$line" | write_atomic "$STATE/backup/last-check.json" 0600; echo "$line"

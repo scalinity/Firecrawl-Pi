@@ -34,8 +34,7 @@ CONF=/etc/firecrawl-pi/backup.env
 . "$CONF"
 : "${FCPI_RESTIC_REPOSITORY:?}" "${FCPI_RESTIC_PASSWORD_FILE:?}"
 export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
-# Backend credentials, exported to restic alone.
-if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi
+# Backend credentials reach restic alone (lib.sh restic).
 OFFDEVICE=${FCPI_BACKUP_OFFDEVICE:-unknown}
 # The repository's kind (its scheme, or local for a path), never its address.
 case $RESTIC_REPOSITORY in /*) KIND=local ;; *) KIND=${RESTIC_REPOSITORY%%:*} ;; esac

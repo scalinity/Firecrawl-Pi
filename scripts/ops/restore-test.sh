@@ -35,7 +35,6 @@ CONF=/etc/firecrawl-pi/backup.env
 # shellcheck disable=SC1090
 . "$CONF"
 export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
-if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi
 . /etc/firecrawl-pi/config.env
 R=/srv/firecrawl-pi/restore-test P=fcpi-restore
 T0=$(now_s) CHECKS='{}'

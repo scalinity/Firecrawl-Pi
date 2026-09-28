@@ -52,7 +52,6 @@ out migrated "$(jq -cn --argjson m "$mrc" --arg v "$v" --arg st "$(docker inspec
 # Roll back: stop the copy, restore the pre-migration database from the backup it was made from, start the baseline.
 docker compose -p "$P" -f "$R/compose.baseline.json" stop >/dev/null 2>&1
 . /etc/firecrawl-pi/backup.env; export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
-if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi
 snap=$(jq -r .snapshot "$STATE/backup/last-restore-test.json")
 rm -rf "$R/pgrestore"; mkdir -m 0700 "$R/pgrestore"
 restic restore "$snap" --target "$R/pgrestore" --include /srv/firecrawl-pi/backup-staging/current/data/postgres >/dev/null 2>&1; rr=$?

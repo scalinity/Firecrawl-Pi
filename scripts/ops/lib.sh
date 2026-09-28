@@ -43,6 +43,11 @@ append_line() { [ -e "$1" ] || install -m 0640 /dev/null "$1"; printf '%s\n' "$2
 # before `docker compose up` can be stale after it (CLAUDE.md §33.6).
 cid() { docker ps -aq --filter label=com.docker.compose.project=fcpi --filter "label=com.docker.compose.service=$1" | head -1; }
 
+# restic with the repository's backend credentials (the file FCPI_RESTIC_ENV_FILE names, when backup.env names one) in
+# its own environment only: docker, curl and jq, which the backup and restore scripts also run, never see them. exec
+# runs the binary, not this function.
+restic() { ( if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi; exec restic "$@" ); }
+
 # pg <sql>: a read-only query as the superuser over the database container's local socket (psql -At, | separated).
 pg() {
   local c; c=$(cid nuq-postgres); [ -n "$c" ] || return 1
