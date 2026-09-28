@@ -110,7 +110,11 @@ q "select name || '=' || current_setting(name) from pg_settings where name in ('
 
 sec redis_health
 echo "health_user_ping=$(D exec "$RD" redis-cli --no-auth-warning --user health --pass - PING 2>&1)"
-sudo -n sed -n 's#^redis://:\(.*\)@redis:6379$#\1#p' $S/core_redis_url | D exec -i "$RD" sh -c 'read -r p; export REDISCLI_AUTH="$p"; redis-cli --no-auth-warning INFO persistence; redis-cli --no-auth-warning INFO memory' 2>&1 \
+# As the operator's own user once scripts/m8/pi-redis-narrow.sh has made it (the default user is off after it, so the M1
+# URL shape no longer names a user that can log in), before that as the user the core's URL names; password on stdin.
+if sudo -n test -r $S/redis_ops_password; then ru=fcpi_ops; rp() { sudo -n cat $S/redis_ops_password | tr -d '\n'; echo; }
+else ru=$(sudo -n sed -nE 's#^redis://([^:@]*):.*#\1#p' $S/core_redis_url); ru=${ru:-default}; rp() { sudo -n sed -nE 's#^redis://[^:@]*:([^@]*)@.*#\1#p' $S/core_redis_url; }; fi
+rp | D exec -i "$RD" sh -c 'read -r p; export REDISCLI_AUTH="$p"; redis-cli --no-auth-warning --user "$0" INFO persistence; redis-cli --no-auth-warning --user "$0" INFO memory' "$ru" 2>&1 \
   | tr -d '\r' | grep -E '^(aof_enabled|aof_last_write_status|maxmemory_policy|used_memory_human):'
 
 sec rabbitmq_health

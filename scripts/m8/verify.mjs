@@ -791,7 +791,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; guard handle ${handle(`${RAW}guard-window-open.txt`)}→${handle(`${RAW}egress-probe.txt`)}, web accepted delta=${web}, proxy-port delta=${proxy}; core logs=${recs.length}` };
     } },
   X02: { name: "network-and-container-posture", inputs: [`${RAW}stack.txt`, `${EV}rendered-compose.json`],
-    expected: "all fifteen containers run aarch64 under fcpi.slice with memory.swap.max 0 (the scope and the slice); the only host publication is 127.0.0.1:3380; the gateway and the retrieval service mount the admission directory read-only and name PI_ADMISSION_FILE; the core's health check reports its API and worker apart",
+    expected: "all fifteen containers run aarch64 under fcpi.slice with memory.swap.max 0 (the scope and the slice); the only host publication is 127.0.0.1:3380; the gateway and the retrieval service mount the admission directory read-only and name PI_ADMISSION_FILE; the core's health check reports its API and worker apart; Redis, read as the operator's user after the narrowing, reports AOF on and its last write ok",
     run() {
       const st = S(`${RAW}stack.txt`), R = json(`${EV}rendered-compose.json`).services;
       const pub = (st.published ?? []).filter((l) => /->/.test(l));
@@ -799,7 +799,8 @@ const checks = {
       const adm = (s) => (R[s].volumes ?? []).some((v) => v.source === "/run/firecrawl-pi/admission" && v.target === "/srv/admission" && v.read_only === true) && R[s].environment?.PI_ADMISSION_FILE === "/srv/admission/admission.json";
       const cond = { slice: Object.values(R).every((s) => s.cgroup_parent === "fcpi.slice"), swap: (st.cgroups ?? []).length === 15 && (st.cgroups ?? []).every((l) => / parent_swap_max=0 /.test(l) && / memory\.swap\.max=0 /.test(l)),
         arch: arch.length === 15 && arch.every((l) => /uname_m=aarch64$/.test(l)), publication: pub.length === 1 && /^access-gateway 3300\/tcp -> 127\.0\.0\.1:3380$/.test(pub[0]),
-        admission: adm("access-gateway") && adm("retrieval-service"), health: /api=/.test(JSON.stringify(R["firecrawl-core"].healthcheck.test)) && /worker=/.test(JSON.stringify(R["firecrawl-core"].healthcheck.test)) };
+        admission: adm("access-gateway") && adm("retrieval-service"), health: /api=/.test(JSON.stringify(R["firecrawl-core"].healthcheck.test)) && /worker=/.test(JSON.stringify(R["firecrawl-core"].healthcheck.test)),
+        redis_persistence: ["aof_enabled:1", "aof_last_write_status:ok"].every((x) => (st.redis_health ?? []).includes(x)) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; publications=${pub.join(";")}; cgroups=${(st.cgroups ?? []).length}` };
     } },
   X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`, "evidence/M7/raw/nft-ruleset.txt", `${EV}reboots/`],
