@@ -61,6 +61,10 @@ finish() { # finish <PASS|FAIL> [error]
 }
 trap teardown EXIT
 ST=$R/fs/srv/firecrawl-pi/backup-staging/current
+rpg() { timeout 20 docker exec -i "$(docker ps -q --filter "label=com.docker.compose.project=$P" --filter label=com.docker.compose.service=nuq-postgres)" \
+  psql -X -q -At -F '|' -U postgres -d postgres -c "$1" 2>/dev/null; }
+HOOKS="SELECT count(*) FILTER (WHERE state = 'DELIVERED') || '|' || coalesce(sum(attempts), 0) FROM fcpi_platform.webhook_event"
+hooks0=""
 if [ "$MODE" = full ]; then
 [ "$(findmnt -no UUID --target /srv/firecrawl-pi)" = "$PI_DATA_MOUNT_ID" ] || { finish FAIL "/srv/firecrawl-pi is not on the data filesystem"; exit 1; }
 [ -e "$R" ] && { teardown; [ -e "$R" ] && { finish FAIL "$R exists and could not be cleared"; exit 1; }; }
@@ -108,7 +112,13 @@ out_paths=$(jq -L "$OPS" -r --arg R "$R" 'include "restore"; outside($R) | join(
 check binds_isolated "$([ -z "$out_paths" ] && echo true || echo false)" "host paths outside the copy: ${out_paths:-none}"
 [ -z "$out_paths" ] || { finish FAIL "the copy would share host paths with production"; exit 1; }
 t_up=$(now_s)
-docker compose -p "$P" -f "$R/compose.json" up -d --wait --wait-timeout 600 >"$R/up.log" 2>&1; up=$?
+# The data services first: the webhook baseline is read before any service that could deliver one has started, so an
+# attempt made while the copy comes up is counted too.
+docker compose -p "$P" -f "$R/compose.json" up -d --wait --wait-timeout 300 nuq-postgres redis rabbitmq >"$R/up.log" 2>&1; up=$?
+if [ $up = 0 ]; then
+  hooks0=$(rpg "$HOOKS")
+  docker compose -p "$P" -f "$R/compose.json" up -d --wait --wait-timeout 600 >>"$R/up.log" 2>&1; up=$?
+fi
 check copy_started "$([ $up = 0 ] && echo true || echo false)" "compose up exit $up after $(( $(now_s) - t_up )) s"
 [ $up = 0 ] || { finish FAIL "the isolated copy did not become healthy"; exit 1; }
 nets=$(docker network ls -q --filter "label=com.docker.compose.project=$P" | xargs -r docker network inspect -f '{{.Name}} {{.Internal}}')
@@ -119,9 +129,7 @@ fi
 # ---- 3. the requests (also: fcpi restore-test --check, against the running copy) ------------------------------------
 META=$(cat "$ST/backup-meta.json" 2>/dev/null) || die "no restored copy at $R"
 RUN_ID=$(jq -r .run <<<"$META")
-rpg() { timeout 20 docker exec -i "$(docker ps -q --filter "label=com.docker.compose.project=$P" --filter label=com.docker.compose.service=nuq-postgres)" \
-  psql -X -q -At -F '|' -U postgres -d postgres -c "$1" 2>/dev/null; }
-hooks0=$(rpg "SELECT count(*) FILTER (WHERE state = 'DELIVERED') || '|' || coalesce(sum(attempts), 0) FROM fcpi_platform.webhook_event")
+[ -n "$hooks0" ] || hooks0=$(rpg "$HOOKS")   # --check: the copy is already running; its baseline is now
 
 REG=$R/secrets/secrets/gateway/clients TOK=$R/secrets/secrets/clients
 # The tokens are production's own (the secrets snapshot is): jq reads each from its file and the map travels on stdin,
@@ -182,7 +190,7 @@ done < <(jq -c '.canaries.artifacts[]' <<<"$META")
 r=$(one scrape); check rest_fixture_scrape "$([ "$(jq -r .status <<<"$r")" = 200 ] && jq -e '.body.data.markdown | contains("fcpi-m1-static-7f3a")' <<<"$r" >/dev/null 2>&1 && echo true || echo false)" "status $(jq -r .status <<<"$r")"
 r=$(one mcp-list); check mcp_tools_list "$(jq -e '.status == 200 and (.body.result.tools | length) > 0' <<<"$r" >/dev/null 2>&1 && echo true || echo false)" "status $(jq -r .status <<<"$r")"
 r=$(one mcp-scrape); check mcp_scrape "$(jq -e '.status == 200 and (.body.result.isError != true) and (.body.result | tostring | contains("fcpi-m1-static-7f3a"))' <<<"$r" >/dev/null 2>&1 && echo true || echo false)" "status $(jq -r .status <<<"$r")"
-hooks1=$(rpg "SELECT count(*) FILTER (WHERE state = 'DELIVERED') || '|' || coalesce(sum(attempts), 0) FROM fcpi_platform.webhook_event")
+hooks1=$(rpg "$HOOKS")
 check no_webhook_delivered "$([ -n "$hooks0" ] && [ "$hooks0" = "$hooks1" ] && echo true || echo false)" "delivered|attempts before $hooks0, after $hooks1"
 if [ "$MODE" = check ]; then jq -c . <<<"$CHECKS"; jq -e 'all(.[]; .ok)' <<<"$CHECKS" >/dev/null; exit; fi
 if jq -e 'all(.[]; .ok)' <<<"$CHECKS" >/dev/null; then finish PASS; else finish FAIL "a check failed"; exit 1; fi
