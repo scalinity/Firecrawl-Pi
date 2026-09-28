@@ -139,6 +139,11 @@ jq -n --arg run "$RUN" --arg utc "$(utc)" --arg commit "$(source_commit)" --arg 
     deployed_matches_running:(if ($ri | type) == "object" then all($ri | to_entries[]; $images[.key] == null or $images[.key] == .value) else null end),
     platform_schema_version:($schema|tonumber? // null),
     canaries:{results:$c,artifacts:$a,inflight:$i},quiesce_s:$q,drained:$dr,boot:$boot}' >"$S/backup-meta.json"
+# A backup whose metadata did not compute (an empty image map, a failed jq) would restore without its canaries or its
+# version check: it fails here rather than at the next monthly restore test.
+jq -e '(.run | type) == "string" and (.versions_lock_sha256 | test("^[0-9a-f]{64}$")) and (.images | type) == "object" and (.images | length) > 0
+  and (.canaries.results | type) == "array" and (.canaries.artifacts | type) == "array" and (.canaries.inflight | type) == "array"' \
+  "$S/backup-meta.json" >/dev/null 2>&1 || { record FAIL '{"error":"backup-meta.json is incomplete: the run, version lock, images or canaries did not compute"}'; exit 1; }
 (cd "$S" && find . -type f ! -name MANIFEST.sha256 -print0 | sort -z | xargs -0 sha256sum >MANIFEST.sha256)
 t_u0=$(now_s)
 out=$(restic backup --json --tag fcpi-data --host fcpi-pi --exclude-caches "$S" "$DATA/artifacts" "$REPO" /etc/firecrawl-pi \
