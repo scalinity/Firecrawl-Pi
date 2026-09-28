@@ -106,7 +106,13 @@ put_obj() {
 # The tick's pressure state ($RUND/pressure.json) and any hold ($HOLDS/<name>, holding its expiry in epoch seconds)
 # decide it. A hold past its expiry is removed, so a backup that died cannot pause the platform for good. The file
 # carries its time: a service ignores one older than three minutes (a stopped tick must not pause the platform).
+# Writers take $RUND/admission.lock, so a tick that listed the holds just before a backup took one cannot write its
+# older view over the backup's (reopening dispatch while the backup drains), nor re-apply a hold just cleared.
 admission_write() {
+  ( flock -w 20 7 || logger -t fcpi-tick -p user.warning -- "admission written without its lock (held past 20 s)"
+    admission_write_locked ) 7>"$RUND/admission.lock"
+}
+admission_write_locked() {
   local p holds=() h exp
   p=$(obj "$RUND/pressure.json")
   mkdir -p "$HOLDS"
