@@ -118,12 +118,13 @@ jq -c --argjson t $((NOW - 86400)) 'select(.epoch >= $t)' "$SUP" 2>/dev/null | w
 
 # ---- 4. incidents ----------------------------------------------------------------------------------------------------
 last_backup=$(obj "$STATE/backup/last.json")
+last_attempt=$(obj "$STATE/backup/last-attempt.json")
 last_restore=$(obj "$STATE/backup/last-restore-test.json")
 last_probe=$(obj "$STATE/probe-last.json")
 prev_oom=$(obj "$STATE/alerts/oom.json")
 jq -c 'map({key: .name, value: (.oom_kill // 0)}) | from_entries' <<<"$containers" | write_atomic "$STATE/alerts/oom.json" 0600
 exh=$(printf '%s\n' "${exhausted[@]}" | jq -R . | jq -sc 'map(select(. != ""))')
-active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk_crit" --argjson p "$pressure" --argjson lb "$last_backup" \
+active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk_crit" --argjson p "$pressure" --argjson lb "$last_backup" --argjson la "$last_attempt" \
   --argjson lr "$last_restore" --argjson po "$prev_oom" --argjson exh "$exh" --arg throttled "$throttled" --argjson pr "$last_probe" '
   . as $s | [
     (.containers[] | select(.project == "fcpi" and .service == "firecrawl-core" and .health != "healthy") | {key: "core_unhealthy", detail: {health: .health, state: .state}}),
@@ -140,6 +141,8 @@ active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk
     ($exh[] | {key: "restart_budget_or_data_service:\(.)", detail: {service: .}}),
     (if ($lb.utc // null) == null then {key: "backup_missing", detail: {reason: ($lb.error // "no backup has completed")}}
      elif ($now - ($lb.utc | fromdateiso8601)) > 93600 then {key: "backup_stale", detail: {last: $lb.utc}} else empty end),
+    # The newest backup attempt held the platform quiescent past the five minutes of spec §26: the staging needs redesign.
+    (if $la.quiesce_exceeded == true then {key: "backup_quiescence_over_budget", detail: {run: $la.run, quiesce_s: $la.quiesce_s, result: $la.result}} else empty end),
     (if ($lr.result // "") == "FAIL" then {key: "restore_test_failed", detail: {utc: $lr.utc}} else empty end),
     (if ($pr.consecutive_failures // 0) >= 2 then {key: "functional_probe_failing", detail: {since_failures: $pr.consecutive_failures, scrape: $pr.scrape, mcp: $pr.mcp}} else empty end)
   ]' <<<"$sample")

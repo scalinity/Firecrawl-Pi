@@ -90,11 +90,18 @@ resume() {
 }
 trap 'resume' EXIT
 hold_set backup 900
-# In-flight work gets up to FCPI_BACKUP_DRAIN_S (default 120) to finish; what is still running then is captured as it
-# stands, its receipt durable in the ledger (the restore test proves it is still tracked).
-for _ in $(seq 1 $(( ${FCPI_BACKUP_DRAIN_S:-120} / 5 ))); do
+# The five minutes (spec §26) are one budget the drain, the dump and the copy share; each step gets what is left of it
+# less a reserve for the steps after it, never under 30 s. A copy that cannot fit fails the run and the stack starts
+# again: availability first, and the quiescence incident says the staging needs redesign.
+QMAX=300
+budget() { local s=$(( QMAX - ($(now_s) - t_q0) - $1 )); [ "$s" -ge 30 ] || s=30; echo "$s"; }
+# In-flight work gets up to FCPI_BACKUP_DRAIN_S (default and ceiling 120) to finish; what is still running then is
+# captured as it stands, its receipt durable in the ledger (the restore test proves it is still tracked).
+drain_s=${FCPI_BACKUP_DRAIN_S:-120}; [[ $drain_s =~ ^[0-9]+$ ]] && [ "$drain_s" -le 120 ] || drain_s=120
+while :; do
   n=$(pg "SELECT (SELECT count(*) FROM nuq.queue_scrape WHERE status IN ('queued','active')) + (SELECT count(*) FROM fcpi_platform.job WHERE state IN ('SUBMITTING','RUNNING','QUEUED'))")
   [ "$n" = 0 ] && { drained=true; break; }
+  [ $(( $(now_s) - t_q0 + 5 )) -le "$drain_s" ] || break
   sleep 5
 done
 dump_ok=false
@@ -102,7 +109,7 @@ pgc=$(cid nuq-postgres)
 stopped=true
 # shellcheck disable=SC2086
 "${COMPOSE[@]}" stop $APP >/dev/null 2>&1
-if timeout 240 docker exec "$pgc" pg_dump -U postgres -d postgres -Fc >"$S/postgres.dump" 2>"$S/pg_dump.err" && [ -s "$S/postgres.dump" ]; then dump_ok=true; fi
+if timeout "$(budget 120)" docker exec "$pgc" pg_dump -U postgres -d postgres -Fc >"$S/postgres.dump" 2>"$S/pg_dump.err" && [ -s "$S/postgres.dump" ]; then dump_ok=true; fi
 "${COMPOSE[@]}" stop redis rabbitmq nuq-postgres >/dev/null 2>&1
 # The copy is taken only from stopped data services: a copy of a live PostgreSQL directory is torn.
 still_running=""
@@ -111,7 +118,7 @@ copy_ok=false
 if [ -z "$still_running" ]; then
   mkdir -m 0700 "$S/data"
   copy_ok=true
-  for d in postgres redis rabbitmq; do cp -a "$DATA/$d" "$S/data/$d" || copy_ok=false; done
+  for d in postgres redis rabbitmq; do timeout "$(budget 60)" cp -a "$DATA/$d" "$S/data/$d" || copy_ok=false; done
   cp -a "$DATA/.fcpi-data-id" "$S/data/" || copy_ok=false
 fi
 resume
@@ -120,7 +127,7 @@ quiesce_s=$(( $(now_s) - t_q0 ))
 up_ok=true; for c in firecrawl-core access-gateway nuq-postgres; do [ "$(docker inspect -f '{{.State.Health.Status}}' "$(cid $c)" 2>/dev/null)" = healthy ] || up_ok=false; done
 if [ "$copy_ok" != true ] || [ "$dump_ok" != true ]; then
   record FAIL "$(jq -cn --argjson q "$quiesce_s" --argjson c "$copy_ok" --argjson d "$dump_ok" --argjson u "$up_ok" --arg sr "$still_running" \
-    '{error:"the staged copy is incomplete",quiesce_s:$q,copy_ok:$c,dump_ok:$d,stack_healthy_after:$u} + (if $sr == "" then {} else {data_services_not_stopped:$sr} end)')"
+    '{error:"the staged copy is incomplete",quiesce_s:$q,quiesce_exceeded:($q > 300),copy_ok:$c,dump_ok:$d,stack_healthy_after:$u} + (if $sr == "" then {} else {data_services_not_stopped:$sr} end)')"
   exit 1
 fi
 
@@ -156,7 +163,7 @@ upload_s=$(( $(now_s) - t_u0 ))
 x=$(jq -cn --arg d "$snap_data" --arg s "$snap_sec" --argjson a "${added:-0}" --argjson q "$quiesce_s" --argjson u "$upload_s" --argjson dr "$drained" \
   --arg k "$KIND" --arg off "$OFFDEVICE" --argjson up "$up_ok" --arg commit "$(source_commit)" --arg lock "$lock_sha" \
   --argjson nc "${#canaries[@]}" --argjson ni "$(jq length <<<"$inflight")" \
-  '{snapshot_data:$d,snapshot_secrets:$s,data_added:$a,quiesce_s:$q,upload_s:$u,drained:$dr,repository_kind:$k,offdevice:$off,
+  '{snapshot_data:$d,snapshot_secrets:$s,data_added:$a,quiesce_s:$q,quiesce_exceeded:($q > 300),upload_s:$u,drained:$dr,repository_kind:$k,offdevice:$off,
     stack_healthy_after:$up,source_commit:$commit,versions_lock_sha256:$lock,canary_results:$nc,inflight_jobs:$ni}')
 if [ -z "$snap_data" ] || [ -z "$snap_sec" ]; then record FAIL "$(jq -c '. + {error:"a snapshot did not complete; the staged copy is kept for the next run"}' <<<"$x")"; exit 1; fi
 
