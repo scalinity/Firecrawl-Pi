@@ -37,7 +37,9 @@ card_mm=$(cat "/sys/block/$card_dev/dev" 2>/dev/null)
 card_wsect=$(awk -v d="$card_dev" '$3 == d {print $10}' /proc/diskstats)
 host_oom=$(awk '$1 == "oom_kill" {print $2}' /proc/vmstat)
 
-insp=$(docker inspect $(docker ps -aq) 2>/dev/null || echo '[]')
+# A container removed between the listing and the inspection makes docker inspect print the rest and fail: whatever it
+# printed is merged into one list, so the list is always one JSON array.
+insp=$(docker ps -aq | xargs -r docker inspect 2>/dev/null | jq -sc 'add // []' 2>/dev/null); [ -n "$insp" ] || insp='[]'
 containers=$(jq -c '[.[] | {id: .Id, name: (.Name | ltrimstr("/")), project: (.Config.Labels["com.docker.compose.project"] // null),
   service: (.Config.Labels["com.docker.compose.service"] // null), transient: (.Config.Labels["fcpi.transient"] != null),
   state: .State.Status, health: (.State.Health.Status // "none"), restarts: .RestartCount, started: .State.StartedAt,
@@ -87,7 +89,7 @@ append_line "$LOGD/samples/$DAY.jsonl" "$compact"
 printf '%s\n' "$compact" | write_atomic "$RUND/last-sample.json" 0644
 
 # ---- 2. pressure -----------------------------------------------------------------------------------------------------
-prev='{}'; [ -r "$RUND/pressure.json" ] && prev=$(cat "$RUND/pressure.json")
+prev=$(obj "$RUND/pressure.json")
 disk_crit=$(jq -n --argjson s "${d_size:-0}" --argjson a "${d_avail:-0}" '$a < 2 * 1073741824 or ($s > 0 and $a * 10 < $s)')
 disk_low=$(jq -n --argjson s "${d_size:-0}" --argjson a "${d_avail:-0}" '$a < 5 * 1073741824 or ($s > 0 and $a * 100 < $s * 15)')
 pressure=$(jq -c --argjson avail "${avail:-0}" --argjson temp "${temp_c:-0}" --argjson dc "$disk_crit" '
@@ -97,7 +99,7 @@ pressure=$(jq -c --argjson avail "${avail:-0}" --argjson temp "${temp_c:-0}" --a
   {memory: step($avail < 1024; $avail >= 1280; "memory"), thermal: step($temp >= 75; $temp < 70; "thermal"), disk: step($dc; ($dc | not); "disk")}
   | .dispatch_reasons = ([if .memory.on then "memory" else empty end, if .disk.on then "disk" else empty end])
   | .browser_reasons = ([if .thermal.on then "thermal" else empty end])' <<<"$prev")
-printf '%s\n' "$pressure" | write_atomic "$RUND/pressure.json" 0644
+put_obj "$RUND/pressure.json" 0644 "$pressure"
 admission_write
 
 # ---- 3. the supervisor -----------------------------------------------------------------------------------------------
@@ -115,10 +117,10 @@ done < <(jq -r '.[] | select(.project == "fcpi" and .state == "running" and .hea
 jq -c --argjson t $((NOW - 86400)) 'select(.epoch >= $t)' "$SUP" 2>/dev/null | write_atomic "$SUP" 0640
 
 # ---- 4. incidents ----------------------------------------------------------------------------------------------------
-last_backup='{}'; [ -r "$STATE/backup/last.json" ] && last_backup=$(cat "$STATE/backup/last.json")
-last_restore='{}'; [ -r "$STATE/backup/last-restore-test.json" ] && last_restore=$(cat "$STATE/backup/last-restore-test.json")
-last_probe='{}'; [ -r "$STATE/probe-last.json" ] && last_probe=$(cat "$STATE/probe-last.json")
-prev_oom='{}'; [ -r "$STATE/alerts/oom.json" ] && prev_oom=$(cat "$STATE/alerts/oom.json")
+last_backup=$(obj "$STATE/backup/last.json")
+last_restore=$(obj "$STATE/backup/last-restore-test.json")
+last_probe=$(obj "$STATE/probe-last.json")
+prev_oom=$(obj "$STATE/alerts/oom.json")
 jq -c 'map({key: .name, value: (.oom_kill // 0)}) | from_entries' <<<"$containers" | write_atomic "$STATE/alerts/oom.json" 0600
 exh=$(printf '%s\n' "${exhausted[@]}" | jq -R . | jq -sc 'map(select(. != ""))')
 active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk_crit" --argjson p "$pressure" --argjson lb "$last_backup" \
@@ -143,7 +145,8 @@ active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk
   ]' <<<"$sample")
 # Sustained conditions: the core must be unhealthy for two minutes and memory low for over a minute before they open.
 AST=$STATE/alerts/state.json
-st='{}'; [ -r "$AST" ] && st=$(jq -c . "$AST" 2>/dev/null || echo '{}')
+st=$(obj "$AST")
+[ -n "$active" ] && jq -e 'type == "array"' >/dev/null 2>&1 <<<"$active" || { logger -t fcpi-tick -p user.err -- "incidents not judged this minute: the conditions did not compute"; active=null; }
 new=$(jq -c --argjson a "$active" --argjson now "$NOW" '
   . as $st | ($a | map({key: .key, value: .detail}) | from_entries) as $act
   | reduce ($act | keys[]) as $k ($st; .[$k] = ((.[$k] // {first: $now, open: false}) | .seen = $now | .clear = 0 | .detail = $act[$k]))
@@ -159,7 +162,7 @@ for k in $(jq -r 'keys[]' <<<"$new"); do
     new=$(jq -c --arg k "$k" 'del(.[$k])' <<<"$new")
   fi
 done
-printf '%s\n' "$new" | write_atomic "$AST" 0600
+[ "$active" = null ] || put_obj "$AST" 0600 "$new"
 deliver_notices
 
 # ---- 5. retention and the daily aggregate ----------------------------------------------------------------------------

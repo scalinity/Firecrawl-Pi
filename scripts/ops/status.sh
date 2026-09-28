@@ -14,13 +14,13 @@ set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/lib.sh"
 need_root
 json=false; [ "${1:-}" = --json ] && json=true
-sample='{}'; [ -r "$RUND/last-sample.json" ] && sample=$(cat "$RUND/last-sample.json")
-adm='{}'; [ -r "$ADMISSION" ] && adm=$(cat "$ADMISSION")
-inc='{}'; [ -r "$STATE/alerts/state.json" ] && inc=$(cat "$STATE/alerts/state.json")
-probe='{}'; [ -r "$STATE/probe-last.json" ] && probe=$(cat "$STATE/probe-last.json")
-lb='{}'; [ -r "$STATE/backup/last.json" ] && lb=$(cat "$STATE/backup/last.json")
-la='{}'; [ -r "$STATE/backup/last-attempt.json" ] && la=$(cat "$STATE/backup/last-attempt.json")
-lr='{}'; [ -r "$STATE/backup/last-restore-test.json" ] && lr=$(cat "$STATE/backup/last-restore-test.json")
+sample=$(obj "$RUND/last-sample.json")
+adm=$(obj "$ADMISSION")
+inc=$(obj "$STATE/alerts/state.json")
+probe=$(obj "$STATE/probe-last.json")
+lb=$(obj "$STATE/backup/last.json")
+la=$(obj "$STATE/backup/last-attempt.json")
+lr=$(obj "$STATE/backup/last-restore-test.json")
 # Live reads: the gateway's platform status and a modern MCP request.
 GW_TIMEOUT=10 gw GET /platform/v1/status; ps=$GW_STATUS pb=$GW_BODY pms=$GW_MS
 [ "$ps" = 200 ] && jq -e . <<<"$pb" >/dev/null 2>&1 || pb='{}'

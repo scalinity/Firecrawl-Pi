@@ -79,6 +79,15 @@ mcp() {
   if [[ $GW_BODY == *"data: "* ]]; then GW_BODY=$(grep '^data: ' <<<"$GW_BODY" | tail -1 | cut -c7-); fi
 }
 
+# obj <file>: the file's JSON object, or {} when it is absent, empty, unreadable or not an object. A state file is read
+# through this, so one bad write can never wedge every later run.
+obj() { local v; v=$(jq -ce 'if type == "object" then . else error("not an object") end' "$1" 2>/dev/null) && [ -n "$v" ] && printf '%s\n' "$v" || echo '{}'; }
+# put_obj <file> <mode> <json>: writes the value only if it is a JSON object; otherwise logs and keeps the old file.
+put_obj() {
+  if [ -n "$3" ] && jq -e 'type == "object"' >/dev/null 2>&1 <<<"$3"; then printf '%s\n' "$3" | write_atomic "$1" "$2"
+  else logger -t fcpi-tick -p user.err -- "not written: $1 (the computed state was not a JSON object)"; return 1; fi
+}
+
 # ---- admission (spec §23.1) ------------------------------------------------------------------------------------------
 # The services read $ADMISSION (a tmpfs file, mounted read-only into the gateway and the retrieval service):
 #   dispatch paused: the gateway refuses new work with 503 HOST_PRESSURE and a Retry-After (never 502);
@@ -87,8 +96,8 @@ mcp() {
 # decide it. A hold past its expiry is removed, so a backup that died cannot pause the platform for good. The file
 # carries its time: a service ignores one older than three minutes (a stopped tick must not pause the platform).
 admission_write() {
-  local p='{}' holds=() h exp
-  [ -r "$RUND/pressure.json" ] && p=$(cat "$RUND/pressure.json")
+  local p holds=() h exp
+  p=$(obj "$RUND/pressure.json")
   mkdir -p "$HOLDS"
   for h in "$HOLDS"/*; do
     [ -f "$h" ] || continue
