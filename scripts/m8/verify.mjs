@@ -865,10 +865,12 @@ const checks = {
   // Fails: a finding without an outcome, a fix without its commit, a cited commit that does not exist, a finding an earlier
   // review deferred to M8 without its own row, or an absolute local path.
   V01: { name: "review-record-complete", inputs: [`${EV}review/REVIEW.md`],
-    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists, and every finding found during M8 outside the review (F), a row with an outcome (fixed with its commit, rejected with evidence, deferred to M9); gives every finding an earlier review deferred to M8 (M1's R11, R12, R13, R14 and R15, M4's F1 and F2, M7's F10 and F13) a row with an outcome; cites only commits that exist; holds no absolute local path",
+    expected: "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists, and every finding found during M8 outside the review (F), a row with one of CLAUDE.md §5's outcomes stated with its substance (fixed with its commit, rejected with the evidence, deferred to M9 with the reason; never closed, recorded or returned); gives every finding an earlier review deferred to M8 (M1's R11, R12, R13, R14 and R15, M4's F1 and F2, M7's F10 and F13) a row with an outcome; cites only commits that exist; holds no absolute local path",
     run() {
       const text = read(`${EV}review/REVIEW.md`);
-      const OUTCOME = /^(Fixed|Closed|Rejected, with the evidence|Deferred to M9\b|Returned to M\d\b|Recorded)/;
+      // CLAUDE.md §5's outcomes only, each with its substance: fixed (with its commit, required below), rejected with the
+      // evidence, or deferred to M9 with the reason. "Returned" is M9's alone.
+      const OUTCOME = /^(Fixed\b|Rejected, with the evidence\b|Deferred to M9\b).{20,}/;
       const rows = text.split("\n").filter((l) => /^\| [A-Z]{1,2}\d+ \|/.test(l)).map((l) => l.split(" | "));
       const badRows = rows.filter((c) => !OUTCOME.test(c[3] ?? "")).map((c) => c[0].slice(2));
       const carried = ["M1 R11", "M1 R12", "M1 R13", "M1 R14", "M1 R15", "M4 F1", "M4 F2", "M7 F10", "M7 F13"];
