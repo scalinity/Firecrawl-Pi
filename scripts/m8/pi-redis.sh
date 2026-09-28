@@ -18,7 +18,11 @@ case ${1:-} in
     echo "### meta"; echo "utc=$(utc) source_commit=$(source_commit) user=$user core_user=$core_user"
     echo "### commandstats"; r INFO commandstats | tr -d '\r' | grep '^cmdstat_'
     echo "### acl_users"; r ACL LIST | tr -d '\r' | sed -E 's/ #[0-9a-f]{64}/ #<hash>/g; s/ >[^ ]+/ ><password>/g'
-    echo "### acl_log"; r ACL LOG 100 | tr -d '\r' | paste -sd' ' - | head -c 4000; echo
+    # The read's own line comes first, so an empty section can never be taken for an empty log: entries counts the
+    # log's records (each carries one "count" field).
+    echo "### acl_log"; log=$(r ACL LOG 100 | tr -d '\r')
+    echo "acl_log_read=ok entries=$(grep -cx count <<<"$log" || true)"
+    [ -z "$log" ] || { printf '%s\n' "$log" | paste -sd' ' - | head -c 4000; echo; }
     echo "### end" ;;
   reset) r CONFIG RESETSTAT; r ACL LOG RESET ;;
   *) die "usage: pi-redis.sh stats | reset" ;;

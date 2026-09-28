@@ -676,7 +676,8 @@ const checks = {
       const allowed = [...core.matchAll(/ \+([a-z|]+)/g)].map((x) => x[1]);
       const rejected = (s.commandstats ?? []).filter((l) => /rejected_calls=[1-9]|failed_calls=[1-9]/.test(l));
       const cond = { measured: used.length >= 5, narrowed: !!core && !/ \+@all/.test(core) && used.every((c) => allowed.includes(c)), core_user: kv((s.meta ?? []).flatMap((l) => l.split(" "))).core_user === "fcpi_core",
-        default_off: / off /.test(`${dflt} `), no_denials: /^\s*$/.test((s.acl_log ?? [""]).join("")) && rejected.length === 0 && (s.commandstats ?? []).length >= 5 };
+        default_off: / off /.test(`${dflt} `), acl_log_read: /^acl_log_read=ok entries=\d+$/.test((s.acl_log ?? [])[0] ?? ""),
+        no_denials: /^acl_log_read=ok entries=0$/.test((s.acl_log ?? [])[0] ?? "") && (s.acl_log ?? []).slice(1).join("").trim() === "" && rejected.length === 0 && (s.commandstats ?? []).length >= 5 };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; measured ${used.length} commands: ${used.join(",")}; allowed ${allowed.join(",")}; rejected lines ${rejected.length}` };
     } },
   // Fails: a heap failure or a core restart on any page up to 2 MiB, a 502, or no live heap reading.
