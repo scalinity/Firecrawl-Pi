@@ -2,7 +2,8 @@
 # fcpi — the platform's operational command (FIRECRAWL_PI_SPEC.md §25), ON the Pi, installed as /usr/local/bin/fcpi.
 # Every command acts on Compose project fcpi and the project's own paths only. Commands that read secrets, the
 # operations state or Docker need root: run them with sudo.
-#   fcpi status [--json]            services, capability readiness, queue, host, admission, incidents, backup age;
+#   fcpi status [--json]            services, capability readiness, queue, host, admission, incidents, backup age (from
+#                                   another machine, with FCPI_BASE_URL and FCPI_TOKEN_FILE: the gateway's view, M3's client);
 #                                   exit 0 healthy, 1 core or ledger not ready, 2 usage
 #   fcpi jobs [<id>] [--as <label>] [--limit N] [--json]
 #                                   job receipts through the gateway, as the operator or as a named client
@@ -23,6 +24,10 @@
 # Timers run: fcpi tick (every minute), fcpi probe (every five minutes), fcpi boot-record (at boot).
 set -uo pipefail
 HERE=$(dirname "$(readlink -f "$0")")
+# From any machine with Node (the workstation, an agent's host), with FCPI_BASE_URL in the environment, even empty:
+# status and jobs are M3's client (scripts/ops/client.mjs), through the private gateway with the token in
+# FCPI_TOKEN_FILE, one principal's owner-safe view. Every other command, and these without FCPI_BASE_URL, run on the Pi.
+case ${1:-} in status|jobs) [ -n "${FCPI_BASE_URL+set}" ] && exec node "$HERE/ops/client.mjs" "$@" ;; esac
 . "$HERE/ops/lib.sh"
 cmd=${1:-help}; shift || true
 case $cmd in
