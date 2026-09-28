@@ -461,11 +461,13 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; search ${JSON.stringify(s)}; searxng ${n?.searxng_state}; after ${JSON.stringify(a)}` };
     } },
   I09: { name: "proxy-outage-never-spills-to-the-home-ip", inputs: [`${RAW}faults.txt`],
-    expected: "with the residential route selected and its proxy down: a bulk crawl (past the bulk mark) is refused or ends PROXY_REQUIRED, and no direct attempt reaches its domain; a low-risk fixture scrape goes on directly",
+    expected: "with the residential route selected and its proxy down: a bulk crawl of the M3 site (past the bulk mark) is refused PROXY_REQUIRED at submission, or runs only residential attempts that fail as the proxy's failures, with no direct attempt to its domain and no page archived; a low-risk fixture scrape goes on directly",
     run() {
-      const b = step("proxy_down", "bulk_submit"), j = step("proxy_down", "bulk_job"), l = step("proxy_down", "low_risk_during");
-      const cond = { refused: (b?.code === "PROXY_REQUIRED") || /PROXY_REQUIRED/.test(JSON.stringify(j?.job ?? {})), no_spill: l?.bulk_direct_attempts === "0", low_risk: l?.status === 200 && l.sentinel === true, not502: not502(b) };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; bulk ${JSON.stringify(b)} ${JSON.stringify(j?.job ?? null)}; direct attempts ${l?.bulk_direct_attempts}` };
+      const b = step("proxy_down", "bulk_submit"), j = step("proxy_down", "bulk_job"), e = step("proxy_down", "bulk_errors"), l = step("proxy_down", "low_risk_during");
+      const proxyFailures = (e?.classes ?? []).length >= 1 && e.classes.every((c) => /^(PROXY_|RESIDENTIAL_)/.test(c));
+      const cond = { refused_or_failed_on_the_proxy: b?.code === "PROXY_REQUIRED" || (j?.job?.archived === 0 && proxyFailures && +l?.bulk_residential_attempts >= 1),
+        no_spill: l?.bulk_direct_attempts === "0", low_risk: l?.status === 200 && l.sentinel === true, not502: not502(b) };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; bulk ${JSON.stringify(b)} ${JSON.stringify(j?.job ?? null)} errors ${JSON.stringify(e)}; direct attempts ${l?.bulk_direct_attempts}, residential ${l?.bulk_residential_attempts}` };
     } },
   I10: { name: "model-parser-enhanced-outage-isolated", inputs: [`${RAW}faults.txt`],
     expected: "with the fixture model, parser and enhanced provider down: extraction and a scan-only PDF answer typed failures, never 502; an ordinary scrape and a crawl are unaffected; with them back, extraction succeeds",

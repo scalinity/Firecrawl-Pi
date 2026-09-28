@@ -60,7 +60,8 @@ mcp_crash)
   kill -9 "$(pid_of mcp-gateway)"
   static; out rest_during "$CALL"
   s=$(until_ 180 'GW_TIMEOUT=10 mcp tools/list "{}"; [ "$GW_STATUS" = 200 ]')
-  GW_TIMEOUT=60 mcp tools/call "$(jq -cn --arg id "$JOB" '{name:"firecrawl_check_crawl_status",arguments:{id:$id}}')"
+  # As the job's own principal: another principal's token is answered 404, as owner scoping requires.
+  OPS_TOKEN=$SOAK GW_TIMEOUT=60 mcp tools/call "$(jq -cn --arg id "$JOB" '{name:"firecrawl_check_crawl_status",arguments:{id:$id}}')"
   out mcp_after "$(jq -cn --argjson s "$s" --arg st "$GW_STATUS" --argjson r "$(restarts mcp-gateway)" --argjson r0 "$r0" --arg b "$GW_BODY" \
     '{back_after_s:$s, restarts_delta:($r - $r0), handle_call_status:($st|tonumber), handle_call_ok:(($b | fromjson? // {}) | (.result != null and .result.isError != true)),
       handle_result:(($b | fromjson? // {}) | {isError: .result.isError, error: .error, text: ((.result.content[0].text // "") | .[0:160])})}')" ;;
@@ -153,13 +154,19 @@ searxng_down)
   call POST /v2/search '{"query":"fcpi fault search","limit":3}'; out search_after "$(jq -c --argjson s "$s" --arg b "$GW_BODY" '. + {ready_after_s:$s, results: (($b | fromjson? // {}).data // null | tostring | length)}' <<<"$CALL")" ;;
 
 proxy_down)
+  # The residential route selected and its proxy (on fixture-m6) down; the target is the M3 site on another container,
+  # asked for more pages than the bulk mark (20), so the job must use the residential route from the start.
   bash "$REPO/scripts/m5/pi-selection.sh" fixture fcpi-fixture-model fcpi-fixture-parser fcpi-fixture-proxy none >/dev/null
   "${C[@]}" stop fixture-m6 >/dev/null 2>&1
   since=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  call POST /v2/crawl '{"url":"http://m6bulk.fixture.fcpi.test:8080/","limit":25}'; j=$(jq -r '.id // empty' <<<"$GW_BODY"); out bulk_submit "$(jq -c --arg j "$j" '. + {job:$j}' <<<"$CALL")"
-  [ -n "$j" ] && out bulk_job "$(jq -cn --argjson x "$(wait_job "$j" 600)" '{job:$x}')"
-  direct=$(pg "SELECT count(*) FROM fcpi_retrieval.attempt WHERE domain LIKE 'm6bulk.%' AND strategy LIKE 'direct%' AND started_at >= '$since'")
-  static; out low_risk_during "$(jq -c --arg d "$direct" '. + {bulk_direct_attempts:$d}' <<<"$CALL")"
+  call POST /v2/crawl "{\"url\":\"$M3/\",\"limit\":25}"; j=$(jq -r '.id // empty' <<<"$GW_BODY"); out bulk_submit "$(jq -c --arg j "$j" '. + {job:$j}' <<<"$CALL")"
+  if [ -n "$j" ]; then
+    out bulk_job "$(jq -cn --argjson x "$(wait_job "$j" 600)" '{job:$x}')"
+    OPS_TOKEN=$SOAK GW_TIMEOUT=30 gw GET "/v2/crawl/$j/errors"; out bulk_errors "$(jq -c '{classes: ([.errors[]?.error | capture("Retrieval failed: (?<c>[A-Z_]+)")? | .c] | unique), count: (.errors | length)}' <<<"$GW_BODY" 2>/dev/null || echo '{}')"
+  fi
+  direct=$(pg "SELECT count(*) FROM fcpi_retrieval.attempt WHERE domain = 'm3.fixture.fcpi.test' AND strategy LIKE 'direct%' AND started_at >= '$since'")
+  resid=$(pg "SELECT count(*) FROM fcpi_retrieval.attempt WHERE domain = 'm3.fixture.fcpi.test' AND strategy LIKE 'residential%' AND started_at >= '$since'")
+  static; out low_risk_during "$(jq -c --arg d "$direct" --arg r "$resid" '. + {bulk_direct_attempts:$d, bulk_residential_attempts:$r}' <<<"$CALL")"
   "${C[@]}" start fixture-m6 >/dev/null 2>&1
   bash "$REPO/scripts/m5/pi-selection.sh" fixture fcpi-fixture-model fcpi-fixture-parser none none >/dev/null
   s=$(until_ 300 ready); out recovered "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{ready_after_s:$s, status:$b}')" ;;
