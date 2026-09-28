@@ -10,7 +10,9 @@
 #      outside the project: M1 R12); then daemon-reload, and the timers and the boot record enabled;
 #   5. /usr/local/bin/fcpi pointing at the deployed command;
 #   6. the operator's gateway client (label ops, principal operator: read, scrape, map), which the probe, the boot
-#      record and fcpi status use, and the soak's client (label soak, principal soak: every scope), if absent.
+#      record and fcpi status use, and the soak's client (label soak, principal soak: every scope), if absent;
+#   7. the core's Redis user narrowed to deploy/redis/fcpi-core.rules (scripts/m8/pi-redis-narrow.sh, M1 R11), which
+#      recreates Redis and the core.
 # A daemon-reload lifts the swap limit of every container not yet under fcpi.slice (F2): scripts/m8/pi-up-m8.sh recreates
 # the stack under the slice next. Prints what it did; no secret.   ssh … 'bash /opt/firecrawl-pi/scripts/m8/pi-init-m8.sh'
 set -euo pipefail
@@ -64,4 +66,7 @@ for c in "ops operator read,scrape,map" "soak soak read,scrape,map,crawl,batch,c
   set -- $c
   if sudo -n test -f /etc/firecrawl-pi/secrets/clients/$1.token; then echo "kept client $1"; else bash $REPO/scripts/m3/pi-client-token.sh create "$1" "$2" "$3" >/dev/null && echo "created client $1 ($2: $3)"; fi
 done
+
+sec redis
+sudo -n bash $REPO/scripts/m8/pi-redis-narrow.sh | sed -n "/^### narrow/,/^### end/p" | grep -v "^### "
 echo end

@@ -1,0 +1,19 @@
+# The core's Redis user (fcpi_core; M1 review finding R11), applied by scripts/m8/pi-redis-narrow.sh. One rule per line.
+# The allowance is the union of what the pinned build can issue, read from its compiled code on the Pi:
+#   - the core's own calls (dist/src: ioredis methods and .call("…")),
+#   - BullMQ 5.56.7's client (bzpopmin, xread, info, client setname and list, multi and exec, evalsha and the eval and
+#     script load it falls back to when Redis's script cache is empty after a restart) and the commands its 47 Lua
+#     scripts call (a script's commands are checked against its caller's rules),
+#   - ioredis's ready check (info) and disconnect (quit);
+# and M8's measurement of a paced workload (evidence/M8/raw/redis-soak-a.txt), every command of which is in it. Refused:
+# everything else, flushall, flushdb, config, debug, acl, module, shutdown, save, bgsave, replicaof, migrate,
+# client kill and script flush among them. Keys and channels stay unrestricted: the core names its own keys.
+~* &* -@all
++get +set +mget +del +exists +expire +pexpire +pttl +keys +scan +type +rename +time +incr +incrby
++hget +hset +hmget +hmset +hsetnx +hdel +hexists +hgetall +hincrby +hlen
++lpush +rpush +lpop +rpop +llen +lindex +lpos +lrange +lrem +lset +ltrim +rpoplpush
++sadd +srem +spop +scard +sismember +smembers
++zadd +zrem +zcard +zcount +zscore +zpopmin +bzpopmin +zrange +zrangebyscore +zrevrange +zrevrangebyscore +zremrangebyrank +zremrangebyscore
++xadd +xread +xtrim
++eval +evalsha +script|load +script|exists +multi +exec +discard
++info +client|setname +client|list +ping +quit

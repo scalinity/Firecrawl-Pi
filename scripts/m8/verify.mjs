@@ -637,7 +637,9 @@ const checks = {
     expected: "the command set the core used across every suite and a paced workload (INFO commandstats) is the narrowed user's allowance; the core connects as that user; the default user is off; across the 24-hour soak no command was rejected and the ACL log holds no denial (M1 R11)",
     run() {
       const m = S(`${RAW}redis-measured.txt`), s = S(`${RAW}redis-soak.txt`);
-      const used = (m.commandstats ?? []).map((l) => l.match(/^cmdstat_([^:]+):calls=(\d+)/)).filter(Boolean).map((x) => x[1]);
+      // AUTH is outside every ACL, and CONFIG RESETSTAT, ACL LOG and ACL LIST are the measurement tool's own (scripts/m8/pi-redis.sh).
+      const TOOL = ["auth", "config|resetstat", "acl|log", "acl|list"];
+      const used = (m.commandstats ?? []).map((l) => l.match(/^cmdstat_([^:]+):calls=(\d+)/)).filter(Boolean).map((x) => x[1]).filter((c) => !TOOL.includes(c));
       const users = s.acl_users ?? [];
       const core = users.find((u) => /^user fcpi_core /.test(u)) ?? "", dflt = users.find((u) => /^user default /.test(u)) ?? "";
       const allowed = [...core.matchAll(/ \+([a-z|]+)/g)].map((x) => x[1]);
