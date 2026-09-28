@@ -1,14 +1,16 @@
 # Installed and enabled by scripts/m8/pi-init-m8.sh. The durable boot record (scripts/ops/boot-record.sh): the boot
 # that ended, recorded at once, then this boot's readiness. It orders after the journal only, so it starts at once and
-# never delays the stack; the readiness part waits for the stack by itself.
+# never delays the stack; the readiness part waits for the stack by itself. Type=exec, not oneshot: multi-user.target
+# does not wait up to 20 minutes for the readiness part, and RuntimeMaxSec bounds it instead (the script's own waits end
+# inside it).
 [Unit]
 Description=FCPI boot record and readiness timing
 After=systemd-journald.service local-fs.target
 
 [Service]
-Type=oneshot
+Type=exec
 ExecStart=/opt/firecrawl-pi/scripts/fcpi boot-record
-TimeoutStartSec=1200
+RuntimeMaxSec=1200
 
 [Install]
 WantedBy=multi-user.target

@@ -32,9 +32,10 @@ chmod 0644 "$F"
 
 # Readiness. The operator token and the gateway exist only once the stack is up; every check is retried until then.
 # Both waits are bounded by the clock, not by a count of tries (each try can spend over a minute in the gateway's
-# timeouts): readiness until 15 minutes after kernel start, and everything by T_END, inside the unit's 1200 s start
-# timeout with room to write, so the readiness line and "end" are written even on a boot whose stack never starts.
-T_END=$(( $(now_s) + 1000 ))   # a last try (at most 80 s of timeouts) still ends inside the 1200 s
+# timeouts): readiness until 15 minutes after kernel start, and everything by T_END, inside the unit's 1200 s bound
+# (RuntimeMaxSec) with room for a last try (at most 80 s of timeouts) and the write, so the readiness line and "end" are
+# written even on a boot whose stack never starts.
+T_END=$(( $(now_s) + 1000 ))
 before_end() { [ "$(now_s)" -lt "$T_END" ]; }
 {
   echo "### readiness"
