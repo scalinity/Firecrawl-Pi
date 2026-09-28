@@ -43,10 +43,10 @@ out=$(jq -n --arg utc "$(utc)" --arg commit "$(source_commit)" --arg lock "$lock
   | ($pb.providers // {}) as $prov
   | { utc: $utc, commit: $commit, versions_lock_sha256: $lock,
       services: ($live | to_entries | map({key: .key, value: (.value + {mem_mib: ($cg[.key].mem_current | mib), peak_mib: ($cg[.key].mem_peak | mib),
-        limit_mib: ($cg[.key].mem_limit | mib), swap_denied: ($cg[.key].swap_limited // null), oom_kills: ($cg[.key].oom_kill // null)} | del(.check))}) | from_entries),
+        limit_mib: ($cg[.key].mem_limit | mib), swap_denied: $cg[.key].swap_limited, oom_kills: ($cg[.key].oom_kill // null)} | del(.check))}) | from_entries),
       core: { api: ($cc | test("api=ok")), worker: ($cc | test("worker=ok")), heartbeat_at: $live["firecrawl-core"].check_at, check: $cc },
       rest: { ready: ($ps == "200" and $pb.core.live == true and $pb.ledger.ok == true), status: ($ps | tonumber), ms: $pms,
-              core_live: ($pb.core.live // null), ledger_ok: ($pb.ledger.ok // null), jobs: ($pb.jobs // null), archive: ($pb.archive // null) },
+              core_live: $pb.core.live, ledger_ok: $pb.ledger.ok, jobs: ($pb.jobs // null), archive: ($pb.archive // null) },
       mcp: { ready: ($ms == "200" and $mt > 0), status: ($ms | tonumber), ms: $mms, tools: $mt, protocol: "2026-07-28" },
       capabilities: {
         scrape: ($live["firecrawl-core"].health == "healthy" and $live["retrieval-service"].health == "healthy"),

@@ -16,7 +16,7 @@ M1=http://m1.fixture.fcpi.test:8080 M2=http://m2.fixture.fcpi.test:8080 M3=http:
 echo "### $CASE"
 out() { jq -cn --arg utc "$(utc)" --arg step "$1" --argjson d "${2:-"{}"}" '{utc:$utc,step:$step} + $d'; }
 brief() { bash "$REPO/scripts/ops/status.sh" --json 2>/dev/null | jq -c '{healthy, api: .core.api, worker: .core.worker, rest: .rest.ready, ledger: .rest.ledger_ok, mcp: .mcp.ready,
-  queue_ok: (.queue.ok // null), search: .capabilities.search, browser: .capabilities.browser, admission: {dispatch: .admission.dispatch, browser: .admission.browser, reasons: .admission.reasons},
+  queue_ok: .queue.ok, search: .capabilities.search, browser: .capabilities.browser, admission: {dispatch: .admission.dispatch, browser: .admission.browser, reasons: .admission.reasons},
   incidents: (.incidents | keys), not_healthy: [.services | to_entries[] | select(.value.health != "healthy" or .value.state != "running") | .key]}'; }
 # call <METHOD> <path> [body]: as the soak client; CALL holds {status, ms, code, class, error}, GW_BODY the answer.
 call() {
@@ -101,7 +101,7 @@ postgres_down)
   "${C[@]}" stop nuq-postgres >/dev/null 2>&1
   GW_EXTRA_HEADERS="x-idempotency-key: $key" call POST /v2/crawl "{\"url\":\"$M3/\",\"limit\":12}"; out submit_during "$CALL"
   static; out scrape_during "$CALL"
-  CT=20 call GET /platform/v1/status; out platform_status_during "$(jq -c --arg b "$GW_BODY" '. + {ledger_ok: (($b | fromjson? // {}).ledger.ok // null)}' <<<"$CALL")"
+  CT=20 call GET /platform/v1/status; out platform_status_during "$(jq -c --arg b "$GW_BODY" '. + {ledger_ok: ($b | fromjson? // {}).ledger.ok}' <<<"$CALL")"
   out status_during "$(jq -cn --argjson b "$(brief)" '{status:$b}')"
   "${C[@]}" start nuq-postgres >/dev/null 2>&1
   s=$(until_ 600 ready); out recovered "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{ready_after_s:$s, status:$b}')"
@@ -116,7 +116,7 @@ redis_down|rabbitmq_down)
   out before "$(jq -cn --argjson b "$(brief)" '{status:$b}')"
   "${C[@]}" stop "$s0" >/dev/null 2>&1
   crawl; j=$JOB; out submit_during "$(jq -c --arg j "$j" '. + {job:$j}' <<<"$CALL")"
-  CT=60 static; out scrape_during "$CALL"
+  CT=130 static; out scrape_during "$CALL"   # past the gateway's 110 s core deadline, so its own typed answer is recorded
   sleep 35; out status_during "$(jq -cn --argjson b "$(brief)" '{status:$b}')"
   "${C[@]}" start "$s0" >/dev/null 2>&1
   s=$(until_ 600 ready); out recovered "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{ready_after_s:$s, status:$b}')"
