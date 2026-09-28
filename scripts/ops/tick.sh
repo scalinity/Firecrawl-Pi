@@ -79,8 +79,12 @@ sample=$(jq -cn --arg utc "$T" --arg boot "$(boot_hash)" --arg commit "$(source_
     disk:{size:$dsize, free:$davail, free_pct:(if $dsize > 0 then ($davail * 1000 / $dsize | floor) / 10 else null end),
       inodes_free_pct:(if $ditot > 0 then ($diav * 1000 / $ditot | floor) / 10 else null end)},
     card:{dev:$card, written_sectors:$cws}, containers:$c, foreign:$f, queue:$q, admission:$adm}')
-append_line "$LOGD/samples/$DAY.jsonl" "$sample"
-printf '%s\n' "$sample" | write_atomic "$RUND/last-sample.json" 0644
+# What is kept is the project's containers with the fields the checks, fcpi status and the daily aggregate read (about 3 KiB a
+# minute); the incidents below are judged on the full record.
+compact=$(jq -c '.containers |= map(select(.project == "fcpi") | {id, project, service, state, health, restarts, mem_limit, mem_current, mem_peak, swap_limited, oom_kill, card_wbytes}
+  + (if .service == "firecrawl-core" then {check: .health_out} else {} end))' <<<"$sample")
+append_line "$LOGD/samples/$DAY.jsonl" "$compact"
+printf '%s\n' "$compact" | write_atomic "$RUND/last-sample.json" 0644
 
 # ---- 2. pressure -----------------------------------------------------------------------------------------------------
 prev='{}'; [ -r "$RUND/pressure.json" ] && prev=$(cat "$RUND/pressure.json")
