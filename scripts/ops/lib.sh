@@ -153,14 +153,19 @@ notice() { # notice <kind: opened|cleared> <key> <detail json>
 # At most three deliveries and 30 s a tick, oldest first: with the channel down, a backlog of pending notices would
 # otherwise spend 20 s each and run the tick past its unit's start timeout, every minute.
 deliver_notices() {
-  local f cmd="" n t0 tries=0
+  local f cmd="" n t0 tries=0 since
   [ -r /etc/firecrawl-pi/alerts.env ] && cmd=$(sed -n 's/^FCPI_ALERT_COMMAND=//p' /etc/firecrawl-pi/alerts.env | tail -1)
+  # The value as an env file writes it: one pair of surrounding quotes is not part of the command.
+  case $cmd in \"*\") cmd=${cmd#\"}; cmd=${cmd%\"} ;; \'*\') cmd=${cmd#\'}; cmd=${cmd%\'} ;; esac
   [ -n "$cmd" ] || return 0
+  # Only notices raised since the channel was configured (alerts.env's time): a channel set up later is not sent the
+  # whole 90-day outbox at once; older notices stay in the outbox and the journal.
+  since=$(stat -c %Y /etc/firecrawl-pi/alerts.env)
   t0=$(now_s)
   for f in "$STATE"/alerts/outbox/*.json; do
     [ -f "$f" ] || continue
     n=$(cat "$f")
-    [ "$(jq -r '.delivered' <<<"$n")" = false ] && [ "$(jq -r '.attempts' <<<"$n")" -lt 5 ] || continue
+    [ "$(jq -r --argjson s "$since" '.delivered == false and .attempts < 5 and (.utc | fromdateiso8601) >= $s' <<<"$n" 2>/dev/null)" = true ] || continue
     [ "$tries" -lt 3 ] && [ $(( $(now_s) - t0 )) -lt 30 ] || break
     tries=$((tries + 1))
     if printf '%s\n' "$n" | timeout 20 sh -c "$cmd" >/dev/null 2>&1; then
