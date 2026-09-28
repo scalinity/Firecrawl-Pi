@@ -56,12 +56,13 @@ gw() {
   GW_STATUS=000 GW_BODY="" GW_MS=0
   tok=$(cat "$OPS_TOKEN" 2>/dev/null) || { GW_BODY='{"error":"no operator token"}'; return 1; }
   out=$(mktemp) || return 1
-  local args=(-sS -m "${GW_TIMEOUT:-20}" -o "$out" -w '%{http_code}' -X "$method"
-    -H @<(printf 'Authorization: Bearer %s\n' "$tok") -H 'Accept: application/json, text/event-stream')
+  local args=(-sS -m "${GW_TIMEOUT:-20}" -o "$out" -w '%{http_code}' -X "$method" -H 'Accept: application/json, text/event-stream')
   [ -n "$body" ] && args+=(-H 'Content-Type: application/json' --data-binary "$body")
   [ -n "${GW_EXTRA_HEADERS-}" ] && while IFS= read -r h; do [ -n "$h" ] && args+=(-H "$h"); done <<<"$GW_EXTRA_HEADERS"
   t0=$(date +%s%N)
-  GW_STATUS=$(curl "${args[@]}" "$GW$path" 2>/dev/null) || GW_STATUS=${GW_STATUS:-000}
+  # The token reaches curl through a descriptor opened on curl's own command line: a process substitution inside an
+  # assignment is closed when the assignment ends.
+  GW_STATUS=$(curl "${args[@]}" -H @<(printf 'Authorization: Bearer %s\n' "$tok") "$GW$path" 2>/dev/null) || GW_STATUS=${GW_STATUS:-000}
   GW_MS=$(( ($(date +%s%N) - t0) / 1000000 ))
   GW_BODY=$(cat "$out"); rm -f "$out"
   [ "${#GW_STATUS}" = 3 ] || GW_STATUS=000
