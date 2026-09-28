@@ -642,7 +642,7 @@ const checks = {
       const core = users.find((u) => /^user fcpi_core /.test(u)) ?? "", dflt = users.find((u) => /^user default /.test(u)) ?? "";
       const allowed = [...core.matchAll(/ \+([a-z|]+)/g)].map((x) => x[1]);
       const rejected = (s.commandstats ?? []).filter((l) => /rejected_calls=[1-9]|failed_calls=[1-9]/.test(l));
-      const cond = { measured: used.length >= 5, narrowed: !!core && !/ \+@all/.test(core) && used.every((c) => allowed.includes(c)), core_user: kv(s.meta ?? [])["user"] === "fcpi_core" || /user=fcpi_core/.test((s.meta ?? []).join(" ")),
+      const cond = { measured: used.length >= 5, narrowed: !!core && !/ \+@all/.test(core) && used.every((c) => allowed.includes(c)), core_user: kv((s.meta ?? []).flatMap((l) => l.split(" "))).core_user === "fcpi_core",
         default_off: / off /.test(`${dflt} `), no_denials: /^\s*$/.test((s.acl_log ?? [""]).join("")) && rejected.length === 0 && (s.commandstats ?? []).length >= 5 };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; measured ${used.length} commands: ${used.join(",")}; allowed ${allowed.join(",")}; rejected lines ${rejected.length}` };
     } },
