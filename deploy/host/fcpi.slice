@@ -1,0 +1,11 @@
+# Installed by scripts/m8/pi-init-m8.sh as /etc/systemd/system/fcpi.slice. Every fcpi container runs under it
+# (cgroup_parent in deploy/compose.yaml). MemorySwapMax=0 here is a unit property systemd itself re-asserts at
+# every daemon-reload, where the per-container swap limit Docker writes (memswap_limit equal to mem_limit) is not:
+# a reload lifts that to "max" until the container is recreated (M4 review finding F2). With the slice at 0, no
+# container of the project can swap to the host's zram whatever happens to its own scope.
+[Unit]
+Description=FCPI containers (no swap)
+Before=slices.target
+
+[Slice]
+MemorySwapMax=0

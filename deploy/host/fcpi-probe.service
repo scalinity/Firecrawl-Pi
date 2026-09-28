@@ -1,0 +1,10 @@
+# Installed by scripts/m8/pi-init-m8.sh. The functional probe against a controlled fixture (scripts/ops/probe.sh).
+[Unit]
+Description=FCPI functional probe
+After=fcpi-stack.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/firecrawl-pi/scripts/fcpi probe
+TimeoutStartSec=150
+Nice=5

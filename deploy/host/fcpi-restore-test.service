@@ -1,0 +1,11 @@
+# Installed by scripts/m8/pi-init-m8.sh. The isolated restore test (scripts/ops/restore-test.sh).
+[Unit]
+Description=FCPI isolated restore test
+After=fcpi-stack.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/firecrawl-pi/scripts/fcpi restore-test
+TimeoutStartSec=3h
+Nice=10

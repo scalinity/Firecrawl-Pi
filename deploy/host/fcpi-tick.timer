@@ -1,0 +1,11 @@
+# Installed and enabled by scripts/m8/pi-init-m8.sh.
+[Unit]
+Description=FCPI host tick every minute
+
+[Timer]
+OnBootSec=60
+OnUnitActiveSec=60
+AccuracySec=5s
+
+[Install]
+WantedBy=timers.target

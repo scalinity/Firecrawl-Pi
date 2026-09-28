@@ -1,0 +1,12 @@
+# Installed and enabled by scripts/m8/pi-init-m8.sh. Nightly at 03:30 America/New_York (spec §26); Persistent, so a
+# backup missed while the host was down runs once it is back.
+[Unit]
+Description=FCPI nightly backup
+
+[Timer]
+OnCalendar=*-*-* 03:30:00 America/New_York
+Persistent=true
+RandomizedDelaySec=120
+
+[Install]
+WantedBy=timers.target

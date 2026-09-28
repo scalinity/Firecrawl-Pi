@@ -18,6 +18,9 @@
 # The core has no route out: every acquisition goes through the retrieval service (M2).
 # Every bind mount sets create_host_path: false, so a missing data path fails the
 # start instead of being recreated on the root card.
+# M8: every container runs under fcpi.slice, whose MemorySwapMax=0 systemd re-asserts at each reload (a reload lifts the
+# per-container swap limit Docker writes, M4 review F2); the gateway and the retrieval service read the host's admission
+# file (/run/firecrawl-pi/admission, written by the host tick, scripts/ops/tick.sh).
 name: fcpi
 
 x-logging-app: &logging-app
@@ -34,6 +37,7 @@ services:
     pull_policy: never
     hostname: nuq-postgres
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "5432:5432"                  # dedicated uid; the image default (999) is pihole on this host
     # Command-line settings outrank nuq.sql's ALTER SYSTEM values in postgresql.auto.conf:
     # WAL sizing for the 64 GB card, spec §22 memory/connection limits, durability kept on.
@@ -128,6 +132,7 @@ services:
     pull_policy: missing
     hostname: redis
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "6379:6379"                  # dedicated uid; the image default (999) is pihole on this host
     entrypoint: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     secrets: [redis_users_acl]
@@ -167,6 +172,7 @@ services:
     # directory, stable across container recreation.
     hostname: rabbitmq
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "5672:5672"                  # dedicated uid; the image default (999) is pihole on this host
     environment:
       RABBITMQ_NODENAME: rabbit@rabbitmq
@@ -215,6 +221,7 @@ services:
     pull_policy: never
     hostname: firecrawl-core
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     entrypoint: ["/fcpi/entrypoint.sh"]
     command: ["node", "dist/src/harness.js", "--start-docker"]
     environment:
@@ -264,8 +271,10 @@ services:
     stop_grace_period: 45s
     healthcheck:
       # Beyond the API heartbeat: nuq-worker-0's /health runs a PostgreSQL query. It runs as
-      # the service uid (3002), not the container's root, like every resident process.
-      test: ["CMD", "setpriv", "--reuid=3002", "--regid=3002", "--clear-groups", "node", "-e", "Promise.all(['http://127.0.0.1:3002/v0/health/liveness','http://127.0.0.1:3006/health'].map(u=>fetch(u,{signal:AbortSignal.timeout(5000)}).then(r=>{if(!r.ok)throw new Error(u)}))).then(()=>process.exit(0),()=>process.exit(1))"]
+      # the service uid (3002), not the container's root, like every resident process. M8: it prints each part's result
+      # ("api=ok worker=fail"), which Docker keeps with the check's time: the worker's heartbeat, and a live API with a
+      # dead worker shown as the degraded state it is (spec §24.1; fcpi status).
+      test: ["CMD", "setpriv", "--reuid=3002", "--regid=3002", "--clear-groups", "node", "-e", "Promise.all(['http://127.0.0.1:3002/v0/health/liveness','http://127.0.0.1:3006/health'].map(u=>fetch(u,{signal:AbortSignal.timeout(5000)}).then(r=>r.ok,()=>false))).then(([a,w])=>{console.log('api='+(a?'ok':'fail')+' worker='+(w?'ok':'fail'));process.exit(a&&w?0:1)})"]
       interval: 30s
       timeout: 15s
       retries: 3
@@ -288,6 +297,7 @@ services:
     pull_policy: never
     hostname: access-gateway
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "3380:3380"
     environment:
       PI_GATEWAY_LISTEN_PORT: "3300"
@@ -310,6 +320,8 @@ services:
       PI_MCP_URL: http://10.231.8.20:3400
       # M5: the retrieval service's extraction listener on fcpi_model, for the json format and /v2/extract.
       PI_EXTRACT_URL: http://10.231.9.20:3314
+      # M8: the host's admission state; new work is refused 503 HOST_PRESSURE while dispatch is paused (spec §23.1).
+      PI_ADMISSION_FILE: /srv/admission/admission.json
     secrets: [gateway_postgres_password, gateway_retrieval_token]
     volumes:
       - type: bind
@@ -329,6 +341,12 @@ services:
       - type: bind
         source: /srv/firecrawl-pi/data/artifacts
         target: /srv/artifacts
+        bind: { create_host_path: false }
+      # M8: the directory (a tmpfs systemd-tmpfiles creates at boot), so each atomic replacement of the file is seen.
+      - type: bind
+        source: /run/firecrawl-pi/admission
+        target: /srv/admission
+        read_only: true
         bind: { create_host_path: false }
     ports:
       - "127.0.0.1:3380:3300"
@@ -379,6 +397,7 @@ services:
     pull_policy: never
     hostname: mcp-gateway
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "3400:3400"
     environment:
       # A heap ceiling under the 192 MiB cap: at worst a predictable V8 failure rather than a cgroup OOM
@@ -419,6 +438,7 @@ services:
     pull_policy: missing
     hostname: fixture
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "8080:8080"
     command: ["node", "/fixture/server.mjs"]
     volumes:
@@ -455,6 +475,7 @@ services:
     pull_policy: never
     hostname: retrieval-service
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "3310:3310"
     environment:
       PI_RETRIEVAL_LISTEN: 10.231.5.10:3310
@@ -485,6 +506,8 @@ services:
       PI_BUDGET_POLICY_FILE: /srv/policy/budget.json
       PI_PROVIDERS_DIR: /run/providers
       PI_SELECTION_FILE: /srv/selection/selection.json
+      # M8: the host's admission state; the browser tier waits while browser work is paused (spec §23.1).
+      PI_ADMISSION_FILE: /srv/admission/admission.json
     secrets: [retrieval_postgres_password, retrieval_core_token_sha256, retrieval_browser_token, retrieval_gateway_token_sha256, retrieval_searxng_proxy_sha256, webhook_signing_secret]
     volumes:
       - type: bind
@@ -511,6 +534,11 @@ services:
       - type: bind
         source: /etc/firecrawl-pi/selection
         target: /srv/selection
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /run/firecrawl-pi/admission
+        target: /srv/admission
         read_only: true
         bind: { create_host_path: false }
     dns: [10.231.6.1]
@@ -550,6 +578,7 @@ services:
     pull_policy: missing
     hostname: searxng
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "3330:3330"
     entrypoint: ["/fcpi/entrypoint.sh"]
     environment:
@@ -596,6 +625,7 @@ services:
     pull_policy: never
     hostname: browser-worker
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "3320:3320"
     init: true
     environment:
@@ -635,6 +665,7 @@ services:
     pull_policy: missing
     hostname: fixture-m2
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "8080:8080"
     command: ["node", "/fixtures/m2/server.mjs"]
     volumes:
@@ -673,6 +704,7 @@ services:
     pull_policy: missing
     hostname: fixture-m3
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "8080:8080"
     command: ["node", "/fixture/server.mjs"]
     volumes:
@@ -708,6 +740,7 @@ services:
     pull_policy: missing
     hostname: fixture-m5
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "8080:8080"
     command: ["node", "/fixtures/m5/server.mjs"]
     volumes:
@@ -745,6 +778,7 @@ services:
     pull_policy: missing
     hostname: fixture-m6
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "8080:8080"
     command: ["node", "/fixtures/m6/server.mjs"]
     secrets: [fixture_proxy_sha256]
@@ -784,6 +818,7 @@ services:
     pull_policy: missing
     hostname: fixture-m7
     restart: unless-stopped
+    cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "8080:8080"
     command: ["node", "/fixtures/m7/server.mjs"]
     secrets: [fixture_zyte_sha256, fixture_webhook_secret]

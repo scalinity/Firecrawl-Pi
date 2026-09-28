@@ -16,6 +16,10 @@ RemainAfterExit=yes
 # The host's connected networks, for the guard and the retrieval service (M2); a failure does not
 # stop the stack, because the retrieval service then refuses to acquire (fcpi-egress-local.sh).
 ExecStartPre=-/etc/firecrawl-pi/fcpi-egress-local.sh
+# M8 (M1 review R12): dockerd's start is gated on the project's data check, which is right only while Docker serves this
+# project alone. Every start reports any container outside Compose project fcpi to the journal (fcpi-stack tag); the
+# tick opens the foreign_container incident and fcpi status names it. Reporting only: it never stops the stack.
+ExecStartPre=-/opt/firecrawl-pi/scripts/fcpi foreign
 # `up --wait` returns once every service is healthy; a failed health wait fails the start.
 ExecStart=/usr/bin/docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml up -d --wait --wait-timeout 900
 # `stop` (not `down`): containers and networks stay, and restart policies do not revive

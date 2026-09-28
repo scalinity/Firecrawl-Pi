@@ -1,0 +1,13 @@
+# Installed by scripts/m8/pi-init-m8.sh. The coordinated encrypted backup (scripts/ops/backup.sh): at most five minutes
+# of quiescence, then the upload with the stack running. Exits 3 while no repository is configured.
+[Unit]
+Description=FCPI coordinated encrypted backup
+After=fcpi-stack.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/firecrawl-pi/scripts/fcpi backup
+TimeoutStartSec=4h
+Nice=10
+IOSchedulingClass=idle

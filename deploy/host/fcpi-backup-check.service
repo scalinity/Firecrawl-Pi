@@ -1,0 +1,12 @@
+# Installed by scripts/m8/pi-init-m8.sh. restic's integrity check over a 5 % subset of the repository's data.
+[Unit]
+Description=FCPI backup repository check
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/opt/firecrawl-pi/scripts/fcpi backup-check
+TimeoutStartSec=4h
+Nice=10
+IOSchedulingClass=idle

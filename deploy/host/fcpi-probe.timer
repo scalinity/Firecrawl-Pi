@@ -1,0 +1,11 @@
+# Installed and enabled by scripts/m8/pi-init-m8.sh.
+[Unit]
+Description=FCPI functional probe every five minutes
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+AccuracySec=10s
+
+[Install]
+WantedBy=timers.target

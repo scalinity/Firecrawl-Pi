@@ -1,0 +1,10 @@
+# Installed and enabled by scripts/m8/pi-init-m8.sh. Weekly, Sunday 05:00 America/New_York, after that night's backup.
+[Unit]
+Description=FCPI weekly backup check
+
+[Timer]
+OnCalendar=Sun *-*-* 05:00:00 America/New_York
+Persistent=true
+
+[Install]
+WantedBy=timers.target

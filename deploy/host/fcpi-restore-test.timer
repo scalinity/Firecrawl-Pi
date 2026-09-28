@@ -1,0 +1,10 @@
+# Installed and enabled by scripts/m8/pi-init-m8.sh. Monthly, on the first Sunday at 05:30 America/New_York (spec §26).
+[Unit]
+Description=FCPI monthly isolated restore test
+
+[Timer]
+OnCalendar=Sun *-*-01..07 05:30:00 America/New_York
+Persistent=true
+
+[Install]
+WantedBy=timers.target

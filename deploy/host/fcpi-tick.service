@@ -1,0 +1,11 @@
+# Installed by scripts/m8/pi-init-m8.sh. One host sample, the admission pressure, the bounded supervisor and the
+# incident notices (scripts/ops/tick.sh), every 60 s by fcpi-tick.timer.
+[Unit]
+Description=FCPI host tick (sample, admission, supervisor, incidents)
+After=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/firecrawl-pi/scripts/fcpi tick
+TimeoutStartSec=150
+Nice=5
