@@ -34,7 +34,7 @@ step plans; "$root/scripts/m8/stage.sh" 19f047f >/dev/null
 cand=$("${SSH[@]}" 'ls -1d /opt/firecrawl-pi-candidate/19f047f* | head -1')
 "${SSH[@]}" "sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-plans.sh $cand" >"$R/plans.txt" 2>&1
 step soak; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-redis.sh reset' >/dev/null
-run=$("${SSH[@]}" "bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh start $H" | jq -r .run)
+run=$("${SSH[@]}" "bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh start $H" | sed -n '/^{/,$p' | jq -r .run)   # the JSON after the selection line
 until "${SSH[@]}" "sudo -n grep -q '\"class\":\"end\"' /var/log/firecrawl-pi/soak/$run.jsonl" 2>/dev/null; do sleep 120; done
 "${SSH[@]}" "bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh collect $run" >"$R/soak.txt"
 "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-redis.sh stats' >"$R/redis-soak.txt"
