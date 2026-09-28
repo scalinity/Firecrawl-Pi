@@ -615,7 +615,9 @@ const checks = {
   // Fails: the chosen write settings not in force in the final Compose file and the soak, or the A/B not measured on the
   // same workload, or the chosen settings writing more than the server-class ones.
   S03: { name: "postgres-write-settings-measured-on-the-card", inputs: [`${RAW}pg-writes.txt`, `${EV}rendered-compose.json`],
-    expected: "the same paced workload measured under nuq.sql's server-class write settings (A) and under the settings M8 keeps (B): PostgreSQL's own card writes (its cgroup's io.stat) and WAL bytes per hour are each no higher under B; the Compose command carries B's settings and the soak ran with them (M1 R15)",
+    // WAL bytes are reported, not judged: these settings decide when dirty buffers and WAL are written and flushed, not how
+    // much WAL a workload generates (a first version of this check judged them too; see REVIEW.md F8).
+    expected: "the same paced workload measured for an hour under nuq.sql's server-class writer settings (A) and for an hour under the settings M8 keeps (B): PostgreSQL's own writes to the card (its cgroup's io.stat) and its WAL flushes per hour are each no higher under B; the Compose command carries B's settings (M1 R15)",
     run() {
       const l = read(`${RAW}pg-writes.txt`).split("\n").filter((x) => x.startsWith("{")).map((x) => JSON.parse(x));
       const g = (k) => l.find((x) => x.label === k);
@@ -623,13 +625,14 @@ const checks = {
       const [a0, a1, b0, b1] = ["a_start", "a_end", "b_start", "b_end"].map(g);
       if (!a0 || !a1 || !b0 || !b1) return { ok: false, actual: `missing labels: ${["a_start", "a_end", "b_start", "b_end"].filter((k) => !g(k)).join(",")}` };
       const io = (x) => x.postgres_cgroup_wbytes, wal = (x) => x.pg.wal_bytes;
-      const A = { io: rate(a0, a1, io), wal: rate(a0, a1, wal) }, B = { io: rate(b0, b1, io), wal: rate(b0, b1, wal) };
+      const syncs = (x) => x.pg.wal_sync;
+      const A = { io: rate(a0, a1, io), wal: rate(a0, a1, wal), syncs: rate(a0, a1, syncs) }, B = { io: rate(b0, b1, io), wal: rate(b0, b1, wal), syncs: rate(b0, b1, syncs) };
       const cmd = json(`${EV}rendered-compose.json`).services["nuq-postgres"].command.join(" ");
       const keep = b1.pg.settings;
       const inCompose = ["bgwriter_delay", "bgwriter_lru_maxpages", "wal_writer_delay", "wal_buffers", "effective_io_concurrency"].every((k) => cmd.includes(`${k}=`));
       const cond = { server_class_a: a0.pg.settings.bgwriter_delay === "50" && a0.pg.settings.wal_writer_delay === "10", b_differs: keep.bgwriter_delay !== "50" && keep.wal_writer_delay !== "10",
-        windows: Math.abs((Date.parse(a1.utc) - Date.parse(a0.utc)) - (Date.parse(b1.utc) - Date.parse(b0.utc))) < 600000, no_more_writes: B.io <= A.io * 1.05 && B.wal <= A.wal * 1.05, compose: inCompose };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; A io ${(A.io / MIB).toFixed(1)} MiB/h wal ${(A.wal / MIB).toFixed(1)} MiB/h; B io ${(B.io / MIB).toFixed(1)} MiB/h wal ${(B.wal / MIB).toFixed(1)} MiB/h; kept ${JSON.stringify(keep)}` };
+        windows: Math.abs((Date.parse(a1.utc) - Date.parse(a0.utc)) - (Date.parse(b1.utc) - Date.parse(b0.utc))) < 600000, no_more_card_writes: B.io <= A.io, no_more_flushes: B.syncs <= A.syncs, compose: inCompose };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; A card ${(A.io / MIB).toFixed(1)} MiB/h, ${Math.round(A.syncs)} WAL flushes/h, WAL ${(A.wal / MIB).toFixed(2)} MiB/h; B card ${(B.io / MIB).toFixed(1)} MiB/h, ${Math.round(B.syncs)} flushes/h, WAL ${(B.wal / MIB).toFixed(2)} MiB/h; kept ${JSON.stringify(keep)}` };
     } },
   // Fails: the core's Redis user not the narrowed one, any command rejected or denied by the ACL across the soak, or the
   // default user still enabled with every command.
