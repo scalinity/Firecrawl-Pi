@@ -37,7 +37,9 @@ append_line "$LOGD/probe/${T%%T*}.jsonl" "$line"
 printf '%s\n' "$line" | write_atomic "$STATE/probe-last.json" 0644
 
 # The tick's freshness.
-age=999999; [ -r "$RUND/last-sample.json" ] && age=$(( $(now_s) - $(jq -r '.utc | fromdateiso8601' "$RUND/last-sample.json") ))
+# A sample file without a readable time (a partial write) counts as no sample, never as an arithmetic error that ends
+# the probe before this check.
+age=999999; st=$(jq -r '.utc | fromdateiso8601' "$RUND/last-sample.json" 2>/dev/null); [[ $st =~ ^[0-9]+$ ]] && age=$(( $(now_s) - st ))
 flag=$STATE/alerts/tick-stale.open
 if [ "$age" -gt 180 ] && [ ! -e "$flag" ]; then notice opened tick_stale "{\"sample_age_s\":$age}"; touch "$flag"
 elif [ "$age" -le 180 ] && [ -e "$flag" ]; then notice cleared tick_stale "{\"sample_age_s\":$age}"; rm -f "$flag"; fi

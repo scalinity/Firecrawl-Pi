@@ -50,15 +50,16 @@ rows=()
 while IFS=$'\t' read -r id parent; do
   p=/sys/fs/cgroup/$parent/docker-$id.scope
   if [ -d "$p" ]; then
-    cur=$(cat "$p/memory.current") peak=$(cat "$p/memory.peak" 2>/dev/null || echo null) swc=$(cat "$p/memory.swap.current")
-    swm=$(cat "$p/memory.swap.max") pswm=$(cat "/sys/fs/cgroup/$parent/memory.swap.max" 2>/dev/null || echo max)
-    oom=$(awk '$1 == "oom_kill" {print $2}' "$p/memory.events")
+    # A read that fails (the container stopping mid-sample) is null, never an empty field that breaks the JSON.
+    cur=$(cat "$p/memory.current" 2>/dev/null) peak=$(cat "$p/memory.peak" 2>/dev/null) swc=$(cat "$p/memory.swap.current" 2>/dev/null)
+    swm=$(cat "$p/memory.swap.max" 2>/dev/null) pswm=$(cat "/sys/fs/cgroup/$parent/memory.swap.max" 2>/dev/null || echo max)
+    oom=$(awk '$1 == "oom_kill" {print $2}' "$p/memory.events" 2>/dev/null)
     wb=$(awk -v d="$card_mm" '$1 == d {for (i = 2; i <= NF; i++) if ($i ~ /^wbytes=/) {sub("wbytes=", "", $i); print $i}}' "$p/io.stat" 2>/dev/null)
     rows+=("$(printf '{"id":"%s","mem_current":%s,"mem_peak":%s,"swap_current":%s,"swap_max":"%s","parent_swap_max":"%s","oom_kill":%s,"card_wbytes":%s}' \
-      "$id" "$cur" "$peak" "$swc" "$swm" "$pswm" "${oom:-0}" "${wb:-0}")")
+      "$id" "${cur:-null}" "${peak:-null}" "${swc:-null}" "$swm" "$pswm" "${oom:-0}" "${wb:-0}")")
   fi
 done < <(jq -r '.[] | select(.state == "running") | [.id, .parent] | @tsv' <<<"$containers")
-cg=$(printf '%s\n' "${rows[@]}" | jq -sc 'map({key: .id, value: .}) | from_entries')
+cg=$(printf '%s\n' "${rows[@]}" | jq -Rsc 'split("\n") | map(fromjson? // empty) | map({key: .id, value: .}) | from_entries')   # a malformed row drops alone
 containers=$(jq -c --argjson cg "$cg" 'map(. + ($cg[.id] // {}) | .swap_limited = ((.swap_max == "0") or (.parent_swap_max == "0")) | .id = .id[0:12])' <<<"$containers")
 foreign=$(jq -c '[.[] | select(.project != "fcpi" and (.transient | not)) | .name]' <<<"$containers")
 
