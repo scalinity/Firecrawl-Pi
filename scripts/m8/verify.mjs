@@ -570,7 +570,9 @@ const checks = {
       const cond = { disk: step("disk_pressure", "state_during")?.opened_notices === 1 && step("disk_pressure", "recovered")?.disk_critical_notices === 2,
         memory: step("memory_pressure", "state_during")?.opened_notices === 1 && step("memory_pressure", "recovered")?.memory_low_notices === 2,
         thermal: step("thermal_pressure", "js_after")?.temperature_notices === 2, foreign: step("foreign_container", "detected")?.opened_notices === 1 && step("foreign_container", "cleared")?.notices_since === 2,
-        supervisor: step("supervisor", "round_4")?.budget_notices === 1 || [1, 2, 3, 4].some((n) => step("supervisor", `round_${n}`)?.budget_notices === 1) };
+        // Three restarts in budget (rounds 1-3, no notice), the fourth hang opens the one notice, the recovery clears it.
+        supervisor: [1, 2, 3].every((n) => step("supervisor", `round_${n}`)?.budget_notices === 0 && step("supervisor", `round_${n}`)?.supervisor_restarts === n)
+          && step("supervisor", "round_4")?.budget_notices === 1 && step("supervisor", "recovered")?.budget_notices === 2 };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}` };
     } },
   // Fails: a container log past its rotation bound, operations logs past 200 MiB, a doctor bundle over 5 MiB or carrying a
@@ -619,7 +621,8 @@ const checks = {
       const free0 = smp[0]?.disk?.free, free1 = smp.at(-1)?.disk?.free;
       const cond = { duration: dur >= 86400 && log.some((r) => r.class === "end"), coverage: smp.length >= 0.95 * (dur / 60), no_oom: !oom, no_throttle: smp.every((s) => s.throttled === "0x0"),
         memory: minAvail >= 1024, queue: smp.every((s) => s.queue?.ok) && maxOld <= 300, disk: free1 >= free0 - 2 * 1024 * MIB, requests: reqs.length >= 2000 && unexplained.length === 0,
-        latency: p95.static <= 5000 && p95.js <= 20000 && p95.status <= 2000 && p95.mcp_list <= 2000,
+        // A class with no answer has no p95 (null), and null <= n is true in JavaScript: each must be measured.
+        latency: Object.values(p95).every((v) => typeof v === "number") && p95.static <= 5000 && p95.js <= 20000 && p95.status <= 2000 && p95.mcp_list <= 2000,
         swap: smp.every((s) => (s.containers ?? []).filter((c) => c.project === "fcpi" && c.state === "running").every((c) => c.swap_limited)) };
       const classes = [...new Set(reqs.map((r) => r.class))].map((c) => `${c}:${reqs.filter((r) => r.class === c && r.ok).length}/${reqs.filter((r) => r.class === c).length}`).join(" ");
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; window ${w.start_utc}..${w.end_utc} (${(dur / 3600).toFixed(1)} h); samples=${smp.length}; requests ${classes}; failed=${failed.length} (held by a backup ${explained.length}; ${unexplained.slice(0, 5).map((r) => `${r.class} ${r.status} ${r.code}`).join("; ")}); missed minutes=${log.filter((r) => r.class === "missed").length}; min available ${minAvail} MiB; max oldest queued ${maxOld} s; p95 ms ${JSON.stringify(p95)}; disk free ${free0}→${free1}` };

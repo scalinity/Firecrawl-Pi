@@ -293,7 +293,7 @@ supervisor)
   done
   docker restart "$m" >/dev/null; s=$(until_ 180 ready)
   tick; tick
-  out recovered "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{ready_after_s:$s, status:$b}')" ;;
+  out recovered "$(jq -cn --argjson s "$s" --argjson b "$(brief)" --argjson n "$(( $(notices restart_budget_or_data_service_mcp-gateway) - n0 ))" '{ready_after_s:$s, status:$b, budget_notices:$n}')" ;;
 
 swap_reload)
   # Scopes found at max are F2's lift on the running stack (its trigger is not pinned: a plain reload, a unit added,
