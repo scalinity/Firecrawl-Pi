@@ -150,14 +150,19 @@ notice() { # notice <kind: opened|cleared> <key> <detail json>
   printf '%s\n' "$n" | write_atomic "$STATE/alerts/outbox/$id.json" 0600
   logger -t fcpi-alert -p "user.$([ "$kind" = opened ] && echo warning || echo notice)" -- "$n"
 }
+# At most three deliveries and 30 s a tick, oldest first: with the channel down, a backlog of pending notices would
+# otherwise spend 20 s each and run the tick past its unit's start timeout, every minute.
 deliver_notices() {
-  local f cmd="" n
+  local f cmd="" n t0 tries=0
   [ -r /etc/firecrawl-pi/alerts.env ] && cmd=$(sed -n 's/^FCPI_ALERT_COMMAND=//p' /etc/firecrawl-pi/alerts.env | tail -1)
   [ -n "$cmd" ] || return 0
+  t0=$(now_s)
   for f in "$STATE"/alerts/outbox/*.json; do
     [ -f "$f" ] || continue
     n=$(cat "$f")
     [ "$(jq -r '.delivered' <<<"$n")" = false ] && [ "$(jq -r '.attempts' <<<"$n")" -lt 5 ] || continue
+    [ "$tries" -lt 3 ] && [ $(( $(now_s) - t0 )) -lt 30 ] || break
+    tries=$((tries + 1))
     if printf '%s\n' "$n" | timeout 20 sh -c "$cmd" >/dev/null 2>&1; then
       jq -c --arg t "$(utc)" '.delivered=true | .delivered_at=$t | .attempts+=1' <<<"$n" | write_atomic "$f" 0600
     else

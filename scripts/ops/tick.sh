@@ -110,8 +110,10 @@ while IFS=$'\t' read -r svc name; do
   recent=$(jq -r --arg s "$svc" --argjson t $((NOW - 900)) 'select(.service == $s and .epoch >= $t) | .epoch' "$SUP" 2>/dev/null | wc -l)
   if [[ " $SAFE_SERVICES " != *" $svc "* ]] || [ "$recent" -ge 3 ]; then exhausted+=("$svc"); continue; fi
   logger -t fcpi-supervisor -- "restarting $svc (unhealthy; $recent restarts in the last 15 minutes)"
+  # Recorded before the restart, so a tick killed during it still counts it against the budget.
+  append_line "$SUP" "$(jq -cn --arg u "$T" --argjson e "$NOW" --arg s "$svc" '{utc:$u,epoch:$e,service:$s}')"
   timeout 120 docker restart "$name" >/dev/null 2>&1; rc=$?
-  append_line "$SUP" "$(jq -cn --arg u "$T" --argjson e "$NOW" --arg s "$svc" --argjson rc "$rc" '{utc:$u,epoch:$e,service:$s,exit:$rc}')"
+  logger -t fcpi-supervisor -- "restart of $svc exited $rc"
 done < <(jq -r '.[] | select(.project == "fcpi" and .state == "running" and .health == "unhealthy") | [.service, .name] | @tsv' <<<"$containers")
 # The restart log keeps a day.
 jq -c --argjson t $((NOW - 86400)) 'select(.epoch >= $t)' "$SUP" 2>/dev/null | write_atomic "$SUP" 0640
