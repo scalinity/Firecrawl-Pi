@@ -6,7 +6,8 @@
 #      checked against the backup's MANIFEST.sha256;
 #   2. the copy runs as Compose project fcpi-restore, made from the restored tree's own compose file by one jq
 #      transformation (the images, configuration and version lock of the run that was backed up): every network
-#      internal, renamed fcpi_r_* (bridges fcpi-r-*, which NetworkManager leaves alone) on 10.232.0.0/16; no published
+#      internal, renamed fcpi_r_* (bridges fcpi-r-*, which NetworkManager leaves alone), each project /24 10.231.N moved to
+#      10.231.(200+N), inside the project range the policies require and apart from production's; no published
 #      port; no egress network at all, so nothing in the copy can reach a provider, a webhook receiver or the Internet;
 #      webhook delivery suppressed and paid dispatch off besides; the browser, SearXNG and the M2-M7 fixtures left out;
 #      every container labelled fcpi.transient=restore-test;
@@ -80,20 +81,22 @@ lock_ok=false; [ "$(sha256sum "$R/fs$REPO/deploy/versions.lock.json" | cut -c1-6
 check config_matches_backup "$lock_ok" "restored versions lock against backup-meta; commit $(jq -r .source_commit <<<"$META")"
 # The data directory the copy runs on: the staged data services' copy, and the result store backed up live beside it.
 mv "$ST/data" "$R/data" && mv "$R/fs/srv/firecrawl-pi/data/artifacts" "$R/data/artifacts" || { finish FAIL "the restored data could not be put in place"; exit 1; }
-# The copy runs on 10.232.0.0/16: its egress policy names the fixture network by address too, so the restored tree's copy of
-# the policy (a disposable copy, removed with the rest) moves with it; the backed-up files are unchanged in the repository.
-sed -i "s/10\\.231\\./10.232./g" "$R/fs$REPO/deploy/policies/egress.json"
+# The copy's networks: each project /24 10.231.N moves to 10.231.(200+N), still inside the range the retrieval service's
+# policy requires of a fixture network and apart from production's. The egress policy names the fixture network by address
+# too, so the restored tree's copy of it (disposable, removed with the rest) moves the same way.
+MOVE='def move: gsub("10\\.231\\.(?<n>[0-9]{1,2})\\."; "10.231.\((.n | tonumber) + 200).");'
+jq "$MOVE walk(if type == \"string\" then move else . end)" "$R/fs$REPO/deploy/policies/egress.json" >"$R/egress.moved" && cat "$R/egress.moved" >"$R/fs$REPO/deploy/policies/egress.json"
 # The copy's own admission file, open: the services read any file older than three minutes as open, so it needs no tick.
 mkdir -m 0755 "$R/admission"
 printf '{"utc":"%s","dispatch":"open","browser":"open","reasons":[]}\n' "$(utc)" >"$R/admission/admission.json"
 
 # ---- 2. the isolated copy ------------------------------------------------------------------------------------------
 KEEP_SVC='["nuq-postgres","redis","rabbitmq","firecrawl-core","access-gateway","mcp-gateway","retrieval-service","fixture"]'
-docker compose -f "$R/fs$REPO/deploy/compose.yaml" config --format json 2>"$R/render.err" | jq --arg R "$R" --argjson keep "$KEEP_SVC" '
+docker compose -f "$R/fs$REPO/deploy/compose.yaml" config --format json 2>"$R/render.err" | jq --arg R "$R" --argjson keep "$KEEP_SVC" "$MOVE"'
   def fix: if type == "string" then
       gsub("/srv/firecrawl-pi/data/"; $R + "/data/") | gsub("/opt/firecrawl-pi/"; $R + "/fs/opt/firecrawl-pi/")
     | gsub("/etc/firecrawl-pi/secrets"; $R + "/secrets/secrets") | gsub("/etc/firecrawl-pi/"; $R + "/fs/etc/firecrawl-pi/")
-    | gsub("/run/firecrawl-pi/admission"; $R + "/admission") | gsub("10\\.231\\."; "10.232.")
+    | gsub("/run/firecrawl-pi/admission"; $R + "/admission") | move
     elif type == "object" then map_values(fix) elif type == "array" then map(fix) else . end;
   fix | .name = "fcpi-restore"
   | .services |= with_entries(select(.key as $k | $keep | index($k)))
