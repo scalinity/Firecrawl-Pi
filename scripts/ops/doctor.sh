@@ -8,7 +8,7 @@
 # URLs, query strings, key=value secrets and the tailnet's names and addresses (the Serve origin the gateway logs at start is
 # kept in the secrets directory, out of the repository); then every file is searched for every value in the secrets directory
 # (each client token included), and any hit discards the bundle and fails the command. The bundle stops at 5 MiB.
-#   fcpi doctor [--self-test]   --self-test plants one secret value in the bundle, which the check must find and refuse
+#   fcpi doctor [--self-test]   --self-test plants real secret values in the bundle, which the check must all find and refuse
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/lib.sh"
 need_root
@@ -44,16 +44,26 @@ journalctl --no-pager --utc -o short-iso -n 300 -u fcpi-stack.service -u fcpi-ti
   vcgencmd get_throttled 2>/dev/null; vcgencmd measure_temp 2>/dev/null; cat /sys/fs/cgroup/fcpi.slice/memory.swap.max 2>/dev/null | sed 's/^/fcpi.slice memory.swap.max=/'
   systemctl list-timers 'fcpi-*' --no-pager 2>/dev/null; sha256sum "$REPO/deploy/versions.lock.json"; } >"$B/host.txt" 2>&1
 
-# The self-test: one real secret value, as a log line would carry it, which the check below must find.
-[ "${1:-}" = --self-test ] && find /etc/firecrawl-pi/secrets/clients -name '*.token' | head -1 | xargs -r cat | sed 's/^/leaked /' >"$B/containers/self-test.log"
-# Enforced redaction: every secret value, searched for literally in every file.
+# The self-test: real secret values, each in its own file as a log line would carry it, which the check below must all
+# find: a client token, and a value from a file with no final newline (most secrets are written with printf '%s').
+planted=0
+if [ "${1:-}" = --self-test ]; then
+  tokf=$(find /etc/firecrawl-pi/secrets/clients -name '*.token' | head -1)
+  nlf=$(find /etc/firecrawl-pi/secrets -type f -size -8k ! -path '*/clients/*' | sort | while read -r f; do
+    [ "$(wc -l <"$f")" = 0 ] && [ "$(wc -c <"$f")" -ge 12 ] && { echo "$f"; break; }; done)
+  for f in "$tokf" "$nlf"; do [ -n "$f" ] || continue; awk 1 "$f" | sed 's/^/leaked /' >"$B/containers/self-test-$planted.log"; planted=$((planted + 1)); done
+fi
+# Enforced redaction: every secret value, searched for literally in every file. awk 1 ends each file's last line, so a
+# value written without a final newline is never joined to the next file's first line.
 pat=$(mktemp "$RUND/doctor-pat.XXXXXX"); chmod 0600 "$pat"
-find /etc/firecrawl-pi/secrets -type f -size -8k -print0 | xargs -0 -r cat | tr -s '\n' '\n' | awk 'length($0) >= 12' | sort -u >"$pat"
+find /etc/firecrawl-pi/secrets -type f -size -8k -print0 | xargs -0 -r awk 1 | awk 'length($0) >= 12' | sort -u >"$pat"
 # Values that are only part of a line (a URL with a password) are searched for by their secret part too.
 grep -Eo '://[^:/@]*:[^@]+@' "$pat" | sed -E 's#^://[^:]*:##; s#@$##' | awk 'length($0) >= 8' >>"$pat"
 hits=$(grep -rlF -f "$pat" "$B" 2>/dev/null | wc -l); npat=$(wc -l <"$pat")
+found=0; [ "$planted" -gt 0 ] && found=$(grep -lF -f "$pat" "$B"/containers/self-test-*.log 2>/dev/null | wc -l)
 rm -f "$pat"
-if [ "$hits" != 0 ] || [ "$npat" -lt 5 ]; then echo "fcpi doctor: redaction check failed ($hits files carry a secret, $npat values checked); no bundle kept" >&2; exit 1; fi
+st=""; [ "$planted" -gt 0 ] && st="; self-test planted $planted, found $found"
+if [ "$hits" != 0 ] || [ "$npat" -lt 5 ]; then echo "fcpi doctor: redaction check failed ($hits files carry a secret, $npat values checked$st); no bundle kept" >&2; exit 1; fi
 # The bound: logs are cut first, the largest first, until the bundle fits.
 while [ "$(du -sb "$B" | cut -f1)" -gt 5242880 ]; do f=$(ls -S "$B"/containers/*.log 2>/dev/null | head -1); [ -n "$f" ] || break; tail -n 50 "$f" >"$f.t" && mv "$f.t" "$f.cut"; rm -f "$f"; done
 echo "secret values checked: $npat; files carrying one: 0" >"$B/REDACTION.txt"

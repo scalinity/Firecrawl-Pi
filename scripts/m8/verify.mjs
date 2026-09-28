@@ -572,17 +572,18 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}` };
     } },
   // Fails: a container log past its rotation bound, operations logs past 200 MiB, a doctor bundle over 5 MiB or carrying a
-  // secret, or a self-test the redaction check does not refuse.
+  // secret, or a self-test the redaction check does not refuse or whose planted values it does not all find.
   O03: { name: "logs-bounded-and-diagnostics-redacted", inputs: [`${RAW}faults.txt`],
-    expected: "every project container's log is within its rotation bound (10 MiB x 3 for the services, 5 MiB x 2 for the dependencies); /var/log/firecrawl-pi stays under 200 MiB; fcpi doctor writes a bundle of at most 5 MiB after searching it for every secret value and finding none; with one real secret planted (--self-test) it refuses and keeps nothing",
+    expected: "every project container's log is within its rotation bound (10 MiB x 3 for the services, 5 MiB x 2 for the dependencies); /var/log/firecrawl-pi stays under 200 MiB; fcpi doctor writes a bundle of at most 5 MiB after searching it for every secret value and finding none; with real secrets planted (--self-test), one of them from a file with no final newline, it finds every one, refuses and keeps nothing",
     run() {
       const logs = steps("log_bounds").filter((r) => r.step === "container_log"), ops = step("log_bounds", "ops_logs");
       const size = (x) => ({ "10m": 10 * MIB, "5m": 5 * MIB })[x] ?? NaN;
       const over = logs.filter((l) => !(l.files <= +l.max_file && l.largest <= size(l.max_size) + 64 * 1024)).map((l) => l.service);
       const b = step("doctor", "bundle"), t = step("doctor", "self_test");
+      const pm = (t?.output ?? "").match(/self-test planted (\d+), found (\d+)/), planted = { n: +(pm?.[1] ?? 0), found: +(pm?.[2] ?? -1) };
       const cond = { containers: logs.length >= 15 && over.length === 0, ops: ops?.var_log_firecrawl_pi_bytes < 200 * MIB,
         bundle: b?.exit === 0 && /secret values checked, 0 found/.test(b.output) && b.size > 0 && b.size <= 5 * MIB && b.files >= 10,
-        self_test: !!t && t.exit !== 0 && /redaction check failed \([1-9]\d* files carry a secret/.test(t.output) };
+        self_test: !!t && t.exit !== 0 && /redaction check failed \([1-9]\d* files carry a secret/.test(t.output) && planted.n >= 2 && planted.found === planted.n };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; logs over bound=${over.join(",") || "none"} of ${logs.length}; ops logs ${ops?.var_log_firecrawl_pi_bytes} B; bundle ${b?.size} B ${b?.files} files; self-test exit ${t?.exit}` };
     } },
   // Fails: a 502 anywhere the gateway answered in the fault cases or the soak.
