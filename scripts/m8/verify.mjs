@@ -299,10 +299,11 @@ const checks = {
       }
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; deployed commits=${deployed.map((c) => c.slice(0, 7)).join(",")}; retrieval ${last("retrieval")?.[1].slice(7, 19)} from ${builtFrom("retrieval")?.slice(0, 7)}, gateway ${last("access-gateway")?.[1].slice(7, 19)} from ${builtFrom("access-gateway")?.slice(0, 7)}` };
     } },
-  // Fails: a failing or skipped test, fewer tests than the suites hold, a bash script that does not parse, a leftover
+  // Fails: a failing or skipped test, fewer tests than the suites hold, a bash script that does not parse, a restore copy
+  // naming a production host path (or a control naming none), a leftover
   // throwaway container.
   G02: { name: "suites-pass-in-the-running-images", inputs: [`${RAW}suites.txt`, `${EV}rendered-compose.json`],
-    expected: "inside the images the stack runs: the retrieval service's suite with M8's host-admission tests among its tests (at least 170, none skipped or failing), the gateway ledger SQL, the gateway's suites, the MCP service's, M3's contract suite with M8's HOST_PRESSURE test (43), M4's /mcp contract suite and the grammars; every host operations script parses; no throwaway container or network is left",
+    expected: "inside the images the stack runs: the retrieval service's suite with M8's host-admission tests among its tests (at least 170, none skipped or failing), the gateway ledger SQL, the gateway's suites, the MCP service's, M3's contract suite with M8's HOST_PRESSURE test (43), M4's /mcp contract suite and the grammars; every host operations script parses; the restore test's transformation of the Compose file the Pi renders names no host path outside the copy's directory (production's own file, the control, names more than ten); no throwaway container or network is left",
     run() {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
       const t = (k) => tapCounts(s[k]), exit0 = (k) => (s[k] ?? []).includes("test_exit=0");
@@ -311,7 +312,7 @@ const checks = {
         .every((x) => (s.retrieval_tap ?? []).some((l) => l.startsWith("ok ") && l.includes(x)));
       const hp = (s.gateway_contract_tap ?? []).some((l) => l.startsWith("ok ") && l.includes("M8: while the host holds dispatch"));
       const ops = kv((s.ops_syntax ?? []).filter((l) => /^files=/.test(l)).flatMap((l) => l.split(" ")));
-      const tr = kv((s.transient ?? []).flatMap((l) => l.split(" ")));
+      const tr = kv((s.transient ?? []).flatMap((l) => l.split(" "))), ri = kv((s.restore_isolation ?? []).flatMap((l) => l.split(" ")));
       const cond = { images: m.retrieval_image === composeImage("retrieval-service") && m.gateway_image === composeImage("access-gateway") && m.mcp_image === composeImage("mcp-gateway"),
         retrieval: t("retrieval_tap").tests >= 170 && t("retrieval_tap").fail === 0 && skipped === 0 && exit0("retrieval_tap"), m8_retrieval_tests: m8,
         ledger: t("ledger_tap").tests === 6 && t("ledger_tap").pass === 6 && exit0("ledger_tap"),
@@ -320,6 +321,7 @@ const checks = {
         m3_contract: t("gateway_contract_tap").tests === 43 && t("gateway_contract_tap").pass === 43 && exit0("gateway_contract_tap") && hp,
         m4_contract: t("gateway_mcp_contract_tap").tests >= 3 && t("gateway_mcp_contract_tap").fail === 0 && exit0("gateway_mcp_contract_tap"),
         grammars: t("grammars_tap").tests >= 3 && t("grammars_tap").fail === 0, ops_syntax: +ops.files >= 20 && ops.failed === "0" && exit0("ops_syntax"),
+        restore_isolation: ri.outside_copy === "0" && +ri.outside_production > 10 && exit0("restore_isolation"),
         no_leftovers: tr.leftover_transient_containers === "0" && tr.leftover_transient_networks === "0" };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; retrieval ${t("retrieval_tap").pass}/${t("retrieval_tap").tests} (skipped ${skipped}), ledger ${t("ledger_tap").pass}/${t("ledger_tap").tests}, gateway-m7 ${t("gateway_m7_tap").pass}/${t("gateway_m7_tap").tests}, mcp ${t("mcp_tap").pass}/${t("mcp_tap").tests}, gateway unit ${t("gateway_unit_tap").pass}/${t("gateway_unit_tap").tests}, M3 contract ${t("gateway_contract_tap").pass}/${t("gateway_contract_tap").tests}, ops scripts ${ops.files} parsed, ${ops.failed} failed` };
     } },
@@ -712,11 +714,11 @@ const checks = {
   // Fails: any restore check failing (a canary's hash, another principal's access, an in-flight receipt, REST or MCP, a
   // webhook delivered, a network not internal) or the isolated copy left behind.
   K02: { name: "isolated-restore-proves-the-backup", inputs: [`${RAW}backup-fixture.txt`],
-    expected: "fcpi restore-test restores that backup into Compose project fcpi-restore (every network internal, no egress, webhooks suppressed, paid dispatch off): the manifest verifies, the configuration matches the backup's, every canary result's documents hash as they did before the backup and another principal gets 404, the in-flight job's receipt is still tracked, artifacts hash and are refused to another principal, a REST fixture scrape and MCP tools/list and a scrape tool call work, no webhook is delivered; then the copy is removed",
+    expected: "fcpi restore-test restores that backup into Compose project fcpi-restore (every host path it names under its own directory, checked before it starts; every network internal, no egress, webhooks suppressed, paid dispatch off): the manifest verifies, the configuration matches the backup's, every canary result's documents hash as they did before the backup and another principal gets 404, the in-flight job's receipt is still tracked, artifacts hash and are refused to another principal, a REST fixture scrape and MCP tools/list and a scrape tool call work, no webhook is delivered; then the copy is removed",
     run() {
       const r = records(`${RAW}backup-fixture.txt`), t = r.restore_test?.[0], lo = r.leftovers?.[0], b = r.backup?.[0];
       const c = t?.checks ?? {};
-      const need = ["manifest", "config_matches_backup", "copy_started", "networks_internal", "side_effects_off", "result_hashes", "rest_fixture_scrape", "mcp_tools_list", "mcp_scrape", "no_webhook_delivered"];
+      const need = ["manifest", "config_matches_backup", "binds_isolated", "copy_started", "networks_internal", "side_effects_off", "result_hashes", "rest_fixture_scrape", "mcp_tools_list", "mcp_scrape", "no_webhook_delivered"];
       const cond = { pass: t?.result === "PASS" && t.backup_run && t.snapshot === b?.snapshot_data?.slice(0, 8), checks: need.every((k) => c[k]?.ok === true),
         acl: Object.keys(c).some((k) => k.startsWith("result_acl:")) && Object.entries(c).filter(([k]) => k.startsWith("result_acl:")).every(([, v]) => v.ok),
         inflight: Object.keys(c).some((k) => k.startsWith("inflight_tracked:")) && Object.entries(c).filter(([k]) => k.startsWith("inflight_tracked:")).every(([, v]) => v.ok),

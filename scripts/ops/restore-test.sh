@@ -5,7 +5,8 @@
 #      under /srv/firecrawl-pi/restore-test (on the data filesystem, removed at the end), and every staged file is
 #      checked against the backup's MANIFEST.sha256;
 #   2. the copy runs as Compose project fcpi-restore, made from the restored tree's own compose file by one jq
-#      transformation (the images, configuration and version lock of the run that was backed up): every network
+#      transformation (scripts/ops/restore.jq; the images, configuration and version lock of the run that was backed up),
+#      every host path it names asserted to be under the copy's directory before it starts: every network
 #      internal, renamed fcpi_r_* (bridges fcpi-r-*, which NetworkManager leaves alone), each project /24 10.231.N moved to
 #      10.231.(200+N), inside the project range the policies require and apart from production's; no published
 #      port; no egress network at all, so nothing in the copy can reach a provider, a webhook receiver or the Internet;
@@ -90,33 +91,22 @@ lock_ok=false; [ "$(sha256sum "$R/fs$REPO/deploy/versions.lock.json" | cut -c1-6
 check config_matches_backup "$lock_ok" "restored versions lock against backup-meta; commit $(jq -r .source_commit <<<"$META")"
 # The data directory the copy runs on: the staged data services' copy, and the result store backed up live beside it.
 mv "$ST/data" "$R/data" && mv "$R/fs/srv/firecrawl-pi/data/artifacts" "$R/data/artifacts" || { finish FAIL "the restored data could not be put in place"; exit 1; }
-# The copy's networks: each project /24 10.231.N moves to 10.231.(200+N), still inside the range the retrieval service's
-# policy requires of a fixture network and apart from production's. The egress policy names the fixture network by address
-# too, so the restored tree's copy of it (disposable, removed with the rest) moves the same way.
-MOVE='def move: gsub("10\\.231\\.(?<n>[0-9]{1,2})\\."; "10.231.\((.n | tonumber) + 200).");'
-jq "$MOVE walk(if type == \"string\" then move else . end)" "$R/fs$REPO/deploy/policies/egress.json" >"$R/egress.moved" && cat "$R/egress.moved" >"$R/fs$REPO/deploy/policies/egress.json"
+# The copy's networks move (restore.jq move); the egress policy names the fixture network by address too, so the restored
+# tree's copy of it (disposable, removed with the rest) moves the same way.
+OPS=$(dirname "$(readlink -f "$0")")
+jq -L "$OPS" 'include "restore"; walk(if type == "string" then move else . end)' "$R/fs$REPO/deploy/policies/egress.json" >"$R/egress.moved" \
+  && cat "$R/egress.moved" >"$R/fs$REPO/deploy/policies/egress.json"
 # The copy's own admission file, open: the services read any file older than three minutes as open, so it needs no tick.
 mkdir -m 0755 "$R/admission"
 printf '{"utc":"%s","dispatch":"open","browser":"open","reasons":[]}\n' "$(utc)" >"$R/admission/admission.json"
 
 # ---- 2. the isolated copy ------------------------------------------------------------------------------------------
-KEEP_SVC='["nuq-postgres","redis","rabbitmq","firecrawl-core","access-gateway","mcp-gateway","retrieval-service","fixture"]'
-docker compose -f "$R/fs$REPO/deploy/compose.yaml" config --format json 2>"$R/render.err" | jq --arg R "$R" --argjson keep "$KEEP_SVC" "$MOVE"'
-  def fix: if type == "string" then
-      gsub("/srv/firecrawl-pi/data/"; $R + "/data/") | gsub("/opt/firecrawl-pi/"; $R + "/fs/opt/firecrawl-pi/")
-    | gsub("/etc/firecrawl-pi/secrets"; $R + "/secrets/secrets") | gsub("/etc/firecrawl-pi/"; $R + "/fs/etc/firecrawl-pi/")
-    | gsub("/run/firecrawl-pi/admission"; $R + "/admission") | move
-    elif type == "object" then map_values(fix) elif type == "array" then map(fix) else . end;
-  fix | .name = "fcpi-restore"
-  | .services |= with_entries(select(.key as $k | $keep | index($k)))
-  | .services |= map_values(del(.ports) | .labels = ((.labels // {}) + {"fcpi.transient": "restore-test"})
-      | (if .networks then .networks |= del(.egress) else . end)
-      | (if .depends_on then .depends_on |= with_entries(select(.key as $k | $keep | index($k))) else . end))
-  | .services["retrieval-service"].environment += {PI_WEBHOOK_DELIVERY: "suppressed", PI_PAID_DISPATCH_ENABLED: "false"}
-  | .services["firecrawl-core"].environment += {DISABLE_WEBHOOK_DELIVERY: "true"}
-  | .networks |= (del(.egress) | map_values(.name |= sub("^fcpi_"; "fcpi_r_") | .internal = true | .labels = {"fcpi.transient": "restore-test"}
-      | .driver_opts["com.docker.network.bridge.name"] |= sub("^fcpi-"; "fcpi-r-") | .driver_opts["com.docker.network.bridge.gateway_mode_ipv4"] = "isolated"))' \
+docker compose -f "$R/fs$REPO/deploy/compose.yaml" config --format json 2>"$R/render.err" | jq -L "$OPS" --arg R "$R" 'include "restore"; compose($R)' \
   >"$R/compose.json" || { finish FAIL "the restored compose file could not be rendered"; exit 1; }
+# Isolation is asserted, not assumed from the rewrite: every host path the copy names must be under $R, before it starts.
+out_paths=$(jq -L "$OPS" -r --arg R "$R" 'include "restore"; outside($R) | join(" ")' "$R/compose.json")
+check binds_isolated "$([ -z "$out_paths" ] && echo true || echo false)" "host paths outside the copy: ${out_paths:-none}"
+[ -z "$out_paths" ] || { finish FAIL "the copy would share host paths with production"; exit 1; }
 t_up=$(now_s)
 docker compose -p "$P" -f "$R/compose.json" up -d --wait --wait-timeout 600 >"$R/up.log" 2>&1; up=$?
 check copy_started "$([ $up = 0 ] && echo true || echo false)" "compose up exit $up after $(( $(now_s) - t_up )) s"
