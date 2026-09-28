@@ -718,7 +718,7 @@ const checks = {
     run() {
       const r = records(`${RAW}backup-fixture.txt`), t = r.restore_test?.[0], lo = r.leftovers?.[0], b = r.backup?.[0];
       const c = t?.checks ?? {};
-      const need = ["manifest", "config_matches_backup", "binds_isolated", "copy_started", "networks_internal", "side_effects_off", "result_hashes", "rest_fixture_scrape", "mcp_tools_list", "mcp_scrape", "no_webhook_delivered"];
+      const need = ["manifest", "config_matches_backup", "disk_headroom", "binds_isolated", "memory_headroom", "copy_started", "networks_internal", "side_effects_off", "result_hashes", "rest_fixture_scrape", "mcp_tools_list", "mcp_scrape", "no_webhook_delivered"];
       const cond = { pass: t?.result === "PASS" && t.backup_run && t.snapshot === b?.snapshot_data?.slice(0, 8), checks: need.every((k) => c[k]?.ok === true),
         acl: Object.keys(c).some((k) => k.startsWith("result_acl:")) && Object.entries(c).filter(([k]) => k.startsWith("result_acl:")).every(([, v]) => v.ok),
         inflight: Object.keys(c).some((k) => k.startsWith("inflight_tracked:")) && Object.entries(c).filter(([k]) => k.startsWith("inflight_tracked:")).every(([, v]) => v.ok),

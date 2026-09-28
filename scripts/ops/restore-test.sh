@@ -45,7 +45,9 @@ export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_REST
 R=/srv/firecrawl-pi/restore-test P=fcpi-restore
 T0=$(now_s) CHECKS='{}'
 check() { CHECKS=$(jq -c --arg k "$1" --argjson ok "$2" --arg d "$3" '.[$k] = {ok: $ok, detail: $d}' <<<"$CHECKS"); }
+MW=""
 teardown() {
+  [ -n "$MW" ] && kill "$MW" 2>/dev/null
   docker rm -f "$P-check" >/dev/null 2>&1
   [ "$KEEP" = true ] && return 0
   [ -f "$R/compose.json" ] && docker compose -p "$P" -f "$R/compose.json" down --remove-orphans --timeout 30 >/dev/null 2>&1
@@ -84,6 +86,13 @@ SNAP_SEC=$(restic snapshots --json --tag fcpi-secrets --host fcpi-pi | jq -r --a
    else [.[] | select(.time >= $t and ((.time[0:19] + "Z" | fromdateiso8601) - ($t[0:19] + "Z" | fromdateiso8601)) < 3600)] end)
   | min_by(.time) | .short_id // empty')
 [ -n "$SNAP_SEC" ] || { finish FAIL "no fcpi-secrets snapshot for $SNAP_DATA"; exit 1; }
+# Room on the data filesystem, which production's PostgreSQL writes to (full, it would fail its WAL writes): the
+# snapshot's restore size with a fifth to spare, plus 2 GiB. An unknown size fails closed.
+size=$(restic stats --json --mode restore-size "$SNAP_DATA" 2>/dev/null | jq -r '.total_size // empty')
+free=$(df -B1 --output=avail /srv/firecrawl-pi | tail -1)
+room=false; [[ $size =~ ^[0-9]+$ ]] && [ "$free" -gt $(( size * 12 / 10 + 2147483648 )) ] && room=true
+check disk_headroom "$room" "restore size ${size:-unknown} B, free $free B on the data filesystem"
+[ "$room" = true ] || { finish FAIL "not enough room on the data filesystem for the copy"; exit 1; }
 mkdir -m 0700 "$R" "$R/secrets"
 restic restore "$SNAP_DATA" --target "$R/fs" >"$R/restic-restore.log" 2>&1 || { finish FAIL "restic restore failed"; exit 1; }
 restic dump "$SNAP_SEC" fcpi-secrets.tar 2>/dev/null | tar -C "$R/secrets" -xf - || { finish FAIL "the secrets snapshot could not be restored"; exit 1; }
@@ -111,6 +120,17 @@ docker compose -f "$R/fs$REPO/deploy/compose.yaml" config --format json 2>"$R/re
 out_paths=$(jq -L "$OPS" -r --arg R "$R" 'include "restore"; outside($R) | join(" ")' "$R/compose.json")
 check binds_isolated "$([ -z "$out_paths" ] && echo true || echo false)" "host paths outside the copy: ${out_paths:-none}"
 [ -z "$out_paths" ] || { finish FAIL "the copy would share host paths with production"; exit 1; }
+# Memory: production pauses new work below 1024 MiB available (spec §23.1), so the copy starts only with 2048 MiB
+# available, and a watchdog kills it at once should available memory fall below 1280 MiB while it runs: the copy gives
+# way before production would feel it. The lowest reading is recorded, which measures the starting bound.
+mem_avail() { awk '$1 == "MemAvailable:" {print int($2 / 1024)}' /proc/meminfo; }
+m0=$(mem_avail)
+[ "$m0" -ge 2048 ] || { check memory_headroom false "MemAvailable $m0 MiB before the copy (needs 2048)"; finish FAIL "not enough memory to start the copy"; exit 1; }
+echo "$m0" >"$R/mem-min"
+( exec 8>&-; min=$m0; while kill -0 $$ 2>/dev/null; do m=$(mem_avail); [ "$m" -lt "$min" ] && { min=$m; echo "$min" >"$R/mem-min"; }
+    if [ "$m" -lt 1280 ]; then echo "$m" >"$R/mem-abort"; docker compose -p "$P" -f "$R/compose.json" kill >/dev/null 2>&1; exit 0; fi
+    sleep 2; done ) &
+MW=$!
 t_up=$(now_s)
 # The data services first: the webhook baseline is read before any service that could deliver one has started, so an
 # attempt made while the copy comes up is counted too.
@@ -193,4 +213,9 @@ r=$(one mcp-scrape); check mcp_scrape "$(jq -e '.status == 200 and (.body.result
 hooks1=$(rpg "$HOOKS")
 check no_webhook_delivered "$([ -n "$hooks0" ] && [ "$hooks0" = "$hooks1" ] && echo true || echo false)" "delivered|attempts before $hooks0, after $hooks1"
 if [ "$MODE" = check ]; then jq -c . <<<"$CHECKS"; jq -e 'all(.[]; .ok)' <<<"$CHECKS" >/dev/null; exit; fi
+if [ -n "$MW" ]; then
+  kill "$MW" 2>/dev/null; MW=""
+  check memory_headroom "$([ -e "$R/mem-abort" ] && echo false || echo true)" \
+    "MemAvailable $m0 MiB before the copy, lowest $(cat "$R/mem-min" 2>/dev/null) MiB while it ran$([ -e "$R/mem-abort" ] && echo "; killed at $(cat "$R/mem-abort") MiB")"
+fi
 if jq -e 'all(.[]; .ok)' <<<"$CHECKS" >/dev/null; then finish PASS; else finish FAIL "a check failed"; exit 1; fi
