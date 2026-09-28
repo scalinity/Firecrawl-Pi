@@ -1,0 +1,4 @@
+# Positive control for the M8 addition to the redaction scan (scripts/m8/verify.mjs X05). The value is synthetic: the
+# base64 of the 48 characters A-Z a-v, the shape of M8's backup keys (48 random bytes in base64). The by-hash rule is fed
+# its SHA-256 as if it were a live secret, as the real scan is fed the Pi's; this file is excluded from that scan.
+backup key QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2

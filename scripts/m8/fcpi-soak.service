@@ -1,0 +1,15 @@
+# The paced fixture soak (scripts/m8/soak.sh), installed by scripts/m8/pi-soak.sh start for the soak's life and removed by
+# pi-soak.sh stop. Enabled while installed, so a reboot resumes it at the minute the clock says.
+[Unit]
+Description=FCPI paced fixture soak
+After=fcpi-stack.service network-online.target
+
+[Service]
+Type=simple
+ExecStart=/opt/firecrawl-pi/scripts/m8/soak.sh
+Restart=on-failure
+RestartSec=30
+Nice=5
+
+[Install]
+WantedBy=multi-user.target
