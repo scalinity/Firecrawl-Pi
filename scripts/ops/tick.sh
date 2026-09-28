@@ -36,13 +36,16 @@ card_dev=$(lsblk -no PKNAME "$(findmnt -no SOURCE --target "$DATA")" 2>/dev/null
 card_mm=$(cat "/sys/block/$card_dev/dev" 2>/dev/null)
 card_wsect=$(awk -v d="$card_dev" '$3 == d {print $10}' /proc/diskstats)
 host_oom=$(awk '$1 == "oom_kill" {print $2}' /proc/vmstat)
+# The slice's own count covers every container under it: a container's scope count restarts at 0 when its restart
+# policy recreates the scope, and Docker clears State.OOMKilled at the restart, so neither sees a main process killed.
+slice_oom=$(awk '$1 == "oom_kill" {print $2}' /sys/fs/cgroup/fcpi.slice/memory.events 2>/dev/null)
 
 # A container removed between the listing and the inspection makes docker inspect print the rest and fail: whatever it
 # printed is merged into one list, so the list is always one JSON array.
 insp=$(docker ps -aq | xargs -r docker inspect 2>/dev/null | jq -sc 'add // []' 2>/dev/null); [ -n "$insp" ] || insp='[]'
 containers=$(jq -c '[.[] | {id: .Id, name: (.Name | ltrimstr("/")), project: (.Config.Labels["com.docker.compose.project"] // null),
   service: (.Config.Labels["com.docker.compose.service"] // null), transient: (.Config.Labels["fcpi.transient"] != null),
-  state: .State.Status, health: (.State.Health.Status // "none"), restarts: .RestartCount, started: .State.StartedAt,
+  state: .State.Status, health: (.State.Health.Status // "none"), restarts: .RestartCount, oom_killed: .State.OOMKilled, started: .State.StartedAt,
   mem_limit: .HostConfig.Memory, memswap_limit: .HostConfig.MemorySwap, parent: (.HostConfig.CgroupParent | if . == "" then "system.slice" else . end),
   health_out: ((.State.Health.Log // []) | last | .Output // "" | gsub("\\s+$"; "") | .[0:120]),
   health_at: ((.State.Health.Log // []) | last | .End // null)}]' <<<"$insp")
@@ -126,10 +129,13 @@ last_check=$(obj "$STATE/backup/last-check.json")
 last_restore=$(obj "$STATE/backup/last-restore-test.json")
 last_probe=$(obj "$STATE/probe-last.json")
 prev_oom=$(obj "$STATE/alerts/oom.json")
-jq -c 'map({key: .name, value: (.oom_kill // 0)}) | from_entries' <<<"$containers" | write_atomic "$STATE/alerts/oom.json" 0600
+# This minute's counts, written only once the incidents are judged, so a minute that could not judge them keeps the
+# earlier counts and the next one still sees the increase.
+oom_now=$(jq -c --argjson so "${slice_oom:-null}" '{slice: $so, containers: (map({key: .name, value: (.oom_kill // 0)}) | from_entries),
+  restarts: (map({key: .name, value: .restarts}) | from_entries)}' <<<"$containers")
 exh=$(printf '%s\n' "${exhausted[@]}" | jq -R . | jq -sc 'map(select(. != ""))')
 active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk_crit" --argjson p "$pressure" --argjson lb "$last_backup" --argjson la "$last_attempt" --argjson lc "$last_check" \
-  --argjson lr "$last_restore" --argjson po "$prev_oom" --argjson exh "$exh" --arg throttled "$throttled" --argjson pr "$last_probe" '
+  --argjson lr "$last_restore" --argjson po "$prev_oom" --argjson so "${slice_oom:-null}" --argjson exh "$exh" --arg throttled "$throttled" --argjson pr "$last_probe" '
   . as $s | [
     (.containers[] | select(.project == "fcpi" and .service == "firecrawl-core" and .health != "healthy") | {key: "core_unhealthy", detail: {health: .health, state: .state}}),
     (if .queue.ok and .queue.oldest_queued_s > 300 then {key: "queue_stalled", detail: {oldest_queued_s: .queue.oldest_queued_s, queued: .queue.queued}} else empty end),
@@ -140,7 +146,11 @@ active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk
     (if ($throttled | test("^0x0*[1-9a-fA-F]")) then {key: "throttle_flag", detail: {throttled: $throttled}} else empty end),
     (if $dc then {key: "disk_critical", detail: {free: .disk.free, free_pct: .disk.free_pct}} elif $dl then {key: "disk_low", detail: {free: .disk.free, free_pct: .disk.free_pct}} else empty end),
     (.containers[] | select(.project == "fcpi" and .state == "running" and (.swap_limited | not)) | {key: "swap_limit_lost:\(.service)", detail: {swap_max: .swap_max, parent_swap_max: .parent_swap_max}}),
-    (.containers[] | select(.project == "fcpi" and ((.oom_kill // 0) > ($po[.name] // (.oom_kill // 0)))) | {key: "oom_kill:\(.service)", detail: {oom_kill: .oom_kill}}),
+    (($po.containers // {}) as $pc | .containers[] | select(.project == "fcpi" and ((.oom_kill // 0) > ($pc[.name] // (.oom_kill // 0)))) | {key: "oom_kill:\(.service)", detail: {oom_kill: .oom_kill}}),
+    # Any kill under fcpi.slice, the main process of a container included; the services that restarted or show
+    # OOMKilled this minute name the likely one.
+    (($po.restarts // {}) as $pr0 | if $so != null and ($po.slice // null) != null and $so > $po.slice then {key: "oom_kill:fcpi.slice",
+      detail: {oom_kill: $so, since: $po.slice, restarted: [.containers[] | select(.project == "fcpi" and (.restarts > ($pr0[.name] // .restarts) or .oom_killed == true)) | .service]}} else empty end),
     (if (.foreign | length) > 0 then {key: "foreign_container", detail: {names: .foreign}} else empty end),
     # A restore copy still running long after any restore test or rehearsal would end (a run that died before its
     # teardown): the foreign check leaves it out, being transient, so it shows here.
@@ -183,7 +193,7 @@ for k in $(jq -r 'keys[]' <<<"$new"); do
     new=$(jq -c --arg k "$k" 'del(.[$k])' <<<"$new")
   fi
 done
-[ "$active" = null ] || put_obj "$AST" 0600 "$new"
+[ "$active" = null ] || { put_obj "$AST" 0600 "$new"; put_obj "$STATE/alerts/oom.json" 0600 "$oom_now"; }
 deliver_notices
 
 # ---- 5. retention and the daily aggregate ----------------------------------------------------------------------------

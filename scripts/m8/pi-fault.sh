@@ -40,8 +40,9 @@ swap_all() { local bad=0 n=0; for c in $(docker ps -q --filter label=com.docker.
   [ "$(cat "/sys/fs/cgroup/${p:-system.slice}/docker-$id.scope/memory.swap.max")" = 0 ] || [ "$(cat "/sys/fs/cgroup/${p:-system.slice}/memory.swap.max")" = 0 ] || bad=$((bad + 1)); done; echo "{\"containers\":$n,\"swap_allowed\":$bad}"; }
 tick() { bash "$REPO/scripts/ops/tick.sh"; }
 notices() { ls "$STATE"/alerts/outbox/ 2>/dev/null | grep -c -- "$1" || true; }
-oom_sum() { local s=0 v; for c in $(docker ps -q --filter label=com.docker.compose.project=fcpi); do read -r p id < <(docker inspect -f '{{.HostConfig.CgroupParent}} {{.Id}}' "$c")
-  v=$(awk '$1 == "oom_kill" {print $2}' "/sys/fs/cgroup/${p:-system.slice}/docker-$id.scope/memory.events"); s=$((s + ${v:-0})); done; echo $s; }
+# OOM kills under fcpi.slice, every project container's main process included (the hog runs outside it). A container's
+# own scope count restarts at 0 when its restart policy recreates the scope, so summing those misses exactly that kill.
+oom_sum() { awk '$1 == "oom_kill" {print $2}' /sys/fs/cgroup/fcpi.slice/memory.events; }
 IMG_NODE=$(sed -n 's#^ *image: \(node@sha256:[0-9a-f]\{64\}\)$#\1#p' "$REPO/deploy/compose.yaml" | head -1)
 
 case $CASE in
