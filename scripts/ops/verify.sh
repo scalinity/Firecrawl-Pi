@@ -47,8 +47,16 @@ case $suite in
     same "$REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf" /etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf; chk nm_unmanaged $? "90-fcpi-unmanaged.conf"
     ;;
   functional)
-    bash "$(dirname "$(readlink -f "$0")")/probe.sh"
-    p=$(cat "$STATE/probe-last.json")
+    # A probe that started now: probe.sh leaves at once while the timer's probe holds its lock, so it is run again until
+    # the recorded result is newer than this suite's start (the timer's own, begun before it, does not count).
+    t0=$(utc); p='{}'
+    for _ in $(seq 1 24); do
+      bash "$(dirname "$(readlink -f "$0")")/probe.sh"
+      p=$(obj "$STATE/probe-last.json")
+      [[ "$(jq -r '.utc // ""' <<<"$p")" > "$t0" || "$(jq -r '.utc // ""' <<<"$p")" == "$t0" ]] && break
+      p='{}'; sleep 5
+    done
+    [ "$p" != '{}' ]; chk probe_ran_now $? "a probe begun at or after $t0"
     jq -e .scrape.ok <<<"$p" >/dev/null; chk rest_fixture_scrape $? "$(jq -c .scrape <<<"$p")"
     jq -e .mcp.ok <<<"$p" >/dev/null; chk mcp_tools_list $? "$(jq -c .mcp <<<"$p")"
     jq -e '.platform.core_live == true and .platform.ledger_ok == true' <<<"$p" >/dev/null; chk platform_status $? "$(jq -c '.platform | {core_live, ledger_ok}' <<<"$p")"
@@ -57,6 +65,10 @@ case $suite in
     log=$OUT/services-$(date -u +%Y%m%dT%H%M%SZ).txt
     bash "$REPO/scripts/m8/pi-suites.sh" >"$log" 2>&1
     while read -r sec ex; do chk "$sec" "$ex" "test_exit=$ex ($log)"; done < <(awk '/^### /{s=$2} /^test_exit=/{split($0,a,"="); print s, a[2]}' "$log")
+    # Every suite must have reported: a runner that died before a section would otherwise pass with fewer checks.
+    missing=""; for s in retrieval_tap ledger_tap gateway_m7_tap mcp_tap grammars_tap gateway_unit_tap gateway_contract_tap gateway_mcp_contract_tap ops_syntax restore_isolation; do
+      awk -v s="$s" '/^### /{c=$2} c == s && /^test_exit=/{f=1} END{exit !f}' "$log" || missing+="$s "; done
+    [ -z "$missing" ]; chk suites_complete $? "suites with no result: ${missing:-none}"
     left=$(docker ps -aq --filter label=fcpi.transient | wc -l); [ "$left" = 0 ]; chk no_transient_left $? "$left transient containers"
     ;;
   *) die "usage: fcpi verify ops|functional|services" ;;
