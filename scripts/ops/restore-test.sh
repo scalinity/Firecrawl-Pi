@@ -80,6 +80,9 @@ lock_ok=false; [ "$(sha256sum "$R/fs$REPO/deploy/versions.lock.json" | cut -c1-6
 check config_matches_backup "$lock_ok" "restored versions lock against backup-meta; commit $(jq -r .source_commit <<<"$META")"
 # The data directory the copy runs on: the staged data services' copy, and the result store backed up live beside it.
 mv "$ST/data" "$R/data" && mv "$R/fs/srv/firecrawl-pi/data/artifacts" "$R/data/artifacts" || { finish FAIL "the restored data could not be put in place"; exit 1; }
+# The copy runs on 10.232.0.0/16: its egress policy names the fixture network by address too, so the restored tree's copy of
+# the policy (a disposable copy, removed with the rest) moves with it; the backed-up files are unchanged in the repository.
+sed -i "s/10\\.231\\./10.232./g" "$R/fs$REPO/deploy/policies/egress.json"
 # The copy's own admission file, open: the services read any file older than three minutes as open, so it needs no tick.
 mkdir -m 0755 "$R/admission"
 printf '{"utc":"%s","dispatch":"open","browser":"open","reasons":[]}\n' "$(utc)" >"$R/admission/admission.json"
