@@ -40,8 +40,8 @@ case $suite in
     [ -z "$lifted" ]; chk containers_swap_denied $? "swap allowed: ${lifted:-none}"
     f=$(docker ps -a --format '{{.Names}} {{.Label "com.docker.compose.project"}} {{.Label "fcpi.transient"}}' | awk '$2 != "fcpi" && $3 == "" {print $1}' | tr '\n' ' ')
     [ -z "$f" ]; chk no_foreign_containers $? "outside project fcpi: ${f:-none}"
-    a=$(age_of "$RUND/last-sample.json"); [ "$a" -le 180 ]; chk tick_fresh $? "last sample ${a} s old"
-    a=$(age_of "$ADMISSION"); [ "$a" -le 180 ]; chk admission_fresh $? "admission file ${a} s old: $(jq -c '{dispatch,browser,reasons}' "$ADMISSION" 2>/dev/null)"
+    a=$(age_of "$RUND/last-sample.json"); [ "$a" -le "$STALE_S" ]; chk tick_fresh $? "last sample ${a} s old"
+    a=$(age_of "$ADMISSION"); [ "$a" -le "$STALE_S" ]; chk admission_fresh $? "admission file ${a} s old: $(jq -c '{dispatch,browser,reasons}' "$ADMISSION" 2>/dev/null)"
     a=$(age_of "$STATE/probe-last.json"); ok=$(jq -r .ok "$STATE/probe-last.json" 2>/dev/null)
     [ "$a" -le 660 ] && [ "$ok" = true ]; chk probe_recent_ok $? "last probe ${a} s old, ok=$ok"
     same "$REPO/deploy/host/NetworkManager/90-fcpi-unmanaged.conf" /etc/NetworkManager/conf.d/90-fcpi-unmanaged.conf; chk nm_unmanaged $? "90-fcpi-unmanaged.conf"

@@ -96,11 +96,12 @@ printf '%s\n' "$compact" | write_atomic "$RUND/last-sample.json" 0644
 prev=$(obj "$RUND/pressure.json")
 disk_crit=$(jq -n --argjson s "${d_size:-0}" --argjson a "${d_avail:-0}" '$a < 2 * 1073741824 or ($s > 0 and $a * 10 < $s)')
 disk_low=$(jq -n --argjson s "${d_size:-0}" --argjson a "${d_avail:-0}" '$a < 5 * 1073741824 or ($s > 0 and $a * 100 < $s * 15)')
-pressure=$(jq -c --argjson avail "${avail:-0}" --argjson temp "${temp_c:-0}" --argjson dc "$disk_crit" '
+pressure=$(jq -c --argjson avail "${avail:-0}" --argjson temp "${temp_c:-0}" --argjson dc "$disk_crit" \
+  --argjson mp "$MEM_PAUSE_MIB" --argjson mr "$MEM_RESUME_MIB" --argjson tp "$TEMP_PAUSE_C" --argjson tr "$TEMP_RESUME_C" '
   def step(bad; good; key): (.[key] // {on: false, good: 0}) as $s
     | if bad then {on: true, good: 0} elif $s.on and good then (if $s.good + 1 >= 2 then {on: false, good: 0} else {on: true, good: ($s.good + 1)} end)
       elif $s.on then {on: true, good: 0} else {on: false, good: 0} end;
-  {memory: step($avail < 1024; $avail >= 1280; "memory"), thermal: step($temp >= 75; $temp < 70; "thermal"), disk: step($dc; ($dc | not); "disk")}
+  {memory: step($avail < $mp; $avail >= $mr; "memory"), thermal: step($temp >= $tp; $temp < $tr; "thermal"), disk: step($dc; ($dc | not); "disk")}
   | .dispatch_reasons = ([if .memory.on then "memory" else empty end, if .disk.on then "disk" else empty end])
   | .browser_reasons = ([if .thermal.on then "thermal" else empty end])' <<<"$prev")
 put_obj "$RUND/pressure.json" 0644 "$pressure"
@@ -134,13 +135,13 @@ prev_oom=$(obj "$STATE/alerts/oom.json")
 oom_now=$(jq -c --argjson so "${slice_oom:-null}" '{slice: $so, containers: (map({key: .name, value: (.oom_kill // 0)}) | from_entries),
   restarts: (map({key: .name, value: .restarts}) | from_entries)}' <<<"$containers")
 exh=$(printf '%s\n' "${exhausted[@]}" | jq -R . | jq -sc 'map(select(. != ""))')
-active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk_crit" --argjson p "$pressure" --argjson lb "$last_backup" --argjson la "$last_attempt" --argjson lc "$last_check" \
+active=$(jq -c --argjson now "$NOW" --argjson mp "$MEM_PAUSE_MIB" --argjson dl "$disk_low" --argjson dc "$disk_crit" --argjson p "$pressure" --argjson lb "$last_backup" --argjson la "$last_attempt" --argjson lc "$last_check" \
   --argjson lr "$last_restore" --argjson po "$prev_oom" --argjson so "${slice_oom:-null}" --argjson exh "$exh" --arg throttled "$throttled" --argjson pr "$last_probe" '
   . as $s | [
     (.containers[] | select(.project == "fcpi" and .service == "firecrawl-core" and .health != "healthy") | {key: "core_unhealthy", detail: {health: .health, state: .state}}),
     (if .queue.ok and .queue.oldest_queued_s > 300 then {key: "queue_stalled", detail: {oldest_queued_s: .queue.oldest_queued_s, queued: .queue.queued}} else empty end),
     (if .queue.ok | not then {key: "queue_unreadable", detail: {}} else empty end),
-    (if .mem.available_mib < 1024 then {key: "memory_low", detail: {available_mib: .mem.available_mib}} else empty end),
+    (if .mem.available_mib < $mp then {key: "memory_low", detail: {available_mib: .mem.available_mib}} else empty end),
     (if $p.thermal.on then {key: "temperature_high", detail: {temp_c: .temp_c, injected: .injected_temp}} else empty end),
     # Any flag of vcgencmd get_throttled, now or since boot (undervoltage, capping, throttling, soft temperature limit).
     (if ($throttled | test("^0x0*[1-9a-fA-F]")) then {key: "throttle_flag", detail: {throttled: $throttled}} else empty end),

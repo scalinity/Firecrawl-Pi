@@ -21,6 +21,11 @@ MODERN=2026-07-28
 # it (spec §24.1): their own restart policy revives a crash, and a health failure opens an incident instead.
 SAFE_SERVICES="access-gateway mcp-gateway retrieval-service browser-worker searxng firecrawl-core fixture fixture-m2 fixture-m3 fixture-m5 fixture-m6 fixture-m7"
 DATA_SERVICES="nuq-postgres redis rabbitmq"
+# The admission limits (spec §23.1), stated once for the operations scripts: new work pauses under MEM_PAUSE_MIB of
+# available memory and resumes at MEM_RESUME_MIB, browser work pauses at TEMP_PAUSE_C and resumes under TEMP_RESUME_C,
+# and a sample or admission file older than STALE_S is stale. The services' STALE_MS (src/admission.mjs) is
+# STALE_S * 1000; tests/contracts/m8-admission-copies.test.mjs holds the two equal.
+MEM_PAUSE_MIB=1024 MEM_RESUME_MIB=1280 TEMP_PAUSE_C=75 TEMP_RESUME_C=70 STALE_S=180
 
 utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
 now_s() { date +%s; }

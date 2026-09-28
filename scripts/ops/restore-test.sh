@@ -128,7 +128,7 @@ m0=$(mem_avail)
 [ "$m0" -ge 2048 ] || { check memory_headroom false "MemAvailable $m0 MiB before the copy (needs 2048)"; finish FAIL "not enough memory to start the copy"; exit 1; }
 echo "$m0" >"$R/mem-min"
 ( exec 8>&-; min=$m0; while kill -0 $$ 2>/dev/null; do m=$(mem_avail); [ "$m" -lt "$min" ] && { min=$m; echo "$min" >"$R/mem-min"; }
-    if [ "$m" -lt 1280 ]; then echo "$m" >"$R/mem-abort"; docker compose -p "$P" -f "$R/compose.json" kill >/dev/null 2>&1; exit 0; fi
+    if [ "$m" -lt "$MEM_RESUME_MIB" ]; then echo "$m" >"$R/mem-abort"; docker compose -p "$P" -f "$R/compose.json" kill >/dev/null 2>&1; exit 0; fi
     sleep 2; done ) &
 MW=$!
 t_up=$(now_s)

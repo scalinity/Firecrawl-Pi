@@ -41,6 +41,6 @@ printf '%s\n' "$line" | write_atomic "$STATE/probe-last.json" 0644
 # the probe before this check.
 age=999999; st=$(jq -r '.utc | fromdateiso8601' "$RUND/last-sample.json" 2>/dev/null); [[ $st =~ ^[0-9]+$ ]] && age=$(( $(now_s) - st ))
 flag=$STATE/alerts/tick-stale.open
-if [ "$age" -gt 180 ] && [ ! -e "$flag" ]; then notice opened tick_stale "{\"sample_age_s\":$age}"; touch "$flag"
-elif [ "$age" -le 180 ] && [ -e "$flag" ]; then notice cleared tick_stale "{\"sample_age_s\":$age}"; rm -f "$flag"; fi
+if [ "$age" -gt "$STALE_S" ] && [ ! -e "$flag" ]; then notice opened tick_stale "{\"sample_age_s\":$age}"; touch "$flag"
+elif [ "$age" -le "$STALE_S" ] && [ -e "$flag" ]; then notice cleared tick_stale "{\"sample_age_s\":$age}"; rm -f "$flag"; fi
 exit 0
