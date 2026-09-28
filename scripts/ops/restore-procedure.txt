@@ -27,6 +27,10 @@ What you need, none of it on the Pi:
    set changed) and checked against the Compose file's pins:
      restic snapshots --tag fcpi-images                              # its time at or before the data snapshot's
      restic dump <images snapshot> fcpi-images.tar | docker load
+   The archive holds each image by digest without its name, so name each one as the Compose file pins it, then check
+   that every pin resolves:
+     docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml config --images | grep '^fcpi/' \
+       | while read -r ref; do docker tag "${ref#*@}" "${ref%@*}:restored"; done
      docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml config --images | xargs -n1 docker image inspect -f '{{.Id}}'
    Public images are pulled by the digests the version lock holds. Only with no images snapshot: rebuild from the commit
    (scripts/m2/build-api-image.sh on the workstation, the pi-build-images scripts on the host) and repin
