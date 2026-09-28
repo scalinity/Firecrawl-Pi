@@ -1037,3 +1037,33 @@ test("configuration that is unknown, unsafe or missing its data mount stops star
     assert.match(err, why);
   }
 });
+
+test("M8: while the host holds dispatch, new work is 503 HOST_PRESSURE with a Retry-After and reaches neither the core nor the ledger; reads answer; open or stale, work is served", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "fcpi-adm-")), file = join(dir, "admission.json");
+  const put = (o) => { writeFileSync(join(dir, "a.tmp"), JSON.stringify(o)); renameSync(join(dir, "a.tmp"), file); };
+  put({ utc: new Date().toISOString(), dispatch: "paused", browser: "paused", reasons: ["memory"] });
+  try {
+    const h = await harness({ extraEnv: { PI_ADMISSION_FILE: file } });
+    const before = h.core.requests.length;
+    const s = await h.call("POST", "/v2/scrape", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/p1" } });
+    assert.deepEqual([s.status, s.json.code, s.headers["retry-after"]], [503, "HOST_PRESSURE", "60"]);
+    assert.match(s.json.error, /memory/);
+    const c = await h.call("POST", "/v2/crawl", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/" } });
+    assert.deepEqual([c.status, c.json.code], [503, "HOST_PRESSURE"]);
+    assert.equal(h.core.requests.length, before, "nothing reached the core");
+    assert.equal((await h.db.query("SELECT count(*)::int AS n FROM fcpi_platform.job")).rows[0].n, 0, "nothing reached the ledger");
+    const st = await h.call("GET", "/platform/v1/status", { token: T.ro });
+    assert.deepEqual([st.status, st.json.admission.dispatch, st.json.admission.state], [200, "paused", "fresh"]);
+    assert.equal((await h.call("GET", "/platform/v1/jobs", { token: T.a })).status, 200);
+    // The positive control: open again (past the gateway's two-second cache), the same scrape is served.
+    put({ utc: new Date().toISOString(), dispatch: "open", browser: "open", reasons: [] });
+    await sleep(2100);
+    assert.equal((await h.call("POST", "/v2/scrape", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/p1" } })).status, 200);
+    // A paused file older than three minutes is a stopped tick's: open.
+    put({ utc: new Date(Date.now() - 200000).toISOString(), dispatch: "paused", browser: "paused", reasons: ["memory"] });
+    await sleep(2100);
+    const stale = await h.call("POST", "/v2/scrape", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/p1" } });
+    assert.equal(stale.status, 200);
+    assert.equal((await h.call("GET", "/platform/v1/status", { token: T.ro })).json.admission.state, "stale");
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+});

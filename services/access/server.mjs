@@ -41,6 +41,7 @@ import { routeBody, routeRefusal } from "./src/routing.mjs";
 import { storeCaptures } from "./src/artifacts.mjs";
 import { makeChanges } from "./src/changes.mjs";
 import { makeOutbox } from "./src/outbox.mjs";
+import { makeAdmission } from "./src/admission.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -59,6 +60,8 @@ const outbox = extractor ? makeOutbox({ store, extractor, limits: L, log: (o) =>
 const changes = makeChanges({ cfg, store, upstream, archive, originFor, quotaBytes: () => quotaBytes() });
 const PATH = { ...jobs.PATH, extract: "/v2/extract" };
 const started = Date.now();
+// M8: the host's admission state (src/admission.mjs), read before any new work is accepted.
+const admission = makeAdmission(cfg.admissionFile);
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Exact templates, matched against the raw request path (never decoded or normalised), so an
@@ -353,7 +356,7 @@ async function platformStatus(ctx) {
   // host's selection and the budgets, never a secret. Unreachable, it says so; REST is not affected.
   const providers = extractor ? await extractor.providers().then((r) => (r.status === 200 ? r.json : { error: `HTTP ${r.status}` }), (e) => ({ error: e.code })) : null;
   ctx.send(200, { success: true, service: "access-gateway", build: cfg.build, instance: jobs.instance, uptimeSeconds: Math.round((Date.now() - started) / 1000),
-    core, ledger, providers, jobs: summary?.states ?? null, archive: { bytes: summary?.archiveBytes ?? null, quotaBytes: await quotaBytes() },
+    core, ledger, providers, admission: await admission.read(), jobs: summary?.states ?? null, archive: { bytes: summary?.archiveBytes ?? null, quotaBytes: await quotaBytes() },
     capabilities: { routes: M.routes.map((r) => `${r.method} ${r.path}`), notEnabled: M.not_enabled.map((r) => `${r.method} ${r.path}`), formats: M.formats.allowed },
     limits: L });
 }
@@ -531,6 +534,12 @@ const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
     if (!route) return ctx.send(404, { success: false, code: "NOT_FOUND", error: "No such route." });
     ctx.route = route.id;
     if (!ctx.client.scopes.has(route.scope)) return ctx.send(403, { success: false, code: "INSUFFICIENT_SCOPE", error: `This token lacks the '${route.scope}' scope.` });
+    // M8: new work (a synchronous route or a job submission) waits while the host holds dispatch (spec §23.1); 503, never 502,
+    // which a client library would resubmit at once.
+    if (route.mode === "sync" || route.mode === "async") {
+      const a = await admission.read();
+      if (a.dispatch === "paused") return ctx.send(503, { success: false, code: "HOST_PRESSURE", error: `The host has paused new work (${a.reasons.join(", ") || "pressure"}); nothing was accepted. Retry later.` }, { "retry-after": "60" });
+    }
     await HANDLERS[route.id](ctx, route, m[1]);
   } catch (e) {
     if (e instanceof RequestError) {

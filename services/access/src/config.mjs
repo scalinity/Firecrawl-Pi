@@ -10,6 +10,8 @@ const KNOWN = new Set([
   "PI_GATEWAY_POLL_MS", "PI_CLOUD_ACCESS_ENABLED", "PI_MCP_URL",
   // M5: the retrieval service's extraction listener.
   "PI_EXTRACT_URL",
+  // M8: the host's admission file (src/admission.mjs).
+  "PI_ADMISSION_FILE",
 ]);
 
 const int = (env, key, dflt, min, max) => {
@@ -79,6 +81,7 @@ export function loadConfig(env) {
     mcpUrl,
     extractUrl, extractToken,
     db: { host: env.PI_POSTGRES_HOST, database: env.PI_POSTGRES_DB, user: env.PI_POSTGRES_USER, password: pw },
+    admissionFile: env.PI_ADMISSION_FILE || null,
     build: process.env.FCPI_SOURCE_COMMIT ?? "unknown",
   };
 }

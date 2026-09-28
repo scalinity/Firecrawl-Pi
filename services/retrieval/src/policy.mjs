@@ -12,7 +12,9 @@ const ENV_KEYS = new Set(["PI_RETRIEVAL_LISTEN", "PI_RETRIEVAL_PROXY_LISTEN", "P
   // M5: search, extraction and parsing.
   "PI_SEARCH_URL", "PI_SEARCH_PROXY_LISTEN", "PI_EXTRACT_LISTEN", "PI_BUDGET_POLICY_FILE", "PI_PROVIDERS_DIR", "PI_SELECTION_FILE",
   // M7: webhook delivery.
-  "PI_WEBHOOK_DELIVERY"]);
+  "PI_WEBHOOK_DELIVERY",
+  // M8: the host's admission file (src/admission.mjs).
+  "PI_ADMISSION_FILE"]);
 
 // An internal service's URL: http at a fixed address, since a name would be looked up through the
 // egress bridge's resolver rather than Docker's.
@@ -51,6 +53,7 @@ export function loadEnv(env) {
     searchUrl: fixedHttp(need("PI_SEARCH_URL"), "PI_SEARCH_URL"),
     searchProxyListen: listen(need("PI_SEARCH_PROXY_LISTEN")), extractListen: listen(need("PI_EXTRACT_LISTEN")),
     budgetFile: need("PI_BUDGET_POLICY_FILE"), providersDir: need("PI_PROVIDERS_DIR"), selectionFile: need("PI_SELECTION_FILE"),
+    admissionFile: env.PI_ADMISSION_FILE || null,
   };
 }
 

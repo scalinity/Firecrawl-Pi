@@ -227,7 +227,7 @@ function makeLegs({ residential, urlHmac, getBudget }) {
 }
 
 export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, urlHmac, log, residential = NO_ROUTE, getBudget = null,
-  enhanced = NO_ENHANCED, extras = false }) {
+  enhanced = NO_ENHANCED, extras = false, admission = null }) {
   const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
   const legs = makeLegs({ residential, urlHmac, getBudget });
 
@@ -423,6 +423,13 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         if (ordinal === null) return { fail: { class: "ATTEMPT_BUDGET_EXHAUSTED", detail: `the page's ${policy.attempts.maxPerPage} attempts are spent before its browser attempt` } };
         note(attemptId, ordinal, strategy);
         const browserDeadline = Math.min(deadline, Date.now() + policy.attempts.browserAttemptMs);
+        // M8: the host holds browser work under memory, thermal or disk pressure (src/admission.mjs); the attempt ends as a
+        // busy browser does, retryable, before any Chromium work.
+        const held = admission ? await admission.read() : null;
+        if (held?.browser === "paused") {
+          await store.finishAttempt(attemptId, { outcome: "RESOURCE_BUSY" });
+          return { fail: { class: "RESOURCE_BUSY", detail: `the host paused browser work (${held.reasons.join(", ") || "pressure"})`, retryable: true } };
+        }
         if (!(await holdPermit("browser", attemptId, permits.browser, browserDeadline, signal))) {
           await store.finishAttempt(attemptId, { outcome: "RESOURCE_BUSY" });
           return { fail: signal?.aborted ? CANCELLED : { class: "RESOURCE_BUSY", detail: "no browser permit before the deadline", retryable: true } };

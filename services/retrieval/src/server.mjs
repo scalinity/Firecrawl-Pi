@@ -38,6 +38,7 @@ import { makeEnhanced } from "./enhanced.mjs";
 import { makeWebhooks } from "./webhook.mjs";
 import { readCredential } from "./provider.mjs";
 import { Denied, hostMatches, parseTarget } from "./ssrf.mjs";
+import { makeAdmission } from "./admission.mjs";
 
 const env = loadEnv(process.env);
 const BUILD = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
@@ -110,7 +111,8 @@ const browser = makeBrowserClient({ url: env.browserUrl, token: readSecret(env.c
 
 // M7: the enhanced provider, the waterfall's last tier (spec §11), and the browser extras behind their switch.
 const enhanced = makeEnhanced({ getBudget, getPolicy, getSelection, providersDir: env.providersDir, paidDispatch: env.paidDispatch, store, resolvePublic, log });
-const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log, residential, getBudget, enhanced, extras: env.browserExtras });
+const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log, residential, getBudget, enhanced, extras: env.browserExtras,
+  admission: makeAdmission(env.admissionFile) });
 const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log, residential, getBudget });
 const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log });
 const common = { store, getBudget, paidDispatch: env.paidDispatch, providersDir: env.providersDir, getPolicy, resolvePublic, log };
