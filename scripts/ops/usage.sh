@@ -10,7 +10,7 @@ need_root
 period=day json=false
 while [ $# -gt 0 ]; do case $1 in --period) period=$2; shift 2 ;; --json) json=true; shift ;; *) die "unknown option $1" ;; esac; done
 case $period in day) since="date_trunc('day', now())" ;; month) since="date_trunc('month', now())" ;;
-  [0-9]*d) since="now() - interval '${period%d} days'" ;; *) die "period is day, month or <N>d" ;; esac
+  *) [[ $period =~ ^[0-9]{1,4}d$ ]] || die "period is day, month or <N>d (1-9999)"; since="now() - interval '${period%d} days'" ;; esac
 q() { pg "$1" | jq -Rsc --argjson cols "$2" 'split("\n") | map(select(. != "") | split("|") | [$cols, .] | transpose | map({key: .[0], value: (.[1] | tonumber? // .)}) | from_entries)'; }
 out=$(jq -n --arg p "$period" --arg utc "$(utc)" \
   --argjson jobs "$(q "SELECT kind, state, count(*), coalesce(sum(units),0) FROM fcpi_platform.job WHERE created_at >= $since GROUP BY 1,2 ORDER BY 1,2" '["kind","state","jobs","units"]')" \
