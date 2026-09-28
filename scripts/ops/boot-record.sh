@@ -31,11 +31,17 @@ set -C; cat "$tmp" >"$F" || exit 1; set +C
 chmod 0644 "$F"
 
 # Readiness. The operator token and the gateway exist only once the stack is up; every check is retried until then.
+# Both waits are bounded by the clock, not by a count of tries (each try can spend over a minute in the gateway's
+# timeouts): readiness until 15 minutes after kernel start, and everything by T_END, inside the unit's 1200 s start
+# timeout with room to write, so the readiness line and "end" are written even on a boot whose stack never starts.
+T_END=$(( $(now_s) + 1000 ))   # a last try (at most 80 s of timeouts) still ends inside the 1200 s
+before_end() { [ "$(now_s)" -lt "$T_END" ]; }
 {
   echo "### readiness"
-  stack_mono=""; ready=""
-  for _ in $(seq 1 180); do
-    if [ -z "$stack_mono" ] && [ "$(systemctl show -p ActiveState --value fcpi-stack.service)" = active ]; then
+  stack_mono=""; ready=""; st=""
+  while :; do
+    st=$(systemctl show -p ActiveState --value fcpi-stack.service)
+    if [ -z "$stack_mono" ] && [ "$st" = active ]; then
       stack_mono=$(systemctl show -p ActiveEnterTimestampMonotonic --value fcpi-stack.service)
     fi
     GW_TIMEOUT=10 gw GET /platform/v1/status
@@ -44,16 +50,18 @@ chmod 0644 "$F"
       GW_TIMEOUT=60 gw POST /v2/scrape '{"url":"http://m1.fixture.fcpi.test:8080/static.html","formats":["markdown"]}'
       if [ "$m" = 200 ] && [ "$GW_STATUS" = 200 ] && grep -q fcpi-m1-static-7f3a <<<"$GW_BODY"; then ready=$(cut -d. -f1 /proc/uptime); break; fi
     fi
+    [ "$(cut -d. -f1 /proc/uptime)" -lt 900 ] && before_end || break
     sleep 5
   done
   # The restart policies revive the containers before fcpi-stack.service's own start (which waits for every container, the
-  # slow fixtures included) finishes: its time is waited for too, at most ten minutes more.
-  for _ in $(seq 1 120); do
-    [ -n "$stack_mono" ] && break
-    [ "$(systemctl show -p ActiveState --value fcpi-stack.service)" = active ] && stack_mono=$(systemctl show -p ActiveEnterTimestampMonotonic --value fcpi-stack.service) && break
+  # slow fixtures included) finishes: its time is waited for too, until T_END, and not at all once the unit has failed.
+  while [ -z "$stack_mono" ] && before_end; do
+    st=$(systemctl show -p ActiveState --value fcpi-stack.service)
+    [ "$st" = active ] && { stack_mono=$(systemctl show -p ActiveEnterTimestampMonotonic --value fcpi-stack.service); break; }
+    [ "$st" = failed ] && break
     sleep 5
   done
-  echo "stack_active_after_boot_s=${stack_mono:+$((stack_mono / 1000000))} ready_after_boot_s=${ready:-not_ready} recorded_utc=$(utc)"
+  echo "stack_active_after_boot_s=${stack_mono:+$((stack_mono / 1000000))} ready_after_boot_s=${ready:-not_ready} recorded_utc=$(utc) stack_state=${st:-unknown}"
   echo end
 } >>"$F"
 find "$D" -maxdepth 1 -name '*.txt' -mtime +365 -delete
