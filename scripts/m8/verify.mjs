@@ -712,7 +712,8 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${JSON.stringify(b)}` };
     } },
   // Fails: any restore check failing (a canary's hash, another principal's access, an in-flight receipt, REST or MCP, a
-  // webhook delivered, a network not internal) or the isolated copy left behind.
+  // webhook delivered, a network not internal), no artifact hash and refusal proved (the proof's screenshot makes one),
+  // or the isolated copy left behind.
   K02: { name: "isolated-restore-proves-the-backup", inputs: [`${RAW}backup-fixture.txt`],
     expected: "fcpi restore-test restores that backup into Compose project fcpi-restore (every host path it names under its own directory, checked before it starts; every network internal, no egress, webhooks suppressed, paid dispatch off): the manifest verifies, the configuration matches the backup's, every canary result's documents hash as they did before the backup and another principal gets 404, the in-flight job's receipt is still tracked, artifacts hash and are refused to another principal, a REST fixture scrape and MCP tools/list and a scrape tool call work, no webhook is delivered; then the copy is removed",
     run() {
@@ -722,6 +723,8 @@ const checks = {
       const cond = { pass: t?.result === "PASS" && t.backup_run && t.snapshot === b?.snapshot_data?.slice(0, 8), checks: need.every((k) => c[k]?.ok === true),
         acl: Object.keys(c).some((k) => k.startsWith("result_acl:")) && Object.entries(c).filter(([k]) => k.startsWith("result_acl:")).every(([, v]) => v.ok),
         inflight: Object.keys(c).some((k) => k.startsWith("inflight_tracked:")) && Object.entries(c).filter(([k]) => k.startsWith("inflight_tracked:")).every(([, v]) => v.ok),
+        artifacts: r.artifact?.[0]?.status === 200 && r.artifact[0].artifacts >= 1
+          && ["artifact_hash:", "artifact_acl:"].every((p) => Object.keys(c).some((k) => k.startsWith(p)) && Object.entries(c).filter(([k]) => k.startsWith(p)).every(([, v]) => v.ok)),
         removed: lo?.restore_containers === 0 && lo.restore_dir === false };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${t?.result} in ${t?.seconds} s; failing checks: ${Object.entries(c).filter(([, v]) => !v.ok).map(([k, v]) => `${k} (${v.detail})`).join("; ") || "none"}` };
     } },

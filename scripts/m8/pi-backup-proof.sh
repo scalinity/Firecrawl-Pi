@@ -1,15 +1,21 @@
 #!/usr/bin/env bash
 # The fixture backup and isolated restore proof (FIRECRAWL_PI_SPEC.md §26, AC18 on the fixture repository), ON the Pi, as
 # root:   ssh … 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-backup-proof.sh'
-# A slow crawl of the M3 fixture (twenty two-second pages, the bulk mark: more would need the residential route) is started first, so a job is in flight when the snapshot is
+# A screenshot of the M7 fixture first, so a live artifact is backed up; then a slow crawl of the M3 fixture (twenty
+# two-second pages, the bulk mark: more would need the residential route), so a job is in flight when the snapshot is
 # taken (the backup runs with no drain, FCPI_BACKUP_DRAIN_S=0); then fcpi backup, fcpi status, and fcpi restore-test,
-# whose checks include that the in-flight receipt is still tracked in the restored copy. Prints each command's record
-# under its own section, with the repository's kind and whether it is off the device (the fixture repository is not).
+# whose checks include that the in-flight receipt is still tracked in the restored copy and that the artifact hashes and
+# is refused to another principal. Prints each command's record under its own section, with the repository's kind and
+# whether it is off the device (the fixture repository is not).
 set -uo pipefail
 . /opt/firecrawl-pi/scripts/ops/lib.sh
 need_root
 echo "### meta"
 echo "utc=$(utc) source_commit=$(source_commit) repository_kind=$(sed -n 's/^FCPI_RESTIC_REPOSITORY=\([a-z0-9]*\):.*/\1/p; s#^FCPI_RESTIC_REPOSITORY=/.*#local#p' /etc/firecrawl-pi/backup.env) offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' /etc/firecrawl-pi/backup.env)"
+# A screenshot of the M7 fixture first, so the backup holds a live artifact whose hash and access the restore test proves.
+echo "### artifact"
+OPS_TOKEN=/etc/firecrawl-pi/secrets/clients/soak.token GW_TIMEOUT=120 gw POST /v2/scrape "{\"url\":\"http://m7shot.fixture.fcpi.test:8080/bands?backup=$(date +%s)\",\"formats\":[\"screenshot\"]}"
+echo "{\"status\":$GW_STATUS,\"artifacts\":$(jq -c '[.fcpi.artifacts[]?] | length' <<<"$GW_BODY" 2>/dev/null || echo 0)}"
 echo "### inflight"
 OPS_TOKEN=/etc/firecrawl-pi/secrets/clients/soak.token GW_TIMEOUT=60 gw POST /v2/crawl '{"url":"http://m3.fixture.fcpi.test:8080/slow/","limit":20}'
 echo "{\"status\":$GW_STATUS,\"job\":\"$(jq -r '.id // empty' <<<"$GW_BODY")\"}"
