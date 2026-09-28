@@ -197,9 +197,9 @@ for k in $(jq -r 'keys[]' <<<"$new"); do
   e=$(jq -c --arg k "$k" '.[$k]' <<<"$new")
   open=$(jq -r .open <<<"$e") clear=$(jq -r .clear <<<"$e") first=$(jq -r .first <<<"$e")
   if [ "$open" = false ] && [ "$clear" = 0 ] && [ $((NOW - first)) -ge "$(hold_for "${k%%:*}")" ]; then
-    notice opened "$k" "$(jq -c .detail <<<"$e")"; new=$(jq -c --arg k "$k" '.[$k].open = true' <<<"$new")
+    notice opened "$k" "$(jq -c .detail <<<"$e")" "$first"; new=$(jq -c --arg k "$k" '.[$k].open = true' <<<"$new")
   elif [ "$clear" -ge 2 ]; then
-    [ "$open" = true ] && notice cleared "$k" "$(jq -c .detail <<<"$e")"
+    [ "$open" = true ] && notice cleared "$k" "$(jq -c .detail <<<"$e")" "$first"
     new=$(jq -c --arg k "$k" 'del(.[$k])' <<<"$new")
   fi
 done

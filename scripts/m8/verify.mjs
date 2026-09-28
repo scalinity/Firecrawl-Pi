@@ -84,7 +84,7 @@ const ALLOW = new Set(["00:00:00:00:00:00", "02:00:00:00:00:01", "02:00:00:00:00
   "secret = getSecret", "secret: hookSecret", 'SECRET = "fixture-webhook-signing-secret-0123456789', 'password: "unused-with-trust',
   // M8: X05's own sed pattern that extracts the password part of the core's Redis URL on the Pi (code, not a value).
   String.raw`redis://[^:]*:\\(.*\\)@`]);
-const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie", "live-secret-by-hash-base64", "live-secret-by-hash-app-password"];
+const HASH_RULES = ["raw-egress-ip", "raw-board-serial", "raw-machine-id", "unexplained-mac-hash", "live-secret-by-hash-hex", "live-secret-by-hash-cookie", "live-secret-by-hash-base64"];
 function scan(files, ids, rules = RULES, allow = ALLOW) {
   const hits = [];
   const secrets = ids.secrets;
@@ -103,8 +103,6 @@ function scan(files, ids, rules = RULES, allow = ALLOW) {
       for (const m of line.match(/(?<![A-Z])[A-P]{64}(?![A-Z])/g) ?? []) if (secrets.has(sha256(m))) hits.push(`${at} live-secret-by-hash-cookie`);
       // M8: the backup keys are 48 random bytes in base64 (64 characters).
       for (const m of line.match(/(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{64}(?![A-Za-z0-9+/=])/g) ?? []) if (secrets.has(sha256(m))) hits.push(`${at} live-secret-by-hash-base64`);
-      // M8: the email channel's SMTP password, sixteen lowercase letters (a Gmail app password), whole or in four groups.
-      for (const m of line.match(/(?<![A-Za-z])[a-z]{4}(?: ?[a-z]{4}){3}(?![A-Za-z])/g) ?? []) if (secrets.has(sha256(m.replace(/ /g, "")))) hits.push(`${at} live-secret-by-hash-app-password`);
     }
   });
   return hits;
@@ -750,13 +748,19 @@ const checks = {
     } },
   // BLOCKED_CREDENTIAL until the owner names a notification channel and consents to it.
   N01: { name: "incident-notice-reaches-the-owner-channel", inputs: [`${RAW}notify-live.txt`], evidenceClass: "live",
-    expected: "one injected incident (the tick's temperature_high, held across several ticks) and its recovery reach the owner's chosen channel through FCPI_ALERT_COMMAND: one opened and one cleared notice however many ticks judged it, each delivered once on its first attempt",
+    expected: "one injected incident (the tick's temperature_high, held across several ticks) and its recovery reach the owner's ntfy topic through FCPI_ALERT_COMMAND: one opened and one cleared notice however many ticks judged it, each delivered once on its first attempt, and ntfy's server holding exactly those two messages under one incident id (the owner's phone receipt is recorded apart, as the human part)",
     run() {
       const m = kv((S(`${RAW}notify-live.txt`).meta ?? []).flatMap((l) => l.split(" ")));
       if (m.configured !== "yes") return { blocked: true, actual: `no owner notification channel is configured (${m.reason ?? "owner input: a channel and consent"}); notices stay in the journal and the local outbox (O02)` };
-      const rec = records(`${RAW}notify-live.txt`), r = rec.delivered ?? [], w = rec.window?.[0];
+      const rec = records(`${RAW}notify-live.txt`), r = rec.delivered ?? [], w = rec.window?.[0], srv = rec.ntfy_server ?? [];
+      const iid = r[0]?.incident_id;
       const cond = { deduplicated: !!w && w.opened_notices === 1 && w.cleared_notices === 1 && w.ticks_reading_injected >= 2,
-        delivered_once: r.length === 2 && ["opened", "cleared"].every((k) => r.some((x) => x.kind === k && x.incident === "temperature_high")) && r.every((x) => x.delivered === true && x.attempts === 1) };
+        delivered_once: r.length === 2 && ["opened", "cleared"].every((k) => r.some((x) => x.kind === k && x.incident === "temperature_high")) && r.every((x) => x.delivered === true && x.attempts === 1),
+        // ntfy's server holds exactly the incident's two messages (the opened one urgent enough to sound, the recovery at
+        // the default), both carrying the one incident id: what the owner's phone receives.
+        on_ntfy_server: !!iid && r.every((x) => x.incident_id === iid) && srv.filter((m) => m.incident === iid).length === 2
+          && srv.some((m) => m.incident === iid && m.title === "Firecrawl Pi — Incident" && m.priority >= 4)
+          && srv.some((m) => m.incident === iid && m.title === "Firecrawl Pi — Recovered" && (m.priority ?? 3) === 3) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${JSON.stringify(w)}; ${JSON.stringify(r)}` };
     } },
 
@@ -837,7 +841,7 @@ const checks = {
     run() {
       const c = [...scan([M0_CONTROL], { m0: { egress: sha256("192.0.2.77"), serial: sha256("0123456789abcdef"), machineId: sha256("0123456789abcdef0123456789abcdef"), macs: new Set([sha256("02:00:00:00:00:01")]) } }, RULES, new Set()),
         ...scan([M1_CONTROL], { secrets: new Set([sha256("0f".repeat(32)), sha256("ABCDEFGHIJKLMNOP".repeat(4))]) }, RULES, new Set()),
-        ...scan([M8_CONTROL], { secrets: new Set([sha256("QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2"), sha256("abcdefghijklmnop")]) }, RULES, new Set()),
+        ...scan([M8_CONTROL], { secrets: new Set([sha256("QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2")]) }, RULES, new Set()),
         ...scan([M3_CONTROL], {}, RULES, new Set())];
       const fired = new Set(c.map((h) => h.split(" ").pop()));
       const silent = [...RULES.map(([n]) => n), ...HASH_RULES].filter((r) => !fired.has(r));
@@ -847,13 +851,13 @@ const checks = {
         h "$(sed -n "s#^redis://[^:]*:\\(.*\\)@redis:6379\\$#\\1#p" $S/core_redis_url)"; h "$(cat /srv/firecrawl-pi/data/rabbitmq/.erlang.cookie)"; \
         h "$(cat $S/retrieval_postgres_password)"; h "$(cat $S/core_retrieval_token)"; h "$(cat $S/retrieval_browser_token)"; \
         h "$(cat $S/gateway_postgres_password)"; h "$(cat $S/gateway_retrieval_token)"; h "$(cat $S/searxng_proxy_password)"; h "$(cat $S/searxng_secret_key)"; h "$(cat $S/webhook_signing_secret)"; \
-        for f in $S/providers/*; do [ -f "$f" ] && { h "$(tr -d "\\n" < "$f")"; case "$(tr -d "\\n" < "$f")" in *:*) h "$(tr -d "\\n" < "$f" | cut -d: -f2-)";; esac; }; done; for f in $S/clients/*.token $S/backup/*password $S/alerts/smtp_password; do if [ -f "$f" ]; then h "$(tr -d " \\n" < "$f")"; fi; done'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
+        for f in $S/providers/*; do [ -f "$f" ] && { h "$(tr -d "\\n" < "$f")"; case "$(tr -d "\\n" < "$f")" in *:*) h "$(tr -d "\\n" < "$f" | cut -d: -f2-)";; esac; }; done; for f in $S/clients/*.token $S/backup/*password $S/alerts/*; do if [ -f "$f" ]; then h "$(tr -d " \\n" < "$f")"; fi; done'`).split("\n").filter((x) => /^[0-9a-f]{64}$/.test(x));
       const tokenFiles = +ssh("sudo -n sh -c 'ls /etc/firecrawl-pi/secrets/clients/*.token | wc -l'").trim();
       const backupKeys = +ssh("sudo -n sh -c 'ls /etc/firecrawl-pi/secrets/backup/*password 2>/dev/null | wc -l'").trim();
       const providerFiles = +ssh("sudo -n sh -c 'ls -A /etc/firecrawl-pi/secrets/providers | wc -l'").trim();
       const pairFiles = +ssh("sudo -n sh -c 'grep -l : /etc/firecrawl-pi/secrets/providers/* 2>/dev/null | wc -l'").trim();
-      const alertFiles = +ssh("sudo -n sh -c 'ls /etc/firecrawl-pi/secrets/alerts/smtp_password 2>/dev/null | wc -l'").trim();
-      if (tokenFiles < 16 || backupKeys < 1 || hashes.length !== 13 + providerFiles + pairFiles + tokenFiles + backupKeys + alertFiles || new Set(hashes).size !== hashes.length || hashes.includes(sha256(""))) return { ok: false, actual: `expected thirteen fixed secrets, ${providerFiles} provider files (${pairFiles} with a password part), ${tokenFiles} client tokens, ${backupKeys} backup keys and ${alertFiles} SMTP password as distinct non-empty hashes; got ${hashes.length}` };
+      const alertFiles = +ssh("sudo -n sh -c 'ls /etc/firecrawl-pi/secrets/alerts/ 2>/dev/null | wc -l'").trim();
+      if (tokenFiles < 16 || backupKeys < 1 || hashes.length !== 13 + providerFiles + pairFiles + tokenFiles + backupKeys + alertFiles || new Set(hashes).size !== hashes.length || hashes.includes(sha256(""))) return { ok: false, actual: `expected thirteen fixed secrets, ${providerFiles} provider files (${pairFiles} with a password part), ${tokenFiles} client tokens, ${backupKeys} backup keys and ${alertFiles} alert channel secrets as distinct non-empty hashes; got ${hashes.length}` };
       const files = execFileSync("git", ["-C", ROOT, "ls-files", "--cached", "--others", "--exclude-standard"], { encoding: "utf8" }).split("\n").filter((f) => f && ![M0_CONTROL, M1_CONTROL, M3_CONTROL, M8_CONTROL].includes(f) && has(f) && !/\.(pdf|png|gz)$/.test(f));
       const audit = json("evidence/M0/audit.json");
       const m0 = { egress: audit.network.egress_ip_sha256, serial: audit.identity.board_serial_sha256, machineId: audit.identity.machine_id_sha256, macs: new Set([...Object.values(audit.identity.mac_sha256), sha256("00:00:00:00:00:00")]) };

@@ -30,7 +30,15 @@ waitfor 420 '[ -n "$(notices cleared)" ]'
 for _ in 1 2 3 4 5 6; do [ "$( { notices opened; notices cleared; } | jq -s 'map(select(.delivered)) | length')" = 2 ] && break; sleep 10; tick; done
 hot=$(jq -c --arg t "$t0" 'select(.utc >= $t and .injected_temp == true)' "$LOGD/samples/$(date -u +%F).jsonl" 2>/dev/null | wc -l)
 echo "### delivered"
-{ notices opened; notices cleared; } | jq -c '{id, kind, incident, delivered, attempts}'
+{ notices opened; notices cleared; } | jq -c '{id, kind, incident, incident_id, delivered, attempts}'
+# What ntfy's server holds for the topic since the window began, as the phone would receive it: each message's id, time,
+# title, priority, tags and incident line, never the topic (the request reaches curl as a config on a descriptor).
+if [ -r /etc/firecrawl-pi/secrets/alerts/ntfy_topic ] && [[ $cmd == *notify-ntfy.sh ]]; then
+  echo "### ntfy_server"
+  since=$(date -u -d "$t0" +%s)
+  curl -sS --proto =https --max-time 20 -K <(printf 'url = "https://ntfy.sh/%s/json?poll=1&since=%s"\n' "$(tr -d ' \n' </etc/firecrawl-pi/secrets/alerts/ntfy_topic)" "$since") \
+    | jq -c 'select(.event == "message") | {id, time, title, priority, tags, incident: ((.message // "") | capture("Incident: (?<i>[0-9a-f]+)").i // null)}'
+fi
 echo "### window"
 echo "{\"from\":\"$t0\",\"to\":\"$(utc)\",\"opened_notices\":$(notices opened | wc -l),\"cleared_notices\":$(notices cleared | wc -l),\"ticks_reading_injected\":$hot}"
 echo "### end"

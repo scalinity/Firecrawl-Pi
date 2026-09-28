@@ -2,7 +2,3 @@
 # base64 of the 48 characters A-Z a-v, the shape of M8's backup keys (48 random bytes in base64). The by-hash rule is fed
 # its SHA-256 as if it were a live secret, as the real scan is fed the Pi's; this file is excluded from that scan.
 backup key QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVphYmNkZWZnaGlqa2xtbm9wcXJzdHV2
-# The email channel's SMTP password has the shape of a Gmail app password: sixteen lowercase letters, often shown in four
-# groups of four. The synthetic value is the alphabet's first sixteen letters, in both forms.
-smtp password abcdefghijklmnop
-smtp password shown as abcd efgh ijkl mnop

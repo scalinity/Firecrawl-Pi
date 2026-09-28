@@ -149,11 +149,16 @@ hold_clear() { rm -f "$HOLDS/$1"; admission_write; }
 # goes to the journal (tag fcpi-alert), to $STATE/alerts/outbox/, and, when /etc/firecrawl-pi/alerts.env names a
 # command (FCPI_ALERT_COMMAND), to that command on stdin within 20 s. A failed delivery is recorded and retried on the
 # next tick, at most five times; it never blocks the tick or any service.
-notice() { # notice <kind: opened|cleared> <key> <detail json>
-  local kind=$1 key=$2 detail=$3 n id
+# Each notice also carries the incident's start (since, epoch seconds), so its opened and cleared notices share one short
+# incident id and the cleared one its duration.
+notice() { # notice <kind: opened|cleared> <key> <detail json> [<since epoch>]
+  local kind=$1 key=$2 detail=$3 since=${4:-$(now_s)} n id short
   id="$(date -u +%Y%m%dT%H%M%SZ)-$kind-$(printf '%s' "$key" | tr -c 'A-Za-z0-9_.-' '_')"
+  short=$(printf '%s:%s' "$key" "$since" | sha256sum | cut -c1-8)
   n=$(jq -cn --arg utc "$(utc)" --arg kind "$kind" --arg key "$key" --arg id "$id" --argjson d "$detail" --arg boot "$(boot_hash)" \
-    '{utc:$utc,id:$id,kind:$kind,incident:$key,detail:$d,boot:$boot,delivered:false,attempts:0}')
+    --argjson since "$since" --arg short "$short" --argjson now "$(now_s)" \
+    '{utc:$utc,id:$id,kind:$kind,incident:$key,incident_id:$short,since:($since | todate),detail:$d,boot:$boot,delivered:false,attempts:0}
+     + (if $kind == "cleared" then {duration_s:($now - $since)} else {} end)')
   mkdir -p "$STATE/alerts/outbox"; chmod 0700 "$STATE/alerts"
   printf '%s\n' "$n" | write_atomic "$STATE/alerts/outbox/$id.json" 0600
   logger -t fcpi-alert -p "user.$([ "$kind" = opened ] && echo warning || echo notice)" -- "$n"
