@@ -164,7 +164,7 @@ add "$(jq -cn --arg v "$MODERN" --argjson m "$meta_mcp" '{id:"mcp-scrape",method
 gwimg=$(jq -r '.services["access-gateway"].image' "$R/compose.json")
 plan=$(printf '%s' "$tokens" | jq -c --argjson r "$reqs" '{base:"http://access-gateway:3300",host:"127.0.0.1:3380",tokens:.,requests:$r}')
 res=$(printf '%s' "$plan" | docker run -i --rm --name "$P-check" --network fcpi_r_access --read-only --cap-drop ALL --security-opt no-new-privileges:true \
-  --user 3380:3380 --label fcpi.transient=restore-test -v "$REPO/scripts/ops/restore-check.mjs:/check/restore-check.mjs:ro" --memory 128m --entrypoint node "$gwimg" /check/restore-check.mjs 2>&1)
+  --user 3380:3380 --label fcpi.transient=restore-test -v "$REPO/scripts/ops/restore-check.mjs:/check/restore-check.mjs:ro" --memory 128m --entrypoint node "$gwimg" /check/restore-check.mjs 2>"$R/check.err")
 one() { jq -c --arg id "$1" 'select(.id == $id)' <<<"$res" 2>/dev/null | head -1; }
 all_ok=true n_res=0
 while read -r c; do
