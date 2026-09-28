@@ -124,6 +124,8 @@ admission_write() {
         reasons: ($dr + $br + ($holds | map("hold:" + .))) }' "${holds[@]}" \
     | write_atomic "$ADMISSION" 0644
 }
+# holds_live: the names of the holds in force now, one a line (an expired hold is not one, removed or not).
+holds_live() { local h exp; for h in "$HOLDS"/*; do [ -f "$h" ] || continue; exp=$(cat "$h" 2>/dev/null); [[ $exp =~ ^[0-9]+$ ]] && [ "$exp" -gt "$(now_s)" ] && basename "$h"; done; return 0; }
 # hold_set <name> <seconds> / hold_clear <name>: a pause taken by a command (backup, restore, operator), applied at once.
 hold_set() { mkdir -p "$HOLDS"; echo $(( $(now_s) + $2 )) | write_atomic "$HOLDS/$1" 0644; admission_write; }
 hold_clear() { rm -f "$HOLDS/$1"; admission_write; }

@@ -156,10 +156,14 @@ active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk
 AST=$STATE/alerts/state.json
 st=$(obj "$AST")
 [ -n "$active" ] && jq -e 'type == "array"' >/dev/null 2>&1 <<<"$active" || { logger -t fcpi-tick -p user.err -- "incidents not judged this minute: the conditions did not compute"; active=null; }
-new=$(jq -c --argjson a "$active" --argjson now "$NOW" '
-  . as $st | ($a | map({key: .key, value: .detail}) | from_entries) as $act
+held=false; [ -n "$(holds_live)" ] && held=true
+new=$(jq -c --argjson a "$active" --argjson now "$NOW" --argjson held "$held" '
+  # While a hold is in force (a backup stopping the services, an operator pausing work), the conditions the hold itself
+  # causes are not judged: they neither open nor count towards clearing one that was open before it.
+  def byhold: $held and IN("core_unhealthy", "queue_stalled", "queue_unreadable", "functional_probe_failing");
+  . as $st | ($a | map(select(.key | byhold | not)) | map({key: .key, value: .detail}) | from_entries) as $act
   | reduce ($act | keys[]) as $k ($st; .[$k] = ((.[$k] // {first: $now, open: false}) | .seen = $now | .clear = 0 | .detail = $act[$k]))
-  | reduce (keys[]) as $k (.; if $act[$k] == null then .[$k].clear += 1 else . end)' <<<"$st")
+  | reduce (keys[]) as $k (.; if $act[$k] == null and ($k | byhold | not) then .[$k].clear += 1 else . end)' <<<"$st")
 hold_for() { case $1 in core_unhealthy) echo 120 ;; memory_low) echo 60 ;; *) echo 0 ;; esac; }
 for k in $(jq -r 'keys[]' <<<"$new"); do
   e=$(jq -c --arg k "$k" '.[$k]' <<<"$new")

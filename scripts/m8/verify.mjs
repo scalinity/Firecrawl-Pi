@@ -698,13 +698,15 @@ const checks = {
 
   // ================================================================ backup and restore (AC18)
   // Fails: quiescence past five minutes, the stack not healthy after, a snapshot missing, retention not run, the staging
-  // copy left behind.
+  // copy left behind, or a core, queue or probe notice opened during the backup's hold (or no tick seeing the hold).
   K01: { name: "coordinated-backup-on-the-fixture-repository", inputs: [`${RAW}backup-fixture.txt`],
-    expected: "fcpi backup against the fixture repository: at most five minutes of quiescence with a crawl in flight, the stack healthy after, both snapshots (data and secrets) written, retention applied after them, the staging copy removed, fcpi status showing the backup's age; the repository is on the Pi's own card and says so (not the off-device backup, K03)",
+    expected: "fcpi backup against the fixture repository: at most five minutes of quiescence with a crawl in flight, the stack healthy after, both snapshots (data and secrets) written, retention applied after them, the staging copy removed, fcpi status showing the backup's age, no notice opened for a condition the hold itself causes while the ticks during it read the hold; the repository is on the Pi's own card and says so (not the off-device backup, K03)",
     run() {
-      const r = records(`${RAW}backup-fixture.txt`), m = kv(read(`${RAW}backup-fixture.txt`).split("\n")[1].split(" ")), b = r.backup?.[0], st = r.status_after_backup?.[0], lo = r.leftovers?.[0];
+      const r = records(`${RAW}backup-fixture.txt`), m = kv(read(`${RAW}backup-fixture.txt`).split("\n")[1].split(" ")), b = r.backup?.[0], st = r.status_after_backup?.[0], lo = r.leftovers?.[0], nb = r.notices_across_backup?.[0];
+      const HELD = /^(core_unhealthy|queue_stalled|queue_unreadable|functional_probe_failing)$/;
       const cond = { inflight: r.inflight?.[0]?.status === 200 && !!r.inflight[0].job, pass: b?.result === "PASS" && b.quiesce_s <= 300 && b.stack_healthy_after === true && /^[0-9a-f]{8}/.test(b.snapshot_data) && /^[0-9a-f]{8}/.test(b.snapshot_secrets) && b.forget_exit === 0,
-        inflight_captured: b?.inflight_jobs >= 1 && b.canary_results >= 1, labelled: m.offdevice === "no" && b?.offdevice === "no", status: st?.backup?.last_success === b?.utc && st.healthy, staging_removed: lo?.staging_current === false };
+        inflight_captured: b?.inflight_jobs >= 1 && b.canary_results >= 1, labelled: m.offdevice === "no" && b?.offdevice === "no", status: st?.backup?.last_success === b?.utc && st.healthy, staging_removed: lo?.staging_current === false,
+        no_notice_from_the_hold: !!nb && nb.ticks_seeing_hold >= 1 && Array.isArray(nb.opened) && nb.opened.filter((k) => HELD.test(k)).length === 0 };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${JSON.stringify(b)}` };
     } },
   // Fails: any restore check failing (a canary's hash, another principal's access, an in-flight receipt, REST or MCP, a

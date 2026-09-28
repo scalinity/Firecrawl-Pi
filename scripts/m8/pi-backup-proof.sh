@@ -15,9 +15,19 @@ OPS_TOKEN=/etc/firecrawl-pi/secrets/clients/soak.token GW_TIMEOUT=60 gw POST /v2
 echo "{\"status\":$GW_STATUS,\"job\":\"$(jq -r '.id // empty' <<<"$GW_BODY")\"}"
 sleep 10
 echo "### backup"
+t_b0=$(utc)
 FCPI_BACKUP_DRAIN_S=0 bash "$REPO/scripts/ops/backup.sh" | tail -1
+t_b1=$(utc)
 echo "### status_after_backup"
 bash "$REPO/scripts/ops/status.sh" --json | jq -c '{healthy, rest: .rest.ready, mcp: .mcp.ready, backup}'
+# The notices the backup caused: those opened from its start to three minutes after it (two ticks and the probe after
+# the hold ends). The positive control is the ticks during the backup that read the hold, so the tick did judge then.
+sleep 180
+echo "### notices_across_backup"
+opened=$(for f in "$STATE"/alerts/outbox/*.json; do [ -f "$f" ] && jq -c --arg a "$t_b0" 'select(.kind == "opened" and .utc >= $a) | .incident' "$f"; done 2>/dev/null | jq -sc .)
+ticks=$(cat "$LOGD/samples/$(date -u -d yesterday +%F).jsonl" "$LOGD/samples/$(date -u +%F).jsonl" 2>/dev/null \
+  | jq -c --arg a "$t_b0" --arg b "$t_b1" 'select(.utc >= $a and .utc <= $b and ((.admission.reasons // []) | index("hold:backup")))' | wc -l)
+jq -cn --arg a "$t_b0" --arg b "$t_b1" --argjson o "${opened:-[]}" --argjson t "$ticks" '{from:$a, to:$b, opened:$o, ticks_seeing_hold:$t}'
 echo "### restore_test"
 bash "$REPO/scripts/ops/restore-test.sh" 2>&1 | tail -1
 echo "### leftovers"

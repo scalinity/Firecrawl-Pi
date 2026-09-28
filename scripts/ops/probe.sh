@@ -27,9 +27,12 @@ plat='{"ok":false}'
 
 prev=0; [ -r "$STATE/probe-last.json" ] && prev=$(jq -r '.consecutive_failures // 0' "$STATE/probe-last.json")
 ok=false; [ "$scrape_ok" = true ] && [ "$mcp_ok" = true ] && ok=true
-fails=0; [ "$ok" = true ] || fails=$((prev + 1))
-line=$(jq -cn --arg utc "$T" --arg boot "$(boot_hash)" --argjson ok "$ok" --argjson f "$fails" --argjson s "$scrape" --argjson m "$mcpj" --argjson p "$plat" \
-  '{utc:$utc,boot:$boot,ok:$ok,consecutive_failures:$f,scrape:$s,mcp:$m,platform:$p}')
+# A failure while a hold is in force (the backup stops the services, an operator pauses work) is recorded but not
+# counted: the hold caused it.
+held=false; [ -n "$(holds_live)" ] && held=true
+fails=0; if [ "$ok" != true ]; then if [ "$held" = true ]; then fails=$prev; else fails=$((prev + 1)); fi; fi
+line=$(jq -cn --arg utc "$T" --arg boot "$(boot_hash)" --argjson ok "$ok" --argjson held "$held" --argjson f "$fails" --argjson s "$scrape" --argjson m "$mcpj" --argjson p "$plat" \
+  '{utc:$utc,boot:$boot,ok:$ok,held:$held,consecutive_failures:$f,scrape:$s,mcp:$m,platform:$p}')
 append_line "$LOGD/probe/${T%%T*}.jsonl" "$line"
 printf '%s\n' "$line" | write_atomic "$STATE/probe-last.json" 0644
 
