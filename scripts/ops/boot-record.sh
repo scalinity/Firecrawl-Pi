@@ -46,6 +46,13 @@ chmod 0644 "$F"
     fi
     sleep 5
   done
+  # The restart policies revive the containers before fcpi-stack.service's own start (which waits for every container, the
+  # slow fixtures included) finishes: its time is waited for too, at most ten minutes more.
+  for _ in $(seq 1 120); do
+    [ -n "$stack_mono" ] && break
+    [ "$(systemctl show -p ActiveState --value fcpi-stack.service)" = active ] && stack_mono=$(systemctl show -p ActiveEnterTimestampMonotonic --value fcpi-stack.service) && break
+    sleep 5
+  done
   echo "stack_active_after_boot_s=${stack_mono:+$((stack_mono / 1000000))} ready_after_boot_s=${ready:-not_ready} recorded_utc=$(utc)"
   echo end
 } >>"$F"
