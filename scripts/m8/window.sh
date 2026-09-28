@@ -5,7 +5,8 @@
 #   3. every injected failure and the normal reboot (faults.mjs);
 #   4. the core's heap on large pages (pi-heap-probe.sh, M4 F1);
 #   5. the fixture backup and the isolated restore test (pi-backup-proof.sh); then the live records (pi-backup-live.sh,
-#      pi-notify-live.sh), each of which only records "configured=no" while the owner input it needs is absent;
+#      pi-notify-live.sh), each of which only records "configured=no" while the owner input it needs is absent, and the
+#      external watchdog's proof (watchdog-live.sh: the Pi's heartbeat stopped until the VPS notices, then restored);
 #   6. the upgrade and rollback rehearsal in the isolated copy (pi-rehearsal.sh, M7's retrieval image as the candidate
 #      that refuses this release's configuration);
 #   7. the read-only plans against M7's release staged as a candidate (stage.sh, pi-plans.sh);
@@ -32,6 +33,7 @@ step heap; "${SSH[@]}" 'bash -s -- 400 614 1024 1536 2048' <"$root/scripts/m8/pi
 step backup; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-backup-proof.sh' >"$R/backup-fixture.txt" 2>&1
 step live; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-backup-live.sh' >"$R/backup-live.txt" 2>&1
 "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-notify-live.sh' >"$R/notify-live.txt" 2>&1
+"$root/scripts/m8/watchdog-live.sh" >"$R/watchdog-live.txt" 2>"$R/watchdog-live.err"
 step rehearsal; "${SSH[@]}" "sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-rehearsal.sh $M7_RETRIEVAL" >"$R/rehearsal.txt" 2>&1
 step plans; "$root/scripts/m8/stage.sh" 19f047f >/dev/null
 cand=$("${SSH[@]}" 'ls -1d /opt/firecrawl-pi-candidate/19f047f* | head -1')
