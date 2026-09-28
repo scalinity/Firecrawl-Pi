@@ -25,14 +25,23 @@ plat='{"ok":false}'
 [ "$GW_STATUS" = 200 ] && plat=$(jq -c --argjson ms "$GW_MS" '{ok:true, ms:$ms, core_live:.core.live, ledger_ok:.ledger.ok,
   providers:(.providers // null | if type == "object" then (del(.budgets) | tostring | .[0:600]) else null end)}' <<<"$GW_BODY" 2>/dev/null || echo '{"ok":false}')
 
+# Denials of a command or key to a Redis user (the core's is narrowed to the command set one soak measured,
+# deploy/redis/fcpi-core.rules): the ACL log's entries whose reason is not a failed AUTH, read as the operator's own user
+# with its password on stdin. redis-cli -e exits nonzero on a refused read, which leaves null, never a false 0.
+acl=null
+if [ -r /etc/firecrawl-pi/secrets/redis_ops_password ] && rc=$(cid redis) && [ -n "$rc" ]; then
+  acl=$( { tr -d '\n' </etc/firecrawl-pi/secrets/redis_ops_password; echo; } | timeout 10 docker exec -i "$rc" sh -c 'read -r p; REDISCLI_AUTH="$p" exec redis-cli -e --no-auth-warning --user fcpi_ops ACL LOG 128' 2>/dev/null \
+    | tr -d '\r' | awk 'k { if ($0 != "auth") n++; k = 0 } $0 == "reason" { k = 1 } END { print n + 0 }') || acl=null
+fi
+
 prev=0; [ -r "$STATE/probe-last.json" ] && prev=$(jq -r '.consecutive_failures // 0' "$STATE/probe-last.json")
 ok=false; [ "$scrape_ok" = true ] && [ "$mcp_ok" = true ] && ok=true
 # A failure while a hold is in force (the backup stops the services, an operator pauses work) is recorded but not
 # counted: the hold caused it.
 held=false; [ -n "$(holds_live)" ] && held=true
 fails=0; if [ "$ok" != true ]; then if [ "$held" = true ]; then fails=$prev; else fails=$((prev + 1)); fi; fi
-line=$(jq -cn --arg utc "$T" --arg boot "$(boot_hash)" --argjson ok "$ok" --argjson held "$held" --argjson f "$fails" --argjson s "$scrape" --argjson m "$mcpj" --argjson p "$plat" \
-  '{utc:$utc,boot:$boot,ok:$ok,held:$held,consecutive_failures:$f,scrape:$s,mcp:$m,platform:$p}')
+line=$(jq -cn --arg utc "$T" --arg boot "$(boot_hash)" --argjson ok "$ok" --argjson held "$held" --argjson f "$fails" --argjson s "$scrape" --argjson m "$mcpj" --argjson p "$plat" --argjson acl "${acl:-null}" \
+  '{utc:$utc,boot:$boot,ok:$ok,held:$held,consecutive_failures:$f,scrape:$s,mcp:$m,platform:$p,redis_acl_denials:$acl}')
 append_line "$LOGD/probe/${T%%T*}.jsonl" "$line"
 printf '%s\n' "$line" | write_atomic "$STATE/probe-last.json" 0644
 

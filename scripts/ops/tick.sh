@@ -168,6 +168,9 @@ active=$(jq -c --argjson now "$NOW" --argjson mp "$MEM_PAUSE_MIB" --argjson dl "
     (if ($lr.utc // null) != null and ($now - ($lr.utc | fromdateiso8601)) > 35 * 86400 then {key: "restore_test_stale", detail: {last: $lr.utc}} else empty end),
     (if ($lc.result // "") == "FAIL" then {key: "backup_check_failed", detail: {utc: $lc.utc, check_exit: $lc.check_exit, prune_exit: $lc.prune_exit}} else empty end),
     (if ($lc.utc // null) != null and ($now - ($lc.utc | fromdateiso8601)) > 9 * 86400 then {key: "backup_check_stale", detail: {last: $lc.utc}} else empty end),
+    # A command the core needed that its narrowed Redis user refuses (a rare queue path the soak never ran): open until the
+    # log is reset (scripts/m8/pi-redis.sh reset) once the allowance is fixed.
+    (if ($pr.redis_acl_denials // 0) > 0 then {key: "redis_acl_denied", detail: {entries: $pr.redis_acl_denials}} else empty end),
     (if ($pr.consecutive_failures // 0) >= 2 then {key: "functional_probe_failing", detail: {since_failures: $pr.consecutive_failures, scrape: $pr.scrape, mcp: $pr.mcp}} else empty end)
   ]' <<<"$sample")
 # Sustained conditions: the core must be unhealthy for two minutes, memory low for over a minute and a restore copy running
