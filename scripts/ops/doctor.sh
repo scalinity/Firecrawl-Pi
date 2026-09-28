@@ -5,7 +5,8 @@
 # records, each project container's state, limits and health log (never its environment), the last 300 lines of each
 # project container's log after redaction, the rendered Compose file, the project units' journal, and host facts.
 # Redaction is enforced, not trusted: log lines lose Authorization and Cookie values, bearer tokens, credentials in
-# URLs, query strings and key=value secrets; then every file is searched for every value in the secrets directory
+# URLs, query strings, key=value secrets and the tailnet's names and addresses (the Serve origin the gateway logs at start is
+# kept in the secrets directory, out of the repository); then every file is searched for every value in the secrets directory
 # (each client token included), and any hit discards the bundle and fails the command. The bundle stops at 5 MiB.
 #   fcpi doctor [--self-test]   --self-test plants one secret value in the bundle, which the check must find and refuse
 set -uo pipefail
@@ -17,7 +18,8 @@ trap 'rm -rf "$W"' EXIT
 B=$W/fcpi-doctor-$(date -u +%Y%m%dT%H%M%SZ); mkdir "$B"
 red() { sed -E 's/(authorization|cookie|set-cookie|x-api-key|proxy-authorization)(["'"'"']?[:=] *["'"'"']?)[^"'"'"',}]*/\1\2<redacted>/Ig;
   s/Bearer [A-Za-z0-9._~+\/=-]+/Bearer <redacted>/g; s#([a-z][a-z0-9+.-]*://)[^/@ "]+@#\1<redacted>@#Ig; s#(https?://[^ "?]+)\?[^ "]*#\1?<redacted>#g;
-  s/\b(password|passwd|secret|token|api[_-]?key)(["'"'"']?[:=] *["'"'"']?)[A-Za-z0-9+\/_.=-]{6,}/\1\2<redacted>/Ig; s/\bfcpi_[a-z0-9]+_[0-9a-f]{32,}\b/<client-token>/g' | cut -c1-2000; }
+  s/\b(password|passwd|secret|token|api[_-]?key)(["'"'"']?[:=] *["'"'"']?)[A-Za-z0-9+\/_.=-]{6,}/\1\2<redacted>/Ig; s/\bfcpi_[a-z0-9]+_[0-9a-f]{32,}\b/<client-token>/g;
+  s/\b[a-z0-9-]+\.[a-z0-9-]+\.ts\.net\b/<tailnet-name>/Ig; s/\b100\.(6[4-9]|[7-9][0-9]|1[01][0-9]|12[0-7])\.[0-9]{1,3}\.[0-9]{1,3}\b/<tailnet-address>/g' | cut -c1-2000; }
 
 bash "$(dirname "$(readlink -f "$0")")/status.sh" --json >"$B/status.json" 2>&1
 tail -n 60 "$LOGD/samples/$(date -u +%F).jsonl" >"$B/samples-last-hour.jsonl" 2>/dev/null
