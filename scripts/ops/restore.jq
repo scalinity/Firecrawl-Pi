@@ -20,12 +20,13 @@ def fix($R): if type == "string" then
   elif type == "object" then map_values(fix($R)) elif type == "array" then map(fix($R)) else . end;
 
 # The copy: project fcpi-restore; no published port; no egress network; every network internal and renamed fcpi_r_*
-# (bridges fcpi-r-*, which NetworkManager leaves alone); webhook delivery suppressed and paid dispatch off; every
+# (bridges fcpi-r-*, which NetworkManager leaves alone); webhook delivery suppressed and paid dispatch off; no restart
+# policy, so a host that resets during the test never revives the copy at boot (its EXIT trap did not run); every
 # container labelled fcpi.transient=restore-test.
 def compose($R): kept as $keep
   | fix($R) | .name = "fcpi-restore"
   | .services |= with_entries(select(.key as $k | $keep | index($k)))
-  | .services |= map_values(del(.ports) | .labels = ((.labels // {}) + {"fcpi.transient": "restore-test"})
+  | .services |= map_values(del(.ports) | .restart = "no" | .labels = ((.labels // {}) + {"fcpi.transient": "restore-test"})
       | (if .networks then .networks |= del(.egress) else . end)
       | (if .depends_on then .depends_on |= with_entries(select(.key as $k | $keep | index($k))) else . end))
   | .services["retrieval-service"].environment += {PI_WEBHOOK_DELIVERY: "suppressed", PI_PAID_DISPATCH_ENABLED: "false"}

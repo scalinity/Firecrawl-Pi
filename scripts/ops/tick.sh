@@ -139,6 +139,10 @@ active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk
     (.containers[] | select(.project == "fcpi" and .state == "running" and (.swap_limited | not)) | {key: "swap_limit_lost:\(.service)", detail: {swap_max: .swap_max, parent_swap_max: .parent_swap_max}}),
     (.containers[] | select(.project == "fcpi" and ((.oom_kill // 0) > ($po[.name] // (.oom_kill // 0)))) | {key: "oom_kill:\(.service)", detail: {oom_kill: .oom_kill}}),
     (if (.foreign | length) > 0 then {key: "foreign_container", detail: {names: .foreign}} else empty end),
+    # A restore copy still running long after any restore test or rehearsal would end (a run that died before its
+    # teardown): the foreign check leaves it out, being transient, so it shows here.
+    ([.containers[] | select(.project == "fcpi-restore" and .state == "running") | .name] as $rc
+     | if ($rc | length) > 0 then {key: "restore_copy_running", detail: {containers: $rc}} else empty end),
     ($exh[] | {key: "restart_budget_or_data_service:\(.)", detail: {service: .}}),
     (if ($lb.utc // null) == null then {key: "backup_missing", detail: {reason: ($lb.error // "no backup has completed")}}
      elif ($now - ($lb.utc | fromdateiso8601)) > 93600 then {key: "backup_stale", detail: {last: $lb.utc}} else empty end),
@@ -152,7 +156,8 @@ active=$(jq -c --argjson now "$NOW" --argjson dl "$disk_low" --argjson dc "$disk
     (if ($lc.utc // null) != null and ($now - ($lc.utc | fromdateiso8601)) > 9 * 86400 then {key: "backup_check_stale", detail: {last: $lc.utc}} else empty end),
     (if ($pr.consecutive_failures // 0) >= 2 then {key: "functional_probe_failing", detail: {since_failures: $pr.consecutive_failures, scrape: $pr.scrape, mcp: $pr.mcp}} else empty end)
   ]' <<<"$sample")
-# Sustained conditions: the core must be unhealthy for two minutes and memory low for over a minute before they open.
+# Sustained conditions: the core must be unhealthy for two minutes, memory low for over a minute and a restore copy running
+# for three hours before they open.
 AST=$STATE/alerts/state.json
 st=$(obj "$AST")
 [ -n "$active" ] && jq -e 'type == "array"' >/dev/null 2>&1 <<<"$active" || { logger -t fcpi-tick -p user.err -- "incidents not judged this minute: the conditions did not compute"; active=null; }
@@ -164,7 +169,7 @@ new=$(jq -c --argjson a "$active" --argjson now "$NOW" --argjson held "$held" '
   . as $st | ($a | map(select(.key | byhold | not)) | map({key: .key, value: .detail}) | from_entries) as $act
   | reduce ($act | keys[]) as $k ($st; .[$k] = ((.[$k] // {first: $now, open: false}) | .seen = $now | .clear = 0 | .detail = $act[$k]))
   | reduce (keys[]) as $k (.; if $act[$k] == null and ($k | byhold | not) then .[$k].clear += 1 else . end)' <<<"$st")
-hold_for() { case $1 in core_unhealthy) echo 120 ;; memory_low) echo 60 ;; *) echo 0 ;; esac; }
+hold_for() { case $1 in core_unhealthy) echo 120 ;; memory_low) echo 60 ;; restore_copy_running) echo 10800 ;; *) echo 0 ;; esac; }
 for k in $(jq -r 'keys[]' <<<"$new"); do
   e=$(jq -c --arg k "$k" '.[$k]' <<<"$new")
   open=$(jq -r .open <<<"$e") clear=$(jq -r .clear <<<"$e") first=$(jq -r .first <<<"$e")

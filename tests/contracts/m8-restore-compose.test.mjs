@@ -19,10 +19,11 @@ const prod = JSON.parse(readFileSync(FIXTURE, "utf8"));
 const copy = jq("compose($R)");
 const KEPT = ["nuq-postgres", "redis", "rabbitmq", "firecrawl-core", "access-gateway", "mcp-gateway", "retrieval-service", "fixture"];
 
-test("the positive control: production's file names host paths outside the copy, publishes a port and has the egress network", () => {
+test("the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network", () => {
   assert.ok(jq("outside($R)").length > 10);
   assert.ok(Object.values(prod.services).some((s) => (s.ports ?? []).length > 0));
   assert.ok(prod.networks.egress);
+  assert.ok(Object.values(prod.services).every((s) => s.restart && s.restart !== "no"));
 });
 
 test("every host path the copy names is under its directory", () => {
@@ -37,6 +38,7 @@ test("the copy runs only the kept services, publishes nothing and reaches no egr
     assert.equal(s.ports, undefined, `${name} publishes a port`);
     assert.ok(!Object.keys(s.networks ?? {}).includes("egress"), `${name} is on the egress network`);
     assert.equal(s.labels?.["fcpi.transient"], "restore-test", `${name} is not labelled transient`);
+    assert.equal(s.restart, "no", `${name} would be revived at boot after a reset during the test`);
     for (const d of Object.keys(s.depends_on ?? {})) assert.ok(KEPT.includes(d), `${name} depends on ${d}, which the copy does not run`);
   }
 });
