@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The soak's controller, ON the Pi:
-#   pi-soak.sh start <hours>   records the selection in force, selects the fixture engine, model and parser with no proxy
+#   pi-soak.sh start <hours>|<N>m   records the selection in force, selects the fixture engine, model and parser with no proxy
 #                              and no enhancer (scripts/m5/pi-selection.sh), writes the run's window
 #                              (/var/lib/firecrawl-pi/soak/current.json), installs and starts fcpi-soak.service
 #   pi-soak.sh status          the run's window and its log's counts by class and verdict
@@ -13,12 +13,12 @@ set -euo pipefail
 D=$STATE/soak; mkdir -p "$D"; chmod 0700 "$D"
 case ${1:-} in
   start)
-    h=${2:?hours}; [[ $h =~ ^[0-9]+$ ]] || die "hours"
+    h=${2:?hours}; case $h in *m) secs=$(( ${h%m} * 60 )) ;; *) secs=$(( h * 3600 )) ;; esac; [[ ${h%m} =~ ^[0-9]+$ ]] || die "hours, or minutes as <N>m"
     [ -e /etc/systemd/system/fcpi-soak.service ] && die "a soak is installed; stop it first"
     bash $REPO/scripts/m5/pi-selection.sh show >"$D/selection-before.json"
     bash $REPO/scripts/m5/pi-selection.sh fixture fcpi-fixture-model fcpi-fixture-parser none none
     s=$(now_s); run=soak-$(date -u -d "@$s" +%Y%m%dT%H%M%SZ)
-    jq -n --arg run "$run" --argjson s "$s" --argjson e $((s + h * 3600)) --arg c "$(source_commit)" \
+    jq -n --arg run "$run" --argjson s "$s" --argjson e $((s + secs)) --arg c "$(source_commit)" \
       '{run:$run,start_epoch:$s,end_epoch:$e,start_utc:($s|todate),end_utc:($e|todate),commit:$c}' | write_atomic "$D/current.json" 0600
     install -m 0644 $REPO/scripts/m8/fcpi-soak.service /etc/systemd/system/fcpi-soak.service
     systemctl daemon-reload && systemctl enable --now fcpi-soak.service 2>&1 | grep -v '^Created symlink' || true

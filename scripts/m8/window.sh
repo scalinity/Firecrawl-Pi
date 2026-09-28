@@ -8,10 +8,11 @@
 #   6. the upgrade and rollback rehearsal in the isolated copy (pi-rehearsal.sh, M7's retrieval image as the candidate
 #      that refuses this release's configuration);
 #   7. the read-only plans against M7's release staged as a candidate (stage.sh, pi-plans.sh);
-#   8. the paced soak for <hours>, the Redis user's statistics reset before it and read after it;
+#   8. the paced soak for <hours> (or <N>m, for a dry run only: the soak check needs 24 hours), the Redis user's statistics
+#      reset before it and read after it;
 #   9. the close (collect-close.sh).
 # The soak runs on the Pi and survives a workstation that sleeps; the window waits for it here.
-#   scripts/m8/window.sh <soak hours>
+#   scripts/m8/window.sh <soak hours>|<N>m
 set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
 # shellcheck source=scripts/m1/pi-target.conf
