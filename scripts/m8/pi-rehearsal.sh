@@ -38,7 +38,7 @@ jq --arg img "$PREV_RETRIEVAL" '.services["retrieval-service"].image = $img' "$R
 rc=$(up "$R/compose.candidate-image.json" retrieval-service)
 rs=$(docker ps -aq --filter label=com.docker.compose.project=$P --filter label=com.docker.compose.service=retrieval-service)
 out candidate_image "$(jq -cn --argjson rc "$rc" --arg img "$(docker inspect -f '{{.Config.Image}}' "$rs")" --arg st "$(docker inspect -f '{{.State.Status}} {{.State.ExitCode}} restarts={{.RestartCount}}' "$rs")" \
-  --arg log "$(docker logs --tail 3 "$rs" 2>&1 | grep -o 'unknown configuration keys[^"]*' | head -1)" '{up_exit:$rc, image:$img, state:$st, refusal:$log}')"
+  --arg log "$(docker logs "$rs" 2>&1 | grep -o 'unknown configuration keys[^"]*' | head -1)" '{up_exit:$rc, image:$img, state:$st, refusal:$log}')"
 rc=$(up "$R/compose.baseline.json" retrieval-service)
 out rolled_back_image "$(jq -cn --argjson rc "$rc" --arg img "$(docker inspect -f '{{.Config.Image}}' "$(docker ps -q --filter label=com.docker.compose.project=$P --filter label=com.docker.compose.service=retrieval-service)")" --argjson c "$(checks)" '{up_exit:$rc, image:$img, checks:$c}')"
 # 4. the schema-sensitive rollback.
