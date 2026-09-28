@@ -58,7 +58,7 @@ esac
 # The fixture repository's configuration is its own file (the fixture proof and the rehearsal read it); backup.env is
 # the owner's off-device repository, which the nightly backup, the weekly check and the monthly restore test read.
 case ${1:-} in fixture) want=/srv/firecrawl-pi/backup-fixture-repo OUTF=/etc/firecrawl-pi/backup-fixture.env ;; live) want=${2:-} OUTF=/etc/firecrawl-pi/backup.env ;; *) want="" OUTF="" ;; esac
-now_repo=$(sed -n 's/^FCPI_RESTIC_REPOSITORY=//p' "${OUTF:-/dev/null}" 2>/dev/null)
+now_repo=$(sed -n 's/^FCPI_RESTIC_REPOSITORY=//p' "${OUTF:-/dev/null}" 2>/dev/null || true)   # absent at the first setup
 if [ -n "$want" ] && [ -n "$now_repo" ] && [ "$now_repo" != "$want" ] && [ "$switch" != true ]; then
   die "$OUTF already names another repository (offdevice=$(sed -n 's/^FCPI_BACKUP_OFFDEVICE=//p' "$OUTF")); kept as it is. Add --switch to replace it"
 fi
