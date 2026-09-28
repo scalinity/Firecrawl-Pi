@@ -898,9 +898,10 @@ for (const id of wanted) {
   const rec = { test_id: `M8-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, expected: c.expected,
     evidence_class: c.evidenceClass ?? "fixture-or-host" };
   try {
+    // A missing input is NOT_RUN, live or not: only a record whose collector ran and says the owner input is absent is
+    // BLOCKED_CREDENTIAL (the live checks' run() returns blocked from it).
     const missing = c.inputs.filter((p) => !has(p));
-    if (missing.length && c.evidenceClass === "live") Object.assign(rec, { state: "BLOCKED_CREDENTIAL", actual: `no live record (${missing.join(", ")}): the owner input it needs has not been given`, exit_code: null });
-    else if (missing.length) Object.assign(rec, { state: "NOT_RUN", actual: `evidence missing: ${missing.join(", ")}`, exit_code: null });
+    if (missing.length) Object.assign(rec, { state: "NOT_RUN", actual: `evidence missing: ${missing.join(", ")}`, exit_code: null });
     else {
       rec.config_or_fixture_hash = hashOf(c.inputs);
       const r = c.run();

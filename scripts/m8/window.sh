@@ -4,7 +4,8 @@
 #   2. M8's host installation, idempotent, as its record (pi-init-m8.sh);
 #   3. every injected failure and the normal reboot (faults.mjs);
 #   4. the core's heap on large pages (pi-heap-probe.sh, M4 F1);
-#   5. the fixture backup and the isolated restore test (pi-backup-proof.sh);
+#   5. the fixture backup and the isolated restore test (pi-backup-proof.sh); then the live records (pi-backup-live.sh,
+#      pi-notify-live.sh), each of which only records "configured=no" while the owner input it needs is absent;
 #   6. the upgrade and rollback rehearsal in the isolated copy (pi-rehearsal.sh, M7's retrieval image as the candidate
 #      that refuses this release's configuration);
 #   7. the read-only plans against M7's release staged as a candidate (stage.sh, pi-plans.sh);
@@ -29,6 +30,8 @@ step init; "${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m8/pi-init-m8.sh' >"$R/in
 step faults; node "$root/scripts/m8/faults.mjs" >"$R/faults.txt" 2>"$R/faults.err" || true
 step heap; "${SSH[@]}" 'bash -s -- 400 614 1024 1536 2048' <"$root/scripts/m8/pi-heap-probe.sh" >"$R/heap.txt" 2>&1
 step backup; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-backup-proof.sh' >"$R/backup-fixture.txt" 2>&1
+step live; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-backup-live.sh' >"$R/backup-live.txt" 2>&1
+"${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-notify-live.sh' >"$R/notify-live.txt" 2>&1
 step rehearsal; "${SSH[@]}" "sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-rehearsal.sh $M7_RETRIEVAL" >"$R/rehearsal.txt" 2>&1
 step plans; "$root/scripts/m8/stage.sh" 19f047f >/dev/null
 cand=$("${SSH[@]}" 'ls -1d /opt/firecrawl-pi-candidate/19f047f* | head -1')
