@@ -16,11 +16,10 @@
 #      removed once uploaded.
 # Browser scratch, caches and full logs are not included. /var/lib/firecrawl-pi/backup/last.json records the last
 # success (fcpi status shows its age; the tick opens backup_stale past 26 hours); history.jsonl every attempt.
-#   fcpi backup [--no-quiesce-check]
+#   fcpi backup
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/lib.sh"
 need_root
-exec 8>"$RUND/backup.lock"; flock -n 8 || die "another backup or restore test is running"
 B=$STATE/backup; mkdir -p "$B"; chmod 0700 "$B"
 RUN=$(date -u +%Y%m%dT%H%M%SZ)
 record() { # record <result> <json extra>
@@ -29,6 +28,8 @@ record() { # record <result> <json extra>
   [ "$1" = PASS ] && printf '%s\n' "$line" | write_atomic "$B/last.json" 0600
   echo "$line"
 }
+repo_lock || { record SKIPPED '{"error":"the repository lock stayed held: another backup, check or restore test ran past the wait"}'; exit 3; }
+RUN=$(date -u +%Y%m%dT%H%M%SZ)   # named when it starts, after any wait for the lock
 CONF=/etc/firecrawl-pi/backup.env
 [ -r "$CONF" ] || { record NOT_CONFIGURED '{"error":"/etc/firecrawl-pi/backup.env is absent: no backup repository is configured"}'; exit 3; }
 # shellcheck disable=SC1090
@@ -153,11 +154,11 @@ jq -e '(.run | type) == "string" and (.versions_lock_sha256 | test("^[0-9a-f]{64
   "$S/backup-meta.json" >/dev/null 2>&1 || { record FAIL '{"error":"backup-meta.json is incomplete: the run, version lock, images or canaries did not compute"}'; exit 1; }
 (cd "$S" && find . -type f ! -name MANIFEST.sha256 -print0 | sort -z | xargs -0 sha256sum >MANIFEST.sha256)
 t_u0=$(now_s)
-out=$(restic backup --json --tag fcpi-data --host fcpi-pi --exclude-caches "$S" "$DATA/artifacts" "$REPO" /etc/firecrawl-pi \
+out=$(restic backup --json --tag fcpi-data --tag "fcpi-run=$RUN" --host fcpi-pi --exclude-caches "$S" "$DATA/artifacts" "$REPO" /etc/firecrawl-pi \
   --exclude /etc/firecrawl-pi/secrets 2>"$B/restic-data.err" | tail -1)
 snap_data=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <<<"$out" 2>/dev/null)
 added=$(jq -r 'select(.message_type == "summary") | .data_added // 0' <<<"$out" 2>/dev/null)
-out2=$(restic backup --json --tag fcpi-secrets --host fcpi-pi --stdin-filename fcpi-secrets.tar --stdin-from-command -- tar -C /etc/firecrawl-pi -cf - secrets 2>"$B/restic-secrets.err" | tail -1)
+out2=$(restic backup --json --tag fcpi-secrets --tag "fcpi-run=$RUN" --host fcpi-pi --stdin-filename fcpi-secrets.tar --stdin-from-command -- tar -C /etc/firecrawl-pi -cf - secrets 2>"$B/restic-secrets.err" | tail -1)
 snap_sec=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <<<"$out2" 2>/dev/null)
 upload_s=$(( $(now_s) - t_u0 ))
 x=$(jq -cn --arg d "$snap_data" --arg s "$snap_sec" --argjson a "${added:-0}" --argjson q "$quiesce_s" --argjson u "$upload_s" --argjson dr "$drained" \

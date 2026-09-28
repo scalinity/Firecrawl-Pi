@@ -8,6 +8,6 @@ Wants=network-online.target
 [Service]
 Type=oneshot
 ExecStart=/opt/firecrawl-pi/scripts/fcpi backup-check
-TimeoutStartSec=4h
+TimeoutStartSec=7h
 Nice=10
 IOSchedulingClass=idle

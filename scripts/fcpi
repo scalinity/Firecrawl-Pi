@@ -40,12 +40,14 @@ case $cmd in
     need_root
     . /etc/firecrawl-pi/backup.env 2>/dev/null || die "no backup repository is configured"
     export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
+    # The check shares the backup's lock: restic check beside a backup's forget contends for the repository's lock and
+    # fails falsely. A skipped check leaves last-check.json as it was; the tick's backup_check_stale shows it.
+    repo_lock || { logger -t fcpi-backup -p user.warning -- "backup-check skipped: the repository lock stayed held"; echo "fcpi: backup-check skipped: the repository lock stayed held" >&2; exit 3; }
     restic check --read-data-subset=5% >"$STATE/backup/check.log" 2>&1; rc=$?
     # Space the nightly retention forgot is reclaimed only after a passing check (spec §26).
     prc=null; if [ $rc = 0 ]; then restic prune >>"$STATE/backup/check.log" 2>&1; prc=$?; fi
     line=$(jq -cn --arg u "$(utc)" --argjson rc $rc --argjson prc "$prc" '{utc:$u,check_exit:$rc,prune_exit:$prc,result:(if $rc == 0 and $prc == 0 then "PASS" else "FAIL" end)}')
     printf '%s\n' "$line" | write_atomic "$STATE/backup/last-check.json" 0600; echo "$line"
-    [ $rc = 0 ] || notice opened backup_check_failed "$line"
     [ "$(jq -r .result <<<"$line")" = PASS ] ;;
   foreign)
     # Containers outside Compose project fcpi (throwaway fcpi.transient ones aside), to the journal and stdout (M1 R12).

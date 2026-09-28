@@ -26,10 +26,15 @@
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/lib.sh"
 need_root
-exec 8>"$RUND/backup.lock"; flock -n 8 || die "a backup or another restore test is running"
 SNAP=latest KEEP=false MODE=full
 while [ $# -gt 0 ]; do case $1 in --snapshot) SNAP=$2; shift 2 ;; --keep) KEEP=true; shift ;; --check) MODE=check; KEEP=true; shift ;; --teardown) MODE=teardown; shift ;; *) die "unknown option $1" ;; esac; done
 B=$STATE/backup; mkdir -p "$B"
+# A run that cannot take the lock is recorded in the history only, so last-restore-test.json keeps the newest real
+# result, and the tick's restore_test_stale incident shows a month of skipped tests.
+if ! repo_lock; then
+  line=$(jq -cn --arg utc "$(utc)" --arg m "$MODE" '{utc:$utc,result:"SKIPPED",mode:$m,error:"the repository lock stayed held: a backup, check or other restore test ran past the wait"}')
+  append_line "$B/restore-history.jsonl" "$line"; echo "$line"; exit 3
+fi
 CONF=/etc/firecrawl-pi/backup.env
 [ -r "$CONF" ] || die "/etc/firecrawl-pi/backup.env is absent: no backup repository is configured"
 # shellcheck disable=SC1090
@@ -64,10 +69,15 @@ docker ps -aq --filter "label=com.docker.compose.project=$P" | grep . >/dev/null
 SNAP_DATA=$(restic snapshots --json --tag fcpi-data --host fcpi-pi ${SNAP/latest/--latest 1} 2>/dev/null | jq -r --arg s "$SNAP" \
   'if $s == "latest" then (max_by(.time) | .short_id) else (map(select(.id | startswith($s))) | .[0].short_id) end // empty')
 [ -n "$SNAP_DATA" ] || { finish FAIL "no fcpi-data snapshot $SNAP"; exit 1; }
-t_data=$(restic snapshots --json "$SNAP_DATA" | jq -r '.[0].time')
-# The secrets snapshot the same run took: the first after the data snapshot, within an hour.
-SNAP_SEC=$(restic snapshots --json --tag fcpi-secrets --host fcpi-pi | jq -r --arg t "$t_data" \
-  '[.[] | select(.time >= $t and ((.time[0:19] + "Z" | fromdateiso8601) - ($t[0:19] + "Z" | fromdateiso8601)) < 3600)] | min_by(.time) | .short_id // empty')
+data_json=$(restic snapshots --json "$SNAP_DATA")
+t_data=$(jq -r '.[0].time' <<<"$data_json")
+run_tag=$(jq -r '[.[0].tags[]? | select(startswith("fcpi-run="))][0] // empty' <<<"$data_json")
+# The secrets snapshot the same run took: the one carrying the same run tag, whatever the upload took. A snapshot from
+# before runs were tagged is paired by time: the first secrets snapshot after the data snapshot, within an hour.
+SNAP_SEC=$(restic snapshots --json --tag fcpi-secrets --host fcpi-pi | jq -r --arg t "$t_data" --arg rt "$run_tag" '
+  (if $rt != "" then map(select((.tags // []) | index($rt)))
+   else [.[] | select(.time >= $t and ((.time[0:19] + "Z" | fromdateiso8601) - ($t[0:19] + "Z" | fromdateiso8601)) < 3600)] end)
+  | min_by(.time) | .short_id // empty')
 [ -n "$SNAP_SEC" ] || { finish FAIL "no fcpi-secrets snapshot for $SNAP_DATA"; exit 1; }
 mkdir -m 0700 "$R" "$R/secrets"
 restic restore "$SNAP_DATA" --target "$R/fs" >"$R/restic-restore.log" 2>&1 || { finish FAIL "restic restore failed"; exit 1; }

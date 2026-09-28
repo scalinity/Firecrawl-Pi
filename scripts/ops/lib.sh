@@ -48,6 +48,12 @@ cid() { docker ps -aq --filter label=com.docker.compose.project=fcpi --filter "l
 # runs the binary, not this function.
 restic() { ( if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi; exec restic "$@" ); }
 
+# repo_lock: the one lock the backup, the repository check and the restore test share (one restic repository, one data
+# filesystem), on descriptor 8, waited for up to FCPI_LOCK_WAIT_S seconds (default three hours; each unit's start timeout
+# is its own run's bound plus that wait):
+# persistent timers that fire together after downtime then run one after another instead of the later ones giving up.
+repo_lock() { exec 8>"$RUND/backup.lock"; flock -w "${FCPI_LOCK_WAIT_S:-10800}" 8; }
+
 # pg <sql>: a read-only query as the superuser over the database container's local socket (psql -At, | separated).
 pg() {
   local c; c=$(cid nuq-postgres); [ -n "$c" ] || return 1
