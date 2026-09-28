@@ -193,13 +193,13 @@ disk_pressure)
   [ "$fill" -gt 0 ] && [ "$fill" -lt $((50 * 1073741824)) ] || { out refused "{\"free\":$free}"; exit 1; }
   trap 'rm -f "$F"' EXIT
   n0=$(notices disk_critical)
-  fallocate -l "$fill" "$F"; tick
+  fallocate -l "$fill" "$F"; tick; sleep 3
   static; out scrape_during "$CALL"
   CT=20 call GET /platform/v1/jobs; out read_during "$CALL"
   tick
   out state_during "$(jq -cn --argjson b "$(brief)" --arg f "$(df -B1 --output=avail "$PI_DATA_DIR" | tail -1)" --argjson n "$(( $(notices disk_critical) - n0 ))" '{status:$b, free:($f|tonumber), opened_notices:$n}')"
   rm -f "$F"; trap - EXIT
-  tick; tick; tick
+  tick; tick; tick; sleep 3
   pgok=$(docker exec "$(svc nuq-postgres)" pg_isready -U postgres -q && echo true || echo false)
   static
   out recovered "$(jq -cn --argjson c "$CALL" --argjson b "$(brief)" --arg d "$(pg "SELECT count(*) FROM fcpi_platform.job_document")" --arg d0 "$docs0" \
@@ -215,22 +215,22 @@ memory_pressure)
     --memory "$((h + 96))m" --memory-swap "$((h + 96))m" --oom-score-adj 1000 --cpus 0.5 --user 65534:65534 "$IMG_NODE" \
     node -e "const k=[];for(let i=0;i<$h/64;i++)k.push(Buffer.alloc(64<<20,1));setInterval(()=>k.length,1e4)" >/dev/null
   s=$(until_ 180 '[ "$(awk "/^MemAvailable:/ {print int(\$2 / 1024)}" /proc/meminfo)" -lt 1024 ]')
-  tick; static; out scrape_during "$(jq -c --argjson s "$s" '. + {low_after_s:$s}' <<<"$CALL")"
+  tick; sleep 3; static; out scrape_during "$(jq -c --argjson s "$s" '. + {low_after_s:$s}' <<<"$CALL")"
   sleep 61; tick
   out state_during "$(jq -cn --argjson b "$(brief)" --arg a "$(awk '/^MemAvailable:/ {print int($2 / 1024)}' /proc/meminfo)" --argjson n "$(( $(notices memory_low) - n0 ))" '{status:$b, available_mib:($a|tonumber), opened_notices:$n}')"
   docker rm -f fcpi-m8-hog >/dev/null 2>&1; trap - EXIT
-  sleep 5; tick; sleep 5; tick; sleep 5; tick
+  sleep 5; tick; sleep 5; tick; sleep 5; tick; sleep 3
   static
   out recovered "$(jq -cn --argjson c "$CALL" --argjson b "$(brief)" --argjson o "$(( $(oom_sum) - o0 ))" --argjson n "$(( $(notices memory_low) - n0 ))" '{scrape:$c, status:$b, fcpi_oom_kills:$o, memory_low_notices:$n}')" ;;
 
 thermal_pressure)
   mkdir -p "$RUND/inject"; trap 'rm -f "$RUND/inject/temp_c"' EXIT
   n0=$(notices temperature_high)
-  echo 76.0 >"$RUND/inject/temp_c"; tick
+  echo 76.0 >"$RUND/inject/temp_c"; tick; sleep 3
   call POST /v2/scrape "{\"url\":\"$M2/js.html?f=m8-thermal-$RANDOM\",\"formats\":[\"markdown\"]}"; out js_during "$CALL"
   static; out static_during "$CALL"
   out state_during "$(jq -cn --argjson b "$(brief)" '{status:$b}')"
-  echo 69.0 >"$RUND/inject/temp_c"; tick; tick; tick
+  echo 69.0 >"$RUND/inject/temp_c"; tick; tick; tick; sleep 3
   call POST /v2/scrape "{\"url\":\"$M2/js.html?f=m8-thermal-$RANDOM\",\"formats\":[\"markdown\"]}"
   out js_after "$(jq -c --argjson s "$(has fcpi-m2-js-5c1e && echo true || echo false)" --argjson b "$(brief)" --argjson n "$(( $(notices temperature_high) - n0 ))" '. + {sentinel:$s, status:$b, temperature_notices:$n}' <<<"$CALL")"
   rm -f "$RUND/inject/temp_c"; trap - EXIT; tick ;;
@@ -274,9 +274,8 @@ supervisor)
   out recovered "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{ready_after_s:$s, status:$b}')" ;;
 
 swap_reload)
-  # The positive control: a container recreated now has its scope's swap limit at 0, which the reload must lift. (Any
-  # reload lifts every scope: this project's own tools reload systemd when they install a unit, so most scopes stand at
-  # max already; the slice is what holds.)
+  # Scopes found at max are F2's lift on the running stack (its trigger is not pinned: a plain reload, a unit added,
+  # started, enabled or disabled did not lift a new scope in M8's probes); a container recreated now shows a new scope.
   docker compose -p fcpi -f "$REPO/deploy/compose.yaml" up -d --force-recreate --wait fixture >/dev/null 2>&1
   fx=$(cid fixture); read -r fp fid < <(docker inspect -f '{{.HostConfig.CgroupParent}} {{.Id}}' "$fx")
   fx0=$(cat "/sys/fs/cgroup/$fp/docker-$fid.scope/memory.swap.max"); sw0=$(swap_all)
