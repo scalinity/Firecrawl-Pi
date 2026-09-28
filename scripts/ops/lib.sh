@@ -51,7 +51,10 @@ cid() { docker ps -aq --filter label=com.docker.compose.project=fcpi --filter "l
 # restic with the repository's backend credentials (the file FCPI_RESTIC_ENV_FILE names, when backup.env names one) in
 # its own environment only: docker, curl and jq, which the backup and restore scripts also run, never see them. exec
 # runs the binary, not this function.
-restic() { ( if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi; exec restic "$@" ); }
+# An SFTP repository is reached with the backup's own SSH key and its pinned host key (FCPI_RESTIC_SFTP_COMMAND,
+# written by scripts/m8/pi-backup-setup.sh; paths and the destination only, no secret).
+restic() { ( if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi
+  exec restic ${FCPI_RESTIC_SFTP_COMMAND:+-o "sftp.command=$FCPI_RESTIC_SFTP_COMMAND"} "$@" ); }
 
 # repo_lock: the one lock the backup, the repository check and the restore test share (one restic repository, one data
 # filesystem), on descriptor 8, waited for up to FCPI_LOCK_WAIT_S seconds (default three hours; each unit's start timeout
