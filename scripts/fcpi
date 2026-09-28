@@ -1,69 +1,75 @@
-#!/usr/bin/env node
-// fcpi — the platform's operator command (FIRECRAWL_PI_SPEC.md §25). M3 provides `status` and `jobs`;
-// M8 completes the surface. It talks only to the private gateway, with a client token, so it shows only
-// that token's principal's jobs.
-//   FCPI_BASE_URL=http://127.0.0.1:3380 FCPI_TOKEN_FILE=<file> fcpi status [--json]
-//   fcpi jobs [<job id>] [--limit N] [--json]
-// FCPI_BASE_URL has no default: a missing one is an error, never a vendor endpoint. The token file holds
-// one gateway token (scripts/m3/pi-client-token.sh writes them under /etc/firecrawl-pi/secrets/clients).
-// Exit codes: 0 healthy or found; 1 core not live or ledger down; 2 usage or configuration; 3 HTTP error.
-import { readFileSync } from "node:fs";
-import { makeClient } from "../services/access/client.mjs";
-
-const args = process.argv.slice(2);
-const json = args.includes("--json");
-const rest = args.filter((a) => a !== "--json");
-const die = (code, msg) => { process.stderr.write(`fcpi: ${msg}\n`); process.exit(code); };
-
-const [cmd, ...more] = rest;
-if (!["status", "jobs"].includes(cmd)) die(2, "usage: fcpi status [--json] | fcpi jobs [<id>] [--limit N] [--json]");
-if (!process.env.FCPI_BASE_URL) die(2, "FCPI_BASE_URL is not set (there is no default)");
-if (!process.env.FCPI_TOKEN_FILE) die(2, "FCPI_TOKEN_FILE is not set");
-let client;
-try { client = makeClient({ baseUrl: process.env.FCPI_BASE_URL, token: readFileSync(process.env.FCPI_TOKEN_FILE, "utf8").trim(), timeoutMs: 20000 }); }
-catch (e) { die(2, e.message); }
-
-const show = (o) => process.stdout.write(json ? `${JSON.stringify(o, null, 2)}\n` : o);
-const fail = (r) => die(3, `${r.status} ${r.json?.code ?? ""} ${r.json?.error ?? r.text.slice(0, 200)}`.trim());
-
-if (cmd === "status") {
-  const r = await client.call("platform.status");
-  if (r.status !== 200) fail(r);
-  const s = r.json;
-  const healthy = s.core?.live === true && s.ledger?.ok === true;
-  if (json) show(s);
-  else show([
-    `gateway   build ${s.build}, up ${s.uptimeSeconds} s, instance ${s.instance}`,
-    `core      ${s.core?.live ? "live" : "NOT LIVE"} (${s.core?.ms} ms)`,
-    `ledger    ${s.ledger?.ok ? "ok" : `DOWN ${s.ledger?.error ?? ""}`}`,
-    `jobs      ${Object.entries(s.jobs ?? {}).map(([k, v]) => `${k}=${v}`).join(" ") || "none"}`,
-    `archive   ${s.archive?.bytes ?? "?"} of ${s.archive?.quotaBytes} bytes`,
-    `routes    ${s.capabilities?.routes?.length} enabled, ${s.capabilities?.notEnabled?.length} not enabled`,
-    "",
-  ].join("\n"));
-  process.exit(healthy ? 0 : 1);
-}
-
-const limitAt = more.indexOf("--limit");
-const limit = limitAt >= 0 ? Number(more[limitAt + 1]) : undefined;
-const id = more.find((a, i) => !a.startsWith("--") && more[i - 1] !== "--limit");
-if (id) {
-  const r = await client.call("platform.job", { id });
-  if (r.status !== 200) fail(r);
-  const j = r.json.job;
-  if (json) show(j);
-  else show([
-    `${j.id}  ${j.kind}  ${j.state}`,
-    `created ${j.createdAt}  submitted ${j.submittedAt ?? "-"}  finished ${j.finishedAt ?? "-"}`,
-    `upstream ${j.upstreamId ?? "-"} (${j.upstreamStatus ?? "-"})  completed ${j.completed ?? 0}/${j.total ?? 0}  archived ${j.archived}  errors ${j.errorCount}`,
-    `results ${j.results}  kept until ${j.resultsExpireAt ?? "-"}`,
-    ...(j.error ? [`error ${j.error.code}: ${j.error.message}`] : []),
-    ...j.events.map((e) => `  ${e.at}  ${e.from ?? "-"} -> ${e.to}  ${e.detail ?? ""}`),
-    "",
-  ].join("\n"));
-} else {
-  const r = await client.call("platform.jobs", { query: { limit } });
-  if (r.status !== 200) fail(r);
-  if (json) show(r.json.jobs);
-  else show(r.json.jobs.map((j) => `${j.id}  ${j.kind.padEnd(5)}  ${j.state.padEnd(20)}  ${j.createdAt}  ${j.archived} docs`).join("\n") + "\n");
-}
+#!/usr/bin/env bash
+# fcpi — the platform's operational command (FIRECRAWL_PI_SPEC.md §25), ON the Pi, installed as /usr/local/bin/fcpi.
+# Every command acts on Compose project fcpi and the project's own paths only. Commands that read secrets, the
+# operations state or Docker need root: run them with sudo.
+#   fcpi status [--json]            services, capability readiness, queue, host, admission, incidents, backup age;
+#                                   exit 0 healthy, 1 core or ledger not ready, 2 usage
+#   fcpi jobs [<id>] [--as <label>] [--limit N] [--json]
+#                                   job receipts through the gateway, as the operator or as a named client
+#   fcpi usage [--period day|month|<N>d] [--json]
+#                                   requests by route and tier, bytes, provider units, reserved against settled spend
+#   fcpi verify <ops|functional|services>
+#                                   a reproducible suite; results in /var/lib/firecrawl-pi/verify/<suite>-<UTC>.json
+#   fcpi backup                     coordinated encrypted backup (scripts/ops/backup.sh)
+#   fcpi backup-check               restic check of a 5 % data subset (weekly timer)
+#   fcpi restore-test [--snapshot <id>] [--keep]
+#                                   isolated restore and its proof (scripts/ops/restore-test.sh)
+#   fcpi upgrade --plan <commit> | fcpi rollback --plan
+#                                   read-only plans (scripts/ops/plan.sh); nothing is changed
+#   fcpi doctor                     bounded, redacted diagnostic bundle (scripts/ops/doctor.sh)
+#   fcpi hold <name> <seconds> | fcpi hold <name> --clear
+#                                   pause new work by hand (the admission file), or release the pause
+#   fcpi help restore               the disaster-recovery procedure
+# Timers run: fcpi tick (every minute), fcpi probe (every five minutes), fcpi boot-record (at boot).
+set -uo pipefail
+HERE=$(dirname "$(readlink -f "$0")")
+. "$HERE/ops/lib.sh"
+cmd=${1:-help}; shift || true
+case $cmd in
+  tick) exec bash "$HERE/ops/tick.sh" ;;
+  probe) exec bash "$HERE/ops/probe.sh" ;;
+  boot-record) exec bash "$HERE/ops/boot-record.sh" ;;
+  status) exec bash "$HERE/ops/status.sh" "$@" ;;
+  backup) exec bash "$HERE/ops/backup.sh" "$@" ;;
+  restore-test) exec bash "$HERE/ops/restore-test.sh" "$@" ;;
+  doctor) exec bash "$HERE/ops/doctor.sh" "$@" ;;
+  upgrade|rollback|release) exec bash "$HERE/ops/plan.sh" "$cmd" "$@" ;;
+  verify) exec bash "$HERE/ops/verify.sh" "$@" ;;
+  usage) exec bash "$HERE/ops/usage.sh" "$@" ;;
+  backup-check)
+    need_root
+    . /etc/firecrawl-pi/backup.env 2>/dev/null || die "no backup repository is configured"
+    export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache
+    if [ -n "${FCPI_RESTIC_ENV_FILE-}" ]; then set -a; . "$FCPI_RESTIC_ENV_FILE"; set +a; fi
+    restic check --read-data-subset=5% >"$STATE/backup/check.log" 2>&1; rc=$?
+    line=$(jq -cn --arg u "$(utc)" --argjson rc $rc '{utc:$u,check_exit:$rc,result:(if $rc == 0 then "PASS" else "FAIL" end)}')
+    printf '%s\n' "$line" | write_atomic "$STATE/backup/last-check.json" 0600; echo "$line"
+    [ $rc = 0 ] || notice opened backup_check_failed "$line"
+    exit $rc ;;
+  foreign)
+    # Containers outside Compose project fcpi (throwaway fcpi.transient ones aside), to the journal and stdout (M1 R12).
+    f=$(docker ps -a --format '{{.Names}} {{.Label "com.docker.compose.project"}} {{.Label "fcpi.transient"}}' 2>/dev/null | awk '$2 != "fcpi" && $3 == "" {print $1}' | tr '\n' ' ')
+    if [ -n "$f" ]; then logger -t fcpi-stack -p user.warning -- "containers outside project fcpi: $f(dockerd's data-check gate assumes Docker serves this project alone)"; echo "foreign: $f"
+    else echo "foreign: none"; fi ;;
+  hold)
+    need_root
+    name=${1:?usage: fcpi hold <name> <seconds>|--clear}; [[ $name =~ ^[a-z0-9-]{1,32}$ ]] || die "a hold name is 1-32 of a-z 0-9 -"
+    if [ "${2:-}" = --clear ]; then hold_clear "$name"; else [[ ${2:-} =~ ^[0-9]+$ ]] || die "seconds expected"; hold_set "$name" "$2"; fi
+    cat "$ADMISSION" ;;
+  jobs)
+    need_root
+    json=false as=ops limit=20 id=""
+    while [ $# -gt 0 ]; do case $1 in --json) json=true; shift ;; --as) as=$2; shift 2 ;; --limit) limit=$2; shift 2 ;; *) id=$1; shift ;; esac; done
+    [[ $as =~ ^[A-Za-z0-9_-]+$ ]] || die "bad client label"
+    tok=/etc/firecrawl-pi/secrets/clients/$as.token; [ -r "$tok" ] || die "no token for client $as"
+    if [ -n "$id" ]; then OPS_TOKEN=$tok gw GET "/platform/v1/jobs/$id"; else OPS_TOKEN=$tok gw GET "/platform/v1/jobs?limit=$limit"; fi
+    [ "$GW_STATUS" = 200 ] || { echo "fcpi: gateway answered $GW_STATUS $(jq -r '(.code // "") + " " + (.error // "")' <<<"$GW_BODY" 2>/dev/null)" >&2; exit 3; }
+    if [ $json = true ]; then jq . <<<"$GW_BODY"
+    elif [ -n "$id" ]; then jq -r '.job | "\(.id)  \(.kind)  \(.state)\ncreated \(.createdAt)  finished \(.finishedAt // "-")  completed \(.completed // 0)/\(.total // 0)  archived \(.archived)  errors \(.errorCount)",
+      (.events[]? | "  \(.at)  \(.from // "-") -> \(.to)  \(.detail // "")")' <<<"$GW_BODY"
+    else jq -r '.jobs[] | "\(.id)  \(.kind)  \(.state)  \(.createdAt)  \(.archived) docs"' <<<"$GW_BODY"; fi ;;
+  help)
+    if [ "${1:-}" = restore ]; then sed -n '/^# RESTORE$/,/^# END RESTORE$/p' "$HERE/ops/restore-procedure.txt" 2>/dev/null || cat "$HERE/ops/restore-procedure.txt"
+    else sed -n '2,/^set -uo/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//'; fi ;;
+  *) die "unknown command '$cmd' (fcpi help)" ;;
+esac
