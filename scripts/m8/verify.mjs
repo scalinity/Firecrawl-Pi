@@ -445,12 +445,13 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; submit ${JSON.stringify(s)}; scrape ${JSON.stringify(sc)}; job ${JSON.stringify(j?.job)}` };
     } }])),
   I07: { name: "browser-crash-contained", inputs: [`${RAW}faults.txt`],
-    expected: "Chromium killed during a render: the render's answer is a typed failure, never 502; no browser permit is left held and no Chromium process is left; the next script-rendered page renders; the data services stay healthy",
+    expected: "Chromium killed during a render: the render's answer is a typed failure, never 502; no browser permit is left held and no Chromium process is left; while the worker relaunches its browser any refusal is typed and retryable, and a script-rendered page renders within a minute; the data services stay healthy",
     run() {
       const k = step("browser_crash", "render_killed"), n = step("browser_crash", "next_render");
       const cond = { killed: k?.chrome_processes_killed >= 1 && !/^502 /.test(k.answer), permits: n?.browser_permits_held === "0", processes: n?.chrome_left_before_next === "0",
-        next: n?.status === 200 && n.sentinel === true, data_services: !(n?.status?.not_healthy ?? ["?"]).some((s) => ["nuq-postgres", "redis", "rabbitmq"].includes(s)) };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; killed ${JSON.stringify(k)}; next ${JSON.stringify({ status: n?.status, sentinel: n?.sentinel, permits: n?.browser_permits_held, left: n?.chrome_left_before_next })}` };
+        next: n?.status === 200 && n.sentinel === true && n.served_after_s <= 60 && (n.refusals_before ?? []).every((r) => r.status !== 502 && r.class),
+        data_services: !(n?.host?.not_healthy ?? ["?"]).some((s) => ["nuq-postgres", "redis", "rabbitmq"].includes(s)) };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; killed ${JSON.stringify(k)}; next ${JSON.stringify({ status: n?.status, sentinel: n?.sentinel, permits: n?.browser_permits_held, left: n?.chrome_left_before_next, tries: n?.tries, served_after_s: n?.served_after_s, refusals: n?.refusals_before })}` };
     } },
   I08: { name: "search-outage-isolated-and-not-resurrected", inputs: [`${RAW}faults.txt`],
     expected: "with SearXNG stopped: search answers a typed failure, not an empty success, never 502; scrape, map and crawl still work; the supervisor does not start the stopped service (three ticks later it is still exited) and fcpi status shows search not ready while the core is; started again, search returns results",
@@ -509,7 +510,7 @@ const checks = {
       const j = step("thermal_pressure", "js_during"), s = step("thermal_pressure", "static_during"), st = step("thermal_pressure", "state_during"), a = step("thermal_pressure", "js_after");
       const cond = { browser_refused: !!j && j.status !== 200 && not502(j) && /RESOURCE_BUSY/.test(`${j.class} ${j.error}`), static_ok: s?.status === 200 && s.sentinel === true,
         paused: st?.status?.admission?.browser === "paused" && st.status.admission.dispatch === "open" && (st.status.admission.reasons ?? []).includes("thermal"),
-        resumed: a?.status === 200 && a.sentinel === true && a.status.admission.browser === "open", notices: a?.temperature_notices === 2 };
+        resumed: a?.status === 200 && a.sentinel === true && a.host?.admission?.browser === "open", notices: a?.temperature_notices === 2 };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; js during ${JSON.stringify(j)}; notices ${a?.temperature_notices}` };
     } },
   I15: { name: "supervisor-bounded-restarts-then-incident", inputs: [`${RAW}faults.txt`],

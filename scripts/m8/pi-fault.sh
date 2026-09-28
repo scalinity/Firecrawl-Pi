@@ -138,8 +138,17 @@ browser_crash)
   sleep 5
   held=$(pg "SELECT count(*) FROM fcpi_retrieval.permit WHERE kind = 'browser' AND holder IS NOT NULL AND lease_until > now()")
   left=$(docker exec --user 3320 "$b" sh -c 'pgrep -c -f [c]hrome-headless-shell || true')
-  call POST /v2/scrape "{\"url\":\"$M2/js.html?f=m8-$RANDOM\",\"formats\":[\"markdown\"]}"
-  out next_render "$(jq -c --argjson s "$(has fcpi-m2-js-5c1e && echo true || echo false)" --arg held "$held" --arg left "$left" --argjson b "$(brief)" '. + {sentinel:$s, browser_permits_held:$held, chrome_left_before_next:$left, status:$b}' <<<"$CALL")" ;;
+  # The worker relaunches Chromium after it: the next render is asked every five seconds, at most a minute, and each refusal
+  # before the replacement serves is recorded with its class.
+  t0=$(now_s) tries=0 refusals='[]'
+  while :; do
+    tries=$((tries + 1)); call POST /v2/scrape "{\"url\":\"$M2/js.html?f=m8-$RANDOM\",\"formats\":[\"markdown\"]}"
+    has fcpi-m2-js-5c1e && break
+    refusals=$(jq -c --argjson c "$CALL" '. + [$c | {status, class, code}]' <<<"$refusals")
+    [ $(( $(now_s) - t0 )) -ge 60 ] && break; sleep 5
+  done
+  out next_render "$(jq -c --argjson s "$(has fcpi-m2-js-5c1e && echo true || echo false)" --arg held "$held" --arg left "$left" --argjson b "$(brief)" --argjson r "$refusals" --argjson t "$tries" --argjson w "$(( $(now_s) - t0 ))" \
+    '. + {sentinel:$s, browser_permits_held:$held, chrome_left_before_next:$left, tries:$t, served_after_s:$w, refusals_before:$r, host:$b}' <<<"$CALL")" ;;
 
 searxng_down)
   "${C[@]}" stop searxng >/dev/null 2>&1
@@ -244,7 +253,7 @@ thermal_pressure)
   out state_during "$(jq -cn --argjson b "$(brief)" '{status:$b}')"
   echo 69.0 >"$RUND/inject/temp_c"; tick; tick; tick; sleep 3
   call POST /v2/scrape "{\"url\":\"$M2/js.html?f=m8-thermal-$RANDOM\",\"formats\":[\"markdown\"]}"
-  out js_after "$(jq -c --argjson s "$(has fcpi-m2-js-5c1e && echo true || echo false)" --argjson b "$(brief)" --argjson n "$(( $(notices temperature_high) - n0 ))" '. + {sentinel:$s, status:$b, temperature_notices:$n}' <<<"$CALL")"
+  out js_after "$(jq -c --argjson s "$(has fcpi-m2-js-5c1e && echo true || echo false)" --argjson b "$(brief)" --argjson n "$(( $(notices temperature_high) - n0 ))" '. + {sentinel:$s, host:$b, temperature_notices:$n}' <<<"$CALL")"
   rm -f "$RUND/inject/temp_c"; trap - EXIT; tick ;;
 
 missing_mount)
@@ -269,16 +278,16 @@ missing_mount)
     '{ready_after_s:$s, stack_start_to_ready_s:$t, data_id_unchanged:($id == $id0), status:$b, swap:$sw}')" ;;
 
 supervisor)
-  m=$(svc mcp-gateway); n0=$(notices restart_budget_or_data_service); sup=$STATE/supervisor/restarts.jsonl
+  m=$(svc mcp-gateway); n0=$(notices restart_budget_or_data_service_mcp-gateway); sup=$STATE/supervisor/restarts.jsonl
   c0=$(jq -c 'select(.service == "mcp-gateway")' "$sup" 2>/dev/null | wc -l)
   for round in 1 2 3 4; do
     kill -STOP "$(pid_of mcp-gateway)"; t0=$(now_s)
     # Docker marks it unhealthy after three failed checks 30 s apart; the tick (every minute) restarts it within budget.
-    s=$(until_ 420 "[ \$(jq -c 'select(.service == \"mcp-gateway\")' $sup 2>/dev/null | wc -l) -gt $((c0 + round - 1)) ] || ls $STATE/alerts/outbox/ | grep -q 'restart_budget_or_data_service_mcp-gateway'")
+    s=$(until_ 420 "[ \$(jq -c 'select(.service == \"mcp-gateway\")' $sup 2>/dev/null | wc -l) -gt $((c0 + round - 1)) ] || [ \$(notices restart_budget_or_data_service_mcp-gateway) -gt $n0 ]")
     static
-    out "round_$round" "$(jq -cn --argjson s "$s" --argjson r "$(jq -c 'select(.service == "mcp-gateway")' "$sup" | wc -l)" --argjson c0 "$c0" --argjson rest "$CALL" --argjson n "$(( $(notices restart_budget_or_data_service) - n0 ))" \
+    out "round_$round" "$(jq -cn --argjson s "$s" --argjson r "$(jq -c 'select(.service == "mcp-gateway")' "$sup" | wc -l)" --argjson c0 "$c0" --argjson rest "$CALL" --argjson n "$(( $(notices restart_budget_or_data_service_mcp-gateway) - n0 ))" \
       '{acted_after_s:$s, supervisor_restarts:($r - $c0), rest:$rest, budget_notices:$n}')"
-    [ $(( $(notices restart_budget_or_data_service) - n0 )) -gt 0 ] && break
+    [ $(( $(notices restart_budget_or_data_service_mcp-gateway) - n0 )) -gt 0 ] && break
     until_ 120 '[ "$(docker inspect -f "{{.State.Health.Status}}" '"$m"')" = healthy ]' >/dev/null
   done
   docker restart "$m" >/dev/null; s=$(until_ 180 ready)
