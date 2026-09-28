@@ -104,16 +104,23 @@ stopped=true
 "${COMPOSE[@]}" stop $APP >/dev/null 2>&1
 if timeout 240 docker exec "$pgc" pg_dump -U postgres -d postgres -Fc >"$S/postgres.dump" 2>"$S/pg_dump.err" && [ -s "$S/postgres.dump" ]; then dump_ok=true; fi
 "${COMPOSE[@]}" stop redis rabbitmq nuq-postgres >/dev/null 2>&1
-mkdir -m 0700 "$S/data"
-copy_ok=true
-for d in postgres redis rabbitmq; do cp -a "$DATA/$d" "$S/data/$d" || copy_ok=false; done
-cp -a "$DATA/.fcpi-data-id" "$S/data/" || copy_ok=false
+# The copy is taken only from stopped data services: a copy of a live PostgreSQL directory is torn.
+still_running=""
+for s in $DATA_SERVICES; do [ "$(docker inspect -f '{{.State.Running}}' "$(cid "$s")" 2>/dev/null)" = false ] || still_running+="$s "; done
+copy_ok=false
+if [ -z "$still_running" ]; then
+  mkdir -m 0700 "$S/data"
+  copy_ok=true
+  for d in postgres redis rabbitmq; do cp -a "$DATA/$d" "$S/data/$d" || copy_ok=false; done
+  cp -a "$DATA/.fcpi-data-id" "$S/data/" || copy_ok=false
+fi
 resume
 trap - EXIT
 quiesce_s=$(( $(now_s) - t_q0 ))
 up_ok=true; for c in firecrawl-core access-gateway nuq-postgres; do [ "$(docker inspect -f '{{.State.Health.Status}}' "$(cid $c)" 2>/dev/null)" = healthy ] || up_ok=false; done
 if [ "$copy_ok" != true ] || [ "$dump_ok" != true ]; then
-  record FAIL "$(jq -cn --argjson q "$quiesce_s" --argjson c "$copy_ok" --argjson d "$dump_ok" --argjson u "$up_ok" '{error:"the staged copy is incomplete",quiesce_s:$q,copy_ok:$c,dump_ok:$d,stack_healthy_after:$u}')"
+  record FAIL "$(jq -cn --argjson q "$quiesce_s" --argjson c "$copy_ok" --argjson d "$dump_ok" --argjson u "$up_ok" --arg sr "$still_running" \
+    '{error:"the staged copy is incomplete",quiesce_s:$q,copy_ok:$c,dump_ok:$d,stack_healthy_after:$u} + (if $sr == "" then {} else {data_services_not_stopped:$sr} end)')"
   exit 1
 fi
 
