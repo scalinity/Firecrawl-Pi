@@ -8,11 +8,13 @@
 #                          needs its own migration). It names the steps spec §27 requires, in order, and whether the
 #                          change is schema-sensitive, which decides how it is rolled back.
 #   rollback --plan        compares the running release with the previous recorded one: what a redeploy of the previous
-#                          commit restores, and whether the ledger moved since, in which case the pre-cutover backup must
-#                          be restored with it (never an older gateway on a newer ledger).
+#                          commit restores, and whether the data must be restored with it: the ledger moved since, a data
+#                          service's image moves back, or the NuQ or retrieval schema file differs (never an older binary
+#                          on newer data). The backup named is the newest that finished before the cutover at the previous
+#                          release's ledger version (from the backup history), never one taken after a migration.
 #   release                records the running release (/var/lib/firecrawl-pi/releases/<UTC>-<commit12>.json): commit,
-#                          version lock, images, ledger version, and the newest backup before it. Bring-up and cutover
-#                          scripts call it.
+#                          version lock, images, ledger version, the NuQ and retrieval schema files' hashes, and the
+#                          newest backup before it. Bring-up and cutover scripts call it.
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/lib.sh"
 need_root
@@ -29,8 +31,9 @@ current_release() {
   jq -n --arg utc "$(utc)" --arg commit "$(source_commit)" --arg lock "$(h "$REPO/deploy/versions.lock.json")" --argjson images "$(images_of "$REPO")" --argjson config "$(config_of "$REPO")" \
     --arg db "$(pg 'SELECT max(version) FROM fcpi_platform.schema_version')" --arg file "$(schema_max "$REPO")" \
     --arg backup "$(jq -r '.utc // empty' "$STATE/backup/last.json" 2>/dev/null)" --arg snap "$(jq -r '.snapshot_data // empty' "$STATE/backup/last.json" 2>/dev/null)" \
+    --arg nuq "$(h "$REPO/deploy/nuq-postgres/nuq.sql")" --arg ret "$(h "$REPO/deploy/nuq-postgres/fcpi-retrieval-schema.sql")" \
     '{utc:$utc,commit:$commit,versions_lock_sha256:$lock,images:$images,config:$config,ledger_schema_db:($db|tonumber? // null),ledger_schema_file:($file|tonumber? // null),
-      last_backup_before:(if $backup == "" then null else {utc:$backup,snapshot:$snap} end)}'
+      schema_files:{nuq:$nuq,retrieval:$ret}, last_backup_before:(if $backup == "" then null else {utc:$backup,snapshot:$snap} end)}'
 }
 case ${1:-} in
   release)
@@ -67,14 +70,29 @@ case ${1:-} in
     cur=$(current_release)
     prev=$(ls -1 "$RD"/*.json 2>/dev/null | sort | while read -r f; do [ "$(jq -r .commit "$f")" != "$(jq -r .commit <<<"$cur")" ] && echo "$f"; done | tail -1)
     [ -n "$prev" ] || die "no earlier release is recorded"
-    jq -n --argjson cur "$cur" --argjson prev "$(cat "$prev")" --arg pf "$(basename "$prev")" '
+    # The cutover: the first release recorded for the running commit after the previous one. The backup to restore is
+    # the newest that finished before it (so its data is from before any migration) at the previous release's ledger
+    # version, where the backup recorded one.
+    cutover=$(ls -1 "$RD"/*.json | sort | while read -r f; do [[ $f > $prev ]] && [ "$(jq -r .commit "$f")" = "$(jq -r .commit <<<"$cur")" ] && { jq -r .utc "$f"; break; }; done)
+    hist=$(jq -sc 'map(select(.result == "PASS"))' "$STATE/backup/history.jsonl" 2>/dev/null); [ -n "$hist" ] || hist='[]'
+    jq -n --argjson cur "$cur" --argjson prev "$(cat "$prev")" --arg pf "$(basename "$prev")" --arg cut "$cutover" --argjson hist "$hist" '
       ($cur.images | keys + ($prev.images | keys) | unique) as $svcs
-      | { plan: "rollback", from_commit: $cur.commit, to_commit: $prev.commit, to_release: $pf,
-          image_changes: [ $svcs[] as $s | select($cur.images[$s] != $prev.images[$s]) | {service: $s, from: $cur.images[$s], to: $prev.images[$s]} ],
+      | [ $svcs[] as $s | select($cur.images[$s] != $prev.images[$s]) | {service: $s, from: $cur.images[$s], to: $prev.images[$s]} ] as $moves
+      # A data service image that moves back (a PostgreSQL major version above all) cannot start on data the newer one
+      # wrote; a schema file that differs may have migrated the data. Either restores the data (spec §27).
+      | [ $moves[] | select(.service | IN("nuq-postgres", "redis", "rabbitmq")) | .service ] as $data_moves
+      | [ "nuq", "retrieval" | select(($prev.schema_files // {})[.] != null and $cur.schema_files[.] != $prev.schema_files[.]) ] as $schema_moves
+      | (($cur.ledger_schema_db // 0) != ($prev.ledger_schema_db // 0) or ($data_moves | length) > 0 or ($schema_moves | length) > 0) as $restore
+      | ($hist | map(select(($cut == "" or .utc < $cut) and ((.platform_schema_version // null) == null or .platform_schema_version == $prev.ledger_schema_db)))
+          | max_by(.utc) | if . == null then null else {utc, snapshot: .snapshot_data, run} end) as $pre
+      | { plan: "rollback", from_commit: $cur.commit, to_commit: $prev.commit, to_release: $pf, cutover: (if $cut == "" then "unknown: no release recorded for the running commit" else $cut end),
+          image_changes: $moves,
           configuration_changes: (if $prev.config then [($cur.config | keys) + ($prev.config | keys) | unique | .[] as $s | select($cur.config[$s] != $prev.config[$s]) | $s] else "unknown: that release recorded no configuration" end),
           ledger_schema: {now: $cur.ledger_schema_db, at_that_release: $prev.ledger_schema_db},
-          data_restore_needed: (($cur.ledger_schema_db // 0) != ($prev.ledger_schema_db // 0)),
-          backup_to_restore: (if ($cur.ledger_schema_db // 0) != ($prev.ledger_schema_db // 0) then $cur.last_backup_before else null end) }
+          data_service_image_changes: $data_moves,
+          schema_file_changes: (if $prev.schema_files then $schema_moves else "unknown: that release recorded no schema files" end),
+          data_restore_needed: $restore,
+          backup_to_restore: (if $restore then $pre else null end) }
       | .steps = (if .data_restore_needed then
           ["fcpi hold rollback <seconds>", "stop the stack (systemctl stop fcpi-stack)", "restore the data directories from backup \(.backup_to_restore.snapshot // "NONE RECORDED: stop here") (fcpi help restore)",
            "scripts/m1/deploy.sh of \(.to_commit[0:12]); recreate every service", "reconcile provider spend newer than the backup before paid dispatch returns", "fcpi verify functional; fcpi status; fcpi hold rollback --clear"]

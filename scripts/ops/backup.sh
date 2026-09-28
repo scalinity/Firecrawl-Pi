@@ -163,9 +163,9 @@ snap_sec=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <<
 upload_s=$(( $(now_s) - t_u0 ))
 x=$(jq -cn --arg d "$snap_data" --arg s "$snap_sec" --argjson a "${added:-0}" --argjson q "$quiesce_s" --argjson u "$upload_s" --argjson dr "$drained" \
   --arg k "$KIND" --arg off "$OFFDEVICE" --argjson up "$up_ok" --arg commit "$(source_commit)" --arg lock "$lock_sha" \
-  --argjson nc "${#canaries[@]}" --argjson ni "$(jq length <<<"$inflight")" \
+  --argjson nc "${#canaries[@]}" --argjson ni "$(jq length <<<"$inflight")" --arg schema "$schema" \
   '{snapshot_data:$d,snapshot_secrets:$s,data_added:$a,quiesce_s:$q,quiesce_exceeded:($q > 300),upload_s:$u,drained:$dr,repository_kind:$k,offdevice:$off,
-    stack_healthy_after:$up,source_commit:$commit,versions_lock_sha256:$lock,canary_results:$nc,inflight_jobs:$ni}')
+    stack_healthy_after:$up,source_commit:$commit,versions_lock_sha256:$lock,platform_schema_version:($schema|tonumber? // null),canary_results:$nc,inflight_jobs:$ni}')
 if [ -z "$snap_data" ] || [ -z "$snap_sec" ]; then record FAIL "$(jq -c '. + {error:"a snapshot did not complete; the staged copy is kept for the next run"}' <<<"$x")"; exit 1; fi
 
 # ---- 4. retention --------------------------------------------------------------------------------------------------
