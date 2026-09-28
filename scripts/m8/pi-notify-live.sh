@@ -35,9 +35,12 @@ echo "### delivered"
 # title, priority, tags and incident line, never the topic (the request reaches curl as a config on a descriptor).
 if [ -r /etc/firecrawl-pi/secrets/alerts/ntfy_topic ] && [[ $cmd == *notify-ntfy.sh ]]; then
   echo "### ntfy_server"
-  since=$(date -u -d "$t0" +%s)
-  curl -sS --proto =https --max-time 20 -K <(printf 'url = "https://ntfy.sh/%s/json?poll=1&since=%s"\n' "$(tr -d ' \n' </etc/firecrawl-pi/secrets/alerts/ntfy_topic)" "$since") \
-    | jq -c 'select(.event == "message") | {id, time, title, priority, tags, incident: ((.message // "") | capture("Incident: (?<i>[0-9a-f]+)").i // null)}'
+  since=$(date -u -d "$t0" +%s) iid=$(notices opened | jq -r '.incident_id' | head -1)
+  poll() { curl -sS --proto =https --max-time 20 -K <(printf 'url = "https://ntfy.sh/%s/json?poll=1&since=%s"\n' "$(tr -d ' \n' </etc/firecrawl-pi/secrets/alerts/ntfy_topic)" "$since") \
+    | jq -c 'select(.event == "message") | {id, time, title, priority, tags, incident: ((.message // "") | capture("Incident: (?<i>[0-9a-f]+)").i // null)}'; }
+  # The server can list a message a moment after accepting it: asked again, for up to a minute, until both are there.
+  for _ in 1 2 3 4 5 6; do srv=$(poll); [ "$(jq -s --arg i "$iid" 'map(select(.incident == $i)) | length' <<<"$srv")" -ge 2 ] && break; sleep 10; done
+  printf '%s\n' "$srv"
 fi
 echo "### window"
 echo "{\"from\":\"$t0\",\"to\":\"$(utc)\",\"opened_notices\":$(notices opened | wc -l),\"cleared_notices\":$(notices cleared | wc -l),\"ticks_reading_injected\":$hot}"
