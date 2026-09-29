@@ -743,6 +743,26 @@ Reserve at least **1 GiB measured available host memory under the normal mixed w
 
 Every project container runs under one systemd slice, `fcpi.slice`. It denies swap to the whole project (`MemorySwapMax=0`, which systemd re-asserts at every reload, where a reload can lift a container's own swap limit) and bounds the project as a whole at **`MemoryHigh` 5,632 MiB**: the measured 8,062 MiB `MemTotal` less the 1 GiB reserve and the host's own services (about 1,100 MiB measured), rounded down. The containers' own caps together exceed the host; past the slice's bound the kernel reclaims and slows the project without killing anything, before the host's services or the reserve are touched. The host sample records the slice's use and peak against the bound every minute.
 
+Measured over M8's 24-hour paced soak (1,378 minute samples; `evidence/M8/raw/soak.txt`): idle is a service's lowest cgroup memory, normal its median, peak its highest peak, all in MiB, against its cap. The whole project peaked at 3,405 MiB under the slice's 5,632 MiB bound, and the host never had less than 4,756 MiB available.
+
+| Service | Idle | Normal | Peak | Cap | Peak of cap |
+|---|---:|---:|---:|---:|---:|
+| `firecrawl-core` | 1,696 | 1,798 | 1,961 | 2,560 | 77 % |
+| `browser-worker` | 65 | 140 | 185 | 1,536 | 12 % |
+| `nuq-postgres` | 46 | 81 | 114 | 640 | 18 % |
+| `redis` | 7 | 8 | 19 | 320 | 6 % |
+| `rabbitmq` | 118 | 165 | 232 | 512 | 45 % |
+| `searxng` | 81 | 83 | 92 | 320 | 29 % |
+| `access-gateway` | 20 | 41 | 62 | 160 | 38 % |
+| `mcp-gateway` | 35 | 43 | 66 | 192 | 35 % |
+| `retrieval-service` | 24 | 45 | 68 | 448 | 15 % |
+| `fixture` | 28 | 31 | 53 | 64 | 82 % |
+| `fixture-m2` | 30 | 35 | 55 | 192 | 29 % |
+| `fixture-m3` | 28 | 35 | 55 | 64 | 85 % |
+| `fixture-m5` | 16 | 18 | 38 | 128 | 30 % |
+| `fixture-m6` | 25 | 31 | 50 | 96 | 52 % |
+| `fixture-m7` | 15 | 22 | 42 | 96 | 43 % |
+
 Initial PostgreSQL tuning: 128 MiB shared buffers, 4 MiB work memory, 32 connections, pooled application connections, bounded maintenance work. These are project defaults requiring compatibility/performance tests, not universal optimal values. RabbitMQ uses an explicit memory alarm below its cap, initially 256 MiB; verify alarms/backpressure before enforcement. Avoid the management UI/plugin unless an actual diagnostic need warrants it.
 
 Each Firecrawl child process has a **384 MiB** JavaScript old-space ceiling, inside the core container's memory cap, since the API child holds about 232 MiB live at rest (measured on the Pi) and a scrape answer carrying captures needs room above that. Measure native/Go/Rust buffers and total harness RSS. A Node heap setting does not bound all container memory, and the harness may spawn several children. Raise a role-specific heap only with a tested rebalanced budget. Preserve graceful failures for oversized documents rather than allowing uncontrolled allocation.

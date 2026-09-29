@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-27T09:38:43Z",
-  "generated_by": "scripts/m7/build-lock.mjs (M7), from the lock M6 closed with at 0318b6e; entries owned by later milestones are as M6 wrote them",
-  "repository_sha": "ce09074978725c4a12ccff4a78153c0171d7bc69",
+  "generated_utc": "2026-09-29T13:02:49Z",
+  "generated_by": "scripts/m8/build-lock.mjs (M8), from the lock M7 closed with at 19f047f; entries owned by later milestones are as M7 wrote them",
+  "repository_sha": "28724e81e1496a52d60e5ad3e73a99ecb46c50f8",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -297,7 +297,9 @@
         "meaning": "supports pages up to 64 KiB, including this host's 16 KiB",
         "source": "evidence/M0/sources/redis-jemalloc-lg-page.txt",
         "retrieved_utc": "2026-09-25T04:04:46Z"
-      }
+      },
+      "core_user": "fcpi_core, limited to the command set measured in M8 (deploy/redis/fcpi-core.acl)",
+      "acl_evidence": "evidence/M8/raw/redis-measured.txt"
     },
     "rabbitmq": {
       "role": "RabbitMQ (NuQ messaging)",
@@ -510,7 +512,26 @@
         "platform_on_pi": "linux/arm64",
         "verified_utc": "2026-09-25T08:09:57Z",
         "evidence": "evidence/M1/raw/image-inspect.txt"
-      }
+      },
+      "runtime_settings": [
+        "bgwriter_delay=200ms",
+        "bgwriter_lru_maxpages=100",
+        "bgwriter_lru_multiplier=2.0",
+        "wal_writer_delay=200ms",
+        "wal_buffers=-1",
+        "effective_io_concurrency=1",
+        "maintenance_io_concurrency=10",
+        "commit_delay=0",
+        "shared_buffers=128MB",
+        "work_mem=4MB",
+        "max_connections=32",
+        "max_wal_size=1GB",
+        "min_wal_size=80MB",
+        "fsync=on",
+        "full_page_writes=on",
+        "synchronous_commit=on"
+      ],
+      "runtime_settings_evidence": "evidence/M8/raw/pg-writes.txt"
     },
     "rust_toolchain": {
       "role": "Rust toolchain copied into the API build stage",
@@ -548,17 +569,17 @@
       }
     },
     "retrieval": {
-      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, and since M7 the enhanced provider, the browser extras and webhook delivery",
+      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:9c92d952c5701a35302614250d2cfd067a79c9c5a2c473bbceef2e83fb84651a",
+      "image_id": "sha256:0a087bd8890f5dbd9015a0c182a4e8c1566fd1359b14abcade85a1c4f015493c",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "7ccd57a22212dd1b3d6d57b4ba93ca57c66912ad587e6af370818ef8986bb8cd"
       },
-      "evidence": "evidence/M7/raw/image-build.txt",
+      "evidence": "evidence/M8/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
+      "built_from_commit": "72ad8447fc4ec7f3e01b4ab416a3014b661d7855",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -654,12 +675,12 @@
       }
     },
     "access_gateway": {
-      "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection and the webhook outbox since M7",
+      "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work",
       "status": "selected",
-      "image_id": "sha256:55a69dfa9368698117edaf7a5deec3143f6cdb6fdff96b2d9ca1c0ae9300b4fb",
+      "image_id": "sha256:a9fae8d26ce9c04ca71c385d48de823ac83d942fc3a64fd4d5af33d533865caa",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
+      "built_from_commit": "72ad8447fc4ec7f3e01b4ab416a3014b661d7855",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -726,7 +747,7 @@
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
         }
       },
-      "evidence": "evidence/M7/raw/image-build.txt"
+      "evidence": "evidence/M8/raw/image-build.txt"
     },
     "mcp_gateway": {
       "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tool offers the action subset, the screenshot format and the cache options since M7",
@@ -2013,5 +2034,34 @@
       "zyte.fixture.fcpi.test",
       "hooks.fixture.fcpi.test"
     ]
+  },
+  "host_packages": {
+    "restic": {
+      "version": "0.18.0-1+b4",
+      "source": "Debian 13 (trixie) main, arm64, apt with Debian's archive signatures",
+      "binary": "/usr/bin/restic",
+      "binary_sha256": "80d615c1c49b7ccd8121e9ce4e1944da274d3d2f28c24f8d54ec70d9d8957803",
+      "purpose": "encrypted off-device backups (spec §26); installed by scripts/m8/pi-init-m8.sh",
+      "evidence": "evidence/M8/raw/init-m8.txt"
+    }
+  },
+  "host_units": {
+    "fcpi-backup-check.service": "811e50ce4e4c14c9736c3dc469a0f68a2e4f25d814e8eea5c86fb127d82cb11e",
+    "fcpi-backup-check.timer": "f1dae1286607c7a58845afb4c8486ff12b0ff3221e207a11f3f5ffd4307e8df5",
+    "fcpi-backup.service": "82b82b0a7e68a01973350c802dc2ed60f2c79194726105974e979cb7c845a248",
+    "fcpi-backup.timer": "0dcf185fe3b4e811e26fc97ba800dce302cb23d1f6c459972e506f7719e29817",
+    "fcpi-boot-record.service": "62ad9e7eced5291c6562124462616965383d4102ba3344a87edaa30d9374b869",
+    "fcpi-data-check.service": "15928d94754471da0bf8ede77c42d7802bf30109359973d7d78be9c6c53dc8bc",
+    "fcpi-heartbeat.service": "cd03aabf15dcf677ea7e411e17f4e11664b0bb2b03507b19c7d6729cc74f02a8",
+    "fcpi-heartbeat.timer": "f33f2dffe50f58f72e3512318ba19050298872f3f9918cb9bcaa56f362ce6069",
+    "fcpi-probe.service": "6ab83f2fda1005c598a7710c7d5cd92118a1b8330e5f19fc1f3a25b36605c364",
+    "fcpi-probe.timer": "7eade845789f95eb8b084db2933f63d9cd7fc9c9fa3b5ef6e6ee777ae9fb4f21",
+    "fcpi-restore-test.service": "cae90cf44f4f369bba712cd4133642d77a2c76b89d244f69a039a52fca661068",
+    "fcpi-restore-test.timer": "edd250b192d23c34268b78133106ef00df6647a9868beee8c68eb83c10074176",
+    "fcpi-stack.service": "909c0d4480d95c2ebf01db01cfc6bbccf2aab440686ae112ba81d66117d3e102",
+    "fcpi-tick.service": "b8d69ae9965e8efe1d0bfbd1d2b203d3a2ac8b1a344048657c152c8784dba149",
+    "fcpi-tick.timer": "869dfbea3da7f8b272786798c26b09688be17a218ea9273752d25987dfafdb3c",
+    "fcpi.slice": "5beddf9f26cae61720992ea04fee57bcde1f1d1e101dbaa13d0da3ba9cb0aadb",
+    "tmpfiles-fcpi.conf": "9cabd92c053a428e5211890d2de4ea3d1cd2e9e711297357cf4a0eca3ac6ffdc"
   }
 }
