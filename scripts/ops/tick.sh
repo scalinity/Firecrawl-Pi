@@ -17,7 +17,9 @@
 set -uo pipefail
 . "$(dirname "$(readlink -f "$0")")/lib.sh"
 need_root
-exec 9>"$RUND/tick.lock"; flock -n 9 || exit 0
+# The timer's run leaves at once when another holds the lock; a test that runs the tick itself waits for it
+# (FCPI_TICK_LOCK_WAIT_S), so its run is never silently skipped.
+exec 9>"$RUND/tick.lock"; flock -w "${FCPI_TICK_LOCK_WAIT_S:-0}" 9 || exit 0
 mkdir -p "$STATE"/{alerts,supervisor} "$LOGD"/samples; chmod 0700 "$STATE/alerts"
 NOW=$(now_s) T=$(utc) DAY=${T%%T*}
 # shellcheck disable=SC1091

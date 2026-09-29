@@ -19,7 +19,7 @@ fi
 echo "utc=$(utc) source_commit=$(source_commit) configured=yes command=$(basename "${cmd%% *}")"
 t0=$(utc) OB=$STATE/alerts/outbox
 notices() { for f in "$OB"/*-"$1"-temperature_high.json; do [ -f "$f" ] && jq -c --arg t "$t0" 'select(.utc >= $t)' "$f"; done 2>/dev/null; }
-tick() { bash "$REPO/scripts/ops/tick.sh"; }
+tick() { FCPI_TICK_LOCK_WAIT_S=90 bash "$REPO/scripts/ops/tick.sh"; }   # waits for the timer's run rather than skipping
 waitfor() { local end=$(( $(now_s) + $1 )); while [ "$(now_s)" -lt "$end" ]; do tick; eval "$2" && return 0; sleep 10; done; return 1; }
 trap 'rm -f "$RUND/inject/temp_c"' EXIT
 mkdir -p "$RUND/inject"; echo 80.0 >"$RUND/inject/temp_c"
