@@ -610,9 +610,11 @@ const checks = {
       if (!w) return { ok: false, actual: "no soak window" };
       const dur = w.end_epoch - w.start_epoch;
       const reqs = log.filter((r) => !["missed", "end"].includes(r.class));
+      // A request refused during a backup's hold is the backup's designed pause (spec §26): 503 HOST_PRESSURE while the
+      // gateway runs, or no answer at all (status 0) once the quiescence has stopped it. Any other failure is unexplained.
       const held = new Set(smp.filter((s) => (s.admission?.reasons ?? []).some((x) => /^hold:backup$/.test(x))).map((s) => s.utc.slice(0, 16)));
       const near = (u) => { const t = Date.parse(u); return [-2, -1, 0, 1, 2].some((d) => held.has(new Date(t + d * 60000).toISOString().slice(0, 16))); };
-      const failed = reqs.filter((r) => !r.ok), explained = failed.filter((r) => r.code === "HOST_PRESSURE" && near(r.utc)), unexplained = failed.filter((r) => !explained.includes(r));
+      const failed = reqs.filter((r) => !r.ok), explained = failed.filter((r) => near(r.utc) && (r.code === "HOST_PRESSURE" || r.status === 0)), unexplained = failed.filter((r) => !explained.includes(r));
       const byClass = (c) => reqs.filter((r) => r.class === c && r.ok).map((r) => r.ms);
       const p95 = { static: pct(byClass("static"), 95), js: pct(byClass("js"), 95), status: pct(byClass("status"), 95), mcp_list: pct(byClass("mcp_list"), 95) };
       const perInst = new Map(); for (const s of smp) for (const c of s.containers ?? []) if (c.project === "fcpi") { const k = `${c.service}/${c.id}`; const v = perInst.get(k) ?? []; v.push(c.oom_kill ?? 0); perInst.set(k, v); }
@@ -821,17 +823,19 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; guard handle ${handle(`${RAW}guard-window-open.txt`)}→${handle(`${RAW}egress-probe.txt`)}, web accepted delta=${web}, proxy-port delta=${proxy}; core logs=${recs.length}` };
     } },
   X02: { name: "network-and-container-posture", inputs: [`${RAW}stack.txt`, `${EV}rendered-compose.json`],
-    expected: "all fifteen containers run aarch64 under fcpi.slice with memory.swap.max 0 (the scope and the slice); the only host publication is 127.0.0.1:3380; the gateway and the retrieval service mount the admission directory read-only and name PI_ADMISSION_FILE; the core's health check reports its API and worker apart; Redis, read as the operator's user after the narrowing, reports AOF on and its last write ok",
+    expected: "all fifteen containers run aarch64 under fcpi.slice, whose memory.swap.max is 0 above every one of them (each scope's own limit is reported); the only host publication is 127.0.0.1:3380; the gateway and the retrieval service mount the admission directory read-only and name PI_ADMISSION_FILE; the core's health check reports its API and worker apart; Redis, read as the operator's user after the narrowing, reports AOF on and its last write ok",
     run() {
       const st = S(`${RAW}stack.txt`), R = json(`${EV}rendered-compose.json`).services;
       const pub = (st.published ?? []).filter((l) => /->/.test(l));
       const arch = (st.containers ?? []).filter((l) => / uname_m=/.test(l));
       const adm = (s) => (R[s].volumes ?? []).some((v) => v.source === "/run/firecrawl-pi/admission" && v.target === "/srv/admission" && v.read_only === true) && R[s].environment?.PI_ADMISSION_FILE === "/srv/admission/admission.json";
-      const cond = { slice: Object.values(R).every((s) => s.cgroup_parent === "fcpi.slice"), swap: (st.cgroups ?? []).length === 15 && (st.cgroups ?? []).every((l) => / parent_swap_max=0 /.test(l) && / memory\.swap\.max=0 /.test(l)),
+      const cond = { slice: Object.values(R).every((s) => s.cgroup_parent === "fcpi.slice"), // Swap is denied by fcpi.slice (spec §22), which systemd re-asserts; a container's own scope limit can be lifted
+        // (M4 F2, F9) and is reported, not required.
+        swap: (st.cgroups ?? []).length === 15 && (st.cgroups ?? []).every((l) => / parent_swap_max=0 /.test(l)),
         arch: arch.length === 15 && arch.every((l) => /uname_m=aarch64$/.test(l)), publication: pub.length === 1 && /^access-gateway 3300\/tcp -> 127\.0\.0\.1:3380$/.test(pub[0]),
         admission: adm("access-gateway") && adm("retrieval-service"), health: /api=/.test(JSON.stringify(R["firecrawl-core"].healthcheck.test)) && /worker=/.test(JSON.stringify(R["firecrawl-core"].healthcheck.test)),
         redis_persistence: ["aof_enabled:1", "aof_last_write_status:ok"].every((x) => (st.redis_health ?? []).includes(x)) };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; publications=${pub.join(";")}; cgroups=${(st.cgroups ?? []).length}` };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; publications=${pub.join(";")}; cgroups=${(st.cgroups ?? []).length}; scopes with their own limit lifted (the slice holds)=${(st.cgroups ?? []).filter((l) => !/ memory\.swap\.max=0 /.test(l)).map((l) => l.split(" ")[0]).join(",") || "none"}` };
     } },
   X04: { name: "unrelated-state-unchanged", inputs: [`${EV}snapshot-before.txt`, `${EV}snapshot-after.txt`, `${RAW}nft-ruleset.txt`, "evidence/M7/raw/nft-ruleset.txt", `${EV}reboots/`],
     expected: "every line differing between M8's BEFORE and AFTER snapshots is attributed to the project (fcpi containers, their scopes and namespaces, M8's units, slice and timers, kernel modules for the runtime), the collector's own SSH sessions, or the owner's own work that raw/owner-session.txt records; the boot ID is unchanged, or changed only across reboots the durable boot records tie from BEFORE's boot to AFTER's, each an orderly watchdog reboot or the reboot the driver made; the guard's rules are M7's and the installed guard is the repository's",
