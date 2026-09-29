@@ -41,8 +41,15 @@ cand=$("${SSH[@]}" 'ls -1d /opt/firecrawl-pi-candidate/19f047f* | head -1')
 step soak; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-redis.sh reset' >/dev/null
 run=$("${SSH[@]}" "bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh start $H" | sed -n '/^{/,$p' | jq -r .run)   # the JSON after the selection line
 until "${SSH[@]}" "sudo -n grep -q '\"class\":\"end\"' /var/log/firecrawl-pi/soak/$run.jsonl" 2>/dev/null; do sleep 120; done
-"${SSH[@]}" "bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh collect $run" >"$R/soak.txt"
-"${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-redis.sh stats' >"$R/redis-soak.txt"
-"${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh stop' >/dev/null
+# The soak's record is several megabytes, and a long session over the Pi's Wi-Fi can drop: it is written on the Pi, copied
+# over and checked against the Pi's own hash. These steps only read (the stop only removes the soak's unit), so each is
+# tried again after a dropped connection; the note of a retry goes to this log, never into the evidence.
+retry() { local i; for i in 1 2 3 4 5; do "$@" && return 0; echo "$(date -u +%H:%M:%SZ) retry $i after a failed step (exit $?)" >&2; sleep 30; done; return 1; }
+retry "${SSH[@]}" "bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh collect $run >/tmp/fcpi-soak-collect.txt && tail -1 /tmp/fcpi-soak-collect.txt | grep -qx '### end'"
+retry scp -q -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=15 "$PI_SSH_TARGET:/tmp/fcpi-soak-collect.txt" "$R/soak.txt"
+[ "$(retry "${SSH[@]}" 'sha256sum /tmp/fcpi-soak-collect.txt' | cut -c1-64)" = "$(shasum -a 256 "$R/soak.txt" | cut -c1-64)" ] || { echo "the soak record copied differs from the Pi's" >&2; exit 1; }
+retry "${SSH[@]}" 'rm -f /tmp/fcpi-soak-collect.txt'
+retry "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-redis.sh stats' >"$R/redis-soak.txt"
+retry "${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh stop' >/dev/null
 step close; "$root/scripts/m8/collect-close.sh"
 step done
