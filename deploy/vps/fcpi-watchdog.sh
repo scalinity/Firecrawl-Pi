@@ -10,7 +10,8 @@
 #                      itself, so it is recorded here and not sent
 #   ok                 anything else
 # An incident opens after THRESHOLD consecutive checks of one failing class and is sent once, urgently for a missing
-# heartbeat; it closes after two consecutive ok checks and its recovery is sent once, with the outage's duration. Before
+# heartbeat, and keeps its class and first failure while open, whatever class later failing checks have; it closes
+# after two consecutive ok checks and its recovery is sent once, with the outage's duration. Before
 # anything is sent, this host checks that it can reach ntfy.sh itself; if it cannot, it records that it is offline and
 # claims nothing. The notices go to the owner's ntfy topic (/etc/fcpi-watchdog/ntfy_topic, 0600), inside the JSON body,
 # holding operational metadata only. State: /var/lib/fcpi-watchdog/state (key=value); events.jsonl keeps the last 500.
@@ -56,7 +57,9 @@ send() { # send <title> <message> <priority> <tag> <class>
 
 # ---- the incident ------------------------------------------------------------------------------------------------------
 if [ "$this" = heartbeat_missing ] || [ "$this" = monitor_stale ]; then
-  if [ "$fails" = 0 ] || [ "$cls" != "$this" ]; then fails=0 first_fail=$now cls=$this; fi
+  # An open incident keeps its class and first failure until it clears: a Pi coming back from an outage can report a
+  # stale tick for a minute, which is the same outage, not a new one.
+  if [ "$open" = 0 ] && { [ "$fails" = 0 ] || [ "$cls" != "$this" ]; }; then fails=0 first_fail=$now cls=$this; fi
   fails=$((fails + 1)) goods=0 last_fail=$now
   if [ "$open" = 0 ] && [ "$fails" -ge "$THRESHOLD" ]; then
     if ! observer_ok; then event "\"event\":\"observer_offline\",\"class\":\"$this\",\"note\":\"this host cannot reach ntfy.sh; nothing is claimed\""
