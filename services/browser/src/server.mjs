@@ -37,7 +37,7 @@ const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), s
 
 let browser = null, launchedAt = 0, pagesServed = 0, busy = false, launches = 0;
 
-async function launch() {
+async function launch(run) {
   const t = Date.now();
   const b = await chromium.launch({
     headless: true,
@@ -48,6 +48,8 @@ async function launch() {
     args: ["--force-webrtc-ip-handling-policy=disable_non_proxied_udp", "--webrtc-ip-handling-policy=disable_non_proxied_udp"],
     timeout: 30000,
   });
+  // A render abandoned while this launch ran must not install it over a successor's browser.
+  if (run?.abandoned) { await Promise.race([b.close().catch(() => {}), new Promise((r) => setTimeout(r, CLOSE_GRACE_MS))]); return; }
   browser = b;
   launchedAt = Date.now(); pagesServed = 0; launches++;
   // Only this instance's own disconnect clears it: a retired browser that disconnects late must not
@@ -77,9 +79,9 @@ async function retire(reason) {
   log({ event: "browser_retired", reason, killed });
 }
 
-async function ensureBrowser() {
+async function ensureBrowser(run) {
   if (browser && (pagesServed >= RECYCLE_PAGES || Date.now() - launchedAt >= RECYCLE_MS)) await retire("recycle");
-  if (!browser) await launch();
+  if (!browser) await launch(run);
 }
 
 // The page is settled when its visible text has stopped changing for a second, or when the
@@ -166,13 +168,34 @@ async function capture(page, fullPage, timeout) {
 
 // signal: aborted when the retrieval service stops waiting (its caller went away); the render then
 // ends at once, through the same close-or-retire path as a deadline.
+// The whole render, its launch and context included, is bounded: Chromium lost as a render starts (before its context
+// and deadline timer exist) can leave a Playwright call that never settles, and the worker would answer 429 for good.
+// Past the deadline and both grace periods the render is abandoned and the browser retired; the render is the only one
+// (busy), so the browser retired is its own, and an abandoned render never retires one later, when a successor may run.
 async function render(r, signal) {
   const started = Date.now();
   const deadline = started + Math.min(Number(r.deadlineMs) || 0, r.limits?.contextMaxMs ?? CONTEXT_MAX_MS, CONTEXT_MAX_MS);
+  const run = { abandoned: false };
+  let stop;
+  const hard = new Promise((res) => { stop = setTimeout(res, Math.max(deadline - Date.now(), 1) + 2 * CLOSE_GRACE_MS + 1000); });
+  const job = renderWithin(r, signal, started, deadline, run);
+  job.catch(() => {});
+  try {
+    const out = await Promise.race([job, hard]);
+    if (out !== undefined) return out;
+  } finally {
+    clearTimeout(stop);
+  }
+  run.abandoned = true;
+  await retire("render did not end");
+  return { ok: false, failure: { class: "BROWSER_CRASHED", detail: "the render did not end after its browser was lost; the browser was retired" }, timings: { totalMs: Date.now() - started } };
+}
+
+async function renderWithin(r, signal, started, deadline, run) {
   const wantsExtras = !!r.hooks?.screenshot || (r.hooks?.actions ?? []).length > 0;
   if (wantsExtras && !EXTRAS) return { ok: false, failure: { class: "UNSUPPORTED_CAPABILITY", detail: "screenshots and actions are not enabled in this release" } };
   const maxSub = Math.min(Number(r.limits?.maxSubresources) || 200, 200);
-  await ensureBrowser();
+  await ensureBrowser(run);
   // actionNavigations: main-frame loads the actions started (a same-host click that opens a new document), reported so the
   // retrieval service counts each against the domain as it counts the first (review W6).
   const counters = { requests: 0, blocked: 0, overLimit: 0, offHost: 0, actionNavigations: 0 };
@@ -194,7 +217,7 @@ async function render(r, signal) {
   let closing = null;
   const closeNow = () => (closing ??= (async () => {
     const closed = await Promise.race([context.close().then(() => true, () => true), new Promise((res) => setTimeout(() => res(false), CLOSE_GRACE_MS))]);
-    if (!closed) await retire("context did not close");
+    if (!closed && !run.abandoned) await retire("context did not close");
   })());
   const killer = setTimeout(() => { expired = true; closeNow(); }, Math.max(deadline - Date.now(), 1));
   const onAbort = () => { cancelled = true; clearTimeout(killer); closeNow(); };
