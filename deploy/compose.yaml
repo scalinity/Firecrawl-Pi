@@ -468,8 +468,8 @@ services:
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
-    mem_limit: 64m
-    memswap_limit: 64m
+    mem_limit: 96m
+    memswap_limit: 96m
     cpus: 0.1
     pids_limit: 32
     healthcheck:
@@ -734,8 +734,8 @@ services:
     read_only: true
     cap_drop: [ALL]
     security_opt: [no-new-privileges:true]
-    mem_limit: 64m
-    memswap_limit: 64m
+    mem_limit: 96m
+    memswap_limit: 96m
     cpus: 0.1
     pids_limit: 32
     healthcheck:
