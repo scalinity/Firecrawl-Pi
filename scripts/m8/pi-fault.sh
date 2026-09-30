@@ -149,7 +149,29 @@ browser_crash)
     [ $(( $(now_s) - t0 )) -ge 60 ] && break; sleep 5
   done
   out next_render "$(jq -c --argjson s "$(has fcpi-m2-js-5c1e && echo true || echo false)" --arg held "$held" --arg left "$left" --argjson b "$(brief)" --argjson r "$refusals" --argjson t "$tries" --argjson w "$(( $(now_s) - t0 ))" \
-    '. + {sentinel:$s, browser_permits_held:$held, chrome_left_before_next:$left, tries:$t, served_after_s:$w, refusals_before:$r, host:$b}' <<<"$CALL")" ;;
+    '. + {sentinel:$s, browser_permits_held:$held, chrome_left_before_next:$left, tries:$t, served_after_s:$w, refusals_before:$r, host:$b}' <<<"$CALL")"
+  # Chromium killed as a render starts: with the browser up and idle, it is killed 10 ms after the worker reports the
+  # render busy, before the render's context exists. The render must still end (a typed answer), and a render be served
+  # again within 90 s, every refusal before it typed.
+  docker exec --user 3320 "$b" node -e '
+    const fs = require("fs"), [h, p] = process.env.PI_BROWSER_LISTEN.split(":");
+    const kill = () => { let n = 0; for (const d of fs.readdirSync("/proc").filter((x) => /^\d+$/.test(x))) { try { if (/chrome-headless-shell/.test(fs.readFileSync(`/proc/${d}/cmdline`, "utf8"))) { process.kill(+d, "SIGKILL"); n++; } } catch {} } return n; };
+    (async () => { const end = Date.now() + 60000; let seen = false; while (Date.now() < end) { try { if ((await (await fetch(`http://${h}:${p}/healthz`)).json()).busy) { seen = true; break; } } catch {} await new Promise((r) => setTimeout(r, 3)); }
+      await new Promise((r) => setTimeout(r, 10)); console.log(seen ? kill() : 0); })();' >"$RUND/fault-browser-start.txt" 2>&1 &
+  kp=$!
+  sleep 1
+  call POST /v2/scrape "{\"url\":\"$M2/js-hold.html?k=m8s-$RANDOM\",\"formats\":[\"markdown\"]}"; killed=$CALL
+  wait $kp; n1=$(tr -dc 0-9 <"$RUND/fault-browser-start.txt"); rm -f "$RUND/fault-browser-start.txt"
+  t0=$(now_s) tries=0 refusals='[]'
+  while :; do
+    tries=$((tries + 1)); call POST /v2/scrape "{\"url\":\"$M2/js.html?f=m8s-$RANDOM\",\"formats\":[\"markdown\"]}"
+    has fcpi-m2-js-5c1e && break
+    refusals=$(jq -c --argjson c "$CALL" '. + [$c | {status, class, code}]' <<<"$refusals")
+    [ $(( $(now_s) - t0 )) -ge 90 ] && break; sleep 5
+  done
+  out start_killed "$(jq -cn --argjson k "$killed" --arg n "${n1:-0}" --argjson s "$(has fcpi-m2-js-5c1e && echo true || echo false)" --argjson c "$CALL" \
+    --argjson r "$refusals" --argjson t "$tries" --argjson w "$(( $(now_s) - t0 ))" \
+    '{chrome_processes_killed:($n | tonumber), killed:$k, next:($c + {sentinel:$s}), tries:$t, served_after_s:$w, refusals_before:$r}')" ;;
 
 searxng_down)
   "${C[@]}" stop searxng >/dev/null 2>&1

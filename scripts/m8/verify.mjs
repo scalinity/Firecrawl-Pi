@@ -467,13 +467,15 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; submit ${JSON.stringify(s)}; scrape ${JSON.stringify(sc)}; job ${JSON.stringify(j?.job)}` };
     } }])),
   I07: { name: "browser-crash-contained", inputs: [`${RAW}faults.txt`],
-    expected: "Chromium killed during a render: the render's answer is a typed failure, never 502; no browser permit is left held and no Chromium process is left; while the worker relaunches its browser any refusal is typed and retryable, and a script-rendered page renders within a minute; the data services stay healthy",
+    expected: "Chromium killed during a render: the render's answer is a typed failure, never 502; no browser permit is left held and no Chromium process is left; while the worker relaunches its browser any refusal is typed and retryable, and a script-rendered page renders within a minute; the data services stay healthy; Chromium killed as a render starts (10 ms after the worker reports it busy, before its context exists): that render still ends with a typed answer, never 502, and a script-rendered page is served again within 90 s, every refusal before it typed",
     run() {
-      const k = step("browser_crash", "render_killed"), n = step("browser_crash", "next_render");
+      const k = step("browser_crash", "render_killed"), n = step("browser_crash", "next_render"), sk = step("browser_crash", "start_killed");
       const cond = { killed: k?.chrome_processes_killed >= 1 && !/^502 /.test(k.answer), permits: n?.browser_permits_held === "0", processes: n?.chrome_left_before_next === "0",
         next: n?.status === 200 && n.sentinel === true && n.served_after_s <= 60 && (n.refusals_before ?? []).every((r) => r.status !== 502 && r.class),
-        data_services: !(n?.host?.not_healthy ?? ["?"]).some((s) => ["nuq-postgres", "redis", "rabbitmq"].includes(s)) };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; killed ${JSON.stringify(k)}; next ${JSON.stringify({ status: n?.status, sentinel: n?.sentinel, permits: n?.browser_permits_held, left: n?.chrome_left_before_next, tries: n?.tries, served_after_s: n?.served_after_s, refusals: n?.refusals_before })}` };
+        data_services: !(n?.host?.not_healthy ?? ["?"]).some((s) => ["nuq-postgres", "redis", "rabbitmq"].includes(s)),
+        start_killed: sk?.chrome_processes_killed >= 1 && !!sk.killed?.status && sk.killed.status !== 502 && (sk.killed.status === 200 || !!sk.killed.class)
+          && sk.next?.status === 200 && sk.next.sentinel === true && sk.served_after_s <= 90 && (sk.refusals_before ?? []).every((r) => r.status !== 502 && r.class) };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; killed ${JSON.stringify(k)}; next ${JSON.stringify({ status: n?.status, sentinel: n?.sentinel, permits: n?.browser_permits_held, left: n?.chrome_left_before_next, tries: n?.tries, served_after_s: n?.served_after_s, refusals: n?.refusals_before })}; start_killed ${JSON.stringify({ killed: sk?.chrome_processes_killed, answer: sk?.killed && { status: sk.killed.status, class: sk.killed.class }, next: sk?.next?.status, sentinel: sk?.next?.sentinel, served_after_s: sk?.served_after_s, refusals: (sk?.refusals_before ?? []).length })}` };
     } },
   I08: { name: "search-outage-isolated-and-not-resurrected", inputs: [`${RAW}faults.txt`],
     expected: "with SearXNG stopped: search answers a typed failure, not an empty success, never 502; scrape, map and crawl still work; the supervisor does not start the stopped service (three ticks later it is still exited) and fcpi status shows search not ready while the core is; started again, search returns results",
