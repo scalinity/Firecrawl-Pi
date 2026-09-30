@@ -5,7 +5,7 @@
 #                              (/var/lib/firecrawl-pi/soak/current.json), installs and starts fcpi-soak.service
 #   pi-soak.sh status          the run's window and its log's counts by class and verdict
 #   pi-soak.sh stop            stops and removes the unit, restores the selection recorded at start
-#   pi-soak.sh collect <run>   prints the run's log, then the host samples, probes and notices inside its window, each in
+#   pi-soak.sh collect <run>   prints the run's log, then the host samples, probes, notices, supervisor restarts and backup runs inside its window, each in
 #                              its own section, for evidence/M8/raw/soak/
 set -euo pipefail
 . /opt/firecrawl-pi/scripts/ops/lib.sh
@@ -43,6 +43,9 @@ case ${1:-} in
     echo "### probes"; cat "$LOGD"/probe/*.jsonl | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
     echo "### notices"; cat "$STATE"/alerts/outbox/*.json 2>/dev/null | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
     echo "### supervisor"; jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)' "$STATE/supervisor/restarts.jsonl" 2>/dev/null || true
+    # Each backup run that ended in the window: its start (the run's name) and end bound its hold, which the minute samples
+    # can miss entirely when the quiescence is shorter than a minute.
+    echo "### backups"; jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e) | {run, utc, result, quiesce_s}' "$STATE/backup/history.jsonl" 2>/dev/null || true
     echo "### end" ;;
   *) die "usage: pi-soak.sh start <hours> | status | stop | collect <run>" ;;
 esac

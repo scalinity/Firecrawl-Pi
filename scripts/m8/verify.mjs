@@ -614,9 +614,13 @@ const checks = {
       const reqs = log.filter((r) => !["missed", "end"].includes(r.class));
       // A request refused during a backup's hold is the backup's designed pause (spec §26): 503 HOST_PRESSURE while the
       // gateway runs, or no answer at all (status 0) once the quiescence has stopped it. Any other failure is unexplained.
+      // The hold is placed by a sample that saw it, or by the backup run's own start and end (a quiescence shorter than a
+      // minute can fall between two samples).
       const held = new Set(smp.filter((s) => (s.admission?.reasons ?? []).some((x) => /^hold:backup$/.test(x))).map((s) => s.utc.slice(0, 16)));
       const near = (u) => { const t = Date.parse(u); return [-2, -1, 0, 1, 2].some((d) => held.has(new Date(t + d * 60000).toISOString().slice(0, 16))); };
-      const failed = reqs.filter((r) => !r.ok), explained = failed.filter((r) => near(r.utc) && (r.code === "HOST_PRESSURE" || r.status === 0)), unexplained = failed.filter((r) => !explained.includes(r));
+      const runs = (SOAK().backups ?? []).map((b) => { const m = /^(\d{4})(\d\d)(\d\d)T(\d\d)(\d\d)(\d\d)Z$/.exec(b.run ?? ""); return m ? [Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]), Date.parse(b.utc)] : null; }).filter(Boolean);
+      const during = (u) => { const t = Date.parse(u); return runs.some(([a, z]) => t >= a && t <= z); };
+      const failed = reqs.filter((r) => !r.ok), explained = failed.filter((r) => (near(r.utc) || during(r.utc)) && (r.code === "HOST_PRESSURE" || r.status === 0)), unexplained = failed.filter((r) => !explained.includes(r));
       const byClass = (c) => reqs.filter((r) => r.class === c && r.ok).map((r) => r.ms);
       const p95 = { static: pct(byClass("static"), 95), js: pct(byClass("js"), 95), status: pct(byClass("status"), 95), mcp_list: pct(byClass("mcp_list"), 95) };
       const perInst = new Map(); for (const s of smp) for (const c of s.containers ?? []) if (c.project === "fcpi") { const k = `${c.service}/${c.id}`; const v = perInst.get(k) ?? []; v.push(c.oom_kill ?? 0); perInst.set(k, v); }
