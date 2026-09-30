@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Resolve M8's entries in deploy/versions.lock.json from M8 evidence, starting from the lock as M7 closed it (at 19f047f),
 // so a re-run resolves the same entries the same way. M8 owns: the retrieval and gateway images rebuilt on the Pi (host
-// admission), restic (Debian's package, the one host package M8 installs) with its binary's hash, the project's host
-// units, slice, timers and tmpfiles entry by hash, the PostgreSQL write settings and the Redis ACL M8 measured, and the
-// capability manifest's hash. Entries owned by other milestones are left as M7 wrote them.
+// admission) and the browser worker's (a render whose browser is lost as it starts is bounded), restic (Debian's
+// package, the one host package M8 installs) with its binary's hash, the project's host units, slice, timers and
+// tmpfiles entry by hash, the PostgreSQL write settings and the Redis ACL M8 measured, and the capability manifest's hash.
+// Entries owned by other milestones are left as M7 wrote them.
 //   node scripts/m8/build-lock.mjs
 import { readFileSync, writeFileSync, readdirSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -23,16 +24,20 @@ const running = (svc) => need((compose.services[svc]?.image ?? "").match(/@(sha2
 const build = read(`${EV}raw/image-build.txt`);
 const packagesOf = (dir) => Object.fromEntries(Object.entries(JSON.parse(read(`${dir}/package-lock.json`)).packages).filter(([k, v]) => k && !v.dev)
   .map(([k, v]) => [k.replace(/^node_modules\//, ""), { version: need(v.version, k), integrity: need(v.integrity, `${k}'s integrity`) }]));
-const image = (svc, tag, dir, key, role) => {
+// dockerfile and base: where the image's Dockerfile is and how its digest-pinned FROM is recorded ({key, re}).
+const NODE_BASE = { key: "base", re: /^FROM (node:22\.23\.3-bookworm-slim@sha256:[0-9a-f]{64})$/m };
+const image = (svc, tag, dir, key, role, dockerfile = `${dir}/Dockerfile`, from = NODE_BASE) => {
   const id = running(svc);
   need([...build.matchAll(new RegExp(`^fcpi/${tag}:m8 id=(sha256:[0-9a-f]{64}) os=linux arch=arm64 `, "gm"))].at(-1)?.[1] === id ? true : null, `${svc} running its last recorded build`);
   const commit = need([...build.matchAll(new RegExp(`^fcpi/${tag}:m8 FCPI_SOURCE_COMMIT=([0-9a-f]{40})$`, "gm"))].at(-1)?.[1], `the commit ${svc}'s image records`);
-  const base = need(read(`${dir}/Dockerfile`).match(/^FROM (node:22\.23\.3-bookworm-slim@sha256:[0-9a-f]{64})$/m)?.[1], `${svc}'s digest-pinned base`);
-  lock.images[key] = { ...lock.images[key], role, status: "selected", image_id: id, platform: "linux/arm64", base, built_from_commit: commit,
-    dockerfile: { path: `${dir}/Dockerfile`, sha256: sha256File(`${dir}/Dockerfile`) }, lockfile: { path: `${dir}/package-lock.json`, sha256: sha256File(`${dir}/package-lock.json`) }, packages: packagesOf(dir), evidence: `${EV}raw/image-build.txt` };
+  const base = need(read(dockerfile).match(from.re)?.[1], `${svc}'s digest-pinned base`);
+  lock.images[key] = { ...lock.images[key], role, status: "selected", image_id: id, platform: "linux/arm64", [from.key]: base, built_from_commit: commit,
+    dockerfile: { path: dockerfile, sha256: sha256File(dockerfile) }, lockfile: { path: `${dir}/package-lock.json`, sha256: sha256File(`${dir}/package-lock.json`) }, packages: packagesOf(dir), evidence: `${EV}raw/image-build.txt` };
 };
 image("retrieval-service", "retrieval", "services/retrieval", "retrieval", "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission");
 image("access-gateway", "access-gateway", "services/access", "access_gateway", "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work");
+image("browser-worker", "browser", "services/browser", "browser_worker", "The browser-worker image (built on the Pi, natively linux/arm64), with the action subset and screenshots since M7, and since M8 a render bounded whole when its browser is lost as it starts",
+  "deploy/browser/Dockerfile", { key: "base_manifest_digest", re: /^FROM mcr\.microsoft\.com\/playwright@(sha256:[0-9a-f]{64})$/m });
 
 // restic, as the init transcript recorded it on the Pi.
 const init = sections(`${EV}raw/init-m8.txt`);
@@ -55,4 +60,4 @@ lock.generated_utc = new Date().toISOString().replace(/\.\d+Z$/, "Z");
 lock.repository_sha = repo.repository_sha;
 lock.worktree_dirty = repo.worktree_dirty;
 writeFileSync(resolve(ROOT, LOCK), JSON.stringify(lock, null, 2) + "\n");
-console.log(`lock: retrieval ${lock.images.retrieval.image_id.slice(7, 19)}, gateway ${lock.images.access_gateway.image_id.slice(7, 19)}, restic ${lock.host_packages.restic.version}, host units ${Object.keys(lock.host_units).length}, postgres settings ${lock.images.nuq_postgres.runtime_settings.length}`);
+console.log(`lock: retrieval ${lock.images.retrieval.image_id.slice(7, 19)}, gateway ${lock.images.access_gateway.image_id.slice(7, 19)}, browser ${lock.images.browser_worker.image_id.slice(7, 19)}, restic ${lock.host_packages.restic.version}, host units ${Object.keys(lock.host_units).length}, postgres settings ${lock.images.nuq_postgres.runtime_settings.length}`);

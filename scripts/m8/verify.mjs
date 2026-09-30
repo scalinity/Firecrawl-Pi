@@ -277,7 +277,7 @@ const checks = {
   // Fails: an M8 image not built from a clean commit whose service directory is unchanged to HEAD, a running image that is
   // not the Compose file's, or a record naming a deployed commit that differs from HEAD in what the Pi runs.
   G01: { name: "images-built-and-running-deployed-code-is-head", inputs: [`${RAW}image-build.txt`, `${EV}rendered-compose.json`, `${RAW}stack.txt`, "deploy/versions.lock.json", "evidence/M7/raw/api-build.log"],
-    expected: "the retrieval and gateway images the stack runs are their last builds on the Pi, each recording the commit it was built from, whose source directories are unchanged to HEAD; the API, MCP and browser images are M7's, their sources (and the patch series) unchanged since the commits that built them; every deployed commit a record names differs from HEAD in nothing the Pi runs",
+    expected: "the retrieval, gateway and browser-worker images the stack runs are their last builds on the Pi, each recording the commit it was built from, whose source directories are unchanged to HEAD; the API and MCP images are M7's, their sources (and the patch series) unchanged since the commits that built them; every deployed commit a record names differs from HEAD in nothing the Pi runs",
     run() {
       const build = read(`${RAW}image-build.txt`), st = S(`${RAW}stack.txt`), L = json("deploy/versions.lock.json");
       const running = (s) => (st.containers ?? []).find((l) => l.startsWith(`${s} `))?.match(/ image=(sha256:[0-9a-f]{64}) /)?.[1];
@@ -291,13 +291,13 @@ const checks = {
       const deployed = [...new Set([kv(st.meta ?? []).source_commit, ...metas].filter(Boolean))];
       const cond = { deployed_code_is_head: deployed.length >= 1 && deployed.every(runsSame),
         api: running("firecrawl-core") === L.images.firecrawl_api_patched.image_id && digestOf(composeImage("firecrawl-core")) === L.images.firecrawl_api_patched.image_id && !!apiCommit && dirSame(apiCommit, "patches"),
-        mcp: running("mcp-gateway") === L.images.mcp_gateway.image_id && dirSame(L.images.mcp_gateway.built_from_commit, "services/mcp"),
-        browser: running("browser-worker") === L.images.browser_worker.image_id && dirSame(L.images.browser_worker.built_from_commit, "services/browser", "deploy/browser") };
-      for (const [svc, img, dirs, uid] of [["retrieval-service", "retrieval", ["services/retrieval"], "3310:3310"], ["access-gateway", "access-gateway", ["services/access"], "3380:3380"]]) {
+        mcp: running("mcp-gateway") === L.images.mcp_gateway.image_id && dirSame(L.images.mcp_gateway.built_from_commit, "services/mcp") };
+      for (const [svc, img, dirs, uid] of [["retrieval-service", "retrieval", ["services/retrieval"], "3310:3310"], ["access-gateway", "access-gateway", ["services/access"], "3380:3380"],
+        ["browser-worker", "browser", ["services/browser", "deploy/browser"], "3320:3320"]]) {
         const l = last(img), c = builtFrom(img);
         cond[`${img}_built_runs_unchanged`] = !!l && l[2] === uid && running(svc) === l[1] && digestOf(composeImage(svc)) === l[1] && !!c && dirSame(c, ...dirs);
       }
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; deployed commits=${deployed.map((c) => c.slice(0, 7)).join(",")}; retrieval ${last("retrieval")?.[1].slice(7, 19)} from ${builtFrom("retrieval")?.slice(0, 7)}, gateway ${last("access-gateway")?.[1].slice(7, 19)} from ${builtFrom("access-gateway")?.slice(0, 7)}` };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; deployed commits=${deployed.map((c) => c.slice(0, 7)).join(",")}; retrieval ${last("retrieval")?.[1].slice(7, 19)} from ${builtFrom("retrieval")?.slice(0, 7)}, gateway ${last("access-gateway")?.[1].slice(7, 19)} from ${builtFrom("access-gateway")?.slice(0, 7)}, browser ${last("browser")?.[1].slice(7, 19)} from ${builtFrom("browser")?.slice(0, 7)}` };
     } },
   // Fails: a failing or skipped test, fewer tests than the suites hold, a bash script that does not parse, a restore copy
   // naming a production host path (or a control naming none), a leftover
