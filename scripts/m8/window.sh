@@ -40,7 +40,7 @@ cand=$("${SSH[@]}" 'ls -1d /opt/firecrawl-pi-candidate/19f047f* | head -1')
 "${SSH[@]}" "sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-plans.sh $cand" >"$R/plans.txt" 2>&1
 step soak; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-redis.sh reset' >/dev/null
 run=$("${SSH[@]}" "bash /opt/firecrawl-pi/scripts/m8/pi-soak.sh start $H" | sed -n '/^{/,$p' | jq -r .run)   # the JSON after the selection line
-until "${SSH[@]}" "sudo -n grep -q '\"class\":\"end\"' /var/log/firecrawl-pi/soak/$run.jsonl" 2>/dev/null; do sleep 120; done
+until "${SSH[@]}" "sudo -n grep -a -q '\"class\":\"end\"' /var/log/firecrawl-pi/soak/$run.jsonl" 2>/dev/null; do sleep 120; done   # -a: a file a power cut left NULs in is still text
 # The soak's record is several megabytes, and a long session over the Pi's Wi-Fi can drop: it is written on the Pi, copied
 # over and checked against the Pi's own hash. These steps only read (the stop only removes the soak's unit), so each is
 # tried again after a dropped connection; the note of a retry goes to this log, never into the evidence.

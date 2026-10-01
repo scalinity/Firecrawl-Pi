@@ -84,7 +84,7 @@ worker_child_crash)
   # A hung NuQ worker (SIGSTOP), the degraded state spec §24.1 names: its health endpoint stops answering while the API
   # stays live. The harness does not see a stopped child, so recovery is the supervisor's restart of the core once
   # Docker marks it unhealthy. (A worker killed outright makes the harness stop the whole core, as api_child_crash shows.)
-  c=$(svc firecrawl-core); r0=$(restarts firecrawl-core); sup0=$(jq -c 'select(.service == "firecrawl-core")' "$STATE/supervisor/restarts.jsonl" 2>/dev/null | wc -l)
+  c=$(svc firecrawl-core); r0=$(restarts firecrawl-core); sup0=$(jsonl "$STATE/supervisor/restarts.jsonl" | jq -c 'select(.service == "firecrawl-core")' | wc -l)
   out before "$(jq -cn --argjson b "$(brief)" --arg t "$(docker top "$c" -eo pid,args | awk 'NR > 1 {$1=""; print}' | sort | uniq -c | tr -s ' ' | tr '\n' ';')" '{status:$b, processes:$t}')"
   p=$(docker top "$c" -eo pid,args | awk '$2 == "node" && $3 == "dist/src/services/worker/nuq-worker.js" && NF == 3 {print $1}' | head -1)
   [ -n "$p" ] || { out no_worker_process '{}'; exit 1; }
@@ -93,7 +93,7 @@ worker_child_crash)
   out detected "$(jq -cn --argjson s "$s" --argjson b "$(brief)" '{worker_down_seen_after_s:$s, status:$b}')"
   s=$(until_ 600 ready)
   out recovered "$(jq -cn --argjson s "$s" --argjson r "$(restarts firecrawl-core)" --argjson r0 "$r0" --argjson b "$(brief)" \
-    --argjson sup "$(( $(jq -c 'select(.service == "firecrawl-core")' "$STATE/supervisor/restarts.jsonl" 2>/dev/null | wc -l) - sup0 ))" '{ready_after_s:$s, container_restarts_delta:($r - $r0), supervisor_restarts:$sup, status:$b}')"
+    --argjson sup "$(( $(jsonl "$STATE/supervisor/restarts.jsonl" | jq -c 'select(.service == "firecrawl-core")' | wc -l) - sup0 ))" '{ready_after_s:$s, container_restarts_delta:($r - $r0), supervisor_restarts:$sup, status:$b}')"
   crawl; out job_after "$(jq -cn --argjson j "$(wait_job "$JOB" 600)" '{job:$j}')" ;;
 
 postgres_down)

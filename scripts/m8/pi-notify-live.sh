@@ -28,7 +28,7 @@ for _ in 1 2 3; do sleep 15; tick; done                  # further ticks while i
 rm -f "$RUND/inject/temp_c"
 waitfor 420 '[ -n "$(notices cleared)" ]'
 for _ in 1 2 3 4 5 6; do [ "$( { notices opened; notices cleared; } | jq -s 'map(select(.delivered)) | length')" = 2 ] && break; sleep 10; tick; done
-hot=$(jq -c --arg t "$t0" 'select(.utc >= $t and .injected_temp == true)' "$LOGD/samples/$(date -u +%F).jsonl" 2>/dev/null | wc -l)
+hot=$(jsonl "$LOGD/samples/$(date -u +%F).jsonl" | jq -c --arg t "$t0" 'select(.utc >= $t and .injected_temp == true)' | wc -l)
 echo "### delivered"
 { notices opened; notices cleared; } | jq -c '{id, kind, incident, incident_id, delivered, attempts}'
 # What ntfy's server holds for the topic since the window began, as the phone would receive it: each message's id, time,

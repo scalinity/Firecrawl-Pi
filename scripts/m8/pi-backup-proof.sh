@@ -33,7 +33,7 @@ bash "$REPO/scripts/ops/status.sh" --json | jq -c '{healthy, rest: .rest.ready, 
 sleep 180
 echo "### notices_across_backup"
 opened=$(for f in "$STATE"/alerts/outbox/*.json; do [ -f "$f" ] && jq -c --arg a "$t_b0" 'select(.kind == "opened" and .utc >= $a) | .incident' "$f"; done 2>/dev/null | jq -sc .)
-ticks=$(cat "$LOGD/samples/$(date -u -d yesterday +%F).jsonl" "$LOGD/samples/$(date -u +%F).jsonl" 2>/dev/null \
+ticks=$(jsonl "$LOGD/samples/$(date -u -d yesterday +%F).jsonl" "$LOGD/samples/$(date -u +%F).jsonl" \
   | jq -c --arg a "$t_b0" --arg b "$t_b1" 'select(.utc >= $a and .utc <= $b and ((.admission.reasons // []) | index("hold:backup")))' | wc -l)
 jq -cn --arg a "$t_b0" --arg b "$t_b1" --argjson o "${opened:-[]}" --argjson t "$ticks" '{from:$a, to:$b, opened:$o, ticks_seeing_hold:$t}'
 echo "### restore_test"

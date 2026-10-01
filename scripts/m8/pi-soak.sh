@@ -25,7 +25,7 @@ case ${1:-} in
     cat "$D/current.json" ;;
   status)
     cat "$D/current.json"; systemctl is-active fcpi-soak.service || true
-    run=$(jq -r .run "$D/current.json"); jq -r '"\(.class) \(.ok)"' "$LOGD/soak/$run.jsonl" 2>/dev/null | sort | uniq -c ;;
+    run=$(jq -r .run "$D/current.json"); jsonl "$LOGD/soak/$run.jsonl" | jq -r '"\(.class) \(.ok)"' | sort | uniq -c ;;
   stop)
     systemctl disable --now fcpi-soak.service 2>/dev/null || true
     rm -f /etc/systemd/system/fcpi-soak.service; systemctl daemon-reload
@@ -38,14 +38,22 @@ case ${1:-} in
     run=${2:?run}; c=$D/current.json
     s=$(jq -r .start_utc "$c") e=$(jq -r .end_utc "$c")
     echo "### meta"; jq -c '. + {collected_utc: (now | todate)}' "$c"
-    echo "### soak_log"; cat "$LOGD/soak/$run.jsonl"
-    echo "### samples"; cat "$LOGD"/samples/*.jsonl | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
-    echo "### probes"; cat "$LOGD"/probe/*.jsonl | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
-    echo "### notices"; cat "$STATE"/alerts/outbox/*.json 2>/dev/null | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
-    echo "### supervisor"; jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)' "$STATE/supervisor/restarts.jsonl" 2>/dev/null || true
+    # Every log is read through jsonl: a line a power cut damaged is dropped, never everything after it; "damage" says
+    # how much each file held, so a dropped line is visible in the record.
+    echo "### damage"
+    for f in "$LOGD/soak/$run.jsonl" "$LOGD"/samples/*.jsonl "$LOGD"/probe/*.jsonl "$STATE/supervisor/restarts.jsonl" "$STATE/backup/history.jsonl"; do
+      [ -f "$f" ] || continue
+      z=$(tr -cd '\000' <"$f" | wc -c) n=$(tr -d '\000' <"$f" | grep -c .) k=$(jsonl "$f" | wc -l)
+      if (( z > 0 || n != k )); then jq -cn --arg f "${f#"$LOGD"/}" --argjson z "$z" --argjson d $((n - k)) '{file:$f, nul_bytes:$z, lines_dropped:$d}'; fi
+    done
+    echo "### soak_log"; jsonl "$LOGD/soak/$run.jsonl"
+    echo "### samples"; jsonl "$LOGD"/samples/*.jsonl | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
+    echo "### probes"; jsonl "$LOGD"/probe/*.jsonl | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
+    echo "### notices"; jsonl "$STATE"/alerts/outbox/*.json | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
+    echo "### supervisor"; jsonl "$STATE/supervisor/restarts.jsonl" | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e)'
     # Each backup run that ended in the window: its start (the run's name) and end bound its hold, which the minute samples
     # can miss entirely when the quiescence is shorter than a minute.
-    echo "### backups"; jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e) | {run, utc, result, quiesce_s}' "$STATE/backup/history.jsonl" 2>/dev/null || true
+    echo "### backups"; jsonl "$STATE/backup/history.jsonl" | jq -c --arg s "$s" --arg e "$e" 'select(.utc >= $s and .utc <= $e) | {run, utc, result, quiesce_s}'
     echo "### end" ;;
   *) die "usage: pi-soak.sh start <hours> | status | stop | collect <run>" ;;
 esac

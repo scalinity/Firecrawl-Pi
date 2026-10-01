@@ -17,7 +17,8 @@ VPS_SSH_KEY=${VPS_SSH_KEY/\$HOME/$HOME} VPS_KNOWN_HOSTS=${VPS_KNOWN_HOSTS/\$HOME
 P=(ssh -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes "$PI_SSH_TARGET")
 V=(ssh -i "$VPS_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$VPS_KNOWN_HOSTS" "$VPS_SSH_TARGET")
 utc() { date -u +%Y-%m-%dT%H:%M:%SZ; }
-events() { "${V[@]}" "cat /var/lib/fcpi-watchdog/events.jsonl 2>/dev/null" | jq -c --arg t "$t0" 'select(.utc >= $t)'; }
+# Read line by line (NULs dropped, damaged lines skipped), so one bad line cannot hide the events after it.
+events() { "${V[@]}" "cat /var/lib/fcpi-watchdog/events.jsonl 2>/dev/null" | tr -d '\000' | jq -cR --arg t "$t0" 'fromjson? | objects | select(.utc >= $t)'; }
 waitfor() { local end=$(( $(date +%s) + $1 )); while [ "$(date +%s)" -lt "$end" ]; do events | jq -e "select(.event == \"$2\")" >/dev/null 2>&1 && return 0; sleep 20; done; return 1; }
 t0=$(utc)
 echo "### meta"
