@@ -7,7 +7,8 @@
 #   3. /etc/tmpfiles.d/fcpi.conf, applied now (the admission directory the gateway and the retrieval service mount);
 #   4. the project's systemd units: fcpi.slice (no swap, re-asserted at every reload: M4 F2), the tick, probe, boot-record,
 #      backup, backup-check and restore-test units and timers, and fcpi-stack.service (which now reports containers
-#      outside the project: M1 R12); then daemon-reload, and the timers and the boot record enabled;
+#      outside the project: M1 R12), and the repair of docker logs a power cut damaged with docker.service's drop-in that
+#      runs it before every dockerd start; then daemon-reload, and the timers and the boot record enabled;
 #   5. /usr/local/bin/fcpi pointing at the deployed command;
 #   6. the operator's gateway client (label ops, principal operator: read, scrape, map), which the probe, the boot
 #      record and fcpi status use, and the soak's client (label soak, principal soak: every scope), if absent;
@@ -50,6 +51,11 @@ for f in fcpi.slice fcpi-stack.service fcpi-tick.service fcpi-tick.timer fcpi-pr
          fcpi-backup.service fcpi-backup.timer fcpi-backup-check.service fcpi-backup-check.timer fcpi-restore-test.service fcpi-restore-test.timer fcpi-heartbeat.service fcpi-heartbeat.timer; do
   if ! cmp -s $H/$f /etc/systemd/system/$f; then sudo -n install -m 0644 -o root -g root $H/$f /etc/systemd/system/$f; echo "installed $f"; changed=1; fi
 done
+# The repair of docker logs a power cut damaged, run before every dockerd start (deploy/host/fcpi-docker-log-repair.sh).
+if ! sudo -n cmp -s $H/fcpi-docker-log-repair.sh /etc/firecrawl-pi/fcpi-docker-log-repair.sh; then
+  sudo -n install -m 0755 -o root -g root $H/fcpi-docker-log-repair.sh /etc/firecrawl-pi/fcpi-docker-log-repair.sh; echo "installed fcpi-docker-log-repair.sh"; fi
+f=docker.service.d/40-fcpi-docker-log-repair.conf
+if ! cmp -s $H/$f /etc/systemd/system/$f; then sudo -n install -m 0644 -o root -g root $H/$f /etc/systemd/system/$f; echo "installed $f"; changed=1; fi
 [ $changed = 1 ] && sudo -n systemctl daemon-reload && echo "daemon-reload (lifts the swap limit of containers not yet under fcpi.slice until they are recreated)"
 sudo -n systemctl start fcpi.slice
 for t in fcpi-tick.timer fcpi-probe.timer fcpi-backup.timer fcpi-backup-check.timer fcpi-restore-test.timer fcpi-heartbeat.timer; do sudo -n systemctl enable --now "$t" 2>&1 | grep -v '^Created symlink' || true; done
