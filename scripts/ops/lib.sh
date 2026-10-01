@@ -47,6 +47,11 @@ write_atomic() {
 }
 # append_line <path> <line>: one JSON line, the file created 0640.
 append_line() { [ -e "$1" ] || install -m 0640 /dev/null "$1"; printf '%s\n' "$2" >>"$1"; }
+# jsonl <path>...: the JSON objects of JSON-lines files, one per line, whatever a power cut left in them. An append is
+# not atomic: power lost mid-write leaves NUL bytes (blocks allocated, never written) and can leave a partial line, and
+# jq reading such a file stops at the first damaged line, hiding every line after it. NULs are dropped and any line
+# that is not a whole JSON object is skipped. Missing files read as empty.
+jsonl() { cat -- "$@" 2>/dev/null | tr -d '\000' | jq -cR 'fromjson? | objects'; }
 
 # The container of a Compose service of project fcpi (running or not), by label, resolved at each call: an ID resolved
 # before `docker compose up` can be stale after it (CLAUDE.md §33.6).

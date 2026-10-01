@@ -74,7 +74,7 @@ case ${1:-} in
     # the newest that finished before it (so its data is from before any migration) at the previous release's ledger
     # version, where the backup recorded one.
     cutover=$(ls -1 "$RD"/*.json | sort | while read -r f; do [[ $f > $prev ]] && [ "$(jq -r .commit "$f")" = "$(jq -r .commit <<<"$cur")" ] && { jq -r .utc "$f"; break; }; done)
-    hist=$(jq -sc 'map(select(.result == "PASS"))' "$STATE/backup/history.jsonl" 2>/dev/null); [ -n "$hist" ] || hist='[]'
+    hist=$(jsonl "$STATE/backup/history.jsonl" | jq -sc 'map(select(.result == "PASS"))'); [ -n "$hist" ] || hist='[]'
     jq -n --argjson cur "$cur" --argjson prev "$(cat "$prev")" --arg pf "$(basename "$prev")" --arg cut "$cutover" --argjson hist "$hist" '
       ($cur.images | keys + ($prev.images | keys) | unique) as $svcs
       | [ $svcs[] as $s | select($cur.images[$s] != $prev.images[$s]) | {service: $s, from: $cur.images[$s], to: $prev.images[$s]} ] as $moves

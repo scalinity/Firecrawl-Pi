@@ -119,7 +119,7 @@ SUP=$STATE/supervisor/restarts.jsonl
 [ -e "$SUP" ] || install -m 0640 /dev/null "$SUP"
 exhausted=()
 while IFS=$'\t' read -r svc name; do
-  recent=$(jq -r --arg s "$svc" --argjson t $((NOW - 900)) 'select(.service == $s and .epoch >= $t) | .epoch' "$SUP" 2>/dev/null | wc -l)
+  recent=$(jsonl "$SUP" | jq -r --arg s "$svc" --argjson t $((NOW - 900)) 'select(.service == $s and .epoch >= $t) | .epoch' | wc -l)
   if [[ " $SAFE_SERVICES " != *" $svc "* ]] || [ "$recent" -ge 3 ]; then exhausted+=("$svc"); continue; fi
   logger -t fcpi-supervisor -- "restarting $svc (unhealthy; $recent restarts in the last 15 minutes)"
   # Recorded before the restart, so a tick killed during it still counts it against the budget.
@@ -127,8 +127,8 @@ while IFS=$'\t' read -r svc name; do
   timeout 120 docker restart "$name" >/dev/null 2>&1; rc=$?
   logger -t fcpi-supervisor -- "restart of $svc exited $rc"
 done < <(jq -r '.[] | select(.project == "fcpi" and .state == "running" and .health == "unhealthy") | [.service, .name] | @tsv' <<<"$containers")
-# The restart log keeps a day.
-jq -c --argjson t $((NOW - 86400)) 'select(.epoch >= $t)' "$SUP" 2>/dev/null | write_atomic "$SUP" 0640
+# The restart log keeps a day (read through jsonl, so a line a power cut damaged is dropped, not everything after it).
+jsonl "$SUP" | jq -c --argjson t $((NOW - 86400)) 'select(.epoch >= $t)' | write_atomic "$SUP" 0640
 
 # ---- 4. incidents ----------------------------------------------------------------------------------------------------
 last_backup=$(obj "$STATE/backup/last.json")
@@ -218,7 +218,7 @@ if [ -s "$LOGD/samples/$Y.jsonl" ] && ! grep -q "\"day\":\"$Y\"" "$LOGD/daily.js
     card_written_mib: (((map(.card.written_sectors) | max) - (map(.card.written_sectors) | min)) * 512 / 1048576 | floor),
     host_oom_kills: ((map(.host_oom_kill) | max) - (map(.host_oom_kill) | min)),
     peaks: (map(.containers[] | select(.project == "fcpi") | {key: .service, value: (.mem_peak // 0)}) | group_by(.key) | map({key: .[0].key, value: (map(.value) | max)}) | from_entries),
-    max_oldest_queued_s: (map(.queue.oldest_queued_s // 0) | max)}' "$LOGD/samples/$Y.jsonl")
+    max_oldest_queued_s: (map(.queue.oldest_queued_s // 0) | max)}' < <(jsonl "$LOGD/samples/$Y.jsonl"))
   append_line "$LOGD/daily.jsonl" "$agg"
   tail -n 90 "$LOGD/daily.jsonl" | write_atomic "$LOGD/daily.jsonl" 0640
 fi
