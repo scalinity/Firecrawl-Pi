@@ -638,7 +638,7 @@ services:
   # (Docker's default plus chroot, clone and unshare; scripts/m2/build-seccomp.mjs). Its network is
   # internal and holds only itself and the retrieval service, whose proxy is its one way out.
   browser-worker:
-    image: fcpi/browser@sha256:6e3dd0270177b56a758f966e2ee32c37488ca03c33e77d0b62f5cfe3c02419f2
+    image: fcpi/browser@sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549
     platform: linux/arm64
     pull_policy: never
     hostname: browser-worker
