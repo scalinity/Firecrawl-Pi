@@ -32,13 +32,15 @@ want=$(sel)
 if [ "$(sudo -n cat "$F" | jq -c .)" = "$want" ]; then
   echo "selection applied: search=$search model=$model parser=$parser proxy=$proxy enhanced=$enh utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) (unchanged)"; exit 0
 fi
+# The service's log is read from the line it had reached before the write, not from a time: docker's timestamps go back
+# when a power cut restarts the Pi on its last saved clock, and `docker logs --since` then misses the line waited for.
+before=0; [ -z "$C" ] || before=$(sudo -n docker logs "$C" 2>&1 | wc -l)
 tmp=$(sudo -n mktemp /etc/firecrawl-pi/selection/.fcpi-tmp.XXXXXX)
 sel | sudo -n tee "$tmp" >/dev/null
 sudo -n chmod 0644 "$tmp" && sudo -n mv -f "$tmp" "$F"
-since=$(date +%s)
 [ -n "$C" ] || { echo "retrieval-service is not running; the selection applies at its start"; exit 0; }
 for _ in $(seq 1 75); do
-  if sudo -n docker logs --since "$since" "$C" 2>/dev/null | jq -ce --arg s "$search" --arg m "$model" --arg p "$parser" --arg x "$proxy" --arg e "$enh" 'select(.event == "selection_loaded" and .search == $s and .extractionModel == $m and .parser == $p and ((.proxy // "none") == $x) and ((.enhanced // "none") == $e))' 2>/dev/null | grep . >/dev/null; then
+  if sudo -n docker logs "$C" 2>&1 | tail -n +"$((before + 1))" | tr -d '\000' | jq -cR --arg s "$search" --arg m "$model" --arg p "$parser" --arg x "$proxy" --arg e "$enh" 'fromjson? | objects | select(.event == "selection_loaded" and .search == $s and .extractionModel == $m and .parser == $p and ((.proxy // "none") == $x) and ((.enhanced // "none") == $e))' | grep . >/dev/null; then
     echo "selection applied: search=$search model=$model parser=$parser proxy=$proxy enhanced=$enh utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"; exit 0
   fi
   sleep 1

@@ -50,7 +50,7 @@ v=$(docker exec "$(pgc)" psql -X -At -U postgres -d postgres -c "SELECT max(vers
 gw=$(docker ps -aq --filter label=com.docker.compose.project=$P --filter label=com.docker.compose.service=access-gateway)
 docker restart "$gw" >/dev/null 2>&1; sleep 15
 out migrated "$(jq -cn --argjson m "$mrc" --arg v "$v" --arg st "$(docker inspect -f '{{.State.Status}} exit={{.State.ExitCode}} restarts={{.RestartCount}}' "$gw")" \
-  --arg log "$(docker logs --since 30s "$gw" 2>&1 | grep -o "the ledger's schema version is [0-9]*, this build needs [0-9]*" | tail -1)" '{migration_exit:$m, schema_version:$v, gateway:$st, refusal:$log}')"
+  --arg log "$(docker logs -n 100 "$gw" 2>&1 | grep -a -o "the ledger's schema version is [0-9]*, this build needs [0-9]*" | tail -1)" '{migration_exit:$m, schema_version:$v, gateway:$st, refusal:$log}')"
 # Roll back: stop the copy, restore the pre-migration database from the backup it was made from, start the baseline.
 docker compose -p "$P" -f "$R/compose.baseline.json" stop >/dev/null 2>&1
 . "$BACKUP_ENV"; export RESTIC_REPOSITORY=$FCPI_RESTIC_REPOSITORY RESTIC_PASSWORD_FILE=$FCPI_RESTIC_PASSWORD_FILE RESTIC_CACHE_DIR=$STATE/restic-cache

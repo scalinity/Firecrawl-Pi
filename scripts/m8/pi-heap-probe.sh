@@ -40,7 +40,8 @@ st; heap
 for kb in "$@"; do
   echo "### probe_$kb"
   healthy || echo "core not healthy before the probe"
-  since=$(date -u +%Y-%m-%dT%H:%M:%SZ); st
+  # The core's log from the line it had reached, not from a time (docker's timestamps go back after a power cut).
+  n0=$(sudo -n docker logs "$c" 2>&1 | wc -l); st
   out=$(mktemp)
   sudo -n cat /etc/firecrawl-pi/secrets/clients/soak.token | sed 's/^/Authorization: Bearer /' | \
     curl -sS -m 150 -o "$out" -w "http=%{http_code} bytes=%{size_download} seconds=%{time_total}\n" -H @- -H 'content-type: application/json' \
@@ -48,7 +49,7 @@ for kb in "$@"; do
   echo "code=$(jq -r '.code // "none"' "$out" 2>/dev/null) markdown_chars=$(jq -r '.data.markdown // "" | length' "$out" 2>/dev/null) html_chars=$(jq -r '.data.html // "" | length' "$out" 2>/dev/null) rawHtml_chars=$(jq -r '.data.rawHtml // "" | length' "$out" 2>/dev/null) sentinel=$(grep -c 'fcpi-m3-big' "$out")"
   rm -f "$out"
   sleep 5; st
-  echo "heap_failures_logged=$(sudo -n docker logs --since "$since" "$c" 2>&1 | grep -c 'JavaScript heap out of memory')"
+  echo "heap_failures_logged=$(sudo -n docker logs "$c" 2>&1 | tail -n +"$((n0 + 1))" | grep -a -c 'JavaScript heap out of memory')"
   heap
 done
 echo "### restart"
