@@ -28,7 +28,14 @@ M7_RETRIEVAL=fcpi/retrieval@sha256:9c92d952c5701a35302614250d2cfd067a79c9c5a2c47
 step() { echo "$(date -u +%H:%M:%SZ) $*"; }
 step open; "$root/scripts/m8/collect-open.sh"
 step init; "${SSH[@]}" 'bash /opt/firecrawl-pi/scripts/m8/pi-init-m8.sh' >"$R/init-m8.txt" 2>&1
-step faults; node "$root/scripts/m8/faults.mjs" >"$R/faults.txt" 2>"$R/faults.err" || true
+# A case's own failure is recorded in faults.txt for the verifier to judge. The harness failing (the selection not set or
+# not restored), a case that errored or found the stack not ready, or no reboot or closing selection means the window
+# cannot pass, so it stops here instead of soaking for a day first.
+step faults; node "$root/scripts/m8/faults.mjs" >"$R/faults.txt" 2>"$R/faults.err" || { echo "faults.mjs failed: see $R/faults.err" >&2; exit 1; }
+if grep -E '^### (case_error|not_ready)$' "$R/faults.txt" >/dev/null || ! grep -E '^### reboot$' "$R/faults.txt" >/dev/null \
+  || ! grep -F '"selection_after"' "$R/faults.txt" >/dev/null; then
+  echo "a fault case errored or found the stack not ready, or the reboot or the restored selection is missing: see $R/faults.txt" >&2; exit 1
+fi
 step heap; "${SSH[@]}" 'bash -s -- 400 614 1024 1536 2048' <"$root/scripts/m8/pi-heap-probe.sh" >"$R/heap.txt" 2>&1
 step backup; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-backup-proof.sh' >"$R/backup-fixture.txt" 2>&1
 step live; "${SSH[@]}" 'sudo -n bash /opt/firecrawl-pi/scripts/m8/pi-backup-live.sh' >"$R/backup-live.txt" 2>&1
