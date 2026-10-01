@@ -155,7 +155,8 @@ browser_crash)
   # again within 90 s, every refusal before it typed.
   docker exec --user 3320 "$b" node -e '
     const fs = require("fs"), [h, p] = process.env.PI_BROWSER_LISTEN.split(":");
-    const kill = () => { let n = 0; for (const d of fs.readdirSync("/proc").filter((x) => /^\d+$/.test(x))) { try { if (/chrome-headless-shell/.test(fs.readFileSync(`/proc/${d}/cmdline`, "utf8"))) { process.kill(+d, "SIGKILL"); n++; } } catch {} } return n; };
+    // The command line of this script names Chromium too, so it never kills itself.
+    const kill = () => { let n = 0; for (const d of fs.readdirSync("/proc").filter((x) => /^\d+$/.test(x) && +x !== process.pid)) { try { if (/chrome-headless-shell/.test(fs.readFileSync(`/proc/${d}/cmdline`, "utf8"))) { process.kill(+d, "SIGKILL"); n++; } } catch {} } return n; };
     (async () => { const end = Date.now() + 60000; let seen = false; while (Date.now() < end) { try { if ((await (await fetch(`http://${h}:${p}/healthz`)).json()).busy) { seen = true; break; } } catch {} await new Promise((r) => setTimeout(r, 3)); }
       await new Promise((r) => setTimeout(r, 10)); console.log(seen ? kill() : 0); })();' >"$RUND/fault-browser-start.txt" 2>&1 &
   kp=$!
