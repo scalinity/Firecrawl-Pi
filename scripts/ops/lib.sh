@@ -52,6 +52,13 @@ append_line() { [ -e "$1" ] || install -m 0640 /dev/null "$1"; printf '%s\n' "$2
 # jq reading such a file stops at the first damaged line, hiding every line after it. NULs are dropped and any line
 # that is not a whole JSON object is skipped. Missing files read as empty.
 jsonl() { cat -- "$@" 2>/dev/null | tr -d '\000' | jq -cR 'fromjson? | objects'; }
+# container_log <container> [<n>]: the container's log as `docker logs` prints it (its last n lines when given), read as
+# root from the json-file driver's own files, rotated ones first. A power cut leaves NUL blocks in them too, and
+# `docker logs` stops at the first without an error, hiding everything logged after it; here a damaged line is dropped.
+container_log() {
+  local p i; p=$(docker inspect -f '{{.LogPath}}' "$1") || return 1
+  { for i in 9 8 7 6 5 4 3 2 1; do [ ! -f "$p.$i" ] || cat -- "$p.$i"; done; cat -- "$p"; } | tail -n "${2:-+1}" | tr -d '\000' | jq -jR 'fromjson? | objects | .log // empty'
+}
 
 # The container of a Compose service of project fcpi (running or not), by label, resolved at each call: an ID resolved
 # before `docker compose up` can be stale after it (CLAUDE.md §33.6).

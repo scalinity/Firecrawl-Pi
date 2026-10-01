@@ -63,7 +63,8 @@ scan() {
 }
 for id in $ids; do
   f=$DIR/$id.log
-  sudo -n sh -c "docker logs '$id' >'$f.tmp' 2>&1 && chmod 0600 '$f.tmp' && mv -f '$f.tmp' '$f'"
+  # Read past any NUL block a power cut left in docker's own log file, which `docker logs` would stop at (lib.sh).
+  sudo -n bash -c '. /opt/firecrawl-pi/scripts/ops/lib.sh; container_log "$1" >"$2.tmp" && chmod 0600 "$2.tmp" && mv -f "$2.tmp" "$2"' _ "$id" "$f"
   printf '### instance_%s\n' "${id:0:12}"
   sudo -n docker inspect -f 'id={{.Id}} image={{.Image}} created={{.Created}} started={{.State.StartedAt}} finished={{.State.FinishedAt}} running={{.State.Running}} restarts={{.RestartCount}} log_driver={{.HostConfig.LogConfig.Type}}' "$id"
   scan "$f"

@@ -10,7 +10,8 @@ export LC_ALL=C
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 c=$(sudo -n docker ps -aq --filter label=com.docker.compose.project=fcpi --filter label=com.docker.compose.service=mcp-gateway)
 [ -n "$c" ] && [ "$(printf '%s\n' "$c" | wc -l)" -eq 1 ] || { echo "scan=failed reason=not-exactly-one-mcp-container"; exit 1; }
-L=$(sudo -n docker logs "$c" 2>&1)
+# Read past any NUL block a power cut left in docker's own log file, which `docker logs` would stop at (lib.sh).
+L=$(sudo -n bash -c '. /opt/firecrawl-pi/scripts/ops/lib.sh; container_log "$1"' _ "$c")
 # The first line by parameter expansion: `printf | head -1` can end printf with SIGPIPE on a long log, and
 # under pipefail that failure appended a stray "unreadable" line (CLAUDE.md §33.6).
 first=${L%%$'\n'*}

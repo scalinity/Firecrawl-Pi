@@ -35,7 +35,7 @@ for c in $(docker ps -aq --filter label=com.docker.compose.project=fcpi); do
   docker inspect "$c" | jq '.[0] | {Name, Image, Created, State: (.State | del(.Health.Log) + {HealthLog: (.Health.Log // [] | map({Start, End, ExitCode, Output: (.Output | .[0:300])}))}),
     RestartCount, HostConfig: (.HostConfig | {Memory, MemorySwap, NanoCpus, PidsLimit, CgroupParent, ReadonlyRootfs, CapDrop, CapAdd, SecurityOpt, RestartPolicy}),
     Mounts: [.Mounts[] | {Type, Source, Destination, RW}], Networks: (.NetworkSettings.Networks | keys)}' >"$B/containers/$s.json"
-  docker logs --tail 300 "$c" 2>&1 | red >"$B/containers/$s.log"
+  container_log "$c" 300 | red >"$B/containers/$s.log"
 done
 docker compose -p fcpi -f "$REPO/deploy/compose.yaml" config >"$B/compose-rendered.yaml" 2>&1
 journalctl --no-pager --utc -o short-iso -n 300 -u fcpi-stack.service -u fcpi-tick.service -u fcpi-probe.service -u fcpi-boot-record.service \
