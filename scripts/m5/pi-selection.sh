@@ -8,7 +8,7 @@
 #   ssh … 'bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show'
 # "live" lets SearXNG's engine requests reach the live engines' hosts: live search egress over the home
 # connection, held until the milestone's review is addressed (CLAUDE.md §5). The file is replaced
-# atomically, then the service's own log is awaited for the new selection, so the caller knows it applies.
+# atomically, then the service is asked until it reports the new selection, so the caller knows it applies.
 set -euo pipefail
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 REPO=/opt/firecrawl-pi
@@ -32,17 +32,21 @@ want=$(sel)
 if [ "$(sudo -n cat "$F" | jq -c .)" = "$want" ]; then
   echo "selection applied: search=$search model=$model parser=$parser proxy=$proxy enhanced=$enh utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) (unchanged)"; exit 0
 fi
-# The service's log is read from the line it had reached before the write, not from a time: docker's timestamps go back
-# when a power cut restarts the Pi on its last saved clock, and `docker logs --since` then misses the line waited for.
-before=0; [ -z "$C" ] || before=$(sudo -n docker logs "$C" 2>&1 | wc -l)
 tmp=$(sudo -n mktemp /etc/firecrawl-pi/selection/.fcpi-tmp.XXXXXX)
 sel | sudo -n tee "$tmp" >/dev/null
 sudo -n chmod 0644 "$tmp" && sudo -n mv -f "$tmp" "$F"
 [ -n "$C" ] || { echo "retrieval-service is not running; the selection applies at its start"; exit 0; }
-for _ in $(seq 1 75); do
-  if sudo -n docker logs "$C" 2>&1 | tail -n +"$((before + 1))" | tr -d '\000' | jq -cR --arg s "$search" --arg m "$model" --arg p "$parser" --arg x "$proxy" --arg e "$enh" 'fromjson? | objects | select(.event == "selection_loaded" and .search == $s and .extractionModel == $m and .parser == $p and ((.proxy // "none") == $x) and ((.enhanced // "none") == $e))' | grep . >/dev/null; then
+# The service is asked which selection it runs (its /internal/providers, relayed by the gateway's status), never its log:
+# a power cut leaves NULs in docker's json-file log, and `docker logs` stops at the first without an error, so a line
+# logged after them is never shown. "file" as the source keeps a file the service refused, whose default may be the
+# same fixture selection, from passing as applied.
+want_run=$(jq -c '. + {source: "file"}' <<<"$want")
+end=$((SECONDS + 90))
+while [ "$SECONDS" -lt "$end" ]; do
+  got=$(sudo -n bash "$REPO/scripts/ops/status.sh" --json 2>/dev/null | jq -c '.capabilities.providers.selection // {} | {search, extractionModel, parser, proxy, enhanced, source}' 2>/dev/null || true)
+  if [ "$got" = "$want_run" ]; then
     echo "selection applied: search=$search model=$model parser=$parser proxy=$proxy enhanced=$enh utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"; exit 0
   fi
-  sleep 1
+  sleep 2
 done
-echo "the retrieval service did not report the new selection within 75 s" >&2; exit 1
+echo "the retrieval service did not report the new selection within 90 s (it reports: ${got:-nothing})" >&2; exit 1
