@@ -743,25 +743,25 @@ Reserve at least **1 GiB measured available host memory under the normal mixed w
 
 Every project container runs under one systemd slice, `fcpi.slice`. It denies swap to the whole project (`MemorySwapMax=0`, which systemd re-asserts at every reload, where a reload can lift a container's own swap limit) and bounds the project as a whole at **`MemoryHigh` 5,632 MiB**: the measured 8,062 MiB `MemTotal` less the 1 GiB reserve and the host's own services (about 1,100 MiB measured), rounded down. The containers' own caps together exceed the host; past the slice's bound the kernel reclaims and slows the project without killing anything, before the host's services or the reserve are touched. The host sample records the slice's use and peak against the bound every minute.
 
-Measured over M8's 24-hour paced soak (1,378 minute samples; `evidence/M8/raw/soak.txt`): idle is a service's lowest cgroup memory, normal its median, peak its highest peak, all in MiB, against its cap. The whole project peaked at 3,405 MiB under the slice's 5,632 MiB bound, and the host never had less than 4,756 MiB available.
+Measured over M8's 24-hour paced soak (1,390 minute samples; `evidence/M8/raw/soak.txt`): idle is a service's lowest cgroup memory, normal its median, peak its highest peak, all in MiB, against its cap. The whole project peaked at 3,409 MiB under the slice's 5,632 MiB bound, and the host never had less than 4,822 MiB available.
 
 | Service | Idle | Normal | Peak | Cap | Peak of cap |
 |---|---:|---:|---:|---:|---:|
-| `firecrawl-core` | 1,696 | 1,798 | 1,961 | 2,560 | 77 % |
-| `browser-worker` | 65 | 140 | 185 | 1,536 | 12 % |
-| `nuq-postgres` | 46 | 81 | 114 | 640 | 18 % |
-| `redis` | 7 | 8 | 19 | 320 | 6 % |
-| `rabbitmq` | 118 | 165 | 232 | 512 | 45 % |
-| `searxng` | 81 | 83 | 92 | 320 | 29 % |
-| `access-gateway` | 20 | 41 | 62 | 160 | 38 % |
-| `mcp-gateway` | 35 | 43 | 66 | 192 | 35 % |
-| `retrieval-service` | 24 | 45 | 68 | 448 | 15 % |
-| `fixture` | 28 | 31 | 53 | 64 | 82 % |
-| `fixture-m2` | 30 | 35 | 55 | 192 | 29 % |
-| `fixture-m3` | 28 | 35 | 55 | 64 | 85 % |
-| `fixture-m5` | 16 | 18 | 38 | 128 | 30 % |
-| `fixture-m6` | 25 | 31 | 50 | 96 | 52 % |
-| `fixture-m7` | 15 | 22 | 42 | 96 | 43 % |
+| `firecrawl-core` | 1,279 | 1,787 | 1,955 | 2,560 | 76 % |
+| `browser-worker` | 66 | 140 | 193 | 1,536 | 13 % |
+| `nuq-postgres` | 67 | 90 | 129 | 640 | 20 % |
+| `redis` | 7 | 8 | 16 | 320 | 5 % |
+| `rabbitmq` | 121 | 158 | 197 | 512 | 38 % |
+| `searxng` | 82 | 84 | 92 | 320 | 29 % |
+| `access-gateway` | 21 | 40 | 58 | 160 | 37 % |
+| `mcp-gateway` | 31 | 42 | 69 | 192 | 36 % |
+| `retrieval-service` | 24 | 50 | 76 | 448 | 17 % |
+| `fixture` | 33 | 38 | 62 | 96 | 64 % |
+| `fixture-m2` | 15 | 19 | 40 | 192 | 21 % |
+| `fixture-m3` | 21 | 28 | 50 | 96 | 52 % |
+| `fixture-m5` | 16 | 18 | 39 | 128 | 31 % |
+| `fixture-m6` | 29 | 35 | 55 | 96 | 57 % |
+| `fixture-m7` | 15 | 21 | 41 | 96 | 43 % |
 
 Initial PostgreSQL tuning: 128 MiB shared buffers, 4 MiB work memory, 32 connections, pooled application connections, bounded maintenance work. These are project defaults requiring compatibility/performance tests, not universal optimal values. RabbitMQ uses an explicit memory alarm below its cap, initially 256 MiB; verify alarms/backpressure before enforcement. Avoid the management UI/plugin unless an actual diagnostic need warrants it.
 
@@ -800,6 +800,8 @@ A host startup unit verifies the data mount, secret readability, version lock, a
 Docker health checks mark unhealthy containers but are not themselves a promise of automatic restart. Add a small host supervisor that, after three consecutive local liveness failures over at least 60 seconds, restarts only the affected safe-to-restart service, at most three times in 15 minutes. Then open an incident/circuit and alert. Do not repeatedly restart databases or the entire stack because a remote site/provider is down.
 
 Every boot writes a durable record of its own, made at that boot while the journal still holds the boot that ended: that boot's last entries, its orderly-shutdown markers and any watchdog recovery before it, then this boot's time to a ready stack. One file per boot, never rewritten, kept a year.
+
+A power cut is a reboot without a shutdown. The card can keep a file's new length without its data, so an appended log (the project's JSON-lines logs, Docker's `json-file` container logs) may hold runs of NUL bytes where its last writes were. Every project reader reads such a log line by line and skips what is not a whole JSON line, so nothing written after the damage is hidden. Before every dockerd start, while no container has its log open, a repair rewrites each damaged container log with its whole JSON lines, byte for byte, with its owner and mode, and reports what it kept and dropped in docker.service's journal; it never keeps dockerd down. The Pi has no real-time-clock battery and starts on its last saved clock until NTP corrects it, so a reader finds the lines a step wrote by their position in the log, never by time.
 
 Define `/livez` as process/event-loop viability, `/readyz` as the local dependencies required for that capability, and a separate cached functional check that exercises a controlled fixture. Do not treat upstream `/v0/health/readiness` alone as dependency health. Workers publish a timestamped heartbeat and oldest-queued-item age; a live API with dead workers is degraded, not healthy. [F01]
 
