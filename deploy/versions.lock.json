@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-09-29T13:02:49Z",
+  "generated_utc": "2026-10-02T23:22:36Z",
   "generated_by": "scripts/m8/build-lock.mjs (M8), from the lock M7 closed with at 19f047f; entries owned by later milestones are as M7 wrote them",
-  "repository_sha": "28724e81e1496a52d60e5ad3e73a99ecb46c50f8",
+  "repository_sha": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -652,17 +652,17 @@
       }
     },
     "browser_worker": {
-      "role": "The browser-worker image (built on the Pi, natively linux/arm64), with the action subset and screenshots since M7",
+      "role": "The browser-worker image (built on the Pi, natively linux/arm64), with the action subset and screenshots since M7, and since M8 a render bounded whole when its browser is lost as it starts",
       "status": "selected",
-      "image_id": "sha256:6e3dd0270177b56a758f966e2ee32c37488ca03c33e77d0b62f5cfe3c02419f2",
+      "image_id": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
       "platform": "linux/arm64",
       "base_manifest_digest": "sha256:a0f4498920a5dbac63196d9140ed738ef00470f27e2e74029abd8850b7bd5717",
       "dockerfile": {
         "path": "deploy/browser/Dockerfile",
         "sha256": "96d50e27cba176c763d6daf99f9a26ccf1867a353f30706787e7fe3ad7ddb78f"
       },
-      "evidence": "evidence/M7/raw/image-build.txt",
-      "built_from_commit": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
+      "evidence": "evidence/M8/raw/image-build.txt",
+      "built_from_commit": "dc11b35a3d746e5fb439bc83fe21659a4a19c839",
       "lockfile": {
         "path": "services/browser/package-lock.json",
         "sha256": "19ed0b8e6471eec482f1b5af8e18aea02536590382b580a9719b5fe027c8d5a8"
