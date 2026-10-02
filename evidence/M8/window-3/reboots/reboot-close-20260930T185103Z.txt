@@ -1,0 +1,28 @@
+### meta
+utc=2026-09-30T18:51:04Z source_commit=a8e4433708a1598f89aaf676a5d21298f695757a before_boot=89767a8cefdc8717f3c4fceecf593d9a769bd83bbe814451fd70cb134689b203
+before_found=no
+### boots
+idx=0 boot_id_sha256=6553aa5fca5b7734026e50c96320652432866390125ba155b6aebb22c648eee3 first=2026-09-30T11:25:29+00:00 last=2026-09-30T18:51:04+00:00
+### current
+boot_id_sha256=6553aa5fca5b7734026e50c96320652432866390125ba155b6aebb22c648eee3 kernel=6.18.50+rpt-rpi-2712 page_size=16384 up_since_utc=2026-09-29T18:16:17Z
+rsts=1020 throttled_this_boot=0x0
+### recovery
+docker.service ExecMainStatus=0 ActiveState=active
+fcpi-stack.service ExecMainStatus=0 ActiveState=active
+-- entries --
+access-gateway status=running health=healthy restarts=0
+browser-worker status=running health=healthy restarts=0
+firecrawl-core status=running health=healthy restarts=0
+fixture status=running health=healthy restarts=0
+fixture-m2 status=running health=healthy restarts=0
+fixture-m3 status=running health=healthy restarts=0
+fixture-m5 status=running health=healthy restarts=0
+fixture-m6 status=running health=healthy restarts=0
+fixture-m7 status=running health=healthy restarts=0
+mcp-gateway status=running health=healthy restarts=0
+nuq-postgres status=running health=healthy restarts=0
+rabbitmq status=running health=healthy restarts=0
+redis status=running health=healthy restarts=0
+retrieval-service status=running health=healthy restarts=0
+searxng status=running health=healthy restarts=0
+end

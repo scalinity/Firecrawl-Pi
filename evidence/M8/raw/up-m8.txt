@@ -1,0 +1,50 @@
+### meta
+utc=2026-09-28T00:32:29Z source_commit=0a569720a92df609635ad19fa8b3498094d1150a
+### data_check
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=30 create_host_path=false
+### config
+compose_config=valid
+### up
+ Container fcpi-mcp-gateway-1 Healthy 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-fixture-m3-1 Healthy 
+ Container fcpi-fixture-m5-1 Healthy 
+ Container fcpi-browser-worker-1 Healthy 
+ Container fcpi-fixture-m2-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+### swap
+access-gateway parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+fixture-m7 parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+firecrawl-core parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+retrieval-service parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+nuq-postgres parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+rabbitmq parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+redis parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+searxng parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+fixture-m6 parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+browser-worker parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+mcp-gateway parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+fixture-m3 parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+fixture-m5 parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+fixture-m2 parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+fixture parent=fcpi.slice scope_swap_max=0 slice_swap_max=0
+### release
+/var/lib/firecrawl-pi/releases/20260928T003408Z-0a569720a92d.json
+### ps
+access-gateway running healthy fcpi/access-gateway@sha256:0f12b9262db2209904e1cbef01e6f2832cdadd1edbb00ee701ddb31e1137231b
+browser-worker running healthy fcpi/browser@sha256:6e3dd0270177b56a758f966e2ee32c37488ca03c33e77d0b62f5cfe3c02419f2
+firecrawl-core running healthy fcpi/firecrawl-api@sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4
+fixture running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m2 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m3 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m5 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m6 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+fixture-m7 running healthy node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+mcp-gateway running healthy fcpi/mcp-gateway@sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d
+nuq-postgres running healthy fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180
+rabbitmq running healthy rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8
+redis running healthy redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44
+retrieval-service running healthy fcpi/retrieval@sha256:5e538aefa64a088f40d5c2d62fb747443f6203b3cec909e4e2ba80a6cbf566f3
+searxng running healthy searxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19
+end

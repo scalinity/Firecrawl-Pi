@@ -1,0 +1,36 @@
+### meta
+utc=2026-09-28T09:46:53Z source_commit=fa4bb523ae78ece1a2057453a8b193aab79d6afb before_boot=7bd11a829e41eed13b813e223473e2dd3f3c871ecca31c4825ca493b09026bf7
+before_found=yes
+### boots
+idx=-1 boot_id_sha256=7bd11a829e41eed13b813e223473e2dd3f3c871ecca31c4825ca493b09026bf7 first=2026-09-28T08:28:56+00:00 last=2026-09-28T09:46:38+00:00
+idx=0 boot_id_sha256=89e17161f660cc405cfb3011ef7b2f95a47b7f0a7a30f3b4dbb07a4f217647a8 first=2026-09-28T09:46:51+00:00 last=2026-09-28T09:46:53+00:00
+### ended_1
+last=2026-09-28T09:46:38+00:00 shutdown_markers=192 watchdog_reboot=yes loss_utc=2026-09-28T09:37:41+00:00 sudo_commands=0 ssh_logins=0 sessions=0 console_logins=0 undervoltage=0
+2026-09-28T09:37:41+00:00 net-watchdog[125611]: recovery 1/3: bouncing Wi-Fi
+2026-09-28T09:41:55+00:00 net-watchdog[130160]: recovery 2/3: reloading brcmfmac driver
+2026-09-28T09:46:15+00:00 net-watchdog[134705]: recovery 3/3: still dead after driver reload - rebooting
+### current
+boot_id_sha256=89e17161f660cc405cfb3011ef7b2f95a47b7f0a7a30f3b4dbb07a4f217647a8 kernel=6.18.50+rpt-rpi-2712 page_size=16384 up_since_utc=2026-09-28T09:46:48Z
+rsts=20 throttled_this_boot=0x0
+### recovery
+docker.service ExecMainStatus=0 ActiveState=inactive
+fcpi-stack.service ExecMainStatus=0 ActiveState=inactive
+-- entries --
+access-gateway status=running health=starting restarts=0
+browser-worker status=running health=healthy restarts=0
+firecrawl-core status=running health=starting restarts=0
+fixture status=running health=healthy restarts=0
+fixture-m2 status=running health=healthy restarts=0
+fixture-m3 status=running health=healthy restarts=0
+fixture-m5 status=exited health=unhealthy restarts=0
+fixture-m6 status=running health=healthy restarts=0
+fixture-m7 status=exited health=unhealthy restarts=0
+mcp-gateway status=running health=healthy restarts=0
+nuq-postgres status=running health=healthy restarts=0
+rabbitmq status=running health=starting restarts=0
+redis status=running health=healthy restarts=0
+retrieval-service status=running health=healthy restarts=0
+searxng status=running health=starting restarts=0
+### readiness
+stack_active_after_boot_s=45 ready_after_boot_s=45 recorded_utc=2026-09-28T09:47:33Z stack_state=active
+end

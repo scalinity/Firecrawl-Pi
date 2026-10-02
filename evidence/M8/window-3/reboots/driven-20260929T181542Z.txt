@@ -1,0 +1,2 @@
+### driven
+{"utc":"2026-09-29T18:15:42.319Z","source":"scripts/m8/faults.mjs reboot (an orderly sudo systemctl reboot the driver made)","boot_before":"47254a9fa4511d69bb9de5db46159923cdfd790c6a52be6d3479639ce1ad4a53","boot_after":"6553aa5fca5b7734026e50c96320652432866390125ba155b6aebb22c648eee3","ssh_back_after_s":56,"record_file":"20260929T181617Z-6553aa5fca5b.txt"}

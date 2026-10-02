@@ -1,0 +1,40 @@
+### meta
+utc=2026-10-02T23:01:08Z source_commit=6366dd8b5b080c3059203412cabd6b8ad7d7832b before_boot=89767a8cefdc8717f3c4fceecf593d9a769bd83bbe814451fd70cb134689b203
+before_found=no
+### boots
+idx=-3 boot_id_sha256=25d91962ce87aa951b7c68726cb369ef906fc5a3edfa7f209541f5c7c83c2f2c first=2026-10-01T14:40:06+00:00 last=2026-10-01T20:32:18+00:00
+idx=-2 boot_id_sha256=4aaee20e37bd60c50bde50155e39550b8e809bf91fa5bf6416dac618b5467f84 first=2026-10-01T20:32:31+00:00 last=2026-10-01T21:05:10+00:00
+idx=-1 boot_id_sha256=df1800499382a2ec14a4722f07d20591889d317f9ca90ac2c07a854510534e8e first=2026-10-01T21:05:23+00:00 last=2026-10-01T22:26:03+00:00
+idx=0 boot_id_sha256=aa2771aeb24cb237f4f66a983aac1f8e63a691b5ff6f76d75a9754f0cbf9dd75 first=2026-10-01T22:26:16+00:00 last=2026-10-02T23:01:08+00:00
+### ended_3
+last=2026-10-01T20:32:18+00:00 shutdown_markers=1189 watchdog_reboot=no loss_utc=2026-10-01T20:32:15+00:00 sudo_commands=0 ssh_logins=0 sessions=0 console_logins=0 undervoltage=0
+### ended_2
+last=2026-10-01T21:05:10+00:00 shutdown_markers=70 watchdog_reboot=no loss_utc=none sudo_commands=0 ssh_logins=0 sessions=0 console_logins=0 undervoltage=0
+### ended_1
+last=2026-10-01T22:26:03+00:00 shutdown_markers=114 watchdog_reboot=no loss_utc=2026-10-01T22:26:02+00:00 sudo_commands=0 ssh_logins=0 sessions=0 console_logins=0 undervoltage=0
+### current
+boot_id_sha256=aa2771aeb24cb237f4f66a983aac1f8e63a691b5ff6f76d75a9754f0cbf9dd75 kernel=6.18.50+rpt-rpi-2712 page_size=16384 up_since_utc=2026-10-01T22:26:13Z
+rsts=1020 throttled_this_boot=0x0
+### recovery
+docker.service ExecMainStatus=0 ActiveState=active
+fcpi-stack.service ExecMainStatus=0 ActiveState=active
+2026-10-01T22:26:19+00:00 fcpi-data-check.sh[602]: fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=30 create_host_path=false
+2026-10-01T22:26:25+00:00 fcpi-data-check.sh[1348]: fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=30 create_host_path=false
+2026-10-01T22:26:25+00:00 fcpi-egress-local.sh[1385]: fcpi-egress-local: ipv4=2 ipv6=0
+2026-10-01T22:26:40+00:00 fcpi-egress-local.sh[3128]: fcpi-egress-local: ipv4=2 ipv6=0
+access-gateway status=running health=healthy restarts=0
+browser-worker status=running health=healthy restarts=0
+firecrawl-core status=running health=healthy restarts=0
+fixture status=running health=healthy restarts=0
+fixture-m2 status=running health=healthy restarts=0
+fixture-m3 status=running health=healthy restarts=0
+fixture-m5 status=running health=healthy restarts=0
+fixture-m6 status=running health=healthy restarts=0
+fixture-m7 status=running health=healthy restarts=0
+mcp-gateway status=running health=healthy restarts=0
+nuq-postgres status=running health=healthy restarts=0
+rabbitmq status=running health=healthy restarts=0
+redis status=running health=healthy restarts=0
+retrieval-service status=running health=healthy restarts=0
+searxng status=running health=healthy restarts=0
+end

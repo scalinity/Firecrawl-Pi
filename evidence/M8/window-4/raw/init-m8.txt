@@ -1,0 +1,31 @@
+### meta
+utc=2026-10-01T05:18:26Z source_commit=63d2b04928b6ed000b743dbcbe0b36f17ecabe61
+### restic
+restic_package=0.18.0-1+b4 restic_sha256=80d615c1c49b7ccd8121e9ce4e1944da274d3d2f28c24f8d54ec70d9d8957803 restic 0.18.0 compiled with go1.24.4 on linux/arm64
+### directories
+root:root 755 /var/lib/firecrawl-pi
+root:root 700 /var/lib/firecrawl-pi/alerts
+root:root 700 /var/lib/firecrawl-pi/backup
+root:adm 750 /var/log/firecrawl-pi
+root:root 700 /srv/firecrawl-pi/backup-staging
+### tmpfiles
+root:root 755 /run/firecrawl-pi/admission
+root:root 644 /run/firecrawl-pi/admission/admission.json
+### units
+fcpi.slice MemorySwapMax=0 memory.swap.max=0
+enabled enabled enabled enabled enabled enabled enabled
+### command
+/opt/firecrawl-pi/scripts/fcpi
+### clients
+kept client ops
+kept client soak
+### redis
+already narrowed; rules refreshed
+user default off
+user health on nopass -@all +ping
+user fcpi_core on #<hash> ~* &* -@all +get +set +mget +del +exists +expire +pexpire +pttl +keys +scan +type +rename +time +incr +incrby +hget +hset +hmget +hmset +hsetnx +hdel +hexists +hgetall +hincrby +hlen +lpush +rpush +lpop +rpop +llen +lindex +lpos +lrange +lrem +lset +ltrim +rpoplpush +sadd +srem +spop +scard +sismember +smembers +zadd +zrem +zcard +zcount +zscore +zpopmin +bzpopmin +zrange +zrangebyscore +zrevrange +zrevrangebyscore +zremrangebyrank +zremrangebyscore +xadd +xread +xtrim +eval +evalsha +script|load +script|exists +multi +exec +discard +info +client|setname +client|list +ping +quit
+user fcpi_ops on #<hash> ~* -@all +info +acl|list +acl|log +config|resetstat +ping
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-rabbitmq-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+end

@@ -1,0 +1,11 @@
+### meta
+utc=2026-10-01T20:44:45Z source_commit=66ac385ce1463d775f3349f143ef3419f2fdcb4f configured=yes command=notify-ntfy.sh
+### delivered
+{"id":"20261001T204446Z-opened-temperature_high","kind":"opened","incident":"temperature_high","incident_id":"e2612402","delivered":true,"attempts":1}
+{"id":"20261001T204556Z-cleared-temperature_high","kind":"cleared","incident":"temperature_high","incident_id":"e2612402","delivered":true,"attempts":1}
+### ntfy_server
+{"id":"W0UTv6W9Vz9O","time":1790887487,"title":"Firecrawl Pi — Incident","priority":4,"tags":["warning","fcpi","incident_opened"],"incident":"e2612402"}
+{"id":"48NecOAWFiVA","time":1790887557,"title":"Firecrawl Pi — Recovered","priority":3,"tags":["white_check_mark","fcpi","recovery_succeeded"],"incident":"e2612402"}
+### window
+{"from":"2026-10-01T20:44:45Z","to":"2026-10-01T20:46:00Z","opened_notices":1,"cleared_notices":1,"ticks_reading_injected":5}
+### end

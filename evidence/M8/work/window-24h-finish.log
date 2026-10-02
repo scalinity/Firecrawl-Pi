@@ -1,0 +1,6 @@
+22:54:44Z finish (detached) for soak-20261001T225357Z
+22:55:50Z close
+wrote evidence/M8/snapshot-after.txt (348 lines)
+collected: suites, stack, verify ops, status, core logs, egress probe, rendered compose, ruleset, AFTER snapshot, owner session, reboot records
+23:01:11Z done
+window exit 0

@@ -1,0 +1,22 @@
+10:46:35Z open
+opened: guard_table_handle=10
+10:46:35Z init
+10:47:11Z faults
+11:18:28Z heap
+11:19:50Z backup
+11:25:11Z live
+11:40:04Z rehearsal
+11:42:50Z plans
+11:43:08Z soak
+Read from remote host pi.local: Operation timed out
+client_loop: send disconnect: Broken pipe
+exit=255
+close exit=255
+11:51:39Z close (resumed by hand: the soak collection's connection dropped at the window's end; soak collected and verified against the Pi's copy, Redis statistics read, soak stopped)
+Read from remote host pi.local: Connection reset by peer
+client_loop: send disconnect: Broken pipe
+close exit=255
+13:00:24Z close resumed from the stack record (suites.txt complete; each remaining step retried on a dropped connection)
+wrote evidence/M8/snapshot-after.txt (346 lines)
+collected: suites, stack, verify ops, status, core logs, egress probe, rendered compose, ruleset, AFTER snapshot, owner session, reboot records
+close exit=0

@@ -1,0 +1,43 @@
+### meta
+utc=2026-10-01T22:27:35Z source_commit=6366dd8b5b080c3059203412cabd6b8ad7d7832b node_options=--max-old-space-size=384 mem_limit=2684354560
+### rest
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=2132410368 memory.peak=2221031424
+live_heap_used_mib=225.8 heap_total_mib=235.4 rss_mib=357.1 external_mib=18.1 array_buffers_mib=8.7
+### probe_400
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=2025095168 memory.peak=2221031424
+http=200 bytes=1227811 seconds=0.452800
+code=none markdown_chars=405761 html_chars=410084 rawHtml_chars=410146 sentinel=1
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=2013790208 memory.peak=2221031424
+heap_failures_logged=0
+live_heap_used_mib=225.7 heap_total_mib=235.4 rss_mib=370.3 external_mib=18.1 array_buffers_mib=8.7
+### probe_614
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=1987837952 memory.peak=2221031424
+http=200 bytes=1884274 seconds=0.813779
+code=none markdown_chars=622818 html_chars=629409 rawHtml_chars=629471 sentinel=1
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=1982988288 memory.peak=2221031424
+heap_failures_logged=0
+live_heap_used_mib=225.8 heap_total_mib=235.2 rss_mib=371.5 external_mib=18.1 array_buffers_mib=8.7
+### probe_1024
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=1943470080 memory.peak=2221031424
+http=200 bytes=3141573 seconds=1.555344
+code=none markdown_chars=1038543 html_chars=1049472 rawHtml_chars=1049534 sentinel=1
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=2049835008 memory.peak=2221031424
+heap_failures_logged=0
+live_heap_used_mib=225.5 heap_total_mib=234.7 rss_mib=375.9 external_mib=18.1 array_buffers_mib=8.7
+### probe_1536
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=1949859840 memory.peak=2221031424
+http=200 bytes=4713629 seconds=3.804104
+code=none markdown_chars=1558343 html_chars=1574696 rawHtml_chars=1574758 sentinel=1
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=2063351808 memory.peak=2221031424
+heap_failures_logged=0
+live_heap_used_mib=225.4 heap_total_mib=234.9 rss_mib=384.9 external_mib=18.1 array_buffers_mib=8.7
+### probe_2048
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=1956839424 memory.peak=2221031424
+http=200 bytes=6285685 seconds=7.517592
+code=none markdown_chars=2078143 html_chars=2099920 rawHtml_chars=2099982 sentinel=1
+core started=2026-10-01T22:26:29.044430379Z restarts=0 health=healthy memory.current=2069594112 memory.peak=2221031424
+heap_failures_logged=0
+live_heap_used_mib=225.4 heap_total_mib=235.2 rss_mib=388.6 external_mib=18.1 array_buffers_mib=8.7
+### restart
+core restarted to close the inspector: core started=2026-10-01T22:28:34.853567824Z restarts=0 health=healthy memory.current=1982136320 memory.peak=2020458496
+### end

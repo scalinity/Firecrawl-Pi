@@ -1,0 +1,436 @@
+{
+  "utc": "2026-09-29T13:01:47Z",
+  "commit": "7bad925a029e9178875d09b2d437ead17c014d20",
+  "versions_lock_sha256": "e832c1467b46b717054e822f9ac28c68ba65f2102d69d8e0e8caf02577e86619",
+  "services": {
+    "fixture": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:22.390957253-04:00",
+      "mem_mib": 33,
+      "peak_mib": 52,
+      "limit_mib": 64,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "firecrawl-core": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:45.56544419-04:00",
+      "mem_mib": 1792,
+      "peak_mib": 1953,
+      "limit_mib": 2560,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "redis": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:20.431410998-04:00",
+      "mem_mib": 8,
+      "peak_mib": 15,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "access-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:37.18295263-04:00",
+      "mem_mib": 37,
+      "peak_mib": 50,
+      "limit_mib": 160,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m7": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:00:51.755136335-04:00",
+      "mem_mib": 21,
+      "peak_mib": 41,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "retrieval-service": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:21.459134636-04:00",
+      "mem_mib": 45,
+      "peak_mib": 64,
+      "limit_mib": 448,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "nuq-postgres": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:44.687076531-04:00",
+      "mem_mib": 78,
+      "peak_mib": 107,
+      "limit_mib": 640,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "rabbitmq": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:31.115050603-04:00",
+      "mem_mib": 164,
+      "peak_mib": 243,
+      "limit_mib": 512,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "searxng": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:22.569842822-04:00",
+      "mem_mib": 91,
+      "peak_mib": 99,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m6": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:00:51.889350433-04:00",
+      "mem_mib": 32,
+      "peak_mib": 50,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "browser-worker": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:22.661615659-04:00",
+      "mem_mib": 136,
+      "peak_mib": 173,
+      "limit_mib": 1536,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "mcp-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:45.710917673-04:00",
+      "mem_mib": 44,
+      "peak_mib": 63,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m3": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:01:21.788037797-04:00",
+      "mem_mib": 36,
+      "peak_mib": 55,
+      "limit_mib": 64,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m5": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:00:51.838827796-04:00",
+      "mem_mib": 19,
+      "peak_mib": 38,
+      "limit_mib": 128,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m2": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-09-29T09:00:51.975738589-04:00",
+      "mem_mib": 35,
+      "peak_mib": 55,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    }
+  },
+  "core": {
+    "api": true,
+    "worker": true,
+    "heartbeat_at": "2026-09-29T09:01:45.56544419-04:00",
+    "check": "api=ok worker=ok"
+  },
+  "rest": {
+    "ready": true,
+    "status": 200,
+    "ms": 22,
+    "core_live": true,
+    "ledger_ok": true,
+    "jobs": {
+      "CANCELLED": 103,
+      "FAILED": 6,
+      "PARTIAL": 14,
+      "SUCCEEDED": 287
+    },
+    "archive": {
+      "bytes": 144409567,
+      "quotaBytes": 10737418240
+    }
+  },
+  "mcp": {
+    "ready": true,
+    "status": 200,
+    "ms": 13,
+    "tools": 13,
+    "protocol": "2026-07-28"
+  },
+  "capabilities": {
+    "scrape": true,
+    "browser": true,
+    "search": true,
+    "providers": {
+      "selection": {
+        "search": "live",
+        "extractionModel": "gpt-4.1-mini-2025-04-14",
+        "parser": "llamaparse-cost-effective",
+        "proxy": "decodo-residential",
+        "enhanced": "zyte-api",
+        "source": "file"
+      },
+      "paidDispatch": false,
+      "budgetPolicySha256": "5480507c7af1e37448c8ad2cc82d0a8fdc673f96d2580f8d5baaf6de2e2250b9",
+      "providers": {
+        "openai": {
+          "kind": "model",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-model": {
+          "kind": "model",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "llamaparse": {
+          "kind": "parser",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-parser": {
+          "kind": "parser",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "decodo": {
+          "kind": "proxy",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-proxy": {
+          "kind": "proxy",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "zyte": {
+          "kind": "enhanced",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-zyte": {
+          "kind": "enhanced",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        }
+      },
+      "budgets": [
+        {
+          "category": "fixture",
+          "period": "day",
+          "period_start": "2026-09-29",
+          "reserved": 0,
+          "settled": 4465
+        }
+      ],
+      "caps": {
+        "llm": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "parser": {
+          "paid": true,
+          "unit": "credits",
+          "caps": {
+            "month": 0
+          }
+        },
+        "fixture": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 100000
+          }
+        },
+        "fixture_parser": {
+          "paid": false,
+          "unit": "credits",
+          "caps": {
+            "day": 3000
+          }
+        },
+        "proxy": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_proxy": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000000
+          }
+        },
+        "fixture_proxy_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 130000
+          }
+        },
+        "enhanced": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_enhanced": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_enhanced_small": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000
+          }
+        }
+      }
+    }
+  },
+  "queue": {
+    "ok": true,
+    "queued": 0,
+    "oldest_queued_s": 0,
+    "active": 0,
+    "open_jobs": 0
+  },
+  "host": {
+    "sample_age_s": 10,
+    "mem": {
+      "total_mib": 8062,
+      "available_mib": 4887,
+      "swap_used_mib": 0
+    },
+    "temp_c": 45.8,
+    "injected_temp": false,
+    "throttled": "0x0",
+    "disk": {
+      "size": 62295171072,
+      "free": 35179794432,
+      "free_pct": 56.4,
+      "inodes_free_pct": 84.2
+    },
+    "host_oom_kill": 0
+  },
+  "admission": {
+    "utc": "2026-09-29T13:01:37Z",
+    "dispatch": "open",
+    "browser": "open",
+    "reasons": [],
+    "age_s": 10
+  },
+  "incidents": {},
+  "foreign_containers": [],
+  "probe": {
+    "utc": "2026-09-29T13:00:39Z",
+    "boot": "d3cdf7effb306140681c39cb4a0467db286be28cdba8762030badfd62a840266",
+    "ok": true,
+    "held": false,
+    "consecutive_failures": 0,
+    "scrape": {
+      "ok": true,
+      "status": 200,
+      "ms": 77,
+      "code": null
+    },
+    "mcp": {
+      "ok": true,
+      "status": 200,
+      "ms": 17
+    },
+    "platform": {
+      "ok": true,
+      "ms": 23,
+      "core_live": true,
+      "ledger_ok": true,
+      "providers": "{\"selection\":{\"search\":\"live\",\"extractionModel\":\"gpt-4.1-mini-2025-04-14\",\"parser\":\"llamaparse-cost-effective\",\"proxy\":\"decodo-residential\",\"enhanced\":\"zyte-api\",\"source\":\"file\"},\"paidDispatch\":false,\"budgetPolicySha256\":\"5480507c7af1e37448c8ad2cc82d0a8fdc673f96d2580f8d5baaf6de2e2250b9\",\"providers\":{\"openai\":{\"kind\":\"model\",\"paid\":true,\"credential\":\"absent\",\"breaker\":\"closed\"},\"fixture-model\":{\"kind\":\"model\",\"paid\":false,\"credential\":\"not_required\",\"breaker\":\"closed\"},\"llamaparse\":{\"kind\":\"parser\",\"paid\":true,\"credential\":\"absent\",\"breaker\":\"closed\"},\"fixture-parser\":{\"kind\":\"parser\",\"paid\":fa"
+    },
+    "redis_acl_denials": 0
+  },
+  "backup": {
+    "last_success": "2026-09-29T07:31:24Z",
+    "age_h": 5.5,
+    "offdevice": "yes",
+    "last_attempt": {
+      "utc": "2026-09-29T07:31:24Z",
+      "result": "PASS",
+      "error": null
+    },
+    "last_restore_test": {
+      "utc": "2026-09-28T11:41:11Z",
+      "result": "PASS",
+      "error": null
+    }
+  },
+  "healthy": true
+}

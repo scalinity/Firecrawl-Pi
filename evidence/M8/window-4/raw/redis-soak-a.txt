@@ -1,0 +1,39 @@
+### meta
+utc=2026-09-28T01:40:09Z source_commit=0416d79c9a7620cd188600a676d4688f889a80bd user=default
+### commandstats
+cmdstat_pttl:calls=21,usec=32,usec_per_call=1.52,rejected_calls=0,failed_calls=0
+cmdstat_evalsha:calls=1556,usec=115527,usec_per_call=74.25,rejected_calls=0,failed_calls=0
+cmdstat_exists:calls=122,usec=823,usec_per_call=6.75,rejected_calls=0,failed_calls=0
+cmdstat_rpoplpush:calls=1434,usec=1065,usec_per_call=0.74,rejected_calls=0,failed_calls=0
+cmdstat_del:calls=1486,usec=2171,usec_per_call=1.46,rejected_calls=0,failed_calls=0
+cmdstat_zrem:calls=120,usec=265,usec_per_call=2.21,rejected_calls=0,failed_calls=0
+cmdstat_auth:calls=124,usec=503,usec_per_call=4.06,rejected_calls=0,failed_calls=0
+cmdstat_lrange:calls=118,usec=100,usec_per_call=0.85,rejected_calls=0,failed_calls=0
+cmdstat_xtrim:calls=118,usec=171,usec_per_call=1.45,rejected_calls=0,failed_calls=0
+cmdstat_get:calls=300,usec=1005,usec_per_call=3.35,rejected_calls=0,failed_calls=0
+cmdstat_zrange:calls=1444,usec=817,usec_per_call=0.57,rejected_calls=0,failed_calls=0
+cmdstat_scard:calls=214,usec=637,usec_per_call=2.98,rejected_calls=0,failed_calls=0
+cmdstat_hget:calls=118,usec=431,usec_per_call=3.65,rejected_calls=0,failed_calls=0
+cmdstat_bzpopmin:calls=1434,usec=15954,usec_per_call=11.13,rejected_calls=0,failed_calls=0
+cmdstat_info:calls=1,usec=132,usec_per_call=132.00,rejected_calls=0,failed_calls=0
+cmdstat_zcount:calls=4,usec=21,usec_per_call=5.25,rejected_calls=0,failed_calls=0
+cmdstat_config|resetstat:calls=1,usec=64,usec_per_call=64.00,rejected_calls=0,failed_calls=0
+cmdstat_ping:calls=121,usec=59,usec_per_call=0.49,rejected_calls=0,failed_calls=0
+cmdstat_zadd:calls=74,usec=569,usec_per_call=7.69,rejected_calls=0,failed_calls=0
+cmdstat_zremrangebyscore:calls=120,usec=235,usec_per_call=1.96,rejected_calls=0,failed_calls=0
+cmdstat_set:calls=278,usec=2581,usec_per_call=9.28,rejected_calls=0,failed_calls=0
+cmdstat_hmget:calls=1434,usec=5715,usec_per_call=3.99,rejected_calls=0,failed_calls=0
+cmdstat_zrangebyscore:calls=1474,usec=3241,usec_per_call=2.20,rejected_calls=0,failed_calls=0
+cmdstat_zpopmin:calls=1442,usec=745,usec_per_call=0.52,rejected_calls=0,failed_calls=0
+cmdstat_srem:calls=156,usec=1550,usec_per_call=9.94,rejected_calls=0,failed_calls=0
+cmdstat_sadd:calls=374,usec=2624,usec_per_call=7.02,rejected_calls=0,failed_calls=0
+cmdstat_expire:calls=511,usec=2199,usec_per_call=4.30,rejected_calls=0,failed_calls=0
+cmdstat_smembers:calls=208,usec=358,usec_per_call=1.72,rejected_calls=0,failed_calls=0
+cmdstat_acl|log:calls=1,usec=2,usec_per_call=2.00,rejected_calls=0,failed_calls=0
+### acl_users
+user default on sanitize-payload #<hash> ~* &* +@all
+user health on nopass sanitize-payload resetchannels -@all +ping
+### acl_log
+
+
+### end

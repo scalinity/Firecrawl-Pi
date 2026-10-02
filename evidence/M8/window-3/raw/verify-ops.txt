@@ -1,0 +1,15 @@
+ops PASS (a8e4433708a1)
+  PASS  data_check  fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=30 create_host_path=false
+  PASS  guard_loaded  table inet fcpi_guard
+  PASS  docker_dropins  differ or absent: none
+  PASS  units_installed  differ or absent: none
+  PASS  units_enabled_active  not enabled or not active: none
+  PASS  slice_swap_zero  memory.swap.max=0 MemorySwapMax=0
+  PASS  slice_memory_high  memory.high=5905580032 MemoryHigh=5905580032
+  PASS  containers_in_slice  15 running, outside fcpi.slice: none
+  PASS  containers_swap_denied  swap allowed: none
+  PASS  no_foreign_containers  outside project fcpi: none
+  PASS  tick_fresh  last sample 47 s old
+  PASS  admission_fresh  admission file 47 s old: {"dispatch":"open","browser":"open","reasons":[]}
+  PASS  probe_recent_ok  last probe 272 s old, ok=true
+  PASS  nm_unmanaged  90-fcpi-unmanaged.conf

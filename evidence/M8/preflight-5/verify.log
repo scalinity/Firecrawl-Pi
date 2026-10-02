@@ -1,0 +1,47 @@
+M8-B00 FAIL               baseline-matches-m7-after  — boot changed=true, tied=false; the earliest M8 reboot record (reboot-20260927T231255Z.txt) found M7 AFTER's boot in the journal=no; added=21 removed=22; attributed {"own SSH session scope":3,"a socket-diagnostics module the snapshot's own ss loads on demand":2
+M8-G01 FAIL               images-built-and-running-deployed-code-is-head  — failed=deployed_code_is_head; deployed commits=66ac385; retrieval 0a087bd8890f from 72ad844, gateway a9fae8d26ce9 from 72ad844, browser f05d6bc2e18c from dc11b35
+M8-G02 PASS               suites-pass-in-the-running-images
+M8-H01 PASS               host-units-timers-slice-and-command
+M8-H02 PASS               swap-denied-across-a-systemd-reload
+M8-H03 PASS               containers-outside-the-project-reported
+M8-H04 PASS               durable-boot-records
+M8-R01 PASS               normal-reboot-ready-within-five-minutes
+M8-R02 PASS               docker-restart-recovers-without-action
+M8-R03 PASS               missing-data-mount-refuses-writers
+M8-I01 PASS               mcp-crash-restarts-mcp-alone
+M8-I02 PASS               api-child-crash-recovers-typed
+M8-I03 PASS               worker-death-shown-as-degraded-and-recovered
+M8-I04 PASS               postgres-down-fails-closed-and-reconciles
+M8-I05 PASS               redis-down-stops-dispatch-and-recovers
+M8-I06 PASS               rabbitmq-down-stops-dispatch-and-recovers
+M8-I07 PASS               browser-crash-contained
+M8-I08 PASS               search-outage-isolated-and-not-resurrected
+M8-I09 PASS               proxy-outage-never-spills-to-the-home-ip
+M8-I10 PASS               model-parser-enhanced-outage-isolated
+M8-I11 PASS               network-outage-bounded-and-recovered-without-restart
+M8-I12 PASS               disk-pressure-stops-admission-and-deletes-nothing
+M8-I13 PASS               memory-pressure-pauses-and-nothing-of-the-project-is-killed
+M8-I14 PASS               thermal-pressure-pauses-browser-work-only
+M8-I15 PASS               supervisor-bounded-restarts-then-incident
+M8-O01 PASS               status-names-each-failure-independently
+M8-O02 PASS               one-notice-per-incident-and-its-recovery
+M8-O03 PASS               logs-bounded-and-diagnostics-redacted
+M8-O04 FAIL               the-gateway-never-answers-502  — answers=135, 502s=0
+M8-S01 FAIL               24-hour-paced-soak  — failed=duration,coverage,requests; window 2026-10-01T21:00:18Z..2026-10-01T21:30:18Z (0.5 h); samples=26; requests static:27/27 status:27/27 js:5/5 mcp_list:5/5 mcp_scrape:5/5 search:3/3 pdf:2/2 extract:2/2 crawl_submit:1/1 crawl_done:1/1 map:2/2 screenshot:1/
+M8-S02 FAIL               memory-within-caps-and-measured-budget  — failed=samples,spec_rows; project at most 3110 MiB against fcpi.slice MemoryHigh 5632 MiB; over 90 %=none; spec rows=15, differing=firecrawl-core,browser-worker,nuq-postgres,redis,rabbitmq,searxng,access-gateway,mcp-gateway,retrieval-service,fixture,fixture-m2
+M8-S03 NOT_RUN            postgres-write-settings-measured-on-the-card  — evidence missing: evidence/M8/preflight-5/raw/pg-writes.txt
+M8-S04 NOT_RUN            redis-user-narrowed-to-the-measured-command-set  — evidence missing: evidence/M8/preflight-5/raw/redis-measured.txt
+M8-S05 PASS               core-heap-holds-large-pages-at-384-mib
+M8-K01 PASS               coordinated-backup-on-the-fixture-repository
+M8-K02 PASS               isolated-restore-proves-the-backup
+M8-K03 PASS               off-device-backup-and-restore
+M8-N01 PASS               incident-notice-reaches-the-owner-channel
+M8-N02 PASS               external-watchdog-notices-a-lost-heartbeat-once
+M8-U01 PASS               upgrade-and-rollback-rehearsed-in-isolation
+M8-U02 PASS               upgrade-and-rollback-plans-read-only
+M8-X01 PASS               zero-firecrawl-cloud-attempts
+M8-X02 PASS               network-and-container-posture
+M8-X04 FAIL               unrelated-state-unchanged  — added=79 removed=67; attributed {"scope of an fcpi container":30,"own SSH session scope":3,"fcpi container":30,"container network namespace":30,"fcpi container root filesystem":30,"nftables ruleset: every changed rule attributed in X04 (raw/nft-ruleset.txt)":2
+M8-X05 PASS               secret-and-identifier-redaction-scan
+M8-L03 FAIL               lock-and-compose-consistent  — services=15; unpinned=none; lock disagrees on=services
+M8-V01 PASS               review-record-complete

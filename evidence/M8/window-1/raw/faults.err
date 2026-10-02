@@ -1,0 +1,5 @@
+Job for docker.service failed because the control process exited with error code.
+See "systemctl status docker.service" and "journalctl -xeu docker.service" for details.
+A dependency job for fcpi-stack.service failed. See 'journalctl -xe' for details.
+ssh: Could not resolve hostname pi.local: nodename nor servname provided, or not known
+ssh: Could not resolve hostname pi.local: nodename nor servname provided, or not known

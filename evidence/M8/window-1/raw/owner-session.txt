@@ -1,0 +1,37 @@
+### meta
+utc=2026-09-29T13:02:34Z since=2026-09-27T23:12:44Z running_kernel=6.18.50+rpt-rpi-2712 boot_id_sha256=d3cdf7effb306140681c39cb4a0467db286be28cdba8762030badfd62a840266
+### apt_runs
+Start-Date: 2026-09-27  20:32:15
+Commandline: apt-get -q -o Dpkg::Use-Pty=0 install -y --no-install-recommends restic=0.18.0-1+b4
+Requested-By: <owner> (1000)
+Install packages=1
+End-Date: 2026-09-27  20:32:17
+held=containerd.io docker-buildx-plugin docker-ce docker-ce-cli docker-compose-plugin 
+### journal
+2026-09-29T11:51:08.526144+00:00 pi systemd[1]: Reloading...
+2026-09-29T11:51:09.073543+00:00 pi systemd[1]: Reloading finished in 547 ms.
+2026-09-29T11:51:09.135315+00:00 pi systemd[1]: Reloading...
+2026-09-29T11:51:09.681705+00:00 pi systemd[1]: Reloading finished in 545 ms.
+### loopback_listeners
+### pihole_udp
+*:123
+*:53
+0.0.0.0:123
+0.0.0.0:53
+### container_swap
+fixture started=2026-09-28T11:17:23.171363621Z memory.swap.max=max parent=fcpi.slice parent_swap_max=0
+firecrawl-core started=2026-09-29T07:30:40.626422062Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+redis started=2026-09-29T07:30:24.20035974Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+access-gateway started=2026-09-29T07:30:41.418784615Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m7 started=2026-09-28T11:17:37.867119341Z memory.swap.max=max parent=fcpi.slice parent_swap_max=0
+retrieval-service started=2026-09-29T07:30:30.322315469Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+nuq-postgres started=2026-09-29T07:30:24.578464786Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+rabbitmq started=2026-09-29T07:30:24.815632717Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+searxng started=2026-09-29T07:30:25.043242386Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m6 started=2026-09-28T11:17:23.125731751Z memory.swap.max=max parent=fcpi.slice parent_swap_max=0
+browser-worker started=2026-09-29T07:30:24.397978815Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+mcp-gateway started=2026-09-29T07:30:23.9120692Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m3 started=2026-09-28T11:17:23.13802051Z memory.swap.max=max parent=fcpi.slice parent_swap_max=0
+fixture-m5 started=2026-09-28T11:17:36.867336131Z memory.swap.max=max parent=fcpi.slice parent_swap_max=0
+fixture-m2 started=2026-09-28T11:17:23.210553954Z memory.swap.max=max parent=fcpi.slice parent_swap_max=0
+### end

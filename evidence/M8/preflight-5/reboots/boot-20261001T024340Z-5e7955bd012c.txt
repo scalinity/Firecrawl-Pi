@@ -1,0 +1,33 @@
+### meta
+utc=2026-10-01T02:43:45Z source_commit=d7ab53f6dcf3b6a339d3b66af93b74dff7bb23db before_boot=3f391ac002a7f45574cac14243ba85b598a442a1849645008f0307eb7c7efe5d
+before_found=yes
+### boots
+idx=-1 boot_id_sha256=3f391ac002a7f45574cac14243ba85b598a442a1849645008f0307eb7c7efe5d first=2026-10-01T00:46:20+00:00 last=2026-10-01T02:43:29+00:00
+idx=0 boot_id_sha256=5e7955bd012c3e14cb10bdc385099573c55a31bbd137fbe671108f1cd434dad6 first=2026-10-01T02:43:43+00:00 last=2026-10-01T02:43:46+00:00
+### ended_1
+last=2026-10-01T02:43:29+00:00 shutdown_markers=303 watchdog_reboot=no loss_utc=2026-10-01T02:43:28+00:00 sudo_commands=0 ssh_logins=0 sessions=0 console_logins=0 undervoltage=0
+### current
+boot_id_sha256=5e7955bd012c3e14cb10bdc385099573c55a31bbd137fbe671108f1cd434dad6 kernel=6.18.50+rpt-rpi-2712 page_size=16384 up_since_utc=2026-10-01T02:43:40Z
+rsts=1020 throttled_this_boot=0x0
+### recovery
+docker.service ExecMainStatus=0 ActiveState=inactive
+fcpi-stack.service ExecMainStatus=0 ActiveState=inactive
+-- entries --
+access-gateway status=running health=starting restarts=0
+browser-worker status=running health=healthy restarts=0
+firecrawl-core status=running health=starting restarts=0
+fixture status=running health=healthy restarts=0
+fixture-m2 status=running health=healthy restarts=0
+fixture-m3 status=running health=healthy restarts=0
+fixture-m5 status=exited health=unhealthy restarts=0
+fixture-m6 status=running health=healthy restarts=0
+fixture-m7 status=exited health=unhealthy restarts=0
+mcp-gateway status=running health=healthy restarts=0
+nuq-postgres status=running health=healthy restarts=0
+rabbitmq status=running health=starting restarts=0
+redis status=running health=healthy restarts=0
+retrieval-service status=running health=healthy restarts=0
+searxng status=running health=starting restarts=0
+### readiness
+stack_active_after_boot_s=45 ready_after_boot_s=46 recorded_utc=2026-10-01T02:44:26Z stack_state=active
+end

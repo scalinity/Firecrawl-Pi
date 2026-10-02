@@ -1,0 +1,15 @@
+20:00:03Z open
+opened: guard_table_handle=12
+20:00:04Z init
+20:00:35Z faults
+20:33:52Z heap
+20:35:17Z backup
+20:40:51Z live
+20:56:08Z rehearsal
+20:59:04Z plans
+20:59:25Z soak
+21:31:31Z close
+wrote <home>/Documents/Tools/Firecrawl/evidence/M8/preflight-5/snapshot-after.txt (347 lines)
+collected: suites, stack, verify ops, status, core logs, egress probe, rendered compose, ruleset, AFTER snapshot, owner session, reboot records
+21:36:55Z done
+window exit 0

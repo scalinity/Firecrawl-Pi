@@ -1,0 +1,15 @@
+17:44:48Z open
+opened: guard_table_handle=10
+17:44:49Z init
+17:45:20Z faults
+18:17:11Z heap
+18:18:32Z backup
+18:23:51Z live
+18:39:13Z rehearsal
+18:41:56Z plans
+18:42:35Z soak
+18:45:31Z close
+wrote evidence/M8/snapshot-after.txt (348 lines)
+collected: suites, stack, verify ops, status, core logs, egress probe, rendered compose, ruleset, AFTER snapshot, owner session, reboot records
+18:51:05Z done
+window exit 0

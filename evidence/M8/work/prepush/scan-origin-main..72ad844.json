@@ -1,0 +1,12 @@
+{
+  "commits": 238,
+  "blobs_scanned": 792,
+  "binaries": 12,
+  "live_secret_hashes": 38,
+  "controls": "every rule fired",
+  "findings": [
+    "services/retrieval/test/proxy.test.mjs:162 credential-assignment"
+  ],
+  "identifier_files": [],
+  "large_blobs": 8
+}

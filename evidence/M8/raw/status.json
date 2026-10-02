@@ -1,0 +1,436 @@
+{
+  "utc": "2026-10-02T23:00:14Z",
+  "commit": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+  "versions_lock_sha256": "520c9e9e522fcf4f6060ef326934c77732586e842b2117a7e2ccbe8fe7f0aeaf",
+  "services": {
+    "fixture": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:54.638191362-04:00",
+      "mem_mib": 42,
+      "peak_mib": 61,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "firecrawl-core": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:51.796462401-04:00",
+      "mem_mib": 1800,
+      "peak_mib": 1954,
+      "limit_mib": 2560,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "redis": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:48.342410627-04:00",
+      "mem_mib": 8,
+      "peak_mib": 15,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "access-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:52.940221054-04:00",
+      "mem_mib": 45,
+      "peak_mib": 58,
+      "limit_mib": 160,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m7": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:44.074311905-04:00",
+      "mem_mib": 22,
+      "peak_mib": 41,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "retrieval-service": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:46.099369601-04:00",
+      "mem_mib": 57,
+      "peak_mib": 76,
+      "limit_mib": 448,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "nuq-postgres": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:55.411009054-04:00",
+      "mem_mib": 91,
+      "peak_mib": 121,
+      "limit_mib": 640,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "rabbitmq": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:49.265041803-04:00",
+      "mem_mib": 189,
+      "peak_mib": 196,
+      "limit_mib": 512,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "searxng": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:49.249691861-04:00",
+      "mem_mib": 83,
+      "peak_mib": 92,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m6": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:37.699996586-04:00",
+      "mem_mib": 35,
+      "peak_mib": 54,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "browser-worker": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:45.951376284-04:00",
+      "mem_mib": 140,
+      "peak_mib": 181,
+      "limit_mib": 1536,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "mcp-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T19:00:11.624792979-04:00",
+      "mem_mib": 45,
+      "peak_mib": 65,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m3": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:54.139241385-04:00",
+      "mem_mib": 31,
+      "peak_mib": 49,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m5": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:44.00310613-04:00",
+      "mem_mib": 18,
+      "peak_mib": 39,
+      "limit_mib": 128,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m2": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-02T18:59:43.848880838-04:00",
+      "mem_mib": 19,
+      "peak_mib": 40,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    }
+  },
+  "core": {
+    "api": true,
+    "worker": true,
+    "heartbeat_at": "2026-10-02T18:59:51.796462401-04:00",
+    "check": "api=ok worker=ok"
+  },
+  "rest": {
+    "ready": true,
+    "status": 200,
+    "ms": 21,
+    "core_live": true,
+    "ledger_ok": true,
+    "jobs": {
+      "CANCELLED": 103,
+      "FAILED": 6,
+      "PARTIAL": 18,
+      "SUCCEEDED": 585
+    },
+    "archive": {
+      "bytes": 146526358,
+      "quotaBytes": 10737418240
+    }
+  },
+  "mcp": {
+    "ready": true,
+    "status": 200,
+    "ms": 14,
+    "tools": 13,
+    "protocol": "2026-07-28"
+  },
+  "capabilities": {
+    "scrape": true,
+    "browser": true,
+    "search": true,
+    "providers": {
+      "selection": {
+        "search": "live",
+        "extractionModel": "gpt-4.1-mini-2025-04-14",
+        "parser": "llamaparse-cost-effective",
+        "proxy": "decodo-residential",
+        "enhanced": "zyte-api",
+        "source": "file"
+      },
+      "paidDispatch": false,
+      "budgetPolicySha256": "5480507c7af1e37448c8ad2cc82d0a8fdc673f96d2580f8d5baaf6de2e2250b9",
+      "providers": {
+        "openai": {
+          "kind": "model",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-model": {
+          "kind": "model",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "llamaparse": {
+          "kind": "parser",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-parser": {
+          "kind": "parser",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "decodo": {
+          "kind": "proxy",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-proxy": {
+          "kind": "proxy",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "zyte": {
+          "kind": "enhanced",
+          "paid": true,
+          "credential": "absent",
+          "breaker": "closed"
+        },
+        "fixture-zyte": {
+          "kind": "enhanced",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        }
+      },
+      "budgets": [
+        {
+          "category": "fixture",
+          "period": "day",
+          "period_start": "2026-10-02",
+          "reserved": 0,
+          "settled": 8740
+        }
+      ],
+      "caps": {
+        "llm": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "parser": {
+          "paid": true,
+          "unit": "credits",
+          "caps": {
+            "month": 0
+          }
+        },
+        "fixture": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 100000
+          }
+        },
+        "fixture_parser": {
+          "paid": false,
+          "unit": "credits",
+          "caps": {
+            "day": 3000
+          }
+        },
+        "proxy": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_proxy": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000000
+          }
+        },
+        "fixture_proxy_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 130000
+          }
+        },
+        "enhanced": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_enhanced": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_enhanced_small": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000
+          }
+        }
+      }
+    }
+  },
+  "queue": {
+    "ok": true,
+    "queued": 0,
+    "oldest_queued_s": 0,
+    "active": 0,
+    "open_jobs": 0
+  },
+  "host": {
+    "sample_age_s": 44,
+    "mem": {
+      "total_mib": 8062,
+      "available_mib": 4577,
+      "swap_used_mib": 0
+    },
+    "temp_c": 46.9,
+    "injected_temp": false,
+    "throttled": "0x0",
+    "disk": {
+      "size": 62295171072,
+      "free": 34671759360,
+      "free_pct": 55.6,
+      "inodes_free_pct": 84.1
+    },
+    "host_oom_kill": 0
+  },
+  "admission": {
+    "utc": "2026-10-02T22:59:30Z",
+    "dispatch": "open",
+    "browser": "open",
+    "reasons": [],
+    "age_s": 44
+  },
+  "incidents": {},
+  "foreign_containers": [],
+  "probe": {
+    "utc": "2026-10-02T22:57:33Z",
+    "boot": "aa2771aeb24cb237f4f66a983aac1f8e63a691b5ff6f76d75a9754f0cbf9dd75",
+    "ok": true,
+    "held": false,
+    "consecutive_failures": 0,
+    "scrape": {
+      "ok": true,
+      "status": 200,
+      "ms": 74,
+      "code": null
+    },
+    "mcp": {
+      "ok": true,
+      "status": 200,
+      "ms": 13
+    },
+    "platform": {
+      "ok": true,
+      "ms": 16,
+      "core_live": true,
+      "ledger_ok": true,
+      "providers": "{\"selection\":{\"search\":\"live\",\"extractionModel\":\"gpt-4.1-mini-2025-04-14\",\"parser\":\"llamaparse-cost-effective\",\"proxy\":\"decodo-residential\",\"enhanced\":\"zyte-api\",\"source\":\"file\"},\"paidDispatch\":false,\"budgetPolicySha256\":\"5480507c7af1e37448c8ad2cc82d0a8fdc673f96d2580f8d5baaf6de2e2250b9\",\"providers\":{\"openai\":{\"kind\":\"model\",\"paid\":true,\"credential\":\"absent\",\"breaker\":\"closed\"},\"fixture-model\":{\"kind\":\"model\",\"paid\":false,\"credential\":\"not_required\",\"breaker\":\"closed\"},\"llamaparse\":{\"kind\":\"parser\",\"paid\":true,\"credential\":\"absent\",\"breaker\":\"closed\"},\"fixture-parser\":{\"kind\":\"parser\",\"paid\":fa"
+    },
+    "redis_acl_denials": 0
+  },
+  "backup": {
+    "last_success": "2026-10-02T07:33:24Z",
+    "age_h": 15.4,
+    "offdevice": "yes",
+    "last_attempt": {
+      "utc": "2026-10-02T07:33:24Z",
+      "result": "PASS",
+      "error": null
+    },
+    "last_restore_test": {
+      "utc": "2026-10-01T22:51:23Z",
+      "result": "PASS",
+      "error": null
+    }
+  },
+  "healthy": true
+}
