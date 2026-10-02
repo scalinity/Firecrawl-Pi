@@ -1,0 +1,16 @@
+{
+  "commits": 36,
+  "blobs_scanned": 270,
+  "binaries": 0,
+  "live_secret_hashes": 40,
+  "controls": "every rule fired",
+  "findings": [],
+  "identifier_files": [],
+  "large_blobs": [
+    "evidence/M8/raw/soak.txt 6.4 MiB",
+    "evidence/M8/window-1/raw/soak.txt 6.3 MiB",
+    "evidence/M8/window-2/raw/soak.txt 6.3 MiB",
+    "evidence/M8/window-4/raw/soak-partial.txt 3.7 MiB"
+  ],
+  "binary_blobs": []
+}
