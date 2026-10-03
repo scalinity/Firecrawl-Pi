@@ -10,5 +10,6 @@ export function clientProof(client,events){
   if((x.success===true||x.success===undefined)&&typeof x.data?.markdown==='string')return /^(?:# Static fixture(?:\r?\n|$)|Static fixture\r?\n=+(?:\r?\n|$))/.test(x.data.markdown);
   return usable(x.content)||usable(x.text)||usable(x.structuredContent);
  }
- return {calls: calls.map(({id,...x})=>x),usable:calls.length===1&&approved.length===1&&results.some(usable)};
+ const forbiddenBuiltin=client==='codex'&&events.some(x=>['command_execution','web_search','file_change','collab_tool_call','image_view'].includes(x.item?.type));
+ return {calls: calls.map(({id,...x})=>x),usable:!forbiddenBuiltin&&calls.length===1&&approved.length===1&&results.some(usable)};
 }
