@@ -18,7 +18,7 @@ export function closureVerdicts(m5, m6, m7) {
       subresources:b?.renders?.some(x=>x.ok===true && x.requests>=1 && x.blocked===0 && x.over_limit===0),
       settlement:b?.ledger?.some(x=>x.provider==="decodo" && x.state==="SETTLED" && x.usage?.bytes>0 && x.usage?.tunnels>=2) }),
     enhanced_cache:result({ complete:ended(m7), cached:c?.status===200 && c.cache==="hit", no_dispatch:c?.rows_before>=1 && c.rows_after===c.rows_before }),
-    automatic_enhanced:result({ complete:ended(m7), challenge_rejected:a?.success===false && a.code==="BLOCKED_PUBLIC_CONTENT",
+    automatic_enhanced:result({ complete:ended(m7), challenge_rejected:a?.success===false && a.class==="BLOCKED_PUBLIC_CONTENT",
       one_dispatch:a?.ledger?.length===1 && a.ledger[0].provider==="zyte",
       bounded_route:a?.acquisitions?.some(x=>x.failure==="BLOCKED_PUBLIC_CONTENT" && x.strategies?.[0]==="direct_http" && x.strategies.filter(s=>/^enhanced_/.test(s)).length===1 && x.attempts_used<=4 && x.logical_id===a.ledger?.[0]?.logical_id),
       accounted:a?.ledger?.every(x=>["SETTLED","RELEASED"].includes(x.state) && Number.isFinite(Number(x.actual))) })
