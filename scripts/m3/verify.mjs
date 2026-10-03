@@ -827,7 +827,7 @@ const series = json("patches/series.json");
 for (const id of wanted) {
   const c = checks[id];
   if (!c) throw new Error(`unknown check ${id}`);
-  const rec = { test_id: `M3-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, input_paths: c.inputs, expected: c.expected };
+  const rec = { test_id: `M3-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, input_paths: c.inputs.concat(id === "P02" ? [`${RAW}tailscale-status.txt`, `${RAW}tailnet-check.txt`].filter(has) : []), expected: c.expected };
   try {
     const missing = c.inputs.filter((p) => !has(p));
     if (missing.length) Object.assign(rec, { state: "NOT_RUN", actual: `evidence missing: ${missing.join(", ")}`, exit_code: null });
