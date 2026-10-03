@@ -191,6 +191,23 @@ test("public browser redirects remain usable with unrelated denied subresources"
   } finally { fx.s.close(); }
 });
 
+test("a committed credential-free forbidden URL matches its actual host refusal", async (t) => {
+  const fx = await serve((req, res) => page(res));
+  try {
+    for (const status of [200, 403]) await t.test(`initial status ${status}`, async () => {
+      const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
+      store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
+      const finalUrl = "http://169.254.169.254/latest/meta-data/";
+      const browser = { render: async () => ({ ok: true, status, finalUrl, html: "fcpi: refused", proxy: { denied: [{ host: "169.254.169.254", class: "SSRF_DENIED",
+        urlHash: createHash("sha256").update(finalUrl.replace("http://", "http://fixture-user:fixture-password@")).digest("hex") }] } }) };
+      const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/redirect`));
+      assert.equal(r.ok, false); assert.equal(r.failure.class, "SSRF_DENIED"); assert.equal(r.failure.retryable, false);
+      assert.equal(r.attemptsUsed, 1); assert.deepEqual(r.strategies, ["direct_browser"]); assert.equal(store.permits.size, 0);
+      assert.equal(fx.hits.length, 0, "the block is unchanged and has no fallback");
+    });
+  } finally { fx.s.close(); }
+});
+
 test("a post-load tunnel failure on the main frame propagates the actual Cloud refusal", async () => {
   const fx = await serve((req, res) => page(res));
   try {

@@ -496,8 +496,16 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
               nav.hash = "";
               const urlHash = createHash("sha256").update(nav.href).digest("hex");
               const authority = `${nav.hostname}:${nav.port || (nav.protocol === "https:" ? "443" : "80")}`;
-              const denied = r.proxy?.denied?.find((d) => ["SSRF_DENIED", "CLOUD_DENIED"].includes(d.class) &&
+              let denied = r.proxy?.denied?.find((d) => ["SSRF_DENIED", "CLOUD_DENIED"].includes(d.class) &&
                 (d.urlHash === urlHash || (failedNavigation && nav.protocol === "https:" && !d.urlHash && d.host === authority)));
+              // Chromium strips URL credentials from a committed HTTP document. Only
+              // a final URL independently forbidden by the unchanged policy may use
+              // its actual same-host refusal; a usable public 403 cannot match this way.
+              if (!denied && r.ok && nav.protocol === "http:") {
+                try { parseTarget(nav.href, policy); } catch (e) {
+                  if (["SSRF_DENIED", "CLOUD_DENIED"].includes(e.failureClass)) denied = r.proxy?.denied?.find(d => d.host === nav.host && d.class === e.failureClass);
+                }
+              }
               if (denied) navigationFailure = { class: denied.class, detail: "the browser's main-frame destination was refused by acquisition policy", retryable: false, retryAfter: null };
             } catch { /* no attributable navigation target */ }
           }
