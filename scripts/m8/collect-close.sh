@@ -26,7 +26,7 @@ run "$R/egress-probe.txt" "$root/scripts/m2/pi-egress-probe.sh" 'bash -s'
 run "${EV}rendered-compose.json" /dev/null 'bash /opt/firecrawl-pi/scripts/m1/pi-rendered-compose.sh'
 run "$R/nft-ruleset.txt" /dev/null 'bash /opt/firecrawl-pi/scripts/m3/pi-nft-ruleset.sh 2>/dev/null'
 "$root/scripts/m1/snapshot.sh" "${EV}snapshot-after.txt" 2>/dev/null
-since=$(sed -n 2p "$root/evidence/M8/snapshot-before.txt")
+since=$(sed -n 2p "${EV}snapshot-before.txt")
 [[ $since =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:]{8}Z$ ]] || { echo "no BEFORE snapshot time" >&2; exit 1; }
 run "$R/owner-session.txt" "$root/scripts/m8/pi-owner-session.sh" "bash -s -- $since"
 # Every durable boot record the Pi holds, each copied once under its own name (the verifier chooses the window's).
@@ -34,6 +34,6 @@ for f in $("${SSH[@]}" "ls -1 /var/lib/firecrawl-pi/boots/ 2>/dev/null"); do
   [[ $f =~ ^[0-9]{8}T[0-9]{6}Z-[0-9a-f]{12}\.txt$ ]] || continue
   [ -e "${EV}reboots/boot-$f" ] || run "${EV}reboots/boot-$f" /dev/null "cat /var/lib/firecrawl-pi/boots/$f"
 done
-before_boot=$(sed -n 's/^boot_id_sha256=//p' "$root/evidence/M8/snapshot-before.txt")
+before_boot=$(sed -n 's/^boot_id_sha256=//p' "${EV}snapshot-before.txt")
 run "${EV}reboots/reboot-close-$(date -u +%Y%m%dT%H%M%SZ).txt" "$root/scripts/m7/pi-reboot-record.sh" "bash -s -- $before_boot"
 echo "collected: suites, stack, verify ops, status, core logs, egress probe, rendered compose, ruleset, AFTER snapshot, owner session, reboot records"
