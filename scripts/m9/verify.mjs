@@ -58,6 +58,8 @@ let incidentOk=false;if(proof&&/^[0-9a-f]{8}$/.test(proof.incident_id)){
 results.push({test_id:'M9-INCIDENT',state:incidentOk?'PASS':'NOT_RUN',root_fixtures:rootOk});
 const review=text('evidence/M9/review/REVIEW.md');const dispositions=[...review.matchAll(/^\| (?:DB1|CA1|SELF)-[^|]+\| ([^|]+)\|/gm)].map(x=>x[1].trim());
 results.push({test_id:'M9-REVIEW',state:review.includes('Remediation complete')&&dispositions.length===43&&dispositions.every(x=>/^(FIXED|REJECTED|RETURNED)/.test(x))?'PASS':'NOT_RUN'});
+const returned=[...review.matchAll(/^\| ([A-Z0-9][A-Za-z0-9-]+) \| RETURNED\b[^|]*\|/gm)].map(x=>x[1]);
+results.push({test_id:'M9-RETURNED-FINDINGS',state:returned.length?'FAIL':'PASS',owning_milestone_remediation_required:returned});
 const current=json('evidence/M9/current/versions.json');results.push({test_id:'M9-CURRENT',state:current?.source_commit===head&&Object.values(current.checks??{}).length>=14&&Object.values(current.checks).every(x=>x===true)?'PASS':current?'FAIL':'NOT_RUN'});
 const run=json('evidence/M9/work/fixture-run.json'),fixtureRaw=text('evidence/M9/work/pi-fixtures-final.txt');results.push({test_id:'M9-FIXTURES',state:run&&sameCode(run.source_commit)&&fixturesVerdict(fixtureRaw,run)&&rootOk?'PASS':'NOT_RUN'});
 // Re-run the scanner, including its live hash controls, rather than trust a summary.
