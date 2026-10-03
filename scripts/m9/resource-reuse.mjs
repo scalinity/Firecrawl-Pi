@@ -15,7 +15,11 @@ export const acceptedResourceHashes={
 // These files evaluate evidence; none runs a workload or changes the Pi. Keep
 // all other scripts/tests in source-equivalence checks, including collectors.
 export const proofOnlyPaths=['scripts/m9/verify.mjs','scripts/m9/resource-reuse.mjs','tests/contracts/m9-resource-reuse.test.mjs'];
-export function onlyProofChanges(paths){return paths.length>0&&paths.every(p=>proofOnlyPaths.includes(p));}
+// The live corpus driver is not used by earlier milestone fixtures, native
+// onboarding, incident investigation or the completed resource workload. Its
+// changes never qualify old corpus/research execution as current.
+const liveProducerPaths=['scripts/m9/live.mjs','scripts/m9/live-contract.mjs','tests/contracts/m9-live.test.mjs'];
+export function onlyProofChanges(paths,independent=false){return paths.length>0&&paths.every(p=>proofOnlyPaths.includes(p)||(independent&&liveProducerPaths.includes(p)));}
 export function frames(raw){let key;const out={};for(const line of raw.split('\n')){const m=/^### (\S+)$/.exec(line);if(m){key=m[1];if(['meta','samples','end'].includes(key)&&out[key])throw Error('Duplicate resource frame');out[key]??=[];}else if(key&&line.startsWith('{')){try{out[key].push(JSON.parse(line));}catch{throw Error('Malformed resource record');}}else if(key==='samples'&&line.trim())throw Error('Non-JSON sample');}return out;}
 const MIB=1048576,percentile=(xs,p)=>[...xs].sort((a,b)=>a-b)[Math.ceil(xs.length*p)-1];
 const canonical=o=>JSON.stringify(o,(_,v)=>v&&typeof v==='object'&&!Array.isArray(v)?Object.fromEntries(Object.entries(v).sort(([a],[b])=>a.localeCompare(b))):v);

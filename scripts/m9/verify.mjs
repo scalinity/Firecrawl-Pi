@@ -1,12 +1,13 @@
 // Final binary gate. Canonical verifiers recompute current raw regressions;
 // summaries never grant acceptance. Historical exceptions remain immutable.
 import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync,mkdirSync,renameSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict,incidentVerdict,reviewVerdict}from'./evidence-checks.mjs';
+import{researchComplete,liveEvidenceInWindow}from'./live-contract.mjs';
 import{inputHash,collectionVerdict,inputKey,codeDirty}from'./collection.mjs';
 import{acceptedResourceHashes,resourceBaseline,resourceReuseVerdict,sameResourceCompose,onlyProofChanges,runtimeDeltaPaths,runtimeDeltaArgs,cloudWindowVerdict,priorCloudProbe,liveCloudVerdict}from'./resource-reuse.mjs';
 const hash=p=>sha(readFileSync(p)),json=p=>existsSync(p)?JSON.parse(readFileSync(p)):null,text=p=>existsSync(p)?readFileSync(p,'utf8'):'';
 const git=(...a)=>execFileSync('git',a,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim(),head=git('rev-parse','HEAD');
 const equivalentSources=new Map();
-const sameCode=s=>{if(equivalentSources.has(s))return equivalentSources.get(s);if(!/^[0-9a-f]{40}$/.test(s??''))return false;try{const paths=git('diff','--name-only','--no-renames',s,head,'--','services','deploy','scripts','tests','patches').split('\n').filter(Boolean);const ok=paths.length===0||onlyProofChanges(paths);equivalentSources.set(s,ok);return ok;}catch{return false;}};
+const sameCode=(s,independent=true)=>{const key=s+':'+independent;if(equivalentSources.has(key))return equivalentSources.get(key);if(!/^[0-9a-f]{40}$/.test(s??''))return false;try{const paths=git('diff','--name-only','--no-renames',s,head,'--','services','deploy','scripts','tests','patches').split('\n').filter(Boolean);const ok=paths.length===0||onlyProofChanges(paths,independent);equivalentSources.set(key,ok);return ok;}catch{return false;}};
 writeFileSync('evidence/M9/acceptance.json',JSON.stringify({schema:'fcpi.m9-acceptance/v2',utc:new Date().toISOString(),source_commit:head,state:'IN_PROGRESS',exit_code:1,verification_pending:true})+'\n');
 const historical={AC01:[[3,'A03'],[3,'N02']],AC02:[[3,'N01'],[3,'N03'],[3,'P02']],AC03:[[2,'R01'],[2,'R02'],[2,'R03']],AC04:[[3,'A01'],[3,'J04'],[3,'J07']],AC05:[[5,'M01']],AC06:[[5,'S05']],AC07:[[5,'E01']],AC08:[[5,'D01']],AC09:[[6,'R01']],AC10:[[7,'E01']],AC11:[[7,'B01']],AC12:[[4,'P01'],[4,'P02'],[4,'P03'],[4,'P08'],[4,'P09'],[4,'P10']],AC13:[[4,'P06'],[4,'P07']],AC14:[[3,'X02'],[3,'J03'],[3,'J06']],AC15:[[8,'R01']],AC16:[[8,'S01']],AC17:[[8,'O01']],AC18:[[8,'K03']],AC19:[[8,'U01'],[8,'U02']],AC20:[[7,'W01']],AC21:[[7,'C01']],AC23:[[5,'I01'],[6,'R06'],[7,'E03']],AC24:[[8,'X01']],AC25:[[7,'E04']]};
 const fresh=structuredClone(historical);fresh.AC07.push([5,'E05']);fresh.AC08.push([5,'D03']);fresh.AC09.push([6,'L01']);fresh.AC10.push([7,'E05']);
@@ -74,13 +75,13 @@ const evaluatorOk=evaluatorTests?.exit_code===0&&evaluatorTests.source_commit===
 results.push({test_id:'M9-RESOURCE-EVALUATOR-TESTS',state:evaluatorOk?'PASS':'NOT_RUN'});
 const privateRoot=join(homedir(),'.local/share/firecrawl-pi/m9');
 const freeze=json('evidence/M9/work/corpus-freeze.json'),corpus=json('evidence/M9/corpus.json'),rawCorpus=json(join(privateRoot,'live/corpus.json'));
-const corpusOk=rawCorpus&&sameCode(rawCorpus.source_commit)&&sameCode(corpus?.source_commit)&&corpusVerdict(text(join(privateRoot,'corpus.json')),freeze,rawCorpus,corpus);
+const corpusOk=rawCorpus&&sameCode(rawCorpus.source_commit,false)&&sameCode(corpus?.source_commit,false)&&liveEvidenceInWindow(rawCorpus,corpus,json('evidence/M9/work/live-window.json'))&&corpusVerdict(text(join(privateRoot,'corpus.json')),freeze,rawCorpus,corpus);
 results.push({test_id:'M9-CORPUS',state:corpusOk?'PASS':corpus?'FAIL':'NOT_RUN',denominator:20,usable:corpus?.usable??null});
 const clients=['claude','codex'].map(client=>{const r=json(`evidence/M9/clients/${client}.json`);const path=r&&/^native-[A-Za-z0-9]+$/.test(r.private_run??'')?join(privateRoot,r.private_run,'stdout.jsonl'):'';return {client,ok:!!path&&existsSync(path)&&sameCode(r.source_commit)&&nativeVerdict(client,text(path),r)};});
 results.push({test_id:'M9-CLIENTS',state:clients.every(x=>x.ok)?'PASS':'NOT_RUN',clients});
 const flow=json('evidence/M9/research-flow.json'),rawFlow=json(join(privateRoot,'live/research.json'));
 const ss=rawFlow?.steps??[],step=n=>ss.find(x=>x.step===n);
-const flowOk=rawFlow&&sameCode(rawFlow.source_commit)&&sha(JSON.stringify(rawFlow))===flow?.raw_sha256&&ss.length===5&&ss.every(x=>x.status>=200&&x.status<300)&&((step('search')?.json.data?.web??step('search')?.json.data??[]).length>0)&&(step('map')?.json.links?.length>0)&&(step('retrieve')?.json.data?.markdown?.length>0)&&step('poll/read')?.json.status==='completed'&&typeof step('poll/read')?.json.data?.title==='string';
+const flowOk=rawFlow&&sameCode(rawFlow.source_commit,false)&&sameCode(flow?.source_commit,false)&&sha(JSON.stringify(rawFlow))===flow?.raw_sha256&&researchComplete(ss)&&liveEvidenceInWindow(rawFlow,flow,json('evidence/M9/work/live-window.json'));
 results.push({test_id:'M9-RESEARCH',state:flowOk?'PASS':flow?'FAIL':'NOT_RUN'});
 const proof=json('evidence/M9/incident-proof.json'),rootTests=text('evidence/M9/work/root-fixtures.txt');
 const rootOk=/RESULT pass=\d+ fail=0 source=[0-9a-f]{40}/.test(rootTests)&&sameCode(rootTests.match(/RESULT pass=\d+ fail=0 source=([0-9a-f]{40})/)?.[1]);
