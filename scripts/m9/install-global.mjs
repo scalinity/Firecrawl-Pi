@@ -25,7 +25,7 @@ const existingCodex=beforeCodex.find(x=>x.name==='fcpi');
 const privateCodex=readFileSync(codexFile,'utf8');
 const privateBlock=/^\[mcp_servers\.fcpi\]\n([\s\S]*?)(?=^\[|$(?![\s\S]))/m.exec(privateCodex)?.[1];
 const privateHelper=privateBlock?.match(/^http_headers_helper = (".*")$/m)?.[1];
-if(existingCodex && (existingCodex.transport.url!==endpoint || !privateHelper || JSON.parse(privateHelper)!==q(helper)+' codex'))throw new Error('Existing Codex fcpi configuration differs; deliberate change required');
+if(existingCodex && (existingCodex.transport.url!==endpoint || (privateHelper && JSON.parse(privateHelper)!==q(helper)+' codex')))throw new Error('Existing Codex fcpi configuration differs; deliberate change required');
 for(const client of ['claude','codex','desktop']){
  const label=`m9${client}`;
  if(pi(`sudo -n test -f /etc/firecrawl-pi/secrets/clients/${label}.token && echo yes || echo no`).trim()==='no')
@@ -42,11 +42,11 @@ const current=readFileSync(codexFile,'utf8');
 const section=/^\[mcp_servers\.fcpi\]\n([\s\S]*?)(?=^\[|$(?![\s\S]))/m.exec(current);
 if(!section)throw new Error('Native Codex configuration missing');
 const replacement=section[0].trimEnd()+`\nhttp_headers_helper = ${JSON.stringify(q(helper)+' codex')}\n\n`;
-if(!existingCodex){const after=current.replace(section[0],replacement),tmp=codexFile+'.fcpi-new';
+if(!privateHelper){const after=current.replace(section[0],()=>replacement),tmp=codexFile+'.fcpi-new';
 writeFileSync(tmp,after,{mode:0o600,flag:'wx'});renameSync(tmp,codexFile);chmodSync(codexFile,0o600);}
 const afterClaude=JSON.parse(readFileSync(claudeFile)),afterCodex=JSON.parse(run('codex',['mcp','list','--json']));
 for(const [name,value] of Object.entries(beforeClaude.mcpServers||{}))if(!isDeepStrictEqual(afterClaude.mcpServers[name],value))throw new Error('Unrelated Claude server changed');
-for(const value of beforeCodex)if(!isDeepStrictEqual(afterCodex.find(x=>x.name===value.name),value))throw new Error('Unrelated Codex server changed');
+for(const value of beforeCodex.filter(x=>x.name!=='fcpi'))if(!isDeepStrictEqual(afterCodex.find(x=>x.name===value.name),value))throw new Error('Unrelated Codex server changed');
 const result={utc:new Date().toISOString(),test_id:'M9-GLOBAL-INSTALL',status:'CONFIGURED_PENDING_LIVE',private_endpoint:true,authentication:'macOS login keychain via native HTTP header helpers',existing_claude_servers_preserved:Object.keys(beforeClaude.mcpServers||{}).filter(x=>x!=='fcpi').length,existing_codex_servers_preserved:beforeCodex.filter(x=>x.name!=='fcpi').length,versions:{claude:run('claude',['--version']).trim(),codex:run('codex',['--version']).trim()},helper_sha256:createHash('sha256').update(readFileSync(helper)).digest('hex'),hosted_profiles_enabled:false,verification_note:'Initial string comparison rejected nondeterministic CLI map ordering; semantic comparison and idempotent configuration verification pass. CLI helper redaction is compared against the private TOML value.'};
 mkdirSync(join(root,'evidence/M9/clients'),{recursive:true});writeFileSync(join(root,'evidence/M9/clients/global-install.json'),JSON.stringify(result,null,2)+'\n');
 console.log(JSON.stringify(result));

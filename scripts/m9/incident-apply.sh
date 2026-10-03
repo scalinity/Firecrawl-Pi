@@ -12,8 +12,11 @@ finish_apply() {
  rc=$?
  trap - EXIT TERM INT
  hold_clear incident-deploy || true
+ if [ "$rc" != 0 ] && [ "$deployment_started" = true ] && [ "$final_state" = FAILED ] && [ "${3:-}" != --rollback ]; then
+  if restore_previous; then final_state=ROLLED_BACK; else final_state=ROLLBACK_FAILED; fi
+ fi
  if [ "$rc" != 0 ]; then
-  notice deployment_failed "incident_agent:$id" '{"state":"APPLY_FAILED","automatic_retry":false,"owner_attention_required":true}' "$(now_s)" "$id" || true
+  notice deployment_failed "incident_agent:$id" "$(jq -cn --arg state "$final_state" '{state:$state,automatic_retry:false,owner_attention_required:true}')" "$(now_s)" "$id" || true
  fi
  [ ! -s "$C/processed/$nonce.json" ] || jq --arg state "$final_state" --argjson rc "$rc" '. + {state:$state,exit_code:$rc,finished_at:now}' "$C/processed/$nonce.json" | write_atomic "$C/processed/$nonce.json" 0600
 }
@@ -43,7 +46,7 @@ else
  # Trusted tests run again immediately before creating an executable release.
  bash "$REPO/scripts/m9/incident-tests.sh" "$W/tree" >"$W/predeploy-tests.txt" 2>&1
  while IFS= read -r -d '' p; do git -C "$W/tree" add -- "$p"; done < <(git -C "$W/tree" diff --name-only -z)
- git -C "$W/tree" -c core.hooksPath=/dev/null commit -m "Fix incident $id with owner-approved tested patch" >/dev/null
+ git -C "$W/tree" -c core.hooksPath=/dev/null -c core.fsmonitor=false commit -m "Fix incident $id with owner-approved tested patch" >/dev/null
  code=$(git -C "$W/tree" rev-parse HEAD)
  # Only approved tracked bytes enter Docker COPY; the mutable tree is not a build context.
  install -d -m 0755 "$W/build-context"
