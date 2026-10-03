@@ -1,8 +1,8 @@
 {
-  "utc": "2026-10-03T02:55:32.237Z",
-  "repository_sha": "b1646901c7165381364b9f90bd105a0a09014580",
+  "utc": "2026-10-03T03:04:42.957Z",
+  "repository_sha": "a07a8f44901cd3d5aba6142cec3ba1aeb7908bda",
   "worktree_dirty": true,
-  "code_dirty": true,
+  "code_dirty": false,
   "test_id": "PRE-M9-CURRENT-POSTURE",
   "expected": "current M8 layout, inherited workload log controls and final live accounting; no M9 acceptance run",
   "checks": {
@@ -71,7 +71,7 @@
     },
     {
       "path": "evidence/M5/pre-m9-closure/additional-verification.json",
-      "sha256": "7d40319e34c79a27df0a64906be80fc2a0db8b9c08f03a8c99ab9aa1b0874585"
+      "sha256": "b4f260c56b99de330e3d0fbecf29db8cbe0013d8cd6f6ba51a2cfde5f7a7c86e"
     },
     {
       "path": "evidence/M5/pre-m9-closure/raw/guard-window-open.txt",

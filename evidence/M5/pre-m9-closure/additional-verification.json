@@ -1,8 +1,8 @@
 {
-  "utc": "2026-10-03T02:45:45.046Z",
-  "repository_sha": "4707e2a5d9d0ee26b4b87e6c56fd3bc44a1f49c1",
-  "worktree_dirty": true,
-  "code_dirty": true,
+  "utc": "2026-10-03T03:04:42.840Z",
+  "repository_sha": "a07a8f44901cd3d5aba6142cec3ba1aeb7908bda",
+  "worktree_dirty": false,
+  "code_dirty": false,
   "scope": "PRE-M9 additional proofs; no M9 acceptance",
   "inputs": [
     {

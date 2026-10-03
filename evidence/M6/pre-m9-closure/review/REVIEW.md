@@ -126,6 +126,11 @@ Additional safety follow-up: `5c60d9a` leaves the proxy validation cap at zero u
 
 ### Final closure follow-ups
 
+1. **F5 — Public HTML fixture encoding/vendor escaping** — corrected raw endpoint and padded Base64; approved before dispatch.
+2. **F6 — Current Example Domain content sentinel** — body-only paragraph matched with unusable-body/provider negative controls.
+3. **F7 — Recorded tunnel/strategy schema** — one shared CONNECT tunnel and literal enhanced strategy; controls retain two browser requests and one HTTP dispatch.
+4. **F8 — Current posture provenance and live Cloud window** — all consumed inputs hashed and guard/window/driver controls included.
+
 | ID | Finding | Severity | Outcome | Commit and evidence |
 | --- | --- | --- | --- | --- |
 | F5 | Public HTML fixture encoding/vendor escaping | Verification | Fixed | `767bb9e`; designed raw HTML endpoint and padded Base64 validated; CA1 approved |
@@ -136,3 +141,5 @@ Additional safety follow-up: `5c60d9a` leaves the proxy validation cap at zero u
 Both independent reviewers approved the accumulated remediation. All five required live gates and five added live proofs PASS. All 14 real-provider reservations SETTLED after socket closure; no UNCERTAIN/RESERVED row remains. Paid dispatch is false, base caps zero. Opus 5.5 was unavailable; the GPT-6.1 Sol substitution remains explicit. The provider-side reduction to 0.05 GB was verified before Decodo dispatch. No provider purchase or account broadening occurred.
 
 Exploratory legacy M5 X01/X02/X03 supplemental FAIL records remain in `evidence/M5/pre-m9-closure/raw/legacy-verifier-probe.json`: current M8 collector places container identity before its log counters, has 15 services rather than 13 and denies swap at the parent, and the restored base container has six startup lines rather than 100 workload lines. Current equivalent controls pass in `evidence/M5/pre-m9-closure/posture-verification.json`, using the retained 291-line whole fixture workload scan, current base scan, saved core logs, all live driver records and the unchanged guard window. These do not claim a retained whole log for every replaced paid container. Historical M5–M8 evidence is unchanged.
+
+Report-format follow-up: V01 initially failed because the final four table outcomes had no numbered finding entries. The original result is preserved in `evidence/M5/pre-m9-closure/raw/review-format-probe.json`; the entries above correct the report without changing its findings or implementation. Raw command transcripts retain their original trailing whitespace; source/doc whitespace checks are clean.
