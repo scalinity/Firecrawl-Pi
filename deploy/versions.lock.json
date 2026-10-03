@@ -1,6 +1,6 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-10-03T17:32:35.413Z",
+  "generated_utc": "2026-10-03T17:50:48.192Z",
   "generated_by": "scripts/m8/build-lock.mjs (M8), from the lock M7 closed with at 19f047f; entries owned by later milestones are as M7 wrote them",
   "repository_sha": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
   "worktree_dirty": true,
@@ -571,15 +571,15 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:acc94e9c2dbe05ee5740585417d34f4860195c78e9764fd0625546035d8ff483",
+      "image_id": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
       },
-      "evidence": "evidence/M9/work/M2-credential-image-build.txt",
+      "evidence": "evidence/M9/work/final-crash-image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "9c11be997b4556c480cf88cd99a07e769ff34066",
+      "built_from_commit": "047a42e0cee666f52b98576ef9796c804d6545f6",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
