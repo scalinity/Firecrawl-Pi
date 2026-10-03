@@ -29,3 +29,19 @@ export function fixturesVerdict(raw,run){
  const failures=[...raw.matchAll(/^# fail (\d+)$/gm)].map(x=>+x[1]);
  return run?.exit_code===0&&sha(raw)===run.raw_sha256&&ns.length>=3&&ns.reduce((a,b)=>a+b,0)>=270&&ns.length===passes.length&&ns.every((n,i)=>n===passes[i])&&failures.length===ns.length&&failures.every(x=>x===0)&&!/^not ok /m.test(raw);
 }
+export function incidentVerdict(raw,proof){
+ let r;try{r=JSON.parse(raw);}catch{return false;}
+ if(!r||typeof r!=='object'||!/^([0-9a-f]{8})$/.test(proof?.incident_id??''))return false;
+ const u=proof?.unit,models=Object.keys(r.modelUsage??{});
+ const w='/var/lib/firecrawl-pi/incidents/work/'+proof.incident_id;
+ const paths=x=>typeof x==='string'?x.split(/\s+/).filter(Boolean).map(p=>p.replace(/^-/,'')).sort():[];
+ const exactPaths=(got,want)=>JSON.stringify(paths(got))===JSON.stringify(want.sort());
+ return sha(raw)===proof?.raw_sha256&&r.is_error===false&&r.structured_output?.incident_id===proof.incident_id&&
+  models.length>0&&models.every(x=>x==='claude-opus-5-5')&&u?.MemoryMax===805306368&&u.NoNewPrivileges===true&&
+  u.declared_tools==='Read,Edit,Write'&&u.User==='danny'&&u.Group==='danny'&&u.MemorySwapMax==='0'&&u.RuntimeMaxUSec==='5min 30s'&&
+  u.CPUQuotaPerSecUSec==='500ms'&&u.TasksMax==='128'&&u.Slice==='fcpi.slice'&&u.KillMode==='control-group'&&u.TimeoutStopUSec==='15s'&&
+  u.ProtectSystem==='strict'&&u.ProtectHome==='read-only'&&u.PrivateTmp==='yes'&&
+  exactPaths(u.ReadWritePaths,[w+'/tree',w+'/run'])&&exactPaths(u.InaccessiblePaths,['/etc/firecrawl-pi','/srv/firecrawl-pi/data','/run/docker.sock','/home/danny/.ssh','/home/danny/.codex','/home/danny/.claude','/var/lib/firecrawl-pi/incidents/control'])&&
+  exactPaths(u.BindReadOnlyPaths,['/home/danny/.local/bin/claude'])&&proof.auth_removed===true&&
+  proof.owner_authentication==='Max subscription'&&proof.invoiced_usd===null;
+}

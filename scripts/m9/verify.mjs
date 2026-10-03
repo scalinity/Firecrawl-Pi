@@ -1,6 +1,6 @@
 // Final binary gate. Canonical verifiers recompute current raw regressions;
 // summaries never grant acceptance. Historical exceptions remain immutable.
-import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict}from'./evidence-checks.mjs';
+import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict,incidentVerdict}from'./evidence-checks.mjs';
 const hash=p=>sha(readFileSync(p)),json=p=>existsSync(p)?JSON.parse(readFileSync(p)):null,text=p=>existsSync(p)?readFileSync(p,'utf8'):'';
 const git=(...a)=>execFileSync('git',a,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim(),head=git('rev-parse','HEAD');
 const sameCode=s=>{if(!/^[0-9a-f]{40}$/.test(s??''))return false;try{git('diff','--quiet',s,head,'--','services','deploy','scripts','tests','patches',':(exclude)deploy/versions.lock.json');return true;}catch{return false;}};
@@ -52,10 +52,10 @@ results.push({test_id:'M9-RESEARCH',state:flowOk?'PASS':flow?'FAIL':'NOT_RUN'});
 const proof=json('evidence/M9/incident-proof.json'),rootTests=text('evidence/M9/work/root-fixtures.txt');
 const rootOk=/RESULT pass=\d+ fail=0 source=[0-9a-f]{40}/.test(rootTests)&&sameCode(rootTests.match(/RESULT pass=\d+ fail=0 source=([0-9a-f]{40})/)?.[1]);
 let incidentOk=false;if(proof&&/^[0-9a-f]{8}$/.test(proof.incident_id)){
- const raw=text(join(privateRoot,'incident',proof.incident_id+'.json'));let r;try{r=JSON.parse(raw);}catch{}
- incidentOk=rootOk&&sha(raw)===proof.raw_sha256&&sameCode(proof.source_commit)&&r?.is_error===false&&r.structured_output?.incident_id===proof.incident_id&&proof.unit?.MemoryMax===805306368&&proof.unit?.NoNewPrivileges===true&&proof.unit?.tools==='Read,Edit,Write'&&proof.auth_removed===true&&proof.unit?.User==='danny'&&Number(proof.unit?.MemorySwapMax)===0&&proof.owner_authentication==='Max subscription'&&proof.invoiced_usd===null;
+ const raw=text(join(privateRoot,'incident',proof.incident_id+'.json'));
+ incidentOk=rootOk&&sameCode(proof.source_commit)&&incidentVerdict(raw,proof);
 }
-results.push({test_id:'M9-INCIDENT',state:incidentOk?'PASS':'NOT_RUN',root_fixtures:rootOk});
+results.push({test_id:'M9-INCIDENT',state:incidentOk?'PASS':proof?'FAIL':'NOT_RUN',root_fixtures:rootOk});
 const review=text('evidence/M9/review/REVIEW.md');const dispositions=[...review.matchAll(/^\| (?:DB1|CA1|SELF)-[^|]+\| ([^|]+)\|/gm)].map(x=>x[1].trim());
 results.push({test_id:'M9-REVIEW',state:review.includes('Remediation complete')&&dispositions.length===43&&dispositions.every(x=>/^(FIXED|REJECTED|RETURNED)/.test(x))?'PASS':'NOT_RUN'});
 const returned=[...review.matchAll(/^\| ([A-Z0-9][A-Za-z0-9-]+) \| RETURNED\b[^|]*\|/gm)].map(x=>x[1]);
