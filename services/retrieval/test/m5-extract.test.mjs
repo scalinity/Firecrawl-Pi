@@ -23,6 +23,29 @@ async function rig({ mutate, paidDispatch = false, creds = {}, timeoutMs, handle
 }
 const req = (over = {}) => ({ logicalId: `test:${crypto.randomUUID()}`, schema: SCHEMA, documents: [DOC()], ...over });
 
+test("malformed HTTP 200 model answers settle conservatively and exhaust only the one repair (PRE-M9 W1)", async () => {
+  for (const body of ["null", "{not-json"]) {
+    let calls = 0;
+    const r = await rig({ handler: async (q, s) => {
+      for await (const _ of q) { /* drain the request */ }
+      calls++;
+      s.writeHead(200, { "content-type": "application/json" }).end(body);
+    } });
+    try {
+      const out = await r.extract(req());
+      assert.equal(out.ok, false);
+      assert.equal(out.failure.class, "EXTRACTION_INVALID_OUTPUT");
+      assert.equal(calls, 2);
+      for (const row of r.store.rows.values()) {
+        assert.equal(row.state, "SETTLED");
+        assert.equal(row.actual, row.reserved);
+        assert.equal(row.usage, null);
+        assert.equal(row.result.resolvedModel, null);
+      }
+    } finally { await r.srv.close(); }
+  }
+});
+
 test("Luna request parameters and cache-write usage stay inside the reservation", async () => {
   let sent;
   const r = await rig({ mutate: (b) => {

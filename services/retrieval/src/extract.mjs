@@ -187,7 +187,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       ? { promptTokens: counts[0], completionTokens: counts[1], cachedTokens: counts[2], cacheWriteTokens: counts[3] } : null;
     // Without the provider's counts the whole reservation is the charge: never less than it could be.
     const cost = usage ? modelCost(card, usage) : amount;
-    const result = { resolvedModel: typeof json.model === "string" ? json.model : null, content: typeof msg.content === "string" ? msg.content : null, refusal: msg.refusal ?? null, finishReason: json?.choices?.[0]?.finish_reason ?? null };
+    const result = { resolvedModel: typeof json?.model === "string" ? json.model : null, content: typeof msg.content === "string" ? msg.content : null, refusal: msg.refusal ?? null, finishReason: json?.choices?.[0]?.finish_reason ?? null };
     await store.settleBudget(res.id, cost, { usage, result, detail: usage ? (cost > amount ? `settled above the reservation by ${cost - amount}` : null) : "usage absent from the answer; settled at the reservation" });
     log({ event: "model_call", logical_id: logicalId, call: callKey, kind, model, outcome: "answered", prompt_tokens: usage?.promptTokens ?? null, completion_tokens: usage?.completionTokens ?? null,
       cached_tokens: usage?.cachedTokens ?? null, cache_write_tokens: usage?.cacheWriteTokens ?? null, resolved_model: result.resolvedModel,
