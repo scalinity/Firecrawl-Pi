@@ -20,7 +20,9 @@ echo "### meta"
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) image=${image:-absent} test_postgres=$PGIMG"
 [ -n "$image" ] || { echo "no gateway image in compose.yaml"; exit 1; }
 D network create --internal --label fcpi.transient=gateway-tests "$N" >/dev/null
-D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=gateway-tests --tmpfs /var/lib/postgresql/data --tmpfs /var/run/postgresql \
+D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=gateway-tests --read-only --user 999:999 --cgroup-parent fcpi.slice \
+  --cap-drop ALL --security-opt no-new-privileges:true --memory 192m --memory-swap 192m --cpus 0.3 --pids-limit 64 \
+  --tmpfs /var/lib/postgresql/data:uid=999,gid=999,mode=0700,size=256m --tmpfs /var/run/postgresql:uid=999,gid=999,mode=0700,size=8m --tmpfs /tmp:size=16m \
   -e POSTGRES_HOST_AUTH_METHOD=trust "$PGIMG" >/dev/null
 # Over TCP: the entrypoint's temporary init server listens on the socket only, so this waits for the real one.
 for _ in $(seq 1 90); do D exec "$N-pg" pg_isready -h 127.0.0.1 -U postgres -q 2>/dev/null && break; sleep 1; done
@@ -29,6 +31,7 @@ run() { # run <section> <command…>: one node --test run in the gateway image
   local s=$1; shift
   echo "### $s"
   D run --rm --network "$N" --read-only --tmpfs /tmp:size=64m --cap-drop ALL --security-opt no-new-privileges:true --user 3380:3380 \
+    --cgroup-parent fcpi.slice --memory 384m --memory-swap 384m --cpus 0.5 --pids-limit 64 \
     --label fcpi.transient=gateway-tests -e FCPI_TEST_PG="$N-pg" -e FCPI_GATEWAY_DIR=/srv/access \
     -e FCPI_TEST_MANIFEST=/srv/policy/capabilities.json -e FCPI_TEST_SCHEMA=/srv/schema.sql \
     -v "$REPO/services/access/test:/srv/access/test:ro" \
@@ -40,7 +43,7 @@ run() { # run <section> <command…>: one node --test run in the gateway image
 }
 run unit_tap node --test --test-reporter=tap --test-timeout=60000 test/validate.test.mjs test/auth.test.mjs test/archive.test.mjs
 run contract_tap node --test --test-reporter=tap --test-timeout=120000 /srv/contracts/m3-gateway.test.mjs
-echo "node_version=$(D run --rm --network none --label fcpi.transient=gateway-tests "$image" node --version 2>&1)"
+echo "node_version=$(D run --rm --network none --read-only --user 3380:3380 --cap-drop ALL --security-opt no-new-privileges:true --cgroup-parent fcpi.slice --memory 64m --memory-swap 64m --cpus 0.2 --pids-limit 32 --label fcpi.transient=gateway-tests "$image" node --version 2>&1)"
 D rm -f "$N-pg" >/dev/null 2>&1; D network rm "$N" >/dev/null 2>&1
 echo "### transient"
 echo "leftover_transient_containers=$(D ps -aq --filter label=fcpi.transient | wc -l) leftover_transient_networks=$(D network ls -q --filter label=fcpi.transient | wc -l)"
