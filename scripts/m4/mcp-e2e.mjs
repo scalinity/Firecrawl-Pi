@@ -423,8 +423,9 @@ const PHASES = {
     // The durable crawl cancellation, as M3's J07 measures it: no slow page starts more than 2.5 s after
     // the cancel. Each slow page answers after 2 s.
     const since = piNow();
-    const cr = await call("firecrawl_crawl", { url: `${FX}/slow/`, limit: 30, sitemap: "skip" });
+    const cr = await call("firecrawl_crawl", { url: `${FX}/slow/`, limit: 12, sitemap: "skip" });
     const id = payloadOf(cr)?.id;
+    if (!id) throw new Error(`controlled cancellation crawl was not admitted: ${JSON.stringify(payloadOf(cr))}`);
     await sleep(6000);
     const cancelAt = piNow();
     const k1 = await call("firecrawl_cancel_crawl", { id });
