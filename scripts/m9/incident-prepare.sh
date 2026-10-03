@@ -18,7 +18,8 @@ systemctl list-units --state=active --type=service 'fcpi-incident-????????.servi
 # Count every launch (including resumes) in an immutable root UTC ledger.
 day=$(date -u +%F)
 [ ! -e "$D/launches.jsonl" ] || jq -e -s 'all(.[]; (.day|type)=="string" and (.incident_id|test("^[0-9a-f]{8}$")))' "$D/launches.jsonl" >/dev/null || die 'launch ledger damaged; investigation blocked'
-count=$(jq -s --arg day "$day" '[.[]|select(.day==$day)]|length' "$D/launches.jsonl" 2>/dev/null || echo 0)
+count=0
+if [ -e "$D/launches.jsonl" ]; then count=$(jq -s --arg day "$day" '[.[]|select(.day==$day)]|length' "$D/launches.jsonl") || die 'launch ledger unreadable'; fi
 [ "$count" -lt 4 ] || die 'UTC daily investigation limit reached'
 # Pin the native binary before any auth operation or worktree creation.
 sha=$(sha256sum /home/danny/.local/bin/claude | cut -c1-64)
