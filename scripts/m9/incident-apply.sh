@@ -46,9 +46,10 @@ else
  [ "$(git -C "$W/tree" diff --binary | sha256sum | cut -c1-64)" = "$(jq -r .patch_sha <<<"$g")" ] || die 'frozen source changed'
  # Reconstruct and compare the same approved archive before repeating its tests.
  [ "$(sha256sum "$W/candidate.tar"|cut -c1-64)" = "$(jq -r .archive_sha "$W/harvested.json")" ] || die 'approved archive changed'
+ mapfile -d '' approved_paths < <(git -C "$W/tree" diff --name-only -z)
  export GIT_INDEX_FILE="$W/predeploy.index"
  git -C "$W/tree" read-tree "$base"
- while IFS= read -r -d '' p; do git -C "$W/tree" add -- "$p"; done < <(git -C "$W/tree" diff --name-only -z)
+ for p in "${approved_paths[@]}"; do git -C "$W/tree" add -- "$p"; done
  [ "$(git -C "$W/tree" write-tree)" = "$(jq -r .tested_tree "$W/harvested.json")" ] || die 'approved tracked tree changed'
  unset GIT_INDEX_FILE
  bash "$REPO/scripts/m9/incident-tests.sh" "$W/tested-source" >"$W/predeploy-tests.txt" 2>&1
