@@ -23,3 +23,16 @@ test("the actual M9 window policy generator satisfies the production validator a
   assert.equal(paidDispatchActive(policy, true, Date.parse(grant.expires_at)), false);
   assert.equal(paidDispatchActive(policy, false, Date.parse(grant.expires_at) - 1), false);
 });
+
+test("the actual consent predicate rejects wrong, over-budget, expired and period-crossing grants", () => {
+  const script = readFileSync(new URL("../../scripts/m9/validation.sh", import.meta.url), "utf8");
+  const expression = script.match(/jq -e --arg source [^\n]+? '([^']+)' <<<"\$g"/)?.[1];
+  assert.ok(expression, "exercise the deployed consent predicate");
+  const source = "1".repeat(40), now = Date.parse("2026-10-03T17:15:00Z") / 1000;
+  const grant = { scope: "M9 acceptance", source_commit: source, expires_at: "2026-10-03T18:00:00Z", llm_micro_usd: 20000, proxy_micro_usd: 100000, enhanced_micro_usd: 100000, parser_credits: 20 };
+  const accepts = (g, at = now) => spawnSync("jq", ["-e", "--arg", "source", source, "--argjson", "fixture_now", String(at), `def now: $fixture_now; (${expression})`], { input: JSON.stringify(g), encoding: "utf8" }).status === 0;
+  assert.equal(accepts(grant), true);
+  for (const patch of [{ source_commit: "2".repeat(40) }, { scope: "normal production" }, { llm_micro_usd: 20001 }, { proxy_micro_usd: 100001 }, { enhanced_micro_usd: 100001 }, { parser_credits: 21 }, { llm_micro_usd: -1 }, { llm_micro_usd: 0.5 }, { expires_at: "2026-10-03T17:15:00Z" }, { expires_at: "2026-10-03T18:00:01Z" }]) assert.equal(accepts({ ...grant, ...patch }), false, JSON.stringify(patch));
+  assert.equal(accepts({ ...grant, expires_at: "2026-11-01T00:15:00Z" }, Date.parse("2026-10-31T23:30:00Z") / 1000), false);
+  assert.equal(accepts({ ...grant, expires_at: "2026-10-04T00:15:00Z" }, Date.parse("2026-10-03T23:30:00Z") / 1000), false);
+});
