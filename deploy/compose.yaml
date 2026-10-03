@@ -344,6 +344,7 @@ services:
       PI_INCIDENT_REQUESTS_DIR: /srv/incidents/requests
       PI_INCIDENT_KEY_FILE: /srv/incidents/public-key.pem
       PI_INCIDENT_REPORTS_DIR: /srv/incidents/reports
+      PI_INCIDENT_OWNER_FILE: /srv/incidents/owner.sha256
     secrets: [gateway_postgres_password, gateway_retrieval_token]
     volumes:
       - type: bind
@@ -387,6 +388,11 @@ services:
       - type: bind
         source: /var/lib/firecrawl-pi/incidents/control/public-key.pem
         target: /srv/incidents/public-key.pem
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /var/lib/firecrawl-pi/incidents/control/owner.sha256
+        target: /srv/incidents/owner.sha256
         read_only: true
         bind: { create_host_path: false }
     ports:

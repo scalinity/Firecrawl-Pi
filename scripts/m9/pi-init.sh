@@ -22,6 +22,12 @@ if [ ! -e /etc/firecrawl-pi/secrets/incident_signing_key ]; then
 fi
 openssl pkey -in /etc/firecrawl-pi/secrets/incident_signing_key -pubout >"$C/public-key.pem.new"
 chmod 0640 "$C/public-key.pem.new"; chown root:3380 "$C/public-key.pem.new"; mv "$C/public-key.pem.new" "$C/public-key.pem"
+# Bind approvals to this private Serve owner's authenticated identity. Raw login
+# never enters repository evidence; only its SHA-256 is mounted in the gateway.
+owner=$(tailscale status --json | jq -er '. as $s | $s.User[($s.Self.UserID|tostring)].LoginName')
+printf '%s' "$owner" | sha256sum | cut -c1-64 >"$C/owner.sha256.new"
+chmod 0640 "$C/owner.sha256.new"; chown root:3380 "$C/owner.sha256.new"; mv "$C/owner.sha256.new" "$C/owner.sha256"
+unset owner
 if [ ! -e /etc/firecrawl-pi/incidents.env ]; then printf 'FCPI_INCIDENT_ENABLED=false\n' | write_atomic /etc/firecrawl-pi/incidents.env 0600; fi
 bash "$REPO/deploy/host/fcpi-data-check.sh"
 for u in fcpi-incident.service fcpi-incident.timer; do install -m 0644 "$REPO/deploy/host/$u" "/etc/systemd/system/$u"; done

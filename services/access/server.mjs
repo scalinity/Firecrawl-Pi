@@ -529,7 +529,7 @@ const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
       // accept only a header signature on POST; no query can approve a deployment.
       const view = req.method === "GET" && [...ctx.url.searchParams.keys()].join() === "proof";
       if (ctx.url.search && !view) return ctx.send(400, { success: false, code: "NO_ACTION_QUERY" });
-      const r = await incidentActions.consume(action[1], view ? ctx.url.searchParams.get("proof") : req.headers["x-fcpi-approval"], { method: req.method, bodyBytes: (await readBody(req)).length });
+      const r = await incidentActions.consume(action[1], view ? ctx.url.searchParams.get("proof") : req.headers["x-fcpi-approval"], { method: req.method, bodyBytes: (await readBody(req)).length, ownerLogin: req.headers["tailscale-user-login"] });
       if (r.status === 401) {
         const wait = failures.fail();
         if (wait) return ctx.send(429, { success: false, code: "TOO_MANY_FAILED_ATTEMPTS" }, { "retry-after": String(wait) });

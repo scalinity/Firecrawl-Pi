@@ -2,7 +2,7 @@
 // patch and test report. The signature is an HTTP header for mutations. Exclusive,
 // fsynced request creation consumes it across restarts; the gateway executes no host command.
 import { readFile, open } from 'node:fs/promises';
-import { sign, verify, randomBytes } from 'node:crypto';
+import { sign, verify, randomBytes, createHash } from 'node:crypto';
 import { join } from 'node:path';
 
 const HEX = /^[0-9a-f]{64}$/;
@@ -40,11 +40,16 @@ export async function issueGrant({grantsDir,key,incident_id,action,base_sha,patc
   await durableExclusive(join(grantsDir,g.id+'.json'),g);
   return {grant:g,signature:signatureFor(key,g)};
 }
-export function makeIncidentActions({grantsDir,requestsDir,keyFile,reportsDir=null,now=()=>Date.now()}) {
-  return {async consume(id,signature,{method='POST',bodyBytes=0}={}) {
+export function makeIncidentActions({grantsDir,requestsDir,keyFile,reportsDir=null,ownerFile,now=()=>Date.now()}) {
+  return {async consume(id,signature,{method='POST',bodyBytes=0,ownerLogin}={}) {
     const no = (status,code) => ({status,body:{success:false,code}});
     if(!['POST','GET'].includes(method)) return no(405,'METHOD_NOT_ALLOWED');
     if(bodyBytes!==0) return no(400,'EMPTY_BODY_REQUIRED');
+    // Serve strips inbound identity headers and supplies its authenticated user.
+    // The only host publication is loopback behind that trusted private proxy.
+    if(!ownerFile || typeof ownerLogin!=='string' || !ownerLogin) return no(401,'OWNER_REQUIRED');
+    const ownerHash=(await readFile(ownerFile,'utf8')).trim();
+    if(!HEX.test(ownerHash) || createHash('sha256').update(ownerLogin).digest('hex')!==ownerHash) return no(401,'OWNER_REQUIRED');
     if(!/^[0-9a-f]{32}$/.test(id) || typeof signature!=='string' || !/^[0-9a-f]{128}$/.test(signature)) return no(401,'INVALID_APPROVAL');
     let g;
     try { g=JSON.parse(await readFile(join(grantsDir,id+'.json'),'utf8')); }
@@ -55,13 +60,17 @@ export function makeIncidentActions({grantsDir,requestsDir,keyFile,reportsDir=nu
     // Only a public verifier key is mounted here. The gateway cannot mint an
     // owner approval even if its writable request spool were compromised.
     if(!verifySignature(key,g,signature)) return no(401,'INVALID_APPROVAL');
-    try { await durableExclusive(join(requestsDir,id+'.json'),{...g,signature,approved_at:now()}); }
-    catch(e) { if(e.code==='EEXIST') return no(409,'APPROVAL_ALREADY_USED'); throw e; }
+    let report;
     if(method==='GET') {
-      const report=JSON.parse(await readFile(join(reportsDir,g.incident_id+'.json'),'utf8'));
+      // Immutable per-grant report, checked before consuming a view nonce. A
+      // newer notice cannot invalidate an earlier, still-valid report link.
+      try { report=JSON.parse(await readFile(join(reportsDir,id+'.json'),'utf8')); }
+      catch(e) { if(e.code==='ENOENT') return no(503,'REPORT_UNAVAILABLE'); throw e; }
       if(report.incident_id!==g.incident_id || report.base_sha!==g.base_sha) throw new Error('Incident report binding mismatch');
-      return {status:200,body:{success:true,report}};
     }
+    try { await durableExclusive(join(requestsDir,id+'.json'),{...g,signature,approved_at:now(),read_only:method==='GET'}); }
+    catch(e) { if(e.code==='EEXIST') return no(409,'APPROVAL_ALREADY_USED'); throw e; }
+    if(method==='GET') return {status:200,body:{success:true,report}};
     return {status:202,body:{success:true,incident_id:g.incident_id,action:g.action,state:'QUEUED'}};
   }};
 }

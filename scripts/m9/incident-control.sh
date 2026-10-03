@@ -37,7 +37,7 @@ for f in "$C"/requests/*.json; do
  rc=0
  case $action in
   investigate) if [ -e "$D/work/$id" ]; then bash "$REPO/scripts/m9/incident-prepare.sh" "$id" --resume || rc=$?; else bash "$REPO/scripts/m9/incident-prepare.sh" "$id" || rc=$?; fi ;;
-  details) notice diagnosis_ready "incident_agent:$id" '{"report":"available privately","action":"details"}' "$(now_s)" "$id" ;;
+  details) : ;;
   dismiss) put_obj "$C/dismissed/$id.json" 0600 "$(jq -c '{incident_id,approved_at}' <<<"$g")" ;;
   apply_fix) bash "$REPO/scripts/m9/incident-apply.sh" "$id" "$grant" || rc=$? ;;
   rollback) bash "$REPO/scripts/m9/incident-apply.sh" "$id" "$grant" --rollback || rc=$? ;;
@@ -47,7 +47,7 @@ for f in "$C"/requests/*.json; do
 done
 # Expired, consumed grant material is removed after seven days. Replay records
 # remain for the same window (longer than the maximum one-hour validity).
-find "$C/grants" "$C/requests" "$C/processed" -type f -name '*.json' -mtime +7 -delete
+find "$C/grants" "$C/requests" "$C/processed" "$C/reports" -type f -name '*.json' -mtime +7 -delete
 for w in "$D"/work/*; do
  [ -d "$w" ] || continue
  id=${w##*/}; [[ $id =~ ^[0-9a-f]{8}$ ]] || continue

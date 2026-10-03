@@ -74,7 +74,7 @@ function call(port, { token, host = HOST, headers = {}, body = '{"jsonrpc":"2.0"
 }
 
 let gw, bare;
-const incidentEnv = {PI_INCIDENT_GRANTS_DIR:join(dir,'grants'),PI_INCIDENT_REQUESTS_DIR:join(dir,'requests'),PI_INCIDENT_KEY_FILE:join(dir,'incident-key'),PI_INCIDENT_REPORTS_DIR:join(dir,'reports')};
+const incidentEnv = {PI_INCIDENT_GRANTS_DIR:join(dir,'grants'),PI_INCIDENT_REQUESTS_DIR:join(dir,'requests'),PI_INCIDENT_KEY_FILE:join(dir,'incident-key'),PI_INCIDENT_REPORTS_DIR:join(dir,'reports'),PI_INCIDENT_OWNER_FILE:join(dir,'owner-hash')};
 const incidentKeys=generateKeyPairSync('ed25519');
 before(async () => {
   await new Promise((r) => mcp.listen(0, "127.0.0.1", r));
@@ -94,6 +94,7 @@ before(async () => {
   writeFileSync(join(dir, "art", ".fcpi-artifact-root"), "test\n");
   writeFileSync(join(dir, "cred", "gateway_postgres_password"), "p".repeat(40));
   for(const name of ['grants','requests','reports'])mkdirSync(join(dir,name));
+  writeFileSync(incidentEnv.PI_INCIDENT_OWNER_FILE,createHash('sha256').update('fixture-owner').digest('hex'));
   writeFileSync(incidentEnv.PI_INCIDENT_KEY_FILE,incidentKeys.publicKey.export({type:'spki',format:'pem'}));
   gw = await startGateway({ PI_MCP_URL: `http://127.0.0.1:${mcp.address().port}`, ...incidentEnv });
   bare = await startGateway({});
@@ -102,12 +103,13 @@ before(async () => {
 test('M9 phone approvals retain Host/Origin checks and never accept URL-only or replayed authority',async()=>{
   const {grant,signature}=await issueGrant({grantsDir:incidentEnv.PI_INCIDENT_GRANTS_DIR,key:incidentKeys.privateKey,incident_id:'123abcde',action:'apply_fix',base_sha:'b'.repeat(40),patch_sha:'c'.repeat(64),tests_sha:'d'.repeat(64)});
   const path='/platform/v1/incidents/action/'+grant.id;
-  const args={path,body:'',headers:{'X-FCPI-Approval':signature}};
+  const args={path,body:'',headers:{'X-FCPI-Approval':signature,'Tailscale-User-Login':'fixture-owner'}};
   assert.equal((await call(gw.port,{...args,host:'rebinding.example'})).status,421);
   assert.equal((await call(gw.port,{...args,headers:{...args.headers,origin:'https://evil.example'}})).status,403);
   assert.equal((await call(gw.port,{path,body:''})).status,401);
   assert.equal((await call(gw.port,{path:path+'?proof='+signature,body:''})).status,400);
-  assert.equal((await call(gw.port,{path:path+'?proof='+signature,method:'GET',body:''})).status,405);
+  assert.equal((await call(gw.port,{path:path+'?proof='+signature,method:'GET',body:'',headers:args.headers})).status,405);
+  assert.equal((await call(gw.port,{...args,headers:{...args.headers,'Tailscale-User-Login':'different-owner'}})).status,401);
   assert.equal((await call(gw.port,args)).status,202);
   const restarted=await startGateway(incidentEnv);
   assert.equal((await call(restarted.port,args)).status,409);
