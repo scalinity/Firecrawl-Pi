@@ -51,6 +51,11 @@ else
  # Only approved tracked bytes enter Docker COPY; the mutable tree is not a build context.
  install -d -m 0755 "$W/build-context"
  git -C "$W/tree" archive "$code" | tar -xf - -C "$W/build-context"
+ # Retain each accepted image before any mutable tag is replaced.
+ for service in access-gateway retrieval-service; do
+  tag=access-gateway; [ "$service" != retrieval-service ] || tag=retrieval
+  docker image tag "$(docker inspect -f '{{.Image}}' "$(cid "$service")")" "fcpi/$tag:retained-$base"
+ done
  # Both bounded services are rebuilt; no browser/upstream/database image changes.
  for component in access retrieval; do
   tag=access-gateway; [ "$component" != retrieval ] || tag=retrieval
