@@ -116,4 +116,72 @@ for rel in services/retrieval/src/ssrf.mjs services/retrieval/src/quality/node_m
 done
 ok 'policy, ignored nested bytes and existing tests denied'
 incident_writable "$T/candidate" services/retrieval/test/new-incident.test.mjs; ok 'new direct unit test permitted'
+
+# A standalone candidate exposes its own Git metadata to the unprivileged agent;
+# the root-only source mirror is never needed by the writable-path hook.
+W=$T/state/incidents/work/55555555
+mkdir -p "$W/run" "$T/repo/scripts/m1" "$T/repo/deploy/host"
+git clone --quiet --no-hardlinks "$T/state/incidents/source.git" "$W/tree"
+git -C "$W/tree" switch --quiet --detach "$base"
+git -C "$W/tree" switch --quiet -c codex/incident-55555555
+chown -R danny:danny "$W/tree"
+runuser_real=$(command -v /usr/sbin/runuser)
+"$runuser_real" -u danny -- git -C "$W/tree" rev-parse --verify HEAD >/dev/null
+ok 'standalone candidate metadata readable without root mirror access'
+chown -R root:root "$W/tree"
+printf '\n// Synthetic incident regression.\n' >>"$W/tree/services/retrieval/src/quality.mjs"
+git -C "$W/tree" diff --binary >"$W/patch.diff"
+GIT_INDEX_FILE="$W/test.index" git -C "$W/tree" read-tree "$base"
+GIT_INDEX_FILE="$W/test.index" git -C "$W/tree" add services/retrieval/src/quality.mjs
+tree=$(GIT_INDEX_FILE="$W/test.index" git -C "$W/tree" write-tree)
+git -C "$W/tree" archive "$tree" >"$W/candidate.tar"
+mkdir "$W/tested-source"; tar -xf "$W/candidate.tar" -C "$W/tested-source"
+printf '%s\n' "$base" >"$W/base-sha"; echo 'fixture tests passed' >"$W/tests.txt"
+p=$(sha256sum "$W/patch.diff"|cut -c1-64) t=$(sha256sum "$W/tests.txt"|cut -c1-64) a=$(sha256sum "$W/candidate.tar"|cut -c1-64)
+jq -n --arg tree "$tree" --arg a "$a" '{test_exit:0,changed_files:1,tested_tree:$tree,archive_sha:$a}' >"$W/harvested.json"
+nonce=$(printf '5%.0s' {1..32})
+jq -n --arg base "$base" --arg p "$p" --arg t "$t" '{state:"EXECUTION_STARTED",incident_id:"55555555",action:"apply_fix",base_sha:$base,patch_sha:$p,tests_sha:$t}' >"$T/state/incidents/control/processed/$nonce.json"
+# Fixed root authorities are recording stubs in this disposable namespace.
+for script in incident-tests.sh; do printf '#!/bin/bash\nexit 0\n' >"$T/repo/scripts/m9/$script"; done
+for script in backup.sh restore-test.sh; do printf '#!/bin/bash\nexit 0\n' >"$T/repo/scripts/ops/$script"; done
+printf '#!/bin/bash\nexit 0\n' >"$T/repo/deploy/host/fcpi-data-check.sh"
+cat >"$T/repo/scripts/m1/deploy.sh" <<DEPLOY
+#!/bin/bash
+sha=\$(git -C "\$2" rev-parse HEAD)
+echo "\$sha" >>$T/releases
+echo "\$sha" >$T/repo/.fcpi-source-commit
+# A partially applied candidate must return to the paired previous release.
+[ "\$sha" = "$base" ]
+DEPLOY
+cat >"$T/repo/scripts/ops/verify.sh" <<VERIFY
+#!/bin/bash
+[ "\$(cat $T/repo/.fcpi-source-commit)" = "$base" ]
+VERIFY
+cat >"$T/bin/docker" <<DOCKER
+#!/bin/bash
+case \$1 in
+ inspect) echo sha256:fixture;;
+ image) [ "\$2" != inspect ] || echo sha256:fixture;;
+ run) echo fixture >>$W/tree/deploy/compose.yaml;;
+ *) echo "\$*" >>$T/docker;;
+esac
+DOCKER
+printf '#!/bin/bash\nexit 0\n' >"$T/bin/sleep"
+chmod +x "$T/bin/docker" "$T/bin/sleep"
+reject bash "$T/repo/scripts/m9/incident-apply.sh" 55555555 "$nonce"
+jq -e '.state=="ROLLED_BACK" and .exit_code!=0' "$T/state/incidents/control/processed/$nonce.json" >/dev/null
+[ "$(cat "$T/repo/.fcpi-source-commit")" = "$base" ]
+[ "$(wc -l <"$T/releases")" = 2 ]
+ok 'partial candidate cutover automatically returns to paired accepted release'
+# Explicit rollback failure must not recursively attempt a second rollback.
+current=$(git -C "$W/tree" rev-parse codex/incident-55555555)
+echo "$current" >"$T/repo/.fcpi-source-commit"
+jq -n --arg b "$base" --arg c "$current" '{previous_sha:$b,candidate_sha:$c}' >"$W/release.json"
+jq --arg c "$current" '.state="EXECUTION_STARTED" | .action="rollback" | .base_sha=$c' "$T/state/incidents/control/processed/$nonce.json" >"$T/proof"
+cp "$T/proof" "$T/state/incidents/control/processed/$nonce.json"
+printf '#!/bin/bash\necho failed >>%s\nexit 1\n' "$T/rollback-calls" >"$T/repo/scripts/m1/deploy.sh"
+reject bash "$T/repo/scripts/m9/incident-apply.sh" 55555555 "$nonce" --rollback
+[ "$(wc -l <"$T/rollback-calls")" = 1 ]
+jq -e '.state=="ROLLBACK_FAILED"' "$T/state/incidents/control/processed/$nonce.json" >/dev/null
+ok 'failed explicit rollback is terminal without recursive retry'
 echo "RESULT pass=$pass fail=0 source=$base"
