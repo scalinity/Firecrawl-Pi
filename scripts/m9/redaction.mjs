@@ -14,7 +14,7 @@ h "$(sed -n 's#^redis://[^:]*:\(.*\)@redis:6379$#\1#p' "$S/core_redis_url")"
 for f in "$S"/providers/* "$S"/clients/*.token "$S"/backup/*password "$S"/alerts/*; do
  [ -f "$f" ] || continue
  v=$(tr -d '\n' <"$f"); h "$v"
- case "$v" in *:*) h "${v#*:}";; esac
+ case "$v" in *:*) h "${'${v#*:}'}";; esac
 done`;
 const secretText=execFileSync('ssh',['-i',t.PI_SSH_KEY,'-o','IdentitiesOnly=yes','-o','BatchMode=yes',t.PI_SSH_TARGET,command],{input:extraction,encoding:'utf8'});
 const hashes=secretText.trim().split('\n');if(hashes.length<30||hashes.some(x=>! /^[0-9a-f]{64}$/.test(x)))throw Error('Live hash inventory incomplete');const secrets=new Set(hashes);
