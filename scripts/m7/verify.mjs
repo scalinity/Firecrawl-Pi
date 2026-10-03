@@ -511,7 +511,7 @@ const checks = {
     } },
 
   // ================================================================ webhooks (AC20)
-  W01: { name: "webhooks-signed-retried-deduplicated-and-restricted", inputs: [`${RAW}e2e-fixture.txt`],
+  W01: { name: "webhooks-signed-retried-deduplicated-and-restricted", inputs: [`${RAW}e2e-fixture.txt`, "deploy/policies/capabilities.json"],
     expected: "a batch naming the approved receiver gets its started and completed events delivered and accepted by the receiver's signature and timestamp check, each once; a receiver refusing twice sees the same event id three times and accepts it once, the receipt showing DELIVERED after three attempts; a receiver that never accepts sees the event limits.webhooks.maxAttempts times and the receipt shows it DEAD; a private address, a public host and an unlisted path on the approved host are refused 400 before any receipt; the receiver refuses a stale timestamp and a tampered body (401) and acknowledges a replay as a duplicate",
     run() {
       const w = FX().webhooks ?? [], k = (n) => one(w, n), max = json("deploy/policies/capabilities.json").limits.webhooks.maxAttempts;

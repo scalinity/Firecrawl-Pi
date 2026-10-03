@@ -318,7 +318,7 @@ const checks = {
         reach: reach.default_route === "" && ["example.com", "api.firecrawl.dev", "duckduckgo.com"].every((h) => reach[`https_${h}`] === "refused") && reach.search_proxy_control === "407" };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; elf files=${elfs.length}, page=${page}, aligns=${[...new Set(elfs.map((x) => x.align))].join("|")}; reach=${JSON.stringify(reach)}; engines=${cfg?.engines?.join(",")}` };
     } },
-  S05: { name: "search-live", live: true, inputs: [`${RAW}e2e-live.txt`],
+  S05: { name: "search-live", live: true, inputs: [`${RAW}e2e-live.txt`, "deploy/policies/egress.json"],
     expected: "with live search egress switched on after the review was addressed: a live query returns results from the live engines through REST and MCP; a quoted nonsense query is answered 200 or with a typed failure, never an error of the platform's own (a live engine may still return loose matches for it, so the true empty answer is proven against the fixture engine in S01 and S02, and the count is reported here); every partial answer names the engines that did not answer; every search event names the live engine set; and every connection SearXNG made through the search proxy went to a live engine's host, with at least one",
     run() {
       const e = LIVE(), c = (k) => one(e.live_search, k);
