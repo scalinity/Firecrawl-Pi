@@ -170,7 +170,7 @@ DOCKER
 printf '#!/bin/bash\nexit 0\n' >"$T/bin/sleep"
 chmod +x "$T/bin/docker" "$T/bin/sleep"
 reject bash "$T/repo/scripts/m9/incident-apply.sh" 55555555 "$nonce"
-jq -e '.state=="ROLLED_BACK" and .exit_code!=0' "$T/state/incidents/control/processed/$nonce.json" >/dev/null
+jq -e '.state=="ROLLED_BACK" and .exit_code!=0' "$T/state/incidents/control/processed/$nonce.json" >/dev/null || { cat "$T/out"; cat "$T/state/incidents/control/processed/$nonce.json"; exit 1; }
 [ "$(cat "$T/repo/.fcpi-source-commit")" = "$base" ]
 [ "$(wc -l <"$T/releases")" = 2 ]
 ok 'partial candidate cutover automatically returns to paired accepted release'
