@@ -52,9 +52,14 @@ export PATH="$T/bin:$PATH"
 pass=0
 ok() { pass=$((pass+1)); echo "PASS $1"; }
 reject() { if "$@" >"$T/out" 2>&1; then cat "$T/out"; echo 'unexpected acceptance' >&2; exit 1; fi; }
+mkdir -p "$T/repo/deploy"
+echo fixture >"$T/home/.local/bin/claude"
+h=$(sha256sum "$T/home/.local/bin/claude"|cut -c1-64)
+jq -n --arg h "$h" '{host_packages:{claude_code:{binary_sha256:$h}}}' >"$T/repo/deploy/versions.lock.json"
 p="$T/repo/scripts/m9/incident-prepare.sh"
 # Missing OAuth and mismatched binary cannot leave a permanently stuck worktree.
 reject bash "$p" 11111111
+grep -q "subscription refresh failed" "$T/out"
 [ ! -e "$T/state/incidents/work/11111111" ]; ok 'missing OAuth checked before worktree'
 mkdir -p "$T/repo/deploy"
 printf '{"claudeAiOauth":{"accessToken":"synthetic-fixture-only","subscriptionType":"max","expiresAt":%s}}\n' "$(( $(date +%s%3N)+1000000 ))" >"$T/home/.claude/.credentials.json"
