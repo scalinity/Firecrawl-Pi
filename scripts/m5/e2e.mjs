@@ -406,7 +406,7 @@ async function livePhase() {
     out("live_model", { case: "json_format", ...brief(r), json: docOf(r)?.json ?? null, fcpi: r.json?.fcpi ?? null });
     r = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/injection.html`, formats: [{ type: "json", schema: SCHEMA }] });
     out("live_model", { case: "injection_ignored", ...brief(r), json: docOf(r)?.json ?? null });
-    const nullable = { type: "object", properties: { product: {type:"string"}, manufacturer: {type:["string","null"]} }, required:["product","manufacturer"] };
+    const nullable = { type: "object", properties: { product: {type:"string"}, manufacturer: {type:["string","null"]} }, required:["product"] };
     r = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/product.html`, formats: [{type:"json",schema:nullable,prompt:"The source gives no manufacturer. Return null for manufacturer."}] });
     out("live_model", {case:"missing_is_null", ...brief(r), json:docOf(r)?.json ?? null, fcpi:r.json?.fcpi ?? null});
     r = await rest("POST", "/v2/extract", { urls: [`${FX5}/extract/product.html`, `${FX5}/extract/other.html`], schema: SCHEMA });
