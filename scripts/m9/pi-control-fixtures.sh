@@ -45,6 +45,8 @@ cat >"$T/bin/runuser" <<'SHSTUB'
 exit 2
 SHSTUB
 chmod +x "$T/bin/runuser"
+cp /home/danny/.gitconfig "$T/home/.gitconfig"
+chmod 0600 "$T/home/.gitconfig"
 export GIT_CONFIG_GLOBAL=/home/danny/.gitconfig
 base=$(cat "$R/.fcpi-source-commit"); echo "$base" >"$T/repo/.fcpi-source-commit"
 git clone --quiet --bare /var/lib/firecrawl-pi/incidents/source.git "$T/state/incidents/source.git"
