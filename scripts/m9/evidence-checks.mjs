@@ -38,10 +38,10 @@ export function incidentVerdict(raw,proof){
  const exactPaths=(got,want)=>JSON.stringify(paths(got))===JSON.stringify(want.sort());
  return sha(raw)===proof?.raw_sha256&&r.is_error===false&&r.structured_output?.incident_id===proof.incident_id&&
   models.length>0&&models.every(x=>x==='claude-opus-5-5')&&u?.MemoryMax===805306368&&u.NoNewPrivileges===true&&
-  u.declared_tools==='Read,Edit,Write'&&u.User==='danny'&&u.Group==='danny'&&u.MemorySwapMax==='0'&&u.RuntimeMaxUSec==='5min 30s'&&
+  u.declared_tools==='Read,Edit,Write,StructuredOutput'&&u.User==='danny'&&u.Group==='danny'&&u.MemorySwapMax==='0'&&u.RuntimeMaxUSec==='5min 30s'&&
   u.CPUQuotaPerSecUSec==='500ms'&&u.TasksMax==='128'&&u.Slice==='fcpi.slice'&&u.KillMode==='control-group'&&u.TimeoutStopUSec==='15s'&&
   u.ProtectSystem==='strict'&&u.ProtectHome==='read-only'&&u.PrivateTmp==='yes'&&
   exactPaths(u.ReadWritePaths,[w+'/tree',w+'/run'])&&exactPaths(u.InaccessiblePaths,['/etc/firecrawl-pi','/srv/firecrawl-pi/data','/run/docker.sock','/home/danny/.ssh','/home/danny/.codex','/home/danny/.claude','/var/lib/firecrawl-pi/incidents/control'])&&
-  exactPaths(u.BindReadOnlyPaths,['/home/danny/.local/bin/claude'])&&proof.auth_removed===true&&
+  exactPaths(u.BindReadOnlyPaths,['/home/danny/.local/bin/claude:/home/danny/.local/bin/claude:rbind'])&&proof.auth_removed===true&&
   proof.owner_authentication==='Max subscription'&&proof.invoiced_usd===null;
 }

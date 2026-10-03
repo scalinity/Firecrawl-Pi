@@ -8,6 +8,15 @@ n=$(cat)
 deny() { printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"Outside the bounded incident worktree permission contract"}}'; exit 0; }
 [ -n "${FCPI_INCIDENT_WORKTREE:-}" ] && [ -n "${FCPI_INCIDENT_INPUT:-}" ] || deny
 tool=$(jq -er '.tool_name' <<<"$n") || deny
+# The CLI's fixed-schema serialization tool has no file, command or network
+# authority. It must report this exact incident, never choose another handle.
+if [ "$tool" = StructuredOutput ]; then
+ id=$(basename "$(dirname "$FCPI_INCIDENT_INPUT")")
+ [[ $id =~ ^[0-9a-f]{8}$ ]] || deny
+ jq -e --arg id "$id" '.tool_input.incident_id == $id' <<<"$n" >/dev/null || deny
+ printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"allow","permissionDecisionReason":"Fixed diagnosis schema output only"}}'
+ exit 0
+fi
 p=$(jq -er '.tool_input.file_path' <<<"$n") || deny
 case $tool in Read|Edit|Write) ;; *) deny ;; esac
 [[ $p = /* ]] || p=$FCPI_INCIDENT_WORKTREE/$p

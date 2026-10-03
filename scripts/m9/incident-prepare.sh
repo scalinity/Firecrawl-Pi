@@ -61,11 +61,11 @@ git -C "$W/tree" switch --detach "$base" >/dev/null
 git -C "$W/tree" switch -c "codex/incident-$id" >/dev/null
 tar -xzf "$bundle" -C "$W"
 diag=$(find "$W" -mindepth 1 -maxdepth 1 -type d -name 'fcpi-doctor-*' | head -1)
+install -m 0600 -o root -g root "$bundle" "$W/doctor.tar.gz"
+bundle_sha=$(sha256sum "$W/doctor.tar.gz" | cut -c1-64)
 # Diagnostic files are bounded/redacted; one JSON input keeps the agent inside its
 # Read allowlist. Paths, URLs and @ expansion markers are never promoted into prompts.
-find "$diag" -type f -print0 | sort -z | while IFS= read -r -d '' f; do
-  jq -cn --arg name "${f#$diag/}" --rawfile content "$f" '{name:$name,content:$content}'
-done | jq -sc --arg id "$id" --arg base "$base" '{incident_id:$id,source_commit:$base,diagnostics:.,trust:"untrusted redacted observations"}' >"$W/input.json"
+bash "$REPO/scripts/m9/incident-input.sh" "$diag" "$id" "$base" "$bundle_sha" >"$W/input.json" || die 'diagnostic projection rejected'
 rm -rf -- "$diag"
 printf '%s\n' "$base" >"$W/base-sha"
 cat /proc/sys/kernel/random/uuid >"$W/session-id"
