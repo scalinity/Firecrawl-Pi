@@ -356,8 +356,9 @@ async function livePhase(before) {
     const p = await scrape(`${echo}&r=1`, { proxy: "stealth", formats: ["rawHtml"] });
     const ip = (r) => { try { return JSON.parse((docOf(r)?.rawHtml ?? "").replace(/<[^>]+>/g, "")).ip; } catch { return null; } };
     out("live_egress", { case: "direct_vs_proxied", direct: brief(d), proxied: brief(p), direct_ip_sha256: ip(d) ? sha(ip(d)) : null, proxied_ip_sha256: ip(p) ? sha(ip(p)) : null, differ: !!ip(d) && !!ip(p) && ip(d) !== ip(p), proxyUsed: docOf(p)?.metadata?.proxyUsed ?? null });
-    const html = '<!doctype html><title>FCPI public routing fixture</title><main><h1>FCPI proxy browser test</h1><p>This controlled public test page loads one image through the assigned residential route.</p><img src="https://httpbingo.org/image/png" onload="this.setAttribute(\'data-fcpi-loaded\',\'yes\')"></main>';
-    const browserUrl = `https://httpbingo.org/base64/${Buffer.from(html).toString("base64url")}?content-type=text/html`;
+    const html = '<!doctype html><title>FCPI public routing fixture</title><main><h1>FCPI proxy browser test</h1><p>This controlled public test page loads one image through the assigned residential route.</p><img src="https://httpbin.org/image/png" onload="this.setAttribute(\'data-fcpi-loaded\',\'yes\')"></main>';
+    const encoded = Buffer.from(html).toString("base64url");
+    const browserUrl = `https://httpbin.org/base64/${encoded + "=".repeat((4-encoded.length%4)%4)}`;
     const browserSince = piNow();
     const browser = await scrape(browserUrl, {proxy:"stealth",formats:["rawHtml"],actions:[{type:"wait",milliseconds:1000}]});
     const browserLog = jsonLog("retrieval-service",since);

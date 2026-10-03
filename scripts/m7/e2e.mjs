@@ -519,7 +519,8 @@ async function livePhase(before) {
       // this proves automatic dispatch and rejection of unusable content, not real anti-bot success.
       select(before.search, before.extractionModel, before.parser, "none", "zyte-api");
       const challenge = '<!doctype html><title>Just a moment...</title><main>FCPI synthetic public test interstitial</main>';
-      const url = 'https://httpbingo.org/base64/' + Buffer.from(challenge).toString('base64url') + '?content-type=text/html';
+      const encoded = Buffer.from(challenge).toString('base64url');
+      const url = 'https://httpbin.org/base64/' + encoded + '='.repeat((4-encoded.length%4)%4);
       const autoSince = piNow();
       const auto = await scrape(url, {proxy:"auto"});
       out("live_auto", {case:"synthetic_challenge_real_zyte", ...brief(auto), acquisitions:jsonLog("retrieval-service",autoSince).filter(l=>l.event==="acquisition"),
