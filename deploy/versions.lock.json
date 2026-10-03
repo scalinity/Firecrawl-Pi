@@ -677,10 +677,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work",
       "status": "selected",
-      "image_id": "sha256:db11309ff73776027adfee98a61167d57a172732f5f12e7e5640fb4ef577f5f4",
+      "image_id": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "438eb60d01df3e8c0fd42443ea7457c178bc38b2",
+      "built_from_commit": "922d9afbf45fce8e9f5ace18b9b6a578be7ca897",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
