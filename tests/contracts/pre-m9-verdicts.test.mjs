@@ -17,3 +17,7 @@ test("wrong/null invention, cache charges, home browser routing and duplicate Zy
   c.live_cache[0].rows_after=2;c.live_auto[0].ledger.push({...c.live_auto[0].ledger[0]});
   assert.ok(Object.values(closureVerdicts(a,b,c)).every(x=>x.state==="FAIL"));
 });
+test("an unrelated decoded failure cannot establish challenge rejection",()=>{
+  const c=structuredClone(m7);c.live_auto[0].class="TARGET_UNREACHABLE";
+  assert.equal(closureVerdicts(m5,m6,c).automatic_enhanced.state,"FAIL");
+});
