@@ -488,7 +488,13 @@ const checks = {
       const e = LIVE(), b = one(e.live_parser, "blocked");
       if (b) return { blocked: true, actual: `blocked: parser credential ${b.credential}, paid dispatch ${b.paidDispatch}, parser caps ${JSON.stringify(b.parserCaps?.caps ?? null)}` };
       const c = (k) => one(e.live_parser, k), rows = ((e.ledger ?? []).find((l) => l.point === "live")?.rows ?? []).filter((r) => r.category === "parser" && r.state === "SETTLED");
-      const cond = { scan: c("scan_only")?.status === 200 && /FCPI\s*SCAN\s*42/i.test(c("scan_only").head ?? ""), complex: c("complex")?.status === 200 && /Bolt|Washer/.test(c("complex").head ?? ""),
+      const retained = has(`${RAW}parser-result.json`) ? json(`${RAW}parser-result.json`) : null;
+      const event = e.provider_log?.flatMap(r=>r.events ?? []).find(r=>r.event === "parse" && r.reason === "complex_layout" && r.outcome === "COMPLETED");
+      const retainedValid = retained && retained.input_sha256 === sha256File(`${RAW}e2e-live.txt`) && retained.logical_id === event?.logical_id &&
+        rows.some(r=>r.logical_id === retained.logical_id && Number(r.actual) === Number(retained.actual)) && retained.state === "SETTLED" &&
+        retained.markdown?.length === c("complex")?.chars && sha256(retained.markdown) === retained.markdown_sha256;
+      const complexText = c("complex")?.full_markdown ?? (retainedValid ? retained.markdown : c("complex")?.head ?? "");
+      const cond = { scan: c("scan_only")?.status === 200 && /FCPI\s*SCAN\s*42/i.test(c("scan_only").head ?? ""), complex: c("complex")?.status === 200 && /Bolt|Washer/.test(complexText),
         credits: rows.length >= 2 && rows.every((r) => Number(r.actual) === 3 * (r.usage?.pages ?? 0)) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; settled parses=${rows.length}` };
     } },
