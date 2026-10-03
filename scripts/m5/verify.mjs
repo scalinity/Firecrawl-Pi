@@ -54,7 +54,7 @@ const bad = (cond) => Object.entries(cond).filter(([, v]) => !v).map(([k]) => k)
 const tapCounts = (lines) => { const n = (k) => +((lines ?? []).find((l) => l.startsWith(`# ${k} `)) ?? "").split(" ")[2]; return { tests: n("tests"), pass: n("pass"), fail: n("fail") }; };
 const BUDGET = () => json("deploy/policies/budget.json");
 const cardFor = (subject) => BUDGET().rateCards.find((r) => r.subject === subject && r.effectiveTo === null);
-const modelCost = (card, u) => Math.ceil(((u.promptTokens - Math.min(u.cachedTokens ?? 0, u.promptTokens)) * card.inputPerMTok + Math.min(u.cachedTokens ?? 0, u.promptTokens) * card.cachedInputPerMTok + u.completionTokens * card.outputPerMTok) / 1e6);
+const modelCost = (card, u) => { const cached = Math.min(u.cachedTokens ?? 0,u.promptTokens), written = Math.min(u.cacheWriteTokens ?? 0,u.promptTokens-cached); return Math.ceil(((u.promptTokens-cached-written)*card.inputPerMTok+cached*card.cachedInputPerMTok+written*(card.cacheWritePerMTok ?? card.inputPerMTok)+u.completionTokens*card.outputPerMTok)/1e6); };
 const FIXTURE_ENGINES = ["fcpi fixture", "fcpi fixture b"];
 const LIVE_ENGINES = ["duckduckgo", "bing", "brave"];
 
@@ -438,7 +438,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; cap=${cap} used before=${before} amount=${amount} expected=${expected} granted=${ok} exhausted=${exhausted}; settled after=${after}` };
     } },
   B03: { name: "rate-cards-versioned", inputs: ["deploy/policies/budget.json", `${RAW}e2e-fixture.txt`],
-    expected: "every model and parser the budget policy lists has a rate card with an effective date and a source, no two cards of one subject overlap, the default model's card carries the published GPT-4.1 Mini prices (0.40/0.10/1.60 USD per million tokens) and LlamaParse's cost-effective card three credits a page, and a card that has ended is refused (E03's stale card, and RATE_CARD_MISSING in the record)",
+    expected: "every model and parser the budget policy lists has a rate card with an effective date and a source, no two cards of one subject overlap, the default model's card carries the published GPT-6 Luna standard prices (0.10/0.01/0.125/0.50 USD per million input/cached/cache-write/output tokens) and LlamaParse's cost-effective card three credits a page, and a card that has ended is refused (E03's stale card, and RATE_CARD_MISSING in the record)",
     run() {
       const b = BUDGET();
       const subjects = [...Object.keys(b.models), ...Object.keys(b.parsers)];
@@ -447,7 +447,7 @@ const checks = {
       const mini = cardFor(b.extraction.defaultModel), lp = cardFor(b.parsing.defaultParser);
       const stale = (FX().refusals?.[0]?.cases ?? []).find((x) => x.case === "stale_rate_card");
       const cond = { every_subject: subjects.every((s) => b.rateCards.some((r) => r.subject === s)), dated, no_overlap: !overlap,
-        mini: mini?.inputPerMTok === 400000 && mini.cachedInputPerMTok === 100000 && mini.outputPerMTok === 1600000, llamaparse: lp?.creditsPerPage === 3, stale_refused: stale?.class === "RATE_CARD_MISSING" };
+        luna: b.extraction.defaultModel === "gpt-6-luna" && mini?.inputPerMTok === 100000 && mini.cachedInputPerMTok === 10000 && mini.cacheWritePerMTok === 125000 && mini.outputPerMTok === 500000, llamaparse: lp?.creditsPerPage === 3, stale_refused: stale?.class === "RATE_CARD_MISSING" };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; rate cards=${b.rateCards.length} for ${subjects.length} subjects` };
     } },
 

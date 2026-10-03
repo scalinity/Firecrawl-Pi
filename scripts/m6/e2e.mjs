@@ -361,7 +361,7 @@ async function livePhase(before) {
     const browser = await scrape(browserUrl, {proxy:"stealth",formats:["rawHtml"],actions:[{type:"wait",milliseconds:1000}]});
     const browserLog = jsonLog("retrieval-service",since);
     out("live_browser", {case:"assigned_subresource_route", ...brief(browser), proxyUsed:docOf(browser)?.metadata?.proxyUsed ?? null, pagePresent:/FCPI proxy browser test/.test(docOf(browser)?.rawHtml ?? ""),
-      acquisitions:browserLog.filter(l=>l.event==="acquisition" && l.domain==="httpbingo.org"), tunnels:browserLog.filter(l=>l.event==="proxy_tunnel_closed" && l.target_host==="httpbingo.org").map(l=>({session:l.session,host:l.target_host,route:l.route,provider_bytes:l.provider_bytes}))});
+      acquisitions:browserLog.filter(l=>l.event==="acquisition" && l.strategies?.includes("residential_browser")), tunnels:browserLog.filter(l=>l.event==="proxy_tunnel_closed" && l.target_host==="httpbingo.org").map(l=>({session:l.session,host:l.target_host,route:l.route,provider_bytes:l.provider_bytes}))});
     select("live", before.extractionModel, before.parser, "decodo-residential");
     const s = await rest("POST", "/v2/search", { query: "Raspberry Pi 5 official product brief", limit: 5 });
     out("live_search", { case: "residential_engines", ...brief(s), results: (s.json?.data?.web ?? []).length, warning: s.json?.warning ?? null,

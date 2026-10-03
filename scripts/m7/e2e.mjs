@@ -518,8 +518,9 @@ async function livePhase(before) {
       select(before.search, before.extractionModel, before.parser, "none", "zyte-api");
       const challenge = '<!doctype html><title>Just a moment...</title><main>FCPI synthetic public test interstitial</main>';
       const url = 'https://httpbingo.org/base64/' + Buffer.from(challenge).toString('base64url') + '?content-type=text/html';
+      const autoSince = piNow();
       const auto = await scrape(url, {proxy:"auto"});
-      out("live_auto", {case:"synthetic_challenge_real_zyte", ...brief(auto), acquisitions:jsonLog("retrieval-service",since).filter(l=>l.event==="acquisition" && l.domain==="httpbingo.org"),
+      out("live_auto", {case:"synthetic_challenge_real_zyte", ...brief(auto), acquisitions:jsonLog("retrieval-service",autoSince).filter(l=>l.event==="acquisition"),
         ledger:sql("SELECT row_to_json(r) FROM (SELECT logical_id,provider,subject,reserved,actual,state,usage FROM fcpi_retrieval.budget_reservation WHERE kind='enhanced' AND provider='zyte' AND created_at >= :'since') r", {since}).map(l=>JSON.parse(l))});
     }
   // The public sample, through the production selection: live search and the budget's default proxy and enhancer, set
