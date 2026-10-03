@@ -1,0 +1,62 @@
+{
+  "utc": "2026-10-03T03:09:56.181Z",
+  "test_id": "PRE-M9-ENTRY-GATE",
+  "source_commit": "d0d9dcdc89088170eeefad804c3436f315a502a6",
+  "dependencies_read_literally": "All mandatory M0–M8 criteria passed, including real proxy, enhanced, model, complex-parser and off-device restore evidence. Optional hosted access may remain disabled, but must be labeled accordingly.",
+  "states": {
+    "M0": "ACCEPTED",
+    "M1": "ACCEPTED",
+    "M2": "ACCEPTED",
+    "M3": "ACCEPTED",
+    "M4": "ACCEPTED",
+    "M5": "ACCEPTED",
+    "M6": "ACCEPTED",
+    "M7": "ACCEPTED",
+    "M8": "ACCEPTED",
+    "M9": "NOT_STARTED"
+  },
+  "checks": {
+    "states": true,
+    "blockers": true,
+    "M5-E05": true,
+    "M5-D03": true,
+    "M5-V01": true,
+    "M6-L01": true,
+    "M6-L02": true,
+    "M6-V01": true,
+    "M7-E05": true,
+    "M7-V01": true,
+    "current_posture": true,
+    "additional": true,
+    "healthy": true,
+    "restore": true,
+    "zero_paid": true,
+    "no_push": true,
+    "source_clean": true
+  },
+  "expected": "all pre-M9 mandatory gates satisfied; M9 NOT_STARTED",
+  "actual": "M9 READY",
+  "exit_code": 0,
+  "remote_main": "5ab47b979c9e243f62f46035714aa83a94d7b090",
+  "canonical_hash": "e28798b0140c5016874ffc3e9707b275c5e147377bc958f445093b5b151df736",
+  "code_sha_note": "Evidence storing commit follows the checked source; only supplemental evidence pending archival",
+  "owner_action_before_entry": "none; separate M9 kickoff and fresh authorization for any new paid dispatch",
+  "host": {
+    "sample_age_s": 30,
+    "mem": {
+      "total_mib": 8062,
+      "available_mib": 4837,
+      "swap_used_mib": 0
+    },
+    "temp_c": 46.3,
+    "injected_temp": false,
+    "throttled": "0x0",
+    "disk": {
+      "size": 62295171072,
+      "free": 34574675968,
+      "free_pct": 55.5,
+      "inodes_free_pct": 84
+    },
+    "host_oom_kill": 0
+  }
+}
