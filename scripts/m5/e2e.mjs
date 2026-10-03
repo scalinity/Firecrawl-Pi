@@ -67,8 +67,9 @@ async function waitHealthy(svc, ms = 180000) {
 const piNow = () => pi("date -u +%Y-%m-%dT%H:%M:%S.%3NZ").trim();
 const jsonLog = (svc, since) => pi(`sudo -n docker logs ${since ? `--since ${since} ` : ""}${cname(svc)} 2>&1`).split("\n").filter((l) => l.startsWith("{")).map((l) => { try { return JSON.parse(l); } catch { return null; } }).filter(Boolean);
 // The selection, applied and confirmed by the retrieval service's own log (scripts/m5/pi-selection.sh).
-function select(search, model, parser) {
-  const r = pi(`bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh ${search} ${model} ${parser}`).trim();
+function select(search, model, parser, proxy, enhanced) {
+  const args = [search,model,parser,...(proxy === undefined ? [] : [proxy,enhanced ?? "none"])];
+  const r = pi(`bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh ${args.join(" ")}`).trim();
   out("selection", { search, model, parser, applied: /^selection applied/.test(r) });
 }
 // The fixture providers' counters, read inside the fixture container (the only place they are served).
@@ -148,7 +149,7 @@ async function catalog() {
 async function fixturePhase() {
   const since = piNow();
   out("meta", { phase, pi_utc: since, deployed_commit: pi("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(), selection_before: JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show")) });
-  select("fixture", "fcpi-fixture-model", "fcpi-fixture-parser");
+  select("fixture", "fcpi-fixture-model", "fcpi-fixture-parser", "fcpi-fixture-proxy", "fcpi-fixture-zyte");
   D(`exec ${cname("fixture-m5")} node -e "fetch('http://127.0.0.1:8080/__reset',{method:'POST'}).then(()=>{})"`);
   resources("fixture-start");
   await catalog();
@@ -430,17 +431,17 @@ async function livePhase() {
   out("meta_end", { pi_utc: piNow(), selection_after: JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show")) });
 }
 
-let exit = 0;
+let exit = 0, before = null;
 try {
   await openTunnel();
+  before = JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show"));
   await (phase === "fixture" ? fixturePhase() : livePhase());
 } catch (e) {
   exit = 1;
   out("error", { message: e.message, stack: String(e.stack ?? "").split("\n").slice(0, 4).join(" | ") });
 } finally {
-  // The production selection is restored whatever happened (search stays on the fixture engine unless the
-  // live phase ran to its end, which leaves live search on).
-  try { if (phase === "fixture" || exit) select(...PRODUCTION); } catch (e) { out("error", { message: `restoring the selection: ${e.message}` }); exit = 1; }
+  // Restore every dimension found at entry, including M6/M7's proxy and enhancer selections.
+  try { if (before) select(before.search,before.extractionModel,before.parser,before.proxy ?? "none",before.enhanced ?? "none"); } catch (e) { out("error", { message: `restoring the selection: ${e.message}` }); exit = 1; }
   try { if (health("searxng") !== "running healthy") { D(`unpause ${cname("searxng")}`); } } catch { /* not paused */ }
   tunnel?.kill();
   out("end", { exit });

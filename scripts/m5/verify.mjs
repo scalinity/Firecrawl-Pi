@@ -55,7 +55,7 @@ const tapCounts = (lines) => { const n = (k) => +((lines ?? []).find((l) => l.st
 const BUDGET = () => json("deploy/policies/budget.json");
 const cardFor = (subject) => BUDGET().rateCards.find((r) => r.subject === subject && r.effectiveTo === null);
 const modelCost = (card, u) => { const cached = Math.min(u.cachedTokens ?? 0,u.promptTokens), written = Math.min(u.cacheWriteTokens ?? 0,u.promptTokens-cached); return Math.ceil(((u.promptTokens-cached-written)*card.inputPerMTok+cached*card.cachedInputPerMTok+written*(card.cacheWritePerMTok ?? card.inputPerMTok)+u.completionTokens*card.outputPerMTok)/1e6); };
-const FIXTURE_ENGINES = ["fcpi fixture", "fcpi fixture b"];
+const FIXTURE_ENGINES = ["fcpi fixture", "fcpi fixture b", "fcpi fixture r"];
 const LIVE_ENGINES = ["duckduckgo", "bing", "brave"];
 
 // ---- redaction (M4's rules and controls, M5's live secrets) ------------------------------------------
@@ -407,7 +407,7 @@ const checks = {
 
   // ================================================================ budgets and reservations (AC25)
   B01: { name: "paid-dispatch-off-caps-zero", inputs: [`${RAW}e2e-fixture.txt`, "deploy/policies/budget.json", `${EV}rendered-compose.json`],
-    expected: "every paid cap in the budget policy is zero and the rendered Compose file sets PI_PAID_DISPATCH_ENABLED=false; with the production selection (the real model and parser), the json format is 402 PAID_DISPATCH_DISABLED, an extraction job fails with it, a scan-only document is PARSER_REQUIRED, and no fixture provider counter moves (no provider was asked); the platform status reports paid dispatch off and each credential only as present or absent",
+    expected: "every paid cap in the budget policy is zero and the rendered Compose file sets PI_PAID_DISPATCH_ENABLED=false; with the production selection, the json format is 402 PAID_DISPATCH_DISABLED, an extraction job fails with it, a scan-only document is PAID_DISPATCH_DISABLED when its credential is present or PARSER_REQUIRED when absent, and no fixture provider counter moves; status reports paid dispatch off and credential presence only",
     run() {
       const e = FX(), b = BUDGET(), c = (k) => one(e.production, k);
       const R = json(`${EV}rendered-compose.json`).services["retrieval-service"];
@@ -416,7 +416,7 @@ const checks = {
       const cond = { caps_zero: zero, env: R.environment?.PI_PAID_DISPATCH_ENABLED === "false",
         json: c("json_paid_dispatch_disabled")?.status === 402 && c("json_paid_dispatch_disabled").code === "PAID_DISPATCH_DISABLED",
         job: c("extract_job_paid_dispatch_disabled")?.status_field === "failed" && c("extract_job_paid_dispatch_disabled").errorCode === "PAID_DISPATCH_DISABLED",
-        parser_required: /PARSER_REQUIRED/.test(c("scan_parser_required")?.error ?? ""),
+        parser_required: new RegExp(`Retrieval failed: ${prov?.providers?.llamaparse?.credential === "present" ? "PAID_DISPATCH_DISABLED" : "PARSER_REQUIRED"}\\.`).test(c("scan_parser_required")?.error ?? ""),
         no_provider: !!np && same(np.stats_before?.model, np.stats_after?.model) && same(np.stats_before?.parser, np.stats_after?.parser),
         status: prov?.paidDispatch === false && ["openai", "llamaparse"].every((p) => ["present", "absent"].includes(prov?.providers?.[p]?.credential)) && !/sk-|llx-|Bearer/.test(JSON.stringify(prov)) };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; credentials=${JSON.stringify(Object.fromEntries(Object.entries(prov?.providers ?? {}).map(([k, v]) => [k, v.credential])))}` };
@@ -465,7 +465,7 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; ${(e.documents ?? []).map((x) => `${x.case}=${x.status}`).join(", ")}` };
     } },
   D02: { name: "parser-fallback-and-credits-fixture", inputs: [`${RAW}e2e-fixture.txt`, "deploy/policies/budget.json"],
-    expected: "with the fixture parser's cache rows cleared first (the count recorded), so this pass uploads afresh: a scan-only PDF (no text layer) and a complex-layout PDF go to the parser and come back with its text; the second scan of the same bytes is answered from the cache with no new upload; each parse reserved pages × 3 credits before the upload and settled at the pages returned; each finished job's upload was deleted; with the production parser (no credential) the scan is PARSER_REQUIRED and the complex layout keeps its native text",
+    expected: "with the fixture parser's cache rows cleared first: scan-only and complex-layout PDFs return parser text, the second scan is cached without upload, credits reserve and settle at pages × 3, and finished uploads are deleted; the production parser refuses the scan as PAID_DISPATCH_DISABLED with a key or PARSER_REQUIRED without one, and complex layout keeps native text",
     run() {
       const e = FX(), d = (k) => one(e.documents, k), p = (k) => one(e.production, k);
       const rows = ((e.ledger ?? []).find((l) => l.point === "documents")?.rows ?? []).filter((r) => r.category === "fixture_parser");
@@ -475,7 +475,7 @@ const checks = {
       const cond = { cache_cleared: Number.isInteger(d("fixture_parse_cache_cleared")?.rows), scan: d("scan_pdf")?.status === 200 && /FCPI SCAN 42/.test(d("scan_pdf").head ?? ""), complex: d("table_pdf_complex")?.status === 200 && /Fixture parse of page 1/.test(d("table_pdf_complex").head ?? ""),
         cached: d("scan_pdf_cached")?.status === 200 && /FCPI SCAN 42/.test(d("scan_pdf_cached").head ?? "") && up && before && up.uploads - before.uploads === 4,
         credits: settled.length === 2 && settled.every((r) => Number(r.reserved) === 3 && Number(r.actual) === 3 && r.usage?.pages === 1), deleted: up && up.deletes - (before?.deletes ?? 0) >= 2,
-        production: /PARSER_REQUIRED/.test(p("scan_parser_required")?.error ?? "") && p("complex_keeps_native_text")?.status === 200 && /Left column: the first of two columns/.test(p("complex_keeps_native_text").head ?? "") };
+        production: new RegExp(`Retrieval failed: ${p("platform_status")?.providers?.providers?.llamaparse?.credential === "present" ? "PAID_DISPATCH_DISABLED" : "PARSER_REQUIRED"}\\.`).test(p("scan_parser_required")?.error ?? "") && p("complex_keeps_native_text")?.status === 200 && /Left column: the first of two columns/.test(p("complex_keeps_native_text").head ?? "") };
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; parser uploads=${up?.uploads} deletes=${up?.deletes}; settled parses=${settled.length}` };
     } },
   D03: { name: "parser-live", live: true, inputs: [`${RAW}e2e-live.txt`],
@@ -642,7 +642,7 @@ const checks = {
       return { ok: hits.length === 0 && idHits.length === 0, configHash: hashOf(files.filter((f) => f !== OUT)), actual: `controls fired all ${RULES.length + HASH_RULES.length} rules; files scanned=${files.length}; live secret hashes compared=${hashes.length} (provider keys ${providerFiles}, client tokens ${tokenFiles}); findings=${hits.length}${hits.length ? " [" + hits.slice(0, 12).join("; ") + "]" : ""}; M5 files with the LAN address, network or SSH target=${idHits.join(",") || "none"} (of ${changed.length})` };
     } },
   L01: { name: "lock-and-compose-consistent", inputs: ["deploy/versions.lock.json", "deploy/compose.yaml", `${EV}rendered-compose.json`, "deploy/policies/budget.json", "deploy/policies/capabilities.json", "patches/series.json"],
-    expected: "every Compose image is pinned by digest for linux/arm64 across M5's thirteen services; the lock records SearXNG's selected arm64 digest and settings, the API image and patch series the core runs, the retrieval, gateway and MCP images the stack runs, the budget policy's hash with its rate cards, and the capability manifest's hash",
+    expected: "every Compose image is pinned by digest for linux/arm64 across the current fifteen services (M6/M7 fixture services included); the lock records SearXNG's selected arm64 digest and settings, the API image and patch series, retrieval/gateway/MCP images, budget policy hash and rate cards, and capability manifest hash",
     run() {
       const R = json(`${EV}rendered-compose.json`), L = json("deploy/versions.lock.json"), s = json("patches/series.json");
       const unpinned = Object.entries(R.services).filter(([, v]) => !/@sha256:[0-9a-f]{64}$/.test(v.image) || v.platform !== "linux/arm64").map(([k]) => k);
@@ -651,7 +651,7 @@ const checks = {
         services: L.images?.retrieval?.image_id === digestOf(R.services["retrieval-service"].image) && L.images?.access_gateway?.image_id === digestOf(R.services["access-gateway"].image) && L.images?.mcp_gateway?.image_id === digestOf(R.services["mcp-gateway"].image),
         budget: L.providers?.budget_policy?.sha256 === sha256File("deploy/policies/budget.json") && same(L.providers.rate_cards, json("deploy/policies/budget.json").rateCards),
         manifest: L.gateway?.capabilities_sha256 === sha256File("deploy/policies/capabilities.json") };
-      return { ok: unpinned.length === 0 && bad(cond).length === 0 && Object.keys(R.services).length === 13, actual: `services=${Object.keys(R.services).length}; unpinned=${unpinned.join(",") || "none"}; lock disagrees on=${bad(cond).join(",") || "none"}` };
+      return { ok: unpinned.length === 0 && bad(cond).length === 0 && Object.keys(R.services).length === 15, actual: `services=${Object.keys(R.services).length}; unpinned=${unpinned.join(",") || "none"}; lock disagrees on=${bad(cond).join(",") || "none"}` };
     } },
 
   // ================================================================ the review of record
