@@ -28,10 +28,11 @@ for f in "$C"/requests/*.json; do
  fi
  if [ "$proof_rc" != 0 ]; then
   if [ "$proof_rc" = 3 ]; then
-   put_obj "$C/processed/$grant.json" 0600 '{"state":"REJECTED_INVALID_PROOF"}'
+   put_obj "$C/processed/$grant.json" 0600 '{"state":"REJECTED_INVALID_OR_EXPIRED_PROOF"}'
+   notice diagnosis_ready 'incident_proof' '{"state":"REJECTED_INVALID_OR_EXPIRED_PROOF","owner_attention_required":true}' "$(now_s)" "${grant:0:8}"
   elif [ ! -e "$D/blocked/proof-$grant.json" ]; then
    put_obj "$D/blocked/proof-$grant.json" 0600 '{"state":"PROOF_INFRASTRUCTURE_BLOCKED","approval_consumed":false}'
-   notice diagnosis_ready 'incident_proof' '{"state":"PROOF_INFRASTRUCTURE_BLOCKED","approval_consumed":false,"owner_attention_required":true}' "$(now_s)" ''
+   notice diagnosis_ready 'incident_proof' '{"state":"PROOF_INFRASTRUCTURE_BLOCKED","approval_consumed":false,"owner_attention_required":true}' "$(now_s)" "${grant:0:8}"
   fi
   continue
  fi

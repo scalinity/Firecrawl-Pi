@@ -107,6 +107,12 @@ touch "$T/docker-down"
 sed -i "s|PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin|PATH=$T/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin|" "$T/repo/scripts/ops/notify-ntfy.sh"
 printf '{"kind":"opened","incident":"core_unhealthy","incident_id":"44444444"}' | bash "$T/repo/scripts/ops/notify-ntfy.sh"
 jq -e '.actions==[] and (.tags|index("incident_opened")) and (.message|contains("44444444"))' "$T/published.json" >/dev/null; ok 'outage notice survives missing action infrastructure'
+q=$(printf '6%.0s' {1..32}); echo '{}' >"$T/state/incidents/control/requests/$q.json"
+bash "$T/repo/scripts/m9/incident-control.sh" tick
+[ ! -e "$T/state/incidents/control/processed/$q.json" ]
+jq -e '.approval_consumed==false' "$T/state/incidents/blocked/proof-$q.json" >/dev/null
+ok 'unavailable proof infrastructure leaves queued approval unconsumed'
+rm "$T/state/incidents/control/requests/$q.json" "$T/docker-down"
 # Exact shared proposal boundary includes no ignored file or existing gating test.
 git --git-dir="$T/state/incidents/source.git" worktree add --quiet --detach "$T/candidate" "$base"
 . "$T/repo/scripts/m9/incident-paths.sh"

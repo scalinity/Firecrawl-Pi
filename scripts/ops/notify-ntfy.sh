@@ -23,6 +23,8 @@ base=${key%%:*} svc=${key#*:}; [ "$svc" = "$key" ] && svc=""
 # The incident in plain words, and how urgent an opening is: 5 when the platform cannot serve or cannot watch itself,
 # 4 when it degrades or its safety net fails, 3 for the rest.
 case $base in
+  incident_agent) what="Bounded incident investigation"; pri=4 ;;
+  incident_proof) what="Incident approval needs attention"; pri=4 ;;
   core_unhealthy) what="Firecrawl core unhealthy"; pri=5 ;;
   queue_unreadable) what="Job queue unreadable (PostgreSQL)"; pri=5 ;;
   functional_probe_failing) what="Functional probe failing (scrape or MCP)"; pri=5 ;;
@@ -67,7 +69,7 @@ case $kind in
   *) echo "unknown notice kind $kind" >&2; exit 2 ;;
 esac
 actions='[]'
-if [ -r /etc/firecrawl-pi/incidents.env ] && grep -qx 'FCPI_INCIDENT_ENABLED=true' /etc/firecrawl-pi/incidents.env; then
+if [ "$base" != incident_proof ] && [ -r /etc/firecrawl-pi/incidents.env ] && grep -qx 'FCPI_INCIDENT_ENABLED=true' /etc/firecrawl-pi/incidents.env; then
   # Docker and the gateway may be down precisely when the phone needs a notice.
   # Missing actions cannot suppress the metadata-only message.
   actions=$(timeout --kill-after=1 5 /bin/bash /opt/firecrawl-pi/scripts/m9/incident-notice-actions.sh "$id" "$kind" 2>/dev/null) || actions='[]'
