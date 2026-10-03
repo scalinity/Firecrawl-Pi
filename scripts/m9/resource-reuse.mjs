@@ -120,7 +120,7 @@ export function corpusRecheckVerdict({specText,freeze,initialText,initialRecord,
    for(const item of r.results){
     const i=spec.targets.findIndex(t=>t.id===item.id),target=spec.targets[i],response=item.response,sid=response?.json?.data?.metadata?.scrapeId,summary=rec.results?.find(x=>x.id===item.id);
     if(i<0||!['static','js'].includes(target.page_class)||!Number.isInteger(target.max_attempts)||target.max_attempts<1||target.max_attempts>3||initialRecord.results[i].usable!==false)return false;
-    const js=target.page_class==='js',extra=batch.profile===1?(js?{waitFor:1000}:{}):({actions:[{type:'wait',milliseconds:js?(item.id==='P08'?10000:1000):0}]});
+    const js=target.page_class==='js',extra=batch.profile===1?(js?{waitFor:1000}:{}):({actions:[{type:'wait',milliseconds:js?(item.id==='P08'?10000:1000):1}]});
     const expected={url:target.url,formats:batch.profile===1?['markdown']:['markdown','rawHtml'],maxAge:0,storeInCache:false,onlyMainContent:false,...extra};
     const began=Date.parse(response?.started_utc),finished=Date.parse(response?.completed_utc),used=response?.acquisition?.attempts_used;
     if(!sid||receipts.has(sid)||response.acquisition?.logical_id!==sid||canonical(item.request)!==canonical(expected)||summary?.request_sha256!==sha(JSON.stringify(item.request))||summary?.attempts!==used||summary?.status!==response.status||
