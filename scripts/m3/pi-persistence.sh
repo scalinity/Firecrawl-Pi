@@ -87,7 +87,9 @@ echo "recreate_exit=${PIPESTATUS[0]}"
 
 sec after
 ids
-"${COMPOSE[@]}" ps -a --format '{{.Service}} {{.State}} {{.Health}}'
+# The M3 contract compares these ten services; later milestones' services are
+# recreated above too and checked by their own full-stack collector.
+"${COMPOSE[@]}" ps -a --format '{{.Service}} {{.State}} {{.Health}}' "${SERVICES[@]}"
 
 sec read
 echo "postgres_read=$(pg "select v from fcpi_m3_sentinel.sentinel where k = 'm3'")"

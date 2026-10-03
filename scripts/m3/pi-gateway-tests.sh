@@ -19,7 +19,9 @@ trap 'sudo -n docker rm -f "$N-pg" >/dev/null 2>&1; sudo -n docker network rm "$
 echo "### meta"
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) source_commit=$(cat $REPO/.fcpi-source-commit) image=${image:-absent} test_postgres=$PGIMG"
 [ -n "$image" ] || { echo "no gateway image in compose.yaml"; exit 1; }
-D network create --internal --label fcpi.transient=gateway-tests "$N" >/dev/null
+# NetworkManager leaves project fcpi-* bridges unmanaged; a default br-* bridge
+# can otherwise become an unintended host network configuration change.
+D network create --internal -o com.docker.network.bridge.name=fcpi-g$$ -o com.docker.network.bridge.gateway_mode_ipv4=isolated --label fcpi.transient=gateway-tests "$N" >/dev/null
 D run -d --rm --name "$N-pg" --network "$N" --label fcpi.transient=gateway-tests --read-only --user 999:999 --cgroup-parent fcpi.slice \
   --cap-drop ALL --security-opt no-new-privileges:true --memory 192m --memory-swap 192m --cpus 0.3 --pids-limit 64 \
   --tmpfs /var/lib/postgresql/data:uid=999,gid=999,mode=0700,size=256m --tmpfs /var/run/postgresql:uid=999,gid=999,mode=0700,size=8m --tmpfs /tmp:size=16m \
