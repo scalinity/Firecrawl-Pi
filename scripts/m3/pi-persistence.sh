@@ -44,10 +44,7 @@ archive() {
   rm -f /tmp/.fcpi-art-$$
 }
 # M2's helpers (scripts/m2/pi-persistence.sh): the Redis password and the sentinel value travel on stdin.
-redis_cmd() {
-  sudo -n sed -n 's#^redis://:\(.*\)@redis:6379$#\1#p' $S/core_redis_url \
-    | D exec -i "$(cid redis)" sh -c 'read -r p; REDISCLI_AUTH="$p" exec redis-cli --no-auth-warning "$@"' sh "$@" 2>&1
-}
+redis_cmd() { bash "$REPO/scripts/ops/redis-cli.sh" "$@" 2>&1; }
 amqp_sentinel() { D exec -i -u 0 -e SENTINEL_MODE="$1" -e SENTINEL_VALUE="${2:-}" "$(cid firecrawl-core)" node --input-type=module - <"$REPO/scripts/m1/core-amqp-sentinel.mjs" 2>&1; }
 pg() { D exec "$(cid nuq-postgres)" psql -U postgres -v ON_ERROR_STOP=1 -q -Atc "$1" 2>&1; }
 registry() { echo "registry sha256=$(sudo -n sha256sum $S/gateway/clients | cut -c1-64) clients=$(sudo -n awk '!/^#/ && NF == 4' $S/gateway/clients | wc -l)"; }

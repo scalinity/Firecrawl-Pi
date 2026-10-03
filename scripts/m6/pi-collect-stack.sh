@@ -109,7 +109,7 @@ q "select name || '=' || current_setting(name) from pg_settings where name in ('
 
 sec redis_health
 echo "health_user_ping=$(D exec "$RD" redis-cli --no-auth-warning --user health --pass - PING 2>&1)"
-sudo -n sed -n 's#^redis://:\(.*\)@redis:6379$#\1#p' $S/core_redis_url | D exec -i "$RD" sh -c 'read -r p; export REDISCLI_AUTH="$p"; redis-cli --no-auth-warning INFO persistence; redis-cli --no-auth-warning INFO memory' 2>&1 \
+{ bash "$REPO/scripts/ops/redis-cli.sh" INFO persistence; bash "$REPO/scripts/ops/redis-cli.sh" INFO memory; } 2>&1 \
   | tr -d '\r' | grep -E '^(aof_enabled|aof_last_write_status|maxmemory_policy|used_memory_human):'
 
 sec rabbitmq_health

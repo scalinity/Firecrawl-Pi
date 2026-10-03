@@ -15,10 +15,7 @@ D() { sudo -n docker "$@"; }
 sec() { printf '### %s\n' "$1"; }
 name() { D inspect -f '{{.Name}}' "$(D compose -p fcpi ps -q "$1")" | tr -d /; }
 ids() { for s in "${SERVICES[@]}"; do echo "$s $(D compose -p fcpi ps -q "$s")"; done; }
-redis_cmd() { # redis_cmd <args...>: default user; the password travels on stdin only
-  sudo -n sed -n 's#^redis://:\(.*\)@redis:6379$#\1#p' $S/core_redis_url \
-    | D exec -i "$(name redis)" sh -c 'read -r p; REDISCLI_AUTH="$p" exec redis-cli --no-auth-warning "$@"' sh "$@" 2>&1
-}
+redis_cmd() { bash "$REPO/scripts/ops/redis-cli.sh" "$@" 2>&1; }
 amqp_sentinel() { D exec -i -u 0 -e SENTINEL_MODE="$1" -e SENTINEL_VALUE="${2:-}" "$(name firecrawl-core)" node --input-type=module - <"$REPO/scripts/m1/core-amqp-sentinel.mjs" 2>&1; }
 pg() { D exec "$(name nuq-postgres)" psql -U postgres -v ON_ERROR_STOP=1 -Atc "$1" 2>&1; }
 

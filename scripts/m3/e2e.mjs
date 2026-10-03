@@ -427,7 +427,7 @@ const PHASES = {
     const ups = jobs.map(([, id]) => ledgerJob(id).upstream);
     const manifest = Object.fromEntries(jobs.map(([, id]) => [id, sql(`SELECT ordinal, sha256 FROM fcpi_platform.job_document WHERE job_id = '${id}' ORDER BY ordinal;`).map((l) => l.split("|")[1])]));
     const upstreamRows = () => ups.map((u) => ({ upstream: u, nuq_jobs: Number(sql(`SELECT count(*) FROM nuq.queue_scrape WHERE group_id = '${u}';`)[0]), group_row: Number(sql(`SELECT count(*) FROM nuq.group_crawl WHERE id = '${u}';`)[0]) }));
-    const redisKeys = (u) => Number(pi(`sudo -n sed -n 's#^redis://:\\(.*\\)@redis:6379$#\\1#p' /etc/firecrawl-pi/secrets/core_redis_url | sudo -n docker exec -i ${cname("redis")} sh -c 'read -r p; REDISCLI_AUTH="$p" redis-cli --no-auth-warning --scan --pattern "crawl:${u}*" | wc -l'`).trim());
+    const redisKeys = (u) => Number(pi(`set -o pipefail; sudo -n bash /opt/firecrawl-pi/scripts/ops/redis-cli.sh --scan --pattern "crawl:${u}*" | wc -l`).trim());
     const coreStatus = (kind, u) => pi(`sudo -n docker exec -u 3002 ${cname("firecrawl-core")} node -e "fetch('http://127.0.0.1:3002/v2/${kind === "crawl" ? "crawl" : "batch/scrape"}/${u}').then(r=>console.log(r.status),e=>console.log('error'))"`).trim();
     out("before", { upstream: upstreamRows(), redis_keys: ups.map(redisKeys), core_status: jobs.map(([k], i) => coreStatus(k, ups[i])), cleaner: sql("SELECT jobname || ' ' || schedule FROM cron.job WHERE jobname IN ('nuq_group_crawl_clean', 'nuq_queue_scrape_clean_completed', 'nuq_group_crawl_finished');") });
     // The core's own expiry, brought forward: the group's expiry moves to the past, and pg_cron's
@@ -437,7 +437,7 @@ const PHASES = {
     out("expire", { updated, at_db: sql("SELECT to_char(clock_timestamp() at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"');")[0] });
     for (let i = 0; i < 150 && upstreamRows().some((r) => r.nuq_jobs + r.group_row > 0); i++) await sleep(2000);
     const cron = sql("SELECT status || ' ' || to_char(start_time at time zone 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"') FROM cron.job_run_details d JOIN cron.job j ON j.jobid = d.jobid WHERE j.jobname = 'nuq_group_crawl_clean' ORDER BY d.start_time DESC LIMIT 3;");
-    for (const u of ups) pi(`sudo -n sed -n 's#^redis://:\\(.*\\)@redis:6379$#\\1#p' /etc/firecrawl-pi/secrets/core_redis_url | sudo -n docker exec -i ${cname("redis")} sh -c 'read -r p; export REDISCLI_AUTH="$p"; redis-cli --no-auth-warning --scan --pattern "crawl:${u}*" | while read -r k; do redis-cli --no-auth-warning EXPIRE "$k" 1 >/dev/null; done'`);
+    for (const u of ups) pi(`set -o pipefail; sudo -n bash /opt/firecrawl-pi/scripts/ops/redis-cli.sh --scan --pattern "crawl:${u}*" | while read -r k; do sudo -n bash /opt/firecrawl-pi/scripts/ops/redis-cli.sh EXPIRE "$k" 1 >/dev/null || exit; done`);
     await sleep(3000);
     out("core_logs", { label: "expiry-before-core-recreate", summary: pi("bash /opt/firecrawl-pi/scripts/m2/pi-core-logs.sh m3-expiry-before-recreate").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
     resources("before-core-recreate");
