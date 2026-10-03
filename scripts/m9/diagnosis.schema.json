@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "incident_id": {"type":"string", "pattern":"^[0-9a-f]{8}$"},
+    "observed_symptom": {"type":"string", "maxLength":1500},
+    "likely_root_cause": {"type":"string", "maxLength":2000},
+    "evidence": {"type":"array", "maxItems":12, "items":{"type":"string", "maxLength":1000}},
+    "confidence": {"type":"string", "enum":["low","medium","high"]},
+    "uncertainty": {"type":"string", "maxLength":1500},
+    "affected_component": {"type":"string", "maxLength":100},
+    "proposed_remediation": {"type":"string", "maxLength":2000},
+    "tests_required": {"type":"array", "maxItems":12, "items":{"type":"string", "maxLength":500}},
+    "modification_recommended": {"type":"boolean"},
+    "immediate_owner_attention": {"type":"boolean"}
+  },
+  "required":["incident_id","observed_symptom","likely_root_cause","evidence","confidence","uncertainty","affected_component","proposed_remediation","tests_required","modification_recommended","immediate_owner_attention"]
+}

@@ -12,6 +12,7 @@ const KNOWN = new Set([
   "PI_EXTRACT_URL",
   // M8: the host's admission file (src/admission.mjs).
   "PI_ADMISSION_FILE",
+  "PI_INCIDENT_GRANTS_DIR", "PI_INCIDENT_REQUESTS_DIR", "PI_INCIDENT_KEY_FILE", "PI_INCIDENT_REPORTS_DIR",
 ]);
 
 const int = (env, key, dflt, min, max) => {
@@ -66,6 +67,9 @@ export function loadConfig(env) {
   if (extractUrl && !/^[\x21-\x7e]{32,512}$/.test(extractToken)) throw new Error("gateway_retrieval_token must be 32-512 printable characters");
   const pw = readFileSync(`${env.PI_CREDENTIALS_DIR}/gateway_postgres_password`, "utf8").trim();
   if (pw.length < 32) throw new Error("gateway_postgres_password is shorter than 32 characters");
+  const incidentKeys = ["PI_INCIDENT_GRANTS_DIR", "PI_INCIDENT_REQUESTS_DIR", "PI_INCIDENT_KEY_FILE", "PI_INCIDENT_REPORTS_DIR"];
+  const incidentEnabled = incidentKeys.some(k => env[k]);
+  if (incidentEnabled && incidentKeys.some(k => !env[k]?.startsWith("/"))) throw new Error("All incident paths must be absolute and configured together");
   return {
     port: int(env, "PI_GATEWAY_LISTEN_PORT", 3300, 0, 65535),
     core,
@@ -82,6 +86,7 @@ export function loadConfig(env) {
     extractUrl, extractToken,
     db: { host: env.PI_POSTGRES_HOST, database: env.PI_POSTGRES_DB, user: env.PI_POSTGRES_USER, password: pw },
     admissionFile: env.PI_ADMISSION_FILE || null,
+    incidents: incidentEnabled ? { grantsDir: env.PI_INCIDENT_GRANTS_DIR, requestsDir: env.PI_INCIDENT_REQUESTS_DIR, keyFile: env.PI_INCIDENT_KEY_FILE, reportsDir: env.PI_INCIDENT_REPORTS_DIR } : null,
     build: process.env.FCPI_SOURCE_COMMIT ?? "unknown",
   };
 }

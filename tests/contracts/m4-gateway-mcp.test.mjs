@@ -10,7 +10,7 @@ import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, request } from "node:http";
 import { spawn } from "node:child_process";
-import { createHash, randomUUID } from "node:crypto";
+import { createHash, randomUUID, generateKeyPairSync } from "node:crypto";
 import { createRequire } from "node:module";
 import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -19,6 +19,7 @@ import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GW_DIR = process.env.FCPI_GATEWAY_DIR ?? join(HERE, "../../services/access");
+const { issueGrant } = await import(join(GW_DIR, "src/incidents.mjs"));
 const MANIFEST = readFileSync(process.env.FCPI_TEST_MANIFEST ?? join(HERE, "../../deploy/policies/capabilities.json"), "utf8");
 const SCHEMA = readFileSync(process.env.FCPI_TEST_SCHEMA ?? join(HERE, "../../deploy/nuq-postgres/fcpi-platform-schema.sql"), "utf8").split("\n").filter((l) => !l.startsWith("\\")).join("\n");
 const pg = createRequire(join(GW_DIR, "package.json"))("pg");
@@ -60,10 +61,10 @@ function startGateway(extraEnv) {
     proc.on("exit", (c) => { clearTimeout(timer); reject(new Error(`gateway exited ${c}`)); });
   });
 }
-function call(port, { token, host = HOST, headers = {}, body = '{"jsonrpc":"2.0","id":1,"method":"tools/list"}', method = "POST" } = {}) {
+function call(port, { token, host = HOST, headers = {}, body = '{"jsonrpc":"2.0","id":1,"method":"tools/list"}', method = "POST", path = "/mcp" } = {}) {
   return new Promise((resolve, reject) => {
     const data = Buffer.from(body);
-    const req = request({ host: "127.0.0.1", port, method, path: "/mcp", headers: { host, "content-type": "application/json", "content-length": data.length, accept: "application/json, text/event-stream",
+    const req = request({ host: "127.0.0.1", port, method, path, headers: { host, "content-type": "application/json", "content-length": data.length, accept: "application/json, text/event-stream",
       ...(token ? { authorization: `Bearer ${token}` } : {}), ...headers } }, (res) => {
       const c = []; res.on("data", (x) => c.push(x)); res.on("end", () => { let json = null; try { json = JSON.parse(Buffer.concat(c).toString()); } catch { /* not JSON */ } resolve({ status: res.statusCode, headers: res.headers, json }); });
     });
@@ -73,6 +74,8 @@ function call(port, { token, host = HOST, headers = {}, body = '{"jsonrpc":"2.0"
 }
 
 let gw, bare;
+const incidentEnv = {PI_INCIDENT_GRANTS_DIR:join(dir,'grants'),PI_INCIDENT_REQUESTS_DIR:join(dir,'requests'),PI_INCIDENT_KEY_FILE:join(dir,'incident-key'),PI_INCIDENT_REPORTS_DIR:join(dir,'reports')};
+const incidentKeys=generateKeyPairSync('ed25519');
 before(async () => {
   await new Promise((r) => mcp.listen(0, "127.0.0.1", r));
   await new Promise((r) => core.listen(0, "127.0.0.1", r));
@@ -90,8 +93,27 @@ before(async () => {
   mkdirSync(join(dir, "art")); mkdirSync(join(dir, "cred"));
   writeFileSync(join(dir, "art", ".fcpi-artifact-root"), "test\n");
   writeFileSync(join(dir, "cred", "gateway_postgres_password"), "p".repeat(40));
-  gw = await startGateway({ PI_MCP_URL: `http://127.0.0.1:${mcp.address().port}` });
+  for(const name of ['grants','requests','reports'])mkdirSync(join(dir,name));
+  writeFileSync(incidentEnv.PI_INCIDENT_KEY_FILE,incidentKeys.publicKey.export({type:'spki',format:'pem'}));
+  gw = await startGateway({ PI_MCP_URL: `http://127.0.0.1:${mcp.address().port}`, ...incidentEnv });
   bare = await startGateway({});
+});
+
+test('M9 phone approvals retain Host/Origin checks and never accept URL-only or replayed authority',async()=>{
+  const {grant,signature}=await issueGrant({grantsDir:incidentEnv.PI_INCIDENT_GRANTS_DIR,key:incidentKeys.privateKey,incident_id:'123abcde',action:'apply_fix',base_sha:'b'.repeat(40),patch_sha:'c'.repeat(64),tests_sha:'d'.repeat(64)});
+  const path='/platform/v1/incidents/action/'+grant.id;
+  const args={path,body:'',headers:{'X-FCPI-Approval':signature}};
+  assert.equal((await call(gw.port,{...args,host:'rebinding.example'})).status,421);
+  assert.equal((await call(gw.port,{...args,headers:{...args.headers,origin:'https://evil.example'}})).status,403);
+  assert.equal((await call(gw.port,{path,body:''})).status,401);
+  assert.equal((await call(gw.port,{path:path+'?proof='+signature,body:''})).status,400);
+  assert.equal((await call(gw.port,{path:path+'?proof='+signature,method:'GET',body:''})).status,405);
+  assert.equal((await call(gw.port,args)).status,202);
+  const restarted=await startGateway(incidentEnv);
+  assert.equal((await call(restarted.port,args)).status,409);
+  const q=JSON.parse(readFileSync(join(incidentEnv.PI_INCIDENT_REQUESTS_DIR,grant.id+'.json')));
+  assert.equal(q.patch_sha,grant.patch_sha);
+  assert.ok(gw.logs.every(x=>!JSON.stringify(x).includes(signature)));
 });
 after(async () => {
   for (const p of gws) p.kill("SIGKILL");

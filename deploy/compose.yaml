@@ -340,6 +340,10 @@ services:
       PI_EXTRACT_URL: http://10.231.9.20:3314
       # M8: the host's admission state; new work is refused 503 HOST_PRESSURE while dispatch is paused (spec §23.1).
       PI_ADMISSION_FILE: /srv/admission/admission.json
+      PI_INCIDENT_GRANTS_DIR: /srv/incidents/grants
+      PI_INCIDENT_REQUESTS_DIR: /srv/incidents/requests
+      PI_INCIDENT_KEY_FILE: /srv/incidents/public-key.pem
+      PI_INCIDENT_REPORTS_DIR: /srv/incidents/reports
     secrets: [gateway_postgres_password, gateway_retrieval_token]
     volumes:
       - type: bind
@@ -364,6 +368,25 @@ services:
       - type: bind
         source: /run/firecrawl-pi/admission
         target: /srv/admission
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /var/lib/firecrawl-pi/incidents/control/grants
+        target: /srv/incidents/grants
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /var/lib/firecrawl-pi/incidents/control/requests
+        target: /srv/incidents/requests
+        bind: { create_host_path: false }
+      - type: bind
+        source: /var/lib/firecrawl-pi/incidents/control/reports
+        target: /srv/incidents/reports
+        read_only: true
+        bind: { create_host_path: false }
+      - type: bind
+        source: /var/lib/firecrawl-pi/incidents/control/public-key.pem
+        target: /srv/incidents/public-key.pem
         read_only: true
         bind: { create_host_path: false }
     ports:

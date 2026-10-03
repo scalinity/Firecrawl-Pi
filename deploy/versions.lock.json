@@ -2045,6 +2045,15 @@
       "binary_sha256": "80d615c1c49b7ccd8121e9ce4e1944da274d3d2f28c24f8d54ec70d9d8957803",
       "purpose": "encrypted off-device backups (spec §26); installed by scripts/m8/pi-init-m8.sh",
       "evidence": "evidence/M8/raw/init-m8.txt"
+    },
+    "claude_code": {
+      "version": "2.1.283",
+      "binary": "/home/danny/.local/bin/claude",
+      "binary_sha256": "346d294f0103d6fc0de11ac953579b5c62dfa90698a4cfc486b6f927c615e697",
+      "model": "claude-opus-5-5",
+      "authentication": "existing Max subscription OAuth access token; no refresh/API billing fallback",
+      "purpose": "bounded M9 incident investigation",
+      "evidence": "evidence/M9/work/review-model-readiness.json"
     }
   },
   "host_units": {

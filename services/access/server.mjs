@@ -42,6 +42,7 @@ import { storeCaptures } from "./src/artifacts.mjs";
 import { makeChanges } from "./src/changes.mjs";
 import { makeOutbox } from "./src/outbox.mjs";
 import { makeAdmission } from "./src/admission.mjs";
+import { makeIncidentActions } from "./src/incidents.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -62,6 +63,7 @@ const PATH = { ...jobs.PATH, extract: "/v2/extract" };
 const started = Date.now();
 // M8: the host's admission state (src/admission.mjs), read before any new work is accepted.
 const admission = makeAdmission(cfg.admissionFile);
+const incidentActions = cfg.incidents ? makeIncidentActions(cfg.incidents) : null;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // Exact templates, matched against the raw request path (never decoded or normalised), so an
@@ -518,6 +520,22 @@ const server = createServer({ maxHeaderSize: 16384 }, async (req, res) => {
     if (!ctx.origin) return ctx.send(421, { success: false, code: "MISDIRECTED", error: "This host name is not served here." });
     if (req.headers.origin !== undefined && !cfg.browserOrigins.has(req.headers.origin)) return ctx.send(403, { success: false, code: "ORIGIN_NOT_ALLOWED", error: "Browser origins are not allowed." });
     ctx.url = new URL(req.url.startsWith("/") ? req.url : "/", ctx.origin);
+    const action = /^\/platform\/v1\/incidents\/action\/([0-9a-f]{32})$/.exec(rawPath);
+    if (action && incidentActions) {
+      ctx.route = "platform.incident.action";
+      // Signed, one-use grant authentication replaces bearer authentication only
+      // on this exact path. Host/Origin checks still precede every action.
+      // A view-only grant may be opened by a phone browser. Consequential actions
+      // accept only a header signature on POST; no query can approve a deployment.
+      const view = req.method === "GET" && [...ctx.url.searchParams.keys()].join() === "proof";
+      if (ctx.url.search && !view) return ctx.send(400, { success: false, code: "NO_ACTION_QUERY" });
+      const r = await incidentActions.consume(action[1], view ? ctx.url.searchParams.get("proof") : req.headers["x-fcpi-approval"], { method: req.method, bodyBytes: (await readBody(req)).length });
+      if (r.status === 401) {
+        const wait = failures.fail();
+        if (wait) return ctx.send(429, { success: false, code: "TOO_MANY_FAILED_ATTEMPTS" }, { "retry-after": String(wait) });
+      }
+      return ctx.send(r.status, r.body, { "cache-control": "no-store" });
+    }
     ctx.client = registry.authenticate(req.headers.authorization);
     if (!ctx.client) {
       const wait = failures.fail();

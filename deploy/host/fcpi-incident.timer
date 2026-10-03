@@ -1,0 +1,11 @@
+[Unit]
+Description=Check Firecrawl Pi incident actions and diagnoses
+
+[Timer]
+OnBootSec=120
+OnUnitInactiveSec=30
+Persistent=true
+Unit=fcpi-incident.service
+
+[Install]
+WantedBy=timers.target

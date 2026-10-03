@@ -46,6 +46,7 @@ case $base in
   *) what="Incident $base"; pri=4 ;;
 esac
 id=$(jq -r '.incident_id // "-"' <<<"$n")
+[[ $id =~ ^[0-9a-f]{8}$ ]] || exit 2
 dur() { local s=$1; if [ "$s" -ge 3600 ]; then printf '%dh %02dm' $((s / 3600)) $((s % 3600 / 60)); elif [ "$s" -ge 60 ]; then printf '%dm %02ds' $((s / 60)) $((s % 60)); else printf '%ds' "$s"; fi; }
 case $kind in
   opened) if [ "$base" = restart_budget_or_data_service ]; then class=recovery_failed title="Firecrawl Pi — Recovery failed"; tags='["x"]'
@@ -53,8 +54,51 @@ case $kind in
           msg="$what."$'\n'"Incident: $id" ;;
   cleared) class=recovery_succeeded title="Firecrawl Pi — Recovered" pri=3 tags='["white_check_mark"]'
            msg="$what: cleared."$'\n'"Incident: $id"$'\n'"Duration: $(dur "$(jq -r '.duration_s // 0' <<<"$n")")" ;;
+  recovery_attempted|investigation_started|diagnosis_ready|approval_required|deployment_failed)
+    class=$kind; pri=4; tags='["mag"]'
+    case $kind in
+      recovery_attempted) title='Firecrawl Pi — Recovery attempted' ;;
+      investigation_started) title='Firecrawl Pi — Investigation started' ;;
+      diagnosis_ready) title='Firecrawl Pi — Claude diagnosis' ;;
+      approval_required) title='Firecrawl Pi — Approval required' ;;
+      deployment_failed) title='Firecrawl Pi — Deployment failed' ;;
+    esac
+    msg="$what."$'\n'"Incident: $id" ;;
   *) echo "unknown notice kind $kind" >&2; exit 2 ;;
 esac
+actions='[]'
+if [ -r /etc/firecrawl-pi/incidents.env ] && grep -qx 'FCPI_INCIDENT_ENABLED=true' /etc/firecrawl-pi/incidents.env; then
+  REPO=/opt/firecrawl-pi C=/var/lib/firecrawl-pi/incidents/control
+  # Use the private Tailscale Serve origin, never open a new ingress for actions.
+  origin=$(grep '^https://.*\.ts\.net$' /etc/firecrawl-pi/secrets/gateway/served-origins | head -1)
+  [ -n "$origin" ] || exit 2
+  case $kind in
+    opened) verbs='["investigate","details","dismiss"]' ;;
+    approval_required) verbs='["apply_fix","details","dismiss"]' ;;
+    deployment_failed) verbs='["rollback","details"]' ;;
+    *) verbs='["details","dismiss"]' ;;
+  esac
+  base=$(cat "$REPO/.fcpi-source-commit")
+  report=/var/lib/firecrawl-pi/incidents/work/$id/harvested.json
+  if [ -r "$report" ]; then
+    # A concrete patch and its test result are visible in the private report.
+    jq --arg base "$base" --rawfile patch "/var/lib/firecrawl-pi/incidents/work/$id/patch.diff" '. + {proposal_base_sha:.base_sha,base_sha:$base,patch:$patch}' "$report" >"$C/reports/$id.new"
+    chmod 0640 "$C/reports/$id.new"; chown root:3380 "$C/reports/$id.new"; mv "$C/reports/$id.new" "$C/reports/$id.json"
+    patch=$(jq -r .patch_sha "$report"); tests=$(jq -r .tests_sha "$report")
+    msg+=$'\n'"Files changed: $(jq -r .changed_files "$report"); test exit: $(jq -r .test_exit "$report")."$'\n'"Patch: ${patch:0:12}"
+  else
+    patch='' tests=''
+    jq -n --arg id "$id" --arg base "$base" --arg what "$what" '{schema:"fcpi.incident-report/v1",incident_id:$id,base_sha:$base,state:"OPEN",observed_symptom:$what}' >"$C/reports/$id.new"
+    chmod 0640 "$C/reports/$id.new"; chown root:3380 "$C/reports/$id.new"; mv "$C/reports/$id.new" "$C/reports/$id.json"
+  fi
+  input=$(jq -cn --arg origin "$origin" --arg id "$id" --arg base "$base" --arg patch "$patch" --arg tests "$tests" --argjson actions "$verbs" \
+    '{origin:$origin,incident_id:$id,base_sha:$base,patch_sha:(if $patch=="" then null else $patch end),tests_sha:(if $tests=="" then null else $tests end),actions:$actions}')
+  image=$(docker inspect -f '{{.Image}}' fcpi-access-gateway-1)
+  actions=$(printf '%s\n' "$input" | docker run --rm -i --label fcpi.transient=incident-actions --network none --read-only --user 3382:3380 --cgroup-parent fcpi.slice \
+    --cap-drop ALL --security-opt no-new-privileges --memory 128m --memory-swap 128m --cpus 0.3 --pids-limit 32 \
+    -v "$REPO:/repo:ro" -v "$C/grants:/grants" -v /etc/firecrawl-pi/secrets/incident_signing_key:/run/secrets/incident_signing_key:ro \
+    "$image" node /repo/scripts/m9/incident-actions.mjs) || exit 1
+fi
 jq -cn --rawfile t "$TOPIC_FILE" --arg title "$title" --arg msg "$msg" --argjson pri "$pri" --argjson tags "$tags" --arg class "$class" --arg id "$id" \
-  '{topic: ($t | gsub("\\s"; "")), title: $title, message: $msg, priority: $pri, tags: ($tags + ["fcpi", $class]), actions: []}' \
+  --argjson actions "$actions" '{topic: ($t | gsub("\\s"; "")), title: $title, message: $msg, priority: $pri, tags: ($tags + ["fcpi", $class]), actions: $actions}' \
   | curl -sS --proto =https --tlsv1.2 --max-time 15 --fail-with-body -H 'Content-Type: application/json' --data-binary @- https://ntfy.sh/ >/dev/null

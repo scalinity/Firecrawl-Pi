@@ -1,0 +1,15 @@
+[Unit]
+Description=Firecrawl Pi bounded incident controller
+After=fcpi-stack.service
+ConditionPathExists=/etc/firecrawl-pi/incidents.env
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/firecrawl-pi/scripts/m9/incident-control.sh tick
+TimeoutStartSec=600
+Slice=fcpi.slice
+MemoryMax=256M
+MemorySwapMax=0
+TasksMax=128
+NoNewPrivileges=yes
+

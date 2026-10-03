@@ -170,7 +170,8 @@ hold_clear() { rm -f "$HOLDS/$1"; admission_write; }
 notice() { # notice <kind: opened|cleared> <key> <detail json> [<since epoch>]
   local kind=$1 key=$2 detail=$3 since=${4:-$(now_s)} n id short
   id="$(date -u +%Y%m%dT%H%M%SZ)-$kind-$(printf '%s' "$key" | tr -c 'A-Za-z0-9_.-' '_')"
-  short=$(printf '%s:%s' "$key" "$since" | sha256sum | cut -c1-8)
+  short=${5:-$(printf '%s:%s' "$key" "$since" | sha256sum | cut -c1-8)}
+  [[ $short =~ ^[0-9a-f]{8}$ ]] || return 2
   n=$(jq -cn --arg utc "$(utc)" --arg kind "$kind" --arg key "$key" --arg id "$id" --argjson d "$detail" --arg boot "$(boot_hash)" \
     --argjson since "$since" --arg short "$short" --argjson now "$(now_s)" \
     '{utc:$utc,id:$id,kind:$kind,incident:$key,incident_id:$short,since:($since | todate),detail:$d,boot:$boot,delivered:false,attempts:0}

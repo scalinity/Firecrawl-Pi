@@ -17,6 +17,7 @@ def fix($R): if type == "string" then
     gsub("/srv/firecrawl-pi/data/"; $R + "/data/") | gsub("/opt/firecrawl-pi/"; $R + "/fs/opt/firecrawl-pi/")
   | gsub("/etc/firecrawl-pi/secrets"; $R + "/secrets/secrets") | gsub("/etc/firecrawl-pi/"; $R + "/fs/etc/firecrawl-pi/")
   | gsub("/run/firecrawl-pi/admission"; $R + "/admission") | move
+  | gsub("/var/lib/firecrawl-pi/"; $R + "/fs/var/lib/firecrawl-pi/")
   elif type == "object" then map_values(fix($R)) elif type == "array" then map(fix($R)) else . end;
 
 # The copy: project fcpi-restore; no published port; no egress network; every network internal and renamed fcpi_r_*
@@ -31,6 +32,10 @@ def compose($R): kept as $keep
       | (if .depends_on then .depends_on |= with_entries(select(.key as $k | $keep | index($k))) else . end))
   | .services["retrieval-service"].environment += {PI_WEBHOOK_DELIVERY: "suppressed", PI_PAID_DISPATCH_ENABLED: "false"}
   | .services["firecrawl-core"].environment += {DISABLE_WEBHOOK_DELIVERY: "true"}
+  # Restored approvals and incident agents never control production or consume
+  # an old owner action. Their state is retained for inspection only.
+  | .services["access-gateway"].environment |= with_entries(select(.key | startswith("PI_INCIDENT_") | not))
+  | .services["access-gateway"].volumes |= map(select((.target | startswith("/srv/incidents")) | not))
   | .networks |= (del(.egress) | map_values(.name |= sub("^fcpi_"; "fcpi_r_") | .internal = true | .labels = {"fcpi.transient": "restore-test"}
       | .driver_opts["com.docker.network.bridge.name"] |= sub("^fcpi-"; "fcpi-r-") | .driver_opts["com.docker.network.bridge.gateway_mode_ipv4"] = "isolated"));
 

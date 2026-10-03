@@ -124,6 +124,7 @@ while IFS=$'\t' read -r svc name; do
   logger -t fcpi-supervisor -- "restarting $svc (unhealthy; $recent restarts in the last 15 minutes)"
   # Recorded before the restart, so a tick killed during it still counts it against the budget.
   append_line "$SUP" "$(jq -cn --arg u "$T" --argjson e "$NOW" --arg s "$svc" '{utc:$u,epoch:$e,service:$s}')"
+  notice recovery_attempted "restart_budget_or_data_service:$svc" '{"runbook":"bounded_service_restart"}'
   timeout 120 docker restart "$name" >/dev/null 2>&1; rc=$?
   logger -t fcpi-supervisor -- "restart of $svc exited $rc"
 done < <(jq -r '.[] | select(.project == "fcpi" and .state == "running" and .health == "unhealthy") | [.service, .name] | @tsv' <<<"$containers")
@@ -206,6 +207,8 @@ for k in $(jq -r 'keys[]' <<<"$new"); do
   fi
 done
 [ "$active" = null ] || { put_obj "$AST" 0600 "$new"; put_obj "$STATE/alerts/oom.json" 0600 "$oom_now"; }
+# The controller launches bounded units, never waits for a model inside the tick.
+# Its own timer consumes actions and harvests results; tick only supplies incidents.
 deliver_notices
 
 # ---- 5. retention and the daily aggregate ----------------------------------------------------------------------------

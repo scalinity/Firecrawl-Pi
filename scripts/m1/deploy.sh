@@ -13,11 +13,21 @@
 # which lacks --from0 and --chown, and the archive is exactly the tracked files at HEAD.
 set -euo pipefail
 root=$(cd "$(dirname "$0")/../.." && pwd)
+# M9's authenticated incident controller uses this same archive/hash/prune/marker
+# pipeline on the Pi. Only root and the project-owned isolated worktree may use it.
+local_mode=false
+if [ "${1:-}" = --local ]; then
+  [ "$(id -u)" = 0 ] || { echo 'local incident deployment requires root' >&2; exit 2; }
+  root=$(realpath "${2:?incident worktree required}")
+  [[ $root =~ ^/var/lib/firecrawl-pi/incidents/work/[0-9a-f]{8}/tree$ ]] || exit 2
+  local_mode=true
+fi
 # shellcheck source=scripts/m1/pi-target.conf
 . "$root/scripts/m1/pi-target.conf"
 SSH=(ssh -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15)
 PI=$PI_SSH_TARGET
 DEST=/opt/firecrawl-pi
+remote() { if [ "$local_mode" = true ]; then bash -c "${1//sudo -n /}"; else "${SSH[@]}" "$PI" "$1"; fi; }
 
 cd "$root"
 # Code must be committed: the copy is `git archive HEAD`, so an uncommitted change would
@@ -37,13 +47,13 @@ mkdir "$work/tree" && tar -xf "$work/src.tar" -C "$work/tree"
 (cd "$work/tree" && find . -type f -print0 | xargs -0 shasum -a 256) >"$work/sums"
 sums=$work/sums
 
-"${SSH[@]}" "$PI" "sudo -n install -d -m 0755 -o root -g root $DEST"
-"${SSH[@]}" "$PI" "sudo -n tar -x --no-same-owner -f - -C $DEST" <"$work/src.tar"
-"${SSH[@]}" "$PI" "cd $DEST && sha256sum --quiet --strict -c -" <"$sums"
+remote "sudo -n install -d -m 0755 -o root -g root $DEST"
+remote "sudo -n tar -x --no-same-owner -f - -C $DEST" <"$work/src.tar"
+remote "cd $DEST && sha256sum --quiet --strict -c -" <"$sums"
 # Only after every hash is verified: remove what the archive does not contain. The list
 # goes over stdin; `comm -23` keeps the paths present on the Pi and absent from the archive.
 sed -E 's/^[0-9a-f]{64}  //' "$sums" | LC_ALL=C sort >"$work/list"
-"${SSH[@]}" "$PI" "set -o pipefail; l=\$(mktemp) && cat >\"\$l\" && cd $DEST && sudo -n find . -type f ! -path ./.fcpi-source-commit | LC_ALL=C sort | LC_ALL=C comm -23 - \"\$l\"; s=\$?; rm -f \"\$l\"; exit \$s" <"$work/list" >"$work/stale"
-"${SSH[@]}" "$PI" "set -e; cd $DEST; while IFS= read -r f; do sudo -n rm -f -- \"\$f\"; echo \"removed \$f\"; done; sudo -n find . -mindepth 1 -type d -empty -print -delete | sed 's/^/removed-dir /'" <"$work/stale"
-"${SSH[@]}" "$PI" "printf '%s\n' '$sha' | sudo -n tee $DEST/.fcpi-source-commit >/dev/null"
+remote "set -o pipefail; l=\$(mktemp) && cat >\"\$l\" && cd $DEST && sudo -n find . -type f ! -path ./.fcpi-source-commit | LC_ALL=C sort | LC_ALL=C comm -23 - \"\$l\"; s=\$?; rm -f \"\$l\"; exit \$s" <"$work/list" >"$work/stale"
+remote "set -e; cd $DEST; while IFS= read -r f; do sudo -n rm -f -- \"\$f\"; echo \"removed \$f\"; done; sudo -n find . -mindepth 1 -type d -empty -print -delete | sed 's/^/removed-dir /'" <"$work/stale"
+remote "printf '%s\n' '$sha' | sudo -n tee $DEST/.fcpi-source-commit >/dev/null"
 echo "deployed commit $sha ($(wc -l <"$sums" | tr -d ' ') files, hashes verified, $(wc -l <"$work/stale" | tr -d ' ') stale files removed) to $PI:$DEST"

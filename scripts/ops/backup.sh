@@ -155,8 +155,9 @@ jq -e '(.run | type) == "string" and (.versions_lock_sha256 | test("^[0-9a-f]{64
   "$S/backup-meta.json" >/dev/null 2>&1 || { record FAIL '{"error":"backup-meta.json is incomplete: the run, version lock, images or canaries did not compute"}'; exit 1; }
 (cd "$S" && find . -type f ! -name MANIFEST.sha256 -print0 | sort -z | xargs -0 sha256sum >MANIFEST.sha256)
 t_u0=$(now_s)
-out=$(restic backup --json --tag fcpi-data --tag "fcpi-run=$RUN" --host fcpi-pi --exclude-caches "$S" "$DATA/artifacts" "$REPO" /etc/firecrawl-pi \
-  --exclude /etc/firecrawl-pi/secrets 2>"$B/restic-data.err" | tail -1)
+incident_state=(); [ ! -d "$STATE/incidents" ] || incident_state+=("$STATE/incidents")
+out=$(restic backup --json --tag fcpi-data --tag "fcpi-run=$RUN" --host fcpi-pi --exclude-caches "$S" "$DATA/artifacts" "$REPO" /etc/firecrawl-pi "${incident_state[@]}" \
+  --exclude /etc/firecrawl-pi/secrets --exclude '**/incidents/work/*/run/auth/**' 2>"$B/restic-data.err" | tail -1)
 snap_data=$(jq -r 'select(.message_type == "summary") | .snapshot_id // empty' <<<"$out" 2>/dev/null)
 added=$(jq -r 'select(.message_type == "summary") | .data_added // 0' <<<"$out" 2>/dev/null)
 out2=$(restic backup --json --tag fcpi-secrets --tag "fcpi-run=$RUN" --host fcpi-pi --stdin-filename fcpi-secrets.tar --stdin-from-command -- tar -C /etc/firecrawl-pi -cf - secrets 2>"$B/restic-secrets.err" | tail -1)

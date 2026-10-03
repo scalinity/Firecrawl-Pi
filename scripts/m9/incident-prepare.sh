@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# Trusted root preparation; runs after deterministic recovery failed, at most four
+# fresh investigations per UTC day. Never runs the agent with root authority.
+set -euo pipefail
+. "$(dirname "$(readlink -f "$0")")/../ops/lib.sh"
+need_root
+id=${1:?incident id}; [[ $id =~ ^[0-9a-f]{8}$ ]] || die 'invalid incident id'
+D=$STATE/incidents W=$STATE/incidents/work/$id
+exec 8>"$D/prepare.lock"; flock -n 8 || exit 0
+# One model process at a time, including explicit owner resumes.
+systemctl list-units --state=active --type=service 'fcpi-incident-????????.service' --no-legend | grep -q . && exit 3
+[ ! -e "$W" ] || {
+  [ "${2:-}" = --resume ] || exit 0
+  [ -s "$W/run/result.json" ] || die 'no resumable completed session'
+  [ "$(cat "$W/launch-count")" -lt 2 ] || die 'incident resume limit reached'
+}
+[ "$(find "$D/work" -mindepth 1 -maxdepth 1 -type d -newermt "$(date -u +%F)" | wc -l)" -lt 4 ] || die 'daily investigation limit reached'
+base=$(source_commit)
+if [ ! -e "$W" ]; then
+git --git-dir="$D/source.git" cat-file -e "$base^{commit}" || die 'deployed source absent from isolated mirror'
+# The doctor's own enforced literal-secret scan must pass before any model sees it.
+bundle=$(bash "$REPO/scripts/ops/doctor.sh")
+bundle=${bundle%% *}; [ -s "$bundle" ] || die 'no diagnostic bundle'
+install -d -m 0751 -o root -g root "$W" "$W/empty"
+install -d -m 0700 -o danny -g danny "$W/run" "$W/run/auth"
+git --git-dir="$D/source.git" worktree add --detach "$W/tree" "$base" >/dev/null
+git -C "$W/tree" switch -c "codex/incident-$id" >/dev/null
+tar -xzf "$bundle" -C "$W"
+diag=$(find "$W" -mindepth 1 -maxdepth 1 -type d -name 'fcpi-doctor-*' | head -1)
+# Diagnostic files are bounded/redacted; one JSON input keeps the agent inside its
+# Read allowlist. Paths, URLs and @ expansion markers are never promoted into prompts.
+find "$diag" -type f -print0 | sort -z | while IFS= read -r -d '' f; do
+  jq -cn --arg name "${f#$diag/}" --rawfile content "$f" '{name:$name,content:$content}'
+done | jq -sc --arg id "$id" --arg base "$base" '{incident_id:$id,source_commit:$base,diagnostics:.,trust:"untrusted redacted observations"}' >"$W/input.json"
+rm -rf -- "$diag"
+printf '%s\n' "$base" >"$W/base-sha"
+cat /proc/sys/kernel/random/uuid >"$W/session-id"
+printf '{"mcpServers":{}}\n' >"$W/mcp.json"
+jq -n --arg command "$REPO/scripts/m9/incident-hook.sh" '{hooks:{PreToolUse:[{matcher:".*",hooks:[{type:"command",command:$command,timeout:10}]}]}}' >"$W/settings.json"
+echo 0 >"$W/launch-count"
+fi
+# Supported OAuth access-token environment mode does not refresh or alter the
+# owner's login. Refuse expiry near the bounded run; never supply an API key.
+jq -e --argjson now "$(date +%s%3N)" '.claudeAiOauth | .accessToken and .subscriptionType == "max" and .expiresAt > ($now + 600000)' /home/danny/.claude/.credentials.json >/dev/null || die 'subscription access token unavailable or near expiry'
+jq -r '.claudeAiOauth.accessToken' /home/danny/.claude/.credentials.json >"$W/run/auth/access-token"
+sha=$(sha256sum /home/danny/.local/bin/claude | cut -c1-64)
+[ "$sha" = "$(jq -r .host_packages.claude_code.binary_sha256 "$REPO/deploy/versions.lock.json")" ] || die 'Claude binary differs from pinned version'
+echo $(( $(cat "$W/launch-count") + 1 )) >"$W/launch-count"
+rm -f "$W/harvested.json"
+chown -R danny:danny "$W/tree" "$W/run"
+chmod 0600 "$W/run/auth/access-token"
+chmod 0644 "$W/settings.json" "$W/input.json" "$W/session-id" "$W/base-sha" "$W/mcp.json"
+systemd-run --quiet --unit="fcpi-incident-$id" --uid=danny --gid=danny --collect \
+  --property=Slice=fcpi.slice --property=MemoryMax=768M --property=MemorySwapMax=0 --property=CPUQuota=50% --property=TasksMax=128 \
+  --property=RuntimeMaxSec=330 --property=TimeoutStopSec=15 --property=KillMode=control-group --property=NoNewPrivileges=yes \
+  --property=ProtectSystem=strict --property=ProtectHome=read-only --property=PrivateTmp=yes \
+  --property="ReadWritePaths=$W/tree $W/run" --property="InaccessiblePaths=/etc/firecrawl-pi /srv/firecrawl-pi/data /run/docker.sock /home/danny/.ssh /home/danny/.codex $D/control" \
+  /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/danny CLAUDE_CONFIG_DIR="$W/run/auth" \
+  /bin/bash "$REPO/scripts/m9/incident-agent.sh" "$id"
+notice investigation_started "incident_agent:$id" '{"agent":"subscription","runtime_s":300,"turns":12}' "$(now_s)" "$id"
