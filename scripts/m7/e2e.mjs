@@ -506,13 +506,13 @@ async function livePhase(before) {
     out("live_enhanced", { case: "blocked", credential: zyte?.credential ?? null, paidDispatch: status.paidDispatch ?? null, enhancedCaps: cap, reason: "no Zyte key with an approved budget and paid dispatch; no live enhanced request was made" });
   } else {
     select(before.search, before.extractionModel, before.parser, before.proxy ?? "none", "zyte-api");
-    const r = await scrape("https://example.com/", { proxy: "enhanced", storeInCache:true }, "m7cache");
+    const r = await scrape("https://example.com/", { proxy: "enhanced", storeInCache:true });
     out("live_enhanced", { case: "permitted_target", ...brief(r), markdown: (docOf(r)?.markdown ?? "").slice(0, 200), proxyUsed: docOf(r)?.metadata?.proxyUsed ?? null,
       ledger: sql(`SELECT row_to_json(r) FROM (SELECT provider, subject, reserved, actual, state, usage FROM fcpi_retrieval.budget_reservation WHERE kind = 'enhanced' AND provider = 'zyte' AND created_at >= :'since') r`, { since }).map((l) => JSON.parse(l)) });
   }
     if (liveEnhanced && heldOnly) {
       const rowsBefore = enhancedLedger(since).length;
-      const cached = await scrape("https://example.com/", {proxy:"enhanced",maxAge:600000}, "m7cache");
+      const cached = await scrape("https://example.com/", {proxy:"enhanced",maxAge:600000});
       out("live_cache", {case:"enhanced_cached", ...brief(cached), proxyUsed:docOf(cached)?.metadata?.proxyUsed ?? null,
         rows_before:rowsBefore, rows_after:enhancedLedger(since).length});
       // The echo target serves our synthetic interstitial. Both direct and Zyte see the same challenge;

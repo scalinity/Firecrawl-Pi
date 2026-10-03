@@ -422,7 +422,7 @@ async function livePhase() {
       const rowsBefore = ledger(m0).filter(x=>x.category==="parser").length;
       r = await rest("POST", "/v2/scrape", { url: `${FX5}${path}?live=${nonce}`, formats: ["markdown"] });
       out("live_parser", { case: c, ...brief(r), chars: docOf(r)?.markdown?.length ?? null, head: docOf(r)?.markdown?.slice(0, 300) ?? null,
-        rows_before:rowsBefore, rows_after:ledger(m0).filter(x=>x.category==="parser").length });
+        full_markdown:(docOf(r)?.markdown ?? "").slice(0,2000), rows_before:rowsBefore, rows_after:ledger(m0).filter(x=>x.category==="parser").length });
     }
   } else out("live_parser", { case: "blocked", credential: providers.providers?.llamaparse?.credential ?? null, paidDispatch: paid, parserCaps: providers.caps?.parser ?? null });
   out("ledger", { point: "live", rows: ledger(m0) });
