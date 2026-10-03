@@ -292,9 +292,10 @@ const PHASES = {
 
   async cancel() {
     const since = piNow();
-    const s = await post("crawl", { url: `${FX}/slow/`, limit: 30, sitemap: "skip" });
+    const s = await post("crawl", { url: `${FX}/slow/`, limit: 12, sitemap: "skip" });
     out("slow_crawl", { case: "submit", ...brief(s), id: s.json?.id ?? null });
     const id = s.json.id;
+    if (s.status !== 200 || !id) throw new Error("controlled cancellation crawl was not admitted");
     for (let i = 0; i < 120; i++) { const j = await receipt(id); if ((j?.completed ?? 0) >= 2) break; await sleep(1000); }
     const q = await post("crawl", { url: `${FX}/`, limit: 3, sitemap: "skip" });
     const qs = ledgerJob(q.json.id);

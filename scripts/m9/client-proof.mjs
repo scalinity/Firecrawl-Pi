@@ -7,7 +7,7 @@ export function clientProof(client,events){
   if(typeof x==='string'){try{return usable(JSON.parse(x));}catch{return false;}}
   if(Array.isArray(x))return x.some(usable);
   if(!x||typeof x!=='object'||x.isError||x.is_error||x.error)return false;
-  if((x.success===true||x.success===undefined)&&typeof x.data?.markdown==='string')return /^# Static fixture(?:\r?\n|$)/.test(x.data.markdown);
+  if((x.success===true||x.success===undefined)&&typeof x.data?.markdown==='string')return /^(?:# Static fixture(?:\r?\n|$)|Static fixture\r?\n=+(?:\r?\n|$))/.test(x.data.markdown);
   return usable(x.content)||usable(x.text)||usable(x.structuredContent);
  }
  return {calls: calls.map(({id,...x})=>x),usable:calls.length===1&&approved.length===1&&results.some(usable)};
