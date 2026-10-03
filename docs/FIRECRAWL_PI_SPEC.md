@@ -1266,3 +1266,5 @@ Research date: **2026-09-22**. Public vendor documentation describes products; p
 **End of canonical specification.** Implementation and milestone status are governed by `FIRECRAWL_PI_MILESTONES.md`.
 
 M9 verification note (2026-10-03): the legacy M2 R02 cold-routing assumption now also checks the M6 learned JavaScript route against its correlated acquisition event. The static fixture starts with only its disposable `m2.fixture.fcpi.test` hint cleared; public domain knowledge is preserved. Initial warm-route negative fixture failures and the isolated renderer OOM remain in `evidence/M9/regression/M2/raw/initial-learned-rt-static.txt` and `evidence/M9/work/browser-oom-kernel.txt`. This changes the probe interpretation to the existing M6 architecture and does not establish final acceptance.
+
+M9 verification note: M2 R01 distinguishes ordinary static requests from the two explicit screenshot/action requests that M7 subsequently enabled. Those two cases must account for every browser attempt/render; all ordinary static cases still require direct HTTP. The saved initial all-phase R01 FAIL remains visible.

@@ -324,11 +324,15 @@ const checks = {
 
   // ============================================================== retrieval behaviour
   R01: { name: "static-pages-never-start-chromium", inputs: [`${RAW}rt-static.txt`],
-    expected: "with the browser worker up, every static-phase acquisition is direct HTTP and the browser logs no render during the phase; the worker answering its health check at the end is the positive control that it was there to be used",
+    expected: "with the browser worker up, every ordinary static-phase acquisition is direct HTTP; only the explicit screenshot/action cases enabled by M7 may render, with exact attempt/log accounting; the worker answering its health check at the end is the positive control that it was there to be used",
     run() {
       const p = phase("static");
       const h = p.browserHealth ? JSON.parse(p.browserHealth) : null;
-      const ok = p.attempts.length >= 15 && p.attempts.every((a) => a.strategy === "direct_http") && !p.browser.some((e) => e.event === "render") && h?.ok === true;
+      const explicit = new Set([p.cases["C24-screenshot"]?.scrapeId, p.cases["C25-actions"]?.scrapeId].filter(Boolean));
+      const ordinary = p.attempts.filter(a => !explicit.has(a.logical));
+      const requestedBrowser = p.attempts.filter(a => explicit.has(a.logical) && a.strategy === "direct_browser");
+      const renders = p.browser.filter(e => e.event === "render");
+      const ok = ordinary.length >= 15 && ordinary.every(a => a.strategy === "direct_http") && renders.length === requestedBrowser.length && p.retrieval.filter(e => e.strategies?.includes("direct_browser")).every(e => explicit.has(e.logical_id)) && h?.ok === true;
       return { ok, actual: `attempts=${p.attempts.length}, strategies=${[...new Set(p.attempts.map((a) => a.strategy))].join(",")}; renders=${p.browser.filter((e) => e.event === "render").length}; browser health=${p.browserHealth}` };
     } },
   R02: { name: "js-delayed-cookie-pages-render", inputs: [`${RAW}rt-browser.txt`],
