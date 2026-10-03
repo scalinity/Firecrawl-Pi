@@ -63,6 +63,11 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
   // An attempt's refusals are returned when it closes; a standing session never closes, so it keeps none
   // and each refusal is only logged (review S5).
   const refuse = (s, target, e, rawUrl = null) => {
+    // Early readiness/cap refusals can arrive before target parsing. Never let
+    // an absolute URL, credentials or query enter the host-only refusal record.
+    if (!/^(?:[A-Za-z0-9.-]+|\[[0-9a-fA-F:.]+\])(?::\d{1,5})?$/.test(target ?? "")) {
+      try { target = new URL(target).host || "?"; } catch { target = "?"; }
+    }
     if (!s.logEach) {
       const denied = { host: target, class: e.failureClass ?? "PROXY_ERROR" };
       // Correlate HTTP navigation refusals without retaining URL/query text.

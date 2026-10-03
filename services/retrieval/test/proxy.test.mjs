@@ -117,6 +117,7 @@ test("a session past its request or byte cap is refused and marked capped (revie
       const a = sessions.close("req-cap");
       assert.equal(a.capped, true);
       assert.deepEqual(a.denied.map((d) => d.class), ["RESOURCE_LIMIT"]);
+      assert.deepEqual(a.denied.map((d) => d.host), [`fx.fixture.fcpi.test:${big.address().port}`]);
       const byBytes = sessions.open("byte-cap", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1024, maxRequests: 50 });
       await viaProxy(port, url, byBytes).catch(() => null);
       assert.equal(sessions.close("byte-cap").capped, true);
@@ -127,14 +128,18 @@ test("a session past its request or byte cap is refused and marked capped (revie
 test("the proxy answers 503 while the local-network list is not loaded (review finding W7)", async () => {
   const good = http.createServer((q, r) => r.end("fine")).listen(0, "127.0.0.1");
   await listening(good);
-  const sessions = new ProxySessions();
+  const sessions = new ProxySessions(), logs = [];
   const proxy = startProxy({ listen: { host: "127.0.0.1", port: 0 }, sessions, getPolicy: () => ({ ...policyFor(good.address().port), localCidrs: undefined }),
-    resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
+    resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: (e) => logs.push(e) });
   await listening(proxy);
   try {
     const cred = sessions.open("not-ready", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
-    assert.equal((await viaProxy(proxy.address().port, `http://fx.fixture.fcpi.test:${good.address().port}/`, cred)).status, 503);
-    assert.deepEqual(sessions.close("not-ready").denied.map((d) => d.class), ["RETRIEVAL_NOT_READY"]);
+    const url = `http://fixture-user:fixture-password@fx.fixture.fcpi.test:${good.address().port}/private?token=fixture-sensitive-query`;
+    assert.equal((await viaProxy(proxy.address().port, url, cred)).status, 503);
+    assert.deepEqual(sessions.close("not-ready").denied, [{ host: `fx.fixture.fcpi.test:${good.address().port}`, class: "RETRIEVAL_NOT_READY" }]);
+    assert.equal(logs.find(e => e.event === "proxy_denied")?.target_host, `fx.fixture.fcpi.test:${good.address().port}`);
+    assert.equal(JSON.stringify(logs).includes("fixture-sensitive-query"), false);
+    assert.equal(JSON.stringify(logs).includes("fixture-password"), false);
   } finally { proxy.close(); good.close(); }
 });
 
