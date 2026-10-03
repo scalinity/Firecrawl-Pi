@@ -11,7 +11,7 @@ export function corpusVerdict(specText,freeze,raw,record){
   const target=targets[i],r=raw.results[i],pub=record.results[i];
   const text=r.json?.data?.markdown??'';
   const criteria=(Array.isArray(target.required_text)?target.required_text:[target.required_text]);
-  const ok=r.status===200&&r.json.success===true&&criteria.every(x=>new RegExp(x,'i').test(text));
+  const ok=r.status===200&&r.json.success===true&&criteria.every(x=>new RegExp(x,'i').test(text))&&Number.isInteger(r.acquisition?.attempts_used)&&r.acquisition.attempts_used<=target.max_attempts;
   if(pub.id!==target.id||pub.page_class!==target.page_class||pub.domain!==new URL(target.url).hostname||pub.status!==r.status||pub.content_sha256!==sha(text)||pub.usable!==ok)return false;
   if(ok)usable++;
  }

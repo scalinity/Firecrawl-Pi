@@ -38,7 +38,7 @@ const proof=json('evidence/M9/incident-proof.json'),rootTests=text('evidence/M9/
 const rootOk=/RESULT pass=\d+ fail=0 source=[0-9a-f]{40}/.test(rootTests)&&sameCode(rootTests.match(/RESULT pass=\d+ fail=0 source=([0-9a-f]{40})/)?.[1]);
 let incidentOk=false;if(proof&&/^[0-9a-f]{8}$/.test(proof.incident_id)){
  const raw=text(join(privateRoot,'incident',proof.incident_id+'.json'));let r;try{r=JSON.parse(raw);}catch{}
- incidentOk=rootOk&&sha(raw)===proof.raw_sha256&&sameCode(proof.source_commit)&&r?.is_error===false&&r.structured_output?.incident_id===proof.incident_id&&proof.unit?.MemoryMax===805306368&&proof.unit?.NoNewPrivileges===true&&proof.unit?.tools==='Read,Edit,Write'&&proof.owner_authentication==='Max subscription'&&proof.invoiced_usd===null;
+ incidentOk=rootOk&&sha(raw)===proof.raw_sha256&&sameCode(proof.source_commit)&&r?.is_error===false&&r.structured_output?.incident_id===proof.incident_id&&proof.unit?.MemoryMax===805306368&&proof.unit?.NoNewPrivileges===true&&proof.unit?.tools==='Read,Edit,Write'&&proof.auth_removed===true&&proof.unit?.User==='danny'&&Number(proof.unit?.MemorySwapMax)===0&&proof.owner_authentication==='Max subscription'&&proof.invoiced_usd===null;
 }
 results.push({test_id:'M9-INCIDENT',state:incidentOk?'PASS':'NOT_RUN',root_fixtures:rootOk});
 const review=text('evidence/M9/review/REVIEW.md');const dispositions=[...review.matchAll(/^\| (?:DB1|CA1|SELF)-[^|]+\| ([^|]+)\|/gm)].map(x=>x[1].trim());
