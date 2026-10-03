@@ -6,7 +6,7 @@ ARG FCPI_SOURCE_COMMIT=unknown
 ENV FCPI_SOURCE_COMMIT=${FCPI_SOURCE_COMMIT}
 WORKDIR /srv/retrieval
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+RUN npm ci --omit=dev --ignore-scripts --no-audit && npm cache clean --force && node --version && npm ls --omit=dev --all
 COPY src ./src
 USER 3310:3310
 CMD ["node", "src/server.mjs"]

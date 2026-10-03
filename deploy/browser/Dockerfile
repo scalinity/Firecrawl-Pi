@@ -13,7 +13,7 @@ ENV FCPI_SOURCE_COMMIT=${FCPI_SOURCE_COMMIT}
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 WORKDIR /srv/browser
 COPY package.json package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+RUN npm ci --omit=dev --ignore-scripts --no-audit && npm cache clean --force && node --version && npm ls --omit=dev --all
 COPY src ./src
 USER 3320:3320
 CMD ["node", "src/server.mjs"]
