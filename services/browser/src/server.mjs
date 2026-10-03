@@ -261,7 +261,7 @@ async function renderWithin(r, signal, started, deadline, run) {
     if (chars > maxHtml) return { ok: false, failure: { class: "SIZE_LIMIT", detail: `rendered document of ${chars} characters exceeds ${maxHtml}` }, subresources: counters, timings: { totalMs: Date.now() - started } };
     const html = await page.content();
     return {
-      ok: true, finalUrl: page.url(), navigationUrl, status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,
+      ok: true, finalUrl: page.url(), navigationUrl: response?.url() ?? navigationUrl, status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,
       subresources: counters, screenshot: extras.screenshot, actions: extras.actions,
       timings: { totalMs: Date.now() - started }, browser: { version: browser?.version() ?? null, pagesServed: pagesServed + 1, launches },
     };
