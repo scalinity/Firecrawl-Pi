@@ -35,7 +35,14 @@ const PAGES = {
 function documentRoute(req, res, path) {
   const send = (status, type, body) => { res.writeHead(status, { "content-type": type, "content-length": body.length }); res.end(body); };
   let m;
-  if ((m = path.match(/^\/docs\/([a-z0-9-]+\.(pdf|docx))$/)) && DOCS[m[1]]) return send(200, TYPES[m[2]], DOCS[m[1]]);
+  if ((m = path.match(/^\/docs\/([a-z0-9-]+\.(pdf|docx))$/)) && DOCS[m[1]]) {
+    const fresh = new URL(req.url, "http://fixture.invalid").searchParams.get("fresh");
+    // PDF trailing comments preserve the document while making a cold parse
+    // distinct from an earlier run's content-addressed cache. Same nonce caches.
+    const bytes = m[2] === "pdf" && /^[0-9a-f]{8}$/.test(fresh ?? "")
+      ? Buffer.concat([DOCS[m[1]], Buffer.from(`\n%fcpi-fresh=${fresh}\n`)]) : DOCS[m[1]];
+    return send(200, TYPES[m[2]], bytes);
+  }
   // Misleading MIME, both ways: a PDF declared as HTML, and an HTML page declared as a PDF.
   if (path === "/docs/pdf-as-html") return send(200, "text/html; charset=utf-8", DOCS["text.pdf"]);
   if (path === "/docs/html-as-pdf") return send(200, "application/pdf", Buffer.from(page("Not a PDF", ["FCPI-M5-HTML-AS-PDF sentinel: this page is HTML served as application/pdf."])));

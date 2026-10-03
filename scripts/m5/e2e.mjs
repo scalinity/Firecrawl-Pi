@@ -420,7 +420,7 @@ async function livePhase() {
     select("live", modelLive ? "gpt-6-luna" : PRODUCTION[1], "llamaparse-cost-effective");
     for (const [c, path] of [["scan_only", "/docs/scan.pdf"], ["complex", "/docs/table.pdf"], ["scan_cached", "/docs/scan.pdf"]]) {
       const rowsBefore = ledger(m0).filter(x=>x.category==="parser").length;
-      r = await rest("POST", "/v2/scrape", { url: `${FX5}${path}?live=${nonce}`, formats: ["markdown"] });
+      r = await rest("POST", "/v2/scrape", { url: `${FX5}${path}?fresh=${nonce}`, formats: ["markdown"] });
       out("live_parser", { case: c, ...brief(r), chars: docOf(r)?.markdown?.length ?? null, head: docOf(r)?.markdown?.slice(0, 300) ?? null,
         full_markdown:(docOf(r)?.markdown ?? "").slice(0,2000), rows_before:rowsBefore, rows_after:ledger(m0).filter(x=>x.category==="parser").length });
     }
