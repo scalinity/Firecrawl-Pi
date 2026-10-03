@@ -193,4 +193,12 @@ reject bash "$T/repo/scripts/m9/incident-apply.sh" 55555555 "$nonce" --rollback
 [ "$(wc -l <"$T/rollback-calls")" = 1 ]
 jq -e '.state=="ROLLBACK_FAILED"' "$T/state/incidents/control/processed/$nonce.json" >/dev/null
 ok 'failed explicit rollback is terminal without recursive retry'
+# Also run M1's actual local archive/hash/prune/marker branch, relocated wholly
+# into this namespace; no source/config/image cutover reaches production.
+cp "$R/scripts/m1/deploy.sh" "$T/actual-deploy.sh"
+sed -i -e "s|/var/lib/firecrawl-pi|$T/state|g" -e "s|/opt/firecrawl-pi|$T/archive-target|g" "$T/actual-deploy.sh"
+bash "$T/actual-deploy.sh" --local "$W/tree" >"$T/archive-result" 2>&1
+[ "$(cat "$T/archive-target/.fcpi-source-commit")" = "$base" ]
+[ "$(sha256sum "$T/archive-target/services/retrieval/src/quality.mjs"|cut -c1-64)" = "$(sha256sum "$W/tree/services/retrieval/src/quality.mjs"|cut -c1-64)" ]
+ok 'actual M1 local deployment verifies committed archive bytes and source marker'
 echo "RESULT pass=$pass fail=0 source=$base"
