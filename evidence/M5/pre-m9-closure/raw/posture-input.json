@@ -1,0 +1,245 @@
+{
+  "utc": "2026-10-03T02:49:34.432Z",
+  "source_commit": "4707e2a5d9d0ee26b4b87e6c56fd3bc44a1f49c1",
+  "command_id": "PRE-M9-POSTURE-INPUT",
+  "providers": {
+    "status": 200,
+    "body": {
+      "selection": {
+        "search": "fixture",
+        "extractionModel": "gpt-6-luna",
+        "parser": "llamaparse-cost-effective",
+        "proxy": "decodo-residential",
+        "enhanced": "zyte-api",
+        "source": "file"
+      },
+      "paidDispatch": false,
+      "budgetPolicySha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
+      "providers": {
+        "openai": {
+          "kind": "model",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-model": {
+          "kind": "model",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "llamaparse": {
+          "kind": "parser",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-parser": {
+          "kind": "parser",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "decodo": {
+          "kind": "proxy",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-proxy": {
+          "kind": "proxy",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "zyte": {
+          "kind": "enhanced",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-zyte": {
+          "kind": "enhanced",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        }
+      },
+      "budgets": [
+        {
+          "category": "enhanced",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 0,
+          "settled": 3810
+        },
+        {
+          "category": "enhanced",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 0,
+          "settled": 3810
+        },
+        {
+          "category": "fixture",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 27408,
+          "settled": 77200
+        },
+        {
+          "category": "fixture_parser",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 12,
+          "settled": 24
+        },
+        {
+          "category": "fixture_proxy",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 0,
+          "settled": 100
+        },
+        {
+          "category": "fixture_race",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 0,
+          "settled": 47511
+        },
+        {
+          "category": "llm",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 0,
+          "settled": 170
+        },
+        {
+          "category": "llm",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 0,
+          "settled": 170
+        },
+        {
+          "category": "_paid_total",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 0,
+          "settled": 4520
+        },
+        {
+          "category": "parser",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 0,
+          "settled": 6
+        },
+        {
+          "category": "proxy",
+          "period": "day",
+          "period_start": "2026-10-03",
+          "reserved": 0,
+          "settled": 540
+        },
+        {
+          "category": "proxy",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 0,
+          "settled": 540
+        }
+      ],
+      "caps": {
+        "llm": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "parser": {
+          "paid": true,
+          "unit": "credits",
+          "caps": {
+            "month": 0
+          }
+        },
+        "fixture": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 100000
+          }
+        },
+        "fixture_parser": {
+          "paid": false,
+          "unit": "credits",
+          "caps": {
+            "day": 3000
+          }
+        },
+        "proxy": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_proxy": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000000
+          }
+        },
+        "fixture_proxy_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 130000
+          }
+        },
+        "enhanced": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_enhanced": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_enhanced_small": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000
+          }
+        }
+      }
+    }
+  },
+  "secretModes": [
+    "600:3310:3310",
+    "600:3310:3310",
+    "600:3310:3310",
+    "600:3310:3310"
+  ],
+  "overridesAbsent": true
+}

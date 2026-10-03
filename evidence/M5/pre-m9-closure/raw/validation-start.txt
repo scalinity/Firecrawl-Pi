@@ -1,0 +1,7 @@
+ Container fcpi-retrieval-service-1 Recreate 
+ Container fcpi-retrieval-service-1 Recreated 
+ Container fcpi-retrieval-service-1 Starting 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-retrieval-service-1 Healthy 
+validation_started utc=2026-10-03T02:15:44Z expires=2026-10-03T03:00:36Z policy_sha256=1df55c851f82f73810b34544577fc43a5e084a593778040d424e692380433129 shutoff=45min

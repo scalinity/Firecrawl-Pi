@@ -1,0 +1,294 @@
+{
+  "utc": "2026-10-03T02:45:07.517Z",
+  "command_id": "PRE-M9-PAID-LEDGER-FINAL",
+  "expected": "all costs retained; no inference of vendor billed amounts",
+  "rows": [
+    {
+      "id": "ecc70edb-936c-43c0-9275-a77ae1dfc219",
+      "logical_id": "scrape:5dc43ee5-543f-40f8-b8e3-69335c04c6e0",
+      "category": "llm",
+      "provider": "openai",
+      "subject": "gpt-6-luna",
+      "kind": "extract",
+      "rate_card": "openai/gpt-6-luna@2026-10-02",
+      "reserved": 2154,
+      "actual": 37,
+      "state": "SETTLED",
+      "usage": {
+        "cachedTokens": 0,
+        "promptTokens": 202,
+        "cacheWriteTokens": 0,
+        "completionTokens": 32
+      },
+      "detail": null,
+      "created_at": "2026-10-03T02:16:41.718024+00:00",
+      "settled_at": "2026-10-03T02:16:44.853919+00:00"
+    },
+    {
+      "id": "331b4cd6-7f18-4dfe-8cfa-3f7b6673e4ad",
+      "logical_id": "scrape:c0b1e5ce-dfb8-48a0-a60d-4e0e6a972da9",
+      "category": "llm",
+      "provider": "openai",
+      "subject": "gpt-6-luna",
+      "kind": "extract",
+      "rate_card": "openai/gpt-6-luna@2026-10-02",
+      "reserved": 2158,
+      "actual": 35,
+      "state": "SETTLED",
+      "usage": {
+        "cachedTokens": 0,
+        "promptTokens": 202,
+        "cacheWriteTokens": 0,
+        "completionTokens": 28
+      },
+      "detail": null,
+      "created_at": "2026-10-03T02:16:44.924911+00:00",
+      "settled_at": "2026-10-03T02:16:46.464026+00:00"
+    },
+    {
+      "id": "8f343be0-a2da-40c6-b524-48078c31aef4",
+      "logical_id": "scrape:92d70a46-21f6-40f7-9284-ae956a9af5f8",
+      "category": "llm",
+      "provider": "openai",
+      "subject": "gpt-6-luna",
+      "kind": "extract",
+      "rate_card": "openai/gpt-6-luna@2026-10-02",
+      "reserved": 2145,
+      "actual": 27,
+      "state": "SETTLED",
+      "usage": {
+        "cachedTokens": 0,
+        "promptTokens": 183,
+        "cacheWriteTokens": 0,
+        "completionTokens": 17
+      },
+      "detail": null,
+      "created_at": "2026-10-03T02:16:46.523981+00:00",
+      "settled_at": "2026-10-03T02:16:47.47989+00:00"
+    },
+    {
+      "id": "71f4f75a-d4da-4fba-9261-d4ce1eaea50c",
+      "logical_id": "fcpi:b867d41f-1c0a-4d1b-a257-4a4c756085b9",
+      "category": "llm",
+      "provider": "openai",
+      "subject": "gpt-6-luna",
+      "kind": "extract",
+      "rate_card": "openai/gpt-6-luna@2026-10-02",
+      "reserved": 2149,
+      "actual": 36,
+      "state": "SETTLED",
+      "usage": {
+        "cachedTokens": 0,
+        "promptTokens": 196,
+        "cacheWriteTokens": 0,
+        "completionTokens": 32
+      },
+      "detail": null,
+      "created_at": "2026-10-03T02:16:47.595969+00:00",
+      "settled_at": "2026-10-03T02:16:49.22501+00:00"
+    },
+    {
+      "id": "0fdfbb91-6234-4446-9be3-ccd4d9312c2d",
+      "logical_id": "fcpi:b867d41f-1c0a-4d1b-a257-4a4c756085b9",
+      "category": "llm",
+      "provider": "openai",
+      "subject": "gpt-6-luna",
+      "kind": "extract",
+      "rate_card": "openai/gpt-6-luna@2026-10-02",
+      "reserved": 2149,
+      "actual": 35,
+      "state": "SETTLED",
+      "usage": {
+        "cachedTokens": 0,
+        "promptTokens": 191,
+        "cacheWriteTokens": 0,
+        "completionTokens": 31
+      },
+      "detail": null,
+      "created_at": "2026-10-03T02:16:49.230184+00:00",
+      "settled_at": "2026-10-03T02:16:51.050861+00:00"
+    },
+    {
+      "id": "428dea3c-d7a4-4774-b455-8ba81debd362",
+      "logical_id": "doc:01a0ff8c-cb70-7602-aa4f-03f3d71060ea",
+      "category": "parser",
+      "provider": "llamaparse",
+      "subject": "llamaparse-cost-effective",
+      "kind": "parse",
+      "rate_card": "llamaparse/cost_effective@2026-09-26",
+      "reserved": 3,
+      "actual": 3,
+      "state": "SETTLED",
+      "usage": {
+        "pages": 1
+      },
+      "detail": "job pjb-jmdsq9bcr0z7d9w4ws0tiy5qv8xv",
+      "created_at": "2026-10-03T02:16:52.37774+00:00",
+      "settled_at": "2026-10-03T02:17:03.841603+00:00"
+    },
+    {
+      "id": "4b4ef83a-fd56-4cef-b38d-c175fa4560de",
+      "logical_id": "doc:01a0ff8c-fb0c-7425-980b-38095de795bf",
+      "category": "parser",
+      "provider": "llamaparse",
+      "subject": "llamaparse-cost-effective",
+      "kind": "parse",
+      "rate_card": "llamaparse/cost_effective@2026-09-26",
+      "reserved": 3,
+      "actual": 3,
+      "state": "SETTLED",
+      "usage": {
+        "pages": 1
+      },
+      "detail": "job pjb-swup2y3qfto8wqd86kx1y8s3fvj6",
+      "created_at": "2026-10-03T02:17:04.575639+00:00",
+      "settled_at": "2026-10-03T02:17:17.238664+00:00"
+    },
+    {
+      "id": "d95b94df-b9aa-42f1-9edf-798cbc120ad0",
+      "logical_id": "01a0ff91-994a-70b6-9b12-73d79b669b93",
+      "category": "enhanced",
+      "provider": "zyte",
+      "subject": "zyte-api",
+      "kind": "enhanced",
+      "rate_card": "zyte/api-payg@2026-09-27",
+      "reserved": 1270,
+      "actual": 1270,
+      "state": "SETTLED",
+      "usage": {
+        "mode": "http",
+        "bytes": 577,
+        "requests": 1,
+        "requestId": null,
+        "targetStatus": 200
+      },
+      "detail": "a successful http response, charged at the card's highest tier (the tier is not reported)",
+      "created_at": "2026-10-03T02:22:07.533233+00:00",
+      "settled_at": "2026-10-03T02:22:08.974767+00:00"
+    },
+    {
+      "id": "62fb747f-45af-4989-a2ec-f3163e367588",
+      "logical_id": "01a0ff9b-fcf5-711f-908b-f71600c20082",
+      "category": "proxy",
+      "provider": "decodo",
+      "subject": "decodo-residential",
+      "kind": "proxy",
+      "rate_card": "decodo/residential-payg@2026-09-26",
+      "reserved": 40000,
+      "actual": 28,
+      "state": "SETTLED",
+      "usage": {
+        "bytes": 6874,
+        "capped": false,
+        "tunnels": 1
+      },
+      "detail": "fetched 200",
+      "created_at": "2026-10-03T02:33:28.080673+00:00",
+      "settled_at": "2026-10-03T02:33:31.628547+00:00"
+    },
+    {
+      "id": "5c103a28-bf1a-43b4-89fd-518c9bfa0662",
+      "logical_id": "01a0ff9c-0bf6-750f-a5ab-d000c2b92df0",
+      "category": "proxy",
+      "provider": "decodo",
+      "subject": "decodo-residential",
+      "kind": "proxy",
+      "rate_card": "decodo/residential-payg@2026-09-26",
+      "reserved": 40000,
+      "actual": 68,
+      "state": "SETTLED",
+      "usage": {
+        "bytes": 16968,
+        "capped": false,
+        "tunnels": 1
+      },
+      "detail": "rendered 200",
+      "created_at": "2026-10-03T02:33:31.912567+00:00",
+      "settled_at": "2026-10-03T02:33:36.083232+00:00"
+    },
+    {
+      "id": "62e2fe62-d039-4da0-9a77-152bdfb22789",
+      "logical_id": "search:25109abfffee27a95ff79d3c90037b46:2984991",
+      "category": "proxy",
+      "provider": "decodo",
+      "subject": "decodo-residential",
+      "kind": "proxy",
+      "rate_card": "decodo/residential-payg@2026-09-26",
+      "reserved": 8000,
+      "actual": 106,
+      "state": "SETTLED",
+      "usage": {
+        "bytes": 26367,
+        "capped": false,
+        "tunnels": 1
+      },
+      "detail": "search tunnel to html.duckduckgo.com",
+      "created_at": "2026-10-03T02:34:23.208362+00:00",
+      "settled_at": "2026-10-03T02:36:44.635621+00:00"
+    },
+    {
+      "id": "d4d0c3dd-ab12-4566-84e8-106752c77b39",
+      "logical_id": "search:29ca598d19c7e6dfe772a018427c0c55:2984991",
+      "category": "proxy",
+      "provider": "decodo",
+      "subject": "decodo-residential",
+      "kind": "proxy",
+      "rate_card": "decodo/residential-payg@2026-09-26",
+      "reserved": 8000,
+      "actual": 338,
+      "state": "SETTLED",
+      "usage": {
+        "bytes": 84382,
+        "capped": false,
+        "tunnels": 1
+      },
+      "detail": "search tunnel to search.brave.com",
+      "created_at": "2026-10-03T02:34:23.347157+00:00",
+      "settled_at": "2026-10-03T02:36:24.97583+00:00"
+    },
+    {
+      "id": "d0421325-632b-47b5-a30f-4e589cad662a",
+      "logical_id": "01a0ff9d-c0ec-77ee-a648-30a50308f320",
+      "category": "enhanced",
+      "provider": "zyte",
+      "subject": "zyte-api",
+      "kind": "enhanced",
+      "rate_card": "zyte/api-payg@2026-09-27",
+      "reserved": 1270,
+      "actual": 1270,
+      "state": "SETTLED",
+      "usage": {
+        "mode": "http",
+        "bytes": 577,
+        "requests": 1,
+        "requestId": null,
+        "targetStatus": 200
+      },
+      "detail": "a successful http response, charged at the card's highest tier (the tier is not reported)",
+      "created_at": "2026-10-03T02:35:23.779632+00:00",
+      "settled_at": "2026-10-03T02:35:24.890761+00:00"
+    },
+    {
+      "id": "476eab8a-10fc-47f8-9bcb-77f24d60cd70",
+      "logical_id": "01a0ff9e-a201-7388-afe6-14716aa401b0",
+      "category": "enhanced",
+      "provider": "zyte",
+      "subject": "zyte-api",
+      "kind": "enhanced",
+      "rate_card": "zyte/api-payg@2026-09-27",
+      "reserved": 1270,
+      "actual": 1270,
+      "state": "SETTLED",
+      "usage": {
+        "mode": "http",
+        "bytes": 98,
+        "requests": 1,
+        "requestId": null,
+        "targetStatus": 200
+      },
+      "detail": "a successful http response, charged at the card's highest tier (the tier is not reported)",
+      "created_at": "2026-10-03T02:36:23.837071+00:00",
+      "settled_at": "2026-10-03T02:36:25.482927+00:00"
+    }
+  ]
+}

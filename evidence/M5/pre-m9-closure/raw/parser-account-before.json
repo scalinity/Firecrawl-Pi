@@ -1,0 +1,22 @@
+{
+  "utc": "2026-10-03T01:54:18.316Z",
+  "provider": "llamaparse",
+  "probe": "read-only organizations and usage aggregate",
+  "organizations_http": 200,
+  "plan": "DEFAULT",
+  "billing_customer_present": false,
+  "usage_http": 400,
+  "usage_aggregate": null,
+  "paid_authorization_usd": 0,
+  "free_credit_ceiling": 500,
+  "local_credit_cap": 100,
+  "source": "https://api.cloud.llamaindex.ai/docs",
+  "plan_interpretation": "Owner-created default plan with no billing customer; no plan change or payment setup performed.",
+  "ui_verified_utc": "2026-10-03T02:11:10.724Z",
+  "ui_plan": "Free Active",
+  "ui_usage_credits": 0,
+  "ui_allocation_credits": 10000,
+  "ui_period_label": "Last 14 days",
+  "ui_account_changes": false,
+  "interpretation": "Signed-in UI confirms Free Active, 0 / 10,000 usage; session uses at most 100 free credits and authorizes no paid plan."
+}

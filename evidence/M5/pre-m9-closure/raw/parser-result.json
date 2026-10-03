@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-03T02:19:54.600Z",
+  "probe": "read-only retained result; zero new dispatch",
+  "source_sha": "0fa0e23ceac991053c5c69041e28e3726908b55f",
+  "input_sha256": "cdce9d880330b31436bb1498c1e3f27b4d249a9ee2ffda9fc31d918f427a77a6",
+  "logical_id": "doc:01a0ff8c-fb0c-7425-980b-38095de795bf",
+  "state": "SETTLED",
+  "actual": 3,
+  "usage": {
+    "pages": 1
+  },
+  "markdown": "Left column: the first of two columns.\nIts lines run beside the right column,\nwhich a naive text extraction interleaves.\n\nRight column: the second column.\nReading order matters here.\nFCPI-M5-TABLE-PDF\n\n<table>\n  <thead>\n    <tr>\n      <th>Item</th>\n      <th>Qty</th>\n      <th>Unit price</th>\n    </tr>\n  </thead>\n  <tbody>\n    <tr>\n      <td>Bolt</td>\n      <td>12</td>\n      <td>0.25</td>\n    </tr>\n    <tr>\n      <td>Nut</td>\n      <td>40</td>\n      <td>0.10</td>\n    </tr>\n    <tr>\n      <td>Washer</td>\n      <td>100</td>\n      <td>0.02</td>\n    </tr>\n  </tbody>\n</table>",
+  "markdown_sha256": "b7a66096a6f8e5bef2c0a7a5792b3015cef6e9a7f0dce4957a1b9d5bdbf6ea7f"
+}

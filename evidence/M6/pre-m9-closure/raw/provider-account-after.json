@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-03T03:01:44.278Z",
+  "provider": "Decodo",
+  "probe": "signed-in UI persisted cap after reopening edit modal",
+  "account": "ACTIVE Pay As You Go",
+  "userTrafficLimitGB": 0.05,
+  "changesSubmitted": true,
+  "noPurchase": true,
+  "noTargetUnblocking": true,
+  "dedicatedUsageConfirmed": false,
+  "usageReconciliationEnabled": false,
+  "localPaidDispatchAfter": false,
+  "screenshot": "private external proof kept outside repository"
+}

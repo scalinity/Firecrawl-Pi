@@ -1,0 +1,6 @@
+ Container fcpi-fixture-m6-1 Recreate 
+ Container fcpi-fixture-m6-1 Recreated 
+ Container fcpi-fixture-m6-1 Starting 
+ Container fcpi-fixture-m6-1 Started 
+ Container fcpi-fixture-m6-1 Waiting 
+ Container fcpi-fixture-m6-1 Healthy 

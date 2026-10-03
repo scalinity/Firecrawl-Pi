@@ -1,0 +1,129 @@
+{
+  "utc": "2026-10-03T02:45:45.046Z",
+  "repository_sha": "4707e2a5d9d0ee26b4b87e6c56fd3bc44a1f49c1",
+  "worktree_dirty": true,
+  "code_dirty": true,
+  "scope": "PRE-M9 additional proofs; no M9 acceptance",
+  "inputs": [
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/e2e-live.txt",
+      "sha256": "cdce9d880330b31436bb1498c1e3f27b4d249a9ee2ffda9fc31d918f427a77a6"
+    },
+    {
+      "path": "evidence/M6/pre-m9-closure/raw/e2e-live.txt",
+      "sha256": "3a609776248d147b98edd31c44def79ceb9a7dbd4c7ebe2b457d8ccab92fddf1"
+    },
+    {
+      "path": "evidence/M7/pre-m9-closure/raw/e2e-live.txt",
+      "sha256": "37590677949a36be005169715c39932542855c2cbba74db591779c6ccc12c08e"
+    }
+  ],
+  "patch_sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96",
+  "configuration_sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
+  "fixture_sha256": "b873b79bb86b208ba4985a1a8165878dcc31efa3dcca1e22924a6d922fa7557c",
+  "retrieval_image": {
+    "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
+    "status": "selected",
+    "image_id": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+    "platform": "linux/arm64",
+    "dockerfile": {
+      "path": "services/retrieval/Dockerfile",
+      "sha256": "7ccd57a22212dd1b3d6d57b4ba93ca57c66912ad587e6af370818ef8986bb8cd"
+    },
+    "evidence": "evidence/M5/pre-m9-closure/raw/image-remediation-build.txt",
+    "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+    "built_from_commit": "a51ec7f1ae61c85ed739f2beff1d1c1f22dfe12b",
+    "lockfile": {
+      "path": "services/retrieval/package-lock.json",
+      "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
+    },
+    "packages": {
+      "pg": {
+        "version": "8.23.0",
+        "integrity": "sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg=="
+      },
+      "pg-cloudflare": {
+        "version": "1.4.0",
+        "integrity": "sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A=="
+      },
+      "pg-connection-string": {
+        "version": "2.14.0",
+        "integrity": "sha512-XwWDGcLRGCXAR8F/AM5bG7Q+A3Wm2s6QeEjlOKZLlH3UYcguiqCWKyWXVag5TLTIjR7oOJUY8kcADaZgWPyLeg=="
+      },
+      "pg-int8": {
+        "version": "1.0.1",
+        "integrity": "sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw=="
+      },
+      "pg-pool": {
+        "version": "3.14.0",
+        "integrity": "sha512-gKtPkFdQPU3DksooVLi9LsjZxrsBUZIpa+7aVx+LV5pNh0KzP4Zleud2po+ConrxbuXGBJ6Hfer6hdgpIBpBaw=="
+      },
+      "pg-protocol": {
+        "version": "1.16.0",
+        "integrity": "sha512-sILXutLVjCLjcDuOmvhX5e2Z4cS5qG/6Bu3VkpFwdf/633ElGLpEh9bgmuI5I4sqKqkifQiGyiCcx1HdtrK7tg=="
+      },
+      "pg-types": {
+        "version": "2.2.0",
+        "integrity": "sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA=="
+      },
+      "pgpass": {
+        "version": "1.0.5",
+        "integrity": "sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug=="
+      },
+      "postgres-array": {
+        "version": "2.0.0",
+        "integrity": "sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA=="
+      },
+      "postgres-bytea": {
+        "version": "1.0.1",
+        "integrity": "sha512-5+5HqXnsZPE65IJZSMkZtURARZelel2oXUEO8rH83VS/hxH5vv1uHquPg5wZs8yMAfdv971IU+kcPUczi7NVBQ=="
+      },
+      "postgres-date": {
+        "version": "1.0.7",
+        "integrity": "sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q=="
+      },
+      "postgres-interval": {
+        "version": "1.2.0",
+        "integrity": "sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ=="
+      },
+      "split2": {
+        "version": "4.2.0",
+        "integrity": "sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg=="
+      },
+      "tldts": {
+        "version": "7.4.15",
+        "integrity": "sha512-SJVBeHOxDbNoq14CvpAoA2mLEWdbldGK8nR+yumpjY5nrlZxOflcA7p1Qj1gbTGmbu9DY9qLj/bENSWhBzjxRQ=="
+      },
+      "tldts-core": {
+        "version": "7.4.15",
+        "integrity": "sha512-ERuv0p98XgSzmlSLJr8vDNxX+uATGInlN97V3R+JpYWaSqn5IG3ewWgCwczk4bkOpgth/o8Nt5FOi4B4w0n/1A=="
+      },
+      "xtend": {
+        "version": "4.0.2",
+        "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
+      }
+    }
+  },
+  "tests": {
+    "model_null_and_selection": {
+      "state": "PASS",
+      "failed": []
+    },
+    "parser_cache": {
+      "state": "PASS",
+      "failed": []
+    },
+    "residential_browser": {
+      "state": "PASS",
+      "failed": []
+    },
+    "enhanced_cache": {
+      "state": "PASS",
+      "failed": []
+    },
+    "automatic_enhanced": {
+      "state": "PASS",
+      "failed": []
+    }
+  }
+}

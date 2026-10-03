@@ -1,0 +1,245 @@
+{
+  "schema": "fcpi.m7.verification/v1",
+  "runner": "scripts/m7/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (E05, L02) from the fixture and host checks.",
+  "results": [
+    {
+      "test_id": "M7-B00",
+      "name": "baseline-matches-m6-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-G01",
+      "name": "images-pinned-built-and-running",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-P01",
+      "name": "patch-series-and-coverage",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-G02",
+      "name": "suites-pass-in-the-running-images",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-E01",
+      "name": "automatic-escalation-ends-at-one-enhanced-dispatch",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-E02",
+      "name": "four-attempts-one-enhanced-no-paid-retry-multiplication",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-E03",
+      "name": "target-and-provider-errors-apart",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-E04",
+      "name": "outage-and-exhausted-budget-without-cloud",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-E05",
+      "name": "live-enhanced-request",
+      "utc": "2026-10-03T02:42:33Z",
+      "repository_sha": "4707e2a5d9d0ee26b4b87e6c56fd3bc44a1f49c1",
+      "worktree_dirty": true,
+      "code_dirty": true,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "6662784e6a19a3042d7075c15bfdb28d08161d1898bb1e85bc065ad19c1788b3",
+      "expected": "with a Zyte key, an approved enhanced budget and paid dispatch: route enhanced fetches a permitted public target (example.com) through the provider, the answer is the page, and its ledger row is SETTLED at the card's price; without them the check is BLOCKED_CREDENTIAL and the record shows no live request was made",
+      "evidence_class": "live",
+      "state": "PASS",
+      "actual": "status 200; ledger {\"provider\":\"zyte\",\"subject\":\"zyte-api\",\"reserved\":1270,\"actual\":1270,\"state\":\"SETTLED\",\"usage\":{\"mode\":\"http\",\"bytes\":577,\"requests\":1,\"requestId\":null,\"targetStatus\":200}}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:a9fae8d26ce9c04ca71c385d48de823ac83d942fc3a64fd4d5af33d533865caa",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-B01",
+      "name": "screenshots-correct-and-bounded",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-B02",
+      "name": "action-subset-correct-bounded-and-refused-outside-it",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-B03",
+      "name": "artifacts-owner-bound-and-expiring",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-B04",
+      "name": "contexts-and-processes-cleaned",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-C01",
+      "name": "cache-scope-freshness-expiry-and-billing",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-C02",
+      "name": "parse-cache-owner-scoped",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-C03",
+      "name": "change-detection",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-W01",
+      "name": "webhooks-signed-retried-deduplicated-and-restricted",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-W02",
+      "name": "webhooks-suppressed-during-restore",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-K01",
+      "name": "capability-manifest-and-mcp-catalog",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-L02",
+      "name": "public-sample-documented",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-X02",
+      "name": "network-and-container-posture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-X03",
+      "name": "retrieval-log-hygiene",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-M01",
+      "name": "memory-within-caps",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-L03",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    },
+    {
+      "test_id": "M7-V01",
+      "name": "review-record-complete",
+      "utc": "2026-10-03T02:42:33Z",
+      "repository_sha": "4707e2a5d9d0ee26b4b87e6c56fd3bc44a1f49c1",
+      "worktree_dirty": true,
+      "code_dirty": true,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "cc412ac7eb313f808e2da4ee9a7daf9308e0c5b7398d64201e289e551ba64e8e",
+      "expected": "the saved /review-2 report (CLAUDE.md §5) gives every finding it lists, and every finding found during M7 outside the review (F), a row with an outcome (fixed with its commit, rejected with evidence, deferred to M8 or M9), gives every finding an earlier review deferred to M7 (M5's S1) a row of its own with an outcome, cites only commits that exist, and holds no absolute local path",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "carried over from earlier reviews=M5 S1, without a recognised outcome=none; findings listed=8, rows=8, without a row=none; fixed without a commit=none; without a recognised outcome=none; commits cited=22, missing=none; absolute local path=false",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:a9fae8d26ce9c04ca71c385d48de823ac83d942fc3a64fd4d5af33d533865caa",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M7/pre-m9-closure/verification.json"
+    }
+  ]
+}

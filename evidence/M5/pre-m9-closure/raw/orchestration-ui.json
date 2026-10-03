@@ -1,0 +1,76 @@
+{
+  "desktopLightMetrics": {
+    "accepted": "9",
+    "documentWidth": 1440,
+    "externalAssets": [],
+    "remaining": "1",
+    "states": [
+      {
+        "id": "M0",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M1",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M2",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M3",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M4",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M5",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M6",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M7",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M8",
+        "runnable": "false",
+        "state": "ACCEPTED"
+      },
+      {
+        "id": "M9",
+        "runnable": "true",
+        "state": "NOT_STARTED"
+      }
+    ],
+    "width": 1440
+  },
+  "desktopDarkMetrics": {
+    "documentWidth": 1440,
+    "width": 1440
+  },
+  "phoneMetrics": {
+    "documentWidth": 390,
+    "width": 390
+  },
+  "sourceDialogResult": {
+    "cleared": true,
+    "open": true
+  },
+  "errors": [],
+  "screenshots": "inspected inline; no screenshot file saved",
+  "utc": "2026-10-03T02:59:14.449Z"
+}

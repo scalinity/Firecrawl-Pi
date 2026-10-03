@@ -1,0 +1,9 @@
+{
+  "utc": "2026-10-03T02:29:05.097Z",
+  "provider": "public httpbin test endpoint, no paid provider",
+  "status": 200,
+  "type": "text/html; charset=utf-8",
+  "bodyMatchesInput": true,
+  "bodySha256": "5f2fd9e5aedc06c5c0f18bd818cd9f936e1d416a2d2cc5a8293acf3c629cc362",
+  "source": "https://httpbin.org/"
+}

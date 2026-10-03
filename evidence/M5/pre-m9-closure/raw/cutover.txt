@@ -1,0 +1,7 @@
+ Container fcpi-retrieval-service-1 Recreate 
+ Container fcpi-retrieval-service-1 Recreated 
+ Container fcpi-retrieval-service-1 Starting 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-retrieval-service-1 Healthy 
+selection applied: search=live model=gpt-6-luna parser=llamaparse-cost-effective proxy=decodo-residential enhanced=zyte-api utc=2026-10-03T01:27:52Z

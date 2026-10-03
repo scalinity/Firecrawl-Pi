@@ -1,0 +1,186 @@
+{
+  "utc": "2026-10-03T02:55:32.237Z",
+  "repository_sha": "b1646901c7165381364b9f90bd105a0a09014580",
+  "worktree_dirty": true,
+  "code_dirty": true,
+  "test_id": "PRE-M9-CURRENT-POSTURE",
+  "expected": "current M8 layout, inherited workload log controls and final live accounting; no M9 acceptance run",
+  "checks": {
+    "healthy": true,
+    "native": true,
+    "effective_swap": true,
+    "isolation": true,
+    "private_access": true,
+    "zero_paid": true,
+    "secret_modes": true,
+    "complete_accounting": true,
+    "log_hygiene": true,
+    "budget_hash": true,
+    "cloud_disabled": true,
+    "cloud_window": true,
+    "cloud": true,
+    "host_headroom": true,
+    "preserved": true,
+    "offdevice_restore": true
+  },
+  "state": "PASS",
+  "inputs": [
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/stack.txt",
+      "sha256": "f60b56512a34f9393c87a070a8b292627675514a9d89845e6047c1a9d88c8e17"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/stack-before-live.txt",
+      "sha256": "32c9d7743ccef0f59f4b0a27ff5521f1484664b96bd5184b6cdc0e570b1dadf2"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/status-after.json",
+      "sha256": "0911caa4d58b95a42ba26cdf5350d26810e314762284c2a53518241b43c7e918"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/posture-input.json",
+      "sha256": "7c890f7b85d96e7b661f5f9e9a469d82491aa16a33f8a5456421ce1b2037baa6"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/core-logs-final.txt",
+      "sha256": "abe749f0144d2056fb4131ac127ce72dccb3a1f5f508226eeda6316654b701c7"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/nft-ruleset.txt",
+      "sha256": "afb7c4fbb44366b2489984a86223eb704c5067e6ddaa5eeee03072e031ce9c21"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/snapshot-before.txt",
+      "sha256": "8ba19f75b46344ba2e8de08e6d7fb20aa3c8752c5739c338c8cd0feb40ec8a96"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/snapshot-after.txt",
+      "sha256": "5d9d75c9cd3f146735bd48cb6584bc6a45694d922beb9f1c947987eb3d6c6f4d"
+    },
+    {
+      "path": "evidence/M6/pre-m9-closure/raw/ledger-after-stop.json",
+      "sha256": "de914dc306b79c537df2a21d938fd7fd7697c88d1dde3335ee08c6b6154811bd"
+    },
+    {
+      "path": "evidence/M8/raw/nft-ruleset.txt",
+      "sha256": "cba84539a9f82c008de70ae27ca97ce890a3bafc6005dbb4ad8356308f8818a1"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/rendered-compose.json",
+      "sha256": "740911b72132e3918aa9e1c30ca5e544a2f2f3969f61c5295ec2312d01f5cdc1"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/additional-verification.json",
+      "sha256": "7d40319e34c79a27df0a64906be80fc2a0db8b9c08f03a8c99ab9aa1b0874585"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/guard-window-open.txt",
+      "sha256": "d234e12a8fbfd5e43bb0c96f443181f5d3d4d790f36047cd1b69433a7511ef34"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/egress-probe.txt",
+      "sha256": "ab94727b735dfe58d42015c2f9136f190168efd46b5eba134f51c043d71f08ed"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/e2e-fixture.txt",
+      "sha256": "39cd61592e67c1dfb78ad761543826faab82fdb6dba8277cd56f378318b6de95"
+    },
+    {
+      "path": "evidence/M5/pre-m9-closure/raw/e2e-live.txt",
+      "sha256": "cdce9d880330b31436bb1498c1e3f27b4d249a9ee2ffda9fc31d918f427a77a6"
+    },
+    {
+      "path": "evidence/M6/pre-m9-closure/raw/e2e-live.txt",
+      "sha256": "3a609776248d147b98edd31c44def79ceb9a7dbd4c7ebe2b457d8ccab92fddf1"
+    },
+    {
+      "path": "evidence/M7/pre-m9-closure/raw/e2e-live.txt",
+      "sha256": "37590677949a36be005169715c39932542855c2cbba74db591779c6ccc12c08e"
+    }
+  ],
+  "patch_sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96",
+  "config_sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
+  "image": {
+    "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
+    "status": "selected",
+    "image_id": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+    "platform": "linux/arm64",
+    "dockerfile": {
+      "path": "services/retrieval/Dockerfile",
+      "sha256": "7ccd57a22212dd1b3d6d57b4ba93ca57c66912ad587e6af370818ef8986bb8cd"
+    },
+    "evidence": "evidence/M5/pre-m9-closure/raw/image-remediation-build.txt",
+    "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+    "built_from_commit": "a51ec7f1ae61c85ed739f2beff1d1c1f22dfe12b",
+    "lockfile": {
+      "path": "services/retrieval/package-lock.json",
+      "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
+    },
+    "packages": {
+      "pg": {
+        "version": "8.23.0",
+        "integrity": "sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg=="
+      },
+      "pg-cloudflare": {
+        "version": "1.4.0",
+        "integrity": "sha512-Vo7z/6rrQYxpNRylp4Tlob2elzbh+N/MOQbxFVWCxS7oEx6jF53GTJFxK2WWpKuBRkmiin4Mt+xofFDjx09R0A=="
+      },
+      "pg-connection-string": {
+        "version": "2.14.0",
+        "integrity": "sha512-XwWDGcLRGCXAR8F/AM5bG7Q+A3Wm2s6QeEjlOKZLlH3UYcguiqCWKyWXVag5TLTIjR7oOJUY8kcADaZgWPyLeg=="
+      },
+      "pg-int8": {
+        "version": "1.0.1",
+        "integrity": "sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw=="
+      },
+      "pg-pool": {
+        "version": "3.14.0",
+        "integrity": "sha512-gKtPkFdQPU3DksooVLi9LsjZxrsBUZIpa+7aVx+LV5pNh0KzP4Zleud2po+ConrxbuXGBJ6Hfer6hdgpIBpBaw=="
+      },
+      "pg-protocol": {
+        "version": "1.16.0",
+        "integrity": "sha512-sILXutLVjCLjcDuOmvhX5e2Z4cS5qG/6Bu3VkpFwdf/633ElGLpEh9bgmuI5I4sqKqkifQiGyiCcx1HdtrK7tg=="
+      },
+      "pg-types": {
+        "version": "2.2.0",
+        "integrity": "sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA=="
+      },
+      "pgpass": {
+        "version": "1.0.5",
+        "integrity": "sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug=="
+      },
+      "postgres-array": {
+        "version": "2.0.0",
+        "integrity": "sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA=="
+      },
+      "postgres-bytea": {
+        "version": "1.0.1",
+        "integrity": "sha512-5+5HqXnsZPE65IJZSMkZtURARZelel2oXUEO8rH83VS/hxH5vv1uHquPg5wZs8yMAfdv971IU+kcPUczi7NVBQ=="
+      },
+      "postgres-date": {
+        "version": "1.0.7",
+        "integrity": "sha512-suDmjLVQg78nMK2UZ454hAG+OAW+HQPZ6n++TNDUX+L0+uUlLywnoxJKDou51Zm+zTCjrCl0Nq6J9C5hP9vK/Q=="
+      },
+      "postgres-interval": {
+        "version": "1.2.0",
+        "integrity": "sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ=="
+      },
+      "split2": {
+        "version": "4.2.0",
+        "integrity": "sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg=="
+      },
+      "tldts": {
+        "version": "7.4.15",
+        "integrity": "sha512-SJVBeHOxDbNoq14CvpAoA2mLEWdbldGK8nR+yumpjY5nrlZxOflcA7p1Qj1gbTGmbu9DY9qLj/bENSWhBzjxRQ=="
+      },
+      "tldts-core": {
+        "version": "7.4.15",
+        "integrity": "sha512-ERuv0p98XgSzmlSLJr8vDNxX+uATGInlN97V3R+JpYWaSqn5IG3ewWgCwczk4bkOpgth/o8Nt5FOi4B4w0n/1A=="
+      },
+      "xtend": {
+        "version": "4.0.2",
+        "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
+      }
+    }
+  }
+}

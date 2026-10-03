@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-03T02:09:47.534Z",
+  "provider": "Decodo",
+  "probe": "read-only signed-in residential authentication UI",
+  "account": "ACTIVE Pay As You Go",
+  "allocationGB": 1,
+  "trafficUsedGB": 0,
+  "proxyUsers": 1,
+  "userTrafficLimit": "ABSENT: Add traffic limit action shown",
+  "changesSubmitted": false,
+  "liveDispatch": false,
+  "gate": "initial cap absent; dispatch held"
+}

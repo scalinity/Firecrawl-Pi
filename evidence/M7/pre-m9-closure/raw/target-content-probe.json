@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-03T02:31:50.982Z",
+  "source": "https://example.com/",
+  "status": 200,
+  "title": "Example Domain",
+  "hasTitleInBody": false,
+  "bodyParagraph": "This domain is for use in documentation examples without needing permission.",
+  "paragraphPresent": true,
+  "htmlSha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+  "interpretation": "Current site keeps Example Domain in head title and only its documentation-use paragraph in body; the live normalized response contains that exact paragraph."
+}

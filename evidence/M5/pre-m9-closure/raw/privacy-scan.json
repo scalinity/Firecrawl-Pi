@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-03T03:02:56.776Z",
+  "command_id": "PRE-M9-PRIVATE-LITERAL-SCAN",
+  "source": "eae2a085b8b0b6e9f5c94513aabdf045059a2cbf",
+  "expected": "zero credential literal in candidate files/local commit objects; real private evidence literals preserved outside Git then replaced exactly",
+  "classifiedPrivateIdentifierPaths": [
+    "evidence/M6/pre-m9-closure/raw/deploy-live-alignment.txt",
+    "evidence/M7/pre-m9-closure/raw/deploy-live-driver-remediation.txt"
+  ],
+  "workingTreeCredentialHits": [],
+  "localHistoryCredentialHits": [],
+  "filesChecked": 1246,
+  "objectsChecked": 193,
+  "envIgnored": true,
+  "envMode": "600",
+  "futurePublicationScanStillRequired": true
+}

@@ -1,0 +1,18 @@
+--- evidence/M8/snapshot-after.txt	2026-10-02 19:01:02
++++ evidence/M5/pre-m9-closure/snapshot-before.txt	2026-10-02 21:10:23
+@@ -1,5 +1,5 @@
+ ### meta
+-2026-10-02T23:01:01Z
++2026-10-03T01:10:22Z
+ boot_id_sha256=aa2771aeb24cb237f4f66a983aac1f8e63a691b5ff6f76d75a9754f0cbf9dd75
+ ### systemd_running
+ NetworkManager.service
+@@ -37,7 +37,7 @@
+ mosquitto.service
+ pihole-FTL.service
+ proc-sys-fs-binfmt_misc.automount
+-session-10714.scope
++session-11503.scope
+ session-4492.scope
+ ssh.service
+ systemd-journald-dev-log.socket

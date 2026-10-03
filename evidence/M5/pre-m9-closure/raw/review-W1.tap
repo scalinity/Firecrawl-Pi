@@ -1,0 +1,25 @@
+✔ malformed HTTP 200 model answers settle conservatively and exhaust only the one repair (PRE-M9 W1) (13.571958ms)
+✔ Luna request parameters and cache-write usage stay inside the reservation (1.7225ms)
+✔ a schema-valid extraction settles from the provider's usage, keeps nulls and names its source (1.503ms)
+✔ an invalid answer gets exactly one repair, in the same logical budget (2.561459ms)
+✔ refusals before any spend: unknown model, stale rate card, paid dispatch off, missing credential, zero cap (1.601625ms)
+✔ provider refusals are classified: a refused request is released, an answered one settled (6.033166ms)
+✔ three provider failures open the breaker: the next call is refused without a request (1.507458ms)
+✔ a logical unit retried under a different input cap is refused rather than merged from other chunks (review S11) (1.106792ms)
+✔ no request is started with less than a second of the deadline left, and the gate refuses a passed deadline (review W14) (0.503ms)
+✔ a unit retried while its call is still in flight is EXTRACTION_IN_FLIGHT, retryable, then reuses the answer (review W13) (3003.722375ms)
+✔ a reuse-only extraction returns stored answers and sends nothing new (review S12) (1.369959ms)
+✔ a rate limit stops the extraction's later units: the provider is asked once (review S8) (0.853708ms)
+✔ a half-open probe that ends without a verdict hands the probe back (review W10) (1103.97875ms)
+✔ an unanswered call stays reserved and is never sent again; a settled one is reused without a charge (1503.580959ms)
+✔ long documents are chunked under the input cap and merged with each part's provenance; conflicts are reported (626.729583ms)
+✔ a required value that no document holds stays null and is named, not invented (0.847875ms)
+✔ schemas beyond the supported subset are refused before any request (0.599ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 94246.862833
