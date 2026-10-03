@@ -11,6 +11,7 @@ exec 8>"$D/prepare.lock"; flock -n 8 || exit 0
 systemctl list-units --state=active --type=service 'fcpi-incident-????????.service' --no-legend | grep -q . && exit 3
 [ ! -e "$W" ] || {
   [ "${2:-}" = --resume ] || exit 0
+  [ "$(cat "$W/base-sha")" = "$(source_commit)" ] || die 'deployed release changed; start a new investigation'
   [ -s "$W/run/result.json" ] || die 'no resumable completed session'
   [ "$(cat "$W/launch-count")" -lt 2 ] || die 'incident resume limit reached'
 }

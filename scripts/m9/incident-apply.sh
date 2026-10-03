@@ -16,6 +16,9 @@ systemctl is-active --quiet "fcpi-incident-$id.service" && die 'agent still acti
 [ "$(jq -r .patch_sha <<<"$g")" = "$(sha256sum "$W/patch.diff" | cut -c1-64)" ] && [ "$(jq -r .tests_sha <<<"$g")" = "$(sha256sum "$W/tests.txt" | cut -c1-64)" ] || die 'approved patch/test binding changed'
 export GIT_CONFIG_GLOBAL=/home/danny/.gitconfig
 base=$(cat "$W/base-sha")
+if [ "${3:-}" != --rollback ]; then
+ [ "$base" = "$(source_commit)" ] || die 'proposal base changed; a new investigation and approval are required'
+fi
 if [ "${3:-}" = --rollback ]; then
  [ "$(jq -r .action <<<"$g")" = rollback ] && [ -s "$W/release.json" ] || die 'no approved rollback release'
  [ "$(source_commit)" = "$(jq -r .candidate_sha "$W/release.json")" ] || die 'release has moved'

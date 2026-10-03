@@ -81,6 +81,11 @@ if [ -r /etc/firecrawl-pi/incidents.env ] && grep -qx 'FCPI_INCIDENT_ENABLED=tru
   base=$(cat "$REPO/.fcpi-source-commit")
   report=/var/lib/firecrawl-pi/incidents/work/$id/harvested.json
   if [ -r "$report" ]; then
+    proposal_base=$(jq -r .base_sha "$report")
+    if [ "$kind" = approval_required ]; then
+      base=$proposal_base
+      [ "$base" = "$(cat "$REPO/.fcpi-source-commit")" ] || verbs='["details","dismiss"]'
+    fi
     # A concrete patch and its test result are visible in the private report.
     jq --arg base "$base" --rawfile patch "/var/lib/firecrawl-pi/incidents/work/$id/patch.diff" '. + {proposal_base_sha:.base_sha,base_sha:$base,patch:$patch}' "$report" >"$C/reports/$id.new"
     chmod 0640 "$C/reports/$id.new"; chown root:3380 "$C/reports/$id.new"; mv "$C/reports/$id.new" "$C/reports/$id.json"
