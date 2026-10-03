@@ -20,7 +20,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const phase = process.argv[2];
 const T = Object.fromEntries(readFileSync(join(ROOT, "scripts/m1/pi-target.conf"), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
 const SSH = ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15"];
-const STATE = join(ROOT, "evidence/M3/raw/e2e-state.json");   // ids later phases reuse (no secrets)
+const STATE = join(ROOT, process.env.FCPI_M3_EVIDENCE ?? "evidence/M3/", "raw/e2e-state.json");   // ids later phases reuse (no secrets)
 const HOST = "127.0.0.1:3380", ORIGIN = `http://${HOST}`, FX = "http://m3.fixture.fcpi.test:8080";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const now = () => new Date().toISOString();

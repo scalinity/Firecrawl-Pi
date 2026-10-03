@@ -26,7 +26,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const phase = process.argv[2];
 const T = Object.fromEntries(readFileSync(join(ROOT, "scripts/m1/pi-target.conf"), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
 const SSH = ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15"];
-const STATE = join(ROOT, "evidence/M4/raw/e2e-state.json");   // ids later phases reuse (no secrets)
+const STATE = join(ROOT, process.env.FCPI_M4_EVIDENCE ?? "evidence/M4/", "raw/e2e-state.json");   // ids later phases reuse (no secrets)
 const HOST = "127.0.0.1:3380", ORIGIN = `http://${HOST}`, FX = "http://m3.fixture.fcpi.test:8080";
 const MODERN = "2026-07-28", LEGACY = "2025-11-25";
 const META = { "io.modelcontextprotocol/protocolVersion": MODERN, "io.modelcontextprotocol/clientCapabilities": {}, "io.modelcontextprotocol/clientInfo": { name: "fcpi-m4-raw", version: "1" } };
