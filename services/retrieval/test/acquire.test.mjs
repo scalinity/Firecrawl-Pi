@@ -181,11 +181,12 @@ test("public browser redirects remain usable with unrelated denied subresources"
     store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
     const finalUrl = `http://t.fixture.fcpi.test:${fx.port}/public`;
     const browser = { render: async () => ({ ok: true, status: 200, html: RENDERED, finalUrl, navigationUrl: finalUrl,
-      proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }, { host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }) };
+      proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }, { host: "127.0.0.1:3002", class: "SSRF_DENIED", urlHash: createHash("sha256").update("http://127.0.0.1:3002/?private=fixture").digest("hex") }] } }) };
     const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/redirect`));
     assert.equal(r.ok, true);
     assert.equal(r.finalUrl, finalUrl);
     assert.equal(r.proxyDenied.length, 2);
+    assert.deepEqual(r.proxyDenied, [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }, { host: "127.0.0.1:3002", class: "SSRF_DENIED" }], "URL correlation material never leaves the retrieval process");
   } finally { fx.s.close(); }
 });
 

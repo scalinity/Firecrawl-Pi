@@ -519,7 +519,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           if (shellTier === tier) await learn(answered, { tier, mode: "browser", outcome: "js_rendered" });
           return { done: finish({ ok: true, body: r.html, finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
             bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
-            subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [], ...(hooks ? { screenshot: r.screenshot ?? null, actions: r.actions ?? null } : {}) }) };
+            subresources: r.subresources, proxyDenied: (r.proxy?.denied ?? []).map(({ urlHash, ...denied }) => denied), ...(hooks ? { screenshot: r.screenshot ?? null, actions: r.actions ?? null } : {}) }) };
         } finally {
           await releaseAll(log, [paced && (() => store.releaseDomain(paced.domain, attemptId)), () => store.releasePermit("browser", attemptId)]);
         }
