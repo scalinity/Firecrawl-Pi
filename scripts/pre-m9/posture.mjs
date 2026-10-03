@@ -22,7 +22,7 @@ const normalize=s=>Object.fromEntries(Object.entries(s).map(([k,ls])=>[k,ls.filt
 const rules=p=>read(p).split("\n").filter(l=>!l.startsWith("#") && l.trim()!== 'ip daddr 10.231.6.2 iifname != "fcpi-egress" counter drop').join("\n");
 const net=n=>st.networks.find(l=>l.startsWith(n+" "))??"";
 const pub=st.published.filter(l=>l.includes(" -> "));
-const p=input.providers.body, caps=p.caps;
+const p=input.providers.body, caps=p.caps, compose=json(EV+"rendered-compose.json");
 const ledger=json("evidence/M6/pre-m9-closure/raw/ledger-after-stop.json").rows;
 const checks={
   healthy:status.healthy===true && Object.keys(status.services).length===15 && Object.values(status.services).every(x=>x.state==="running"&&x.health==="healthy"&&x.oom_kills===0),
@@ -35,6 +35,7 @@ const checks={
   complete_accounting:ledger.length===14 && ledger.every(x=>x.state==="SETTLED" && x.actual>=0),
   log_hygiene:scans[0].lines>=100 && ["search","model_call","parse","extraction"].every(k=>scans[0][k]>0) && scans[1].lines>=1 && scans.every(s=>["provider_key_like","client_token_like","bearer","proxy_authorization","basic_credential","session_username","signature"].every(k=>s[k]==="0")),
   budget_hash:budgetHashes.every(h=>h.budget_policy_sha256_logged===h.budget_policy_sha256_deployed && h.budget_policy_sha256_deployed===sha256File("deploy/policies/budget.json")),
+  cloud_disabled:["access-gateway","mcp-gateway","retrieval-service"].every(n=>compose.services[n].environment.PI_CLOUD_ACCESS_ENABLED==="false"),
   cloud:scans.every(s=>s.cloud_host==="0") && core.length>=1 && core.every(ls=>{const c=kv(ls.find(l=>l.startsWith("classified ")).split(" "));return c.cloud_unexplained==="0"&&c.dns_unexplained==="0"&&ls.some(l=>/^control=Starting services count=[1-9]/.test(l));}) && Object.values(json(EV+"additional-verification.json").tests).every(x=>x.state==="PASS"),
   host_headroom:status.host.mem.available_mib>1024 && status.host.host_oom_kill===0 && status.host.throttled==="0x0",
   preserved:status.foreign_containers.length===0 && [...before.docker_ps,...after.docker_ps].every(l=>/\tfcpi-/.test(l)) && before.meta[1]===after.meta[1] && JSON.stringify(normalize(before))===JSON.stringify(normalize(after)) && rules("evidence/M8/raw/nft-ruleset.txt")===rules(R+"nft-ruleset.txt"),
