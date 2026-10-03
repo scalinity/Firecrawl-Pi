@@ -86,7 +86,7 @@ async function openTunnel() {
 function http(method, path, { tok, body, headers = {}, host = HOST, timeoutMs = 200000 } = {}) {
   return new Promise((resolve, reject) => {
     const data = body === undefined ? undefined : Buffer.from(typeof body === "string" ? body : JSON.stringify(body));
-    const req = request({ host: "127.0.0.1", port: 3380, method, path, timeout: timeoutMs, headers: { host, ...(tok ? { authorization: `Bearer ${token(tok)}` } : {}),
+    const req = request({ host: "127.0.0.1", port: 3380, agent: false, method, path, timeout: timeoutMs, headers: { host, ...(tok ? { authorization: `Bearer ${token(tok)}` } : {}),
       ...(data ? { "content-type": "application/json", "content-length": data.length } : {}), ...headers } }, (res) => {
       const chunks = [];
       res.on("data", (c) => chunks.push(c));
