@@ -2,6 +2,18 @@
 // responses and public hashes; a convenient summary state cannot grant a PASS.
 import{createHash}from'node:crypto';import{clientProof}from'./client-proof.mjs';
 export const sha=x=>createHash('sha256').update(x).digest('hex');
+export function reviewVerdict(review){
+ const rows=review.split('\n').filter(line=>line.includes('|')).map(line=>line.trim().replace(/^\|/,'').replace(/\|$/,'').split('|').map(c=>c.trim()))
+  .filter(c=>!c.every(x=>/^:?-+:?$/.test(x))&&!( /^(?:Finding|Earlier finding|Additional finding)$/i.test(c[0])&&/^Disposition$/i.test(c[1])))
+  .map(c=>({finding:c[0],outcome:c[1]??'',columns:c.length}));
+ const expected=['SELF-01','SELF-02'];
+ for(const [prefix,counts]of Object.entries({DB1:{C:5,W:6,S:9},CA1:{C:4,W:10,S:7}}))
+  for(const [kind,count]of Object.entries(counts))for(let i=1;i<=count;i++)expected.push(`${prefix}-${kind}${i}`);
+ const originals=rows.filter(x=>/^(?:DB1|CA1|SELF)-/.test(x.finding));
+ const complete=review.includes('Remediation complete')&&originals.length===expected.length&&expected.every(id=>originals.some(x=>x.finding===id))&&
+  new Set(rows.map(x=>x.finding)).size===rows.length&&rows.every(x=>x.columns>=3&&/^(?:DB1|CA1|SELF|M8|M9)-[A-Za-z0-9-]+$/.test(x.finding)&&/^(FIXED|REJECTED|RETURNED)$/.test(x.outcome));
+ return {complete,rows,returned:[...new Set(rows.filter(x=>/^RETURNED\b/i.test(x.outcome)).map(x=>x.finding))]};
+}
 export function corpusVerdict(specText,freeze,raw,record){
  const spec=JSON.parse(specText),targets=spec.targets;
  if(sha(specText)!==freeze.sha256||record?.corpus_sha256!==freeze.sha256||targets.length!==20||raw?.results?.length!==20||record?.results?.length!==20)return false;

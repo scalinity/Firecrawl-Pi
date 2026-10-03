@@ -1,6 +1,6 @@
 // Final binary gate. Canonical verifiers recompute current raw regressions;
 // summaries never grant acceptance. Historical exceptions remain immutable.
-import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict,incidentVerdict}from'./evidence-checks.mjs';
+import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict,incidentVerdict,reviewVerdict}from'./evidence-checks.mjs';
 const hash=p=>sha(readFileSync(p)),json=p=>existsSync(p)?JSON.parse(readFileSync(p)):null,text=p=>existsSync(p)?readFileSync(p,'utf8'):'';
 const git=(...a)=>execFileSync('git',a,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim(),head=git('rev-parse','HEAD');
 const sameCode=s=>{if(!/^[0-9a-f]{40}$/.test(s??''))return false;try{git('diff','--quiet',s,head,'--','services','deploy','scripts','tests','patches',':(exclude)deploy/versions.lock.json');return true;}catch{return false;}};
@@ -13,12 +13,12 @@ for(const [id,refs] of Object.entries({
  AC07:[[5,'E02'],[5,'E03'],[5,'E04'],[5,'B02']],AC08:[[5,'D02']],
  AC09:[[6,'R02'],[6,'R03'],[6,'R04'],[6,'R05'],[6,'R06'],[6,'R09']],
  AC11:[[7,'B02'],[7,'B03'],[7,'B04']],AC12:[[4,'P04'],[4,'P05']],
- AC21:[[7,'C02'],[7,'C03']],AC23:[[6,'R07']],
+ AC21:[[7,'C02'],[7,'C03']],
  AC15:[[8,'R02'],[8,'R03'],[8,'I01'],[8,'I02'],[8,'I03'],[8,'I04'],[8,'I07'],[8,'I15']],
  AC16:[[8,'S02'],[8,'S04'],[8,'S05']],
  AC17:[[8,'O02'],[8,'O03'],[8,'O04'],[8,'N01'],[8,'N02']],
  AC18:[[8,'K01'],[8,'K02']],
- AC23:[[8,'I08'],[8,'I09'],[8,'I10'],[8,'I11']],
+ AC23:[[6,'R07'],[8,'I08'],[8,'I09'],[8,'I10'],[8,'I11']],
  AC25:[[2,'S01'],[2,'S02'],[5,'E03'],[5,'B02'],[6,'R09'],[7,'E02'],[8,'X02']]
 }))fresh[id].push(...refs);
 // Recompute every selected legacy check into M9-owned paths, even when it fails
@@ -57,9 +57,9 @@ let incidentOk=false;if(proof&&/^[0-9a-f]{8}$/.test(proof.incident_id)){
  incidentOk=rootOk&&sameCode(proof.source_commit)&&incidentVerdict(raw,proof,transcript);
 }
 results.push({test_id:'M9-INCIDENT',state:incidentOk?'PASS':proof?'FAIL':'NOT_RUN',root_fixtures:rootOk});
-const review=text('evidence/M9/review/REVIEW.md');const dispositions=[...review.matchAll(/^\| (?:DB1|CA1|SELF)-[^|]+\| ([^|]+)\|/gm)].map(x=>x[1].trim());
-results.push({test_id:'M9-REVIEW',state:review.includes('Remediation complete')&&dispositions.length===43&&dispositions.every(x=>/^(FIXED|REJECTED|RETURNED)/.test(x))?'PASS':'NOT_RUN'});
-const returned=[...review.matchAll(/^\| ([A-Z0-9][A-Za-z0-9-]+) \| RETURNED\b[^|]*\|/gm)].map(x=>x[1]);
+const review=text('evidence/M9/review/REVIEW.md'),reviewResult=reviewVerdict(review);
+results.push({test_id:'M9-REVIEW',state:reviewResult.complete?'PASS':review?'FAIL':'NOT_RUN',finding_count:reviewResult.rows.length});
+const returned=reviewResult.returned;
 results.push({test_id:'M9-RETURNED-FINDINGS',state:returned.length?'FAIL':'PASS',owning_milestone_remediation_required:returned});
 const current=json('evidence/M9/current/versions.json');results.push({test_id:'M9-CURRENT',state:current?.source_commit===head&&Object.values(current.checks??{}).length>=14&&Object.values(current.checks).every(x=>x===true)?'PASS':current?'FAIL':'NOT_RUN'});
 const run=json('evidence/M9/work/fixture-run.json'),fixtureRaw=text('evidence/M9/work/pi-fixtures-final.txt');results.push({test_id:'M9-FIXTURES',state:run&&sameCode(run.source_commit)&&fixturesVerdict(fixtureRaw,run)&&rootOk?'PASS':'NOT_RUN'});
