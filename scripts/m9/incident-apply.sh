@@ -44,6 +44,7 @@ else
  jq -cn --arg base "$base" --arg c "$candidate" --arg code "$code" '{previous_sha:$base,candidate_sha:$c,image_source_sha:$code,state:"PREPARED"}' | write_atomic "$W/release.json" 0600
  # Current platform remains active unless the encrypted pre-change backup passes.
  bash "$REPO/scripts/ops/backup.sh" >"$W/predeploy-backup.txt" 2>&1
+ bash "$REPO/scripts/ops/restore-test.sh" >"$W/predeploy-restore.txt" 2>&1
 fi
 hold_set incident-deploy 900
 trap 'hold_clear incident-deploy' EXIT

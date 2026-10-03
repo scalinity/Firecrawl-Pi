@@ -6,10 +6,9 @@ ConditionPathExists=/etc/firecrawl-pi/incidents.env
 [Service]
 Type=oneshot
 ExecStart=/bin/bash /opt/firecrawl-pi/scripts/m9/incident-control.sh tick
-TimeoutStartSec=600
+TimeoutStartSec=1800
 Slice=fcpi.slice
 MemoryMax=256M
 MemorySwapMax=0
 TasksMax=128
 NoNewPrivileges=yes
-

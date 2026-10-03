@@ -40,6 +40,8 @@ timeout 180 docker run --rm --label fcpi.transient=incident-tests --network "$N"
  "$image" node --test --test-concurrency=1 --test-timeout=120000 /repo/tests/contracts/m4-gateway-mcp.test.mjs
 # No arbitrary new executable test filenames are accepted for incident patches;
 # changes to the explicitly trusted contract above are tested by that invocation.
+if [ -f "$tree/.git" ]; then
 while IFS= read -r -d '' p; do
  case $p in tests/contracts/*) [ "$p" = tests/contracts/m4-gateway-mcp.test.mjs ] || die 'new contract requires operator review/testing outside automatic apply' ;; esac
 done < <(git -C "$tree" diff --name-only -z)
+fi

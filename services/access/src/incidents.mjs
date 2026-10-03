@@ -22,6 +22,12 @@ const signedBytes = g => Buffer.from(JSON.stringify([
 export const signatureFor = (key,g) => sign(null,signedBytes(g),key).toString('hex');
 export const verifySignature = (key,g,signature) => typeof signature==='string' && /^[0-9a-f]{128}$/.test(signature)
   && verify(null,signedBytes(g),key,Buffer.from(signature,'hex'));
+export function verifiedRequest(g,issued,key,nonce,now=Date.now()) {
+  const fields=['schema','id','incident_id','action','base_sha','patch_sha','tests_sha','issued_at','expires_at'];
+  if(g.id!==nonce || !validGrant(g,now) || fields.some(k=>g[k]!==issued[k]) || !verifySignature(key,g,g.signature)
+    || !Number.isSafeInteger(g.approved_at) || g.approved_at<g.issued_at || g.approved_at>=g.expires_at || g.approved_at>now) throw new Error('Approval proof rejected');
+  return Object.fromEntries([...fields,'approved_at'].map(k=>[k,g[k]]));
+}
 export async function durableExclusive(path, data) {
   const f = await open(path,'wx',0o640);
   try { await f.writeFile(JSON.stringify(data)+'\n'); await f.sync(); } finally { await f.close(); }
