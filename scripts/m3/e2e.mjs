@@ -407,12 +407,25 @@ const PHASES = {
     out("k4_gateway_crash_running", { case: "finished", state: k4done.state, archived: k4done.archived, marker_groups: markerGroups(k4.json.id), events: events(k4.json.id) });
 
     // K5: the core dies while an acknowledged crawl runs; NuQ requeues the stalled page, and the job reaches an explicit end.
-    const k5 = await post("crawl", { url: `${FX}/slow/`, limit: 6, sitemap: "skip" }, "m3a", { "x-idempotency-key": `m3-k5-${randomUUID()}` });
-    for (let i = 0; i < 120; i++) { const j = await receipt(k5.json.id); if ((j?.completed ?? 0) >= 1) break; await sleep(1000); }
     out("core_logs", { label: "k5-before-core-kill", summary: coreLogs("m3-k5-before-kill").split("\n").filter((l) => /^(classified|control=)/.test(l)) });
     resources("before-core-kill-k5");
-    out("k5_core_crash_running", { case: "core_killed", id: k5.json.id, ledger: ledgerJob(k5.json.id), result: D(`kill ${cname("firecrawl-core")}`).trim() });
-    D(`start ${cname("firecrawl-core")}`); await waitHealthy("firecrawl-core");
+    const k5 = await post("crawl", { url: `${FX}/slow/`, limit: 6, sitemap: "skip" }, "m3a", { "x-idempotency-key": `m3-k5-${randomUUID()}` });
+    let activeAtKill = 0, ledgerAtKill = null;
+    for (let i = 0; i < 240 && !activeAtKill; i++) {
+      const j = ledgerJob(k5.json.id);
+      if (["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"].includes(j?.state)) break;
+      if (j?.upstream) {
+        if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(j.upstream)) throw new Error("K5 upstream group is not a UUID");
+        // Observe a slow fixture page and kill in the same remote shell. No log scan or resource probe can consume its two-second window.
+        activeAtKill = Number(pi(`set -e; n=$(sudo -n timeout 10 docker exec ${cname("nuq-postgres")} psql -U postgres -d postgres -q -At -X -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM nuq.queue_scrape WHERE group_id = '${j.upstream}' AND status = 'active' AND data->>'url' LIKE '${FX}/slow/s%'"); if [ "$n" -ge 1 ]; then sudo -n docker kill ${cname("firecrawl-core")} >/dev/null; printf '%s\\n' "$n"; else echo 0; fi`).trim());
+        if (!Number.isInteger(activeAtKill) || activeAtKill < 0) throw new Error("K5 active-row probe is invalid");
+        if (activeAtKill) ledgerAtKill = j;
+      }
+      if (!activeAtKill) await sleep(250);
+    }
+    out("k5_core_crash_running", { case: activeAtKill ? "core_killed" : "core_kill_refused", id: k5.json.id, ledger: ledgerAtKill, active_at_kill: activeAtKill, result: activeAtKill ? cname("firecrawl-core") : null });
+    if (activeAtKill) D(`start ${cname("firecrawl-core")}`);
+    await waitHealthy("firecrawl-core");
     const k5done = await waitState(k5.json.id, ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"], 900000);
     const up = ledgerJob(k5.json.id).upstream;
     const perPage = sql(`SELECT a.logical_id, a.attempts FROM fcpi_retrieval.acquisition a WHERE a.logical_id IN (SELECT id::text FROM nuq.queue_scrape WHERE group_id = '${up}') ORDER BY 2 DESC;`).map((l) => Number(l.split("|")[1]));

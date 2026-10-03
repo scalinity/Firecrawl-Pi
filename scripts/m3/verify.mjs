@@ -374,11 +374,11 @@ const checks = {
       return { ok: endOk(c) && k2ok && k3ok, actual: `K2 ${seq2} final ${f2?.state} upstream=${f2?.marker_groups} retry same id=${sameId(one(k2, "client_retries_same_key"))}; K3 ${seq3} native=${d3?.native_status?.status} ${d3?.native_status?.code} final ${f3?.state} upstream=${f3?.marker_groups}` };
     } },
   J03: { name: "acknowledged-jobs-tracked-through-crashes-k4-k5", inputs: [`${RAW}e2e-crash.txt`],
-    expected: "an acknowledged crawl running when the gateway is killed is tracked by the next gateway to SUCCEEDED with all 6 pages archived; one running when the core is killed reaches an explicit end state (here SUCCEEDED) after NuQ requeued the interrupted page (at least one stalled page, the positive control that work was cut), no page above 4 attempts, and one upstream job",
+    expected: "an acknowledged crawl running when the gateway is killed is tracked by the next gateway to SUCCEEDED with all 6 pages archived; one with an observed active slow page when the core is killed reaches an explicit end state (here SUCCEEDED) after NuQ requeued the interrupted page (at least one stalled page, the positive control that work was cut), no page above 4 attempts, and one upstream job",
     run() {
       const c = E("crash"), k4 = one(c.k4_gateway_crash_running, "finished"), k5 = one(c.k5_core_crash_running, "finished");
       const ok = endOk(c) && one(c.k4_gateway_crash_running, "acknowledged_running")?.ledger?.state === "RUNNING" && k4?.state === "SUCCEEDED" && k4.archived === 6 && k4.marker_groups === 1 &&
-        one(c.k5_core_crash_running, "core_killed")?.ledger?.state === "RUNNING" && ["SUCCEEDED", "PARTIAL", "FAILED"].includes(k5?.state) && k5.marker_groups === 1 && k5.stalled_pages >= 1 &&
+        one(c.k5_core_crash_running, "core_killed")?.ledger?.state === "RUNNING" && one(c.k5_core_crash_running, "core_killed")?.active_at_kill >= 1 && ["SUCCEEDED", "PARTIAL", "FAILED"].includes(k5?.state) && k5.marker_groups === 1 && k5.stalled_pages >= 1 &&
         (k5.attempts_per_page ?? []).length > 0 && k5.attempts_per_page.every((n) => n <= 4);
       return { ok, actual: `K4 ${k4?.state} archived=${k4?.archived}; K5 ${k5?.state} archived=${k5?.archived} stalled pages=${k5?.stalled_pages} attempts per page=${JSON.stringify(k5?.attempts_per_page)}` };
     } },
