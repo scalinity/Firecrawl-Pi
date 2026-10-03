@@ -6,6 +6,16 @@ const git=(...a)=>execFileSync('git',a,{encoding:'utf8',stdio:['ignore','pipe','
 const sameCode=s=>{if(!/^[0-9a-f]{40}$/.test(s??''))return false;try{git('diff','--quiet',s,head,'--','services','deploy','scripts','tests','patches',':(exclude)deploy/versions.lock.json');return true;}catch{return false;}};
 const historical={AC01:[[3,'A03'],[3,'N02']],AC02:[[3,'N01'],[3,'N03'],[3,'P02']],AC03:[[2,'R01'],[2,'R02'],[2,'R03']],AC04:[[3,'A01'],[3,'J04'],[3,'J07']],AC05:[[5,'M01']],AC06:[[5,'S05']],AC07:[[5,'E01']],AC08:[[5,'D01']],AC09:[[6,'R01']],AC10:[[7,'E01']],AC11:[[7,'B01']],AC12:[[4,'P01'],[4,'P02'],[4,'P03'],[4,'P08'],[4,'P09'],[4,'P10']],AC13:[[4,'P06'],[4,'P07']],AC14:[[3,'X02'],[3,'J03'],[3,'J06']],AC15:[[8,'R01']],AC16:[[8,'S01']],AC17:[[8,'O01']],AC18:[[8,'K03']],AC19:[[8,'U01'],[8,'U02']],AC20:[[7,'W01']],AC21:[[7,'C01']],AC23:[[5,'I01'],[6,'R06'],[7,'E03']],AC24:[[8,'X01']],AC25:[[7,'E04']]};
 const fresh=structuredClone(historical);fresh.AC07.push([5,'E05']);fresh.AC08.push([5,'D03']);fresh.AC09.push([6,'L01']);fresh.AC10.push([7,'E05']);
+// Each acceptance row needs all its current contract evidence, including the
+// scope/budget/cleanup cases beside its successful acquisition example.
+for(const [id,refs] of Object.entries({
+ AC03:[[2,'R04']],AC04:[[3,'A02']],AC06:[[5,'S01'],[5,'S02'],[5,'S03']],
+ AC07:[[5,'E02'],[5,'E03'],[5,'E04'],[5,'B02']],AC08:[[5,'D02']],
+ AC09:[[6,'R02'],[6,'R03'],[6,'R04'],[6,'R05'],[6,'R06'],[6,'R09']],
+ AC11:[[7,'B02'],[7,'B03'],[7,'B04']],AC12:[[4,'P04'],[4,'P05']],
+ AC21:[[7,'C02'],[7,'C03']],AC23:[[6,'R07']],
+ AC25:[[2,'S01'],[2,'S02'],[5,'E03'],[5,'B02'],[6,'R09']]
+}))fresh[id].push(...refs);
 // Recompute every selected legacy check into M9-owned paths, even when it fails
 // or lacks raw inputs. Their nonzero all-milestone exit is expected for subsets.
 for(const m of [2,3,4,5,6,7,8]){
