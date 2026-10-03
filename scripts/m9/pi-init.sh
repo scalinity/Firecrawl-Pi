@@ -9,7 +9,7 @@ need_root
 . /etc/firecrawl-pi/config.env
 [ -d "$PI_DATA_DIR" ] && [ "$(findmnt -n -o UUID --target "$PI_DATA_DIR")" = "$PI_DATA_MOUNT_ID" ] && [ "$(cat "$PI_DATA_DIR/.fcpi-data-id")" = "$PI_DATA_ID" ] || die 'audited data device absent'
 D=$STATE/incidents C=$STATE/incidents/control
-install -d -m 0751 -o root -g root "$D" "$D/work"
+install -d -m 0751 -o root -g root "$D" "$D/work" "$D/blocked"
 install -d -m 0750 -o root -g 3380 "$C"
 install -d -m 0700 -o root -g root "$C/processed" "$C/dismissed"
 install -d -m 0750 -o 3382 -g 3380 "$C/grants"

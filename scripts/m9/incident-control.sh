@@ -52,12 +52,14 @@ for w in "$D"/work/*; do
  [ -d "$w" ] || continue
  id=${w##*/}; [[ $id =~ ^[0-9a-f]{8}$ ]] || continue
  systemctl is-active --quiet "fcpi-incident-$id.service" && continue
- if [ -s "$w/run/result.new.json" ] && [ ! -s "$w/run/result.json" ] && [ ! -e "$w/failed.json" ]; then
+ rm -f "$w/run/auth/access-token"
+ if [ -s "$w/launched-at" ] && [ ! -s "$w/run/result.json" ] && [ ! -e "$w/failed.json" ]; then
   put_obj "$w/failed.json" 0600 '{"state":"INVESTIGATION_FAILED","automatic_retry":false}'
   notice diagnosis_ready "incident_agent:$id" '{"state":"INVESTIGATION_FAILED","automatic_retry":false}' "$(now_s)" "$id"
  fi
- if [ -e "$w/harvested.json" ] && [ "$(find "$w/harvested.json" -mtime +14 | wc -l)" -gt 0 ]; then
+ if [ -s "$w/launched-at" ] && [ $(( $(now_s) - $(cat "$w/launched-at") )) -gt 1209600 ]; then
   git --git-dir="$D/source.git" worktree remove --force "$w/tree"
+  git --git-dir="$D/source.git" branch -D "codex/incident-$id" 2>/dev/null || true
   rm -rf -- "$w"; rm -f -- "$C/reports/$id.json"
  fi
 done
@@ -66,9 +68,12 @@ done
 while IFS=$'\t' read -r key first; do
  id=$(printf '%s:%s' "$key" "$first" | sha256sum | cut -c1-8)
  [ ! -e "$C/dismissed/$id.json" ] || continue
- [ ! -e "$D/work/$id" ] || continue
+ [ ! -e "$D/work/$id" ] && [ ! -e "$D/blocked/$id.json" ] || continue
  [ $(( $(now_s) - first )) -ge 120 ] || continue
- bash "$REPO/scripts/m9/incident-prepare.sh" "$id" || logger -t fcpi-incident -- 'investigation preparation blocked; inspect private controller state'
+ if ! bash "$REPO/scripts/m9/incident-prepare.sh" "$id"; then
+  put_obj "$D/blocked/$id.json" 0600 '{"state":"PREPARATION_BLOCKED","automatic_retry":false}'
+  notice diagnosis_ready "incident_agent:$id" '{"state":"PREPARATION_BLOCKED","automatic_retry":false,"owner_attention_required":true}' "$(now_s)" "$id"
+ fi
 done < <(jq -r 'to_entries[] | select(.value.open == true) | select(.key | test("^(core_unhealthy|queue_stalled|queue_unreadable|functional_probe_failing|redis_acl_denied|oom_kill:|restart_budget_or_data_service:)")) | [.key,.value.first] | @tsv' "$STATE/alerts/state.json" 2>/dev/null)
 for w in "$D"/work/*; do
  [ -d "$w" ] || continue

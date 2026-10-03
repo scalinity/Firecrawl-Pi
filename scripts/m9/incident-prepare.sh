@@ -8,16 +8,39 @@ id=${1:?incident id}; [[ $id =~ ^[0-9a-f]{8}$ ]] || die 'invalid incident id'
 D=$STATE/incidents W=$STATE/incidents/work/$id
 exec 8>"$D/prepare.lock"; flock -n 8 || exit 0
 # One model process at a time, including explicit owner resumes.
-systemctl list-units --state=active --type=service 'fcpi-incident-????????.service' --no-legend | grep -q . && exit 3
+systemctl list-units --state=active --type=service 'fcpi-incident-????????.service' --no-legend | grep . >/dev/null && exit 3
 [ ! -e "$W" ] || {
   [ "${2:-}" = --resume ] || exit 0
   [ "$(cat "$W/base-sha")" = "$(source_commit)" ] || die 'deployed release changed; start a new investigation'
   [ -s "$W/run/result.json" ] || die 'no resumable completed session'
   [ "$(cat "$W/launch-count")" -lt 2 ] || die 'incident resume limit reached'
 }
-[ "$(find "$D/work" -mindepth 1 -maxdepth 1 -type d -newermt "$(date -u +%F)" | wc -l)" -lt 4 ] || die 'daily investigation limit reached'
+# Count every launch (including resumes) in an immutable root UTC ledger.
+day=$(date -u +%F)
+[ ! -e "$D/launches.jsonl" ] || jq -e -s 'all(.[]; (.day|type)=="string" and (.incident_id|test("^[0-9a-f]{8}$")))' "$D/launches.jsonl" >/dev/null || die 'launch ledger damaged; investigation blocked'
+count=$(jq -s --arg day "$day" '[.[]|select(.day==$day)]|length' "$D/launches.jsonl" 2>/dev/null || echo 0)
+[ "$count" -lt 4 ] || die 'UTC daily investigation limit reached'
+# Validate credentials and the pinned native binary BEFORE creating any worktree.
+# The supported access-token mode does not refresh or modify the owner login.
+jq -e --argjson now "$(date +%s%3N)" '.claudeAiOauth | .accessToken and .subscriptionType == "max" and .expiresAt > ($now + 600000)' /home/danny/.claude/.credentials.json >/dev/null || die 'subscription access token unavailable or near expiry'
+sha=$(sha256sum /home/danny/.local/bin/claude | cut -c1-64)
+[ "$sha" = "$(jq -r .host_packages.claude_code.binary_sha256 "$REPO/deploy/versions.lock.json")" ] || die 'Claude binary differs from pinned version'
+new=false
+cleanup_prepare() {
+ rc=$?
+ if [ "$rc" != 0 ]; then
+  rm -f "$W/run/auth/access-token"
+  if [ "$new" = true ] && ! systemctl is-active --quiet "fcpi-incident-$id.service"; then
+   git --git-dir="$D/source.git" worktree remove --force "$W/tree" 2>/dev/null || true
+   git --git-dir="$D/source.git" branch -D "codex/incident-$id" 2>/dev/null || true
+   rm -rf -- "$W"
+  fi
+ fi
+}
+trap cleanup_prepare EXIT
 base=$(source_commit)
 if [ ! -e "$W" ]; then
+new=true
 git --git-dir="$D/source.git" cat-file -e "$base^{commit}" || die 'deployed source absent from isolated mirror'
 # The doctor's own enforced literal-secret scan must pass before any model sees it.
 bundle=$(bash "$REPO/scripts/ops/doctor.sh")
@@ -40,14 +63,14 @@ printf '{"mcpServers":{}}\n' >"$W/mcp.json"
 jq -n --arg command "$REPO/scripts/m9/incident-hook.sh" '{hooks:{PreToolUse:[{matcher:".*",hooks:[{type:"command",command:$command,timeout:10}]}]}}' >"$W/settings.json"
 echo 0 >"$W/launch-count"
 fi
-# Supported OAuth access-token environment mode does not refresh or alter the
-# owner's login. Refuse expiry near the bounded run; never supply an API key.
-jq -e --argjson now "$(date +%s%3N)" '.claudeAiOauth | .accessToken and .subscriptionType == "max" and .expiresAt > ($now + 600000)' /home/danny/.claude/.credentials.json >/dev/null || die 'subscription access token unavailable or near expiry'
 jq -r '.claudeAiOauth.accessToken' /home/danny/.claude/.credentials.json >"$W/run/auth/access-token"
-sha=$(sha256sum /home/danny/.local/bin/claude | cut -c1-64)
-[ "$sha" = "$(jq -r .host_packages.claude_code.binary_sha256 "$REPO/deploy/versions.lock.json")" ] || die 'Claude binary differs from pinned version'
+# An old completed result never qualifies as the result of a failed resume.
+[ ! -e "$W/run/result.json" ] || mv "$W/run/result.json" "$W/run/result.previous.json"
+rm -f "$W/run/result.new.json" "$W/harvested.json" "$W/failed.json"
 echo $(( $(cat "$W/launch-count") + 1 )) >"$W/launch-count"
-rm -f "$W/harvested.json"
+now_s >"$W/launched-at"
+jq -cn --arg day "$day" --arg id "$id" --argjson at "$(now_s)" '{day:$day,incident_id:$id,launched_at:$at}' >>"$D/launches.jsonl"
+chmod 0600 "$D/launches.jsonl"; sync -f "$D/launches.jsonl"; sync -f "$D"
 chown -R danny:danny "$W/tree" "$W/run"
 chmod 0600 "$W/run/auth/access-token"
 chmod 0644 "$W/settings.json" "$W/input.json" "$W/session-id" "$W/base-sha" "$W/mcp.json"
@@ -55,7 +78,7 @@ systemd-run --quiet --unit="fcpi-incident-$id" --uid=danny --gid=danny --collect
   --property=Slice=fcpi.slice --property=MemoryMax=768M --property=MemorySwapMax=0 --property=CPUQuota=50% --property=TasksMax=128 \
   --property=RuntimeMaxSec=330 --property=TimeoutStopSec=15 --property=KillMode=control-group --property=NoNewPrivileges=yes \
   --property=ProtectSystem=strict --property=ProtectHome=read-only --property=PrivateTmp=yes \
-  --property="ReadWritePaths=$W/tree $W/run" --property="InaccessiblePaths=/etc/firecrawl-pi /srv/firecrawl-pi/data /run/docker.sock /home/danny/.ssh /home/danny/.codex $D/control" \
+  --property="ReadWritePaths=$W/tree $W/run" --property="InaccessiblePaths=/etc/firecrawl-pi /srv/firecrawl-pi/data /run/docker.sock /home/danny/.ssh /home/danny/.codex /home/danny/.claude $D/control" --property="BindReadOnlyPaths=/home/danny/.local/bin/claude" \
   /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/danny CLAUDE_CONFIG_DIR="$W/run/auth" \
   /bin/bash "$REPO/scripts/m9/incident-agent.sh" "$id"
 notice investigation_started "incident_agent:$id" '{"agent":"subscription","runtime_s":300,"turns":12}' "$(now_s)" "$id"
