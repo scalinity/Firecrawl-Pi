@@ -1,9 +1,11 @@
 // Final binary gate. Canonical verifiers recompute current raw regressions;
 // summaries never grant acceptance. Historical exceptions remain immutable.
-import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict,incidentVerdict,reviewVerdict}from'./evidence-checks.mjs';
+import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync,mkdirSync,renameSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict,incidentVerdict,reviewVerdict}from'./evidence-checks.mjs';
+import{inputHash,collectionVerdict,inputKey,codeDirty}from'./collection.mjs';
 const hash=p=>sha(readFileSync(p)),json=p=>existsSync(p)?JSON.parse(readFileSync(p)):null,text=p=>existsSync(p)?readFileSync(p,'utf8'):'';
 const git=(...a)=>execFileSync('git',a,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim(),head=git('rev-parse','HEAD');
 const sameCode=s=>{if(!/^[0-9a-f]{40}$/.test(s??''))return false;try{git('diff','--quiet',s,head,'--','services','deploy','scripts','tests','patches',':(exclude)deploy/versions.lock.json');return true;}catch{return false;}};
+writeFileSync('evidence/M9/acceptance.json',JSON.stringify({schema:'fcpi.m9-acceptance/v2',utc:new Date().toISOString(),source_commit:head,state:'IN_PROGRESS',exit_code:1,verification_pending:true})+'\n');
 const historical={AC01:[[3,'A03'],[3,'N02']],AC02:[[3,'N01'],[3,'N03'],[3,'P02']],AC03:[[2,'R01'],[2,'R02'],[2,'R03']],AC04:[[3,'A01'],[3,'J04'],[3,'J07']],AC05:[[5,'M01']],AC06:[[5,'S05']],AC07:[[5,'E01']],AC08:[[5,'D01']],AC09:[[6,'R01']],AC10:[[7,'E01']],AC11:[[7,'B01']],AC12:[[4,'P01'],[4,'P02'],[4,'P03'],[4,'P08'],[4,'P09'],[4,'P10']],AC13:[[4,'P06'],[4,'P07']],AC14:[[3,'X02'],[3,'J03'],[3,'J06']],AC15:[[8,'R01']],AC16:[[8,'S01']],AC17:[[8,'O01']],AC18:[[8,'K03']],AC19:[[8,'U01'],[8,'U02']],AC20:[[7,'W01']],AC21:[[7,'C01']],AC23:[[5,'I01'],[6,'R06'],[7,'E03']],AC24:[[8,'X01']],AC25:[[7,'E04']]};
 const fresh=structuredClone(historical);fresh.AC07.push([5,'E05']);fresh.AC08.push([5,'D03']);fresh.AC09.push([6,'L01']);fresh.AC10.push([7,'E05']);
 // Each acceptance row needs all its current contract evidence, including the
@@ -27,14 +29,19 @@ for(const m of [2,3,4,5,6,7,8]){
  const base=`evidence/M9/regression/M${m}/`;
  if(!existsSync(base))continue;
  const ids=[...new Set(Object.values(fresh).flat().filter(x=>x[0]===m).map(x=>x[1]))];
+ const previous=base+'verification.json';if(existsSync(previous)){mkdirSync(base+'verification-history',{recursive:true});renameSync(previous,base+'verification-history/'+Date.now()+'.json');}
  const r=spawnSync(process.execPath,[`scripts/m${m}/verify.mjs`,...ids],{encoding:'utf8',env:{...process.env,[`FCPI_M${m}_EVIDENCE`]:base},maxBuffer:8*1024*1024});
  if(r.error)throw r.error;
 }
-const get=(m,id,old=false)=>{const path=`evidence/${old?'': 'M9/regression/'}M${m}/verification.json`,rec=json(path)?.results?.find(x=>x.test_id===`M${m}-${id}`);return {path,sha256:existsSync(path)?hash(path):null,test_id:`M${m}-${id}`,state:rec?.state??'NOT_RUN',source_commit:rec?.repository_sha??rec?.source_commit??null,config_or_fixture_hash:rec?.config_or_fixture_hash??null};};
+const get=(m,id,old=false)=>{const path=`evidence/${old?'': 'M9/regression/'}M${m}/verification.json`,rec=json(path)?.results?.find(x=>x.test_id===`M${m}-${id}`),base=`evidence/M9/regression/M${m}/`;
+ const receipts=old?[]:(json(base+'collection.json')?.receipts??[]),inputPaths=old?[]:(rec?.input_paths??[]).filter(p=>p.startsWith(base));
+ const externalEvidence=old?[]:(rec?.input_paths??[]).filter(p=>p.startsWith('evidence/')&&!p.startsWith(base));
+ const bindings=inputPaths.map(input=>{const key=inputKey(input),matches=receipts.filter(x=>x.path===key);try{const r=matches.length===1?matches[0]:null,privatePath=r&&/^[A-Za-z0-9_.-]+$/.test(r.private_record??'')?join(homedir(),'.local/share/firecrawl-pi/m9/collections',r.private_record):'',privateBytes=privatePath&&existsSync(privatePath)?readFileSync(privatePath):null,isText=!input.endsWith('/')&&!/\.json$/.test(input);return {path:input,...collectionVerdict(key,r,inputHash(key),isText?text(input):'',sameCode,privateBytes)};}catch{return {path:input,attributed:false,bound:false};}});
+ return {path,sha256:existsSync(path)?hash(path):null,test_id:`M${m}-${id}`,state:rec?.state??'NOT_RUN',verifier_commit:rec?.repository_sha??rec?.source_commit??null,code_dirty:rec?.code_dirty??true,config_or_fixture_hash:rec?.config_or_fixture_hash??null,bindings,tested_bound:old?null:externalEvidence.length===0&&inputPaths.length>0&&bindings.every(x=>x.bound),external_evidence_inputs:externalEvidence};};
 const results=[];
 for(const[id,refs]of Object.entries(fresh)){
  const prior=historical[id].map(([m,t])=>get(m,t,true)),current=refs.map(([m,t])=>get(m,t));
- const bound=current.every(x=>sameCode(x.source_commit)&&x.config_or_fixture_hash);
+ const bound=current.every(x=>sameCode(x.verifier_commit)&&x.code_dirty===false&&x.config_or_fixture_hash&&x.tested_bound);
  const state=prior.some(x=>x.state!=='PASS')?'FAIL':current.some(x=>x.state==='FAIL')?'FAIL':current.some(x=>x.state==='BLOCKED_CREDENTIAL')?'BLOCKED_CREDENTIAL':bound&&current.every(x=>x.state==='PASS')?'PASS':'NOT_RUN';
  results.push({test_id:id,state,historical:prior,current,bound});
 }
@@ -66,6 +73,6 @@ const run=json('evidence/M9/work/fixture-run.json'),fixtureRaw=text('evidence/M9
 // Re-run the scanner, including its live hash controls, rather than trust a summary.
 spawnSync(process.execPath,['scripts/m9/redaction.mjs'],{encoding:'utf8',maxBuffer:8*1024*1024});
 const redaction=json('evidence/M9/redaction.json');results.push({test_id:'M9-REDACTION',state:redaction&&redaction.source_commit===head&&redaction.inputs?.length>1000&&redaction.inputs.every(x=>existsSync(x.path)&&hash(x.path)===x.sha256)&&redaction.positive_controls>=4&&redaction.live_secret_hashes>=30&&redaction.real_secret_hits?.length===0&&redaction.unclassified_hits?.length===0?'PASS':'NOT_RUN'});
-const codeDirty=git('status','--porcelain','--untracked-files=all').split('\n').filter(Boolean).some(x=>!x.slice(3).startsWith('evidence/'));
+const dirty=codeDirty(execFileSync('git',['status','--porcelain=v1','-z','--untracked-files=all'],{encoding:'utf8'}));
 const files=['docs/FIRECRAWL_PI_SPEC.md','docs/FIRECRAWL_PI_MILESTONES.md','deploy/versions.lock.json','patches/series.json','deploy/policies/budget.json','deploy/policies/egress.json','deploy/policies/capabilities.json','evidence/M9/work/corpus-freeze.json','evidence/M9/review/REVIEW.md','evidence/M9/work/root-fixtures.txt','evidence/M9/work/fixture-run.json','evidence/M9/work/pi-fixtures-final.txt','evidence/M9/current/versions.json'];
-const accepted=results.every(x=>x.state==='PASS')&&!codeDirty;const out={schema:'fcpi.m9-acceptance/v2',utc:new Date().toISOString(),source_commit:head,patch_sha256:hash('patches/series.json'),state:accepted?'ACCEPTED':'IN_PROGRESS',exit_code:accepted?0:1,code_dirty:codeDirty,results,inputs:files.filter(existsSync).map(path=>({path,sha256:hash(path)})),limitations:['M8 B00/X04 historical FAIL interpretations preserved','Legacy supplemental M5 X01/X02/X03 FAIL and equivalent PASS evidence preserved','Provider estimates are not invoices','Synthetic routing is not real anti-bot success','Hosted access NOT_ENABLED; single host, power, storage and network fault domain']};writeFileSync('evidence/M9/acceptance.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify({state:out.state,states:Object.fromEntries(results.map(x=>[x.test_id,x.state]))}));process.exitCode=out.exit_code;
+const accepted=results.every(x=>x.state==='PASS')&&!dirty;const out={schema:'fcpi.m9-acceptance/v2',utc:new Date().toISOString(),source_commit:head,patch_sha256:hash('patches/series.json'),state:accepted?'ACCEPTED':'IN_PROGRESS',exit_code:accepted?0:1,code_dirty:dirty,results,inputs:files.filter(existsSync).map(path=>({path,sha256:hash(path)})),limitations:['M8 B00/X04 historical FAIL interpretations preserved','Legacy supplemental M5 X01/X02/X03 FAIL and equivalent PASS evidence preserved','Provider estimates are not invoices','Synthetic routing is not real anti-bot success','Hosted access NOT_ENABLED; single host, power, storage and network fault domain']};writeFileSync('evidence/M9/acceptance.json',JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify({state:out.state,states:Object.fromEntries(results.map(x=>[x.test_id,x.state]))}));process.exitCode=out.exit_code;

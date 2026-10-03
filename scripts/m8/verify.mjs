@@ -945,7 +945,7 @@ const series = json("patches/series.json");
 for (const id of wanted) {
   const c = checks[id];
   if (!c) throw new Error(`unknown check ${id}`);
-  const rec = { test_id: `M8-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, expected: c.expected,
+  const rec = { test_id: `M8-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, input_paths: c.inputs, expected: c.expected,
     evidence_class: c.evidenceClass ?? "fixture-or-host" };
   try {
     // A missing input is NOT_RUN, live or not: only a record whose collector ran and says the owner input is absent is

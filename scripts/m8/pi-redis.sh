@@ -9,13 +9,14 @@
 set -euo pipefail
 . /opt/firecrawl-pi/scripts/ops/lib.sh
 need_root
+MARKER=$STATE/verification/redis-reset.json
 core_user=$(sed -nE 's#^redis://([^:@]*):.*#\1#p' /etc/firecrawl-pi/secrets/core_redis_url); core_user=${core_user:-default}
 if [ -f /etc/firecrawl-pi/secrets/redis_ops_password ]; then user=fcpi_ops; pw() { tr -d '\n' </etc/firecrawl-pi/secrets/redis_ops_password; echo; }
 else user=$core_user; pw() { sed -nE 's#^redis://[^:@]*:([^@]*)@.*#\1#p' /etc/firecrawl-pi/secrets/core_redis_url; }; fi
 r() { pw | docker exec -i "$(cid redis)" sh -c 'read -r p; REDISCLI_AUTH="$p" exec redis-cli --no-auth-warning --user "$0" "$@"' "$user" "$@"; }
 case ${1:-} in
   stats)
-    echo "### meta"; echo "utc=$(utc) source_commit=$(source_commit) user=$user core_user=$core_user"
+    echo "### meta"; echo "utc=$(utc) source_commit=$(source_commit) user=$user core_user=$core_user start_source_commit=$(jq -r ' .source_commit // "unverified" ' "$MARKER" 2>/dev/null || echo unverified) reset_utc=$(jq -r ' .utc // "unverified" ' "$MARKER" 2>/dev/null || echo unverified)"
     echo "### commandstats"; r INFO commandstats | tr -d '\r' | grep '^cmdstat_'
     echo "### acl_users"; r ACL LIST | tr -d '\r' | sed -E 's/ #[0-9a-f]{64}/ #<hash>/g; s/ >[^ ]+/ ><password>/g'
     # The read's own line comes first, so an empty section can never be taken for an empty log: entries counts the
@@ -24,6 +25,7 @@ case ${1:-} in
     echo "acl_log_read=ok entries=$(grep -cx count <<<"$log" || true)"
     [ -z "$log" ] || { printf '%s\n' "$log" | paste -sd' ' - | head -c 4000; echo; }
     echo "### end" ;;
-  reset) r CONFIG RESETSTAT; r ACL LOG RESET ;;
+  reset) r CONFIG RESETSTAT; r ACL LOG RESET
+    mkdir -p "$(dirname "$MARKER")"; jq -cn --arg utc "$(utc)" --arg source "$(source_commit)" '{utc:$utc,source_commit:$source}' | write_atomic "$MARKER" 0640 ;;
   *) die "usage: pi-redis.sh stats | reset" ;;
 esac

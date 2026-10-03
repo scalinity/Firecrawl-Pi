@@ -696,7 +696,7 @@ const series = json("patches/series.json");
 for (const id of wanted) {
   const c = checks[id];
   if (!c) throw new Error(`unknown check ${id}`);
-  const rec = { test_id: `M5-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, expected: c.expected,
+  const rec = { test_id: `M5-${id}`, name: c.name, utc: now(), ...repo, upstream_sha: UPSTREAM_SHA, patch_series_sha256: series.series_sha256, config_or_fixture_hash: null, input_paths: c.inputs.concat(id === "D03" && has(`${RAW}parser-result.json`) ? [`${RAW}parser-result.json`] : []), expected: c.expected,
     evidence_class: ["S05", "E05", "D03"].includes(id) ? "live" : "fixture-or-host" };
   try {
     const missing = c.inputs.filter((p) => !has(p));
