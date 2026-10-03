@@ -32,10 +32,13 @@ else
  while IFS= read -r -d '' p; do git -C "$W/tree" add -- "$p"; done < <(git -C "$W/tree" diff --name-only -z)
  git -C "$W/tree" -c core.hooksPath=/dev/null commit -m "Fix incident $id with owner-approved tested patch" >/dev/null
  code=$(git -C "$W/tree" rev-parse HEAD)
+ # Only approved tracked bytes enter Docker COPY; the mutable tree is not a build context.
+ install -d -m 0755 "$W/build-context"
+ git -C "$W/tree" archive "$code" | tar -xf - -C "$W/build-context"
  # Both bounded services are rebuilt; no browser/upstream/database image changes.
  for component in access retrieval; do
   tag=access-gateway; [ "$component" != retrieval ] || tag=retrieval
-  timeout 600 docker buildx build --platform linux/arm64 --provenance=false --sbom=false --build-arg "FCPI_SOURCE_COMMIT=$code" --load -t "fcpi/$tag:incident-$id" "$W/tree/services/$component" >"$W/build-$component.txt" 2>&1
+  timeout 600 docker buildx build --platform linux/arm64 --provenance=false --sbom=false --build-arg "FCPI_SOURCE_COMMIT=$code" --load -t "fcpi/$tag:incident-$id" "$W/build-context/services/$component" >"$W/build-$component.txt" 2>&1
  done
  access=$(docker image inspect "fcpi/access-gateway:incident-$id" -f '{{.Id}}')
  retrieval=$(docker image inspect "fcpi/retrieval:incident-$id" -f '{{.Id}}')

@@ -4,6 +4,7 @@
 set -euo pipefail
 . "$(dirname "$(readlink -f "$0")")/../ops/lib.sh"
 need_root
+. "$REPO/scripts/m9/incident-paths.sh"
 id=${1:?incident id}; [[ $id =~ ^[0-9a-f]{8}$ ]] || exit 2
 W=$STATE/incidents/work/$id
 systemctl is-active --quiet "fcpi-incident-$id.service" && die 'agent still running'
@@ -12,17 +13,15 @@ systemctl is-active --quiet "fcpi-incident-$id.service" && die 'agent still runn
 chown -R root:root "$W/tree"
 base=$(cat "$W/base-sha")
 [ "$(git -C "$W/tree" rev-parse HEAD)" = "$base" ] || die 'incident base moved'
-# New files are explicitly inspected and individually staged with intent-to-add
-# so the patch includes them; never stage ignored runtime or unrelated files.
+# Reject ignored bytes, including nested node_modules, before hashing/testing.
+[ -z "$(git -C "$W/tree" ls-files --others --ignored --exclude-standard)" ] || die 'ignored bytes in candidate'
 while IFS= read -r -d '' p; do
- case $p in services/access/src/*.mjs|services/access/test/*.mjs|services/retrieval/src/*.mjs|services/retrieval/test/*.mjs|tests/contracts/*.test.mjs) ;; *) die 'unexpected incident file' ;; esac
+ incident_writable "$W/tree" "$p" || die 'unexpected incident file'
  git -C "$W/tree" add -N -- "$p"
 done < <(git -C "$W/tree" ls-files --others --exclude-standard -z)
 paths=()
 while IFS= read -r -d '' p; do
- [[ $p != *$'\n'* && /$p/ != */.* ]] || die 'unexpected incident path'
- case $p in services/access/src/*.mjs|services/access/test/*.mjs|services/retrieval/src/*.mjs|services/retrieval/test/*.mjs|tests/contracts/*.test.mjs) ;; *) die 'incident patch outside approved source' ;; esac
- case $p in */config.mjs|*/auth.mjs|*/incidents.mjs|*/budget*|*/egress*|*/store.mjs|*/schema*|*/admission.mjs|*/security*) die 'incident patch changes protected code' ;; esac
+ incident_writable "$W/tree" "$p" || die 'incident patch changes protected code or existing tests'
  [ -f "$W/tree/$p" ] && [ ! -L "$W/tree/$p" ] || die 'only ordinary files allowed'
  paths+=("$p")
 done < <(git -C "$W/tree" diff --name-only -z)
