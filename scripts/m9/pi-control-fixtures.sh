@@ -11,7 +11,7 @@ cp "$R"/scripts/m9/incident-{prepare,control,agent,hook,paths,apply}.sh "$T/repo
 cp "$R/scripts/ops/notify-ntfy.sh" "$T/repo/scripts/ops/"
 cp "$R/scripts/m9/incident-notice-actions.sh" "$T/repo/scripts/m9/"
 # Only location literals are replaced. Logic under test is unchanged.
-find "$T/repo" -type f -name '*.sh' -exec sed -i -e "s|/opt/firecrawl-pi|$T/repo|g" -e "s|/var/lib/firecrawl-pi|$T/state|g" -e "s|/etc/firecrawl-pi|$T/etc|g" -e "s|/home/danny|$T/home|g" {} +
+find "$T/repo" -type f -name '*.sh' -exec sed -i -e "s|/var/lib/firecrawl-pi|$T/state|g" -e "s|/etc/firecrawl-pi|$T/etc|g" -e "s|/home/danny|$T/home|g" -e "s|/opt/firecrawl-pi|$T/repo|g" {} +
 cat >"$T/repo/scripts/ops/lib.sh" <<SHLIB
 export PATH=$T/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 REPO=$T/repo STATE=$T/state RUND=$T/run

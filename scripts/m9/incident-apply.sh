@@ -7,14 +7,15 @@ set -euo pipefail
 need_root
 id=${1:?}; nonce=${2:?}; [[ $id =~ ^[0-9a-f]{8}$ && $nonce =~ ^[0-9a-f]{32}$ ]] || exit 2
 W=$STATE/incidents/work/$id C=$STATE/incidents/control
+mode=${3:-}
 deployment_started=false final_state=FAILED
 finish_apply() {
  rc=$?
  trap - EXIT TERM INT
- hold_clear incident-deploy || true
- if [ "$rc" != 0 ] && [ "$deployment_started" = true ] && [ "$final_state" = FAILED ] && [ "${3:-}" != --rollback ]; then
+ if [ "$rc" != 0 ] && [ "$deployment_started" = true ] && [ "$final_state" = FAILED ] && [ "$mode" != --rollback ]; then
   if restore_previous; then final_state=ROLLED_BACK; else final_state=ROLLBACK_FAILED; fi
  fi
+ hold_clear incident-deploy || true
  if [ "$rc" != 0 ]; then
   notice deployment_failed "incident_agent:$id" "$(jq -cn --arg state "$final_state" '{state:$state,automatic_retry:false,owner_attention_required:true}')" "$(now_s)" "$id" || true
  fi
@@ -31,10 +32,10 @@ systemctl is-active --quiet "fcpi-incident-$id.service" && die 'agent still acti
 [ "$(jq -r .patch_sha <<<"$g")" = "$(sha256sum "$W/patch.diff" | cut -c1-64)" ] && [ "$(jq -r .tests_sha <<<"$g")" = "$(sha256sum "$W/tests.txt" | cut -c1-64)" ] || die 'approved patch/test binding changed'
 export GIT_CONFIG_GLOBAL=/home/danny/.gitconfig
 base=$(cat "$W/base-sha")
-if [ "${3:-}" != --rollback ]; then
+if [ "$mode" != --rollback ]; then
  [ "$base" = "$(source_commit)" ] || die 'proposal base changed; a new investigation and approval are required'
 fi
-if [ "${3:-}" = --rollback ]; then
+if [ "$mode" = --rollback ]; then
  [ "$(jq -r .action <<<"$g")" = rollback ] && [ -s "$W/release.json" ] || die 'no approved rollback release'
  current=$(source_commit)
  [[ $current = "$base" || $current = "$(jq -r .candidate_sha "$W/release.json")" ]] || die 'release has moved'
@@ -106,7 +107,7 @@ if [ "$rc" = 0 ]; then
 fi
 if [ "$rc" != 0 ]; then
  # An unhealthy gateway cannot be the only way to approve its own recovery.
- if [ "${3:-}" != --rollback ] && restore_previous; then
+ if [ "$mode" != --rollback ] && restore_previous; then
   final_state=ROLLED_BACK
   notice deployment_failed "incident_agent:$id" '{"state":"FAILED_CANDIDATE_ROLLED_BACK","previous_release_verified":true,"automatic_retry":false}' "$(now_s)" "$id"
  else

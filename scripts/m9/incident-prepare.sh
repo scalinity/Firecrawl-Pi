@@ -37,14 +37,16 @@ cleanup_prepare() {
  if [ "$rc" != 0 ]; then
   rm -f "$W/run/auth/access-token"
   if [ "$new" = true ] && ! systemctl is-active --quiet "fcpi-incident-$id.service"; then
-   git --git-dir="$D/source.git" worktree remove --force "$W/tree" 2>/dev/null || true
-   git --git-dir="$D/source.git" branch -D "codex/incident-$id" 2>/dev/null || true
+   [ ! -d "$W/tree" ] || rm -rf -- "$W/tree"
    rm -rf -- "$W"
   fi
  fi
 }
 trap cleanup_prepare EXIT
 base=$(source_commit)
+# Leave the measured host reserve intact before launching another 768 MiB task.
+[ "$(awk '/MemAvailable:/{print $2}' /proc/meminfo)" -ge 2097152 ] || die 'insufficient investigation memory headroom'
+[ "$(df -Pk "$D" | awk 'NR==2{print $4}')" -ge 1048576 ] || die 'insufficient investigation disk headroom'
 if [ ! -e "$W" ]; then
 new=true
 git --git-dir="$D/source.git" cat-file -e "$base^{commit}" || die 'deployed source absent from isolated mirror'
@@ -53,7 +55,8 @@ bundle=$(bash "$REPO/scripts/ops/doctor.sh")
 bundle=${bundle%% *}; [ -s "$bundle" ] || die 'no diagnostic bundle'
 install -d -m 0751 -o root -g root "$W" "$W/empty"
 install -d -m 0700 -o danny -g danny "$W/run" "$W/run/auth"
-git --git-dir="$D/source.git" worktree add --detach "$W/tree" "$base" >/dev/null
+git clone --quiet --no-hardlinks "$D/source.git" "$W/tree"
+git -C "$W/tree" switch --detach "$base" >/dev/null
 git -C "$W/tree" switch -c "codex/incident-$id" >/dev/null
 tar -xzf "$bundle" -C "$W"
 diag=$(find "$W" -mindepth 1 -maxdepth 1 -type d -name 'fcpi-doctor-*' | head -1)

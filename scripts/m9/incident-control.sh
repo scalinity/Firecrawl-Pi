@@ -41,7 +41,7 @@ for f in "$C"/requests/*.json; do
   dismiss) put_obj "$C/dismissed/$id.json" 0600 "$(jq -c '{incident_id,approved_at}' <<<"$g")" ;;
   apply_fix|rollback)
    args=("$id" "$grant"); [ "$action" != rollback ] || args+=(--rollback)
-   if systemd-run --quiet --unit="fcpi-incident-apply-$id" --collect --property=Slice=fcpi.slice --property=MemoryMax=512M --property=MemorySwapMax=0 --property=TasksMax=128 --property=RuntimeMaxSec=3600 --property=TimeoutStopSec=120 --property=KillMode=mixed /bin/bash "$REPO/scripts/m9/incident-apply.sh" "${args[@]}"; then
+   if systemd-run --quiet --unit="fcpi-incident-apply-$id" --collect --property=Slice=fcpi.slice --property=MemoryMax=512M --property=MemorySwapMax=0 --property=TasksMax=128 --property=RuntimeMaxSec=3600 --property=TimeoutStopSec=120 --property=KillMode=mixed --property=NoNewPrivileges=yes /bin/bash "$REPO/scripts/m9/incident-apply.sh" "${args[@]}"; then
     # The apply unit records the final disposition; tick remains available.
     continue
    else rc=$?; fi ;;
@@ -62,8 +62,7 @@ for w in "$D"/work/*; do
   notice diagnosis_ready "incident_agent:$id" '{"state":"INVESTIGATION_FAILED","automatic_retry":false}' "$(now_s)" "$id"
  fi
  if [ -s "$w/launched-at" ] && [ $(( $(now_s) - $(cat "$w/launched-at") )) -gt 1209600 ]; then
-  git --git-dir="$D/source.git" worktree remove --force "$w/tree"
-  git --git-dir="$D/source.git" branch -D "codex/incident-$id" 2>/dev/null || true
+  [ ! -d "$w/tree" ] || rm -rf -- "$w/tree"
   rm -rf -- "$w"; rm -f -- "$C/reports/$id.json"
  fi
 done
