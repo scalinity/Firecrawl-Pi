@@ -205,6 +205,32 @@ test("a post-load tunnel failure on the main frame propagates the actual Cloud r
   } finally { fx.s.close(); }
 });
 
+test("a committed browser error page fails without inventing a proxy policy refusal", async (t) => {
+  const fx = await serve((req, res) => page(res));
+  try {
+    const target = `http://t.fixture.fcpi.test:${fx.port}/`;
+    const errorPage = { ok: true, status: 200, html: "<p>Browser error</p>", finalUrl: "chrome-error://chromewebdata/", navigationUrl: target };
+    for (const [name, reply, expected] of [
+      ["aborted off-host navigation", errorPage, "NAVIGATION_FAILED"],
+      ["unrelated policy refusal", { ...errorPage, proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }] } }, "NAVIGATION_FAILED"],
+      ["unmatched tunnel witness", { ...errorPage, navigationFailure: { class: "NAVIGATION_FAILED", url: "https://public.example/" }, proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }] } }, "NAVIGATION_FAILED"],
+      ["target 403 precedence", { ...errorPage, status: 403 }, "ACCESS_DENIED"],
+      ["resource limit precedence", { ...errorPage, subresources: { overLimit: 1 } }, "RESOURCE_LIMIT"],
+      ["provider failure precedence", { ...errorPage, ok: false, failure: { class: "NAVIGATION_FAILED" }, proxy: { upstreamFailure: { class: "PROXY_UNAVAILABLE" } } }, "PROXY_UNAVAILABLE"],
+      ["cancellation precedence", { ...errorPage, ok: false, failure: { class: "CANCELLED" } }, "CANCELLED"],
+    ]) await t.test(name, async () => {
+      const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
+      store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
+      const r = await acquirerFor(store, policy, { render: async () => reply })(body(target));
+      assert.equal(r.ok, false); assert.equal(r.failure.class, expected);
+      if (expected === "NAVIGATION_FAILED") assert.equal(r.failure.retryable, false);
+      assert.equal(r.attemptsUsed, 1); assert.deepEqual(r.strategies, ["direct_browser"]);
+      assert.equal(store.attempts[0].outcome, expected); assert.equal(store.permits.size, 0);
+      assert.equal(fx.hits.length, 0, "failure introduces no HTTP fallback");
+    });
+  } finally { fx.s.close(); }
+});
+
 test("page text, unmatched refusals and cancellation do not invent a navigation policy failure", async () => {
   const fx = await serve((req, res) => page(res));
   try {

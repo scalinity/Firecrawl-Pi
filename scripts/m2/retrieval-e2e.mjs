@@ -113,7 +113,8 @@ if (groups.has("browser-redirect")) {
   for (const [id, to] of [["BR01-redis", "http://10.231.1.5:6379/"], ["BR02-metadata", "http://169.254.169.254/latest/meta-data/"],
     ["BR03-cloud", "https://api.firecrawl.dev/v1/scrape"], ["BR04-loopback", "http://127.0.0.1:3002/"],
     ["BR05-mapped", "http://[::ffff:10.231.1.5]/"], ["BR06-name", "http://redis:6379/"],
-    ["BR07-lan", process.env.LAN_ADDRESS ? `http://${process.env.LAN_ADDRESS}/` : "http://lan.invalid/"]]) {
+    ["BR07-lan", process.env.LAN_ADDRESS ? `http://${process.env.LAN_ADDRESS}/` : "http://lan.invalid/"],
+    ["BR12-credentialed-private", "http://fixture-user:fixture-password@169.254.169.254/latest/meta-data/"]]) {
     const url = `${M2}/redirect?to=${encodeURIComponent(to)}`;
     await scrape(`${id}-core`, url);
     await acquire(`${id}-rs`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url });
@@ -128,6 +129,11 @@ if (groups.has("browser-redirect")) {
   }
   await scrape("BR11-own-403-core", `${M2}/forbidden-navigation`);
   await acquire("BR11-own-403-rs", { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: `${M2}/forbidden-navigation` });
+  for (const [id, dst] of [["BR13-direct-private", "private"], ["BR14-direct-cloud", "cloud"]]) {
+    const url = `${M2}/postload-denied.html?dst=${dst}&direct=1`;
+    await scrape(`${id}-core`, url);
+    await acquire(`${id}-rs`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url });
+  }
 }
 
 if (groups.has("browser")) {

@@ -503,7 +503,9 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           }
           // M7: a render asked for a screenshot that came back without one did not do what was asked.
           const noShot = r.ok && hooks?.screenshot && !r.screenshot?.base64 ? { class: "BROWSER_ERROR", detail: "the render returned no screenshot" } : null;
-          const failure = navigationFailure ?? providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? noShot ?? (shell
+          const errorPage = r.ok && finalUrl.startsWith("chrome-error:")
+            ? { class: "NAVIGATION_FAILED", detail: "the main frame ended on the browser's error page", retryable: false, retryAfter: null } : null;
+          const failure = navigationFailure ?? providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? errorPage ?? noShot ?? (shell
             ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null));
           await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: s?.bytes ?? r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
           if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }

@@ -3,8 +3,9 @@
 <main id="content"><noscript>Please enable JavaScript.</noscript></main>
 <script>
 setTimeout(() => {
-  const destination = new URLSearchParams(location.search).get('dst') === 'cloud'
+  const params = new URLSearchParams(location.search);
+  const destination = params.get('dst') === 'cloud'
     ? 'https://api.firecrawl.dev/v1/scrape' : 'http://169.254.169.254/latest/meta-data/';
-  location.href = '/redirect?to=' + encodeURIComponent(destination);
+  location.href = params.get('direct') === '1' ? destination : '/redirect?to=' + encodeURIComponent(destination);
 }, 100);
 </script>
