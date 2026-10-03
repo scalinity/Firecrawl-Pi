@@ -600,10 +600,12 @@ const checks = {
       const sentinel = /^fcpi-m3-persist-[0-9a-f]{12}$/.test(V ?? "");
       const lw = kv(pick("write", "ledger ").split(" ").slice(1)), files = +((pick("write", "archive files=").match(/files=(\d+)/) ?? [])[1]);
       const archiveFull = files > 0 && Number.isInteger(+lw.documents_distinct_sha256) && files >= +lw.documents_distinct_sha256 && +lw.events > 0 && +lw.idempotency > 0;
+      const billing = kv(pick("write", "billing ").split(" ").slice(1));
+      const billingFull = +billing.reservations > 0 && +billing.usage > 0 && /^[0-9a-f]{64}$/.test(billing.rows_sha256 ?? "") && same("billing ");
       const ok = sentinel && archiveFull && replaced && healthy && /recreate_exit=0/.test((s.recreate ?? []).join(" ")) && r.postgres_read === V && r.redis_read === V && (r.rabbitmq_read ?? "").includes(V) &&
-        same("ledger ") && same("archive files=") && pick("read", "archive files_whose_content_differs_from_name=") === "archive files_whose_content_differs_from_name=0" && same("registry ") &&
+        same("ledger ") && billingFull && same("archive files=") && pick("read", "archive files_whose_content_differs_from_name=") === "archive files_whose_content_differs_from_name=0" && same("registry ") &&
         (s.core_logs_before ?? []).some((l) => l.startsWith("classified ")) && one(ar.tokens, "still_valid")?.status === 200 && served && endOk(ar);
-      return { ok, actual: `replaced=${replaced}; healthy=${healthy}; sentinels pg=${r.postgres_read === V} redis=${r.redis_read === V} rabbitmq=${(r.rabbitmq_read ?? "").includes(V)}; ledger same=${same("ledger ")}; archive same=${same("archive files=")}; registry same=${same("registry ")}; served after=${served}` };
+      return { ok, actual: `replaced=${replaced}; healthy=${healthy}; sentinels pg=${r.postgres_read === V} redis=${r.redis_read === V} rabbitmq=${(r.rabbitmq_read ?? "").includes(V)}; ledger same=${same("ledger ")}; billing same=${billingFull}; archive same=${same("archive files=")}; registry same=${same("registry ")}; served after=${served}` };
     } },
   X03: { name: "non-internal-containers-name-their-dns-and-the-core-stays-inside", inputs: [`${RAW}egress-probe.txt`],
     expected: "every container on a non-internal network names its own DNS upstream (the gateway 192.0.2.1, the retrieval service its egress bridge's host address); the core has no default route; the M3 fixture joins only the internal fixture network",

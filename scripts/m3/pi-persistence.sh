@@ -32,6 +32,10 @@ SELECT 'ledger jobs=' || (SELECT count(*) FROM fcpi_platform.job) || ' events=' 
        coalesce((SELECT string_agg(id || '|' || job_id || '|' || coalesce(from_state, '') || '|' || to_state || '|' || coalesce(detail, '') || '|' || at, ',' ORDER BY id) FROM fcpi_platform.job_event), '') || '#' ||
        coalesce((SELECT string_agg(principal || '|' || operation || '|' || key || '|' || request_hash || '|' || job_id || '|' || expires_at, ',' ORDER BY principal, operation, key) FROM fcpi_platform.idempotency), ''), 'UTF8')), 'hex');
 SELECT 'retrieval_rows acquisitions=' || (SELECT count(*) FROM fcpi_retrieval.acquisition) || ' attempts=' || (SELECT count(*) FROM fcpi_retrieval.attempt);
+SELECT 'billing reservations=' || (SELECT count(*) FROM fcpi_retrieval.budget_reservation) || ' usage=' || (SELECT count(*) FROM fcpi_retrieval.budget_usage)
+  || ' rows_sha256=' || encode(sha256(convert_to(
+       coalesce((SELECT string_agg(to_jsonb(b)::text, ',' ORDER BY id) FROM fcpi_retrieval.budget_reservation b), '') || '#' ||
+       coalesce((SELECT string_agg(to_jsonb(b)::text, ',' ORDER BY to_jsonb(b)::text) FROM fcpi_retrieval.budget_usage b), ''), 'UTF8')), 'hex');
 SQL
 }
 archive() {
