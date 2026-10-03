@@ -90,7 +90,9 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${m.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
     Object.assign(hold, { breaker, probe });
     const body = { model, messages, temperature: 0, n: 1, response_format: { type: "json_schema", json_schema: { name: "extraction", strict: true, schema } },
-      [prov.maxTokensParam]: maxOutputTokens, ...(prov.store === false ? { store: false } : {}) };
+      [prov.maxTokensParam]: maxOutputTokens, ...(prov.store === false ? { store: false } : {}),
+      // The selected Luna contract keeps deterministic extraction and disables implicit cache writes.
+      ...(m.reasoningEffort === "none" ? { reasoning_effort: "none", prompt_cache_options: { mode: "explicit" }, service_tier: "default" } : {}) };
     const payload = Buffer.from(JSON.stringify(body));
     const amount = maxModelCost(card, payload.length, maxOutputTokens);
     const { day, month } = periodStarts();
@@ -180,13 +182,15 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     breaker.success();
     const msg = json?.choices?.[0]?.message ?? {};
     const u = json?.usage;
-    const usage = u && Number.isInteger(u.prompt_tokens) && Number.isInteger(u.completion_tokens)
-      ? { promptTokens: u.prompt_tokens, completionTokens: u.completion_tokens, cachedTokens: u.prompt_tokens_details?.cached_tokens ?? 0 } : null;
+    const counts = [u?.prompt_tokens, u?.completion_tokens, u?.prompt_tokens_details?.cached_tokens ?? 0, u?.prompt_tokens_details?.cache_write_tokens ?? 0];
+    const usage = counts.every((n) => Number.isSafeInteger(n) && n >= 0) && counts[2] + counts[3] <= counts[0]
+      ? { promptTokens: counts[0], completionTokens: counts[1], cachedTokens: counts[2], cacheWriteTokens: counts[3] } : null;
     // Without the provider's counts the whole reservation is the charge: never less than it could be.
     const cost = usage ? modelCost(card, usage) : amount;
-    const result = { content: typeof msg.content === "string" ? msg.content : null, refusal: msg.refusal ?? null, finishReason: json?.choices?.[0]?.finish_reason ?? null };
+    const result = { resolvedModel: typeof json.model === "string" ? json.model : null, content: typeof msg.content === "string" ? msg.content : null, refusal: msg.refusal ?? null, finishReason: json?.choices?.[0]?.finish_reason ?? null };
     await store.settleBudget(res.id, cost, { usage, result, detail: usage ? (cost > amount ? `settled above the reservation by ${cost - amount}` : null) : "usage absent from the answer; settled at the reservation" });
     log({ event: "model_call", logical_id: logicalId, call: callKey, kind, model, outcome: "answered", prompt_tokens: usage?.promptTokens ?? null, completion_tokens: usage?.completionTokens ?? null,
+      cached_tokens: usage?.cachedTokens ?? null, cache_write_tokens: usage?.cacheWriteTokens ?? null, resolved_model: result.resolvedModel,
       reserved_micro_usd: amount, cost_micro_usd: cost, finish_reason: result.finishReason, ms: Date.now() - started });
     return { ...result, usage, cost, reused: false, reservationId: res.id };
   }
@@ -292,7 +296,7 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     const requestHash = sha(canonical({ model, schema, prompt, systemPrompt, docs: docs.map((d) => [d.url, sha(d.markdown)]), maxInputTokens: X.maxInputTokens, instructions: sha(SYSTEM) }));
     let data = null;
     const sources = {}, outcomes = [];
-    const usage = { calls: 0, reused: 0, promptTokens: 0, completionTokens: 0, costMicroUsd: 0 };
+    const usage = { calls: 0, reused: 0, promptTokens: 0, completionTokens: 0, cachedTokens: 0, cacheWriteTokens: 0, costMicroUsd: 0 };
     let stop = null;
     for (const [i, c] of chunks.entries()) {
       const src = c.parts > 1 ? `${c.url}#part=${c.part}/${c.parts}` : c.url;
@@ -301,7 +305,7 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
       if (stop) { outcomes.push({ url: c.url, part: c.part, ok: false, failure: stop }); continue; }
       const messages = [{ role: "system", content: instructions },
         { role: "user", content: `${task}Content of ${c.url}${c.parts > 1 ? ` (part ${c.part} of ${c.parts})` : ""}, between the markers:\n<<<CONTENT\n${c.text}\nCONTENT>>>` }];
-      const account = (r) => { usage.calls++; if (r.reused) usage.reused++; usage.promptTokens += r.usage?.promptTokens ?? 0; usage.completionTokens += r.usage?.completionTokens ?? 0; usage.costMicroUsd += r.cost ?? 0; };
+      const account = (r) => { usage.calls++; if (r.reused) usage.reused++; usage.promptTokens += r.usage?.promptTokens ?? 0; usage.completionTokens += r.usage?.completionTokens ?? 0; usage.cachedTokens += r.usage?.cachedTokens ?? 0; usage.cacheWriteTokens += r.usage?.cacheWriteTokens ?? 0; usage.costMicroUsd += r.cost ?? 0; };
       const judge = (r) => {
         if (r.refusal) return { refused: r.refusal };
         if (r.finishReason === "length") return { limit: true };

@@ -1660,7 +1660,7 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "5480507c7af1e37448c8ad2cc82d0a8fdc673f96d2580f8d5baaf6de2e2250b9",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
       "paid_caps": {
         "llm": {
           "day": 0,
@@ -1685,14 +1685,15 @@
     },
     "rate_cards": [
       {
-        "id": "openai/gpt-4.1-mini-2025-04-14@2026-09-26",
-        "subject": "gpt-4.1-mini-2025-04-14",
-        "effectiveFrom": "2026-09-26",
+        "id": "openai/gpt-6-luna@2026-10-02",
+        "subject": "gpt-6-luna",
+        "effectiveFrom": "2026-10-02",
         "effectiveTo": null,
-        "inputPerMTok": 400000,
-        "cachedInputPerMTok": 100000,
-        "outputPerMTok": 1600000,
-        "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini, observed 2026-09-26 (spec O11)"
+        "inputPerMTok": 100000,
+        "cachedInputPerMTok": 10000,
+        "cacheWritePerMTok": 125000,
+        "outputPerMTok": 500000,
+        "source": "https://developers.openai.com/api/docs/pricing and /api/docs/models/gpt-6-luna, observed 2026-10-02: Standard, below 272K context; implicit cache writes disabled"
       },
       {
         "id": "fixture/fcpi-fixture-model@2026-09-26",
@@ -1801,9 +1802,10 @@
       }
     ],
     "models": {
-      "gpt-4.1-mini-2025-04-14": {
+      "gpt-6-luna": {
         "provider": "openai",
-        "category": "llm"
+        "category": "llm",
+        "reasoningEffort": "none"
       },
       "fcpi-fixture-model": {
         "provider": "fixture-model",
@@ -1832,7 +1834,7 @@
         "version": "fixture-1"
       }
     },
-    "default_model": "gpt-4.1-mini-2025-04-14",
+    "default_model": "gpt-6-luna",
     "default_parser": "llamaparse-cost-effective",
     "providers": {
       "openai": {

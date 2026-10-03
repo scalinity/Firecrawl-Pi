@@ -21,13 +21,14 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const phase = process.argv[2];
+const heldOnly = process.argv.includes("--held-only");
 if (!["fixture", "live"].includes(phase)) { console.error("usage: e2e.mjs fixture|live"); process.exit(2); }
 const T = Object.fromEntries(readFileSync(join(ROOT, "scripts/m1/pi-target.conf"), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
 const SSH = ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15"];
 const HOST = "127.0.0.1:3380", FX5 = "http://m5.fixture.fcpi.test:8080", FX2 = "http://m2.fixture.fcpi.test:8080", FX3 = "http://m3.fixture.fcpi.test:8080";
 const MODERN = "2026-07-28";
 const META = { "io.modelcontextprotocol/protocolVersion": MODERN, "io.modelcontextprotocol/clientCapabilities": {}, "io.modelcontextprotocol/clientInfo": { name: "fcpi-m5-e2e", version: "1" } };
-const PRODUCTION = ["fixture", "gpt-4.1-mini-2025-04-14", "llamaparse-cost-effective"];
+const PRODUCTION = ["fixture", "gpt-6-luna", "llamaparse-cost-effective"];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 const SCHEMA = { type: "object", properties: { product: { type: "string" }, price: { type: "number" }, in_stock: { type: "boolean" }, feature: { type: "array", items: { type: "string" } } }, required: ["product"] };
@@ -382,10 +383,12 @@ async function livePhase() {
   const paid = providers.paidDispatch === true;
   const modelLive = has("openai") && paid && (providers.caps?.llm?.caps?.day ?? 0) > 0;
   const parserLive = has("llamaparse") && paid && (providers.caps?.parser?.caps?.month ?? 0) > 0;
-  select("live", modelLive ? "gpt-4.1-mini-2025-04-14" : PRODUCTION[1], PRODUCTION[2]);
+  select("live", modelLive ? "gpt-6-luna" : PRODUCTION[1], PRODUCTION[2]);
   // Live search: results, a query nothing matches, and one through MCP. Few queries, each fanned to three engines.
   const nonce = randomUUID().slice(0, 8);
-  let r = await rest("POST", "/v2/search", { query: "Raspberry Pi 5 official product brief", limit: 5 });
+  let r;
+  if (!heldOnly) {
+  r = await rest("POST", "/v2/search", { query: "Raspberry Pi 5 official product brief", limit: 5 });
   out("live_search", { case: "results", ...brief(r), results: webOf(r)?.length ?? null, hosts: webOf(r)?.map((x) => { try { return new URL(x.url).hostname; } catch { return null; } }) ?? null, warning: r.json?.warning ?? null });
   await sleep(3000);
   r = await rest("POST", "/v2/search", { query: `"fcpiqz${nonce}xk7vw3m9"`, limit: 5 });
@@ -395,6 +398,7 @@ async function livePhase() {
   out("live_search", { case: "mcp_results", isError: t.isError, results: t.payload?.data?.web?.length ?? null, code: t.payload?.error?.code ?? null });
   out("live_search_log", { events: jsonLog("retrieval-service", since).filter((l) => l.event === "search").map((e) => ({ outcome: e.outcome, selection: e.selection, engines: e.engines, results: e.results ?? null, unresponsive: e.unresponsive ?? null })),
     egress: jsonLog("retrieval-service", since).filter((l) => l.event === "proxy_request" && l.session === "searxng").map((e) => ({ method: e.method, host: e.target_host, status: e.status ?? null, bytes_in: e.bytes_in ?? null })) });
+  }
   // The live model and parser, only with a credential and an approved budget; otherwise their state is recorded.
   const m0 = piNow();
   if (modelLive) {
@@ -402,19 +406,23 @@ async function livePhase() {
     out("live_model", { case: "json_format", ...brief(r), json: docOf(r)?.json ?? null, fcpi: r.json?.fcpi ?? null });
     r = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/injection.html`, formats: [{ type: "json", schema: SCHEMA }] });
     out("live_model", { case: "injection_ignored", ...brief(r), json: docOf(r)?.json ?? null });
+    const nullable = { type: "object", properties: { product: {type:"string"}, manufacturer: {type:["string","null"]} }, required:["product","manufacturer"] };
+    r = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/product.html`, formats: [{type:"json",schema:nullable,prompt:"The source gives no manufacturer. Return null for manufacturer."}] });
+    out("live_model", {case:"missing_is_null", ...brief(r), json:docOf(r)?.json ?? null, fcpi:r.json?.fcpi ?? null});
     r = await rest("POST", "/v2/extract", { urls: [`${FX5}/extract/product.html`, `${FX5}/extract/other.html`], schema: SCHEMA });
     const job = r.json?.id;
     r = await pollExtract(job);
     out("live_model", { case: "extract_job", ...brief(r), status_field: r.json?.status ?? null, data: r.json?.data ?? null, sources: r.json?.sources ?? null, usage: r.json?.fcpi?.usage ?? null });
   } else out("live_model", { case: "blocked", credential: providers.providers?.openai?.credential ?? null, paidDispatch: paid, llmCaps: providers.caps?.llm ?? null });
   if (parserLive) {
-    select("live", modelLive ? "gpt-4.1-mini-2025-04-14" : PRODUCTION[1], "llamaparse-cost-effective");
-    for (const [c, path] of [["scan_only", "/docs/scan.pdf"], ["complex", "/docs/table.pdf"]]) {
+    select("live", modelLive ? "gpt-6-luna" : PRODUCTION[1], "llamaparse-cost-effective");
+    for (const [c, path] of [["scan_only", "/docs/scan.pdf"], ["complex", "/docs/table.pdf"], ["scan_cached", "/docs/scan.pdf"]]) {
       r = await rest("POST", "/v2/scrape", { url: `${FX5}${path}?live=${nonce}`, formats: ["markdown"] });
       out("live_parser", { case: c, ...brief(r), chars: docOf(r)?.markdown?.length ?? null, head: docOf(r)?.markdown?.slice(0, 300) ?? null });
     }
   } else out("live_parser", { case: "blocked", credential: providers.providers?.llamaparse?.credential ?? null, paidDispatch: paid, parserCaps: providers.caps?.parser ?? null });
   out("ledger", { point: "live", rows: ledger(m0) });
+  out("provider_log", {events:jsonLog("retrieval-service",m0).filter(l=>["model_call","parse","parse_cleanup"].includes(l.event))});
   resources("live-end");
   out("connections", { hosts: [...new Set(seen)].sort(), lookups: [...new Set(looked)].filter((h) => h !== "localhost").sort() });
   out("meta_end", { pi_utc: piNow(), selection_after: JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show")) });

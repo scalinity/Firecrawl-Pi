@@ -27,7 +27,7 @@ test("the budget policy refuses what would open a gap", () => {
     ["negative cap", (j) => { j.categories.llm.caps.day = -1; }],
     ["a paid provider on a fixture host", (j) => { j.providers.openai.baseUrl = "http://model.fixture.fcpi.test:8080/v1"; }],
     ["an unpaid provider on the Internet", (j) => { j.providers["fixture-model"].baseUrl = "http://api.example.com/v1"; }],
-    ["a paid model on an unpaid category", (j) => { j.models["gpt-4.1-mini-2025-04-14"].category = "fixture"; }],
+    ["a paid model on an unpaid category", (j) => { j.models["gpt-6-luna"].category = "fixture"; }],
     ["overlapping rate cards", (j) => { j.rateCards.push({ ...j.rateCards[0], id: "dup", effectiveFrom: "2026-10-01" }); }],
     ["a rate card for an unknown subject", (j) => { j.rateCards.push({ ...j.rateCards[0], id: "x", subject: "gpt-9" }); }],
     ["input cap past spec §14", (j) => { j.extraction.maxInputTokens = 64000; }],
@@ -39,9 +39,9 @@ test("the budget policy refuses what would open a gap", () => {
 
 test("rate cards apply by effective date; a card that has ended is none", () => {
   const b = loadBudgetPolicy(RAW);
-  assert.equal(rateCardFor(b, "gpt-4.1-mini-2025-04-14", new Date("2026-09-26T12:00:00Z")).id, "openai/gpt-4.1-mini-2025-04-14@2026-09-26");
-  assert.equal(rateCardFor(b, "gpt-4.1-mini-2025-04-14", new Date("2026-09-25T12:00:00Z")), null, "before its start");
-  assert.equal(rateCardFor(b, "fcpi-fixture-stale", new Date("2026-09-26T12:00:00Z")), null);
+  assert.equal(rateCardFor(b, "gpt-6-luna", new Date("2026-10-02T12:00:00Z")).id, "openai/gpt-6-luna@2026-10-02");
+  assert.equal(rateCardFor(b, "gpt-6-luna", new Date("2026-09-25T12:00:00Z")), null, "before its start");
+  assert.equal(rateCardFor(b, "fcpi-fixture-stale", new Date("2026-10-02T12:00:00Z")), null);
   assert.deepEqual(periodStarts(new Date("2026-09-26T23:59:59Z")), { day: "2026-09-26", month: "2026-09-01" });
 });
 
@@ -52,6 +52,16 @@ test("costs round up; the reservation bounds any byte-level tokenizer's count", 
   assert.equal(modelCost(card, { promptTokens: 1000, cachedTokens: 1000, completionTokens: 0 }), 100);
   assert.equal(maxModelCost(card, 96000, 4000), modelCost(card, { promptTokens: 96000, completionTokens: 4000 }));
   assert.ok(estimateTokens("a".repeat(3000)) === 1000 && estimateTokens("漢字".repeat(10)) === 20);
+});
+
+test("Luna prices cache writes separately and reserves at the highest input rate", () => {
+  const b = loadBudgetPolicy(RAW), card = rateCardFor(b, "gpt-6-luna", new Date("2026-10-02T12:00:00Z"));
+  assert.deepEqual(Object.keys(b.models).filter((m) => b.providers[b.models[m].provider].paid), ["gpt-6-luna"]);
+  assert.equal(b.models["gpt-6-luna"].reasoningEffort, "none");
+  assert.equal(modelCost(card, { promptTokens: 1000000, cachedTokens: 200000, cacheWriteTokens: 300000, completionTokens: 100000 }), 139500);
+  assert.equal(maxModelCost(card, 1000000, 100000), 175000);
+  assert.throws(() => loadBudgetPolicy(mutate((j) => { j.models["gpt-6-luna"].reasoningEffort = "high"; })), /reasoningEffort/);
+  assert.throws(() => loadBudgetPolicy(mutate((j) => { j.rateCards[0].cacheWritePerMTok = -1; })), /cacheWritePerMTok/);
 });
 
 test("the breaker opens after its failures, admits one probe, and closes on its success", () => {
@@ -114,7 +124,7 @@ test("the egress policy's search section and the host selection are validated", 
   assert.throws(() => loadPolicy(e((j) => { j.search.deadlineMs = 20000; })), /deadlineMs/);
   assert.throws(() => loadPolicy(e((j) => { j.search.engineHosts.live.push("search.fixture.fcpi.test"); })), /public host/);
   const b = loadBudgetPolicy(RAW);
-  assert.deepEqual(defaultSelection(b), { search: "fixture", extractionModel: "gpt-4.1-mini-2025-04-14", parser: "llamaparse-cost-effective", proxy: "decodo-residential", enhanced: "zyte-api" });
+  assert.deepEqual(defaultSelection(b), { search: "fixture", extractionModel: "gpt-6-luna", parser: "llamaparse-cost-effective", proxy: "decodo-residential", enhanced: "zyte-api" });
   assert.equal(loadSelection(JSON.stringify({ search: "live", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b).search, "live");
   assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "gpt-4o", parser: "fcpi-fixture-parser" }), p, b), /extractionModel/);
   assert.throws(() => loadSelection(JSON.stringify({ search: "everything", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b), /search/);

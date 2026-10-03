@@ -29,7 +29,7 @@ const HOST = "127.0.0.1:3380";
 const FX = (h = "m6") => `http://${h}.fixture.fcpi.test:8080`;
 const MODERN = "2026-07-28";
 const META = { "io.modelcontextprotocol/protocolVersion": MODERN, "io.modelcontextprotocol/clientCapabilities": {}, "io.modelcontextprotocol/clientInfo": { name: "fcpi-m6-e2e", version: "1" } };
-const MODEL = "gpt-4.1-mini-2025-04-14", PARSER = "llamaparse-cost-effective";
+const MODEL = "gpt-6-luna", PARSER = "llamaparse-cost-effective";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 
@@ -356,6 +356,12 @@ async function livePhase(before) {
     const p = await scrape(`${echo}&r=1`, { proxy: "stealth", formats: ["rawHtml"] });
     const ip = (r) => { try { return JSON.parse((docOf(r)?.rawHtml ?? "").replace(/<[^>]+>/g, "")).ip; } catch { return null; } };
     out("live_egress", { case: "direct_vs_proxied", direct: brief(d), proxied: brief(p), direct_ip_sha256: ip(d) ? sha(ip(d)) : null, proxied_ip_sha256: ip(p) ? sha(ip(p)) : null, differ: !!ip(d) && !!ip(p) && ip(d) !== ip(p), proxyUsed: docOf(p)?.metadata?.proxyUsed ?? null });
+    const html = '<!doctype html><title>FCPI public routing fixture</title><main><h1>FCPI proxy browser test</h1><p>This controlled public test page loads one image through the assigned residential route.</p><img src="https://httpbingo.org/image/png"></main>';
+    const browserUrl = `https://httpbingo.org/base64/${Buffer.from(html).toString("base64url")}?content-type=text/html`;
+    const browser = await scrape(browserUrl, {proxy:"stealth",formats:["rawHtml"],actions:[{type:"wait",milliseconds:1000}]});
+    const browserLog = jsonLog("retrieval-service",since);
+    out("live_browser", {case:"assigned_subresource_route", ...brief(browser), proxyUsed:docOf(browser)?.metadata?.proxyUsed ?? null, pagePresent:/FCPI proxy browser test/.test(docOf(browser)?.rawHtml ?? ""),
+      acquisitions:browserLog.filter(l=>l.event==="acquisition" && l.domain==="httpbingo.org"), tunnels:browserLog.filter(l=>l.event==="proxy_tunnel_closed" && l.target_host==="httpbingo.org").map(l=>({session:l.session,host:l.target_host,route:l.route,provider_bytes:l.provider_bytes}))});
     select("live", before.extractionModel, before.parser, "decodo-residential");
     const s = await rest("POST", "/v2/search", { query: "Raspberry Pi 5 official product brief", limit: 5 });
     out("live_search", { case: "residential_engines", ...brief(s), results: (s.json?.data?.web ?? []).length, warning: s.json?.warning ?? null,

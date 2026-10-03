@@ -10,8 +10,8 @@ import { fixtures, serve, policyFor, lookupFixture, budgetFor, providersDir, Fak
 const SCHEMA = { type: "object", properties: { product: { type: "string" }, price: { type: "number" }, in_stock: { type: "boolean" }, feature: { type: "array", items: { type: "string" } } }, required: ["product"] };
 const DOC = (extra = "") => ({ url: "http://m5.fixture.fcpi.test:8080/extract/product.html", markdown: `# Fixture Widget\n\nProduct: Fixture Widget\n\nPrice: 42.50\n\nIn stock: yes\n\nFeature[]: sturdy\n\n${extra}` });
 
-async function rig({ mutate, paidDispatch = false, creds = {}, timeoutMs } = {}) {
-  const srv = await serve(fixtures.modelHandler);
+async function rig({ mutate, paidDispatch = false, creds = {}, timeoutMs, handler = fixtures.modelHandler } = {}) {
+  const srv = await serve(handler);
   fixtures.resetStats();
   const budget = budgetFor({ modelPort: srv.port, mutate: (b) => { if (timeoutMs) b.extraction.requestTimeoutMs = timeoutMs; mutate?.(b); } });
   const store = new FakeLedger();
@@ -22,6 +22,32 @@ async function rig({ mutate, paidDispatch = false, creds = {}, timeoutMs } = {})
   return { srv, budget, store, adapter, extract, logs, calls: () => fixtures.providerStats().model.calls };
 }
 const req = (over = {}) => ({ logicalId: `test:${crypto.randomUUID()}`, schema: SCHEMA, documents: [DOC()], ...over });
+
+test("Luna request parameters and cache-write usage stay inside the reservation", async () => {
+  let sent;
+  const r = await rig({ mutate: (b) => {
+    b.models["fcpi-fixture-model"].reasoningEffort = "none";
+    Object.assign(b.rateCards.find((c) => c.subject === "fcpi-fixture-model"), { inputPerMTok: 100000, cachedInputPerMTok: 10000, cacheWritePerMTok: 125000, outputPerMTok: 500000 });
+  }, handler: async (q, s) => {
+    const chunks = []; for await (const c of q) chunks.push(c);
+    sent = JSON.parse(Buffer.concat(chunks));
+    s.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ product: "Fixture Widget", price: null, in_stock: null, feature: null }) }, finish_reason: "stop" }],
+      usage: { prompt_tokens: 100, completion_tokens: 20, prompt_tokens_details: { cached_tokens: 10, cache_write_tokens: 40 } } }));
+  } });
+  try {
+    const out = await r.extract(req());
+    assert.equal(out.ok, true);
+    assert.equal(sent.reasoning_effort, "none");
+    assert.deepEqual(sent.prompt_cache_options, { mode: "explicit" });
+    assert.equal(sent.service_tier, "default");
+    assert.equal(sent.store, false);
+    assert.equal(sent.response_format.json_schema.strict, true);
+    const row = [...r.store.rows.values()][0];
+    assert.deepEqual(row.usage, { promptTokens: 100, completionTokens: 20, cachedTokens: 10, cacheWriteTokens: 40 });
+    assert.equal(row.actual, 21);
+    assert.ok(row.reserved >= row.actual);
+  } finally { await r.srv.close(); }
+});
 
 test("a schema-valid extraction settles from the provider's usage, keeps nulls and names its source", async () => {
   const r = await rig();
@@ -63,7 +89,7 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
     const cases = [
       [{ model: "gpt-4o" }, "MODEL_NOT_ALLOWED"],
       [{ model: "fcpi-fixture-stale" }, "RATE_CARD_MISSING"],
-      [{ model: "gpt-4.1-mini-2025-04-14" }, "PAID_DISPATCH_DISABLED"],
+      [{ model: "gpt-6-luna" }, "PAID_DISPATCH_DISABLED"],
     ];
     for (const [over, cls] of cases) {
       const out = await r.extract(req(over));
@@ -75,13 +101,13 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
   } finally { await r.srv.close(); }
   const p = await rig({ paidDispatch: true });
   try {
-    const out = await p.extract(req({ model: "gpt-4.1-mini-2025-04-14" }));
+    const out = await p.extract(req({ model: "gpt-6-luna" }));
     assert.equal(out.failure.class, "BLOCKED_CREDENTIAL");
   } finally { await p.srv.close(); }
   // With paid dispatch on and a credential present, the zero cap still refuses before any request leaves.
   const z = await rig({ paidDispatch: true, creds: { openai_api_key: "sk-test-not-a-real-key-0000000000" } });
   try {
-    const out = await z.extract(req({ model: "gpt-4.1-mini-2025-04-14" }));
+    const out = await z.extract(req({ model: "gpt-6-luna" }));
     assert.equal(out.failure.class, "BUDGET_EXHAUSTED");
     assert.match(out.failure.detail, /llm day budget has 0 of 0/);
     assert.equal(z.store.rows.size, 0);

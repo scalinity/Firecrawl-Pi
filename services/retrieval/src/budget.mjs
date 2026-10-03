@@ -75,7 +75,8 @@ export function loadBudgetPolicy(text) {
   }
   const subjectOf = (kind, map) => {
     for (const [name, m] of Object.entries(map)) {
-      exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : []);
+      exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort"] : []);
+      if (kind === "model" && m.reasoningEffort !== undefined && m.reasoningEffort !== "none") throw new Error(`model ${name}.reasoningEffort must be none`);
       const prov = p.providers[m.provider], cat = p.categories[m.category];
       if (!prov || prov.kind !== kind) throw new Error(`${kind} ${name} names ${m.provider}, which is not a ${kind} provider`);
       if (!cat) throw new Error(`${kind} ${name} names unknown category ${m.category}`);
@@ -96,7 +97,8 @@ export function loadBudgetPolicy(text) {
     exact(r, isParser ? ["id", "subject", "effectiveFrom", "effectiveTo", "creditsPerPage", "microUsdPerCredit", "source"]
       : isProxy ? ["id", "subject", "effectiveFrom", "effectiveTo", "microUsdPerGB", "billing", "source"]
       : isEnhancer ? ["id", "subject", "effectiveFrom", "effectiveTo", "microUsdPerHttpRequest", "microUsdPerBrowserRequest", "billing", "source"]
-      : ["id", "subject", "effectiveFrom", "effectiveTo", "inputPerMTok", "cachedInputPerMTok", "outputPerMTok", "source"], `rate card ${r.id}`);
+      : ["id", "subject", "effectiveFrom", "effectiveTo", "inputPerMTok", "cachedInputPerMTok", "outputPerMTok", "source"], `rate card ${r.id}`, !isParser && !isProxy && !isEnhancer ? ["cacheWritePerMTok"] : []);
+    if (r.cacheWritePerMTok !== undefined) posInt(r.cacheWritePerMTok, 1, 1e9, `rate card ${r.id}.cacheWritePerMTok`);
     // M7: Zyte prices a request by the target's tier, which no answer reports; the card holds the highest tier's price for
     // each request type, and a successful response is charged at it (spec §28.3: a conservative maximum).
     if (isEnhancer) {
@@ -176,14 +178,15 @@ export function rateCardFor(policy, subject, now = new Date()) {
 export const proxyCost = (card, bytes) => Math.ceil((bytes * card.microUsdPerGB) / 1e9);
 
 // Micro-USD for a model call, rounded up so settlement never undercounts.
-export function modelCost(card, { promptTokens, cachedTokens = 0, completionTokens }) {
+export function modelCost(card, { promptTokens, cachedTokens = 0, cacheWriteTokens = 0, completionTokens }) {
   const cached = Math.min(cachedTokens, promptTokens);
-  return Math.ceil(((promptTokens - cached) * card.inputPerMTok + cached * card.cachedInputPerMTok + completionTokens * card.outputPerMTok) / 1e6);
+  const written = Math.min(cacheWriteTokens, promptTokens - cached);
+  return Math.ceil(((promptTokens - cached - written) * card.inputPerMTok + cached * card.cachedInputPerMTok + written * (card.cacheWritePerMTok ?? card.inputPerMTok) + completionTokens * card.outputPerMTok) / 1e6);
 }
 
 // The conservative maximum a model call can cost: its input can hold no more tokens than bytes (every
 // token of a byte-level tokenizer covers at least one byte), and its output no more than it may write.
-export const maxModelCost = (card, inputBytes, maxOutputTokens) => modelCost(card, { promptTokens: inputBytes, completionTokens: maxOutputTokens });
+export const maxModelCost = (card, inputBytes, maxOutputTokens) => modelCost({ ...card, inputPerMTok: Math.max(card.inputPerMTok, card.cacheWritePerMTok ?? 0) }, { promptTokens: inputBytes, completionTokens: maxOutputTokens });
 
 // A token estimate for chunking under the input cap: three bytes per token for ASCII text (o200k and
 // cl100k average near four on prose and markdown), one token per character beyond ASCII (CJK runs are

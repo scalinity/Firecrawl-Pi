@@ -29,7 +29,7 @@
     "fixture-zyte": { "kind": "enhanced", "baseUrl": "http://zyte.fixture.fcpi.test:8080", "credential": "fixture_zyte", "paid": false, "api": "zyte-v1" }
   },
   "models": {
-    "gpt-4.1-mini-2025-04-14": { "provider": "openai", "category": "llm" },
+    "gpt-6-luna": { "provider": "openai", "category": "llm", "reasoningEffort": "none" },
     "fcpi-fixture-model": { "provider": "fixture-model", "category": "fixture" },
     "fcpi-fixture-race": { "provider": "fixture-model", "category": "fixture_race" },
     "fcpi-fixture-stale": { "provider": "fixture-model", "category": "fixture" }
@@ -49,9 +49,9 @@
     "fcpi-fixture-zyte-small": { "provider": "fixture-zyte", "category": "fixture_enhanced_small" }
   },
   "rateCards": [
-    { "id": "openai/gpt-4.1-mini-2025-04-14@2026-09-26", "subject": "gpt-4.1-mini-2025-04-14", "effectiveFrom": "2026-09-26", "effectiveTo": null,
-      "inputPerMTok": 400000, "cachedInputPerMTok": 100000, "outputPerMTok": 1600000,
-      "source": "https://developers.openai.com/api/docs/models/gpt-4.1-mini, observed 2026-09-26 (spec O11)" },
+    { "id": "openai/gpt-6-luna@2026-10-02", "subject": "gpt-6-luna", "effectiveFrom": "2026-10-02", "effectiveTo": null,
+      "inputPerMTok": 100000, "cachedInputPerMTok": 10000, "cacheWritePerMTok": 125000, "outputPerMTok": 500000,
+      "source": "https://developers.openai.com/api/docs/pricing and /api/docs/models/gpt-6-luna, observed 2026-10-02: Standard, below 272K context; implicit cache writes disabled" },
     { "id": "fixture/fcpi-fixture-model@2026-09-26", "subject": "fcpi-fixture-model", "effectiveFrom": "2026-09-26", "effectiveTo": null,
       "inputPerMTok": 400000, "cachedInputPerMTok": 100000, "outputPerMTok": 1600000, "source": "fixture: GPT-4.1 Mini's prices, no money" },
     { "id": "fixture/fcpi-fixture-race@2026-09-26", "subject": "fcpi-fixture-race", "effectiveFrom": "2026-09-26", "effectiveTo": null,
@@ -79,7 +79,7 @@
       "microUsdPerHttpRequest": 1270, "microUsdPerBrowserRequest": 16080, "billing": "successful_response_at_highest_tier", "source": "fixture: Zyte's tier-5 prices against a cap with room for one browser request, no money" }
   ],
   "extraction": {
-    "defaultModel": "gpt-4.1-mini-2025-04-14",
+    "defaultModel": "gpt-6-luna",
     "maxInputTokens": 32000,
     "maxOutputTokens": 4000,
     "maxRepairs": 1,

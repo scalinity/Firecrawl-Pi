@@ -23,6 +23,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const phase = process.argv[2];
+const heldOnly = process.argv.includes("--held-only");
 if (!["fixture", "live"].includes(phase)) { console.error("usage: e2e.mjs fixture|live"); process.exit(2); }
 const EV = process.env.FCPI_M7_EVIDENCE ?? "evidence/M7/";
 const T = Object.fromEntries(readFileSync(join(ROOT, "scripts/m1/pi-target.conf"), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
@@ -31,7 +32,7 @@ const HOST = "127.0.0.1:3380";
 const FX = (h = "m7esc") => `http://${h}.fixture.fcpi.test:8080`;
 const MODERN = "2026-07-28";
 const META = { "io.modelcontextprotocol/protocolVersion": MODERN, "io.modelcontextprotocol/clientCapabilities": {}, "io.modelcontextprotocol/clientInfo": { name: "fcpi-m7-e2e", version: "1" } };
-const MODEL = "gpt-4.1-mini-2025-04-14", PARSER = "llamaparse-cost-effective";
+const MODEL = "gpt-6-luna", PARSER = "llamaparse-cost-effective";
 const BUDGET = JSON.parse(readFileSync(join(ROOT, "deploy/policies/budget.json"), "utf8"));
 const MANIFEST = JSON.parse(readFileSync(join(ROOT, "deploy/policies/capabilities.json"), "utf8"));
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -505,12 +506,25 @@ async function livePhase(before) {
     out("live_enhanced", { case: "blocked", credential: zyte?.credential ?? null, paidDispatch: status.paidDispatch ?? null, enhancedCaps: cap, reason: "no Zyte key with an approved budget and paid dispatch; no live enhanced request was made" });
   } else {
     select(before.search, before.extractionModel, before.parser, before.proxy ?? "none", "zyte-api");
-    const r = await scrape("https://example.com/", { proxy: "enhanced" });
+    const r = await scrape("https://example.com/", { proxy: "enhanced", storeInCache:true }, "m7cache");
     out("live_enhanced", { case: "permitted_target", ...brief(r), markdown: (docOf(r)?.markdown ?? "").slice(0, 200), proxyUsed: docOf(r)?.metadata?.proxyUsed ?? null,
       ledger: sql(`SELECT row_to_json(r) FROM (SELECT provider, subject, reserved, actual, state, usage FROM fcpi_retrieval.budget_reservation WHERE kind = 'enhanced' AND provider = 'zyte' AND created_at >= :'since') r`, { since }).map((l) => JSON.parse(l)) });
   }
+    if (liveEnhanced && heldOnly) {
+      const cached = await scrape("https://example.com/", {proxy:"enhanced",maxAge:600000}, "m7cache");
+      out("live_cache", {case:"enhanced_cached", ...brief(cached), proxyUsed:docOf(cached)?.metadata?.proxyUsed ?? null});
+      // The echo target serves our synthetic interstitial. Both direct and Zyte see the same challenge;
+      // this proves automatic dispatch and rejection of unusable content, not real anti-bot success.
+      select(before.search, before.extractionModel, before.parser, "none", "zyte-api");
+      const challenge = '<!doctype html><title>Just a moment...</title><main>FCPI synthetic public test interstitial</main>';
+      const url = 'https://httpbingo.org/base64/' + Buffer.from(challenge).toString('base64url') + '?content-type=text/html';
+      const auto = await scrape(url, {proxy:"auto"});
+      out("live_auto", {case:"synthetic_challenge_real_zyte", ...brief(auto), acquisitions:jsonLog("retrieval-service",since).filter(l=>l.event==="acquisition" && l.domain==="httpbingo.org"),
+        ledger:sql("SELECT row_to_json(r) FROM (SELECT logical_id,provider,subject,reserved,actual,state,usage FROM fcpi_retrieval.budget_reservation WHERE kind='enhanced' AND provider='zyte' AND created_at >= :'since') r", {since}).map(l=>JSON.parse(l))});
+    }
   // The public sample, through the production selection: live search and the budget's default proxy and enhancer, set
   // here rather than taken as found, since a run cut off before its restore can leave the fixture selection behind.
+  if (!heldOnly) {
   const prod = { search: "live", proxy: BUDGET.proxying?.defaultProxy ?? "none", enhanced: BUDGET.enhancing?.defaultEnhancer ?? "none" };
   out("public_sample", { case: "selection", ...prod, applied: select(prod.search, MODEL, PARSER, prod.proxy, prod.enhanced) });
   out("public_sample", { case: "declared", urls: SAMPLE.map(([c, url]) => ({ class: c, url })), domains: [...new Set(SAMPLE.map(([, u]) => new URL(u).hostname.replace(/^www\./, "")))].length });
@@ -521,6 +535,7 @@ async function livePhase(before) {
     await sleep(1500);
   }
   out("public_sample", { case: "acquisitions", rows: jsonLog("retrieval-service", since).filter((l) => l.event === "acquisition").map((l) => ({ strategies: l.strategies, failure: l.failure, route_reason: l.route_reason ?? null, attempts_used: l.attempts_used })) });
+  }
   out("connections", { hosts: [...new Set(seen)].sort(), lookups: [...new Set(looked)].filter((h) => h !== "localhost").sort() });
   out("meta_end", { pi_utc: piNow() });
 }
