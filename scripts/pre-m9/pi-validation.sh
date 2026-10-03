@@ -9,12 +9,15 @@ DIR=/etc/firecrawl-pi/pre-m9-validation
 C=(sudo -n docker compose -p fcpi -f "$REPO/deploy/compose.yaml")
 case ${1:-} in
   start)
+    # Proxy stays refused until the required provider-side cap has been verified by the operator.
+    proxy_cap=${FCPI_PRE_M9_PROXY_CAP_MICROUSD:-0}
+    case $proxy_cap in 0|200000) ;; *) echo 'proxy validation cap must be 0 or 200000 microUSD' >&2; exit 2 ;; esac
     sudo -n test ! -e "$DIR/override.yaml" || { echo 'validation window already exists; stop it first' >&2; exit 2; }
     sudo -n install -d -m 0750 -o 3310 -g 3310 "$DIR"
     # Lower than owner ceilings: $0.05 model, $0.20 proxy, $0.05 enhanced, 100 free parser credits.
     expires=$(date -u -d '+45 minutes' +%Y-%m-%dT%H:%M:%SZ)
-    jq --arg expires "$expires" '.validationExpiresAt = $expires | .categories.llm.caps = {day:50000,month:50000} |
-        .categories.proxy.caps = {day:200000,month:200000} |
+    jq --arg expires "$expires" --argjson proxy_cap "$proxy_cap" '.validationExpiresAt = $expires | .categories.llm.caps = {day:50000,month:50000} |
+        .categories.proxy.caps = {day:$proxy_cap,month:$proxy_cap} |
         .categories.enhanced.caps = {day:50000,month:50000} |
         .categories.parser.caps = {month:100} | .paidTotal.caps.day = 300000 |
         .parsing.maxPages = 10 |
