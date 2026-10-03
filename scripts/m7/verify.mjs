@@ -376,14 +376,15 @@ const checks = {
       return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; 404→${t4?.statusCode}, 401→${t1?.class}, 429→${t9?.class} (cooldown ${cool?.domain_state?.cooldown_s} s), cloud→${fu?.class}; provider 520→${p("provider_520")?.class} ${states(p("provider_520"))}, silent→${p("provider_blackhole")?.class} ${states(p("provider_blackhole"))}, 429→${p("provider_429")?.class}, 401→${p("provider_401")?.class}; m7esc route=${JSON.stringify(dom)}` };
     } },
   E04: { name: "outage-and-exhausted-budget-without-cloud", inputs: [`${RAW}e2e-fixture.txt`],
-    expected: "with the production selection (Zyte, no key, paid dispatch off) a request for the enhanced tier is ENHANCED_REQUIRED and an auto challenge BLOCKED_PUBLIC_CONTENT naming both unavailable tiers, with no provider request and no attempt beyond the direct one, while an ordinary page is fetched directly; with the small fixture category full (concurrent reservations granted exactly the room left) the next dispatch is refused as ENHANCED_REQUIRED (BUDGET_EXHAUSTED) before any request; after three counted provider failures the breaker is open, the tier is refused with no request, and direct scrapes and MCP scrapes go on (AC23)",
+    expected: "with the production selection (Zyte, paid dispatch off, whether its key is present or absent) a request for the enhanced tier is ENHANCED_REQUIRED and an auto challenge BLOCKED_PUBLIC_CONTENT naming both unavailable tiers, with no provider request and no attempt beyond the direct one, while an ordinary page is fetched directly; with the small fixture category full (concurrent reservations granted exactly the room left) the next dispatch is refused as ENHANCED_REQUIRED (BUDGET_EXHAUSTED) before any request; after three counted provider failures the breaker is open, the tier is refused with no request, and direct scrapes and MCP scrapes go on (AC23)",
     run() {
       const p = FX().production ?? [], bud = FX().budget ?? [], o = FX().outage ?? [];
       const er = one(p, "enhanced_required"), ab = one(p, "auto_blocked_no_tier"), dc = one(p, "direct_control"), ts = one(p, "tier_state");
       const race = one(bud, "reservation_race"), ex = one(bud, "exhausted_enhanced"), ea = one(bud, "exhausted_auto"), rel = one(bud, "race_released");
       const br = one(o, "breaker"), bo = one(o, "breaker_open_refused"), ad = one(o, "auto_during_outage"), du = one(o, "direct_unaffected"), mu = one(o, "mcp_unaffected");
       const granted = (race?.outcomes ?? []).filter((x) => x.granted).length;
-      const cond = { production_state: ts?.readyz?.available === false && ts.readyz.reason === "PAID_DISPATCH_DISABLED" && ts.provider?.credential === "absent",
+      const cond = { production_state: ts?.readyz?.available === false && ts.readyz.reason === "PAID_DISPATCH_DISABLED" && ts.routes?.available === false && ts.routes.reason === "PAID_DISPATCH_DISABLED"
+          && ts.provider?.kind === "enhanced" && ts.provider.paid === true && ["present", "absent"].includes(ts.provider.credential),
         production_refused: er?.class === "ENHANCED_REQUIRED" && (er.acquisitions ?? []).length === 0 && calls(er).length === 0 && (er.hits ?? []).length === 0,
         production_auto: ab?.class === "BLOCKED_PUBLIC_CONTENT" && same(strat(ab), [["direct_http"]]) && calls(ab).length === 0 && /enhanced provider is unavailable \(PAID_DISPATCH_DISABLED\)/.test(ab.error ?? ""),
         production_control: ok200(dc) && dc.markdown === true,
