@@ -101,6 +101,9 @@ export function makeTarget(state) {
     // The residential fixture search engine (SearXNG's "fcpi fixture r", a json_engine).
     if (host === "searchr.fixture.fcpi.test") {
       const q = new URL(req.url, "http://x").searchParams.get("q") ?? "";
+      // The added engine participates in M5's complete empty/failure controls too.
+      if (/fcpi-fail/.test(q)) return res.writeHead(500, { "content-type": "application/json" }).end(JSON.stringify({ error: "fixture engine failure" }));
+      if (/fcpi-empty/.test(q)) return res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ results: [] }));
       return res.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ results: [{ url: `https://example.org/residential-engine/${encodeURIComponent(q)}`, title: `Residential engine result (${via})`, content: `answered ${via}` }] }));
     }
     switch (path) {

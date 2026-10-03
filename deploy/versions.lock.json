@@ -801,7 +801,7 @@
         "server": "tests/fixtures/m6/server.mjs",
         "server_sha256": "e60005f7925ae50cc8f241bb46a89a84657c3153c3db39fe22a5f5846c53036f",
         "fixture": "tests/fixtures/m6/fixture.mjs",
-        "fixture_sha256": "6ab6fb6901684c79e8c16c7aaf20ea8b6dffc032905707c050863589b149d720"
+        "fixture_sha256": "5717d8213b195ed43fb0b849a0f167022be98ac589892e3a1935ae1a11a21336"
       }
     },
     "fixture_m7": {
