@@ -32,6 +32,12 @@ for(const r of Object.values(refs)){
  if(e<0)throw Error(`Missing citation end ${r.title}`);
  r.start=s+1;r.end=e;
 }
+for(const unit of blocks['unit-data'].data){
+ const row=next.milestones.lines.find(l=>l.startsWith('| '+unit.id+' | '));
+ if(!row)throw Error('Missing canonical unit status '+unit.id);
+ unit.state=row.split('|')[2].trim();
+ if(unit.state==='IN_PROGRESS')unit.runnable=false;
+}
 blocks['source-data'].data=next;
 for(const id of Object.keys(blocks)){
  const b=blocks[id],serialized=JSON.stringify(b.data,null,id==='source-data'?undefined:2);
