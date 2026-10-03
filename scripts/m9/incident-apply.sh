@@ -44,8 +44,14 @@ else
  [ "$(jq -r .action <<<"$g")" = apply_fix ] && [ "$(jq -r .test_exit "$W/harvested.json")" = 0 ] && [ "$(jq -r .changed_files "$W/harvested.json")" -gt 0 ] || die 'no tested approved patch'
  [ "$(git -C "$W/tree" rev-parse HEAD)" = "$base" ] || die 'candidate base moved'
  [ "$(git -C "$W/tree" diff --binary | sha256sum | cut -c1-64)" = "$(jq -r .patch_sha <<<"$g")" ] || die 'frozen source changed'
- # Trusted tests run again immediately before creating an executable release.
- bash "$REPO/scripts/m9/incident-tests.sh" "$W/tree" >"$W/predeploy-tests.txt" 2>&1
+ # Reconstruct and compare the same approved archive before repeating its tests.
+ [ "$(sha256sum "$W/candidate.tar"|cut -c1-64)" = "$(jq -r .archive_sha "$W/harvested.json")" ] || die 'approved archive changed'
+ export GIT_INDEX_FILE="$W/predeploy.index"
+ git -C "$W/tree" read-tree "$base"
+ while IFS= read -r -d '' p; do git -C "$W/tree" add -- "$p"; done < <(git -C "$W/tree" diff --name-only -z)
+ [ "$(git -C "$W/tree" write-tree)" = "$(jq -r .tested_tree "$W/harvested.json")" ] || die 'approved tracked tree changed'
+ unset GIT_INDEX_FILE
+ bash "$REPO/scripts/m9/incident-tests.sh" "$W/tested-source" >"$W/predeploy-tests.txt" 2>&1
  while IFS= read -r -d '' p; do git -C "$W/tree" add -- "$p"; done < <(git -C "$W/tree" diff --name-only -z)
  git -C "$W/tree" -c core.hooksPath=/dev/null -c core.fsmonitor=false commit -m "Fix incident $id with owner-approved tested patch" >/dev/null
  code=$(git -C "$W/tree" rev-parse HEAD)

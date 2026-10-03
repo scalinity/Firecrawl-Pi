@@ -17,12 +17,25 @@ for f in "$C"/requests/*.json; do
  handled=$((handled + 1)); [ "$handled" -le 16 ] || break
  [ "$(stat -c %s "$f")" -le 8192 ] || { put_obj "$C/processed/$grant.json" 0600 '{"state":"REJECTED_OVERSIZE"}'; continue; }
  raw=$(cat "$f")
- image=$(docker inspect -f '{{.Image}}' "$(cid access-gateway)")
- if ! g=$(printf '%s\n' "$raw" | docker run --rm -i --label fcpi.transient=incident-proof --network none --read-only --user 3380:3380 --cgroup-parent fcpi.slice \
+ image=$(docker inspect -f '{{.Image}}' "$(cid access-gateway)" 2>/dev/null) || image=''
+ proof_rc=1
+ if [ -n "$image" ]; then
+ if g=$(printf '%s\n' "$raw" | docker run --rm -i --label fcpi.transient=incident-proof --network none --read-only --user 3380:3380 --cgroup-parent fcpi.slice \
   --cap-drop ALL --security-opt no-new-privileges --memory 128m --memory-swap 128m --cpus 0.3 --pids-limit 32 \
   -v "$REPO:/repo:ro" -v "$C:/control:ro" "$image" node /repo/scripts/m9/incident-verify.mjs "$grant" 2>/dev/null); then
-   put_obj "$C/processed/$grant.json" 0600 '{"state":"REJECTED_INVALID_PROOF"}'; continue
+  proof_rc=0
+ else proof_rc=$?; fi
  fi
+ if [ "$proof_rc" != 0 ]; then
+  if [ "$proof_rc" = 3 ]; then
+   put_obj "$C/processed/$grant.json" 0600 '{"state":"REJECTED_INVALID_PROOF"}'
+  elif [ ! -e "$D/blocked/proof-$grant.json" ]; then
+   put_obj "$D/blocked/proof-$grant.json" 0600 '{"state":"PROOF_INFRASTRUCTURE_BLOCKED","approval_consumed":false}'
+   notice diagnosis_ready 'incident_proof' '{"state":"PROOF_INFRASTRUCTURE_BLOCKED","approval_consumed":false,"owner_attention_required":true}' "$(now_s)" ''
+  fi
+  continue
+ fi
+ rm -f "$D/blocked/proof-$grant.json"
  id=$(jq -er .incident_id <<<"$g"); action=$(jq -er .action <<<"$g")
  [[ $id =~ ^[0-9a-f]{8}$ ]] || continue
  # The approved deployed base must still be current; an intervening release needs
