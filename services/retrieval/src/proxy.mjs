@@ -62,8 +62,15 @@ export class ProxySessions {
 export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupFixture, log }) {
   // An attempt's refusals are returned when it closes; a standing session never closes, so it keeps none
   // and each refusal is only logged (review S5).
-  const refuse = (s, target, e) => {
-    if (!s.logEach) s.denied.push({ host: target, class: e.failureClass ?? "PROXY_ERROR" });
+  const refuse = (s, target, e, rawUrl = null) => {
+    if (!s.logEach) {
+      const denied = { host: target, class: e.failureClass ?? "PROXY_ERROR" };
+      // Correlate HTTP navigation refusals without retaining URL/query text.
+      if (rawUrl && ["SSRF_DENIED", "CLOUD_DENIED"].includes(denied.class)) {
+        try { const url = new URL(rawUrl); url.hash = ""; denied.urlHash = digest(url.href).toString("hex"); } catch { /* invalid target */ }
+      }
+      s.denied.push(denied);
+    }
     log({ event: "proxy_denied", attempt_id: s.attemptId, target_host: target, failure: e.failureClass ?? "PROXY_ERROR", detail: e.detail ?? e.message });
   };
   const count = (s, n, ...socks) => {
@@ -152,7 +159,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       req.pipe(up);
     } catch (e) {
       settleLeg();
-      refuse(s, host, e);
+      refuse(s, host, e, req.url);
       const code = e.provider || e.failureClass === "TARGET_UNREACHABLE" ? 502 : 403;
       res.writeHead(code, { "content-type": "text/plain", connection: "close" }).end(`fcpi: ${e.failureClass ?? "refused"}\n`);
     }

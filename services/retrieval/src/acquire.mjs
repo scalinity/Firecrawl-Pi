@@ -484,9 +484,24 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             ? { class: "RESOURCE_LIMIT", detail: `the page passed its browser budget (${r.subresources?.requests ?? 0} subresources, ${r.proxy?.requests ?? 0} proxied requests, ${r.proxy?.bytes ?? 0} bytes)`, retryable: false, retryAfter: null } : null;
           // A render that failed because the provider refused its tunnels is the provider's failure, not the page's.
           const providerFailure = !r.ok && r.proxy?.upstreamFailure ? { ...r.proxy.upstreamFailure, provider: true } : null;
+          // A proxy-denied main document may appear as a 403 page or a failed
+          // HTTPS navigation. Use the attempt's actual refusal, never page text;
+          // an unrelated blocked subresource must not fail a usable document.
+          let navigationFailure = null;
+          if ((r.ok && r.status === 403) || (!r.ok && r.failure?.class === "NAVIGATION_FAILED")) {
+            try {
+              const nav = new URL(r.navigationUrl ?? r.finalUrl);
+              nav.hash = "";
+              const urlHash = createHash("sha256").update(nav.href).digest("hex");
+              const authority = `${nav.hostname}:${nav.port || (nav.protocol === "https:" ? "443" : "80")}`;
+              const denied = r.proxy?.denied?.find((d) => ["SSRF_DENIED", "CLOUD_DENIED"].includes(d.class) &&
+                (d.urlHash === urlHash || (!r.ok && nav.protocol === "https:" && !d.urlHash && d.host === authority)));
+              if (denied) navigationFailure = { class: denied.class, detail: "the browser's main-frame destination was refused by acquisition policy", retryable: false, retryAfter: null };
+            } catch { /* no attributable navigation target */ }
+          }
           // M7: a render asked for a screenshot that came back without one did not do what was asked.
           const noShot = r.ok && hooks?.screenshot && !r.screenshot?.base64 ? { class: "BROWSER_ERROR", detail: "the render returned no screenshot" } : null;
-          const failure = providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? noShot ?? (shell
+          const failure = navigationFailure ?? providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? noShot ?? (shell
             ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null));
           await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: s?.bytes ?? r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
           if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }

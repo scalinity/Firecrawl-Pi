@@ -5,6 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import http from "node:http";
+import { createHash } from "node:crypto";
 import { getEventListeners } from "node:events";
 import { makeAcquirer, makeFetcher, makePacer, makeUrlHmac } from "../src/acquire.mjs";
 import { FakeStore, policyFor, serve, acquirerFor, body, page, urlHmac } from "./acquire-helpers.mjs";
@@ -137,6 +138,76 @@ test("a render that hit its budget is RESOURCE_LIMIT, not a success (review find
 const SHELL = '<main id="root"><noscript>Please enable JavaScript to read this page.</noscript></main><script src="/app.js"></script>';
 const RENDERED = "<main><h1>Rendered</h1><p>Enough article text here to be an adequate page of its own, once rendered by script.</p></main>";
 const okRender = (html = RENDERED) => ({ render: async (a) => ({ ok: true, html, status: 200, finalUrl: a.url, subresources: { requests: 1, overLimit: 0 }, proxy: { requests: 1, bytes: 10, capped: false, denied: [] } }) });
+
+test("browser-first redirects retain authoritative private/Cloud proxy refusals", async (t) => {
+  const fx = await serve((req, res) => page(res));
+  try {
+    for (const [navigationUrl, cls, status] of [
+      ["http://10.231.1.5:6379/", "SSRF_DENIED", 403],
+      ["http://169.254.169.254/latest/meta-data/", "SSRF_DENIED", 403],
+      ["http://127.0.0.1:3002/", "SSRF_DENIED", 403],
+      ["http://[::ffff:a00:105]/", "SSRF_DENIED", 403],
+      ["http://redis:6379/", "SSRF_DENIED", 403],
+      ["http://45.33.20.9/", "SSRF_DENIED", 403],
+      ["http://100.100.100.100/", "SSRF_DENIED", 403],
+      ["https://127.0.0.1/", "SSRF_DENIED", null],
+      ["https://api.firecrawl.dev/v1/scrape", "CLOUD_DENIED", null],
+    ]) await t.test(navigationUrl, async () => {
+      const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
+      store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
+      const nav = new URL(navigationUrl);
+      const browser = { render: async () => ({ navigationUrl, ...(status ? { ok: true, status, finalUrl: navigationUrl, html: "fcpi: refused" }
+        : { ok: false, failure: { class: "NAVIGATION_FAILED", retryable: true } }),
+        proxy: { denied: [{ host: status ? nav.host : `${nav.hostname}:443`, class: cls,
+          ...(status ? { urlHash: createHash("sha256").update(nav.href).digest("hex") } : {}) }],
+          upstreamFailure: status ? null : { class: "PROXY_UNAVAILABLE", retryable: true } } }) };
+      const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/redirect`));
+      assert.equal(r.ok, false);
+      assert.equal(r.failure.class, cls);
+      assert.equal(r.failure.retryable, false);
+      assert.deepEqual(r.strategies, ["direct_browser"]);
+      assert.equal(r.attemptsUsed, 1);
+      assert.equal(store.attempts[0].outcome, cls);
+      assert.equal(store.permits.size, 0);
+      assert.equal(fx.hits.length, 0, "no direct retry or fallback is introduced");
+    });
+  } finally { fx.s.close(); }
+});
+
+test("public browser redirects remain usable with unrelated denied subresources", async () => {
+  const fx = await serve((req, res) => page(res));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
+    store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
+    const finalUrl = `http://t.fixture.fcpi.test:${fx.port}/public`;
+    const browser = { render: async () => ({ ok: true, status: 200, html: RENDERED, finalUrl, navigationUrl: finalUrl,
+      proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }, { host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }) };
+    const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/redirect`));
+    assert.equal(r.ok, true);
+    assert.equal(r.finalUrl, finalUrl);
+    assert.equal(r.proxyDenied.length, 2);
+  } finally { fx.s.close(); }
+});
+
+test("page text, unmatched refusals and cancellation do not invent a navigation policy failure", async () => {
+  const fx = await serve((req, res) => page(res));
+  try {
+    const target = `http://t.fixture.fcpi.test:${fx.port}/`;
+    for (const [reply, expected] of [
+      [{ ok: true, status: 403, html: "fcpi: CLOUD_DENIED", navigationUrl: target, finalUrl: target, proxy: { denied: [] } }, "ACCESS_DENIED"],
+      [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }] } }, "ACCESS_DENIED"],
+      [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: new URL(target).host, class: "SSRF_DENIED",
+        urlHash: createHash("sha256").update(target + "asset").digest("hex") }] } }, "ACCESS_DENIED"],
+      [{ ok: false, navigationUrl: target, failure: { class: "NAVIGATION_FAILED" }, proxy: { denied: [{ host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }, "NAVIGATION_FAILED"],
+      [{ ok: false, navigationUrl: "http://127.0.0.1:3002/", failure: { class: "CANCELLED" }, proxy: { denied: [{ host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }, "CANCELLED"],
+    ]) {
+      const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
+      store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
+      const r = await acquirerFor(store, policy, { render: async () => reply })(body(target));
+      assert.equal(r.failure.class, expected);
+    }
+  } finally { fx.s.close(); }
+});
 
 test("a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE", async () => {
   const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(SHELL));

@@ -3,7 +3,7 @@
 // as the gateway does, and the retrieval service on fcpi_acquire with the core's own credential
 // (read from its secret file, never printed). One JSON line per case: what was asked, what came
 // back, and the scrape id the collector joins with the service's attempt rows and logs.
-//   GROUP=static|browser|budget|pacing|permits|cancel|paths|ssrf  (comma-separated)
+//   GROUP=static|browser|browser-redirect|budget|pacing|permits|cancel|paths|ssrf  (comma-separated)
 //   LAN_ADDRESS: the host's LAN address, for the one LAN-literal case; recorded only as "lan".
 import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
@@ -105,6 +105,22 @@ if (groups.has("ssrf")) {
     ["SR13-localhost", "http://localhost/"], ["SR14-private-port-80", "http://10.231.1.5/"], ["SR15-file-scheme", "file:///etc/passwd"],
     ["SR16-lan-literal", lan ? `http://${lan}/` : "http://lan.invalid/"], ["SR17-metadata", "http://169.254.169.254/latest/meta-data/"],
     ["SR18-cloud-api", "https://api.firecrawl.dev/v1/scrape"]]) await acquire(id, { logicalAcquisitionId: `m2-ssrf-${randomUUID()}`, url });
+}
+
+if (groups.has("browser-redirect")) {
+  // Two actual script-shell acquisitions establish M6's browser-first hint.
+  for (let i = 1; i <= 2; i++) await acquire(`BR00-warm-${i}`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: `${M2}/js.html?br=${randomUUID()}` });
+  for (const [id, to] of [["BR01-redis", "http://10.231.1.5:6379/"], ["BR02-metadata", "http://169.254.169.254/latest/meta-data/"],
+    ["BR03-cloud", "https://api.firecrawl.dev/v1/scrape"], ["BR04-loopback", "http://127.0.0.1:3002/"],
+    ["BR05-mapped", "http://[::ffff:10.231.1.5]/"], ["BR06-name", "http://redis:6379/"],
+    ["BR07-lan", process.env.LAN_ADDRESS ? `http://${process.env.LAN_ADDRESS}/` : "http://lan.invalid/"]]) {
+    const url = `${M2}/redirect?to=${encodeURIComponent(to)}`;
+    await scrape(`${id}-core`, url);
+    await acquire(`${id}-rs`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url });
+  }
+  const publicRedirect = `${M2}/redirect?to=${encodeURIComponent(`${M2}/short.html`)}`;
+  await scrape("BR08-public-core", publicRedirect);
+  await acquire("BR08-public-rs", { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: publicRedirect });
 }
 
 if (groups.has("browser")) {

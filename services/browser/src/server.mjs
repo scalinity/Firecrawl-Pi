@@ -199,7 +199,7 @@ async function renderWithin(r, signal, started, deadline, run) {
   // actionNavigations: main-frame loads the actions started (a same-host click that opens a new document), reported so the
   // retrieval service counts each against the domain as it counts the first (review W6).
   const counters = { requests: 0, blocked: 0, overLimit: 0, offHost: 0, actionNavigations: 0 };
-  let inActions = false;
+  let inActions = false, navigationUrl = r.url;
   // The render starts where the direct attempt's paced chain ended; the main frame may not move to
   // another host, whose navigation no pacing decision covered (review finding C4).
   const startHost = new URL(r.url).host;
@@ -235,6 +235,11 @@ async function renderWithin(r, signal, started, deadline, run) {
       return route.continue();
     });
     const page = await context.newPage();
+    // Redirected navigation requests do not rerun the route callback. Keep their
+    // main-frame target for matching the proxy's refusal, including goto errors.
+    page.on("request", (req) => {
+      try { if (req.isNavigationRequest() && req.frame() === page.mainFrame()) navigationUrl = req.url(); } catch { /* no associated frame */ }
+    });
     // A renderer that dies (in this container, usually the cgroup's memory cap) ends the page alone.
     page.on("crash", () => { crashed = true; });
     page.on("dialog", (d) => d.dismiss().catch(() => {}));
@@ -256,7 +261,7 @@ async function renderWithin(r, signal, started, deadline, run) {
     if (chars > maxHtml) return { ok: false, failure: { class: "SIZE_LIMIT", detail: `rendered document of ${chars} characters exceeds ${maxHtml}` }, subresources: counters, timings: { totalMs: Date.now() - started } };
     const html = await page.content();
     return {
-      ok: true, finalUrl: page.url(), status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,
+      ok: true, finalUrl: page.url(), navigationUrl, status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,
       subresources: counters, screenshot: extras.screenshot, actions: extras.actions,
       timings: { totalMs: Date.now() - started }, browser: { version: browser?.version() ?? null, pagesServed: pagesServed + 1, launches },
     };
@@ -264,7 +269,7 @@ async function renderWithin(r, signal, started, deadline, run) {
     const cls = e.failureClass ?? (cancelled ? "CANCELLED" : expired ? "TIMEOUT" : browser === null ? "BROWSER_CRASHED" : crashed ? "RENDERER_CRASHED" : /Timeout/i.test(e.name) ? "TIMEOUT" : /net::ERR_/.test(e.message) ? "NAVIGATION_FAILED" : "BROWSER_ERROR");
     // M7: an action that could not be done, or extras past their bounds, will not go better on a second try.
     const final = ["ACTION_FAILED", "UNSUPPORTED_CAPABILITY", "RESOURCE_LIMIT", "SIZE_LIMIT"].includes(cls);
-    return { ok: false, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300), ...(final ? { retryable: false } : {}) }, subresources: counters, timings: { totalMs: Date.now() - started } };
+    return { ok: false, navigationUrl, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300), ...(final ? { retryable: false } : {}) }, subresources: counters, timings: { totalMs: Date.now() - started } };
   } finally {
     clearTimeout(killer);
     signal?.removeEventListener("abort", onAbort);

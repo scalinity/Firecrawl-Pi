@@ -43,7 +43,8 @@ test("a public page's requests cannot reach a fixture host (review finding S1)",
       const pub = sessions.open("public-page", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
       const r = await viaProxy(port, `http://fx.fixture.fcpi.test:${fx.address().port}/slow`, pub);
       assert.equal(r.status, 403);
-      assert.deepEqual(sessions.close("public-page").denied, [{ host: `fx.fixture.fcpi.test:${fx.address().port}`, class: "SSRF_DENIED" }]);
+      assert.deepEqual(sessions.close("public-page").denied, [{ host: `fx.fixture.fcpi.test:${fx.address().port}`, class: "SSRF_DENIED",
+        urlHash: createHash("sha256").update(`http://fx.fixture.fcpi.test:${fx.address().port}/slow`).digest("hex") }]);
       const own = sessions.open("fixture-page", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
       assert.deepEqual(await viaProxy(port, `http://fx.fixture.fcpi.test:${fx.address().port}/ok`, own), { status: 200, body: "fixture" });
       sessions.close("fixture-page");
