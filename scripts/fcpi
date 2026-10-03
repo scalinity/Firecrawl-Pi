@@ -58,7 +58,7 @@ case $cmd in
     [ "$(jq -r .result <<<"$line")" = PASS ] ;;
   foreign)
     # Containers outside Compose project fcpi (throwaway fcpi.transient ones aside), to the journal and stdout (M1 R12).
-    f=$(docker ps -a --format '{{.Names}} {{.Label "com.docker.compose.project"}} {{.Label "fcpi.transient"}}' 2>/dev/null | awk '$2 != "fcpi" && $3 == "" {print $1}' | tr '\n' ' ')
+    f=$(docker ps -a --format '{{.Names}}\t{{.Label "com.docker.compose.project"}}\t{{.Label "fcpi.transient"}}' 2>/dev/null | awk -F '\t' '$2 != "fcpi" && $3 == "" {print $1}' | tr '\n' ' ')
     if [ -n "$f" ]; then logger -t fcpi-stack -p user.warning -- "containers outside project fcpi: $f(dockerd's data-check gate assumes Docker serves this project alone)"; echo "foreign: $f"
     else echo "foreign: none"; fi ;;
   hold)

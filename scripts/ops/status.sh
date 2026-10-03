@@ -31,7 +31,7 @@ live=$(docker inspect $(docker ps -aq --filter label=com.docker.compose.project=
   value: {state: .State.Status, health: (.State.Health.Status // "none"), restarts: .RestartCount,
           check: ((.State.Health.Log // []) | last | .Output // "" | gsub("\\s+$"; "")), check_at: ((.State.Health.Log // []) | last | .End // null)}}) | from_entries')
 [ -n "$live" ] || live='{}'
-foreign=$(docker ps -a --format '{{.Names}} {{.Label "com.docker.compose.project"}} {{.Label "fcpi.transient"}}' | awk '$2 != "fcpi" && $3 == "" {print $1}' | jq -Rsc 'split("\n") | map(select(. != ""))')
+foreign=$(docker ps -a --format '{{.Names}}\t{{.Label "com.docker.compose.project"}}\t{{.Label "fcpi.transient"}}' | awk -F '\t' '$2 != "fcpi" && $3 == "" {print $1}' | jq -Rsc 'split("\n") | map(select(. != ""))')
 lock=$(sha256sum "$REPO/deploy/versions.lock.json" 2>/dev/null | cut -c1-64)
 out=$(jq -n --arg utc "$(utc)" --arg commit "$(source_commit)" --arg lock "$lock" --argjson s "$sample" --argjson adm "$adm" --argjson inc "$inc" \
   --argjson probe "$probe" --argjson lb "$lb" --argjson la "$la" --argjson lr "$lr" --arg ps "$ps" --argjson pb "$pb" --argjson pms "$pms" \
