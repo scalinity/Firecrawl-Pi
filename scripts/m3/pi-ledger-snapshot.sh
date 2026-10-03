@@ -17,7 +17,8 @@ sudo -n docker exec -i "$PG" psql -U postgres -d postgres -At -X -q -v ON_ERROR_
 SELECT json_build_object('id', j.id, 'kind', j.kind, 'state', j.state, 'upstream', j.upstream_id, 'cancel_requested', j.cancel_requested_at IS NOT NULL,
   'dispatch_attempts', j.dispatch_attempts,
   'marker_groups', (SELECT count(DISTINCT q.group_id) FROM (SELECT group_id, data FROM nuq.queue_scrape UNION ALL SELECT group_id, data FROM nuq.queue_scrape_backlog) q
-                     WHERE q.group_id IS NOT NULL AND (q.data->>'origin' = j.submission_key OR q.data->'scrapeOptions'->>'origin' = j.submission_key)),
+                     WHERE q.group_id IS NOT NULL AND (q.data->>'origin' = j.submission_key OR q.data->>'origin' LIKE 'fcpi:%:' || j.submission_key
+                       OR q.data->'scrapeOptions'->>'origin' = j.submission_key OR q.data->'scrapeOptions'->>'origin' LIKE 'fcpi:%:' || j.submission_key)),
   'upstream_rows', (SELECT count(*) FROM nuq.queue_scrape q WHERE j.upstream_id IS NOT NULL AND q.group_id = j.upstream_id))
   FROM fcpi_platform.job j WHERE j.created_at >= :'since'::timestamptz ORDER BY j.created_at;
 SQL

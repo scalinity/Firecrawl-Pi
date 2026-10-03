@@ -429,7 +429,7 @@ const checks = {
       const late = (s?.fixture_requests ?? []).filter((r) => !(Date.parse(r.started) <= cut));
       const sk = records(`${RAW}sdk-compat.txt`);
       const ok = endOk(c) && one(c.queued_crawl, "submit_while_other_runs")?.ledger_state === "RECEIVED" && q?.status === 200 && q.ledger_state === "CANCELLED" && q.marker_groups === 0 &&
-        Number.isFinite(cut) && cc?.status === 200 && cc.body?.status === "cancelled" && s?.state === "CANCELLED" && s.archived === s.completed && s.archived >= 2 && (s.fixture_requests ?? []).length >= 2 && late.length === 0 &&
+        Number.isFinite(cut) && cc?.status === 200 && cc.body?.status === "cancelled" && s?.state === "CANCELLED" && s.marker_groups === 1 && s.archived === s.completed && s.archived >= 2 && (s.fixture_requests ?? []).length >= 2 && late.length === 0 &&
         one(c.finished_job, "cancel_finished")?.status === 409 && sk.cancel?.[0]?.cancel_returned === true && sk.cancel[0].final_status === "cancelled";
       return { ok, actual: `queued job ${q?.ledger_state} upstream=${q?.marker_groups}; running job ${s?.state} archived=${s?.archived}; slow pages started after cancel+2.5 s=${late.length} of ${(s?.fixture_requests ?? []).length}; finished job cancel=${one(c.finished_job, "cancel_finished")?.status}; official client=${sk.cancel?.[0]?.final_status}` };
     } },
