@@ -59,7 +59,7 @@ jq -n --arg h "$h" '{host_packages:{claude_code:{binary_sha256:$h}}}' >"$T/repo/
 p="$T/repo/scripts/m9/incident-prepare.sh"
 # Missing OAuth and mismatched binary cannot leave a permanently stuck worktree.
 reject bash "$p" 11111111
-grep -q "subscription refresh failed" "$T/out"
+grep -q "subscription refresh failed" "$T/out" || { cat "$T/out"; exit 1; }
 [ ! -e "$T/state/incidents/work/11111111" ]; ok 'missing OAuth checked before worktree'
 mkdir -p "$T/repo/deploy"
 printf '{"claudeAiOauth":{"accessToken":"synthetic-fixture-only","subscriptionType":"max","expiresAt":%s}}\n' "$(( $(date +%s%3N)+1000000 ))" >"$T/home/.claude/.credentials.json"
@@ -120,6 +120,7 @@ incident_writable "$T/candidate" services/retrieval/test/new-incident.test.mjs; 
 # A standalone candidate exposes its own Git metadata to the unprivileged agent;
 # the root-only source mirror is never needed by the writable-path hook.
 W=$T/state/incidents/work/55555555
+chmod 0711 "$T"
 mkdir -p "$W/run" "$T/repo/scripts/m1" "$T/repo/deploy/host"
 git clone --quiet --no-hardlinks "$T/state/incidents/source.git" "$W/tree"
 git -C "$W/tree" switch --quiet --detach "$base"
