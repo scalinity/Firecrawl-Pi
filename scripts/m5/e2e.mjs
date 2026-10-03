@@ -20,6 +20,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
+const BUDGET = JSON.parse(readFileSync(join(ROOT, "deploy/policies/budget.json"), "utf8"));
 const phase = process.argv[2];
 const heldOnly = process.argv.includes("--held-only");
 if (!["fixture", "live"].includes(phase)) { console.error("usage: e2e.mjs fixture|live"); process.exit(2); }
@@ -441,7 +442,9 @@ try {
   out("error", { message: e.message, stack: String(e.stack ?? "").split("\n").slice(0, 4).join(" | ") });
 } finally {
   // Restore every dimension found at entry, including M6/M7's proxy and enhancer selections.
-  try { if (before) select(before.search,before.extractionModel,before.parser,before.proxy ?? "none",before.enhanced ?? "none"); } catch (e) { out("error", { message: `restoring the selection: ${e.message}` }); exit = 1; }
+  try { if (before) select(before.search,before.extractionModel,before.parser,
+    (before.proxy === undefined ? BUDGET.proxying.defaultProxy : before.proxy) ?? "none",
+    (before.enhanced === undefined ? BUDGET.enhancing.defaultEnhancer : before.enhanced) ?? "none"); } catch (e) { out("error", { message: `restoring the selection: ${e.message}` }); exit = 1; }
   try { if (health("searxng") !== "running healthy") { D(`unpause ${cname("searxng")}`); } } catch { /* not paused */ }
   tunnel?.kill();
   out("end", { exit });
