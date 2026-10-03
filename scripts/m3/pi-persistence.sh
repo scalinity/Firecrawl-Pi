@@ -39,13 +39,31 @@ SELECT 'billing reservations=' || (SELECT count(*) FROM fcpi_retrieval.budget_re
 SQL
 }
 archive() {
-  sudo -n sh -c "cd $ART/results 2>/dev/null && find . -name '*.json' -type f | LC_ALL=C sort" >/tmp/.fcpi-art-$$
-  echo "archive files=$(wc -l </tmp/.fcpi-art-$$) names_sha256=$(sha256sum </tmp/.fcpi-art-$$ | cut -c1-64)"
-  # Every file's content hashes to its name.
-  bad=0
-  while read -r f; do n=$(basename "$f" .json); h=$(sudo -n sha256sum "$ART/results/$f" | cut -c1-64); [ "$n" = "$h" ] || bad=$((bad + 1)); done </tmp/.fcpi-art-$$
-  echo "archive files_whose_content_differs_from_name=$bad"
-  rm -f /tmp/.fcpi-art-$$
+  # One bounded container process avoids thousands of privileged shell launches
+  # extending the checkpoint across unrelated result-retention deadlines.
+  D exec -i -u 3380 "$(cid access-gateway)" node --input-type=module - <<'JS'
+import fs from 'node:fs'; import crypto from 'node:crypto';
+const end=Date.now()+120000,timer=setTimeout(()=>process.exit(124),120000);
+const root='/srv/artifacts/results',files=[],pending=[''];
+while(pending.length){
+ if(Date.now()>end)throw Error('archive inspection deadline exceeded');
+ const dir=pending.pop();
+ for(const f of fs.readdirSync(root+'/'+dir,{withFileTypes:true})){
+  const path=dir+f.name;
+  if(f.isDirectory())pending.push(path+'/');
+  else if(f.isFile()&&f.name.endsWith('.json'))files.push('./'+path);
+ }
+}
+files.sort(); const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
+let bad=0;for(const f of files){
+ const h=crypto.createHash('sha256');
+ for await(const bytes of fs.createReadStream(root+'/'+f.slice(2)))h.update(bytes);
+ if(h.digest('hex')!==f.split('/').at(-1).slice(0,-5))bad++;
+}
+console.log(`archive files=${files.length} names_sha256=${hash(files.map(f=>f+'\n').join(''))}`);
+console.log(`archive files_whose_content_differs_from_name=${bad}`);
+clearTimeout(timer);
+JS
 }
 # M2's helpers (scripts/m2/pi-persistence.sh): the Redis password and the sentinel value travel on stdin.
 redis_cmd() { bash "$REPO/scripts/ops/redis-cli.sh" "$@" 2>&1; }
