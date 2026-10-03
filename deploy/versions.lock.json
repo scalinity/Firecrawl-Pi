@@ -571,15 +571,15 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:0a087bd8890f5dbd9015a0c182a4e8c1566fd1359b14abcade85a1c4f015493c",
+      "image_id": "sha256:ec5e703422997ae84c5823e6e79c9b09539083ff531994b14d87cecdb5cf4b98",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "7ccd57a22212dd1b3d6d57b4ba93ca57c66912ad587e6af370818ef8986bb8cd"
       },
-      "evidence": "evidence/M8/raw/image-build.txt",
+      "evidence": "evidence/M5/pre-m9-closure/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "72ad8447fc4ec7f3e01b4ab416a3014b661d7855",
+      "built_from_commit": "7b4bf99a9982570751ab2b0efc82c0bc2af0f31f",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"

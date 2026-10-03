@@ -67,7 +67,7 @@ dir $S/providers 3310:3310 0700
 
 sec selection
 dir $ETC/selection 0:0 0755
-printf '{ "search": "fixture", "extractionModel": "gpt-4.1-mini-2025-04-14", "parser": "llamaparse-cost-effective" }\n' | put $ETC/selection/selection.json 0:0 0644
+printf '{ "search": "fixture", "extractionModel": "gpt-6-luna", "parser": "llamaparse-cost-effective" }\n' | put $ETC/selection/selection.json 0:0 0644
 
 sec inventory
 sudo -n sh -c "stat -c '%u:%g %a %n' $S/gateway_retrieval_token $S/retrieval_gateway_token_sha256 $S/searxng_proxy_password $S/retrieval_searxng_proxy_sha256 $S/searxng_secret_key $S/providers $ETC/selection $ETC/selection/selection.json"
