@@ -145,6 +145,7 @@ test("browser-first redirects retain authoritative private/Cloud proxy refusals"
     for (const [navigationUrl, cls, status] of [
       ["http://10.231.1.5:6379/", "SSRF_DENIED", 403],
       ["http://169.254.169.254/latest/meta-data/", "SSRF_DENIED", 403],
+      ["http://169.254.169.254/latest/meta-data/?after=load", "SSRF_DENIED", 200],
       ["http://127.0.0.1:3002/", "SSRF_DENIED", 403],
       ["http://[::ffff:a00:105]/", "SSRF_DENIED", 403],
       ["http://redis:6379/", "SSRF_DENIED", 403],
@@ -190,6 +191,20 @@ test("public browser redirects remain usable with unrelated denied subresources"
   } finally { fx.s.close(); }
 });
 
+test("a post-load tunnel failure on the main frame propagates the actual Cloud refusal", async () => {
+  const fx = await serve((req, res) => page(res));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
+    store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
+    const browser = { render: async () => ({ ok: true, status: 200, html: "<p>Browser error</p>", finalUrl: "chrome-error://chromewebdata/",
+      navigationUrl: `http://t.fixture.fcpi.test:${fx.port}/`, navigationFailure: { class: "NAVIGATION_FAILED", url: "https://api.firecrawl.dev/v1/scrape" },
+      proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }] } }) };
+    const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/`));
+    assert.equal(r.ok, false); assert.equal(r.failure.class, "CLOUD_DENIED"); assert.equal(r.attemptsUsed, 1);
+    assert.deepEqual(r.strategies, ["direct_browser"]); assert.equal(store.permits.size, 0);
+  } finally { fx.s.close(); }
+});
+
 test("page text, unmatched refusals and cancellation do not invent a navigation policy failure", async () => {
   const fx = await serve((req, res) => page(res));
   try {
@@ -199,6 +214,10 @@ test("page text, unmatched refusals and cancellation do not invent a navigation 
       [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }] } }, "ACCESS_DENIED"],
       [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: new URL(target).host, class: "SSRF_DENIED",
         urlHash: createHash("sha256").update(target + "asset").digest("hex") }] } }, "ACCESS_DENIED"],
+      [{ ok: true, status: 403, html: "refused", navigationUrl: "http://169.254.169.254/", finalUrl: target, proxy: { denied: [{ host: "169.254.169.254", class: "SSRF_DENIED",
+        urlHash: createHash("sha256").update("http://169.254.169.254/").digest("hex") }] } }, "ACCESS_DENIED"],
+      [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: new URL(target).host, class: "SSRF_DENIED",
+        urlHash: createHash("sha256").update(target.replace("http://", "http://fixture-user:fixture-password@")).digest("hex") }] } }, "ACCESS_DENIED"],
       [{ ok: false, navigationUrl: target, failure: { class: "NAVIGATION_FAILED" }, proxy: { denied: [{ host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }, "NAVIGATION_FAILED"],
       [{ ok: false, navigationUrl: "http://127.0.0.1:3002/", failure: { class: "CANCELLED" }, proxy: { denied: [{ host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }, "CANCELLED"],
     ]) {

@@ -416,11 +416,11 @@ const checks = {
     } },
 
   S03: { name: "browser-first-redirect-denial-classification", inputs: [`${RAW}rt-browser-redirect.txt`],
-    expected: "seven already-blocked private/Cloud redirects report their canonical classes through both core and retrieval, each in one browser attempt; a permitted cross-host public redirect succeeds and all permits are released",
+    expected: "seven initial and two post-load already-blocked private/Cloud redirects report canonical classes through core and retrieval, each in one browser attempt; a permitted cross-host redirect succeeds, a page's own 403 remains ACCESS_DENIED and all permits are released",
     run() {
       const p = phase("browser-redirect"), bad = [];
-      for (const stem of ["BR01-redis", "BR02-metadata", "BR03-cloud", "BR04-loopback", "BR05-mapped", "BR06-name", "BR07-lan"]) {
-        const cls = stem === "BR03-cloud" ? "CLOUD_DENIED" : "SSRF_DENIED";
+      for (const stem of ["BR01-redis", "BR02-metadata", "BR03-cloud", "BR04-loopback", "BR05-mapped", "BR06-name", "BR07-lan", "BR09-postload-private", "BR10-postload-cloud"]) {
+        const cls = stem.includes("cloud") ? "CLOUD_DENIED" : "SSRF_DENIED";
         const core = p.cases[`${stem}-core`], direct = p.cases[`${stem}-rs`], attempts = byLogical(p, direct?.logicalId);
         if (core?.success !== false || !new RegExp(`\\b${cls}\\b`).test(core.error ?? "") || direct?.ok !== false || direct.failure !== cls || direct.attemptsUsed !== 1 ||
           JSON.stringify(direct.strategies) !== JSON.stringify(["direct_browser"]) || attempts.length !== 1 || attempts[0].strategy !== "direct_browser" || attempts[0].outcome !== cls) bad.push(stem);
@@ -431,8 +431,9 @@ const checks = {
       const positive = publicCore?.success === true && publicCore.sentinels.includes("fcpi-m1-static-7f3a") && publicDirect?.ok === true && publicDirect.sentinels.includes("fcpi-m1-static-7f3a") &&
         JSON.stringify(publicDirect.strategies) === JSON.stringify(["direct_browser"]) && publicDirect.attemptsUsed === 1;
       const actualRefusals = p.retrieval.filter(e => e.event === "proxy_denied" && ["SSRF_DENIED", "CLOUD_DENIED"].includes(e.failure) && e.attempt_id);
-      const ok = p.driverExit === "0" && bad.length === 0 && counts.SSRF_DENIED === 12 && counts.CLOUD_DENIED === 2 && denied.every(a => a.strategy === "direct_browser") && actualRefusals.length >= 14 && positive && permitsFree(p) && healthy(p);
-      return { ok, actual: `wrong-class cases=${bad.join(",") || "none"}; actual attempt outcomes=${JSON.stringify(counts)}; proxy refusals=${actualRefusals.length}; public cross-host positive=${positive}; permits=${permitsFree(p)}; health=${healthy(p)}` };
+      const own403 = p.cases["BR11-own-403-core"]?.success === false && /\bACCESS_DENIED\b/.test(p.cases["BR11-own-403-core"].error ?? "") && p.cases["BR11-own-403-rs"]?.ok === false && p.cases["BR11-own-403-rs"].failure === "ACCESS_DENIED";
+      const ok = p.driverExit === "0" && bad.length === 0 && counts.SSRF_DENIED === 14 && counts.CLOUD_DENIED === 4 && denied.every(a => a.strategy === "direct_browser") && actualRefusals.length >= 18 && positive && own403 && permitsFree(p) && healthy(p);
+      return { ok, actual: `wrong-class cases=${bad.join(",") || "none"}; actual attempt outcomes=${JSON.stringify(counts)}; proxy refusals=${actualRefusals.length}; public cross-host positive=${positive}; own 403 unchanged=${own403}; permits=${permitsFree(p)}; health=${healthy(p)}` };
     } },
 
   // ============================================================== attempts, pacing, permits

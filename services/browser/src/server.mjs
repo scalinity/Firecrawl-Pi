@@ -199,7 +199,7 @@ async function renderWithin(r, signal, started, deadline, run) {
   // actionNavigations: main-frame loads the actions started (a same-host click that opens a new document), reported so the
   // retrieval service counts each against the domain as it counts the first (review W6).
   const counters = { requests: 0, blocked: 0, overLimit: 0, offHost: 0, actionNavigations: 0 };
-  let inActions = false, navigationUrl = r.url;
+  let inActions = false, navigationUrl = r.url, failedTunnelUrl = null;
   // The render starts where the direct attempt's paced chain ended; the main frame may not move to
   // another host, whose navigation no pacing decision covered (review finding C4).
   const startHost = new URL(r.url).host;
@@ -240,6 +240,9 @@ async function renderWithin(r, signal, started, deadline, run) {
     page.on("request", (req) => {
       try { if (req.isNavigationRequest() && req.frame() === page.mainFrame()) navigationUrl = req.url(); } catch { /* no associated frame */ }
     });
+    page.on("requestfailed", (req) => {
+      try { if (req.isNavigationRequest() && req.frame() === page.mainFrame() && req.failure()?.errorText === "net::ERR_TUNNEL_CONNECTION_FAILED") failedTunnelUrl = req.url(); } catch { /* no associated frame */ }
+    });
     // A renderer that dies (in this container, usually the cgroup's memory cap) ends the page alone.
     page.on("crash", () => { crashed = true; });
     page.on("dialog", (d) => d.dismiss().catch(() => {}));
@@ -262,6 +265,7 @@ async function renderWithin(r, signal, started, deadline, run) {
     const html = await page.content();
     return {
       ok: true, finalUrl: page.url(), navigationUrl: response?.url() ?? navigationUrl, status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,
+      navigationFailure: page.url() === "chrome-error://chromewebdata/" && failedTunnelUrl ? { class: "NAVIGATION_FAILED", url: failedTunnelUrl } : null,
       subresources: counters, screenshot: extras.screenshot, actions: extras.actions,
       timings: { totalMs: Date.now() - started }, browser: { version: browser?.version() ?? null, pagesServed: pagesServed + 1, launches },
     };

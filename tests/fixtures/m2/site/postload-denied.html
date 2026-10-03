@@ -1,0 +1,10 @@
+<!doctype html>
+<title>Controlled post-load policy probe</title>
+<main id="content"><noscript>Please enable JavaScript.</noscript></main>
+<script>
+setTimeout(() => {
+  const destination = new URLSearchParams(location.search).get('dst') === 'cloud'
+    ? 'https://api.firecrawl.dev/v1/scrape' : 'http://169.254.169.254/latest/meta-data/';
+  location.href = '/redirect?to=' + encodeURIComponent(destination);
+}, 100);
+</script>

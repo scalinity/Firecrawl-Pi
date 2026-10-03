@@ -72,7 +72,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
       const denied = { host: target, class: e.failureClass ?? "PROXY_ERROR" };
       // Correlate HTTP navigation refusals without retaining URL/query text.
       if (rawUrl && ["SSRF_DENIED", "CLOUD_DENIED"].includes(denied.class)) {
-        try { const url = new URL(rawUrl); url.hash = ""; url.username = ""; url.password = ""; denied.urlHash = digest(url.href).toString("hex"); } catch { /* invalid target */ }
+        try { const url = new URL(rawUrl); url.hash = ""; denied.urlHash = digest(url.href).toString("hex"); } catch { /* invalid target */ }
       }
       s.denied.push(denied);
     }

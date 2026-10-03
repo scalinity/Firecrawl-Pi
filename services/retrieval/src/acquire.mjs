@@ -488,15 +488,16 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           // HTTPS navigation. Use the attempt's actual refusal, never page text;
           // an unrelated blocked subresource must not fail a usable document.
           let navigationFailure = null;
-          if ((r.ok && r.status === 403) || (!r.ok && r.failure?.class === "NAVIGATION_FAILED")) {
+          const failedNavigation = (!r.ok && r.failure?.class === "NAVIGATION_FAILED") ||
+            (r.ok && r.finalUrl === "chrome-error://chromewebdata/" && r.navigationFailure?.class === "NAVIGATION_FAILED");
+          if (r.ok || failedNavigation) {
             try {
-              const nav = new URL(r.navigationUrl ?? r.finalUrl);
+              const nav = new URL(failedNavigation ? r.navigationFailure?.url ?? r.navigationUrl ?? r.finalUrl : r.finalUrl);
               nav.hash = "";
-              nav.username = ""; nav.password = "";
               const urlHash = createHash("sha256").update(nav.href).digest("hex");
               const authority = `${nav.hostname}:${nav.port || (nav.protocol === "https:" ? "443" : "80")}`;
               const denied = r.proxy?.denied?.find((d) => ["SSRF_DENIED", "CLOUD_DENIED"].includes(d.class) &&
-                (d.urlHash === urlHash || (!r.ok && nav.protocol === "https:" && !d.urlHash && d.host === authority)));
+                (d.urlHash === urlHash || (failedNavigation && nav.protocol === "https:" && !d.urlHash && d.host === authority)));
               if (denied) navigationFailure = { class: denied.class, detail: "the browser's main-frame destination was refused by acquisition policy", retryable: false, retryAfter: null };
             } catch { /* no attributable navigation target */ }
           }

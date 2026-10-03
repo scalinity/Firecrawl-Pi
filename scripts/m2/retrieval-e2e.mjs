@@ -121,6 +121,13 @@ if (groups.has("browser-redirect")) {
   const publicRedirect = `${M2}/redirect?to=${encodeURIComponent("http://m1.fixture.fcpi.test:8080/static.html")}`;
   await scrape("BR08-public-core", publicRedirect);
   await acquire("BR08-public-rs", { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: publicRedirect });
+  for (const [id, dst] of [["BR09-postload-private", "private"], ["BR10-postload-cloud", "cloud"]]) {
+    const url = `${M2}/postload-denied.html?dst=${dst}`;
+    await scrape(`${id}-core`, url);
+    await acquire(`${id}-rs`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url });
+  }
+  await scrape("BR11-own-403-core", `${M2}/forbidden-navigation`);
+  await acquire("BR11-own-403-rs", { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: `${M2}/forbidden-navigation` });
 }
 
 if (groups.has("browser")) {

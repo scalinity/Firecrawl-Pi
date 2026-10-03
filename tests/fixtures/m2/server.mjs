@@ -41,6 +41,7 @@ const routes = {
   "/members": () => [302, { location: "/login?next=/members" }, ""],
   "/login": () => [200, { "content-type": "text/html; charset=utf-8" }, html("Sign in", "<main><h1>Sign in</h1><form method=\"post\"><input name=\"user\"><input type=\"password\" name=\"pw\"><button>Sign in</button></form></main>")],
   "/forbidden": () => [403, { "content-type": "text/html; charset=utf-8" }, html("Forbidden", "<p>You do not have access to this resource.</p>")],
+  "/forbidden-navigation": () => [403, { "content-type": "text/html; charset=utf-8" }, html("Forbidden navigation control", '<p>You do not have access to this resource.</p><img src="http://169.254.169.254/latest/meta-data/"><script>setTimeout(()=>location.href="http://169.254.169.254/latest/meta-data/",100)</script>')],
   "/challenge": () => [200, { "content-type": "text/html; charset=utf-8" }, html("Just a moment...", "<div id=\"challenge-running\">Checking your browser before accessing the site.</div><script src=\"/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1\"></script>")],
   "/pdf": async () => [200, { "content-type": "application/pdf" }, await pdf()],
   "/doc.pdf": async () => [200, { "content-type": "application/pdf" }, await pdf()],
