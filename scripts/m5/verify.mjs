@@ -242,17 +242,21 @@ const checks = {
     run() {
       const s = S(`${RAW}suites.txt`), m = kv((s.meta ?? [""])[0].split(" "));
       const t = (k) => tapCounts(s[k]), exit0 = (k) => (s[k] ?? []).includes("test_exit=0");
+      // M7/M8 run M5's cases in their larger gateway and ledger suites.
+      const gatewaySuite = s.gateway_m5_tap ? "gateway_m5_tap" : "gateway_m7_tap";
+      const migrationSuite = s.ledger_migration_tap ? "ledger_migration_tap" : "ledger_tap";
+      const migrationCase = (s[migrationSuite] ?? []).some(l => /^ok \d+ - a version-1 ledger gains the extract kind and version 2 in place, and keeps its jobs/.test(l));
       const skipped = +(((s.retrieval_tap ?? []).find((l) => l.startsWith("# skipped ")) ?? "# skipped 1").split(" ")[2]);
       const tr = kv((s.transient ?? []).flatMap((l) => l.split(" ")));
       const cond = { images: m.retrieval_image === composeImage("retrieval-service") && m.gateway_image === composeImage("access-gateway") && m.mcp_image === composeImage("mcp-gateway"),
         retrieval: t("retrieval_tap").tests >= 114 && t("retrieval_tap").fail === 0 && skipped === 0 && exit0("retrieval_tap"),
-        gateway_m5: t("gateway_m5_tap").tests >= 16 && t("gateway_m5_tap").fail === 0 && exit0("gateway_m5_tap"),
+        gateway_m5: t(gatewaySuite).tests >= 16 && t(gatewaySuite).fail === 0 && exit0(gatewaySuite),
         mcp: t("mcp_tap").tests >= 41 && t("mcp_tap").fail === 0 && exit0("mcp_tap"), gateway_unit: t("gateway_unit_tap").tests >= 30 && t("gateway_unit_tap").fail === 0 && exit0("gateway_unit_tap"),
-        m3_contract: t("gateway_contract_tap").tests === 40 && t("gateway_contract_tap").pass === 40 && exit0("gateway_contract_tap"),
+        m3_contract: t("gateway_contract_tap").tests >= 40 && t("gateway_contract_tap").pass === t("gateway_contract_tap").tests && t("gateway_contract_tap").fail === 0 && exit0("gateway_contract_tap"),
         m4_contract: t("gateway_mcp_contract_tap").tests >= 3 && t("gateway_mcp_contract_tap").fail === 0 && exit0("gateway_mcp_contract_tap"),
-        ledger_migration: t("ledger_migration_tap").tests === 1 && t("ledger_migration_tap").fail === 0 && exit0("ledger_migration_tap"),
+        ledger_migration: migrationCase && t(migrationSuite).tests >= 1 && t(migrationSuite).fail === 0 && exit0(migrationSuite),
         grammars: t("grammars_tap").tests >= 3 && t("grammars_tap").fail === 0, no_leftovers: tr.leftover_transient_containers === "0" && tr.leftover_transient_networks === "0" };
-      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; retrieval ${t("retrieval_tap").pass}/${t("retrieval_tap").tests} (skipped ${skipped}), gateway-m5 ${t("gateway_m5_tap").pass}/${t("gateway_m5_tap").tests}, mcp ${t("mcp_tap").pass}/${t("mcp_tap").tests}, gateway unit ${t("gateway_unit_tap").pass}/${t("gateway_unit_tap").tests}, M3 contract ${t("gateway_contract_tap").pass}/${t("gateway_contract_tap").tests}, M4 contract ${t("gateway_mcp_contract_tap").pass}/${t("gateway_mcp_contract_tap").tests}` };
+      return { ok: bad(cond).length === 0, actual: `failed=${bad(cond).join(",") || "none"}; retrieval ${t("retrieval_tap").pass}/${t("retrieval_tap").tests} (skipped ${skipped}), gateway-m5 ${t(gatewaySuite).pass}/${t(gatewaySuite).tests}, mcp ${t("mcp_tap").pass}/${t("mcp_tap").tests}, gateway unit ${t("gateway_unit_tap").pass}/${t("gateway_unit_tap").tests}, M3 contract ${t("gateway_contract_tap").pass}/${t("gateway_contract_tap").tests}, M4 contract ${t("gateway_mcp_contract_tap").pass}/${t("gateway_mcp_contract_tap").tests}` };
     } },
 
   // ================================================================ search (AC06; review finding S6)
