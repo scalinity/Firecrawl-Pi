@@ -20,11 +20,17 @@ day=$(date -u +%F)
 [ ! -e "$D/launches.jsonl" ] || jq -e -s 'all(.[]; (.day|type)=="string" and (.incident_id|test("^[0-9a-f]{8}$")))' "$D/launches.jsonl" >/dev/null || die 'launch ledger damaged; investigation blocked'
 count=$(jq -s --arg day "$day" '[.[]|select(.day==$day)]|length' "$D/launches.jsonl" 2>/dev/null || echo 0)
 [ "$count" -lt 4 ] || die 'UTC daily investigation limit reached'
-# Validate credentials and the pinned native binary BEFORE creating any worktree.
-# The supported access-token mode does not refresh or modify the owner login.
-jq -e --argjson now "$(date +%s%3N)" '.claudeAiOauth | .accessToken and .subscriptionType == "max" and .expiresAt > ($now + 600000)' /home/danny/.claude/.credentials.json >/dev/null || die 'subscription access token unavailable or near expiry'
+# Pin the native binary before any auth operation or worktree creation.
 sha=$(sha256sum /home/danny/.local/bin/claude | cut -c1-64)
 [ "$sha" = "$(jq -r .host_packages.claude_code.binary_sha256 "$REPO/deploy/versions.lock.json")" ] || die 'Claude binary differs from pinned version'
+valid_token() { jq -e --argjson now "$(date +%s%3N)" '.claudeAiOauth | .accessToken and .subscriptionType == "max" and .expiresAt > ($now + 600000)' /home/danny/.claude/.credentials.json >/dev/null 2>&1; }
+if ! valid_token; then
+ # Refresh only through the installed CLI's documented noninteractive login.
+ # The model still receives only an isolated short-lived access token.
+ runuser -u danny -- /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/danny /bin/bash "$REPO/scripts/m9/incident-auth.sh" >"$D/auth-refresh.txt" 2>&1 || die 'subscription refresh failed; owner attention required'
+ chmod 0600 "$D/auth-refresh.txt"
+fi
+valid_token || die 'subscription access token unavailable or near expiry'
 new=false
 cleanup_prepare() {
  rc=$?

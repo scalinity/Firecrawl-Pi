@@ -40,6 +40,11 @@ cat >"$T/bin/docker" <<SHSTUB
 case \$1 in inspect) echo sha256:fixture;; run) cat $T/proof;; *) echo "\$*" >>$T/docker;; esac
 SHSTUB
 chmod +x "$T/bin/"*
+cat >"$T/bin/runuser" <<'SHSTUB'
+#!/bin/bash
+exit 2
+SHSTUB
+chmod +x "$T/bin/runuser"
 export GIT_CONFIG_GLOBAL=/home/danny/.gitconfig
 base=$(cat "$R/.fcpi-source-commit"); echo "$base" >"$T/repo/.fcpi-source-commit"
 git clone --quiet --bare /var/lib/firecrawl-pi/incidents/source.git "$T/state/incidents/source.git"
