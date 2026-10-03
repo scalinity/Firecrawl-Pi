@@ -38,6 +38,14 @@ git diff --quiet HEAD -- . ':(exclude)evidence' || { echo "tracked files outside
 # a name holding a backslash, so no tracked path may hold a newline or a backslash.
 [ "$(git ls-tree -r -z --name-only HEAD | tr -cd '\\\n' | wc -c | tr -d ' ')" = 0 ] || { echo "a tracked path contains a newline or a backslash" >&2; exit 1; }
 sha=$(git rev-parse HEAD)
+if [ "$local_mode" = false ]; then
+ previous=$(remote "cat $DEST/.fcpi-source-commit 2>/dev/null || true")
+ if [[ $previous =~ ^[0-9a-f]{40}$ ]] && [ "$previous" != "$sha" ]; then
+  git cat-file -e "$previous^{commit}" 2>/dev/null && git merge-base --is-ancestor "$previous" "$sha" || {
+   echo "deployment refused: deployed release is not an ancestor of this checkout; import and reconcile the private incident branch first" >&2; exit 2;
+  }
+ fi
+fi
 # One archive is built, hashed from its own extracted contents, and sent: the hashes the Pi
 # checks describe exactly what it received, whatever the working tree holds.
 work=$(mktemp -d)

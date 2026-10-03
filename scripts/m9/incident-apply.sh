@@ -7,6 +7,18 @@ set -euo pipefail
 need_root
 id=${1:?}; nonce=${2:?}; [[ $id =~ ^[0-9a-f]{8}$ && $nonce =~ ^[0-9a-f]{32}$ ]] || exit 2
 W=$STATE/incidents/work/$id C=$STATE/incidents/control
+deployment_started=false final_state=FAILED
+finish_apply() {
+ rc=$?
+ trap - EXIT TERM INT
+ hold_clear incident-deploy || true
+ if [ "$rc" != 0 ]; then
+  notice deployment_failed "incident_agent:$id" '{"state":"APPLY_FAILED","automatic_retry":false,"owner_attention_required":true}' "$(now_s)" "$id" || true
+ fi
+ [ ! -s "$C/processed/$nonce.json" ] || jq --arg state "$final_state" --argjson rc "$rc" '. + {state:$state,exit_code:$rc,finished_at:now}' "$C/processed/$nonce.json" | write_atomic "$C/processed/$nonce.json" 0600
+}
+trap finish_apply EXIT
+trap 'exit 143' TERM INT
 exec 9>"$STATE/incidents/deploy.lock"; flock -n 9 || die 'another incident deployment is active'
 g=$(cat "$C/processed/$nonce.json")
 [ "$(jq -r .state <<<"$g")" = EXECUTION_STARTED ] && [ "$(jq -r .incident_id <<<"$g")" = "$id" ] || die 'no verified execution record'
@@ -21,7 +33,8 @@ if [ "${3:-}" != --rollback ]; then
 fi
 if [ "${3:-}" = --rollback ]; then
  [ "$(jq -r .action <<<"$g")" = rollback ] && [ -s "$W/release.json" ] || die 'no approved rollback release'
- [ "$(source_commit)" = "$(jq -r .candidate_sha "$W/release.json")" ] || die 'release has moved'
+ current=$(source_commit)
+ [[ $current = "$base" || $current = "$(jq -r .candidate_sha "$W/release.json")" ]] || die 'release has moved'
  git -C "$W/tree" switch --detach "$base" >/dev/null
 else
  [ "$(jq -r .action <<<"$g")" = apply_fix ] && [ "$(jq -r .test_exit "$W/harvested.json")" = 0 ] && [ "$(jq -r .changed_files "$W/harvested.json")" -gt 0 ] || die 'no tested approved patch'
@@ -49,11 +62,27 @@ else
  candidate=$(git -C "$W/tree" rev-parse HEAD)
  jq -cn --arg base "$base" --arg c "$candidate" --arg code "$code" '{previous_sha:$base,candidate_sha:$c,image_source_sha:$code,state:"PREPARED"}' | write_atomic "$W/release.json" 0600
  # Current platform remains active unless the encrypted pre-change backup passes.
- bash "$REPO/scripts/ops/backup.sh" >"$W/predeploy-backup.txt" 2>&1
- bash "$REPO/scripts/ops/restore-test.sh" >"$W/predeploy-restore.txt" 2>&1
+ FCPI_LOCK_WAIT_S=30 timeout --kill-after=120 600 bash "$REPO/scripts/ops/backup.sh" >"$W/predeploy-backup.txt" 2>&1
+ FCPI_LOCK_WAIT_S=30 timeout --kill-after=120 900 bash "$REPO/scripts/ops/restore-test.sh" >"$W/predeploy-restore.txt" 2>&1
 fi
-hold_set incident-deploy 900
-trap 'hold_clear incident-deploy' EXIT
+hold_set incident-deploy 3600
+# Fixed paired rollback is part of the approved Apply Fix transaction. These
+# proposals cannot change schemas/data, so restore code/config/images together
+# without rewinding live durable jobs or issuing duplicate external work.
+restore_previous() {
+ git -C "$W/tree" switch --detach "$base" >/dev/null || return
+ bash "$REPO/scripts/m1/deploy.sh" --local "$W/tree" >"$W/rollback.txt" 2>&1 || return
+ bash "$REPO/deploy/host/fcpi-data-check.sh" >>"$W/rollback.txt" 2>&1 || return
+ docker compose -p fcpi -f "$REPO/deploy/compose.yaml" up -d --no-build --no-deps access-gateway retrieval-service >>"$W/rollback.txt" 2>&1 || return
+ sleep 20
+ bash "$REPO/scripts/ops/verify.sh" functional >>"$W/rollback.txt" 2>&1
+}
+# Export approved history privately before cutover; it can be imported on the
+# owner workstation and the normal deployment guard prevents overwriting it.
+install -d -m 0700 "$STATE/incidents/exports"
+git -C "$W/tree" bundle create "$STATE/incidents/exports/$id.bundle" "codex/incident-$id"
+chmod 0600 "$STATE/incidents/exports/$id.bundle"
+deployment_started=true
 rc=0
 bash "$REPO/scripts/m1/deploy.sh" --local "$W/tree" >"$W/deploy.txt" 2>&1 || rc=$?
 if [ "$rc" = 0 ]; then
@@ -68,7 +97,15 @@ if [ "$rc" = 0 ]; then
  bash "$REPO/scripts/ops/verify.sh" functional >"$W/postdeploy-tests.txt" 2>&1 || rc=$?
 fi
 if [ "$rc" != 0 ]; then
- notice deployment_failed "incident_agent:$id" '{"state":"DEPLOYMENT_FAILED","rollback_requires_owner_approval":true}' "$(now_s)" "$id"
+ # An unhealthy gateway cannot be the only way to approve its own recovery.
+ if [ "${3:-}" != --rollback ] && restore_previous; then
+  final_state=ROLLED_BACK
+  notice deployment_failed "incident_agent:$id" '{"state":"FAILED_CANDIDATE_ROLLED_BACK","previous_release_verified":true,"automatic_retry":false}' "$(now_s)" "$id"
+ else
+  final_state=ROLLBACK_FAILED
+  notice deployment_failed "incident_agent:$id" '{"state":"ROLLBACK_FAILED","owner_attention_required":true,"automatic_retry":false}' "$(now_s)" "$id"
+ fi
  exit "$rc"
 fi
+final_state=EXECUTED
 notice cleared "incident_agent:$id" '{"state":"APPROVED_RELEASE_VERIFIED"}' "$(now_s)" "$id"

@@ -39,8 +39,12 @@ for f in "$C"/requests/*.json; do
   investigate) if [ -e "$D/work/$id" ]; then bash "$REPO/scripts/m9/incident-prepare.sh" "$id" --resume || rc=$?; else bash "$REPO/scripts/m9/incident-prepare.sh" "$id" || rc=$?; fi ;;
   details) : ;;
   dismiss) put_obj "$C/dismissed/$id.json" 0600 "$(jq -c '{incident_id,approved_at}' <<<"$g")" ;;
-  apply_fix) bash "$REPO/scripts/m9/incident-apply.sh" "$id" "$grant" || rc=$? ;;
-  rollback) bash "$REPO/scripts/m9/incident-apply.sh" "$id" "$grant" --rollback || rc=$? ;;
+  apply_fix|rollback)
+   args=("$id" "$grant"); [ "$action" != rollback ] || args+=(--rollback)
+   if systemd-run --quiet --unit="fcpi-incident-apply-$id" --collect --property=Slice=fcpi.slice --property=MemoryMax=512M --property=MemorySwapMax=0 --property=TasksMax=128 --property=RuntimeMaxSec=3600 --property=TimeoutStopSec=120 --property=KillMode=mixed /bin/bash "$REPO/scripts/m9/incident-apply.sh" "${args[@]}"; then
+    # The apply unit records the final disposition; tick remains available.
+    continue
+   else rc=$?; fi ;;
   *) die 'unknown incident action' ;;
  esac
  put_obj "$C/processed/$grant.json" 0600 "$(jq -c --argjson rc "$rc" '. + {state:(if $rc==0 then "EXECUTED" else "FAILED" end),exit_code:$rc,finished_at:now}' <<<"$g")"
