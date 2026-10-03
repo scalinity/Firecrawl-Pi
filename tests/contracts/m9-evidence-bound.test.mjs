@@ -1,4 +1,4 @@
-import test from 'node:test';import assert from 'node:assert/strict';import {sha,corpusVerdict,fixturesVerdict,nativeVerdict,incidentVerdict}from'../../scripts/m9/evidence-checks.mjs';
+import test from 'node:test';import assert from 'node:assert/strict';import {sha,corpusVerdict,fixturesVerdict,nativeVerdict,incidentVerdict,incidentSourceRead}from'../../scripts/m9/evidence-checks.mjs';
 test('missing, edited, failed or summary-only evidence cannot grant acceptance',()=>{
  const raw='# tests 270\n# pass 270\n# fail 0\n';assert.equal(fixturesVerdict(raw,{state:'PASS',exit_code:0}),false);
  assert.equal(fixturesVerdict(raw,{raw_sha256:sha(raw),exit_code:0}),false); // missing suites
@@ -14,17 +14,24 @@ test('missing, edited, failed or summary-only evidence cannot grant acceptance',
 test('incident acceptance requires actual model and every enforced resource bound',()=>{
  const raw=JSON.stringify({is_error:false,structured_output:{incident_id:'123abcde'},modelUsage:{'claude-opus-5-5':{inputTokens:10}}});
  const w='/var/lib/firecrawl-pi/incidents/work/123abcde';
- const proof={incident_id:'123abcde',raw_sha256:sha(raw),unit:{MemoryMax:805306368,NoNewPrivileges:true,declared_tools:'Read,Edit,Write,StructuredOutput',User:'danny',Group:'danny',MemorySwapMax:'0',RuntimeMaxUSec:'5min 30s',CPUQuotaPerSecUSec:'500ms',TasksMax:'128',Slice:'fcpi.slice',KillMode:'control-group',TimeoutStopUSec:'15s',ProtectSystem:'strict',ProtectHome:'read-only',PrivateTmp:'yes',ReadWritePaths:w+'/tree '+w+'/run',InaccessiblePaths:'/etc/firecrawl-pi /srv/firecrawl-pi/data /run/docker.sock -/home/danny/.ssh -/home/danny/.codex /home/danny/.claude /var/lib/firecrawl-pi/incidents/control',BindReadOnlyPaths:'/home/danny/.local/bin/claude:/home/danny/.local/bin/claude:rbind'},auth_removed:true,owner_authentication:'Max subscription',invoiced_usd:null};
- assert.equal(incidentVerdict(raw,proof),true);
- for(const [key,value]of Object.entries({MemoryMax:0,NoNewPrivileges:false,declared_tools:'Bash',User:'root',Group:'root',MemorySwapMax:'infinity',RuntimeMaxUSec:'infinity',CPUQuotaPerSecUSec:'infinity',TasksMax:'infinity',Slice:'system.slice',KillMode:'process',TimeoutStopUSec:'infinity',ProtectSystem:'no',ProtectHome:'no',PrivateTmp:'no',ReadWritePaths:'/',InaccessiblePaths:'',BindReadOnlyPaths:null}))assert.equal(incidentVerdict(raw,{...proof,unit:{...proof.unit,[key]:value}}),false,key);
- for(const key of Object.keys(proof.unit)){const unit={...proof.unit};delete unit[key];assert.equal(incidentVerdict(raw,{...proof,unit}),false,'missing '+key);}
- for(const value of [null,'',false,0])assert.equal(incidentVerdict(raw,{...proof,unit:{...proof.unit,MemorySwapMax:value}}),false);
- const wrong=raw.replace('claude-opus-5-5','other-model');assert.equal(incidentVerdict(wrong,{...proof,raw_sha256:sha(wrong)}),false);
- assert.equal(incidentVerdict(raw,{...proof,auth_removed:false}),false);
- for(const bind of ['/home/danny/.local/bin/claude','/home/danny/.local/bin/claude:/tmp/other:rbind'])assert.equal(incidentVerdict(raw,{...proof,unit:{...proof.unit,BindReadOnlyPaths:bind}}),false);
- assert.equal(incidentVerdict(raw,{...proof,invoiced_usd:0}),false);
- assert.equal(incidentVerdict(raw,{...proof,incident_id:'aaaaaaaa'}),false);
- assert.equal(incidentVerdict(raw+' ',proof),false);
- for(const value of ['null','[]','42','"text"','invalid'])assert.equal(incidentVerdict(value,{...proof,raw_sha256:sha(value)}),false);
- for(const modelUsage of [undefined,{}, {'claude-opus-5-5':{},other:{}}]){const value=JSON.stringify({is_error:false,structured_output:{incident_id:'123abcde'},modelUsage});assert.equal(incidentVerdict(value,{...proof,raw_sha256:sha(value)}),false);}
+ const transcript=[{type:'assistant',message:{content:[{type:'tool_use',id:'read1',name:'Read',input:{file_path:w+'/tree/scripts/ops/tick.sh'}}]}},{type:'user',message:{content:[{type:'tool_result',tool_use_id:'read1',content:'151\tqueue_unreadable',is_error:false}]}}].map(x=>JSON.stringify(x)).join('\n');
+ const verdict=(raw,proof,trace=transcript)=>incidentVerdict(raw,proof,trace);
+ const proof={incident_id:'123abcde',raw_sha256:sha(raw),transcript_sha256:sha(transcript),unit:{MemoryMax:805306368,NoNewPrivileges:true,declared_tools:'Read,Edit,Write,StructuredOutput',User:'danny',Group:'danny',MemorySwapMax:'0',RuntimeMaxUSec:'5min 30s',CPUQuotaPerSecUSec:'500ms',TasksMax:'128',Slice:'fcpi.slice',KillMode:'control-group',TimeoutStopUSec:'15s',ProtectSystem:'strict',ProtectHome:'read-only',PrivateTmp:'yes',ReadWritePaths:w+'/tree '+w+'/run',InaccessiblePaths:'/etc/firecrawl-pi /srv/firecrawl-pi/data /run/docker.sock -/home/danny/.ssh -/home/danny/.codex /home/danny/.claude /var/lib/firecrawl-pi/incidents/control',BindReadOnlyPaths:'/home/danny/.local/bin/claude:/home/danny/.local/bin/claude:rbind'},auth_removed:true,owner_authentication:'Max subscription',invoiced_usd:null};
+ assert.equal(verdict(raw,proof),true);
+ assert.equal(incidentVerdict(raw,proof),false);
+ assert.equal(verdict(raw,proof,transcript+' '),false);
+ for(const trace of ['',transcript.replaceAll('read1','wrong').replace('"tool_use_id":"wrong"','"tool_use_id":"missing"'),transcript.replace('"is_error":false','"is_error":true'),transcript.replace('123abcde','ffffffff'),transcript.replace('151\\tqueue_unreadable','permission denied'),'null','invalid'])assert.equal(verdict(raw,{...proof,transcript_sha256:sha(trace)},trace),false);
+ assert.equal(verdict(raw,{...proof,transcript_sha256:'0'.repeat(64)}),false);
+ assert.equal(incidentSourceRead(transcript,'123abcde'),true);
+ for(const [key,value]of Object.entries({MemoryMax:0,NoNewPrivileges:false,declared_tools:'Bash',User:'root',Group:'root',MemorySwapMax:'infinity',RuntimeMaxUSec:'infinity',CPUQuotaPerSecUSec:'infinity',TasksMax:'infinity',Slice:'system.slice',KillMode:'process',TimeoutStopUSec:'infinity',ProtectSystem:'no',ProtectHome:'no',PrivateTmp:'no',ReadWritePaths:'/',InaccessiblePaths:'',BindReadOnlyPaths:null}))assert.equal(verdict(raw,{...proof,unit:{...proof.unit,[key]:value}}),false,key);
+ for(const key of Object.keys(proof.unit)){const unit={...proof.unit};delete unit[key];assert.equal(verdict(raw,{...proof,unit}),false,'missing '+key);}
+ for(const value of [null,'',false,0])assert.equal(verdict(raw,{...proof,unit:{...proof.unit,MemorySwapMax:value}}),false);
+ const wrong=raw.replace('claude-opus-5-5','other-model');assert.equal(verdict(wrong,{...proof,raw_sha256:sha(wrong)}),false);
+ assert.equal(verdict(raw,{...proof,auth_removed:false}),false);
+ for(const bind of ['/home/danny/.local/bin/claude','/home/danny/.local/bin/claude:/tmp/other:rbind'])assert.equal(verdict(raw,{...proof,unit:{...proof.unit,BindReadOnlyPaths:bind}}),false);
+ assert.equal(verdict(raw,{...proof,invoiced_usd:0}),false);
+ assert.equal(verdict(raw,{...proof,incident_id:'aaaaaaaa'}),false);
+ assert.equal(verdict(raw+' ',proof),false);
+ for(const value of ['null','[]','42','"text"','invalid'])assert.equal(verdict(value,{...proof,raw_sha256:sha(value)}),false);
+ for(const modelUsage of [undefined,{}, {'claude-opus-5-5':{},other:{}}]){const value=JSON.stringify({is_error:false,structured_output:{incident_id:'123abcde'},modelUsage});assert.equal(verdict(value,{...proof,raw_sha256:sha(value)}),false);}
 });

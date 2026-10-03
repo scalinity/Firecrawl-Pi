@@ -21,6 +21,9 @@ function decision(tool,file,payload={file_path:file},inputPath=input) {
 }
 test('incident file guard permits bounded reads and a proposed source fix',()=>{
  assert.equal(decision('Read',input),'allow');assert.equal(decision('Edit',join(tree,'services/access/src/changes.mjs')),'allow');
+ assert.equal(decision('Read',join(tree,'scripts/ops/tick.sh')),'allow');
+ assert.equal(decision('Read',tree),'deny');
+ assert.equal(decision('Read',join(tree,'README.md')),'deny');
  assert.equal(decision('Write',join(tree,'services/access/test/new-incident.test.mjs')),'allow');
 });
 test('only the native schema serialization tool may emit this incident handle',()=>{

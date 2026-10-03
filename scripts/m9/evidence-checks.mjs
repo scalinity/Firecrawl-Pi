@@ -29,14 +29,25 @@ export function fixturesVerdict(raw,run){
  const failures=[...raw.matchAll(/^# fail (\d+)$/gm)].map(x=>+x[1]);
  return run?.exit_code===0&&sha(raw)===run.raw_sha256&&ns.length>=3&&ns.reduce((a,b)=>a+b,0)>=270&&ns.length===passes.length&&ns.every((n,i)=>n===passes[i])&&failures.length===ns.length&&failures.every(x=>x===0)&&!/^not ok /m.test(raw);
 }
-export function incidentVerdict(raw,proof){
+export function incidentSourceRead(transcript,id){
+ if(typeof transcript!=='string'||!/^[0-9a-f]{8}$/.test(id??''))return false;
+ let events;try{events=transcript.trim().split('\n').map(x=>JSON.parse(x));}catch{return false;}
+ const uses=new Set();
+ for(const e of events){
+  if(e?.type!=='assistant'||!Array.isArray(e.message?.content))continue;
+  for(const c of e.message.content)if(c?.type==='tool_use'&&c.name==='Read'&&typeof c.id==='string'&&c.input?.file_path===`/var/lib/firecrawl-pi/incidents/work/${id}/tree/scripts/ops/tick.sh`)uses.add(c.id);
+ }
+ return events.some(e=>e?.type==='user'&&Array.isArray(e.message?.content)&&e.message.content.some(c=>c?.type==='tool_result'&&uses.has(c.tool_use_id)&&c.is_error!==true&&typeof c.content==='string'&&/^\s*\d+\t/m.test(c.content)&&c.content.includes('queue_unreadable')));
+}
+export function incidentVerdict(raw,proof,transcript){
  let r;try{r=JSON.parse(raw);}catch{return false;}
  if(!r||typeof r!=='object'||!/^([0-9a-f]{8})$/.test(proof?.incident_id??''))return false;
  const u=proof?.unit,models=Object.keys(r.modelUsage??{});
  const w='/var/lib/firecrawl-pi/incidents/work/'+proof.incident_id;
  const paths=x=>typeof x==='string'?x.split(/\s+/).filter(Boolean).map(p=>p.replace(/^-/,'')).sort():[];
  const exactPaths=(got,want)=>JSON.stringify(paths(got))===JSON.stringify(want.sort());
- return sha(raw)===proof?.raw_sha256&&r.is_error===false&&r.structured_output?.incident_id===proof.incident_id&&
+ return typeof transcript==='string'&&sha(transcript)===proof.transcript_sha256&&incidentSourceRead(transcript,proof.incident_id)&&
+  sha(raw)===proof?.raw_sha256&&r.is_error===false&&r.structured_output?.incident_id===proof.incident_id&&
   models.length>0&&models.every(x=>x==='claude-opus-5-5')&&u?.MemoryMax===805306368&&u.NoNewPrivileges===true&&
   u.declared_tools==='Read,Edit,Write,StructuredOutput'&&u.User==='danny'&&u.Group==='danny'&&u.MemorySwapMax==='0'&&u.RuntimeMaxUSec==='5min 30s'&&
   u.CPUQuotaPerSecUSec==='500ms'&&u.TasksMax==='128'&&u.Slice==='fcpi.slice'&&u.KillMode==='control-group'&&u.TimeoutStopUSec==='15s'&&

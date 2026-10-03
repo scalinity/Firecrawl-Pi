@@ -53,7 +53,8 @@ const proof=json('evidence/M9/incident-proof.json'),rootTests=text('evidence/M9/
 const rootOk=/RESULT pass=\d+ fail=0 source=[0-9a-f]{40}/.test(rootTests)&&sameCode(rootTests.match(/RESULT pass=\d+ fail=0 source=([0-9a-f]{40})/)?.[1]);
 let incidentOk=false;if(proof&&/^[0-9a-f]{8}$/.test(proof.incident_id)){
  const raw=text(join(privateRoot,'incident',proof.incident_id+'.json'));
- incidentOk=rootOk&&sameCode(proof.source_commit)&&incidentVerdict(raw,proof);
+ const transcript=text(join(privateRoot,'incident',proof.incident_id+'.transcript.jsonl'));
+ incidentOk=rootOk&&sameCode(proof.source_commit)&&incidentVerdict(raw,proof,transcript);
 }
 results.push({test_id:'M9-INCIDENT',state:incidentOk?'PASS':proof?'FAIL':'NOT_RUN',root_fixtures:rootOk});
 const review=text('evidence/M9/review/REVIEW.md');const dispositions=[...review.matchAll(/^\| (?:DB1|CA1|SELF)-[^|]+\| ([^|]+)\|/gm)].map(x=>x[1].trim());
