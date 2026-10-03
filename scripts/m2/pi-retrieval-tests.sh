@@ -107,13 +107,15 @@ D logs --since "$start" "$FX" 2>&1 | redact
 sec browser_log
 { [ -n "$BW" ] && D logs --since "$start" "$BW" 2>&1; } | redact
 sec attempts
-D exec -i "$PG" psql -U postgres -d postgres -At -F $'\t' -X <<SQL | redact
+D exec -i "$PG" psql -U postgres -d postgres -At -F $'\t' -X -v ON_ERROR_STOP=1 <<SQL | redact
 SELECT a.logical_id, a.ordinal, a.purpose, a.strategy, a.domain, to_char(a.started_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
        coalesce(to_char(a.finished_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),''), coalesce(a.outcome,''), coalesce(a.target_status::text,''),
-       coalesce(a.bytes::text,''), coalesce(a.subresources::text,''), acq.attempts, a.id
+       coalesce(a.bytes::text,''), coalesce(a.subresources::text,''), acq.attempts, a.attempt_id
   FROM fcpi_retrieval.attempt a JOIN fcpi_retrieval.acquisition acq USING (logical_id)
  WHERE a.started_at >= '$start'::timestamptz ORDER BY a.started_at;
 SQL
+query_exit=$?; echo "attempt_query_exit=$query_exit"
+[ "$query_exit" = 0 ] || exit "$query_exit"
 sec permits
 D exec "$PG" psql -U postgres -d postgres -At -F $'\t' -X -c "SELECT kind, slot, holder IS NULL, coalesce(to_char(lease_until AT TIME ZONE 'UTC','HH24:MI:SS'),'') FROM fcpi_retrieval.permit ORDER BY 1, 2;"
 sec health
