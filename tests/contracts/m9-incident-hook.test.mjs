@@ -7,7 +7,8 @@ import {spawnSync} from 'node:child_process';
 const d=realpathSync(mkdtempSync(join(tmpdir(),'fcpi-hook-')));
 const tree=join(d,'tree'),input=join(d,'redacted.json');
 mkdirSync(join(tree,'services/access/src'),{recursive:true});
-mkdirSync(join(tree,'tests/contracts'),{recursive:true});writeFileSync(input,'{}');
+mkdirSync(join(tree,'services/access/test'),{recursive:true});
+spawnSync('git',['init','--quiet',tree]);spawnSync('git',['-C',tree,'fetch','--quiet',process.cwd(),'HEAD']);spawnSync('git',['-C',tree,'update-ref','HEAD','FETCH_HEAD']);writeFileSync(input,'{}');
 // macOS realpath lacks -m. The Linux launcher uses the system realpath; this
 // fixture supplies equivalent canonicalisation while the hook checks links itself.
 writeFileSync(join(d,'realpath'),`#!/usr/bin/env node
@@ -18,8 +19,8 @@ function decision(tool,file) {
  assert.equal(r.status,0,r.stderr);return JSON.parse(r.stdout).hookSpecificOutput.permissionDecision;
 }
 test('incident file guard permits bounded reads and a proposed source fix',()=>{
- assert.equal(decision('Read',input),'allow');assert.equal(decision('Edit',join(tree,'services/access/src/jobs.mjs')),'allow');
- assert.equal(decision('Write',join(tree,'tests/contracts/incident.test.mjs')),'allow');
+ assert.equal(decision('Read',input),'allow');assert.equal(decision('Edit',join(tree,'services/access/src/changes.mjs')),'allow');
+ assert.equal(decision('Write',join(tree,'services/access/test/new-incident.test.mjs')),'allow');
 });
 test('secrets, security changes, runtime hooks and execution tools are denied',()=>{
  for(const path of ['/etc/firecrawl-pi/secrets/clients/ops.token',join(tree,'.claude/settings.json'),join(tree,'deploy/policies/budget.json'),join(tree,'services/access/src/auth.mjs'),join(tree,'services/access/src/incidents.mjs'),join(tree,'services/access/src/../src/store.mjs')]) assert.equal(decision('Write',path),'deny',path);

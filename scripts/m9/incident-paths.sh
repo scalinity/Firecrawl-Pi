@@ -2,6 +2,7 @@
 # budgets, SSRF, provider dispatch and deployment remain read-only to the model.
 incident_writable() {
  local tree=$1 rel=$2
+ git -C "$tree" rev-parse --verify HEAD >/dev/null 2>&1 || return 1
  case "$rel" in
   services/access/src/changes.mjs|services/retrieval/src/quality.mjs) ;;
   services/access/test/*.test.mjs|services/retrieval/test/*.test.mjs)

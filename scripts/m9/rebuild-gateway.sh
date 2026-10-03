@@ -7,7 +7,7 @@ SSH=(ssh -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes "$PI_SSH_TARGET
 git diff --quiet HEAD -- . ':(exclude)evidence' || exit 2
 sha=$(git rev-parse HEAD)
 mkdir -p evidence/M9/work
-"${SSH[@]}" "test \"\$(cat /opt/firecrawl-pi/.fcpi-source-commit)\" = '$sha'; sudo -n docker buildx build --platform linux/arm64 --progress=plain --provenance=false --sbom=false --build-arg FCPI_SOURCE_COMMIT=$sha --load -t fcpi/access-gateway:m9 /opt/firecrawl-pi/services/access; sudo -n docker image inspect fcpi/access-gateway:m9 --format 'image_id={{.Id}} platform={{.Os}}/{{.Architecture}} user={{.Config.User}}'" >evidence/M9/work/image-build.txt 2>&1
+"${SSH[@]}" "set -e; test \"\$(cat /opt/firecrawl-pi/.fcpi-source-commit)\" = '$sha'; sudo -n docker image tag \"$(sudo -n docker inspect -f '{{.Image}}' fcpi-access-gateway-1)\" \"fcpi/access-gateway:retained-$sha\"; sudo -n docker buildx build --platform linux/arm64 --progress=plain --provenance=false --sbom=false --build-arg FCPI_SOURCE_COMMIT=$sha --load -t fcpi/access-gateway:m9 /opt/firecrawl-pi/services/access; sudo -n docker image inspect fcpi/access-gateway:m9 --format 'image_id={{.Id}} platform={{.Os}}/{{.Architecture}} user={{.Config.User}}'" >evidence/M9/work/image-build.txt 2>&1
 node --input-type=module <<'JS'
 import fs from 'node:fs';import{execFileSync}from'node:child_process';import{createHash}from'node:crypto';
 const transcript=fs.readFileSync('evidence/M9/work/image-build.txt','utf8');const id=transcript.match(/^image_id=(sha256:[0-9a-f]{64}) platform=linux\/arm64 user=3380:3380$/m)?.[1];if(!id)throw Error('No native immutable image');

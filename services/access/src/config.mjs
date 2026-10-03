@@ -12,7 +12,7 @@ const KNOWN = new Set([
   "PI_EXTRACT_URL",
   // M8: the host's admission file (src/admission.mjs).
   "PI_ADMISSION_FILE",
-  "PI_INCIDENT_GRANTS_DIR", "PI_INCIDENT_REQUESTS_DIR", "PI_INCIDENT_KEY_FILE", "PI_INCIDENT_REPORTS_DIR",
+  "PI_INCIDENT_GRANTS_DIR", "PI_INCIDENT_REQUESTS_DIR", "PI_INCIDENT_KEY_FILE", "PI_INCIDENT_REPORTS_DIR", "PI_INCIDENT_OWNER_FILE",
 ]);
 
 const int = (env, key, dflt, min, max) => {
