@@ -30,3 +30,11 @@ test('Redis memory headroom and zero eviction/error counters are measured',()=>{
 test('live Cloud audit covers the completed authorized window and actual paid container',()=>{const window={state:'CLOSED',started_utc:iso(start),required_work_finished_utc:iso(start+600000),closed_utc:iso(start+700000),expires_at:iso(end),paid_dispatch:false,provider_caps_zero:true},raw='### meta\nutc='+iso(start+650000)+' source_commit='+source+'\ncontainer=fixture started_at='+iso(start+1000)+'\nlines=80 acquisition=30 cloud_host=0\n';assert.equal(liveCloudVerdict(raw,window,true).state,'PASS');for(const [r,w,b]of [[raw.replace('cloud_host=0','cloud_host=1'),window,true],[raw,{...window,required_work_finished_utc:iso(start+680000)},true],[raw,{...window,closed_utc:iso(start+600000)},true],[raw,{...window,paid_dispatch:true},true],[raw,window,false],[raw.replace('acquisition=30','acquisition=0'),window,true]])assert.notEqual(liveCloudVerdict(r,w,b).state,'PASS');});
 
 test('AC16 uses p95 latency while keeping successful startup outliers visible',()=>{const x=good();x.resources=x.resources.replace('"ms":100','"ms":14056');assert.equal(resourceReuseVerdict(x).state,'PASS');const y=good();y.resources=y.resources.replaceAll('"ms":100','"ms":14056');fails(y);const z=good();z.redis=z.redis.replace(' core_user=', '\ncore_user=');assert.equal(resourceReuseVerdict(z).state,'PASS');});
+
+test('live driver changes invalidate corpus/research proof while preserving independent unchanged executions', () => {
+  for (const p of ['scripts/m9/live.mjs', 'scripts/m9/live-contract.mjs', 'tests/contracts/m9-live.test.mjs']) {
+    assert.equal(onlyProofChanges([p]), false);
+    assert.equal(onlyProofChanges([p], true), true);
+  }
+  for (const p of ['scripts/m9/collect-input.mjs', 'scripts/m5/e2e.mjs', 'services/access/server.mjs', 'deploy/versions.lock.json', 'scripts/m9/incident-prepare.sh']) assert.equal(onlyProofChanges([p], true), false);
+});

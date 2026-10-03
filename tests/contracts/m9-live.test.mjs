@@ -2,7 +2,6 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { liveRequests, validateLiveRequests, researchComplete, liveExitCode, liveWindowReady, liveEvidenceInWindow } from '../../scripts/m9/live-contract.mjs';
-import { onlyProofChanges } from '../../scripts/m9/resource-reuse.mjs';
 const manifest = JSON.parse(readFileSync(new URL('../../deploy/policies/capabilities.json', import.meta.url)));
 const corpus = { targets: Array.from({ length: 20 }, (_, i) => ({ url: i === 0 ? 'https://nodejs.org/api/fs.html' : `https://example.com/${i}`, page_class: i === 19 ? 'lawful-difficult' : 'static' })) };
 const plan = () => liveRequests(corpus, 'm9-research-fixed-key');
@@ -50,11 +49,4 @@ test('400 responses, missing polls, failed jobs, empty results and incomplete co
   for (const mutate of [s => s[0].json.data.web = [], s => s[1].json.links = [], s => s[2].json.data.markdown = '', s => s[3].json.id = '', s => s[4].json.status = 'failed', s => s[4].json.data.title = null]) {
     const s = steps(); mutate(s); assert.equal(liveExitCode(20, 20, 20, s), 1);
   }
-});
-test('live driver changes invalidate corpus/research proof while preserving independent unchanged executions', () => {
-  for (const p of ['scripts/m9/live.mjs', 'scripts/m9/live-contract.mjs', 'tests/contracts/m9-live.test.mjs']) {
-    assert.equal(onlyProofChanges([p]), false);
-    assert.equal(onlyProofChanges([p], true), true);
-  }
-  for (const p of ['scripts/m9/collect-input.mjs', 'scripts/m5/e2e.mjs', 'services/access/server.mjs', 'deploy/versions.lock.json', 'scripts/m9/incident-prepare.sh']) assert.equal(onlyProofChanges([p], true), false);
 });
