@@ -24,6 +24,12 @@ const net=n=>st.networks.find(l=>l.startsWith(n+" "))??"";
 const pub=st.published.filter(l=>l.includes(" -> "));
 const p=input.providers.body, caps=p.caps, compose=json(EV+"rendered-compose.json");
 const ledger=json("evidence/M6/pre-m9-closure/raw/ledger-after-stop.json").rows;
+const record=p=>Object.fromEntries(Object.entries(sections(p)).map(([k,v])=>[k,v.filter(l=>l.startsWith("{")).map(JSON.parse)]));
+const phases=[record(R+"e2e-fixture.txt"),...[5,6,7].map(m=>record(`evidence/M${m}/pre-m9-closure/raw/e2e-live.txt`))];
+const open=sections(R+"guard-window-open.txt"), close=sections(R+"egress-probe.txt");
+const meta=s=>kv(s.meta[0].split(" ")), start=Date.parse(meta(open).utc), finish=Date.parse(meta(close).utc);
+const web=(s,k)=>Number(s[k].find(l=>l.startsWith("egress_web_accepted")).split("=")[1]);
+const webDelta=web(close,"guard_after")-web(open,"counters");
 const checks={
   healthy:status.healthy===true && Object.keys(status.services).length===15 && Object.values(status.services).every(x=>x.state==="running"&&x.health==="healthy"&&x.oom_kills===0),
   native:containers.length===15 && containers.every(x=>x.platform==="linux/arm64") && st.containers.filter(l=>l.includes(" uname_m=")).length===15 && st.containers.filter(l=>l.includes(" uname_m=")).every(l=>l.endsWith("uname_m=aarch64")),
@@ -36,12 +42,13 @@ const checks={
   log_hygiene:scans[0].lines>=100 && ["search","model_call","parse","extraction"].every(k=>scans[0][k]>0) && scans[1].lines>=1 && scans.every(s=>["provider_key_like","client_token_like","bearer","proxy_authorization","basic_credential","session_username","signature"].every(k=>s[k]==="0")),
   budget_hash:budgetHashes.every(h=>h.budget_policy_sha256_logged===h.budget_policy_sha256_deployed && h.budget_policy_sha256_deployed===sha256File("deploy/policies/budget.json")),
   cloud_disabled:["access-gateway","mcp-gateway","retrieval-service"].every(n=>compose.services[n].environment.PI_CLOUD_ACCESS_ENABLED==="false"),
+  cloud_window:meta(open).guard_table_handle===meta(close).guard_table_handle && Number.isFinite(start) && Number.isFinite(finish) && webDelta>0 && webDelta<=ledger.length*4+20 && phases.every(e=>e.meta?.length===1 && e.end?.[0]?.exit===0 && Date.parse(e.meta[0].pi_utc)>start && Date.parse(e.end[0].utc)<finish && JSON.stringify(e.connections?.[0]?.hosts)==='["127.0.0.1:3380"]' && e.connections[0].lookups.length===0),
   cloud:scans.every(s=>s.cloud_host==="0") && core.length>=1 && core.every(ls=>{const c=kv(ls.find(l=>l.startsWith("classified ")).split(" "));return c.cloud_unexplained==="0"&&c.dns_unexplained==="0"&&ls.some(l=>/^control=Starting services count=[1-9]/.test(l));}) && Object.values(json(EV+"additional-verification.json").tests).every(x=>x.state==="PASS"),
   host_headroom:status.host.mem.available_mib>1024 && status.host.host_oom_kill===0 && status.host.throttled==="0x0",
   preserved:status.foreign_containers.length===0 && [...before.docker_ps,...after.docker_ps].every(l=>/\tfcpi-/.test(l)) && before.meta[1]===after.meta[1] && JSON.stringify(normalize(before))===JSON.stringify(normalize(after)) && rules("evidence/M8/raw/nft-ruleset.txt")===rules(R+"nft-ruleset.txt"),
   offdevice_restore:status.backup.offdevice==="yes" && status.backup.last_restore_test.result==="PASS"
 };
-const inputs=[R+"stack.txt",R+"stack-before-live.txt",R+"status-after.json",R+"posture-input.json",R+"core-logs-final.txt",R+"nft-ruleset.txt",EV+"snapshot-before.txt",EV+"snapshot-after.txt","evidence/M6/pre-m9-closure/raw/ledger-after-stop.json","evidence/M8/raw/nft-ruleset.txt"];
+const inputs=[R+"stack.txt",R+"stack-before-live.txt",R+"status-after.json",R+"posture-input.json",R+"core-logs-final.txt",R+"nft-ruleset.txt",EV+"snapshot-before.txt",EV+"snapshot-after.txt","evidence/M6/pre-m9-closure/raw/ledger-after-stop.json","evidence/M8/raw/nft-ruleset.txt",EV+"rendered-compose.json",EV+"additional-verification.json",R+"guard-window-open.txt",R+"egress-probe.txt",R+"e2e-fixture.txt",...[5,6,7].map(m=>`evidence/M${m}/pre-m9-closure/raw/e2e-live.txt`)];
 const out={utc:new Date().toISOString(),...repoState(),test_id:"PRE-M9-CURRENT-POSTURE",expected:"current M8 layout, inherited workload log controls and final live accounting; no M9 acceptance run",checks,state:Object.values(checks).every(Boolean)?"PASS":"FAIL",inputs:inputs.map(path=>({path,sha256:sha256File(path)})),patch_sha256:sha256File("patches/series.json"),config_sha256:sha256File("deploy/policies/budget.json"),image:json("deploy/versions.lock.json").images.retrieval};
 writeFileSync(`${ROOT}/${EV}posture-verification.json`,JSON.stringify(out,null,2)+"\n");
 console.log(out.state, Object.entries(checks).filter(([,v])=>!v).map(([k])=>k));process.exitCode=out.state==="PASS"?0:1;
