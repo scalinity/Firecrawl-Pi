@@ -101,28 +101,34 @@ export function liveCloudVerdict(raw,window,bound){
 
 // Recheck only failed low-risk corpus cases with supported caller options.
 // Keep the original batch, all twenty targets/criteria and its paid audit intact.
-export function corpusRecheckVerdict({specText,freeze,initialText,initialRecord,initialWindow,recheckText,record,finalRecord,sourceEquivalent,bound}){
+export function corpusLineageComplete({firstStarted,firstRecord,finalStarted,finalRecord}){return(!firstStarted||!!firstRecord)&&(!finalStarted||!!(finalRecord&&firstRecord));}
+export function corpusRecheckVerdict({specText,freeze,initialText,initialRecord,initialWindow,recheckText,record,finalRecord,sourceEquivalent,bound,prior}){
  try{
-  const initial=JSON.parse(initialText),recheck=JSON.parse(recheckText),spec=JSON.parse(specText),count=(raw,key)=>{const m=[...String(raw).matchAll(new RegExp('(?:^| )'+key+'=(\\d+)(?= |$)','gm'))];return m.length===1?Number(m[0][1]):NaN;};
-  if(bound!==true||recheck.source_commit!==record.source_commit||!sourceEquivalent(initial.source_commit)||!sourceEquivalent(recheck.source_commit)||record.initial_raw_sha256!==sha(initialText)||record.raw_sha256!==sha(recheckText)||
-   !liveEvidenceInWindow(initial,initialRecord,initialWindow)||record.initial_public_sha256!==sha(JSON.stringify(initialRecord))||
-   recheck.status_before?.healthy!==true||!Array.isArray(recheck.results)||JSON.stringify(recheck.results.map(r=>r.id).sort())!==JSON.stringify(['P01','P02','P07','P08'])||
-   ![recheck.before,recheck.after].every(s=>s.paid_dispatch===false&&s.caps_zero===true)||
-   JSON.stringify(recheck.ledger_keys_before)!==JSON.stringify(recheck.ledger_keys_after)||
-   count(recheck.cloud_audit,'cloud_host')!==0||count(recheck.cloud_audit_before,'cloud_host')!==0||!Number.isFinite(count(recheck.cloud_audit_before,'acquisition'))||!Number.isFinite(count(recheck.cloud_audit,'acquisition'))||count(recheck.cloud_audit,'acquisition')-count(recheck.cloud_audit_before,'acquisition')<4)return false;
-  const results=structuredClone(initial.results),start=Date.parse(record.started_utc),end=Date.parse(record.completed_utc);
-  if(![start,end,Date.parse(initialWindow.closed_utc)].every(Number.isFinite)||end<start||start<=Date.parse(initialWindow.closed_utc))return false;const receipts=new Set();
-  for(const r of recheck.results){
-   const i=spec.targets.findIndex(t=>t.id===r.id),target=spec.targets[i],old=initial.results[i],began=Date.parse(r.response?.started_utc),finished=Date.parse(r.response?.completed_utc);
-   const sid=r.response?.json?.data?.metadata?.scrapeId,keys=['url','formats','maxAge','storeInCache','onlyMainContent',...(target?.page_class==='js'?['waitFor']:[])].sort(),summary=record.results?.find(x=>x.id===r.id);
-   if(!sid||receipts.has(sid)||r.response.acquisition?.logical_id!==sid||JSON.stringify(Object.keys(r.request).sort())!==JSON.stringify(keys)||summary?.request_sha256!==sha(JSON.stringify(r.request))||summary?.attempts!==r.response.acquisition?.attempts_used||summary?.status!==r.response.status||i<0||initialRecord.results[i].usable!==false||!['static','js'].includes(target.page_class)||
-    JSON.stringify(r.request.formats)!==JSON.stringify(['markdown'])||r.request.url!==target.url||r.request.onlyMainContent!==false||r.request.maxAge!==0||r.request.storeInCache!==false||
-    (target.page_class==='js'&&r.request.waitFor!==1000)||
-    !Number.isFinite(began)||!Number.isFinite(finished)||began<start||finished>end||finished<began||
-    !Number.isInteger(old.acquisition?.attempts_used)||!Number.isInteger(r.response.acquisition?.attempts_used)||
-    old.acquisition.attempts_used+r.response.acquisition.attempts_used>target.max_attempts||
-    r.response.acquisition.proxy_bytes!==0||r.response.acquisition.proxy_micro_usd!==0||r.response.acquisition.enhanced_micro_usd!==0)return false;
-   receipts.add(sid);results[i]=r.response;
+  const initial=JSON.parse(initialText),spec=JSON.parse(specText),count=(raw,key)=>{const m=[...String(raw).matchAll(new RegExp('(?:^| )'+key+'=(\\d+)(?= |$)','gm'))];return m.length===1?Number(m[0][1]):NaN;};
+  if(!sourceEquivalent(initial.source_commit)||!liveEvidenceInWindow(initial,initialRecord,initialWindow))return false;
+  const results=structuredClone(initial.results),spent=results.map(r=>r.acquisition?.attempts_used),receipts=new Set(initial.results.map(r=>r?.json?.data?.metadata?.scrapeId).filter(Boolean));let previousEnd=Date.parse(initialWindow.closed_utc);
+  const batches=prior?[{...prior,profile:1},{recheckText,record,bound,profile:2}]:[{recheckText,record,bound,profile:1}];
+  if(prior&&(record.prior_raw_sha256!==sha(prior.recheckText)||record.prior_record_sha256!==sha(JSON.stringify(prior.record))))return false;
+  for(const batch of batches){
+   const r=JSON.parse(batch.recheckText),rec=batch.record,identity=raw=>{const rows=String(raw).split('\n').filter(l=>/^container=[0-9a-f]{12,64} started_at=\S+$/.test(l));return rows.length===1&&Number.isFinite(Date.parse(rows[0].split('started_at=')[1]))?rows[0]:null},start=Date.parse(rec.started_utc),end=Date.parse(rec.completed_utc);
+   if(batch.profile===2&&r.deployed_commit!==r.source_commit)return false;
+   if(!identity(r.cloud_audit)||identity(r.cloud_audit)!==identity(r.cloud_audit_before))return false;
+   if(batch.bound!==true||r.source_commit!==rec.source_commit||!sourceEquivalent(r.source_commit)||rec.initial_raw_sha256!==sha(initialText)||rec.raw_sha256!==sha(batch.recheckText)||rec.initial_public_sha256!==sha(JSON.stringify(initialRecord))||
+    ![start,end,previousEnd].every(Number.isFinite)||end<start||start<=previousEnd||r.status_before?.healthy!==true||!Array.isArray(r.results)||JSON.stringify(r.results.map(x=>x.id).sort())!==JSON.stringify(['P01','P02','P07','P08'])||
+    ![r.before,r.after].every(s=>s.paid_dispatch===false&&s.caps_zero===true)||!Array.isArray(r.ledger_keys_before)||JSON.stringify(r.ledger_keys_before)!==JSON.stringify(r.ledger_keys_after)||
+    count(r.cloud_audit,'cloud_host')!==0||count(r.cloud_audit_before,'cloud_host')!==0||!Number.isFinite(count(r.cloud_audit_before,'acquisition'))||!Number.isFinite(count(r.cloud_audit,'acquisition'))||count(r.cloud_audit,'acquisition')-count(r.cloud_audit_before,'acquisition')<4)return false;
+   for(const item of r.results){
+    const i=spec.targets.findIndex(t=>t.id===item.id),target=spec.targets[i],response=item.response,sid=response?.json?.data?.metadata?.scrapeId,summary=rec.results?.find(x=>x.id===item.id);
+    if(i<0||!['static','js'].includes(target.page_class)||!Number.isInteger(target.max_attempts)||target.max_attempts<1||target.max_attempts>3||initialRecord.results[i].usable!==false)return false;
+    const js=target.page_class==='js',extra=batch.profile===1?(js?{waitFor:1000}:{}):({actions:[{type:'wait',milliseconds:js?(item.id==='P08'?10000:1000):0}]});
+    const expected={url:target.url,formats:batch.profile===1?['markdown']:['markdown','rawHtml'],maxAge:0,storeInCache:false,onlyMainContent:false,...extra};
+    const began=Date.parse(response?.started_utc),finished=Date.parse(response?.completed_utc),used=response?.acquisition?.attempts_used;
+    if(!sid||receipts.has(sid)||response.acquisition?.logical_id!==sid||canonical(item.request)!==canonical(expected)||summary?.request_sha256!==sha(JSON.stringify(item.request))||summary?.attempts!==used||summary?.status!==response.status||
+     !Number.isFinite(began)||!Number.isFinite(finished)||began<start||finished>end||finished<began||!Number.isInteger(spent[i])||!Number.isInteger(used)||used<1||spent[i]+used>target.max_attempts||
+     response.acquisition.proxy_bytes!==0||response.acquisition.proxy_micro_usd!==0||response.acquisition.enhanced_micro_usd!==0)return false;
+    receipts.add(sid);spent[i]+=used;if(batch.profile===2&&summary.cumulative_attempts!==spent[i])return false;results[i]=response;
+   }
+   previousEnd=end;
   }
   return finalRecord.evidence_mode==='INITIAL_BATCH_PLUS_UNPAID_RECHECKS'&&finalRecord.initial_usable===initialRecord.usable&&corpusVerdict(specText,freeze,{results},finalRecord);
  }catch{return false;}
