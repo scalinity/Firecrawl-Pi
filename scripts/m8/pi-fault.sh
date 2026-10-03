@@ -39,7 +39,9 @@ started() { docker inspect -f '{{.State.StartedAt}}' "$(svc "$1")"; }
 swap_all() { local bad=0 n=0; for c in $(docker ps -q --filter label=com.docker.compose.project=fcpi); do n=$((n + 1)); read -r p id < <(docker inspect -f '{{.HostConfig.CgroupParent}} {{.Id}}' "$c")
   [ "$(cat "/sys/fs/cgroup/${p:-system.slice}/docker-$id.scope/memory.swap.max")" = 0 ] || [ "$(cat "/sys/fs/cgroup/${p:-system.slice}/memory.swap.max")" = 0 ] || bad=$((bad + 1)); done; echo "{\"containers\":$n,\"swap_allowed\":$bad}"; }
 tick() { FCPI_TICK_LOCK_WAIT_S=90 bash "$REPO/scripts/ops/tick.sh"; }   # waits for the timer's run rather than skipping
-notices() { ls "$STATE"/alerts/outbox/ 2>/dev/null | grep -c -- "$1" || true; }
+notices() { local f n=0; for f in "$STATE"/alerts/outbox/*.json; do [ -f "$f" ] || continue
+  case ${f##*/} in ????????T??????Z-opened-"$1".json|????????T??????Z-cleared-"$1".json) n=$((n + 1)) ;; esac
+  done; echo "$n"; }
 # OOM kills under fcpi.slice, every project container's main process included (the hog runs outside it). A container's
 # own scope count restarts at 0 when its restart policy recreates the scope, so summing those misses exactly that kill.
 oom_sum() { awk '$1 == "oom_kill" {print $2}' /sys/fs/cgroup/fcpi.slice/memory.events; }
@@ -304,6 +306,7 @@ missing_mount)
 supervisor)
   m=$(svc mcp-gateway); n0=$(notices restart_budget_or_data_service_mcp-gateway); sup=$STATE/supervisor/restarts.jsonl
   c0=$(jq -c 'select(.service == "mcp-gateway")' "$sup" 2>/dev/null | wc -l)
+  [ "$(jq -c --argjson t $(( $(now_s) - 900 )) 'select(.service == "mcp-gateway" and .epoch >= $t)' "$sup" 2>/dev/null | wc -l)" -eq 0 ] || { out refused '{"reason":"restart_budget_window_in_use"}'; exit 1; }
   for round in 1 2 3 4; do
     kill -STOP "$(pid_of mcp-gateway)"; t0=$(now_s)
     # Docker marks it unhealthy after three failed checks 30 s apart; the tick (every minute) restarts it within budget.

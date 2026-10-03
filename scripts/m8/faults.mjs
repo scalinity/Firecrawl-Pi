@@ -13,7 +13,7 @@ import { fileURLToPath } from "node:url";
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const T = Object.fromEntries(readFileSync(join(ROOT, "scripts/m1/pi-target.conf"), "utf8").split("\n").filter((l) => /^PI_\w+=/.test(l)).map((l) => [l.slice(0, l.indexOf("=")), l.slice(l.indexOf("=") + 1).replace("$HOME", process.env.HOME)]));
 const SSH = ["-i", T.PI_SSH_KEY, "-o", "IdentitiesOnly=yes", "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", "-o", "ServerAliveInterval=15", "-o", "ServerAliveCountMax=8"];
-const hide = (s) => [[T.PI_SSH_KEY, "<pi-ssh-key>"], [T.PI_SSH_TARGET, "<pi-ssh-target>"], [T.PI_LAN_ADDRESS, "<pi-lan-address>"], [process.env.HOME, "<home>"]].reduce((x, [a, b]) => (a ? x.split(a).join(b) : x), s);
+const hide = (s) => [[T.PI_SSH_KEY, "<pi-ssh-key>"], [T.PI_SSH_TARGET, "<pi-ssh-target>"], [T.PI_SSH_TARGET.split("@").at(-1), "<pi-ssh-host>"], [T.PI_LAN_ADDRESS, "<pi-lan-address>"], [process.env.HOME, "<home>"]].reduce((x, [a, b]) => (a ? x.split(a).join(b) : x), s);
 const pi = (cmd, timeoutMs = 3600000) => execFileSync("ssh", [...SSH, T.PI_SSH_TARGET, cmd], { encoding: "utf8", timeout: timeoutMs, maxBuffer: 64 * 1024 * 1024 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const say = (section, o) => process.stdout.write(`### ${section}\n${hide(JSON.stringify({ utc: new Date().toISOString(), ...o }))}\n`);
