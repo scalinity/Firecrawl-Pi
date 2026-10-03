@@ -6,7 +6,7 @@ set -euo pipefail
 need_root
 id=${1:?incident id}; [[ $id =~ ^[0-9a-f]{8}$ ]] || die 'invalid incident id'
 D=$STATE/incidents W=$STATE/incidents/work/$id
-exec 8>"$D/prepare.lock"; flock -n 8 || exit 0
+exec 8>"$D/prepare.lock"; flock -n 8 || exit 3
 # One model process at a time, including explicit owner resumes.
 systemctl list-units --state=active --type=service 'fcpi-incident-????????.service' --no-legend | grep . >/dev/null && exit 3
 [ ! -e "$W" ] || {
@@ -88,7 +88,7 @@ systemd-run --quiet --unit="fcpi-incident-$id" --uid=danny --gid=danny --collect
   --property=Slice=fcpi.slice --property=MemoryMax=768M --property=MemorySwapMax=0 --property=CPUQuota=50% --property=TasksMax=128 \
   --property=RuntimeMaxSec=330 --property=TimeoutStopSec=15 --property=KillMode=control-group --property=NoNewPrivileges=yes \
   --property=ProtectSystem=strict --property=ProtectHome=read-only --property=PrivateTmp=yes \
-  --property="ReadWritePaths=$W/tree $W/run" --property="InaccessiblePaths=/etc/firecrawl-pi /srv/firecrawl-pi/data /run/docker.sock /home/danny/.ssh /home/danny/.codex /home/danny/.claude $D/control" --property="BindReadOnlyPaths=/home/danny/.local/bin/claude" \
+  --property="ReadWritePaths=$W/tree $W/run" --property="InaccessiblePaths=/etc/firecrawl-pi /srv/firecrawl-pi/data /run/docker.sock -/home/danny/.ssh -/home/danny/.codex /home/danny/.claude $D/control" --property="BindReadOnlyPaths=/home/danny/.local/bin/claude" \
   /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/danny CLAUDE_CONFIG_DIR="$W/run/auth" \
   /bin/bash "$REPO/scripts/m9/incident-agent.sh" "$id"
 notice investigation_started "incident_agent:$id" '{"agent":"subscription","runtime_s":300,"turns":12}' "$(now_s)" "$id"

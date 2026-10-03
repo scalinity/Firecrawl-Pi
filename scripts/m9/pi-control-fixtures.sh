@@ -92,10 +92,37 @@ reject bash "$T/repo/scripts/m9/incident-apply.sh" 33333333 "$(printf '1%.0s' {1
 echo "$base" >"$W/base-sha"; date +%s >"$W/launched-at"
 echo token >"$W/run/auth/access-token"
 echo '{"old":true}' >"$W/run/result.previous.json"
+echo 'FCPI_INCIDENT_ENABLED=false' >"$T/etc/incidents.env"
+exec 9>"$T/state/incidents/prepare.lock"; flock 9
+bash "$T/repo/scripts/m9/incident-control.sh" tick
+[ -e "$W/run/auth/access-token" ]; ok 'disabled cleanup respects in-progress preparation lock'
+rc=0; bash "$T/repo/scripts/m9/incident-prepare.sh" 77777777 || rc=$?
+[ "$rc" = 3 ] && [ ! -e "$T/state/incidents/work/77777777" ]; ok 'busy preparation lock reports no launch explicitly'
+echo 'FCPI_INCIDENT_ENABLED=true' >"$T/etc/incidents.env"
+bash "$T/repo/scripts/m9/incident-control.sh" tick
+[ -e "$W/run/auth/access-token" ] && [ ! -e "$W/failed.json" ]; ok 'enabled cleanup respects preparation lock'
+echo 'FCPI_INCIDENT_ENABLED=false' >"$T/etc/incidents.env"
+flock -u 9; exec 9>&-
+echo 'fcpi-incident-33333333.service' >"$T/active"
+bash "$T/repo/scripts/m9/incident-control.sh" tick
+[ -e "$W/run/auth/access-token" ]; ok 'disabled cleanup preserves active agent auth'
+rm "$T/active"
+bash "$T/repo/scripts/m9/incident-control.sh" tick
+[ ! -e "$W/run/auth/access-token" ] && [ ! -e "$W/failed.json" ]; ok 'disabled controller cleans inactive auth without launching'
+echo token >"$W/run/auth/access-token"
 echo 'FCPI_INCIDENT_ENABLED=true' >"$T/etc/incidents.env"
 echo '{}' >"$T/state/alerts/state.json"
 bash "$T/repo/scripts/m9/incident-control.sh" tick
 [ -s "$W/failed.json" ] && [ ! -e "$W/run/auth/access-token" ] && [ ! -e "$W/harvested.json" ]; ok 'empty failed resume is terminal and removes auth'
+# The automatic path must postpone an incident while another agent is active,
+# without creating a permanent preparation failure or consuming a launch.
+echo 'fcpi-incident-33333333.service' >"$T/active"
+first=$(( $(date +%s)-200 )); key=core_unhealthy
+id=$(printf '%s:%s' "$key" "$first" | sha256sum | cut -c1-8)
+jq -n --argjson first "$first" '{core_unhealthy:{open:true,first:$first}}' >"$T/state/alerts/state.json"
+bash "$T/repo/scripts/m9/incident-control.sh" tick
+[ ! -e "$T/state/incidents/blocked/$id.json" ] && [ ! -e "$T/state/incidents/work/$id" ] && [ ! -e "$T/state/incidents/launches.jsonl" ]; ok 'active agent postpones automatic incident without consuming a launch'
+rm "$T/active"; echo '{}' >"$T/state/alerts/state.json"
 # Notification delivery still occurs when the action signer cannot find Docker/origin.
 cat >"$T/bin/curl" <<SHSTUB
 #!/bin/bash

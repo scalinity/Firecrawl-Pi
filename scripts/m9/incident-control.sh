@@ -5,6 +5,20 @@ set -euo pipefail
 . "$(dirname "$(readlink -f "$0")")/../ops/lib.sh"
 need_root
 D=$STATE/incidents C=$STATE/incidents/control
+# Cleanup also runs while automatic investigation is disabled. A namespace
+# failure can prevent the unprivileged agent's EXIT trap from ever starting.
+# The preparation lock excludes the interval before its unit has been launched.
+exec 9>"$D/prepare.lock"
+if flock -n 9; then
+ for w in "$D"/work/*; do
+  [ -d "$w" ] || continue
+  id=${w##*/}; [[ $id =~ ^[0-9a-f]{8}$ ]] || continue
+  systemctl is-active --quiet "fcpi-incident-$id.service" && continue
+  rm -f "$w/run/auth/access-token"
+ done
+ flock -u 9
+fi
+exec 9>&-
 [ -r /etc/firecrawl-pi/incidents.env ] || exit 0
 grep -qx 'FCPI_INCIDENT_ENABLED=true' /etc/firecrawl-pi/incidents.env || exit 0
 exec 7>"$D/control.lock"; flock -n 7 || exit 0
@@ -66,6 +80,8 @@ done
 # Expired, consumed grant material is removed after seven days. Replay records
 # remain for the same window (longer than the maximum one-hour validity).
 find "$C/grants" "$C/requests" "$C/processed" "$C/reports" -type f -name '*.json' -mtime +7 -delete
+exec 9>"$D/prepare.lock"
+if flock -n 9; then
 for w in "$D"/work/*; do
  [ -d "$w" ] || continue
  id=${w##*/}; [[ $id =~ ^[0-9a-f]{8}$ ]] || continue
@@ -80,6 +96,9 @@ for w in "$D"/work/*; do
   rm -rf -- "$w"; rm -f -- "$C/reports/$id.json"
  fi
 done
+ flock -u 9
+fi
+exec 9>&-
 # Meaningful unresolved incidents only. Physical thermal/disk conditions are
 # noticed by M8 but do not invite a code agent to change their safety boundaries.
 while IFS=$'\t' read -r key first; do
@@ -87,7 +106,11 @@ while IFS=$'\t' read -r key first; do
  [ ! -e "$C/dismissed/$id.json" ] || continue
  [ ! -e "$D/work/$id" ] && [ ! -e "$D/blocked/$id.json" ] || continue
  [ $(( $(now_s) - first )) -ge 120 ] || continue
- if ! bash "$REPO/scripts/m9/incident-prepare.sh" "$id"; then
+ rc=0; bash "$REPO/scripts/m9/incident-prepare.sh" "$id" || rc=$?
+ # A busy preparation or active agent postpones this incident without spending
+ # a launch. Other failures retain their explicit owner-attention disposition.
+ [ "$rc" != 3 ] || continue
+ if [ "$rc" != 0 ]; then
   put_obj "$D/blocked/$id.json" 0600 '{"state":"PREPARATION_BLOCKED","automatic_retry":false}'
   notice diagnosis_ready "incident_agent:$id" '{"state":"PREPARATION_BLOCKED","automatic_retry":false,"owner_attention_required":true}' "$(now_s)" "$id"
  fi
