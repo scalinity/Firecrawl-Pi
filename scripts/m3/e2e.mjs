@@ -415,7 +415,7 @@ const PHASES = {
     for (let i = 0; i < 240 && !activeAtKill; i++) {
       const j = ledgerJob(k5.json.id);
       if (["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"].includes(j?.state)) break;
-      if (j?.upstream) {
+      if (j?.state === "RUNNING" && j.upstream) {
         if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(j.upstream)) throw new Error("K5 upstream group is not a UUID");
         // Observe a slow fixture page and kill in the same remote shell. No log scan or resource probe can consume its two-second window.
         activeAtKill = Number(pi(`set -e; n=$(sudo -n timeout 10 docker exec ${cname("nuq-postgres")} psql -U postgres -d postgres -q -At -X -v ON_ERROR_STOP=1 -c "SELECT count(*) FROM nuq.queue_scrape WHERE group_id = '${j.upstream}' AND status = 'active' AND data->>'url' LIKE '${FX}/slow/s%'"); if [ "$n" -ge 1 ]; then sudo -n docker kill ${cname("firecrawl-core")} >/dev/null; printf '%s\\n' "$n"; else echo 0; fi`).trim());

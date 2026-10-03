@@ -498,7 +498,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
               const authority = `${nav.hostname}:${nav.port || (nav.protocol === "https:" ? "443" : "80")}`;
               let denied = r.proxy?.denied?.find((d) => ["SSRF_DENIED", "CLOUD_DENIED"].includes(d.class) &&
                 (d.urlHash === urlHash || (failedNavigation && nav.protocol === "https:" && !d.urlHash && d.host === authority)));
-              // Chromium strips URL credentials from a committed HTTP document. Only
+              // Chromium's committed URL and proxy request may normalize credentials differently. Only
               // a final URL independently forbidden by the unchanged policy may use
               // its actual same-host refusal; a usable public 403 cannot match this way.
               if (!denied && r.ok && nav.protocol === "http:") {
