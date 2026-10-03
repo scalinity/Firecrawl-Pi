@@ -332,11 +332,11 @@ const checks = {
       return { ok, actual: `attempts=${p.attempts.length}, strategies=${[...new Set(p.attempts.map((a) => a.strategy))].join(",")}; renders=${p.browser.filter((e) => e.event === "render").length}; browser health=${p.browserHealth}` };
     } },
   R02: { name: "js-delayed-cookie-pages-render", inputs: [`${RAW}rt-browser.txt`],
-    expected: "the JS, delayed and cookie-then-JS fixtures return their sentinels in Markdown, each after a direct attempt classified js_shell and one browser attempt",
+    expected: "the JS, delayed and cookie-then-JS fixtures return their sentinels in Markdown, after a cold direct js_shell plus browser attempt, or one browser attempt backed by an explicit M6 learned_js routing event",
     run() {
       const p = phase("browser");
       const want = { "C03-js": "fcpi-m2-js-5c1e", "C04-delayed": "fcpi-m2-delayed-9b2d", "C06-cookie-js": "fcpi-m2-cookiejs-7d1c" };
-      const bad = Object.entries(want).filter(([id, s]) => { const c = p.cases[id]; const a = scrapeAttempts(p, c); return !(c?.success && c.sentinels.includes(s) && a.length === 2 && a[0].outcome === "js_shell" && a[1].strategy === "direct_browser" && a[1].outcome === "rendered"); }).map(([id]) => id);
+      const bad = Object.entries(want).filter(([id, s]) => { const c = p.cases[id]; const a = scrapeAttempts(p, c); const cold = a.length === 2 && a[0].outcome === "js_shell" && a[1].strategy === "direct_browser" && a[1].outcome === "rendered"; const learned = a.length === 1 && a[0].strategy === "direct_browser" && a[0].outcome === "rendered" && p.retrieval.some(e => e.logical_id === c?.scrapeId && e.initial_strategy === "direct_browser" && e.escalations?.includes("learned_js") && e.attempts_used === 1); return !(c?.success && c.sentinels.includes(s) && (cold || learned)); }).map(([id]) => id);
       return { ok: bad.length === 0, actual: `failing=${bad.join(",") || "none"}; renders logged=${p.browser.filter((e) => e.event === "render" && e.ok).length}` };
     } },
   R03: { name: "content-classified", inputs: [`${RAW}rt-static.txt`, `${RAW}rt-browser.txt`],
