@@ -8,7 +8,7 @@ if(hash(corpusText)!==(freeze.corpus_sha256??freeze.sha256))throw Error('Frozen 
 const review=readFileSync('evidence/M9/review/REVIEW.md','utf8');if(!review.includes('Remediation complete'))throw Error('Review remediation gate not passed');
 const t=Object.fromEntries(readFileSync('scripts/m1/pi-target.conf','utf8').split('\n').filter(l=>/^PI_\w+=/.test(l)).map(l=>[l.split('=')[0],l.slice(l.indexOf('=')+1).replace('$HOME',process.env.HOME)]));
 const pi=cmd=>execFileSync('ssh',['-i',t.PI_SSH_KEY,'-o','IdentitiesOnly=yes','-o','BatchMode=yes',t.PI_SSH_TARGET,cmd],{encoding:'utf8'});
-const origin=pi("sudo -n cat /etc/firecrawl-pi/secrets/gateway/served-origins").trim().split('\n').find(x=>/^https:\/\/.*\.ts\.net$/.test(x));if(!origin)throw Error('Private HTTPS origin absent');
+const origin=pi("sudo -n cat /etc/firecrawl-pi/secrets/gateway/served-origins").trim().split('\n').find(x=>/^https:\/\/.*\.ts\.net(?::\d+)?$/.test(x));if(!origin)throw Error('Private HTTPS origin absent');
 const consent=JSON.parse(pi('sudo -n cat /etc/firecrawl-pi/m9-validation/consent.json'));
 if(consent.scope!=='M9 acceptance' || Date.parse(consent.expires_at)<=Date.now())throw Error('Fresh M9 consent required');
 const token=execFileSync('security',['find-generic-password','-a','fcpi','-s','fcpi mcp codex','-w'],{encoding:'utf8'}).trim();
