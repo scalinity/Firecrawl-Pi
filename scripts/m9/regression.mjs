@@ -8,6 +8,7 @@ const script=group==='M2'?'scripts/m2/pi-retrieval-tests.sh':group==='M4'?'scrip
 const t=Object.fromEntries(readFileSync('scripts/m1/pi-target.conf','utf8').split('\n').filter(l=>/^PI_\w+=/.test(l)).map(l=>[l.split('=')[0],l.slice(l.indexOf('=')+1).replace('$HOME',process.env.HOME)]));
 const source=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();const runs=[];
 for(const phase of phases){
+ if(group==='M3'&&phase==='auth')execFileSync('ssh',['-i',t.PI_SSH_KEY,'-o','IdentitiesOnly=yes','-o','BatchMode=yes',t.PI_SSH_TARGET,'sudo -n test -f /etc/firecrawl-pi/secrets/clients/m3rev.token || bash /opt/firecrawl-pi/scripts/m3/pi-client-token.sh create m3rev m3-revoked status'],{stdio:'pipe'});
  const r=group==='M2'?spawnSync('ssh',['-i',t.PI_SSH_KEY,'-o','IdentitiesOnly=yes','-o','BatchMode=yes',t.PI_SSH_TARGET,`bash -s -- ${phase}`],{input:readFileSync(script),env,encoding:'utf8',timeout:1200000,maxBuffer:64*1024*1024}):spawnSync(process.execPath,[script,phase],{env,encoding:'utf8',timeout:1800000,maxBuffer:64*1024*1024});
  const path=raw+`${group==='M2'?'rt':'e2e'}-${phase}.txt`;writeFileSync(path,r.stdout??'');const stderr=r.stderr??'';if(stderr)writeFileSync(raw+`stderr-${phase}.txt`,stderr.replaceAll(process.env.HOME,'<home>').replaceAll(t.PI_SSH_TARGET,'<pi-ssh-target>'));runs.push({phase,path,sha256:createHash('sha256').update(r.stdout??'').digest('hex'),exit_code:r.status??1});if(r.status!==0)break;
 }

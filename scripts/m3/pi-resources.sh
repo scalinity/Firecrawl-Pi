@@ -11,10 +11,10 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 label=${1:-}
 [[ $label =~ ^[a-z0-9-]{1,64}$ ]] || { echo "usage: pi-resources.sh <label: lowercase letters, digits, hyphens>" >&2; exit 2; }
 cg() { # cg <compose service>: its running container's cgroup, or null
-  local c id p
+  local c id p parent
   c=$(sudo -n docker ps -q --filter label=com.docker.compose.project=fcpi --filter "label=com.docker.compose.service=$1")
   [ -n "$c" ] || { printf 'null'; return; }
-  id=$(sudo -n docker inspect -f '{{.Id}}' "$c"); p=/sys/fs/cgroup/system.slice/docker-$id.scope
+  id=$(sudo -n docker inspect -f '{{.Id}}' "$c"); parent=$(sudo -n docker inspect -f '{{.HostConfig.CgroupParent}}' "$c"); p=/sys/fs/cgroup/${parent:-system.slice}/docker-$id.scope
   printf '{"instance":"%s","started_at":"%s","peak":%s,"max":"%s","current":%s,"oom_kill":%s}' "${id:0:12}" "$(sudo -n docker inspect -f '{{.State.StartedAt}}' "$c")" \
     "$(cat "$p/memory.peak")" "$(cat "$p/memory.max")" "$(cat "$p/memory.current")" "$(awk '$1 == "oom_kill" {print $2}' "$p/memory.events")"
 }
