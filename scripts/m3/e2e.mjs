@@ -373,6 +373,7 @@ const PHASES = {
     out("k2_answer_lost", { case: "client_retries_same_key", ...brief(retry), id: retry.json?.id ?? null, first_id: k2id });
     const k2done = await waitState(k2id, ["SUCCEEDED", "PARTIAL", "FAILED"]);
     out("k2_answer_lost", { case: "finished", state: k2done.state, archived: k2done.archived, marker_groups: markerGroups(k2id), events: events(k2id) });
+    await waitHealthy("firecrawl-core");
 
     // K3: the submission is lost. The core is paused with the submission in its socket, the gateway dies, and
     // the core is killed while paused, so it never reads it: uncertain until the settle window, then sent once.
