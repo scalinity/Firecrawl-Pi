@@ -30,7 +30,7 @@ import net from "node:net";
 import tls from "node:tls";
 import { Duplex } from "node:stream";
 import { randomUUID } from "node:crypto";
-import { Breaker, rateCardFor, proxyCost, periodStarts } from "./budget.mjs";
+import { Breaker, rateCardFor, proxyCost, periodStarts, paidDispatchActive } from "./budget.mjs";
 import { readCredential } from "./provider.mjs";
 import { parseTarget, Denied, hostMatches } from "./ssrf.mjs";
 import { resolveTarget } from "./resolve.mjs";
@@ -124,7 +124,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     const base = { subject, providerName: s.provider, provider, categoryName: s.category, category, paid: provider.paid };
     const card = rateCardFor(budget, subject);
     if (!card) return { ...base, available: false, reason: "RATE_CARD_MISSING" };
-    if (provider.paid && !paidDispatch) return { ...base, card, available: false, reason: "PAID_DISPATCH_DISABLED" };
+    if (provider.paid && !paidDispatchActive(budget, paidDispatch)) return { ...base, card, available: false, reason: "PAID_DISPATCH_DISABLED" };
     if (!credentialOf(provider)) return { ...base, card, available: false, reason: "BLOCKED_CREDENTIAL" };
     const b = breakerFor(s.provider);
     if (b.state() === "open") return { ...base, card, available: false, reason: "PROVIDER_UNAVAILABLE", retryAfter: b.retryAfterS() };
@@ -200,6 +200,8 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
   // A tunnel to host:port through the selected provider, under one sticky session; resolves the metered stream over it
   // (never the raw socket). Rejects with a ProviderRefusal (the provider's failure) or a Denied (cancel, deadline).
   async function tunnel(st, { host, port, sessionId, deadline, signal, meter }) {
+    const authorize = () => !st.paid || paidDispatchActive(getBudget(), paidDispatch);
+    if (!authorize()) throw new ProviderRefusal("PAID_DISPATCH_DISABLED", "the proxy dispatch lease expired");
     if (signal?.aborted) throw new Denied("CANCELLED", "the caller cancelled the acquisition");
     if (meter.capped) throw new Denied("SIZE_LIMIT", "the attempt passed its proxy byte budget");
     const cred = credentialOf(st.provider);
@@ -213,6 +215,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     let ep;
     try { ep = await endpointAddress(st.provider); }
     catch (e) { b.failure(); throw new ProviderRefusal("PROVIDER_UNREACHABLE", `the proxy endpoint could not be resolved (${e.failureClass ?? e.message})`, { retryable: true }); }
+    if (!authorize()) { b.neutral(); throw new ProviderRefusal("PAID_DISPATCH_DISABLED", "the proxy dispatch lease expired during resolution"); }
     const auth = Buffer.from(`${sessionUsername(cred.name, sessionId, policy.residential.sessionMinutes)}:${cred.password}`).toString("base64");
     return new Promise((resolve, reject) => {
       let settled = false, up = false;
@@ -228,6 +231,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
         ? otherFail(new Denied("DEADLINE_EXCEEDED", `the attempt's deadline came ${timeoutMs} ms into opening the proxy tunnel`))
         : providerFail("PROVIDER_UNREACHABLE", `the proxy did not open a tunnel within ${timeoutMs} ms`, true)), timeoutMs);
       socket.once("connect", () => {
+        if (!authorize()) return otherFail(new ProviderRefusal("PAID_DISPATCH_DISABLED", "the proxy dispatch lease expired before CONNECT"));
         if (socket.remoteAddress !== ep.address) return otherFail(new Denied("SSRF_DENIED", `connected peer ${socket.remoteAddress} is not the proxy's validated address`));
         const req = `CONNECT ${host}:${port} HTTP/1.1\r\nHost: ${host}:${port}\r\nProxy-Authorization: Basic ${auth}\r\nProxy-Connection: keep-alive\r\n\r\n`;
         meter?.add(Buffer.byteLength(req));

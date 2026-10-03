@@ -16,11 +16,25 @@ async function rig({ parser = "fcpi-fixture-parser", mutate, paidDispatch = fals
   const store = new FakeLedger();
   const parse = makeParser({ store, getBudget: () => budget, getSelection: () => ({ parser }), paidDispatch, providersDir: providersDir(creds),
     getPolicy: () => policyFor({ "parser.fixture.fcpi.test": srv.port }), resolvePublic: async () => { throw new Error("no public resolution"); }, lookupFixture, log: () => {} });
-  return { srv, store, parse, stats: () => fixtures.providerStats().parser };
+  return { srv, budget, store, parse, stats: () => fixtures.providerStats().parser };
 }
 // Owners are the gateway's tags for principals (sixteen hex digits; patch 0010).
 const OWNER_A = "a1a1a1a1a1a1a1a1", OWNER_B = "b2b2b2b2b2b2b2b2";
 const req = (bytes, over = {}) => ({ logicalId: `scrape:${crypto.randomUUID()}`, owner: OWNER_A, bytes, pages: 1, reason: "scan_only", ...over });
+
+test("a parser lease expiring during reservation sends no upload and releases credits (PRE-M9 C1)", async () => {
+  const r = await rig({ paidDispatch: true });
+  try {
+    r.budget.providers["fixture-parser"].paid = true;
+    r.budget.paidTotal.caps.day = 1000000;
+    r.budget.validationExpiresAt = new Date(Date.now() + 60000).toISOString();
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async (x) => { const row = await reserve(x); r.budget.validationExpiresAt = new Date(0).toISOString(); return row; };
+    await assert.rejects(r.parse(req(docs.scanPdfBytes())), (e) => e.failureClass === "PAID_DISPATCH_DISABLED");
+    assert.equal(r.stats().uploads, 0);
+    assert.deepEqual(r.store.states(), ["RELEASED"]);
+  } finally { await r.srv.close(); }
+});
 
 test("a scan-only page is parsed, its credits settled from the pages returned, cached, and its upload deleted", async () => {
   const r = await rig();

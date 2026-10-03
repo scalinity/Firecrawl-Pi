@@ -12,6 +12,23 @@ import { startFixture, rig, req, m6Policy, m6Budget, M6Store, CRED } from "./m6-
 const base = (fx, host = "m6.fixture.fcpi.test") => `http://${host}:${fx.targetPort}`;
 const hitsOf = (fx, path) => fx.state.hits.filter((h) => h.path === path);
 
+test("a proxy lease expiring during reservation opens no CONNECT and never spills home (PRE-M9 C1)", async () => {
+  const fx = await startFixture();
+  try {
+    const r = rig(fx, { paidDispatch: true });
+    r.budget.providers["fixture-proxy"].paid = true;
+    r.budget.paidTotal.caps.day = 1000000;
+    r.budget.validationExpiresAt = new Date(Date.now() + 60000).toISOString();
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async (x) => { const row = await reserve(x); r.budget.validationExpiresAt = new Date(0).toISOString(); return row; };
+    const out = await r.acquire(req(`${base(fx)}/static`, { route: "stealth" }));
+    assert.equal(out.ok, false);
+    assert.equal(fx.state.tunnels.length, 0);
+    assert.equal(fx.state.hits.length, 0);
+    assert.deepEqual(r.store.ledger.states(), ["RELEASED"]);
+  } finally { await fx.close(); }
+});
+
 test("a stealth request travels one tunnel under a sticky session, and settles at the bytes it carried", async () => {
   const fx = await startFixture();
   try {

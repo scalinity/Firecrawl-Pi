@@ -13,7 +13,7 @@
 // JSON configuration) starts a job; GET /api/v2/parse/{id}?expand=markdown answers { job: { status },
 // markdown: { pages: [{ page_number, markdown }] } } until the status is COMPLETED, FAILED or CANCELLED.
 import { createHash, randomUUID } from "node:crypto";
-import { rateCardFor, periodStarts, Breaker } from "./budget.mjs";
+import { rateCardFor, periodStarts, Breaker, paidDispatchActive } from "./budget.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
 import { ExtractionFailure, canonical } from "./extract.mjs";
 
@@ -66,7 +66,8 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     if (hit) { log({ event: "parse", logical_id: logicalId, parser: name, cached: true, pages: hit.pages }); return { ok: true, parser: name, markdown: hit.markdown, pages: hit.pages, cached: true, credits: 0 }; }
     const cred = readCredential(providersDir, prov.credential);
     if (prov.credential && !cred) throw fail("PARSER_REQUIRED", `the document needs the complex-document parser (${reason.replace("_", " ")}), and ${pp.provider} has no credential in this deployment`);
-    if (prov.paid && !paidDispatch) throw fail("PAID_DISPATCH_DISABLED", `'${name}' is a paid parser and paid dispatch is disabled (PI_PAID_DISPATCH_ENABLED=false)`);
+    const authorize = () => !prov.paid || paidDispatchActive(getBudget(), paidDispatch);
+    if (!authorize()) throw fail("PAID_DISPATCH_DISABLED", `'${name}' has no active paid dispatch authorization`);
     const breaker = breakerOf(pp.provider);
     const probe = breaker.state() === "half_open";
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${pp.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
@@ -98,10 +99,11 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     // The parse runs to its end even if the caller leaves: the result is settled and cached, so a retry is a
     // cache hit rather than a second charge. Only the job deadline bounds it.
     const call = (method, path, body, extra = {}) => providerRequest({ baseUrl: prov.baseUrl, path, method, body, getPolicy, resolvePublic, lookupFixture,
-      headers: { accept: "application/json", ...auth, ...extra }, timeoutMs: 30000, maxBytes: 16 * 1048576 });
+      headers: { accept: "application/json", ...auth, ...extra }, timeoutMs: 30000, maxBytes: 16 * 1048576, ...(method === "POST" ? { authorize } : {}) });
     const started = Date.now();
     const settleOrThrow = async (e) => {
-      breaker[e.code === "CANCELLED" ? "neutral" : "failure"]();
+      breaker[["CANCELLED", "PAID_DISPATCH_DISABLED"].includes(e.code) ? "neutral" : "failure"]();
+      if (e.code === "PAID_DISPATCH_DISABLED") { await store.releaseBudget(res.id, "lease expired before upload"); throw fail(e.code, e.message); }
       if (!e.sent) { await store.releaseBudget(res.id, `not sent: ${e.code}`); throw fail("PROVIDER_UNREACHABLE", e.message, { retryable: true }); }
       await store.markBudgetUncertain(res.id, `${e.code}: ${e.message}`);
       throw fail("PROVIDER_UNCERTAIN", `the parse request may have been processed and no answer came; its ${amount} credits stay reserved`);

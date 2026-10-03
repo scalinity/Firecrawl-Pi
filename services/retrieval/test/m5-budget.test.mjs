@@ -3,12 +3,21 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { loadBudgetPolicy, rateCardFor, modelCost, maxModelCost, estimateTokens, Breaker, periodStarts } from "../src/budget.mjs";
+import { loadBudgetPolicy, rateCardFor, modelCost, maxModelCost, estimateTokens, Breaker, periodStarts, paidDispatchActive } from "../src/budget.mjs";
 import { checkSchema, toStrict, validate, missingRequired } from "../src/jsonschema.mjs";
 import { loadPolicy, loadSelection, defaultSelection } from "../src/policy.mjs";
 
 const RAW = readFileSync(new URL("../policy/budget.json", import.meta.url), "utf8");
 const mutate = (f) => { const j = JSON.parse(RAW); f(j); return JSON.stringify(j); };
+
+test("an absolute validation lease expires even with the paid switch still on and after a month rollover (PRE-M9 C1)", () => {
+  const b = loadBudgetPolicy(mutate((p) => { p.validationExpiresAt = "2026-10-03T02:00:00Z"; }));
+  assert.equal(paidDispatchActive(b, true, Date.parse("2026-10-03T01:59:59Z")), true);
+  assert.equal(paidDispatchActive(b, false, Date.parse("2026-10-03T01:59:59Z")), false);
+  assert.equal(paidDispatchActive(b, true, Date.parse(b.validationExpiresAt)), false);
+  assert.equal(paidDispatchActive(b, true, Date.parse("2026-11-01T00:00:00Z")), false);
+  for (const v of [null, "2026-02-30T02:00:00Z", "2026-10-03", "bad"]) assert.throws(() => loadBudgetPolicy(mutate((p) => { p.validationExpiresAt = v; })), /validationExpiresAt/);
+});
 
 test("the deployed budget policy loads: every paid cap zero, the default model and parser paid, fixtures unpaid", () => {
   const b = loadBudgetPolicy(RAW);

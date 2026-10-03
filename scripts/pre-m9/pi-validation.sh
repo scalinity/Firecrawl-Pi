@@ -12,7 +12,8 @@ case ${1:-} in
     sudo -n test ! -e "$DIR/override.yaml" || { echo 'validation window already exists; stop it first' >&2; exit 2; }
     sudo -n install -d -m 0750 -o 3310 -g 3310 "$DIR"
     # Lower than owner ceilings: $0.05 model, $0.20 proxy, $0.05 enhanced, 100 free parser credits.
-    jq '.categories.llm.caps = {day:50000,month:50000} |
+    expires=$(date -u -d '+45 minutes' +%Y-%m-%dT%H:%M:%SZ)
+    jq --arg expires "$expires" '.validationExpiresAt = $expires | .categories.llm.caps = {day:50000,month:50000} |
         .categories.proxy.caps = {day:200000,month:200000} |
         .categories.enhanced.caps = {day:50000,month:50000} |
         .categories.parser.caps = {month:100} | .paidTotal.caps.day = 300000 |
@@ -24,6 +25,7 @@ case ${1:-} in
     sudo -n tee "$DIR/override.yaml" >/dev/null <<'YAML'
 services:
   retrieval-service:
+    restart: "no"
     environment:
       PI_PAID_DISPATCH_ENABLED: "true"
     volumes:
@@ -41,7 +43,7 @@ YAML
       /bin/bash "$REPO/scripts/pre-m9/pi-validation.sh" stop
     "${C[@]}" -f "$DIR/override.yaml" config -q
     "${C[@]}" -f "$DIR/override.yaml" up -d --no-deps --force-recreate --wait --wait-timeout 180 retrieval-service
-    echo "validation_started utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) policy_sha256=$(sudo -n sha256sum "$DIR/budget.json" | cut -d' ' -f1) shutoff=45min"
+    echo "validation_started utc=$(date -u +%Y-%m-%dT%H:%M:%SZ) expires=$expires policy_sha256=$(sudo -n sha256sum "$DIR/budget.json" | cut -d' ' -f1) shutoff=45min"
     ;;
   stop)
     "${C[@]}" up -d --no-deps --force-recreate --wait --wait-timeout 180 retrieval-service

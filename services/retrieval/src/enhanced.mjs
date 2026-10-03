@@ -32,7 +32,7 @@
 // call key is the logical page's own: a page retried by upstream or NuQ finds its earlier dispatch, and a settled one's
 // answer, when small enough to keep, is used again instead of paying twice.
 import { createHash, randomUUID } from "node:crypto";
-import { Breaker, rateCardFor, periodStarts } from "./budget.mjs";
+import { Breaker, rateCardFor, periodStarts, paidDispatchActive } from "./budget.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { resolveTarget } from "./resolve.mjs";
@@ -68,7 +68,7 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
     const base = { subject, providerName: s.provider, provider, categoryName: s.category, category, paid: provider.paid };
     const card = rateCardFor(budget, subject);
     if (!card) return { ...base, available: false, reason: "RATE_CARD_MISSING" };
-    if (provider.paid && !paidDispatch) return { ...base, card, available: false, reason: "PAID_DISPATCH_DISABLED" };
+    if (provider.paid && !paidDispatchActive(budget, paidDispatch)) return { ...base, card, available: false, reason: "PAID_DISPATCH_DISABLED" };
     if (!readCredential(providersDir, provider.credential)) return { ...base, card, available: false, reason: "BLOCKED_CREDENTIAL" };
     const b = breakerFor(s.provider);
     if (b.state() === "open") return { ...base, card, available: false, reason: "PROVIDER_UNAVAILABLE", retryAfter: b.retryAfterS() };
@@ -160,12 +160,14 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
         let resp;
         try {
           resp = await providerRequest({ baseUrl: st.provider.baseUrl, path: "/v1/extract", method: "POST", body: Buffer.from(JSON.stringify(request)), timeoutMs, maxBytes: E.maxResponseBytes,
-            headers: { authorization: `Basic ${Buffer.from(`${key}:`).toString("base64")}`, "content-type": "application/json", accept: "application/json" }, getPolicy, resolvePublic, lookupFixture });
+            headers: { authorization: `Basic ${Buffer.from(`${key}:`).toString("base64")}`, "content-type": "application/json", accept: "application/json" }, getPolicy, resolvePublic, lookupFixture,
+            authorize: () => !st.paid || paidDispatchActive(getBudget(), paidDispatch) });
         } catch (e) {
           if (!(e instanceof ProviderError)) throw e;
-          verdict = e.code === "CANCELLED" ? "neutral" : "failure";
+          verdict = ["CANCELLED", "PAID_DISPATCH_DISABLED"].includes(e.code) ? "neutral" : "failure";
           if (!e.sent) {
             await store.releaseBudget(res.id, `not sent: ${e.code}`);
+            if (e.code === "PAID_DISPATCH_DISABLED") return failure(e.code, e.message);
             return e.code === "CANCELLED" ? failure("CANCELLED", "the caller cancelled the acquisition") : failure("PROVIDER_UNREACHABLE", e.message, { retryable: true, provider: true });
           }
           await store.markBudgetUncertain(res.id, `${e.code}: ${e.message}`);

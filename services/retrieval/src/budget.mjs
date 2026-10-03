@@ -18,9 +18,17 @@ const nonNegInt = (v, where) => { if (!Number.isSafeInteger(v) || v < 0) throw n
 const posInt = (v, lo, hi, where) => { if (!Number.isSafeInteger(v) || v < lo || v > hi) throw new Error(`${where} must be an integer in ${lo}..${hi}`); return v; };
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+// A session policy's absolute lease survives process and daemon restarts. Check at dispatch, including
+// after asynchronous waits; already-dispatched work may still settle, poll, and delete its upload.
+export function paidDispatchActive(policy, enabled, now = Date.now()) {
+  return enabled && (policy.validationExpiresAt === undefined || now < Date.parse(policy.validationExpiresAt));
+}
+
 export function loadBudgetPolicy(text) {
   const p = JSON.parse(text);
-  exact(p, TOP_KEYS, "budget policy");
+  exact(p, TOP_KEYS, "budget policy", ["validationExpiresAt"]);
+  if (p.validationExpiresAt !== undefined && (typeof p.validationExpiresAt !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(p.validationExpiresAt)
+    || !Number.isFinite(Date.parse(p.validationExpiresAt)) || new Date(p.validationExpiresAt).toISOString().replace(".000Z", "Z") !== p.validationExpiresAt)) throw new Error("validationExpiresAt must be an exact UTC timestamp");
   if (p.schema !== "fcpi.budget-policy/v1") throw new Error("budget policy schema must be fcpi.budget-policy/v1");
   if (!(p.notifyAtFraction > 0 && p.notifyAtFraction < 1)) throw new Error("notifyAtFraction must lie strictly between 0 and 1");
   for (const [name, c] of Object.entries(p.categories)) {

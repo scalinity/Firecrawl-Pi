@@ -62,6 +62,23 @@ const req = (url, over = {}) => ({ requestId: `r-${++n}`, logicalAcquisitionId: 
 const at = (fx, path, host = "m7esc") => `http://${host}.fixture.fcpi.test:${fx.targetPort}${path}`;
 const rows = (store) => [...store.ledger.rows.values()].filter((r) => r.kind === "enhanced");
 
+test("an enhanced lease expiring during reservation sends no paid request (PRE-M9 C1)", async () => {
+  const fx = await startM7();
+  try {
+    const r = rig(fx, { paidDispatch: true });
+    r.budget.providers["fixture-zyte"].paid = true;
+    r.budget.paidTotal.caps.day = 1000000;
+    r.budget.validationExpiresAt = new Date(Date.now() + 60000).toISOString();
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async (x) => { const row = await reserve(x); r.budget.validationExpiresAt = new Date(0).toISOString(); return row; };
+    const url = at(fx, "/static");
+    const out = await r.enhanced.dispatch({ logicalId: "lease-enhanced-test", target: parseTarget(url, r.policy), url, mode: "http", deadline: Date.now() + 30000 });
+    assert.equal(out.failure.class, "PAID_DISPATCH_DISABLED");
+    assert.equal(fx.state.calls.length, 0);
+    assert.deepEqual(r.store.ledger.states(), ["RELEASED"]);
+  } finally { await fx.close(); }
+});
+
 test("the budget policy validates the enhanced provider, its subjects and per-request cards; the selection names an enhancer", () => {
   const b = JSON.parse(readFileSync(new URL("../policy/budget.json", import.meta.url), "utf8"));
   const load = (f) => { const c = structuredClone(b); f(c); return loadBudgetPolicy(JSON.stringify(c)); };

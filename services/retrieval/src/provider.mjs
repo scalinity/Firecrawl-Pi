@@ -24,7 +24,7 @@ export function readCredential(dir, name) {
   try { const v = readFileSync(`${dir}/${name}`, "utf8").trim(); return v || null; } catch { return null; }
 }
 
-export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal }) {
+export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize }) {
   const url = new URL(baseUrl.replace(/\/$/, "") + path);
   const policy = getPolicy();
   if (!policy.localCidrs) throw new ProviderError("NOT_READY", "the host's local-network list is not loaded", { sent: false });
@@ -37,6 +37,7 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
     throw e;
   }
   const mod = url.protocol === "https:" ? https : http;
+  if (authorize && !authorize()) throw new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before connection", { sent: false });
   // The body is one buffer or a list of buffers written in order (a multipart upload's parts).
   const parts = body === null ? null : Array.isArray(body) ? body : [body];
   const length = parts ? parts.reduce((n, p) => n + p.length, 0) : 0;
@@ -53,16 +54,25 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
       res.on("error", () => done(reject, new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
       res.on("aborted", () => done(reject, new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
     });
-    // The request is on its way once the connection (and, for https, its handshake) is up: Node writes
-    // the buffered request at that moment. Before it, nothing can have reached the provider.
+    // Send only after connection/TLS and the final authorization check. Do not buffer credential-bearing
+    // headers or a billable body across the handshake while a validation lease can expire.
+    const send = () => {
+      if (settled) return;
+      if (authorize && !authorize()) {
+        done(reject, new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before send", { sent: false }));
+        req.destroy();
+        return;
+      }
+      written = true;
+      for (const p of parts?.slice(0, -1) ?? []) req.write(p);
+      req.end(parts ? parts.at(-1) : undefined);
+    };
     req.on("socket", (s) => {
-      s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) written = true; });
-      if (mod === https) s.once("secureConnect", () => { written = true; });
+      s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
+      if (mod === https) s.once("secureConnect", send);
     });
     const timer = setTimeout(() => { req.destroy(new Error("timeout")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `no answer within ${timeoutMs} ms`, { sent: written })); }, timeoutMs);
     req.on("error", (e) => done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${url.host}: ${e.code ?? e.message}`, { sent: written })));
     signal?.addEventListener("abort", () => { req.destroy(new Error("cancelled")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written })); }, { once: true });
-    for (const p of parts?.slice(0, -1) ?? []) req.write(p);
-    req.end(parts ? parts.at(-1) : undefined);
   });
 }

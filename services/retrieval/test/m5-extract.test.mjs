@@ -23,6 +23,20 @@ async function rig({ mutate, paidDispatch = false, creds = {}, timeoutMs, handle
 }
 const req = (over = {}) => ({ logicalId: `test:${crypto.randomUUID()}`, schema: SCHEMA, documents: [DOC()], ...over });
 
+test("a model lease expiring while waiting for its slot sends nothing and releases its reservation (PRE-M9 C1)", async () => {
+  const r = await rig({ paidDispatch: true });
+  try {
+    r.budget.providers["fixture-model"].paid = true;
+    r.budget.paidTotal.caps.day = 1000000;
+    r.budget.validationExpiresAt = new Date(Date.now() + 60000).toISOString();
+    r.adapter.gate.take = async () => { r.budget.validationExpiresAt = new Date(0).toISOString(); return true; };
+    const out = await r.extract(req());
+    assert.equal(out.failure.class, "PAID_DISPATCH_DISABLED");
+    assert.equal(r.calls(), 0);
+    assert.deepEqual(r.store.states(), ["RELEASED"]);
+  } finally { await r.srv.close(); }
+});
+
 test("malformed HTTP 200 model answers settle conservatively and exhaust only the one repair (PRE-M9 W1)", async () => {
   for (const body of ["null", "{not-json"]) {
     let calls = 0;

@@ -23,7 +23,7 @@ import http from "node:http";
 import { readFileSync } from "node:fs";
 import { createHash, createHmac, timingSafeEqual, randomUUID } from "node:crypto";
 import { loadEnv, loadPolicy, loadLocalCidrs, loadSelection, defaultSelection, readSecret, parseSha256 } from "./policy.mjs";
-import { loadBudgetPolicy, periodStarts } from "./budget.mjs";
+import { loadBudgetPolicy, periodStarts, paidDispatchActive } from "./budget.mjs";
 import { Store } from "./store.mjs";
 import { makePublicResolver } from "./resolve.mjs";
 import { ProxySessions, startProxy } from "./proxy.mjs";
@@ -132,7 +132,7 @@ const routeView = (st) => ({ available: st.available, reason: st.reason, subject
 // while attempts are in flight (review C1); repeating the same day charges nothing new.
 setInterval(async () => {
   const st = residential.state();
-  if (!env.paidDispatch || !st.providerName || !st.paid || !st.provider?.usageUrl || !readCredential(env.providersDir, st.provider.usageCredential)) return;
+  if (!paidDispatchActive(budget, env.paidDispatch) || !st.providerName || !st.paid || !st.provider?.usageUrl || !readCredential(env.providersDir, st.provider.usageCredential)) return;
   for (const day of [periodStarts(new Date(Date.now() - 86400e3)).day]) {
     await reconcileDay({ store, getBudget, providersDir: env.providersDir, providerName: st.providerName, day, getPolicy, resolvePublic, log })
       .catch((e) => log({ event: "proxy_reconcile_failed", provider: st.providerName, day, error: e.code ?? e.message }));
@@ -183,7 +183,7 @@ async function providerStatus() {
   const usage = storeReady ? await store.budgetUsage(day, month).catch(() => null) : null;
   return {
     selection: { ...selection, source: selectionSource },
-    paidDispatch: env.paidDispatch,
+    paidDispatch: paidDispatchActive(budget, env.paidDispatch),
     budgetPolicySha256: budgetSha256,
     providers: Object.fromEntries(Object.entries(budget.providers).map(([name, p]) => [name, { kind: p.kind, paid: p.paid,
       credential: p.credential ? (readCredential(env.providersDir, p.credential) ? "present" : "absent") : "not_required",

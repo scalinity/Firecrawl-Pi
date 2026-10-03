@@ -16,7 +16,7 @@
 // chunk inside the same budget, and the chunks' answers merged with each value's source URLs. A value
 // the page does not hold comes back null; two chunks that disagree keep the first and say so.
 import { createHash, randomUUID } from "node:crypto";
-import { rateCardFor, maxModelCost, modelCost, estimateTokens, periodStarts, Breaker } from "./budget.mjs";
+import { rateCardFor, maxModelCost, modelCost, estimateTokens, periodStarts, Breaker, paidDispatchActive } from "./budget.mjs";
 import { checkSchema, toStrict, validate, missingRequired, SchemaError } from "./jsonschema.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
 
@@ -80,7 +80,8 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const prov = budget.providers[m.provider], cat = budget.categories[m.category];
     const card = rateCardFor(budget, model);
     if (!card) throw fail("RATE_CARD_MISSING", `no rate card for '${model}' is in effect today; a model without a known price is refused`);
-    if (prov.paid && !paidDispatch) throw fail("PAID_DISPATCH_DISABLED", `'${model}' is a paid model and paid dispatch is disabled (PI_PAID_DISPATCH_ENABLED=false)`);
+    const authorize = () => !prov.paid || paidDispatchActive(getBudget(), paidDispatch);
+    if (!authorize()) throw fail("PAID_DISPATCH_DISABLED", `'${model}' has no active paid dispatch authorization`);
     const cred = readCredential(providersDir, prov.credential);
     if (prov.credential && !cred) throw fail("BLOCKED_CREDENTIAL", `provider ${m.provider} has no credential in this deployment`);
     // A request needs at least a second before the caller's deadline: none is started past it (review W14).
@@ -140,15 +141,16 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     try {
       // No cancellation reaches a request once it is out: a caller that left gets its answer settled and stored,
       // so its retry reuses it instead of paying twice; only the next call is not made.
-      answer = await providerRequest({ baseUrl: prov.baseUrl, path: "/chat/completions", body: payload, getPolicy, resolvePublic, lookupFixture,
+      answer = await providerRequest({ baseUrl: prov.baseUrl, path: "/chat/completions", body: payload, getPolicy, resolvePublic, lookupFixture, authorize,
         headers: { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
         timeoutMs: Math.min(budget.extraction.requestTimeoutMs, deadline - Date.now()) });
     } catch (e) {
       gate.give();
       if (!(e instanceof ProviderError)) throw e;
-      breaker[e.code === "CANCELLED" ? "neutral" : "failure"]();
+      breaker[["CANCELLED", "PAID_DISPATCH_DISABLED"].includes(e.code) ? "neutral" : "failure"]();
       if (!e.sent) {
         await store.releaseBudget(res.id, `not sent: ${e.code}`);
+        if (e.code === "PAID_DISPATCH_DISABLED") throw fail(e.code, e.message);
         throw e.code === "CANCELLED" ? fail("CANCELLED", "the caller cancelled before the call left") : fail("PROVIDER_UNREACHABLE", e.message, { retryable: true });
       }
       await store.markBudgetUncertain(res.id, `${e.code}: ${e.message}`);
