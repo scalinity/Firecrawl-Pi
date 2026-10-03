@@ -118,7 +118,7 @@ if (groups.has("browser-redirect")) {
     await scrape(`${id}-core`, url);
     await acquire(`${id}-rs`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url });
   }
-  const publicRedirect = `${M2}/redirect?to=${encodeURIComponent(`${M2}/short.html`)}`;
+  const publicRedirect = `${M2}/redirect?to=${encodeURIComponent("http://m1.fixture.fcpi.test:8080/static.html")}`;
   await scrape("BR08-public-core", publicRedirect);
   await acquire("BR08-public-rs", { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: publicRedirect });
 }

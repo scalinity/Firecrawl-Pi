@@ -21,7 +21,7 @@ for(const [id,refs] of Object.entries({
  AC17:[[8,'O02'],[8,'O03'],[8,'O04'],[8,'N01'],[8,'N02']],
  AC18:[[8,'K01'],[8,'K02']],
  AC23:[[6,'R07'],[8,'I08'],[8,'I09'],[8,'I10'],[8,'I11']],
- AC25:[[2,'S01'],[2,'S02'],[5,'E03'],[5,'B02'],[6,'R09'],[7,'E02'],[8,'X02']]
+ AC25:[[2,'S01'],[2,'S02'],[2,'S03'],[5,'E03'],[5,'B02'],[6,'R09'],[7,'E02'],[8,'X02']]
 }))fresh[id].push(...refs);
 // Recompute every selected legacy check into M9-owned paths, even when it fails
 // or lacks raw inputs. Their nonzero all-milestone exit is expected for subsets.

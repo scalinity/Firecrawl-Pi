@@ -148,7 +148,7 @@ test("browser-first redirects retain authoritative private/Cloud proxy refusals"
       ["http://127.0.0.1:3002/", "SSRF_DENIED", 403],
       ["http://[::ffff:a00:105]/", "SSRF_DENIED", 403],
       ["http://redis:6379/", "SSRF_DENIED", 403],
-      ["http://45.33.20.9/", "SSRF_DENIED", 403],
+      ["http://192.168.1.9/", "SSRF_DENIED", 403],
       ["http://100.100.100.100/", "SSRF_DENIED", 403],
       ["https://127.0.0.1/", "SSRF_DENIED", null],
       ["https://api.firecrawl.dev/v1/scrape", "CLOUD_DENIED", null],

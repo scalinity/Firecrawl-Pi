@@ -90,6 +90,20 @@ test("no credential, a wrong one or an expired one gets 407; a refused target 40
   } finally { good.close(); }
 });
 
+test("real CONNECT refusals preserve the denied authority and canonical class", async () => {
+  await withProxy(8080, async ({ port, sessions }) => {
+    for (const [authority, cls] of [["127.0.0.1:443", "SSRF_DENIED"], ["api.firecrawl.dev:443", "CLOUD_DENIED"]]) {
+      const id = `tunnel-${cls}`, cred = sessions.open(id, { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+      const response = await new Promise((resolve, reject) => {
+        const socket = net.connect(port, "127.0.0.1", () => socket.write(`CONNECT ${authority} HTTP/1.1\r\nhost: ${authority}\r\nproxy-authorization: Basic ${Buffer.from(`${cred.username}:${cred.password}`).toString("base64")}\r\n\r\n`));
+        let data = ""; socket.on("data", (chunk) => { data += chunk; }); socket.on("end", () => resolve(data)); socket.on("error", reject);
+      });
+      assert.match(response, /^HTTP\/1\.1 403/);
+      assert.deepEqual(sessions.close(id).denied, [{ host: authority, class: cls }]);
+    }
+  });
+});
+
 test("a session past its request or byte cap is refused and marked capped (review finding W6)", async () => {
   const big = http.createServer((q, r) => r.end("x".repeat(64 * 1024))).listen(0, "127.0.0.1");
   await listening(big);

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One phase of M2's retrieval tests, ON the Pi:
 #   ssh … 'bash -s -- <phase>' < scripts/m2/pi-retrieval-tests.sh
-# phase: static | ssrf | browser | browser-down | budget | pacing | permits | cancel | crash |
+# phase: static | ssrf | browser | browser-redirect | browser-down | budget | pacing | permits | cancel | crash |
 #        stress | overcap | paths
 # Runs scripts/m2/retrieval-e2e.mjs inside firecrawl-core for that group, then prints, for the
 # phase's window: the driver's lines, the retrieval service's, the M2 fixture's and the browser

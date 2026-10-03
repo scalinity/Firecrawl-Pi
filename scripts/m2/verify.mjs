@@ -415,6 +415,26 @@ const checks = {
       return { ok, actual: `refused=${denied.length} (${[...new Set(denied.map((x) => x.split(":")[0]))].join(",")}); proxy log lines=${logs.length}, without host or attempt=${unnamed.length}; pixel hits=${p.fixture.filter((h) => h.path === "/pixel.png").length}` };
     } },
 
+  S03: { name: "browser-first-redirect-denial-classification", inputs: [`${RAW}rt-browser-redirect.txt`],
+    expected: "seven already-blocked private/Cloud redirects report their canonical classes through both core and retrieval, each in one browser attempt; a permitted cross-host public redirect succeeds and all permits are released",
+    run() {
+      const p = phase("browser-redirect"), bad = [];
+      for (const stem of ["BR01-redis", "BR02-metadata", "BR03-cloud", "BR04-loopback", "BR05-mapped", "BR06-name", "BR07-lan"]) {
+        const cls = stem === "BR03-cloud" ? "CLOUD_DENIED" : "SSRF_DENIED";
+        const core = p.cases[`${stem}-core`], direct = p.cases[`${stem}-rs`], attempts = byLogical(p, direct?.logicalId);
+        if (core?.success !== false || !new RegExp(`\\b${cls}\\b`).test(core.error ?? "") || direct?.ok !== false || direct.failure !== cls || direct.attemptsUsed !== 1 ||
+          JSON.stringify(direct.strategies) !== JSON.stringify(["direct_browser"]) || attempts.length !== 1 || attempts[0].strategy !== "direct_browser" || attempts[0].outcome !== cls) bad.push(stem);
+      }
+      const denied = p.attempts.filter(a => ["SSRF_DENIED", "CLOUD_DENIED"].includes(a.outcome));
+      const counts = Object.fromEntries(["SSRF_DENIED", "CLOUD_DENIED"].map(cls => [cls, denied.filter(a => a.outcome === cls).length]));
+      const publicCore = p.cases["BR08-public-core"], publicDirect = p.cases["BR08-public-rs"];
+      const positive = publicCore?.success === true && publicCore.sentinels.includes("fcpi-m1-static-7f3a") && publicDirect?.ok === true && publicDirect.sentinels.includes("fcpi-m1-static-7f3a") &&
+        JSON.stringify(publicDirect.strategies) === JSON.stringify(["direct_browser"]) && publicDirect.attemptsUsed === 1;
+      const actualRefusals = p.retrieval.filter(e => e.event === "proxy_denied" && ["SSRF_DENIED", "CLOUD_DENIED"].includes(e.failure) && e.attempt_id);
+      const ok = p.driverExit === "0" && bad.length === 0 && counts.SSRF_DENIED === 12 && counts.CLOUD_DENIED === 2 && denied.every(a => a.strategy === "direct_browser") && actualRefusals.length >= 14 && positive && permitsFree(p) && healthy(p);
+      return { ok, actual: `wrong-class cases=${bad.join(",") || "none"}; actual attempt outcomes=${JSON.stringify(counts)}; proxy refusals=${actualRefusals.length}; public cross-host positive=${positive}; permits=${permitsFree(p)}; health=${healthy(p)}` };
+    } },
+
   // ============================================================== attempts, pacing, permits
   A01: { name: "four-attempts-per-logical-page", inputs: [`${RAW}rt-budget.txt`],
     expected: "three calls for one logical page against a 503 target spend 2, then 4, attempts and the third is ATTEMPT_BUDGET_EXHAUSTED with none; the fixture saw exactly 4 requests",

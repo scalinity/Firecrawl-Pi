@@ -492,6 +492,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             try {
               const nav = new URL(r.navigationUrl ?? r.finalUrl);
               nav.hash = "";
+              nav.username = ""; nav.password = "";
               const urlHash = createHash("sha256").update(nav.href).digest("hex");
               const authority = `${nav.hostname}:${nav.port || (nav.protocol === "https:" ? "443" : "80")}`;
               const denied = r.proxy?.denied?.find((d) => ["SSRF_DENIED", "CLOUD_DENIED"].includes(d.class) &&
