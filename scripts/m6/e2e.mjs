@@ -356,12 +356,16 @@ async function livePhase(before) {
     const p = await scrape(`${echo}&r=1`, { proxy: "stealth", formats: ["rawHtml"] });
     const ip = (r) => { try { return JSON.parse((docOf(r)?.rawHtml ?? "").replace(/<[^>]+>/g, "")).ip; } catch { return null; } };
     out("live_egress", { case: "direct_vs_proxied", direct: brief(d), proxied: brief(p), direct_ip_sha256: ip(d) ? sha(ip(d)) : null, proxied_ip_sha256: ip(p) ? sha(ip(p)) : null, differ: !!ip(d) && !!ip(p) && ip(d) !== ip(p), proxyUsed: docOf(p)?.metadata?.proxyUsed ?? null });
-    const html = '<!doctype html><title>FCPI public routing fixture</title><main><h1>FCPI proxy browser test</h1><p>This controlled public test page loads one image through the assigned residential route.</p><img src="https://httpbingo.org/image/png"></main>';
+    const html = '<!doctype html><title>FCPI public routing fixture</title><main><h1>FCPI proxy browser test</h1><p>This controlled public test page loads one image through the assigned residential route.</p><img src="https://httpbingo.org/image/png" onload="this.setAttribute(\'data-fcpi-loaded\',\'yes\')"></main>';
     const browserUrl = `https://httpbingo.org/base64/${Buffer.from(html).toString("base64url")}?content-type=text/html`;
+    const browserSince = piNow();
     const browser = await scrape(browserUrl, {proxy:"stealth",formats:["rawHtml"],actions:[{type:"wait",milliseconds:1000}]});
     const browserLog = jsonLog("retrieval-service",since);
     out("live_browser", {case:"assigned_subresource_route", ...brief(browser), proxyUsed:docOf(browser)?.metadata?.proxyUsed ?? null, pagePresent:/FCPI proxy browser test/.test(docOf(browser)?.rawHtml ?? ""),
-      acquisitions:browserLog.filter(l=>l.event==="acquisition" && l.strategies?.includes("residential_browser")), tunnels:browserLog.filter(l=>l.event==="proxy_tunnel_closed" && l.target_host==="httpbingo.org").map(l=>({session:l.session,host:l.target_host,route:l.route,provider_bytes:l.provider_bytes}))});
+      imageLoaded:/data-fcpi-loaded="yes"/.test(docOf(browser)?.rawHtml ?? ""),
+      acquisitions:browserLog.filter(l=>l.event==="acquisition" && l.strategies?.includes("residential_browser")),
+      renders:jsonLog("browser-worker",browserSince).filter(l=>l.event==="render").map(l=>({ok:l.ok,requests:l.requests,blocked:l.blocked,over_limit:l.over_limit})),
+      ledger:proxyLedger(browserSince)});
     select("live", before.extractionModel, before.parser, "decodo-residential");
     const s = await rest("POST", "/v2/search", { query: "Raspberry Pi 5 official product brief", limit: 5 });
     out("live_search", { case: "residential_engines", ...brief(s), results: (s.json?.data?.web ?? []).length, warning: s.json?.warning ?? null,

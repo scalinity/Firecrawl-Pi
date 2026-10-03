@@ -511,8 +511,10 @@ async function livePhase(before) {
       ledger: sql(`SELECT row_to_json(r) FROM (SELECT provider, subject, reserved, actual, state, usage FROM fcpi_retrieval.budget_reservation WHERE kind = 'enhanced' AND provider = 'zyte' AND created_at >= :'since') r`, { since }).map((l) => JSON.parse(l)) });
   }
     if (liveEnhanced && heldOnly) {
+      const rowsBefore = enhancedLedger(since).length;
       const cached = await scrape("https://example.com/", {proxy:"enhanced",maxAge:600000}, "m7cache");
-      out("live_cache", {case:"enhanced_cached", ...brief(cached), proxyUsed:docOf(cached)?.metadata?.proxyUsed ?? null});
+      out("live_cache", {case:"enhanced_cached", ...brief(cached), proxyUsed:docOf(cached)?.metadata?.proxyUsed ?? null,
+        rows_before:rowsBefore, rows_after:enhancedLedger(since).length});
       // The echo target serves our synthetic interstitial. Both direct and Zyte see the same challenge;
       // this proves automatic dispatch and rejection of unusable content, not real anti-bot success.
       select(before.search, before.extractionModel, before.parser, "none", "zyte-api");
@@ -521,7 +523,7 @@ async function livePhase(before) {
       const autoSince = piNow();
       const auto = await scrape(url, {proxy:"auto"});
       out("live_auto", {case:"synthetic_challenge_real_zyte", ...brief(auto), acquisitions:jsonLog("retrieval-service",autoSince).filter(l=>l.event==="acquisition"),
-        ledger:sql("SELECT row_to_json(r) FROM (SELECT logical_id,provider,subject,reserved,actual,state,usage FROM fcpi_retrieval.budget_reservation WHERE kind='enhanced' AND provider='zyte' AND created_at >= :'since') r", {since}).map(l=>JSON.parse(l))});
+        ledger:sql("SELECT row_to_json(r) FROM (SELECT logical_id,provider,subject,reserved,actual,state,usage FROM fcpi_retrieval.budget_reservation WHERE kind='enhanced' AND provider='zyte' AND created_at >= :'since') r", {since:autoSince}).map(l=>JSON.parse(l))});
     }
   // The public sample, through the production selection: live search and the budget's default proxy and enhancer, set
   // here rather than taken as found, since a run cut off before its restore can leave the fixture selection behind.
