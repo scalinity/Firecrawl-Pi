@@ -401,7 +401,9 @@ const checks = {
       if (!l) return { ok: false, actual: "no live_enhanced record" };
       if (l.case === "blocked") return { blocked: true, actual: `credential=${l.credential}, paidDispatch=${l.paidDispatch}, caps=${JSON.stringify(l.enhancedCaps)}: ${l.reason}` };
       const row = (l.ledger ?? [])[0];
-      const ok = l.status === 200 && /Example Domain/.test(l.markdown ?? "") && l.proxyUsed === "stealth" && row?.state === "SETTLED" && Number(row.actual) > 0;
+      // The current example.com body is its documentation-use paragraph; Example Domain remains its title.
+      const content = /Example Domain|This domain is for use in documentation examples without needing permission\./.test(l.markdown ?? "");
+      const ok = l.status === 200 && content && l.proxyUsed === "stealth" && row?.provider === "zyte" && row?.subject === "zyte-api" && row?.state === "SETTLED" && Number(row.actual) > 0;
       return { ok, actual: `status ${l.status}; ledger ${JSON.stringify(row)}` };
     } },
 
