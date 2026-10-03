@@ -3,7 +3,7 @@
 import{execFileSync,spawnSync}from'node:child_process';import{readFileSync,writeFileSync,existsSync,mkdirSync,renameSync}from'node:fs';import{homedir}from'node:os';import{join}from'node:path';import{sha,corpusVerdict,nativeVerdict,fixturesVerdict,incidentVerdict,reviewVerdict}from'./evidence-checks.mjs';
 import{researchComplete,liveEvidenceInWindow}from'./live-contract.mjs';
 import{inputHash,collectionVerdict,inputKey,codeDirty}from'./collection.mjs';
-import{acceptedResourceHashes,resourceBaseline,resourceReuseVerdict,sameResourceCompose,onlyProofChanges,runtimeDeltaPaths,runtimeDeltaArgs,cloudWindowVerdict,priorCloudProbe,liveCloudVerdict}from'./resource-reuse.mjs';
+import{acceptedResourceHashes,resourceBaseline,resourceReuseVerdict,sameResourceCompose,onlyProofChanges,runtimeDeltaPaths,runtimeDeltaArgs,cloudWindowVerdict,priorCloudProbe,liveCloudVerdict,corpusRecheckVerdict}from'./resource-reuse.mjs';
 const hash=p=>sha(readFileSync(p)),json=p=>existsSync(p)?JSON.parse(readFileSync(p)):null,text=p=>existsSync(p)?readFileSync(p,'utf8'):'';
 const git=(...a)=>execFileSync('git',a,{encoding:'utf8',stdio:['ignore','pipe','pipe']}).trim(),head=git('rev-parse','HEAD');
 const equivalentSources=new Map();
@@ -75,7 +75,9 @@ const evaluatorOk=evaluatorTests?.exit_code===0&&evaluatorTests.source_commit===
 results.push({test_id:'M9-RESOURCE-EVALUATOR-TESTS',state:evaluatorOk?'PASS':'NOT_RUN'});
 const privateRoot=join(homedir(),'.local/share/firecrawl-pi/m9');
 const freeze=json('evidence/M9/work/corpus-freeze.json'),corpus=json('evidence/M9/corpus.json'),rawCorpus=json(join(privateRoot,'live/corpus.json'));
-const corpusOk=rawCorpus&&sameCode(rawCorpus.source_commit,false)&&sameCode(corpus?.source_commit,false)&&liveEvidenceInWindow(rawCorpus,corpus,json('evidence/M9/work/live-window.json'))&&corpusVerdict(text(join(privateRoot,'corpus.json')),freeze,rawCorpus,corpus);
+const initialBase='evidence/M9/work/corpus-initial-real-20261003/',recheckPath='evidence/M9/regression/M8/raw/corpus-rechecks.json',recheckRecord=json(recheckPath);
+const recheckOk=recheckRecord&&corpusRecheckVerdict({specText:text(join(privateRoot,'corpus.json')),freeze,initialText:text(join(privateRoot,'live/history/20261003-first-real/corpus.json')),initialRecord:json(initialBase+'corpus.json'),initialWindow:json(initialBase+'live-window.json'),recheckText:text(join(privateRoot,'live/corpus-rechecks.json')),record:recheckRecord,finalRecord:corpus,sourceEquivalent:s=>sameCode(s,false),bound:normalBinding(recheckPath)});
+const corpusOk=recheckRecord?recheckOk:(rawCorpus&&sameCode(rawCorpus.source_commit,false)&&sameCode(corpus?.source_commit,false)&&liveEvidenceInWindow(rawCorpus,corpus,json('evidence/M9/work/live-window.json'))&&corpusVerdict(text(join(privateRoot,'corpus.json')),freeze,rawCorpus,corpus));
 results.push({test_id:'M9-CORPUS',state:corpusOk?'PASS':corpus?'FAIL':'NOT_RUN',denominator:20,usable:corpus?.usable??null});
 const clients=['claude','codex'].map(client=>{const r=json(`evidence/M9/clients/${client}.json`);const path=r&&/^native-[A-Za-z0-9]+$/.test(r.private_run??'')?join(privateRoot,r.private_run,'stdout.jsonl'):'';return {client,ok:!!path&&existsSync(path)&&sameCode(r.source_commit)&&nativeVerdict(client,text(path),r)};});
 results.push({test_id:'M9-CLIENTS',state:clients.every(x=>x.ok)?'PASS':'NOT_RUN',clients});

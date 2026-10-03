@@ -1,6 +1,7 @@
 // M9 inherits accepted long-duration measurements only with unchanged resource
 // assumptions and source-bound targeted tests. Historical bytes keep their source.
-import{sha}from'./evidence-checks.mjs';
+import{sha,corpusVerdict}from'./evidence-checks.mjs';
+import{liveEvidenceInWindow}from'./live-contract.mjs';
 import{collectorSources}from'./collection.mjs';
 export const executionSource='6366dd8b5b080c3059203412cabd6b8ad7d7832b';
 export const runtimeDeltaPaths=['services','deploy','patches','scripts/ops',':(glob)scripts/m9/incident-*'];
@@ -96,4 +97,33 @@ export function liveCloudVerdict(raw,window,bound){
  const time=Date.parse(/\butc=([^\s]+)/.exec(raw)?.[1]),start=Date.parse(window?.started_utc),finished=Date.parse(window?.required_work_finished_utc),closed=Date.parse(window?.closed_utc),expiry=Date.parse(window?.expires_at),value=k=>Number(new RegExp('(?:^| )'+k+'=(\\d+)(?: |$)','m').exec(raw)?.[1]);
  const created=Date.parse(/\bstarted_at=([^\n ]+)/.exec(raw)?.[1]);
  return {state:bound===true&&window?.state==='CLOSED'&&window.paid_dispatch===false&&window.provider_caps_zero===true&&Number.isFinite(start)&&finished>=start&&time>=finished&&closed>=time&&closed<=expiry&&expiry-start<=2700000&&created>=start&&value('lines')>10&&value('acquisition')>=20&&value('cloud_host')===0?'PASS':'NOT_RUN',window_start_utc:window?.started_utc??null,audit_utc:Number.isFinite(time)?new Date(time).toISOString():null,note:'Actual paid-container logs cover every authorized live operation before shutoff; zero Cloud-host lines, with acquisition/log counts as positive controls. Controlled denial proofs are recorded separately.'};
+}
+
+// Recheck only failed low-risk corpus cases with supported caller options.
+// Keep the original batch, all twenty targets/criteria and its paid audit intact.
+export function corpusRecheckVerdict({specText,freeze,initialText,initialRecord,initialWindow,recheckText,record,finalRecord,sourceEquivalent,bound}){
+ try{
+  const initial=JSON.parse(initialText),recheck=JSON.parse(recheckText),spec=JSON.parse(specText),count=(raw,key)=>{const m=[...String(raw).matchAll(new RegExp('(?:^| )'+key+'=(\\d+)(?= |$)','gm'))];return m.length===1?Number(m[0][1]):NaN;};
+  if(bound!==true||recheck.source_commit!==record.source_commit||!sourceEquivalent(initial.source_commit)||!sourceEquivalent(recheck.source_commit)||record.initial_raw_sha256!==sha(initialText)||record.raw_sha256!==sha(recheckText)||
+   !liveEvidenceInWindow(initial,initialRecord,initialWindow)||record.initial_public_sha256!==sha(JSON.stringify(initialRecord))||
+   recheck.status_before?.healthy!==true||!Array.isArray(recheck.results)||JSON.stringify(recheck.results.map(r=>r.id).sort())!==JSON.stringify(['P01','P02','P07','P08'])||
+   ![recheck.before,recheck.after].every(s=>s.paid_dispatch===false&&s.caps_zero===true)||
+   JSON.stringify(recheck.ledger_keys_before)!==JSON.stringify(recheck.ledger_keys_after)||
+   count(recheck.cloud_audit,'cloud_host')!==0||count(recheck.cloud_audit_before,'cloud_host')!==0||!Number.isFinite(count(recheck.cloud_audit_before,'acquisition'))||!Number.isFinite(count(recheck.cloud_audit,'acquisition'))||count(recheck.cloud_audit,'acquisition')-count(recheck.cloud_audit_before,'acquisition')<4)return false;
+  const results=structuredClone(initial.results),start=Date.parse(record.started_utc),end=Date.parse(record.completed_utc);
+  if(![start,end,Date.parse(initialWindow.closed_utc)].every(Number.isFinite)||end<start||start<=Date.parse(initialWindow.closed_utc))return false;const receipts=new Set();
+  for(const r of recheck.results){
+   const i=spec.targets.findIndex(t=>t.id===r.id),target=spec.targets[i],old=initial.results[i],began=Date.parse(r.response?.started_utc),finished=Date.parse(r.response?.completed_utc);
+   const sid=r.response?.json?.data?.metadata?.scrapeId,keys=['url','formats','maxAge','storeInCache','onlyMainContent',...(target?.page_class==='js'?['waitFor']:[])].sort(),summary=record.results?.find(x=>x.id===r.id);
+   if(!sid||receipts.has(sid)||r.response.acquisition?.logical_id!==sid||JSON.stringify(Object.keys(r.request).sort())!==JSON.stringify(keys)||summary?.request_sha256!==sha(JSON.stringify(r.request))||summary?.attempts!==r.response.acquisition?.attempts_used||summary?.status!==r.response.status||i<0||initialRecord.results[i].usable!==false||!['static','js'].includes(target.page_class)||
+    JSON.stringify(r.request.formats)!==JSON.stringify(['markdown'])||r.request.url!==target.url||r.request.onlyMainContent!==false||r.request.maxAge!==0||r.request.storeInCache!==false||
+    (target.page_class==='js'&&r.request.waitFor!==1000)||
+    !Number.isFinite(began)||!Number.isFinite(finished)||began<start||finished>end||finished<began||
+    !Number.isInteger(old.acquisition?.attempts_used)||!Number.isInteger(r.response.acquisition?.attempts_used)||
+    old.acquisition.attempts_used+r.response.acquisition.attempts_used>target.max_attempts||
+    r.response.acquisition.proxy_bytes!==0||r.response.acquisition.proxy_micro_usd!==0||r.response.acquisition.enhanced_micro_usd!==0)return false;
+   receipts.add(sid);results[i]=r.response;
+  }
+  return finalRecord.evidence_mode==='INITIAL_BATCH_PLUS_UNPAID_RECHECKS'&&finalRecord.initial_usable===initialRecord.usable&&corpusVerdict(specText,freeze,{results},finalRecord);
+ }catch{return false;}
 }
