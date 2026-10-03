@@ -110,7 +110,7 @@ sec attempts
 D exec -i "$PG" psql -U postgres -d postgres -At -F $'\t' -X <<SQL | redact
 SELECT a.logical_id, a.ordinal, a.purpose, a.strategy, a.domain, to_char(a.started_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),
        coalesce(to_char(a.finished_at AT TIME ZONE 'UTC','YYYY-MM-DD"T"HH24:MI:SS.MS"Z"'),''), coalesce(a.outcome,''), coalesce(a.target_status::text,''),
-       coalesce(a.bytes::text,''), coalesce(a.subresources::text,''), acq.attempts
+       coalesce(a.bytes::text,''), coalesce(a.subresources::text,''), acq.attempts, a.id
   FROM fcpi_retrieval.attempt a JOIN fcpi_retrieval.acquisition acq USING (logical_id)
  WHERE a.started_at >= '$start'::timestamptz ORDER BY a.started_at;
 SQL

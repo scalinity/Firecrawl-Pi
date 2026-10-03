@@ -40,7 +40,7 @@ function phase(name) {
   const cases = Object.fromEntries(jsonLines(p("driver")).filter((c) => c.case && c.case !== "end").map((c) => [c.case, c]));
   const attempts = p("attempts").filter((l) => l.includes("\t")).map((l) => {
     const c = l.split("\t");
-    return { logical: c[0], ordinal: +c[1], purpose: c[2], strategy: c[3], domain: c[4], started: c[5], finished: c[6], outcome: c[7], status: c[8], bytes: c[9], subresources: c[10], total: +c[11] };
+    return { logical: c[0], ordinal: +c[1], purpose: c[2], strategy: c[3], domain: c[4], started: c[5], finished: c[6], outcome: c[7], status: c[8], bytes: c[9], subresources: c[10], total: +c[11], attemptId: c[12] };
   });
   const cg = (k) => Object.fromEntries(p(k).filter((l) => / max=/.test(l)).map((l) => {
     const [svc] = l.split(" ");
@@ -431,9 +431,10 @@ const checks = {
       const positive = publicCore?.success === true && publicCore.sentinels.includes("fcpi-m1-static-7f3a") && publicDirect?.ok === true && publicDirect.sentinels.includes("fcpi-m1-static-7f3a") &&
         JSON.stringify(publicDirect.strategies) === JSON.stringify(["direct_browser"]) && publicDirect.attemptsUsed === 1;
       const actualRefusals = p.retrieval.filter(e => e.event === "proxy_denied" && ["SSRF_DENIED", "CLOUD_DENIED"].includes(e.failure) && e.attempt_id);
+      const joinedRefusals = denied.every(a => a.attemptId && actualRefusals.some(e => e.attempt_id === a.attemptId && e.failure === a.outcome));
       const own403 = p.cases["BR11-own-403-core"]?.success === false && /\bACCESS_DENIED\b/.test(p.cases["BR11-own-403-core"].error ?? "") && p.cases["BR11-own-403-rs"]?.ok === false && p.cases["BR11-own-403-rs"].failure === "ACCESS_DENIED";
-      const ok = p.driverExit === "0" && bad.length === 0 && counts.SSRF_DENIED === 14 && counts.CLOUD_DENIED === 4 && denied.every(a => a.strategy === "direct_browser") && actualRefusals.length >= 18 && positive && own403 && permitsFree(p) && healthy(p);
-      return { ok, actual: `wrong-class cases=${bad.join(",") || "none"}; actual attempt outcomes=${JSON.stringify(counts)}; proxy refusals=${actualRefusals.length}; public cross-host positive=${positive}; own 403 unchanged=${own403}; permits=${permitsFree(p)}; health=${healthy(p)}` };
+      const ok = p.driverExit === "0" && bad.length === 0 && counts.SSRF_DENIED === 14 && counts.CLOUD_DENIED === 4 && denied.every(a => a.strategy === "direct_browser") && actualRefusals.length >= 18 && joinedRefusals && positive && own403 && permitsFree(p) && healthy(p);
+      return { ok, actual: `wrong-class cases=${bad.join(",") || "none"}; actual attempt outcomes=${JSON.stringify(counts)}; proxy refusals=${actualRefusals.length}, joined=${joinedRefusals}; public cross-host positive=${positive}; own 403 unchanged=${own403}; permits=${permitsFree(p)}; health=${healthy(p)}` };
     } },
 
   // ============================================================== attempts, pacing, permits
@@ -635,7 +636,7 @@ const checks = {
       const web = (f, sec) => +((sections(f)[sec] ?? []).find((l) => l.startsWith("egress_web_accepted")) ?? "=NaN").split("=")[1];
       const utcOf = (f) => Date.parse(((sections(f).meta ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]);
       const open = utcOf(`${RAW}guard-window-open.txt`), close = utcOf(`${RAW}egress-probe.txt`);
-      const phases = [...["static", "ssrf", "browser", "browser-down", "budget", "pacing", "permits", "permits-before-chromium", "cancel", "crash", "stress", "overcap", "paths"].map((p) => `${RAW}rt-${p}.txt`),
+      const phases = [...["static", "ssrf", "browser", "browser-redirect", "browser-down", "budget", "pacing", "permits", "permits-before-chromium", "cancel", "crash", "stress", "overcap", "paths"].map((p) => `${RAW}rt-${p}.txt`),
         ...["broker", "kill", "stall"].map((t) => `${RAW}nuq-${t}.txt`)];
       const times = phases.map((f) => has(f) ? Date.parse(((Object.entries(sections(f)).find(([k]) => /_meta$/.test(k))?.[1] ?? []).join(" ").match(/utc=(\S+?Z)/) ?? [])[1]) : NaN);
       const inside = times.every((t) => Number.isFinite(t) && t > open && t < close);

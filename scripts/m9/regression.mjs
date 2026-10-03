@@ -3,7 +3,7 @@ import{spawnSync,execFileSync}from'node:child_process';import{readFileSync,write
 const group=process.argv[2];if(!['M2','M3','M4','M5','M6','M7'].includes(group))throw Error('Choose M2..M7 fixture regression');
 const base=`evidence/M9/regression/${group}/`,raw=base+'raw/';mkdirSync(raw,{recursive:true});
 const env={...process.env,[`FCPI_${group}_EVIDENCE`]:base};
-const phases=group==='M2'?['static','browser']:group==='M3'?['auth','sync','jobs','cancel','crash','expiry','cli']:group==='M4'?['wire','sdk','cancel','restart','stopped','tailnet']:['fixture'];
+const phases=group==='M2'?['static','browser','browser-redirect']:group==='M3'?['auth','sync','jobs','cancel','crash','expiry','cli']:group==='M4'?['wire','sdk','cancel','restart','stopped','tailnet']:['fixture'];
 const script=group==='M2'?'scripts/m2/pi-retrieval-tests.sh':group==='M4'?'scripts/m4/mcp-e2e.mjs':`scripts/${group.toLowerCase()}/e2e.mjs`;
 const t=Object.fromEntries(readFileSync('scripts/m1/pi-target.conf','utf8').split('\n').filter(l=>/^PI_\w+=/.test(l)).map(l=>[l.split('=')[0],l.slice(l.indexOf('=')+1).replace('$HOME',process.env.HOME)]));
 const source=execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim();const runs=[];
