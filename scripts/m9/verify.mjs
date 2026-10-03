@@ -14,7 +14,12 @@ for(const [id,refs] of Object.entries({
  AC09:[[6,'R02'],[6,'R03'],[6,'R04'],[6,'R05'],[6,'R06'],[6,'R09']],
  AC11:[[7,'B02'],[7,'B03'],[7,'B04']],AC12:[[4,'P04'],[4,'P05']],
  AC21:[[7,'C02'],[7,'C03']],AC23:[[6,'R07']],
- AC25:[[2,'S01'],[2,'S02'],[5,'E03'],[5,'B02'],[6,'R09']]
+ AC15:[[8,'R02'],[8,'R03'],[8,'I01'],[8,'I02'],[8,'I03'],[8,'I04'],[8,'I07'],[8,'I15']],
+ AC16:[[8,'S02'],[8,'S04'],[8,'S05']],
+ AC17:[[8,'O02'],[8,'O03'],[8,'O04'],[8,'N01'],[8,'N02']],
+ AC18:[[8,'K01'],[8,'K02']],
+ AC23:[[8,'I08'],[8,'I09'],[8,'I10'],[8,'I11']],
+ AC25:[[2,'S01'],[2,'S02'],[5,'E03'],[5,'B02'],[6,'R09'],[7,'E02'],[8,'X02']]
 }))fresh[id].push(...refs);
 // Recompute every selected legacy check into M9-owned paths, even when it fails
 // or lacks raw inputs. Their nonzero all-milestone exit is expected for subsets.
