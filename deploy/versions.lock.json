@@ -677,10 +677,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work",
       "status": "selected",
-      "image_id": "sha256:561c55a9862c5a601b5759841a489d29b531fe470e7078c90d57f265dfa67a46",
+      "image_id": "sha256:9bb6a53f1daf60d9954472272ba67d8c123704dea5d022fc621ef26c6879440f",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "c89697fc5abaeeb156e8e282099359f734eea9c9",
+      "built_from_commit": "b9fff5f40dc686b230aae44df27845461367cbf2",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -2074,7 +2074,7 @@
     "fcpi-tick.timer": "869dfbea3da7f8b272786798c26b09688be17a218ea9273752d25987dfafdb3c",
     "fcpi.slice": "5beddf9f26cae61720992ea04fee57bcde1f1d1e101dbaa13d0da3ba9cb0aadb",
     "tmpfiles-fcpi.conf": "9cabd92c053a428e5211890d2de4ea3d1cd2e9e711297357cf4a0eca3ac6ffdc",
-    "fcpi-incident.service": "22ad39acb7110e9652a33a9c7c18b63994df54b24975a343ed628358cdfbaedc",
+    "fcpi-incident.service": "85a2acbd79de02a6944f7fe6f0235863c4b4af51ef017050593025d28c6fa0ea",
     "fcpi-incident.timer": "fad19fb96660ef652772a5ae8cdf5ddaed64caeb66fbb1fcf6985352823f1046"
   }
 }

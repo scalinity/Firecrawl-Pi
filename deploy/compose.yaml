@@ -310,7 +310,7 @@ services:
   # deployed commit (scripts/m3/pi-build-gateway.sh) on the digest-pinned node base. Targets are no
   # longer limited to fixtures here: every acquisition passes the retrieval service's policy (M2).
   access-gateway:
-    image: fcpi/access-gateway@sha256:561c55a9862c5a601b5759841a489d29b531fe470e7078c90d57f265dfa67a46
+    image: fcpi/access-gateway@sha256:9bb6a53f1daf60d9954472272ba67d8c123704dea5d022fc621ef26c6879440f
     platform: linux/arm64
     pull_policy: never
     hostname: access-gateway
