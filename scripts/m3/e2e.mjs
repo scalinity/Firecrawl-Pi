@@ -173,7 +173,7 @@ const PHASES = {
     const startedAt = () => D(`inspect -f '{{.State.StartedAt}}' ${cname("access-gateway")}`).trim();
     out("revoke", { case: "before", ...brief(await http("GET", "/platform/v1/status", { tok: "m3rev" })), started_at: startedAt() });
     const t0 = Date.now();
-    out("revoke", { case: "revoked_on_pi", result: pi("bash /opt/firecrawl-pi/scripts/m3/pi-client-token.sh revoke m3rev").trim() });
+    out("revoke", { case: "revoked_on_pi", result: pi("sudo -n bash /opt/firecrawl-pi/scripts/m3/pi-client-token.sh revoke m3rev").trim() });
     let r, n = 0;
     do { await sleep(250); r = await http("GET", "/platform/v1/status", { tok: "m3rev" }); n++; } while (r.status === 200 && Date.now() - t0 < 10000);
     out("revoke", { case: "after", ms_until_refused: Date.now() - t0, polls: n, ...brief(r) });
