@@ -76,9 +76,10 @@ export function targetResult(target, response) {
 }
 
 export function corpusResult(spec, raw) {
-  const results = raw.results.map((item, i) => targetResult(spec.targets[i], item.response));
+  const results = raw.results.map((item, i) => ({...targetResult(spec.targets[i], item.response),request_sha256:digest(JSON.stringify(item.request))}));
   return { schema: 'fcpi.public-corpus/v2', revision: 2, utc: raw.completed_utc, source_commit: raw.source_commit,
     corpus_sha256: raw.corpus_sha256, consent_sha256: raw.consent_sha256, raw_sha256: digest(JSON.stringify(raw)),
+    request_plan_sha256:digest(JSON.stringify(requestPlan(spec))),
     evidence_mode: 'COMPLETE_NEW_20_TARGET_RUN', denominator: 20, minimum_usable: 18, completed: results.length,
     usable: results.filter(r => r.usable).length, results };
 }
