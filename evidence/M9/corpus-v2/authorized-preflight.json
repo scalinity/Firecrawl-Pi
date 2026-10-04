@@ -1,0 +1,76 @@
+{
+  "utc": "2026-10-04T02:00:15.118Z",
+  "source": {
+    "local": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+    "pi": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+    "pi_tree_sha256": "745b9b1afcc1650a1b0f8d9afc22ecc10d679f6c9b8d520eb523229e5c69e99d",
+    "pi_expected_sha256": "745b9b1afcc1650a1b0f8d9afc22ecc10d679f6c9b8d520eb523229e5c69e99d",
+    "clean": true
+  },
+  "reviewed": true,
+  "history_905_intact": true,
+  "window_absent": true,
+  "previous_run_absent": true,
+  "healthy": true,
+  "containers": 15,
+  "queue": {
+    "ok": true,
+    "queued": 0,
+    "oldest_queued_s": 0,
+    "active": 0,
+    "open_jobs": 0
+  },
+  "paid_dispatch": false,
+  "caps_zero": true,
+  "usage": [
+    {
+      "category": "enhanced",
+      "used": 6350,
+      "period_start": "2026-10-01",
+      "reserved": 0,
+      "settled": 6350
+    },
+    {
+      "category": "llm",
+      "used": 7714,
+      "period_start": "2026-10-01",
+      "reserved": 0,
+      "settled": 7714
+    },
+    {
+      "category": "parser",
+      "used": 15,
+      "period_start": "2026-10-01",
+      "reserved": 0,
+      "settled": 15
+    },
+    {
+      "category": "proxy",
+      "used": 17517,
+      "period_start": "2026-10-01",
+      "reserved": 16000,
+      "settled": 1517
+    }
+  ],
+  "host": {
+    "sample_age_s": 14,
+    "mem": {
+      "total_mib": 8062,
+      "available_mib": 4786,
+      "swap_used_mib": 15
+    },
+    "temp_c": 45.2,
+    "injected_temp": false,
+    "throttled": "0x0",
+    "disk": {
+      "size": 62295171072,
+      "free": 29523673088,
+      "free_pct": 47.3,
+      "inodes_free_pct": 83.2
+    },
+    "host_oom_kill": 0
+  },
+  "freeze_sha256": "36c61a7f77327c56c884fef0cd9206c32647d1c2cb97f780e07d09298f8416b4",
+  "corpus_sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+  "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e"
+}

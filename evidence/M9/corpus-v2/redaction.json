@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m9-redaction/v1",
-  "utc": "2026-10-04T01:47:53.919Z",
-  "source_commit": "6b6205a6c1aa39f46e64eda416fbd98d1425e711",
+  "utc": "2026-10-04T02:16:49.174Z",
+  "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
   "positive_controls": 4,
   "controls": [
     {
@@ -1929,6 +1929,54 @@
   ],
   "inputs": [
     {
+      "path": "evidence/M9/corpus-v2/authorized-preflight.json",
+      "sha256": "204a57cd9b109f4e187405c1fb307ec3358a906c3c49fe50692af27625380454"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/capabilities.json",
+      "sha256": "8096a69cc74e4a0f176b9c2fbf7eac8dd07a0c830ee32e8a21956fa51124936a"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/cloud-interval.txt",
+      "sha256": "ebefeec34a6db95839f6dee5e8be9b6041d0fd114a65c15593de57460d44e83d"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/corpus.json",
+      "sha256": "aa92cac38555a3899ec67ddb6044dad7973eb9f4a0e15cee5d1dd38c0367bc72"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/live-window.json",
+      "sha256": "4671ded145832226662299cefddd36006f54e088eceba0c47130ce319b1edf17"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/operator-provenance.json",
+      "sha256": "96a6b3a3a8e7d422d1ab3a01d2221514cc88a13da3c347c0ca73dbcbd41ba54e"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/overview-proof.json",
+      "sha256": "7cc37fdfd9617f74b91c6a567a91cbbc1a9fd8ed629c4a08854a374a370dee1a"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/owner-authorizations.json",
+      "sha256": "76ce8f4ff94af5aa141d94b4fcdee8259abd22895ef4ca74d404a2d1076b9288"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/quality-summary.json",
+      "sha256": "cde6c3e3fcb99669276cd5f7e0ad166b2595613398a6d6d6a18f1ff9494d9cfe"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/reconciliation.json",
+      "sha256": "3d961808432b85a97ad1f738b164e3a127e8d83e32b164ed3a384b8b730865c5"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/run-receipt.json",
+      "sha256": "7014ddadefba512287b5a9114577371eddaa0d6563658f6af1cedfd50f7c6396"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/window-preservation.json",
+      "sha256": "76e0d87cf7fa032f0a993a339cbdafe2c449fa4bbb2f75db76d1e3497d3fd9a4"
+    },
+    {
       "path": ".gitignore",
       "sha256": "e7637732f446228e73388f88b9879baf2fc2ed9e8d3b4557668cb64705b07701"
     },
@@ -1942,7 +1990,7 @@
     },
     {
       "path": "ORCHESTRATION.html",
-      "sha256": "27f63fcd345bdcfe4bd01e46e51ce99618104062fb4c422630782896f8e47264"
+      "sha256": "5174ea08a8d813bbbb86ea660faaeb45118c765707951b1522aa01704f3bb301"
     },
     {
       "path": "deploy/browser/Dockerfile",
@@ -2178,11 +2226,11 @@
     },
     {
       "path": "docs/FIRECRAWL_PI_MILESTONES.md",
-      "sha256": "9c94038ee0a8f9a9119588b4c0ede771c95111e027e710a1616690f1f0334ccf"
+      "sha256": "9895283102ca2dd71a0ff8fecb4ae849353c1b03972c28a534136ac8eb08d16e"
     },
     {
       "path": "docs/FIRECRAWL_PI_SPEC.md",
-      "sha256": "f0e08c59a9bd9205ffd6dba5ebecc51e6ecbdd415b390b09493f0758141b56b4"
+      "sha256": "e415ac99b35927dd8bf18b98482926c9b7c777a4da5165388aee972928767d44"
     },
     {
       "path": "evidence/M0/INTERPRETATION.md",
@@ -5506,7 +5554,7 @@
     },
     {
       "path": "evidence/M9/corpus-v2/closeout.json",
-      "sha256": "d4d9803a0e95db44d26ec7e829ab57ab7ade70fd5300f5df6d09ab9826143b8f"
+      "sha256": "385e3b252af1420945c56fc31ec67b532321d859d798a5f259ae3d5afb7cabc7"
     },
     {
       "path": "evidence/M9/corpus-v2/criterion-literal-proof.json",
@@ -5514,11 +5562,11 @@
     },
     {
       "path": "evidence/M9/corpus-v2/current/status.json",
-      "sha256": "eb9c732eda807a54d39c8dbca7ad90be72cf3325471d0d93a647de0f2ca2cc3f"
+      "sha256": "8f06b72538f1bc5c7940802708a1fd61a01eaf0e99660a0c63b4faff0ec86ea2"
     },
     {
       "path": "evidence/M9/corpus-v2/current/versions.json",
-      "sha256": "574d1cab5bd2a12dca83c2128738c355870de685afa62f9a5d3e802123bd2284"
+      "sha256": "5df1ae610c41f936980ff9417d09a770b20b17e5f07523e01755adca1f1781ba"
     },
     {
       "path": "evidence/M9/corpus-v2/deployment-preservation.json",
@@ -5594,7 +5642,7 @@
     },
     {
       "path": "evidence/M9/corpus-v2/usage.json",
-      "sha256": "0de2a319bd0f9d3ac4ad09b07ff0545e90978cb0d61d18fc913e907e6e4fab30"
+      "sha256": "29512413559de9781f821e07ccd498b4132e60d422def8b435cb5a0acc6dbab6"
     },
     {
       "path": "evidence/M9/corpus.json",

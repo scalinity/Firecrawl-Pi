@@ -1,0 +1,274 @@
+{
+  "schema": "fcpi.m9-corpus-v2-quality/v1",
+  "utc": "2026-10-04T02:07:12.609Z",
+  "execution_source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "corpus_sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+  "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+  "evidence_mode": "COMPLETE_NEW_20_TARGET_RUN",
+  "usable": 19,
+  "denominator": 20,
+  "usable_rate": 0.95,
+  "required_rate": 0.9,
+  "per_class": {
+    "static": {
+      "usable": 9,
+      "denominator": 9
+    },
+    "js": {
+      "usable": 2,
+      "denominator": 2
+    },
+    "documentation": {
+      "usable": 7,
+      "denominator": 7
+    },
+    "document": {
+      "usable": 1,
+      "denominator": 1
+    },
+    "lawful-difficult": {
+      "usable": 0,
+      "denominator": 1
+    }
+  },
+  "final_tiers": {
+    "direct_http": {
+      "usable": 15,
+      "denominator": 15,
+      "latency": {
+        "count": 15,
+        "p50_ms": 677,
+        "p95_ms": 2341,
+        "max_ms": 2341
+      }
+    },
+    "residential_http": {
+      "usable": 2,
+      "denominator": 2,
+      "latency": {
+        "count": 2,
+        "p50_ms": 1782,
+        "p95_ms": 2118,
+        "max_ms": 2118
+      }
+    },
+    "direct_browser": {
+      "usable": 2,
+      "denominator": 2,
+      "latency": {
+        "count": 2,
+        "p50_ms": 4461,
+        "p95_ms": 12916,
+        "max_ms": 12916
+      }
+    },
+    "enhanced": {
+      "usable": 0,
+      "denominator": 1,
+      "latency": {
+        "count": 1,
+        "p50_ms": 7639,
+        "p95_ms": 7639,
+        "max_ms": 7639
+      }
+    }
+  },
+  "latency": {
+    "all": {
+      "count": 20,
+      "p50_ms": 763,
+      "p95_ms": 7639,
+      "max_ms": 12916
+    },
+    "usable": {
+      "count": 19,
+      "p50_ms": 763,
+      "p95_ms": 12916,
+      "max_ms": 12916
+    },
+    "quantile": "Nearest rank, end-to-end gateway elapsed; not provider-only latency"
+  },
+  "attempts": {
+    "total": 22,
+    "maximum": 3,
+    "per_page": [
+      {
+        "id": "P01",
+        "attempts": 1
+      },
+      {
+        "id": "P02",
+        "attempts": 1
+      },
+      {
+        "id": "P03",
+        "attempts": 1
+      },
+      {
+        "id": "P04",
+        "attempts": 1
+      },
+      {
+        "id": "P05",
+        "attempts": 1
+      },
+      {
+        "id": "P06",
+        "attempts": 1
+      },
+      {
+        "id": "P07",
+        "attempts": 1
+      },
+      {
+        "id": "P08",
+        "attempts": 1
+      },
+      {
+        "id": "P09",
+        "attempts": 1
+      },
+      {
+        "id": "P10",
+        "attempts": 1
+      },
+      {
+        "id": "P11",
+        "attempts": 1
+      },
+      {
+        "id": "P12",
+        "attempts": 1
+      },
+      {
+        "id": "P13",
+        "attempts": 1
+      },
+      {
+        "id": "P14",
+        "attempts": 1
+      },
+      {
+        "id": "P15",
+        "attempts": 1
+      },
+      {
+        "id": "P16",
+        "attempts": 1
+      },
+      {
+        "id": "P17",
+        "attempts": 1
+      },
+      {
+        "id": "P18",
+        "attempts": 1
+      },
+      {
+        "id": "P19",
+        "attempts": 3
+      },
+      {
+        "id": "P20",
+        "attempts": 1
+      }
+    ]
+  },
+  "bytes": {
+    "markdown": 1107353,
+    "measured_proxy": 30350
+  },
+  "failure": {
+    "id": "P19",
+    "domain": "www.scrapingcourse.com",
+    "category": "BLOCKED_PUBLIC_CONTENT",
+    "gateway_status": 500,
+    "provider_status": 520,
+    "provider_result": "the target banned the enhanced provider",
+    "strategies": [
+      "direct_http",
+      "residential_http",
+      "enhanced"
+    ],
+    "attempts": 3,
+    "assertion_unchanged": true,
+    "retained_in_denominator": true
+  },
+  "resource_observations": {
+    "before": {
+      "sample_age_s": 26,
+      "mem": {
+        "total_mib": 8062,
+        "available_mib": 4786,
+        "swap_used_mib": 15
+      },
+      "temp_c": 45.2,
+      "injected_temp": false,
+      "throttled": "0x0",
+      "disk": {
+        "size": 62295171072,
+        "free": 29523673088,
+        "free_pct": 47.3,
+        "inodes_free_pct": 83.2
+      },
+      "host_oom_kill": 0
+    },
+    "after": {
+      "sample_age_s": 48,
+      "mem": {
+        "total_mib": 8062,
+        "available_mib": 4759,
+        "swap_used_mib": 15
+      },
+      "temp_c": 45.2,
+      "injected_temp": false,
+      "throttled": "0x0",
+      "disk": {
+        "size": 62295171072,
+        "free": 29523546112,
+        "free_pct": 47.3,
+        "inodes_free_pct": 83.2
+      },
+      "host_oom_kill": 0
+    },
+    "post_cleanup": {
+      "sample_age_s": 18,
+      "mem": {
+        "total_mib": 8062,
+        "available_mib": 4887,
+        "swap_used_mib": 15
+      },
+      "temp_c": 45.8,
+      "injected_temp": false,
+      "throttled": "0x0",
+      "disk": {
+        "size": 62295171072,
+        "free": 29533294592,
+        "free_pct": 47.4,
+        "inodes_free_pct": 83.2
+      },
+      "host_oom_kill": 0
+    },
+    "sample_scope": "Before/after/post-cleanup snapshots, not a new continuous soak or run-wide minimum",
+    "historical_AC16": "Accepted M8 24-hour evidence reused with existing30-minute targeted M9 proof; no backend/concurrency/security/policy change in corpus revision2"
+  },
+  "cloud_interval": {
+    "same_container": true,
+    "acquisitions_before": 0,
+    "acquisitions_after": 20,
+    "unintended_cloud_attempts": 0,
+    "actual_scan_sha256_before": "c547caa7afa4d6dcb3b5e0cc16f77185665cc75051dab6a179a525565b2fe312",
+    "actual_scan_sha256_after": "88333398b42ac5917723a20ddf488f68ea9b43e9b7571d5605b04bbbc17416e2"
+  },
+  "cost_evidence": "evidence/M9/corpus-v2/usage.json",
+  "invoices": null,
+  "limitations": [
+    "95% applies only to declared20-target sample",
+    "P19 real provider ban persists; no universal anti-bot success",
+    "Original17/20 and all905files remain immutable; old results not rescored",
+    "Original author intent and source-change chronology UNKNOWN",
+    "Metadata alone is insufficient for P01/P02",
+    "P07/P08 waits and onlyMainContent=false were explicitly owner-authorized",
+    "No new model or complex-parser live gate claimed by this run; their prior current proofs remain separately reused"
+  ]
+}

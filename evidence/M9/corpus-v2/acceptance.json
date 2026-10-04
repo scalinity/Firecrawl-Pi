@@ -1,10 +1,10 @@
 {
   "schema": "fcpi.m9-acceptance/v3",
-  "utc": "2026-10-04T01:47:54.011Z",
-  "source_commit": "6b6205a6c1aa39f46e64eda416fbd98d1425e711",
-  "state": "BLOCKED",
+  "utc": "2026-10-04T02:02:48.061Z",
+  "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "state": "ACCEPTED",
   "code_dirty": false,
-  "exit_code": 1,
+  "exit_code": 0,
   "historical_acceptance": {
     "path": "evidence/M9/acceptance.json",
     "sha256": "8c20514f7d85183edadfb88cca992b3d0471748f35b01d2a2eb821013ced6630",
@@ -4561,11 +4561,11 @@
     },
     {
       "test_id": "M9-CORPUS",
-      "state": "NOT_RUN",
+      "state": "PASS",
       "denominator": 20,
-      "usable": null,
+      "usable": 19,
       "evidence_mode": "COMPLETE_NEW_20_TARGET_RUN",
-      "execution_source": null,
+      "execution_source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
       "revision": 2,
       "minimum_usable": 18
     },
@@ -4616,7 +4616,7 @@
       "test_id": "M9-CURRENT",
       "state": "PASS",
       "evidence_mode": "FRESH_REVISION_2",
-      "execution_source": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+      "execution_source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
       "current_version_record": "evidence/M9/corpus-v2/current/versions.json"
     },
     {
@@ -4629,7 +4629,7 @@
       "test_id": "M9-REDACTION",
       "state": "PASS",
       "evidence_mode": "FRESH_REVISION_2",
-      "execution_source": "6b6205a6c1aa39f46e64eda416fbd98d1425e711",
+      "execution_source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
       "current_scan": "evidence/M9/corpus-v2/redaction.json"
     },
     {
@@ -4656,12 +4656,18 @@
     },
     {
       "test_id": "M9-V2-CLOUD",
-      "state": "NOT_RUN"
+      "state": "PASS"
     },
     {
       "test_id": "M9-V2-USAGE",
-      "state": "NOT_RUN",
-      "costs": null,
+      "state": "PASS",
+      "costs": {
+        "openai_micro_usd": 0,
+        "decodo_micro_usd": 123,
+        "zyte_micro_usd": 0,
+        "parser_free_credits": 0,
+        "uncertain": []
+      },
       "invoices": null
     }
   ],
@@ -4677,6 +4683,14 @@
     {
       "path": "evidence/M9/corpus-v2/history-preservation.json",
       "sha256": "3989032002bd3c5332768d248e4d5305a4bdc267b797f38a56f8adfba1537358"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/corpus.json",
+      "sha256": "aa92cac38555a3899ec67ddb6044dad7973eb9f4a0e15cee5d1dd38c0367bc72"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/live-window.json",
+      "sha256": "4671ded145832226662299cefddd36006f54e088eceba0c47130ce319b1edf17"
     },
     {
       "path": "evidence/M9/corpus-v2/review/REVIEW.md",
@@ -4696,7 +4710,7 @@
     },
     {
       "path": "evidence/M9/corpus-v2/current/versions.json",
-      "sha256": "574d1cab5bd2a12dca83c2128738c355870de685afa62f9a5d3e802123bd2284"
+      "sha256": "5df1ae610c41f936980ff9417d09a770b20b17e5f07523e01755adca1f1781ba"
     },
     {
       "path": "patches/series.json",

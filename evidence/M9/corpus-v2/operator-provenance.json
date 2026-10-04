@@ -1,0 +1,55 @@
+{
+  "schema": "fcpi.m9-live-operator/v1",
+  "utc": "2026-10-04T02:14:18.471Z",
+  "execution_source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "test_id": "M9-CORPUS-REVISION2-FULL",
+  "command": "node scripts/m9/corpus-v2-live.mjs",
+  "setup_cleanup": "scripts/m9/validation.sh start, then stop in operator finally;45minute stop timer and absolute expiry armed before paid dispatch",
+  "driver_exit_code": 0,
+  "cleanup_exit_code": 0,
+  "started_utc": "2026-10-04T02:00:15Z",
+  "required_work_finished_utc": "2026-10-04T02:01:50.194Z",
+  "closed_utc": "2026-10-04T02:01:59.470Z",
+  "private_files": [
+    {
+      "name": "operator.mjs",
+      "sha256": "3e89712dc6f98b72be2972c18a2f257c864607e3de2047a5cf517e98a50de31c"
+    },
+    {
+      "name": "driver-stdout.txt",
+      "sha256": "992817d44f5b8d45500a60be463128332e4d65bcff08e395ff061185583beda0"
+    },
+    {
+      "name": "driver-stderr.txt",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "window-start.txt",
+      "sha256": "767fd987aff622f79d106fe22e6400dc58e102a458190543e42b49d7980367cc"
+    },
+    {
+      "name": "window-stop.txt",
+      "sha256": "5f902d367c7d4c83981d53e94cb00397d551a47fa1921709595fc2cb2868eb5a"
+    }
+  ],
+  "public_inputs": [
+    {
+      "path": "scripts/m9/validation.sh",
+      "sha256": "90101b94fdc610eb961b94d7d3fa545b91eebbd550bf340f4b1f44be662a0ea6"
+    },
+    {
+      "path": "scripts/m9/corpus-v2-live.mjs",
+      "sha256": "a82e09aefb1f5bc0bfaea33137bef56bb80ccbcb6ac65c4bce3bb6fadbe3e28b"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/owner-authorizations.json",
+      "sha256": "76ce8f4ff94af5aa141d94b4fcdee8259abd22895ef4ca74d404a2d1076b9288"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/authorized-preflight.json",
+      "sha256": "204a57cd9b109f4e187405c1fb307ec3358a906c3c49fe50692af27625380454"
+    }
+  ],
+  "expected": "Complete20fresh targets≥18usable, bounded3attempts; close on completion, restore zero/default policy",
+  "actual": "20/20fresh correlated;19usable, onlyP19fails; new cost123microUSD, no new model/parser usage; cleanly closed104.470seconds"
+}

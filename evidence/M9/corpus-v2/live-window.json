@@ -1,0 +1,49 @@
+{
+  "schema": "fcpi.m9-live-window/v2",
+  "state": "CLOSED",
+  "purpose": "M9 corpus revision 2",
+  "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "started_utc": "2026-10-04T02:00:15Z",
+  "expires_at": "2026-10-04T02:45:15Z",
+  "corpus_sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+  "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+  "consent_sha256": "109782539be21f1a3405f10187fb10addc7f8a9337edf02730df5b38a36ef04c",
+  "consent": {
+    "scope": "M9 acceptance",
+    "purpose": "M9 corpus revision 2",
+    "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+    "opened_at": "2026-10-04T02:00:15Z",
+    "expires_at": "2026-10-04T02:45:15Z",
+    "budget_month_start": "2026-10-01",
+    "corpus_sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+    "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+    "request_plan_authorized": true,
+    "browser_request_options": [
+      {
+        "id": "P07",
+        "wait_ms": 1000,
+        "onlyMainContent": false
+      },
+      {
+        "id": "P08",
+        "wait_ms": 10000,
+        "onlyMainContent": false
+      }
+    ],
+    "new_llm_micro_usd": 0,
+    "llm_micro_usd": 0,
+    "new_proxy_micro_usd": 40200,
+    "proxy_micro_usd": 57717,
+    "new_enhanced_micro_usd": 1270,
+    "enhanced_micro_usd": 7620,
+    "new_parser_credits": 3,
+    "parser_credits": 18,
+    "authorization_sha256": "76ce8f4ff94af5aa141d94b4fcdee8259abd22895ef4ca74d404a2d1076b9288",
+    "authority": "Current direct owner reply: Authorize budget and frozen browser options"
+  },
+  "required_work_finished_utc": "2026-10-04T02:01:50.194Z",
+  "closed_utc": "2026-10-04T02:01:59.470Z",
+  "driver_exit_code": 0,
+  "cleanup_exit_code": 0,
+  "error": null
+}

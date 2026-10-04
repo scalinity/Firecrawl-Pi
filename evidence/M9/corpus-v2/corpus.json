@@ -1,0 +1,567 @@
+{
+  "schema": "fcpi.public-corpus/v2",
+  "revision": 2,
+  "utc": "2026-10-04T02:01:50.083Z",
+  "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "corpus_sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+  "consent_sha256": "109782539be21f1a3405f10187fb10addc7f8a9337edf02730df5b38a36ef04c",
+  "raw_sha256": "144ac99d5f32144f4e2e6bd1177a4315027a08447da257c73e26df2d45fbbc4b",
+  "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+  "evidence_mode": "COMPLETE_NEW_20_TARGET_RUN",
+  "denominator": 20,
+  "minimum_usable": 18,
+  "completed": 20,
+  "usable": 19,
+  "results": [
+    {
+      "id": "P01",
+      "domain": "example.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
+          "passed": true
+        },
+        {
+          "kind": "metadata_title",
+          "criterion_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+          "passed": true
+        }
+      ],
+      "content_sha256": "0a080719be9fbb82a86a45b80dc8c2a430fbe17dc93d23758debac092864d00f",
+      "metadata_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "bytes": 156,
+      "elapsed_ms": 475,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "4c57f2565b47026564b4a8c1f7f326f0d302714a01dcf2f56ad90a1ecd0e47c9"
+    },
+    {
+      "id": "P02",
+      "domain": "example.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
+          "passed": true
+        },
+        {
+          "kind": "metadata_title",
+          "criterion_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+          "passed": true
+        }
+      ],
+      "content_sha256": "0a080719be9fbb82a86a45b80dc8c2a430fbe17dc93d23758debac092864d00f",
+      "metadata_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "bytes": 156,
+      "elapsed_ms": 485,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "6558dcbdcb3c870c9f8d5abceb5293f4d130e6135cdc1afaa17a01f00e5162dc"
+    },
+    {
+      "id": "P03",
+      "domain": "httpbin.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "04772b402e9a404e92672e35bc696cacf3d0ab78af207004e2436c66750a3b27",
+          "passed": true
+        }
+      ],
+      "content_sha256": "fba39612d1b025d070757b2abfdf39f8de73cbbcf848d9cfe44136f363d9da57",
+      "metadata_title_sha256": null,
+      "bytes": 3625,
+      "elapsed_ms": 1782,
+      "fcpi": {
+        "strategy": "residential_http",
+        "attempts": 1,
+        "proxy_bytes": 10838,
+        "proxy_micro_usd": 44,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "3465b0a2cfbc69ceabb87c01b86a3d934205cef34a8ce3a365822d29287a69a7"
+    },
+    {
+      "id": "P04",
+      "domain": "httpbin.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "92f33e0c60ff0852d1a2ab2f67abe130378e354050a5bc086a5f324225778643",
+          "passed": true
+        }
+      ],
+      "content_sha256": "b97bb262fd528d7d26c005ac013526425d4bdccf8869cba83418f875f11323e0",
+      "metadata_title_sha256": "9024c197d84940e47ff6aa631b7711c4cbff4e7fb2fe1a574a3592b662983a0d",
+      "bytes": 144,
+      "elapsed_ms": 2118,
+      "fcpi": {
+        "strategy": "residential_http",
+        "attempts": 1,
+        "proxy_bytes": 7270,
+        "proxy_micro_usd": 30,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "a1984f66b4f2a8c4a70df6660092b2c887842083f29a366b65255be8a5624dc6"
+    },
+    {
+      "id": "P05",
+      "domain": "quotes.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+          "passed": true
+        }
+      ],
+      "content_sha256": "a1a6cc5b9ccb4ef93e472a3ace015d7d1837fab5c309ea6af765dda966e71072",
+      "metadata_title_sha256": "902dfaf0cdb206454bb193dc6122a9f5d6c32ec31b3dbf6375403735998d7a8e",
+      "bytes": 4359,
+      "elapsed_ms": 677,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "bde3a92377d52e2cc07836dd5e61031b787f8764b06ce4de621b244b6d7e6261"
+    },
+    {
+      "id": "P06",
+      "domain": "quotes.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "238b82329de4591be36fcb6c2dd5363b634a9e7e2371672abadaa93bc477fc85",
+          "passed": true
+        }
+      ],
+      "content_sha256": "bfaaa9d087a1970783f926c5a060260ed445a0d78ab6109e1833987ce7e9ca41",
+      "metadata_title_sha256": "902dfaf0cdb206454bb193dc6122a9f5d6c32ec31b3dbf6375403735998d7a8e",
+      "bytes": 6553,
+      "elapsed_ms": 379,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "2b250fd2bc8f431f98460ae62d1a838889f958ec10787e9f646c4d59b2c74ac9"
+    },
+    {
+      "id": "P07",
+      "domain": "quotes.toscrape.com",
+      "page_class": "js",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+          "passed": true
+        }
+      ],
+      "content_sha256": "26f68e278714c23c5584ced819d67281b30370c0eca599f85333b16375492b89",
+      "metadata_title_sha256": "902dfaf0cdb206454bb193dc6122a9f5d6c32ec31b3dbf6375403735998d7a8e",
+      "bytes": 1786,
+      "elapsed_ms": 4461,
+      "fcpi": {
+        "strategy": "direct_browser",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "0471e84ded0d801aee012664acaac2298200fe3c4978afbacfdf368583a44827"
+    },
+    {
+      "id": "P08",
+      "domain": "quotes.toscrape.com",
+      "page_class": "js",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+          "passed": true
+        }
+      ],
+      "content_sha256": "53ef42cf68a1e1da7625ec194da3da391972b4cdd6e859c9b4b401ccad648bd3",
+      "metadata_title_sha256": "902dfaf0cdb206454bb193dc6122a9f5d6c32ec31b3dbf6375403735998d7a8e",
+      "bytes": 1794,
+      "elapsed_ms": 12916,
+      "fcpi": {
+        "strategy": "direct_browser",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "9593b76c4625df760717f0758d1b95dcde8bd8992d2bf5aaff4ca6ad5eb82797"
+    },
+    {
+      "id": "P09",
+      "domain": "books.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "d53bd7e0174c0d53cfd5df069eb643902c7da4645326b81e52732b068af3c1cb",
+          "passed": true
+        }
+      ],
+      "content_sha256": "0c3b6d3951adb589c628f3d2d6024c55bad800a3e912f060ea6f544e6da7a790",
+      "metadata_title_sha256": "a8e8afa7450223972eba9b919268e38761f10f4abbaf31067a588373b30f2aa8",
+      "bytes": 9242,
+      "elapsed_ms": 783,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "b68f056c5bc0cd65276fbb782fc2a653c42bffbc0ea2747a373f97b76de1815e"
+    },
+    {
+      "id": "P10",
+      "domain": "books.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "9d948c73e0ad7a5a213a5e7e00b962531ca6b07992a06bd8c2fc2ac5ae23c51b",
+          "passed": true
+        }
+      ],
+      "content_sha256": "b9bc04a91d9cd6d8f5cc787aa86be26496e25017f61012e81aeec082921fad18",
+      "metadata_title_sha256": "f663287d43f1d7b74c67f2a739f35612c348c703343a34b6ce8c9dc6d9fcff12",
+      "bytes": 7922,
+      "elapsed_ms": 394,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "d7a9cf822577f5699c7f68e14ce3b202a250ead8439612d63517028298338b77"
+    },
+    {
+      "id": "P11",
+      "domain": "developer.mozilla.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "b27ad06d123c6145fba7e9217a4cfbf2488b4743810ed8c8ff14ad01a5bbe515",
+          "passed": true
+        }
+      ],
+      "content_sha256": "85c40df5ccade2966609bebbd5e041db53fb019ee5a9b1bb24e6c1cc9ffb969a",
+      "metadata_title_sha256": "1bfbb5013a9d90daca7d271a3b7e136a399743b778f6bf9313621390410bff7e",
+      "bytes": 19796,
+      "elapsed_ms": 575,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "8bb6570de74021864d5c6b207edf00fc4de425cc885cac172b641c6183de70f0"
+    },
+    {
+      "id": "P12",
+      "domain": "developer.mozilla.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "56d6f32151ad8474f40d7b939c2161ee2bbf10023f4af1dbb3e13260ebdc6342",
+          "passed": true
+        }
+      ],
+      "content_sha256": "823dcfb7d73e41b10c137cc976518d73eb8493b481da4cfe6578615aa16a8a92",
+      "metadata_title_sha256": "7c7a8345abac6124c70fcef1dad9f70ea9099760bbbf3405d7fa55afd81d9b6c",
+      "bytes": 21897,
+      "elapsed_ms": 519,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "132d66e24648702fa1ee0e39a937e86155efdac418edc2a408dfb9911aeb51e3"
+    },
+    {
+      "id": "P13",
+      "domain": "nodejs.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "72ede065fad02e5d9fe5681dd9022b26a1cc357ed0ded8e7ba24fab98b18347f",
+          "passed": true
+        }
+      ],
+      "content_sha256": "cd6bb63a3911cd74accc9ce864a350b8d33e503db5a2a03561d33632e59e5989",
+      "metadata_title_sha256": "8bbb7124073da020f5e62303e685c7b2ba6d31e895a2a90c67635fb2b324b1d5",
+      "bytes": 488079,
+      "elapsed_ms": 2341,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "529259fecbc3a3e6a6523d8e0de3aac359b8288b6d865e0a5f325b573488767f"
+    },
+    {
+      "id": "P14",
+      "domain": "nodejs.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "56d6f32151ad8474f40d7b939c2161ee2bbf10023f4af1dbb3e13260ebdc6342",
+          "passed": true
+        }
+      ],
+      "content_sha256": "93004281ac9bbbdd50329a27ded6a806575cac349df1baa3f3d2601270d1dfd4",
+      "metadata_title_sha256": "2cbb48c8c5bb3a88063c7ad16fc1f233177751392239d65101c8e35f1705d4cd",
+      "bytes": 209415,
+      "elapsed_ms": 948,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "22afd92671f16387f0b877d2ff004e63e9a554e9eb889538a0879828de169577"
+    },
+    {
+      "id": "P15",
+      "domain": "docs.python.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "18885f27b5af9012df19e496460f9294d5ab76128824c6f993787004f6d9a7db",
+          "passed": true
+        }
+      ],
+      "content_sha256": "6c50156b60f8c9757f341fab11063f531def1fc0dd4ddfbf266651b56bbcdb4a",
+      "metadata_title_sha256": "3cecf0425da8ebc3390ff8969315c44bf449e9f670d5680f50bb3c2a52d80ff1",
+      "bytes": 23354,
+      "elapsed_ms": 763,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "c73cab0e94f665c9e274ecbd77b916b6335433487d8f8da3d908a788860d5ba4"
+    },
+    {
+      "id": "P16",
+      "domain": "www.w3.org",
+      "page_class": "document",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "41417fb420a737c8064205cf4b7fac3fc7ce6bad26417be5b4f6f6012d92c951",
+          "passed": true
+        }
+      ],
+      "content_sha256": "79d19a177dd0d6be0bc2c4c4c80766737307686bd74b2ba1597459ab0e5171ca",
+      "metadata_title_sha256": null,
+      "bytes": 20,
+      "elapsed_ms": 238,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "63c51fb44686da454b84adc86693c608d6e2348cbbc72518407e9736a3d8d9ac"
+    },
+    {
+      "id": "P17",
+      "domain": "www.w3.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "7605425c77512652e2ab94af37a11afd86084f677375d3edd81f9035a8495434",
+          "passed": true
+        }
+      ],
+      "content_sha256": "0ce20b4d09358e729e84623cc7029db161981b083d86b8de5ee37b8937692ef8",
+      "metadata_title_sha256": "63687ea9f44e463282622770a161758619964b25dcb3e93e6ab8c5b136223530",
+      "bytes": 287237,
+      "elapsed_ms": 1094,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "c615771adc723ce313664f3707cd0ff3cc99902f332d3caa2b76e0c258aec14e"
+    },
+    {
+      "id": "P18",
+      "domain": "react.dev",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "01fad993ff61aca9a1f2f07100c95eb1559d8b6440a00cb974a92810a6b5a2dc",
+          "passed": true
+        }
+      ],
+      "content_sha256": "9be50c66d524ddd1bfc89c99a1087a33fc280152b08661bbb47b56f6e9cdf697",
+      "metadata_title_sha256": "0859ac9fd5ce9762c7dc2f344b5034c8c49130eb7c94015498366e5796fb4118",
+      "bytes": 19328,
+      "elapsed_ms": 1056,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "0ea5f6773f35a57155a51f3621def588fbc8fab2768a951ce9ab05da37ce2420"
+    },
+    {
+      "id": "P19",
+      "domain": "www.scrapingcourse.com",
+      "page_class": "lawful-difficult",
+      "status": 500,
+      "usable": false,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "562be6087cac8848bcc4ba7f4e99aa44d26f3ec68b0f1cf60e18bc15a1f70a9a",
+          "passed": false
+        }
+      ],
+      "content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "metadata_title_sha256": null,
+      "bytes": 0,
+      "elapsed_ms": 7639,
+      "fcpi": {
+        "strategy": "enhanced",
+        "attempts": 3,
+        "proxy_bytes": 12242,
+        "proxy_micro_usd": 49,
+        "enhanced_micro_usd": 0
+      },
+      "failure": "SCRAPE_FCPI_RETRIEVAL",
+      "request_sha256": "6e8e4aebbc1d9b698c8dd1f0bdb2be466deb389ce8905c083839280f803db9e7"
+    },
+    {
+      "id": "P20",
+      "domain": "www.iana.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "kind": "markdown_body",
+          "criterion_sha256": "6ecc30f307d5443aca21d74d9dd696a8b9316a520a32403554525e3425fcd51e",
+          "passed": true
+        }
+      ],
+      "content_sha256": "7ec157a7098711406af1b4bfa1141445d0ccbac19415e58498d673fb8bdfd882",
+      "metadata_title_sha256": "94d32c062c065d272396e5c5d4c8281016bda78ce966245dcae3466d1cfa83b2",
+      "bytes": 2490,
+      "elapsed_ms": 704,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null,
+      "request_sha256": "40cf3f9925ab2fc14ccd33f5f5bf20c5ba8e498f2289474c4117ed0aa08989ca"
+    }
+  ]
+}

@@ -1,0 +1,80 @@
+{
+  "utc": "2026-10-04T02:07:12.610Z",
+  "before_snapshot_sha256": "5a773a07c8f7e635aa2c4ff46aca4ef6580e7fe9f92ebe2dae84563091e25782",
+  "after_snapshot_sha256": "b07aafbe6ea74c433938b91758161c72d4590e6b64e7982768a44440e89a508f",
+  "boot_unchanged": true,
+  "protected_sections": [
+    {
+      "name": "systemd_enabled",
+      "unchanged": true,
+      "before_sha256": "668c4111be07e05a995eb369130beb2fdbbdc27af5bd6696166d6c35aad99a60",
+      "after_sha256": "668c4111be07e05a995eb369130beb2fdbbdc27af5bd6696166d6c35aad99a60"
+    },
+    {
+      "name": "docker_activation",
+      "unchanged": true,
+      "before_sha256": "e917618a40242a50f573c88377977822df8aedc07c90c7d99fb06588ef962d27",
+      "after_sha256": "e917618a40242a50f573c88377977822df8aedc07c90c7d99fb06588ef962d27"
+    },
+    {
+      "name": "lsmod",
+      "unchanged": true,
+      "before_sha256": "40a87358d7bcb28a3ab0242dc4abcf7ae4be14e1538c6d95e6e3c6367743dcaf",
+      "after_sha256": "40a87358d7bcb28a3ab0242dc4abcf7ae4be14e1538c6d95e6e3c6367743dcaf"
+    },
+    {
+      "name": "ss_listen",
+      "unchanged": true,
+      "before_sha256": "df1160a0ae84535bfef80f0d832a405698a8089645e179698e9c601c4758e138",
+      "after_sha256": "df1160a0ae84535bfef80f0d832a405698a8089645e179698e9c601c4758e138"
+    },
+    {
+      "name": "findmnt",
+      "unchanged": false,
+      "before_sha256": "12923c985cd6ccdc87267e7ac0410026d6f8d97e858efe3c87ec23a76c77f8db",
+      "after_sha256": "4772e762e0afc635b85bb6f81dd9a5424b916750f513fb1c90670f2202f087ef"
+    },
+    {
+      "name": "firewall",
+      "unchanged": true,
+      "before_sha256": "eee84373112549e697765b023475529bd60e43d40be47b91c74791f59cf8624a",
+      "after_sha256": "eee84373112549e697765b023475529bd60e43d40be47b91c74791f59cf8624a"
+    },
+    {
+      "name": "swap_zram",
+      "unchanged": true,
+      "before_sha256": "f305062100d12e208adff990402d7c65b0f44c28f6d3e4d79a064925f994e0f4",
+      "after_sha256": "f305062100d12e208adff990402d7c65b0f44c28f6d3e4d79a064925f994e0f4"
+    },
+    {
+      "name": "nft_tables",
+      "unchanged": true,
+      "before_sha256": "1d2f5617505da08bf73c019bfa8fb446a7c2098dd76725b0aaa88a1e84e5c968",
+      "after_sha256": "1d2f5617505da08bf73c019bfa8fb446a7c2098dd76725b0aaa88a1e84e5c968"
+    },
+    {
+      "name": "forwarding",
+      "unchanged": true,
+      "before_sha256": "da3b4ed93097061ff95fdff7bb761e92ab717f8e9184b33a29c7ada6c02091c9",
+      "after_sha256": "da3b4ed93097061ff95fdff7bb761e92ab717f8e9184b33a29c7ada6c02091c9"
+    }
+  ],
+  "changed_project_resources": [
+    "fcpi retrieval-service recreated for bounded overlay and recreated at cleanup"
+  ],
+  "foreign_containers_before": 0,
+  "foreign_containers_after": 0,
+  "systemd_running": "Ephemeral SSH scopes/timer state samples are operational observations, not unrelated configuration changes",
+  "prior_deployment_evidence": "evidence/M9/corpus-v2/deployment-preservation.json",
+  "findmnt_interpretation": {
+    "classification": "EXPECTED_PROJECT_CONTAINER_RECREATION",
+    "exact_current_container_and_network_namespace_match": true,
+    "prior_retrieval_container_bound_to_snapshot_row": true,
+    "removed_lines": 2,
+    "added_lines": 2,
+    "diff_sha256": "63d7b2cfdea74215f9b9f62a2e303750c716412e13092d0a36509204e6f65e42",
+    "unrelated_and_persistent_mounts_unchanged": true,
+    "current_container_sha256": "e171d0576fdc70b8a0e91a2b818d726851b39fdda977abf41094bc80415e5168"
+  },
+  "state": "PASS"
+}

@@ -1,0 +1,44 @@
+{
+  "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "utc": "2026-10-04T02:03:48.287Z",
+  "states": [
+    {
+      "state": "RELEASED",
+      "count": 2
+    },
+    {
+      "state": "SETTLED",
+      "count": 39
+    },
+    {
+      "state": "UNCERTAIN",
+      "count": 2
+    }
+  ],
+  "month_usage": [
+    {
+      "category": "enhanced",
+      "period_start": "2026-10-01",
+      "reserved": 0,
+      "settled": 6350
+    },
+    {
+      "category": "llm",
+      "period_start": "2026-10-01",
+      "reserved": 0,
+      "settled": 7714
+    },
+    {
+      "category": "parser",
+      "period_start": "2026-10-01",
+      "reserved": 0,
+      "settled": 15
+    },
+    {
+      "category": "proxy",
+      "period_start": "2026-10-01",
+      "reserved": 16000,
+      "settled": 1640
+    }
+  ]
+}

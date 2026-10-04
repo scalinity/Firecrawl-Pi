@@ -1,0 +1,47 @@
+{
+  "utc": "2026-10-04T02:15:36.399Z",
+  "state": "PASS",
+  "checks": {
+    "spec": true,
+    "milestones": true,
+    "agents": true,
+    "all10accepted": true,
+    "refs_bounded": true,
+    "agents_claude_identical": true,
+    "history_905_intact": true
+  },
+  "html_sha256": "5174ea08a8d813bbbb86ea660faaeb45118c765707951b1522aa01704f3bb301",
+  "rendering": [
+    {
+      "theme": "light",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "document_width": 1440
+    },
+    {
+      "theme": "dark",
+      "viewport": [
+        1440,
+        1000
+      ],
+      "document_width": 1440
+    },
+    {
+      "theme": "dark",
+      "viewport": [
+        390,
+        844
+      ],
+      "document_width": 390
+    }
+  ],
+  "ui_counts": {
+    "accepted": 10,
+    "unfinished": 0
+  },
+  "observed_browser_errors": [],
+  "screenshots": "Inspected inline; no screenshot files saved",
+  "maintenance": "Current status,counts,eligibility andsource snapshots realigned inexistinglayout. No successor/provider authorization/publication."
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "fcpi.owner-authorization/v1",
+  "recorded_utc": "2026-10-04T02:00:15.119Z",
+  "authority": "Fresh direct owner reply in current Codex chat",
+  "chat_id": "01a0ffc9-2dbf-7892-8248-fe282fcc5cf4",
+  "question_id": "[\"request_user_input_async\",\"call_8XRnN2UBQdvN1G2JoO5Qy1DP\",0]",
+  "reply": "Authorize budget and frozen browser options",
+  "purpose": "M9 corpus revision 2",
+  "maximum_window_minutes": 45,
+  "new_llm_micro_usd": 0,
+  "new_proxy_micro_usd": 40200,
+  "new_enhanced_micro_usd": 1270,
+  "new_paid_total_micro_usd": 41470,
+  "new_parser_free_credits": 3,
+  "project_parser_credit_ceiling": 18,
+  "parser_paid_micro_usd": 0,
+  "maximum_acquisition_attempts_per_page": 3,
+  "maximum_pages_per_parser_submission": 2,
+  "browser_request_options": [
+    {
+      "id": "P07",
+      "wait_ms": 1000,
+      "onlyMainContent": false
+    },
+    {
+      "id": "P08",
+      "wait_ms": 10000,
+      "onlyMainContent": false
+    }
+  ],
+  "corpus_sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+  "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+  "restrictions": [
+    "Only full fresh20-target corpus revision2",
+    "All retries count inside caps",
+    "No purchases,top-ups,plans,subscriptions,alternates,account-limit increases or Cloud",
+    "No model spending",
+    "Close on completion/failure or45minutes; restore paid false/caps zero; reconcile",
+    "Prior grants expired; no later paid execution covered"
+  ]
+}

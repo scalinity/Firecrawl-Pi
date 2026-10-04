@@ -1,19 +1,97 @@
 {
-  "utc": "2026-10-04T01:42:25.800Z",
-  "source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
-  "new_corpus": "NOT_RUN",
-  "new_provider_calls": 0,
-  "new_paid_cost_micro_usd": 0,
+  "schema": "fcpi.m9-corpus-v2-usage/v1",
+  "utc": "2026-10-04T02:07:12.608Z",
+  "execution_source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "window_state": "CLOSED",
+  "new_corpus": "PASS",
+  "new_provider_reservations": 4,
+  "new_provider_dispatches": {
+    "openai": 0,
+    "decodo": 3,
+    "zyte": 1,
+    "llamaparse": 0
+  },
+  "new_paid_cost_micro_usd": 123,
   "new_parser_free_credits": 0,
+  "costs": {
+    "openai_micro_usd": 0,
+    "decodo_micro_usd": 123,
+    "zyte_micro_usd": 0,
+    "parser_free_credits": 0,
+    "uncertain": []
+  },
+  "measured_decodo_bytes": 30350,
+  "ledger_rows": [
+    {
+      "call_key": "enhanced:01a104a5-2d81-755e-95aa-8bec08f8b27a",
+      "logical_id": "01a104a5-2d81-755e-95aa-8bec08f8b27a",
+      "category": "enhanced",
+      "provider": "zyte",
+      "unit": "micro_usd",
+      "reserved": 1270,
+      "actual": 0,
+      "state": "RELEASED",
+      "usage": null
+    },
+    {
+      "call_key": "proxy:05b0ec86-aa21-46f0-9b77-183b6690827d",
+      "logical_id": "01a104a4-51a0-70eb-bbbd-b27b2c531d31",
+      "category": "proxy",
+      "provider": "decodo",
+      "unit": "micro_usd",
+      "reserved": 40000,
+      "actual": 30,
+      "state": "SETTLED",
+      "usage": {
+        "bytes": 7270,
+        "capped": false,
+        "tunnels": 1
+      }
+    },
+    {
+      "call_key": "proxy:c289de46-2269-4305-8d37-8b17a95fe308",
+      "logical_id": "01a104a4-4373-7298-876e-e900f1f43276",
+      "category": "proxy",
+      "provider": "decodo",
+      "unit": "micro_usd",
+      "reserved": 40000,
+      "actual": 44,
+      "state": "SETTLED",
+      "usage": {
+        "bytes": 10838,
+        "capped": false,
+        "tunnels": 1
+      }
+    },
+    {
+      "call_key": "proxy:e64e92e2-2566-43f0-b191-0751e7d801d9",
+      "logical_id": "01a104a5-2d81-755e-95aa-8bec08f8b27a",
+      "category": "proxy",
+      "provider": "decodo",
+      "unit": "micro_usd",
+      "reserved": 40000,
+      "actual": 49,
+      "state": "SETTLED",
+      "usage": {
+        "bytes": 12242,
+        "capped": false,
+        "tunnels": 1
+      }
+    }
+  ],
+  "accounting": "Measured proxy bytes converted at pinned rate card; released Zyte reservation under pinned520 policy. Provider invoices unavailable. API actual is the local ledger field, not an invoice.",
+  "invoices": null,
+  "new_window_authorized_ceiling_micro_usd": 41470,
+  "new_window_free_credit_ceiling": 3,
   "project_ledger": {
     "reservations": [
       {
         "state": "RELEASED",
-        "count": 1
+        "count": 2
       },
       {
         "state": "SETTLED",
-        "count": 36
+        "count": 39
       },
       {
         "state": "UNCERTAIN",
@@ -43,13 +121,22 @@
         "category": "proxy",
         "period_start": "2026-10-01",
         "reserved": 16000,
-        "settled": 1517
+        "settled": 1640
       }
     ]
   },
-  "prior_estimated_paid_micro_usd": 15581,
-  "prior_uncertain_proxy_micro_usd": 16000,
-  "project_conservative_upper_micro_usd": 31581,
-  "invoices": null,
-  "native_reviews": "Existing Claude MaxOAuth; reported API-equivalent usage separate from project ledger and not invoices"
+  "project_settled_estimated_paid_micro_usd": 15704,
+  "retained_prior_uncertain_proxy_micro_usd": 16000,
+  "project_conservative_upper_micro_usd": 31704,
+  "m9_settled_estimated_paid_micro_usd": 11184,
+  "m9_conservative_upper_micro_usd": 27184,
+  "project_parser_free_credits": 15,
+  "m9_parser_free_credits": 9,
+  "parser_paid_micro_usd": 0,
+  "project_decodo_metered_bytes": 408121,
+  "m9_decodo_metered_bytes": 273530,
+  "prior_grants": "Both expired; this direct owner grant was separate and is now closed. No later dispatch authorized.",
+  "native_reviews": "Existing Claude MaxOAuth; API-equivalent usage is separate from project ledger and invoices",
+  "raw_sha256": "144ac99d5f32144f4e2e6bd1177a4315027a08447da257c73e26df2d45fbbc4b",
+  "reconciliation_sha256": "3d961808432b85a97ad1f738b164e3a127e8d83e32b164ed3a384b8b730865c5"
 }

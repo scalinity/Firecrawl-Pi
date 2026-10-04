@@ -1,0 +1,178 @@
+{
+  "schema": "fcpi.m9-capability-scorecard/v1",
+  "utc": "2026-10-04T02:07:12.690Z",
+  "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "full_acceptance": true,
+  "rows": [
+    {
+      "capability": "routine retrieval",
+      "gates": [
+        "AC03",
+        "AC16"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "Declared revision2 corpus19/20 (95%) passes90%; original17/20 remains FAIL and immutable. P19 target bans Zyte520. No universal anti-bot claim.",
+      "evidence_mode": "COMPLETE_NEW_20_TARGET_RUN",
+      "execution_source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f"
+    },
+    {
+      "capability": "crawl/batch",
+      "gates": [
+        "AC04",
+        "AC14"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "VERIFIED_LOCAL",
+      "limitation": "Bounded durable single-host jobs; no high availability claim.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "difficult public pages",
+      "gates": [
+        "AC09",
+        "AC10"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "Fresh real residential/enhanced integrations pass; frozen difficult target P19 remains banned520. Synthetic challenge routing is not real anti-bot success.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "search/map",
+      "gates": [
+        "AC05",
+        "AC06"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "SearXNG/discovery have different ranking/completeness from managed indexes.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "structured extraction",
+      "gates": [
+        "AC07"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "PRE-M9 GPT-6 Luna proof; missing data stays null; discovery modes unsupported.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "documents",
+      "gates": [
+        "AC08"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "PRE-M9 real complex/scanned parsing is retained; fresh M9 free-credit execution is authorized but the window is not opened.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "screenshots/actions",
+      "gates": [
+        "AC11"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "VERIFIED_LOCAL",
+      "limitation": "Bounded browser subset; no interactive session/CDP parity.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "agent research",
+      "gates": [
+        "M9-RESEARCH"
+      ],
+      "historical_state": "IMPLEMENTED_UNVERIFIED",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "Complete actual search/map/retrieve/extract/poll PASS; composed workflow, no native Cloud Agent API parity.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "MCP",
+      "gates": [
+        "AC12",
+        "AC13",
+        "M9-CLIENTS"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "VERIFIED_LOCAL",
+      "limitation": "All ten modern/legacy stateless protocol gates PASS and both globally configured native clients made one correlated successful private fixture scrape. Hosted clients remain separately unconfigured.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "hosted access",
+      "gates": [
+        "AC22"
+      ],
+      "historical_state": "NOT_REQUIRED",
+      "current_m9_state": "NOT_REQUIRED",
+      "limitation": "NOT_ENABLED; ChatGPT/Claude Desktop onboarding supported but unconfigured.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "operations/recovery",
+      "gates": [
+        "AC15",
+        "AC16",
+        "AC17",
+        "AC18",
+        "AC19",
+        "M9-INCIDENT"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "Current reboot/fault/restore/rollback and bounded manual incident proof PASS; accepted M8 24h reused with30m targeted test. Automatic activation held. Single power/storage/network fault domain.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    },
+    {
+      "capability": "Cloud independence",
+      "gates": [
+        "AC24"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "VERIFIED_LIVE",
+      "limitation": "Actual paid and unpaid container audits show zero Cloud service attempts; strict historical denial interpretation retained.",
+      "evidence_mode": "UNCHANGED_IMPLEMENTATION_REUSE",
+      "execution_source": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_SPEC.md",
+      "sha256": "66f53f1f839f61b19e4841b2e21797d43ad5910f778bb3e77de564dac5f090b7"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_MILESTONES.md",
+      "sha256": "c2797f0587f1fe9318c0ae95abd472d8059ae8074796a4a831cad765eabd8d12"
+    }
+  ],
+  "no_native_cloud_product_parity": [
+    "Cloud Agent API",
+    "interactive Browser/Interact",
+    "proprietary indexes/research",
+    "managed scale/SLA",
+    "specialized media extraction"
+  ],
+  "progress_note": "M9 BLOCKED only on frozen public-corpus acceptance; system/client/research/provider/resource gates pass. Paid grants CLOSED; dispatch false/capszero; automatic incident activation held.",
+  "historical_scorecard": {
+    "path": "evidence/M9/capabilities.json",
+    "sha256": "77caef95b337ec55ac6e944c8f5c4d0928d8a3fbea4edfe07ea6d22db643eb0c",
+    "source_commit": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce"
+  }
+}

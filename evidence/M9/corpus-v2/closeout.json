@@ -1,23 +1,31 @@
 {
-  "schema": "fcpi.m9-corpus-v2-held-closeout/v1",
-  "utc": "2026-10-04T01:45:54.766Z",
-  "execution_source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
-  "state": "BLOCKED",
+  "schema": "fcpi.m9-corpus-v2-closeout/v2",
+  "utc": "2026-10-04T02:07:12.610Z",
+  "execution_source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "state": "ACCEPTED",
   "classifications": [
     {
       "id": "P01",
       "classification": "INCORRECT_TEST_FORMULATION",
       "basis": "CURRENT_SOURCE_FORMULATION_ONLY",
-      "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended"
+      "original_author_intent": "UNKNOWN; no preserved intent statement or pre-freeze source chronology",
+      "source_evidence": "evidence/M9/corpus-v2/source-inspection.json"
     },
     {
       "id": "P02",
       "classification": "INCORRECT_TEST_FORMULATION",
       "basis": "CURRENT_SOURCE_FORMULATION_ONLY",
-      "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended"
+      "original_author_intent": "UNKNOWN; no preserved intent statement or pre-freeze source chronology",
+      "source_evidence": "evidence/M9/corpus-v2/source-inspection.json"
     }
   ],
   "new_revision": 2,
+  "assertion_semantics": {
+    "old": "Case-insensitive Example Domain in Markdown body",
+    "new": "Case-insensitive literal body sentence This domain is for use in documentation examples without needing permission. AND exact metadata.title Example Domain",
+    "metadata_alone": "FAIL",
+    "other18criteria": "UNCHANGED"
+  },
   "original_corpus": {
     "usable": 17,
     "denominator": 20,
@@ -27,11 +35,13 @@
     "unchanged": true
   },
   "new_corpus": {
-    "state": "NOT_RUN",
+    "state": "PASS",
+    "usable": 19,
     "denominator": 20,
-    "minimum_usable": 18,
+    "required_minimum": 18,
     "sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
-    "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e"
+    "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+    "raw_sha256": "144ac99d5f32144f4e2e6bd1177a4315027a08447da257c73e26df2d45fbbc4b"
   },
   "review": {
     "model": "claude-opus-5-5",
@@ -40,12 +50,15 @@
     "findings": 28,
     "fixed": 25,
     "rejected": 3,
-    "unresolved": 0
+    "unresolved": 0,
+    "original_m9_findings": 255,
+    "original_m9_unresolved": 0
   },
   "tests": {
     "affected_fixtures": {
       "state": "PASS",
-      "count": 52
+      "count": 52,
+      "execution_source": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a"
     },
     "zero_provider_normalization": {
       "state": "PASS",
@@ -53,24 +66,33 @@
     },
     "current_runtime": {
       "state": "PASS",
-      "checks": 17
+      "checks": 17,
+      "source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f"
     },
     "full_runner": {
-      "state": "BLOCKED",
-      "pass": 40,
+      "state": "PASS",
+      "pass": 43,
       "total": 43,
-      "exit_code": 1,
-      "pending": [
-        "M9-CORPUS",
-        "M9-V2-CLOUD",
-        "M9-V2-USAGE"
-      ]
-    }
+      "exit_code": 0,
+      "source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f"
+    },
+    "all25system_criteria": "PASS, AC22 conditional NOT_REQUIRED; exact unchanged backend proofs explicitly reused"
   },
-  "new_usage": {
-    "paid_micro_usd": 0,
-    "parser_free_credits": 0,
-    "provider_calls": 0
+  "window": {
+    "opened_utc": "2026-10-04T02:00:15Z",
+    "closed_utc": "2026-10-04T02:01:59.470Z",
+    "elapsed_seconds": 104.47,
+    "authority": "evidence/M9/corpus-v2/owner-authorizations.json",
+    "cleanup_exit_code": 0,
+    "any_later_execution_authorized": false
+  },
+  "usage": {
+    "new_estimated_paid_micro_usd": 123,
+    "new_parser_credits": 0,
+    "m9_paid_upper_micro_usd": 27184,
+    "project_paid_upper_micro_usd": 31704,
+    "project_free_parser_credits": 15,
+    "invoices": null
   },
   "health": {
     "healthy": true,
@@ -78,23 +100,46 @@
     "paid_dispatch": false,
     "provider_caps_zero": true,
     "cloud_enabled": false,
-    "validation_overlay_absent": true
+    "validation_overlay_absent": true,
+    "queue": {
+      "ok": true,
+      "queued": 0,
+      "oldest_queued_s": 0,
+      "active": 0,
+      "open_jobs": 0
+    }
   },
-  "remaining": [
-    "Fresh exact≤45minute grant for Decodo40200μUSD/Zyte1270μUSD/parser≤3freecredits",
-    "Explicit readable P07/P08 caller-option consent before live",
-    "Full fresh20run; Cloud scan/accounting/cleanup after it"
+  "remaining_failures": [
+    {
+      "id": "P19",
+      "domain": "www.scrapingcourse.com",
+      "category": "BLOCKED_PUBLIC_CONTENT",
+      "gateway_status": 500,
+      "provider_status": 520,
+      "provider_result": "the target banned the enhanced provider",
+      "strategies": [
+        "direct_http",
+        "residential_http",
+        "enhanced"
+      ],
+      "attempts": 3,
+      "assertion_unchanged": true,
+      "retained_in_denominator": true
+    }
   ],
+  "blockers": [],
   "preserved_limitations": [
-    "P19 original Zyte520/banned remains a real visible failure; no universal anti-bot success claim",
-    "Original author intent/source-change chronology UNKNOWN",
-    "Two uncertain old proxy outcomes retain16000μUSD; invoices unavailable",
-    "Hosted ingress NOT_ENABLED; automatic incident activation held",
-    "M8accepted24hAC16reuse; no second24hsoak",
-    "M8historicalB00/X04 and supplemental M5legacyFAIL/currentequivalentPASS remain unchanged",
-    "Request/criterion integrity hashes are guess-confirmable, not confidentiality"
+    "P19 target banned Zyte520: retained denominator failure, no universal anti-bot success",
+    "Original author intent/source chronology UNKNOWN",
+    "Two older uncertain proxy outcomes retain16000microUSD; invoice reconciliation unavailable",
+    "Hosted ingress NOT_ENABLED; automatic incident investigation remains OFF, bounded manual proof VERIFIED_LIVE",
+    "M8accepted24hAC16+30minM9 targeted proof reused; no duplicate soak",
+    "M8B00/X04 and supplementalM5legacyFAIL/currentequivalentPASS unchanged",
+    "Request/criterion hashes are integrity and guess-confirmable, not confidentiality"
   ],
-  "unrelated_host_evidence": "evidence/M9/corpus-v2/deployment-preservation.json",
+  "unrelated_host_evidence": "evidence/M9/corpus-v2/window-preservation.json",
+  "published": false,
+  "remote_main_observed": "5ab47b979c9e243f62f46035714aa83a94d7b090",
   "inputs": [
     {
       "path": "scripts/m9/corpus-v2.mjs",
@@ -158,11 +203,11 @@
     },
     {
       "path": "evidence/M9/corpus-v2/current/versions.json",
-      "sha256": "574d1cab5bd2a12dca83c2128738c355870de685afa62f9a5d3e802123bd2284"
+      "sha256": "5df1ae610c41f936980ff9417d09a770b20b17e5f07523e01755adca1f1781ba"
     },
     {
       "path": "evidence/M9/corpus-v2/current/status.json",
-      "sha256": "eb9c732eda807a54d39c8dbca7ad90be72cf3325471d0d93a647de0f2ca2cc3f"
+      "sha256": "8f06b72538f1bc5c7940802708a1fd61a01eaf0e99660a0c63b4faff0ec86ea2"
     },
     {
       "path": "evidence/M9/corpus-v2/normalization-preflight.json",
@@ -170,7 +215,31 @@
     },
     {
       "path": "evidence/M9/corpus-v2/usage.json",
-      "sha256": "0de2a319bd0f9d3ac4ad09b07ff0545e90978cb0d61d18fc913e907e6e4fab30"
+      "sha256": "29512413559de9781f821e07ccd498b4132e60d422def8b435cb5a0acc6dbab6"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/quality-summary.json",
+      "sha256": "cde6c3e3fcb99669276cd5f7e0ad166b2595613398a6d6d6a18f1ff9494d9cfe"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/window-preservation.json",
+      "sha256": "76e0d87cf7fa032f0a993a339cbdafe2c449fa4bbb2f75db76d1e3497d3fd9a4"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/corpus.json",
+      "sha256": "aa92cac38555a3899ec67ddb6044dad7973eb9f4a0e15cee5d1dd38c0367bc72"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/run-receipt.json",
+      "sha256": "7014ddadefba512287b5a9114577371eddaa0d6563658f6af1cedfd50f7c6396"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/live-window.json",
+      "sha256": "4671ded145832226662299cefddd36006f54e088eceba0c47130ce319b1edf17"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/owner-authorizations.json",
+      "sha256": "76ce8f4ff94af5aa141d94b4fcdee8259abd22895ef4ca74d404a2d1076b9288"
     },
     {
       "path": "patches/series.json",
@@ -191,8 +260,30 @@
     {
       "path": "deploy/policies/capabilities.json",
       "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/operator-provenance.json",
+      "sha256": "96a6b3a3a8e7d422d1ab3a01d2221514cc88a13da3c347c0ca73dbcbd41ba54e"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/overview-proof.json",
+      "sha256": "7cc37fdfd9617f74b91c6a567a91cbbc1a9fd8ed629c4a08854a374a370dee1a"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/capabilities.json",
+      "sha256": "8096a69cc74e4a0f176b9c2fbf7eac8dd07a0c830ee32e8a21956fa51124936a"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_SPEC.md",
+      "sha256": "e415ac99b35927dd8bf18b98482926c9b7c777a4da5165388aee972928767d44"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_MILESTONES.md",
+      "sha256": "9895283102ca2dd71a0ff8fecb4ae849353c1b03972c28a534136ac8eb08d16e"
+    },
+    {
+      "path": "ORCHESTRATION.html",
+      "sha256": "5174ea08a8d813bbbb86ea660faaeb45118c765707951b1522aa01704f3bb301"
     }
-  ],
-  "remote_main_observed": "5ab47b979c9e243f62f46035714aa83a94d7b090",
-  "published": false
+  ]
 }
