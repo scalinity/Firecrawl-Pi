@@ -20,6 +20,7 @@ export function ready({ consent, window, head, deployed, dirty, reviewed, now })
     consent.new_llm_micro_usd === 0 && consent.llm_micro_usd === 0 && consent.new_parser_credits <= 3 &&
     ['new_proxy_micro_usd', 'new_enhanced_micro_usd', 'new_parser_credits'].every(k => Number.isSafeInteger(consent[k]) && consent[k] >= 0);
 }
+export const dispatchFits=(consent,now)=>Number.isFinite(Date.parse(consent?.expires_at)) && Date.parse(consent.expires_at)-now>=130000;
 
 async function main() {
   const privateDir = homedir() + '/.local/share/firecrawl-pi/m9/corpus-v2';
@@ -85,7 +86,7 @@ async function main() {
   const save = () => writeFileSync(privatePath, JSON.stringify(raw), { mode: 0o600 });
   const call = body => new Promise((resolve, reject) => {
     const started = Date.now(), data = Buffer.from(JSON.stringify(body)), left = Date.parse(consent.expires_at) - started;
-    if (left <= 0) return reject(Error('Fresh owner window expired before dispatch'));
+    if (!dispatchFits(consent,started)) return reject(Error('Insufficient authorized time for request deadline and cleanup margin'));
     const req = request(origin + '/v2/scrape', { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', 'content-length': data.length }, timeout: Math.min(115000, left) }, res => {
       const parts = []; let bytes = 0;
       res.on('data', b => { bytes += b.length; if (bytes > 64 * 1048576) req.destroy(Error('Response exceeds bound')); else parts.push(b); });

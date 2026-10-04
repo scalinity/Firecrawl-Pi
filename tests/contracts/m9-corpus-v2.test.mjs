@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent,normalizationProof,historyManifestVerdict,historyCommit } from '../../scripts/m9/corpus-v2.mjs';
-import { ready } from '../../scripts/m9/corpus-v2-live.mjs';
+import { ready,dispatchFits } from '../../scripts/m9/corpus-v2-live.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 const source = 'a'.repeat(40), iso = n => new Date(Date.parse('2026-10-04T01:00:00Z') + n * 1000).toISOString();
 function fixture() {
@@ -166,6 +166,9 @@ test('driver requires fresh, exact reviewed/deployed authorization with zero mod
   assert.equal(ready({...args,now:Date.parse(iso(181))}),false);
   const c={...f.consent,opened_at:'2026-10-31T23:30:00.000Z',expires_at:'2026-11-01T00:15:00.000Z'};
   assert.equal(ready({...args,now:Date.parse(c.opened_at)+1000,consent:c,window:{...args.window,started_utc:c.opened_at,expires_at:c.expires_at,consent_sha256:digest(JSON.stringify(c))}}),false);
+});
+test('late dispatch refuses before provider work unless deadline and cleanup margin remain',()=>{
+  const c=fixture().consent;assert.equal(dispatchFits(c,Date.parse(c.expires_at)-130000),true);assert.equal(dispatchFits(c,Date.parse(c.expires_at)-129999),false);assert.equal(dispatchFits({expires_at:'invalid'},0),false);
 });
 test('old gate applicability allows only the exact revision proof files, never runtime/security/routing changes', () => {
   assert.equal(unchangedImplementation(['scripts/m9/corpus-v2.mjs']), true);
