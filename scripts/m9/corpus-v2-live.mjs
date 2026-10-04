@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { request } from 'node:https';
 import { homedir } from 'node:os';
-import { base, digest, historicalIntact, revisionIntegrity, requestPlan, corpusResult, proofPaths, budgetAdmission,correlationId,correlationEvent,normalizationProof } from './corpus-v2.mjs';
+import { base, digest, historicalIntact, revisionIntegrity, requestPlan, corpusResult, proofPaths, budgetAdmission,correlationId,correlationEvent,normalizationProof,canonicalTime,browserOptions } from './corpus-v2.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 import { codeDirty } from './collection.mjs';
 import { sourceObservation } from './source-observation.mjs';
@@ -14,8 +14,9 @@ export function ready({ consent, window, head, deployed, dirty, reviewed, now })
     consent.source_commit === head && window.source_commit === head && deployed === head && dirty === false && reviewed === true &&
     window.corpus_sha256 === consent.corpus_sha256 && window.consent_sha256 === digest(JSON.stringify(consent)) &&
     consent.request_plan_authorized === true && /^[0-9a-f]{64}$/.test(consent.request_plan_sha256 ?? '') && window.request_plan_sha256 === consent.request_plan_sha256 &&
+    JSON.stringify(consent.browser_request_options)===JSON.stringify(browserOptions) &&
     window.started_utc === consent.opened_at && window.expires_at === consent.expires_at &&
-    Number.isFinite(start) && Number.isFinite(end) && start <= now && end-now>=2520000 && end > start && end - start <= 2700000 &&
+    canonicalTime(consent.opened_at) && canonicalTime(consent.expires_at) && start <= now && end-now>=2520000 && end > start && end - start <= 2700000 &&
     new Date(start).toISOString().slice(0,7)===new Date(end).toISOString().slice(0,7) &&
     consent.new_llm_micro_usd === 0 && consent.llm_micro_usd === 0 && consent.new_parser_credits <= 3 &&
     ['new_proxy_micro_usd', 'new_enhanced_micro_usd', 'new_parser_credits'].every(k => Number.isSafeInteger(consent[k]) && consent[k] >= 0);

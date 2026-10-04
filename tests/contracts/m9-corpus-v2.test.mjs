@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent,normalizationProof,historyManifestVerdict,historyCommit } from '../../scripts/m9/corpus-v2.mjs';
+import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent,normalizationProof,historyManifestVerdict,historyCommit,browserOptions,canonicalTime } from '../../scripts/m9/corpus-v2.mjs';
 import { ready,dispatchFits } from '../../scripts/m9/corpus-v2-live.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 const source = 'a'.repeat(40), iso = n => new Date(Date.parse('2026-10-04T01:00:00Z') + n * 1000).toISOString();
@@ -20,7 +20,7 @@ function fixture() {
   for(const s of Object.values(sources)){s.document.rawHtml=s.html;s.initial_document=structuredClone(s.document);}
   const inspectionText=JSON.stringify({observations:Object.entries(sources).map(([id,s])=>({id,source_sha256:digest(s.html),historical_markdown_sha256:digest(s.document.markdown),historical_raw_html_sha256:digest(s.document.rawHtml),initial_profile_markdown_sha256:digest(s.initial_document.markdown),initial_profile_title_sha256:digest(s.initial_document.metadata.title)}))});freeze.source_inspection_sha256=digest(inspectionText);
   const consent = { source_commit: source, scope: 'M9 acceptance', purpose: 'M9 corpus revision 2', corpus_sha256: freeze.sha256,
-    request_plan_authorized:true,request_plan_sha256:freeze.request_plan_sha256,
+    request_plan_authorized:true,request_plan_sha256:freeze.request_plan_sha256,browser_request_options:structuredClone(browserOptions),
     opened_at: iso(0), expires_at: iso(2700), llm_micro_usd: 0, new_llm_micro_usd: 0, new_proxy_micro_usd: 40200, new_enhanced_micro_usd: 1270, new_parser_credits: 3 };
   const window = { state: 'CLOSED', purpose: consent.purpose, source_commit: source, corpus_sha256: freeze.sha256, consent,
     request_plan_sha256:freeze.request_plan_sha256,
@@ -169,6 +169,12 @@ test('driver requires fresh, exact reviewed/deployed authorization with zero mod
 });
 test('late dispatch refuses before provider work unless deadline and cleanup margin remain',()=>{
   const c=fixture().consent;assert.equal(dispatchFits(c,Date.parse(c.expires_at)-130000),true);assert.equal(dispatchFits(c,Date.parse(c.expires_at)-129999),false);assert.equal(dispatchFits({expires_at:'invalid'},0),false);
+});
+test('readable browser option consent is exact and UTC times use the same accepted formats',()=>{
+  const f=fixture(),args={consent:f.consent,window:{...f.window,state:'OPEN'},head:source,deployed:source,dirty:false,reviewed:true,now:Date.parse(iso(10))};
+  assert.equal(ready({...args,consent:{...f.consent,browser_request_options:[]}}),false);
+  assert.equal(canonicalTime('2026-10-04T01:00:00Z'),true);assert.equal(canonicalTime(iso(0)),true);
+  for(const t of ['2026-10-04T01:00:00+00:00','2026-10-31T24:00:00Z','not-time'])assert.equal(canonicalTime(t),false);
 });
 test('old gate applicability allows only the exact revision proof files, never runtime/security/routing changes', () => {
   assert.equal(unchangedImplementation(['scripts/m9/corpus-v2.mjs']), true);

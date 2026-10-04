@@ -6,7 +6,10 @@ export const base = 'evidence/M9/corpus-v2';
 export const historyCommit = 'c72e89215b45049bf30905144f2ad7010dbd18bf';
 export const digest = value => createHash('sha256').update(value).digest('hex');
 const equal = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-const finiteTime = value => Number.isFinite(Date.parse(value));
+export const canonicalTime=value=>typeof value==='string' && Number.isFinite(Date.parse(value)) &&
+  [new Date(value).toISOString(),new Date(value).toISOString().replace('.000Z','Z')].includes(value);
+const finiteTime=canonicalTime;
+export const browserOptions=[{id:'P07',wait_ms:1000,onlyMainContent:false},{id:'P08',wait_ms:10000,onlyMainContent:false}];
 const visibleBody = html => (html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1] ?? '')
   .replace(/<!--[\s\S]*?-->|<(script|style|noscript)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
   .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
@@ -95,11 +98,12 @@ export function fullRunVerdict(spec, freeze, raw, record, window) {
         window.source_commit !== raw.source_commit || window.consent?.source_commit !== raw.source_commit ||
         window.consent.scope !== 'M9 acceptance' || window.consent.purpose !== 'M9 corpus revision 2' || window.consent.corpus_sha256 !== freeze.sha256 ||
         window.consent.request_plan_authorized !== true || window.consent.request_plan_sha256 !== freeze.request_plan_sha256 || window.request_plan_sha256 !== freeze.request_plan_sha256 ||
+        !equal(window.consent.browser_request_options,browserOptions) ||
         digest(JSON.stringify(window.consent)) !== window.consent_sha256 ||
         window.consent_sha256 !== raw.consent_sha256 || !finiteTime(window.started_utc) || !finiteTime(window.closed_utc) ||
         !finiteTime(window.expires_at) || window.expires_at !== window.consent.expires_at || window.started_utc !== window.consent.opened_at ||
         Date.parse(window.expires_at) <= Date.parse(window.started_utc) || Date.parse(window.expires_at) - Date.parse(window.started_utc) > 2700000 ||
-        window.expires_at.slice(0,7)!==window.started_utc.slice(0,7) ||
+        new Date(window.expires_at).toISOString().slice(0,7)!==new Date(window.started_utc).toISOString().slice(0,7) ||
         Date.parse(window.closed_utc) > Date.parse(window.expires_at) ||
         !finiteTime(raw.started_utc) || !finiteTime(raw.completed_utc) || !finiteTime(window.required_work_finished_utc) ||
         Date.parse(raw.completed_utc) < Date.parse(raw.started_utc) || Date.parse(raw.started_utc) < Date.parse(window.started_utc) ||
