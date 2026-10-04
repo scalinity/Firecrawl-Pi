@@ -72,7 +72,7 @@ export function targetResult(target, response) {
     fcpi: { strategy: response?.acquisition?.final_strategy ?? null, attempts: attempts ?? null,
       proxy_bytes: response?.acquisition?.proxy_bytes ?? null, proxy_micro_usd: response?.acquisition?.proxy_micro_usd ?? null,
       enhanced_micro_usd: response?.acquisition?.enhanced_micro_usd ?? null },
-    failure: response?.json?.code ?? response?.acquisition?.failure ?? (!usable ? 'CORPUS_ASSERTION_FAILED' : null) };
+    failure: usable ? null : response?.json?.code ?? response?.acquisition?.failure ?? 'CORPUS_ASSERTION_FAILED' };
 }
 
 export function corpusResult(spec, raw) {

@@ -67,6 +67,10 @@ test('new body content AND exact metadata identity are required; metadata never 
     const r = structuredClone(f.raw.results[0].response); change(r); assert.equal(targetResult(t, r).usable, false);
   }
 });
+test('recovered success carries no terminal failure while real target failure remains visible',()=>{
+  const f=fixture();f.raw.results[0].response.acquisition.failure='TRANSIENT_PRIOR_ATTEMPT';assert.equal(targetResult(f.spec.targets[0],f.raw.results[0].response).failure,null);
+  assert.equal(targetResult(f.spec.targets[18],f.raw.results[18].response).failure,'BLOCKED_PUBLIC_CONTENT');
+});
 test('all 20 request bodies pass actual gateway validation; native formats and routing remain selected', () => {
   const f = fixture(), manifest = JSON.parse(readFileSync('deploy/policies/capabilities.json'));
   for (const body of requestPlan(f.spec)) validateBody('scrape', body, manifest);
