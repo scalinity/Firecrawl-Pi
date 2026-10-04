@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m9-acceptance/v3",
-  "utc": "2026-10-04T02:02:48.061Z",
-  "source_commit": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+  "utc": "2026-10-04T02:19:39.859Z",
+  "source_commit": "7f021b41e7caddc2d7c4b7a1eb807e6812ab98dd",
   "state": "ACCEPTED",
   "code_dirty": false,
   "exit_code": 0,
@@ -4616,7 +4616,7 @@
       "test_id": "M9-CURRENT",
       "state": "PASS",
       "evidence_mode": "FRESH_REVISION_2",
-      "execution_source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+      "execution_source": "7f021b41e7caddc2d7c4b7a1eb807e6812ab98dd",
       "current_version_record": "evidence/M9/corpus-v2/current/versions.json"
     },
     {
@@ -4629,7 +4629,7 @@
       "test_id": "M9-REDACTION",
       "state": "PASS",
       "evidence_mode": "FRESH_REVISION_2",
-      "execution_source": "22d6d663f9ea294c55b41d08c001ec767fd07e3f",
+      "execution_source": "7f021b41e7caddc2d7c4b7a1eb807e6812ab98dd",
       "current_scan": "evidence/M9/corpus-v2/redaction.json"
     },
     {
@@ -4710,7 +4710,7 @@
     },
     {
       "path": "evidence/M9/corpus-v2/current/versions.json",
-      "sha256": "5df1ae610c41f936980ff9417d09a770b20b17e5f07523e01755adca1f1781ba"
+      "sha256": "6e6688ba08cdeafe0a707808515d310e541c4d308bdf88be5c7231e4328c9419"
     },
     {
       "path": "patches/series.json",
