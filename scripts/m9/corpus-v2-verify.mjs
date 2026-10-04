@@ -8,6 +8,9 @@ import { codeDirty } from './collection.mjs';
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const json = path => existsSync(path) ? JSON.parse(readFileSync(path)) : null;
 const head = git('rev-parse', 'HEAD'), privateDir = homedir() + '/.local/share/firecrawl-pi/m9/corpus-v2';
+function sameExecution(source) {
+  return typeof source==='string' && /^[0-9a-f]{40}$/.test(source) && git('diff','--name-only',source,head,'--','services','deploy','scripts','tests','patches')==='';
+}
 const prior = json('evidence/M9/acceptance.json');
 const history = historicalIntact();
 const delta = git('diff', '--name-only', prior.source_commit, head, '--', 'services', 'deploy', 'scripts', 'tests', 'patches').split('\n').filter(Boolean);
@@ -27,16 +30,14 @@ const review = gate?.state === 'REMEDIATION_COMPLETE' && gate.criterion_integrit
   gate.premise_sha256===digest(readFileSync(base+'/premise-decision.json')) &&
   gate.review_sha256 === digest(readFileSync(base + '/review/REVIEW.md')) && gate.freeze_sha256 === digest(readFileSync(base + '/freeze.json')) &&
   gate.findings.every(x => ['FIXED', 'REJECTED'].includes(x.disposition)) && proofPaths.every(p => gate.files?.[p] === digest(readFileSync(p)));
-replace('M9-REVIEW', applicable && review ? 'PASS' : 'NOT_RUN', { revision_review: base + '/review/REVIEW.md' });
+replace('M9-REVIEW', applicable && review ? 'PASS' : 'NOT_RUN', { execution_source:gate?.source_commit??null,revision_review: base + '/review/REVIEW.md' });
 const tests = json(base + '/fixtures.json'), testPath = base + '/fixtures.txt';
-const fixtures = tests && existsSync(testPath) && fixturesComplete(tests,readFileSync(testPath,'utf8'),head);
-replace('M9-RESOURCE-EVALUATOR-TESTS', fixtures ? 'PASS' : 'NOT_RUN', { current_fixture_record: base + '/fixtures.json' });
+const fixtures = tests && sameExecution(tests.source_commit) && existsSync(testPath) && fixturesComplete(tests,readFileSync(testPath,'utf8'),tests.source_commit);
+replace('M9-RESOURCE-EVALUATOR-TESTS', fixtures ? 'PASS' : 'NOT_RUN', { execution_source:tests?.source_commit??null,current_fixture_record: base + '/fixtures.json' });
 const current = json(base + '/current/versions.json');
 const raw = json(privateDir + '/run.json'), record = json(base + '/corpus.json'), window = json(base + '/live-window.json');
-replace('M9-CURRENT', current?.source_commit === head && Object.keys(current.checks ?? {}).length >= 17 && Object.values(current.checks).every(x => x === true) &&
-  (!raw || cleanupFresh(current, window)) ? 'PASS' : 'NOT_RUN', { current_version_record: base + '/current/versions.json' });
-const sameExecution = source => typeof source === 'string' && /^[0-9a-f]{40}$/.test(source) &&
-  git('diff', '--name-only', source, head, '--', 'services', 'deploy', 'scripts', 'tests', 'patches') === '';
+replace('M9-CURRENT', sameExecution(current?.source_commit) && Object.keys(current.checks ?? {}).length >= 17 && Object.values(current.checks).every(x => x === true) &&
+  (!raw || cleanupFresh(current, window)) ? 'PASS' : 'NOT_RUN', { execution_source:current?.source_commit??null,current_version_record: base + '/current/versions.json' });
 const corpus = raw && sameExecution(raw.source_commit) && raw.before?.clean === true && raw.after?.clean === true &&
   [raw.before, raw.after].every(x => x.local === raw.source_commit && x.pi === raw.source_commit) && fullRunVerdict(spec, freeze, raw, record, window);
 replace('M9-CORPUS', corpus ? 'PASS' : raw ? 'FAIL' : 'NOT_RUN', { evidence_mode: 'COMPLETE_NEW_20_TARGET_RUN',
