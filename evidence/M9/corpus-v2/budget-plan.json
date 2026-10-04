@@ -1,0 +1,65 @@
+{
+  "utc": "2026-10-04T01:13:17.789Z",
+  "authorization_state": "NOT_AUTHORIZED",
+  "purpose": "Only complete new20-target corpus revision2, no research or M5-M7 rerun",
+  "maximum_window_minutes": 45,
+  "corpus_sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+  "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+  "explicit_js_option_authorization_required": true,
+  "new_llm_micro_usd": 0,
+  "new_proxy_micro_usd": 40200,
+  "new_enhanced_micro_usd": 1270,
+  "new_paid_total_micro_usd": 41470,
+  "new_parser_free_credits": 3,
+  "project_parser_credits_ceiling": 18,
+  "parser_paid_micro_usd": 0,
+  "calculation": {
+    "decodo_maximum_attempt_reservation": 40000,
+    "decodo_settled_traffic_allowance": 200,
+    "decodo_prior_first_two_targets_settled": 74,
+    "decodo_allowance_equivalent_bytes": 50000,
+    "zyte_single_http_reservation": 1270,
+    "model_calls": 0
+  },
+  "minimum_claim": "Smallest practical bounded admission budget under the pinned10MB proxy reservation plus a50KB measured-traffic allowance; not a guaranteed invoice or mathematical minimum for unknown future bytes",
+  "baseline_month": {
+    "period_start": "2026-10-01",
+    "proxy_used": 17517,
+    "proxy_uncertain_retained": 16000,
+    "enhanced_used": 6350,
+    "llm_used": 7714,
+    "parser_credits_used": 15
+  },
+  "derived_absolute_caps": {
+    "llm_micro_usd": 0,
+    "proxy_micro_usd": 57717,
+    "enhanced_micro_usd": 7620,
+    "parser_credits": 18
+  },
+  "constraints": [
+    "All retries inside caps; acquisition≤3/page; parser≤2pages/submission",
+    "No purchases, topups, plans, alternates, subscriptions, Cloud or account-spending-limit increase",
+    "Unexpected usage fails closed; no automatic grant extension",
+    "Restore paid dispatch false/caps zero; retain uncertain charges conservatively; post-close runtime proof required"
+  ],
+  "invoices": null,
+  "browser_request_options": [
+    {
+      "id": "P07",
+      "wait_ms": 1000,
+      "onlyMainContent": false
+    },
+    {
+      "id": "P08",
+      "wait_ms": 10000,
+      "onlyMainContent": false
+    }
+  ],
+  "applicability": {
+    "utc_budget_month": "2026-10",
+    "current_baseline_must_be_reverified_before_open": true,
+    "historical_url_binding_rows_retained_days": 30,
+    "later_month_requires_new_baseline_and_normalization_proof": true,
+    "concurrent_same_target_clients": "Could cause explicit ambiguous FAIL; no success fabricated"
+  }
+}

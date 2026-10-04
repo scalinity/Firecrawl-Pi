@@ -1,0 +1,18 @@
+{
+  "utc": "2026-10-04T01:13:17.789Z",
+  "state": "PASS",
+  "proofs": [
+    {
+      "id": "P01",
+      "criterion_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
+      "literal_sha256": "d2429afa1928206151eacb869c380804ef525456bb38a54def6377b49c11869e",
+      "literal_regex_equivalent": true
+    },
+    {
+      "id": "P02",
+      "criterion_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
+      "literal_sha256": "d2429afa1928206151eacb869c380804ef525456bb38a54def6377b49c11869e",
+      "literal_regex_equivalent": true
+    }
+  ]
+}

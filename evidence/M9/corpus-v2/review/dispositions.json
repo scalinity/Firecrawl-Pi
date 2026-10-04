@@ -89,91 +89,99 @@
     {
       "id": "R15",
       "severity": "Critical",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Historical rawHTML body must independently disprove a real Markdown regression"
+      "disposition": "FIXED",
+      "commit": "0c370a1",
+      "reason": "Both actual historical rawHTML bodies lack old phrase, contain the purpose sentence and expected title; helper independently verifies all three."
     },
     {
       "id": "R16",
       "severity": "Critical",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Semantic fixture mutations must preserve their hash bindings"
+      "disposition": "FIXED",
+      "commit": "deb821b",
+      "reason": "Semantic source mutations rebind hashes before assertions; separate tampering fixtures remain. Raw-body identity/omitted-purpose/wrong-title regressions explicitly FAIL."
     },
     {
       "id": "R17",
       "severity": "Warning",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Bind qualified premise decision to review gate"
+      "disposition": "FIXED",
+      "commit": "d804ebc",
+      "reason": "Review gate pins premise_sha256 in driver and verifier; qualified freeze classification and reviewed/execution-held state retained."
     },
     {
       "id": "R18",
       "severity": "Warning",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Disclose acceptance-determinative effect plainly"
+      "disposition": "FIXED",
+      "commit": "897a99f",
+      "reason": "Record states old criteria permit at most17/20 with still-failing P19; correction can decide acceptance. No historical rescore."
     },
     {
       "id": "R19",
       "severity": "Suggestion",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Refuse dispatch without deadline and cleanup margin"
+      "disposition": "FIXED",
+      "commit": "936a8f7",
+      "reason": "Dispatch refuses unless115s request deadline plus15s cleanup margin remain."
     },
     {
       "id": "R20",
       "severity": "Suggestion",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Repeat readable JS caller options in consent"
+      "disposition": "FIXED",
+      "commit": "c9f0907",
+      "reason": "Fresh consent must repeat exact readable P07/P08 wait_ms and onlyMainContent options, plus frozen plan hash."
     },
     {
       "id": "R21",
       "severity": "Warning",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Consistent canonical UTC timestamp validation"
+      "disposition": "FIXED",
+      "commit": "c9f0907",
+      "reason": "Canonical UTC times accept ISO seconds or milliseconds; offsets and24:00normalization reject; month comparisons use parsedUTC."
     },
     {
       "id": "R22",
       "severity": "Suggestion",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Filter correlation DB reads to target/old receipt IDs"
+      "disposition": "FIXED",
+      "commit": "35380d9",
+      "reason": "After single baseline read, per-request DB reads select only exact url_hmac; historical preflight selects exactly20 validated receipt IDs."
     },
     {
       "id": "R23",
       "severity": "Warning",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Historical30-day preflight and October budget have bounded applicability"
+      "disposition": "FIXED",
+      "commit": "88242fc",
+      "reason": "Consent budget month must match live UTC month; historical preflight revalidates retained rows before any dispatch. October applicability and30day retention documented; later month must rederive."
     },
     {
       "id": "R24",
       "severity": "Warning",
-      "disposition": "PENDING",
-      "commit": null,
-      "reason": "Verify deployed gateway timeout before spending"
+      "disposition": "FIXED",
+      "commit": "88242fc",
+      "reason": "Zero-provider live observation confirms core110000ms vs client115000ms; driver rechecks≤110000before dispatch and stores it in raw receipt."
     },
     {
       "id": "R25",
       "severity": "Suggestion",
-      "disposition": "PENDING",
+      "disposition": "REJECTED",
       "commit": null,
-      "reason": "Request hashes are guess-confirmable, not URL secrecy"
+      "reason": "Accepted privacy limitation, not a defect: request/criterion hashes permit guess confirmation and are integrity evidence, not confidentiality; private full URLs/content remain off Git."
     },
     {
       "id": "R26",
       "severity": "Suggestion",
-      "disposition": "PENDING",
+      "disposition": "REJECTED",
       "commit": null,
-      "reason": "Concurrent same-target clients may safely block correlation"
+      "reason": "No correctness defect: concurrent same-target requests cause explicit ambiguity FAIL; no false success. Session/queue exclusivity will be rechecked before live, without a redundant owner command."
+    },
+    {
+      "id": "R27",
+      "disposition": "FIXED",
+      "commit": "da24186",
+      "reason": "Preserve actual fixture/current execution SHA across documentation/evidence-only checkpoints; exact services/deploy/scripts/tests/patches diff must be empty. No source retagging."
     }
   ],
   "remaining_owner_inputs": [
     "Fresh exact paid/free-credit grant",
     "Explicit authorization of frozen existing P07/P08 browser wait caller options"
   ],
-  "new_corpus": "NOT_RUN"
+  "new_corpus": "NOT_RUN",
+  "state": "REMEDIATION_COMPLETE",
+  "affected_tests": 52
 }

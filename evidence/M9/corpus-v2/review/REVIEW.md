@@ -59,15 +59,20 @@ Remediation is committed and all49 affected fixture tests pass. Independent reme
 ### Independent remediation confirmation
 Both native Opus5.5 reviewers confirm the qualified owner-required classification and most remediations. Additional direct evidence/test gaps were found; no grant is requested while they remain. Original reports: DEBUGGER-REMEDIATION.md and AUDITOR-REMEDIATION.md.
 
-- R15 (Critical): PENDING — Historical rawHTML body must independently disprove a real Markdown regression.
-- R16 (Critical): PENDING — Semantic fixture mutations must preserve their hash bindings.
-- R17 (Warning): PENDING — Bind qualified premise decision to review gate.
-- R18 (Warning): PENDING — Disclose acceptance-determinative effect plainly.
-- R19 (Suggestion): PENDING — Refuse dispatch without deadline and cleanup margin.
-- R20 (Suggestion): PENDING — Repeat readable JS caller options in consent.
-- R21 (Warning): PENDING — Consistent canonical UTC timestamp validation.
-- R22 (Suggestion): PENDING — Filter correlation DB reads to target/old receipt IDs.
-- R23 (Warning): PENDING — Historical30-day preflight and October budget have bounded applicability.
-- R24 (Warning): PENDING — Verify deployed gateway timeout before spending.
-- R25 (Suggestion): PENDING — Request hashes are guess-confirmable, not URL secrecy.
-- R26 (Suggestion): PENDING — Concurrent same-target clients may safely block correlation.
+- R15: FIXED — 0c370a1; Both actual historical rawHTML bodies lack old phrase, contain the purpose sentence and expected title; helper independently verifies all three.
+- R16: FIXED — deb821b; Semantic source mutations rebind hashes before assertions; separate tampering fixtures remain. Raw-body identity/omitted-purpose/wrong-title regressions explicitly FAIL.
+- R17: FIXED — d804ebc; Review gate pins premise_sha256 in driver and verifier; qualified freeze classification and reviewed/execution-held state retained.
+- R18: FIXED — 897a99f; Record states old criteria permit at most17/20 with still-failing P19; correction can decide acceptance. No historical rescore.
+- R19: FIXED — 936a8f7; Dispatch refuses unless115s request deadline plus15s cleanup margin remain.
+- R20: FIXED — c9f0907; Fresh consent must repeat exact readable P07/P08 wait_ms and onlyMainContent options, plus frozen plan hash.
+- R21: FIXED — c9f0907; Canonical UTC times accept ISO seconds or milliseconds; offsets and24:00normalization reject; month comparisons use parsedUTC.
+- R22: FIXED — 35380d9; After single baseline read, per-request DB reads select only exact url_hmac; historical preflight selects exactly20 validated receipt IDs.
+- R23: FIXED — 88242fc; Consent budget month must match live UTC month; historical preflight revalidates retained rows before any dispatch. October applicability and30day retention documented; later month must rederive.
+- R24: FIXED — 88242fc; Zero-provider live observation confirms core110000ms vs client115000ms; driver rechecks≤110000before dispatch and stores it in raw receipt.
+- R25: REJECTED; Accepted privacy limitation, not a defect: request/criterion hashes permit guess confirmation and are integrity evidence, not confidentiality; private full URLs/content remain off Git.
+- R26: REJECTED; No correctness defect: concurrent same-target requests cause explicit ambiguity FAIL; no false success. Session/queue exclusivity will be rechecked before live, without a redundant owner command.
+
+### Final remediation gate
+Both native reviewers conditionally approved the qualified current-source correction after direct evidence/test/binding fixes. Those conditions are now implemented and52affectedtestsPASS; all27findings are FIXED or REJECTED (no unresolved finding). Correction is different from the old predicate, not a logical superset: real body-purpose text AND exact metadata title replace the unsatisfiable identity-in-body check. Historical author intent/source-change chronology remain UNKNOWN. All905originalM9files remain intact; no old score is changed. Actual HTML-body evidence and independent-source evidence both rule out missing original identity text in Markdown for these two cases.
+
+Criterion integrity: APPROVED_AFTER_REMEDIATION, conditional execution held for a fresh owner grant and explicit readable frozen JS caller-option consent. No live success or full acceptance claimed. New20-target run remains NOT_RUN. Each outcome and commit is in dispositions.json; read-only review provenance and verbatim reports are retained. Source-equivalence fix R27 preserves real execution timestamps/SHAs instead of retagging old evidence.

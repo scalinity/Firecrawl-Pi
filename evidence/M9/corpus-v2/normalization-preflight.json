@@ -1,0 +1,124 @@
+{
+  "test_id": "M9-V2-NORMALIZATION-PREFLIGHT",
+  "utc": "2026-10-04T01:12:34.680Z",
+  "source_commit": "bc7a733555052bc79ea3af4f64355aa2971d88c0",
+  "state": "PASS",
+  "provider_calls": 0,
+  "corpus_execution": "NOT_RUN",
+  "expected": "All20 raw target URL HMACs equal their actual historical acquisition DB hashes",
+  "results": [
+    {
+      "id": "P01",
+      "passed": true,
+      "binding_sha256": "3d4c9969f87060907e35f53621fbcae6db85563350ca802946e6e3fe356a329e"
+    },
+    {
+      "id": "P02",
+      "passed": true,
+      "binding_sha256": "6eba6d0d5010c28bc64e1370ce4e323e2f706632d4ba5f4deadbb8e388339e9b"
+    },
+    {
+      "id": "P03",
+      "passed": true,
+      "binding_sha256": "00f2ebb96faaaf6e06af2964b7b1476618e9ab3572e2e54ac68509537c8eb4e5"
+    },
+    {
+      "id": "P04",
+      "passed": true,
+      "binding_sha256": "e5d03e153317963dc04db1b2afd55907dc97bfbc6d8bb755a1ef9fd353ae6a75"
+    },
+    {
+      "id": "P05",
+      "passed": true,
+      "binding_sha256": "5d951929ed84f39088e79e868a896291fc1bcd971f053ff7a9fbc1b31e02627a"
+    },
+    {
+      "id": "P06",
+      "passed": true,
+      "binding_sha256": "fd18fb7bd45c1191b9534d32a9db87ad3b383372496ed306aeffdbe765d38d45"
+    },
+    {
+      "id": "P07",
+      "passed": true,
+      "binding_sha256": "b50d586d162c4240a0cbd4ca8e78e6c07aae810b259471be68896ae75dcd3700"
+    },
+    {
+      "id": "P08",
+      "passed": true,
+      "binding_sha256": "e0f0a0627d901d6199283a149df7111643c5220f9cf2b8f802805e84a958d892"
+    },
+    {
+      "id": "P09",
+      "passed": true,
+      "binding_sha256": "a4e6f0d573089c902fa14eefdad5dd4a19ad2eb8ba55f459c44dcebf2c482877"
+    },
+    {
+      "id": "P10",
+      "passed": true,
+      "binding_sha256": "189a776037658996a3d8694759e1af217eebbf94076d2560fa3040a2c42d5973"
+    },
+    {
+      "id": "P11",
+      "passed": true,
+      "binding_sha256": "8925bb4de0a7828e8217d3190244575bc45c1a5dbc7ce17f99ac1392949c25b7"
+    },
+    {
+      "id": "P12",
+      "passed": true,
+      "binding_sha256": "9cdf72dafd5a991f93fdfe5eafe886257b16616e07c1968123b23621019f969c"
+    },
+    {
+      "id": "P13",
+      "passed": true,
+      "binding_sha256": "5180ba4d0c0a6fc5fc16d36fb222cc311f03e2bd6303f98dbf30f8f998758cf6"
+    },
+    {
+      "id": "P14",
+      "passed": true,
+      "binding_sha256": "e3ec728041a9d61931f8db39577cb1d7ea66a443159b2cd0de6d9dae3b981a9f"
+    },
+    {
+      "id": "P15",
+      "passed": true,
+      "binding_sha256": "94dcce6e6f5875ac25b1b3c0807733647d2f53576fb23fc205ced021c27071bb"
+    },
+    {
+      "id": "P16",
+      "passed": true,
+      "binding_sha256": "99fdeff24360e278e553cfeec9f74640de306f9304ca8d7c7caa6a60ce0e67b3"
+    },
+    {
+      "id": "P17",
+      "passed": true,
+      "binding_sha256": "0b031e7e9cc81a3ac8555822a76831d0849ec98b55573b550b57f3f743e38dd2"
+    },
+    {
+      "id": "P18",
+      "passed": true,
+      "binding_sha256": "3031a715a697643e9a84950d8aa4177a026aeb8129f7b73c2816ed1437235371"
+    },
+    {
+      "id": "P19",
+      "passed": true,
+      "binding_sha256": "947f900d2b6da3f3f564e07b84ef138923a7e3245307acc631a6a97921eae408"
+    },
+    {
+      "id": "P20",
+      "passed": true,
+      "binding_sha256": "a6b57e0f0841e42bae867d3392aea0928a9aacde3a42de95fe3810e1224981b2"
+    }
+  ],
+  "source_oracle_sha256": "797cc5349f2354476159242d0bb378e09cd85d3e7f45bdc850c87fed4e0ce745",
+  "observer_attempts": [
+    {
+      "state": "FAIL",
+      "exit_code": 1,
+      "classification": "Observation exceeded Node default1MiB stdout buffer; no provider execution"
+    },
+    {
+      "state": "PASS",
+      "exit_code": 0,
+      "classification": "32MiB bounded observation; all20 URL hashes matched"
+    }
+  ]
+}

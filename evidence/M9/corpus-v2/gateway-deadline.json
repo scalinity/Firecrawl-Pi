@@ -1,0 +1,10 @@
+{
+  "test_id": "M9-V2-GATEWAY-DEADLINE",
+  "utc": "2026-10-04T01:25:42.483Z",
+  "configured_override": 110000,
+  "effective_core_timeout_ms": 110000,
+  "driver_absolute_timeout_ms": 115000,
+  "margin_ms": 5000,
+  "state": "PASS",
+  "provider_calls": 0
+}
