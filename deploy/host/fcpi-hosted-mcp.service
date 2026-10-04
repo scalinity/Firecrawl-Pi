@@ -1,0 +1,30 @@
+[Unit]
+Description=Firecrawl Pi Claude MCP-only ingress
+After=network-online.target fcpi-stack.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+DynamicUser=yes
+ExecStart=/usr/bin/python3 -B /opt/firecrawl-pi/services/hosted-mcp/ingress.py /etc/firecrawl-pi/hosted-mcp/claude.json
+Restart=on-failure
+RestartSec=5
+Slice=fcpi.slice
+MemoryMax=64M
+CPUQuota=20%
+TasksMax=16
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_INET
+IPAddressDeny=any
+IPAddressAllow=127.0.0.1
+CapabilityBoundingSet=
+UMask=0077
+LogRateLimitIntervalSec=60
+LogRateLimitBurst=60
+
+[Install]
+WantedBy=multi-user.target

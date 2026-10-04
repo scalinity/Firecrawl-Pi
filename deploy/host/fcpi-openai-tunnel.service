@@ -1,0 +1,32 @@
+[Unit]
+Description=Firecrawl Pi outbound OpenAI Secure MCP Tunnel
+After=network-online.target fcpi-stack.service
+Wants=network-online.target
+ConditionPathExists=/etc/firecrawl-pi/hosted-mcp/openai.yaml
+ConditionPathExists=/etc/firecrawl-pi/hosted-mcp/openai-runtime-key
+
+[Service]
+Type=simple
+DynamicUser=yes
+LoadCredential=runtime-key:/etc/firecrawl-pi/hosted-mcp/openai-runtime-key
+LoadCredential=mcp-auth:/etc/firecrawl-pi/hosted-mcp/openai-mcp-auth
+ExecStart=/opt/fcpi-tunnel/v0.0.15/tunnel-client run --profile-file /etc/firecrawl-pi/hosted-mcp/openai.yaml
+Restart=on-failure
+RestartSec=10
+Slice=fcpi.slice
+MemoryMax=192M
+CPUQuota=30%
+TasksMax=64
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+UMask=0077
+LogRateLimitIntervalSec=60
+LogRateLimitBurst=30
+
+[Install]
+WantedBy=multi-user.target
