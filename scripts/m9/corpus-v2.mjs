@@ -11,8 +11,10 @@ const visibleBody = html => (html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i)?.[1]
   .replace(/<!--[\s\S]*?-->|<(script|style|noscript)\b[^>]*>[\s\S]*?<\/\1>/gi, '')
   .replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 
-export function revisionIntegrity(oldText, text, oldFreeze, freeze, sources) {
+export function revisionIntegrity(oldText, text, oldFreeze, freeze, sources, inspectionText) {
   try {
+    const inspection=JSON.parse(inspectionText);
+    if(digest(inspectionText)!==freeze.source_inspection_sha256 || inspection.observations?.length!==2)return false;
     const old = JSON.parse(oldText), spec = JSON.parse(text);
     if (digest(oldText) !== oldFreeze.sha256 || freeze.prior_sha256 !== oldFreeze.sha256 ||
         spec.prior_sha256 !== oldFreeze.sha256 || digest(text) !== freeze.sha256 ||
@@ -29,6 +31,10 @@ export function revisionIntegrity(oldText, text, oldFreeze, freeze, sources) {
         const { required_text: ignored, ...fixed } = before;
         const { required_text: body, required_title: title, ...same } = after;
         const source = sources[before.id], html = source?.html ?? '', doc = source?.document;
+        const observed=inspection.observations.find(x=>x.id===before.id), initial=source?.initial_document;
+        if(!observed || digest(html)!==observed.source_sha256 || digest(doc?.markdown??'')!==observed.historical_markdown_sha256 ||
+          digest(doc?.rawHtml??'')!==observed.historical_raw_html_sha256 || digest(initial?.markdown??'')!==observed.initial_profile_markdown_sha256 ||
+          digest(initial?.metadata?.title??'')!==observed.initial_profile_title_sha256 || initial?.metadata?.title!==title || !new RegExp(body,'i').test(initial?.markdown??''))return false;
         if (!equal(fixed, same) || typeof body !== 'string' || !body || title !== before.required_text ||
             new RegExp(before.required_text, 'i').test(visibleBody(html)) ||
             html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1] !== title ||

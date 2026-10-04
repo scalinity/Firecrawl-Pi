@@ -17,6 +17,8 @@ function fixture() {
       max_attempts: 3, criteria_sha256: digest(JSON.stringify({ required_text: t.required_text, ...(t.required_title ? { required_title: t.required_title } : {}) })) })) };
   const sources = Object.fromEntries(['P01', 'P02'].map(id => [id, { html: '<html><head><title>Sample identity</title></head><body><p>Complete source purpose statement.</p></body></html>',
     document: { metadata: { title: 'Sample identity' }, markdown: 'Complete source purpose statement.' } }]));
+  for(const s of Object.values(sources)){s.document.rawHtml=s.html;s.initial_document=structuredClone(s.document);}
+  const inspectionText=JSON.stringify({observations:Object.entries(sources).map(([id,s])=>({id,source_sha256:digest(s.html),historical_markdown_sha256:digest(s.document.markdown),historical_raw_html_sha256:digest(s.document.rawHtml),initial_profile_markdown_sha256:digest(s.initial_document.markdown),initial_profile_title_sha256:digest(s.initial_document.metadata.title)}))});freeze.source_inspection_sha256=digest(inspectionText);
   const consent = { source_commit: source, scope: 'M9 acceptance', purpose: 'M9 corpus revision 2', corpus_sha256: freeze.sha256,
     request_plan_authorized:true,request_plan_sha256:freeze.request_plan_sha256,
     opened_at: iso(0), expires_at: iso(2700), llm_micro_usd: 0, new_llm_micro_usd: 0, new_proxy_micro_usd: 40200, new_enhanced_micro_usd: 1270, new_parser_credits: 3 };
@@ -30,9 +32,9 @@ function fixture() {
         json: i === 18 ? { success: false, code: 'BLOCKED_PUBLIC_CONTENT' } : { success: true, data: { markdown: i < 2 ? 'Complete source purpose statement.' : t.required_text,
           metadata: { title: t.required_title ?? 'Synthetic title', scrapeId: 'fresh-' + t.id } } }, correlation: 'UNIQUE_FRESH_ACQUISITION',
         acquisition: { logical_id: 'fresh-' + t.id, url_hmac: digest(t.url).slice(0,32), attempts_used: i === 18 ? 3 : 1, final_strategy: 'direct_http', proxy_bytes: 0, proxy_micro_usd: 0, enhanced_micro_usd: 0 } } })) };
-  return { original, oldText, oldFreeze, spec, text, freeze, sources, consent, window, raw, record: corpusResult(spec, raw) };
+  return { original, oldText, oldFreeze, spec, text, freeze, sources, inspectionText,consent, window, raw, record: corpusResult(spec, raw) };
 }
-const revision = f => revisionIntegrity(f.oldText, f.text, f.oldFreeze, f.freeze, f.sources);
+const revision = f => revisionIntegrity(f.oldText, f.text, f.oldFreeze, f.freeze, f.sources,f.inspectionText);
 const verdict = f => fullRunVerdict(f.spec, f.freeze, f.raw, f.record, f.window);
 const rebuild = f => { f.record = corpusResult(f.spec, f.raw); return f; };
 
@@ -52,6 +54,9 @@ test('source title alone, script-only purpose or missing historical body cannot 
     f => f.sources.P01.document.markdown = '', f => f.sources.P02.document.metadata.title = 'wrong']) {
     const f = fixture(); change(f); assert.equal(revision(f), false);
   }
+});
+test('source, initial profile and historical Markdown hashes bind justification to measured inputs',()=>{
+  for(const change of [f=>f.sources.P01.html+=' ', f=>f.sources.P01.document.markdown+=' ',f=>delete f.sources.P02.initial_document,f=>f.inspectionText+=' ']){const f=fixture();change(f);assert.equal(revision(f),false);}
 });
 test('new body content AND exact metadata identity are required; metadata never replaces body', () => {
   const f = fixture(), t = f.spec.targets[0]; assert.equal(targetResult(t, f.raw.results[0].response).usable, true);

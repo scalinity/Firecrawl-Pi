@@ -17,10 +17,11 @@ const results = prior.results.map(row => ({ ...row, evidence_mode: 'UNCHANGED_IM
 const replace = (id, state, details = {}) => { const row = results.find(x => x.test_id === id); Object.assign(row, { state, ...details }); };
 const freeze = json(base + '/freeze.json'), specText = readFileSync(privateDir + '/corpus.json', 'utf8'), spec = JSON.parse(specText);
 const old = json(homedir() + '/.local/share/firecrawl-pi/m9/live/corpus-final-rechecks.json');
+const initial=json(homedir()+'/.local/share/firecrawl-pi/m9/live/history/20261003-first-real/corpus.json');
 const sources = Object.fromEntries(['P01', 'P02'].map(id => [id, { html: readFileSync(privateDir + '/' + id + '-source.html', 'utf8'),
-  document: old.results.find(r => r.id === id).response.json.data }]));
+  document: old.results.find(r => r.id === id).response.json.data,initial_document:initial.results[Number(id.slice(1))-1].json.data }]));
 const integrity = revisionIntegrity(readFileSync(homedir() + '/.local/share/firecrawl-pi/m9/corpus.json', 'utf8'), specText,
-  json('evidence/M9/work/corpus-freeze.json'), freeze, sources) && freeze.policies.every(x => digest(readFileSync(x.path)) === x.sha256);
+  json('evidence/M9/work/corpus-freeze.json'), freeze, sources,readFileSync(base+'/source-inspection.json','utf8')) && freeze.policies.every(x => digest(readFileSync(x.path)) === x.sha256);
 const gate = json(base + '/review/gate.json');
 const review = gate?.state === 'REMEDIATION_COMPLETE' && gate.criterion_integrity === 'APPROVED_AFTER_REMEDIATION' &&
   gate.review_sha256 === digest(readFileSync(base + '/review/REVIEW.md')) && gate.freeze_sha256 === digest(readFileSync(base + '/freeze.json')) &&

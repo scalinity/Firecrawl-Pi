@@ -26,7 +26,11 @@
       "historical_raw_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
       "body_contains_all_normalized_paragraphs": false,
       "independent_inspection": "DIRECT_HTTPS_SOURCE_READ_NOT_CORPUS_EXECUTION",
-      "provider_spend_usd": 0
+      "provider_spend_usd": 0,
+      "initial_profile_markdown_sha256": "0a080719be9fbb82a86a45b80dc8c2a430fbe17dc93d23758debac092864d00f",
+      "initial_profile_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "initial_profile_body_has_current_purpose": true,
+      "initial_profile": "Original batch: Markdown with default onlyMainContent, matching the new static request profile"
     },
     {
       "id": "P02",
@@ -46,7 +50,11 @@
       "historical_raw_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
       "body_contains_all_normalized_paragraphs": false,
       "independent_inspection": "DIRECT_HTTPS_SOURCE_READ_NOT_CORPUS_EXECUTION",
-      "provider_spend_usd": 0
+      "provider_spend_usd": 0,
+      "initial_profile_markdown_sha256": "0a080719be9fbb82a86a45b80dc8c2a430fbe17dc93d23758debac092864d00f",
+      "initial_profile_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "initial_profile_body_has_current_purpose": true,
+      "initial_profile": "Original batch: Markdown with default onlyMainContent, matching the new static request profile"
     }
   ]
 }

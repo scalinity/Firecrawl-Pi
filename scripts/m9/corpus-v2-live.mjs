@@ -31,9 +31,10 @@ async function main() {
   const oldText = readFileSync(homedir() + '/.local/share/firecrawl-pi/m9/corpus.json', 'utf8');
   const specText = readFileSync(privateDir + '/corpus.json', 'utf8'), spec = JSON.parse(specText), freeze = j(base + '/freeze.json');
   const previous = j(homedir() + '/.local/share/firecrawl-pi/m9/live/corpus-final-rechecks.json');
+  const initial=j(homedir()+'/\.local/share/firecrawl-pi/m9/live/history/20261003-first-real/corpus.json');
   const sources = Object.fromEntries(['P01', 'P02'].map(id => [id, { html: readFileSync(privateDir + '/' + id + '-source.html', 'utf8'),
-    document: previous.results.find(r => r.id === id).response.json.data }]));
-  if (!historicalIntact() || !revisionIntegrity(oldText, specText, j('evidence/M9/work/corpus-freeze.json'), freeze, sources)) throw Error('Historical evidence or justified revision changed');
+    document: previous.results.find(r => r.id === id).response.json.data,initial_document:initial.results[Number(id.slice(1))-1].json.data }]));
+  if (!historicalIntact() || !revisionIntegrity(oldText, specText, j('evidence/M9/work/corpus-freeze.json'), freeze, sources,readFileSync(base+'/source-inspection.json','utf8'))) throw Error('Historical evidence or justified revision changed');
   const manifest = j('deploy/policies/capabilities.json'), plan = requestPlan(spec);
   for (const body of plan) validateBody('scrape', body, manifest);
   if (!freeze.policies.every(x => digest(readFileSync(x.path)) === x.sha256)) throw Error('Frozen provider/routing/security policy changed');
