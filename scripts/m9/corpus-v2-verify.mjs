@@ -14,7 +14,7 @@ const delta = git('diff', '--name-only', prior.source_commit, head, '--', 'servi
 const applicable = history && unchangedImplementation(delta);
 const results = prior.results.map(row => ({ ...row, evidence_mode: 'UNCHANGED_IMPLEMENTATION_REUSE', execution_source: prior.source_commit,
   state: row.test_id === 'M9-CORPUS' ? 'NOT_RUN' : applicable ? row.state : 'FAIL' }));
-const replace = (id, state, details = {}) => { const row = results.find(x => x.test_id === id); Object.assign(row, { state, ...details }); };
+const replace = (id, state, details = {}) => { const row = results.find(x => x.test_id === id); delete row.finding_count; Object.assign(row, { state,evidence_mode:'FRESH_REVISION_2',execution_source:head, ...details }); };
 const freeze = json(base + '/freeze.json'), specText = readFileSync(privateDir + '/corpus.json', 'utf8'), spec = JSON.parse(specText);
 const old = json(homedir() + '/.local/share/firecrawl-pi/m9/live/corpus-final-rechecks.json');
 const initial=json(homedir()+'/.local/share/firecrawl-pi/m9/live/history/20261003-first-real/corpus.json');
