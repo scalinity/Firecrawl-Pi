@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission } from '../../scripts/m9/corpus-v2.mjs';
+import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh } from '../../scripts/m9/corpus-v2.mjs';
 import { ready } from '../../scripts/m9/corpus-v2-live.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 const source = 'a'.repeat(40), iso = n => new Date(Date.parse('2026-10-04T01:00:00Z') + n * 1000).toISOString();
@@ -95,6 +95,11 @@ test('absolute monthly caps may not authorize more than the new incremental owne
   const u = [{category:'proxy',used:17517},{category:'enhanced',used:6350},{category:'parser',used:15}];
   assert.equal(budgetAdmission(c,u),true);
   for (const bad of [[],[...u,u[0]],u.map(r=>({...r,used:r.used-1})),u.map(r=>({...r,used:NaN}))]) assert.equal(budgetAdmission(c,bad),false);
+});
+test('cleanup requires fresh post-close runtime proof and absent validation overlays', () => {
+  const window={closed_utc:iso(20)}, current={utc:iso(21),checks:{validation_absent:true,zero_caps:true,paid:true,cloud:true}};
+  assert.equal(cleanupFresh(current,window),true);
+  for(const bad of [{...current,utc:iso(19)},{...current,utc:'invalid'}, {...current,checks:{...current.checks,validation_absent:false}}, {...current,checks:{...current.checks,paid:false}}]) assert.equal(cleanupFresh(bad,window),false);
 });
 test('frozen request plan and all per-page attempt bounds are checked even for failed rows', () => {
   for (const change of [f => f.raw.results[18].response.acquisition.attempts_used = 4, f => f.raw.results[18].response.acquisition.attempts_used = 0,

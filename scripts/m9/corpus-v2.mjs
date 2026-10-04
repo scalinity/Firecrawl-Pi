@@ -130,6 +130,11 @@ export function cloudContinuity(before, after) {
     count(after, 'cloud_host') === 0 && count(after, 'acquisition') - count(before, 'acquisition') >= 20;
 }
 
+export function cleanupFresh(current, window) {
+  return finiteTime(current?.utc) && finiteTime(window?.closed_utc) && Date.parse(current.utc) > Date.parse(window.closed_utc) &&
+    current.checks?.validation_absent === true && current.checks?.zero_caps === true && current.checks?.paid === true && current.checks?.cloud === true;
+}
+
 export function historicalIntact() {
   const manifest = JSON.parse(readFileSync(base + '/history-preservation.json'));
   const names = execFileSync('git', ['ls-tree', '-r', '--name-only', historyCommit, '--', 'evidence/M9'], { encoding: 'utf8' }).trim().split('\n').sort();

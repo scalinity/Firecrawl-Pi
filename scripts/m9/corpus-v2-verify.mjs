@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
-import { base, digest, historyCommit, historicalIntact, unchangedImplementation, proofPaths, revisionIntegrity, fullRunVerdict, cloudContinuity, budgetAdmission } from './corpus-v2.mjs';
+import { base, digest, historyCommit, historicalIntact, unchangedImplementation, proofPaths, revisionIntegrity, fullRunVerdict, cloudContinuity, budgetAdmission, cleanupFresh } from './corpus-v2.mjs';
 import { codeDirty } from './collection.mjs';
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const json = path => existsSync(path) ? JSON.parse(readFileSync(path)) : null;
@@ -32,8 +32,9 @@ const fixtures = tests?.source_commit === head && tests.exit_code === 0 && tests
   tests.files.every(x => x.sha256 === digest(readFileSync(x.path)));
 replace('M9-RESOURCE-EVALUATOR-TESTS', fixtures ? 'PASS' : 'NOT_RUN', { current_fixture_record: base + '/fixtures.json' });
 const current = json(base + '/current/versions.json');
-replace('M9-CURRENT', current?.source_commit === head && Object.keys(current.checks ?? {}).length >= 16 && Object.values(current.checks).every(x => x === true) ? 'PASS' : 'NOT_RUN', { current_version_record: base + '/current/versions.json' });
 const raw = json(privateDir + '/run.json'), record = json(base + '/corpus.json'), window = json(base + '/live-window.json');
+replace('M9-CURRENT', current?.source_commit === head && Object.keys(current.checks ?? {}).length >= 17 && Object.values(current.checks).every(x => x === true) &&
+  (!raw || cleanupFresh(current, window)) ? 'PASS' : 'NOT_RUN', { current_version_record: base + '/current/versions.json' });
 const sameExecution = source => typeof source === 'string' && /^[0-9a-f]{40}$/.test(source) &&
   git('diff', '--name-only', source, head, '--', 'services', 'deploy', 'scripts', 'tests', 'patches') === '';
 const corpus = raw && sameExecution(raw.source_commit) && raw.before?.clean === true && raw.after?.clean === true &&
@@ -57,7 +58,7 @@ if (raw?.ledger_before && raw.ledger_after && window?.consent) {
   }
   budget &&= costs.openai_micro_usd === 0 && costs.decodo_micro_usd <= window.consent.new_proxy_micro_usd &&
     costs.zyte_micro_usd <= window.consent.new_enhanced_micro_usd && costs.parser_free_credits <= window.consent.new_parser_credits &&
-    current?.checks.zero_caps === true && current?.checks.paid === true && current?.checks.cloud === true;
+    cleanupFresh(current, window);
 }
 results.push({ test_id: 'M9-V2-HISTORY', state: history ? 'PASS' : 'FAIL', immutable_commit: historyCommit, files: 905 });
 results.push({ test_id: 'M9-V2-REVISION', state: integrity ? 'PASS' : 'FAIL' });
