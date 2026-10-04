@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m9-corpus-premise-decision/v1",
   "utc": "2026-10-04T00:28:57.311Z",
-  "state": "PROPOSED_PENDING_INDEPENDENT_REVIEW",
+  "state": "REVIEWED_EXECUTION_HELD_PENDING_FRESH_OWNER_CONSENT",
   "historical_run": "IMMUTABLE_17_OF_20_FAIL",
   "new_results": "NOT_RUN",
   "denominator": 20,
@@ -33,7 +33,7 @@
       "observed_condition": "CRITERION_NOT_SATISFIABLE_BY_OBSERVED_SOURCE",
       "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended",
       "classification_limit": "INCORRECT_TEST_FORMULATION is the owner-required category for a check that cannot measure correct current-source retrieval. It does not assert original author error or prove that the source changed after freeze; historical source drift is also possible.",
-      "outcome_determinative": "The correction affects exactly the two original failing assertions; a fresh result could change the count, but no old result is rescored and new result is NOT_RUN."
+      "outcome_determinative": "Under the observed P01/P02 source and a still-failing P19, the old assertions permit at most17/20, below18required. This correction can be acceptance-determinative. Both preserved P01/P02 documents meet the replacement body/title assertions, but no historical result is rescored; only a fresh complete20-run can establish a new score."
     },
     {
       "id": "P02",
@@ -60,7 +60,7 @@
       "observed_condition": "CRITERION_NOT_SATISFIABLE_BY_OBSERVED_SOURCE",
       "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended",
       "classification_limit": "INCORRECT_TEST_FORMULATION is the owner-required category for a check that cannot measure correct current-source retrieval. It does not assert original author error or prove that the source changed after freeze; historical source drift is also possible.",
-      "outcome_determinative": "The correction affects exactly the two original failing assertions; a fresh result could change the count, but no old result is rescored and new result is NOT_RUN."
+      "outcome_determinative": "Under the observed P01/P02 source and a still-failing P19, the old assertions permit at most17/20, below18required. This correction can be acceptance-determinative. Both preserved P01/P02 documents meet the replacement body/title assertions, but no historical result is rescored; only a fresh complete20-run can establish a new score."
     }
   ],
   "request_profile": {
