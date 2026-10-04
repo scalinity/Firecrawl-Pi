@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths } from '../../scripts/m9/corpus-v2.mjs';
+import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent } from '../../scripts/m9/corpus-v2.mjs';
 import { ready } from '../../scripts/m9/corpus-v2-live.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 const source = 'a'.repeat(40), iso = n => new Date(Date.parse('2026-10-04T01:00:00Z') + n * 1000).toISOString();
@@ -91,6 +91,12 @@ test('failed requests cannot borrow an unrelated fresh acquisition with a differ
   for (const change of [f => f.raw.results[18].response.acquisition.url_hmac = 'f'.repeat(32), f => delete f.raw.results[18].expected_url_hmac]) {
     const f = fixture(); change(f); rebuild(f); assert.equal(verdict(f), false);
   }
+});
+test('driver correlation handles concurrent other targets and rejects ambiguity or duplicate log events',()=>{
+  const expected='a'.repeat(32),mine={logical_id:'mine',url_hmac:expected},other={logical_id:'other',url_hmac:'b'.repeat(32)};
+  assert.equal(correlationId(null,[mine,other],expected),'mine');assert.equal(correlationId('mine',[mine,other],expected),'mine');
+  assert.equal(correlationId(null,[mine,{...mine,logical_id:'second'}],expected),null);assert.equal(correlationId('wrong',[mine],expected),null);
+  assert.equal(correlationEvent('mine',[mine,other],expected),mine);assert.equal(correlationEvent('mine',[mine,mine],expected),null);assert.equal(correlationEvent('mine',[other],expected),null);
 });
 test('actual log-scan format binds both zero-Cloud counts to the same running container', () => {
   const scan = (id, count, cloud=0) => `container=${id} started_at=${iso(0)}\nlines=50 acquisition=${count} cloud_host=${cloud}\n`;

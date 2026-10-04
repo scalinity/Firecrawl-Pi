@@ -151,6 +151,16 @@ export function fixturesComplete(record,text,head,hashFile=path=>digest(readFile
     fixturePaths.every(path=>record.files.some(x=>x.path===path)) && record.files.every(x=>x.sha256===hashFile(x.path));
 }
 
+export function correlationId(supplied,fresh,expected) {
+  if(!/^[0-9a-f]{32}$/.test(expected??'') || !Array.isArray(fresh))return null;
+  const matches=fresh.filter(x=>x.url_hmac===expected && (!supplied || x.logical_id===supplied));
+  return matches.length===1 ? matches[0].logical_id : null;
+}
+export function correlationEvent(id,events,expected) {
+  const matches=events.filter(x=>x.logical_id===id && x.url_hmac===expected);
+  return id && matches.length===1 ? matches[0] : null;
+}
+
 export function historicalIntact() {
   const manifest = JSON.parse(readFileSync(base + '/history-preservation.json'));
   const names = execFileSync('git', ['ls-tree', '-r', '--name-only', historyCommit, '--', 'evidence/M9'], { encoding: 'utf8' }).trim().split('\n').sort();

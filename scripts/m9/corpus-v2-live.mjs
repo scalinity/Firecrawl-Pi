@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { request } from 'node:https';
 import { homedir } from 'node:os';
-import { base, digest, historicalIntact, revisionIntegrity, requestPlan, corpusResult, proofPaths, budgetAdmission } from './corpus-v2.mjs';
+import { base, digest, historicalIntact, revisionIntegrity, requestPlan, corpusResult, proofPaths, budgetAdmission,correlationId,correlationEvent } from './corpus-v2.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 import { codeDirty } from './collection.mjs';
 import { sourceObservation } from './source-observation.mjs';
@@ -61,7 +61,8 @@ async function main() {
   if (!origin) throw Error('Private authenticated TLS origin absent');
   const token = execFileSync('security', ['find-generic-password', '-a', 'fcpi', '-s', 'fcpi mcp codex', '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   const sql = text => pi('sudo -n docker exec -i fcpi-nuq-postgres-1 psql -U postgres -d postgres -At -q -X -v ON_ERROR_STOP=1', text);
-  const acquisitionIds = () => sql('SELECT logical_id FROM fcpi_retrieval.acquisition ORDER BY logical_id;').trim().split('\n').filter(Boolean);
+  const acquisitionRows = () => JSON.parse(sql("SELECT coalesce(json_agg(r),'[]') FROM (SELECT logical_id,url_hmac FROM fcpi_retrieval.acquisition ORDER BY logical_id) r;"));
+  const acquisitionIds = () => acquisitionRows().map(x=>x.logical_id);
   const ledger = () => JSON.parse(sql("SELECT coalesce(json_agg(r ORDER BY r.call_key),'[]') FROM (SELECT call_key, logical_id, category, provider, unit, reserved, actual, state, usage FROM fcpi_retrieval.budget_reservation WHERE provider IN ('openai','decodo','zyte','llamaparse')) r;"));
   const monthUsage = () => JSON.parse(sql("SELECT coalesce(json_agg(r),'[]') FROM (SELECT category, (reserved+settled)::float8 AS used FROM fcpi_retrieval.budget_usage WHERE period='month' AND period_start=date_trunc('month',now() AT TIME ZONE 'UTC')::date) r;"));
   const usageBefore = monthUsage();
@@ -97,18 +98,18 @@ async function main() {
     try { item.response = await call(item.request); } catch (e) { item.dispatch_error = e.message; save(); throw Error('Recorded request incomplete; do not restart this revision batch'); }
     save();
     const response = item.response, supplied = response.json?.data?.metadata?.scrapeId;
-    const fresh = acquisitionIds().filter(id => !seen.has(id));
-    const id = supplied && fresh.includes(supplied) ? supplied : !supplied && fresh.length === 1 ? fresh[0] : null;
+    const fresh = acquisitionRows().filter(row => !seen.has(row.logical_id));
+    const id = correlationId(supplied,fresh,item.expected_url_hmac);
     if (id) {
       for (let poll = 0; poll < 5; poll++) {
         if (poll) await new Promise(r => setTimeout(r, 2000));
         const since = new Date(Date.parse(response.started_utc) - 120000).toISOString();
         const events = pi(`sudo -n docker logs --since '${since}' fcpi-retrieval-service-1 2>/dev/null | jq -Rc 'fromjson? | select(.event=="acquisition" and .purpose=="page") | {logical_id,url_hmac,attempts_used,initial_strategy,final_strategy,strategies,failure,proxy_bytes,proxy_micro_usd,enhanced_micro_usd,ms}'`).trim().split('\n').filter(Boolean).map(x => JSON.parse(x));
-        const matched = events.filter(x => x.logical_id === id && x.url_hmac === item.expected_url_hmac);
-        if (matched.length === 1) { response.acquisition = matched[0]; response.correlation = 'UNIQUE_FRESH_ACQUISITION'; break; }
+        const matched = correlationEvent(id,events,item.expected_url_hmac);
+        if (matched) { response.acquisition = matched; response.correlation = 'UNIQUE_FRESH_ACQUISITION'; break; }
       }
     }
-    fresh.forEach(id => seen.add(id)); save();
+    fresh.forEach(row => seen.add(row.logical_id)); save();
     console.log(JSON.stringify({ id: item.id, status: response.status, correlated: !!response.acquisition }));
     await new Promise(r => setTimeout(r, 1200));
   }
