@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent } from '../../scripts/m9/corpus-v2.mjs';
+import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent,normalizationProof } from '../../scripts/m9/corpus-v2.mjs';
 import { ready } from '../../scripts/m9/corpus-v2-live.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 const source = 'a'.repeat(40), iso = n => new Date(Date.parse('2026-10-04T01:00:00Z') + n * 1000).toISOString();
@@ -32,6 +32,7 @@ function fixture() {
         json: i === 18 ? { success: false, code: 'BLOCKED_PUBLIC_CONTENT' } : { success: true, data: { markdown: i < 2 ? 'Complete source purpose statement.' : t.required_text,
           metadata: { title: t.required_title ?? 'Synthetic title', scrapeId: 'fresh-' + t.id } } }, correlation: 'UNIQUE_FRESH_ACQUISITION',
         acquisition: { logical_id: 'fresh-' + t.id, url_hmac: digest(t.url).slice(0,32), attempts_used: i === 18 ? 3 : 1, final_strategy: 'direct_http', proxy_bytes: 0, proxy_micro_usd: 0, enhanced_micro_usd: 0 } } })) };
+  raw.normalization_preflight={ids:spec.targets.map(t=>'prior-'+t.id),bindings:spec.targets.map(t=>digest(t.url).slice(0,32)),stored:spec.targets.map(t=>({logical_id:'prior-'+t.id,url_hmac:digest(t.url).slice(0,32)}))};
   return { original, oldText, oldFreeze, spec, text, freeze, sources, inspectionText,consent, window, raw, record: corpusResult(spec, raw) };
 }
 const revision = f => revisionIntegrity(f.oldText, f.text, f.oldFreeze, f.freeze, f.sources,f.inspectionText);
@@ -97,6 +98,10 @@ test('driver correlation handles concurrent other targets and rejects ambiguity 
   assert.equal(correlationId(null,[mine,other],expected),'mine');assert.equal(correlationId('mine',[mine,other],expected),'mine');
   assert.equal(correlationId(null,[mine,{...mine,logical_id:'second'}],expected),null);assert.equal(correlationId('wrong',[mine],expected),null);
   assert.equal(correlationEvent('mine',[mine,other],expected),mine);assert.equal(correlationEvent('mine',[mine,mine],expected),null);assert.equal(correlationEvent('mine',[other],expected),null);
+});
+test('zero-cost normalization proof requires all20 original IDs bound to the actual target hashes',()=>{
+  const p=fixture().raw.normalization_preflight;assert.equal(normalizationProof(p.ids,p.bindings,p.stored),true);
+  for(const change of [x=>x.ids.pop(),x=>x.bindings[0]='f'.repeat(32),x=>x.stored.pop(),x=>x.ids[0]=x.ids[1]]){const x=structuredClone(p);change(x);assert.equal(normalizationProof(x.ids,x.bindings,x.stored),false);}
 });
 test('actual log-scan format binds both zero-Cloud counts to the same running container', () => {
   const scan = (id, count, cloud=0) => `container=${id} started_at=${iso(0)}\nlines=50 acquisition=${count} cloud_host=${cloud}\n`;

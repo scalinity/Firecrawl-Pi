@@ -85,6 +85,7 @@ export function corpusResult(spec, raw) {
 
 export function fullRunVerdict(spec, freeze, raw, record, window) {
   try {
+    if(!normalizationProof(raw.normalization_preflight?.ids,raw.normalization_preflight?.bindings,raw.normalization_preflight?.stored))return false;
     if (freeze.minimum_usable !== 18 || freeze.count !== 20 || raw.revision !== 2 || raw.corpus_sha256 !== freeze.sha256 ||
         window?.state !== 'CLOSED' || window.purpose !== 'M9 corpus revision 2' || window.corpus_sha256 !== freeze.sha256 ||
         window.source_commit !== raw.source_commit || window.consent?.source_commit !== raw.source_commit ||
@@ -110,6 +111,7 @@ export function fullRunVerdict(spec, freeze, raw, record, window) {
           !/^[0-9a-f-]{36}$/.test(response.gateway_request_id ?? '') || gateways.has(response.gateway_request_id) ||
           !id || seen.has(id) || raw.acquisitions_before.includes(id) || response.correlation !== 'UNIQUE_FRESH_ACQUISITION' ||
           !/^[0-9a-f]{32}$/.test(item.expected_url_hmac ?? '') || response.acquisition.url_hmac !== item.expected_url_hmac ||
+          item.expected_url_hmac!==raw.normalization_preflight.bindings[i] ||
           !Number.isInteger(response.acquisition.attempts_used) || response.acquisition.attempts_used < 1 || response.acquisition.attempts_used > 3 ||
           (response.status === 200 && response.json?.data?.metadata?.scrapeId !== id)) return false;
       seen.add(id); gateways.add(response.gateway_request_id); previous = Date.parse(response.completed_utc);
@@ -159,6 +161,13 @@ export function correlationId(supplied,fresh,expected) {
 export function correlationEvent(id,events,expected) {
   const matches=events.filter(x=>x.logical_id===id && x.url_hmac===expected);
   return id && matches.length===1 ? matches[0] : null;
+}
+
+export function normalizationProof(ids,bindings,stored) {
+  return ids?.length===20 && bindings?.length===20 && new Set(ids).size===20 && ids.every((id,i)=>{
+    const rows=stored.filter(x=>x.logical_id===id);
+    return /^[0-9a-f]{32}$/.test(bindings[i]??'') && rows.length===1 && rows[0].url_hmac===bindings[i];
+  });
 }
 
 export function historicalIntact() {

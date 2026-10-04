@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { request } from 'node:https';
 import { homedir } from 'node:os';
-import { base, digest, historicalIntact, revisionIntegrity, requestPlan, corpusResult, proofPaths, budgetAdmission,correlationId,correlationEvent } from './corpus-v2.mjs';
+import { base, digest, historicalIntact, revisionIntegrity, requestPlan, corpusResult, proofPaths, budgetAdmission,correlationId,correlationEvent,normalizationProof } from './corpus-v2.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 import { codeDirty } from './collection.mjs';
 import { sourceObservation } from './source-observation.mjs';
@@ -71,10 +71,13 @@ async function main() {
   const oracle = 'import {readFileSync} from "node:fs"; import {createHmac} from "node:crypto"; const secret=readFileSync("/run/secrets/retrieval_browser_token","utf8").trim(); const key=createHmac("sha256",secret).update("fcpi.retrieval.url-hmac.v1").digest(); console.log(JSON.stringify(JSON.parse(readFileSync(0,"utf8")).map(url=>createHmac("sha256",key).update(url).digest("hex").slice(0,32))));';
   const bindings = JSON.parse(pi("sudo -n docker exec -i fcpi-retrieval-service-1 node --input-type=module -e '" + oracle + "'", JSON.stringify(spec.targets.map(t => t.url))));
   if (bindings.length !== 20 || bindings.some(x => !/^[0-9a-f]{32}$/.test(x))) throw Error('Exact target bindings unavailable');
+  const priorIds=initial.results.map(r=>r.acquisition?.logical_id??r.json?.data?.metadata?.scrapeId);
+  const stored=acquisitionRows();
+  if(!normalizationProof(priorIds,bindings,stored))throw Error('Zero-cost historical URL-normalization preflight failed');
   const audit = () => pi('sudo -n bash /opt/firecrawl-pi/scripts/m7/pi-retrieval-log-scan.sh');
   const raw = { revision: 2, source_commit: head, corpus_sha256: freeze.sha256, consent_sha256: window.consent_sha256,
     started_utc: new Date().toISOString(), before, status_before: statusBefore, acquisitions_before: acquisitionIds(),
-    ledger_before: ledger(), month_usage_before: usageBefore, cloud_before: audit(), results: [] };
+    ledger_before: ledger(), month_usage_before: usageBefore, normalization_preflight:{ids:priorIds,bindings,stored:stored.filter(r=>priorIds.includes(r.logical_id))},cloud_before: audit(), results: [] };
   const privatePath = privateDir + '/run.json'; mkdirSync(privateDir, { recursive: true, mode: 0o700 });
   writeFileSync(privatePath, JSON.stringify(raw), { mode: 0o600, flag: 'wx' });
   const save = () => writeFileSync(privatePath, JSON.stringify(raw), { mode: 0o600 });
