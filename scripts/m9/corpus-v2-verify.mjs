@@ -5,7 +5,7 @@ import { execFileSync, spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
 import { base, digest, historyCommit, historicalIntact, unchangedImplementation, proofPaths, revisionIntegrity, fullRunVerdict, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete } from './corpus-v2.mjs';
 import { codeDirty } from './collection.mjs';
-const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+const git = (...args) => {const text=execFileSync('git',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']});return args.includes('-z')?text:text.trim();};
 const json = path => existsSync(path) ? JSON.parse(readFileSync(path)) : null;
 const head = git('rev-parse', 'HEAD'), privateDir = homedir() + '/.local/share/firecrawl-pi/m9/corpus-v2';
 function sameExecution(source) {

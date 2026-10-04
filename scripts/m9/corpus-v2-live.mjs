@@ -27,7 +27,7 @@ export const dispatchFits=(consent,now)=>Number.isFinite(Date.parse(consent?.exp
 async function main() {
   const privateDir = homedir() + '/.local/share/firecrawl-pi/m9/corpus-v2';
   const j = p => JSON.parse(readFileSync(p));
-  const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
+  const git = (...args) => {const text=execFileSync('git',args,{encoding:'utf8',stdio:['ignore','pipe','pipe']});return args.includes('-z')?text:text.trim();};
   const conf = Object.fromEntries(readFileSync('scripts/m1/pi-target.conf', 'utf8').split('\n').filter(x => /^PI_\w+=/.test(x))
     .map(x => [x.slice(0, x.indexOf('=')), x.slice(x.indexOf('=') + 1).replace('$HOME', homedir())]));
   const pi = (cmd, input) => execFileSync('ssh', ['-i', conf.PI_SSH_KEY, '-o', 'IdentitiesOnly=yes', '-o', 'BatchMode=yes', conf.PI_SSH_TARGET, cmd],

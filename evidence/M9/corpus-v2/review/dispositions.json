@@ -175,6 +175,11 @@
       "disposition": "FIXED",
       "commit": "da24186",
       "reason": "Preserve actual fixture/current execution SHA across documentation/evidence-only checkpoints; exact services/deploy/scripts/tests/patches diff must be empty. No source retagging."
+    },
+    {
+      "id": "R28",
+      "disposition": "PENDING",
+      "reason": "Verifier/direct driver helper trims leading spaces from NUL-delimited Git porcelain, so evidence-only edits can be misclassified as dirty code. Actual pending runner observed40/43PASS but code_dirty=true."
     }
   ],
   "remaining_owner_inputs": [
