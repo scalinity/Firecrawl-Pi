@@ -20,6 +20,10 @@ class Refusal(Exception):
         self.status = status
 
 
+class CallerGone(Exception):
+    pass
+
+
 class Ingress:
     def __init__(self, config):
         if set(config) != {"host", "token_sha256"}:
@@ -40,7 +44,8 @@ class Ingress:
         writer.write(f"HTTP/1.1 {status} Refused\r\n".encode() + retry +
                      b"Content-Type: application/json\r\nConnection: close\r\n" +
                      f"Content-Length: {len(body)}\r\n\r\n".encode() + body)
-        await writer.drain()
+        async with asyncio.timeout(5):
+            await writer.drain()
 
     def bad_auth(self):
         now = time.monotonic()
@@ -54,6 +59,9 @@ class Ingress:
         sent = False
         admitted = False
         status = 503
+        forward_task = None
+        watch_task = None
+        outcome = "refused"
         self.connections += 1
         try:
             if self.connections > 8:
@@ -105,7 +113,8 @@ class Ingress:
                 self.active += 1
                 admitted = True
                 body = await reader.readexactly(length)
-            async with asyncio.timeout(130):
+            async def forward_response():
+                nonlocal upstream, sent, status, outcome
                 ur, upstream = await asyncio.open_connection("127.0.0.1", 3380, limit=HEADER_BYTES)
                 forward = {k: v for k, v in headers.items()
                            if k in FORWARD or re.fullmatch(r"mcp-param-[a-z0-9-]{1,64}", k)}
@@ -129,9 +138,23 @@ class Ingress:
                         break
                     size += len(chunk)
                     if size > RESPONSE_BYTES:
+                        outcome = "response_too_large"
                         break
                     writer.write(chunk)
                     await writer.drain()
+                if outcome != "response_too_large":
+                    outcome = "completed"
+            forward_task = asyncio.create_task(forward_response())
+            watch_task = asyncio.create_task(reader.read(1))
+            async with asyncio.timeout(130):
+                done, _ = await asyncio.wait({forward_task, watch_task}, return_when=asyncio.FIRST_COMPLETED)
+                if watch_task in done:
+                    if watch_task.result():
+                        raise Refusal(400)
+                    raise CallerGone()
+                await forward_task
+        except CallerGone:
+            status, outcome = 499, "cancelled"
         except Refusal as exc:
             status = exc.status
             if not sent:
@@ -144,6 +167,10 @@ class Ingress:
                 except OSError:
                     pass
         finally:
+            for task in (forward_task, watch_task):
+                if task is not None:
+                    task.cancel()
+            await asyncio.gather(*(task for task in (forward_task, watch_task) if task is not None), return_exceptions=True)
             if admitted:
                 self.active -= 1
             self.connections -= 1
@@ -151,7 +178,7 @@ class Ingress:
                 upstream.close()
             writer.close()
             print(json.dumps({"utc": datetime.now(timezone.utc).isoformat(),
-                              "service": "hosted-mcp-ingress", "status": status}), flush=True)
+                              "service": "hosted-mcp-ingress", "status": status, "outcome": outcome}), flush=True)
 
 
 async def main():

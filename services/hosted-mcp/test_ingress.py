@@ -37,7 +37,6 @@ class Tests(unittest.IsolatedAsyncioTestCase):
         header.update(headers or {})
         data = f'{method} {path} HTTP/1.1\r\n' + ''.join(f'{k}: {v}\r\n' for k, v in header.items()) + '\r\n'
         source.feed_data(data.encode() + body)
-        source.feed_eof()
         reply = Writer()
         upstream_reader = asyncio.StreamReader()
         upstream_reader.feed_data(response)
@@ -102,6 +101,24 @@ class Tests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(reply.data.startswith(b'HTTP/1.1 503'))
         connect.assert_not_called()
         self.assertEqual(self.ingress.active, 2)
+
+    async def test_disconnect_closes_upstream_before_headers_and_between_sse(self):
+        for response in (b'', b'HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\r\ndata: progress\n\n'):
+            source = asyncio.StreamReader()
+            source.feed_data(f'POST /mcp HTTP/1.1\r\nHost: {HOST}\r\nAuthorization: Bearer {TOKEN}\r\nContent-Length: 2\r\n\r\n{{}}'.encode())
+            upstream_reader = asyncio.StreamReader()
+            if response:
+                upstream_reader.feed_data(response)
+            upstream = Writer()
+            with patch.object(module.asyncio, 'open_connection', AsyncMock(return_value=(upstream_reader, upstream))):
+                task = asyncio.create_task(self.ingress.handle(source, Writer()))
+                while not upstream.data:
+                    await asyncio.sleep(0)
+                source.feed_eof()
+                await asyncio.wait_for(task, 1)
+            self.assertTrue(upstream.closed)
+            self.assertEqual(self.ingress.active, 0)
+            self.assertEqual(self.ingress.connections, 0)
 
 
 if __name__ == '__main__':
