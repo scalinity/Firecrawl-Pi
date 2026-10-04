@@ -16,8 +16,8 @@
       "new_assertion": "HTTP success AND the complete current English documentation-purpose sentence in Markdown body AND the exact expected identity in canonical metadata.title",
       "new_required_text_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
       "new_required_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
-      "intended_capability": "Correct ordinary static-page content and identity, with body and title/metadata handled as separate normalized document fields (SPEC 31.1 and AC03)",
-      "intent_authority": "Original row page_class=static plus canonical static-content/metadata assertions; no preserved instruction or pre-freeze source establishes a title-to-body insertion requirement",
+      "intended_capability": "Canonical static-page content plus separate title/metadata (SPEC31.1/AC03); inference about current capability, not evidence of original author intent",
+      "intent_authority": "Current canonical capability and observed source; chronological cause and original author intent unknown",
       "source_evidence": {
         "independent_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
         "historical_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
@@ -26,9 +26,14 @@
         "real_body_returned": true
       },
       "why_not_retrieval_failure": "The expected title is returned in metadata and the current visible source purpose text is present in returned Markdown; missing title duplication does not demonstrate lost body content",
-      "why_not_easier": "Metadata alone cannot pass. The replacement still requires nonempty actual body content, now a longer source-backed body assertion, and additionally requires exact metadata title. Wrong title, empty body, title-only body or missing source-purpose content all fail.",
+      "why_not_easier": "The expected title cannot substitute for Markdown. A source-backed complete body sentence and exact metadata title are both required. Empty body, identity-only Markdown, wrong metadata or absent purpose text fail. The old check demanded text absent from the actual source body, so it measured an unsatisfiable premise rather than correct current retrieval.",
       "source_change_since_freeze": "UNKNOWN; no pre-freeze HTML was retained. Do not label this as a proven later source change.",
-      "language_variant": "The independent HTTPS response is English-only (577 bytes), while the historical browser HTML includes translations (2373 bytes). Both place identity in title and contain the same English body-purpose sentence."
+      "language_variant": "The independent HTTPS response is English-only (577 bytes), while the historical browser HTML includes translations (2373 bytes). Both place identity in title and contain the same English body-purpose sentence.",
+      "classification_basis": "CURRENT_SOURCE_FORMULATION_ONLY",
+      "observed_condition": "CRITERION_NOT_SATISFIABLE_BY_OBSERVED_SOURCE",
+      "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended",
+      "classification_limit": "INCORRECT_TEST_FORMULATION is the owner-required category for a check that cannot measure correct current-source retrieval. It does not assert original author error or prove that the source changed after freeze; historical source drift is also possible.",
+      "outcome_determinative": "The correction affects exactly the two original failing assertions; a fresh result could change the count, but no old result is rescored and new result is NOT_RUN."
     },
     {
       "id": "P02",
@@ -38,8 +43,8 @@
       "new_assertion": "HTTP success AND the complete current English documentation-purpose sentence in Markdown body AND the exact expected identity in canonical metadata.title",
       "new_required_text_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
       "new_required_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
-      "intended_capability": "Correct ordinary static-page content and identity, with body and title/metadata handled as separate normalized document fields (SPEC 31.1 and AC03)",
-      "intent_authority": "Original row page_class=static plus canonical static-content/metadata assertions; no preserved instruction or pre-freeze source establishes a title-to-body insertion requirement",
+      "intended_capability": "Canonical static-page content plus separate title/metadata (SPEC31.1/AC03); inference about current capability, not evidence of original author intent",
+      "intent_authority": "Current canonical capability and observed source; chronological cause and original author intent unknown",
       "source_evidence": {
         "independent_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
         "historical_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
@@ -48,9 +53,14 @@
         "real_body_returned": true
       },
       "why_not_retrieval_failure": "The expected title is returned in metadata and the current visible source purpose text is present in returned Markdown; missing title duplication does not demonstrate lost body content",
-      "why_not_easier": "Metadata alone cannot pass. The replacement still requires nonempty actual body content, now a longer source-backed body assertion, and additionally requires exact metadata title. Wrong title, empty body, title-only body or missing source-purpose content all fail.",
+      "why_not_easier": "The expected title cannot substitute for Markdown. A source-backed complete body sentence and exact metadata title are both required. Empty body, identity-only Markdown, wrong metadata or absent purpose text fail. The old check demanded text absent from the actual source body, so it measured an unsatisfiable premise rather than correct current retrieval.",
       "source_change_since_freeze": "UNKNOWN; no pre-freeze HTML was retained. Do not label this as a proven later source change.",
-      "language_variant": "The independent HTTPS response is English-only (577 bytes), while the historical browser HTML includes translations (2373 bytes). Both place identity in title and contain the same English body-purpose sentence."
+      "language_variant": "The independent HTTPS response is English-only (577 bytes), while the historical browser HTML includes translations (2373 bytes). Both place identity in title and contain the same English body-purpose sentence.",
+      "classification_basis": "CURRENT_SOURCE_FORMULATION_ONLY",
+      "observed_condition": "CRITERION_NOT_SATISFIABLE_BY_OBSERVED_SOURCE",
+      "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended",
+      "classification_limit": "INCORRECT_TEST_FORMULATION is the owner-required category for a check that cannot measure correct current-source retrieval. It does not assert original author error or prove that the source changed after freeze; historical source drift is also possible.",
+      "outcome_determinative": "The correction affects exactly the two original failing assertions; a fresh result could change the count, but no old result is rescored and new result is NOT_RUN."
     }
   ],
   "request_profile": {
