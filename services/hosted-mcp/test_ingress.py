@@ -9,7 +9,7 @@ spec = importlib.util.spec_from_file_location('ingress', Path(__file__).with_nam
 module = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(module)
 TOKEN = 'synthetic-hosted-fixture-' + 'a' * 64
-HOST = 'fixture.example.ts.net:10000'
+HOST = 'fixture.example.ts.net:443'
 
 
 class Writer:
@@ -62,13 +62,19 @@ class Tests(unittest.IsolatedAsyncioTestCase):
         connect.assert_awaited_once()
 
     async def test_host_and_framing_limits(self):
-        for headers, status in [({'Host': 'evil.test'}, 421), ({'Content-Length': '1048577'}, 413),
+        for headers, status in [({'Host': 'evil.test'}, 421), ({'Host': HOST.replace(':443', ':8443')}, 421), ({'Content-Length': '1048577'}, 413),
                                 ({'Transfer-Encoding': 'chunked'}, 400), ({'Expect': '100-continue'}, 400),
                                 ({'authorization': 'Bearer '+TOKEN}, 400), ({'Content-Length': '-1'}, 400),
                                 ({'X-Huge': 'a'*16384}, 431)]:
             reply, _, connect = await self.request(headers=headers)
             self.assertTrue(reply.data.startswith(f'HTTP/1.1 {status}'.encode()))
             connect.assert_not_called()
+
+    async def test_both_default_https_authorities(self):
+        for host in [HOST, HOST.removesuffix(':443')]:
+            reply, _, connect = await self.request(headers={'Host': host})
+            self.assertTrue(reply.data.startswith(b'HTTP/1.1 200'))
+            connect.assert_awaited_once()
 
     async def test_fixed_upstream_identity_stripping_and_modern_headers(self):
         reply, upstream, connect = await self.request(headers={'X-Fcpi-Principal': 'owner', 'X-Forwarded-Host': 'evil',

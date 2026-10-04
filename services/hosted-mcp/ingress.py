@@ -28,8 +28,8 @@ class Ingress:
     def __init__(self, config):
         if set(config) != {"host", "token_sha256"}:
             raise ValueError("invalid ingress configuration")
-        if not re.fullmatch(r"[a-z0-9.-]+\.ts\.net:10000", config["host"]):
-            raise ValueError("expected dedicated Funnel host on port 10000")
+        if not re.fullmatch(r"[a-z0-9.-]+\.ts\.net:443", config["host"]):
+            raise ValueError("expected dedicated Funnel host on port 443")
         if not re.fullmatch(r"[0-9a-f]{64}", config["token_sha256"]):
             raise ValueError("expected dedicated token digest")
         self.config = config
@@ -92,7 +92,7 @@ class Ingress:
                     if name in headers or re.search(r"[\x00-\x1f\x7f]", value):
                         raise Refusal(400)
                     headers[name] = value
-                if headers.get("host", "").lower() != self.config["host"]:
+                if headers.get("host", "").lower() not in {self.config["host"], self.config["host"].removesuffix(":443")}:
                     raise Refusal(421)
                 token = re.fullmatch(r"Bearer ([\x21-\x7e]{16,512})", headers.get("authorization", ""))
                 digest = hashlib.sha256((token[1] if token else "invalid").encode()).hexdigest()

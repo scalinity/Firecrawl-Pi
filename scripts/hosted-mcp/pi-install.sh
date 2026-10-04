@@ -15,14 +15,21 @@ for pair in 'chatgpttunnel chatgpt-tunnel' 'clauderemote claude-remote'; do
   fi
 done
 python3 -B - <<'PY'
-import hashlib,json,os,pathlib,subprocess
+import hashlib,json,os,pathlib,subprocess,tempfile
 p=pathlib.Path('/etc/firecrawl-pi/hosted-mcp')
 state=json.loads(subprocess.check_output(['tailscale','status','--json']))
-host=state['Self']['DNSName'].rstrip('.')+':10000'
+host=state['Self']['DNSName'].rstrip('.')+':443'
 token=pathlib.Path('/etc/firecrawl-pi/secrets/clients/clauderemote.token').read_text().strip()
 cfg={'host':host,'token_sha256':hashlib.sha256(token.encode()).hexdigest()}
 target=p/'claude.json'
-if target.exists() and json.loads(target.read_text())!=cfg: raise SystemExit('existing Claude configuration differs')
+if target.exists() and json.loads(target.read_text())!=cfg:
+    previous=json.loads(target.read_text())
+    expected_previous={**cfg,'host':host.removesuffix(':443')+':10000'}
+    if previous!=expected_previous: raise SystemExit('existing Claude configuration differs')
+    with tempfile.NamedTemporaryFile(mode='w',dir=p,delete=False) as f:
+        json.dump(cfg,f);f.write('\n');f.flush();os.fsync(f.fileno())
+        staged=f.name
+    os.chmod(staged,0o644);os.replace(staged,target)
 if not target.exists():
     with target.open('x') as f: json.dump(cfg,f); f.write('\n')
     os.chmod(target,0o644)
