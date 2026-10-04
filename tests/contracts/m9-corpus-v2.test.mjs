@@ -38,6 +38,10 @@ function fixture() {
 const revision = f => revisionIntegrity(f.oldText, f.text, f.oldFreeze, f.freeze, f.sources,f.inspectionText);
 const verdict = f => fullRunVerdict(f.spec, f.freeze, f.raw, f.record, f.window);
 const rebuild = f => { f.record = corpusResult(f.spec, f.raw); return f; };
+function refreshInspection(f){
+  f.inspectionText=JSON.stringify({observations:Object.entries(f.sources).map(([id,s])=>({id,source_sha256:digest(s.html),historical_markdown_sha256:digest(s.document.markdown),historical_raw_html_sha256:digest(s.document.rawHtml),initial_profile_markdown_sha256:digest(s.initial_document.markdown),initial_profile_title_sha256:digest(s.initial_document.metadata.title)}))});
+  f.freeze.source_inspection_sha256=digest(f.inspectionText);
+}
 
 test('revision requires independent visible body and correctly separated title for both cases', () => assert.equal(revision(fixture()), true));
 test('18 other rows, P19, threshold and attempts cannot change', () => {
@@ -47,13 +51,18 @@ test('18 other rows, P19, threshold and attempts cannot change', () => {
   }
 });
 test('identity text already present in the source body disproves the premise correction', () => {
-  for (const id of ['P01', 'P02']) { const f = fixture(); f.sources[id].html = f.sources[id].html.replace('<p>', '<p>Sample identity '); assert.equal(revision(f), false); }
+  for (const id of ['P01', 'P02']) { const f = fixture(); f.sources[id].html = f.sources[id].html.replace('<p>', '<p>Sample identity ');refreshInspection(f); assert.equal(revision(f), false); }
 });
 test('source title alone, script-only purpose or missing historical body cannot justify correction', () => {
   for (const change of [f => f.sources.P01.html = '<title>Sample identity</title><body></body>',
     f => f.sources.P02.html = '<title>Sample identity</title><body><script>Complete source purpose statement.</script></body>',
     f => f.sources.P01.document.markdown = '', f => f.sources.P02.document.metadata.title = 'wrong']) {
-    const f = fixture(); change(f); assert.equal(revision(f), false);
+    const f = fixture(); change(f);refreshInspection(f); assert.equal(revision(f), false);
+  }
+});
+test('matching historical rawHTML hash cannot hide a real lost-body identity regression',()=>{
+  for(const change of [h=>h.replace('<p>','<p>Sample identity '),h=>h.replace('Complete source purpose statement.','unrelated content'),h=>h.replace('<title>Sample identity','<title>Wrong identity')]){
+    const f=fixture();f.sources.P01.document.rawHtml=change(f.sources.P01.document.rawHtml);refreshInspection(f);assert.equal(revision(f),false);
   }
 });
 test('source, initial profile and historical Markdown hashes bind justification to measured inputs',()=>{
