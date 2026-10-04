@@ -15,7 +15,7 @@ export function ready({ consent, window, head, deployed, dirty, reviewed, now })
     window.corpus_sha256 === consent.corpus_sha256 && window.consent_sha256 === digest(JSON.stringify(consent)) &&
     consent.request_plan_authorized === true && /^[0-9a-f]{64}$/.test(consent.request_plan_sha256 ?? '') && window.request_plan_sha256 === consent.request_plan_sha256 &&
     window.started_utc === consent.opened_at && window.expires_at === consent.expires_at &&
-    Number.isFinite(start) && Number.isFinite(end) && start <= now && now < end && end > start && end - start <= 2700000 &&
+    Number.isFinite(start) && Number.isFinite(end) && start <= now && end-now>=2520000 && end > start && end - start <= 2700000 &&
     consent.new_llm_micro_usd === 0 && consent.llm_micro_usd === 0 && consent.new_parser_credits <= 3 &&
     ['new_proxy_micro_usd', 'new_enhanced_micro_usd', 'new_parser_credits'].every(k => Number.isSafeInteger(consent[k]) && consent[k] >= 0);
 }
@@ -84,7 +84,7 @@ async function main() {
   const call = body => new Promise((resolve, reject) => {
     const started = Date.now(), data = Buffer.from(JSON.stringify(body)), left = Date.parse(consent.expires_at) - started;
     if (left <= 0) return reject(Error('Fresh owner window expired before dispatch'));
-    const req = request(origin + '/v2/scrape', { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', 'content-length': data.length }, timeout: Math.min(130000, left) }, res => {
+    const req = request(origin + '/v2/scrape', { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json', 'content-length': data.length }, timeout: Math.min(115000, left) }, res => {
       const parts = []; let bytes = 0;
       res.on('data', b => { bytes += b.length; if (bytes > 64 * 1048576) req.destroy(Error('Response exceeds bound')); else parts.push(b); });
       res.on('error', () => reject(Error('Gateway response failed')));

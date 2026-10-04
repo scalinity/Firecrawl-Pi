@@ -150,6 +150,7 @@ test('driver requires fresh, exact reviewed/deployed authorization with zero mod
   for (const change of [{ deployed: 'b'.repeat(40) }, { dirty: true }, { reviewed: false }, { now: Date.parse(iso(2700)) }, { window: f.window },
     { consent: { ...f.consent, new_llm_micro_usd: 1 } }, { consent: { ...f.consent, new_parser_credits: 6 } }]) assert.equal(ready({ ...args, ...change }), false);
   assert.equal(ready({...args,consent:{...f.consent,request_plan_authorized:false}}),false);
+  assert.equal(ready({...args,now:Date.parse(iso(181))}),false);
 });
 test('old gate applicability allows only the exact revision proof files, never runtime/security/routing changes', () => {
   assert.equal(unchangedImplementation(['scripts/m9/corpus-v2.mjs']), true);
