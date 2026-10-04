@@ -30,7 +30,10 @@
       "initial_profile_markdown_sha256": "0a080719be9fbb82a86a45b80dc8c2a430fbe17dc93d23758debac092864d00f",
       "initial_profile_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
       "initial_profile_body_has_current_purpose": true,
-      "initial_profile": "Original batch: Markdown with default onlyMainContent, matching the new static request profile"
+      "initial_profile": "Original batch: Markdown with default onlyMainContent, matching the new static request profile",
+      "historical_raw_html_body_has_old_phrase": false,
+      "historical_raw_html_body_has_current_purpose": true,
+      "historical_raw_html_title": "Example Domain"
     },
     {
       "id": "P02",
@@ -54,7 +57,10 @@
       "initial_profile_markdown_sha256": "0a080719be9fbb82a86a45b80dc8c2a430fbe17dc93d23758debac092864d00f",
       "initial_profile_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
       "initial_profile_body_has_current_purpose": true,
-      "initial_profile": "Original batch: Markdown with default onlyMainContent, matching the new static request profile"
+      "initial_profile": "Original batch: Markdown with default onlyMainContent, matching the new static request profile",
+      "historical_raw_html_body_has_old_phrase": false,
+      "historical_raw_html_body_has_current_purpose": true,
+      "historical_raw_html_title": "Example Domain"
     }
   ]
 }

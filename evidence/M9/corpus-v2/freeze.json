@@ -10,7 +10,7 @@
   "required_rate": 0.9,
   "max_attempts": 3,
   "classification": "INCORRECT_TEST_FORMULATION",
-  "source_inspection_sha256": "99d8e08fd9e4a9357b3dada11bffcc2646d54fb170a2a3adb555d6edec5fd5a0",
+  "source_inspection_sha256": "f7431fddfe3685826fa268418eea9c18bf064e5573883bd190784d2d64f48812",
   "routing_policy_unchanged": true,
   "policies": [
     {
@@ -179,5 +179,6 @@
   "private_storage": "owner-only versioned corpus; exact URLs and body criteria excluded from Git",
   "measurements_at_freeze": 0,
   "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
-  "request_plan_requires_explicit_owner_authorization": true
+  "request_plan_requires_explicit_owner_authorization": true,
+  "classification_basis": "CURRENT_SOURCE_FORMULATION_ONLY"
 }

@@ -39,17 +39,35 @@ Two fresh native claude-opus-5-5 reviewers independently found the body-plus-tit
 [x] ❌ Request Changes. Saved before /address. Findings must be resolved and independently checked before requesting a spending grant.
 
 ### Dispositions
-- R01: PENDING
-- R02: PENDING
-- R03: PENDING
-- R04: PENDING
-- R05: PENDING
-- R06: PENDING
-- R07: PENDING
-- R08: PENDING
-- R09: PENDING
-- R10: PENDING
-- R11: PENDING
-- R12: PENDING
-- R13: PENDING
-- R14: PENDING
+- R01: FIXED — 086428f; Fresh post-close collection and runtime validation-overlay absence, with negative fixtures.
+- R02: FIXED — 3ebdc9e; Frozen request_plan_sha256; live driver refuses without explicit owner authorization of recovered JS caller options.
+- R03: FIXED — 68b86dd; Owner-required classification enum retained with CURRENT_SOURCE_FORMULATION_ONLY, neutral observed condition and author/source-history UNKNOWN; correction is not a historical-author claim.
+- R04: FIXED — 1f2da4f; Source/old rawHTML/Markdown and matching initial request-profile hashes all pinned; tamper fixtures.
+- R05: FIXED — c2b1df8; Exact3suite argv/file hashes/counts required; final49-test minimum in11d5ce5.
+- R06: FIXED — cb9f598; Fresh receipt and exact target binding select amid concurrent other targets; duplicate/ambiguous log fixtures.
+- R07: FIXED — bbb6ca6; Before dispatch compare all20 oracle HMACs to stored historical acquisition hashes; actual zero-provider preflightPASS.
+- R08: FIXED — 11d5ce5; Requires≥42minutes remaining; each request has115s absolute deadline bounded by grant expiry. Proposed20×145s admission floor exceeds45minutes and cannot be granted; slow all-timeout batch remainsFAIL, not a guaranteed finish.
+- R09: FIXED — 8bdb360; Fresh gates carry FRESH_REVISION_2 and their execution source; stale finding_count removed.
+- R10: REJECTED; No defect: both real P01/P02 criteria are literal-regex equivalents, including escaped trailing period. Hash-backed criterion-literal-proof.jsonPASS.
+- R11: FIXED — 614cd55; Recovered successes report null terminal failure; real failures retained.
+- R12: FIXED — 80399bb; UTC-month-crossing windows refused by readiness and acceptance.
+- R13: FIXED — 10b296a; Public complete-run record includes request-plan and per-request hashes.
+- R14: FIXED — bc7a733; Source/cleanup/fixture/admission/correlation/history mutation cases tested;49affectedtestsPASS.
+
+Remediation is committed and all49 affected fixture tests pass. Independent remediation confirmation is pending. The new corpus and provider execution remain NOT_RUN.
+
+### Independent remediation confirmation
+Both native Opus5.5 reviewers confirm the qualified owner-required classification and most remediations. Additional direct evidence/test gaps were found; no grant is requested while they remain. Original reports: DEBUGGER-REMEDIATION.md and AUDITOR-REMEDIATION.md.
+
+- R15 (Critical): PENDING — Historical rawHTML body must independently disprove a real Markdown regression.
+- R16 (Critical): PENDING — Semantic fixture mutations must preserve their hash bindings.
+- R17 (Warning): PENDING — Bind qualified premise decision to review gate.
+- R18 (Warning): PENDING — Disclose acceptance-determinative effect plainly.
+- R19 (Suggestion): PENDING — Refuse dispatch without deadline and cleanup margin.
+- R20 (Suggestion): PENDING — Repeat readable JS caller options in consent.
+- R21 (Warning): PENDING — Consistent canonical UTC timestamp validation.
+- R22 (Suggestion): PENDING — Filter correlation DB reads to target/old receipt IDs.
+- R23 (Warning): PENDING — Historical30-day preflight and October budget have bounded applicability.
+- R24 (Warning): PENDING — Verify deployed gateway timeout before spending.
+- R25 (Suggestion): PENDING — Request hashes are guess-confirmable, not URL secrecy.
+- R26 (Suggestion): PENDING — Concurrent same-target clients may safely block correlation.

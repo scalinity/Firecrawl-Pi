@@ -35,6 +35,9 @@ export function revisionIntegrity(oldText, text, oldFreeze, freeze, sources, ins
         if(!observed || digest(html)!==observed.source_sha256 || digest(doc?.markdown??'')!==observed.historical_markdown_sha256 ||
           digest(doc?.rawHtml??'')!==observed.historical_raw_html_sha256 || digest(initial?.markdown??'')!==observed.initial_profile_markdown_sha256 ||
           digest(initial?.metadata?.title??'')!==observed.initial_profile_title_sha256 || initial?.metadata?.title!==title || !new RegExp(body,'i').test(initial?.markdown??''))return false;
+        const returnedBody=visibleBody(doc.rawHtml);
+        if(new RegExp(before.required_text,'i').test(returnedBody) || !new RegExp(body,'i').test(returnedBody) ||
+          doc.rawHtml.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]!==title)return false;
         if (!equal(fixed, same) || typeof body !== 'string' || !body || title !== before.required_text ||
             new RegExp(before.required_text, 'i').test(visibleBody(html)) ||
             html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1] !== title ||

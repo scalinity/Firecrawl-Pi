@@ -1,0 +1,179 @@
+{
+  "utc": "2026-10-04T01:15:23.429Z",
+  "workflow": "Equivalent /address after REVIEW.md exists; each code fix locally committed; no push authorized",
+  "findings": [
+    {
+      "id": "R01",
+      "disposition": "FIXED",
+      "commit": "086428f",
+      "reason": "Fresh post-close collection and runtime validation-overlay absence, with negative fixtures"
+    },
+    {
+      "id": "R02",
+      "disposition": "FIXED",
+      "commit": "3ebdc9e",
+      "reason": "Frozen request_plan_sha256; live driver refuses without explicit owner authorization of recovered JS caller options"
+    },
+    {
+      "id": "R03",
+      "disposition": "FIXED",
+      "commit": "68b86dd",
+      "reason": "Owner-required classification enum retained with CURRENT_SOURCE_FORMULATION_ONLY, neutral observed condition and author/source-history UNKNOWN; correction is not a historical-author claim"
+    },
+    {
+      "id": "R04",
+      "disposition": "FIXED",
+      "commit": "1f2da4f",
+      "reason": "Source/old rawHTML/Markdown and matching initial request-profile hashes all pinned; tamper fixtures"
+    },
+    {
+      "id": "R05",
+      "disposition": "FIXED",
+      "commit": "c2b1df8",
+      "reason": "Exact3suite argv/file hashes/counts required; final49-test minimum in11d5ce5"
+    },
+    {
+      "id": "R06",
+      "disposition": "FIXED",
+      "commit": "cb9f598",
+      "reason": "Fresh receipt and exact target binding select amid concurrent other targets; duplicate/ambiguous log fixtures"
+    },
+    {
+      "id": "R07",
+      "disposition": "FIXED",
+      "commit": "bbb6ca6",
+      "reason": "Before dispatch compare all20 oracle HMACs to stored historical acquisition hashes; actual zero-provider preflightPASS"
+    },
+    {
+      "id": "R08",
+      "disposition": "FIXED",
+      "commit": "11d5ce5",
+      "reason": "Requires≥42minutes remaining; each request has115s absolute deadline bounded by grant expiry. Proposed20×145s admission floor exceeds45minutes and cannot be granted; slow all-timeout batch remainsFAIL, not a guaranteed finish"
+    },
+    {
+      "id": "R09",
+      "disposition": "FIXED",
+      "commit": "8bdb360",
+      "reason": "Fresh gates carry FRESH_REVISION_2 and their execution source; stale finding_count removed"
+    },
+    {
+      "id": "R10",
+      "disposition": "REJECTED",
+      "commit": null,
+      "reason": "No defect: both real P01/P02 criteria are literal-regex equivalents, including escaped trailing period. Hash-backed criterion-literal-proof.jsonPASS"
+    },
+    {
+      "id": "R11",
+      "disposition": "FIXED",
+      "commit": "614cd55",
+      "reason": "Recovered successes report null terminal failure; real failures retained"
+    },
+    {
+      "id": "R12",
+      "disposition": "FIXED",
+      "commit": "80399bb",
+      "reason": "UTC-month-crossing windows refused by readiness and acceptance"
+    },
+    {
+      "id": "R13",
+      "disposition": "FIXED",
+      "commit": "10b296a",
+      "reason": "Public complete-run record includes request-plan and per-request hashes"
+    },
+    {
+      "id": "R14",
+      "disposition": "FIXED",
+      "commit": "bc7a733",
+      "reason": "Source/cleanup/fixture/admission/correlation/history mutation cases tested;49affectedtestsPASS"
+    },
+    {
+      "id": "R15",
+      "severity": "Critical",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Historical rawHTML body must independently disprove a real Markdown regression"
+    },
+    {
+      "id": "R16",
+      "severity": "Critical",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Semantic fixture mutations must preserve their hash bindings"
+    },
+    {
+      "id": "R17",
+      "severity": "Warning",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Bind qualified premise decision to review gate"
+    },
+    {
+      "id": "R18",
+      "severity": "Warning",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Disclose acceptance-determinative effect plainly"
+    },
+    {
+      "id": "R19",
+      "severity": "Suggestion",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Refuse dispatch without deadline and cleanup margin"
+    },
+    {
+      "id": "R20",
+      "severity": "Suggestion",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Repeat readable JS caller options in consent"
+    },
+    {
+      "id": "R21",
+      "severity": "Warning",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Consistent canonical UTC timestamp validation"
+    },
+    {
+      "id": "R22",
+      "severity": "Suggestion",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Filter correlation DB reads to target/old receipt IDs"
+    },
+    {
+      "id": "R23",
+      "severity": "Warning",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Historical30-day preflight and October budget have bounded applicability"
+    },
+    {
+      "id": "R24",
+      "severity": "Warning",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Verify deployed gateway timeout before spending"
+    },
+    {
+      "id": "R25",
+      "severity": "Suggestion",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Request hashes are guess-confirmable, not URL secrecy"
+    },
+    {
+      "id": "R26",
+      "severity": "Suggestion",
+      "disposition": "PENDING",
+      "commit": null,
+      "reason": "Concurrent same-target clients may safely block correlation"
+    }
+  ],
+  "remaining_owner_inputs": [
+    "Fresh exact paid/free-credit grant",
+    "Explicit authorization of frozen existing P07/P08 browser wait caller options"
+  ],
+  "new_corpus": "NOT_RUN"
+}
