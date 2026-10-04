@@ -1,0 +1,43 @@
+{
+  "utc": "2026-10-03T16:36:53.237Z",
+  "source_commit": "3ebf4f52bb4152072e4c1618aa122ea19b9465ef",
+  "owning_milestone": "M2",
+  "review": "review/REVIEW.md",
+  "changes": [
+    {
+      "finding": "M9-REG-12",
+      "commit": "4a305dc"
+    },
+    {
+      "finding": "response/request mismatch",
+      "commit": "f4cbae8"
+    },
+    {
+      "finding": "correlation disclosure",
+      "commit": "31668e6"
+    },
+    {
+      "finding": "integration/verifier coverage",
+      "commit": "503752d"
+    },
+    {
+      "finding": "M9-M2-LOG-01",
+      "commit": "2a990db"
+    },
+    {
+      "finding": "M9-M2-NAV-01",
+      "commit": "3ebf4f5"
+    }
+  ],
+  "fixture_tests": {
+    "state": "PASS",
+    "count": 60,
+    "failed": 0,
+    "skipped": 0,
+    "raw": "work/M2-REG12-postload-fixtures.txt",
+    "sha256": "a35c33d4b856bd9062d5625ccf7258b94a251ef16f472d49a84dcf52c1adff63"
+  },
+  "actual_browser_tests": "NOT_RUN until committed native images are deployed",
+  "patch_sha256": "8dceb0019a115465d5613b46c13a958fecb4c0bd2c51256b7636c611f139439b",
+  "original_failure_preserved": true
+}

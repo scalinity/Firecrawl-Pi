@@ -1,0 +1,25 @@
+{
+  "utc": "2026-10-03T18:37:27.778Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "scope": "Preparation only; no cache mutation or paid window open",
+  "reason": "Fresh required LlamaParse gates must make new submissions; changing the URL query does not bypass the owner/bytes/parser cache.",
+  "inputs": [
+    {
+      "name": "scan.pdf",
+      "bytes_sha256": "97cfc0ee94f2d4a2031c81e69e671b5b58f20d2a45e0679460c5309ddc0e6a69",
+      "max_pages": 2
+    },
+    {
+      "name": "table.pdf",
+      "bytes_sha256": "75c176b03cca3a6e53d0a2de16fd8dbbc284476dcadd176e44c69e4303bea02a",
+      "max_pages": 2
+    }
+  ],
+  "plan": "At the authorized window, preserve privately and invalidate only the two controlled document cache rows for the M5 test principal and selected LlamaParse parser; retain all prior provider reservations/evidence. The scan_cached control then proves no extra submission.",
+  "parser_credit_ceiling": {
+    "new": 14,
+    "cumulative": 20,
+    "pre_m9": 6,
+    "paid_usd": 0
+  }
+}

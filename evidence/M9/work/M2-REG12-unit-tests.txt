@@ -1,0 +1,34 @@
+✔ a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4) (816.4705ms)
+✔ downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1) (1258.868042ms)
+✔ a download's final URL is one a response header can carry (review finding S10) (1.195625ms)
+✔ a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2) (301.7525ms)
+✔ the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target (654.693083ms)
+✔ a pacing wait leaves no abort listener behind on the caller's signal (review finding S7) (24.83425ms)
+✔ a database error while the browser attempt is paced still frees every permit and hold (review finding W3) (3.75575ms)
+✔ a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6) (2.59375ms)
+▶ browser-first redirects retain authoritative private/Cloud proxy refusals
+  ✔ http://10.231.1.5:6379/ (0.481708ms)
+  ✔ http://169.254.169.254/latest/meta-data/ (0.3055ms)
+  ✔ http://127.0.0.1:3002/ (0.187667ms)
+  ✔ http://[::ffff:a00:105]/ (0.753667ms)
+  ✔ http://redis:6379/ (0.363959ms)
+  ✔ http://45.33.20.9/ (0.136125ms)
+  ✔ http://100.100.100.100/ (0.115625ms)
+  ✔ https://127.0.0.1/ (0.082959ms)
+  ✔ https://api.firecrawl.dev/v1/scrape (0.06775ms)
+✔ browser-first redirects retain authoritative private/Cloud proxy refusals (3.446834ms)
+✔ public browser redirects remain usable with unrelated denied subresources (0.387833ms)
+✔ page text, unmatched refusals and cancellation do not invent a navigation policy failure (0.353334ms)
+✔ a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE (2.633125ms)
+✔ a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser (1018.05325ms)
+✔ a pacing refusal is the attempt's recorded outcome and reaches no target (0.655792ms)
+✔ a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5) (0.307833ms)
+✔ requests are validated and bodies decoded by their declared charset (0.54275ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4211.722667

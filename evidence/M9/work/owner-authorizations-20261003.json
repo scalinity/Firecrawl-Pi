@@ -1,0 +1,101 @@
+{
+  "schema": "fcpi.m9-owner-authorization/v1",
+  "recorded_utc": "2026-10-03T15:48:09.038Z",
+  "provenance": "Fresh direct owner message in current Run Firecrawl M9 chat on 2026-10-03",
+  "source_at_authorization": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+  "provider_grant": {
+    "state": "CLOSED",
+    "duration_minutes": 45,
+    "starts": "Intentional enablement after independent fixtures and review/remediation",
+    "expires": "45 minutes or completion of required work, whichever is earlier",
+    "llm_micro_usd": 20000,
+    "model": "gpt-6-luna",
+    "proxy_micro_usd": 100000,
+    "proxy_provider": "decodo",
+    "enhanced_micro_usd": 100000,
+    "enhanced_provider": "zyte",
+    "total_paid_micro_usd": 220000,
+    "parser_new_free_credits": 14,
+    "parser_total_free_credits": 20,
+    "parser_paid_micro_usd": 0,
+    "max_attempts_per_page": 3,
+    "max_pages_per_submission": 2,
+    "purposes": [
+      "Required fresh M5-M7 live gates",
+      "Frozen twenty-target M9 corpus",
+      "Representative M9 research flow"
+    ],
+    "excluded": [
+      "purchases",
+      "reloads",
+      "plan upgrades",
+      "new subscriptions",
+      "alternate providers",
+      "account spending-limit increases",
+      "normal production paid operation",
+      "Firecrawl Cloud"
+    ],
+    "cleanup": [
+      "paid dispatch false",
+      "zero provider caps",
+      "reservation reconciliation",
+      "usage/cost evidence"
+    ],
+    "window_record": "evidence/M9/work/live-window.json",
+    "closed_utc": "2026-10-03T21:15:36.974Z",
+    "required_work_complete": false,
+    "failure_record": "evidence/M9/work/live-driver-failure-20261003/INTERPRETATION.json"
+  },
+  "m2_remediation": {
+    "state": "AUTHORIZED",
+    "finding": "M9-REG-12",
+    "scope": "Canonical failure propagation for already-blocked browser-first redirects only",
+    "private_class": "SSRF_DENIED",
+    "cloud_class": "CLOUD_DENIED",
+    "security_invariant": "Forbidden redirects remain blocked; no policy/routing/retry/sandbox changes",
+    "verification": [
+      "preserve original failed evidence",
+      "focused negative and positive controls",
+      "affected M2 tests and M9 checks"
+    ]
+  },
+  "additional_m2_host_logging": {
+    "authorized": true,
+    "utc": "2026-10-03T16:31:03.858Z",
+    "provenance": "Direct owner response to current-session scope question: Authorize the host-only logging fix",
+    "scope": "Minimum host-only refusal logging and focused tests; no changes to blocking, routing, retries, providers or browser behavior",
+    "owning_milestone": "M2"
+  },
+  "additional_m2_error_page_guard": {
+    "authorized": true,
+    "utc": "2026-10-03T17:15:38.516Z",
+    "provenance": "Direct owner response in current chat: Authorize this minimal failure guard",
+    "scope": "Minimal nonretryable NAVIGATION_FAILED fallback for a committed Chrome error page after existing policy/provider/error classifications; focused tests; no new retries or routing",
+    "owning_milestone": "M2",
+    "preserved_failure": "work/M2-preexisting-direct-postload-probe.txt"
+  },
+  "provider_retry_grant": {
+    "state": "CLOSED",
+    "provenance": "Direct owner reply in current chat 2026-10-03: Authorize this bounded retry",
+    "duration_seconds": 2700,
+    "purposes": [
+      "Frozen twenty-target M9 corpus",
+      "Representative M9 research flow"
+    ],
+    "new_caps": {
+      "llm_micro_usd": 19830,
+      "proxy_micro_usd": 91252,
+      "enhanced_micro_usd": 97460,
+      "total_micro_usd": 208542,
+      "parser_new_free_credits": 8,
+      "parser_project_cumulative_free_credits": 20,
+      "parser_paid_micro_usd": 0
+    },
+    "cumulative_m9_paid_micro_usd": 220000,
+    "attempts_per_page": 3,
+    "pages_per_parser_submission": 2,
+    "cleanup": "Restore paid false and provider caps zero; retain conservative uncertain outcome; no later execution",
+    "window_record": "evidence/M9/work/live-window.json",
+    "closed_utc": "2026-10-03T21:46:48.146Z"
+  }
+}

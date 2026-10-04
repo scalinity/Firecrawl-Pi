@@ -1,0 +1,420 @@
+{
+  "schema": "fcpi.m9-resource-applicability/v1",
+  "utc": "2026-10-03T20:37:48.316Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "accepted_baseline": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+  "owner_instruction": "Reuse accepted M8 AC16 unless runtime changes materially invalidate its resource/stability assumptions; no duplicate 24-hour soak without exact four-part justification.",
+  "historical_inputs": [
+    {
+      "path": "evidence/M8/verification.json",
+      "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642"
+    },
+    {
+      "path": "evidence/M8/raw/soak.txt",
+      "sha256": "85971bcf6f4095b65a31945f41c80e0c098547c716597571f0237deebbbc2d92"
+    },
+    {
+      "path": "evidence/M8/raw/redis-soak.txt",
+      "sha256": "d7f41a463ed89f91cfbce12824b30c2c896fcf81cb9f1b1849f64d95078934ae"
+    },
+    {
+      "path": "evidence/M8/INTERPRETATION.md",
+      "sha256": "8b380d655c7f7b836bebc7e0c42d0406dc4c7b2b775aedcf210425441ce55a1e"
+    }
+  ],
+  "changed_runtime_paths": [
+    "deploy/browser/Dockerfile",
+    "deploy/compose.yaml",
+    "deploy/host/fcpi-incident.service",
+    "deploy/host/fcpi-incident.timer",
+    "deploy/policies/budget.json",
+    "deploy/versions.lock.json",
+    "scripts/m9/incident-actions.mjs",
+    "scripts/m9/incident-agent.sh",
+    "scripts/m9/incident-apply.sh",
+    "scripts/m9/incident-auth.sh",
+    "scripts/m9/incident-control.sh",
+    "scripts/m9/incident-harvest.sh",
+    "scripts/m9/incident-hook.sh",
+    "scripts/m9/incident-input.sh",
+    "scripts/m9/incident-live.mjs",
+    "scripts/m9/incident-notice-actions.sh",
+    "scripts/m9/incident-paths.sh",
+    "scripts/m9/incident-pin.mjs",
+    "scripts/m9/incident-prepare.sh",
+    "scripts/m9/incident-tests.sh",
+    "scripts/m9/incident-verify.mjs",
+    "scripts/ops/backup.sh",
+    "scripts/ops/lib.sh",
+    "scripts/ops/notify-ntfy.sh",
+    "scripts/ops/redis-cli.sh",
+    "scripts/ops/restore.jq",
+    "scripts/ops/status.sh",
+    "scripts/ops/tick.sh",
+    "scripts/ops/verify.sh",
+    "services/access/server.mjs",
+    "services/access/src/config.mjs",
+    "services/access/src/incidents.mjs",
+    "services/access/test/config.test.mjs",
+    "services/access/test/incidents.test.mjs",
+    "services/browser/src/server.mjs",
+    "services/retrieval/Dockerfile",
+    "services/retrieval/src/acquire.mjs",
+    "services/retrieval/src/budget.mjs",
+    "services/retrieval/src/enhanced.mjs",
+    "services/retrieval/src/extract.mjs",
+    "services/retrieval/src/parse.mjs",
+    "services/retrieval/src/provider.mjs",
+    "services/retrieval/src/proxy.mjs",
+    "services/retrieval/src/residential.mjs",
+    "services/retrieval/src/server.mjs",
+    "services/retrieval/test/acquire.test.mjs",
+    "services/retrieval/test/m5-budget.test.mjs",
+    "services/retrieval/test/m5-extract.test.mjs",
+    "services/retrieval/test/m5-parse.test.mjs",
+    "services/retrieval/test/m6-residential.test.mjs",
+    "services/retrieval/test/m7-enhanced.test.mjs",
+    "services/retrieval/test/provider-lease.test.mjs",
+    "services/retrieval/test/proxy.test.mjs"
+  ],
+  "assessment": [
+    {
+      "component": "Firecrawl API/NuQ/Postgres/Redis/RabbitMQ/SearXNG/MCP",
+      "decision": "Unchanged core binaries, data-service versions, concurrency, queue topology, memory/swap caps and storage tuning. Existing long-duration measurements remain relevant."
+    },
+    {
+      "component": "retrieval-service",
+      "decision": "Provider accounting bounded in PRE-M9; M9 adds only refusal correlation, host-only logging and error classification. No new acquisition strategy, queue, retry or browser permit. Unit, live Chromium fixture and provider isolation tests are current."
+    },
+    {
+      "component": "browser-worker",
+      "decision": "Main-frame request listeners record only latest target and tunnel failure; existing context/page/task lifecycle and caps unchanged. Chromium and package lock unchanged. Current denial/positive controls and process-cleanup/failure injection verify behavior."
+    },
+    {
+      "component": "access-gateway",
+      "decision": "Adds fixed, bounded signed incident-action paths and mounts. Existing ordinary paths and cgroup160MiB preserved. Current authentication, replay/expiry, native clients and 77 access fixtures cover changed behavior."
+    },
+    {
+      "component": "incident agent",
+      "decision": "New subscription CLI runs only in a separately bounded768MiB/330s unit, no swap, one investigation; timer256MiB. Accepted minimum host reserve4822MiB is ample for this bound, but concurrent actual resource evidence is required before inheritance is accepted."
+    }
+  ],
+  "targeted_plan": "One 30-minute controlled mixed fixture resource run at unchanged concurrency; fresh bounded incident invocation during that window; current fault/reboot/heap/backup/restore/rollback results; fresh Redis commandstats with zero denials. Preserve and recompute historical 24-hour evidence without retagging it.",
+  "state": "VALID_FOR_M9",
+  "duplicate_24h_soak": "NOT_SCHEDULED",
+  "soak_execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+  "accepted_verification_source": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+  "accepted_repository_baseline": "55d756c5fb12fc5e741ab4145c47a7d7fdee1237",
+  "runtime_delta_paths": [
+    "services",
+    "deploy",
+    "patches",
+    "scripts/ops",
+    ":(glob)scripts/m9/incident-*"
+  ],
+  "runtime_delta_sha256": "c5cb74316b7ab6ad792b27078e2ddfd374c5f8abf6e4d74650a28e137f85b47d",
+  "historical_recomputed": {
+    "utc": "2026-10-03T19:50:27.128Z",
+    "path": "evidence/M9/resource-baseline/verification.json",
+    "checks": [
+      "M8-S01",
+      "M8-S02",
+      "M8-S04",
+      "M8-O04"
+    ],
+    "state": "PASS",
+    "note": "Recomputed unchanged historical bytes using current verifier; not a new execution or a current-source24h run."
+  },
+  "baseline_recomputation": {
+    "checks": [
+      {
+        "test_id": "M8-O04",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M8-S01",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M8-S02",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M8-S04",
+        "state": "PASS"
+      }
+    ],
+    "execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b"
+  },
+  "disposition": "REUSE_WITH_TARGETED_REGRESSION",
+  "material_invalidation": false,
+  "path_assessments": [
+    {
+      "path": "deploy/browser/Dockerfile",
+      "material_invalidation": false,
+      "reason": "Pinned dependency install adds --no-audit only; package lock, native architecture, user and resource limits unchanged. Current immutable build digest is pinned and measured."
+    },
+    {
+      "path": "deploy/compose.yaml",
+      "material_invalidation": false,
+      "reason": "Exactly five reviewed fixed incident env/mount additions on existing gateway; strict compose comparison proves every resource cap, worker count, network and unchanged image identical to accepted M8."
+    },
+    {
+      "path": "deploy/host/fcpi-incident.service",
+      "material_invalidation": false,
+      "reason": "Incident timer/controller limited to 256 MiB/50% CPU; investigations are separately capped and serialized. No change to existing service concurrency or slice ceiling."
+    },
+    {
+      "path": "deploy/host/fcpi-incident.timer",
+      "material_invalidation": false,
+      "reason": "Incident timer/controller limited to 256 MiB/50% CPU; investigations are separately capped and serialized. No change to existing service concurrency or slice ceiling."
+    },
+    {
+      "path": "deploy/policies/budget.json",
+      "material_invalidation": false,
+      "reason": "PRE-M9 cost cards/free-credit accounting preserve hard zero-paid default; atomic reservations and monthly+total caps add no workload or concurrency."
+    },
+    {
+      "path": "deploy/versions.lock.json",
+      "material_invalidation": false,
+      "reason": "Immutable ARM64 retrieval/browser/gateway repins only; core/data/MCP/SearXNG/Chromium versions unchanged. Actual source/image checks, current regression and targeted resource measurement bind these exact images."
+    },
+    {
+      "path": "scripts/m9/incident-actions.mjs",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-agent.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-apply.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-auth.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-control.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-harvest.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-hook.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-input.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-live.mjs",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-notice-actions.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-paths.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-pin.mjs",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-prepare.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-tests.sh",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/m9/incident-verify.mjs",
+      "material_invalidation": false,
+      "reason": "Reviewed least-privilege incident controller/CLI path; separately capped at one 768 MiB/330-second unit with zero swap and no unattended apply. Twenty-one privileged security fixtures and actual concurrent invocation cover the change."
+    },
+    {
+      "path": "scripts/ops/backup.sh",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "scripts/ops/lib.sh",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "scripts/ops/notify-ntfy.sh",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "scripts/ops/redis-cli.sh",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "scripts/ops/restore.jq",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "scripts/ops/status.sh",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "scripts/ops/tick.sh",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "scripts/ops/verify.sh",
+      "material_invalidation": false,
+      "reason": "M8 F13 host Redis helpers and bounded incident notice/tick integration; existing supervisor, storage, service caps and deterministic recovery retained. Actual command/heap/fault/reboot/backup/restore/rollback gates pass and concurrent targeted workload covers overhead."
+    },
+    {
+      "path": "services/access/server.mjs",
+      "material_invalidation": false,
+      "reason": "Fixed owner-signed incident routes with bounded records and exact mounts; existing gateway 160 MiB cap and ordinary acquisition paths unchanged. All 77 actual access fixtures and live native-client requests pass."
+    },
+    {
+      "path": "services/access/src/config.mjs",
+      "material_invalidation": false,
+      "reason": "Fixed owner-signed incident routes with bounded records and exact mounts; existing gateway 160 MiB cap and ordinary acquisition paths unchanged. All 77 actual access fixtures and live native-client requests pass."
+    },
+    {
+      "path": "services/access/src/incidents.mjs",
+      "material_invalidation": false,
+      "reason": "Fixed owner-signed incident routes with bounded records and exact mounts; existing gateway 160 MiB cap and ordinary acquisition paths unchanged. All 77 actual access fixtures and live native-client requests pass."
+    },
+    {
+      "path": "services/access/test/config.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/access/test/incidents.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/browser/src/server.mjs",
+      "material_invalidation": false,
+      "reason": "Only bounded main-frame refusal correlation and committed-error failure classification; existing single-context lifecycle, task deadlines, cleanup and Chromium version remain unchanged. Actual denial/public redirect matrix and faults pass."
+    },
+    {
+      "path": "services/retrieval/Dockerfile",
+      "material_invalidation": false,
+      "reason": "Pinned dependency install adds --no-audit only; package lock, native architecture, user and resource limits unchanged. Current immutable build digest is pinned and measured."
+    },
+    {
+      "path": "services/retrieval/src/acquire.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/budget.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/enhanced.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/extract.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/parse.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/provider.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/proxy.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/residential.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/src/server.mjs",
+      "material_invalidation": false,
+      "reason": "Bounded provider accounting, credential compatibility, host-only logging and policy/error correlation; no additional strategy, retry, page permit or concurrency. All 218 actual retrieval fixtures, denial matrix and isolation tests pass; targeted mixed workload measures these binaries."
+    },
+    {
+      "path": "services/retrieval/test/acquire.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/retrieval/test/m5-budget.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/retrieval/test/m5-extract.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/retrieval/test/m5-parse.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/retrieval/test/m6-residential.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/retrieval/test/m7-enhanced.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/retrieval/test/provider-lease.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    },
+    {
+      "path": "services/retrieval/test/proxy.test.mjs",
+      "material_invalidation": false,
+      "reason": "Deterministic fixtures only; not loaded by production services. Current 299 Pi fixtures and affected regressions pass."
+    }
+  ],
+  "targeted_result": "evidence/M9/work/AC16-actual-candidate.json",
+  "targeted_completed_utc": "2026-10-03T21:06:04.089Z"
+}

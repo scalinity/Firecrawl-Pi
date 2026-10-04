@@ -1,0 +1,22 @@
+### meta
+utc=2026-10-03T17:20:59Z source_commit=a7794f162fac5b2cf6724151e8fdb67db533906b
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=35 create_host_path=false
+ Container fcpi-browser-worker-1 Recreate 
+ Container fcpi-retrieval-service-1 Recreate 
+ Container fcpi-browser-worker-1 Recreated 
+ Container fcpi-retrieval-service-1 Recreated 
+ Container fcpi-retrieval-service-1 Starting 
+ Container fcpi-browser-worker-1 Starting 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-browser-worker-1 Started 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-browser-worker-1 Waiting 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-browser-worker-1 Healthy 
+retrieval-service image=sha256:08e9da89e0af62ffd19c001c075c327ff9515621aecdd9d192d0d2a2e8060664 user=3310:3310 health=healthy parent=fcpi.slice
+FCPI_SOURCE_COMMIT=7492e8350666fbda276eadfc278e79370efaed97
+retrieval-service memory_swap_max=0 slice_swap_max=0
+browser-worker image=sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3 user=3320:3320 health=healthy parent=fcpi.slice
+FCPI_SOURCE_COMMIT=7492e8350666fbda276eadfc278e79370efaed97
+browser-worker memory_swap_max=0 slice_swap_max=0
+/var/lib/firecrawl-pi/releases/20261003T172109Z-a7794f162fac.json

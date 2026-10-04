@@ -1,0 +1,55 @@
+{
+  "utc": "2026-10-03T21:23:39.202Z",
+  "source_commit": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+  "state": "FAIL",
+  "classification": "TEST_DRIVER_ADMISSION_FAILURE",
+  "corpus": {
+    "requests": 20,
+    "admitted": 0,
+    "http_status": 400,
+    "error": "Unsupported cacheMode field"
+  },
+  "research": {
+    "search": "PASS",
+    "map": "PASS",
+    "retrieve": "FAIL",
+    "extract_submit": "FAIL",
+    "error": "Unsupported cacheMode and idempotencyKey fields"
+  },
+  "driver_exit_code": 0,
+  "driver_exit_code_defect": true,
+  "authorization": "First window CLOSED; no reuse despite unused time",
+  "records": [
+    {
+      "path": "evidence/M9/corpus.json",
+      "saved": "evidence/M9/work/live-driver-failure-20261003/corpus.json",
+      "sha256": "458e734deb8ec9e18c1231b8ed6b81a1595951d9bd5de1032a431fd150beda5b"
+    },
+    {
+      "path": "evidence/M9/research-flow.json",
+      "saved": "evidence/M9/work/live-driver-failure-20261003/research-flow.json",
+      "sha256": "c5a43fe9f0afe3e95171610ee365eabdf08801f19740f515aa162018b3af8269"
+    },
+    {
+      "path": "evidence/M9/work/live-window.json",
+      "saved": "evidence/M9/work/live-driver-failure-20261003/live-window.json",
+      "sha256": "3b936f956d1229d6ca5c93f582926ee952ac485b86123ccd781b433e0c47e3b7"
+    },
+    {
+      "path": "evidence/M9/work/live-ledger-after.json",
+      "saved": "evidence/M9/work/live-driver-failure-20261003/live-ledger-after.json",
+      "sha256": "f0c525bec9e7ba34f97c572fb233939478e60873e7114878bf84c32a3bbe8f8e"
+    }
+  ],
+  "private_inputs": [
+    {
+      "name": "corpus.json",
+      "sha256": "969396cf047dafe4cad0394a94cdf3653c39be1eafc9a13d4116dc1459bae07e"
+    },
+    {
+      "name": "research.json",
+      "sha256": "fb7992fe22cc27ec6f8249e55870b25f74fd7bc07ad6b941b69a32cd95a21b7d"
+    }
+  ],
+  "preserved_resource_evidence": "Accepted M8 24h plus completed M9 30m targeted tests; no second 24h scheduled"
+}

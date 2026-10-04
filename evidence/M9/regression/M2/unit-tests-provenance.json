@@ -1,0 +1,7 @@
+{
+  "source_commit": "e683c919bffb43daeba0cd7c00138a6665fb40ed",
+  "input": "evidence/M9/work/pi-fixtures-final.txt",
+  "input_sha256": "19a11557e5019618e0ca9d7b5c3ea3693375c527fdb0a84f4b8cf52cce4ab267",
+  "transformation": "prepend legacy tap section heading; retain full actual native test output",
+  "output_sha256": "bbb4505ab705e8431074812c6ec1355948e18996342b328e8c94045d1341a168"
+}

@@ -1,0 +1,36 @@
+{
+  "utc": "2026-10-03T13:27:22.032Z",
+  "source_commit": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+  "scope": "M9 acceptance tooling and verification only",
+  "sequential": [
+    "M7 isolated fixture and matching stack",
+    "M2 bounded DNS-rebinding suite",
+    "M3 SDK, full stack recreation, retained receipt/result check",
+    "M8 guard window, before snapshot, 22 fault scenarios and normal reboot",
+    "M8 heap, controlled fixture backup/isolated restore, off-device backup/isolated restore",
+    "M8 isolated configuration/image/schema rollback rehearsal",
+    "M8 existing notification channel and external-watchdog proof",
+    "M8 close fixture egress window",
+    "24-hour paced fixture soak with reset-bound Redis command measurement"
+  ],
+  "held": [
+    {
+      "step": "M2 classification remediation",
+      "reason": "Returned owning-milestone finding; M9-only authorization; owner decision pending"
+    },
+    {
+      "step": "Fresh paid/free-credit provider execution and frozen public corpus",
+      "reason": "Expired PRE-M9 consent; fresh exact capped authorization required"
+    },
+    {
+      "step": "Fresh native incident proof",
+      "reason": "UTC daily cap consumed; current-source proof waits for UTC rollover"
+    }
+  ],
+  "constraints": [
+    "No push, publish, rebase or history rewrite",
+    "No circuit reset or lowered acceptance criteria",
+    "Production paid dispatch false and caps zero outside new explicitly approved validation window",
+    "Historical M8 exceptions and M5 failures preserved"
+  ]
+}

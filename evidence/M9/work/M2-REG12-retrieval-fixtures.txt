@@ -1,0 +1,972 @@
+TAP version 13
+# Subtest: a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4)
+ok 1 - a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4)
+  ---
+  duration_ms: 822.166208
+  type: 'test'
+  ...
+# Subtest: downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1)
+ok 2 - downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1)
+  ---
+  duration_ms: 1259.554958
+  type: 'test'
+  ...
+# Subtest: a download's final URL is one a response header can carry (review finding S10)
+ok 3 - a download's final URL is one a response header can carry (review finding S10)
+  ---
+  duration_ms: 0.873083
+  type: 'test'
+  ...
+# Subtest: a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)
+ok 4 - a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)
+  ---
+  duration_ms: 301.692666
+  type: 'test'
+  ...
+# Subtest: the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target
+ok 5 - the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target
+  ---
+  duration_ms: 657.052792
+  type: 'test'
+  ...
+# Subtest: a pacing wait leaves no abort listener behind on the caller's signal (review finding S7)
+ok 6 - a pacing wait leaves no abort listener behind on the caller's signal (review finding S7)
+  ---
+  duration_ms: 23.456125
+  type: 'test'
+  ...
+# Subtest: a database error while the browser attempt is paced still frees every permit and hold (review finding W3)
+ok 7 - a database error while the browser attempt is paced still frees every permit and hold (review finding W3)
+  ---
+  duration_ms: 3.901083
+  type: 'test'
+  ...
+# Subtest: a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6)
+ok 8 - a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6)
+  ---
+  duration_ms: 4.081083
+  type: 'test'
+  ...
+# Subtest: browser-first redirects retain authoritative private/Cloud proxy refusals
+    # Subtest: http://10.231.1.5:6379/
+    ok 1 - http://10.231.1.5:6379/
+      ---
+      duration_ms: 0.671042
+      type: 'test'
+      ...
+    # Subtest: http://169.254.169.254/latest/meta-data/
+    ok 2 - http://169.254.169.254/latest/meta-data/
+      ---
+      duration_ms: 0.400292
+      type: 'test'
+      ...
+    # Subtest: http://127.0.0.1:3002/
+    ok 3 - http://127.0.0.1:3002/
+      ---
+      duration_ms: 0.227166
+      type: 'test'
+      ...
+    # Subtest: http://[::ffff:a00:105]/
+    ok 4 - http://[::ffff:a00:105]/
+      ---
+      duration_ms: 0.566208
+      type: 'test'
+      ...
+    # Subtest: http://redis:6379/
+    ok 5 - http://redis:6379/
+      ---
+      duration_ms: 0.236083
+      type: 'test'
+      ...
+    # Subtest: http://45.33.20.9/
+    ok 6 - http://45.33.20.9/
+      ---
+      duration_ms: 0.187625
+      type: 'test'
+      ...
+    # Subtest: http://100.100.100.100/
+    ok 7 - http://100.100.100.100/
+      ---
+      duration_ms: 0.214333
+      type: 'test'
+      ...
+    # Subtest: https://127.0.0.1/
+    ok 8 - https://127.0.0.1/
+      ---
+      duration_ms: 0.184917
+      type: 'test'
+      ...
+    # Subtest: https://api.firecrawl.dev/v1/scrape
+    ok 9 - https://api.firecrawl.dev/v1/scrape
+      ---
+      duration_ms: 0.142416
+      type: 'test'
+      ...
+    1..9
+ok 9 - browser-first redirects retain authoritative private/Cloud proxy refusals
+  ---
+  duration_ms: 4.015875
+  type: 'test'
+  ...
+# Subtest: public browser redirects remain usable with unrelated denied subresources
+ok 10 - public browser redirects remain usable with unrelated denied subresources
+  ---
+  duration_ms: 0.511042
+  type: 'test'
+  ...
+# Subtest: page text, unmatched refusals and cancellation do not invent a navigation policy failure
+ok 11 - page text, unmatched refusals and cancellation do not invent a navigation policy failure
+  ---
+  duration_ms: 0.759917
+  type: 'test'
+  ...
+# Subtest: a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE
+ok 12 - a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE
+  ---
+  duration_ms: 4.439792
+  type: 'test'
+  ...
+# Subtest: a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser
+ok 13 - a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser
+  ---
+  duration_ms: 1265.4945
+  type: 'test'
+  ...
+# Subtest: a pacing refusal is the attempt's recorded outcome and reaches no target
+ok 14 - a pacing refusal is the attempt's recorded outcome and reaches no target
+  ---
+  duration_ms: 0.75775
+  type: 'test'
+  ...
+# Subtest: a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5)
+ok 15 - a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5)
+  ---
+  duration_ms: 0.390458
+  type: 'test'
+  ...
+# Subtest: requests are validated and bodies decoded by their declared charset
+ok 16 - requests are validated and bodies decoded by their declared charset
+  ---
+  duration_ms: 0.706375
+  type: 'test'
+  ...
+# Subtest: an oversized worker reply is SIZE_LIMIT, declared or chunked; a normal one is parsed
+ok 17 - an oversized worker reply is SIZE_LIMIT, declared or chunked; a normal one is parsed
+  ---
+  duration_ms: 30.977583
+  type: 'test'
+  ...
+# Subtest: a public name with any private answer is refused, and a DNS failure is typed
+ok 18 - a public name with any private answer is refused, and a DNS failure is typed
+  ---
+  duration_ms: 4.987584
+  type: 'test'
+  ...
+# Subtest: DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
+ok 19 - DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
+  ---
+  duration_ms: 10.198584
+  type: 'test'
+  ...
+# Subtest: a fixture name must resolve inside its own subnet
+ok 20 - a fixture name must resolve inside its own subnet
+  ---
+  duration_ms: 0.250292
+  type: 'test'
+  ...
+# Subtest: a redirect is validated at every hop: into private space it is refused before any connection
+ok 21 - a redirect is validated at every hop: into private space it is refused before any connection
+  ---
+  duration_ms: 8.541708
+  type: 'test'
+  ...
+# Subtest: bodies are bounded before and after decoding
+ok 22 - bodies are bounded before and after decoding
+  ---
+  duration_ms: 36.927042
+  type: 'test'
+  ...
+# Subtest: a slow target ends at the deadline
+ok 23 - a slow target ends at the deadline
+  ---
+  duration_ms: 601.623042
+  type: 'test'
+  ...
+# Subtest: a cookie set on a redirect comes back on the next hop to the same host
+ok 24 - a cookie set on a redirect comes back on the next hop to the same host
+  ---
+  duration_ms: 2.777458
+  type: 'test'
+  ...
+# Subtest: a Secure cookie is sent only over https, and an http response cannot set one (review finding S4)
+ok 25 - a Secure cookie is sent only over https, and an http response cannot set one (review finding S4)
+  ---
+  duration_ms: 0.212083
+  type: 'test'
+  ...
+# Subtest: TLS to an IP literal names no server (review finding S4)
+ok 26 - TLS to an IP literal names no server (review finding S4)
+  ---
+  duration_ms: 5013.65625
+  type: 'test'
+  ...
+# Subtest: a HEAD redirected by 303 stays a HEAD (review finding S8)
+ok 27 - a HEAD redirected by 303 stays a HEAD (review finding S8)
+  ---
+  duration_ms: 4.444833
+  type: 'test'
+  ...
+# Subtest: caller credentials go only to the first origin
+ok 28 - caller credentials go only to the first origin
+  ---
+  duration_ms: 2.605833
+  type: 'test'
+  ...
+# Subtest: a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body UNSUPPORTED_CONTENT (review finding W10)
+ok 29 - a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body UNSUPPORTED_CONTENT (review finding W10)
+  ---
+  duration_ms: 54.98775
+  type: 'test'
+  ...
+# Subtest: a HEAD or a redirect is not refused for the length it declares (review finding W11)
+ok 30 - a HEAD or a redirect is not refused for the length it declares (review finding W11)
+  ---
+  duration_ms: 3.632833
+  type: 'test'
+  ...
+# node:fs:620
+#     return binding.readFileUtf8(path, stringToFlags(options.flag));
+#                    ^
+# Error: ENOENT: no such file or directory, open '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/policy/budget.json'
+#     at readFileSync (node:fs:620:20)
+#     at file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-budget.test.mjs:10:13
+#     at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+#     at async node:internal/modules/esm/loader:650:26
+#     at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:105:5) {
+#   errno: -2,
+#   code: 'ENOENT',
+#   syscall: 'open',
+#   path: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/policy/budget.json'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m5-budget.test.mjs
+not ok 4 - services/retrieval/test/m5-budget.test.mjs
+  ---
+  duration_ms: 124.239
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-budget.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-helpers.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m5-extract.test.mjs
+not ok 5 - services/retrieval/test/m5-extract.test.mjs
+  ---
+  duration_ms: 138.654666
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-extract.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-helpers.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m5-parse.test.mjs
+not ok 6 - services/retrieval/test/m5-parse.test.mjs
+  ---
+  duration_ms: 142.408709
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-parse.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-helpers.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m5-search.test.mjs
+not ok 7 - services/retrieval/test/m5-search.test.mjs
+  ---
+  duration_ms: 140.382833
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-search.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: twelve concurrent reservations against a cap that holds three: exactly three succeed (CLAUDE.md §11, AC25)
+ok 35 - twelve concurrent reservations against a cap that holds three: exactly three succeed (CLAUDE.md §11, AC25) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.443459
+  type: 'test'
+  ...
+# Subtest: settlement moves the reservation to its actual cost; release gives it all back; uncertain keeps it whole
+ok 36 - settlement moves the reservation to its actual cost; release gives it all back; uncertain keeps it whole # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.061458
+  type: 'test'
+  ...
+# Subtest: a retried call key finds its reservation; a released one may be reserved again
+ok 37 - a retried call key finds its reservation; a released one may be reserved again # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.039708
+  type: 'test'
+  ...
+# Subtest: a paid category also draws on the paid total's daily cap; a zero cap refuses everything
+ok 38 - a paid category also draws on the paid total's daily cap; a zero cap refuses everything # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.036333
+  type: 'test'
+  ...
+# Subtest: settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2)
+ok 39 - settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.040584
+  type: 'test'
+  ...
+# Subtest: a settlement gives back only the period rows its reservation took, whatever the caps are now (review W2)
+ok 40 - a settlement gives back only the period rows its reservation took, whatever the caps are now (review W2) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.03175
+  type: 'test'
+  ...
+# Subtest: a paid parser's credits count against the paid total's day in micro-USD (review W3)
+ok 41 - a paid parser's credits count against the paid total's day in micro-USD (review W3) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.043125
+  type: 'test'
+  ...
+# Subtest: pruning clears a week-old settled call's stored answer and keeps its amounts (review W9)
+ok 42 - pruning clears a week-old settled call's stored answer and keeps its amounts (review W9) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.028792
+  type: 'test'
+  ...
+# Subtest: the 80% threshold is noticed once per period
+ok 43 - the 80% threshold is noticed once per period # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.053083
+  type: 'test'
+  ...
+# Subtest: search admission holds its hourly cap under concurrent queries; the cache expires
+ok 44 - search admission holds its hourly cap under concurrent queries; the cache expires # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.0705
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-helpers.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m6-proxy.test.mjs
+not ok 9 - services/retrieval/test/m6-proxy.test.mjs
+  ---
+  duration_ms: 156.810375
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m6-proxy.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-helpers.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m6-residential.test.mjs
+not ok 10 - services/retrieval/test/m6-residential.test.mjs
+  ---
+  duration_ms: 156.011875
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m6-residential.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: the start: basic is direct whatever the domain; stealth, a hold, a proxy-first domain and a learned block start residential
+ok 47 - the start: basic is direct whatever the domain; stealth, a hold, a proxy-first domain and a learned block start residential
+  ---
+  duration_ms: 1.851334
+  type: 'test'
+  ...
+# Subtest: after a preference expires, one probe goes direct and the others stay residential while it runs
+ok 48 - after a preference expires, one probe goes direct and the others stay residential while it runs
+  ---
+  duration_ms: 0.740167
+  type: 'test'
+  ...
+# Subtest: two consistent challenges on the direct route set a 24-hour residential preference; one does not
+ok 49 - two consistent challenges on the direct route set a 24-hour residential preference; one does not
+  ---
+  duration_ms: 0.194125
+  type: 'test'
+  ...
+# Subtest: the probe confirms a block at once, or clears the preference
+ok 50 - the probe confirms a block at once, or clears the preference
+  ---
+  duration_ms: 0.072083
+  type: 'test'
+  ...
+# Subtest: residential successes extend the preference by one TTL, never past seven days from when it was set
+ok 51 - residential successes extend the preference by one TTL, never past seven days from when it was set
+  ---
+  duration_ms: 0.075875
+  type: 'test'
+  ...
+# Subtest: script shells: two renders make a domain start in the browser; an HTTP answer that needed none resets it
+ok 52 - script shells: two renders make a domain start in the browser; an HTTP answer that needed none resets it
+  ---
+  duration_ms: 0.071583
+  type: 'test'
+  ...
+# Subtest: the session username is Decodo's documented form, and refuses what would change its meaning
+ok 53 - the session username is Decodo's documented form, and refuses what would change its meaning
+  ---
+  duration_ms: 0.24675
+  type: 'test'
+  ...
+# Subtest: routing records: two challenges set a preference; auth outcomes only count; the table stays within its bound
+ok 54 - routing records: two challenges set a preference; auth outcomes only count; the table stays within its bound # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.406917
+  type: 'test'
+  ...
+# Subtest: after expiry one probe is claimed at a time, and a hold is finite and released by its job
+ok 55 - after expiry one probe is claimed at a time, and a hold is finite and released by its job # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.0655
+  type: 'test'
+  ...
+# Subtest: residential navigations share the domain's gap and hold but are not counted against the direct caps
+ok 56 - residential navigations share the domain's gap and hold but are not counted against the direct caps # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.044333
+  type: 'test'
+  ...
+# Subtest: eight concurrent proxy reservations on a cap with room for three: exactly three
+ok 57 - eight concurrent proxy reservations on a cap with room for three: exactly three # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.045833
+  type: 'test'
+  ...
+# Subtest: reconciliation: an adjustment settles past the cap, uncertain rows settle at their measured bytes
+ok 58 - reconciliation: an adjustment settles past the cap, uncertain rows settle at their measured bytes # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.043542
+  type: 'test'
+  ...
+# Subtest: reconciling a day twice charges its difference once; a later report charges only what it added; a day in flight waits (review C1)
+ok 59 - reconciling a day twice charges its difference once; a later report charges only what it added; a day in flight waits (review C1) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.033666
+  type: 'test'
+  ...
+# Subtest: an adjustment on a day nothing was reserved creates its usage rows, so the caps see the charge (review W8)
+ok 60 - an adjustment on a day nothing was reserved creates its usage rows, so the caps see the charge (review W8) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.033667
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-helpers.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m7-enhanced.test.mjs
+not ok 13 - services/retrieval/test/m7-enhanced.test.mjs
+  ---
+  duration_ms: 155.484167
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m7-enhanced.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: one logical page, eight racing callers: one enhanced reservation, the rest find it; its settled answer is read back
+ok 62 - one logical page, eight racing callers: one enhanced reservation, the rest find it; its settled answer is read back # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.296958
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m7/fixture.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m7-webhook.test.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m7/fixture.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/m7-webhook.test.mjs
+not ok 15 - services/retrieval/test/m7-webhook.test.mjs
+  ---
+  duration_ms: 154.166708
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m7-webhook.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: a fresh file is read as written; its reasons are kept only when well formed
+ok 64 - a fresh file is read as written; its reasons are kept only when well formed
+  ---
+  duration_ms: 1.61425
+  type: 'test'
+  ...
+# Subtest: a stale, future-dated or unreadable file is open, so a stopped tick cannot stop the platform
+ok 65 - a stale, future-dated or unreadable file is open, so a stopped tick cannot stop the platform
+  ---
+  duration_ms: 0.110959
+  type: 'test'
+  ...
+# Subtest: the reader caches for its window, and an absent file is open
+ok 66 - the reader caches for its window, and an absent file is open
+  ---
+  duration_ms: 2.137875
+  type: 'test'
+  ...
+# Subtest: a paused browser ends the page as RESOURCE_BUSY before any render or browser attempt; open, the same page renders
+ok 67 - a paused browser ends the page as RESOURCE_BUSY before any render or browser attempt; open, the same page renders
+  ---
+  duration_ms: 12.468375
+  type: 'test'
+  ...
+# Subtest: a paused browser leaves direct HTTP alone
+ok 68 - a paused browser leaves direct HTTP alone
+  ---
+  duration_ms: 1.165334
+  type: 'test'
+  ...
+# Subtest: the environment: unknown keys, the flags that must stay false, paid dispatch as a switch, the permit counts
+ok 69 - the environment: unknown keys, the flags that must stay false, paid dispatch as a switch, the permit counts
+  ---
+  duration_ms: 4.285875
+  type: 'test'
+  ...
+# Subtest: a permit lease shorter than an acquisition, or a token hash of the wrong length, fails at startup (review finding S3)
+not ok 70 - a permit lease shorter than an acquisition, or a token hash of the wrong length, fails at startup (review finding S3)
+  ---
+  duration_ms: 0.214959
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/policy.test.mjs:34:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, open '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/policy/egress.json'"
+  code: 'ENOENT'
+  stack: |-
+    readFileSync (node:fs:620:20)
+    TestContext.<anonymous> (file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/policy.test.mjs:35:31)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+  ...
+# Subtest: the local-network file must name at least one real network
+ok 71 - the local-network file must name at least one real network
+  ---
+  duration_ms: 1.456167
+  type: 'test'
+  ...
+# node:internal/modules/esm/resolve:241
+#     throw new ERR_MODULE_NOT_FOUND(
+#           ^
+# Error [ERR_MODULE_NOT_FOUND]: Cannot find module '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs' imported from /Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/m5-helpers.mjs
+#     at finalizeResolution (node:internal/modules/esm/resolve:241:11)
+#     at moduleResolve (node:internal/modules/esm/resolve:846:10)
+#     at defaultResolve (node:internal/modules/esm/resolve:973:11)
+#     at \#cachedDefaultResolve (node:internal/modules/esm/loader:708:20)
+#     at \#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:728:38)
+#     at ModuleLoader.resolveSync (node:internal/modules/esm/loader:766:56)
+#     at \#resolve (node:internal/modules/esm/loader:690:17)
+#     at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:610:35)
+#     at node:internal/modules/esm/loader:639:32
+#     at TracingChannel.tracePromise (node:diagnostics_channel:551:22) {
+#   code: 'ERR_MODULE_NOT_FOUND',
+#   url: 'file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m5/providers.mjs'
+# }
+# Node.js v26.10.0
+# Subtest: services/retrieval/test/provider-lease.test.mjs
+not ok 18 - services/retrieval/test/provider-lease.test.mjs
+  ---
+  duration_ms: 109.596083
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/provider-lease.test.mjs:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# Subtest: a public page's requests cannot reach a fixture host (review finding S1)
+ok 73 - a public page's requests cannot reach a fixture host (review finding S1)
+  ---
+  duration_ms: 14.289833
+  type: 'test'
+  ...
+# Subtest: a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2)
+ok 74 - a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2)
+  ---
+  duration_ms: 2.698
+  type: 'test'
+  ...
+# Subtest: no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named
+ok 75 - no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named
+  ---
+  duration_ms: 2.942042
+  type: 'test'
+  ...
+# Subtest: a session past its request or byte cap is refused and marked capped (review finding W6)
+ok 76 - a session past its request or byte cap is refused and marked capped (review finding W6)
+  ---
+  duration_ms: 3.157625
+  type: 'test'
+  ...
+# Subtest: the proxy answers 503 while the local-network list is not loaded (review finding W7)
+ok 77 - the proxy answers 503 while the local-network list is not loaded (review finding W7)
+  ---
+  duration_ms: 0.704333
+  type: 'test'
+  ...
+# Subtest: malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9)
+ok 78 - malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9)
+  ---
+  duration_ms: 2.610625
+  type: 'test'
+  ...
+# Subtest: a standing session's refusals are logged by host and not kept, so it cannot grow (review S5)
+ok 79 - a standing session's refusals are logged by host and not kept, so it cannot grow (review S5)
+  ---
+  duration_ms: 1.288333
+  type: 'test'
+  ...
+# Subtest: static pages are adequate, short ones too; script-rendered ones are JS shells
+not ok 80 - static pages are adequate, short ones too; script-rendered ones are JS shells
+  ---
+  duration_ms: 0.40075
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:16:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, open '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m1/site/static.html'"
+  code: 'ENOENT'
+  stack: |-
+    readFileSync (node:fs:620:20)
+    site (file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:13:21)
+    TestContext.<anonymous> (file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:17:42)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.start (node:internal/test_runner/test:1262:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+# Subtest: interstitials, sign-in gates and refusals are typed failures
+ok 81 - interstitials, sign-in gates and refusals are typed failures
+  ---
+  duration_ms: 0.604791
+  type: 'test'
+  ...
+# Subtest: missing pages and target errors keep the native result; binaries are binaries
+ok 82 - missing pages and target errors keep the native result; binaries are binaries
+  ---
+  duration_ms: 0.0815
+  type: 'test'
+  ...
+# Subtest: direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
+ok 83 - direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
+  ---
+  duration_ms: 1.298625
+  type: 'test'
+  ...
+# Subtest: the deployed policy loads; a looser or unknown one does not
+not ok 84 - the deployed policy loads; a looser or unknown one does not
+  ---
+  duration_ms: 0.112292
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:72:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, open '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/policy/egress.json'"
+  code: 'ENOENT'
+  stack: |-
+    readFileSync (node:fs:620:20)
+    TestContext.<anonymous> (file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:73:16)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: classification stays linear on unclosed and repeated markup (review finding C1)
+ok 85 - classification stays linear on unclosed and repeated markup (review finding C1)
+  ---
+  duration_ms: 122.835666
+  type: 'test'
+  ...
+# Subtest: the linear reader keeps what the regexes kept
+ok 86 - the linear reader keeps what the regexes kept
+  ---
+  duration_ms: 0.238167
+  type: 'test'
+  ...
+# Subtest: only structure makes a shell that fails after rendering; a short scripted page does not (review finding C5)
+not ok 87 - only structure makes a shell that fails after rendering; a short scripted page does not (review finding C5)
+  ---
+  duration_ms: 0.182166
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:108:1'
+  failureType: 'testCodeFailure'
+  error: "ENOENT: no such file or directory, open '/Users/danny/Documents/Tools/Firecrawl/services/retrieval/fixtures/m2/site/js.html'"
+  code: 'ENOENT'
+  stack: |-
+    readFileSync (node:fs:620:20)
+    site (file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:13:21)
+    TestContext.<anonymous> (file:///Users/danny/Documents/Tools/Firecrawl/services/retrieval/test/quality.test.mjs:116:42)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: the PDF magic settles the type at the start of a body, or within the first KiB of one declared a PDF or opaque (review W5)
+ok 88 - the PDF magic settles the type at the start of a body, or within the first KiB of one declared a PDF or opaque (review W5)
+  ---
+  duration_ms: 0.200583
+  type: 'test'
+  ...
+# Subtest: IPv4 special-purpose ranges are never public
+ok 89 - IPv4 special-purpose ranges are never public
+  ---
+  duration_ms: 0.874792
+  type: 'test'
+  ...
+# Subtest: fixture hosts count only for work that began at a fixture (review finding S1)
+ok 90 - fixture hosts count only for work that began at a fixture (review finding S1)
+  ---
+  duration_ms: 3.766584
+  type: 'test'
+  ...
+# Subtest: the host's own LAN is refused even on a globally routable prefix
+ok 91 - the host's own LAN is refused even on a globally routable prefix
+  ---
+  duration_ms: 0.082542
+  type: 'test'
+  ...
+# Subtest: IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
+ok 92 - IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
+  ---
+  duration_ms: 0.39
+  type: 'test'
+  ...
+# Subtest: schemes, credentials, ports and ambiguous numeric hosts
+ok 93 - schemes, credentials, ports and ambiguous numeric hosts
+  ---
+  duration_ms: 0.151208
+  type: 'test'
+  ...
+# Subtest: literal addresses are judged by class
+ok 94 - literal addresses are judged by class
+  ---
+  duration_ms: 0.115291
+  type: 'test'
+  ...
+# Subtest: local and reserved names are refused before any lookup
+ok 95 - local and reserved names are refused before any lookup
+  ---
+  duration_ms: 0.48175
+  type: 'test'
+  ...
+# Subtest: Firecrawl Cloud destinations are refused
+ok 96 - Firecrawl Cloud destinations are refused
+  ---
+  duration_ms: 0.057417
+  type: 'test'
+  ...
+# Subtest: the fixture exception is exact: its host, its port, plain http
+ok 97 - the fixture exception is exact: its host, its port, plain http
+  ---
+  duration_ms: 0.071625
+  type: 'test'
+  ...
+# Subtest: ordinary public URLs pass, with a trailing dot normalised
+ok 98 - ordinary public URLs pass, with a trailing dot normalised
+  ---
+  duration_ms: 0.109083
+  type: 'test'
+  ...
+# Subtest: without the host's local-network list no address is public (review finding W7)
+ok 99 - without the host's local-network list no address is public (review finding W7)
+  ---
+  duration_ms: 0.064459
+  type: 'test'
+  ...
+# Subtest: the platform's daily cap holds under concurrent pacers of different domains (review finding W4)
+ok 100 - the platform's daily cap holds under concurrent pacers of different domains (review finding W4) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.358667
+  type: 'test'
+  ...
+# Subtest: permits: slot 0 is a slot, a full kind answers null, an expired lease is free again (review finding W9)
+ok 101 - permits: slot 0 is a slot, a full kind answers null, an expired lease is free again (review finding W9) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.044917
+  type: 'test'
+  ...
+# Subtest: ten concurrent reservations on one logical page get exactly four attempts
+ok 102 - ten concurrent reservations on one logical page get exactly four attempts # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.036583
+  type: 'test'
+  ...
+# Subtest: a restart reclaims every lease and domain hold (review finding W3)
+ok 103 - a restart reclaims every lease and domain hold (review finding W3) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.033333
+  type: 'test'
+  ...
+# Subtest: cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does not seed the bare one (review finding W14)
+ok 104 - cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does not seed the bare one (review finding W14) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.032458
+  type: 'test'
+  ...
+# Subtest: the pool connects within 5 s and bounds each statement at 10 s (review finding S13)
+ok 105 - the pool connects within 5 s and bounds each statement at 10 s (review finding S13) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.027292
+  type: 'test'
+  ...
+# Subtest: the prune removes only pacing rows that hold nothing a decision reads, and pacing recreates them (review finding S5)
+ok 106 - the prune removes only pacing rows that hold nothing a decision reads, and pacing recreates them (review finding S5) # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.030541
+  type: 'test'
+  ...
+# Subtest: releasing a domain restarts its navigation gap
+ok 107 - releasing a domain restarts its navigation gap # SKIP no test database (FCPI_TEST_PG unset)
+  ---
+  duration_ms: 0.025333
+  type: 'test'
+  ...
+1..107
+# tests 116
+# suites 0
+# pass 77
+# fail 13
+# cancelled 0
+# skipped 26
+# todo 0
+# duration_ms 5996.079125

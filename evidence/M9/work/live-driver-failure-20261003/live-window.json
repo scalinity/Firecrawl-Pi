@@ -1,0 +1,81 @@
+{
+  "schema": "fcpi.m9-live-window/v1",
+  "state": "CLOSED",
+  "source_commit": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+  "started_utc": "2026-10-03T21:10:33Z",
+  "expires_at": "2026-10-03T21:55:33Z",
+  "consent_sha256": "cd61ccecf05201eb320518f1f32eac405e64fde76fd4d81fe6cc3221c5cb50a3",
+  "authorized_caps": {
+    "llm_micro_usd": 20000,
+    "proxy_micro_usd": 100000,
+    "enhanced_micro_usd": 100000,
+    "total_micro_usd": 220000,
+    "parser_new_free_credits": 14,
+    "parser_cumulative_free_credits": 20,
+    "parser_paid_micro_usd": 0
+  },
+  "purposes": [
+    "Required fresh M5-M7 live gates",
+    "Frozen twenty-target M9 corpus",
+    "Representative M9 research flow"
+  ],
+  "results": {
+    "current-real-provider-live": {
+      "exit_code": 0,
+      "utc": "2026-10-03T21:14:41.485Z"
+    },
+    "corpus_research": {
+      "exit_code": 0
+    },
+    "current-paid-cloud-audit": {
+      "exit_code": 0,
+      "utc": "2026-10-03T21:15:28.531Z"
+    }
+  },
+  "start_output_sha256": "767fd987aff622f79d106fe22e6400dc58e102a458190543e42b49d7980367cc",
+  "cache_invalidation": {
+    "controlled_documents": 2,
+    "removed_count": 1,
+    "original_rows_sha256": "e42d71a25a1342632add4978198061a504b44ce086583f08a82d82e159812536",
+    "owner_sha256": "f41aeee79bb08e30",
+    "document_hashes": [
+      "97cfc0ee94f2d4a2031c81e69e671b5b58f20d2a45e0679460c5309ddc0e6a69",
+      "75c176b03cca3a6e53d0a2de16fd8dbbc284476dcadd176e44c69e4303bea02a"
+    ],
+    "scope": "Only the exact existing M5 test principal and selected LlamaParse controlled scan/table cache entries; budget reservations unchanged"
+  },
+  "required_work_finished_utc": "2026-10-03T21:15:26.330Z",
+  "stop_output_sha256": "5f902d367c7d4c83981d53e94cb00397d551a47fa1921709595fc2cb2868eb5a",
+  "closed_utc": "2026-10-03T21:15:36.974Z",
+  "paid_dispatch": false,
+  "provider_caps_zero": true,
+  "reservations": {
+    "new_count": 15,
+    "states": {
+      "SETTLED": 14,
+      "RESERVED": 1
+    },
+    "usage_by_category": {
+      "proxy": {
+        "actual": 748,
+        "reserved": 112000,
+        "unit": "micro_usd"
+      },
+      "llm": {
+        "actual": 170,
+        "reserved": 10755,
+        "unit": "micro_usd"
+      },
+      "parser": {
+        "actual": 6,
+        "reserved": 6,
+        "unit": "credits"
+      },
+      "enhanced": {
+        "actual": 2540,
+        "reserved": 2540,
+        "unit": "micro_usd"
+      }
+    }
+  }
+}

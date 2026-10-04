@@ -1,0 +1,4 @@
+decodo|SETTLED|4
+llamaparse|SETTLED|2
+openai|SETTLED|5
+zyte|SETTLED|3

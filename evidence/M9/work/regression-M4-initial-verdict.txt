@@ -1,0 +1,2 @@
+M4-P06 PASS               2025-11-25-stateless-compatibility
+M4-P07 PASS               two-independent-clients-and-owner-isolation

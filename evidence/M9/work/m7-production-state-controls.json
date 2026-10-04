@@ -1,0 +1,39 @@
+{
+  "utc": "2026-10-03T08:17:09.382Z",
+  "source_commit": "7664e0a334bf2feafce48d8de5e7b53058234e91",
+  "verifier_sha256": "b94e76de9f00f49ef9d814eef36e67f20ab0d76dff81c0e2b93fef4992daae11",
+  "original_raw_sha256": "c8a830597f1cfed9b54641b4651d2bdae1e4d09158dabbb6fc7a4bd57bf43c4e",
+  "source": "Current real fixture transcript with only the production tier-state observation varied in private synthetic copies.",
+  "results": [
+    {
+      "name": "credential_present",
+      "expected": "PASS",
+      "actual": "PASS",
+      "synthetic": true
+    },
+    {
+      "name": "credential_absent",
+      "expected": "PASS",
+      "actual": "PASS",
+      "synthetic": true
+    },
+    {
+      "name": "enabled_ready",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "synthetic": true
+    },
+    {
+      "name": "route_available",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "synthetic": true
+    },
+    {
+      "name": "unclassified_credential",
+      "expected": "FAIL",
+      "actual": "FAIL",
+      "synthetic": true
+    }
+  ]
+}

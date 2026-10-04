@@ -1,0 +1,2 @@
+M2-R04 PASS     size-time-and-redirect-limits
+M2-S02 PASS     browser-subresources-denied

@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-03T05:43:10.433Z",
+  "source_commit": "ca38bc29576d4fde14111ee1eb895f0ad67da9a5",
+  "image_id": "sha256:db11309ff73776027adfee98a61167d57a172732f5f12e7e5640fb4ef577f5f4",
+  "state": "FAIL",
+  "classification": "implementation",
+  "error": "unknown configuration keys: PI_INCIDENT_OWNER_FILE",
+  "recovery": "accepted M8 gateway image with matching environment; data intact",
+  "recovery_exit_code": 0,
+  "first_recovery": "intermediate M9 image no longer addressable after mutable tag replaced",
+  "recovery_image": "sha256:a9fae8d26ce9c04ca71c385d48de823ac83d942fc3a64fd4d5af33d533865caa"
+}

@@ -1,0 +1,16 @@
+✔ a public page's requests cannot reach a fixture host (review finding S1) (12.495791ms)
+✔ a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2) (2.493708ms)
+✔ no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named (3.136209ms)
+✔ real CONNECT refusals preserve the denied authority and canonical class (1.304792ms)
+✔ a session past its request or byte cap is refused and marked capped (review finding W6) (2.764541ms)
+✔ the proxy answers 503 while the local-network list is not loaded (review finding W7) (0.836584ms)
+✔ malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9) (2.078834ms)
+✔ a standing session's refusals are logged by host and not kept, so it cannot grow (review S5) (1.161958ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 121.7105

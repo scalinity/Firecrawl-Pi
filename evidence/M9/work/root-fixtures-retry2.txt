@@ -1,0 +1,3 @@
+/var/lib/firecrawl-pi/m9-fixtures.qll58O/repo/scripts/m9/incident-prepare.sh: line 22: [: 0
+0: integer expression expected
+fixture: UTC daily investigation limit reached

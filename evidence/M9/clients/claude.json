@@ -1,0 +1,66 @@
+{
+  "schema": "fcpi.native-client/v1",
+  "client": "claude",
+  "native_model": null,
+  "utc": "2026-10-03T18:06:00.089Z",
+  "private_run": "native-uWm3nh",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "version": "2.1.288 (Claude Code)",
+  "cwd": "unrelated private directory",
+  "global_config": "~/.claude.json",
+  "authentication": "login keychain header helper",
+  "tools": [
+    {
+      "name": "mcp__fcpi__firecrawl_scrape",
+      "server": "fcpi"
+    }
+  ],
+  "usable": true,
+  "arrival": [
+    {
+      "utc": "2026-10-03T18:05:55.186Z",
+      "event": "tool",
+      "client": "m9claude",
+      "tool": "firecrawl_scrape",
+      "is_error": false,
+      "outcome": "ok",
+      "downstream": {
+        "route": "scrape",
+        "status": 200,
+        "code": null,
+        "request_id": "f3461411-44e3-4253-9eed-4a0f988a45e1"
+      },
+      "request_id": "806f8c48-ed66-47af-a33a-15a6d1f15b8e",
+      "era": "modern",
+      "protocol_version": "2026-07-28"
+    }
+  ],
+  "arrived": true,
+  "exit_code": 0,
+  "state": "VERIFIED_LIVE",
+  "subscription_usage": {
+    "input_tokens": 4,
+    "cache_creation_input_tokens": 132292,
+    "cache_read_input_tokens": 131575,
+    "output_tokens": 650,
+    "output_tokens_details": {
+      "thinking_tokens": 109
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 132292,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "not_available",
+    "iterations": [],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "api_equivalent_estimate_usd": 0.5619909999999999,
+  "invoiced_usd": null,
+  "raw_sha256": "01226afd1f247aa74e42f285fe687803a08217690c914e4ebdb502f801009f28"
+}

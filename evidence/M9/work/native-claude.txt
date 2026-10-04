@@ -1,0 +1,1 @@
+{"client":"claude","state":"VERIFIED_LIVE","exit_code":0,"tools":[{"name":"mcp__fcpi__firecrawl_scrape","server":"fcpi"}],"usable":true}

@@ -1,0 +1,10 @@
+M4-P01 PASS               modern-discovery-and-calls-without-initialize-or-session
+M4-P02 PASS               malformed-missing-mismatched-metadata-rejected
+M4-P03 PASS               json-and-request-scoped-sse
+M4-P04 PASS               cancellation
+M4-P05 PASS               deterministic-catalog
+M4-P06 PASS               2025-11-25-stateless-compatibility
+M4-P07 PASS               two-independent-clients-and-owner-isolation
+M4-P08 PASS               new-tcp-connection-between-related-calls
+M4-P09 PASS               mcp-restart-between-crawl-and-status
+M4-P10 PASS               rest-serves-with-mcp-stopped

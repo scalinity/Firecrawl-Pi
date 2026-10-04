@@ -1,0 +1,5 @@
+M8-I15 FAIL               supervisor-bounded-restarts-then-incident  — failed=three_restarts,incident; rounds [{"s":114,"r":1,"n":1}]
+M8-O02 FAIL               one-notice-per-incident-and-its-recovery  — failed=supervisor
+M8-S05 PASS               core-heap-holds-large-pages-at-384-mib
+M8-K01 FAIL               coordinated-backup-on-the-fixture-repository  — failed=no_notice_from_the_hold; {"utc":"2026-10-03T10:51:25Z","run":"20261003T104947Z","result":"PASS","snapshot_data":"08384c1012a430f5a989c74e12f942fd7b531be5b2d39e7bca6e7c57ee1d9339","snapshot_secrets":"7ee34b246795ff1a414cc48a390870d74b576d3cba7a722c8f2f80
+M8-K02 PASS               isolated-restore-proves-the-backup

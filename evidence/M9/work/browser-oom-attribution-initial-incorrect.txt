@@ -1,0 +1,3 @@
+started=2026-10-02T07:31:40.550682388Z sticky_oom=true
+
+The running container started during M8 on 2026-10-02; no kernel OOM event occurred in the M9 controlled retrieval window above. A fresh soak will measure new OOM deltas. Historical flags remain visible.

@@ -1,0 +1,427 @@
+### meta
+utc=2026-10-03T15:27:04Z source_commit=f72333f81d2c4753bf83d0db359e9ca6c99ef3da image=fcpi/access-gateway@sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb test_postgres=postgres@sha256:86fa57b44a1d38f09970f64ac71eb492f7a9cf94d08b85e1c8f07bb0fc0a1761
+### unit_tap
+TAP version 13
+# Subtest: a root without the marker is refused, so nothing is written to a shadow directory
+ok 1 - a root without the marker is refused, so nothing is written to a shadow directory
+  ---
+  duration_ms: 4.327714
+  type: 'test'
+  ...
+# Subtest: put stores bytes under their SHA-256, once, and nothing stays in tmp
+ok 2 - put stores bytes under their SHA-256, once, and nothing stays in tmp
+  ---
+  duration_ms: 192.08529
+  type: 'test'
+  ...
+# Subtest: the sweep keeps referenced and recent files and removes old orphans and temp files
+ok 3 - the sweep keeps referenced and recent files and removes old orphans and temp files
+  ---
+  duration_ms: 96.53021
+  type: 'test'
+  ...
+# Subtest: putting bytes again refreshes an old copy, so a sweep cannot take it before its row commits
+ok 4 - putting bytes again refreshes an old copy, so a sweep cannot take it before its row commits
+  ---
+  duration_ms: 11.231228
+  type: 'test'
+  ...
+# Subtest: the quota is at most 10 GiB
+ok 5 - the quota is at most 10 GiB
+  ---
+  duration_ms: 2.558505
+  type: 'test'
+  ...
+# Subtest: room is refused for more than the filesystem can hold above its free-space floor
+ok 6 - room is refused for more than the filesystem can hold above its free-space floor
+  ---
+  duration_ms: 83.032329
+  type: 'test'
+  ...
+# Subtest: the registry parses labels, principals and scopes and refuses what it cannot read
+ok 7 - the registry parses labels, principals and scopes and refuses what it cannot read
+  ---
+  duration_ms: 5.760809
+  type: 'test'
+  ...
+# Subtest: authentication: the right token maps to its client; anything else is null
+ok 8 - authentication: the right token maps to its client; anything else is null
+  ---
+  duration_ms: 3.100915
+  type: 'test'
+  ...
+# Subtest: a replaced registry takes effect within a second: a removed token is refused
+ok 9 - a replaced registry takes effect within a second: a removed token is refused
+  ---
+  duration_ms: 1005.232065
+  type: 'test'
+  ...
+# Subtest: a registry that stops parsing keeps the last good set
+ok 10 - a registry that stops parsing keeps the last good set
+  ---
+  duration_ms: 1102.104054
+  type: 'test'
+  ...
+# Subtest: the failure limiter answers 0 within its budget and a wait past it
+ok 11 - the failure limiter answers 0 within its budget and a wait past it
+  ---
+  duration_ms: 0.681557
+  type: 'test'
+  ...
+# Subtest: the manifest in the repository passes the startup check
+ok 12 - the manifest in the repository passes the startup check
+  ---
+  duration_ms: 2.698988
+  type: 'test'
+  ...
+# Subtest: a scrape keeps accepted options, drops origin, and adds nothing
+ok 13 - a scrape keeps accepted options, drops origin, and adds nothing
+  ---
+  duration_ms: 88.110174
+  type: 'test'
+  ...
+# Subtest: refused options name themselves and why, before anything else
+ok 14 - refused options name themselves and why, before anything else
+  ---
+  duration_ms: 5.05353
+  type: 'test'
+  ...
+# Subtest: unknown keys, bad types and out-of-range values are 400 BAD_REQUEST
+ok 15 - unknown keys, bad types and out-of-range values are 400 BAD_REQUEST
+  ---
+  duration_ms: 4.114435
+  type: 'test'
+  ...
+# Subtest: keys and values named after inherited object members are unknown, not manifest entries
+ok 16 - keys and values named after inherited object members are unknown, not manifest entries
+  ---
+  duration_ms: 2.130579
+  type: 'test'
+  ...
+# Subtest: crawl and map get the platform's defaults; a crawl's units are its limit
+ok 17 - crawl and map get the platform's defaults; a crawl's units are its limit
+  ---
+  duration_ms: 0.459186
+  type: 'test'
+  ...
+# Subtest: a batch drops invalid URLs by default, refuses them on request, and caps its size
+ok 18 - a batch drops invalid URLs by default, refuses them on request, and caps its size
+  ---
+  duration_ms: 1.590966
+  type: 'test'
+  ...
+# Subtest: URLs: http(s) with a top-level domain and no credentials
+ok 19 - URLs: http(s) with a top-level domain and no credentials
+  ---
+  duration_ms: 0.858521
+  type: 'test'
+  ...
+# Subtest: the request hash ignores key order but not values
+ok 20 - the request hash ignores key order but not values
+  ---
+  duration_ms: 83.514571
+  type: 'test'
+  ...
+# Subtest: search: bounded query and limit, and every option the pinned client would ignore refused by name
+ok 21 - search: bounded query and limit, and every option the pinned client would ignore refused by name
+  ---
+  duration_ms: 2.563968
+  type: 'test'
+  ...
+# Subtest: the json format: a schema is required, it is an object within 16 KiB, and it is offered on scrape alone
+ok 22 - the json format: a schema is required, it is an object within 16 KiB, and it is offered on scrape alone
+  ---
+  duration_ms: 2.319357
+  type: 'test'
+  ...
+# Subtest: extraction: explicit URLs only, at most ten, a schema required; discovery refused by name
+ok 23 - extraction: explicit URLs only, at most ten, a schema required; discovery refused by name
+  ---
+  duration_ms: 1.627151
+  type: 'test'
+  ...
+1..23
+# tests 23
+# suites 0
+# pass 23
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2601.40655
+test_exit=0
+### contract_tap
+TAP version 13
+# Subtest: missing and malformed tokens get 401 with the gateway's own challenge; nothing reaches the core
+ok 1 - missing and malformed tokens get 401 with the gateway's own challenge; nothing reaches the core
+  ---
+  duration_ms: 404.34729
+  type: 'test'
+  ...
+# Subtest: a valid token scrapes; upstream's Cloud challenge is stripped; only the gateway's headers reach the core
+ok 2 - a valid token scrapes; upstream's Cloud challenge is stripped; only the gateway's headers reach the core
+  ---
+  duration_ms: 83.409071
+  type: 'test'
+  ...
+# Subtest: Host must be a served origin and a browser Origin is refused
+ok 3 - Host must be a served origin and a browser Origin is refused
+  ---
+  duration_ms: 84.660296
+  type: 'test'
+  ...
+# Subtest: a missing scope is 403; admin, unlisted and absolute-form paths are 404; known native routes not enabled are 501
+ok 4 - a missing scope is 403; admin, unlisted and absolute-form paths are 404; known native routes not enabled are 501
+  ---
+  duration_ms: 14.838736
+  type: 'test'
+  ...
+# Subtest: failed authentications past their budget get 429 while a valid token still works
+ok 5 - failed authentications past their budget get 429 while a valid token still works
+  ---
+  duration_ms: 511.800617
+  type: 'test'
+  ...
+# Subtest: oversized bodies are 413 (declared and chunked); Content-Length with Transfer-Encoding is 400
+ok 6 - oversized bodies are 413 (declared and chunked); Content-Length with Transfer-Encoding is 400
+  ---
+  duration_ms: 14.903977
+  type: 'test'
+  ...
+# Subtest: refused options are answered before any receipt or upstream request
+ok 7 - refused options are answered before any receipt or upstream request
+  ---
+  duration_ms: 65.607402
+  type: 'test'
+  ...
+# Subtest: synchronous requests past the in-flight limit get 503 OVERLOADED with Retry-After
+ok 8 - synchronous requests past the in-flight limit get 503 OVERLOADED with Retry-After
+  ---
+  duration_ms: 1507.678014
+  type: 'test'
+  ...
+# Subtest: a crawl is admitted, mapped, archived and paginated from the archive after the core forgets it
+ok 9 - a crawl is admitted, mapped, archived and paginated from the archive after the core forgets it
+  ---
+  duration_ms: 193.5842
+  type: 'test'
+  ...
+# Subtest: archival follows upstream's next past pages whose documents were not stored, and stops on a cancelled job's last page
+ok 10 - archival follows upstream's next past pages whose documents were not stored, and stops on a cancelled job's last page
+  ---
+  duration_ms: 726.846902
+  type: 'test'
+  ...
+# Subtest: per-item errors the core fails to serve are fetched again, never read as none; errors the core has forgotten are recorded as unknown
+ok 11 - per-item errors the core fails to serve are fetched again, never read as none; errors the core has forgotten are recorded as unknown
+  ---
+  duration_ms: 913.490457
+  type: 'test'
+  ...
+# Subtest: a page over the archive's size cap falls back to one document at a time, and a document over it is skipped and recorded
+ok 12 - a page over the archive's size cap falls back to one document at a time, and a document over it is skipped and recorded
+  ---
+  duration_ms: 709.185789
+  type: 'test'
+  ...
+# Subtest: a job whose reconciliation fails does not stop the round: a running job is still archived
+ok 13 - a job whose reconciliation fails does not stop the round: a running job is still archived
+  ---
+  duration_ms: 618.951333
+  type: 'test'
+  ...
+# Subtest: a job still open past its deadline and the grace period is closed with what was archived, and frees the upstream slot
+ok 14 - a job still open past its deadline and the grace period is closed with what was archived, and frees the upstream slot
+  ---
+  duration_ms: 639.84123
+  type: 'test'
+  ...
+# Subtest: archival stops at the result quota with what it holds, and admission then refuses new jobs with STORAGE_QUOTA
+ok 15 - archival stops at the result quota with what it holds, and admission then refuses new jobs with STORAGE_QUOTA
+  ---
+  duration_ms: 649.862937
+  type: 'test'
+  ...
+# Subtest: status reads of a running job are bounded in size and in number
+ok 16 - status reads of a running job are bounded in size and in number
+  ---
+  duration_ms: 1359.787136
+  type: 'test'
+  ...
+# Subtest: M7: a webhook destination is checked before any receipt; a retry of an accepted job gets its receipt whatever the check says now; a reused key is 409
+ok 17 - M7: a webhook destination is checked before any receipt; a retry of an accepted job gets its receipt whatever the check says now; a reused key is 409
+  ---
+  duration_ms: 704.365297
+  type: 'test'
+  ...
+# Subtest: a page of a hundred archived documents is served whole, without piling listeners on the response
+ok 18 - a page of a hundred archived documents is served whole, without piling listeners on the response
+  ---
+  duration_ms: 1428.458415
+  type: 'test'
+  ...
+# Subtest: the same idempotency key returns the same job; another request under it is 409; another principal's key is separate
+ok 19 - the same idempotency key returns the same job; another request under it is 409; another principal's key is separate
+  ---
+  duration_ms: 194.302165
+  type: 'test'
+  ...
+# Subtest: another principal's job looks exactly like an unknown one
+ok 20 - another principal's job looks exactly like an unknown one
+  ---
+  duration_ms: 544.038373
+  type: 'test'
+  ...
+# Subtest: a revoked token stops working within two seconds, without a restart
+ok 21 - a revoked token stops working within two seconds, without a restart
+  ---
+  duration_ms: 273.176596
+  type: 'test'
+  ...
+# Subtest: cancellation: a queued job never reaches the core; a running one is cancelled upstream; a finished one is 409
+ok 22 - cancellation: a queued job never reaches the core; a running one is cancelled upstream; a finished one is 409
+  ---
+  duration_ms: 701.364217
+  type: 'test'
+  ...
+# Subtest: a waiting job whose cancellation was asked closes while another job holds the upstream slot
+ok 23 - a waiting job whose cancellation was asked closes while another job holds the upstream slot
+  ---
+  duration_ms: 569.294669
+  type: 'test'
+  ...
+# Subtest: never delivered: with the core down the job is acknowledged, kept, and submitted once when the core returns
+ok 24 - never delivered: with the core down the job is acknowledged, kept, and submitted once when the core returns
+  ---
+  duration_ms: 2520.84843
+  type: 'test'
+  ...
+# Subtest: answer lost after the core created the job: reconciled by its submission key, never resubmitted
+ok 25 - answer lost after the core created the job: reconciled by its submission key, never resubmitted
+  ---
+  duration_ms: 582.811254
+  type: 'test'
+  ...
+# Subtest: gateway killed mid-submission after the core created the job: the next process maps it without resubmitting
+ok 26 - gateway killed mid-submission after the core created the job: the next process maps it without resubmitting
+  ---
+  duration_ms: 858.887838
+  type: 'test'
+  ...
+# Subtest: gateway killed mid-submission that never reached the core: uncertain until the settle window, then submitted once
+ok 27 - gateway killed mid-submission that never reached the core: uncertain until the settle window, then submitted once
+  ---
+  duration_ms: 10481.258958
+  type: 'test'
+  ...
+# Subtest: the ledger fails after the core accepted a claimed job: the running gateway reconciles it by marker, without a restart or a second submission
+ok 28 - the ledger fails after the core accepted a claimed job: the running gateway reconciles it by marker, without a restart or a second submission
+  ---
+  duration_ms: 814.954743
+  type: 'test'
+  ...
+# Subtest: an uncertain submission's answer says what a retry would do: with a key, without one, and for a read
+ok 29 - an uncertain submission's answer says what a retry would do: with a key, without one, and for a read
+  ---
+  duration_ms: 4152.7154
+  type: 'test'
+  ...
+# Subtest: a job past its deadline is cancelled upstream and ends FAILED with JOB_DEADLINE_EXCEEDED
+ok 30 - a job past its deadline is cancelled upstream and ends FAILED with JOB_DEADLINE_EXCEEDED
+  ---
+  duration_ms: 742.431047
+  type: 'test'
+  ...
+# Subtest: reconciliation that finds two upstream jobs for one submission keeps the earliest and cancels the other
+ok 31 - reconciliation that finds two upstream jobs for one submission keeps the earliest and cancels the other
+  ---
+  duration_ms: 968.894338
+  type: 'test'
+  ...
+# Subtest: a submission the core refuses is FAILED and answered like upstream's refusal
+ok 32 - a submission the core refuses is FAILED and answered like upstream's refusal
+  ---
+  duration_ms: 650.693365
+  type: 'test'
+  ...
+# Subtest: open-job admission caps answer 503 OVERLOADED with Retry-After
+ok 33 - open-job admission caps answer 503 OVERLOADED with Retry-After
+  ---
+  duration_ms: 519.04967
+  type: 'test'
+  ...
+# Subtest: a job the core forgets before finishing fails as UPSTREAM_STATE_LOST; results past retention are 410
+ok 34 - a job the core forgets before finishing fails as UPSTREAM_STATE_LOST; results past retention are 410
+  ---
+  duration_ms: 838.626091
+  type: 'test'
+  ...
+# Subtest: retention: expired results leave the manifest and their files go; old metadata goes whole with its events; expired idempotency keys go
+ok 35 - retention: expired results leave the manifest and their files go; old metadata goes whole with its events; expired idempotency keys go
+  ---
+  duration_ms: 1511.781986
+  type: 'test'
+  ...
+# Subtest: the ledger's times follow the manifest: deadline, results retention, metadata retention and idempotency window
+ok 36 - the ledger's times follow the manifest: deadline, results retention, metadata retention and idempotency window
+  ---
+  duration_ms: 477.101523
+  type: 'test'
+  ...
+# Subtest: an origin from the host-side file is served, and names the URLs the gateway returns
+ok 37 - an origin from the host-side file is served, and names the URLs the gateway returns
+  ---
+  duration_ms: 1182.123581
+  type: 'test'
+  ...
+# Subtest: the platform status reports the core, the ledger and the capabilities
+ok 38 - the platform status reports the core, the ledger and the capabilities
+  ---
+  duration_ms: 5.337308
+  type: 'test'
+  ...
+# Subtest: shutdown claims nothing: a job that comes due while open requests finish is left for the next process
+ok 39 - shutdown claims nothing: a job that comes due while open requests finish is left for the next process
+  ---
+  duration_ms: 6448.824543
+  type: 'test'
+  ...
+# Subtest: a ledger schema this build was not written for stops startup; an unreachable ledger is waited for
+ok 40 - a ledger schema this build was not written for stops startup; an unreachable ledger is waited for
+  ---
+  duration_ms: 8029.86544
+  type: 'test'
+  ...
+# Subtest: M7: a 2xx answer is stored marked as the hit it will be and sent back as stored; error pages, storeInCache false and a plain scrape store nothing
+ok 41 - M7: a 2xx answer is stored marked as the hit it will be and sent back as stored; error pages, storeInCache false and a plain scrape store nothing
+  ---
+  duration_ms: 1401.98745
+  type: 'test'
+  ...
+# Subtest: configuration that is unknown, unsafe or missing its data mount stops startup
+ok 42 - configuration that is unknown, unsafe or missing its data mount stops startup
+  ---
+  duration_ms: 983.623185
+  type: 'test'
+  ...
+# Subtest: M8: while the host holds dispatch, new work is 503 HOST_PRESSURE with a Retry-After and reaches neither the core nor the ledger; reads answer; open or stale, work is served
+ok 43 - M8: while the host holds dispatch, new work is 503 HOST_PRESSURE with a Retry-After and reaches neither the core nor the ledger; reads answer; open or stale, work is served
+  ---
+  duration_ms: 4630.859407
+  type: 'test'
+  ...
+1..43
+# tests 43
+# suites 0
+# pass 43
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 61010.815894
+test_exit=0
+node_version=v22.23.3
+### transient
+leftover_transient_containers=0 leftover_transient_networks=0
+### end
+end

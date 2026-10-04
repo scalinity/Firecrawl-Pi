@@ -1,0 +1,4 @@
+### meta
+utc=2026-10-03T15:23:55Z source_commit=f72333f81d2c4753bf83d0db359e9ca6c99ef3da mode=read-only-installed-package-check
+key_fingerprint=2596A99EAAB33821893C0A79458CA832957F5868
+installed=1.102.4 tailscaled=active

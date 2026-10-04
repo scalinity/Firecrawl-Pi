@@ -1,0 +1,46 @@
+✔ immutable accepted bytes plus bounded concurrent measurements pass (31.634625ms)
+✔ tampered historical evidence never passes (25.877458ms)
+✔ assessment decision, provenance, complete path coverage and hash are mandatory (292.566875ms)
+✔ lock or runtime changes, missing bound receipts, wrong source and wrong incident fail (140.436417ms)
+✔ duplicate frames, non-JSON sample, large gaps and short runs are rejected (114.453291ms)
+✔ boot or container restart and wrong service names fail even if health recovers (67.034417ms)
+✔ incident must overlap real successful traffic with memory headroom and no swap (93.927209ms)
+✔ OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail (185.293ms)
+✔ timestamps, sustained request bins, required classes and window alignment matter (68.900834ms)
+✔ every latency must be finite and satisfy the canonical bound (69.378166ms)
+✔ Redis denials, wrong principal and measurements outside the run fail (93.696375ms)
+✔ source equivalence covers only three pure evaluators and refuses rename deletions (0.13125ms)
+✔ runtime sources never import evidence-only helper or verifier (62.262542ms)
+✔ compose equality allows only exact reviewed mounts and changed images (16.078416ms)
+✖ the immutable old failed Cloud probe is explained without changing its FAIL (2.364ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 14
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1407.594708
+
+✖ failing tests:
+
+test at ../../../.local/share/firecrawl-pi/m9/candidate-resource-reuse.test.mjs:26:1
+✖ the immutable old failed Cloud probe is explained without changing its FAIL (2.364ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  'PASS' !== 'FAIL'
+  
+      at TestContext.<anonymous> (file:///Users/danny/.local/share/firecrawl-pi/m9/candidate-resource-reuse.test.mjs:26:806)
+      at Test.runInAsyncScope (node:async_hooks:226:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 'PASS',
+    expected: 'FAIL',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

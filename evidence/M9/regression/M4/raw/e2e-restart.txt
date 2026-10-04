@@ -1,0 +1,26 @@
+### meta
+{"utc":"2026-10-03T18:30:41.711Z","phase":"restart","platform":"darwin","node":"v26.10.0","client":"@modelcontextprotocol/client@2.1.0","deployed_commit":"82a11536707e3fb6d4fe76497e857b137c5e2184","pi_utc":"2026-10-03T18:30:41.718Z"}
+### forward
+{"utc":"2026-10-03T18:30:41.969Z","pid":22592}
+### resources
+{"utc":"2026-10-03T18:30:42Z","label":"start-restart","mcp":{"instance":"bce65aff9742","started_at":"2026-10-03T15:49:24.892321637Z","peak":70549504,"max":"201326592","current":42237952,"oom_kill":0},"gateway":{"instance":"a92264002c78","started_at":"2026-10-03T18:00:26.744088496Z","peak":48365568,"max":"167772160","current":33882112,"oom_kill":0},"core":{"instance":"3367bc77d4d6","started_at":"2026-10-03T18:28:23.831210571Z","peak":2065448960,"max":"2684354560","current":1818099712,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4893664}
+### before_restart
+{"utc":"2026-10-03T18:30:43.631Z","case":"crawl_started","id":"faa1ddf8-ec8f-4867-a1af-a54f77d59929","sdk_id":"bfb33292-00a8-4b7b-81d7-245a499c3495","status":200,"request_id":"e3bf851e-4fd8-4109-8b0c-787cc13bc9fd","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":52661,"started_at":"2026-10-03T15:49:24.892321637Z","gateway_started_at":"2026-10-03T18:00:26.744088496Z"}
+### resources
+{"utc":"2026-10-03T18:30:43Z","label":"before-mcp-restart","mcp":{"instance":"bce65aff9742","started_at":"2026-10-03T15:49:24.892321637Z","peak":70549504,"max":"201326592","current":42352640,"oom_kill":0},"gateway":{"instance":"a92264002c78","started_at":"2026-10-03T18:00:26.744088496Z","peak":48365568,"max":"167772160","current":33882112,"oom_kill":0},"core":{"instance":"3367bc77d4d6","started_at":"2026-10-03T18:28:23.831210571Z","peak":2065448960,"max":"2684354560","current":1818804224,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4915392}
+### during_restart
+{"utc":"2026-10-03T18:30:45.039Z","case":"rest_crawl_status","status":200,"body_status":"scraping"}
+### after_restart
+{"utc":"2026-10-03T18:30:51.897Z","case":"restarted","restarted_at":"2026-10-03T18:30:45.007Z","started_at":"2026-10-03T18:30:44.880595055Z","gateway_started_at":"2026-10-03T18:00:26.744088496Z","started_changed":true,"gateway_unchanged":true}
+{"utc":"2026-10-03T18:31:00.330Z","case":"status_new_connection","id":"faa1ddf8-ec8f-4867-a1af-a54f77d59929","status":"completed","request_id":"5b3cf83a-3902-4623-89c2-a53a1f02366c","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":52725,"completed":6,"returned":6,"crawl_local_port":52661,"status_local_ports":[52699,52703,52706,52707,52725]}
+{"utc":"2026-10-03T18:31:16.613Z","case":"sdk_client_across_restart","id":"bfb33292-00a8-4b7b-81d7-245a499c3495","status":"completed","completed":3,"exchanges_with_session":0,"initialize_sent":false}
+### pi_view
+{"utc":"2026-10-03T18:31:18.651Z","case":"instances","crawl_instance":"31cf143c-0435-4736-980b-bee8ba945532","status_instances":["afd623a2-27e3-4b0d-afdc-0ef9102768f2"],"started_instances":["afd623a2-27e3-4b0d-afdc-0ef9102768f2"]}
+### resources
+{"utc":"2026-10-03T18:31:18Z","label":"end-restart","mcp":{"instance":"bce65aff9742","started_at":"2026-10-03T18:30:44.880595055Z","peak":56639488,"max":"201326592","current":38715392,"oom_kill":0},"gateway":{"instance":"a92264002c78","started_at":"2026-10-03T18:00:26.744088496Z","peak":48365568,"max":"167772160","current":34111488,"oom_kill":0},"core":{"instance":"3367bc77d4d6","started_at":"2026-10-03T18:28:23.831210571Z","peak":2065448960,"max":"2684354560","current":1824505856,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4906512}
+### connections
+{"utc":"2026-10-03T18:31:19.247Z","hosts":["127.0.0.1:3380"],"total":9,"lookups":[]}
+### forward
+{"utc":"2026-10-03T18:31:19.247Z","pid":22592,"exited_before_end":false}
+### end
+{"utc":"2026-10-03T18:31:19.247Z","exit":0}

@@ -1,0 +1,5 @@
+M3-X02 PASS               persistence-across-force-recreate
+M3-A02 PASS               pagination-private-origin-stable
+M3-N02 PASS               spoofed-principal-headers-have-no-effect
+M3-A01 PASS               authorized-scrape-crawl-batch-map
+M3-J07 PASS               cancellation-stops-new-work

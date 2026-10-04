@@ -1,0 +1,38 @@
+### meta
+utc=2026-10-03T11:10:46Z deployed_commit=14de77bc2b302e4484736b3d281d16bea72de8aa watchdog_installed_sha256=75b90111a60d61972a2ec26aae908f382f189b8b2539ac152ab0d9e3d704ee31 watchdog_repository_sha256=75b90111a60d61972a2ec26aae908f382f189b8b2539ac152ab0d9e3d704ee31
+### before
+cls=ok
+fails=0
+goods=2182
+open=0
+first_fail=1790894572
+opened_at=1790894692
+last_fail=1790894872
+last_ok=1791025776
+id=
+last_seen_cls=ok
+heartbeat_age_s=12
+### window
+{"from":"2026-10-03T11:10:46Z","heartbeat_stopped":"2026-10-03T11:10:51Z","opened_seen":"2026-10-03T11:16:07Z","heartbeat_started":"2026-10-03T11:19:09Z","to":"2026-10-03T11:20:55Z","opened":true,"cleared":true}
+### events
+{"utc":"2026-10-03T11:15:52Z","event":"opened","class":"heartbeat_missing","incident_id":"d2eaacb1","first_failed":"2026-10-03T11:13:50Z","threshold_crossed":"2026-10-03T11:15:52Z","consecutive_failures":3,"sent":true}
+{"utc":"2026-10-03T11:20:52Z","event":"cleared","class":"heartbeat_missing","incident_id":"d2eaacb1","first_failed":"2026-10-03T11:13:50Z","last_failed":"2026-10-03T11:18:52Z","recovered":"2026-10-03T11:20:52Z","outage_s":422,"sent":true}
+### after
+cls=ok
+fails=0
+goods=2
+open=0
+first_fail=1791026030
+opened_at=1791026152
+last_fail=1791026332
+last_ok=1791026436
+id=
+last_seen_cls=ok
+### ntfy_server
+{"id":"Aj7R2A8ikrtw","time":1791025846,"title":"Firecrawl Pi — Recovery attempted","priority":4,"tags":["mag","fcpi","recovery_attempted"],"incident":"c0dd45af"}
+{"id":"WvomgXlfeMEn","time":1791025976,"title":"Firecrawl Pi — Recovery attempted","priority":4,"tags":["mag","fcpi","recovery_attempted"],"incident":"980e3208"}
+{"id":"Imkyszt5Ed2O","time":1791026090,"title":"Firecrawl Pi — Recovery failed","priority":5,"tags":["x","fcpi","recovery_failed"],"incident":"216d9027"}
+{"id":"KqXXc21R1WPl","time":1791026111,"title":"Firecrawl Pi — Recovered","priority":3,"tags":["white_check_mark","fcpi","recovery_succeeded"],"incident":"216d9027"}
+{"id":"EPhHLZkuPZwg","time":1791026152,"title":"Firecrawl Pi — External Watchdog","priority":5,"tags":["rotating_light","fcpi","watchdog_unreachable"],"incident":"d2eaacb1"}
+{"id":"ZF783vTYDYLz","time":1791026452,"title":"Firecrawl Pi — Reachable Again","priority":3,"tags":["white_check_mark","fcpi","watchdog_reachable"],"incident":"d2eaacb1"}
+### end

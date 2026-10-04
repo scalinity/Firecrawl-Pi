@@ -1,0 +1,8 @@
+{
+  "source_commit": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+  "state": "FAIL",
+  "failure_class": "verification_transport",
+  "observed": "K1-K4 recovered with one upstream group; after K5 pre-submission diagnostics the next POST failed with socket hang up before any active-page witness.",
+  "cause": "Inferred fixture transport issue: Node default Agent pools keep-alive sockets across the deliberately killed/restarted gateway; explicit fresh connections remove that dependency.",
+  "remediation": "Use agent:false for actual M3 acceptance requests; no runtime retry or altered budget."
+}

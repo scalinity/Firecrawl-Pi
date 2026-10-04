@@ -1,0 +1,481 @@
+{
+  "schema": "fcpi.m3.verification/v1",
+  "runner": "scripts/m3/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main.",
+  "results": [
+    {
+      "test_id": "M3-B00",
+      "name": "baseline-matches-m2-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-G01",
+      "name": "gateway-image-pinned-built-and-running",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-G02",
+      "name": "gateway-tests-pass-in-the-running-image",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-R01",
+      "name": "route-shapes-verified-at-the-pin",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A01",
+      "name": "authorized-scrape-crawl-batch-map",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "7d6311fbeebb05a217b865ea073ea79f78bc4b9de797158908df81966e9540c6",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-sync.txt",
+        "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+        "evidence/M9/regression/M3/raw/sdk-compat.txt"
+      ],
+      "expected": "through the private path with a scoped token: a scrape returns the fixture's sentinel in Markdown and HTML with its links and status 200; a map returns exactly the 12 graph URLs (5 under limit 5); a crawl of the controlled graph finishes with the 12 unique pages and their sentinels; a crawl limited to 5 returns exactly 5; a batch keeps per-item outcomes (two pages, a 404 page, the authentication gate as an AUTH_REQUIRED error) and reports the invalid URL; the pinned official client does the same operations against the gateway",
+      "state": "PASS",
+      "actual": "failed conditions=none; crawl SUCCEEDED archived=12; batch PARTIAL docs=3 errors=1; map=12; official client exit=0",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A02",
+      "name": "pagination-private-origin-stable",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f197704d6373489fb0bb8ce9f4fa50df1d57735935909243f1c500440203c42",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+        "evidence/M9/regression/M3/raw/e2e-expiry.txt",
+        "evidence/M9/regression/M3/raw/e2e-after-recreate.txt"
+      ],
+      "expected": "a finished 12-page crawl read 5 at a time comes back as pages of 5, 5 and 2 whose `next` URLs name the gateway's private origin, the job's external id and increasing skips, never an internal host; the union is the 12 documents once each; the same pages read after the core forgot the job and after every container was recreated give the same documents",
+      "state": "PASS",
+      "actual": "pages=[5,5,2]; next URLs on the private origin with the external id=true; unique documents=12; same documents after expiry and recreation=true; internal host in the transcript=false",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A03",
+      "name": "credentials-missing-invalid-revoked-scope-owner",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "c1a21586b6665c31415fcaba14adcd1b731ef61371d80c551a914972a36ab195",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-auth.txt"
+      ],
+      "expected": "missing, unknown, Basic-scheme and empty tokens get 401 with the gateway's own challenge (Bearer realm=\"fcpi\", never a firecrawl.dev one) while a valid token gets 200; a read-only token gets 403 INSUFFICIENT_SCOPE on scrape, map, crawl, batch and cancel and 200 on status; on five job routes another principal gets exactly the unknown-id answer (same status and body hash), with and without spoofed identity headers, while the owner gets 200 and the other principal's job list (a list) excludes the job that the owner's own list holds (the control); a token revoked on the Pi is refused within 3 s without a gateway restart (its start time the same before the revocation and after the refusal), having worked just before",
+      "state": "PASS",
+      "actual": "unauthenticated=true; scopes=true; owner isolation over 5 routes=true; revocation refused after 569 ms (restarts 0)=true; no Cloud challenge=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A04",
+      "name": "request-limits-and-overload",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A05",
+      "name": "unsupported-options-refused-before-work",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J01",
+      "name": "crash-before-upstream-submission-k1",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J02",
+      "name": "crash-after-upstream-submission-k2-k3",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J03",
+      "name": "acknowledged-jobs-tracked-through-crashes-k4-k5",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "77f3e13b00d17ff07e098b265c35bc3051acbceb5bf47ed49c50acfbf02a2355",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-crash.txt"
+      ],
+      "expected": "an acknowledged crawl running when the gateway is killed is tracked by the next gateway to SUCCEEDED with all 6 pages archived; one with an observed active slow page when the core is killed reaches an explicit end state (here SUCCEEDED) after NuQ requeued the interrupted page (at least one stalled page, the positive control that work was cut), no page above 4 attempts, and one upstream job",
+      "state": "PASS",
+      "actual": "K4 SUCCEEDED archived=6; K5 SUCCEEDED archived=6 stalled pages=1 attempts per page=[2,1,1,1,1,1]",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J04",
+      "name": "idempotent-requests-and-conflicting-reuse",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "27059dd493674d3b83a549ee741f43ab172a9aad94a7690944e2bc59b7eb8529",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+        "evidence/M9/regression/M3/raw/sdk-compat.txt",
+        "evidence/M9/regression/M3/raw/e2e-crash.txt"
+      ],
+      "expected": "a repeated crawl with the same idempotency key and body (also with its keys reordered) returns the same id; the same key with another body is 409 IDEMPOTENCY_CONFLICT; another principal's use of the key makes its own job; one upstream job carries the key; a batch retried under its key returns the same id, also through the official client; the crash tests' client retries under their keys return the ids they were given; each \"same id\" is two recorded UUIDs that are equal, and the official client's run ended cleanly",
+      "state": "PASS",
+      "actual": "same id where expected={\"same_body\":true,\"reordered\":true,\"batch\":true,\"official_client\":true,\"crash_retry\":true}; other body=409; other principal got its own job=true; upstream jobs for the key=1",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J05",
+      "name": "no-duplicate-logical-submission",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J06",
+      "name": "results-served-after-core-redis-and-nuq-expiry-r9",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5c59fff279d95f09af14a2c0fe6f2e05ddbd0f2e11cb82ee92835b58c6cecf24",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-expiry.txt"
+      ],
+      "expected": "before: the finished crawl's and batch's NuQ job rows and group rows exist, Redis holds their crawl keys and the core answers 200 for them; then pg_cron's own nuq_group_crawl_clean deletes the rows (a successful run that started after the expiry UPDATE committed, both on the database's clock), the Redis keys expire and the core is recreated: 0 NuQ rows, 0 group rows, 0 keys and the core answers 404; yet the gateway serves every document, each hashing to the archive manifest and to the hash recorded when the job finished (evidence/M1/review/REVIEW.md R9)",
+      "state": "PASS",
+      "actual": "before: nuq rows [15,4] keys [10,7] core [\"200\",\"200\"]; after: rows [0,0] keys [0,0] core [\"404\",\"404\"]; served crawl=12 hashes equal=true batch=3 hashes equal=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J07",
+      "name": "cancellation-stops-new-work",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "775759b8b2a118d0f3eddd9a8c2830f9983d5cb13814b6ab9fc7776657dd645e",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-cancel.txt",
+        "evidence/M9/regression/M3/raw/sdk-compat.txt"
+      ],
+      "expected": "a crawl queued behind a running one is cancelled before submission (CANCELLED, no upstream job); the running slow crawl's cancel answers {status: cancelled}, it ends CANCELLED with its completed pages archived, and no slow page started more than 2.5 s after the cancel; cancelling a finished crawl is 409; the official client's cancel returns true and the crawl ends cancelled",
+      "state": "PASS",
+      "actual": "queued job CANCELLED upstream=0; running job CANCELLED archived=4; slow pages started after cancel+2.5 s=0 of 3; finished job cancel=409; official client=cancelled",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N01",
+      "name": "host-and-origin-validated",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "2f5d0be45701c7b8816b74bf02fe1e1c90c156fff2604841d024f8d29542d0e7",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-auth.txt",
+        "evidence/M9/regression/M3/raw/e2e-sync.txt"
+      ],
+      "expected": "a foreign Host and a rebinding-style Host are 421 MISDIRECTED; the served loopback origins are 200; a foreign or null browser Origin (and a foreign preflight) is 403 ORIGIN_NOT_ALLOWED; no Origin is 200; no response carries Access-Control-Allow-Origin, including the scrape and map answers forwarded from the core (whose cors() middleware sets it on every answer), each recorded with the header's value",
+      "state": "PASS",
+      "actual": "host_foreign=421 host_rebinding_name=421 host_localhost_alias=200 host_loopback=200 origin_foreign=403 origin_null=403 origin_absent=200 preflight_foreign=403; ACAO on gateway answers=false; forwarded answers=200,200,200, ACAO on them=absent,absent,absent",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N02",
+      "name": "spoofed-principal-headers-have-no-effect",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "8cdfbaf450b78521736cb9d1cb5bf421ff6098bdc3e217128349a1d51276f4fe",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/e2e-auth.txt",
+        "evidence/M9/regression/M3/raw/gateway-tests.txt"
+      ],
+      "expected": "live: another principal sending x-fcpi-principal, x-fcpi-owner, x-forwarded-user, x-forwarded-for and x-real-ip naming the owner still gets exactly the unknown-id answer on every job route; contract: the core receives only the gateway's own headers (no authorization, cookie, forwarded, idempotency or x-fcpi-* header) and no query string",
+      "state": "PASS",
+      "actual": "live routes with spoofed headers answered as unknown=5/5; contract header test passed=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N03",
+      "name": "internal-ports-denied-from-every-vantage",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "1a938347817e1a3a0e4fa421bda53769fae20c85281a7b7fe1528cff13a9dd51",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/port-probe.txt",
+        "evidence/M9/regression/M3/raw/lan-probe.txt"
+      ],
+      "expected": "every probe names a host and every resolved address is a project address; from the gateway (the permitted vantage) the core's API and PostgreSQL open (the positive controls) and nothing else but the core's own harness ports on fcpi_api: Redis, RabbitMQ, the retrieval service (/internal/acquire too), the browser worker and the fixture are unresolved or dropped, as are the host's listeners through the bridge; a container on the publication bridge reaches only the gateway's port; a container on Docker's default bridge reaches no project service (the host's sshd is its control); on the host only 127.0.0.1:3380 is open; from the LAN every project port is closed while sshd (the control) is open; the guard counted the dropped attempts; no throwaway container is left",
+      "state": "PASS",
+      "actual": "probes=70 with named hosts=true, project addresses=true; gateway opens=core_api,postgres,core_3004,core_3005,core_3006,core_3007,core_3008; access peer=true; default bridge=true; host=true (22 probes); guard counted drops=true; LAN closed 19 with control=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N04",
+      "name": "published-ports-loopback-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N05",
+      "name": "missing-data-mount-fails-closed",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N06",
+      "name": "platform-network-and-ledger-rights",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X02",
+      "name": "persistence-across-force-recreate",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "140a3842047b92d4502dd23de01b5d7e4626d5ec37f7bd98d67dc5de92e056ff",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/persistence.txt",
+        "evidence/M9/regression/M3/raw/e2e-after-recreate.txt"
+      ],
+      "expected": "after `up -d --force-recreate` with no volume removed, all ten services run healthy in new containers; the PostgreSQL, Redis and RabbitMQ sentinels read back; the ledger's rows (receipts, every event, every idempotency key, the document manifest) hash the same; the archive keeps every file, at least one and at least one per distinct document the manifest names, each hashing to its name; the sentinel is a real value; the client registry is unchanged; afterwards the gateway still accepts a token and serves the archived crawl and batch with the same document hashes; the core's log was saved first",
+      "state": "PASS",
+      "actual": "replaced=true; healthy=true; sentinels pg=true redis=true rabbitmq=true; ledger same=true; billing same=true; archive same=true; registry same=true; served after=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X03",
+      "name": "non-internal-containers-name-their-dns-and-the-core-stays-inside",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-L01",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-C01",
+      "name": "fcpi-status-and-jobs",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-M01",
+      "name": "memory-within-caps",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-P01",
+      "name": "private-access-from-the-target-machine",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-P02",
+      "name": "tailnet-tls-private-serving",
+      "utc": "2026-10-03T19:11:20Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "d556d7c5f64b858e4281266f85d444448e210fc40aefe2fe7ead92e439ca3e61",
+      "input_paths": [
+        "evidence/M9/regression/M3/raw/tailscale-before.txt",
+        "evidence/M9/regression/M3/raw/tailscale-install.txt",
+        "evidence/M9/regression/M3/raw/lan-probe.txt",
+        "evidence/M9/regression/M3/raw/tailscale-status.txt",
+        "evidence/M9/regression/M3/raw/tailnet-check.txt"
+      ],
+      "expected": "Tailscale is installed from its repository with the signing key's published fingerprint, and the installed keyring holds that one primary key and no other; it runs without taking the host's DNS (resolv.conf unchanged), routes, an exit node or Tailscale SSH; Serve maps tailnet :8443 to the gateway's loopback publication with no Funnel; from the workstation over the tailnet the certificate verifies for the machine's name, a read-only token gets 200 and no token 401, the gateway returns URLs on the tailnet origin and refuses a foreign Host; from the LAN :8443 is closed; the loaded guard holds the repository guard file's three tailnet rules, and over the tailnet no port a host service listens on answers while Serve's :8443 does (the control); tailscaled's own peer API, which its userspace network stack answers before the host's firewall, is reported by name",
+      "state": "PASS",
+      "actual": "failed conditions=none; backend=Running; serve=[{\"host_port\":\"<pi-tailnet-name-host>:8443\",\"handlers\":{\"/\":\"http://127.0.0.1:3380\"}}]; TLS TLSv1.3 authorized=true issuer=Let's Encrypt; with token=200 without=401 foreign host=421; tailnet ports held by host services=22:timeout,53:timeout,80:timeout,443:timeout,1884:timeout,8080:timeout,9001:timeout; tailscaled's own answering=8443,35237",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    }
+  ]
+}

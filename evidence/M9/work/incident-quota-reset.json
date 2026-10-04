@@ -1,0 +1,16 @@
+{
+  "schema": "fcpi.owner-quota-reset-result/v1",
+  "utc": "2026-10-03T15:29:18Z",
+  "source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+  "state": "PASS",
+  "authorization": "Direct owner instruction",
+  "utc_day": "2026-10-03",
+  "active_count_before": 4,
+  "active_count_after": 0,
+  "normal_daily_limit": 4,
+  "audit_archive": "quota-reset-20261003T152917Z",
+  "original_ledger_sha256": "970ac672ce030c05e0f4470023176104b7c81b73f5f41a8cfdc25fd11099c043",
+  "authorization_sha256": "c07e2f9a6cab71fdfc23f21ecd6e4284bc5e92ec273cc2cd1d589870ff00f53f",
+  "automatic_investigation_enabled": false,
+  "paid_spending_authorized": false
+}

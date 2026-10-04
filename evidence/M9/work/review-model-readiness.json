@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-03T04:21:01.370Z",
+  "test_id": "M9-REVIEW-MODEL-READINESS",
+  "is_error": false,
+  "models": [
+    "claude-opus-5-5"
+  ],
+  "api_equivalent_estimate_usd": 0.016766200000000002,
+  "subscription": true,
+  "tool_count": 1
+}

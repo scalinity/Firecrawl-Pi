@@ -1,0 +1,680 @@
+{
+  "utc": "2026-10-03T12:53:04Z",
+  "period": "month",
+  "jobs": [
+    {
+      "kind": "batch",
+      "state": "PARTIAL",
+      "jobs": 2,
+      "units": 8
+    },
+    {
+      "kind": "batch",
+      "state": "SUCCEEDED",
+      "jobs": 87,
+      "units": 448
+    },
+    {
+      "kind": "crawl",
+      "state": "CANCELLED",
+      "jobs": 10,
+      "units": 91
+    },
+    {
+      "kind": "crawl",
+      "state": "PARTIAL",
+      "jobs": 4,
+      "units": 100
+    },
+    {
+      "kind": "crawl",
+      "state": "SUCCEEDED",
+      "jobs": 165,
+      "units": 1740
+    },
+    {
+      "kind": "extract",
+      "state": "FAILED",
+      "jobs": 8,
+      "units": 8
+    },
+    {
+      "kind": "extract",
+      "state": "PARTIAL",
+      "jobs": 8,
+      "units": 16
+    },
+    {
+      "kind": "extract",
+      "state": "SUCCEEDED",
+      "jobs": 25,
+      "units": 34
+    }
+  ],
+  "acquisitions": {
+    "acquisitions": 8741,
+    "attempts": 9110
+  },
+  "attempts_by_tier": [
+    {
+      "strategy": "direct_browser",
+      "outcome": "ACCESS_DENIED",
+      "attempts": 7,
+      "bytes": 159
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "ACTION_FAILED",
+      "attempts": 2,
+      "bytes": 990
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "AUTH_REQUIRED",
+      "attempts": 2,
+      "bytes": 392
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "BLOCKED_PUBLIC_CONTENT",
+      "attempts": 7,
+      "bytes": 2434
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "BROWSER_CRASHED",
+      "attempts": 6,
+      "bytes": 3485
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "BROWSER_ERROR",
+      "attempts": 2,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "BROWSER_UNAVAILABLE",
+      "attempts": 28,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "NAVIGATION_FAILED",
+      "attempts": 1,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "rendered",
+      "attempts": 660,
+      "bytes": 539365
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "RENDERER_CRASHED",
+      "attempts": 1,
+      "bytes": 25442282
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "RENDER_INCOMPLETE",
+      "attempts": 3,
+      "bytes": 1638
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "RESOURCE_LIMIT",
+      "attempts": 2,
+      "bytes": 1766
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "SIZE_LIMIT",
+      "attempts": 3,
+      "bytes": 2622
+    },
+    {
+      "strategy": "direct_browser",
+      "outcome": "TIMEOUT",
+      "attempts": 3,
+      "bytes": 1778
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "ACCESS_DENIED",
+      "attempts": 4,
+      "bytes": 674
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "adequate",
+      "attempts": 7175,
+      "bytes": 36745040
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "AUTH_REQUIRED",
+      "attempts": 8,
+      "bytes": 1426
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "binary",
+      "attempts": 283,
+      "bytes": 3114055
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "BLOCKED_PUBLIC_CONTENT",
+      "attempts": 29,
+      "bytes": 8874
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "CANCELLED",
+      "attempts": 7,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "CLOUD_DENIED",
+      "attempts": 1,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "DNS_FAILURE",
+      "attempts": 8,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "fetched",
+      "attempts": 267,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "js_shell",
+      "attempts": 339,
+      "bytes": 241857
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "not_found",
+      "attempts": 28,
+      "bytes": 3088
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "RATE_LIMITED",
+      "attempts": 10,
+      "bytes": 718
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "SIZE_LIMIT",
+      "attempts": 12,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "SSRF_DENIED",
+      "attempts": 6,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "target_error",
+      "attempts": 18,
+      "bytes": 2830
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "TIMEOUT",
+      "attempts": 1,
+      "bytes": 0
+    },
+    {
+      "strategy": "direct_http",
+      "outcome": "TOO_MANY_REDIRECTS",
+      "attempts": 2,
+      "bytes": 0
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "adequate",
+      "attempts": 16,
+      "bytes": 7166
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "AUTH_REQUIRED",
+      "attempts": 2,
+      "bytes": 316
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "BLOCKED_PUBLIC_CONTENT",
+      "attempts": 5,
+      "bytes": 1046
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "CLOUD_DENIED",
+      "attempts": 2,
+      "bytes": 0
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "ENHANCED_UNCERTAIN",
+      "attempts": 1,
+      "bytes": 0
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "not_found",
+      "attempts": 2,
+      "bytes": 302
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "PROVIDER_AUTH_FAILED",
+      "attempts": 1,
+      "bytes": 0
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "PROVIDER_RATE_LIMITED",
+      "attempts": 1,
+      "bytes": 0
+    },
+    {
+      "strategy": "enhanced",
+      "outcome": "RATE_LIMITED",
+      "attempts": 2,
+      "bytes": 328
+    },
+    {
+      "strategy": "residential_browser",
+      "outcome": "BLOCKED_PUBLIC_CONTENT",
+      "attempts": 1,
+      "bytes": 1337
+    },
+    {
+      "strategy": "residential_browser",
+      "outcome": "rendered",
+      "attempts": 7,
+      "bytes": 31388
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "adequate",
+      "attempts": 115,
+      "bytes": 151358
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "BLOCKED_PUBLIC_CONTENT",
+      "attempts": 2,
+      "bytes": 2310
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "js_shell",
+      "attempts": 2,
+      "bytes": 3400
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "not_found",
+      "attempts": 4,
+      "bytes": 3990
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "PROVIDER_AUTH_FAILED",
+      "attempts": 2,
+      "bytes": 722
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "PROVIDER_BILLING",
+      "attempts": 2,
+      "bytes": 722
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "PROVIDER_UNREACHABLE",
+      "attempts": 14,
+      "bytes": 636
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "RATE_LIMITED",
+      "attempts": 2,
+      "bytes": 0
+    },
+    {
+      "strategy": "residential_http",
+      "outcome": "SIZE_LIMIT",
+      "attempts": 2,
+      "bytes": 20052548
+    }
+  ],
+  "provider_calls": [
+    {
+      "category": "enhanced",
+      "provider": "zyte",
+      "state": "SETTLED",
+      "calls": 3,
+      "reserved": 3810,
+      "settled": 3810
+    },
+    {
+      "category": "fixture",
+      "provider": "fixture-model",
+      "state": "RELEASED",
+      "calls": 20,
+      "reserved": 137184,
+      "settled": 0
+    },
+    {
+      "category": "fixture",
+      "provider": "fixture-model",
+      "state": "SETTLED",
+      "calls": 261,
+      "reserved": 2377692,
+      "settled": 170075
+    },
+    {
+      "category": "fixture",
+      "provider": "fixture-model",
+      "state": "UNCERTAIN",
+      "calls": 8,
+      "reserved": 54816,
+      "settled": 0
+    },
+    {
+      "category": "fixture_enhanced",
+      "provider": "fixture-zyte",
+      "state": "RELEASED",
+      "calls": 3,
+      "reserved": 3810,
+      "settled": 0
+    },
+    {
+      "category": "fixture_enhanced",
+      "provider": "fixture-zyte",
+      "state": "SETTLED",
+      "calls": 25,
+      "reserved": 90990,
+      "settled": 90990
+    },
+    {
+      "category": "fixture_enhanced",
+      "provider": "fixture-zyte",
+      "state": "UNCERTAIN",
+      "calls": 1,
+      "reserved": 1270,
+      "settled": 0
+    },
+    {
+      "category": "fixture_enhanced_small",
+      "provider": "fixture-zyte",
+      "state": "RELEASED",
+      "calls": 15,
+      "reserved": 19050,
+      "settled": 0
+    },
+    {
+      "category": "fixture_parser",
+      "provider": "fixture-parser",
+      "state": "RELEASED",
+      "calls": 8,
+      "reserved": 24,
+      "settled": 0
+    },
+    {
+      "category": "fixture_parser",
+      "provider": "fixture-parser",
+      "state": "SETTLED",
+      "calls": 18,
+      "reserved": 54,
+      "settled": 54
+    },
+    {
+      "category": "fixture_parser",
+      "provider": "fixture-parser",
+      "state": "UNCERTAIN",
+      "calls": 8,
+      "reserved": 24,
+      "settled": 0
+    },
+    {
+      "category": "fixture_proxy",
+      "provider": "fixture-proxy",
+      "state": "RELEASED",
+      "calls": 14,
+      "reserved": 560000,
+      "settled": 0
+    },
+    {
+      "category": "fixture_proxy",
+      "provider": "fixture-proxy",
+      "state": "SETTLED",
+      "calls": 187,
+      "reserved": 5872356,
+      "settled": 81639
+    },
+    {
+      "category": "fixture_proxy_race",
+      "provider": "fixture-proxy",
+      "state": "RELEASED",
+      "calls": 6,
+      "reserved": 240000,
+      "settled": 0
+    },
+    {
+      "category": "fixture_race",
+      "provider": "fixture-model",
+      "state": "SETTLED",
+      "calls": 24,
+      "reserved": 417993,
+      "settled": 65622
+    },
+    {
+      "category": "llm",
+      "provider": "openai",
+      "state": "SETTLED",
+      "calls": 5,
+      "reserved": 10755,
+      "settled": 170
+    },
+    {
+      "category": "parser",
+      "provider": "llamaparse",
+      "state": "SETTLED",
+      "calls": 2,
+      "reserved": 6,
+      "settled": 6
+    },
+    {
+      "category": "proxy",
+      "provider": "decodo",
+      "state": "SETTLED",
+      "calls": 4,
+      "reserved": 96000,
+      "settled": 540
+    }
+  ],
+  "budget_periods": [
+    {
+      "category": "enhanced",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 3810,
+      "cap": 0,
+      "paid": true,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "enhanced",
+      "period": "month",
+      "start": "2026-10-01",
+      "reserved": 0,
+      "settled": 3810,
+      "cap": 0,
+      "paid": true,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "fixture",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 54816,
+      "settled": 154495,
+      "cap": 5000000,
+      "paid": null,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "fixture_enhanced",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 1270,
+      "settled": 90990,
+      "cap": 5000000,
+      "paid": null,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "fixture_enhanced_small",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 0,
+      "cap": 20000,
+      "paid": null,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "fixture_parser",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 24,
+      "settled": 54,
+      "cap": 3000,
+      "paid": null,
+      "unit": "credits"
+    },
+    {
+      "category": "fixture_proxy",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 81639,
+      "cap": 20000000,
+      "paid": null,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "fixture_proxy_race",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 0,
+      "cap": 130000,
+      "paid": null,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "fixture_race",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 65622,
+      "cap": 100000,
+      "paid": null,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "llm",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 170,
+      "cap": 0,
+      "paid": true,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "llm",
+      "period": "month",
+      "start": "2026-10-01",
+      "reserved": 0,
+      "settled": 170,
+      "cap": 0,
+      "paid": true,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "_paid_total",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 4520,
+      "cap": null,
+      "paid": null,
+      "unit": null
+    },
+    {
+      "category": "parser",
+      "period": "month",
+      "start": "2026-10-01",
+      "reserved": 0,
+      "settled": 6,
+      "cap": 0,
+      "paid": true,
+      "unit": "credits"
+    },
+    {
+      "category": "proxy",
+      "period": "day",
+      "start": "2026-10-03",
+      "reserved": 0,
+      "settled": 540,
+      "cap": 0,
+      "paid": true,
+      "unit": "micro_usd"
+    },
+    {
+      "category": "proxy",
+      "period": "month",
+      "start": "2026-10-01",
+      "reserved": 0,
+      "settled": 540,
+      "cap": 0,
+      "paid": true,
+      "unit": "micro_usd"
+    }
+  ],
+  "proxy_reconciliation": [
+    {
+      "provider": "fixture-proxy",
+      "day": "2026-10-03",
+      "local_bytes": 10143161,
+      "provider_bytes": 10232128,
+      "adjustment_micro_usd": 356
+    },
+    {
+      "provider": "fixture-proxy",
+      "day": "2026-10-03",
+      "local_bytes": 20377936,
+      "provider_bytes": 10224316,
+      "adjustment_micro_usd": 0
+    }
+  ]
+}

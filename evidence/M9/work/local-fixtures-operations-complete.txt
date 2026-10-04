@@ -1,0 +1,184 @@
+TAP version 13
+# Subtest: the gateway's and the retrieval service's admission readers are the same code below their headers
+ok 1 - the gateway's and the retrieval service's admission readers are the same code below their headers
+  ---
+  duration_ms: 0.961458
+  type: 'test'
+  ...
+# Subtest: the services' staleness bound is the operations scripts' STALE_S
+ok 2 - the services' staleness bound is the operations scripts' STALE_S
+  ---
+  duration_ms: 1.192959
+  type: 'test'
+  ...
+# Subtest: the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network
+ok 3 - the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network
+  ---
+  duration_ms: 3.879375
+  type: 'test'
+  ...
+# Subtest: every host path the copy names is under its directory
+ok 4 - every host path the copy names is under its directory
+  ---
+  duration_ms: 16.284792
+  type: 'test'
+  ...
+# Subtest: the copy runs only the kept services, publishes nothing and reaches no egress network
+ok 5 - the copy runs only the kept services, publishes nothing and reaches no egress network
+  ---
+  duration_ms: 0.153417
+  type: 'test'
+  ...
+# Subtest: every network is internal, isolated, renamed and moved off production's addresses
+ok 6 - every network is internal, isolated, renamed and moved off production's addresses
+  ---
+  duration_ms: 0.153875
+  type: 'test'
+  ...
+# Subtest: webhook delivery and paid dispatch are off in the copy
+ok 7 - webhook delivery and paid dispatch are off in the copy
+  ---
+  duration_ms: 0.04425
+  type: 'test'
+  ...
+# Subtest: native proof excludes arguments, error output, prose and other servers
+ok 8 - native proof excludes arguments, error output, prose and other servers
+  ---
+  duration_ms: 0.773125
+  type: 'test'
+  ...
+# Subtest: missing, edited, failed or summary-only evidence cannot grant acceptance
+ok 9 - missing, edited, failed or summary-only evidence cannot grant acceptance
+  ---
+  duration_ms: 1.303958
+  type: 'test'
+  ...
+# Subtest: incident acceptance requires actual model and every enforced resource bound
+ok 10 - incident acceptance requires actual model and every enforced resource bound
+  ---
+  duration_ms: 1.367709
+  type: 'test'
+  ...
+# Subtest: empty Compose labels do not turn owned disposable containers into foreign infrastructure
+ok 11 - empty Compose labels do not turn owned disposable containers into foreign infrastructure
+  ---
+  duration_ms: 4.597125
+  type: 'test'
+  ...
+# Subtest: incident file guard permits bounded reads and a proposed source fix
+ok 12 - incident file guard permits bounded reads and a proposed source fix
+  ---
+  duration_ms: 1499.951834
+  type: 'test'
+  ...
+# Subtest: only the native schema serialization tool may emit this incident handle
+ok 13 - only the native schema serialization tool may emit this incident handle
+  ---
+  duration_ms: 125.819333
+  type: 'test'
+  ...
+# Subtest: secrets, security changes, runtime hooks and execution tools are denied
+ok 14 - secrets, security changes, runtime hooks and execution tools are denied
+  ---
+  duration_ms: 1260.678958
+  type: 'test'
+  ...
+# Subtest: a symlink cannot expose an outside file or redirect a write
+ok 15 - a symlink cannot expose an outside file or redirect a write
+  ---
+  duration_ms: 33.628541
+  type: 'test'
+  ...
+# Subtest: large diagnostic projections stay readable and disclose omitted evidence
+ok 16 - large diagnostic projections stay readable and disclose omitted evidence
+  ---
+  duration_ms: 2268.927709
+  type: 'test'
+  ...
+# Subtest: operational probe counts only exact incident lifecycle notices
+ok 17 - operational probe counts only exact incident lifecycle notices
+  ---
+  duration_ms: 30.567875
+  type: 'test'
+  ...
+# Subtest: INFO uses the operator without the password in argv
+ok 18 - INFO uses the operator without the password in argv
+  ---
+  duration_ms: 452.129292
+  type: 'test'
+  ...
+# Subtest: key scans and fixture writes use the narrowed core user
+ok 19 - key scans and fixture writes use the narrowed core user
+  ---
+  duration_ms: 390.2575
+  type: 'test'
+  ...
+# Subtest: the preserved pre-M8 deployment remains readable
+ok 20 - the preserved pre-M8 deployment remains readable
+  ---
+  duration_ms: 98.147917
+  type: 'test'
+  ...
+# Subtest: unexpected users and missing passwords fail closed
+ok 21 - unexpected users and missing passwords fail closed
+  ---
+  duration_ms: 96.980459
+  type: 'test'
+  ...
+# Subtest: restore preserves private incident state only for inspection, without a control surface
+ok 22 - restore preserves private incident state only for inspection, without a control surface
+  ---
+  duration_ms: 20.168709
+  type: 'test'
+  ...
+# Subtest: complete reviews and padded or optional table bars preserve returned blockers
+ok 23 - complete reviews and padded or optional table bars preserve returned blockers
+  ---
+  duration_ms: 1.559208
+  type: 'test'
+  ...
+# Subtest: pending, duplicate, malformed and missing findings cannot disappear
+ok 24 - pending, duplicate, malformed and missing findings cannot disappear
+  ---
+  duration_ms: 0.772625
+  type: 'test'
+  ...
+# Subtest: privileged controller independently rejects forged/tampered/expired gateway spool entries
+ok 25 - privileged controller independently rejects forged/tampered/expired gateway spool entries
+  ---
+  duration_ms: 1.5835
+  type: 'test'
+  ...
+# Subtest: positive closure controls pass, absent records never pass
+ok 26 - positive closure controls pass, absent records never pass
+  ---
+  duration_ms: 0.579083
+  type: 'test'
+  ...
+# Subtest: wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs
+ok 27 - wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs
+  ---
+  duration_ms: 0.165625
+  type: 'test'
+  ...
+# Subtest: an unrelated decoded failure cannot establish challenge rejection
+ok 28 - an unrelated decoded failure cannot establish challenge rejection
+  ---
+  duration_ms: 0.156125
+  type: 'test'
+  ...
+# Subtest: missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail
+ok 29 - missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail
+  ---
+  duration_ms: 0.194541
+  type: 'test'
+  ...
+1..29
+# tests 29
+# suites 0
+# pass 29
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3444.931625

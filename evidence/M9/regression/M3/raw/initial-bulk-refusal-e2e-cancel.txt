@@ -1,0 +1,21 @@
+### meta
+{"utc":"2026-10-03T06:44:20.476Z","phase":"cancel","source_commit":"f2b2593bbe644952218297a40e0283ba71068038","vantage":"workstation through an SSH forward of 127.0.0.1:3380","platform":"darwin","node":"v26.10.0"}
+### slow_crawl
+{"utc":"2026-10-03T06:44:21.446Z","case":"submit","status":429,"code":"PROXY_REQUIRED","error":"This job needs the residential route from the start, which is unavailable (PAID_DISPATCH_DISABLED); nothing was accepted or sent.","www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"1586d4c6c3d3da97b0a424b163e2dc50fbb2930a26c04df3c57258f24033ee55","id":null}
+### queued_crawl
+{"utc":"2026-10-03T06:46:31.097Z","case":"submit_while_other_runs","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"5527eef92a5b12064a73225946cc88f5bbd7046d8d9bac6da2d32e379264bb6b","id":"dd3f138e-2113-4592-8682-84cca96112c8","ledger_state":"QUEUED"}
+{"utc":"2026-10-03T06:46:31.752Z","case":"cancel","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"a0af58eabbdc165960166eac02d0515f7d631a86d262e5f74af474e283dc7521","ledger_state":"QUEUED","marker_groups":0}
+### slow_crawl
+{"utc":"2026-10-03T06:46:35.817Z","case":"cancel","status":400,"code":"BAD_REQUEST","error":"Invalid job ID format. Job ID must be a valid UUID.","www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"1b45c61ef50bc397add94bbf44c265e152fe997af85a869cc344dee0d6ce3af8","body":{"success":false,"code":"BAD_REQUEST","error":"Invalid job ID format. Job ID must be a valid UUID."},"at":"2026-10-03T06:46:35.786Z"}
+### error
+{"utc":"2026-10-03T06:51:36.064Z","message":"job undefined did not reach CANCELLED/FAILED/SUCCEEDED/PARTIAL (last undefined)"}
+### restore
+{"utc":"2026-10-03T06:51:38.317Z","firecrawl-core":{"was":"running","now":"running healthy"},"access-gateway":{"was":"running","now":"running healthy"},"cancelled":[]}
+### resources
+{"utc":"2026-10-03T06:51:41Z","label":"end-cancel","gateway":{"instance":"168063943b73","started_at":"2026-10-03T05:47:49.818488246Z","peak":55934976,"max":"167772160","current":36798464,"oom_kill":0},"core":{"instance":"07fa416c96a8","started_at":"2026-10-02T07:31:57.149425239Z","peak":2049654784,"max":"2684354560","current":1924841472,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4740000}
+### ledger
+{"utc":"2026-10-03T06:51:42.736Z","id":"dd3f138e-2113-4592-8682-84cca96112c8","kind":"crawl","state":"CANCELLED","upstream":"01a10083-a82b-7760-9f1b-aa0883c833cc","cancel_requested":true,"dispatch_attempts":1,"marker_groups":0,"upstream_rows":2}
+### forward
+{"utc":"2026-10-03T06:51:42.736Z","pid":35067,"local":"127.0.0.1:3380","remote":"127.0.0.1:3380","exited_before_end":false}
+### end
+{"utc":"2026-10-03T06:51:42.736Z","exit":1}

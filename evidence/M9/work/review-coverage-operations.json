@@ -1,0 +1,519 @@
+{
+  "utc": "2026-10-03T11:08:35.203Z",
+  "complete": false,
+  "rows": [
+    {
+      "finding": "DB1-C1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-C2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-C3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-C4",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-C5",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-W1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-W2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-W3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-W4",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-W5",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-W6",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S4",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S5",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S6",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S7",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S8",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "DB1-S9",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-C1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-C2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-C3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-C4",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W4",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W5",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W6",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W7",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W8",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W9",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-W10",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-S1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-S2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-S3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-S4",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-S5",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-S6",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "CA1-S7",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "SELF-01",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "SELF-02",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M8-F13",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-01",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-02",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-LIVE-01",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-03",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-NATIVE-01",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-04",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-05",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-06",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-07",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-08",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-09",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-10",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-11",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-12",
+      "outcome": "RETURNED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-INC-01",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-INC-02",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-INC-03",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DELTA-S1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DELTA-S2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DELTA-S3",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-BOUND-W1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-BOUND-W2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-BOUND-W3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-BOUND-S1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-BOUND-S2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-BOUND-S3",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DIAG-W1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DIAG-W2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DIAG-S1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DIAG-S2",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DIAG-S3",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DIAG-S4",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-DIAG-S5",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-INC-04",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-SOURCE-W1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-SOURCE-W2",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-SOURCE-S1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-13",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-14",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-COVERAGE-W1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-COVERAGE-S1",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-COVERAGE-S2",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-15",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-REG-16",
+      "outcome": "FIXED pending verification",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-DB-W1",
+      "outcome": "FIXED pending verification",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-DB-W2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-DB-W3",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-DB-S1",
+      "outcome": "FIXED pending verification",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-DB-S2",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-DB-S3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-W1",
+      "outcome": "FIXED pending verification",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-W2",
+      "outcome": "FIXED pending verification",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-W3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-W4",
+      "outcome": "FIXED pending verification",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-S1",
+      "outcome": "FIXED pending verification",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-S2",
+      "outcome": "REJECTED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-S3",
+      "outcome": "FIXED",
+      "columns": 3
+    },
+    {
+      "finding": "M9-OPS-CA-S4",
+      "outcome": "REJECTED",
+      "columns": 3
+    }
+  ],
+  "returned": [
+    "M9-REG-12"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "utc": "2026-10-03T17:18:25.887Z",
+  "source_commit": "bc648b5",
+  "owning_milestone": "M2",
+  "authorization": "work/owner-authorizations-20261003.json",
+  "original_failure": {
+    "path": "work/M2-preexisting-direct-postload-probe.txt",
+    "sha256": "a1638b9e9da6171b9bf58bba1a44382addc5e6f7534269a9493d2314dd362944"
+  },
+  "fixtures": {
+    "state": "PASS",
+    "tests": 43,
+    "fail": 0,
+    "skipped": 0,
+    "path": "work/M2-error-page-guard-fixtures.txt",
+    "sha256": "eb9935dec9ef6b4b7731f403ae4b6ea45e337463060cbdd0896ad8129911bb98"
+  },
+  "real_chromium": {
+    "state": "NOT_RUN",
+    "reason": "Held until pinned images are built/deployed"
+  },
+  "security": "No block, routing, retry or sandbox change"
+}

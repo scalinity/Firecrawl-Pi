@@ -1,0 +1,13 @@
+{
+  "utc": "2026-10-03T18:04:01.710Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "test_id": "M3-J03",
+  "state": "PASS",
+  "actual": "K4 SUCCEEDED archived=6; K5 SUCCEEDED archived=6 stalled pages=1 attempts per page=[2,1,1,1,1,1]",
+  "configuration_fixture_hash": "77f3e13b00d17ff07e098b265c35bc3051acbceb5bf47ed49c50acfbf02a2355",
+  "source_input": {
+    "path": "evidence/M9/regression/M3/raw/e2e-crash.txt",
+    "sha256": "d77750e088f2b3261e2c8cddec14e450eb0fa0d5c7f10d354f60fdf82eeed997"
+  },
+  "preserved_failure": "work/M3-k5-queued-witness-da4b451"
+}

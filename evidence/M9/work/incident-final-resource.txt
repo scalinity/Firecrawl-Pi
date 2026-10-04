@@ -1,0 +1,8 @@
+Started fcpi-incident-e69e0944.service - [systemd-run] /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/danny CLAUDE_CONFIG_DIR=/var/lib/firecrawl-pi/incidents/work/e69e0944/run/auth /bin/bash /opt/firecrawl-pi/scripts/m9/incident-agent.sh e69e0944.
+fcpi-incident-e69e0944.service: Deactivated successfully.
+fcpi-incident-e69e0944.service: Consumed 3.164s CPU time, 171.2M memory peak.
+{
+  "utc_day": "2026-10-03",
+  "launches": 4,
+  "daily_cap": 4
+}

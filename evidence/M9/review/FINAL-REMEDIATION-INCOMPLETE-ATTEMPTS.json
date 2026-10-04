@@ -1,0 +1,28 @@
+{
+  "utc": "2026-10-03T16:58:18.214Z",
+  "model": "claude-opus-5-5",
+  "state": "NOT_RUN",
+  "note": "Both initial final-remediation reviewer processes exhausted 35 tool turns before emitting reports. Neither is a completed independent review. Fresh source-supplied replacement contexts are running; original results remain private and usage is retained.",
+  "attempts": [
+    {
+      "role": "debugger",
+      "raw_sha256": "8513cb2ae3a304573978f3735ca990d716953aea23c477b67ed76be000ce4725",
+      "prompt_sha256": "65a7143190024a717bb4b2b2218d4d36fa057e0a7f2bcb443675a95bf4fe9e8f",
+      "terminal": "error_max_turns",
+      "turns": 36,
+      "permission_denials": 0,
+      "reported_api_equivalent_usd": 2.3872286,
+      "invoiced_usd": null
+    },
+    {
+      "role": "auditor",
+      "raw_sha256": "e2f920712c8296323b9a4423d49cb1683efda9d226b70428723f24e3c8cb8629",
+      "prompt_sha256": "aff0c1450a56b7eb19999c1a56a2922e2ced139177ad51e438d908099f3ae2d0",
+      "terminal": "error_max_turns",
+      "turns": 36,
+      "permission_denials": 0,
+      "reported_api_equivalent_usd": 2.786663,
+      "invoiced_usd": null
+    }
+  ]
+}

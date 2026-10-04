@@ -1,0 +1,6 @@
+M2-R01 PASS     static-pages-never-start-chromium
+M2-R02 PASS     js-delayed-cookie-pages-render
+M2-R03 PASS     content-classified
+M2-R04 PASS     size-time-and-redirect-limits
+M2-S01 FAIL     ssrf-matrix-denied  — attempts accounted=false ({"ACCESS_DENIED":6,"NAVIGATION_FAILED":1,"rendered":1}); through core=18 not refused=S09-redirect-redis,S10-redirect-metadata,S11-redirect-cloud,S12-redirect-loopback,S13-redirect-mapped,S14-red
+M2-S02 PASS     browser-subresources-denied

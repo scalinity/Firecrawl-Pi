@@ -1,0 +1,8 @@
+{
+  "utc": "2026-10-03T13:59:55.243Z",
+  "source_commit": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+  "exit_code": 0,
+  "raw_sha256": "ae99703b6521760cc163a6bde70cccf50cf8527191148fb1fd7d4c54cbe9128f",
+  "raw": "evidence/M9/work/local-fixtures-selected-inputs.txt",
+  "tests": 36
+}

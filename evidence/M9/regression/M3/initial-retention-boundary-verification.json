@@ -1,0 +1,318 @@
+{
+  "schema": "fcpi.m3.verification/v1",
+  "runner": "scripts/m3/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main.",
+  "results": [
+    {
+      "test_id": "M3-B00",
+      "name": "baseline-matches-m2-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-G01",
+      "name": "gateway-image-pinned-built-and-running",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-G02",
+      "name": "gateway-tests-pass-in-the-running-image",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-R01",
+      "name": "route-shapes-verified-at-the-pin",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A01",
+      "name": "authorized-scrape-crawl-batch-map",
+      "utc": "2026-10-03T08:43:33Z",
+      "repository_sha": "27f29d1cf6f8cddf742e683e95d52dd4531150ac",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "59ce4e257bc1f5169e383e747f9d4d5c5aaba3e9d07b8e47e2086b52795c69b0",
+      "expected": "through the private path with a scoped token: a scrape returns the fixture's sentinel in Markdown and HTML with its links and status 200; a map returns exactly the 12 graph URLs (5 under limit 5); a crawl of the controlled graph finishes with the 12 unique pages and their sentinels; a crawl limited to 5 returns exactly 5; a batch keeps per-item outcomes (two pages, a 404 page, the authentication gate as an AUTH_REQUIRED error) and reports the invalid URL; the pinned official client does the same operations against the gateway",
+      "state": "PASS",
+      "actual": "failed conditions=none; crawl SUCCEEDED archived=12; batch PARTIAL docs=3 errors=1; map=12; official client exit=0",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A02",
+      "name": "pagination-private-origin-stable",
+      "utc": "2026-10-03T08:43:33Z",
+      "repository_sha": "27f29d1cf6f8cddf742e683e95d52dd4531150ac",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "50c5d9d55d5f3de1ca9b368778300e352eb5941c3149d5615040d432ab8563ab",
+      "expected": "a finished 12-page crawl read 5 at a time comes back as pages of 5, 5 and 2 whose `next` URLs name the gateway's private origin, the job's external id and increasing skips, never an internal host; the union is the 12 documents once each; the same pages read after the core forgot the job and after every container was recreated give the same documents",
+      "state": "PASS",
+      "actual": "pages=[5,5,2]; next URLs on the private origin with the external id=true; unique documents=12; same documents after expiry and recreation=true; internal host in the transcript=false",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A03",
+      "name": "credentials-missing-invalid-revoked-scope-owner",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A04",
+      "name": "request-limits-and-overload",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-A05",
+      "name": "unsupported-options-refused-before-work",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J01",
+      "name": "crash-before-upstream-submission-k1",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J02",
+      "name": "crash-after-upstream-submission-k2-k3",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J03",
+      "name": "acknowledged-jobs-tracked-through-crashes-k4-k5",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J04",
+      "name": "idempotent-requests-and-conflicting-reuse",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J05",
+      "name": "no-duplicate-logical-submission",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J06",
+      "name": "results-served-after-core-redis-and-nuq-expiry-r9",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-J07",
+      "name": "cancellation-stops-new-work",
+      "utc": "2026-10-03T08:43:33Z",
+      "repository_sha": "27f29d1cf6f8cddf742e683e95d52dd4531150ac",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "7d35d7d933a269a94b8f4bbb79d92f24bc68cdcedd59f47f639ef1e67b6a5f3b",
+      "expected": "a crawl queued behind a running one is cancelled before submission (CANCELLED, no upstream job); the running slow crawl's cancel answers {status: cancelled}, it ends CANCELLED with its completed pages archived, and no slow page started more than 2.5 s after the cancel; cancelling a finished crawl is 409; the official client's cancel returns true and the crawl ends cancelled",
+      "state": "PASS",
+      "actual": "queued job CANCELLED upstream=0; running job CANCELLED archived=4; slow pages started after cancel+2.5 s=0 of 3; finished job cancel=409; official client=cancelled",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N01",
+      "name": "host-and-origin-validated",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N02",
+      "name": "spoofed-principal-headers-have-no-effect",
+      "utc": "2026-10-03T08:43:33Z",
+      "repository_sha": "27f29d1cf6f8cddf742e683e95d52dd4531150ac",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "917cdc18334e73edea3e018bc175626f596c2b0473e8dc11d39bb11b82ad47d8",
+      "expected": "live: another principal sending x-fcpi-principal, x-fcpi-owner, x-forwarded-user, x-forwarded-for and x-real-ip naming the owner still gets exactly the unknown-id answer on every job route; contract: the core receives only the gateway's own headers (no authorization, cookie, forwarded, idempotency or x-fcpi-* header) and no query string",
+      "state": "PASS",
+      "actual": "live routes with spoofed headers answered as unknown=5/5; contract header test passed=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N03",
+      "name": "internal-ports-denied-from-every-vantage",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N04",
+      "name": "published-ports-loopback-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N05",
+      "name": "missing-data-mount-fails-closed",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-N06",
+      "name": "platform-network-and-ledger-rights",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X02",
+      "name": "persistence-across-force-recreate",
+      "utc": "2026-10-03T08:43:33Z",
+      "repository_sha": "27f29d1cf6f8cddf742e683e95d52dd4531150ac",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "3bba23ec8f9e056833f6fe5388edf5b68e23bd4d862322a162d1cf54fc30ddcd",
+      "expected": "after `up -d --force-recreate` with no volume removed, all ten services run healthy in new containers; the PostgreSQL, Redis and RabbitMQ sentinels read back; the ledger's rows (receipts, every event, every idempotency key, the document manifest) hash the same; the archive keeps every file, at least one and at least one per distinct document the manifest names, each hashing to its name; the sentinel is a real value; the client registry is unchanged; afterwards the gateway still accepts a token and serves the archived crawl and batch with the same document hashes; the core's log was saved first",
+      "state": "FAIL",
+      "actual": "replaced=true; healthy=true; sentinels pg=true redis=true rabbitmq=true; ledger same=false; billing same=true; archive same=false; registry same=true; served after=true",
+      "exit_code": 1,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X03",
+      "name": "non-internal-containers-name-their-dns-and-the-core-stays-inside",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-L01",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-C01",
+      "name": "fcpi-status-and-jobs",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-M01",
+      "name": "memory-within-caps",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-P01",
+      "name": "private-access-from-the-target-machine",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-P02",
+      "name": "tailnet-tls-private-serving",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    },
+    {
+      "test_id": "M3-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M3/verification.json"
+    }
+  ]
+}

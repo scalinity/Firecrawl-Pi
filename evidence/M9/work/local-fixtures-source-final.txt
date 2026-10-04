@@ -1,0 +1,20 @@
+✔ native proof excludes arguments, error output, prose and other servers (0.662708ms)
+✔ missing, edited, failed or summary-only evidence cannot grant acceptance (1.441708ms)
+✔ empty Compose labels do not turn owned disposable containers into foreign infrastructure (3.597458ms)
+✔ incident file guard permits bounded reads and a proposed source fix (722.610708ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1254.60825ms)
+✔ a symlink cannot expose an outside file or redirect a write (39.218625ms)
+✔ INFO uses the operator without the password in argv (371.35075ms)
+✔ key scans and fixture writes use the narrowed core user (245.50975ms)
+✔ the preserved pre-M8 deployment remains readable (92.695834ms)
+✔ unexpected users and missing passwords fail closed (162.018042ms)
+✔ restore preserves private incident state only for inspection, without a control surface (19.35925ms)
+✔ privileged controller independently rejects forged/tampered/expired gateway spool entries (1.605792ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2482.745083

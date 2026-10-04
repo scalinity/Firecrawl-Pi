@@ -1,0 +1,2 @@
+M2-S01 PASS     ssrf-matrix-denied
+M2-S02 PASS     browser-subresources-denied

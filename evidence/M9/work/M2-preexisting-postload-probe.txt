@@ -1,0 +1,5 @@
+utc=2026-10-03T16:29:58Z source_commit=f72333f81d2c4753bf83d0db359e9ca6c99ef3da probe_fixture_sha256=c8f791a194936e26a54d1711c2d492403c251cf5ec9dc70ff93caf08f4eb84d8
+{"phase":"warm","ok":true,"strategies":["direct_http","direct_browser"]}
+{"phase":"warm","ok":true,"strategies":["direct_http","direct_browser"]}
+{"dst":"private","logical_id":"m9-postload-5c1aa1d8-844b-41a5-91ee-990521a95d41","http":200,"ok":true,"targetStatus":200,"finalUrl":"http://169.254.169.254/latest/meta-data/","failure":null,"strategies":["direct_browser"],"proxyDenied":[{"host":"169.254.169.254","class":"SSRF_DENIED"}],"body_is_proxy_refusal":true}
+{"dst":"cloud","logical_id":"m9-postload-12819384-20e4-4dec-a673-d8648f176ae9","http":200,"ok":true,"targetStatus":200,"finalUrl":"chrome-error://chromewebdata/","failure":null,"strategies":["direct_browser"],"proxyDenied":[{"host":"api.firecrawl.dev:443","class":"CLOUD_DENIED"}],"body_is_proxy_refusal":false}

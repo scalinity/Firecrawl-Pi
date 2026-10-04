@@ -1,0 +1,47 @@
+{
+  "utc": "2026-10-03T14:22:24.787Z",
+  "source_commit": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+  "end_source_commit": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+  "command": [
+    "scripts/m3/e2e.mjs",
+    "auth",
+    "sync",
+    "jobs",
+    "cancel",
+    "crash",
+    "expiry",
+    "cli"
+  ],
+  "runs": [
+    {
+      "phase": "auth",
+      "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+      "sha256": "f31165351b485202342348dac4984a3e2c030719c6ef3f98043b8a3996cec7ec",
+      "exit_code": 0
+    },
+    {
+      "phase": "sync",
+      "path": "evidence/M9/regression/M3/raw/e2e-sync.txt",
+      "sha256": "1cf6aad240a34d8456ceb9ae7796a861861617b395187453f22728a597136ccc",
+      "exit_code": 0
+    },
+    {
+      "phase": "jobs",
+      "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+      "sha256": "50987fda30b07200fd96645e214a4d894d5ef6d1cc8e2c9ac53e36badd44478c",
+      "exit_code": 0
+    },
+    {
+      "phase": "cancel",
+      "path": "evidence/M9/regression/M3/raw/e2e-cancel.txt",
+      "sha256": "9d29b6d646e3b39dbf0aaaac5e079099f4f9d89e8d056e8311a4c53da279908c",
+      "exit_code": 0
+    },
+    {
+      "phase": "crash",
+      "path": "evidence/M9/regression/M3/raw/e2e-crash.txt",
+      "sha256": "be85a78bd8d8706f80ea27f8e164960f76813e232cb15b348eab4f951456cd0f",
+      "exit_code": 1
+    }
+  ]
+}

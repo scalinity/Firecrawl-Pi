@@ -1,0 +1,53 @@
+✔ a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4) (816.395166ms)
+✔ downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1) (1258.846041ms)
+✔ a download's final URL is one a response header can carry (review finding S10) (0.770916ms)
+✔ a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2) (301.332958ms)
+✔ the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target (654.480375ms)
+✔ a pacing wait leaves no abort listener behind on the caller's signal (review finding S7) (23.676666ms)
+✔ a database error while the browser attempt is paced still frees every permit and hold (review finding W3) (1.428459ms)
+✔ a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6) (2.057125ms)
+▶ browser-first redirects retain authoritative private/Cloud proxy refusals
+  ✔ http://10.231.1.5:6379/ (0.29325ms)
+  ✔ http://169.254.169.254/latest/meta-data/ (0.169917ms)
+  ✔ http://169.254.169.254/latest/meta-data/?after=load (0.125875ms)
+  ✔ http://127.0.0.1:3002/ (0.090167ms)
+  ✔ http://[::ffff:a00:105]/ (0.229625ms)
+  ✔ http://redis:6379/ (0.088541ms)
+  ✔ http://192.168.1.9/ (0.090041ms)
+  ✔ http://100.100.100.100/ (0.08275ms)
+  ✔ https://127.0.0.1/ (0.079292ms)
+  ✔ https://api.firecrawl.dev/v1/scrape (0.062166ms)
+✔ browser-first redirects retain authoritative private/Cloud proxy refusals (1.810041ms)
+✔ public browser redirects remain usable with unrelated denied subresources (0.288917ms)
+✔ a post-load tunnel failure on the main frame propagates the actual Cloud refusal (0.19825ms)
+▶ a committed browser error page fails without inventing a proxy policy refusal
+  ✔ aborted off-host navigation (0.105917ms)
+  ✔ unrelated policy refusal (0.067167ms)
+  ✔ unmatched tunnel witness (0.055ms)
+  ✔ target 403 precedence (0.050375ms)
+  ✔ resource limit precedence (0.055167ms)
+  ✔ provider failure precedence (0.052709ms)
+  ✔ cancellation precedence (0.060709ms)
+✔ a committed browser error page fails without inventing a proxy policy refusal (0.652583ms)
+✔ page text, unmatched refusals and cancellation do not invent a navigation policy failure (0.442167ms)
+✔ a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE (3.438584ms)
+✔ a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser (1225.968084ms)
+✔ a pacing refusal is the attempt's recorded outcome and reaches no target (0.270834ms)
+✔ a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5) (0.124125ms)
+✔ requests are validated and bodies decoded by their declared charset (0.238875ms)
+✔ a public page's requests cannot reach a fixture host (review finding S1) (12.850875ms)
+✔ a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2) (2.402375ms)
+✔ no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named (3.231375ms)
+✔ real CONNECT refusals preserve the denied authority and canonical class (1.277625ms)
+✔ a session past its request or byte cap is refused and marked capped (review finding W6) (3.568875ms)
+✔ the proxy answers 503 while the local-network list is not loaded (review finding W7) (0.963834ms)
+✔ malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9) (2.120583ms)
+✔ a standing session's refusals are logged by host and not kept, so it cannot grow (review S5) (1.316084ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 43
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4413.252042

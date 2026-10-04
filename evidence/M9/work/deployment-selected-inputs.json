@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-03T13:59:55.243Z",
+  "source_commit": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+  "local": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+  "pi": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+  "pi_tree_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+  "pi_expected_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+  "clean": true,
+  "no_image_rebuild": true,
+  "reason": "Only acceptance verifier/driver sources changed; component runtime source and immutable images unchanged."
+}

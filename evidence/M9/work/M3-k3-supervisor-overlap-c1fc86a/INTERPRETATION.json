@@ -1,0 +1,7 @@
+{
+  "source_commit": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+  "state": "FAIL",
+  "classification": "verification_environment",
+  "observed": "The real supervisor restarted core at 14:38:55, one second before K3 paused it. Six actual submission attempts got ECONNREFUSED and returned to RECEIVED; the restored test cancelled that job. No duplicate upstream work.",
+  "remediation": "Wait for actual core container health after K2 before beginning the next pause. Keep the supervisor enabled and its bounded restart ledger intact."
+}

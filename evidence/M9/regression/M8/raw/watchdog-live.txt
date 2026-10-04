@@ -1,0 +1,34 @@
+### meta
+utc=2026-10-03T20:08:36Z deployed_commit=82a11536707e3fb6d4fe76497e857b137c5e2184 watchdog_installed_sha256=75b90111a60d61972a2ec26aae908f382f189b8b2539ac152ab0d9e3d704ee31 watchdog_repository_sha256=75b90111a60d61972a2ec26aae908f382f189b8b2539ac152ab0d9e3d704ee31
+### before
+cls=ok
+fails=0
+goods=529
+open=0
+first_fail=1791026030
+opened_at=1791026152
+last_fail=1791026332
+last_ok=1791058052
+id=
+last_seen_cls=ok
+heartbeat_age_s=8
+### window
+{"from":"2026-10-03T20:08:36Z","heartbeat_stopped":"2026-10-03T20:08:39Z","opened_seen":"2026-10-03T20:13:54Z","heartbeat_started":"2026-10-03T20:16:57Z","to":"2026-10-03T20:19:04Z","opened":true,"cleared":true}
+### events
+{"utc":"2026-10-03T20:13:52Z","event":"opened","class":"heartbeat_missing","incident_id":"54af7c83","first_failed":"2026-10-03T20:11:52Z","threshold_crossed":"2026-10-03T20:13:52Z","consecutive_failures":3,"sent":true}
+{"utc":"2026-10-03T20:18:52Z","event":"cleared","class":"heartbeat_missing","incident_id":"54af7c83","first_failed":"2026-10-03T20:11:52Z","last_failed":"2026-10-03T20:16:52Z","recovered":"2026-10-03T20:18:52Z","outage_s":420,"sent":true}
+### after
+cls=ok
+fails=0
+goods=2
+open=0
+first_fail=1791058312
+opened_at=1791058432
+last_fail=1791058612
+last_ok=1791058711
+id=
+last_seen_cls=ok
+### ntfy_server
+{"id":"JRnH7PAt0lLs","time":1791058432,"title":"Firecrawl Pi — External Watchdog","priority":5,"tags":["rotating_light","fcpi","watchdog_unreachable"],"incident":"54af7c83"}
+{"id":"RGfYbBpifDXy","time":1791058732,"title":"Firecrawl Pi — Reachable Again","priority":3,"tags":["white_check_mark","fcpi","watchdog_reachable"],"incident":"54af7c83"}
+### end

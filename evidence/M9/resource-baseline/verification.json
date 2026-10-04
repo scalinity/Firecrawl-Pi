@@ -1,0 +1,395 @@
+{
+  "schema": "fcpi.m8.verification/v1",
+  "runner": "scripts/m8/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (K03, N01, N02) from the fixture and host checks.",
+  "results": [
+    {
+      "test_id": "M8-B00",
+      "name": "baseline-matches-m7-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-G01",
+      "name": "images-built-and-running-deployed-code-is-head",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-G02",
+      "name": "suites-pass-in-the-running-images",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-H01",
+      "name": "host-units-timers-slice-and-command",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-H02",
+      "name": "swap-denied-across-a-systemd-reload",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-H03",
+      "name": "containers-outside-the-project-reported",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-H04",
+      "name": "durable-boot-records",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-R01",
+      "name": "normal-reboot-ready-within-five-minutes",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-R02",
+      "name": "docker-restart-recovers-without-action",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-R03",
+      "name": "missing-data-mount-refuses-writers",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I01",
+      "name": "mcp-crash-restarts-mcp-alone",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I02",
+      "name": "api-child-crash-recovers-typed",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I03",
+      "name": "worker-death-shown-as-degraded-and-recovered",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I04",
+      "name": "postgres-down-fails-closed-and-reconciles",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I05",
+      "name": "redis-down-stops-dispatch-and-recovers",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I06",
+      "name": "rabbitmq-down-stops-dispatch-and-recovers",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I07",
+      "name": "browser-crash-contained",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I08",
+      "name": "search-outage-isolated-and-not-resurrected",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I09",
+      "name": "proxy-outage-never-spills-to-the-home-ip",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I10",
+      "name": "model-parser-enhanced-outage-isolated",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I11",
+      "name": "network-outage-bounded-and-recovered-without-restart",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I12",
+      "name": "disk-pressure-stops-admission-and-deletes-nothing",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I13",
+      "name": "memory-pressure-pauses-and-nothing-of-the-project-is-killed",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I14",
+      "name": "thermal-pressure-pauses-browser-work-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-I15",
+      "name": "supervisor-bounded-restarts-then-incident",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-O01",
+      "name": "status-names-each-failure-independently",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-O02",
+      "name": "one-notice-per-incident-and-its-recovery",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-O03",
+      "name": "logs-bounded-and-diagnostics-redacted",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-O04",
+      "name": "the-gateway-never-answers-502",
+      "utc": "2026-10-03T19:47:06Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "e1bc77f7d8e87f89f0d76065fcb5daad9b85b7d27eff17afaf77bba2a383e48c",
+      "input_paths": [
+        "evidence/M9/resource-baseline/raw/faults.txt",
+        "evidence/M9/resource-baseline/raw/soak.txt"
+      ],
+      "expected": "no answer the gateway gave in the injected failures or the soak is HTTP 502 (a client library retries 502 by resubmitting); the fault cases and the soak together hold at least 1,000 gateway answers",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "answers=4536, 502s=0",
+      "exit_code": 0,
+      "image_digests_platform": null,
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-S01",
+      "name": "24-hour-paced-soak",
+      "utc": "2026-10-03T19:47:05Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "0f314270445621819aba1ba272ba724da9fc5a19d584ea4c0979a074dc0eae0d",
+      "input_paths": [
+        "evidence/M9/resource-baseline/raw/soak.txt"
+      ],
+      "expected": "a 24-hour paced fixture soak (every minute a static scrape and the status, and on a fixed schedule script-rendered pages, MCP, search, map, PDFs, extraction, crawls, batches, screenshots and change checks): at least 95 % of its minutes sampled; no OOM kill in any project container or the host; no throttle or undervoltage flag; at least 1 GiB available in every sample; the oldest queued item never older than 5 minutes; disk free space within 2 GiB of the start; every request succeeds except any refused 503 HOST_PRESSURE while a backup held the platform; p95 at most 5 s for static pages, 20 s for script-rendered ones, 2 s for status and MCP discovery; swap denied to every container throughout",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; window 2026-10-01T22:53:57Z..2026-10-02T22:53:57Z (24.0 h); samples=1390; requests static:1439/1440 status:1439/1440 js:288/288 mcp_list:288/288 mcp_scrape:288/288 search:144/144 pdf:96/96 map:144/144 extract:96/96 crawl_submit:48/48 crawl_done:48/48 screenshot:48/48 batch_submit:48/48 batch_done:48/48 changes:24/24; failed=2 (held by a backup 2; ); missed minutes=0; log damage samples/2026-10-01.jsonl 3537 NUL bytes, 0 lines dropped; min available 4822 MiB; max oldest queued 0 s; p95 ms {\"static\":104,\"js\":1794,\"status\":22,\"mcp_list\":18}; disk free 34772488192→34672648192",
+      "exit_code": 0,
+      "image_digests_platform": null,
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-S02",
+      "name": "memory-within-caps-and-measured-budget",
+      "utc": "2026-10-03T19:47:06Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "e2f28abbc2096f6f17e8dfc9df2ad9a557810d060cd27e68f74bf5dcf1c9d0c9",
+      "input_paths": [
+        "evidence/M9/resource-baseline/raw/soak.txt",
+        "docs/FIRECRAWL_PI_SPEC.md"
+      ],
+      "expected": "over the soak every project service's memory peak stays under 90 % of its cap and the project as a whole under fcpi.slice's MemoryHigh; spec §22's measured column (idle as the soak's lowest current value, normal as its median, peak as its highest peak, in MiB) equals what the soak's samples give",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; project at most 3409 MiB against fcpi.slice MemoryHigh 5632 MiB; over 90 %=none; spec rows=15, differing=none; measured {\"fixture\":{\"idle\":33,\"normal\":38,\"peak\":62,\"cap\":96,\"frac\":0.644},\"firecrawl-core\":{\"idle\":1279,\"normal\":1787,\"peak\":1955,\"cap\":2560,\"frac\":0.764},\"redis\":{\"idle\":7,\"normal\":8,\"peak\":16,\"cap\":320,\"frac\":0.049},\"access-gateway\":{\"idle\":21,\"normal\":40,\"peak\":58,\"cap\":160,\"frac\":0.365},\"fixture-m7\":{\"idle\":15,\"normal\":21,\"peak\":41,\"cap\":96,\"frac\":0.43},\"retrieval-service\":{\"idle\":24,\"normal\":50,\"peak\":76,\"cap\":448,\"frac\":0.17},\"nuq-postgres\":{\"idle\":67,\"normal\":90,\"peak\":129,\"cap\":640,\"frac\":0.201},\"rabbitmq\":{\"idle\":121,\"normal\":158,\"peak\":197,\"cap\":512,\"frac\":0.384},\"searxng\":{\"idle\":82,\"normal\":84,\"peak\":92,\"cap\":320,\"frac\":0.289},\"fixture-m6\":{\"idle\":29,\"normal\":35,\"peak\":55,\"cap\":96,\"frac\":0.57},\"browser-worker\":{\"idle\":66,\"normal\":140,\"peak\":193,\"cap\":1536,\"frac\":0.125},\"mcp-gateway\":{\"idle\":31,\"normal\":42,\"peak\":69,\"cap\":192,\"frac\":0.358},\"fixture-m3\":{\"idle\":21,\"normal\":28,\"peak\":50,\"cap\":96,\"frac\":0.516},\"fixture-m5\":{\"idle\":16,\"normal\":18,\"peak\":39,\"cap\":128,\"frac\":0.306},\"fixture-m2\":{\"idle\":15,\"normal\":19,\"peak\":40,\"cap\":192,\"frac\":0.211}}",
+      "exit_code": 0,
+      "image_digests_platform": null,
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-S03",
+      "name": "postgres-write-settings-measured-on-the-card",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-S04",
+      "name": "redis-user-narrowed-to-the-measured-command-set",
+      "utc": "2026-10-03T19:47:06Z",
+      "repository_sha": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "6a7e8d2555fde7d581428234f3c4b4acd3b2e8ba6583f0b86d06ce2b8fad725f",
+      "input_paths": [
+        "evidence/M9/resource-baseline/raw/redis-measured.txt",
+        "evidence/M9/resource-baseline/raw/redis-soak.txt"
+      ],
+      "expected": "the command set the core used across every suite and a paced workload (INFO commandstats) is the narrowed user's allowance; the core connects as that user; the default user is off; across the 24-hour soak no command was rejected and the ACL log holds no denial (M1 R11)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; measured 29 commands: pttl,evalsha,exists,rpoplpush,del,hmset,zrem,lrange,xtrim,get,zrange,scard,hget,bzpopmin,info,zcount,ping,zadd,zremrangebyscore,set,eval,hmget,zrangebyscore,zpopmin,client|setname,srem,sadd,expire,smembers; allowed get,set,mget,del,exists,expire,pexpire,pttl,keys,scan,type,rename,time,incr,incrby,hget,hset,hmget,hmset,hsetnx,hdel,hexists,hgetall,hincrby,hlen,lpush,rpush,lpop,rpop,llen,lindex,lpos,lrange,lrem,lset,ltrim,rpoplpush,sadd,srem,spop,scard,sismember,smembers,zadd,zrem,zcard,zcount,zscore,zpopmin,bzpopmin,zrange,zrangebyscore,zrevrange,zrevrangebyscore,zremrangebyrank,zremrangebyscore,xadd,xread,xtrim,eval,evalsha,script|load,script|exists,multi,exec,discard,info,client|setname,client|list,ping,quit; rejected lines 0",
+      "exit_code": 0,
+      "image_digests_platform": null,
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-S05",
+      "name": "core-heap-holds-large-pages-at-384-mib",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-K01",
+      "name": "coordinated-backup-on-the-fixture-repository",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-K02",
+      "name": "isolated-restore-proves-the-backup",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-K03",
+      "name": "off-device-backup-and-restore",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-N01",
+      "name": "incident-notice-reaches-the-owner-channel",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-N02",
+      "name": "external-watchdog-notices-a-lost-heartbeat-once",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-U01",
+      "name": "upgrade-and-rollback-rehearsed-in-isolation",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-U02",
+      "name": "upgrade-and-rollback-plans-read-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-X02",
+      "name": "network-and-container-posture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-L03",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    },
+    {
+      "test_id": "M8-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/resource-baseline/verification.json"
+    }
+  ]
+}

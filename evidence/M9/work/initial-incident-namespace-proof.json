@@ -1,0 +1,25 @@
+{
+  "schema": "fcpi.incident-live/v1",
+  "utc": "2026-10-03T08:42:23.558Z",
+  "source_commit": "27f29d1cf6f8cddf742e683e95d52dd4531150ac",
+  "incident_id": "59d5d64c",
+  "controlled_healthy_diagnosis": true,
+  "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "unit": {
+    "RuntimeMaxUSec": "infinity",
+    "CPUQuotaPerSecUSec": "infinity",
+    "MemoryMax": null,
+    "MemorySwapMax": "infinity",
+    "TasksMax": "9626",
+    "User": "",
+    "NoNewPrivileges": false,
+    "tools": "Read,Edit,Write"
+  },
+  "owner_authentication": "Max subscription",
+  "auth_removed": false,
+  "is_error": null,
+  "model": "claude-opus-5-5",
+  "api_equivalent_estimate_usd": null,
+  "invoiced_usd": null,
+  "state": "IMPLEMENTED_UNVERIFIED"
+}

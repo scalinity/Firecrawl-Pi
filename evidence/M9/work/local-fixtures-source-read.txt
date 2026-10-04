@@ -1,0 +1,28 @@
+✔ the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network (3.494792ms)
+✔ every host path the copy names is under its directory (16.265208ms)
+✔ the copy runs only the kept services, publishes nothing and reaches no egress network (0.154208ms)
+✔ every network is internal, isolated, renamed and moved off production's addresses (0.146333ms)
+✔ webhook delivery and paid dispatch are off in the copy (0.042708ms)
+✔ native proof excludes arguments, error output, prose and other servers (0.589375ms)
+✔ missing, edited, failed or summary-only evidence cannot grant acceptance (0.985459ms)
+✔ incident acceptance requires actual model and every enforced resource bound (1.853ms)
+✔ empty Compose labels do not turn owned disposable containers into foreign infrastructure (3.584208ms)
+✔ incident file guard permits bounded reads and a proposed source fix (1528.450333ms)
+✔ only the native schema serialization tool may emit this incident handle (119.943542ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1333.912417ms)
+✔ a symlink cannot expose an outside file or redirect a write (35.058792ms)
+✔ large diagnostic projections stay readable and disclose omitted evidence (2315.624583ms)
+✔ INFO uses the operator without the password in argv (388.907292ms)
+✔ key scans and fixture writes use the narrowed core user (305.16425ms)
+✔ the preserved pre-M8 deployment remains readable (95.331583ms)
+✔ unexpected users and missing passwords fail closed (99.035958ms)
+✔ restore preserves private incident state only for inspection, without a control surface (18.500375ms)
+✔ privileged controller independently rejects forged/tampered/expired gateway spool entries (1.52625ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3468.983208

@@ -1,0 +1,37 @@
+{
+  "utc": "2026-10-03T17:18:25.888Z",
+  "source_commit": "7492e83",
+  "finding": "SELF-M9-BUILD-01",
+  "scope": "M9 build recipes only",
+  "dockerfiles": [
+    {
+      "path": "services/retrieval/Dockerfile",
+      "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
+    },
+    {
+      "path": "deploy/browser/Dockerfile",
+      "sha256": "ab690be888c197c81b218e8a1795d2ef345ad386b98f71c65c6ce9b11e96505e"
+    }
+  ],
+  "unchanged_lockfiles": [
+    {
+      "path": "services/retrieval/package-lock.json",
+      "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
+    },
+    {
+      "path": "services/browser/package-lock.json",
+      "sha256": "19ed0b8e6471eec482f1b5af8e18aea02536590382b580a9719b5fe027c8d5a8"
+    }
+  ],
+  "original_failure": {
+    "path": "work/M2-REG12-image-build.txt",
+    "sha256": "d1cfaa850c0ffe1153c69b356d79ba41fe5d67571952b6d8d5af349eeae1f5b4",
+    "exit": 130
+  },
+  "actual_rebuild": "PASS",
+  "build_evidence": {
+    "path": "evidence/M9/work/M2-REG12-image-build-no-audit.txt",
+    "sha256": "6065ff510501981301db28dfd343fb1a675b08f6e93c75cff9a8ce1dbaa6ad5b",
+    "source_commit": "7492e8350666fbda276eadfc278e79370efaed97"
+  }
+}

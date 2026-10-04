@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-03T12:26:40.987Z",
+  "state": "FAIL",
+  "classification": "collector_invocation",
+  "reason": "A non-existent candidate directory was passed to a read-only plan probe. No candidate cutover occurred. The actual staged directory was discovered from its prior staging record; the corrected invocation is separate and source-bound.",
+  "initial_wrapper": "evidence/M9/work/plans-collection.txt",
+  "corrected_wrapper": "evidence/M9/work/plans-collection-corrected.txt",
+  "corrected_raw": "evidence/M9/regression/M8/raw/plans.txt",
+  "corrected_raw_sha256": "5ce6db8eac7a5c09923edfb037da842fd6188834a0074a6447137e7a4b6dd526"
+}

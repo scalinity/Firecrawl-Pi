@@ -1,0 +1,54 @@
+{
+  "utc": "2026-10-03T12:44:53.309Z",
+  "source_commit": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+  "counts": {
+    "local": 36,
+    "privileged": 21,
+    "isolated": 273
+  },
+  "paths": [
+    {
+      "path": "evidence/M9/work/local-fixtures-final-source.txt",
+      "sha256": "3f29c0bc79cc194e643a8b68ad7cb438aafbbed3a4b3332ca81e5d6de687fd01"
+    },
+    {
+      "path": "evidence/M9/work/root-fixtures-final-source.txt",
+      "sha256": "6336ff13c9083abdf9e29d7871a252417d8bab9cbca2201aef0cc94dd1a97dfc"
+    },
+    {
+      "path": "evidence/M9/work/pi-fixtures-final-source.txt",
+      "sha256": "bfebc2653e5fae91ebf2bbf812c384aac9227969976208c42e27ef5bbbf5325b"
+    }
+  ],
+  "review_findings_terminal": 137,
+  "additional_input_control": {
+    "B01": [
+      "e2e-fixture.txt",
+      "stack.txt",
+      "artifacts/"
+    ],
+    "B02": [
+      "e2e-fixture.txt",
+      "artifacts/"
+    ]
+  },
+  "native_clients": [
+    {
+      "client": "claude",
+      "proof": "evidence/M9/clients/claude.json",
+      "sha256": "fab9dece1909f9421131a308c372be8b317050b4444dc6c210f4e0064138f4eb"
+    },
+    {
+      "client": "codex",
+      "proof": "evidence/M9/clients/codex.json",
+      "sha256": "ef743b36f05a3adb2ba1e79d750055fddfa00ba98db95f5797b7432b06436bc1"
+    }
+  ],
+  "not_acceptance": true,
+  "unresolved": [
+    "M9-REG-12 returned to M2",
+    "fresh paid/free-credit consent",
+    "current 24-hour soak",
+    "native investigation current source after legitimate UTC rollover"
+  ]
+}

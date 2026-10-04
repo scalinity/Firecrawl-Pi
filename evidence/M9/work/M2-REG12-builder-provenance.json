@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-03T16:36:53.238Z",
+  "parent": "scripts/m8/pi-build-images.sh",
+  "parent_sha256": "6f23094ed5499eb194fbe6144f54cd94a08949713cbac70abb69f1e59d8dfd70",
+  "private_runner_sha256": "733e48a7857858e408007c06ead42c681564f4891e8903c5d2fc873532262a92",
+  "only_runner_change": "image tag m8 becomes m9; source build argument, pinned Dockerfiles and resource observations unchanged",
+  "images": [
+    "retrieval",
+    "browser"
+  ],
+  "source_commit": "3ebf4f52bb4152072e4c1618aa122ea19b9465ef"
+}

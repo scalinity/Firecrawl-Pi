@@ -1,0 +1,1 @@
+{"state":"VERIFIED_LIVE","incident_id":"c142fcfa","auth_removed":true,"api_equivalent_estimate_usd":0.414832}

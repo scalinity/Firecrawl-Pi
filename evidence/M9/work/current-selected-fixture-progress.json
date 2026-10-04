@@ -1,0 +1,1914 @@
+{
+  "utc": "2026-10-03T19:19:05.775Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "milestone_state": "IN_PROGRESS",
+  "required_regression_count": 96,
+  "current_pass_count": 61,
+  "current_bound_count": 61,
+  "required_by_group": {
+    "M2": 7,
+    "M3": 12,
+    "M4": 10,
+    "M5": 15,
+    "M6": 9,
+    "M7": 13,
+    "M8": 30
+  },
+  "results": [
+    {
+      "id": "M2-R01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M2-R02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M2-R03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M2-R04",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M2-S01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-ssrf.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M2/raw/unit-tests.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M2-S02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M2-S03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M2/raw/rt-browser-redirect.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-A03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-N02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/gateway-tests.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-N01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-sync.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-N03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/port-probe.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/lan-probe.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-P02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/tailscale-before.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/tailscale-install.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/lan-probe.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/tailscale-status.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/tailnet-check.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-A01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-sync.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/sdk-compat.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-J04",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/sdk-compat.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-crash.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-J07",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-cancel.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/sdk-compat.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-A02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-expiry.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-after-recreate.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-X02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/persistence.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-after-recreate.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-J03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-crash.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M3-J06",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M3/raw/e2e-expiry.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-restart.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-tailnet.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P08",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-restart.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P09",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-restart.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P10",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-stopped.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P04",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-cancel.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P05",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-stopped.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P06",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-tailnet.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M4-P07",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M4/raw/e2e-tailnet.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-M01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-S01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-S02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-S03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-E01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-E02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-E03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-E04",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-B02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-D01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-D02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M5-I01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R04",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R05",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R06",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R09",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M6/rendered-compose.json",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M6-R07",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-E01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-B01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M7/raw/stack.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M7/raw/artifacts/",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-B02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        },
+        {
+          "path": "evidence/M9/regression/M7/raw/artifacts/",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-B03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-B04",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-W01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-C01",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-C02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-C03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-E03",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-E04",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    },
+    {
+      "id": "M7-E02",
+      "state": "PASS",
+      "source": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+      "code_dirty": false,
+      "source_bound": true,
+      "bindings": [
+        {
+          "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+          "attributed": true,
+          "bound": true,
+          "collector_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184",
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "embedded_sources": [
+            "82a11536707e3fb6d4fe76497e857b137c5e2184"
+          ],
+          "metadata_scope": "preamble/first-metadata/soak-samples"
+        }
+      ]
+    }
+  ],
+  "pending_note": "This is regression progress, not a milestone/time percentage. Current M8 operations, a complete 24-hour soak, five fresh live gates, corpus/research and final acceptance are still required."
+}

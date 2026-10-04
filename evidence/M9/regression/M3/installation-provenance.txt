@@ -1,0 +1,1 @@
+Tailscale installation provenance is reused byte-for-byte from accepted M3. Installation is not repeated. Current keyring, preferences, guard, Serve state, private TLS and reachability are verified separately by the current status/probes.

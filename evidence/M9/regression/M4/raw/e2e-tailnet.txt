@@ -1,0 +1,16 @@
+### meta
+{"utc":"2026-10-03T18:31:40.220Z","phase":"tailnet","platform":"darwin","node":"v26.10.0","client":"@modelcontextprotocol/client@2.1.0","deployed_commit":"82a11536707e3fb6d4fe76497e857b137c5e2184","pi_utc":"2026-10-03T18:31:40.228Z"}
+### resources
+{"utc":"2026-10-03T18:31:40Z","label":"start-tailnet","mcp":{"instance":"bce65aff9742","started_at":"2026-10-03T18:31:30.206788535Z","peak":56754176,"max":"201326592","current":40468480,"oom_kill":0},"gateway":{"instance":"a92264002c78","started_at":"2026-10-03T18:00:26.744088496Z","peak":48365568,"max":"167772160","current":34422784,"oom_kill":0},"core":{"instance":"3367bc77d4d6","started_at":"2026-10-03T18:28:23.831210571Z","peak":2065448960,"max":"2684354560","current":1823506432,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4923424}
+### tailnet
+{"utc":"2026-10-03T18:31:41.311Z","case":"discover","status":200,"request_id":"2123b586-1899-42ad-b231-309ec2c5da8f","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":52823,"tls":"TLSv1.3","tls_authorized":true,"cert_matches_host":true}
+{"utc":"2026-10-03T18:31:45.861Z","case":"modern_sdk","negotiated":"2026-07-28","tools":13,"sentinel":"fcpi-m3-p02-d64d","progress_messages":1,"sse_exchanges":1,"crawl_status":"completed","results_on_tailnet_origin":true,"sessions":0}
+{"utc":"2026-10-03T18:31:46.734Z","case":"legacy_sdk","negotiated":"2025-11-25","sentinel":"fcpi-m3-p03-aa2a","sessions":0}
+{"utc":"2026-10-03T18:31:46.778Z","case":"no_token","status":401,"request_id":"0a87a434-97f1-4078-8c94-5ffe7c36cce7","content_type":"application/json; charset=utf-8","sse":false,"session_header":null,"www_authenticate":"Bearer realm=\"fcpi\"","acao":null,"code":"UNAUTHORIZED","rpc_error":null,"result_type":null,"is_error":null,"local_port":52838}
+{"utc":"2026-10-03T18:31:46.944Z","case":"foreign_host","status":421,"request_id":"ece62f4b-6c57-441e-9883-0d6eb0b83d93","content_type":"application/json; charset=utf-8","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":"MISDIRECTED","rpc_error":null,"result_type":null,"is_error":null,"local_port":52839}
+### tailnet_connections
+{"utc":"2026-10-03T18:31:46.944Z","hosts":["<pi-tailnet-name-host>:8443"],"total":4,"lookups":["<pi-tailnet-name-host>"]}
+### resources
+{"utc":"2026-10-03T18:31:47Z","label":"end-tailnet","mcp":{"instance":"bce65aff9742","started_at":"2026-10-03T18:31:30.206788535Z","peak":56754176,"max":"201326592","current":42713088,"oom_kill":0},"gateway":{"instance":"a92264002c78","started_at":"2026-10-03T18:00:26.744088496Z","peak":48365568,"max":"167772160","current":35110912,"oom_kill":0},"core":{"instance":"3367bc77d4d6","started_at":"2026-10-03T18:28:23.831210571Z","peak":2065448960,"max":"2684354560","current":1826586624,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4929152}
+### end
+{"utc":"2026-10-03T18:31:47.801Z","exit":0}

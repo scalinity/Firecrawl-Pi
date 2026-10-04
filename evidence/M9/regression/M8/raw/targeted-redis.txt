@@ -1,0 +1,40 @@
+### meta
+utc=2026-10-03T21:02:18Z source_commit=82a11536707e3fb6d4fe76497e857b137c5e2184 user=fcpi_ops core_user=fcpi_core start_source_commit=82a11536707e3fb6d4fe76497e857b137c5e2184 reset_utc=2026-10-03T20:31:29Z
+### commandstats
+cmdstat_set:calls=278,usec=3088,usec_per_call=11.11,rejected_calls=0,failed_calls=0
+cmdstat_zpopmin:calls=728,usec=359,usec_per_call=0.49,rejected_calls=0,failed_calls=0
+cmdstat_info:calls=3,usec=221,usec_per_call=73.67,rejected_calls=0,failed_calls=0
+cmdstat_hmget:calls=724,usec=3138,usec_per_call=4.33,rejected_calls=0,failed_calls=0
+cmdstat_expire:calls=398,usec=2273,usec_per_call=5.71,rejected_calls=0,failed_calls=0
+cmdstat_zrem:calls=60,usec=150,usec_per_call=2.50,rejected_calls=0,failed_calls=0
+cmdstat_lrange:calls=54,usec=47,usec_per_call=0.87,rejected_calls=0,failed_calls=0
+cmdstat_zadd:calls=37,usec=508,usec_per_call=13.73,rejected_calls=0,failed_calls=0
+cmdstat_hget:calls=54,usec=223,usec_per_call=4.13,rejected_calls=0,failed_calls=0
+cmdstat_zremrangebyscore:calls=60,usec=124,usec_per_call=2.07,rejected_calls=0,failed_calls=0
+cmdstat_smembers:calls=97,usec=194,usec_per_call=2.00,rejected_calls=0,failed_calls=0
+cmdstat_del:calls=750,usec=1413,usec_per_call=1.88,rejected_calls=0,failed_calls=0
+cmdstat_config|resetstat:calls=1,usec=69,usec_per_call=69.00,rejected_calls=0,failed_calls=0
+cmdstat_get:calls=141,usec=528,usec_per_call=3.74,rejected_calls=0,failed_calls=0
+cmdstat_exists:calls=62,usec=398,usec_per_call=6.42,rejected_calls=0,failed_calls=0
+cmdstat_zrange:calls=729,usec=389,usec_per_call=0.53,rejected_calls=0,failed_calls=0
+cmdstat_zcount:calls=2,usec=13,usec_per_call=6.50,rejected_calls=0,failed_calls=0
+cmdstat_pttl:calls=9,usec=11,usec_per_call=1.22,rejected_calls=0,failed_calls=0
+cmdstat_rpoplpush:calls=724,usec=606,usec_per_call=0.84,rejected_calls=0,failed_calls=0
+cmdstat_ping:calls=62,usec=31,usec_per_call=0.50,rejected_calls=0,failed_calls=0
+cmdstat_zrangebyscore:calls=744,usec=1773,usec_per_call=2.38,rejected_calls=0,failed_calls=0
+cmdstat_evalsha:calls=786,usec=60538,usec_per_call=77.02,rejected_calls=0,failed_calls=0
+cmdstat_bzpopmin:calls=724,usec=8104,usec_per_call=11.19,rejected_calls=0,failed_calls=0
+cmdstat_srem:calls=222,usec=2456,usec_per_call=11.06,rejected_calls=0,failed_calls=0
+cmdstat_scard:calls=251,usec=852,usec_per_call=3.39,rejected_calls=0,failed_calls=0
+cmdstat_xtrim:calls=54,usec=85,usec_per_call=1.57,rejected_calls=0,failed_calls=0
+cmdstat_auth:calls=74,usec=347,usec_per_call=4.69,rejected_calls=0,failed_calls=0
+cmdstat_acl|log:calls=8,usec=23,usec_per_call=2.88,rejected_calls=0,failed_calls=0
+cmdstat_sadd:calls=331,usec=2848,usec_per_call=8.60,rejected_calls=0,failed_calls=0
+### acl_users
+user default off sanitize-payload resetchannels -@all
+user fcpi_core on sanitize-payload #<hash> ~* &* -@all +get +set +mget +del +exists +expire +pexpire +pttl +keys +scan +type +rename +time +incr +incrby +hget +hset +hmget +hmset +hsetnx +hdel +hexists +hgetall +hincrby +hlen +lpush +rpush +lpop +rpop +llen +lindex +lpos +lrange +lrem +lset +ltrim +rpoplpush +sadd +srem +spop +scard +sismember +smembers +zadd +zrem +zcard +zcount +zscore +zpopmin +bzpopmin +zrange +zrangebyscore +zrevrange +zrevrangebyscore +zremrangebyrank +zremrangebyscore +xadd +xread +xtrim +eval +evalsha +script|load +script|exists +multi +exec +discard +info +client|setname +client|list +ping +quit
+user fcpi_ops on sanitize-payload #<hash> ~* resetchannels -@all +info +acl|list +acl|log +config|resetstat +ping
+user health on nopass sanitize-payload resetchannels -@all +ping
+### acl_log
+acl_log_read=ok entries=0
+### end

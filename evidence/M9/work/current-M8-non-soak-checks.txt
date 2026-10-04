@@ -1,0 +1,26 @@
+M8-R01 PASS               normal-reboot-ready-within-five-minutes
+M8-R02 PASS               docker-restart-recovers-without-action
+M8-R03 PASS               missing-data-mount-refuses-writers
+M8-I01 PASS               mcp-crash-restarts-mcp-alone
+M8-I02 PASS               api-child-crash-recovers-typed
+M8-I03 PASS               worker-death-shown-as-degraded-and-recovered
+M8-I04 PASS               postgres-down-fails-closed-and-reconciles
+M8-I07 PASS               browser-crash-contained
+M8-I15 PASS               supervisor-bounded-restarts-then-incident
+M8-O01 PASS               status-names-each-failure-independently
+M8-O02 PASS               one-notice-per-incident-and-its-recovery
+M8-O03 PASS               logs-bounded-and-diagnostics-redacted
+M8-N01 PASS               incident-notice-reaches-the-owner-channel
+M8-N02 PASS               external-watchdog-notices-a-lost-heartbeat-once
+M8-K01 PASS               coordinated-backup-on-the-fixture-repository
+M8-K02 PASS               isolated-restore-proves-the-backup
+M8-K03 PASS               off-device-backup-and-restore
+M8-U01 PASS               upgrade-and-rollback-rehearsed-in-isolation
+M8-U02 PASS               upgrade-and-rollback-plans-read-only
+M8-I08 PASS               search-outage-isolated-and-not-resurrected
+M8-I09 PASS               proxy-outage-never-spills-to-the-home-ip
+M8-I10 PASS               model-parser-enhanced-outage-isolated
+M8-I11 PASS               network-outage-bounded-and-recovered-without-restart
+M8-X01 FAIL               zero-firecrawl-cloud-attempts  — failed=core_logs; guard handle 10→10, web accepted delta=0, proxy-port delta=0; core logs=44
+M8-X02 PASS               network-and-container-posture
+M8-S05 PASS               core-heap-holds-large-pages-at-384-mib

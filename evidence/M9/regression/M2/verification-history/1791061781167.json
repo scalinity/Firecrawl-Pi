@@ -1,0 +1,479 @@
+{
+  "schema": "fcpi.m2.verification/v1",
+  "runner": "scripts/m2/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main.",
+  "results": [
+    {
+      "test_id": "M2-B00",
+      "name": "baseline-matches-m1-closeout-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-B01",
+      "name": "chromium-native-aarch64",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-B02",
+      "name": "chromium-load-segments-16k-aligned",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-B03",
+      "name": "chromium-runs-non-root",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-B04",
+      "name": "chromium-sandbox-on",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-B05",
+      "name": "chromium-renders-fixture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-B06",
+      "name": "chromium-closes-cleanly",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-B07",
+      "name": "chromium-no-stray-processes",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-D01",
+      "name": "d1-playwright-admission-every-in-the-wild-cve",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-D02",
+      "name": "api-build-reproducible-and-pinned",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-D03",
+      "name": "service-images-pinned",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-P01",
+      "name": "patch-series-hashes-and-call-site-manifest",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-P02",
+      "name": "traced-paths-reach-the-adapter",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-R01",
+      "name": "static-pages-never-start-chromium",
+      "utc": "2026-10-03T21:09:01Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "92ce9303b06d33f3a23a9be748bdab01b6662eef1c1c9474c918ed4e5eee6fdc",
+      "input_paths": [
+        "evidence/M9/regression/M2/raw/rt-static.txt"
+      ],
+      "expected": "with the browser worker up, every ordinary static-phase acquisition is direct HTTP; only the explicit screenshot/action cases enabled by M7 may render, with exact attempt/log accounting; the worker answering its health check at the end is the positive control that it was there to be used",
+      "state": "PASS",
+      "actual": "attempts=22, strategies=direct_http,direct_browser; renders=2; browser health={\"ok\":true,\"browser\":\"up\",\"version\":\"153.0.8010.12\",\"pagesServed\":34,\"launches\":2,\"busy\":false}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-R02",
+      "name": "js-delayed-cookie-pages-render",
+      "utc": "2026-10-03T21:09:01Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "3ddc932dead4e95950407faa76c67480b4f5a9132ec75d81f9fe45e288085dcc",
+      "input_paths": [
+        "evidence/M9/regression/M2/raw/rt-browser.txt"
+      ],
+      "expected": "the JS, delayed and cookie-then-JS fixtures return their sentinels in Markdown, after a cold direct js_shell plus browser attempt, or one browser attempt backed by an explicit M6 learned_js routing event",
+      "state": "PASS",
+      "actual": "failing=none; renders logged=8",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-R03",
+      "name": "content-classified",
+      "utc": "2026-10-03T21:09:01Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "c9dcea6c8ef782a4c63606db6c7ef346438f477001f5f01f11449b341dfbaea7",
+      "input_paths": [
+        "evidence/M9/regression/M2/raw/rt-static.txt",
+        "evidence/M9/regression/M2/raw/rt-browser.txt"
+      ],
+      "expected": "short content is adequate (no escalation); a bot interstitial is BLOCKED_PUBLIC_CONTENT; sign-in redirects and 401 are AUTH_REQUIRED; 403 is ACCESS_DENIED; 404 and 503 keep the target's status; 429 is RATE_LIMITED with Retry-After and the next request to that domain is refused during the cooldown without reaching it; an empty page is adequate at the service; a page still a shell after rendering is RENDER_INCOMPLETE, while a short scripted page and an image-led one come back as the page",
+      "state": "PASS",
+      "actual": "failing=none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-R04",
+      "name": "size-time-and-redirect-limits",
+      "utc": "2026-10-03T21:09:01Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "c9dcea6c8ef782a4c63606db6c7ef346438f477001f5f01f11449b341dfbaea7",
+      "input_paths": [
+        "evidence/M9/regression/M2/raw/rt-static.txt",
+        "evidence/M9/regression/M2/raw/rt-browser.txt"
+      ],
+      "expected": "a declared body over 25 MiB, a gzip bomb and a script-built document over 25 MiB are SIZE_LIMIT; a target slower than the scrape timeout times out; three redirects are followed and twelve are TOO_MANY_REDIRECTS",
+      "state": "PASS",
+      "actual": "failing=none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-R05",
+      "name": "unregistered-capabilities-refused",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-S01",
+      "name": "ssrf-matrix-denied",
+      "utc": "2026-10-03T21:09:01Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "eeed6f76ce1526a9551c06cc6e502cc1fd0cb5fdadfd0c379d894736596d7ba0",
+      "input_paths": [
+        "evidence/M9/regression/M2/raw/rt-ssrf.txt",
+        "evidence/M9/regression/M2/raw/unit-tests.txt"
+      ],
+      "expected": "every private, loopback (IPv4 and IPv6), link-local, metadata, IPv4-mapped, NAT64, CGNAT, numeric, single-label, service-name, file-scheme, host-LAN and Cloud target is refused, asked through the core and asked of the service directly, with no attempt spent; each redirect to such a target is refused after the fixture served the redirect; the direct control page succeeds; the unit tests, which include DNS rebinding, pass",
+      "state": "PASS",
+      "actual": "attempts accounted=true ({\"SSRF_DENIED\":6,\"CLOUD_DENIED\":1,\"adequate\":1}); through core=18 not refused=none; direct=18 not refused=none; redirect cases=7, fixture served /redirect=7; control=true; unit DNS rebinding and suite=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-S02",
+      "name": "browser-subresources-denied",
+      "utc": "2026-10-03T21:09:01Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "3ddc932dead4e95950407faa76c67480b4f5a9132ec75d81f9fe45e288085dcc",
+      "input_paths": [
+        "evidence/M9/regression/M2/raw/rt-browser.txt"
+      ],
+      "expected": "each of the subresource fixture's 13 private, loopback, metadata, LAN-range, numeric, Cloud and project-internal requests is refused at the proxy by host, with the attempt id on every log line; the pixel, the positive control, reaches the fixture; the page renders",
+      "state": "PASS",
+      "actual": "refused=13 (SSRF_DENIED,CLOUD_DENIED); proxy log lines=26, without host or attempt=0; pixel hits=7",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-S03",
+      "name": "browser-first-redirect-denial-classification",
+      "utc": "2026-10-03T21:09:01Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "352381fd25fcbfdfee669eb273d2a620db445b1efaef152d049d27573f959c42",
+      "input_paths": [
+        "evidence/M9/regression/M2/raw/rt-browser-redirect.txt"
+      ],
+      "expected": "eight initial (including synthetic URL credentials) and two post-load already-blocked private/Cloud redirects report canonical classes through core and retrieval, each in one browser attempt; a permitted cross-host redirect succeeds, a page's own 403 remains ACCESS_DENIED, aborted direct off-host navigations report NAVIGATION_FAILED and all permits are released",
+      "state": "PASS",
+      "actual": "wrong-class cases=none; actual attempt outcomes={\"SSRF_DENIED\":16,\"CLOUD_DENIED\":4}; proxy refusals=22, joined=true; public cross-host positive=true; own 403 unchanged=true; aborted navigation denied=true; permits=true; health=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-A01",
+      "name": "four-attempts-per-logical-page",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-A02",
+      "name": "requeued-job-shares-its-budget",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-A03",
+      "name": "direct-traffic-within-limits",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-A04",
+      "name": "global-url-permits",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-C01",
+      "name": "cancellation-releases-permits-and-processes",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-C02",
+      "name": "browser-crash-contained",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-C03",
+      "name": "browser-down-isolated",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-M01",
+      "name": "caps-read-from-cgroups",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-M02",
+      "name": "core-peak-before-chromium",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-M03",
+      "name": "chromium-stress-within-cap",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-M04",
+      "name": "over-cap-browser-contained",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-N01",
+      "name": "broker-outage-survived-pc-nuq-connect",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-N02",
+      "name": "reply-queue-consumer-back-within-60s-4244",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-N03",
+      "name": "worker-killed-mid-job-recorded",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X02",
+      "name": "core-has-no-direct-egress",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X03",
+      "name": "egress-bridge-guarded-and-own-dns",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X11",
+      "name": "router-public-address-is-host-local",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X04",
+      "name": "access-bridge-guard-still-holds",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X05",
+      "name": "allow-local-webhooks-removed-r4",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X06",
+      "name": "published-ports-loopback-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X07",
+      "name": "core-credentials-dml-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X08",
+      "name": "persistence-across-force-recreate",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X09",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-X10",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-L01",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-U01",
+      "name": "retrieval-unit-tests-pass",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    },
+    {
+      "test_id": "M2-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M2/verification.json"
+    }
+  ]
+}

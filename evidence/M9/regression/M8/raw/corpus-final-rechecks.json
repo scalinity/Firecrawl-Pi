@@ -1,0 +1,45 @@
+{
+  "schema": "fcpi.corpus-unpaid-rechecks/v1",
+  "source_commit": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce",
+  "started_utc": "2026-10-03T22:30:12.051Z",
+  "completed_utc": "2026-10-03T22:30:43.995Z",
+  "raw_sha256": "9c45a30831e8693978726ae00c8fe04eea2647c378f1f29d37040b39f4ed6b0e",
+  "initial_raw_sha256": "2ad4a55cf3f94a3c94cf99677f8ef00776d59ff0fd5208a1c389386070ea8ef1",
+  "initial_public_sha256": "ac31e7fbde57b57af081734b63ebda87c2c5b0f865e0572c8d8cf52e89b9e83d",
+  "producer_sha256": "0c2729473ea0d64e3629277b89dfd15c0bc42ee31afa6db127c8595549257439",
+  "prior_raw_sha256": "9ce90ffdaf52aee8e3cfd8c7409fe4c2c1c27c1a056d7a5272562df90dd51b81",
+  "prior_record_sha256": "f15bb18ab718af4b8b82f5a401ddb8e657a6730cf08039d4113837980a8e5903",
+  "results": [
+    {
+      "id": "P01",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "12d0095bfd222600d327a24c7be4fd8c2be4e67ab8433dd004d496d27f9a6525",
+      "cumulative_attempts": 3
+    },
+    {
+      "id": "P02",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "8cdc02858f1fabc622d64824ae2ad24fee75bb32910ee6edcfca958b50466fb5",
+      "cumulative_attempts": 3
+    },
+    {
+      "id": "P07",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "56a1d4fc2a17416b46941e525b936d1fab82c6f03a0448cc43bc02719e369074",
+      "cumulative_attempts": 3
+    },
+    {
+      "id": "P08",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "2bb0398957b0b8eadff68adb22ff3601bffff3b34181d654e0533e7df7639fc4",
+      "cumulative_attempts": 3
+    }
+  ],
+  "paid_dispatch": false,
+  "caps_zero": true,
+  "new_provider_reservations": 0
+}

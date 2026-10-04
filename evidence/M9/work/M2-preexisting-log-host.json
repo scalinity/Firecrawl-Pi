@@ -1,0 +1,18 @@
+{
+  "schema": "fcpi.m9-preexisting-probe/v1",
+  "test_id": "M9-M2-LOG-HOST",
+  "utc": "2026-10-03T16:26:18.000Z",
+  "source_commit": "31668e6d628de63fa5aed5b89af3a322f4c38947",
+  "source_file_sha256": "7d97ad15692d646912b706b8451815d97d95ac8c6220e67d903fa5988795bb27",
+  "fixture_sha256": "365b599c3b3f10a7d78e0f81e4e0812462186b4c68a195a9f6203f9773e0e057",
+  "synthetic_fixture": true,
+  "expected": "target_host omits path and query",
+  "actual": {
+    "status": 503,
+    "refusal_class": "RETRIEVAL_NOT_READY",
+    "log_contains_query": true,
+    "log_value_sha256": "365b599c3b3f10a7d78e0f81e4e0812462186b4c68a195a9f6203f9773e0e057"
+  },
+  "state": "FAIL",
+  "classification": "pre-existing log metadata disclosure; loopback-only fixture, no secret or target egress"
+}

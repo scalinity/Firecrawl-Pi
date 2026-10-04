@@ -1,0 +1,37 @@
+### meta
+utc=2026-10-03T20:24:24Z since=2026-10-03T19:10:26Z running_kernel=6.18.50+rpt-rpi-2712 boot_id_sha256=7f34310353ce995681f52fc20ec3e815ec21b5c8cbbc96dccd92caa12a287aa5
+### apt_runs
+held=containerd.io docker-buildx-plugin docker-ce docker-ce-cli docker-compose-plugin 
+### journal
+2026-10-03T19:11:11.080425+00:00 pi systemd[1]: Reloading...
+2026-10-03T19:11:11.626565+00:00 pi systemd[1]: Reloading finished in 544 ms.
+2026-10-03T19:41:30.873221+00:00 pi systemd[1]: Reloading...
+2026-10-03T19:41:31.336308+00:00 pi systemd[1]: Reloading finished in 462 ms.
+2026-10-03T19:41:31.537658+00:00 pi systemd[1]: Reloading...
+2026-10-03T19:41:31.998917+00:00 pi systemd[1]: Reloading finished in 460 ms.
+2026-10-03T19:41:32.183090+00:00 pi systemd[1]: Reloading...
+2026-10-03T19:41:32.655227+00:00 pi systemd[1]: Reloading finished in 471 ms.
+2026-10-03T20:00:16.950400+00:00 pi kernel: NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030
+### loopback_listeners
+### pihole_udp
+*:123
+*:53
+0.0.0.0:123
+0.0.0.0:53
+### container_swap
+fixture started=2026-10-03T19:41:40.977521323Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+access-gateway started=2026-10-03T19:53:11.280256696Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m7 started=2026-10-03T19:41:57.737042092Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+firecrawl-core started=2026-10-03T19:53:10.47989772Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+retrieval-service started=2026-10-03T19:52:58.662811446Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+nuq-postgres started=2026-10-03T19:52:52.853353695Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+rabbitmq started=2026-10-03T19:52:51.86567999Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+redis started=2026-10-03T19:52:53.178400524Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+searxng started=2026-10-03T19:52:52.544951784Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m6 started=2026-10-03T19:41:40.869573305Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+browser-worker started=2026-10-03T19:52:52.056610269Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+mcp-gateway started=2026-10-03T19:52:52.272474322Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m3 started=2026-10-03T19:41:40.825576545Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m2 started=2026-10-03T19:41:40.882302175Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+fixture-m5 started=2026-10-03T19:41:56.475445947Z memory.swap.max=0 parent=fcpi.slice parent_swap_max=0
+### end

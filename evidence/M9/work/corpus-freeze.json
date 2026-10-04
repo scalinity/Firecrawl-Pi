@@ -1,0 +1,164 @@
+{
+  "schema": "fcpi.m9-corpus/v1",
+  "frozen_at": "2026-10-03T03:53:03.551Z",
+  "sha256": "c1e735e869798c0491421e73d8439ee856df9cffaa030887c13bc4334f117d6a",
+  "count": 20,
+  "domains": [
+    "example.com",
+    "example.org",
+    "httpbin.org",
+    "quotes.toscrape.com",
+    "books.toscrape.com",
+    "developer.mozilla.org",
+    "nodejs.org",
+    "docs.python.org",
+    "www.w3.org",
+    "react.dev",
+    "www.scrapingcourse.com",
+    "www.iana.org"
+  ],
+  "targets": [
+    {
+      "id": "P01",
+      "page_class": "static",
+      "domain": "example.com",
+      "criteria_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "max_attempts": 3
+    },
+    {
+      "id": "P02",
+      "page_class": "static",
+      "domain": "example.org",
+      "criteria_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "max_attempts": 3
+    },
+    {
+      "id": "P03",
+      "page_class": "static",
+      "domain": "httpbin.org",
+      "criteria_sha256": "04772b402e9a404e92672e35bc696cacf3d0ab78af207004e2436c66750a3b27",
+      "max_attempts": 3
+    },
+    {
+      "id": "P04",
+      "page_class": "static",
+      "domain": "httpbin.org",
+      "criteria_sha256": "92f33e0c60ff0852d1a2ab2f67abe130378e354050a5bc086a5f324225778643",
+      "max_attempts": 3
+    },
+    {
+      "id": "P05",
+      "page_class": "static",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+      "max_attempts": 3
+    },
+    {
+      "id": "P06",
+      "page_class": "static",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "238b82329de4591be36fcb6c2dd5363b634a9e7e2371672abadaa93bc477fc85",
+      "max_attempts": 3
+    },
+    {
+      "id": "P07",
+      "page_class": "js",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+      "max_attempts": 3
+    },
+    {
+      "id": "P08",
+      "page_class": "js",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+      "max_attempts": 3
+    },
+    {
+      "id": "P09",
+      "page_class": "static",
+      "domain": "books.toscrape.com",
+      "criteria_sha256": "d53bd7e0174c0d53cfd5df069eb643902c7da4645326b81e52732b068af3c1cb",
+      "max_attempts": 3
+    },
+    {
+      "id": "P10",
+      "page_class": "static",
+      "domain": "books.toscrape.com",
+      "criteria_sha256": "9d948c73e0ad7a5a213a5e7e00b962531ca6b07992a06bd8c2fc2ac5ae23c51b",
+      "max_attempts": 3
+    },
+    {
+      "id": "P11",
+      "page_class": "documentation",
+      "domain": "developer.mozilla.org",
+      "criteria_sha256": "b27ad06d123c6145fba7e9217a4cfbf2488b4743810ed8c8ff14ad01a5bbe515",
+      "max_attempts": 3
+    },
+    {
+      "id": "P12",
+      "page_class": "documentation",
+      "domain": "developer.mozilla.org",
+      "criteria_sha256": "56d6f32151ad8474f40d7b939c2161ee2bbf10023f4af1dbb3e13260ebdc6342",
+      "max_attempts": 3
+    },
+    {
+      "id": "P13",
+      "page_class": "documentation",
+      "domain": "nodejs.org",
+      "criteria_sha256": "72ede065fad02e5d9fe5681dd9022b26a1cc357ed0ded8e7ba24fab98b18347f",
+      "max_attempts": 3
+    },
+    {
+      "id": "P14",
+      "page_class": "documentation",
+      "domain": "nodejs.org",
+      "criteria_sha256": "56d6f32151ad8474f40d7b939c2161ee2bbf10023f4af1dbb3e13260ebdc6342",
+      "max_attempts": 3
+    },
+    {
+      "id": "P15",
+      "page_class": "documentation",
+      "domain": "docs.python.org",
+      "criteria_sha256": "18885f27b5af9012df19e496460f9294d5ab76128824c6f993787004f6d9a7db",
+      "max_attempts": 3
+    },
+    {
+      "id": "P16",
+      "page_class": "document",
+      "domain": "www.w3.org",
+      "criteria_sha256": "41417fb420a737c8064205cf4b7fac3fc7ce6bad26417be5b4f6f6012d92c951",
+      "max_attempts": 3
+    },
+    {
+      "id": "P17",
+      "page_class": "documentation",
+      "domain": "www.w3.org",
+      "criteria_sha256": "7605425c77512652e2ab94af37a11afd86084f677375d3edd81f9035a8495434",
+      "max_attempts": 3
+    },
+    {
+      "id": "P18",
+      "page_class": "documentation",
+      "domain": "react.dev",
+      "criteria_sha256": "01fad993ff61aca9a1f2f07100c95eb1559d8b6440a00cb974a92810a6b5a2dc",
+      "max_attempts": 3
+    },
+    {
+      "id": "P19",
+      "page_class": "lawful-difficult",
+      "domain": "www.scrapingcourse.com",
+      "criteria_sha256": "562be6087cac8848bcc4ba7f4e99aa44d26f3ec68b0f1cf60e18bc15a1f70a9a",
+      "max_attempts": 3
+    },
+    {
+      "id": "P20",
+      "page_class": "static",
+      "domain": "www.iana.org",
+      "criteria_sha256": "6ecc30f307d5443aca21d74d9dd696a8b9316a520a32403554525e3425fcd51e",
+      "max_attempts": 3
+    }
+  ],
+  "private_storage": "owner-only local corpus; exact URLs and text criteria excluded from Git",
+  "platform_measurements_before_freeze": 0
+}

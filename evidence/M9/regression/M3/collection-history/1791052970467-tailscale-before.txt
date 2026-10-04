@@ -1,0 +1,4 @@
+### meta
+utc=2026-10-03T15:23:54Z source_commit=f72333f81d2c4753bf83d0db359e9ca6c99ef3da mode=read-only-current-baseline
+resolv_conf_sha256=de08881cd2a06e1a3dba4a62ca41abfe418f74f4ede94e596105a813bc9662cf nameservers=1
+tailscale_installed=install ok installed

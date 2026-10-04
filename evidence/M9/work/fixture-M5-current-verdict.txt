@@ -1,0 +1,13 @@
+M5-M01 PASS               map-during-search-outage
+M5-S01 PASS               search-typed-outcomes-rest
+M5-S02 PASS               search-typed-outcomes-mcp
+M5-S03 PASS               search-log-cache-and-selection
+M5-S05 NOT_RUN            search-live  — evidence missing: evidence/M9/regression/M5/raw/e2e-live.txt
+M5-E01 PASS               json-format-fixture-model
+M5-E02 PASS               explicit-url-extract-jobs
+M5-E03 PASS               refusals-before-spend
+M5-E04 PASS               provider-rejection-and-outage
+M5-B02 PASS               concurrent-reservation-race
+M5-D01 PASS               document-classes
+M5-D02 PASS               parser-fallback-and-credits-fixture
+M5-I01 PASS               acquisition-unaffected-by-provider-failure

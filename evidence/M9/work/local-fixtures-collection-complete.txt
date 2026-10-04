@@ -1,0 +1,226 @@
+TAP version 13
+# Subtest: the gateway's and the retrieval service's admission readers are the same code below their headers
+ok 1 - the gateway's and the retrieval service's admission readers are the same code below their headers
+  ---
+  duration_ms: 0.58525
+  type: 'test'
+  ...
+# Subtest: the services' staleness bound is the operations scripts' STALE_S
+ok 2 - the services' staleness bound is the operations scripts' STALE_S
+  ---
+  duration_ms: 1.166125
+  type: 'test'
+  ...
+# Subtest: the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network
+ok 3 - the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network
+  ---
+  duration_ms: 4.428167
+  type: 'test'
+  ...
+# Subtest: every host path the copy names is under its directory
+ok 4 - every host path the copy names is under its directory
+  ---
+  duration_ms: 17.182416
+  type: 'test'
+  ...
+# Subtest: the copy runs only the kept services, publishes nothing and reaches no egress network
+ok 5 - the copy runs only the kept services, publishes nothing and reaches no egress network
+  ---
+  duration_ms: 0.160167
+  type: 'test'
+  ...
+# Subtest: every network is internal, isolated, renamed and moved off production's addresses
+ok 6 - every network is internal, isolated, renamed and moved off production's addresses
+  ---
+  duration_ms: 0.162958
+  type: 'test'
+  ...
+# Subtest: webhook delivery and paid dispatch are off in the copy
+ok 7 - webhook delivery and paid dispatch are off in the copy
+  ---
+  duration_ms: 0.046958
+  type: 'test'
+  ...
+# Subtest: native proof excludes arguments, error output, prose and other servers
+ok 8 - native proof excludes arguments, error output, prose and other servers
+  ---
+  duration_ms: 0.626959
+  type: 'test'
+  ...
+# Subtest: actual input identity binds independently of the verifier revision
+ok 9 - actual input identity binds independently of the verifier revision
+  ---
+  duration_ms: 1.679292
+  type: 'test'
+  ...
+# Subtest: private producer records cannot be missing, tampered or substituted
+ok 10 - private producer records cannot be missing, tampered or substituted
+  ---
+  duration_ms: 0.152625
+  type: 'test'
+  ...
+# Subtest: soak and counter intervals bind their start and every controlled sample
+ok 11 - soak and counter intervals bind their start and every controlled sample
+  ---
+  duration_ms: 0.70975
+  type: 'test'
+  ...
+# Subtest: NUL porcelain rejects both code paths of staged renames and copies
+ok 12 - NUL porcelain rejects both code paths of staged renames and copies
+  ---
+  duration_ms: 0.26525
+  type: 'test'
+  ...
+# Subtest: unstamped inputs need receipts; body and immutable image stamps cannot supply identity
+ok 13 - unstamped inputs need receipts; body and immutable image stamps cannot supply identity
+  ---
+  duration_ms: 0.139916
+  type: 'test'
+  ...
+# Subtest: real wrapper preserves producer bytes, stdin, relative env and side outputs; failures invalidate receipts
+ok 14 - real wrapper preserves producer bytes, stdin, relative env and side outputs; failures invalidate receipts
+  ---
+  duration_ms: 1149.599958
+  type: 'test'
+  ...
+# Subtest: directory hashes include exact names and bytes and refuse symbolic links
+ok 15 - directory hashes include exact names and bytes and refuse symbolic links
+  ---
+  duration_ms: 1.097
+  type: 'test'
+  ...
+# Subtest: missing, edited, failed or summary-only evidence cannot grant acceptance
+ok 16 - missing, edited, failed or summary-only evidence cannot grant acceptance
+  ---
+  duration_ms: 1.340833
+  type: 'test'
+  ...
+# Subtest: incident acceptance requires actual model and every enforced resource bound
+ok 17 - incident acceptance requires actual model and every enforced resource bound
+  ---
+  duration_ms: 1.454042
+  type: 'test'
+  ...
+# Subtest: empty Compose labels do not turn owned disposable containers into foreign infrastructure
+ok 18 - empty Compose labels do not turn owned disposable containers into foreign infrastructure
+  ---
+  duration_ms: 3.858208
+  type: 'test'
+  ...
+# Subtest: incident file guard permits bounded reads and a proposed source fix
+ok 19 - incident file guard permits bounded reads and a proposed source fix
+  ---
+  duration_ms: 1509.992416
+  type: 'test'
+  ...
+# Subtest: only the native schema serialization tool may emit this incident handle
+ok 20 - only the native schema serialization tool may emit this incident handle
+  ---
+  duration_ms: 128.878958
+  type: 'test'
+  ...
+# Subtest: secrets, security changes, runtime hooks and execution tools are denied
+ok 21 - secrets, security changes, runtime hooks and execution tools are denied
+  ---
+  duration_ms: 1259.622375
+  type: 'test'
+  ...
+# Subtest: a symlink cannot expose an outside file or redirect a write
+ok 22 - a symlink cannot expose an outside file or redirect a write
+  ---
+  duration_ms: 35.600625
+  type: 'test'
+  ...
+# Subtest: large diagnostic projections stay readable and disclose omitted evidence
+ok 23 - large diagnostic projections stay readable and disclose omitted evidence
+  ---
+  duration_ms: 2312.0875
+  type: 'test'
+  ...
+# Subtest: operational probe counts only exact incident lifecycle notices
+ok 24 - operational probe counts only exact incident lifecycle notices
+  ---
+  duration_ms: 33.502292
+  type: 'test'
+  ...
+# Subtest: INFO uses the operator without the password in argv
+ok 25 - INFO uses the operator without the password in argv
+  ---
+  duration_ms: 265.130792
+  type: 'test'
+  ...
+# Subtest: key scans and fixture writes use the narrowed core user
+ok 26 - key scans and fixture writes use the narrowed core user
+  ---
+  duration_ms: 244.524583
+  type: 'test'
+  ...
+# Subtest: the preserved pre-M8 deployment remains readable
+ok 27 - the preserved pre-M8 deployment remains readable
+  ---
+  duration_ms: 127.70275
+  type: 'test'
+  ...
+# Subtest: unexpected users and missing passwords fail closed
+ok 28 - unexpected users and missing passwords fail closed
+  ---
+  duration_ms: 94.850833
+  type: 'test'
+  ...
+# Subtest: restore preserves private incident state only for inspection, without a control surface
+ok 29 - restore preserves private incident state only for inspection, without a control surface
+  ---
+  duration_ms: 20.469083
+  type: 'test'
+  ...
+# Subtest: complete reviews and padded or optional table bars preserve returned blockers
+ok 30 - complete reviews and padded or optional table bars preserve returned blockers
+  ---
+  duration_ms: 1.818375
+  type: 'test'
+  ...
+# Subtest: pending, duplicate, malformed and missing findings cannot disappear
+ok 31 - pending, duplicate, malformed and missing findings cannot disappear
+  ---
+  duration_ms: 0.543125
+  type: 'test'
+  ...
+# Subtest: privileged controller independently rejects forged/tampered/expired gateway spool entries
+ok 32 - privileged controller independently rejects forged/tampered/expired gateway spool entries
+  ---
+  duration_ms: 1.871791
+  type: 'test'
+  ...
+# Subtest: positive closure controls pass, absent records never pass
+ok 33 - positive closure controls pass, absent records never pass
+  ---
+  duration_ms: 0.682459
+  type: 'test'
+  ...
+# Subtest: wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs
+ok 34 - wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs
+  ---
+  duration_ms: 0.227917
+  type: 'test'
+  ...
+# Subtest: an unrelated decoded failure cannot establish challenge rejection
+ok 35 - an unrelated decoded failure cannot establish challenge rejection
+  ---
+  duration_ms: 0.280083
+  type: 'test'
+  ...
+# Subtest: missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail
+ok 36 - missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail
+  ---
+  duration_ms: 0.330666
+  type: 'test'
+  ...
+1..36
+# tests 36
+# suites 0
+# pass 36
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3434.526417

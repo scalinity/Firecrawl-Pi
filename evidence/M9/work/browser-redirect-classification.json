@@ -1,0 +1,87 @@
+{
+  "utc": "2026-10-03T08:30:24.114Z",
+  "source_commit": "e683c919bffb43daeba0cd7c00138a6665fb40ed",
+  "test_id": "M9-BROWSER-REDIRECT-CLASSIFICATION",
+  "state": "FAIL",
+  "disposition": "RETURNED",
+  "owning_milestone": "M2",
+  "scope_decision": "Pending owner response; no runtime remediation begun under M9-only authorization.",
+  "raw_path": "evidence/M9/regression/M2/raw/initial-learned-browser-rt-ssrf.txt",
+  "raw_sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599",
+  "redirects": [
+    {
+      "case": "S09-redirect-redis",
+      "http": 500,
+      "success": false,
+      "reported_class": "ACCESS_DENIED"
+    },
+    {
+      "case": "S10-redirect-metadata",
+      "http": 500,
+      "success": false,
+      "reported_class": "ACCESS_DENIED"
+    },
+    {
+      "case": "S11-redirect-cloud",
+      "http": 500,
+      "success": false,
+      "reported_class": "NAVIGATION_FAILED"
+    },
+    {
+      "case": "S12-redirect-loopback",
+      "http": 500,
+      "success": false,
+      "reported_class": "ACCESS_DENIED"
+    },
+    {
+      "case": "S13-redirect-mapped",
+      "http": 500,
+      "success": false,
+      "reported_class": "ACCESS_DENIED"
+    },
+    {
+      "case": "S14-redirect-name",
+      "http": 500,
+      "success": false,
+      "reported_class": "ACCESS_DENIED"
+    },
+    {
+      "case": "S19-redirect-lan",
+      "http": 500,
+      "success": false,
+      "reported_class": "ACCESS_DENIED"
+    }
+  ],
+  "proxy_refusals": [
+    {
+      "attempt_id": "34570cde-25f5-45d6-8d4f-567c86322ddd",
+      "class": "SSRF_DENIED"
+    },
+    {
+      "attempt_id": "e7da44b4-ff46-4acb-a74c-2d2caf0523eb",
+      "class": "SSRF_DENIED"
+    },
+    {
+      "attempt_id": "de9df76a-693a-4d3a-8ac3-e9efa1adb0dd",
+      "class": "CLOUD_DENIED"
+    },
+    {
+      "attempt_id": "d18ddffe-f847-4991-909a-b8b7701f9967",
+      "class": "SSRF_DENIED"
+    },
+    {
+      "attempt_id": "cdaf6059-cb38-4b4a-b690-71a93b5dbcf9",
+      "class": "SSRF_DENIED"
+    },
+    {
+      "attempt_id": "801ff0e4-9be9-41ce-834d-613c817fdce3",
+      "class": "SSRF_DENIED"
+    },
+    {
+      "attempt_id": "58748400-2534-4af6-9525-991faac5971b",
+      "class": "SSRF_DENIED"
+    }
+  ],
+  "observed": "Seven browser-first redirects were refused by the proxy (six SSRF_DENIED, one CLOUD_DENIED), while the API/attempt records misclassified them as six ACCESS_DENIED and one NAVIGATION_FAILED. Direct-path rerun passes the full original matrix. The failed browser path is not replaced by that direct-path PASS.",
+  "proposed_remediation": "Carry the main-frame navigation target through browser failure/results, match its proxy refusal, and preserve that security class without treating blocked subresources as a failed legitimate page. Add positive and negative controls, independent owning-scope review, and rerun affected acquisition/browser contracts."
+}

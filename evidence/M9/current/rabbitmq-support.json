@@ -1,0 +1,10 @@
+{
+  "checked_at": "2026-10-03T04:56:45.955Z",
+  "source": "https://www.rabbitmq.com/release-information",
+  "selected_version": "4.3.6",
+  "released": "2026-09-16",
+  "community_support_ends": "2026-11-30",
+  "state": "SUPPORTED_CURRENTLY",
+  "commercial_support": "not purchased or claimed",
+  "upgrade_policy": "Pinned baseline preserved; future series change follows staged upgrade/restore/rollback contract."
+}

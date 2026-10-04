@@ -1,0 +1,1751 @@
+### meta
+utc=2026-10-03T16:09:44Z base_source_commit=f72333f81d2c4753bf83d0db359e9ca6c99ef3da candidate_archive_sha256=b57a6eff8b5ae1196daf668b5afc8dfadb220ebe7cf29d37848ade5d167d43f3 production_source_changed=false
+### candidate_files
+7f6cf6521560874be75b716a2af6ab8cd4bfe2b8fdf8ae60fbd9825199c9b66a services/browser/src/server.mjs
+63c821279af7ff3768d60b70b10a18326cffc5dd544513d017e18a7ba00a9f05 services/retrieval/src/acquire.mjs
+8e389524ad8c28f6e525f7f83134e8bcce08f8e229d90fcc6a390160c6636b16 services/retrieval/src/proxy.mjs
+eedcac5742252fa4d2a8715e845ac03714d4df20591cdf2643a3ab638521af23 services/retrieval/test/acquire.test.mjs
+d2235c1ec85023540173a43b3ad4c325886f49e8716b2ebc05e7531608dc0fb7 services/retrieval/test/proxy.test.mjs
+c9cba35fb968208662aac982584606d5edfbd2aa78ca468e34ddebece0ec1507 scripts/m2/retrieval-e2e.mjs
+### isolated_fixtures
+TAP version 13
+# Subtest: a root without the marker is refused, so nothing is written to a shadow directory
+ok 1 - a root without the marker is refused, so nothing is written to a shadow directory
+  ---
+  duration_ms: 2.7888
+  type: 'test'
+  ...
+# Subtest: put stores bytes under their SHA-256, once, and nothing stays in tmp
+ok 2 - put stores bytes under their SHA-256, once, and nothing stays in tmp
+  ---
+  duration_ms: 61.906059
+  type: 'test'
+  ...
+# Subtest: the sweep keeps referenced and recent files and removes old orphans and temp files
+ok 3 - the sweep keeps referenced and recent files and removes old orphans and temp files
+  ---
+  duration_ms: 8.439032
+  type: 'test'
+  ...
+# Subtest: putting bytes again refreshes an old copy, so a sweep cannot take it before its row commits
+ok 4 - putting bytes again refreshes an old copy, so a sweep cannot take it before its row commits
+  ---
+  duration_ms: 5.910066
+  type: 'test'
+  ...
+# Subtest: the quota is at most 10 GiB
+ok 5 - the quota is at most 10 GiB
+  ---
+  duration_ms: 2.272685
+  type: 'test'
+  ...
+# Subtest: room is refused for more than the filesystem can hold above its free-space floor
+ok 6 - room is refused for more than the filesystem can hold above its free-space floor
+  ---
+  duration_ms: 1.683736
+  type: 'test'
+  ...
+# Subtest: the registry parses labels, principals and scopes and refuses what it cannot read
+ok 7 - the registry parses labels, principals and scopes and refuses what it cannot read
+  ---
+  duration_ms: 3.225267
+  type: 'test'
+  ...
+# Subtest: authentication: the right token maps to its client; anything else is null
+ok 8 - authentication: the right token maps to its client; anything else is null
+  ---
+  duration_ms: 2.035739
+  type: 'test'
+  ...
+# Subtest: a replaced registry takes effect within a second: a removed token is refused
+ok 9 - a replaced registry takes effect within a second: a removed token is refused
+  ---
+  duration_ms: 1006.401811
+  type: 'test'
+  ...
+# Subtest: a registry that stops parsing keeps the last good set
+ok 10 - a registry that stops parsing keeps the last good set
+  ---
+  duration_ms: 1102.556309
+  type: 'test'
+  ...
+# Subtest: the failure limiter answers 0 within its budget and a wait past it
+ok 11 - the failure limiter answers 0 within its budget and a wait past it
+  ---
+  duration_ms: 0.456467
+  type: 'test'
+  ...
+# Subtest: the full incident configuration passes startup; partial or unknown policy fails closed
+ok 12 - the full incident configuration passes startup; partial or unknown policy fails closed
+  ---
+  duration_ms: 5.839454
+  type: 'test'
+  ...
+# Subtest: every page scraped and extracted: SUCCEEDED, the result archived, the submission key as the logical id
+ok 13 - every page scraped and extracted: SUCCEEDED, the result archived, the submission key as the logical id
+  ---
+  duration_ms: 17.849515
+  type: 'test'
+  ...
+# Subtest: a page the core could not scrape makes the job PARTIAL, with the page and its code named
+ok 14 - a page the core could not scrape makes the job PARTIAL, with the page and its code named
+  ---
+  duration_ms: 6.829944
+  type: 'test'
+  ...
+# Subtest: no page scraped: FAILED NO_PAGES, and the model is never asked
+ok 15 - no page scraped: FAILED NO_PAGES, and the model is never asked
+  ---
+  duration_ms: 65.809679
+  type: 'test'
+  ...
+# Subtest: the extraction service's typed refusal closes the job FAILED with its class (paid caps at zero, for one)
+ok 16 - the extraction service's typed refusal closes the job FAILED with its class (paid caps at zero, for one)
+  ---
+  duration_ms: 5.551563
+  type: 'test'
+  ...
+# Subtest: an unreachable extraction service leaves the job RUNNING; the next round resumes from the archived pages without scraping again
+ok 17 - an unreachable extraction service leaves the job RUNNING; the next round resumes from the archived pages without scraping again
+  ---
+  duration_ms: 7.518654
+  type: 'test'
+  ...
+# Subtest: a job past its deadline is closed FAILED without any work
+ok 18 - a job past its deadline is closed FAILED without any work
+  ---
+  duration_ms: 1.405567
+  type: 'test'
+  ...
+# Subtest: a page whose target answered an error is a named page failure, not text to extract from
+ok 19 - a page whose target answered an error is a named page failure, not text to extract from
+  ---
+  duration_ms: 5.972678
+  type: 'test'
+  ...
+# Subtest: a page's markdown is cut to the extraction limit as it lands, archived and sent cut, and the cut is said (review W4)
+ok 20 - a page's markdown is cut to the extraction limit as it lands, archived and sent cut, and the cut is said (review W4)
+  ---
+  duration_ms: 101.575875
+  type: 'test'
+  ...
+# Subtest: a page's failure is archived, so a resumed job sends the same documents rather than scraping it again (review W13)
+ok 21 - a page's failure is archived, so a resumed job sends the same documents rather than scraping it again (review W13)
+  ---
+  duration_ms: 81.950106
+  type: 'test'
+  ...
+# Subtest: a call still in flight at the extraction service keeps the job RUNNING, and the next round finishes it (review W13)
+ok 22 - a call still in flight at the extraction service keeps the job RUNNING, and the next round finishes it (review W13)
+  ---
+  duration_ms: 6.596053
+  type: 'test'
+  ...
+# Subtest: a job resumed past its deadline with every page archived makes one reuse-only call and can still finish (review S12)
+ok 23 - a job resumed past its deadline with every page archived makes one reuse-only call and can still finish (review S12)
+  ---
+  duration_ms: 4.331257
+  type: 'test'
+  ...
+# Subtest: a reuse-only call that cannot finish the job closes it FAILED on its deadline (review S12)
+ok 24 - a reuse-only call that cannot finish the job closes it FAILED on its deadline (review S12)
+  ---
+  duration_ms: 5.933066
+  type: 'test'
+  ...
+# Subtest: one authenticated action survives restart and concurrent replay
+ok 25 - one authenticated action survives restart and concurrent replay
+  ---
+  duration_ms: 32.631337
+  type: 'test'
+  ...
+# Subtest: a URL alone, wrong MAC, payload, or expired grant never approves
+ok 26 - a URL alone, wrong MAC, payload, or expired grant never approves
+  ---
+  duration_ms: 62.913989
+  type: 'test'
+  ...
+# Subtest: a changed patch or action invalidates an issued MAC
+ok 27 - a changed patch or action invalidates an issued MAC
+  ---
+  duration_ms: 5.048059
+  type: 'test'
+  ...
+# Subtest: unbound fixes and unknown actions cannot be issued
+ok 28 - unbound fixes and unknown actions cannot be issued
+  ---
+  duration_ms: 4.200404
+  type: 'test'
+  ...
+# Subtest: a valid signature cannot replace the authenticated Serve owner
+ok 29 - a valid signature cannot replace the authenticated Serve owner
+  ---
+  duration_ms: 5.042004
+  type: 'test'
+  ...
+# Subtest: report views are bound before consumption and produce no mutation request
+ok 30 - report views are bound before consumption and produce no mutation request
+  ---
+  duration_ms: 87.69393
+  type: 'test'
+  ...
+# Subtest: only the retrieval service's refusal (409, held: false) fails a job as PROXY_REQUIRED, unsent
+ok 31 - only the retrieval service's refusal (409, held: false) fails a job as PROXY_REQUIRED, unsent
+  ---
+  duration_ms: 3.436065
+  type: 'test'
+  ...
+# Subtest: a 5xx hold answer (a restart, a database fault) puts the job back in the queue, unsent
+ok 32 - a 5xx hold answer (a restart, a database fault) puts the job back in the queue, unsent
+  ---
+  duration_ms: 1.626624
+  type: 'test'
+  ...
+# Subtest: an unreachable retrieval service puts the job back in the queue, unsent
+ok 33 - an unreachable retrieval service puts the job back in the queue, unsent
+  ---
+  duration_ms: 0.676209
+  type: 'test'
+  ...
+# Subtest: any other hold answer is the gateway's own error (ROUTE_HOLD_INVALID), not an unavailable route
+ok 34 - any other hold answer is the gateway's own error (ROUTE_HOLD_INVALID), not an unavailable route
+  ---
+  duration_ms: 0.940693
+  type: 'test'
+  ...
+# Subtest: with no route client configured, a job that needs the route fails as PROXY_REQUIRED, unsent
+ok 35 - with no route client configured, a job that needs the route fails as PROXY_REQUIRED, unsent
+  ---
+  duration_ms: 0.363651
+  type: 'test'
+  ...
+# Subtest: a held job the core accepts keeps its hold for its run
+ok 36 - a held job the core accepts keeps its hold for its run
+  ---
+  duration_ms: 59.967705
+  type: 'test'
+  ...
+# Subtest: a held job that goes back to the queue gives its hold up, so a job waiting there, or cancelled before submission, holds nothing (S16)
+ok 37 - a held job that goes back to the queue gives its hold up, so a job waiting there, or cancelled before submission, holds nothing (S16)
+  ---
+  duration_ms: 5.35458
+  type: 'test'
+  ...
+# Subtest: a job that does not need the route is never held
+ok 38 - a job that does not need the route is never held
+  ---
+  duration_ms: 0.768136
+  type: 'test'
+  ...
+# Subtest: the json format needs the 'extract' scope, and nothing is scraped without it (review W7)
+ok 39 - the json format needs the 'extract' scope, and nothing is scraped without it (review W7)
+  ---
+  duration_ms: 1.591735
+  type: 'test'
+  ...
+# Subtest: an extracted page: its json, markdown only when asked, the logical id, and a deadline the gateway waits past (review W14)
+ok 40 - an extracted page: its json, markdown only when asked, the logical id, and a deadline the gateway waits past (review W14)
+  ---
+  duration_ms: 1.854848
+  type: 'test'
+  ...
+# Subtest: a part of the page no answer came for is named in a warning and the units are returned (review S9)
+ok 41 - a part of the page no answer came for is named in a warning and the units are returned (review S9)
+  ---
+  duration_ms: 0.694802
+  type: 'test'
+  ...
+# Subtest: typed failures keep their class, status and Retry-After; an unreachable service is 503 (review W15)
+ok 42 - typed failures keep their class, status and Retry-After; an unreachable service is 503 (review W15)
+  ---
+  duration_ms: 0.959193
+  type: 'test'
+  ...
+# Subtest: the gateway's own failures are never 502, which a client library retries by resubmitting (review W14)
+ok 43 - the gateway's own failures are never 502, which a client library retries by resubmitting (review W14)
+  ---
+  duration_ms: 1.271529
+  type: 'test'
+  ...
+# Subtest: the action subset: accepted and normalized, everything outside it refused by name before any work
+ok 44 - the action subset: accepted and normalized, everything outside it refused by name before any work
+  ---
+  duration_ms: 7.371652
+  type: 'test'
+  ...
+# Subtest: the cache options: maxAge within the cache's hour, storeInCache a boolean, both on /v2/scrape only
+ok 45 - the cache options: maxAge within the cache's hour, storeInCache a boolean, both on /v2/scrape only
+  ---
+  duration_ms: 0.592671
+  type: 'test'
+  ...
+# Subtest: a job's webhook: url, metadata and the three events; custom headers and page events refused by name
+ok 46 - a job's webhook: url, metadata and the three events; custom headers and page events refused by name
+  ---
+  duration_ms: 0.93573
+  type: 'test'
+  ...
+# Subtest: the owner tag: sixteen hex digits, stable per principal, different across principals; the origin carries it
+ok 47 - the owner tag: sixteen hex digits, stable per principal, different across principals; the origin carries it
+  ---
+  duration_ms: 0.960119
+  type: 'test'
+  ...
+# Subtest: captures become owner-bound artifacts with the PNG's own dimensions; a clipped capture says so; anything else is refused
+ok 48 - captures become owner-bound artifacts with the PNG's own dimensions; a clipped capture says so; anything else is refused
+  ---
+  duration_ms: 809.780584
+  type: 'test'
+  ...
+# Subtest: change detection: normalized text, a bounded line diff, and the key of equivalent options only
+ok 49 - change detection: normalized text, a bounded line diff, and the key of equivalent options only
+  ---
+  duration_ms: 59.403329
+  type: 'test'
+  ...
+# Subtest: change detection: new, same, then changed with a diff; an error page and a failed scrape are never versions
+ok 50 - change detection: new, same, then changed with a diff; an error page and a failed scrape are never versions
+  ---
+  duration_ms: 3.460694
+  type: 'test'
+  ...
+# Subtest: the outbox round: delivered, retried, dead after its attempts or at once for an unapproved destination, deferred without an attempt
+ok 51 - the outbox round: delivered, retried, dead after its attempts or at once for an unapproved destination, deferred without an attempt
+  ---
+  duration_ms: 1.362826
+  type: 'test'
+  ...
+# Subtest: forward: an unreachable core is the gateway's own 503 with Retry-After, never 502 (review W14)
+ok 52 - forward: an unreachable core is the gateway's own 503 with Retry-After, never 502 (review W14)
+  ---
+  duration_ms: 116.671455
+  type: 'test'
+  ...
+# Subtest: the MCP service gets the protocol headers, the token, the Host and the validated identity, and nothing else
+ok 53 - the MCP service gets the protocol headers, the token, the Host and the validated identity, and nothing else
+  ---
+  duration_ms: 81.221911
+  type: 'test'
+  ...
+# Subtest: an SSE answer streams through as it is written, not when it ends
+ok 54 - an SSE answer streams through as it is written, not when it ends
+  ---
+  duration_ms: 407.228468
+  type: 'test'
+  ...
+# Subtest: a client that goes away cancels the MCP request behind it
+ok 55 - a client that goes away cancels the MCP request behind it
+  ---
+  duration_ms: 503.750163
+  type: 'test'
+  ...
+# Subtest: a stopped MCP service is 503 MCP_UNAVAILABLE, promptly
+ok 56 - a stopped MCP service is 503 MCP_UNAVAILABLE, promptly
+  ---
+  duration_ms: 6.720387
+  type: 'test'
+  ...
+# Subtest: past the in-flight cap the gateway answers 503 OVERLOADED without forwarding
+ok 57 - past the in-flight cap the gateway answers 503 OVERLOADED without forwarding
+  ---
+  duration_ms: 1603.692438
+  type: 'test'
+  ...
+# Subtest: the exchange deadline ends an MCP request that never answers, and cuts one that stops mid-stream
+ok 58 - the exchange deadline ends an MCP request that never answers, and cuts one that stops mid-stream
+  ---
+  duration_ms: 706.463369
+  type: 'test'
+  ...
+# Subtest: the manifest's MCP section is checked only when the gateway serves /mcp
+ok 59 - the manifest's MCP section is checked only when the gateway serves /mcp
+  ---
+  duration_ms: 4.879538
+  type: 'test'
+  ...
+# Subtest: the manifest's bulk threshold is spec §10.2's 20, and a hold outlasts a job
+ok 60 - the manifest's bulk threshold is spec §10.2's 20, and a hold outlasts a job
+  ---
+  duration_ms: 1.627254
+  type: 'test'
+  ...
+# Subtest: a crawl past 20 pages, or a batch past 20 URLs, is bulk and asks for the residential route; 20 or fewer are not touched
+ok 61 - a crawl past 20 pages, or a batch past 20 URLs, is bulk and asks for the residential route; 20 or fewer are not touched
+  ---
+  duration_ms: 1.311621
+  type: 'test'
+  ...
+# Subtest: a crawl with no limit takes the manifest's default of 20 pages, and is not bulk: it runs without the residential route
+ok 62 - a crawl with no limit takes the manifest's default of 20 pages, and is not bulk: it runs without the residential route
+  ---
+  duration_ms: 1.375362
+  type: 'test'
+  ...
+# Subtest: a local-only (basic) bulk job is refused outright
+ok 63 - a local-only (basic) bulk job is refused outright
+  ---
+  duration_ms: 0.756932
+  type: 'test'
+  ...
+# Subtest: a crawl holds its start URL's domain, a batch every URL's; an unavailable route is a 429 naming why
+ok 64 - a crawl holds its start URL's domain, a batch every URL's; an unavailable route is a 429 naming why
+  ---
+  duration_ms: 0.421855
+  type: 'test'
+  ...
+# Subtest: a job of any size whose pages ask for the residential route needs it, and holds its domains; auto and basic small jobs do not (review W7)
+ok 65 - a job of any size whose pages ask for the residential route needs it, and holds its domains; auto and basic small jobs do not (review W7)
+  ---
+  duration_ms: 0.222243
+  type: 'test'
+  ...
+# Subtest: the manifest in the repository passes the startup check
+ok 66 - the manifest in the repository passes the startup check
+  ---
+  duration_ms: 1.641125
+  type: 'test'
+  ...
+# Subtest: a scrape keeps accepted options, drops origin, and adds nothing
+ok 67 - a scrape keeps accepted options, drops origin, and adds nothing
+  ---
+  duration_ms: 2.258648
+  type: 'test'
+  ...
+# Subtest: refused options name themselves and why, before anything else
+ok 68 - refused options name themselves and why, before anything else
+  ---
+  duration_ms: 3.660048
+  type: 'test'
+  ...
+# Subtest: unknown keys, bad types and out-of-range values are 400 BAD_REQUEST
+ok 69 - unknown keys, bad types and out-of-range values are 400 BAD_REQUEST
+  ---
+  duration_ms: 1.191935
+  type: 'test'
+  ...
+# Subtest: keys and values named after inherited object members are unknown, not manifest entries
+ok 70 - keys and values named after inherited object members are unknown, not manifest entries
+  ---
+  duration_ms: 1.216935
+  type: 'test'
+  ...
+# Subtest: crawl and map get the platform's defaults; a crawl's units are its limit
+ok 71 - crawl and map get the platform's defaults; a crawl's units are its limit
+  ---
+  duration_ms: 0.270854
+  type: 'test'
+  ...
+# Subtest: a batch drops invalid URLs by default, refuses them on request, and caps its size
+ok 72 - a batch drops invalid URLs by default, refuses them on request, and caps its size
+  ---
+  duration_ms: 0.971433
+  type: 'test'
+  ...
+# Subtest: URLs: http(s) with a top-level domain and no credentials
+ok 73 - URLs: http(s) with a top-level domain and no credentials
+  ---
+  duration_ms: 0.40891
+  type: 'test'
+  ...
+# Subtest: the request hash ignores key order but not values
+ok 74 - the request hash ignores key order but not values
+  ---
+  duration_ms: 1.603012
+  type: 'test'
+  ...
+# Subtest: search: bounded query and limit, and every option the pinned client would ignore refused by name
+ok 75 - search: bounded query and limit, and every option the pinned client would ignore refused by name
+  ---
+  duration_ms: 1.410289
+  type: 'test'
+  ...
+# Subtest: the json format: a schema is required, it is an object within 16 KiB, and it is offered on scrape alone
+ok 76 - the json format: a schema is required, it is an object within 16 KiB, and it is offered on scrape alone
+  ---
+  duration_ms: 1.539383
+  type: 'test'
+  ...
+# Subtest: extraction: explicit URLs only, at most ten, a schema required; discovery refused by name
+ok 77 - extraction: explicit URLs only, at most ten, a schema required; discovery refused by name
+  ---
+  duration_ms: 1.108954
+  type: 'test'
+  ...
+1..77
+# tests 77
+# suites 0
+# pass 77
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 8997.435203
+TAP version 13
+# Subtest: a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4)
+ok 1 - a redirect into another domain is paced and counted there, and a 429 cools down the host that sent it (review finding C4)
+  ---
+  duration_ms: 852.736469
+  type: 'test'
+  ...
+# Subtest: downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1)
+ok 2 - downloads and searches hold a URL permit, and repeated downloads of one URL share a budget (review finding W1)
+  ---
+  duration_ms: 1266.97751
+  type: 'test'
+  ...
+# Subtest: a download's final URL is one a response header can carry (review finding S10)
+ok 3 - a download's final URL is one a response header can carry (review finding S10)
+  ---
+  duration_ms: 4.545054
+  type: 'test'
+  ...
+# Subtest: a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)
+ok 4 - a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)
+  ---
+  duration_ms: 301.809961
+  type: 'test'
+  ...
+# Subtest: the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target
+ok 5 - the navigation gap runs from the previous navigation's end, so a slow set-up cannot shorten it at the target
+  ---
+  duration_ms: 658.352723
+  type: 'test'
+  ...
+# Subtest: a pacing wait leaves no abort listener behind on the caller's signal (review finding S7)
+ok 6 - a pacing wait leaves no abort listener behind on the caller's signal (review finding S7)
+  ---
+  duration_ms: 23.438739
+  type: 'test'
+  ...
+# Subtest: a database error while the browser attempt is paced still frees every permit and hold (review finding W3)
+ok 7 - a database error while the browser attempt is paced still frees every permit and hold (review finding W3)
+  ---
+  duration_ms: 6.699293
+  type: 'test'
+  ...
+# Subtest: a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6)
+ok 8 - a render that hit its budget is RESOURCE_LIMIT, not a success (review finding W6)
+  ---
+  duration_ms: 10.123598
+  type: 'test'
+  ...
+# Subtest: browser-first redirects retain authoritative private/Cloud proxy refusals
+    # Subtest: http://10.231.1.5:6379/
+    ok 1 - http://10.231.1.5:6379/
+      ---
+      duration_ms: 1.780551
+      type: 'test'
+      ...
+    # Subtest: http://169.254.169.254/latest/meta-data/
+    ok 2 - http://169.254.169.254/latest/meta-data/
+      ---
+      duration_ms: 1.073397
+      type: 'test'
+      ...
+    # Subtest: http://127.0.0.1:3002/
+    ok 3 - http://127.0.0.1:3002/
+      ---
+      duration_ms: 0.841655
+      type: 'test'
+      ...
+    # Subtest: http://[::ffff:a00:105]/
+    ok 4 - http://[::ffff:a00:105]/
+      ---
+      duration_ms: 1.427807
+      type: 'test'
+      ...
+    # Subtest: http://redis:6379/
+    ok 5 - http://redis:6379/
+      ---
+      duration_ms: 1.329159
+      type: 'test'
+      ...
+    # Subtest: http://45.33.20.9/
+    ok 6 - http://45.33.20.9/
+      ---
+      duration_ms: 1.702384
+      type: 'test'
+      ...
+    # Subtest: http://100.100.100.100/
+    ok 7 - http://100.100.100.100/
+      ---
+      duration_ms: 1.022175
+      type: 'test'
+      ...
+    # Subtest: https://127.0.0.1/
+    ok 8 - https://127.0.0.1/
+      ---
+      duration_ms: 1.585031
+      type: 'test'
+      ...
+    # Subtest: https://api.firecrawl.dev/v1/scrape
+    ok 9 - https://api.firecrawl.dev/v1/scrape
+      ---
+      duration_ms: 0.70482
+      type: 'test'
+      ...
+    1..9
+ok 9 - browser-first redirects retain authoritative private/Cloud proxy refusals
+  ---
+  duration_ms: 15.126211
+  type: 'test'
+  ...
+# Subtest: public browser redirects remain usable with unrelated denied subresources
+ok 10 - public browser redirects remain usable with unrelated denied subresources
+  ---
+  duration_ms: 1.980423
+  type: 'test'
+  ...
+# Subtest: page text, unmatched refusals and cancellation do not invent a navigation policy failure
+ok 11 - page text, unmatched refusals and cancellation do not invent a navigation policy failure
+  ---
+  duration_ms: 3.215766
+  type: 'test'
+  ...
+# Subtest: a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE
+ok 12 - a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE
+  ---
+  duration_ms: 74.39862
+  type: 'test'
+  ...
+# Subtest: a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser
+ok 13 - a target error gets one same-tier retry and keeps its native status; the budget can run out before the browser
+  ---
+  duration_ms: 1062.9088
+  type: 'test'
+  ...
+# Subtest: a pacing refusal is the attempt's recorded outcome and reaches no target
+ok 14 - a pacing refusal is the attempt's recorded outcome and reaches no target
+  ---
+  duration_ms: 1.263028
+  type: 'test'
+  ...
+# Subtest: a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5)
+ok 15 - a URL's keyed hash depends only on the key and the URL, so it lasts across restarts (review finding S5)
+  ---
+  duration_ms: 0.510708
+  type: 'test'
+  ...
+# Subtest: requests are validated and bodies decoded by their declared charset
+ok 16 - requests are validated and bodies decoded by their declared charset
+  ---
+  duration_ms: 1.152083
+  type: 'test'
+  ...
+# Subtest: an oversized worker reply is SIZE_LIMIT, declared or chunked; a normal one is parsed
+ok 17 - an oversized worker reply is SIZE_LIMIT, declared or chunked; a normal one is parsed
+  ---
+  duration_ms: 203.469182
+  type: 'test'
+  ...
+# Subtest: a public name with any private answer is refused, and a DNS failure is typed
+ok 18 - a public name with any private answer is refused, and a DNS failure is typed
+  ---
+  duration_ms: 10.136209
+  type: 'test'
+  ...
+# Subtest: DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
+ok 19 - DNS rebinding: each connection uses the one address it checked, and a changed answer is checked again
+  ---
+  duration_ms: 21.848467
+  type: 'test'
+  ...
+# Subtest: a fixture name must resolve inside its own subnet
+ok 20 - a fixture name must resolve inside its own subnet
+  ---
+  duration_ms: 0.932877
+  type: 'test'
+  ...
+# Subtest: a redirect is validated at every hop: into private space it is refused before any connection
+ok 21 - a redirect is validated at every hop: into private space it is refused before any connection
+  ---
+  duration_ms: 100.240763
+  type: 'test'
+  ...
+# Subtest: bodies are bounded before and after decoding
+ok 22 - bodies are bounded before and after decoding
+  ---
+  duration_ms: 271.116168
+  type: 'test'
+  ...
+# Subtest: a slow target ends at the deadline
+ok 23 - a slow target ends at the deadline
+  ---
+  duration_ms: 601.789222
+  type: 'test'
+  ...
+# Subtest: a cookie set on a redirect comes back on the next hop to the same host
+ok 24 - a cookie set on a redirect comes back on the next hop to the same host
+  ---
+  duration_ms: 5.521024
+  type: 'test'
+  ...
+# Subtest: a Secure cookie is sent only over https, and an http response cannot set one (review finding S4)
+ok 25 - a Secure cookie is sent only over https, and an http response cannot set one (review finding S4)
+  ---
+  duration_ms: 0.393763
+  type: 'test'
+  ...
+# Subtest: TLS to an IP literal names no server (review finding S4)
+ok 26 - TLS to an IP literal names no server (review finding S4)
+  ---
+  duration_ms: 7.360131
+  type: 'test'
+  ...
+# Subtest: a HEAD redirected by 303 stays a HEAD (review finding S8)
+ok 27 - a HEAD redirected by 303 stays a HEAD (review finding S8)
+  ---
+  duration_ms: 7.204519
+  type: 'test'
+  ...
+# Subtest: caller credentials go only to the first origin
+ok 28 - caller credentials go only to the first origin
+  ---
+  duration_ms: 6.65833
+  type: 'test'
+  ...
+# Subtest: a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body UNSUPPORTED_CONTENT (review finding W10)
+ok 29 - a connection reset mid-body is TARGET_UNREACHABLE, and a broken gzip body UNSUPPORTED_CONTENT (review finding W10)
+  ---
+  duration_ms: 115.257617
+  type: 'test'
+  ...
+# Subtest: a HEAD or a redirect is not refused for the length it declares (review finding W11)
+ok 30 - a HEAD or a redirect is not refused for the length it declares (review finding W11)
+  ---
+  duration_ms: 10.455119
+  type: 'test'
+  ...
+# Subtest: an absolute validation lease expires even with the paid switch still on and after a month rollover (PRE-M9 C1)
+ok 31 - an absolute validation lease expires even with the paid switch still on and after a month rollover (PRE-M9 C1)
+  ---
+  duration_ms: 5.803859
+  type: 'test'
+  ...
+# Subtest: the deployed budget policy loads: every paid cap zero, the default model and parser paid, fixtures unpaid
+ok 32 - the deployed budget policy loads: every paid cap zero, the default model and parser paid, fixtures unpaid
+  ---
+  duration_ms: 0.822636
+  type: 'test'
+  ...
+# Subtest: the budget policy refuses what would open a gap
+ok 33 - the budget policy refuses what would open a gap
+  ---
+  duration_ms: 4.845168
+  type: 'test'
+  ...
+# Subtest: rate cards apply by effective date; a card that has ended is none
+ok 34 - rate cards apply by effective date; a card that has ended is none
+  ---
+  duration_ms: 1.351362
+  type: 'test'
+  ...
+# Subtest: costs round up; the reservation bounds any byte-level tokenizer's count
+ok 35 - costs round up; the reservation bounds any byte-level tokenizer's count
+  ---
+  duration_ms: 0.915656
+  type: 'test'
+  ...
+# Subtest: Luna prices cache writes separately and reserves at the highest input rate
+ok 36 - Luna prices cache writes separately and reserves at the highest input rate
+  ---
+  duration_ms: 1.641476
+  type: 'test'
+  ...
+# Subtest: the breaker opens after its failures, admits one probe, and closes on its success
+ok 37 - the breaker opens after its failures, admits one probe, and closes on its success
+  ---
+  duration_ms: 0.586171
+  type: 'test'
+  ...
+# Subtest: strict schemas: every property required and nullable (a chunk may lack a value); required ones judged on the merge
+ok 38 - strict schemas: every property required and nullable (a chunk may lack a value); required ones judged on the merge
+  ---
+  duration_ms: 2.459352
+  type: 'test'
+  ...
+# Subtest: inherited names are not schema properties, and __proto__ is refused as a name (review S3)
+ok 39 - inherited names are not schema properties, and __proto__ is refused as a name (review S3)
+  ---
+  duration_ms: 0.98873
+  type: 'test'
+  ...
+# Subtest: the egress policy's search section and the host selection are validated
+ok 40 - the egress policy's search section and the host selection are validated
+  ---
+  duration_ms: 4.159718
+  type: 'test'
+  ...
+# Subtest: a model lease expiring while waiting for its slot sends nothing and releases its reservation (PRE-M9 C1)
+ok 41 - a model lease expiring while waiting for its slot sends nothing and releases its reservation (PRE-M9 C1)
+  ---
+  duration_ms: 25.534217
+  type: 'test'
+  ...
+# Subtest: malformed HTTP 200 model answers settle conservatively and exhaust only the one repair (PRE-M9 W1)
+ok 42 - malformed HTTP 200 model answers settle conservatively and exhaust only the one repair (PRE-M9 W1)
+  ---
+  duration_ms: 87.736404
+  type: 'test'
+  ...
+# Subtest: Luna request parameters and cache-write usage stay inside the reservation
+ok 43 - Luna request parameters and cache-write usage stay inside the reservation
+  ---
+  duration_ms: 9.011885
+  type: 'test'
+  ...
+# Subtest: a schema-valid extraction settles from the provider's usage, keeps nulls and names its source
+ok 44 - a schema-valid extraction settles from the provider's usage, keeps nulls and names its source
+  ---
+  duration_ms: 62.151354
+  type: 'test'
+  ...
+# Subtest: an invalid answer gets exactly one repair, in the same logical budget
+ok 45 - an invalid answer gets exactly one repair, in the same logical budget
+  ---
+  duration_ms: 19.456744
+  type: 'test'
+  ...
+# Subtest: refusals before any spend: unknown model, stale rate card, paid dispatch off, missing credential, zero cap
+ok 46 - refusals before any spend: unknown model, stale rate card, paid dispatch off, missing credential, zero cap
+  ---
+  duration_ms: 8.363324
+  type: 'test'
+  ...
+# Subtest: provider refusals are classified: a refused request is released, an answered one settled
+ok 47 - provider refusals are classified: a refused request is released, an answered one settled
+  ---
+  duration_ms: 97.392275
+  type: 'test'
+  ...
+# Subtest: three provider failures open the breaker: the next call is refused without a request
+ok 48 - three provider failures open the breaker: the next call is refused without a request
+  ---
+  duration_ms: 77.185153
+  type: 'test'
+  ...
+# Subtest: a logical unit retried under a different input cap is refused rather than merged from other chunks (review S11)
+ok 49 - a logical unit retried under a different input cap is refused rather than merged from other chunks (review S11)
+  ---
+  duration_ms: 5.976565
+  type: 'test'
+  ...
+# Subtest: no request is started with less than a second of the deadline left, and the gate refuses a passed deadline (review W14)
+ok 50 - no request is started with less than a second of the deadline left, and the gate refuses a passed deadline (review W14)
+  ---
+  duration_ms: 2.727947
+  type: 'test'
+  ...
+# Subtest: a unit retried while its call is still in flight is EXTRACTION_IN_FLIGHT, retryable, then reuses the answer (review W13)
+ok 51 - a unit retried while its call is still in flight is EXTRACTION_IN_FLIGHT, retryable, then reuses the answer (review W13)
+  ---
+  duration_ms: 3008.422646
+  type: 'test'
+  ...
+# Subtest: a reuse-only extraction returns stored answers and sends nothing new (review S12)
+ok 52 - a reuse-only extraction returns stored answers and sends nothing new (review S12)
+  ---
+  duration_ms: 7.26463
+  type: 'test'
+  ...
+# Subtest: a rate limit stops the extraction's later units: the provider is asked once (review S8)
+ok 53 - a rate limit stops the extraction's later units: the provider is asked once (review S8)
+  ---
+  duration_ms: 6.885572
+  type: 'test'
+  ...
+# Subtest: a half-open probe that ends without a verdict hands the probe back (review W10)
+ok 54 - a half-open probe that ends without a verdict hands the probe back (review W10)
+  ---
+  duration_ms: 1117.48213
+  type: 'test'
+  ...
+# Subtest: an unanswered call stays reserved and is never sent again; a settled one is reused without a charge
+ok 55 - an unanswered call stays reserved and is never sent again; a settled one is reused without a charge
+  ---
+  duration_ms: 1511.196621
+  type: 'test'
+  ...
+# Subtest: long documents are chunked under the input cap and merged with each part's provenance; conflicts are reported
+ok 56 - long documents are chunked under the input cap and merged with each part's provenance; conflicts are reported
+  ---
+  duration_ms: 6754.392965
+  type: 'test'
+  ...
+# Subtest: a required value that no document holds stays null and is named, not invented
+ok 57 - a required value that no document holds stays null and is named, not invented
+  ---
+  duration_ms: 4.506774
+  type: 'test'
+  ...
+# Subtest: schemas beyond the supported subset are refused before any request
+ok 58 - schemas beyond the supported subset are refused before any request
+  ---
+  duration_ms: 2.866262
+  type: 'test'
+  ...
+# Subtest: a parser lease expiring during reservation sends no upload and releases credits (PRE-M9 C1)
+ok 59 - a parser lease expiring during reservation sends no upload and releases credits (PRE-M9 C1)
+  ---
+  duration_ms: 99.0029
+  type: 'test'
+  ...
+# Subtest: a scan-only page is parsed, its credits settled from the pages returned, cached, and its upload deleted
+ok 60 - a scan-only page is parsed, its credits settled from the pages returned, cached, and its upload deleted
+  ---
+  duration_ms: 10148.851723
+  type: 'test'
+  ...
+# Subtest: without its credential the complex-document parser answers PARSER_REQUIRED, with no request and no reservation
+ok 61 - without its credential the complex-document parser answers PARSER_REQUIRED, with no request and no reservation
+  ---
+  duration_ms: 30.262846
+  type: 'test'
+  ...
+# Subtest: limits are checked before any spend: pages, size, type
+ok 62 - limits are checked before any spend: pages, size, type
+  ---
+  duration_ms: 13.310746
+  type: 'test'
+  ...
+# Subtest: the provider is held to the reserved pages, and pages past them are settled and said so (review W1)
+ok 63 - the provider is held to the reserved pages, and pages past them are settled and said so (review W1)
+  ---
+  duration_ms: 4030.101332
+  type: 'test'
+  ...
+# Subtest: a retried parse that returned no text is PARSE_EMPTY again, with no second upload (review W12)
+ok 64 - a retried parse that returned no text is PARSE_EMPTY again, with no second upload (review W12)
+  ---
+  duration_ms: 2025.012388
+  type: 'test'
+  ...
+# Subtest: a parse reused under its logical id must be the same request: another owner's is refused (review S2)
+ok 65 - a parse reused under its logical id must be the same request: another owner's is refused (review S2)
+  ---
+  duration_ms: 2015.076896
+  type: 'test'
+  ...
+# Subtest: an upload accepted with a 202 starts its job like a 200 (review W11)
+ok 66 - an upload accepted with a 202 starts its job like a 200 (review W11)
+  ---
+  duration_ms: 2013.507787
+  type: 'test'
+  ...
+# Subtest: an upload answered without a job id counts against the breaker; its credits stay reserved (review W10)
+ok 67 - an upload answered without a job id counts against the breaker; its credits stay reserved (review W10)
+  ---
+  duration_ms: 17.844696
+  type: 'test'
+  ...
+# Subtest: provider refusals release the credits; a failed or unfinished job keeps them reserved until reconciled
+ok 68 - provider refusals release the credits; a failed or unfinished job keeps them reserved until reconciled
+  ---
+  duration_ms: 10133.79289
+  type: 'test'
+  ...
+# Subtest: results come back with their engines; a non-http(s) result is dropped; a complete answer is cached
+ok 69 - results come back with their engines; a non-http(s) result is dropped; a complete answer is cached
+  ---
+  duration_ms: 85.774907
+  type: 'test'
+  ...
+# Subtest: a true empty answer is a 200 with no results; every engine failing is SEARCH_ENGINES_FAILED, never an empty list
+ok 70 - a true empty answer is a 200 with no results; every engine failing is SEARCH_ENGINES_FAILED, never an empty list
+  ---
+  duration_ms: 11.839085
+  type: 'test'
+  ...
+# Subtest: a partial answer names the engines that failed and is not cached; an empty answer from the engines that answered is still a 200
+ok 71 - a partial answer names the engines that failed and is not cached; an empty answer from the engines that answered is still a 200
+  ---
+  duration_ms: 10.223354
+  type: 'test'
+  ...
+# Subtest: backend failures are typed: unreachable, erroring, not JSON, stalled
+ok 72 - backend failures are typed: unreachable, erroring, not JSON, stalled
+  ---
+  duration_ms: 1512.232901
+  type: 'test'
+  ...
+# Subtest: the hourly cap refuses before the backend, and invalid queries are refused
+ok 73 - the hourly cap refuses before the backend, and invalid queries are refused
+  ---
+  duration_ms: 1.635436
+  type: 'test'
+  ...
+# Subtest: only the first page is served: a later one could look like a true empty answer (review S14)
+ok 74 - only the first page is served: a later one could look like a true empty answer (review S14)
+  ---
+  duration_ms: 1.635583
+  type: 'test'
+  ...
+# Subtest: the engines are the selection's, never the caller's; the query is logged only as a hash
+ok 75 - the engines are the selection's, never the caller's; the query is logged only as a hash
+  ---
+  duration_ms: 7.197429
+  type: 'test'
+  ...
+# Subtest: twelve concurrent reservations against a cap that holds three: exactly three succeed (CLAUDE.md §11, AC25)
+ok 76 - twelve concurrent reservations against a cap that holds three: exactly three succeed (CLAUDE.md §11, AC25)
+  ---
+  duration_ms: 119.179535
+  type: 'test'
+  ...
+# Subtest: settlement moves the reservation to its actual cost; release gives it all back; uncertain keeps it whole
+ok 77 - settlement moves the reservation to its actual cost; release gives it all back; uncertain keeps it whole
+  ---
+  duration_ms: 89.563685
+  type: 'test'
+  ...
+# Subtest: a retried call key finds its reservation; a released one may be reserved again
+ok 78 - a retried call key finds its reservation; a released one may be reserved again
+  ---
+  duration_ms: 97.487415
+  type: 'test'
+  ...
+# Subtest: a paid category also draws on the paid total's daily cap; a zero cap refuses everything
+ok 79 - a paid category also draws on the paid total's daily cap; a zero cap refuses everything
+  ---
+  duration_ms: 172.297759
+  type: 'test'
+  ...
+# Subtest: settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2)
+ok 80 - settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2)
+  ---
+  duration_ms: 522.085858
+  type: 'test'
+  ...
+# Subtest: a settlement gives back only the period rows its reservation took, whatever the caps are now (review W2)
+ok 81 - a settlement gives back only the period rows its reservation took, whatever the caps are now (review W2)
+  ---
+  duration_ms: 69.450016
+  type: 'test'
+  ...
+# Subtest: a paid parser's credits count against the paid total's day in micro-USD (review W3)
+ok 82 - a paid parser's credits count against the paid total's day in micro-USD (review W3)
+  ---
+  duration_ms: 32.291976
+  type: 'test'
+  ...
+# Subtest: pruning clears a week-old settled call's stored answer and keeps its amounts (review W9)
+ok 83 - pruning clears a week-old settled call's stored answer and keeps its amounts (review W9)
+  ---
+  duration_ms: 91.283545
+  type: 'test'
+  ...
+# Subtest: the 80% threshold is noticed once per period
+ok 84 - the 80% threshold is noticed once per period
+  ---
+  duration_ms: 90.456152
+  type: 'test'
+  ...
+# Subtest: search admission holds its hourly cap under concurrent queries; the cache expires
+ok 85 - search admission holds its hourly cap under concurrent queries; the cache expires
+  ---
+  duration_ms: 103.192149
+  type: 'test'
+  ...
+# Subtest: a residential browser session tunnels the page and every subresource under one session and one meter
+ok 86 - a residential browser session tunnels the page and every subresource under one session and one meter
+  ---
+  duration_ms: 166.143443
+  type: 'test'
+  ...
+# Subtest: a provider refusal of a browser request is a 502 and the attempt's provider failure
+ok 87 - a provider refusal of a browser request is a 502 and the attempt's provider failure
+  ---
+  duration_ms: 8.508492
+  type: 'test'
+  ...
+# Subtest: F11: the real search leg sends a residential-routed engine through the provider, reserving and settling each tunnel, and refuses it without the route (review W12, S4)
+ok 88 - F11: the real search leg sends a residential-routed engine through the provider, reserving and settling each tunnel, and refuses it without the route (review W12, S4)
+  ---
+  duration_ms: 127.842025
+  type: 'test'
+  ...
+# Subtest: a residential browser tunnel the provider breaks after it was up ends the request, and leaves the attempt's charge UNCERTAIN, still counted (review W12)
+ok 89 - a residential browser tunnel the provider breaks after it was up ends the request, and leaves the attempt's charge UNCERTAIN, still counted (review W12)
+  ---
+  duration_ms: 18.597047
+  type: 'test'
+  ...
+# Subtest: a proxy lease expiring during reservation opens no CONNECT and never spills home (PRE-M9 C1)
+ok 90 - a proxy lease expiring during reservation opens no CONNECT and never spills home (PRE-M9 C1)
+  ---
+  duration_ms: 26.936094
+  type: 'test'
+  ...
+# Subtest: a stealth request travels one tunnel under a sticky session, and settles at the bytes it carried
+ok 91 - a stealth request travels one tunnel under a sticky session, and settles at the bytes it carried
+  ---
+  duration_ms: 88.681474
+  type: 'test'
+  ...
+# Subtest: protected work never spills to the home connection: every reason the route is unavailable is PROXY_REQUIRED with no target request
+ok 92 - protected work never spills to the home connection: every reason the route is unavailable is PROXY_REQUIRED with no target request
+  ---
+  duration_ms: 7.699024
+  type: 'test'
+  ...
+# Subtest: a bulk hold and a proxy-first domain start residential, and without the route they are refused, not sent directly
+ok 93 - a bulk hold and a proxy-first domain start residential, and without the route they are refused, not sent directly
+  ---
+  duration_ms: 87.205225
+  type: 'test'
+  ...
+# Subtest: auto: a challenge on the direct route escalates once to the residential route; two challenges teach the domain
+ok 94 - auto: a challenge on the direct route escalates once to the residential route; two challenges teach the domain
+  ---
+  duration_ms: 91.468249
+  type: 'test'
+  ...
+# Subtest: auto without the route answers a challenge as BLOCKED_PUBLIC_CONTENT; basic never escalates; the residential route's own challenge is final
+ok 95 - auto without the route answers a challenge as BLOCKED_PUBLIC_CONTENT; basic never escalates; the residential route's own challenge is final
+  ---
+  duration_ms: 21.447452
+  type: 'test'
+  ...
+# Subtest: 401, 429, an unknown 403, 404 and 5xx follow spec §9.2: nothing of them reaches the residential route
+ok 96 - 401, 429, an unknown 403, 404 and 5xx follow spec §9.2: nothing of them reaches the residential route
+  ---
+  duration_ms: 1136.29907
+  type: 'test'
+  ...
+# Subtest: provider failures are typed, count on the breaker, never teach the domain and never fall back to direct
+ok 97 - provider failures are typed, count on the breaker, never teach the domain and never fall back to direct
+  ---
+  duration_ms: 11.702287
+  type: 'test'
+  ...
+# Subtest: a proxy that cannot be reached or never answers is PROVIDER_UNREACHABLE within the connect timeout
+ok 98 - a proxy that cannot be reached or never answers is PROVIDER_UNREACHABLE within the connect timeout
+  ---
+  duration_ms: 3009.614479
+  type: 'test'
+  ...
+# Subtest: an attempt past its byte reservation is cut off as SIZE_LIMIT with no retry, and its true charge is recorded, above the reservation by at most the chunk that tripped it (review W2, S8)
+ok 99 - an attempt past its byte reservation is cut off as SIZE_LIMIT with no retry, and its true charge is recorded, above the reservation by at most the chunk that tripped it (review W2, S8)
+  ---
+  duration_ms: 139.413171
+  type: 'test'
+  ...
+# Subtest: the direct limits spent, an auto request moves the same attempt to the residential route; basic stops at PROXY_REQUIRED
+ok 100 - the direct limits spent, an auto request moves the same attempt to the residential route; basic stops at PROXY_REQUIRED
+  ---
+  duration_ms: 91.769725
+  type: 'test'
+  ...
+# Subtest: HTTP to browser to residential browser: a script shell renders on the same route, and its challenge escalates in the browser
+ok 101 - HTTP to browser to residential browser: a script shell renders on the same route, and its challenge escalates in the browser
+  ---
+  duration_ms: 85.894323
+  type: 'test'
+  ...
+# Subtest: the four-attempt budget holds across routes: no fifth attempt, whatever the escalations
+ok 102 - the four-attempt budget holds across routes: no fifth attempt, whatever the escalations
+  ---
+  duration_ms: 14.840822
+  type: 'test'
+  ...
+# Subtest: eight simultaneous reservations against a cap with room for three: three granted, five BUDGET_EXHAUSTED, nothing sent for them
+ok 103 - eight simultaneous reservations against a cap with room for three: three granted, five BUDGET_EXHAUSTED, nothing sent for them
+  ---
+  duration_ms: 3.751058
+  type: 'test'
+  ...
+# Subtest: the meter trips at its cap, and a tunnel attached after it tripped is cut at once (review W2)
+ok 104 - the meter trips at its cap, and a tunnel attached after it tripped is cut at once (review W2)
+  ---
+  duration_ms: 0.417262
+  type: 'test'
+  ...
+# Subtest: a residential render whose leg passed its reservation is RESOURCE_LIMIT, not a success, and no tunnel opens after the cap (review W2)
+ok 105 - a residential render whose leg passed its reservation is RESOURCE_LIMIT, not a success, and no tunnel opens after the cap (review W2)
+  ---
+  duration_ms: 194.981753
+  type: 'test'
+  ...
+# Subtest: a credential whose name would change the session username is refused, and the route's state never carries the password (review S18, S2)
+ok 106 - a credential whose name would change the session username is refused, and the route's state never carries the password (review S18, S2)
+  ---
+  duration_ms: 3.789762
+  type: 'test'
+  ...
+# Subtest: a target that never answers the TLS hello through the tunnel ends as TIMEOUT within the attempt, not at the provider's leisure (review W3)
+ok 107 - a target that never answers the TLS hello through the tunnel ends as TIMEOUT within the attempt, not at the provider's leisure (review W3)
+  ---
+  duration_ms: 5009.263577
+  type: 'test'
+  ...
+# Subtest: an exception between a reservation and its settlement still closes the leg: released when nothing was sent (review W9)
+ok 108 - an exception between a reservation and its settlement still closes the leg: released when nothing was sent (review W9)
+  ---
+  duration_ms: 4.440913
+  type: 'test'
+  ...
+# Subtest: only the provider's own failures count on its breaker: an exit's 502 and a deadline-cut timeout do not, and a half-open breaker admits one probe (review W1)
+ok 109 - only the provider's own failures count on its breaker: an exit's 502 and a deadline-cut timeout do not, and a half-open breaker admits one probe (review W1)
+  ---
+  duration_ms: 9211.565509
+  type: 'test'
+  ...
+# Subtest: a challenge met after a redirect is learned under the domain that served it, not the one the request started at (review W6)
+ok 110 - a challenge met after a redirect is learned under the domain that served it, not the one the request started at (review W6)
+  ---
+  duration_ms: 18.489116
+  type: 'test'
+  ...
+# Subtest: a direct browser attempt at the direct cap moves to the residential browser, as the HTTP step does (review S17)
+ok 111 - a direct browser attempt at the direct cap moves to the residential browser, as the HTTP step does (review S17)
+  ---
+  duration_ms: 35.862967
+  type: 'test'
+  ...
+# Subtest: an auxiliary download past the direct limits is refused, never moved to the paid route, and one of a held domain takes it (review W7)
+ok 112 - an auxiliary download past the direct limits is refused, never moved to the paid route, and one of a held domain takes it (review W7)
+  ---
+  duration_ms: 10.090961
+  type: 'test'
+  ...
+# Subtest: a usage report not declared to cover this deployment alone is not reconciled (review W13)
+ok 113 - a usage report not declared to cover this deployment alone is not reconciled (review W13)
+  ---
+  duration_ms: 4.245282
+  type: 'test'
+  ...
+# Subtest: Decodo's usage report: the day asked for with the API key, bytes read from metadata.total_rx_tx; a refused key, a missing total and an absent key are typed failures (review W12)
+ok 114 - Decodo's usage report: the day asked for with the API key, bytes read from metadata.total_rx_tx; a refused key, a missing total and an absent key are typed failures (review W12)
+  ---
+  duration_ms: 11.731543
+  type: 'test'
+  ...
+# Subtest: the start: basic is direct whatever the domain; stealth, a hold, a proxy-first domain and a learned block start residential
+ok 115 - the start: basic is direct whatever the domain; stealth, a hold, a proxy-first domain and a learned block start residential
+  ---
+  duration_ms: 1.992733
+  type: 'test'
+  ...
+# Subtest: after a preference expires, one probe goes direct and the others stay residential while it runs
+ok 116 - after a preference expires, one probe goes direct and the others stay residential while it runs
+  ---
+  duration_ms: 0.535466
+  type: 'test'
+  ...
+# Subtest: two consistent challenges on the direct route set a 24-hour residential preference; one does not
+ok 117 - two consistent challenges on the direct route set a 24-hour residential preference; one does not
+  ---
+  duration_ms: 0.495595
+  type: 'test'
+  ...
+# Subtest: the probe confirms a block at once, or clears the preference
+ok 118 - the probe confirms a block at once, or clears the preference
+  ---
+  duration_ms: 0.387465
+  type: 'test'
+  ...
+# Subtest: residential successes extend the preference by one TTL, never past seven days from when it was set
+ok 119 - residential successes extend the preference by one TTL, never past seven days from when it was set
+  ---
+  duration_ms: 0.698078
+  type: 'test'
+  ...
+# Subtest: script shells: two renders make a domain start in the browser; an HTTP answer that needed none resets it
+ok 120 - script shells: two renders make a domain start in the browser; an HTTP answer that needed none resets it
+  ---
+  duration_ms: 0.319076
+  type: 'test'
+  ...
+# Subtest: the session username is Decodo's documented form, and refuses what would change its meaning
+ok 121 - the session username is Decodo's documented form, and refuses what would change its meaning
+  ---
+  duration_ms: 0.935116
+  type: 'test'
+  ...
+# Subtest: routing records: two challenges set a preference; auth outcomes only count; the table stays within its bound
+ok 122 - routing records: two challenges set a preference; auth outcomes only count; the table stays within its bound
+  ---
+  duration_ms: 125.36627
+  type: 'test'
+  ...
+# Subtest: after expiry one probe is claimed at a time, and a hold is finite and released by its job
+ok 123 - after expiry one probe is claimed at a time, and a hold is finite and released by its job
+  ---
+  duration_ms: 144.625686
+  type: 'test'
+  ...
+# Subtest: residential navigations share the domain's gap and hold but are not counted against the direct caps
+ok 124 - residential navigations share the domain's gap and hold but are not counted against the direct caps
+  ---
+  duration_ms: 103.719434
+  type: 'test'
+  ...
+# Subtest: eight concurrent proxy reservations on a cap with room for three: exactly three
+ok 125 - eight concurrent proxy reservations on a cap with room for three: exactly three
+  ---
+  duration_ms: 98.541592
+  type: 'test'
+  ...
+# Subtest: reconciliation: an adjustment settles past the cap, uncertain rows settle at their measured bytes
+ok 126 - reconciliation: an adjustment settles past the cap, uncertain rows settle at their measured bytes
+  ---
+  duration_ms: 127.4983
+  type: 'test'
+  ...
+# Subtest: reconciling a day twice charges its difference once; a later report charges only what it added; a day in flight waits (review C1)
+ok 127 - reconciling a day twice charges its difference once; a later report charges only what it added; a day in flight waits (review C1)
+  ---
+  duration_ms: 347.22058
+  type: 'test'
+  ...
+# Subtest: an adjustment on a day nothing was reserved creates its usage rows, so the caps see the charge (review W8)
+ok 128 - an adjustment on a day nothing was reserved creates its usage rows, so the caps see the charge (review W8)
+  ---
+  duration_ms: 64.662506
+  type: 'test'
+  ...
+# Subtest: an enhanced lease expiring during reservation sends no paid request (PRE-M9 C1)
+ok 129 - an enhanced lease expiring during reservation sends no paid request (PRE-M9 C1)
+  ---
+  duration_ms: 75.297692
+  type: 'test'
+  ...
+# Subtest: the budget policy validates the enhanced provider, its subjects and per-request cards; the selection names an enhancer
+ok 130 - the budget policy validates the enhanced provider, its subjects and per-request cards; the selection names an enhancer
+  ---
+  duration_ms: 5.940402
+  type: 'test'
+  ...
+# Subtest: an HTTP dispatch settles at the card's highest tier, keeps its answer, and a retried page reuses it without a second call
+ok 131 - an HTTP dispatch settles at the card's highest tier, keeps its answer, and a retried page reuses it without a second call
+  ---
+  duration_ms: 25.602893
+  type: 'test'
+  ...
+# Subtest: a kept answer is reused before any availability check: at a spent cap, after the paid switch, and for an auto page without walking the waterfall again
+ok 132 - a kept answer is reused before any availability check: at a spent cap, after the paid switch, and for an auto page without walking the waterfall again
+  ---
+  duration_ms: 93.009451
+  type: 'test'
+  ...
+# Subtest: each provider failure class: released and free, counted on the breaker or not, and an unknown outcome stays reserved and is never resent
+ok 133 - each provider failure class: released and free, counted on the breaker or not, and an unknown outcome stays reserved and is never resent
+  ---
+  duration_ms: 73.214716
+  type: 'test'
+  ...
+# Subtest: a request with no answer leaves its charge UNCERTAIN and the page's dispatch is never sent again; a malformed 200 is charged
+ok 134 - a request with no answer leaves its charge UNCERTAIN and the page's dispatch is never sent again; a malformed 200 is charged
+  ---
+  duration_ms: 3015.628929
+  type: 'test'
+  ...
+# Subtest: a settlement that fails after a paid answer leaves the charge UNCERTAIN, never RESERVED, and the attempt finished
+ok 135 - a settlement that fails after a paid answer leaves the charge UNCERTAIN, never RESERVED, and the attempt finished
+  ---
+  duration_ms: 13.644348
+  type: 'test'
+  ...
+# Subtest: the enhanced dispatch holds its domain for the provider's request timeout, past a browser attempt's
+ok 136 - the enhanced dispatch holds its domain for the provider's request timeout, past a browser attempt's
+  ---
+  duration_ms: 16.553031
+  type: 'test'
+  ...
+# Subtest: the tier's refusals come before any reservation: no credential, a paid provider without paid dispatch, a zero cap, no enhancer
+ok 137 - the tier's refusals come before any reservation: no credential, a paid provider without paid dispatch, a zero cap, no enhancer
+  ---
+  duration_ms: 8.303654
+  type: 'test'
+  ...
+# Subtest: an exhausted cap stops the next page's dispatch before it is sent, and concurrent pages cannot pass the cap
+ok 138 - an exhausted cap stops the next page's dispatch before it is sent, and concurrent pages cannot pass the cap
+  ---
+  duration_ms: 52.022103
+  type: 'test'
+  ...
+# Subtest: the waterfall: a direct challenge with no residential route goes straight to one enhanced dispatch; the provider's 200 is judged by the target's page
+ok 139 - the waterfall: a direct challenge with no residential route goes straight to one enhanced dispatch; the provider's 200 is judged by the target's page
+  ---
+  duration_ms: 111.155299
+  type: 'test'
+  ...
+# Subtest: the full waterfall: direct, residential, then the one enhanced dispatch, within four attempts; a stealth request stops at the residential route
+ok 140 - the full waterfall: direct, residential, then the one enhanced dispatch, within four attempts; a stealth request stops at the residential route
+  ---
+  duration_ms: 86.365244
+  type: 'test'
+  ...
+# Subtest: a residential route refused by its spend limit ends the page: the enhanced provider is not the fallback for a spent budget
+ok 141 - a residential route refused by its spend limit ends the page: the enhanced provider is not the fallback for a spent budget
+  ---
+  duration_ms: 105.930808
+  type: 'test'
+  ...
+# Subtest: the page's attempts are shared: a page whose earlier attempts spent the budget gets no enhanced dispatch
+ok 142 - the page's attempts are shared: a page whose earlier attempts spent the budget gets no enhanced dispatch
+  ---
+  duration_ms: 5.623548
+  type: 'test'
+  ...
+# Subtest: screenshots and actions: validated to the subset, refused for the enhanced tier and while switched off, and never sent to the provider
+ok 143 - screenshots and actions: validated to the subset, refused for the enhanced tier and while switched off, and never sent to the provider
+  ---
+  duration_ms: 9.70542
+  type: 'test'
+  ...
+# Subtest: readAnswer holds the provider to its contract
+ok 144 - readAnswer holds the provider to its contract
+  ---
+  duration_ms: 0.667985
+  type: 'test'
+  ...
+# Subtest: the action subset is one definition: the capability manifest's subset and bounds are what the retrieval service accepts (review S7)
+ok 145 - the action subset is one definition: the capability manifest's subset and bounds are what the retrieval service accepts (review S7)
+  ---
+  duration_ms: 2.072844
+  type: 'test'
+  ...
+# Subtest: a success carrying 401, 403 or 429 is never returned as content: upstream's AddFeatureError retry stays unreachable (review W13)
+ok 146 - a success carrying 401, 403 or 429 is never returned as content: upstream's AddFeatureError retry stays unreachable (review W13)
+  ---
+  duration_ms: 0.316558
+  type: 'test'
+  ...
+# Subtest: one logical page, eight racing callers: one enhanced reservation, the rest find it; its settled answer is read back
+ok 147 - one logical page, eight racing callers: one enhanced reservation, the rest find it; its settled answer is read back
+  ---
+  duration_ms: 201.415711
+  type: 'test'
+  ...
+# Subtest: an approved destination receives a signed delivery the receiver verifies; a retry of the same event is acknowledged once
+ok 148 - an approved destination receives a signed delivery the receiver verifies; a retry of the same event is acknowledged once
+  ---
+  duration_ms: 99.488367
+  type: 'test'
+  ...
+# Subtest: a refusing receiver is a failed attempt; suppressed delivery, an unapproved destination and a missing secret send nothing
+ok 149 - a refusing receiver is a failed attempt; suppressed delivery, an unapproved destination and a missing secret send nothing
+  ---
+  duration_ms: 11.259818
+  type: 'test'
+  ...
+# Subtest: an approved public destination whose name resolves to a private address is refused unsent (SSRF)
+ok 150 - an approved public destination whose name resolves to a private address is refused unsent (SSRF)
+  ---
+  duration_ms: 53.118312
+  type: 'test'
+  ...
+# Subtest: the receiver's documented check: a tampered body, a stale timestamp and a forged signature are refused
+ok 151 - the receiver's documented check: a tampered body, a stale timestamp and a forged signature are refused
+  ---
+  duration_ms: 102.727161
+  type: 'test'
+  ...
+# Subtest: a fresh file is read as written; its reasons are kept only when well formed
+ok 152 - a fresh file is read as written; its reasons are kept only when well formed
+  ---
+  duration_ms: 2.364068
+  type: 'test'
+  ...
+# Subtest: a stale, future-dated or unreadable file is open, so a stopped tick cannot stop the platform
+ok 153 - a stale, future-dated or unreadable file is open, so a stopped tick cannot stop the platform
+  ---
+  duration_ms: 0.360391
+  type: 'test'
+  ...
+# Subtest: the reader caches for its window, and an absent file is open
+ok 154 - the reader caches for its window, and an absent file is open
+  ---
+  duration_ms: 9.906625
+  type: 'test'
+  ...
+# Subtest: a paused browser ends the page as RESOURCE_BUSY before any render or browser attempt; open, the same page renders
+ok 155 - a paused browser ends the page as RESOURCE_BUSY before any render or browser attempt; open, the same page renders
+  ---
+  duration_ms: 97.941746
+  type: 'test'
+  ...
+# Subtest: a paused browser leaves direct HTTP alone
+ok 156 - a paused browser leaves direct HTTP alone
+  ---
+  duration_ms: 5.920308
+  type: 'test'
+  ...
+# Subtest: the environment: unknown keys, the flags that must stay false, paid dispatch as a switch, the permit counts
+ok 157 - the environment: unknown keys, the flags that must stay false, paid dispatch as a switch, the permit counts
+  ---
+  duration_ms: 9.055528
+  type: 'test'
+  ...
+# Subtest: a permit lease shorter than an acquisition, or a token hash of the wrong length, fails at startup (review finding S3)
+ok 158 - a permit lease shorter than an acquisition, or a token hash of the wrong length, fails at startup (review finding S3)
+  ---
+  duration_ms: 2.253807
+  type: 'test'
+  ...
+# Subtest: the local-network file must name at least one real network
+ok 159 - the local-network file must name at least one real network
+  ---
+  duration_ms: 3.362202
+  type: 'test'
+  ...
+# Subtest: expiry during DNS or the connection handshake sends no HTTP request (PRE-M9 C1)
+ok 160 - expiry during DNS or the connection handshake sends no HTTP request (PRE-M9 C1)
+  ---
+  duration_ms: 21.19122
+  type: 'test'
+  ...
+# Subtest: a public page's requests cannot reach a fixture host (review finding S1)
+ok 161 - a public page's requests cannot reach a fixture host (review finding S1)
+  ---
+  duration_ms: 101.401059
+  type: 'test'
+  ...
+# Subtest: a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2)
+ok 162 - a target status Node cannot relay is a 502, and the proxy keeps serving (review finding C2)
+  ---
+  duration_ms: 64.803018
+  type: 'test'
+  ...
+# Subtest: no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named
+ok 163 - no credential, a wrong one or an expired one gets 407; a refused target 403 with the attempt named
+  ---
+  duration_ms: 18.409854
+  type: 'test'
+  ...
+# Subtest: a session past its request or byte cap is refused and marked capped (review finding W6)
+ok 164 - a session past its request or byte cap is refused and marked capped (review finding W6)
+  ---
+  duration_ms: 16.500196
+  type: 'test'
+  ...
+# Subtest: the proxy answers 503 while the local-network list is not loaded (review finding W7)
+ok 165 - the proxy answers 503 while the local-network list is not loaded (review finding W7)
+  ---
+  duration_ms: 4.601468
+  type: 'test'
+  ...
+# Subtest: malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9)
+ok 166 - malformed credentials, CONNECT to a non-443 port, forwarded proxy credentials and a closed session (review finding W9)
+  ---
+  duration_ms: 66.990567
+  type: 'test'
+  ...
+# Subtest: a standing session's refusals are logged by host and not kept, so it cannot grow (review S5)
+ok 167 - a standing session's refusals are logged by host and not kept, so it cannot grow (review S5)
+  ---
+  duration_ms: 6.890294
+  type: 'test'
+  ...
+# Subtest: static pages are adequate, short ones too; script-rendered ones are JS shells
+ok 168 - static pages are adequate, short ones too; script-rendered ones are JS shells
+  ---
+  duration_ms: 7.207129
+  type: 'test'
+  ...
+# Subtest: interstitials, sign-in gates and refusals are typed failures
+ok 169 - interstitials, sign-in gates and refusals are typed failures
+  ---
+  duration_ms: 0.599244
+  type: 'test'
+  ...
+# Subtest: missing pages and target errors keep the native result; binaries are binaries
+ok 170 - missing pages and target errors keep the native result; binaries are binaries
+  ---
+  duration_ms: 0.490872
+  type: 'test'
+  ...
+# Subtest: direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
+ok 171 - direct pacing: gap, one in flight, the hourly and daily caps, cooldowns
+  ---
+  duration_ms: 1.832565
+  type: 'test'
+  ...
+# Subtest: the deployed policy loads; a looser or unknown one does not
+ok 172 - the deployed policy loads; a looser or unknown one does not
+  ---
+  duration_ms: 3.213091
+  type: 'test'
+  ...
+# Subtest: classification stays linear on unclosed and repeated markup (review finding C1)
+ok 173 - classification stays linear on unclosed and repeated markup (review finding C1)
+  ---
+  duration_ms: 1161.682167
+  type: 'test'
+  ...
+# Subtest: the linear reader keeps what the regexes kept
+ok 174 - the linear reader keeps what the regexes kept
+  ---
+  duration_ms: 0.771337
+  type: 'test'
+  ...
+# Subtest: only structure makes a shell that fails after rendering; a short scripted page does not (review finding C5)
+ok 175 - only structure makes a shell that fails after rendering; a short scripted page does not (review finding C5)
+  ---
+  duration_ms: 0.822689
+  type: 'test'
+  ...
+# Subtest: the PDF magic settles the type at the start of a body, or within the first KiB of one declared a PDF or opaque (review W5)
+ok 176 - the PDF magic settles the type at the start of a body, or within the first KiB of one declared a PDF or opaque (review W5)
+  ---
+  duration_ms: 1.848102
+  type: 'test'
+  ...
+# Subtest: IPv4 special-purpose ranges are never public
+ok 177 - IPv4 special-purpose ranges are never public
+  ---
+  duration_ms: 4.500671
+  type: 'test'
+  ...
+# Subtest: fixture hosts count only for work that began at a fixture (review finding S1)
+ok 178 - fixture hosts count only for work that began at a fixture (review finding S1)
+  ---
+  duration_ms: 7.847836
+  type: 'test'
+  ...
+# Subtest: the host's own LAN is refused even on a globally routable prefix
+ok 179 - the host's own LAN is refused even on a globally routable prefix
+  ---
+  duration_ms: 0.544225
+  type: 'test'
+  ...
+# Subtest: IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
+ok 180 - IPv6 non-global, and every IPv6 form that carries an IPv4 address, are refused
+  ---
+  duration_ms: 3.226702
+  type: 'test'
+  ...
+# Subtest: schemes, credentials, ports and ambiguous numeric hosts
+ok 181 - schemes, credentials, ports and ambiguous numeric hosts
+  ---
+  duration_ms: 1.00932
+  type: 'test'
+  ...
+# Subtest: literal addresses are judged by class
+ok 182 - literal addresses are judged by class
+  ---
+  duration_ms: 0.60017
+  type: 'test'
+  ...
+# Subtest: local and reserved names are refused before any lookup
+ok 183 - local and reserved names are refused before any lookup
+  ---
+  duration_ms: 0.844875
+  type: 'test'
+  ...
+# Subtest: Firecrawl Cloud destinations are refused
+ok 184 - Firecrawl Cloud destinations are refused
+  ---
+  duration_ms: 0.269835
+  type: 'test'
+  ...
+# Subtest: the fixture exception is exact: its host, its port, plain http
+ok 185 - the fixture exception is exact: its host, its port, plain http
+  ---
+  duration_ms: 0.728819
+  type: 'test'
+  ...
+# Subtest: ordinary public URLs pass, with a trailing dot normalised
+ok 186 - ordinary public URLs pass, with a trailing dot normalised
+  ---
+  duration_ms: 0.94206
+  type: 'test'
+  ...
+# Subtest: without the host's local-network list no address is public (review finding W7)
+ok 187 - without the host's local-network list no address is public (review finding W7)
+  ---
+  duration_ms: 0.39252
+  type: 'test'
+  ...
+# Subtest: the platform's daily cap holds under concurrent pacers of different domains (review finding W4)
+ok 188 - the platform's daily cap holds under concurrent pacers of different domains (review finding W4)
+  ---
+  duration_ms: 119.846687
+  type: 'test'
+  ...
+# Subtest: permits: slot 0 is a slot, a full kind answers null, an expired lease is free again (review finding W9)
+ok 189 - permits: slot 0 is a slot, a full kind answers null, an expired lease is free again (review finding W9)
+  ---
+  duration_ms: 80.084743
+  type: 'test'
+  ...
+# Subtest: ten concurrent reservations on one logical page get exactly four attempts
+ok 190 - ten concurrent reservations on one logical page get exactly four attempts
+  ---
+  duration_ms: 80.399801
+  type: 'test'
+  ...
+# Subtest: a restart reclaims every lease and domain hold (review finding W3)
+ok 191 - a restart reclaims every lease and domain hold (review finding W3)
+  ---
+  duration_ms: 112.851095
+  type: 'test'
+  ...
+# Subtest: cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does not seed the bare one (review finding W14)
+ok 192 - cooldowns: 60 s, then doubled on a recurrence; a short Retry-After does not seed the bare one (review finding W14)
+  ---
+  duration_ms: 119.477204
+  type: 'test'
+  ...
+# Subtest: the pool connects within 5 s and bounds each statement at 10 s (review finding S13)
+ok 193 - the pool connects within 5 s and bounds each statement at 10 s (review finding S13)
+  ---
+  duration_ms: 73.944859
+  type: 'test'
+  ...
+# Subtest: the prune removes only pacing rows that hold nothing a decision reads, and pacing recreates them (review finding S5)
+ok 194 - the prune removes only pacing rows that hold nothing a decision reads, and pacing recreates them (review finding S5)
+  ---
+  duration_ms: 118.005584
+  type: 'test'
+  ...
+# Subtest: releasing a domain restarts its navigation gap
+ok 195 - releasing a domain restarts its navigation gap
+  ---
+  duration_ms: 88.499118
+  type: 'test'
+  ...
+1..195
+# tests 204
+# suites 0
+# pass 204
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 167689.832143
+TAP version 13
+# Subtest: M9 phone approvals retain Host/Origin checks and never accept URL-only or replayed authority
+ok 1 - M9 phone approvals retain Host/Origin checks and never accept URL-only or replayed authority
+  ---
+  duration_ms: 1104.060681
+  type: 'test'
+  ...
+# Subtest: every refusal on /mcp happens at the gateway: nothing reaches the MCP service
+ok 2 - every refusal on /mcp happens at the gateway: nothing reaches the MCP service
+  ---
+  duration_ms: 82.392288
+  type: 'test'
+  ...
+# Subtest: an authenticated request reaches the MCP service with the gateway's identity, never the client's
+ok 3 - an authenticated request reaches the MCP service with the gateway's identity, never the client's
+  ---
+  duration_ms: 12.293378
+  type: 'test'
+  ...
+# Subtest: without PI_MCP_URL, /mcp is no route and the REST routes still serve
+ok 4 - without PI_MCP_URL, /mcp is no route and the REST routes still serve
+  ---
+  duration_ms: 86.438401
+  type: 'test'
+  ...
+1..4
+# tests 4
+# suites 0
+# pass 4
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1582.750242

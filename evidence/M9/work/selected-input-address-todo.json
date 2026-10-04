@@ -1,0 +1,34 @@
+{
+  "utc": "2026-10-03T15:17:55.594Z",
+  "scope": "M9 acceptance drivers/verifiers only",
+  "tasks": [
+    {
+      "id": 1,
+      "step": "Declare TLS side evidence",
+      "state": "IMPLEMENTED_PENDING_VERIFICATION"
+    },
+    {
+      "id": 2,
+      "step": "Owner-tagged marker queries and cancellation positive control",
+      "state": "PASS",
+      "evidence": "regression/M3/verification.json: J03/J04/J07 PASS at current source; producer receipts and failed histories retained."
+    },
+    {
+      "id": 3,
+      "step": "Observe active slow-page row and kill core before diagnostics",
+      "state": "PASS",
+      "evidence": "regression/M3/verification.json: J03/J04/J07 PASS at current source; producer receipts and failed histories retained."
+    },
+    {
+      "id": 4,
+      "step": "Declare consumed static policy inputs",
+      "state": "IMPLEMENTED_PENDING_VERIFICATION"
+    },
+    {
+      "id": 5,
+      "step": "Recollect all current acceptance inputs after final verification-source commit",
+      "state": "IN_PROGRESS"
+    }
+  ],
+  "source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da"
+}

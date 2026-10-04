@@ -1,0 +1,1 @@
+M2-S03 FAIL     browser-first-redirect-denial-classification  — wrong-class cases=BR01-redis,BR02-metadata,BR03-cloud,BR04-loopback,BR05-mapped,BR06-name,BR07-lan,BR09-postload-private,BR10-postload-cloud,BR12-credentialed-private; actual attempt outcomes={"SSRF_DENIED":0,"CLOUD_DENI

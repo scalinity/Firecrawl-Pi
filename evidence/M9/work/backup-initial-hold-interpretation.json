@@ -1,0 +1,19 @@
+{
+  "utc": "2026-10-03T11:04:37.207Z",
+  "source_commit": "591dff27ec9acb603fa8d6356141912cf475a158",
+  "preserved_raw": "evidence/M9/regression/M8/raw/initial-unsampled-hold-backup-fixture.txt",
+  "fixture_backup": "PASS",
+  "isolated_restore": "PASS",
+  "quiescence_s": 50,
+  "restore_s": 209,
+  "min_available_mib": 2870,
+  "K01": "FAIL",
+  "failure": "required positive timer sample while hold active was absent",
+  "sample_starts": [
+    "2026-10-03T10:49:48Z",
+    "2026-10-03T10:50:51Z"
+  ],
+  "sample_admission": "open at both readings",
+  "interpretation": "Short successful quiescence may fall between periodic ticks. No runtime failure is established, and missing positive evidence is not PASS.",
+  "rerun": "same fixture backup/restore with one bounded explicit tick triggered by the actual backup hold; no runtime or acceptance criterion change"
+}

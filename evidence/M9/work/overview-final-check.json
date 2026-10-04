@@ -1,0 +1,35 @@
+{
+  "utc": "2026-10-03T22:59:51.327Z",
+  "observations": [
+    {
+      "name": "light",
+      "theme": "light",
+      "background": "rgb(246, 246, 242)",
+      "viewport": 1400,
+      "scroll_width": 1400,
+      "m9_blocked": true,
+      "title": "Firecrawl Pi — Orchestration"
+    },
+    {
+      "name": "dark",
+      "theme": "dark",
+      "background": "rgb(20, 25, 22)",
+      "viewport": 1400,
+      "scroll_width": 1400,
+      "m9_blocked": true,
+      "title": "Firecrawl Pi — Orchestration"
+    },
+    {
+      "name": "phone",
+      "theme": "light",
+      "background": "rgb(246, 246, 242)",
+      "viewport": 390,
+      "scroll_width": 390,
+      "m9_blocked": true,
+      "title": "Firecrawl Pi — Orchestration"
+    }
+  ],
+  "mode": "Local headless browser; no external dependencies",
+  "screenshot_status": "INSPECTED_LIGHT_DARK_PHONE_FIRST_VIEWPORT_AND_DELETED",
+  "phone_layout": "390px viewport checked, document scroll width390; horizontal navigation strip remains scrollable. No layout change."
+}

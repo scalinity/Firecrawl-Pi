@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-03T16:54:22.769Z",
+  "source_commit": "3ebf4f52bb4152072e4c1618aa122ea19b9465ef",
+  "state": "FAIL",
+  "exit_code": 130,
+  "raw_sha256": "d1cfaa850c0ffe1153c69b356d79ba41fe5d67571952b6d8d5af349eeae1f5b4",
+  "classification": "environment: npm audit POST stalled after all pinned tarballs downloaded; only exact owned build PID terminated after 893 seconds",
+  "runtime_services_untouched": true,
+  "mem_available_mib_after": 5019,
+  "proposed_remediation": "Disable optional build-time npm audit request while keeping npm ci lockfile/integrity and --ignore-scripts; no dependency or network policy change"
+}

@@ -1,0 +1,26 @@
+### meta
+{"utc":"2026-10-03T15:09:45.218Z","phase":"restart","platform":"darwin","node":"v26.10.0","client":"@modelcontextprotocol/client@2.1.0","deployed_commit":"f72333f81d2c4753bf83d0db359e9ca6c99ef3da","pi_utc":"2026-10-03T15:09:45.230Z"}
+### forward
+{"utc":"2026-10-03T15:09:45.473Z","pid":33169}
+### resources
+{"utc":"2026-10-03T15:09:45Z","label":"start-restart","mcp":{"instance":"71b2eb0ad794","started_at":"2026-10-03T12:41:31.86365842Z","peak":76464128,"max":"201326592","current":56213504,"oom_kill":0},"gateway":{"instance":"a9150e4dfead","started_at":"2026-10-03T14:57:31.04894259Z","peak":44482560,"max":"167772160","current":32342016,"oom_kill":0},"core":{"instance":"0f1eb2e6b177","started_at":"2026-10-03T15:07:24.776280299Z","peak":2063859712,"max":"2684354560","current":1811316736,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4875536}
+### before_restart
+{"utc":"2026-10-03T15:09:47.014Z","case":"crawl_started","id":"79b350e2-1b3a-47b2-a6f0-6c11abcf40d3","sdk_id":"f27a49bf-ea2c-473d-9885-bc004b31a240","status":200,"request_id":"5c910628-1cac-46da-83a0-139154c331c1","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":62146,"started_at":"2026-10-03T12:41:31.86365842Z","gateway_started_at":"2026-10-03T14:57:31.04894259Z"}
+### resources
+{"utc":"2026-10-03T15:09:47Z","label":"before-mcp-restart","mcp":{"instance":"71b2eb0ad794","started_at":"2026-10-03T12:41:31.86365842Z","peak":76464128,"max":"201326592","current":56213504,"oom_kill":0},"gateway":{"instance":"a9150e4dfead","started_at":"2026-10-03T14:57:31.04894259Z","peak":44482560,"max":"167772160","current":32342016,"oom_kill":0},"core":{"instance":"0f1eb2e6b177","started_at":"2026-10-03T15:07:24.776280299Z","peak":2063859712,"max":"2684354560","current":1811513344,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4856016}
+### during_restart
+{"utc":"2026-10-03T15:09:48.421Z","case":"rest_crawl_status","status":200,"body_status":"scraping"}
+### after_restart
+{"utc":"2026-10-03T15:09:55.489Z","case":"restarted","restarted_at":"2026-10-03T15:09:48.382Z","started_at":"2026-10-03T15:09:48.186756425Z","gateway_started_at":"2026-10-03T14:57:31.04894259Z","started_changed":true,"gateway_unchanged":true}
+{"utc":"2026-10-03T15:10:01.924Z","case":"status_new_connection","id":"79b350e2-1b3a-47b2-a6f0-6c11abcf40d3","status":"completed","request_id":"e2e22d87-81d7-4a31-b67e-0452e4eb9e3c","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":62176,"completed":6,"returned":6,"crawl_local_port":62146,"status_local_ports":[62167,62170,62175,62176]}
+{"utc":"2026-10-03T15:10:16.628Z","case":"sdk_client_across_restart","id":"f27a49bf-ea2c-473d-9885-bc004b31a240","status":"completed","completed":3,"exchanges_with_session":0,"initialize_sent":false}
+### pi_view
+{"utc":"2026-10-03T15:10:19.041Z","case":"instances","crawl_instance":"6351c218-3d91-4f47-989a-d2ae31e0207f","status_instances":["072f40ee-e7ce-4faa-99d4-326620a29043"],"started_instances":["072f40ee-e7ce-4faa-99d4-326620a29043"]}
+### resources
+{"utc":"2026-10-03T15:10:19Z","label":"end-restart","mcp":{"instance":"71b2eb0ad794","started_at":"2026-10-03T15:09:48.186756425Z","peak":56360960,"max":"201326592","current":38977536,"oom_kill":0},"gateway":{"instance":"a9150e4dfead","started_at":"2026-10-03T14:57:31.04894259Z","peak":44482560,"max":"167772160","current":32587776,"oom_kill":0},"core":{"instance":"0f1eb2e6b177","started_at":"2026-10-03T15:07:24.776280299Z","peak":2063859712,"max":"2684354560","current":1816018944,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4890448}
+### connections
+{"utc":"2026-10-03T15:10:19.752Z","hosts":["127.0.0.1:3380"],"total":8,"lookups":[]}
+### forward
+{"utc":"2026-10-03T15:10:19.752Z","pid":33169,"exited_before_end":false}
+### end
+{"utc":"2026-10-03T15:10:19.752Z","exit":0}

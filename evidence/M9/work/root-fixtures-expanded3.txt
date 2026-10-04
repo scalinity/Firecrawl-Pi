@@ -1,0 +1,36 @@
+PASS missing OAuth checked before worktree
+PASS mismatched binary checked before worktree
+PASS four UTC launches block fifth
+PASS active agent blocks another launch
+PASS stale apply cannot execute tests or deployment
+PASS empty failed resume is terminal and removes auth
+PASS outage notice survives missing action infrastructure
+PASS unavailable proof infrastructure leaves queued approval unconsumed
+PASS named bounded source file permitted
+PASS policy, ignored nested bytes and existing tests denied
+PASS new direct unit test permitted
+warning: remote HEAD refers to nonexistent ref, unable to checkout
+PASS standalone candidate metadata readable without root mirror access
+Author identity unknown
+
+*** Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'root@pi.(none)')
+{
+  "state": "FAILED",
+  "incident_id": "55555555",
+  "action": "apply_fix",
+  "base_sha": "bd89cd4b5ab1e16c2465a14a5855724154ff1463",
+  "patch_sha": "df0e78152fbfb62e36ece19bf80501d19adc96436e8aeadaec8010bf2a605b08",
+  "tests_sha": "b4e1fc7587ff61cc9f231ecf97277f78d54dd4e20df08e2b3d1e73db9e4b8dcc",
+  "exit_code": 128,
+  "finished_at": 1791007951.425261
+}

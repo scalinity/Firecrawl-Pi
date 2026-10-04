@@ -1,0 +1,12 @@
+M3-A01 PASS               authorized-scrape-crawl-batch-map
+M3-A02 PASS               pagination-private-origin-stable
+M3-A03 PASS               credentials-missing-invalid-revoked-scope-owner
+M3-N01 PASS               host-and-origin-validated
+M3-N02 PASS               spoofed-principal-headers-have-no-effect
+M3-N03 PASS               internal-ports-denied-from-every-vantage
+M3-P02 PASS               tailnet-tls-private-serving
+M3-J03 PASS               acknowledged-jobs-tracked-through-crashes-k4-k5
+M3-J04 PASS               idempotent-requests-and-conflicting-reuse
+M3-J06 PASS               results-served-after-core-redis-and-nuq-expiry-r9
+M3-J07 PASS               cancellation-stops-new-work
+M3-X02 PASS               persistence-across-force-recreate

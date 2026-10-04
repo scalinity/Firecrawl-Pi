@@ -1,0 +1,14 @@
+{
+  "utc": "2026-10-03T21:27:56.195Z",
+  "source_commit": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+  "call_key": "proxy:search:764d9480-ebe7-4ee3-a7c6-1fe19f48cfcf",
+  "original_state": "RESERVED",
+  "state": "UNCERTAIN",
+  "measured_actual_micro_usd": null,
+  "conservative_retained_micro_usd": 8000,
+  "settlement": "Unknown outcome; whole reservation retained, not released or relabeled measured usage",
+  "before_sha256": "de16a8728f31883212323eefab34e77750e4dc24ff6aab063cc4dad9c161e441",
+  "after_sha256": "d0cabfeede6c9ada907e03038f8e3d07e55e23ab598a98eeb8168ccee5867477",
+  "paid_dispatch": false,
+  "invoiced_usd": null
+}

@@ -1,0 +1,15 @@
+{
+  "source_commit": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+  "classification": "controlled_fixture_resource",
+  "actual": "Kernel recorded a CONSTRAINT_MEMCG kill of node in fixture-m2, at its 192 MiB limit; host kernel oom_kill counter increased to one. The core, retrieval, data services and host did not run out of memory.",
+  "fixture_cgroup_prefix": "a3c8546a76f2",
+  "kernel_raw": "Retained privately outside repository",
+  "health_after": {
+    "healthy": true,
+    "available_mib": 4909,
+    "temp_c": 46.3,
+    "throttled": "0x0",
+    "swap_used_mib": 8
+  },
+  "limitations": "This bounded negative-fixture event is outside the future current-source paced soak. The future soak must still have zero OOM counter increase."
+}

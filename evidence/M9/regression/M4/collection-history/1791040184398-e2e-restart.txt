@@ -1,0 +1,26 @@
+### meta
+{"utc":"2026-10-03T12:40:35.308Z","phase":"restart","platform":"darwin","node":"v26.10.0","client":"@modelcontextprotocol/client@2.1.0","deployed_commit":"010d6f9e84f732783ab94745a8b5b05cc0f8d2eb","pi_utc":"2026-10-03T12:40:35.385Z"}
+### forward
+{"utc":"2026-10-03T12:40:35.570Z","pid":41893}
+### resources
+{"utc":"2026-10-03T12:40:35Z","label":"start-restart","mcp":{"instance":"71b2eb0ad794","started_at":"2026-10-03T11:16:37.528565886Z","peak":64339968,"max":"201326592","current":44580864,"oom_kill":0},"gateway":{"instance":"a9150e4dfead","started_at":"2026-10-03T12:36:27.00131701Z","peak":41631744,"max":"167772160","current":28655616,"oom_kill":0},"core":{"instance":"17ab747b3fe4","started_at":"2026-10-03T12:38:24.20986853Z","peak":2042871808,"max":"2684354560","current":1816068096,"oom_kill":0},"vmstat_oom_kill":0,"mem_available_kib":5009440}
+### before_restart
+{"utc":"2026-10-03T12:40:37.640Z","case":"crawl_started","id":"ff337caa-2626-4cb3-b717-9f7b829185ec","sdk_id":"e70bfeb7-9d2d-466d-bf17-d50d13445b4b","status":200,"request_id":"9e0442a8-a6f4-4527-9f42-60e68750c7cc","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":51316,"started_at":"2026-10-03T11:16:37.528565886Z","gateway_started_at":"2026-10-03T12:36:27.00131701Z"}
+### resources
+{"utc":"2026-10-03T12:40:37Z","label":"before-mcp-restart","mcp":{"instance":"71b2eb0ad794","started_at":"2026-10-03T11:16:37.528565886Z","peak":64389120,"max":"201326592","current":44580864,"oom_kill":0},"gateway":{"instance":"a9150e4dfead","started_at":"2026-10-03T12:36:27.00131701Z","peak":41631744,"max":"167772160","current":28884992,"oom_kill":0},"core":{"instance":"17ab747b3fe4","started_at":"2026-10-03T12:38:24.20986853Z","peak":2042871808,"max":"2684354560","current":1816281088,"oom_kill":0},"vmstat_oom_kill":0,"mem_available_kib":5004576}
+### during_restart
+{"utc":"2026-10-03T12:40:40.004Z","case":"rest_crawl_status","status":200,"body_status":"scraping"}
+### after_restart
+{"utc":"2026-10-03T12:40:47.658Z","case":"restarted","restarted_at":"2026-10-03T12:40:39.973Z","started_at":"2026-10-03T12:40:39.918870087Z","gateway_started_at":"2026-10-03T12:36:27.00131701Z","started_changed":true,"gateway_unchanged":true}
+{"utc":"2026-10-03T12:41:02.257Z","case":"status_new_connection","id":"ff337caa-2626-4cb3-b717-9f7b829185ec","status":"completed","request_id":"a5eb9881-bee7-4a7e-8609-3da6cd27a803","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":51356,"completed":6,"returned":6,"crawl_local_port":51316,"status_local_ports":[51337,51340,51342,51345,51346,51351,51353,51356]}
+{"utc":"2026-10-03T12:41:16.935Z","case":"sdk_client_across_restart","id":"e70bfeb7-9d2d-466d-bf17-d50d13445b4b","status":"completed","completed":3,"exchanges_with_session":0,"initialize_sent":false}
+### pi_view
+{"utc":"2026-10-03T12:41:19.085Z","case":"instances","crawl_instance":"59395483-23d6-4617-8809-2b9222886f4b","status_instances":["bcf89086-7bb9-4a75-8eeb-837f484b4ed0"],"started_instances":["bcf89086-7bb9-4a75-8eeb-837f484b4ed0"]}
+### resources
+{"utc":"2026-10-03T12:41:19Z","label":"end-restart","mcp":{"instance":"71b2eb0ad794","started_at":"2026-10-03T12:40:39.918870087Z","peak":59015168,"max":"201326592","current":39960576,"oom_kill":0},"gateway":{"instance":"a9150e4dfead","started_at":"2026-10-03T12:36:27.00131701Z","peak":41631744,"max":"167772160","current":29687808,"oom_kill":0},"core":{"instance":"17ab747b3fe4","started_at":"2026-10-03T12:38:24.20986853Z","peak":2042871808,"max":"2684354560","current":1822785536,"oom_kill":0},"vmstat_oom_kill":0,"mem_available_kib":4994656}
+### connections
+{"utc":"2026-10-03T12:41:19.651Z","hosts":["127.0.0.1:3380"],"total":12,"lookups":[]}
+### forward
+{"utc":"2026-10-03T12:41:19.651Z","pid":41893,"exited_before_end":false}
+### end
+{"utc":"2026-10-03T12:41:19.651Z","exit":0}

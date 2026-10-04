@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-03T10:05:14.235Z",
+  "incident_id": "17685034",
+  "binary_sha256": "346d294f0103d6fc0de11ac953579b5c62dfa90698a4cfc486b6f927c615e697",
+  "transcript_sha256": "ec66de6a95607d2c6b8deca8c9f88cfb665d16f374c80ef948dea24be6af8c54",
+  "native_successful_diagnostic_read": true,
+  "content_type": "string",
+  "line_number_separator": "tab",
+  "source_read_verified": false,
+  "fixture": false
+}

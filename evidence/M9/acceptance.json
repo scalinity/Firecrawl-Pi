@@ -1,0 +1,4656 @@
+{
+  "schema": "fcpi.m9-acceptance/v2",
+  "utc": "2026-10-04T00:09:08.380Z",
+  "source_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+  "patch_sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96",
+  "state": "BLOCKED",
+  "exit_code": 1,
+  "code_dirty": false,
+  "results": [
+    {
+      "test_id": "AC01",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-A03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "1173327d0c263c7402720b8c9d2ad814d8c18dff817850a11bb25d6e3b69cfdf",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-N02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "d804228d54d399747b8699a9580b5121ed53fd126bfc5a8df539a0e806cc3074",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-A03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "c1a21586b6665c31415fcaba14adcd1b731ef61371d80c551a914972a36ab195",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-N02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "8cdfbaf450b78521736cb9d1cb5bf421ff6098bdc3e217128349a1d51276f4fe",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/gateway-tests.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC02",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-N01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "c3a0afe764a652a78dfcbef5cc2a0d3956122ee5df12c6b40581bf4fdaac9f47",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-N03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "344707cdb8b5e7107741c753ad5ff73c6d927fe41e010ac46fc8369913c05e66",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-P02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "173cfe304806cce840c2aec21f8099830876cd976597b98f47eb7889f50c0e80",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-N01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "2f5d0be45701c7b8816b74bf02fe1e1c90c156fff2604841d024f8d29542d0e7",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-sync.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-N03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "1a938347817e1a3a0e4fa421bda53769fae20c85281a7b7fe1528cff13a9dd51",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/port-probe.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/lan-probe.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-P02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "d556d7c5f64b858e4281266f85d444448e210fc40aefe2fe7ead92e439ca3e61",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/tailscale-before.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/tailscale-install.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/lan-probe.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/tailscale-status.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/tailnet-check.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC03",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M2/verification.json",
+          "sha256": "3197002324e115416b2a62b77d7b6ee8de53cef42106909f2e4c1ed2f1145476",
+          "test_id": "M2-R01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "f11917abd27f32cb961c8ef2485b526f098eabf6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "3ab1f04e4bb88fc67b70d01e0df963dd39d9cb800473f7e838e6788f9b881e5c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M2/verification.json",
+          "sha256": "3197002324e115416b2a62b77d7b6ee8de53cef42106909f2e4c1ed2f1145476",
+          "test_id": "M2-R02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "f11917abd27f32cb961c8ef2485b526f098eabf6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "4c4de4788ed04fccf585f5d5fbcca22f41068812a5714c454d4da0b3cd20514c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M2/verification.json",
+          "sha256": "3197002324e115416b2a62b77d7b6ee8de53cef42106909f2e4c1ed2f1145476",
+          "test_id": "M2-R03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "f11917abd27f32cb961c8ef2485b526f098eabf6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "0fbb7cf6876d88e5c1178b93418e16b0412901119dc1db93c77c01a10be42b1a",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M2/verification.json",
+          "sha256": "d7fae3fb3eec81edec4544a6f5c64d2b380ff40aae5c37fe02a4bfc09591c8b4",
+          "test_id": "M2-R01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "92ce9303b06d33f3a23a9be748bdab01b6662eef1c1c9474c918ed4e5eee6fdc",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M2/verification.json",
+          "sha256": "d7fae3fb3eec81edec4544a6f5c64d2b380ff40aae5c37fe02a4bfc09591c8b4",
+          "test_id": "M2-R02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "3ddc932dead4e95950407faa76c67480b4f5a9132ec75d81f9fe45e288085dcc",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M2/verification.json",
+          "sha256": "d7fae3fb3eec81edec4544a6f5c64d2b380ff40aae5c37fe02a4bfc09591c8b4",
+          "test_id": "M2-R03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "c9dcea6c8ef782a4c63606db6c7ef346438f477001f5f01f11449b341dfbaea7",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M2/verification.json",
+          "sha256": "d7fae3fb3eec81edec4544a6f5c64d2b380ff40aae5c37fe02a4bfc09591c8b4",
+          "test_id": "M2-R04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "c9dcea6c8ef782a4c63606db6c7ef346438f477001f5f01f11449b341dfbaea7",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC04",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-A01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "f51af14dbdc2841e6397c3ad02139bdbc2ed10fa95b8586d5ffa760ba9a375b6",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-J04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "161b8eb41310f3b7b2509fbc0f7a5d0e74d0a84cff4b3f79e607125a383ac4ff",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-J07",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "bb5c1da804b828b0ff6f63a33404e010d441aa0b4f3e217ab65f9a808fff4b6d",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-A01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "7d6311fbeebb05a217b865ea073ea79f78bc4b9de797158908df81966e9540c6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-sync.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/sdk-compat.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-J04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "27059dd493674d3b83a549ee741f43ab172a9aad94a7690944e2bc59b7eb8529",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/sdk-compat.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-crash.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-J07",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "775759b8b2a118d0f3eddd9a8c2830f9983d5cb13814b6ab9fc7776657dd645e",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-cancel.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/sdk-compat.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-A02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f197704d6373489fb0bb8ce9f4fa50df1d57735935909243f1c500440203c42",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-expiry.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-after-recreate.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC05",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M5/verification.json",
+          "sha256": "8b353e991e1cfaebc78997e1199e50aa889b28c7c27fa6467821362961809843",
+          "test_id": "M5-M01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "a544420dfce73380b39cdf7a78c23666ff2177a6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "e2ad9c8ead9ee11ee285dc7222cdb45a18e57b5615d22db6600419ae21fd1770",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-M01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC06",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M5/verification.json",
+          "sha256": "8b353e991e1cfaebc78997e1199e50aa889b28c7c27fa6467821362961809843",
+          "test_id": "M5-S05",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "a544420dfce73380b39cdf7a78c23666ff2177a6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "3b54133da133fc0663eb80ebda036dc0c3041392292045b2f178c931f7780a3b",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-S05",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "8862967a8335da0d3ec82cb4e2844d62e349939d5bc89ec28042eada441e1cff",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "embedded_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-S01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-S02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-S03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC07",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M5/verification.json",
+          "sha256": "8b353e991e1cfaebc78997e1199e50aa889b28c7c27fa6467821362961809843",
+          "test_id": "M5-E01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "a544420dfce73380b39cdf7a78c23666ff2177a6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "e92068f4babc1d6259112a6529fea1f4ed35fe7816231ae364eea00bf8637db4",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-E01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "81cb0a8f146b807d081986b24e9164114b33313b999c94e42a3a89483a4bf7b9",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-E05",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "6bc877767d06e4f3befa7d09b196901b693955b146eded542e442fcceeca1ca5",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "embedded_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-E02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-E03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-E04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-B02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "81cb0a8f146b807d081986b24e9164114b33313b999c94e42a3a89483a4bf7b9",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC08",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M5/verification.json",
+          "sha256": "8b353e991e1cfaebc78997e1199e50aa889b28c7c27fa6467821362961809843",
+          "test_id": "M5-D01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "a544420dfce73380b39cdf7a78c23666ff2177a6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "e2ad9c8ead9ee11ee285dc7222cdb45a18e57b5615d22db6600419ae21fd1770",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-D01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-D03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "6bc877767d06e4f3befa7d09b196901b693955b146eded542e442fcceeca1ca5",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "embedded_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-D02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "81cb0a8f146b807d081986b24e9164114b33313b999c94e42a3a89483a4bf7b9",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC09",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M6/verification.json",
+          "sha256": "62a92170507897634b14a696f01dd9619a31d5833762e0c5ada27ffb14f38eb3",
+          "test_id": "M6-R01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "47b2811e15965295a0b4f032723febe5a1f7a6dc",
+          "code_dirty": false,
+          "config_or_fixture_hash": "0deade523ea6c54ea40405655a00c5764d3d203a5a9fe34c60ff7944487a323c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-L01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "d19a7cc29ff9ace1dc805faac8b614e9f0c309cc299a2aa7895197470e79a61d",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "embedded_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R05",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R06",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R09",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "eb447c721d6ed5cae74410c9d75fa76e701fc3daa4456964357764142c77fef1",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M6/rendered-compose.json",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC10",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M7/verification.json",
+          "sha256": "bedd5b0388bf556e869fcc08e8858e986e71ecda22ac079bf433c70cb03e12f2",
+          "test_id": "M7-E01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "99333b82815122919d4f8f79907142682f07d6ae",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5472e1604adc6c10f9839b1f2a4b83ec0657b53923dee9cfa8a675ce87d54c7c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-E01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-E05",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "210690ddb6ed9512efc0faaca0c21d2206f19f798573b47ba2306eda2f23d807",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "embedded_sources": [
+                "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC11",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M7/verification.json",
+          "sha256": "bedd5b0388bf556e869fcc08e8858e986e71ecda22ac079bf433c70cb03e12f2",
+          "test_id": "M7-B01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "99333b82815122919d4f8f79907142682f07d6ae",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5472e1604adc6c10f9839b1f2a4b83ec0657b53923dee9cfa8a675ce87d54c7c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-B01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M7/raw/stack.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M7/raw/artifacts/",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-B02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M7/raw/artifacts/",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-B03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-B04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC12",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "cd76a74c06de8245cff7ede54352e3d500dc5df4362f8be68c651aac3696fd06",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "ea614a0d135652621a7e6bc12b5691579546fcc5290572016dd6f188c31f1bdd",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "3d4dd1f22fd6d55474198fd825066dd8425086850f2cedf42cd24b15011d7e9d",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P08",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "f026a31cabdcd571f89a6e9d519837d92052a778eb0fabac3bdd2ca15e07112f",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P09",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "f026a31cabdcd571f89a6e9d519837d92052a778eb0fabac3bdd2ca15e07112f",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P10",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "579dafd46f312466035af8cbe96dd03f64fe5eaf66c21042de9d08933f2b9093",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b55621ec3040314625fcaeb822f368eced8e0a83bce5c902ceb0e9e6232cd283",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-restart.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "6d6fd5aac187a717678efae94e2e7c9a677eeb10dea5b4097e3534161cbdc987",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b5a236e9d1b11148545dce3eb51bf52984d1ca43d3e82e5a2bd8417adfc293aa",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-tailnet.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P08",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "fd28995628debc41fd160f16093c3abc4c48ebe6889ec2ff1bbd8d4c5a226ac7",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-restart.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P09",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "fd28995628debc41fd160f16093c3abc4c48ebe6889ec2ff1bbd8d4c5a226ac7",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-restart.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P10",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "a94f7d97dce643d0f99052d2399d3f71ef4cae0b7976fe56b945bb242d3fecd3",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-stopped.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "c2cb662b4bfc5a9e40a41835162f43939c49dc507f18e8bf5d8ffb780acf2f48",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-cancel.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P05",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5293edf605ab83e00c6e95a38b947063a349b2be4467a03b4720f7c186d9421a",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-stopped.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC13",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P06",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5642c74238cbae6282b198982fabdb1d50020d6bf6fe0726f980f729fda3222d",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M4/verification.json",
+          "sha256": "9b89f4f28e745b069a3ca1a410b0dade5ba661b31adba082152e68ea3031ac08",
+          "test_id": "M4-P07",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "db7e787847f98de91325c81a80051c582491858f",
+          "code_dirty": false,
+          "config_or_fixture_hash": "27cb47c76b767554fc84e8abd73a549192be4fc1c246ef9f04f312a4e9ce90b5",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P06",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "3da3f3d42b24c3caeb1c43b1d9fd0ca887d70a5016d2da4b37eeb0ea771e64cf",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-tailnet.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M4/verification.json",
+          "sha256": "c1e1b46dc59c507833257527f9d685ff226c63cd76b6647e9f0fe7bd6aa459a6",
+          "test_id": "M4-P07",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "3bb9e37f679e8d07c73646c82dab2fa9564ea90f03e791de29ab2e1af6bdca45",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M4/raw/e2e-tailnet.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC14",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-X02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "694bbe7695ec5ffd00824e011b48c3505f2531dc103b111cfa8cd22ff21457a1",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-J03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "372262601071d7c039d9dd5559daf439bc100fd911159d09740c71855885477f",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M3/verification.json",
+          "sha256": "eee34468f056adfb8fcbcbd1adea0d18ec18e1c2b1e8adeeb8538084cf8ea6ef",
+          "test_id": "M3-J06",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "4405e0bad580e9ffe62b57d118a9daf06f4dc788",
+          "code_dirty": false,
+          "config_or_fixture_hash": "7620f716b3ce886c30d4f007a1bf9508bb30bb776ad9f55b89a3462a488abee2",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-X02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "140a3842047b92d4502dd23de01b5d7e4626d5ec37f7bd98d67dc5de92e056ff",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/persistence.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-after-recreate.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-J03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "77f3e13b00d17ff07e098b265c35bc3051acbceb5bf47ed49c50acfbf02a2355",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-crash.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M3/verification.json",
+          "sha256": "07308988a04ff3779dd948ee3eb777a62a61d1bf9fba7c09e2159abe100ee11e",
+          "test_id": "M3-J06",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5c59fff279d95f09af14a2c0fe6f2e05ddbd0f2e11cb82ee92835b58c6cecf24",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M3/raw/e2e-expiry.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC15",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M8/verification.json",
+          "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642",
+          "test_id": "M8-R01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+          "code_dirty": false,
+          "config_or_fixture_hash": "4e41380aab80d76e9364f5036db99adfcdda9c5043ef0226f3c196f2701f5ad4",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-R01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "01c11ff2bb233d682ed771a0a29ef4d66dbd293b3e7d872ffa050a2885fd59dd",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M8/reboots/",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-R02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-R03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I07",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I15",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC16",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M8/verification.json",
+          "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642",
+          "test_id": "M8-S01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+          "code_dirty": false,
+          "config_or_fixture_hash": "04d15629aa75e2676b51f3495ba6fb7ee8f9175653491657f034b70472a37474",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-S01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "1173120766c4d96768486b044fa0c2a5bafca85a855161879cf1d7f344447356",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/soak.txt",
+              "attributed": true,
+              "bound": true,
+              "evidence_mode": "ACCEPTED_M8_REUSE",
+              "historical_input": "evidence/M8/raw/soak.txt",
+              "execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+              "note": "Immutable historical bytes, never retagged as current execution."
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-S02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "7f1521b5a361f6f6f2e2a311df95f810e977356d06681555c308e9162f5aa3de",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/soak.txt",
+              "attributed": true,
+              "bound": true,
+              "evidence_mode": "ACCEPTED_M8_REUSE",
+              "historical_input": "evidence/M8/raw/soak.txt",
+              "execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+              "note": "Immutable historical bytes, never retagged as current execution."
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-S04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "ccddad102d3a4eddac7e0741ee7778cedcf3cce88fc6edaa477491265327d0cc",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/redis-measured.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M8/raw/redis-soak.txt",
+              "attributed": true,
+              "bound": true,
+              "evidence_mode": "ACCEPTED_M8_REUSE",
+              "historical_input": "evidence/M8/raw/redis-soak.txt",
+              "execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+              "note": "Immutable historical bytes, never retagged as current execution."
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-S05",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "7c76e4182a55a8fd493ac69bf2093679deb362540805e61f64c5a4de06f668e7",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/heap.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC17",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M8/verification.json",
+          "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642",
+          "test_id": "M8-O01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+          "code_dirty": false,
+          "config_or_fixture_hash": "233a1f7521d818bb61a9d0225fc5d9e53a351359767ea364a332e32acb1da048",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-O01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-O02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-O03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-O04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "a47900af800d9536aacaa1035da96ecf7a824d9b11f6bc79c5080d5920e1eb1c",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M8/raw/soak.txt",
+              "attributed": true,
+              "bound": true,
+              "evidence_mode": "ACCEPTED_M8_REUSE",
+              "historical_input": "evidence/M8/raw/soak.txt",
+              "execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+              "note": "Immutable historical bytes, never retagged as current execution."
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-N01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "f433565367e29919ee369abe31f5226e7bd67a7e92138fdf8702ee3ef4598773",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/notify-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-N02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b829ca8d683b7e335dcab568d5dac48c7067cb7207b312db022ba2e3eae27c4b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/watchdog-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC18",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M8/verification.json",
+          "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642",
+          "test_id": "M8-K03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+          "code_dirty": false,
+          "config_or_fixture_hash": "40b13c65ca0cabbc9b2ad889b6a171ec50345c2c7740d1bf354324b579aa2e21",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-K03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "1ba70b6f627cec82be808e08558689107d3da7d495af770a7d0e2ae668bab6d7",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/backup-live.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-K01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "ee302e307befc084e94d93e737bfa0752e4b7196273df467b88a9c1d18efd9bc",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/backup-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-K02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "ee302e307befc084e94d93e737bfa0752e4b7196273df467b88a9c1d18efd9bc",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/backup-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC19",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M8/verification.json",
+          "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642",
+          "test_id": "M8-U01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+          "code_dirty": false,
+          "config_or_fixture_hash": "d8034975ee509b924aef6029323d517a3ca8073354316d7df33b78adeda9ec90",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M8/verification.json",
+          "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642",
+          "test_id": "M8-U02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+          "code_dirty": false,
+          "config_or_fixture_hash": "054bb21d8726234623d53da8f5621375160e7c75bd8863b1443abd08e46c78cd",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-U01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "84b039b6d03a9753533074feff29229cf7c21db30721413cf66b07e30d3eb292",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/rehearsal.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-U02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "6b48634c772a2a89987c6f68cdfd8f0bb791a75e755cdaf1324a2c9d7fa358ec",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/plans.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC20",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M7/verification.json",
+          "sha256": "bedd5b0388bf556e869fcc08e8858e986e71ecda22ac079bf433c70cb03e12f2",
+          "test_id": "M7-W01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "99333b82815122919d4f8f79907142682f07d6ae",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5472e1604adc6c10f9839b1f2a4b83ec0657b53923dee9cfa8a675ce87d54c7c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-W01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "fc9e1d880bc6145a0a01320b82a388aaf2139dbab8b1e3d0a6fed3b4b5ee8216",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC21",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M7/verification.json",
+          "sha256": "bedd5b0388bf556e869fcc08e8858e986e71ecda22ac079bf433c70cb03e12f2",
+          "test_id": "M7-C01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "99333b82815122919d4f8f79907142682f07d6ae",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5472e1604adc6c10f9839b1f2a4b83ec0657b53923dee9cfa8a675ce87d54c7c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-C01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-C02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-C03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC23",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M5/verification.json",
+          "sha256": "8b353e991e1cfaebc78997e1199e50aa889b28c7c27fa6467821362961809843",
+          "test_id": "M5-I01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "a544420dfce73380b39cdf7a78c23666ff2177a6",
+          "code_dirty": false,
+          "config_or_fixture_hash": "e2ad9c8ead9ee11ee285dc7222cdb45a18e57b5615d22db6600419ae21fd1770",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M6/verification.json",
+          "sha256": "62a92170507897634b14a696f01dd9619a31d5833762e0c5ada27ffb14f38eb3",
+          "test_id": "M6-R06",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "47b2811e15965295a0b4f032723febe5a1f7a6dc",
+          "code_dirty": false,
+          "config_or_fixture_hash": "0deade523ea6c54ea40405655a00c5764d3d203a5a9fe34c60ff7944487a323c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M7/verification.json",
+          "sha256": "bedd5b0388bf556e869fcc08e8858e986e71ecda22ac079bf433c70cb03e12f2",
+          "test_id": "M7-E03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "99333b82815122919d4f8f79907142682f07d6ae",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5472e1604adc6c10f9839b1f2a4b83ec0657b53923dee9cfa8a675ce87d54c7c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-I01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R06",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-E03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R07",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "78e2dbd505dcc812754bc9a88971e4d92b93306a42d8469c8999ec87de704e7b",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I08",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I09",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I10",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-I11",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/faults.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC24",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M8/verification.json",
+          "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642",
+          "test_id": "M8-X01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+          "code_dirty": false,
+          "config_or_fixture_hash": "e4c80301931276a2585a1788e139d640e4b3f10e81c2ac0804babe0dcd839377",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-X01",
+          "state": "PASS",
+          "legacy_state": "FAIL",
+          "interpretation": {
+            "state": "PASS",
+            "conditions": {
+              "inputs_bound": true,
+              "current_security": true,
+              "prior_probe": true,
+              "legacy_failure": true,
+              "scan_sections": true,
+              "times": true,
+              "window": true,
+              "counter_control": true,
+              "classified_logs": true,
+              "legacy_coverage": true,
+              "exact_retained_failure": true
+            },
+            "failed": [],
+            "legacy_test_state": "FAIL",
+            "legacy_failure_detail": "failed=core_logs; guard handle 10→10, web accepted delta=0, proxy-port delta=0; core logs=44",
+            "retained_unexplained_lines": 6,
+            "prior_probe_sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599",
+            "prior_block_sha256": "bfa000be11c79077d0920d74766fe655e7e6e9d931f4b57c32e7b4582b5fce9d",
+            "window_start_utc": "2026-10-03T19:10:25Z",
+            "window_close_utc": "2026-10-03T21:03:10Z",
+            "logs_meta_utc": "2026-10-03T21:03:48Z",
+            "note": "M8-X01 retains FAIL for one immutable pre-fix M9-REG-12 block. The proxy refused a deliberate redirect probe; no Cloud egress. Timestamp/URL and matched real attempt-id connect the hash-pinned probe events. All other scan conditions remain mandatory; actual later provider-window logs are audited separately.",
+            "inputs": [
+              {
+                "path": "evidence/M9/regression/M8/raw/core-logs-final.txt",
+                "sha256": "43f4889bbf2789af064e26c0f98c3cc611afb41286e6697604debb9388a18a69"
+              },
+              {
+                "path": "evidence/M9/regression/M8/raw/guard-window-open.txt",
+                "sha256": "491deca060c390c56b9b96c6abc17d38dd2f0f2daf3d29151d29070f9b13f297"
+              },
+              {
+                "path": "evidence/M9/regression/M8/raw/egress-probe.txt",
+                "sha256": "29cc9ff172133235e54297c449c07f0e1daf1ef97ac047e624b2f198138c47f6"
+              },
+              {
+                "path": "evidence/M9/regression/M2/raw/initial-learned-browser-rt-ssrf.txt",
+                "sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599"
+              }
+            ],
+            "source_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27"
+          },
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "d5739e760922867bf1a71d4f2e6d872e3c8be63e9e972d4a3870dcee73398898",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/guard-window-open.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M8/raw/egress-probe.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M8/raw/core-logs-final.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC25",
+      "state": "PASS",
+      "historical": [
+        {
+          "path": "evidence/M7/verification.json",
+          "sha256": "bedd5b0388bf556e869fcc08e8858e986e71ecda22ac079bf433c70cb03e12f2",
+          "test_id": "M7-E04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "99333b82815122919d4f8f79907142682f07d6ae",
+          "code_dirty": false,
+          "config_or_fixture_hash": "5472e1604adc6c10f9839b1f2a4b83ec0657b53923dee9cfa8a675ce87d54c7c",
+          "bindings": [],
+          "tested_bound": null,
+          "external_evidence_inputs": []
+        }
+      ],
+      "current": [
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-E04",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M2/verification.json",
+          "sha256": "d7fae3fb3eec81edec4544a6f5c64d2b380ff40aae5c37fe02a4bfc09591c8b4",
+          "test_id": "M2-S01",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "eeed6f76ce1526a9551c06cc6e502cc1fd0cb5fdadfd0c379d894736596d7ba0",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-ssrf.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M2/raw/unit-tests.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M2/verification.json",
+          "sha256": "d7fae3fb3eec81edec4544a6f5c64d2b380ff40aae5c37fe02a4bfc09591c8b4",
+          "test_id": "M2-S02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "3ddc932dead4e95950407faa76c67480b4f5a9132ec75d81f9fe45e288085dcc",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M2/verification.json",
+          "sha256": "d7fae3fb3eec81edec4544a6f5c64d2b380ff40aae5c37fe02a4bfc09591c8b4",
+          "test_id": "M2-S03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "352381fd25fcbfdfee669eb273d2a620db445b1efaef152d049d27573f959c42",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M2/raw/rt-browser-redirect.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-E03",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "309beaeec18b6410d03feaed6d6829e9ca1c8c9bc7f6cd03af75648d78995c68",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M5/verification.json",
+          "sha256": "18f062fa0574d3a52097273ed73ae189a4ea9e7767fcc593cc24d06757536b79",
+          "test_id": "M5-B02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "81cb0a8f146b807d081986b24e9164114b33313b999c94e42a3a89483a4bf7b9",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M6/verification.json",
+          "sha256": "f2241ee8268b5711a89d81f7210ef35ea2c2e85d82815a02c5ff92801fde9366",
+          "test_id": "M6-R09",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "eb447c721d6ed5cae74410c9d75fa76e701fc3daa4456964357764142c77fef1",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M6/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M6/rendered-compose.json",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M7/verification.json",
+          "sha256": "f300775b9cf7466d515564bb1752ed0785d3ab4353e7e393ffe27c03040a9ff1",
+          "test_id": "M7-E02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        },
+        {
+          "path": "evidence/M9/regression/M8/verification.json",
+          "sha256": "5dcb15c0ccebc046bd06fe928cee5d7cb2acdf8b25d0763ef015a536f5386436",
+          "test_id": "M8-X02",
+          "state": "PASS",
+          "legacy_state": null,
+          "interpretation": null,
+          "verifier_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+          "code_dirty": false,
+          "config_or_fixture_hash": "175a5582415181992ccd0cc861beb9c5e3e281752c352e97c3f7ac6f16208def",
+          "bindings": [
+            {
+              "path": "evidence/M9/regression/M8/raw/stack.txt",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            },
+            {
+              "path": "evidence/M9/regression/M8/rendered-compose.json",
+              "attributed": true,
+              "bound": true,
+              "collector_sources": [
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184",
+                "82a11536707e3fb6d4fe76497e857b137c5e2184"
+              ],
+              "embedded_sources": [],
+              "metadata_scope": "preamble/first-metadata/soak-samples"
+            }
+          ],
+          "tested_bound": true,
+          "external_evidence_inputs": []
+        }
+      ],
+      "bound": true
+    },
+    {
+      "test_id": "AC22",
+      "state": "PASS",
+      "capability_state": "NOT_REQUIRED",
+      "selected_profile": "NOT_ENABLED",
+      "note": "Conditional gate: no hosted profile is enabled; no hosted parity claimed."
+    },
+    {
+      "test_id": "M9-RESOURCE-REUSE",
+      "state": "PASS",
+      "failed": [],
+      "conditions": {
+        "accepted_bytes": true,
+        "accepted_checks": true,
+        "historical_sources": true,
+        "assessment": true,
+        "assessed_paths": true,
+        "resource_configuration": true,
+        "current_input_bindings": true,
+        "incident": true,
+        "duration": true,
+        "sample_times": true,
+        "no_restart": true,
+        "source": true,
+        "healthy": true,
+        "host": true,
+        "queue": true,
+        "disk": true,
+        "concurrent_incident": true,
+        "aligned_windows": true,
+        "workload_window": true,
+        "workload_outcomes": true,
+        "concurrent_traffic": true,
+        "targeted_requests": true,
+        "continuity": true,
+        "workload_coverage": true,
+        "latency": true,
+        "redis_window": true,
+        "redis_memory": true,
+        "redis": true
+      },
+      "metrics": {
+        "samples": 144,
+        "minimum_available_mib": 4516,
+        "slice_peak_mib": 3117,
+        "incident_peak_mib": 173,
+        "controlled_static_p95_ms": 97,
+        "controlled_static_max_ms": 14056,
+        "requests": 93,
+        "p95_ms": {
+          "static": 105,
+          "js": 5063,
+          "status": 26,
+          "mcp_list": 16
+        }
+      },
+      "note": "Accepted M8 24-hour evidence reused, combined with current 30-minute targeted resource regression and bounded incident invocation; no new 24-hour soak.",
+      "assessment_sha256": "575795d9d2f13f34a0344102d70a11d0a736549ee06714190f7b332ded458891",
+      "inputs": [
+        {
+          "path": "evidence/M9/regression/M8/raw/targeted-resources.txt",
+          "sha256": "63879f9964280a113fc5305834993945d12c624739934f530a4db7680c6b475f"
+        },
+        {
+          "path": "evidence/M9/regression/M8/raw/targeted-workload.txt",
+          "sha256": "7eb354a3caa3f4730695cc185fadf30f23f691918dccf82332fb54be900a43d8"
+        },
+        {
+          "path": "evidence/M9/regression/M8/raw/targeted-redis.txt",
+          "sha256": "a116e61b174685fc7b522f5aa12844f6f8cadf68c6278043383ad3a35715dceb"
+        },
+        {
+          "path": "evidence/M9/regression/M8/raw/targeted-redis-memory.txt",
+          "sha256": "abdf5b5762edd82701635b6b3d793d23632b65719a36277d53cadc02606cc914"
+        }
+      ],
+      "source_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+      "historical_execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+      "accepted_repository_baseline": "55d756c5fb12fc5e741ab4145c47a7d7fdee1237"
+    },
+    {
+      "test_id": "M9-CLOUD-WINDOW",
+      "state": "PASS",
+      "conditions": {
+        "inputs_bound": true,
+        "current_security": true,
+        "prior_probe": true,
+        "legacy_failure": true,
+        "scan_sections": true,
+        "times": true,
+        "window": true,
+        "counter_control": true,
+        "classified_logs": true,
+        "legacy_coverage": true,
+        "exact_retained_failure": true
+      },
+      "failed": [],
+      "legacy_test_state": "FAIL",
+      "legacy_failure_detail": "failed=core_logs; guard handle 10→10, web accepted delta=0, proxy-port delta=0; core logs=44",
+      "retained_unexplained_lines": 6,
+      "prior_probe_sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599",
+      "prior_block_sha256": "bfa000be11c79077d0920d74766fe655e7e6e9d931f4b57c32e7b4582b5fce9d",
+      "window_start_utc": "2026-10-03T19:10:25Z",
+      "window_close_utc": "2026-10-03T21:03:10Z",
+      "logs_meta_utc": "2026-10-03T21:03:48Z",
+      "note": "M8-X01 retains FAIL for one immutable pre-fix M9-REG-12 block. The proxy refused a deliberate redirect probe; no Cloud egress. Timestamp/URL and matched real attempt-id connect the hash-pinned probe events. All other scan conditions remain mandatory; actual later provider-window logs are audited separately.",
+      "inputs": [
+        {
+          "path": "evidence/M9/regression/M8/raw/core-logs-final.txt",
+          "sha256": "43f4889bbf2789af064e26c0f98c3cc611afb41286e6697604debb9388a18a69"
+        },
+        {
+          "path": "evidence/M9/regression/M8/raw/guard-window-open.txt",
+          "sha256": "491deca060c390c56b9b96c6abc17d38dd2f0f2daf3d29151d29070f9b13f297"
+        },
+        {
+          "path": "evidence/M9/regression/M8/raw/egress-probe.txt",
+          "sha256": "29cc9ff172133235e54297c449c07f0e1daf1ef97ac047e624b2f198138c47f6"
+        },
+        {
+          "path": "evidence/M9/regression/M2/raw/initial-learned-browser-rt-ssrf.txt",
+          "sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599"
+        }
+      ],
+      "source_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27"
+    },
+    {
+      "test_id": "M9-LIVE-CLOUD",
+      "state": "PASS",
+      "window_start_utc": "2026-10-03T21:43:44Z",
+      "audit_utc": "2026-10-03T21:46:39.440Z",
+      "note": "Actual paid-container logs cover every authorized live operation before shutoff; zero Cloud-host lines, with acquisition/log counts as positive controls. Controlled denial proofs are recorded separately."
+    },
+    {
+      "test_id": "M9-RESOURCE-EVALUATOR-TESTS",
+      "state": "PASS"
+    },
+    {
+      "test_id": "M9-CORPUS",
+      "state": "FAIL",
+      "denominator": 20,
+      "usable": 17
+    },
+    {
+      "test_id": "M9-CLIENTS",
+      "state": "PASS",
+      "clients": [
+        {
+          "client": "claude",
+          "ok": true
+        },
+        {
+          "client": "codex",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "test_id": "M9-RESEARCH",
+      "state": "PASS"
+    },
+    {
+      "test_id": "M9-INCIDENT",
+      "state": "PASS",
+      "root_fixtures": true
+    },
+    {
+      "test_id": "M9-REVIEW",
+      "state": "PASS",
+      "finding_count": 255
+    },
+    {
+      "test_id": "M9-RETURNED-FINDINGS",
+      "state": "PASS",
+      "owning_milestone_remediation_required": []
+    },
+    {
+      "test_id": "M9-CURRENT",
+      "state": "PASS"
+    },
+    {
+      "test_id": "M9-FIXTURES",
+      "state": "PASS"
+    },
+    {
+      "test_id": "M9-REDACTION",
+      "state": "PASS"
+    }
+  ],
+  "inputs": [
+    {
+      "path": "evidence/M9/work/live-window.json",
+      "sha256": "59f2af12c4a6d840a2b584e0dfba05c3fb931535e73c0a7c7c5f7810e8a6cfee"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/live-provider-cloud-audit.txt",
+      "sha256": "f4e07b5ee53243f9cc4764d8d4e956abfe696dd0de4c2bb6bb9661422410fc9f"
+    },
+    {
+      "path": "evidence/M9/cloud-window.json",
+      "sha256": "8d169beb6917c0a80b7ac949c87a6be052646275280cae221e84af033e20ea59"
+    },
+    {
+      "path": "evidence/M9/work/resource-verifier-tests.txt",
+      "sha256": "38c07d903f821115fb3539205518eec8b5801d1834e8d018df935fd51040e62c"
+    },
+    {
+      "path": "evidence/M9/work/AC16-applicability.json",
+      "sha256": "575795d9d2f13f34a0344102d70a11d0a736549ee06714190f7b332ded458891"
+    },
+    {
+      "path": "evidence/M9/resource-reuse.json",
+      "sha256": "122c8abdeeaa5f0df566ec5d2d7b04e6ba61fceacceaeb2ee3f0836ba5b36b6a"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-resources.txt",
+      "sha256": "63879f9964280a113fc5305834993945d12c624739934f530a4db7680c6b475f"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-workload.txt",
+      "sha256": "7eb354a3caa3f4730695cc185fadf30f23f691918dccf82332fb54be900a43d8"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-redis.txt",
+      "sha256": "a116e61b174685fc7b522f5aa12844f6f8cadf68c6278043383ad3a35715dceb"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-redis-memory.txt",
+      "sha256": "abdf5b5762edd82701635b6b3d793d23632b65719a36277d53cadc02606cc914"
+    },
+    {
+      "path": "evidence/M9/work/resource-verifier-tests.json",
+      "sha256": "1c4817be47c071f931ac4798f6f31ae759ad65a4c8f85214e4f20737e3340b92"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_SPEC.md",
+      "sha256": "66f53f1f839f61b19e4841b2e21797d43ad5910f778bb3e77de564dac5f090b7"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_MILESTONES.md",
+      "sha256": "c2797f0587f1fe9318c0ae95abd472d8059ae8074796a4a831cad765eabd8d12"
+    },
+    {
+      "path": "deploy/versions.lock.json",
+      "sha256": "0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a"
+    },
+    {
+      "path": "patches/series.json",
+      "sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96"
+    },
+    {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea"
+    },
+    {
+      "path": "deploy/policies/egress.json",
+      "sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c"
+    },
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    },
+    {
+      "path": "evidence/M9/work/corpus-freeze.json",
+      "sha256": "4d9a0d2559cc90558f2c92efb21cf0f2dbae196250e2cd992b8fa5d19060fa54"
+    },
+    {
+      "path": "evidence/M9/review/REVIEW.md",
+      "sha256": "8794fa1bd283f58dc2462c12ac4d93c4f8ca2fb7ef1fb02bb6c6c79758590530"
+    },
+    {
+      "path": "evidence/M9/work/root-fixtures.txt",
+      "sha256": "1053b6de3c6efc8bc8aee1d2ac374fa8559a6d5229def148339ba4410a91e0dc"
+    },
+    {
+      "path": "evidence/M9/work/fixture-run.json",
+      "sha256": "dca53dadf097080b36009a91f75273adbf78bc362c627983a11a43a43955e7c1"
+    },
+    {
+      "path": "evidence/M9/work/pi-fixtures-final.txt",
+      "sha256": "546bd9dec2755c1136e92376551aa58b0cab614336abc3ec45b6ade0ce4c36d2"
+    },
+    {
+      "path": "evidence/M9/current/versions.json",
+      "sha256": "d6b7025970307ac1123682886b17dbc2aff6681fdfc1cc094bd9f46d9e33b686"
+    }
+  ],
+  "limitations": [
+    "M8 B00/X04 historical FAIL interpretations preserved",
+    "Legacy supplemental M5 X01/X02/X03 FAIL and equivalent PASS evidence preserved",
+    "Provider estimates are not invoices",
+    "Synthetic routing is not real anti-bot success",
+    "Hosted access NOT_ENABLED; single host, power, storage and network fault domain"
+  ]
+}

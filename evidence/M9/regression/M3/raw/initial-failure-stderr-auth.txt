@@ -1,0 +1,9 @@
+cat: /etc/firecrawl-pi/secrets/clients/m3rev.token: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.peak: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.current: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-07fa416c96a8e1cf48dd9bf1205396c08bcf282686b3e8c3432e67d5d3e12876.scope/memory.peak: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-07fa416c96a8e1cf48dd9bf1205396c08bcf282686b3e8c3432e67d5d3e12876.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-07fa416c96a8e1cf48dd9bf1205396c08bcf282686b3e8c3432e67d5d3e12876.scope/memory.current: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-07fa416c96a8e1cf48dd9bf1205396c08bcf282686b3e8c3432e67d5d3e12876.scope/memory.events" (No such file or directory)

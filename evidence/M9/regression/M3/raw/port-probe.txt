@@ -1,0 +1,89 @@
+### meta
+utc=2026-10-03T18:43:13Z source_commit=82a11536707e3fb6d4fe76497e857b137c5e2184 probe_image=node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+addresses core_api=10.231.4.1 core_core=10.231.1.5 pg_core=10.231.1.2 pg_platform=10.231.7.1 redis=10.231.1.1 rabbitmq=10.231.1.3 retrieval=10.231.5.10 browser=10.231.2.20 fixture_m3=10.231.3.3 gateway_access=10.231.0.2
+### guard_before
+access_forward_out_dropped packets=99
+access_forward_in_dropped packets=0
+access_input_new_dropped packets=42
+### gateway
+{"role":"gateway","label":"core_api","target":"firecrawl-core:3002","outcome":"open"}
+{"role":"gateway","label":"postgres","target":"nuq-postgres:5432","outcome":"open"}
+{"role":"gateway","label":"core_3004","target":"firecrawl-core:3004","outcome":"open"}
+{"role":"gateway","label":"core_3005","target":"firecrawl-core:3005","outcome":"open"}
+{"role":"gateway","label":"core_3006","target":"firecrawl-core:3006","outcome":"open"}
+{"role":"gateway","label":"core_3007","target":"firecrawl-core:3007","outcome":"open"}
+{"role":"gateway","label":"core_3008","target":"firecrawl-core:3008","outcome":"open"}
+{"role":"gateway","label":"core_9090","target":"firecrawl-core:9090","outcome":"refused"}
+{"role":"gateway","label":"redis_name","target":"redis:6379","outcome":"unresolved","code":"EAI_AGAIN"}
+{"role":"gateway","label":"rabbitmq_name","target":"rabbitmq:5672","outcome":"unresolved","code":"EAI_AGAIN"}
+{"role":"gateway","label":"retrieval_name","target":"retrieval-service:3310","outcome":"refused"}
+{"role":"gateway","label":"browser_name","target":"browser-worker:3320","outcome":"unresolved","code":"EAI_AGAIN"}
+{"role":"gateway","label":"fixture_name","target":"fixture-m3:8080","outcome":"unresolved","code":"EAI_AGAIN"}
+{"role":"gateway","label":"core_on_core_net","target":"10.231.1.5:3002","outcome":"timeout"}
+{"role":"gateway","label":"postgres_on_core_net","target":"10.231.1.2:5432","outcome":"timeout"}
+{"role":"gateway","label":"redis_ip","target":"10.231.1.1:6379","outcome":"timeout"}
+{"role":"gateway","label":"rabbitmq_ip","target":"10.231.1.3:5672","outcome":"timeout"}
+{"role":"gateway","label":"retrieval_ip","target":"10.231.5.10:3310","outcome":"timeout"}
+{"role":"gateway","label":"retrieval_proxy_ip","target":"10.231.2.10:3312","outcome":"timeout"}
+{"role":"gateway","label":"browser_ip","target":"10.231.2.20:3320","outcome":"timeout"}
+{"role":"gateway","label":"fixture_ip","target":"10.231.3.3:8080","outcome":"timeout"}
+{"role":"gateway","label":"host_sshd","target":"10.231.0.1:22","outcome":"timeout"}
+{"role":"gateway","label":"host_dns","target":"10.231.0.1:53","outcome":"timeout"}
+{"role":"gateway","label":"host_http","target":"10.231.0.1:80","outcome":"timeout"}
+{"role":"gateway","label":"host_mqtt","target":"10.231.0.1:1883","outcome":"timeout"}
+{"role":"gateway","label":"host_airdb","target":"10.231.0.1:8080","outcome":"timeout"}
+--- the retrieval service's acquisition route, by address, from the gateway
+{"role":"gateway","label":"retrieval_internal","target":"10.231.5.10:3310","outcome":"timeout"}
+### access_peer
+{"role":"access_peer","label":"gateway_port","target":"10.231.0.2:3300","outcome":"open"}
+{"role":"access_peer","label":"core_name","target":"firecrawl-core:3002","outcome":"unresolved","code":"EAI_AGAIN"}
+{"role":"access_peer","label":"core_api","target":"10.231.4.1:3002","outcome":"timeout"}
+{"role":"access_peer","label":"postgres_platform","target":"10.231.7.1:5432","outcome":"timeout"}
+{"role":"access_peer","label":"postgres_core","target":"10.231.1.2:5432","outcome":"timeout"}
+{"role":"access_peer","label":"redis_ip","target":"10.231.1.1:6379","outcome":"timeout"}
+{"role":"access_peer","label":"rabbitmq_ip","target":"10.231.1.3:5672","outcome":"timeout"}
+{"role":"access_peer","label":"retrieval_ip","target":"10.231.5.10:3310","outcome":"timeout"}
+{"role":"access_peer","label":"browser_ip","target":"10.231.2.20:3320","outcome":"timeout"}
+{"role":"access_peer","label":"host_sshd","target":"10.231.0.1:22","outcome":"timeout"}
+### default_bridge
+{"role":"default_bridge","label":"host_sshd","target":"172.17.0.1:22","outcome":"open"}
+{"role":"default_bridge","label":"host_gateway_publication","target":"172.17.0.1:3380","outcome":"refused"}
+{"role":"default_bridge","label":"gateway_access","target":"10.231.0.2:3300","outcome":"timeout"}
+{"role":"default_bridge","label":"core_api","target":"10.231.4.1:3002","outcome":"timeout"}
+{"role":"default_bridge","label":"postgres_platform","target":"10.231.7.1:5432","outcome":"timeout"}
+{"role":"default_bridge","label":"postgres_core","target":"10.231.1.2:5432","outcome":"timeout"}
+{"role":"default_bridge","label":"redis_ip","target":"10.231.1.1:6379","outcome":"timeout"}
+{"role":"default_bridge","label":"rabbitmq_ip","target":"10.231.1.3:5672","outcome":"timeout"}
+{"role":"default_bridge","label":"retrieval_ip","target":"10.231.5.10:3310","outcome":"timeout"}
+{"role":"default_bridge","label":"browser_ip","target":"10.231.2.20:3320","outcome":"timeout"}
+{"role":"default_bridge","label":"fixture_ip","target":"10.231.3.3:8080","outcome":"timeout"}
+### host
+{"role":"host","label":"gateway_publication","target":"127.0.0.1:3380","outcome":"open"}
+{"role":"host","label":"loopback_3300","target":"127.0.0.1:3300","outcome":"closed"}
+{"role":"host","label":"loopback_3002","target":"127.0.0.1:3002","outcome":"closed"}
+{"role":"host","label":"loopback_3004","target":"127.0.0.1:3004","outcome":"closed"}
+{"role":"host","label":"loopback_3005","target":"127.0.0.1:3005","outcome":"closed"}
+{"role":"host","label":"loopback_3006","target":"127.0.0.1:3006","outcome":"closed"}
+{"role":"host","label":"loopback_3007","target":"127.0.0.1:3007","outcome":"closed"}
+{"role":"host","label":"loopback_3008","target":"127.0.0.1:3008","outcome":"closed"}
+{"role":"host","label":"loopback_5432","target":"127.0.0.1:5432","outcome":"closed"}
+{"role":"host","label":"loopback_6379","target":"127.0.0.1:6379","outcome":"closed"}
+{"role":"host","label":"loopback_5672","target":"127.0.0.1:5672","outcome":"closed"}
+{"role":"host","label":"loopback_3310","target":"127.0.0.1:3310","outcome":"closed"}
+{"role":"host","label":"loopback_3312","target":"127.0.0.1:3312","outcome":"closed"}
+{"role":"host","label":"loopback_3320","target":"127.0.0.1:3320","outcome":"closed"}
+{"role":"host","label":"core_api","target":"10.231.4.1:3002","outcome":"closed"}
+{"role":"host","label":"postgres_platform","target":"10.231.7.1:5432","outcome":"closed"}
+{"role":"host","label":"postgres_core","target":"10.231.1.2:5432","outcome":"closed"}
+{"role":"host","label":"redis","target":"10.231.1.1:6379","outcome":"closed"}
+{"role":"host","label":"rabbitmq","target":"10.231.1.3:5672","outcome":"closed"}
+{"role":"host","label":"retrieval","target":"10.231.5.10:3310","outcome":"closed"}
+{"role":"host","label":"browser","target":"10.231.2.20:3320","outcome":"closed"}
+{"role":"host","label":"fixture_m3","target":"10.231.3.3:8080","outcome":"closed"}
+### guard_after
+access_forward_out_dropped packets=157
+access_forward_in_dropped packets=0
+access_input_new_dropped packets=60
+### transient
+leftover_transient_containers=0
+end

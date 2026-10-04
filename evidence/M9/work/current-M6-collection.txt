@@ -1,0 +1,1 @@
+{"group":"M6","runs":[{"phase":"fixture","path":"evidence/M9/regression/M6/raw/e2e-fixture.txt","sha256":"e80aa56322f7105d0c4844018f4778271f0fddc4375b7416ae2cc7fc7fb66e6f","exit_code":0}]}

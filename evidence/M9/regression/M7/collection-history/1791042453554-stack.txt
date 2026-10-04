@@ -1,0 +1,309 @@
+### meta
+utc=2026-10-03T13:43:53Z
+source_commit=010d6f9e84f732783ab94745a8b5b05cc0f8d2eb
+host_page_size=16384 kernel=6.18.50+rpt-rpi-2712 uname_m=aarch64
+boot_id_sha256=d60f278673b664339fcb44f6b59eba910def9b210fdd20ada93e3e46210cb7bf
+binfmt_misc_handlers=python3.13
+### containers
+nuq-postgres name=fcpi-nuq-postgres-1 image=sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180 platform=linux/arm64 state=running health=healthy restarts=0 user=5432:5432 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T11:16:37.921192573Z
+nuq-postgres uname_m=aarch64
+redis name=fcpi-redis-1 image=sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44 platform=linux/arm64 state=running health=healthy restarts=0 user=6379:6379 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T11:16:37.731009794Z
+redis uname_m=aarch64
+rabbitmq name=fcpi-rabbitmq-1 image=sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8 platform=linux/arm64 state=running health=healthy restarts=0 user=5672:5672 readonly_rootfs=true privileged=false network_mode=fcpi_core cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T11:16:38.4051708Z
+rabbitmq uname_m=aarch64
+firecrawl-core name=fcpi-firecrawl-core-1 image=sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4 platform=linux/arm64 state=running health=healthy restarts=0 user= readonly_rootfs=true privileged=false network_mode=fcpi_acquire cap_drop=ALL cap_add=CAP_SETGID,CAP_SETUID security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T12:38:24.20986853Z
+firecrawl-core uname_m=aarch64
+access-gateway name=fcpi-access-gateway-1 image=sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb platform=linux/arm64 state=running health=healthy restarts=0 user=3380:3380 readonly_rootfs=true privileged=false network_mode=fcpi_access cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T12:36:27.00131701Z
+access-gateway uname_m=aarch64
+mcp-gateway name=fcpi-mcp-gateway-1 image=sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d platform=linux/arm64 state=running health=healthy restarts=0 user=3400:3400 readonly_rootfs=true privileged=false network_mode=fcpi_mcp cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T12:41:31.86365842Z
+mcp-gateway uname_m=aarch64
+fixture name=fcpi-fixture-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T10:40:38.087237526Z
+fixture uname_m=aarch64
+retrieval-service name=fcpi-retrieval-service-1 image=sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba platform=linux/arm64 state=running health=healthy restarts=0 user=3310:3310 readonly_rootfs=true privileged=false network_mode=fcpi_acquire cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T13:39:13.990373396Z
+retrieval-service uname_m=aarch64
+browser-worker name=fcpi-browser-worker-1 image=sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549 platform=linux/arm64 state=running health=healthy restarts=0 user=3320:3320 readonly_rootfs=true privileged=false network_mode=fcpi_browser cap_drop=ALL cap_add= security_opt=no-new-privileges:true,seccomp={"defaultAction":"SCMP_ACT_ERRNO","defaultErrnoRet":1,"archMap":[{"architecture":"SCMP_ARCH_X86_64","subArchitectures":["SCMP_ARCH_X86","SCMP_ARCH_X32"]},{"architecture":"SCMP_ARCH_AARCH64","subArchitectures":["SCMP_ARCH_ARM"]},{"architecture":"SCMP_ARCH_MIPS64","subArchitectures":["SCMP_ARCH_MIPS","SCMP_ARCH_MIPS64N32"]},{"architecture":"SCMP_ARCH_MIPS64N32","subArchitectures":["SCMP_ARCH_MIPS","SCMP_ARCH_MIPS64"]},{"architecture":"SCMP_ARCH_MIPSEL64","subArchitectures":["SCMP_ARCH_MIPSEL","SCMP_ARCH_MIPSEL64N32"]},{"architecture":"SCMP_ARCH_MIPSEL64N32","subArchitectures":["SCMP_ARCH_MIPSEL","SCMP_ARCH_MIPSEL64"]},{"architecture":"SCMP_ARCH_S390X","subArchitectures":["SCMP_ARCH_S390"]},{"architecture":"SCMP_ARCH_RISCV64","subArchitectures":null},{"architecture":"SCMP_ARCH_LOONGARCH64","subArchitectures":null}],"syscalls":[{"names":["accept","accept4","access","adjtimex","alarm","bind","brk","cachestat","capget","capset","chdir","chmod","chown","chown32","clock_adjtime","clock_adjtime64","clock_getres","clock_getres_time64","clock_gettime","clock_gettime64","clock_nanosleep","clock_nanosleep_time64","close","close_range","connect","copy_file_range","creat","dup","dup2","dup3","epoll_create","epoll_create1","epoll_ctl","epoll_ctl_old","epoll_pwait","epoll_pwait2","epoll_wait","epoll_wait_old","eventfd","eventfd2","execve","execveat","exit","exit_group","faccessat","faccessat2","fadvise64","fadvise64_64","fallocate","fanotify_mark","fchdir","fchmod","fchmodat","fchmodat2","fchown","fchown32","fchownat","fcntl","fcntl64","fdatasync","fgetxattr","flistxattr","flock","fork","fremovexattr","fsetxattr","fstat","fstat64","fstatat64","fstatfs","fstatfs64","fsync","ftruncate","ftruncate64","futex","futex_requeue","futex_time64","futex_wait","futex_waitv","futex_wake","futimesat","getcpu","getcwd","getdents","getdents64","getegid","getegid32","geteuid","geteuid32","getgid","getgid32","getgroups","getgroups32","getitimer","getpeername","getpgid","getpgrp","getpid","getppid","getpriority","getrandom","getresgid","getresgid32","getresuid","getresuid32","getrlimit","get_robust_list","getrusage","getsid","getsockname","getsockopt","get_thread_area","gettid","gettimeofday","getuid","getuid32","getxattr","getxattrat","inotify_add_watch","inotify_init","inotify_init1","inotify_rm_watch","io_cancel","ioctl","io_destroy","io_getevents","io_pgetevents","io_pgetevents_time64","ioprio_get","ioprio_set","io_setup","io_submit","ipc","kill","landlock_add_rule","landlock_create_ruleset","landlock_restrict_self","lchown","lchown32","lgetxattr","link","linkat","listen","listmount","listxattr","listxattrat","llistxattr","_llseek","lremovexattr","lseek","lsetxattr","lstat","lstat64","madvise","map_shadow_stack","membarrier","memfd_create","memfd_secret","mincore","mkdir","mkdirat","mknod","mknodat","mlock","mlock2","mlockall","mmap","mmap2","mprotect","mq_getsetattr","mq_notify","mq_open","mq_timedreceive","mq_timedreceive_time64","mq_timedsend","mq_timedsend_time64","mq_unlink","mremap","mseal","msgctl","msgget","msgrcv","msgsnd","msync","munlock","munlockall","munmap","name_to_handle_at","nanosleep","newfstatat","_newselect","open","openat","openat2","pause","pidfd_open","pidfd_send_signal","pipe","pipe2","pkey_alloc","pkey_free","pkey_mprotect","poll","ppoll","ppoll_time64","prctl","pread64","preadv","preadv2","prlimit64","process_mrelease","pselect6","pselect6_time64","pwrite64","pwritev","pwritev2","read","readahead","readlink","readlinkat","readv","recv","recvfrom","recvmmsg","recvmmsg_time64","recvmsg","remap_file_pages","removexattr","removexattrat","rename","renameat","renameat2","restart_syscall","riscv_hwprobe","rmdir","rseq","rt_sigaction","rt_sigpending","rt_sigprocmask","rt_sigqueueinfo","rt_sigreturn","rt_sigsuspend","rt_sigtimedwait","rt_sigtimedwait_time64","rt_tgsigqueueinfo","sched_getaffinity","sched_getattr","sched_getparam","sched_get_priority_max","sched_get_priority_min","sched_getscheduler","sched_rr_get_interval","sched_rr_get_interval_time64","sched_setaffinity","sched_setattr","sched_setparam","sched_setscheduler","sched_yield","seccomp","select","semctl","semget","semop","semtimedop","semtimedop_time64","send","sendfile","sendfile64","sendmmsg","sendmsg","sendto","setfsgid","setfsgid32","setfsuid","setfsuid32","setgid","setgid32","setgroups","setgroups32","setitimer","setpgid","setpriority","setregid","setregid32","setresgid","setresgid32","setresuid","setresuid32","setreuid","setreuid32","setrlimit","set_robust_list","setsid","setsockopt","set_thread_area","set_tid_address","setuid","setuid32","setxattr","setxattrat","shmat","shmctl","shmdt","shmget","shutdown","sigaltstack","signalfd","signalfd4","sigprocmask","sigreturn","socketcall","socketpair","splice","stat","stat64","statfs","statfs64","statmount","statx","symlink","symlinkat","sync","sync_file_range","syncfs","sysinfo","tee","tgkill","time","timer_create","timer_delete","timer_getoverrun","timer_gettime","timer_gettime64","timer_settime","timer_settime64","timerfd_create","timerfd_gettime","timerfd_gettime64","timerfd_settime","timerfd_settime64","times","tkill","truncate","truncate64","ugetrlimit","umask","uname","unlink","unlinkat","uretprobe","utime","utimensat","utimensat_time64","utimes","vfork","vmsplice","wait4","waitid","waitpid","write","writev"],"action":"SCMP_ACT_ALLOW"},{"names":["process_vm_readv","process_vm_writev","ptrace"],"action":"SCMP_ACT_ALLOW","includes":{"minKernel":"4.8"}},{"names":["socket"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":38,"op":"SCMP_CMP_LT"}]},{"names":["socket"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":39,"op":"SCMP_CMP_EQ"}]},{"names":["socket"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":40,"op":"SCMP_CMP_GT"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":0,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":8,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":131072,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":131080,"op":"SCMP_CMP_EQ"}]},{"names":["personality"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":4294967295,"op":"SCMP_CMP_EQ"}]},{"names":["sync_file_range2","swapcontext"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["ppc64le"]}},{"names":["arm_fadvise64_64","arm_sync_file_range","sync_file_range2","breakpoint","cacheflush","set_tls"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["arm","arm64"]}},{"names":["arch_prctl"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["amd64","x32"]}},{"names":["modify_ldt"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["amd64","x32","x86"]}},{"names":["s390_pci_mmio_read","s390_pci_mmio_write","s390_runtime_instr"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["s390","s390x"]}},{"names":["riscv_flush_icache"],"action":"SCMP_ACT_ALLOW","includes":{"arches":["riscv64"]}},{"names":["open_by_handle_at"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_DAC_READ_SEARCH"]}},{"names":["bpf","clone","clone3","fanotify_init","fsconfig","fsmount","fsopen","fspick","lookup_dcookie","lsm_get_self_attr","lsm_list_modules","lsm_set_self_attr","mount","mount_setattr","move_mount","open_tree","perf_event_open","quotactl","quotactl_fd","setdomainname","sethostname","setns","syslog","umount","umount2","unshare"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_ADMIN"]}},{"names":["clone"],"action":"SCMP_ACT_ALLOW","args":[{"index":0,"value":2114060288,"op":"SCMP_CMP_MASKED_EQ"}],"excludes":{"caps":["CAP_SYS_ADMIN"],"arches":["s390","s390x"]}},{"names":["clone"],"action":"SCMP_ACT_ALLOW","args":[{"index":1,"value":2114060288,"op":"SCMP_CMP_MASKED_EQ"}],"comment":"s390 parameter ordering for clone is different","includes":{"arches":["s390","s390x"]},"excludes":{"caps":["CAP_SYS_ADMIN"]}},{"names":["clone3"],"action":"SCMP_ACT_ERRNO","errnoRet":38,"excludes":{"caps":["CAP_SYS_ADMIN"]}},{"names":["reboot"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_BOOT"]}},{"names":["chroot"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_CHROOT"]}},{"names":["delete_module","init_module","finit_module"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_MODULE"]}},{"names":["acct"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_PACCT"]}},{"names":["kcmp","pidfd_getfd","process_madvise","process_vm_readv","process_vm_writev","ptrace"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_PTRACE"]}},{"names":["iopl","ioperm"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_RAWIO"]}},{"names":["settimeofday","stime","clock_settime","clock_settime64"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_TIME"]}},{"names":["vhangup"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_TTY_CONFIG"]}},{"names":["get_mempolicy","mbind","set_mempolicy","set_mempolicy_home_node"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYS_NICE"]}},{"names":["syslog"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_SYSLOG"]}},{"names":["bpf"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_BPF"]}},{"names":["perf_event_open"],"action":"SCMP_ACT_ALLOW","includes":{"caps":["CAP_PERFMON"]}},{"names":["chroot","clone","unshare"],"action":"SCMP_ACT_ALLOW","comment":"fcpi: Chromium's namespace sandbox (scripts/m2/build-seccomp.mjs)"}]} docker_sock_mount=0 started_at=2026-10-03T11:16:37.299925656Z
+browser-worker uname_m=aarch64
+fixture-m2 name=fcpi-fixture-m2-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T10:40:37.865366582Z
+fixture-m2 uname_m=aarch64
+fixture-m3 name=fcpi-fixture-m3-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T10:40:37.730840286Z
+fixture-m3 uname_m=aarch64
+searxng name=fcpi-searxng-1 image=sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19 platform=linux/arm64 state=running health=healthy restarts=0 user=3330:3330 readonly_rootfs=true privileged=false network_mode=fcpi_search cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T12:46:01.001492007Z
+searxng uname_m=aarch64
+fixture-m5 name=fcpi-fixture-m5-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T10:40:53.918181275Z
+fixture-m5 uname_m=aarch64
+fixture-m6 name=fcpi-fixture-m6-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T10:40:38.0264711Z
+fixture-m6 uname_m=aarch64
+fixture-m7 name=fcpi-fixture-m7-1 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e platform=linux/arm64 state=running health=healthy restarts=0 user=8080:8080 readonly_rootfs=true privileged=false network_mode=fcpi_fixture cap_drop=ALL cap_add= security_opt=no-new-privileges:true docker_sock_mount=0 started_at=2026-10-03T10:40:54.413359099Z
+fixture-m7 uname_m=aarch64
+### gateway_image
+image_FCPI_SOURCE_COMMIT=922d9afbf45fce8e9f5ace18b9b6a578be7ca897
+mounts=/run/secrets/gateway_postgres_password:ro,/run/secrets/gateway_retrieval_token:ro,/srv/admission:ro,/srv/artifacts:rw,/srv/clients:ro,/srv/incidents/grants:ro,/srv/incidents/owner.sha256:ro,/srv/incidents/public-key.pem:ro,/srv/incidents/reports:ro,/srv/incidents/requests:rw,/srv/policy/capabilities.json:ro
+### mcp_image
+image_FCPI_SOURCE_COMMIT=b825e574da37391c9e67f577ee01b73c8a7ed12c
+mounts=/srv/policy/capabilities.json:ro ipv4=10.231.8.20
+### process_elf
+### cgroups
+nuq-postgres memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+redis memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+rabbitmq memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+firecrawl-core memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+access-gateway memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+mcp-gateway memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+fixture memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+retrieval-service memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+browser-worker memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+fixture-m2 memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+fixture-m3 memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+searxng memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+fixture-m5 memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+fixture-m6 memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+fixture-m7 memory.max= memory.swap.max= cpu.max= pids.max= memory.current= memory.peak= oom_kill= pids.current=
+### host_memory
+MemTotal:        8255824 kB
+MemAvailable:    4851344 kB
+SwapTotal:       2097136 kB
+SwapFree:        2087696 kB
+### published
+access-gateway 3300/tcp -> 127.0.0.1:3380
+--- host listeners (ss -Hltnup)
+tcp 0.0.0.0:1884 users:(("mosquitto",pid=1164,fd=6))
+tcp 0.0.0.0:22 users:(("sshd",pid=1184,fd=6))
+tcp 0.0.0.0:443 users:(("pihole-FTL",pid=1175,fd=36))
+tcp 0.0.0.0:53 users:(("pihole-FTL",pid=1175,fd=22))
+tcp 0.0.0.0:80 users:(("pihole-FTL",pid=1175,fd=35))
+tcp 0.0.0.0:8080 users:(("python",pid=1187,fd=3))
+tcp 0.0.0.0:9001 users:(("mosquitto",pid=1164,fd=11))
+tcp <tailnet-address>:35237 users:(("tailscaled",pid=1147,fd=24))
+tcp <tailnet-address>:8443 users:(("tailscaled",pid=1147,fd=28))
+tcp 127.0.0.1:1883 users:(("mosquitto",pid=1164,fd=5))
+tcp 127.0.0.1:3380 users:(("docker-proxy",pid=288554,fd=8))
+tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=1136,fd=7),("systemd",pid=1,fd=141))
+tcp [::]:1884 users:(("mosquitto",pid=1164,fd=7))
+tcp [::]:22 users:(("sshd",pid=1184,fd=7))
+tcp [::]:443 users:(("pihole-FTL",pid=1175,fd=38))
+tcp [::]:53 users:(("pihole-FTL",pid=1175,fd=24))
+tcp [::]:80 users:(("pihole-FTL",pid=1175,fd=37))
+tcp [::]:9001 users:(("mosquitto",pid=1164,fd=12))
+tcp [<tailnet-address-v6>]:49128 users:(("tailscaled",pid=1147,fd=25))
+tcp [<tailnet-address-v6>]:8443 users:(("tailscaled",pid=1147,fd=18))
+udp *:123 users:(("pihole-FTL",pid=1175,fd=41))
+udp *:41641 users:(("tailscaled",pid=1147,fd=22))
+udp *:53 users:(("pihole-FTL",pid=1175,fd=23))
+udp *:5353 users:(("avahi-daemon",pid=600,fd=13))
+udp *:54568 users:(("avahi-daemon",pid=600,fd=15))
+udp 0.0.0.0:123 users:(("pihole-FTL",pid=1175,fd=40))
+udp 0.0.0.0:41641 users:(("tailscaled",pid=1147,fd=23))
+udp 0.0.0.0:44689 users:(("avahi-daemon",pid=600,fd=14))
+udp 0.0.0.0:53 users:(("pihole-FTL",pid=1175,fd=21))
+udp 0.0.0.0:5353 users:(("avahi-daemon",pid=600,fd=12))
+udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=1136,fd=8),("systemd",pid=1,fd=142))
+### networks
+fcpi_access internal=false subnet=10.231.0.0/24 gateway_mode_ipv4=nat bridge=fcpi-access ipv6=false members=fcpi-access-gateway-1
+fcpi_api internal=true subnet=10.231.4.0/24 gateway_mode_ipv4=isolated bridge=fcpi-api ipv6=false members=fcpi-access-gateway-1,fcpi-firecrawl-core-1
+fcpi_platform internal=true subnet=10.231.7.0/24 gateway_mode_ipv4=isolated bridge=fcpi-platform ipv6=false members=fcpi-access-gateway-1,fcpi-nuq-postgres-1
+fcpi_mcp internal=true subnet=10.231.8.0/24 gateway_mode_ipv4=isolated bridge=fcpi-mcp ipv6=false members=fcpi-access-gateway-1,fcpi-mcp-gateway-1
+fcpi_search internal=true subnet=10.231.10.0/24 gateway_mode_ipv4=isolated bridge=fcpi-search ipv6=false members=fcpi-retrieval-service-1,fcpi-searxng-1
+fcpi_model internal=true subnet=10.231.9.0/24 gateway_mode_ipv4=isolated bridge=fcpi-model ipv6=false members=fcpi-access-gateway-1,fcpi-retrieval-service-1
+fcpi_core internal=true subnet=10.231.1.0/24 gateway_mode_ipv4=isolated bridge=fcpi-core ipv6=false members=fcpi-firecrawl-core-1,fcpi-nuq-postgres-1,fcpi-rabbitmq-1,fcpi-redis-1,fcpi-retrieval-service-1
+fcpi_fixture internal=true subnet=10.231.3.0/24 gateway_mode_ipv4=isolated bridge=fcpi-fixture ipv6=false members=fcpi-fixture-1,fcpi-fixture-m2-1,fcpi-fixture-m3-1,fcpi-fixture-m5-1,fcpi-fixture-m6-1,fcpi-fixture-m7-1,fcpi-retrieval-service-1
+fcpi_acquire internal=true subnet=10.231.5.0/24 gateway_mode_ipv4=isolated bridge=fcpi-acquire ipv6=false members=fcpi-firecrawl-core-1,fcpi-retrieval-service-1
+fcpi_browser internal=true subnet=10.231.2.0/24 gateway_mode_ipv4=isolated bridge=fcpi-browser ipv6=false members=fcpi-browser-worker-1,fcpi-retrieval-service-1
+fcpi_egress internal=false subnet=10.231.6.0/24 gateway_mode_ipv4=nat bridge=fcpi-egress ipv6=false members=fcpi-retrieval-service-1
+bridge fcpi-access addresses=10.231.0.1/24
+bridge fcpi-api addresses=
+bridge fcpi-platform addresses=
+bridge fcpi-mcp addresses=
+bridge fcpi-search addresses=
+bridge fcpi-model addresses=
+bridge fcpi-core addresses=
+bridge fcpi-fixture addresses=
+bridge fcpi-acquire addresses=
+bridge fcpi-browser addresses=
+bridge fcpi-egress addresses=10.231.6.1/24
+### gateway_unauthenticated
+status_without_token=401
+### gateway_log_scan
+instance=a9150e4dfead created=2026-10-03T09:36:41.606793725Z started=2026-10-03T12:36:27.00131701Z lines=3221 request_records=2956 job_records=194 starts=10 first_event=clients_loaded
+pattern=firecrawl\.dev count=0
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=fcpi_[a-z0-9]+_[0-9a-f]{64} count=0
+pattern=Bearer [A-Za-z0-9] count=0
+pattern=[Aa]uthorization count=0
+pattern=m3\.fixture\.fcpi\.test count=0
+### mcp_health
+200 {"live":true,"service":"mcp-gateway","build":"b825e574da37391c9e67f577ee01b73c8a7ed12c","instance":"6351c218-3d91-4f47-989a-d2ae31e0207f","tools":13}
+### mcp_log_scan
+instance=71b2eb0ad794 created=2026-10-03T09:35:47.142900665Z started=2026-10-03T12:41:31.86365842Z lines=2096 exchange_records=1002 serve_records=988 tool_records=83 starts=14 first_event=listening
+pattern=firecrawl\.dev count=0
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=fcpi_[a-z0-9]+_[0-9a-f]{64} count=0
+pattern=Bearer [A-Za-z0-9] count=0
+pattern=[Aa]uthorization count=0
+pattern=m3\.fixture\.fcpi\.test count=0
+pattern=fcpi-m3-[a-z0-9]+-[0-9a-f]{4} count=0
+### mcp_reach
+default_route=no
+gateway_tcp_10.231.8.10:3300=open
+public_tcp_1.1.1.1:443=ENETUNREACH
+public_tcp_104.18.0.1:443=ENETUNREACH
+dns_api.firecrawl.dev=EAI_AGAIN
+dns_firecrawl.dev=EAI_AGAIN
+dns_example.com=EAI_AGAIN
+### postgres_health
+select_1=1
+version=PostgreSQL 17.11 (Debian 17.11-1.pgdg13+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 14.2.0-19) 14.2.0, 64-bit
+cron_jobs=36
+cron_runs_last_10min_failed=0
+connections=13 max_connections=32
+gateway_connections=3
+fsync=on
+full_page_writes=on
+synchronous_commit=on
+### redis_health
+health_user_ping=PONG
+aof_enabled:1
+aof_last_write_status:ok
+used_memory_human:2.07M
+maxmemory_policy:noeviction
+### rabbitmq_health
+check_running=ok
+check_local_alarms=ok
+### core_health
+{"utc":"2026-10-03T13:44:07.416Z","api_liveness":{"status":200,"body":"{\"status\":\"ok\"}"},"api_readiness":{"status":200,"body":"{\"status\":\"ok\"}"},"extract_worker":{"status":200,"body":"{\"ok\":true}"},"queue_worker":{"status":200,"body":"{\"ok\":true}"},"nuq_reconciler":{"status":200,"body":"OK"},"nuq_prefetch_worker":{"status":200,"body":"OK"},"nuq_worker_0":{"status":200,"body":"OK"}}
+### retrieval_ready
+200 {"ok":true,"store":true,"local_networks":true,"browser":"up","search_selection":"fixture","providers":{"openai":"closed","fixture-model":"closed","llamaparse":"closed","fixture-parser":"closed","decodo":"closed","fixture-proxy":"closed","zyte":"closed","fixture-zyte":"open"},"residential":{"available":false,"reason":"PAID_DISPATCH_DISABLED","subject":"decodo-residential","provider":"decodo","paid":true},"enhanced":{"available":false,"reason":"PAID_DISPATCH_DISABLED","subject":"zyte-api","provider":"zyte","paid":true},"browser_extras":true,"webhook_delivery":"enabled"}
+### retrieval_image
+image_FCPI_SOURCE_COMMIT=a51ec7f1ae61c85ed739f2beff1d1c1f22dfe12b
+mounts=/run/providers:ro,/run/secrets/retrieval_browser_token:ro,/run/secrets/retrieval_core_token_sha256:ro,/run/secrets/retrieval_gateway_token_sha256:ro,/run/secrets/retrieval_postgres_password:ro,/run/secrets/retrieval_searxng_proxy_sha256:ro,/run/secrets/webhook_signing_secret:ro,/srv/admission:ro,/srv/local:ro,/srv/policy/budget.json:ro,/srv/policy/egress.json:ro,/srv/selection:ro ipv4=fcpi_acquire=10.231.5.10,fcpi_browser=10.231.2.10,fcpi_core=10.231.1.4,fcpi_egress=10.231.6.2,fcpi_fixture=10.231.3.5,fcpi_model=10.231.9.20,fcpi_search=10.231.10.10
+### searxng_image
+image=sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19 user=3330:3330 entrypoint=/fcpi/entrypoint.sh mounts=/fcpi:ro,/run/secrets/searxng_proxy_password:ro,/run/secrets/searxng_secret_key:ro tmpfs=/etc/searxng,/tmp,/var/cache/searxng
+version=2026.9.25-12f8b6515 revision=12f8b6515ca77c3c3bc1498584950ef5daca1433 license=AGPL-3.0-or-later os=linux arch=arm64
+### searxng_native
+python=/usr/bin/python3.14 page_size=16384
+elf path=/usr/bin/python3.14 machine=AArch64 load_align=0x10000
+elf path=/usr/lib/libpython3.14.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/libpython3.14.so.1.0 machine=AArch64 load_align=0x10000
+elf path=/usr/lib/libpython3.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_asyncio.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_bisect.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_blake2.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_bz2.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_codecs_cn.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_codecs_hk.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_codecs_iso2022.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_codecs_jp.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_codecs_kr.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_codecs_tw.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_csv.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_ctypes.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_ctypes_test.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_curses.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_curses_panel.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_dbm.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_decimal.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_elementtree.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_gdbm.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_hashlib.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_heapq.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_hmac.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_interpchannels.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_interpqueues.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_interpreters.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_json.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_lsprof.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_lzma.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_md5.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_multibytecodec.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_multiprocessing.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_pickle.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_posixshmem.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_posixsubprocess.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_queue.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_random.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_remote_debugging.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_sha1.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_sha2.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_sha3.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_socket.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_sqlite3.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_ssl.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_statistics.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_struct.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testbuffer.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testcapi.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testclinic.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testclinic_limited.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testimportmultiple.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testinternalcapi.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testlimitedcapi.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testmultiphase.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_testsinglephase.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_xxtestfuzz.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_zoneinfo.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/_zstd.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/array.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/binascii.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/cmath.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/fcntl.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/grp.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/math.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/mmap.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/pyexpat.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/readline.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/resource.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/select.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/syslog.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/termios.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/unicodedata.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/xxlimited.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/xxlimited_35.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/xxsubtype.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/lib/python3.14/lib-dynload/zlib.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/_cffi_backend.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/curl_cffi/_wrapper.abi3.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/granian/_granian.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/lxml/_elementpath.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/lxml/builder.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/lxml/etree.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/lxml/html/_difflib.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/lxml/html/diff.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/lxml/objectify.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/lxml/sax.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/markupsafe/_speedups.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/msgspec/_core.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/setproctitle/_setproctitle.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+elf path=/usr/local/searxng/.venv/lib/python3.14/site-packages/yaml/_yaml.cpython-314-aarch64-linux-gnu.so machine=AArch64 load_align=0x10000
+granian_workers=2
+### searxng_reach
+default_route=
+https_example.com=refused
+https_api.firecrawl.dev=refused
+https_duckduckgo.com=refused
+search_proxy_control=407
+### searxng_health
+OK
+{"engines":["bing","brave","duckduckgo","fcpi fixture","fcpi fixture b","fcpi fixture r"],"formats":null}
+html_format_status=403
+### retrieval_log_scan
+container=d3a2c3f2528b started_at=2026-10-03T13:39:13.990373396Z
+lines=24 search=0 model_call=0 parse=0 extraction=0 proxy_request=0 residential_route=0 budget_loaded=1 selection_loaded=4 acquisition=11 acquisition_with_route_fields=11 route_held=0 route_released=0 proxy_reconciled=0 enhanced=4 webhook_attempt=1 renders_with_extras=0 provider_key_like=0 client_token_like=0 bearer=0 proxy_authorization=0 basic_credential=0 session_username=0 signature=0 fixture_credential=0 fixture_credential_readable=yes zyte_fixture_key=0 zyte_fixture_key_readable=yes webhook_secret=0 webhook_secret_readable=yes cloud_host=0
+budget_policy_sha256_logged=2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea budget_policy_sha256_deployed=2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea
+switches_logged={"browser_extras":true,"webhook_delivery":"enabled","enhancers":["zyte-api","fcpi-fixture-zyte","fcpi-fixture-zyte-small"]}
+### provider_files
+providers_present=6 names=decodo_proxy,fixture_proxy,fixture_zyte,llamaparse_api_key,openai_api_key,zyte_api_key selection={"search":"fixture","extractionModel":"gpt-6-luna","parser":"llamaparse-cost-effective","proxy":"decodo-residential","enhanced":"zyte-api"}
+### browser_image
+image_FCPI_SOURCE_COMMIT=dc11b35a3d746e5fb439bc83fe21659a4a19c839
+chrome_processes=6 health={"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":1,"launches":5,"busy":false}
+### fixture_m6_reach
+default_route=no
+networks=fcpi_fixture aliases=fcpi-fixture-m6-1,fixture-m6,m6.fixture.fcpi.test,m6bulk.fixture.fcpi.test,m6cool.fixture.fcpi.test,m6esc.fixture.fcpi.test,m6hard.fixture.fcpi.test,m6learn.fixture.fcpi.test,m6pace.fixture.fcpi.test,proxy.fixture.fcpi.test,searchr.fixture.fcpi.test secrets_mounted=/run/secrets/fixture_proxy_sha256
+### fixture_m7_reach
+default_route=no
+networks=fcpi_fixture aliases=fcpi-fixture-m7-1,fixture-m7,hooks.fixture.fcpi.test,m7.fixture.fcpi.test,m7cache.fixture.fcpi.test,m7chg.fixture.fcpi.test,m7esc.fixture.fcpi.test,m7shot.fixture.fcpi.test,zyte.fixture.fcpi.test secrets_mounted=/run/secrets/fixture_webhook_secret,/run/secrets/fixture_zyte_sha256
+### ledger_m7
+platform_version=3
+webhook_events=DEAD:8,DELIVERED:32
+artifacts=302 cache_rows=4 page_versions=24
+end

@@ -1,0 +1,3 @@
+From /tmp/tmp.tzU7L1CTki
+   017d2494..1f35cdef  main       -> main
+staged_source_sha=1f35cdef9c0db2db040bcc216a0da7366dd6d982

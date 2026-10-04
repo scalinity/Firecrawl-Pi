@@ -1,0 +1,138 @@
+TAP version 13
+# Subtest: immutable accepted bytes plus bounded concurrent measurements pass
+ok 1 - immutable accepted bytes plus bounded concurrent measurements pass
+  ---
+  duration_ms: 35.120334
+  type: 'test'
+  ...
+# Subtest: tampered historical evidence never passes
+ok 2 - tampered historical evidence never passes
+  ---
+  duration_ms: 27.201625
+  type: 'test'
+  ...
+# Subtest: assessment decision, provenance, complete path coverage and hash are mandatory
+ok 3 - assessment decision, provenance, complete path coverage and hash are mandatory
+  ---
+  duration_ms: 306.655208
+  type: 'test'
+  ...
+# Subtest: lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+ok 4 - lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+  ---
+  duration_ms: 148.804708
+  type: 'test'
+  ...
+# Subtest: duplicate frames, non-JSON sample, large gaps and short runs are rejected
+ok 5 - duplicate frames, non-JSON sample, large gaps and short runs are rejected
+  ---
+  duration_ms: 120.443833
+  type: 'test'
+  ...
+# Subtest: boot or container restart and wrong service names fail even if health recovers
+ok 6 - boot or container restart and wrong service names fail even if health recovers
+  ---
+  duration_ms: 73.285917
+  type: 'test'
+  ...
+# Subtest: incident must overlap real successful traffic with memory headroom and no swap
+ok 7 - incident must overlap real successful traffic with memory headroom and no swap
+  ---
+  duration_ms: 98.646959
+  type: 'test'
+  ...
+# Subtest: OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+ok 8 - OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+  ---
+  duration_ms: 197.380708
+  type: 'test'
+  ...
+# Subtest: timestamps, sustained request bins, required classes and window alignment matter
+ok 9 - timestamps, sustained request bins, required classes and window alignment matter
+  ---
+  duration_ms: 71.705916
+  type: 'test'
+  ...
+# Subtest: every latency must be finite and satisfy the canonical bound
+ok 10 - every latency must be finite and satisfy the canonical bound
+  ---
+  duration_ms: 72.369875
+  type: 'test'
+  ...
+# Subtest: Redis denials, wrong principal and measurements outside the run fail
+ok 11 - Redis denials, wrong principal and measurements outside the run fail
+  ---
+  duration_ms: 98.157542
+  type: 'test'
+  ...
+# Subtest: source equivalence covers only three pure evaluators and refuses rename deletions
+ok 12 - source equivalence covers only three pure evaluators and refuses rename deletions
+  ---
+  duration_ms: 0.150334
+  type: 'test'
+  ...
+# Subtest: runtime sources never import evidence-only helper or verifier
+not ok 13 - runtime sources never import evidence-only helper or verifier
+  ---
+  duration_ms: 27.887167
+  type: 'test'
+  location: '/Users/danny/Documents/Tools/Firecrawl/tests/contracts/m9-resource-reuse.test.mjs:24:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    tests/contracts/m9-live.test.mjs
+    
+    true !== false
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: false
+  actual: true
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/danny/Documents/Tools/Firecrawl/tests/contracts/m9-resource-reuse.test.mjs:24:614)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: compose equality allows only exact reviewed mounts and changed images
+ok 14 - compose equality allows only exact reviewed mounts and changed images
+  ---
+  duration_ms: 17.992
+  type: 'test'
+  ...
+# Subtest: the immutable old failed Cloud probe is explained without changing its FAIL
+ok 15 - the immutable old failed Cloud probe is explained without changing its FAIL
+  ---
+  duration_ms: 3.225667
+  type: 'test'
+  ...
+# Subtest: Redis memory headroom and zero eviction/error counters are measured
+ok 16 - Redis memory headroom and zero eviction/error counters are measured
+  ---
+  duration_ms: 100.633833
+  type: 'test'
+  ...
+# Subtest: live Cloud audit covers the completed authorized window and actual paid container
+ok 17 - live Cloud audit covers the completed authorized window and actual paid container
+  ---
+  duration_ms: 0.418666
+  type: 'test'
+  ...
+# Subtest: AC16 uses p95 latency while keeping successful startup outliers visible
+ok 18 - AC16 uses p95 latency while keeping successful startup outliers visible
+  ---
+  duration_ms: 72.90625
+  type: 'test'
+  ...
+1..18
+# tests 18
+# suites 0
+# pass 17
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1626.737625

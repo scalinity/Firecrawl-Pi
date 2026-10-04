@@ -1,0 +1,148 @@
+{
+  "schema": "fcpi.m9-capability-scorecard/v1",
+  "utc": "2026-10-03T14:31:46.976Z",
+  "source_commit": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+  "full_acceptance": false,
+  "rows": [
+    {
+      "capability": "routine retrieval",
+      "gates": [
+        "AC03",
+        "AC16"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "Controlled HTML/JavaScript fixtures; new fixed public corpus not executed."
+    },
+    {
+      "capability": "crawl/batch",
+      "gates": [
+        "AC04",
+        "AC14"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "Bounded durable single-host jobs; no high availability claim."
+    },
+    {
+      "capability": "difficult public pages",
+      "gates": [
+        "AC09",
+        "AC10"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "PRE-M9 real residential/enhanced calls; synthetic challenge routing is not real anti-bot success. New M9 live execution held."
+    },
+    {
+      "capability": "search/map",
+      "gates": [
+        "AC05",
+        "AC06"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "SearXNG/discovery have different ranking/completeness from managed indexes."
+    },
+    {
+      "capability": "structured extraction",
+      "gates": [
+        "AC07"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "PRE-M9 GPT-6 Luna proof; missing data stays null; discovery modes unsupported."
+    },
+    {
+      "capability": "documents",
+      "gates": [
+        "AC08"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "PRE-M9 real complex/scanned parsing; new parser credit consent held."
+    },
+    {
+      "capability": "screenshots/actions",
+      "gates": [
+        "AC11"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "Bounded browser subset; no interactive session/CDP parity."
+    },
+    {
+      "capability": "agent research",
+      "gates": [
+        "M9-RESEARCH"
+      ],
+      "historical_state": "IMPLEMENTED_UNVERIFIED",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "Tool composition; full five-step M9 flow requires a new authorized model call."
+    },
+    {
+      "capability": "MCP",
+      "gates": [
+        "AC12",
+        "AC13",
+        "M9-CLIENTS"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "Modern/legacy stateless wire proof and two native global clients; recollecting current source."
+    },
+    {
+      "capability": "hosted access",
+      "gates": [
+        "AC22"
+      ],
+      "historical_state": "NOT_REQUIRED",
+      "current_m9_state": "NOT_REQUIRED",
+      "limitation": "NOT_ENABLED; ChatGPT/Claude Desktop onboarding supported but unconfigured."
+    },
+    {
+      "capability": "operations/recovery",
+      "gates": [
+        "AC15",
+        "AC16",
+        "AC17",
+        "AC18",
+        "AC19",
+        "M9-INCIDENT"
+      ],
+      "historical_state": "VERIFIED_LIVE",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "Historical M8 accepted; current-source operations/soak/incident proof pending. Single power/storage/network fault domain."
+    },
+    {
+      "capability": "Cloud independence",
+      "gates": [
+        "AC24"
+      ],
+      "historical_state": "VERIFIED_LOCAL",
+      "current_m9_state": "IMPLEMENTED_UNVERIFIED",
+      "limitation": "Cloud disabled; selected paths deny Cloud; final M9 zero-attempt audit pending."
+    }
+  ],
+  "inputs": [
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_SPEC.md",
+      "sha256": "36cd51f59947f7da1743a1be084bd7da450356b94ab2157516963c2521e2faed"
+    },
+    {
+      "path": "docs/FIRECRAWL_PI_MILESTONES.md",
+      "sha256": "de6fa23f0d3d1dd79031feacdbeb79b46d0fce2f3ce39c25ea27bf18ad726585"
+    }
+  ],
+  "no_native_cloud_product_parity": [
+    "Cloud Agent API",
+    "interactive Browser/Interact",
+    "proprietary indexes/research",
+    "managed scale/SLA",
+    "specialized media extraction"
+  ]
+}

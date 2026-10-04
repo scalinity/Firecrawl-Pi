@@ -1,0 +1,32 @@
+✔ the gateway's and the retrieval service's admission readers are the same code below their headers (0.459834ms)
+✔ the services' staleness bound is the operations scripts' STALE_S (1.116458ms)
+✔ the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network (3.506959ms)
+✔ every host path the copy names is under its directory (16.218667ms)
+✔ the copy runs only the kept services, publishes nothing and reaches no egress network (0.159042ms)
+✔ every network is internal, isolated, renamed and moved off production's addresses (0.151792ms)
+✔ webhook delivery and paid dispatch are off in the copy (0.323417ms)
+✔ native proof excludes arguments, error output, prose and other servers (0.747ms)
+✔ missing, edited, failed or summary-only evidence cannot grant acceptance (1.272459ms)
+✔ incident acceptance requires actual model and every enforced resource bound (1.027709ms)
+✔ empty Compose labels do not turn owned disposable containers into foreign infrastructure (3.840167ms)
+✔ incident file guard permits bounded reads and a proposed source fix (744.07ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1352.88875ms)
+✔ a symlink cannot expose an outside file or redirect a write (36.845208ms)
+✔ INFO uses the operator without the password in argv (378.41225ms)
+✔ key scans and fixture writes use the narrowed core user (236.67675ms)
+✔ the preserved pre-M8 deployment remains readable (94.423292ms)
+✔ unexpected users and missing passwords fail closed (94.244291ms)
+✔ restore preserves private incident state only for inspection, without a control surface (19.149375ms)
+✔ privileged controller independently rejects forged/tampered/expired gateway spool entries (1.972875ms)
+✔ positive closure controls pass, absent records never pass (0.673375ms)
+✔ wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs (0.24825ms)
+✔ an unrelated decoded failure cannot establish challenge rejection (0.177708ms)
+✔ missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail (0.189208ms)
+ℹ tests 24
+ℹ suites 0
+ℹ pass 24
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2591.021542

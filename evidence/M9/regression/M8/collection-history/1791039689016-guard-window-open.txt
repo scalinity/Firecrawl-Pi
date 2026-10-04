@@ -1,0 +1,20 @@
+### meta
+utc=2026-10-03T14:30:45Z source_commit=c1fc86a0a21f5caef2079c57351e7a8f6713baac wan_configured=yes guard_table_handle=10
+### counters
+access_forward_out_dropped packets=5
+access_forward_in_dropped packets=0
+egress_ipv6_dropped packets=0
+egress_special_dropped packets=0
+egress_local_dropped packets=0
+egress_web_accepted packets=0
+egress_proxy_accepted packets=0
+egress_other_dropped packets=0
+egress_in_dropped packets=0
+access_input_new_dropped packets=24
+egress_dns_udp_accepted packets=0
+egress_dns_tcp_accepted packets=0
+egress_input_dropped packets=24
+tailnet_serve_accepted packets=0
+tailnet_input_dropped packets=0
+### end
+end

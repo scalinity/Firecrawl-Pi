@@ -1,0 +1,27 @@
+✔ the full incident configuration passes startup; partial or unknown policy fails closed (4.093083ms)
+✔ one authenticated action survives restart and concurrent replay (40.732041ms)
+✔ a URL alone, wrong MAC, payload, or expired grant never approves (13.165833ms)
+✔ a changed patch or action invalidates an issued MAC (9.112709ms)
+✔ unbound fixes and unknown actions cannot be issued (4.561042ms)
+✔ a valid signature cannot replace the authenticated Serve owner (20.213959ms)
+✔ report views are bound before consumption and produce no mutation request (20.106416ms)
+✔ native proof excludes arguments, error output, prose and other servers (0.559917ms)
+✔ missing, edited, failed or summary-only evidence cannot grant acceptance (1.148792ms)
+✔ empty Compose labels do not turn owned disposable containers into foreign infrastructure (18.53ms)
+✔ incident file guard permits bounded reads and a proposed source fix (941.032208ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1869.469458ms)
+✔ a symlink cannot expose an outside file or redirect a write (54.058542ms)
+✔ INFO uses the operator without the password in argv (358.400459ms)
+✔ key scans and fixture writes use the narrowed core user (297.678458ms)
+✔ the preserved pre-M8 deployment remains readable (170.291125ms)
+✔ unexpected users and missing passwords fail closed (278.487917ms)
+✔ restore preserves private incident state only for inspection, without a control surface (33.637875ms)
+✔ privileged controller independently rejects forged/tampered/expired gateway spool entries (3.066042ms)
+ℹ tests 19
+ℹ suites 0
+ℹ pass 19
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3676.640167

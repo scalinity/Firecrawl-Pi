@@ -1,0 +1,19 @@
+{
+  "utc": "2026-10-03T09:22:28.580Z",
+  "source_commit": "7724ec4c33dbf7c41abe323ef7b9262b20e557ee",
+  "state": "FAIL",
+  "incident_id": "9bb97947",
+  "namespace_startup": "PASS",
+  "auth_removed": true,
+  "model": "claude-opus-5-5",
+  "model_turns": 10,
+  "api_equivalent_estimate_usd": 0.1723354,
+  "invoiced_usd": null,
+  "structured_output_present": false,
+  "causes": [
+    "diagnostic input exceeds native Read limits",
+    "PreToolUse rejects schema-only StructuredOutput"
+  ],
+  "source_proposal_or_apply": false,
+  "raw_sha256": "723cf3ce56280123b95a472b56880b96a3daa79b422e239182ed6f8ec57a3799"
+}

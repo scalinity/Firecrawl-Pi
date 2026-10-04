@@ -1,0 +1,3 @@
+ERROR:  relation "fcpi_retrieval.reservation" does not exist
+LINE 1: SELECT provider,state,count(*) FROM fcpi_retrieval.reservati...
+                                            ^

@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-03T21:58:11.865Z",
+  "source_commit": "cf93d5a61fe3940fbe574d3d7642818793fa3205",
+  "call_key": "proxy:search:af088e95-a507-4251-97e2-b876ae2c3140",
+  "original_state": "RESERVED",
+  "state": "UNCERTAIN",
+  "conservative_retained_micro_usd": 8000,
+  "actual": null,
+  "invoiced_usd": null,
+  "before_sha256": "0bef1efac4050e02ff95a7be9f0e4fa69ec7bbc36817cc352030c28da9a49cb9",
+  "after_sha256": "5185599e3e25b37368347b419d66e636fda7be5276757d5edbbaa14167f61a21"
+}

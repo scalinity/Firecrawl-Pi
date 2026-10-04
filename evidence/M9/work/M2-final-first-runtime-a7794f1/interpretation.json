@@ -1,0 +1,13 @@
+{
+  "source_commit": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+  "state": "FAIL",
+  "raw_sha256": "4ecc99db6ee8595cae1412bd653b9ce8eabd82ad8278506876b624081b41e5e2",
+  "verified_runtime": {
+    "initial_private_cloud": "correct canonical classification",
+    "postload_private_cloud": "correct canonical classification",
+    "direct_aborted_navigations": "NAVIGATION_FAILED",
+    "credentialed_private": "blocked but ACCESS_DENIED",
+    "own_403": "404 because fixture server process predates new route"
+  },
+  "evidence_query": "a.id is not in pinned schema; expected attempt_id"
+}

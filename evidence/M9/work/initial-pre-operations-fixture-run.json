@@ -1,0 +1,37 @@
+{
+  "schema": "fcpi.m9-fixture-run/v2",
+  "utc": "2026-10-03T10:11:23.758Z",
+  "source_commit": "591dff27ec9acb603fa8d6356141912cf475a158",
+  "command": "scripts/m9/incident-tests.sh /opt/firecrawl-pi",
+  "raw_sha256": "15e00d264b612297c023e6b1984cc40c26a603ed7c81184144ca62448f296f61",
+  "exit_code": 0,
+  "patch_sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96",
+  "versions_lock_sha256": "f7f6fe3c9a19d5de036f6a7cbbc6c50be7317895a73c11394497c184a1b6026f",
+  "configuration_inputs": [
+    {
+      "path": "deploy/compose.yaml",
+      "sha256": "af9bffee1458691924f74ec6ab1e6e3ccc1f4756dc13d184d4ae532eabb348bc"
+    },
+    {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea"
+    },
+    {
+      "path": "deploy/policies/egress.json",
+      "sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c"
+    },
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    },
+    {
+      "path": "deploy/nuq-postgres/fcpi-retrieval-schema.sql",
+      "sha256": "4e6ba62df36aba7e188451e63cb6095728fe2e451c9cd82b03cdcb6b24bc093c"
+    },
+    {
+      "path": "deploy/nuq-postgres/fcpi-platform-schema.sql",
+      "sha256": "1e61c6acfa24a2044f9dc6e774328a6b8f5c7d1058907796ee7151ea90d7996a"
+    }
+  ],
+  "fixture_git_tree": "cfd26cb77d226bb5bcf4ff7182412f915f2b9c13"
+}

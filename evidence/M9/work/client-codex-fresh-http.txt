@@ -1,0 +1,1 @@
+{"client":"codex","state":"VERIFIED_LIVE","exit_code":0,"tools":[{"name":"firecrawl_scrape","server":"fcpi","status":"completed"}],"usable":true}

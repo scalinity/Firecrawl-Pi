@@ -1,0 +1,4 @@
+M8-S01 PASS               24-hour-paced-soak
+M8-S02 PASS               memory-within-caps-and-measured-budget
+M8-S04 PASS               redis-user-narrowed-to-the-measured-command-set
+M8-O04 PASS               the-gateway-never-answers-502

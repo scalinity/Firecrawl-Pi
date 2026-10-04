@@ -1,0 +1,126 @@
+TAP version 13
+# Subtest: immutable accepted bytes plus bounded concurrent measurements pass
+ok 1 - immutable accepted bytes plus bounded concurrent measurements pass
+  ---
+  duration_ms: 33.177834
+  type: 'test'
+  ...
+# Subtest: tampered historical evidence never passes
+ok 2 - tampered historical evidence never passes
+  ---
+  duration_ms: 27.154208
+  type: 'test'
+  ...
+# Subtest: assessment decision, provenance, complete path coverage and hash are mandatory
+ok 3 - assessment decision, provenance, complete path coverage and hash are mandatory
+  ---
+  duration_ms: 300.353458
+  type: 'test'
+  ...
+# Subtest: lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+ok 4 - lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+  ---
+  duration_ms: 146.434875
+  type: 'test'
+  ...
+# Subtest: duplicate frames, non-JSON sample, large gaps and short runs are rejected
+ok 5 - duplicate frames, non-JSON sample, large gaps and short runs are rejected
+  ---
+  duration_ms: 117.753917
+  type: 'test'
+  ...
+# Subtest: boot or container restart and wrong service names fail even if health recovers
+ok 6 - boot or container restart and wrong service names fail even if health recovers
+  ---
+  duration_ms: 70.9295
+  type: 'test'
+  ...
+# Subtest: incident must overlap real successful traffic with memory headroom and no swap
+ok 7 - incident must overlap real successful traffic with memory headroom and no swap
+  ---
+  duration_ms: 100.748208
+  type: 'test'
+  ...
+# Subtest: OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+ok 8 - OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+  ---
+  duration_ms: 194.110416
+  type: 'test'
+  ...
+# Subtest: timestamps, sustained request bins, required classes and window alignment matter
+ok 9 - timestamps, sustained request bins, required classes and window alignment matter
+  ---
+  duration_ms: 72.540625
+  type: 'test'
+  ...
+# Subtest: every latency must be finite and satisfy the canonical bound
+ok 10 - every latency must be finite and satisfy the canonical bound
+  ---
+  duration_ms: 72.5965
+  type: 'test'
+  ...
+# Subtest: Redis denials, wrong principal and measurements outside the run fail
+ok 11 - Redis denials, wrong principal and measurements outside the run fail
+  ---
+  duration_ms: 95.110042
+  type: 'test'
+  ...
+# Subtest: source equivalence covers only three pure evaluators and refuses rename deletions
+ok 12 - source equivalence covers only three pure evaluators and refuses rename deletions
+  ---
+  duration_ms: 0.128208
+  type: 'test'
+  ...
+# Subtest: runtime sources never import evidence-only helper or verifier
+ok 13 - runtime sources never import evidence-only helper or verifier
+  ---
+  duration_ms: 23.142959
+  type: 'test'
+  ...
+# Subtest: compose equality allows only exact reviewed mounts and changed images
+ok 14 - compose equality allows only exact reviewed mounts and changed images
+  ---
+  duration_ms: 15.823917
+  type: 'test'
+  ...
+# Subtest: the immutable old failed Cloud probe is explained without changing its FAIL
+not ok 15 - the immutable old failed Cloud probe is explained without changing its FAIL
+  ---
+  duration_ms: 2.852375
+  type: 'test'
+  location: '/Users/danny/.local/share/firecrawl-pi/m9/candidate-resource-reuse.test.mjs:26:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    Expected values to be strictly equal:
+    
+    'PASS' !== 'FAIL'
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: 'FAIL'
+  actual: 'PASS'
+  operator: 'strictEqual'
+  stack: |-
+    TestContext.<anonymous> (file:///Users/danny/.local/share/firecrawl-pi/m9/candidate-resource-reuse.test.mjs:26:1573)
+    Test.runInAsyncScope (node:async_hooks:226:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: Redis memory headroom and zero eviction/error counters are measured
+ok 16 - Redis memory headroom and zero eviction/error counters are measured
+  ---
+  duration_ms: 96.580875
+  type: 'test'
+  ...
+1..16
+# tests 16
+# suites 0
+# pass 15
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1519.0925

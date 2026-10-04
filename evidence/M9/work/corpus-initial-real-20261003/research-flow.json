@@ -1,0 +1,36 @@
+{
+  "utc": "2026-10-03T21:45:32.802Z",
+  "source_commit": "cf93d5a61fe3940fbe574d3d7642818793fa3205",
+  "window_consent_sha256": "d0b5bfbd21edfe96f079f97edc95babda3f9258c47a5c9a4fc66298cceec2e33",
+  "raw_sha256": "bc56469360f43de72c48bd3b0cd3b189083e59856da5ab4a83c2cfce2e72f753",
+  "steps": [
+    {
+      "step": "search",
+      "status": 200,
+      "count": 3
+    },
+    {
+      "step": "map",
+      "status": 200,
+      "count": 1
+    },
+    {
+      "step": "retrieve",
+      "status": 200,
+      "bytes": 488079
+    },
+    {
+      "step": "extract_submit",
+      "status": 200,
+      "id": "3579e543-370b-46d6-98a6-acd50a8e20da"
+    },
+    {
+      "step": "poll/read",
+      "status": 200,
+      "job_status": "completed",
+      "data": {
+        "title": "File system"
+      }
+    }
+  ]
+}

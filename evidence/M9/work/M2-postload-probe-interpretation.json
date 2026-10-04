@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-03T16:33:38.485Z",
+  "owning_milestone": "M2",
+  "finding": "M9-M2-NAV-01",
+  "related": "M9-REG-12",
+  "source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+  "state": "FAIL",
+  "raw_sha256": "d33a0db4b8e57c0a5f69bc40051937c1c8c180768ca42fd23f560e03b0457c20",
+  "test_fixture": "Exclusive temporary controlled fixture, removed by hash-checked trap; no production source file replaced",
+  "actual": "Both destinations blocked by proxy; private refusal text and Cloud error document incorrectly returned as successful",
+  "authorization": "Direct owner M9-REG-12 classification-only grant: already-blocked private and Cloud redirects must report canonical classes"
+}

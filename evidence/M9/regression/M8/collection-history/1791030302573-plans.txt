@@ -1,0 +1,10 @@
+### meta
+utc=2026-10-03T12:24:38Z source_commit=010d6f9e84f732783ab94745a8b5b05cc0f8d2eb candidate=
+### tree
+{"utc":"2026-10-03T12:24:38Z","sha256":"f9e3971312944a36d107d6b150f025202b0356483be0a7a885cb7c0ed1950ee7"}
+### upgrade_plan
+### rollback_plan
+{"plan":"rollback","from_commit":"010d6f9e84f732783ab94745a8b5b05cc0f8d2eb","to_commit":"60945a76d8a0e1b1ae0938547a6d6b5fb2fc9fca","to_release":"20261001T020203Z-60945a76d8a0.json","cutover":"unknown: no release recorded for the running commit","image_changes":[{"service":"access-gateway","from":"fcpi/access-gateway@sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb","to":"fcpi/access-gateway@sha256:a9fae8d26ce9c04ca71c385d48de823ac83d942fc3a64fd4d5af33d533865caa"},{"service":"retrieval-service","from":"fcpi/retrieval@sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba","to":"fcpi/retrieval@sha256:0a087bd8890f5dbd9015a0c182a4e8c1566fd1359b14abcade85a1c4f015493c"}],"configuration_changes":["access-gateway"],"ledger_schema":{"now":3,"at_that_release":3},"data_service_image_changes":[],"schema_file_changes":[],"data_restore_needed":false,"backup_to_restore":null,"steps":["scripts/m1/deploy.sh of 60945a76d8a0","recreate the services whose images or configuration differ","fcpi verify functional; fcpi status"]}
+### tree
+{"utc":"2026-10-03T12:24:39Z","sha256":"f9e3971312944a36d107d6b150f025202b0356483be0a7a885cb7c0ed1950ee7"}
+### end

@@ -1,0 +1,557 @@
+{
+  "schema": "fcpi.m5.verification/v1",
+  "runner": "scripts/m5/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (S05, E05, D03) from the fixture and host checks.",
+  "results": [
+    {
+      "test_id": "M5-B00",
+      "name": "baseline-matches-m4-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-G01",
+      "name": "images-pinned-built-and-running",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-P01",
+      "name": "patch-series-and-coverage",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-G02",
+      "name": "suites-pass-in-the-running-images",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-S01",
+      "name": "search-typed-outcomes-rest",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "against the real SearXNG on the fixture engines, through REST: results (200, at least one); the same query again from the cache; a true empty answer (200, web: []); a partial answer (200 with a warning naming the engine that failed); every engine failing (502 SEARCH_ENGINES_FAILED, never an empty list); the backend stopped (503 SEARCH_BACKEND_UNAVAILABLE); the backend paused (504 SEARCH_TIMEOUT after the 10 s deadline); an option the pinned client ignores refused (400 UNSUPPORTED_OPTION); results scraped through the guarded path, and refused (403) to a token without the scrape scope that still searches (the control)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; results=200; repeat_cached=200; true_empty=200; results_scraped=200; scrape_scope_refused=403 INSUFFICIENT_SCOPE; search_scope_control=200; mcp_results=ok; mcp_true_empty=ok; refused_option=400 UNSUPPORTED_OPTION; partial=200; engines_failed=502 SEARCH_ENGINES_FAILED; mcp_engines_failed=tool-error SEARCH_ENGINES_FAILED; backend_down=503 SEARCH_BACKEND_UNAVAILABLE; mcp_backend_down=tool-error SEARCH_BACKEND_UNAVAILABLE; backend_timeout=504 SEARCH_TIMEOUT",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-S02",
+      "name": "search-typed-outcomes-mcp",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "through firecrawl_search on /mcp (modern era): results and a true empty answer are tool results (not errors), every engine failing and the backend stopped are tool errors carrying 502 SEARCH_ENGINES_FAILED and 503 SEARCH_BACKEND_UNAVAILABLE",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-S03",
+      "name": "search-log-cache-and-selection",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "the retrieval service's search events name the fixture selection and engines for every query, count the repeat as a cache hit that reached no backend (the fixture engine's own counter agrees), record the partial, empty and failed outcomes as such, and never hold the query's text (only its hash)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; outcomes=results,cache_hit,empty,results,results,results,empty,partial,engines_failed,engines_failed,SEARCH_BACKEND_UNAVAILABLE,SEARCH_BACKEND_UNAVAILABLE,SEARCH_TIMEOUT; fixture engine calls=15",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-S04",
+      "name": "searxng-posture-native-and-reach",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-S05",
+      "name": "search-live",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": null,
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-live.txt"
+      ],
+      "expected": "with live search egress switched on after the review was addressed: a live query returns results from the live engines through REST and MCP; a quoted nonsense query is answered 200 or with a typed failure, never an error of the platform's own (a live engine may still return loose matches for it, so the true empty answer is proven against the fixture engine in S01 and S02, and the count is reported here); every partial answer names the engines that did not answer; every search event names the live engine set; and every connection SearXNG made through the search proxy went to a live engine's host, with at least one",
+      "evidence_class": "live",
+      "state": "NOT_RUN",
+      "actual": "evidence missing: evidence/M9/regression/M5/raw/e2e-live.txt",
+      "exit_code": null,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-M01",
+      "name": "map-during-search-outage",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "with SearXNG stopped (AC05), /v2/map of the controlled site answers 200 with its links, from its sitemap and pages; the positive control is the same site's links in the isolation phase",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "outage map 200 links=12 (searxng exited unhealthy); control 200 links=12",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-E01",
+      "name": "json-format-fixture-model",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "6406a31a348a30f7015df7880759b4fd1d8a8bafaf60b704162e090a09d816dd",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+        "deploy/policies/budget.json"
+      ],
+      "expected": "on the fixture model: the json scrape format returns the page's values (product, price, stock) with markdown when asked; a sparse page's absent values are null and the markdown is left out when not asked; an invalid first answer is repaired with exactly two calls; an answer invalid after its one repair is 502 EXTRACTION_INVALID_OUTPUT; a schema $ref is refused 400 before any call; the json format on a batch is refused; a token without the extract scope gets 403 for it with no model request, while the same token scrapes (the control); every model call of the phase was reserved before dispatch and settled at the rate card's price from the provider's own usage counts",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; settled model calls=12, priced by the rate card=true; repair usage={\"calls\":2,\"reused\":0,\"promptTokens\":372,\"completionTokens\":23,\"cachedTokens\":0,\"cacheWriteTokens\":0,\"costMicroUsd\":187}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-E02",
+      "name": "explicit-url-extract-jobs",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "/v2/extract over explicit URLs is acknowledged with a job id, resubmitted under its idempotency key returns the same id, and polled to completed with data and each value's sources; a URL whose target answers 404 makes the job PARTIAL naming TARGET_HTTP_404; a long page is extracted in two or more units whose data merges; another principal gets 404 for the job; wildcards and web search are refused 400, a token without the extract scope 403; the same flow completes through firecrawl_extract and firecrawl_extract_status",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; long page units=2; partial failures=[{\"url\":\"http://m5.fixture.fcpi.test:8080/extract/missing-page.html\",\"code\":\"TARGET_HTTP_404\"}]",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-E03",
+      "name": "refusals-before-spend",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "on the retrieval service's extraction listener: a model not in the allowlist is 400 MODEL_NOT_ALLOWED, a model whose rate card has ended is 503 RATE_CARD_MISSING, a schema with a $ref is 400 SCHEMA_UNSUPPORTED, and the fixture model's request counter is the same before and after all three",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; model calls 12->12",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-E04",
+      "name": "provider-rejection-and-outage",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "a model request with no answer within its deadline is 502 PROVIDER_UNCERTAIN and its reservation stays UNCERTAIN and whole; a refused credential is 502 PROVIDER_AUTH_FAILED and a provider error 502 PROVIDER_ERROR, both released; after those three failures the breaker refuses the next request as 503 PROVIDER_UNAVAILABLE without a provider request; the parser's refused credential is PROVIDER_AUTH_FAILED and a job the parser ends FAILED is PARSE_FAILED with its credits kept reserved",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; no_answer=502 PROVIDER_UNCERTAIN; auth_refused=502 PROVIDER_AUTH_FAILED; provider_error=502 PROVIDER_ERROR; breaker_open=503 PROVIDER_UNAVAILABLE",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-E05",
+      "name": "model-live",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": null,
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-live.txt"
+      ],
+      "expected": "with the owner's credential and approved budget: the real model returns schema-valid data for the fixture product page, ignores the injected instructions of another page, and completes an explicit-URL job; every call is settled at the rate card from the provider's reported usage",
+      "evidence_class": "live",
+      "state": "NOT_RUN",
+      "actual": "evidence missing: evidence/M9/regression/M5/raw/e2e-live.txt",
+      "exit_code": null,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-B01",
+      "name": "paid-dispatch-off-caps-zero",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-B02",
+      "name": "concurrent-reservation-race",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "6406a31a348a30f7015df7880759b4fd1d8a8bafaf60b704162e090a09d816dd",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+        "deploy/policies/budget.json"
+      ],
+      "expected": "eight extractions sent at once on the fixture_race model, each reserving the same conservative amount while the first holds the one model slot: exactly floor((cap - used before) / amount) are granted and the rest are BUDGET_EXHAUSTED; the granted reservations overlap in time, their sum never passes what was left, and the category's settled total afterwards is the one before plus the granted calls' actual costs",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; cap=100000 used before=62580 amount=10534 expected=3 granted=3 exhausted=5; settled after=65622",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-B03",
+      "name": "rate-cards-versioned",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-D01",
+      "name": "document-classes",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "a text PDF parses natively with its sentinel; a DOCX converts natively with its sentinel; a PDF served as HTML is parsed as a PDF and an HTML page served as a PDF as HTML (MIME from bytes); a password-protected PDF is DOCUMENT_ENCRYPTED, a malformed one DOCUMENT_MALFORMED, a 26 MiB one SIZE_LIMIT and a 101-page one DOCUMENT_TOO_MANY_PAGES, each a typed failure and never empty success",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; fixture_parse_cache_cleared=undefined, text_pdf=200, table_pdf_complex=200, scan_pdf=200, scan_pdf_cached=200, encrypted_pdf=500, malformed_pdf=500, pdf_served_as_html=200, html_served_as_pdf=200, oversized_pdf=500, pdf_101_pages=500, docx=200, parser_refused_credential=500, parser_job_failed=500",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-D02",
+      "name": "parser-fallback-and-credits-fixture",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "6406a31a348a30f7015df7880759b4fd1d8a8bafaf60b704162e090a09d816dd",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+        "deploy/policies/budget.json"
+      ],
+      "expected": "with the fixture parser's cache rows cleared first: scan-only and complex-layout PDFs return parser text, the second scan is cached without upload, credits reserve and settle at pages × 3, and finished uploads are deleted; the production parser refuses the scan as PAID_DISPATCH_DISABLED with a key or PARSER_REQUIRED without one, and complex layout keeps native text",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; parser uploads=4 deletes=3; settled parses=2",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-D03",
+      "name": "parser-live",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": null,
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-live.txt"
+      ],
+      "expected": "with the owner's LlamaParse credential and approved credits: a scan-only PDF and a complex-layout PDF parse live with their text (the scan's sentinel read from its image), each settled at the pages returned × 3 credits",
+      "evidence_class": "live",
+      "state": "NOT_RUN",
+      "actual": "evidence missing: evidence/M9/regression/M5/raw/e2e-live.txt",
+      "exit_code": null,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-I01",
+      "name": "acquisition-unaffected-by-provider-failure",
+      "utc": "2026-10-03T13:32:57Z",
+      "repository_sha": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "4072fbcb327cb128607ba9e222af388d7882b2a5feca4dc725f04852c4abc258",
+      "input_paths": [
+        "evidence/M9/regression/M5/raw/e2e-fixture.txt"
+      ],
+      "expected": "with SearXNG stopped, the paid model refused and the parser unconfigured: search answers its typed failure while a static scrape, a native text PDF, a four-page crawl and a map all succeed; and with the model provider's breaker open a scrape still succeeds",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-C01",
+      "name": "capabilities-and-mcp-catalog",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-X02",
+      "name": "network-and-container-posture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-X03",
+      "name": "retrieval-log-hygiene",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-M02",
+      "name": "memory-within-caps",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-L01",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    },
+    {
+      "test_id": "M5-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M5/verification.json"
+    }
+  ]
+}

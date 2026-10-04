@@ -1,0 +1,190 @@
+### meta
+utc=2026-10-03T08:27:35Z source_commit=f5f373b2c7ea1fd82e79cb7f2e517b5cf0e4ae2e sentinel=fcpi-m3-persist-16234e10eb4b
+### core_logs_before
+  instance-record meta
+utc=2026-10-03T08:27:35Z label=before-m3-persistence instances=1 source_commit=f5f373b2c7ea1fd82e79cb7f2e517b5cf0e4ae2e
+  instance-record instance_fc9fbe6cdf11
+classified cloud_refusal=30 cloud_refused_job=0 cloud_request_echo=4 cloud_unexplained=6 dns_internal=0 dns_unexplained=0
+control=Starting services count=2
+  instance-record stored_0530f4463c8c
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_06c2350db422
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_07fa416c96a8
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=942 dns_unexplained=4140
+control=Starting services count=21
+  instance-record stored_0b74c9db4de9
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_0cb90427eb32
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_1258584d74c2
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=4
+  instance-record stored_133df1fb31c8
+classified cloud_refusal=24 cloud_refused_job=0 cloud_request_echo=4 cloud_unexplained=0 dns_internal=77 dns_unexplained=0
+control=Starting services count=3
+  instance-record stored_1ca0aab0b83a
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=942 dns_unexplained=4146
+control=Starting services count=17
+  instance-record stored_28c892ade011
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_307b0a78971b
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_314e6da240ef
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_31fe4ddd1d8d
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_47ad1849187e
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_5c5da65b8072
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=3
+  instance-record stored_5fc331449d0a
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=942 dns_unexplained=4140
+control=Starting services count=16
+  instance-record stored_6183f2585e0f
+classified cloud_refusal=6 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_6496ebef9afe
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_6896709b818e
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=4
+  instance-record stored_6a78fb1588f2
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_6b2581af2ad4
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=4
+  instance-record stored_86aa34050f7b
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=4
+  instance-record stored_8b5fa8a2f160
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=962 dns_unexplained=4212
+control=Starting services count=16
+  instance-record stored_908556032da9
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=3
+  instance-record stored_96af8aadfdf6
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=7
+  instance-record stored_98c687db8859
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_9b1fc5f5200d
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_9f0c5db4d1c4
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=941 dns_unexplained=4146
+control=Starting services count=16
+  instance-record stored_a304dc10fd8a
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=77 dns_unexplained=0
+control=Starting services count=3
+  instance-record stored_a64954e03d66
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_b007a62e83b2
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=942 dns_unexplained=4134
+control=Starting services count=15
+  instance-record stored_c3924a28969c
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_dd87757c7c3a
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=1
+  instance-record stored_e1c53d09711f
+classified cloud_refusal=18 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=0 dns_unexplained=0
+control=Starting services count=3
+  instance-record stored_e705e1ece18e
+classified cloud_refusal=0 cloud_refused_job=0 cloud_request_echo=0 cloud_unexplained=0 dns_internal=942 dns_unexplained=4146
+control=Starting services count=16
+  instance-record stored_ef81828d6536
+classified cloud_refusal=12 cloud_refused_job=0 cloud_request_echo=2 cloud_unexplained=0 dns_internal=78 dns_unexplained=0
+control=Starting services count=7
+  instance-record end
+### write
+NOTICE:  schema "fcpi_m3_sentinel" already exists, skipping
+NOTICE:  relation "sentinel" already exists, skipping
+postgres_written=fcpi-m3-persist-16234e10eb4b
+redis_set=OK
+rabbitmq_write={"utc":"2026-10-03T08:27:46.856Z","queue":"fcpi.m1.sentinel","messages_before":1,"purged":1,"published":"fcpi-m3-persist-16234e10eb4b","confirmed":true}
+ledger jobs=786 events=3594 idempotency=30 documents=5169 documents_distinct_sha256=5107 rows_sha256=18c255e19c19076ff12174875fbcc5f64445c756e89f72913f5d8f5f1c8f0d32
+retrieval_rows acquisitions=20190 attempts=21216
+billing reservations=1394 usage=31 rows_sha256=e93269b1d52fc5b0b58950fa26395fe25dbd839a0e72eae890024315895ecca7
+archive files=5168 names_sha256=1def85505577b90f31fde5c4306f5d174e4475842fd4682da74ac23f9e6ceb62
+archive files_whose_content_differs_from_name=0
+registry sha256=4a490dd9a1d3516335bf3e2b89d9adc67cbe574ae7f96827d15f3a1ca9182673 clients=23
+### before
+nuq-postgres 32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175
+redis 65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd
+rabbitmq db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4
+firecrawl-core fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa
+access-gateway 168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3
+fixture 2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647
+retrieval-service c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d
+browser-worker 7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0
+fixture-m2 353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060
+fixture-m3 8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c
+### gateway_log_before
+instance=168063943b73 created=2026-10-03T05:47:46.592745247Z started=2026-10-03T07:30:57.906313949Z lines=2882 request_records=2699 job_records=127 starts=6 first_event=clients_loaded
+pattern=firecrawl\.dev count=0
+pattern=firecrawl\.com count=0
+pattern=mendable count=0
+pattern=fcpi_[a-z0-9]+_[0-9a-f]{64} count=0
+pattern=Bearer [A-Za-z0-9] count=0
+pattern=[Aa]uthorization count=0
+pattern=m3\.fixture\.fcpi\.test count=0
+### resources_before_recreate
+{"label":"before-recreate","utc":"2026-10-03T08:29:03Z","gateway":{"instance":"168063943b73","started_at":"2026-10-03T07:30:57.906313949Z","peak":87687168,"max":"167772160","current":52772864,"oom_kill":0},"core":{"instance":"fc9fbe6cdf11","started_at":"2026-10-03T07:30:57.15523964Z","peak":2021048320,"max":"2684354560","current":1879293952,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4758800}
+### recreate
+ Container fcpi-fixture-m7-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+recreate_exit=0
+### after
+nuq-postgres aab1c46968207f5a9cafa1f617a41d1f18eeaccc640d52a04fcbc87f6a4a987e
+redis 00f55be9d6babf06324a6fce215a54fcd2db046ab16338b1809a86816022c0db
+rabbitmq 2970faf5b365a453a74e070f2378f4ac56efe8237c2372421f3232315c3d84b1
+firecrawl-core 15a7dc86c6577773faf92aa04be998979218bc9c9a5c585007b139ec58e681b4
+access-gateway c05a521b869bcb593c63385f68253755fe0436bc2ad5b3745002112277fabb28
+fixture 202e38f96ada19bf7790cef4b8f0f424311c4e597ede9da705e80cf53dfd7f77
+retrieval-service 2b2175ea8c1adc40cfc2d196e0a56420cb769d6d46f176ec3d169f76163e3be6
+browser-worker b14f92611f21177c157d464692384073d8a10e8222e364c2079d756291faa9aa
+fixture-m2 fc67a47ae31f25d3333f987a56ab7bd47bf6e2f804ad10a016ec3da69d796336
+fixture-m3 844a768c57d82bed093cd9eea933d96b9e85a17de8c9d98eb6855635480b6fca
+access-gateway running healthy
+browser-worker running healthy
+firecrawl-core running healthy
+fixture running healthy
+fixture-m2 running healthy
+fixture-m3 running healthy
+fixture-m5 running healthy
+fixture-m6 running healthy
+fixture-m7 running healthy
+mcp-gateway running healthy
+nuq-postgres running healthy
+rabbitmq running healthy
+redis running healthy
+retrieval-service running healthy
+searxng running healthy
+### read
+postgres_read=fcpi-m3-persist-16234e10eb4b
+redis_read=fcpi-m3-persist-16234e10eb4b
+rabbitmq_read={"utc":"2026-10-03T08:30:51.716Z","queue":"fcpi.m1.sentinel","messages_before":1,"messages":["fcpi-m3-persist-16234e10eb4b"]}
+ledger jobs=786 events=3594 idempotency=30 documents=5169 documents_distinct_sha256=5107 rows_sha256=18c255e19c19076ff12174875fbcc5f64445c756e89f72913f5d8f5f1c8f0d32
+retrieval_rows acquisitions=20191 attempts=21217
+billing reservations=1394 usage=31 rows_sha256=e93269b1d52fc5b0b58950fa26395fe25dbd839a0e72eae890024315895ecca7
+archive files=5161 names_sha256=decc270b6ac72ec58061c7ffea866bc5604ee69148069d4e462e1da1f955010d
+archive files_whose_content_differs_from_name=0
+registry sha256=4a490dd9a1d3516335bf3e2b89d9adc67cbe574ae7f96827d15f3a1ca9182673 clients=23
+end

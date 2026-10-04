@@ -1,0 +1,89 @@
+{
+  "utc": "2026-10-03T10:57:55.031Z",
+  "source_commit": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+  "mechanism": "two fresh independent native contexts; exact requested model; Agent-selector mechanism substitution",
+  "reviews": [
+    {
+      "role": "debugger",
+      "model": "claude-opus-5-5",
+      "raw_sha256": "36e9f7c88eeb50b55852a7f5f445488a2899ad47cc184172321966a2cb2fb504",
+      "api_equivalent_estimate_usd": 1.0178037999999998,
+      "invoiced_usd": null,
+      "usage": {
+        "input_tokens": 40,
+        "cache_creation_input_tokens": 65133,
+        "cache_read_input_tokens": 789299,
+        "output_tokens": 16936,
+        "output_tokens_details": {
+          "thinking_tokens": 8301
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 65133,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 5190,
+            "cache_read_input_tokens": 66213,
+            "cache_creation_input_tokens": 1644,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1644
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      }
+    },
+    {
+      "role": "auditor",
+      "model": "claude-opus-5-5",
+      "raw_sha256": "a2db3fe992f13e9cde8a7b3f5ec612658e2b5e2116f54bda808b4ef737e805a4",
+      "api_equivalent_estimate_usd": 0.5453741999999999,
+      "invoiced_usd": null,
+      "usage": {
+        "input_tokens": 22,
+        "cache_creation_input_tokens": 36114,
+        "cache_read_input_tokens": 243671,
+        "output_tokens": 10382,
+        "output_tokens_details": {
+          "thinking_tokens": 4711
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 36114,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [
+          {
+            "input_tokens": 2,
+            "output_tokens": 3278,
+            "cache_read_input_tokens": 37785,
+            "cache_creation_input_tokens": 1053,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 1053
+            },
+            "type": "message"
+          }
+        ],
+        "speed": "standard",
+        "fallback_credit": null
+      }
+    }
+  ]
+}

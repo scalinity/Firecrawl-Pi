@@ -1,0 +1,5 @@
+utc=2026-10-03T17:03:00Z source_commit=3ebf4f52bb4152072e4c1618aa122ea19b9465ef probe_fixture_sha256=08bec75a918009ca7e44ea91e6c9e0640d698ce2c3acef4dfb2e5309678f0b9c
+{"phase":"warm","ok":true,"strategies":["direct_browser"]}
+{"phase":"warm","ok":true,"strategies":["direct_browser"]}
+{"dst":"private","logical_id":"m9-postload-d94c162d-4d0e-48d1-9d74-956e81968d3a","http":200,"ok":true,"targetStatus":200,"finalUrl":"chrome-error://chromewebdata/","failure":null,"strategies":["direct_browser"],"proxyDenied":[],"body_is_proxy_refusal":false}
+{"dst":"cloud","logical_id":"m9-postload-1bd023d6-cf71-48cb-bf4d-63bad939e5ee","http":200,"ok":true,"targetStatus":200,"finalUrl":"chrome-error://chromewebdata/","failure":null,"strategies":["direct_browser"],"proxyDenied":[],"body_is_proxy_refusal":false}

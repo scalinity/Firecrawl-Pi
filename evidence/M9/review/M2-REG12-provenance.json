@@ -1,0 +1,104 @@
+{
+  "utc": "2026-10-03T16:17:47.158Z",
+  "mechanism": "Two fresh read-only native Claude Code contexts; exact required Opus 5.5, equivalent mechanism because Agent API has no Opus model selector",
+  "reviews": [
+    {
+      "role": "debugger",
+      "model": "claude-opus-5-5",
+      "base_source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+      "candidate_patch_sha256": "3d3638a40bb477649889e96b8fd9324839f2faa332e64c09e186d38cac8733bf",
+      "prompt_sha256": "4403b2b224aab3c2fd94b7ce77113f38ff0570f8b0feadfc9c81ead43e6b5121",
+      "private_result_sha256": "d8f33f60e6926be81e8df6f3ea1dde5b37f950a30c69214f97f90c2d96343bb6",
+      "report_sha256": "5689c92fb1ed7a07f0a9686037e02eaab2617dc1d0849f7e0ebd4b18e6fd84b5",
+      "usage": {
+        "input_tokens": 52,
+        "cache_creation_input_tokens": 86676,
+        "cache_read_input_tokens": 1506553,
+        "output_tokens": 28903,
+        "output_tokens_details": {
+          "thinking_tokens": 22019
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 86676,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "modelUsage": {
+        "claude-opus-5-5": {
+          "inputTokens": 52,
+          "outputTokens": 28903,
+          "cacheReadInputTokens": 1506553,
+          "cacheCreationInputTokens": 86676,
+          "webSearchRequests": 0,
+          "costUSD": 1.5729866000000003,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 22019,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "reported_api_equivalent_usd": 1.5729866000000003,
+      "invoiced_cost_usd": null
+    },
+    {
+      "role": "auditor",
+      "model": "claude-opus-5-5",
+      "base_source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+      "candidate_patch_sha256": "3d3638a40bb477649889e96b8fd9324839f2faa332e64c09e186d38cac8733bf",
+      "prompt_sha256": "f055327d2f51bc75ffdd40ae22679f852dd413700df085dd2ee93b6e13034cd8",
+      "private_result_sha256": "d4db8ac531fac444f9ba2ff9f5650557f4d24806776f5d40445756328eb0f042",
+      "report_sha256": "412fb53f68da598570c95bee4af6398247e020403c4365fbe55513a661af99ce",
+      "usage": {
+        "input_tokens": 46,
+        "cache_creation_input_tokens": 84161,
+        "cache_read_input_tokens": 1163758,
+        "output_tokens": 33692,
+        "output_tokens_details": {
+          "thinking_tokens": 26552
+        },
+        "server_tool_use": {
+          "web_search_requests": 0,
+          "web_fetch_requests": 0
+        },
+        "service_tier": "standard",
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 84161,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "inference_geo": "not_available",
+        "iterations": [],
+        "speed": "standard",
+        "fallback_credit": null
+      },
+      "modelUsage": {
+        "claude-opus-5-5": {
+          "inputTokens": 46,
+          "outputTokens": 33692,
+          "cacheReadInputTokens": 1163758,
+          "cacheCreationInputTokens": 84161,
+          "webSearchRequests": 0,
+          "costUSD": 1.5800636,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 26552,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "reported_api_equivalent_usd": 1.5800636,
+      "invoiced_cost_usd": null
+    }
+  ]
+}

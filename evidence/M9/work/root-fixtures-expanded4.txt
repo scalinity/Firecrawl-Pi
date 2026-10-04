@@ -1,0 +1,16 @@
+PASS missing OAuth checked before worktree
+PASS mismatched binary checked before worktree
+PASS four UTC launches block fifth
+PASS active agent blocks another launch
+PASS stale apply cannot execute tests or deployment
+PASS empty failed resume is terminal and removes auth
+PASS outage notice survives missing action infrastructure
+PASS unavailable proof infrastructure leaves queued approval unconsumed
+PASS named bounded source file permitted
+PASS policy, ignored nested bytes and existing tests denied
+PASS new direct unit test permitted
+warning: remote HEAD refers to nonexistent ref, unable to checkout
+PASS standalone candidate metadata readable without root mirror access
+PASS partial candidate cutover automatically returns to paired accepted release
+PASS failed explicit rollback is terminal without recursive retry
+RESULT pass=14 fail=0 source=9c118c43a3f1a82fb2e66a27d4063d2501c5bba9

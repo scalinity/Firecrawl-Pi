@@ -1,0 +1,18 @@
+M8-R01 FAIL               normal-reboot-ready-within-five-minutes  — failed=record_kept,ready_in_five_minutes,orderly; ssh back after 56 s; {}; ended boot {}
+M8-R02 PASS               docker-restart-recovers-without-action
+M8-R03 PASS               missing-data-mount-refuses-writers
+M8-I01 PASS               mcp-crash-restarts-mcp-alone
+M8-I02 PASS               api-child-crash-recovers-typed
+M8-I03 PASS               worker-death-shown-as-degraded-and-recovered
+M8-I04 PASS               postgres-down-fails-closed-and-reconciles
+M8-I07 PASS               browser-crash-contained
+M8-I15 PASS               supervisor-bounded-restarts-then-incident
+M8-O01 PASS               status-names-each-failure-independently
+M8-O02 PASS               one-notice-per-incident-and-its-recovery
+M8-O03 PASS               logs-bounded-and-diagnostics-redacted
+M8-K01 PASS               coordinated-backup-on-the-fixture-repository
+M8-S05 PASS               core-heap-holds-large-pages-at-384-mib
+M8-I08 PASS               search-outage-isolated-and-not-resurrected
+M8-I09 PASS               proxy-outage-never-spills-to-the-home-ip
+M8-I10 PASS               model-parser-enhanced-outage-isolated
+M8-I11 PASS               network-outage-bounded-and-recovered-without-restart

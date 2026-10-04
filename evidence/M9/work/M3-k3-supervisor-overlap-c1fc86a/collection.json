@@ -1,0 +1,255 @@
+{
+  "schema": "fcpi.collection/v1",
+  "receipts": [
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/e2e-expiry.txt",
+      "test_id": "expiry",
+      "started_utc": "2026-10-03T12:37:47.031Z",
+      "completed_utc": "2026-10-03T12:38:52.927Z",
+      "before": {
+        "local": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi_tree_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "pi_expected_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "clean": true
+      },
+      "after": {
+        "local": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi_tree_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "pi_expected_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "ee15b5bda8db590d7b86804d6cb8b1d3a0ccbc2686c3d11a473a590d42dd725f",
+      "private_record": "M3-expiry-1791031132927.json",
+      "private_record_sha256": "c29bd519190a5f6cb13046a5e4d35b0d5ea4dbc6781d57e31b75ae33d911dd6e"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/e2e-cli.txt",
+      "test_id": "cli",
+      "started_utc": "2026-10-03T12:38:53.006Z",
+      "completed_utc": "2026-10-03T12:38:57.523Z",
+      "before": {
+        "local": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi_tree_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "pi_expected_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "clean": true
+      },
+      "after": {
+        "local": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+        "pi_tree_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "pi_expected_sha256": "f95601c1ac0d010512fc994efff77d978449922dc66092fe159f12115ad19538",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "12c5abb1fc4482e8d003391e7e0ad33733e8d34a77d5da374f0bb2855b1e71b9",
+      "private_record": "M3-cli-1791031137523.json",
+      "private_record_sha256": "3523cd3c79354bd05286623b0adc06395c80a9a945fd2422a2ce59a5b551c62e"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/tailscale-before.txt",
+      "test_id": "tailscale-before-current",
+      "started_utc": "2026-10-03T14:05:11.962Z",
+      "completed_utc": "2026-10-03T14:05:12.946Z",
+      "before": {
+        "local": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi_tree_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "pi_expected_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "clean": true
+      },
+      "after": {
+        "local": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi_tree_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "pi_expected_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "ba09ecb1c5711f9875c59df671b9199456da515b1ac90dfe235fac0126fe580d",
+      "private_record": "M3-tailscale-before-current-1791036312946.json",
+      "private_record_sha256": "f9886018ce54e9102d853701c51a67b9e351a219e14f6fc6a9fe38c47464763c"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/tailscale-install.txt",
+      "test_id": "tailscale-installation-current",
+      "started_utc": "2026-10-03T14:05:59.004Z",
+      "completed_utc": "2026-10-03T14:06:00.234Z",
+      "before": {
+        "local": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi_tree_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "pi_expected_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "clean": true
+      },
+      "after": {
+        "local": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi_tree_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "pi_expected_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "a02a4734b25a28b155547be9cc0cbe62c8ff3d7f7515dbcc9c85ac01168b3656",
+      "private_record": "M3-tailscale-installation-current-1791036360234.json",
+      "private_record_sha256": "5876a1e1ebf10cd163efb6401a95202c4f9f4bd4de33e32f92853d12267a7061"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/tailscale-status.txt",
+      "test_id": "tailscale-status-current",
+      "started_utc": "2026-10-03T14:06:00.314Z",
+      "completed_utc": "2026-10-03T14:06:01.702Z",
+      "before": {
+        "local": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi_tree_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "pi_expected_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "clean": true
+      },
+      "after": {
+        "local": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi": "3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837",
+        "pi_tree_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "pi_expected_sha256": "ca7eef35063aa98ade72c343fb17fc445aa9fc25bbbab56cf8282220b9c03290",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "a59a75d23796620c1f905b61493e76ef585a2df1240febd2059f0898dccd0924",
+      "private_record": "M3-tailscale-status-current-1791036361702.json",
+      "private_record_sha256": "04590645b1848f4074a5316db029457a32d4707ce340db78ef3dc24da024d8e5"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/e2e-auth.txt",
+      "test_id": "auth",
+      "started_utc": "2026-10-03T14:35:17.311Z",
+      "completed_utc": "2026-10-03T14:35:42.787Z",
+      "before": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "after": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "dd429f8a16ff7f5b9015a891740842478b11215a9eca300b6e0ad998831946c4",
+      "private_record": "M3-auth-1791038142787.json",
+      "private_record_sha256": "b08c7ff8fbfc4b0046384ad48435d5ac0e6f06deaa7e4498a63ee71834b16981"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/e2e-sync.txt",
+      "test_id": "sync",
+      "started_utc": "2026-10-03T14:35:42.874Z",
+      "completed_utc": "2026-10-03T14:36:19.453Z",
+      "before": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "after": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "9636d00ffc30636c965c05890e7ef96a2e0b19c64fcf9b87da81eb05f6a81697",
+      "private_record": "M3-sync-1791038179453.json",
+      "private_record_sha256": "6b4da55c58b20bd222d554866028258de71fcc7f097f935acf294a881b0450ef"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/e2e-jobs.txt",
+      "test_id": "jobs",
+      "started_utc": "2026-10-03T14:36:19.528Z",
+      "completed_utc": "2026-10-03T14:37:08.300Z",
+      "before": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "after": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "2815f9f3ad053f09ab55ffcb8b8804aaf56c32483580f9ae0c51b605c66a261f",
+      "private_record": "M3-jobs-1791038228300.json",
+      "private_record_sha256": "f2c73f9c6f1cbb4be7e181367d9839e44175e6c9e6716c825c35f10aed30b4f4"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/e2e-cancel.txt",
+      "test_id": "cancel",
+      "started_utc": "2026-10-03T14:37:08.382Z",
+      "completed_utc": "2026-10-03T14:37:32.150Z",
+      "before": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "after": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "f66a4b1449ed6c883f845589ff98b85421f1fc199c21c86077553dbe2bd82ab4",
+      "private_record": "M3-cancel-1791038252150.json",
+      "private_record_sha256": "0315b24964590f8c32bc8446d32146a7c56f4b7a98e7595f32808faaeab55f4d"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M3/raw/e2e-crash.txt",
+      "test_id": "crash",
+      "started_utc": "2026-10-03T14:37:32.232Z",
+      "completed_utc": "2026-10-03T14:41:08.678Z",
+      "before": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "after": {
+        "local": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi": "c1fc86a0a21f5caef2079c57351e7a8f6713baac",
+        "pi_tree_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "pi_expected_sha256": "2de44347b2e8146e7be90e13c12306448d2a577d23b8709b2f69b3a557c4ff36",
+        "clean": true
+      },
+      "exit_code": 1,
+      "sha256": "443a9ca20eb09a7f3ace5fb4b6800e392a8835ceb76d5db59592b3f1e2f1522a",
+      "private_record": "M3-crash-1791038468678.json",
+      "private_record_sha256": "2ec951321d2db56f571d66caa044d72e3cdcf9949b1082fc844003d90eaf210a"
+    }
+  ]
+}

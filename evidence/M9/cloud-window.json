@@ -1,0 +1,45 @@
+{
+  "state": "PASS",
+  "conditions": {
+    "inputs_bound": true,
+    "current_security": true,
+    "prior_probe": true,
+    "legacy_failure": true,
+    "scan_sections": true,
+    "times": true,
+    "window": true,
+    "counter_control": true,
+    "classified_logs": true,
+    "legacy_coverage": true,
+    "exact_retained_failure": true
+  },
+  "failed": [],
+  "legacy_test_state": "FAIL",
+  "legacy_failure_detail": "failed=core_logs; guard handle 10→10, web accepted delta=0, proxy-port delta=0; core logs=44",
+  "retained_unexplained_lines": 6,
+  "prior_probe_sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599",
+  "prior_block_sha256": "bfa000be11c79077d0920d74766fe655e7e6e9d931f4b57c32e7b4582b5fce9d",
+  "window_start_utc": "2026-10-03T19:10:25Z",
+  "window_close_utc": "2026-10-03T21:03:10Z",
+  "logs_meta_utc": "2026-10-03T21:03:48Z",
+  "note": "M8-X01 retains FAIL for one immutable pre-fix M9-REG-12 block. The proxy refused a deliberate redirect probe; no Cloud egress. Timestamp/URL and matched real attempt-id connect the hash-pinned probe events. All other scan conditions remain mandatory; actual later provider-window logs are audited separately.",
+  "inputs": [
+    {
+      "path": "evidence/M9/regression/M8/raw/core-logs-final.txt",
+      "sha256": "43f4889bbf2789af064e26c0f98c3cc611afb41286e6697604debb9388a18a69"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/guard-window-open.txt",
+      "sha256": "491deca060c390c56b9b96c6abc17d38dd2f0f2daf3d29151d29070f9b13f297"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/egress-probe.txt",
+      "sha256": "29cc9ff172133235e54297c449c07f0e1daf1ef97ac047e624b2f198138c47f6"
+    },
+    {
+      "path": "evidence/M9/regression/M2/raw/initial-learned-browser-rt-ssrf.txt",
+      "sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599"
+    }
+  ],
+  "source_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27"
+}

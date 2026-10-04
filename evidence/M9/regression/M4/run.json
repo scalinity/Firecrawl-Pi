@@ -1,0 +1,52 @@
+{
+  "utc": "2026-10-03T18:31:48.544Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "end_source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "command": [
+    "scripts/m4/mcp-e2e.mjs",
+    "wire",
+    "sdk",
+    "cancel",
+    "restart",
+    "stopped",
+    "tailnet"
+  ],
+  "runs": [
+    {
+      "phase": "wire",
+      "path": "evidence/M9/regression/M4/raw/e2e-wire.txt",
+      "sha256": "e702abae458fdb40513d807f6976075984f49507b55717b7fd5b95b93bd9822b",
+      "exit_code": 0
+    },
+    {
+      "phase": "sdk",
+      "path": "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+      "sha256": "457b3c49ff7213e8df99dc43918559b3501f3bbeecbe0319aa8bbcc8ce0eb741",
+      "exit_code": 0
+    },
+    {
+      "phase": "cancel",
+      "path": "evidence/M9/regression/M4/raw/e2e-cancel.txt",
+      "sha256": "5ff2a02c3e2fb44a6d46a8e153111b3d6727961720c9fce0fe0adb61f65dea2a",
+      "exit_code": 0
+    },
+    {
+      "phase": "restart",
+      "path": "evidence/M9/regression/M4/raw/e2e-restart.txt",
+      "sha256": "337a77354fddfb6547a9d4e8968998f89c35f4b81bc85818ab95e944be87c366",
+      "exit_code": 0
+    },
+    {
+      "phase": "stopped",
+      "path": "evidence/M9/regression/M4/raw/e2e-stopped.txt",
+      "sha256": "bb011faa04c15049e144974a94d44ace7c49a25b192dd726d408626567125eab",
+      "exit_code": 0
+    },
+    {
+      "phase": "tailnet",
+      "path": "evidence/M9/regression/M4/raw/e2e-tailnet.txt",
+      "sha256": "b989dd0a2dc5a320c213ef8348634d07cd3a9b47aaa0957154bdc033b6a943dc",
+      "exit_code": 0
+    }
+  ]
+}

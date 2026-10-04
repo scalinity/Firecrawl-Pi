@@ -1,0 +1,31 @@
+{
+  "utc": "2026-10-03T17:15:38.516Z",
+  "finding": "M9-REG-12",
+  "owning_milestone": "M2",
+  "execution_session": "Run Firecrawl M9",
+  "authorization": "work/owner-authorizations-20261003.json",
+  "paths": [
+    "scripts/m2/pi-retrieval-tests.sh",
+    "scripts/m2/retrieval-e2e.mjs",
+    "scripts/m2/verify.mjs",
+    "scripts/m9/verify.mjs",
+    "services/browser/src/server.mjs",
+    "services/retrieval/src/acquire.mjs",
+    "services/retrieval/src/proxy.mjs",
+    "services/retrieval/test/acquire.test.mjs",
+    "services/retrieval/test/proxy.test.mjs",
+    "tests/fixtures/m2/server.mjs",
+    "tests/fixtures/m2/site/postload-denied.html"
+  ],
+  "scope": "Owner-authorized canonical propagation for already-blocked initial/post-load redirects, transient correlation and focused real-browser fixtures; separately owner-authorized host-only log metadata repair; separately owner-authorized committed Chrome error-page failure guard",
+  "preserved_failure_sha256": "326688cdd8f595b7051638327f859ec8865b5918608f0f2f71af857469121599",
+  "old_operational_batch": "Stopped owned waiter before any M8 operation; completed f72333f fixtures retained with original attribution",
+  "source_commit": "da4b4510479131f119d27f52c12f7d718590c8f9",
+  "scope_authority": "work/owner-authorizations-20261003.json",
+  "source_before_latest_address": "d863dd0e221a09b28636a9fe3e78c45456400149",
+  "latest_m2_fix_commits": [
+    "bc648b5",
+    "79ad1d1"
+  ],
+  "latest_m9_collector_fix": "9c11be9"
+}

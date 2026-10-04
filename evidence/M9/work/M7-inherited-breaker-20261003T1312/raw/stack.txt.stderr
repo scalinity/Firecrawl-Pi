@@ -1,0 +1,135 @@
+cat: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/cgroup.procs: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-32c7adf88322234bf86d3c9ab0b02f31fc55df1aab24958e041a1ba008a1d175.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-65b250081d31471cbda37345fbf8576d71c4346ea513c174eee36f04f36bf5dd.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-db658dffa3cd278f7ba7ee6df272cd67764bf52474d46a5dca7aba1ca78f58d4.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-fc9fbe6cdf11225bb0838985249b959478fe980bc1e5f75e6f1c8bc78f94aaaa.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-168063943b73485350734ed306258a7276ff191b8b593efa087deebbb3ca97b3.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-7723bce95ceadb41612075a156a855109d65dc0909a9dc39f3771c0516768a67.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-2b4755a1ee4aaa6f1bbeba38a9d90f04ac4c07cd86f0ad9a4f02dc5fe6e58647.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-c90c66fe5c243f0e13e481843698609f554ec03c794c12e60607b2ed55683b8d.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-353692fa5ca76d9c010f1c99e578a4af0286b783d229e432999d112ec9a48060.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-8fe493fe12fe8d69c874f1fed6d5ab07bf15e661648ba6be95932b6179ceb70c.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-2266f7d4d7d85191bd66c8843f883e2d5ac933abe9993380e1e20a982c5cd744.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-ee0da5597af02c4f3f2df179792130eb3e1cef80aa2d9d9f7967f4794d63ac60.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-26c9df8a51762ea17c43e68430460155bb72b6361d0a03631c19871839a302d7.scope/pids.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/memory.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/memory.swap.max: No such file or directory
+/opt/firecrawl-pi/scripts/m7/pi-collect-stack.sh: line 61: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/cpu.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/pids.max: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/memory.current: No such file or directory
+cat: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/memory.peak: No such file or directory
+awk: cannot open "/sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/memory.events" (No such file or directory)
+cat: /sys/fs/cgroup/system.slice/docker-165fda22a46464dc5328090616a74618d867d3091aa0ba810d5d17e40c60f4ad.scope/pids.current: No such file or directory

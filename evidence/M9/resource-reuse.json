@@ -1,0 +1,72 @@
+{
+  "state": "PASS",
+  "failed": [],
+  "conditions": {
+    "accepted_bytes": true,
+    "accepted_checks": true,
+    "historical_sources": true,
+    "assessment": true,
+    "assessed_paths": true,
+    "resource_configuration": true,
+    "current_input_bindings": true,
+    "incident": true,
+    "duration": true,
+    "sample_times": true,
+    "no_restart": true,
+    "source": true,
+    "healthy": true,
+    "host": true,
+    "queue": true,
+    "disk": true,
+    "concurrent_incident": true,
+    "aligned_windows": true,
+    "workload_window": true,
+    "workload_outcomes": true,
+    "concurrent_traffic": true,
+    "targeted_requests": true,
+    "continuity": true,
+    "workload_coverage": true,
+    "latency": true,
+    "redis_window": true,
+    "redis_memory": true,
+    "redis": true
+  },
+  "metrics": {
+    "samples": 144,
+    "minimum_available_mib": 4516,
+    "slice_peak_mib": 3117,
+    "incident_peak_mib": 173,
+    "controlled_static_p95_ms": 97,
+    "controlled_static_max_ms": 14056,
+    "requests": 93,
+    "p95_ms": {
+      "static": 105,
+      "js": 5063,
+      "status": 26,
+      "mcp_list": 16
+    }
+  },
+  "note": "Accepted M8 24-hour evidence reused, combined with current 30-minute targeted resource regression and bounded incident invocation; no new 24-hour soak.",
+  "assessment_sha256": "575795d9d2f13f34a0344102d70a11d0a736549ee06714190f7b332ded458891",
+  "inputs": [
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-resources.txt",
+      "sha256": "63879f9964280a113fc5305834993945d12c624739934f530a4db7680c6b475f"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-workload.txt",
+      "sha256": "7eb354a3caa3f4730695cc185fadf30f23f691918dccf82332fb54be900a43d8"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-redis.txt",
+      "sha256": "a116e61b174685fc7b522f5aa12844f6f8cadf68c6278043383ad3a35715dceb"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/targeted-redis-memory.txt",
+      "sha256": "abdf5b5762edd82701635b6b3d793d23632b65719a36277d53cadc02606cc914"
+    }
+  ],
+  "source_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+  "historical_execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+  "accepted_repository_baseline": "55d756c5fb12fc5e741ab4145c47a7d7fdee1237"
+}

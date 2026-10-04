@@ -1,0 +1,2 @@
+M7-B01 PASS               screenshots-correct-and-bounded
+M7-B02 PASS               action-subset-correct-bounded-and-refused-outside-it

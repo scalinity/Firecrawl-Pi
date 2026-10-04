@@ -1,0 +1,428 @@
+diff --git a/scripts/m2/pi-retrieval-tests.sh b/scripts/m2/pi-retrieval-tests.sh
+index ad288b1..70b3537 100755
+--- a/scripts/m2/pi-retrieval-tests.sh
++++ b/scripts/m2/pi-retrieval-tests.sh
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env bash
+ # One phase of M2's retrieval tests, ON the Pi:
+ #   ssh … 'bash -s -- <phase>' < scripts/m2/pi-retrieval-tests.sh
+-# phase: static | ssrf | browser | browser-down | budget | pacing | permits | cancel | crash |
++# phase: static | ssrf | browser | browser-redirect | browser-down | budget | pacing | permits | cancel | crash |
+ #        stress | overcap | paths
+ # Runs scripts/m2/retrieval-e2e.mjs inside firecrawl-core for that group, then prints, for the
+ # phase's window: the driver's lines, the retrieval service's, the M2 fixture's and the browser
+diff --git a/scripts/m2/retrieval-e2e.mjs b/scripts/m2/retrieval-e2e.mjs
+index 3f4bb7d..b7af193 100644
+--- a/scripts/m2/retrieval-e2e.mjs
++++ b/scripts/m2/retrieval-e2e.mjs
+@@ -3,7 +3,7 @@
+ // as the gateway does, and the retrieval service on fcpi_acquire with the core's own credential
+ // (read from its secret file, never printed). One JSON line per case: what was asked, what came
+ // back, and the scrape id the collector joins with the service's attempt rows and logs.
+-//   GROUP=static|browser|budget|pacing|permits|cancel|paths|ssrf  (comma-separated)
++//   GROUP=static|browser|browser-redirect|budget|pacing|permits|cancel|paths|ssrf  (comma-separated)
+ //   LAN_ADDRESS: the host's LAN address, for the one LAN-literal case; recorded only as "lan".
+ import { readFileSync } from "node:fs";
+ import { randomUUID } from "node:crypto";
+@@ -107,6 +107,29 @@ if (groups.has("ssrf")) {
+     ["SR18-cloud-api", "https://api.firecrawl.dev/v1/scrape"]]) await acquire(id, { logicalAcquisitionId: `m2-ssrf-${randomUUID()}`, url });
+ }
+ 
++if (groups.has("browser-redirect")) {
++  // Two actual script-shell acquisitions establish M6's browser-first hint.
++  for (let i = 1; i <= 2; i++) await acquire(`BR00-warm-${i}`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: `${M2}/js.html?br=${randomUUID()}` });
++  for (const [id, to] of [["BR01-redis", "http://10.231.1.5:6379/"], ["BR02-metadata", "http://169.254.169.254/latest/meta-data/"],
++    ["BR03-cloud", "https://api.firecrawl.dev/v1/scrape"], ["BR04-loopback", "http://127.0.0.1:3002/"],
++    ["BR05-mapped", "http://[::ffff:10.231.1.5]/"], ["BR06-name", "http://redis:6379/"],
++    ["BR07-lan", process.env.LAN_ADDRESS ? `http://${process.env.LAN_ADDRESS}/` : "http://lan.invalid/"]]) {
++    const url = `${M2}/redirect?to=${encodeURIComponent(to)}`;
++    await scrape(`${id}-core`, url);
++    await acquire(`${id}-rs`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url });
++  }
++  const publicRedirect = `${M2}/redirect?to=${encodeURIComponent("http://m1.fixture.fcpi.test:8080/static.html")}`;
++  await scrape("BR08-public-core", publicRedirect);
++  await acquire("BR08-public-rs", { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: publicRedirect });
++  for (const [id, dst] of [["BR09-postload-private", "private"], ["BR10-postload-cloud", "cloud"]]) {
++    const url = `${M2}/postload-denied.html?dst=${dst}`;
++    await scrape(`${id}-core`, url);
++    await acquire(`${id}-rs`, { logicalAcquisitionId: `m2-br-${randomUUID()}`, url });
++  }
++  await scrape("BR11-own-403-core", `${M2}/forbidden-navigation`);
++  await acquire("BR11-own-403-rs", { logicalAcquisitionId: `m2-br-${randomUUID()}`, url: `${M2}/forbidden-navigation` });
++}
++
+ if (groups.has("browser")) {
+   await scrape("C03-js", `${M2}/js.html`);
+   await scrape("C04-delayed", `${M2}/delayed.html`);
+diff --git a/scripts/m2/verify.mjs b/scripts/m2/verify.mjs
+index 73b12fe..08680e9 100644
+--- a/scripts/m2/verify.mjs
++++ b/scripts/m2/verify.mjs
+@@ -415,6 +415,27 @@ const checks = {
+       return { ok, actual: `refused=${denied.length} (${[...new Set(denied.map((x) => x.split(":")[0]))].join(",")}); proxy log lines=${logs.length}, without host or attempt=${unnamed.length}; pixel hits=${p.fixture.filter((h) => h.path === "/pixel.png").length}` };
+     } },
+ 
++  S03: { name: "browser-first-redirect-denial-classification", inputs: [`${RAW}rt-browser-redirect.txt`],
++    expected: "seven initial and two post-load already-blocked private/Cloud redirects report canonical classes through core and retrieval, each in one browser attempt; a permitted cross-host redirect succeeds, a page's own 403 remains ACCESS_DENIED and all permits are released",
++    run() {
++      const p = phase("browser-redirect"), bad = [];
++      for (const stem of ["BR01-redis", "BR02-metadata", "BR03-cloud", "BR04-loopback", "BR05-mapped", "BR06-name", "BR07-lan", "BR09-postload-private", "BR10-postload-cloud"]) {
++        const cls = stem.includes("cloud") ? "CLOUD_DENIED" : "SSRF_DENIED";
++        const core = p.cases[`${stem}-core`], direct = p.cases[`${stem}-rs`], attempts = byLogical(p, direct?.logicalId);
++        if (core?.success !== false || !new RegExp(`\\b${cls}\\b`).test(core.error ?? "") || direct?.ok !== false || direct.failure !== cls || direct.attemptsUsed !== 1 ||
++          JSON.stringify(direct.strategies) !== JSON.stringify(["direct_browser"]) || attempts.length !== 1 || attempts[0].strategy !== "direct_browser" || attempts[0].outcome !== cls) bad.push(stem);
++      }
++      const denied = p.attempts.filter(a => ["SSRF_DENIED", "CLOUD_DENIED"].includes(a.outcome));
++      const counts = Object.fromEntries(["SSRF_DENIED", "CLOUD_DENIED"].map(cls => [cls, denied.filter(a => a.outcome === cls).length]));
++      const publicCore = p.cases["BR08-public-core"], publicDirect = p.cases["BR08-public-rs"];
++      const positive = publicCore?.success === true && publicCore.sentinels.includes("fcpi-m1-static-7f3a") && publicDirect?.ok === true && publicDirect.sentinels.includes("fcpi-m1-static-7f3a") &&
++        JSON.stringify(publicDirect.strategies) === JSON.stringify(["direct_browser"]) && publicDirect.attemptsUsed === 1;
++      const actualRefusals = p.retrieval.filter(e => e.event === "proxy_denied" && ["SSRF_DENIED", "CLOUD_DENIED"].includes(e.failure) && e.attempt_id);
++      const own403 = p.cases["BR11-own-403-core"]?.success === false && /\bACCESS_DENIED\b/.test(p.cases["BR11-own-403-core"].error ?? "") && p.cases["BR11-own-403-rs"]?.ok === false && p.cases["BR11-own-403-rs"].failure === "ACCESS_DENIED";
++      const ok = p.driverExit === "0" && bad.length === 0 && counts.SSRF_DENIED === 14 && counts.CLOUD_DENIED === 4 && denied.every(a => a.strategy === "direct_browser") && actualRefusals.length >= 18 && positive && own403 && permitsFree(p) && healthy(p);
++      return { ok, actual: `wrong-class cases=${bad.join(",") || "none"}; actual attempt outcomes=${JSON.stringify(counts)}; proxy refusals=${actualRefusals.length}; public cross-host positive=${positive}; own 403 unchanged=${own403}; permits=${permitsFree(p)}; health=${healthy(p)}` };
++    } },
++
+   // ============================================================== attempts, pacing, permits
+   A01: { name: "four-attempts-per-logical-page", inputs: [`${RAW}rt-budget.txt`],
+     expected: "three calls for one logical page against a 503 target spend 2, then 4, attempts and the third is ATTEMPT_BUDGET_EXHAUSTED with none; the fixture saw exactly 4 requests",
+diff --git a/scripts/m9/verify.mjs b/scripts/m9/verify.mjs
+index 8c5f9ef..9f2fdc7 100755
+--- a/scripts/m9/verify.mjs
++++ b/scripts/m9/verify.mjs
+@@ -21,7 +21,7 @@ for(const [id,refs] of Object.entries({
+  AC17:[[8,'O02'],[8,'O03'],[8,'O04'],[8,'N01'],[8,'N02']],
+  AC18:[[8,'K01'],[8,'K02']],
+  AC23:[[6,'R07'],[8,'I08'],[8,'I09'],[8,'I10'],[8,'I11']],
+- AC25:[[2,'S01'],[2,'S02'],[5,'E03'],[5,'B02'],[6,'R09'],[7,'E02'],[8,'X02']]
++ AC25:[[2,'S01'],[2,'S02'],[2,'S03'],[5,'E03'],[5,'B02'],[6,'R09'],[7,'E02'],[8,'X02']]
+ }))fresh[id].push(...refs);
+ // Recompute every selected legacy check into M9-owned paths, even when it fails
+ // or lacks raw inputs. Their nonzero all-milestone exit is expected for subsets.
+diff --git a/services/browser/src/server.mjs b/services/browser/src/server.mjs
+index 0d02b05..78ebb0c 100644
+--- a/services/browser/src/server.mjs
++++ b/services/browser/src/server.mjs
+@@ -199,7 +199,7 @@ async function renderWithin(r, signal, started, deadline, run) {
+   // actionNavigations: main-frame loads the actions started (a same-host click that opens a new document), reported so the
+   // retrieval service counts each against the domain as it counts the first (review W6).
+   const counters = { requests: 0, blocked: 0, overLimit: 0, offHost: 0, actionNavigations: 0 };
+-  let inActions = false;
++  let inActions = false, navigationUrl = r.url, failedTunnelUrl = null;
+   // The render starts where the direct attempt's paced chain ended; the main frame may not move to
+   // another host, whose navigation no pacing decision covered (review finding C4).
+   const startHost = new URL(r.url).host;
+@@ -235,6 +235,14 @@ async function renderWithin(r, signal, started, deadline, run) {
+       return route.continue();
+     });
+     const page = await context.newPage();
++    // Redirected navigation requests do not rerun the route callback. Keep their
++    // main-frame target for matching the proxy's refusal, including goto errors.
++    page.on("request", (req) => {
++      try { if (req.isNavigationRequest() && req.frame() === page.mainFrame()) navigationUrl = req.url(); } catch { /* no associated frame */ }
++    });
++    page.on("requestfailed", (req) => {
++      try { if (req.isNavigationRequest() && req.frame() === page.mainFrame() && req.failure()?.errorText === "net::ERR_TUNNEL_CONNECTION_FAILED") failedTunnelUrl = req.url(); } catch { /* no associated frame */ }
++    });
+     // A renderer that dies (in this container, usually the cgroup's memory cap) ends the page alone.
+     page.on("crash", () => { crashed = true; });
+     page.on("dialog", (d) => d.dismiss().catch(() => {}));
+@@ -256,7 +264,8 @@ async function renderWithin(r, signal, started, deadline, run) {
+     if (chars > maxHtml) return { ok: false, failure: { class: "SIZE_LIMIT", detail: `rendered document of ${chars} characters exceeds ${maxHtml}` }, subresources: counters, timings: { totalMs: Date.now() - started } };
+     const html = await page.content();
+     return {
+-      ok: true, finalUrl: page.url(), status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,
++      ok: true, finalUrl: page.url(), navigationUrl: response?.url() ?? navigationUrl, status: response?.status() ?? 0, contentType: response?.headers()["content-type"] ?? null, html, redirects,
++      navigationFailure: page.url() === "chrome-error://chromewebdata/" && failedTunnelUrl ? { class: "NAVIGATION_FAILED", url: failedTunnelUrl } : null,
+       subresources: counters, screenshot: extras.screenshot, actions: extras.actions,
+       timings: { totalMs: Date.now() - started }, browser: { version: browser?.version() ?? null, pagesServed: pagesServed + 1, launches },
+     };
+@@ -264,7 +273,7 @@ async function renderWithin(r, signal, started, deadline, run) {
+     const cls = e.failureClass ?? (cancelled ? "CANCELLED" : expired ? "TIMEOUT" : browser === null ? "BROWSER_CRASHED" : crashed ? "RENDERER_CRASHED" : /Timeout/i.test(e.name) ? "TIMEOUT" : /net::ERR_/.test(e.message) ? "NAVIGATION_FAILED" : "BROWSER_ERROR");
+     // M7: an action that could not be done, or extras past their bounds, will not go better on a second try.
+     const final = ["ACTION_FAILED", "UNSUPPORTED_CAPABILITY", "RESOURCE_LIMIT", "SIZE_LIMIT"].includes(cls);
+-    return { ok: false, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300), ...(final ? { retryable: false } : {}) }, subresources: counters, timings: { totalMs: Date.now() - started } };
++    return { ok: false, navigationUrl, failure: { class: cls, detail: String(e.message).split("\n")[0].slice(0, 300), ...(final ? { retryable: false } : {}) }, subresources: counters, timings: { totalMs: Date.now() - started } };
+   } finally {
+     clearTimeout(killer);
+     signal?.removeEventListener("abort", onAbort);
+diff --git a/services/retrieval/src/acquire.mjs b/services/retrieval/src/acquire.mjs
+index 5b0b963..56f54a7 100644
+--- a/services/retrieval/src/acquire.mjs
++++ b/services/retrieval/src/acquire.mjs
+@@ -484,9 +484,26 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
+             ? { class: "RESOURCE_LIMIT", detail: `the page passed its browser budget (${r.subresources?.requests ?? 0} subresources, ${r.proxy?.requests ?? 0} proxied requests, ${r.proxy?.bytes ?? 0} bytes)`, retryable: false, retryAfter: null } : null;
+           // A render that failed because the provider refused its tunnels is the provider's failure, not the page's.
+           const providerFailure = !r.ok && r.proxy?.upstreamFailure ? { ...r.proxy.upstreamFailure, provider: true } : null;
++          // A proxy-denied main document may appear as a 403 page or a failed
++          // HTTPS navigation. Use the attempt's actual refusal, never page text;
++          // an unrelated blocked subresource must not fail a usable document.
++          let navigationFailure = null;
++          const failedNavigation = (!r.ok && r.failure?.class === "NAVIGATION_FAILED") ||
++            (r.ok && r.finalUrl === "chrome-error://chromewebdata/" && r.navigationFailure?.class === "NAVIGATION_FAILED");
++          if (r.ok || failedNavigation) {
++            try {
++              const nav = new URL(failedNavigation ? r.navigationFailure?.url ?? r.navigationUrl ?? r.finalUrl : r.finalUrl);
++              nav.hash = "";
++              const urlHash = createHash("sha256").update(nav.href).digest("hex");
++              const authority = `${nav.hostname}:${nav.port || (nav.protocol === "https:" ? "443" : "80")}`;
++              const denied = r.proxy?.denied?.find((d) => ["SSRF_DENIED", "CLOUD_DENIED"].includes(d.class) &&
++                (d.urlHash === urlHash || (failedNavigation && nav.protocol === "https:" && !d.urlHash && d.host === authority)));
++              if (denied) navigationFailure = { class: denied.class, detail: "the browser's main-frame destination was refused by acquisition policy", retryable: false, retryAfter: null };
++            } catch { /* no attributable navigation target */ }
++          }
+           // M7: a render asked for a screenshot that came back without one did not do what was asked.
+           const noShot = r.ok && hooks?.screenshot && !r.screenshot?.base64 ? { class: "BROWSER_ERROR", detail: "the render returned no screenshot" } : null;
+-          const failure = providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? noShot ?? (shell
++          const failure = navigationFailure ?? providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? noShot ?? (shell
+             ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null));
+           await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: s?.bytes ?? r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
+           if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }
+@@ -504,7 +521,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
+           if (shellTier === tier) await learn(answered, { tier, mode: "browser", outcome: "js_rendered" });
+           return { done: finish({ ok: true, body: r.html, finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
+             bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
+-            subresources: r.subresources, proxyDenied: r.proxy?.denied ?? [], ...(hooks ? { screenshot: r.screenshot ?? null, actions: r.actions ?? null } : {}) }) };
++            subresources: r.subresources, proxyDenied: (r.proxy?.denied ?? []).map(({ urlHash, ...denied }) => denied), ...(hooks ? { screenshot: r.screenshot ?? null, actions: r.actions ?? null } : {}) }) };
+         } finally {
+           await releaseAll(log, [paced && (() => store.releaseDomain(paced.domain, attemptId)), () => store.releasePermit("browser", attemptId)]);
+         }
+diff --git a/services/retrieval/src/proxy.mjs b/services/retrieval/src/proxy.mjs
+index e5ca627..66c5980 100644
+--- a/services/retrieval/src/proxy.mjs
++++ b/services/retrieval/src/proxy.mjs
+@@ -62,8 +62,20 @@ export class ProxySessions {
+ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupFixture, log }) {
+   // An attempt's refusals are returned when it closes; a standing session never closes, so it keeps none
+   // and each refusal is only logged (review S5).
+-  const refuse = (s, target, e) => {
+-    if (!s.logEach) s.denied.push({ host: target, class: e.failureClass ?? "PROXY_ERROR" });
++  const refuse = (s, target, e, rawUrl = null) => {
++    // Early readiness/cap refusals can arrive before target parsing. Never let
++    // an absolute URL, credentials or query enter the host-only refusal record.
++    if (!/^(?:[A-Za-z0-9.-]+|\[[0-9a-fA-F:.]+\])(?::\d{1,5})?$/.test(target ?? "")) {
++      try { target = new URL(target).host || "?"; } catch { target = "?"; }
++    }
++    if (!s.logEach) {
++      const denied = { host: target, class: e.failureClass ?? "PROXY_ERROR" };
++      // Correlate HTTP navigation refusals without retaining URL/query text.
++      if (rawUrl && ["SSRF_DENIED", "CLOUD_DENIED"].includes(denied.class)) {
++        try { const url = new URL(rawUrl); url.hash = ""; denied.urlHash = digest(url.href).toString("hex"); } catch { /* invalid target */ }
++      }
++      s.denied.push(denied);
++    }
+     log({ event: "proxy_denied", attempt_id: s.attemptId, target_host: target, failure: e.failureClass ?? "PROXY_ERROR", detail: e.detail ?? e.message });
+   };
+   const count = (s, n, ...socks) => {
+@@ -152,7 +164,7 @@ export function startProxy({ listen, sessions, getPolicy, resolvePublic, lookupF
+       req.pipe(up);
+     } catch (e) {
+       settleLeg();
+-      refuse(s, host, e);
++      refuse(s, host, e, req.url);
+       const code = e.provider || e.failureClass === "TARGET_UNREACHABLE" ? 502 : 403;
+       res.writeHead(code, { "content-type": "text/plain", connection: "close" }).end(`fcpi: ${e.failureClass ?? "refused"}\n`);
+     }
+diff --git a/services/retrieval/test/acquire.test.mjs b/services/retrieval/test/acquire.test.mjs
+index 2b93c4d..43a9b97 100644
+--- a/services/retrieval/test/acquire.test.mjs
++++ b/services/retrieval/test/acquire.test.mjs
+@@ -5,6 +5,7 @@
+ import { test } from "node:test";
+ import assert from "node:assert/strict";
+ import http from "node:http";
++import { createHash } from "node:crypto";
+ import { getEventListeners } from "node:events";
+ import { makeAcquirer, makeFetcher, makePacer, makeUrlHmac } from "../src/acquire.mjs";
+ import { FakeStore, policyFor, serve, acquirerFor, body, page, urlHmac } from "./acquire-helpers.mjs";
+@@ -138,6 +139,96 @@ const SHELL = '<main id="root"><noscript>Please enable JavaScript to read this p
+ const RENDERED = "<main><h1>Rendered</h1><p>Enough article text here to be an adequate page of its own, once rendered by script.</p></main>";
+ const okRender = (html = RENDERED) => ({ render: async (a) => ({ ok: true, html, status: 200, finalUrl: a.url, subresources: { requests: 1, overLimit: 0 }, proxy: { requests: 1, bytes: 10, capped: false, denied: [] } }) });
+ 
++test("browser-first redirects retain authoritative private/Cloud proxy refusals", async (t) => {
++  const fx = await serve((req, res) => page(res));
++  try {
++    for (const [navigationUrl, cls, status] of [
++      ["http://10.231.1.5:6379/", "SSRF_DENIED", 403],
++      ["http://169.254.169.254/latest/meta-data/", "SSRF_DENIED", 403],
++      ["http://169.254.169.254/latest/meta-data/?after=load", "SSRF_DENIED", 200],
++      ["http://127.0.0.1:3002/", "SSRF_DENIED", 403],
++      ["http://[::ffff:a00:105]/", "SSRF_DENIED", 403],
++      ["http://redis:6379/", "SSRF_DENIED", 403],
++      ["http://192.168.1.9/", "SSRF_DENIED", 403],
++      ["http://100.100.100.100/", "SSRF_DENIED", 403],
++      ["https://127.0.0.1/", "SSRF_DENIED", null],
++      ["https://api.firecrawl.dev/v1/scrape", "CLOUD_DENIED", null],
++    ]) await t.test(navigationUrl, async () => {
++      const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
++      store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
++      const nav = new URL(navigationUrl);
++      const browser = { render: async () => ({ navigationUrl, ...(status ? { ok: true, status, finalUrl: navigationUrl, html: "fcpi: refused" }
++        : { ok: false, failure: { class: "NAVIGATION_FAILED", retryable: true } }),
++        proxy: { denied: [{ host: status ? nav.host : `${nav.hostname}:443`, class: cls,
++          ...(status ? { urlHash: createHash("sha256").update(nav.href).digest("hex") } : {}) }],
++          upstreamFailure: status ? null : { class: "PROXY_UNAVAILABLE", retryable: true } } }) };
++      const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/redirect`));
++      assert.equal(r.ok, false);
++      assert.equal(r.failure.class, cls);
++      assert.equal(r.failure.retryable, false);
++      assert.deepEqual(r.strategies, ["direct_browser"]);
++      assert.equal(r.attemptsUsed, 1);
++      assert.equal(store.attempts[0].outcome, cls);
++      assert.equal(store.permits.size, 0);
++      assert.equal(fx.hits.length, 0, "no direct retry or fallback is introduced");
++    });
++  } finally { fx.s.close(); }
++});
++
++test("public browser redirects remain usable with unrelated denied subresources", async () => {
++  const fx = await serve((req, res) => page(res));
++  try {
++    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
++    store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
++    const finalUrl = `http://t.fixture.fcpi.test:${fx.port}/public`;
++    const browser = { render: async () => ({ ok: true, status: 200, html: RENDERED, finalUrl, navigationUrl: finalUrl,
++      proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }, { host: "127.0.0.1:3002", class: "SSRF_DENIED", urlHash: createHash("sha256").update("http://127.0.0.1:3002/?private=fixture").digest("hex") }] } }) };
++    const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/redirect`));
++    assert.equal(r.ok, true);
++    assert.equal(r.finalUrl, finalUrl);
++    assert.equal(r.proxyDenied.length, 2);
++    assert.deepEqual(r.proxyDenied, [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }, { host: "127.0.0.1:3002", class: "SSRF_DENIED" }], "URL correlation material never leaves the retrieval process");
++  } finally { fx.s.close(); }
++});
++
++test("a post-load tunnel failure on the main frame propagates the actual Cloud refusal", async () => {
++  const fx = await serve((req, res) => page(res));
++  try {
++    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
++    store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
++    const browser = { render: async () => ({ ok: true, status: 200, html: "<p>Browser error</p>", finalUrl: "chrome-error://chromewebdata/",
++      navigationUrl: `http://t.fixture.fcpi.test:${fx.port}/`, navigationFailure: { class: "NAVIGATION_FAILED", url: "https://api.firecrawl.dev/v1/scrape" },
++      proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }] } }) };
++    const r = await acquirerFor(store, policy, browser)(body(`http://t.fixture.fcpi.test:${fx.port}/`));
++    assert.equal(r.ok, false); assert.equal(r.failure.class, "CLOUD_DENIED"); assert.equal(r.attemptsUsed, 1);
++    assert.deepEqual(r.strategies, ["direct_browser"]); assert.equal(store.permits.size, 0);
++  } finally { fx.s.close(); }
++});
++
++test("page text, unmatched refusals and cancellation do not invent a navigation policy failure", async () => {
++  const fx = await serve((req, res) => page(res));
++  try {
++    const target = `http://t.fixture.fcpi.test:${fx.port}/`;
++    for (const [reply, expected] of [
++      [{ ok: true, status: 403, html: "fcpi: CLOUD_DENIED", navigationUrl: target, finalUrl: target, proxy: { denied: [] } }, "ACCESS_DENIED"],
++      [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: "api.firecrawl.dev:443", class: "CLOUD_DENIED" }] } }, "ACCESS_DENIED"],
++      [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: new URL(target).host, class: "SSRF_DENIED",
++        urlHash: createHash("sha256").update(target + "asset").digest("hex") }] } }, "ACCESS_DENIED"],
++      [{ ok: true, status: 403, html: "refused", navigationUrl: "http://169.254.169.254/", finalUrl: target, proxy: { denied: [{ host: "169.254.169.254", class: "SSRF_DENIED",
++        urlHash: createHash("sha256").update("http://169.254.169.254/").digest("hex") }] } }, "ACCESS_DENIED"],
++      [{ ok: true, status: 403, html: "refused", navigationUrl: target, finalUrl: target, proxy: { denied: [{ host: new URL(target).host, class: "SSRF_DENIED",
++        urlHash: createHash("sha256").update(target.replace("http://", "http://fixture-user:fixture-password@")).digest("hex") }] } }, "ACCESS_DENIED"],
++      [{ ok: false, navigationUrl: target, failure: { class: "NAVIGATION_FAILED" }, proxy: { denied: [{ host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }, "NAVIGATION_FAILED"],
++      [{ ok: false, navigationUrl: "http://127.0.0.1:3002/", failure: { class: "CANCELLED" }, proxy: { denied: [{ host: "127.0.0.1:3002", class: "SSRF_DENIED" }] } }, "CANCELLED"],
++    ]) {
++      const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", fx.port, "fixture"]]);
++      store.routes.set("t.fixture.fcpi.test", { prefer_browser: true, browser_expires_at: new Date(Date.now() + 3600e3) });
++      const r = await acquirerFor(store, policy, { render: async () => reply })(body(target));
++      assert.equal(r.failure.class, expected);
++    }
++  } finally { fx.s.close(); }
++});
++
+ test("a JS shell gets one browser attempt; a structural shell after it is RENDER_INCOMPLETE", async () => {
+   const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(SHELL));
+   try {
+diff --git a/services/retrieval/test/proxy.test.mjs b/services/retrieval/test/proxy.test.mjs
+index ca49c80..352498a 100644
+--- a/services/retrieval/test/proxy.test.mjs
++++ b/services/retrieval/test/proxy.test.mjs
+@@ -43,7 +43,8 @@ test("a public page's requests cannot reach a fixture host (review finding S1)",
+       const pub = sessions.open("public-page", { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+       const r = await viaProxy(port, `http://fx.fixture.fcpi.test:${fx.address().port}/slow`, pub);
+       assert.equal(r.status, 403);
+-      assert.deepEqual(sessions.close("public-page").denied, [{ host: `fx.fixture.fcpi.test:${fx.address().port}`, class: "SSRF_DENIED" }]);
++      assert.deepEqual(sessions.close("public-page").denied, [{ host: `fx.fixture.fcpi.test:${fx.address().port}`, class: "SSRF_DENIED",
++        urlHash: createHash("sha256").update(`http://fx.fixture.fcpi.test:${fx.address().port}/slow`).digest("hex") }]);
+       const own = sessions.open("fixture-page", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+       assert.deepEqual(await viaProxy(port, `http://fx.fixture.fcpi.test:${fx.address().port}/ok`, own), { status: 200, body: "fixture" });
+       sessions.close("fixture-page");
+@@ -89,6 +90,20 @@ test("no credential, a wrong one or an expired one gets 407; a refused target 40
+   } finally { good.close(); }
+ });
+ 
++test("real CONNECT refusals preserve the denied authority and canonical class", async () => {
++  await withProxy(8080, async ({ port, sessions }) => {
++    for (const [authority, cls] of [["127.0.0.1:443", "SSRF_DENIED"], ["api.firecrawl.dev:443", "CLOUD_DENIED"]]) {
++      const id = `tunnel-${cls}`, cred = sessions.open(id, { expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
++      const response = await new Promise((resolve, reject) => {
++        const socket = net.connect(port, "127.0.0.1", () => socket.write(`CONNECT ${authority} HTTP/1.1\r\nhost: ${authority}\r\nproxy-authorization: Basic ${Buffer.from(`${cred.username}:${cred.password}`).toString("base64")}\r\n\r\n`));
++        let data = ""; socket.on("data", (chunk) => { data += chunk; }); socket.on("end", () => resolve(data)); socket.on("error", reject);
++      });
++      assert.match(response, /^HTTP\/1\.1 403/);
++      assert.deepEqual(sessions.close(id).denied, [{ host: authority, class: cls }]);
++    }
++  });
++});
++
+ test("a session past its request or byte cap is refused and marked capped (review finding W6)", async () => {
+   const big = http.createServer((q, r) => r.end("x".repeat(64 * 1024))).listen(0, "127.0.0.1");
+   await listening(big);
+@@ -102,6 +117,7 @@ test("a session past its request or byte cap is refused and marked capped (revie
+       const a = sessions.close("req-cap");
+       assert.equal(a.capped, true);
+       assert.deepEqual(a.denied.map((d) => d.class), ["RESOURCE_LIMIT"]);
++      assert.deepEqual(a.denied.map((d) => d.host), [`fx.fixture.fcpi.test:${big.address().port}`]);
+       const byBytes = sessions.open("byte-cap", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1024, maxRequests: 50 });
+       await viaProxy(port, url, byBytes).catch(() => null);
+       assert.equal(sessions.close("byte-cap").capped, true);
+@@ -112,14 +128,18 @@ test("a session past its request or byte cap is refused and marked capped (revie
+ test("the proxy answers 503 while the local-network list is not loaded (review finding W7)", async () => {
+   const good = http.createServer((q, r) => r.end("fine")).listen(0, "127.0.0.1");
+   await listening(good);
+-  const sessions = new ProxySessions();
++  const sessions = new ProxySessions(), logs = [];
+   const proxy = startProxy({ listen: { host: "127.0.0.1", port: 0 }, sessions, getPolicy: () => ({ ...policyFor(good.address().port), localCidrs: undefined }),
+-    resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
++    resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: (e) => logs.push(e) });
+   await listening(proxy);
+   try {
+     const cred = sessions.open("not-ready", { fixture: true, expiresAt: Date.now() + 10000, maxBytes: 1 << 20 });
+-    assert.equal((await viaProxy(proxy.address().port, `http://fx.fixture.fcpi.test:${good.address().port}/`, cred)).status, 503);
+-    assert.deepEqual(sessions.close("not-ready").denied.map((d) => d.class), ["RETRIEVAL_NOT_READY"]);
++    const url = `http://fixture-user:fixture-password@fx.fixture.fcpi.test:${good.address().port}/private?token=fixture-sensitive-query`;
++    assert.equal((await viaProxy(proxy.address().port, url, cred)).status, 503);
++    assert.deepEqual(sessions.close("not-ready").denied, [{ host: `fx.fixture.fcpi.test:${good.address().port}`, class: "RETRIEVAL_NOT_READY" }]);
++    assert.equal(logs.find(e => e.event === "proxy_denied")?.target_host, `fx.fixture.fcpi.test:${good.address().port}`);
++    assert.equal(JSON.stringify(logs).includes("fixture-sensitive-query"), false);
++    assert.equal(JSON.stringify(logs).includes("fixture-password"), false);
+   } finally { proxy.close(); good.close(); }
+ });
+ 
+diff --git a/tests/fixtures/m2/server.mjs b/tests/fixtures/m2/server.mjs
+index e98764a..84baac3 100644
+--- a/tests/fixtures/m2/server.mjs
++++ b/tests/fixtures/m2/server.mjs
+@@ -41,6 +41,7 @@ const routes = {
+   "/members": () => [302, { location: "/login?next=/members" }, ""],
+   "/login": () => [200, { "content-type": "text/html; charset=utf-8" }, html("Sign in", "<main><h1>Sign in</h1><form method=\"post\"><input name=\"user\"><input type=\"password\" name=\"pw\"><button>Sign in</button></form></main>")],
+   "/forbidden": () => [403, { "content-type": "text/html; charset=utf-8" }, html("Forbidden", "<p>You do not have access to this resource.</p>")],
++  "/forbidden-navigation": () => [403, { "content-type": "text/html; charset=utf-8" }, html("Forbidden navigation control", '<p>You do not have access to this resource.</p><img src="http://169.254.169.254/latest/meta-data/"><script>setTimeout(()=>location.href="http://169.254.169.254/latest/meta-data/",100)</script>')],
+   "/challenge": () => [200, { "content-type": "text/html; charset=utf-8" }, html("Just a moment...", "<div id=\"challenge-running\">Checking your browser before accessing the site.</div><script src=\"/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1\"></script>")],
+   "/pdf": async () => [200, { "content-type": "application/pdf" }, await pdf()],
+   "/doc.pdf": async () => [200, { "content-type": "application/pdf" }, await pdf()],
+diff --git a/tests/fixtures/m2/site/postload-denied.html b/tests/fixtures/m2/site/postload-denied.html
+new file mode 100644
+index 0000000..2283e26
+--- /dev/null
++++ b/tests/fixtures/m2/site/postload-denied.html
+@@ -0,0 +1,10 @@
++<!doctype html>
++<title>Controlled post-load policy probe</title>
++<main id="content"><noscript>Please enable JavaScript.</noscript></main>
++<script>
++setTimeout(() => {
++  const destination = new URLSearchParams(location.search).get('dst') === 'cloud'
++    ? 'https://api.firecrawl.dev/v1/scrape' : 'http://169.254.169.254/latest/meta-data/';
++  location.href = '/redirect?to=' + encodeURIComponent(destination);
++}, 100);
++</script>

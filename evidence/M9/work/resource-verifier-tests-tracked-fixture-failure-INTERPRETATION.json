@@ -1,0 +1,8 @@
+{
+  "utc": "2026-10-03T21:39:33.886Z",
+  "state": "FAIL",
+  "actual_test_failures": 1,
+  "metadata_exit_code_0_invalid": true,
+  "cause": "The newly tracked live fixture imported the evidence-only evaluator for an equivalence assertion. The runtime import guard intentionally excludes only the exact proof-test paths; the precommit git-file enumeration missed the untracked test.",
+  "fix": "Move the equivalence assertion into the existing proof-only resource verifier suite; do not broaden runtime exemptions."
+}

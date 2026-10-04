@@ -1,0 +1,21 @@
+{
+  "utc": "2026-10-03T16:07:34.832Z",
+  "base_source": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+  "candidate_patch_sha256": "3d3638a40bb477649889e96b8fd9324839f2faa332e64c09e186d38cac8733bf",
+  "focused": {
+    "state": "PASS",
+    "tests": 57,
+    "raw": "work/M2-REG12-focused-fixtures.txt"
+  },
+  "broad_unmounted_mac": {
+    "state": "FAIL",
+    "classification": "environment",
+    "raw": "work/M2-REG12-retrieval-fixtures.txt",
+    "pass": 77,
+    "fail": 13,
+    "skipped": 26,
+    "cause": "Broad direct command lacked policy/fixture/deployment mounts and FCPI_TEST_PG. No database proof established.",
+    "required_rerun": "scripts/m9/incident-tests.sh on the Pi with disposable internal PostgreSQL and real fixture/policy mounts"
+  },
+  "state": "IMPLEMENTED_UNVERIFIED"
+}

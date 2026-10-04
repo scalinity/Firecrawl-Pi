@@ -1,0 +1,15 @@
+✔ accepted historical bytes plus current bounded evidence pass (9.569834ms)
+✔ historical evidence cannot be rewritten or replaced by a PASS summary (5.4455ms)
+✔ material runtime/configuration or source changes refuse reuse (26.432959ms)
+✔ short, sparse, mixed-source and missing concurrent model evidence fail (17.9715ms)
+✔ OOM, unsafe memory, queue, swap, caps, paid dispatch, latency and ACL failure block reuse (36.415917ms)
+✔ only three pure evidence evaluator paths preserve execution-source equivalence (0.213083ms)
+✔ compose equivalence permits only the reviewed incident additions and three image pins (11.844917ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 216.569542

@@ -1,0 +1,26 @@
+✔ native proof excludes arguments, error output, prose and other servers (0.762375ms)
+✔ missing, edited, failed or summary-only evidence cannot grant acceptance (1.182709ms)
+✔ incident acceptance requires actual model and every enforced resource bound (1.241542ms)
+✔ empty Compose labels do not turn owned disposable containers into foreign infrastructure (3.688917ms)
+✔ incident file guard permits bounded reads and a proposed source fix (1580.968375ms)
+✔ only the native schema serialization tool may emit this incident handle (125.22425ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1219.172208ms)
+✔ a symlink cannot expose an outside file or redirect a write (32.736625ms)
+✔ large diagnostic projections stay readable and disclose omitted evidence (2258.865292ms)
+✔ operational probe counts only exact incident lifecycle notices (30.286708ms)
+✔ INFO uses the operator without the password in argv (428.419666ms)
+✔ key scans and fixture writes use the narrowed core user (301.000625ms)
+✔ the preserved pre-M8 deployment remains readable (100.409459ms)
+✔ unexpected users and missing passwords fail closed (96.408292ms)
+✔ restore preserves private incident state only for inspection, without a control surface (22.656083ms)
+✔ complete reviews and padded or optional table bars preserve returned blockers (1.777417ms)
+✔ pending, duplicate, malformed and missing findings cannot disappear (0.730542ms)
+✔ privileged controller independently rejects forged/tampered/expired gateway spool entries (1.995917ms)
+ℹ tests 18
+ℹ suites 0
+ℹ pass 18
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3461.880541

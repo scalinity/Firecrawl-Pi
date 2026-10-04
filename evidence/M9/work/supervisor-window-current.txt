@@ -1,0 +1,24 @@
+{"utc":"2026-10-03T10:37:07Z","epoch":1791023827,"service":"mcp-gateway"}
+{
+  "healthy": true,
+  "commit": "591dff27ec9acb603fa8d6356141912cf475a158",
+  "host": {
+    "sample_age_s": 44,
+    "mem": {
+      "total_mib": 8062,
+      "available_mib": 5243,
+      "swap_used_mib": 0
+    },
+    "temp_c": 45.8,
+    "injected_temp": false,
+    "throttled": "0x0",
+    "disk": {
+      "size": 62295171072,
+      "free": 32049602560,
+      "free_pct": 51.4,
+      "inodes_free_pct": 83.7
+    },
+    "host_oom_kill": 0
+  },
+  "foreign_containers": []
+}

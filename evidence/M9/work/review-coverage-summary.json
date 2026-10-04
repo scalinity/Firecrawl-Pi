@@ -1,0 +1,10 @@
+{
+  "source_commit": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+  "utc": "2026-10-03T10:27:54.779Z",
+  "complete": true,
+  "findings": 86,
+  "returned": [
+    "M9-REG-12"
+  ],
+  "local_tests": 28
+}

@@ -1,0 +1,6 @@
+M8-I15 PASS               supervisor-bounded-restarts-then-incident
+M8-O02 PASS               one-notice-per-incident-and-its-recovery
+M8-S05 PASS               core-heap-holds-large-pages-at-384-mib
+M8-K01 PASS               coordinated-backup-on-the-fixture-repository
+M8-K02 PASS               isolated-restore-proves-the-backup
+M8-N02 PASS               external-watchdog-notices-a-lost-heartbeat-once

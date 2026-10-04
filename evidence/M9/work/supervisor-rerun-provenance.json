@@ -1,0 +1,37 @@
+{
+  "utc": "2026-10-03T11:20:19.755Z",
+  "initial_raw": "evidence/M9/regression/M8/raw/initial-supervisor-notice-faults.txt",
+  "initial_sha256": "90f31691a9c01fb64b6f3f9cd417aa14527998b61dd72ee9fd439013b89e465c",
+  "rerun_raw": "evidence/M9/regression/M8/raw/supervisor-rerun.txt",
+  "rerun_sha256": "b2399e0d847db8eb25c31502f2115bc9f7d91aa6f41e989a28a6b0b897d094b7",
+  "replaced_only_section": "supervisor",
+  "replacement_sha256": "8d945e1d90b391db58627e0662e5aabd59df28422718f79a460896b8ae6dc4f9",
+  "replacement_source_commit": "14de77bc2b302e4484736b3d281d16bea72de8aa",
+  "composed_raw": "evidence/M9/regression/M8/raw/faults.txt",
+  "composed_sha256": "2987700919acad72cc27f1ee4b5443edcf8fbe9ea66ea3484d665fff54c7e2be",
+  "other_sections_remain_at_original_source": true,
+  "production_restart_ledger_reset": false,
+  "rounds": [
+    {
+      "round": "round_1",
+      "restarts": 1,
+      "budget_notices": 0
+    },
+    {
+      "round": "round_2",
+      "restarts": 2,
+      "budget_notices": 0
+    },
+    {
+      "round": "round_3",
+      "restarts": 3,
+      "budget_notices": 0
+    },
+    {
+      "round": "round_4",
+      "restarts": 3,
+      "budget_notices": 1
+    }
+  ],
+  "recovery_notices": 2
+}

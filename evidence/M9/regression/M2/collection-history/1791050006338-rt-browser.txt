@@ -1,0 +1,153 @@
+### browser_meta
+utc=2026-10-03T17:35:05.813Z source_commit=da4b4510479131f119d27f52c12f7d718590c8f9
+firecrawl-core=bed62f9ccff224b136882becd65e726430849bf89396ed11926b94f1415d5d88 image=sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4 started=2026-10-03T15:49:39.886288838Z restarts=0
+retrieval-service=6f8e2d1cb81e3fb3f0a03e579f82f6e413f01a19a85d9f58cd093844ebca9572 image=sha256:acc94e9c2dbe05ee5740585417d34f4860195c78e9764fd0625546035d8ff483 started=2026-10-03T17:33:28.850207966Z restarts=0
+fixture-m2=7d9e8629b8026eb7c40373e273e815fbf8c4007408b9589402ab887c9e94dbe4 image=sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e started=2026-10-03T17:33:29.628167584Z restarts=0
+browser-worker=f5314ac8afecc98c979d6fe3af23ccb9facce627aedc36ec060ce6682e520b7f image=sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3 started=2026-10-03T17:21:03.456518047Z restarts=0
+### browser_driver
+{"utc":"2026-10-03T17:35:07.894Z","case":"C03-js","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/js.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a102d5-75f5-7075-ab1e-cdfae63e8a0d","sentinels":["fcpi-m2-js-5c1e"],"markdown_chars":307,"warning":null,"ms":1732}
+{"utc":"2026-10-03T17:35:10.552Z","case":"C04-delayed","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/delayed.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a102d5-7c7d-76ec-8faf-d70ca7a4d966","sentinels":["fcpi-m2-delayed-9b2d"],"markdown_chars":228,"warning":null,"ms":2658}
+{"utc":"2026-10-03T17:35:12.239Z","case":"C06-cookie-js","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/cookie-js","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a102d5-86dd-737b-825e-b446e9bfd217","sentinels":["fcpi-m2-cookiejs-7d1c"],"markdown_chars":172,"warning":null,"ms":1687}
+{"utc":"2026-10-03T17:35:13.869Z","case":"C27-js-late","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/js-slow.html","http":500,"success":false,"code":"SCRAPE_FCPI_RETRIEVAL","error":"Retrieval failed: RENDER_INCOMPLETE. the page was still a script shell after rendering (visible_chars=0; scripts=1; noscript asks for JavaScript)","statusCode":null,"scrapeId":null,"sentinels":[],"markdown_chars":0,"warning":null,"ms":1630}
+{"utc":"2026-10-03T17:35:15.545Z","case":"C28-short-scripted","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/short-scripted.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a102d5-93d1-73c5-a161-d3b69bacb154","sentinels":["fcpi-m2-shortjs-4d2e"],"markdown_chars":59,"warning":null,"ms":1676}
+{"utc":"2026-10-03T17:35:17.190Z","case":"C29-gallery","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/gallery.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a102d5-9a5c-763a-9119-95d536d1cf9d","sentinels":["fcpi-m2-gallery-9a1b"],"markdown_chars":203,"warning":null,"ms":1645}
+{"utc":"2026-10-03T17:35:18.978Z","case":"C30-huge-dom","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/huge-dom.html","http":500,"success":false,"code":"SCRAPE_FCPI_RETRIEVAL","error":"Retrieval failed: SIZE_LIMIT. rendered document of 30000878 characters exceeds 26214400","statusCode":null,"scrapeId":null,"sentinels":[],"markdown_chars":0,"warning":null,"ms":1788}
+{"utc":"2026-10-03T17:35:20.862Z","case":"S15-subresources","kind":"core","api":"v2","url_label":"http://m2.fixture.fcpi.test:8080/subresources.html","http":200,"success":true,"code":null,"error":null,"statusCode":200,"scrapeId":"01a102d5-a7c4-75eb-88ae-266cec66b860","sentinels":["fcpi-m2-subresources-6f0b"],"markdown_chars":479,"warning":null,"ms":1884}
+{"utc":"2026-10-03T17:35:22.572Z","case":"S15b-subresources-direct","kind":"rs","url_label":"http://m2.fixture.fcpi.test:8080/subresources.html?direct=1","logicalId":"m2-subres-1937af92-a85e-469f-b3c7-3b4e5f67d63e","http":200,"ok":true,"attemptsUsed":1,"strategies":["direct_browser"],"targetStatus":200,"verdict":"adequate","failure":null,"retryAfter":null,"sentinels":["fcpi-m2-subresources-6f0b"],"subresources":{"requests":14,"blocked":0,"overLimit":0,"offHost":0,"actionNavigations":0},"proxyDenied":["SSRF_DENIED:nuq-postgres:5432","SSRF_DENIED:[::1]:3002","SSRF_DENIED:127.0.0.1:3002","SSRF_DENIED:10.231.1.5:6379","SSRF_DENIED:127.0.0.1:3002","SSRF_DENIED:169.254.169.254","SSRF_DENIED:192.168.1.1","SSRF_DENIED:[::ffff:7f00:1]:3002","CLOUD_DENIED:api.firecrawl.dev:443","SSRF_DENIED:10.231.2.1:8080","SSRF_DENIED:127.0.0.1","SSRF_DENIED:127.0.0.1","SSRF_DENIED:10.231.1.4:5672"],"started":"2026-10-03T17:35:20.863Z","ms":1709}
+{"utc":"2026-10-03T17:35:22.572Z","case":"end"}
+driver_exit=0
+### browser_browser_processes
+utc=2026-10-03T17:35:27Z
+      1       0 Ss       864 docker-init
+      7       1 Sl       864 MainThread
+    973       7 Ssl        8 chrome-headless
+    976     973 S          8 chrome-headless
+    977     973 S          8 chrome-headless
+    979     977 S          8 chrome-headless
+    995     976 Sl         8 chrome-headless
+   1001     973 Sl         8 chrome-headless
+   1040       0 Rs         0 ps
+### browser_retrieval_log
+{"utc":"2026-10-03T17:35:07.869Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"25050f41-d0b4-451e-a8ac-c9d609cf3b2a","logical_id":"01a102d5-75f5-7075-ab1e-cdfae63e8a0d","purpose":"page","url_hmac":"7ab438787391285d1c72d1e7658e3f77","attempts_used":2,"strategies":["direct_http","direct_browser"],"initial_strategy":"direct_http","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":[],"target_status":200,"verdict":"adequate","failure":null,"bytes":721,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1633}
+{"utc":"2026-10-03T17:35:10.540Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"c55a707d-24c3-4b6b-9df4-3fb7610e3c33","logical_id":"01a102d5-7c7d-76ec-8faf-d70ca7a4d966","purpose":"page","url_hmac":"afa7220ecde5c916e944bda2e0e13e0b","attempts_used":2,"strategies":["direct_http","direct_browser"],"initial_strategy":"direct_http","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":[],"target_status":200,"verdict":"adequate","failure":null,"bytes":643,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":2633}
+{"utc":"2026-10-03T17:35:12.228Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"1464e12c-1d80-4890-abae-9dad1f09d70c","logical_id":"01a102d5-86dd-737b-825e-b446e9bfd217","purpose":"page","url_hmac":"d6ecde2fd5306bf48d147ad0def79f04","attempts_used":1,"strategies":["direct_browser"],"initial_strategy":"direct_browser","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":["learned_js"],"target_status":200,"verdict":"adequate","failure":null,"bytes":592,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1664}
+{"utc":"2026-10-03T17:35:13.860Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"67eef058-3e08-4d2b-a996-d7cc83a447d2","logical_id":"01a102d5-8d72-767e-95c5-881c580f6795","purpose":"page","url_hmac":"1642bf96a1038e984eb25ae69cfa789d","attempts_used":1,"strategies":["direct_browser"],"initial_strategy":"direct_browser","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":["learned_js"],"target_status":0,"verdict":null,"failure":"RENDER_INCOMPLETE","bytes":0,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1613}
+{"utc":"2026-10-03T17:35:15.534Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"6a03ea5a-ff43-423f-9a95-71815111b89b","logical_id":"01a102d5-93d1-73c5-a161-d3b69bacb154","purpose":"page","url_hmac":"bee0f7531bb3d07266468de790a24130","attempts_used":1,"strategies":["direct_browser"],"initial_strategy":"direct_browser","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":["learned_js"],"target_status":200,"verdict":"adequate","failure":null,"bytes":483,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1654}
+{"utc":"2026-10-03T17:35:17.177Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"7e772bbf-c912-49b2-ba40-c6eebb041e5e","logical_id":"01a102d5-9a5c-763a-9119-95d536d1cf9d","purpose":"page","url_hmac":"040b7d48f61d6aa5bee9bdbb7831d02a","attempts_used":1,"strategies":["direct_browser"],"initial_strategy":"direct_browser","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":["learned_js"],"target_status":200,"verdict":"adequate","failure":null,"bytes":545,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1624}
+{"utc":"2026-10-03T17:35:18.971Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"03e36095-726e-4adc-9923-e0353d6ec719","logical_id":"01a102d5-a0c8-76aa-9053-4a929d84d636","purpose":"page","url_hmac":"6a4dca24a9a88041280369b45050d186","attempts_used":1,"strategies":["direct_browser"],"initial_strategy":"direct_browser","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":["learned_js"],"target_status":0,"verdict":null,"failure":"SIZE_LIMIT","bytes":0,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1774}
+{"utc":"2026-10-03T17:35:19.218Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"nuq-postgres:5432","failure":"SSRF_DENIED","detail":"port 5432 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.219Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"[::1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.220Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.221Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"10.231.1.5:6379","failure":"SSRF_DENIED","detail":"port 6379 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.238Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.240Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"169.254.169.254","failure":"SSRF_DENIED","detail":"address 169.254.169.254 is link-local"}
+{"utc":"2026-10-03T17:35:19.241Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"192.168.1.1","failure":"SSRF_DENIED","detail":"address 192.168.1.1 is private"}
+{"utc":"2026-10-03T17:35:19.249Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"api.firecrawl.dev:443","failure":"CLOUD_DENIED","detail":"api.firecrawl.dev is a Firecrawl Cloud service destination"}
+{"utc":"2026-10-03T17:35:19.249Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"10.231.2.1:8080","failure":"SSRF_DENIED","detail":"port 8080 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.250Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"10.231.1.4:5672","failure":"SSRF_DENIED","detail":"port 5672 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.251Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"[::ffff:7f00:1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:19.254Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-10-03T17:35:19.257Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-10-03T17:35:20.842Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"91032f5c-4b22-427d-807d-fafec7800a35","logical_id":"01a102d5-a7c4-75eb-88ae-266cec66b860","purpose":"page","url_hmac":"7a1d1e124aa989a777b224685fc3285a","attempts_used":1,"strategies":["direct_browser"],"initial_strategy":"direct_browser","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":["learned_js"],"target_status":200,"verdict":"adequate","failure":null,"bytes":1741,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1858}
+{"utc":"2026-10-03T17:35:20.953Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"nuq-postgres:5432","failure":"SSRF_DENIED","detail":"port 5432 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:20.959Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"[::1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:20.960Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:20.961Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"10.231.1.5:6379","failure":"SSRF_DENIED","detail":"port 6379 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:21.001Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"127.0.0.1:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:21.004Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"169.254.169.254","failure":"SSRF_DENIED","detail":"address 169.254.169.254 is link-local"}
+{"utc":"2026-10-03T17:35:21.006Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"192.168.1.1","failure":"SSRF_DENIED","detail":"address 192.168.1.1 is private"}
+{"utc":"2026-10-03T17:35:21.008Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"[::ffff:7f00:1]:3002","failure":"SSRF_DENIED","detail":"port 3002 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:21.017Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"api.firecrawl.dev:443","failure":"CLOUD_DENIED","detail":"api.firecrawl.dev is a Firecrawl Cloud service destination"}
+{"utc":"2026-10-03T17:35:21.018Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"10.231.2.1:8080","failure":"SSRF_DENIED","detail":"port 8080 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:21.019Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-10-03T17:35:21.021Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"127.0.0.1","failure":"SSRF_DENIED","detail":"address 127.0.0.1 is loopback"}
+{"utc":"2026-10-03T17:35:21.022Z","service":"retrieval","build":"0.5.0","event":"proxy_denied","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","target_host":"10.231.1.4:5672","failure":"SSRF_DENIED","detail":"port 5672 is not the scheme's default port"}
+{"utc":"2026-10-03T17:35:22.565Z","service":"retrieval","build":"0.5.0","event":"acquisition","request_id":"f91b9fc3-38cd-4905-9781-e998de27e2e7","logical_id":"m2-subres-1937af92-a85e-469f-b3c7-3b4e5f67d63e","purpose":"page","url_hmac":"e12a0e6824deb660fe2e0c6b0d1874bd","attempts_used":1,"strategies":["direct_browser"],"initial_strategy":"direct_browser","final_strategy":"direct_browser","route_requested":"auto","route_start":"direct","route_reason":"default","escalations":["learned_js"],"target_status":200,"verdict":"adequate","failure":null,"bytes":1741,"proxy_bytes":0,"proxy_micro_usd":0,"proxy_states":[],"enhanced_mode":null,"enhanced_state":null,"enhanced_reused":false,"enhanced_micro_usd":0,"hooks":null,"ms":1689}
+### browser_fixture_log
+{"utc":"2026-10-03T17:35:06.251Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:06.315Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:07.921Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/delayed.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:07.990Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/delayed.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:10.643Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/cookie-js","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:10.672Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/cookie-js","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":"present"}
+{"utc":"2026-10-03T17:35:12.309Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/js-slow.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:13.962Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/short-scripted.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:13.986Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?analytics=1","status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:15.611Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/gallery.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:15.637Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?gallery=1","status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:15.638Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?i=1","status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:15.639Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?i=2","status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:15.639Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":"?i=3","status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:17.260Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/huge-dom.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:19.159Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/subresources.html","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:19.224Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:20.935Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/subresources.html","query":"?direct=1","status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:20.964Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/pixel.png","query":null,"status":200,"from":"10.231.3.5","ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+{"utc":"2026-10-03T17:35:23.090Z","host":"m2.fixture.fcpi.test:8080","method":"GET","path":"/slow","query":"?ms=40000","status":200,"ua":"Mozilla/5.0 (X11; Linux aarch64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36","cookie":null}
+### browser_browser_log
+{"utc":"2026-10-03T17:35:07.855Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"7e3edc17-468f-4483-9955-2de63206382c","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":1584,"pages_served":44}
+{"utc":"2026-10-03T17:35:10.532Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"747d0170-2aed-470e-9743-1fcdd6ac5b82","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":2594,"pages_served":45}
+{"utc":"2026-10-03T17:35:12.221Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"cd4ac170-e1b1-4912-8084-2487aba12695","ok":true,"failure":null,"status":200,"requests":2,"blocked":0,"over_limit":0,"ms":1638,"pages_served":46}
+{"utc":"2026-10-03T17:35:13.851Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"d1a24453-7ed8-4d98-9e02-6905a57b82ef","ok":true,"failure":null,"status":200,"requests":1,"blocked":0,"over_limit":0,"ms":1587,"pages_served":47}
+{"utc":"2026-10-03T17:35:15.527Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"8b35a5f6-2ca6-4b2d-aa5c-a12c66811de5","ok":true,"failure":null,"status":200,"requests":2,"blocked":0,"over_limit":0,"ms":1631,"pages_served":48}
+{"utc":"2026-10-03T17:35:17.170Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"208c5389-0945-4ef1-9a28-f554e349e7b1","ok":true,"failure":null,"status":200,"requests":5,"blocked":0,"over_limit":0,"ms":1603,"pages_served":49}
+{"utc":"2026-10-03T17:35:18.961Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"72051efe-fa0f-4b1b-9eb0-f3a05b46adf4","ok":false,"failure":"SIZE_LIMIT","status":null,"requests":1,"blocked":0,"over_limit":0,"ms":1745,"pages_served":50}
+{"utc":"2026-10-03T17:35:19.000Z","service":"browser","build":"0.3.0","event":"browser_disconnected"}
+{"utc":"2026-10-03T17:35:19.015Z","service":"browser","build":"0.3.0","event":"browser_retired","reason":"recycle","killed":0}
+{"utc":"2026-10-03T17:35:19.104Z","service":"browser","build":"0.3.0","event":"browser_launched","version":"153.0.8010.12","ms":88,"launches":2}
+{"utc":"2026-10-03T17:35:20.834Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"c007498c-9afa-4a1f-8d2d-280721b12ae3","ok":true,"failure":null,"status":200,"requests":14,"blocked":0,"over_limit":0,"ms":1837,"pages_served":1}
+{"utc":"2026-10-03T17:35:22.559Z","service":"browser","build":"0.3.0","event":"render","attempt_id":"dae3629d-85e0-43dd-9c30-c36540e8c48f","ok":true,"failure":null,"status":200,"requests":14,"blocked":0,"over_limit":0,"ms":1671,"pages_served":2}
+### browser_attempts
+01a102d5-75f5-7075-ab1e-cdfae63e8a0d	1	page	direct_http	m2.fixture.fcpi.test	2026-10-03T17:35:06.241Z	2026-10-03T17:35:06.253Z	js_shell	200	721		2	9783273f-4c44-4ecb-b8c5-cf16cb24fab9
+01a102d5-75f5-7075-ab1e-cdfae63e8a0d	2	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:06.255Z	2026-10-03T17:35:07.858Z	rendered	200	721	1	2	7e3edc17-468f-4483-9955-2de63206382c
+01a102d5-7c7d-76ec-8faf-d70ca7a4d966	1	page	direct_http	m2.fixture.fcpi.test	2026-10-03T17:35:07.912Z	2026-10-03T17:35:07.924Z	js_shell	200	643		2	5fe1be12-16ae-46d3-9f93-a984a5452be5
+01a102d5-7c7d-76ec-8faf-d70ca7a4d966	2	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:07.926Z	2026-10-03T17:35:10.534Z	rendered	200	643	1	2	747d0170-2aed-470e-9743-1fcdd6ac5b82
+01a102d5-86dd-737b-825e-b446e9bfd217	1	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:10.570Z	2026-10-03T17:35:12.224Z	rendered	200	592	2	1	cd4ac170-e1b1-4912-8084-2487aba12695
+01a102d5-8d72-767e-95c5-881c580f6795	1	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:12.254Z	2026-10-03T17:35:13.854Z	RENDER_INCOMPLETE	200	546	1	1	d1a24453-7ed8-4d98-9e02-6905a57b82ef
+01a102d5-93d1-73c5-a161-d3b69bacb154	1	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:13.886Z	2026-10-03T17:35:15.530Z	rendered	200	483	2	1	8b35a5f6-2ca6-4b2d-aa5c-a12c66811de5
+01a102d5-9a5c-763a-9119-95d536d1cf9d	1	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:15.557Z	2026-10-03T17:35:17.172Z	rendered	200	545	5	1	208c5389-0945-4ef1-9a28-f554e349e7b1
+01a102d5-a0c8-76aa-9053-4a929d84d636	1	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:17.205Z	2026-10-03T17:35:18.965Z	SIZE_LIMIT		874	1	1	72051efe-fa0f-4b1b-9eb0-f3a05b46adf4
+01a102d5-a7c4-75eb-88ae-266cec66b860	1	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:18.989Z	2026-10-03T17:35:20.838Z	rendered	200	1741	14	1	c007498c-9afa-4a1f-8d2d-280721b12ae3
+m2-subres-1937af92-a85e-469f-b3c7-3b4e5f67d63e	1	page	direct_browser	m2.fixture.fcpi.test	2026-10-03T17:35:20.880Z	2026-10-03T17:35:22.561Z	rendered	200	1741	14	1	dae3629d-85e0-43dd-9c30-c36540e8c48f
+attempt_query_exit=0
+### browser_permits
+browser	0	t	
+url	0	t	
+url	1	t	
+### browser_health
+retrieval-service running healthy restarts=0
+fixture-m2 running healthy restarts=0
+browser-worker running healthy restarts=0
+access-gateway running healthy restarts=0
+fixture-m7 running healthy restarts=0
+firecrawl-core running healthy restarts=0
+nuq-postgres running healthy restarts=0
+rabbitmq running healthy restarts=0
+redis running healthy restarts=0
+searxng running healthy restarts=0
+fixture-m6 running healthy restarts=0
+mcp-gateway running healthy restarts=0
+fixture-m5 running healthy restarts=0
+fixture running healthy restarts=0
+fixture-m3 running healthy restarts=0
+### browser_cgroups_end
+retrieval-service cgroup=absent state=running
+fixture-m2 cgroup=absent state=running
+browser-worker cgroup=absent state=running
+access-gateway cgroup=absent state=running
+fixture-m7 cgroup=absent state=running
+firecrawl-core cgroup=absent state=running
+nuq-postgres cgroup=absent state=running
+rabbitmq cgroup=absent state=running
+redis cgroup=absent state=running
+searxng cgroup=absent state=running
+fixture-m6 cgroup=absent state=running
+mcp-gateway cgroup=absent state=running
+fixture-m5 cgroup=absent state=running
+fixture cgroup=absent state=running
+fixture-m3 cgroup=absent state=running
+host_mem_available_mib=4843
+### browser_browser_health
+{"ok":true,"browser":"up","version":"153.0.8010.12","pagesServed":2,"launches":2,"busy":false}
+### browser_end
+end

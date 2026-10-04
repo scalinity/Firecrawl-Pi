@@ -1,0 +1,1 @@
+{"group":"M2","runs":[{"phase":"static","path":"evidence/M9/regression/M2/raw/rt-static.txt","sha256":"a899b753d48deca5b9d24a093ec4775a8137e30b390278d3a53a2d972b72a5d7","exit_code":0},{"phase":"browser","path":"evidence/M9/regression/M2/raw/rt-browser.txt","sha256":"6229141dbc17e3d2eae1a28f99e8226aebb1ce52724320019687a4005b1db424","exit_code":0}]}

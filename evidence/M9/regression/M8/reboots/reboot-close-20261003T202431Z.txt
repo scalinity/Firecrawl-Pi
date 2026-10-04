@@ -1,0 +1,34 @@
+### meta
+utc=2026-10-03T20:24:31Z source_commit=82a11536707e3fb6d4fe76497e857b137c5e2184 before_boot=d60f278673b664339fcb44f6b59eba910def9b210fdd20ada93e3e46210cb7bf
+before_found=yes
+### boots
+idx=-1 boot_id_sha256=d60f278673b664339fcb44f6b59eba910def9b210fdd20ada93e3e46210cb7bf first=2026-10-03T10:40:23+00:00 last=2026-10-03T19:41:13+00:00
+idx=0 boot_id_sha256=7f34310353ce995681f52fc20ec3e815ec21b5c8cbbc96dccd92caa12a287aa5 first=2026-10-03T19:41:27+00:00 last=2026-10-03T20:24:32+00:00
+### ended_1
+last=2026-10-03T19:41:13+00:00 shutdown_markers=973 watchdog_reboot=no loss_utc=2026-10-03T19:41:12+00:00 sudo_commands=0 ssh_logins=0 sessions=0 console_logins=0 undervoltage=0
+### current
+boot_id_sha256=7f34310353ce995681f52fc20ec3e815ec21b5c8cbbc96dccd92caa12a287aa5 kernel=6.18.50+rpt-rpi-2712 page_size=16384 up_since_utc=2026-10-03T19:41:24Z
+rsts=20 throttled_this_boot=0x0
+### recovery
+docker.service ExecMainStatus=0 ActiveState=active
+fcpi-stack.service ExecMainStatus=0 ActiveState=active
+2026-10-03T19:41:31+00:00 fcpi-data-check.sh[600]: fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=35 create_host_path=false
+2026-10-03T19:41:38+00:00 fcpi-data-check.sh[1414]: fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=35 create_host_path=false
+2026-10-03T19:41:38+00:00 fcpi-egress-local.sh[1466]: fcpi-egress-local: ipv4=2 ipv6=0
+2026-10-03T19:41:54+00:00 fcpi-egress-local.sh[3341]: fcpi-egress-local: ipv4=2 ipv6=0
+access-gateway status=running health=healthy restarts=0
+browser-worker status=running health=healthy restarts=0
+firecrawl-core status=running health=healthy restarts=0
+fixture status=running health=healthy restarts=0
+fixture-m2 status=running health=healthy restarts=0
+fixture-m3 status=running health=healthy restarts=0
+fixture-m5 status=running health=healthy restarts=0
+fixture-m6 status=running health=healthy restarts=0
+fixture-m7 status=running health=healthy restarts=0
+mcp-gateway status=running health=healthy restarts=0
+nuq-postgres status=running health=healthy restarts=0
+rabbitmq status=running health=healthy restarts=0
+redis status=running health=healthy restarts=0
+retrieval-service status=running health=healthy restarts=0
+searxng status=running health=healthy restarts=0
+end

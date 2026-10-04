@@ -1,0 +1,45 @@
+{
+  "schema": "fcpi.m9-observations/v1",
+  "utc": "2026-10-03T08:48:55.783Z",
+  "source_commit": "27f29d1cf6f8cddf742e683e95d52dd4531150ac",
+  "persistence": {
+    "initial_state": "FAIL",
+    "classification": "verification overlaps normal retention cleanup",
+    "expired_jobs": 31,
+    "collected_files": 43,
+    "ledger_loss_claim": "not established; expired transitions correlate to startup sweep",
+    "runtime_retention_changed": false,
+    "unchanged_billing_hash": true,
+    "unchanged_registry_hash": true,
+    "all_sentinels": true,
+    "affected_fresh_rerun": "pending"
+  },
+  "incident": {
+    "initial_state": "IMPLEMENTED_UNVERIFIED",
+    "classification": "environment-sensitive sandbox startup defect",
+    "exit_class": "226/NAMESPACE",
+    "agent_started": false,
+    "model_usage": null,
+    "apply_grant": false,
+    "inactive_auth_removed": true,
+    "fix_scope": "M9"
+  },
+  "inputs": [
+    {
+      "path": "work/persistence-current-gc.txt",
+      "sha256": "60e7b3a5b5a4624ba26e889ed4c1c0caf7c22912ba957ad2b21ae9bc68a04332"
+    },
+    {
+      "path": "work/persistence-reference-proof.txt",
+      "sha256": "2e43af1245aacf15fee2be1706f9fc60c5362dbe84767799262a8cb9774580ce"
+    },
+    {
+      "path": "regression/M3/raw/initial-retention-boundary-persistence.txt",
+      "sha256": "c90a361854e435934eac354f3c876b955ff03e7101156e77d7d4553954926cd3"
+    },
+    {
+      "path": "work/incident-namespace-failure.txt",
+      "sha256": "a5f8f15c950324acba88b21d606f835beb128ccfd502d4f7c115f75190d481fc"
+    }
+  ]
+}

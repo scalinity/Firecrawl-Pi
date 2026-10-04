@@ -1,0 +1,6 @@
+2026-10-03T02:29:06-04:00 pi kernel: chrome-headless invoked oom-killer: gfp_mask=0xcc0(GFP_KERNEL), order=0, oom_score_adj=300
+2026-10-03T02:29:06-04:00 pi kernel:  oom_kill_process+0x2a8/0x338
+2026-10-03T02:29:06-04:00 pi kernel: Memory cgroup stats for /fcpi.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope:
+2026-10-03T02:29:06-04:00 pi kernel: [  pid  ]   uid  tgid total_vm      rss rss_anon rss_file rss_shmem pgtables_bytes swapents oom_score_adj name
+2026-10-03T02:29:06-04:00 pi kernel: oom-kill:constraint=CONSTRAINT_MEMCG,nodemask=(null),cpuset=docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope,mems_allowed=0-7,oom_memcg=/fcpi.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope,task_memcg=/fcpi.slice/docker-7791cfade334c791f140f3b021ff1a7cf6488e1491915d4c579ec0de20dd14f0.scope,task=chrome-headless,pid=3834278,uid=3320
+2026-10-03T02:29:06-04:00 pi kernel: Memory cgroup out of memory: Killed process 3834278 (chrome-headless) total-vm:1517856336kB, anon-rss:1408176kB, file-rss:73968kB, shmem-rss:4608kB, UID:3320 pgtables:1744kB oom_score_adj:300

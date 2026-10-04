@@ -1,0 +1,26 @@
+{
+  "utc": "2026-10-03T18:27:27.533Z",
+  "session": "01a0ffc9-2dbf-7892-8248-fe282fcc5cf4",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "ownership": "M9 canonical scope plus three narrowly authorized owning-M2 remediations",
+  "interruption": "Previous sequential collection ended after native clients and creating the disposable M3 revoked-token control; no auth raw or receipt existed.",
+  "resumed_at": "M3 auth",
+  "completed_before_resume": [
+    "M2 classification/security real-browser S03",
+    "M3 crash recovery J03",
+    "299 isolated Pi fixture tests",
+    "Claude Code global native MCP scrape",
+    "Codex global native MCP scrape"
+  ],
+  "remaining_order": [
+    "Remaining M3-M8 independent fixture and operations checks",
+    "Current bounded incident investigation",
+    "24-hour controlled fixture soak",
+    "Intentionally open authorized <=45m real-provider window",
+    "Full acceptance, redaction, canonical facts and local close-out"
+  ],
+  "provider_window": "AUTHORIZED_NOT_OPENED",
+  "paid_dispatch": false,
+  "paid_caps": "zero",
+  "publication": "not authorized"
+}

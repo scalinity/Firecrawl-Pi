@@ -1,0 +1,26 @@
+{
+  "source_commit": "bec90502fcff74e04b3fde5ac772cece47d7e417",
+  "mechanism": "two fresh native CLI contexts, debugger and code-auditor; exact requested model",
+  "models": [
+    {
+      "role": "debugger",
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "turns": 61,
+      "api_equivalent_estimate_usd": 2.7051366,
+      "invoiced_usd": null,
+      "subscription": "Max"
+    },
+    {
+      "role": "auditor",
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "turns": 59,
+      "api_equivalent_estimate_usd": 3.4314048,
+      "invoiced_usd": null,
+      "subscription": "Max"
+    }
+  ]
+}

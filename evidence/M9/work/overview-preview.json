@@ -1,0 +1,29 @@
+{
+  "utc": "2026-10-03T05:00:18.028Z",
+  "headless": true,
+  "origin": "localhost:8739",
+  "states": [
+    {
+      "name": "light",
+      "theme": "light",
+      "viewport": 1440,
+      "width": 1440,
+      "unit_count": 0
+    },
+    {
+      "name": "dark",
+      "theme": "dark",
+      "viewport": 1440,
+      "width": 1440,
+      "unit_count": 0
+    },
+    {
+      "name": "mobile",
+      "theme": "dark",
+      "viewport": 390,
+      "width": 390,
+      "unit_count": 0
+    }
+  ],
+  "content_note": "Displayed PRE-M9/M9 NOT_STARTED text is stale despite refreshed canonical snapshot; remediation required."
+}

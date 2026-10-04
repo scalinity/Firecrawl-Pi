@@ -1,0 +1,1 @@
+M4-P04 FAIL               cancellation  — failed=crawl_cancel; modern id 0 cancelled, gateway [{"status":499,"mcp_method":"tools/call"}]/499; legacy close cancelled; legacy notification: 2 acknowledged, call ok (ok: the notification reached another instance; cancelled: it was honoured); crawl null arc

@@ -1,0 +1,4 @@
+decodo|proxy|SETTLED|4|96000|540
+llamaparse|parser|SETTLED|2|6|6
+openai|llm|SETTLED|5|10755|170
+zyte|enhanced|SETTLED|3|3810|3810

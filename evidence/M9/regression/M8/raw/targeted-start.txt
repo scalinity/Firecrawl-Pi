@@ -1,0 +1,9 @@
+selection applied: search=fixture model=fcpi-fixture-model parser=fcpi-fixture-parser proxy=none enhanced=none utc=2026-10-03T20:32:07Z
+{
+  "run": "soak-20261003T203207Z",
+  "start_epoch": 1791059527,
+  "end_epoch": 1791061327,
+  "start_utc": "2026-10-03T20:32:07Z",
+  "end_utc": "2026-10-03T21:02:07Z",
+  "commit": "82a11536707e3fb6d4fe76497e857b137c5e2184"
+}

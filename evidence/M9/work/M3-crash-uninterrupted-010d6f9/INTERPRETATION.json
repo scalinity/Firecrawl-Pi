@@ -1,0 +1,39 @@
+{
+  "utc": "2026-10-03T13:44:58.065Z",
+  "source_commit": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+  "test_id": "M3-J03",
+  "state": "FAIL",
+  "actual": "K4 SUCCEEDED archived=6; K5 SUCCEEDED archived=6 stalled pages=0 attempts per page=[1,1,1,1,1,1]",
+  "positive_control": "zero stalled pages: no interrupted NuQ page demonstrated",
+  "raw_sha256": "43ee1293ba06e554600c94130c4f60441d0c4692c07717a3287dd8390d632c94",
+  "observations": [
+    {
+      "utc": "2026-10-03T12:37:07.092Z",
+      "case": "core_killed",
+      "ledger": {
+        "state": "RUNNING",
+        "upstream": "01a101c4-601e-76dd-afbe-1f8175978c2c",
+        "archived": 0,
+        "error_code": "",
+        "attempts": 1
+      }
+    },
+    {
+      "utc": "2026-10-03T12:37:33.651Z",
+      "case": "finished",
+      "state": "SUCCEEDED",
+      "archived": 6,
+      "stalled_pages": 0,
+      "attempts_per_page": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        1
+      ]
+    }
+  ],
+  "classification": "verification_positive_control",
+  "disposition": "Preserved; independent review of the M9 verification driver is running. No runtime defect inferred and no criterion lowered."
+}

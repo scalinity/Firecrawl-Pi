@@ -1,0 +1,9 @@
+M6-R01 PASS               direct-and-proxied-egress-fixture
+M6-R02 PASS               browser-subresources-follow-the-route
+M6-R03 PASS               protected-and-bulk-work-never-uses-home-egress
+M6-R04 PASS               controlled-escalation
+M6-R05 PASS               failure-rules-401-429-403-404-5xx
+M6-R06 PASS               learning-ttl-probe-and-attempt-limits
+M6-R07 PASS               provider-outage-and-isolation
+M6-R08 PASS               simultaneous-clients-pacing-and-cost
+M6-R09 PASS               proxy-reservations-settlement-and-hard-cap

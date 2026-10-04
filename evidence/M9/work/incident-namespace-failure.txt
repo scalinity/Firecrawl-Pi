@@ -1,0 +1,7 @@
+inactive_auth_removed=true
+2026-10-03T08:42:17+00:00 pi systemd[1]: Started fcpi-incident-59d5d64c.service - [systemd-run] /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/danny CLAUDE_CONFIG_DIR=/var/lib/firecrawl-pi/incidents/work/59d5d64c/run/auth /bin/bash /opt/firecrawl-pi/scripts/m9/incident-agent.sh 59d5d64c.
+2026-10-03T08:42:17+00:00 pi (env)[152010]: fcpi-incident-59d5d64c.service: Failed to set up mount namespacing: /home/danny/.codex: No such file or directory
+2026-10-03T08:42:17+00:00 pi (env)[152010]: fcpi-incident-59d5d64c.service: Failed at step NAMESPACE spawning /usr/bin/env: No such file or directory
+2026-10-03T08:42:17+00:00 pi systemd[1]: fcpi-incident-59d5d64c.service: Main process exited, code=exited, status=226/NAMESPACE
+2026-10-03T08:42:17+00:00 pi systemd[1]: fcpi-incident-59d5d64c.service: Failed with result 'exit-code'.
+27f29d1cf6f8cddf742e683e95d52dd4531150ac

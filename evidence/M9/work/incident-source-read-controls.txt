@@ -1,0 +1,14 @@
+✔ missing, edited, failed or summary-only evidence cannot grant acceptance (0.863041ms)
+✔ incident acceptance requires actual model and every enforced resource bound (0.948083ms)
+✔ incident file guard permits bounded reads and a proposed source fix (1452.058375ms)
+✔ only the native schema serialization tool may emit this incident handle (112.091416ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1207.688583ms)
+✔ a symlink cannot expose an outside file or redirect a write (33.270917ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 6
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3223.271709

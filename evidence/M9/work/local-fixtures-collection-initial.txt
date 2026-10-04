@@ -1,0 +1,202 @@
+TAP version 13
+# Subtest: the gateway's and the retrieval service's admission readers are the same code below their headers
+ok 1 - the gateway's and the retrieval service's admission readers are the same code below their headers
+  ---
+  duration_ms: 0.840209
+  type: 'test'
+  ...
+# Subtest: the services' staleness bound is the operations scripts' STALE_S
+ok 2 - the services' staleness bound is the operations scripts' STALE_S
+  ---
+  duration_ms: 1.373042
+  type: 'test'
+  ...
+# Subtest: the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network
+ok 3 - the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network
+  ---
+  duration_ms: 3.905083
+  type: 'test'
+  ...
+# Subtest: every host path the copy names is under its directory
+ok 4 - every host path the copy names is under its directory
+  ---
+  duration_ms: 16.988292
+  type: 'test'
+  ...
+# Subtest: the copy runs only the kept services, publishes nothing and reaches no egress network
+ok 5 - the copy runs only the kept services, publishes nothing and reaches no egress network
+  ---
+  duration_ms: 0.175125
+  type: 'test'
+  ...
+# Subtest: every network is internal, isolated, renamed and moved off production's addresses
+ok 6 - every network is internal, isolated, renamed and moved off production's addresses
+  ---
+  duration_ms: 0.170834
+  type: 'test'
+  ...
+# Subtest: webhook delivery and paid dispatch are off in the copy
+ok 7 - webhook delivery and paid dispatch are off in the copy
+  ---
+  duration_ms: 0.094084
+  type: 'test'
+  ...
+# Subtest: native proof excludes arguments, error output, prose and other servers
+ok 8 - native proof excludes arguments, error output, prose and other servers
+  ---
+  duration_ms: 0.797542
+  type: 'test'
+  ...
+# Subtest: actual input identity binds independently of the verifier revision
+ok 9 - actual input identity binds independently of the verifier revision
+  ---
+  duration_ms: 1.118625
+  type: 'test'
+  ...
+# Subtest: unstamped inputs need receipts; body and immutable image stamps cannot supply identity
+ok 10 - unstamped inputs need receipts; body and immutable image stamps cannot supply identity
+  ---
+  duration_ms: 0.404708
+  type: 'test'
+  ...
+# Subtest: directory hashes include exact names and bytes and refuse symbolic links
+ok 11 - directory hashes include exact names and bytes and refuse symbolic links
+  ---
+  duration_ms: 1.656959
+  type: 'test'
+  ...
+# Subtest: missing, edited, failed or summary-only evidence cannot grant acceptance
+ok 12 - missing, edited, failed or summary-only evidence cannot grant acceptance
+  ---
+  duration_ms: 1.28025
+  type: 'test'
+  ...
+# Subtest: incident acceptance requires actual model and every enforced resource bound
+ok 13 - incident acceptance requires actual model and every enforced resource bound
+  ---
+  duration_ms: 1.484458
+  type: 'test'
+  ...
+# Subtest: empty Compose labels do not turn owned disposable containers into foreign infrastructure
+ok 14 - empty Compose labels do not turn owned disposable containers into foreign infrastructure
+  ---
+  duration_ms: 4.189167
+  type: 'test'
+  ...
+# Subtest: incident file guard permits bounded reads and a proposed source fix
+ok 15 - incident file guard permits bounded reads and a proposed source fix
+  ---
+  duration_ms: 1685.48
+  type: 'test'
+  ...
+# Subtest: only the native schema serialization tool may emit this incident handle
+ok 16 - only the native schema serialization tool may emit this incident handle
+  ---
+  duration_ms: 135.104625
+  type: 'test'
+  ...
+# Subtest: secrets, security changes, runtime hooks and execution tools are denied
+ok 17 - secrets, security changes, runtime hooks and execution tools are denied
+  ---
+  duration_ms: 1340.061541
+  type: 'test'
+  ...
+# Subtest: a symlink cannot expose an outside file or redirect a write
+ok 18 - a symlink cannot expose an outside file or redirect a write
+  ---
+  duration_ms: 36.63025
+  type: 'test'
+  ...
+# Subtest: large diagnostic projections stay readable and disclose omitted evidence
+ok 19 - large diagnostic projections stay readable and disclose omitted evidence
+  ---
+  duration_ms: 2380.671375
+  type: 'test'
+  ...
+# Subtest: operational probe counts only exact incident lifecycle notices
+ok 20 - operational probe counts only exact incident lifecycle notices
+  ---
+  duration_ms: 36.187542
+  type: 'test'
+  ...
+# Subtest: INFO uses the operator without the password in argv
+ok 21 - INFO uses the operator without the password in argv
+  ---
+  duration_ms: 370.395167
+  type: 'test'
+  ...
+# Subtest: key scans and fixture writes use the narrowed core user
+ok 22 - key scans and fixture writes use the narrowed core user
+  ---
+  duration_ms: 173.415833
+  type: 'test'
+  ...
+# Subtest: the preserved pre-M8 deployment remains readable
+ok 23 - the preserved pre-M8 deployment remains readable
+  ---
+  duration_ms: 91.249459
+  type: 'test'
+  ...
+# Subtest: unexpected users and missing passwords fail closed
+ok 24 - unexpected users and missing passwords fail closed
+  ---
+  duration_ms: 164.601083
+  type: 'test'
+  ...
+# Subtest: restore preserves private incident state only for inspection, without a control surface
+ok 25 - restore preserves private incident state only for inspection, without a control surface
+  ---
+  duration_ms: 20.682375
+  type: 'test'
+  ...
+# Subtest: complete reviews and padded or optional table bars preserve returned blockers
+ok 26 - complete reviews and padded or optional table bars preserve returned blockers
+  ---
+  duration_ms: 1.722542
+  type: 'test'
+  ...
+# Subtest: pending, duplicate, malformed and missing findings cannot disappear
+ok 27 - pending, duplicate, malformed and missing findings cannot disappear
+  ---
+  duration_ms: 0.696791
+  type: 'test'
+  ...
+# Subtest: privileged controller independently rejects forged/tampered/expired gateway spool entries
+ok 28 - privileged controller independently rejects forged/tampered/expired gateway spool entries
+  ---
+  duration_ms: 1.55775
+  type: 'test'
+  ...
+# Subtest: positive closure controls pass, absent records never pass
+ok 29 - positive closure controls pass, absent records never pass
+  ---
+  duration_ms: 0.579917
+  type: 'test'
+  ...
+# Subtest: wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs
+ok 30 - wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs
+  ---
+  duration_ms: 0.213167
+  type: 'test'
+  ...
+# Subtest: an unrelated decoded failure cannot establish challenge rejection
+ok 31 - an unrelated decoded failure cannot establish challenge rejection
+  ---
+  duration_ms: 0.11525
+  type: 'test'
+  ...
+# Subtest: missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail
+ok 32 - missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail
+  ---
+  duration_ms: 0.166417
+  type: 'test'
+  ...
+1..32
+# tests 32
+# suites 0
+# pass 32
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3764.401041

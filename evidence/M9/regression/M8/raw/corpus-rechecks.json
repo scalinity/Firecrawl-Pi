@@ -1,0 +1,39 @@
+{
+  "schema": "fcpi.corpus-unpaid-rechecks/v1",
+  "source_commit": "111341f8726208a21484eb436dae9c39bbe4a213",
+  "started_utc": "2026-10-03T22:08:00.272Z",
+  "completed_utc": "2026-10-03T22:08:08.665Z",
+  "raw_sha256": "9ce90ffdaf52aee8e3cfd8c7409fe4c2c1c27c1a056d7a5272562df90dd51b81",
+  "initial_raw_sha256": "2ad4a55cf3f94a3c94cf99677f8ef00776d59ff0fd5208a1c389386070ea8ef1",
+  "initial_public_sha256": "ac31e7fbde57b57af081734b63ebda87c2c5b0f865e0572c8d8cf52e89b9e83d",
+  "producer_sha256": "1bc533e13e52252c5d61ff685c6658c58b3a6d1f861446f775ef43860c7fa95c",
+  "results": [
+    {
+      "id": "P01",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "6abf87480c1da9c49a4031b3e02418dd873759c8ec3a9411072d172d631938dc"
+    },
+    {
+      "id": "P02",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "1637a13af475c5b95374903d26b642cb24514c19427bce57f9bab2dc7d1c7209"
+    },
+    {
+      "id": "P07",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "026673512a6f567752c6d99cf050850338f642ece8646030eb58caebb396d83d"
+    },
+    {
+      "id": "P08",
+      "status": 200,
+      "attempts": 1,
+      "request_sha256": "c8705dc36c50c552f34ca6e2210d569e84f7204a2f64a41d26c7198172e56cd9"
+    }
+  ],
+  "paid_dispatch": false,
+  "caps_zero": true,
+  "new_provider_reservations": 0
+}

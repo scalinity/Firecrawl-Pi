@@ -1,0 +1,53 @@
+{
+  "schema": "fcpi.m9-live-window/v1",
+  "state": "CLOSED",
+  "source_commit": "cf93d5a61fe3940fbe574d3d7642818793fa3205",
+  "started_utc": "2026-10-03T21:43:44Z",
+  "expires_at": "2026-10-03T22:28:44Z",
+  "consent_sha256": "d0b5bfbd21edfe96f079f97edc95babda3f9258c47a5c9a4fc66298cceec2e33",
+  "authorization": "provider_retry_grant in work/owner-authorizations-20261003.json",
+  "authorized_new_caps": {
+    "llm_micro_usd": 19830,
+    "proxy_micro_usd": 91252,
+    "enhanced_micro_usd": 97460,
+    "total_micro_usd": 208542,
+    "parser_new_free_credits": 8,
+    "parser_project_cumulative_free_credits": 20,
+    "parser_paid_micro_usd": 0
+  },
+  "actual_absolute_caps": {
+    "llm_micro_usd": 20000,
+    "proxy_micro_usd": 100000,
+    "enhanced_micro_usd": 100000,
+    "total_micro_usd": 220000,
+    "parser_free_credits": 20
+  },
+  "cap_note": "Retained PRE-M9 and first-window consumption counts inside these absolute day/month caps; executable remaining amounts are stricter than this new grant.",
+  "prior_closed_utc": "2026-10-03T21:15:36.974Z",
+  "purposes": [
+    "Frozen twenty-target M9 corpus",
+    "Representative M9 research flow"
+  ],
+  "results": {
+    "corpus_research": {
+      "exit_code": 1
+    },
+    "cloud_audit": {
+      "exit_code": 0
+    }
+  },
+  "start_output_sha256": "767fd987aff622f79d106fe22e6400dc58e102a458190543e42b49d7980367cc",
+  "required_work_finished_utc": "2026-10-03T21:45:32.807Z",
+  "stop_output_sha256": "5f902d367c7d4c83981d53e94cb00397d551a47fa1921709595fc2cb2868eb5a",
+  "closed_utc": "2026-10-03T21:46:48.146Z",
+  "paid_dispatch": false,
+  "provider_caps_zero": true,
+  "reservations": {
+    "new_count": 10,
+    "states": {
+      "SETTLED": 8,
+      "RELEASED": 1,
+      "RESERVED": 1
+    }
+  }
+}

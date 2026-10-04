@@ -1,0 +1,492 @@
+{
+  "utc": "2026-10-04T00:07:22.838Z",
+  "source_commit": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+  "checks": {
+    "source_tree": true,
+    "units": true,
+    "runtime_sources": true,
+    "zero_caps": true,
+    "source": true,
+    "healthy": true,
+    "foreign": true,
+    "images": true,
+    "arm64": true,
+    "hashes": true,
+    "cloud": true,
+    "paid": true,
+    "binds": true,
+    "loopback": true,
+    "oom": true,
+    "incident_pin": true
+  },
+  "running": [
+    {
+      "service": "retrieval-service",
+      "image": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+      "user": "3310:3310",
+      "source": "047a42e0cee666f52b98576ef9796c804d6545f6",
+      "paid": "PI_PAID_DISPATCH_ENABLED=false",
+      "cloud": "PI_CLOUD_ACCESS_ENABLED=false",
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 469762048,
+      "swap": 469762048,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "fixture",
+      "image": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "user": "8080:8080",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 100663296,
+      "swap": 100663296,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "access-gateway",
+      "image": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+      "user": "3380:3380",
+      "source": "922d9afbf45fce8e9f5ace18b9b6a578be7ca897",
+      "paid": null,
+      "cloud": "PI_CLOUD_ACCESS_ENABLED=false",
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 167772160,
+      "swap": 167772160,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "fixture-m7",
+      "image": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "user": "8080:8080",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 100663296,
+      "swap": 100663296,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "firecrawl-core",
+      "image": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+      "user": "",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 2684354560,
+      "swap": 2684354560,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "nuq-postgres",
+      "image": "sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180",
+      "user": "5432:5432",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 671088640,
+      "swap": 671088640,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "rabbitmq",
+      "image": "sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8",
+      "user": "5672:5672",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 536870912,
+      "swap": 536870912,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "redis",
+      "image": "sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44",
+      "user": "6379:6379",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 335544320,
+      "swap": 335544320,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "searxng",
+      "image": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+      "user": "3330:3330",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 335544320,
+      "swap": 335544320,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "fixture-m6",
+      "image": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "user": "8080:8080",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 100663296,
+      "swap": 100663296,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "browser-worker",
+      "image": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3",
+      "user": "3320:3320",
+      "source": "7492e8350666fbda276eadfc278e79370efaed97",
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 1610612736,
+      "swap": 1610612736,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "mcp-gateway",
+      "image": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+      "user": "3400:3400",
+      "source": "b825e574da37391c9e67f577ee01b73c8a7ed12c",
+      "paid": null,
+      "cloud": "PI_CLOUD_ACCESS_ENABLED=false",
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 201326592,
+      "swap": 201326592,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "fixture-m3",
+      "image": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "user": "8080:8080",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 100663296,
+      "swap": 100663296,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "fixture-m2",
+      "image": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "user": "8080:8080",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 201326592,
+      "swap": 201326592,
+      "parent": "fcpi.slice",
+      "oom": false
+    },
+    {
+      "service": "fixture-m5",
+      "image": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "user": "8080:8080",
+      "source": null,
+      "paid": null,
+      "cloud": null,
+      "healthy": "healthy",
+      "readonly": true,
+      "caps": [
+        "ALL"
+      ],
+      "memory": 134217728,
+      "swap": 134217728,
+      "parent": "fcpi.slice",
+      "oom": false
+    }
+  ],
+  "images": [
+    {
+      "id": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "os": "linux",
+      "architecture": "arm64"
+    },
+    {
+      "id": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+      "os": "linux",
+      "architecture": "arm64"
+    }
+  ],
+  "hashes": [
+    {
+      "path": "deploy/versions.lock.json",
+      "sha256": "0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a",
+      "local_sha256": "0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a"
+    },
+    {
+      "path": "patches/series.json",
+      "sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96",
+      "local_sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96"
+    },
+    {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
+      "local_sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea"
+    },
+    {
+      "path": "deploy/policies/egress.json",
+      "sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c",
+      "local_sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c"
+    },
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682",
+      "local_sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    }
+  ],
+  "units": [
+    {
+      "name": "fcpi-backup-check.service",
+      "sha256": "811e50ce4e4c14c9736c3dc469a0f68a2e4f25d814e8eea5c86fb127d82cb11e"
+    },
+    {
+      "name": "fcpi-backup-check.timer",
+      "sha256": "f1dae1286607c7a58845afb4c8486ff12b0ff3221e207a11f3f5ffd4307e8df5"
+    },
+    {
+      "name": "fcpi-backup.service",
+      "sha256": "82b82b0a7e68a01973350c802dc2ed60f2c79194726105974e979cb7c845a248"
+    },
+    {
+      "name": "fcpi-backup.timer",
+      "sha256": "0dcf185fe3b4e811e26fc97ba800dce302cb23d1f6c459972e506f7719e29817"
+    },
+    {
+      "name": "fcpi-boot-record.service",
+      "sha256": "62ad9e7eced5291c6562124462616965383d4102ba3344a87edaa30d9374b869"
+    },
+    {
+      "name": "fcpi-data-check.service",
+      "sha256": "15928d94754471da0bf8ede77c42d7802bf30109359973d7d78be9c6c53dc8bc"
+    },
+    {
+      "name": "fcpi-heartbeat.service",
+      "sha256": "cd03aabf15dcf677ea7e411e17f4e11664b0bb2b03507b19c7d6729cc74f02a8"
+    },
+    {
+      "name": "fcpi-heartbeat.timer",
+      "sha256": "f33f2dffe50f58f72e3512318ba19050298872f3f9918cb9bcaa56f362ce6069"
+    },
+    {
+      "name": "fcpi-probe.service",
+      "sha256": "6ab83f2fda1005c598a7710c7d5cd92118a1b8330e5f19fc1f3a25b36605c364"
+    },
+    {
+      "name": "fcpi-probe.timer",
+      "sha256": "7eade845789f95eb8b084db2933f63d9cd7fc9c9fa3b5ef6e6ee777ae9fb4f21"
+    },
+    {
+      "name": "fcpi-restore-test.service",
+      "sha256": "cae90cf44f4f369bba712cd4133642d77a2c76b89d244f69a039a52fca661068"
+    },
+    {
+      "name": "fcpi-restore-test.timer",
+      "sha256": "edd250b192d23c34268b78133106ef00df6647a9868beee8c68eb83c10074176"
+    },
+    {
+      "name": "fcpi-stack.service",
+      "sha256": "909c0d4480d95c2ebf01db01cfc6bbccf2aab440686ae112ba81d66117d3e102"
+    },
+    {
+      "name": "fcpi-tick.service",
+      "sha256": "b8d69ae9965e8efe1d0bfbd1d2b203d3a2ac8b1a344048657c152c8784dba149"
+    },
+    {
+      "name": "fcpi-tick.timer",
+      "sha256": "869dfbea3da7f8b272786798c26b09688be17a218ea9273752d25987dfafdb3c"
+    },
+    {
+      "name": "fcpi.slice",
+      "sha256": "5beddf9f26cae61720992ea04fee57bcde1f1d1e101dbaa13d0da3ba9cb0aadb"
+    },
+    {
+      "name": "fcpi-incident.service",
+      "sha256": "85a2acbd79de02a6944f7fe6f0235863c4b4af51ef017050593025d28c6fa0ea"
+    },
+    {
+      "name": "fcpi-incident.timer",
+      "sha256": "fad19fb96660ef652772a5ae8cdf5ddaed64caeb66fbb1fcf6985352823f1046"
+    },
+    {
+      "name": "tmpfiles-fcpi.conf",
+      "sha256": "9cabd92c053a428e5211890d2de4ea3d1cd2e9e711297357cf4a0eca3ac6ffdc"
+    }
+  ],
+  "runtimeSources": [
+    {
+      "service": "retrieval-service",
+      "source": "047a42e0cee666f52b98576ef9796c804d6545f6"
+    },
+    {
+      "service": "access-gateway",
+      "source": "922d9afbf45fce8e9f5ace18b9b6a578be7ca897"
+    },
+    {
+      "service": "browser-worker",
+      "source": "7492e8350666fbda276eadfc278e79370efaed97"
+    },
+    {
+      "service": "mcp-gateway",
+      "source": "b825e574da37391c9e67f577ee01b73c8a7ed12c"
+    }
+  ],
+  "incident": {
+    "enabled": "false",
+    "model": "claude-opus-5-5",
+    "binary_sha256": "346d294f0103d6fc0de11ac953579b5c62dfa90698a4cfc486b6f927c615e697"
+  },
+  "sourceSpan": {
+    "local": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+    "pi": "cf7ab14a703dd2af7cb1a90be4593bc7648daf27",
+    "pi_tree_sha256": "bcb77e08ebccd14b58f09ddbb0f0e506dbd2383f84f8277241e2f27543ba629e",
+    "pi_expected_sha256": "bcb77e08ebccd14b58f09ddbb0f0e506dbd2383f84f8277241e2f27543ba629e",
+    "clean": true
+  },
+  "exit_code": 0
+}

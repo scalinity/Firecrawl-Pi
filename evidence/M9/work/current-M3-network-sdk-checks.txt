@@ -1,0 +1,4 @@
+M3-N01 PASS               host-and-origin-validated
+M3-N02 PASS               spoofed-principal-headers-have-no-effect
+M3-N03 PASS               internal-ports-denied-from-every-vantage
+M3-P02 PASS               tailnet-tls-private-serving

@@ -1,0 +1,12 @@
+{
+  "utc": "2026-10-03T03:29:00.674Z",
+  "previous": "evidence/M5/pre-m9-closure/snapshot-after.txt",
+  "current": "evidence/M9/work/BEFORE.txt",
+  "state": "PASS",
+  "changes": [
+    "capture timestamp",
+    "collector SSH session scope"
+  ],
+  "unrelated_changes": 0,
+  "boot_changed": false
+}

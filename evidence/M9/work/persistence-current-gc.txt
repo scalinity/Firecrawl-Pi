@@ -1,0 +1,1 @@
+{"utc":"2026-10-03T08:41:44.701Z","service":"access-gateway","build":"922d9afbf45fce8e9f5ace18b9b6a578be7ca897","event":"job","instance":"e46def05-591a-4cc1-922b-e9cf4a45944c","action":"swept","expired":31,"deleted":0,"keys":0,"artifact":0,"page_cache":0,"page_version":0,"files":43}

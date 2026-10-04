@@ -1,0 +1,32 @@
+{
+  "utc": "2026-10-03T22:52:59.429Z",
+  "source_commit": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce",
+  "raw_sha256": "9c45a30831e8693978726ae00c8fe04eea2647c378f1f29d37040b39f4ed6b0e",
+  "criterion": "Example Domain must occur in returned Markdown",
+  "state": "FAIL",
+  "observations": [
+    {
+      "id": "P01",
+      "status": 200,
+      "raw_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
+      "markdown_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+      "title": "Example Domain",
+      "has_h1": false,
+      "body_has_required_text": false,
+      "actual_acquisition": "direct_browser"
+    },
+    {
+      "id": "P02",
+      "status": 200,
+      "raw_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
+      "markdown_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+      "title": "Example Domain",
+      "has_h1": false,
+      "body_has_required_text": false,
+      "actual_acquisition": "direct_browser"
+    }
+  ],
+  "conclusion": "Current targets expose the phrase only in title metadata, not body content. Frozen membership/criteria stay unchanged; do not inject a title or reinterpret this failure as usable.",
+  "attempts_per_rechecked_page": 3,
+  "next_execution": "NO_FOURTH_ATTEMPT_AUTHORIZED"
+}

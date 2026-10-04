@@ -1,0 +1,19 @@
+{
+  "schema": "fcpi.m9-endpoint-control/v1",
+  "utc": "2026-10-03T10:57:23.052Z",
+  "source_commit": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+  "scanner_sha256": "ec42af7332819727b8e104c25f1f293a2ce574b1640490e6e8b3b1a6253910bf",
+  "negative": {
+    "exit_code": 1,
+    "state": "FAIL",
+    "control_detected": true,
+    "control_sha256": "ea6ae0ae42062c0f2d9f30184ac09b9563d2275e4cc7293461e0298893bbd1e0"
+  },
+  "positive": {
+    "exit_code": 0,
+    "state": "PASS",
+    "real_hits": 0,
+    "unclassified": 0
+  },
+  "endpoint_value_retained_in_evidence": false
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "fcpi.m2-candidate-fixture-source/v1",
+  "utc": "2026-10-03T16:09:42.089Z",
+  "base_source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+  "candidate_patch_sha256": "3d3638a40bb477649889e96b8fd9324839f2faa332e64c09e186d38cac8733bf",
+  "candidate_archive_sha256": "b57a6eff8b5ae1196daf668b5afc8dfadb220ebe7cf29d37848ade5d167d43f3",
+  "state": "PASS",
+  "production_source_changed": false,
+  "files": [
+    {
+      "path": "services/browser/src/server.mjs",
+      "sha256": "7f6cf6521560874be75b716a2af6ab8cd4bfe2b8fdf8ae60fbd9825199c9b66a"
+    },
+    {
+      "path": "services/retrieval/src/acquire.mjs",
+      "sha256": "63c821279af7ff3768d60b70b10a18326cffc5dd544513d017e18a7ba00a9f05"
+    },
+    {
+      "path": "services/retrieval/src/proxy.mjs",
+      "sha256": "8e389524ad8c28f6e525f7f83134e8bcce08f8e229d90fcc6a390160c6636b16"
+    },
+    {
+      "path": "services/retrieval/test/acquire.test.mjs",
+      "sha256": "eedcac5742252fa4d2a8715e845ac03714d4df20591cdf2643a3ab638521af23"
+    },
+    {
+      "path": "services/retrieval/test/proxy.test.mjs",
+      "sha256": "d2235c1ec85023540173a43b3ad4c325886f49e8716b2ebc05e7531608dc0fb7"
+    },
+    {
+      "path": "scripts/m2/retrieval-e2e.mjs",
+      "sha256": "c9cba35fb968208662aac982584606d5edfbd2aa78ca468e34ddebece0ec1507"
+    }
+  ],
+  "completed_utc": "2026-10-03T16:17:47.160Z",
+  "tests": 285,
+  "failures": 0,
+  "skips": 0,
+  "exit_code": 0,
+  "raw_sha256": "1a6354343bd0ebd439e3b62129df28d8d316488f79a197d997a56552990d9b97"
+}

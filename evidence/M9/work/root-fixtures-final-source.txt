@@ -1,0 +1,22 @@
+PASS missing OAuth checked before worktree
+PASS mismatched binary checked before worktree
+PASS four UTC launches block fifth
+PASS active agent blocks another launch
+PASS stale apply cannot execute tests or deployment
+PASS disabled cleanup respects in-progress preparation lock
+PASS busy preparation lock reports no launch explicitly
+PASS enabled cleanup respects preparation lock
+PASS disabled cleanup preserves active agent auth
+PASS disabled controller cleans inactive auth without launching
+PASS empty failed resume is terminal and removes auth
+PASS active agent postpones automatic incident without consuming a launch
+PASS outage notice survives missing action infrastructure
+PASS unavailable proof infrastructure leaves queued approval unconsumed
+PASS named bounded source file permitted
+PASS policy, ignored nested bytes and existing tests denied
+PASS new direct unit test permitted
+PASS standalone candidate metadata readable without root mirror access
+PASS partial candidate cutover automatically returns to paired accepted release
+PASS failed explicit rollback is terminal without recursive retry
+PASS actual M1 local deployment verifies committed archive bytes and source marker
+RESULT pass=21 fail=0 source=010d6f9e84f732783ab94745a8b5b05cc0f8d2eb

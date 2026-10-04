@@ -1,0 +1,12 @@
+M7-E01 FAIL               automatic-escalation-ends-at-one-enhanced-dispatch  — failed=waterfall_http,waterfall_four,stealth; auto_403_to_enhanced: [["direct_http","enhanced"]] calls=1; auto_200_to_enhanced: [["direct_http","enhanced"]] calls=1; auto_js_to_enhanced_browser: [["direct_http","direct_browser","enhanced"]] calls=1; route_enha
+M7-E02 PASS               four-attempts-one-enhanced-no-paid-retry-multiplication
+M7-E03 PASS               target-and-provider-errors-apart
+M7-B01 PASS               screenshots-correct-and-bounded
+M7-B02 PASS               action-subset-correct-bounded-and-refused-outside-it
+M7-B03 PASS               artifacts-owner-bound-and-expiring
+M7-B04 PASS               contexts-and-processes-cleaned
+M7-W01 PASS               webhooks-signed-retried-deduplicated-and-restricted
+M7-C01 PASS               cache-scope-freshness-expiry-and-billing
+M7-C02 PASS               parse-cache-owner-scoped
+M7-C03 PASS               change-detection
+M7-K01 PASS               capability-manifest-and-mcp-catalog

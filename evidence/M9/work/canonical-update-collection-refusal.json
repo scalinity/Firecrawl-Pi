@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-03T15:23:53.428Z",
+  "source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+  "classification": "M9 collection precondition refusal",
+  "cause": "Owned status-document edits made tracked checkout dirty before secondary collection",
+  "producer_executed": false,
+  "disposition": "Saved document patch, restored only owned document changes, restart refused collection at clean committed source",
+  "patch": "evidence/M9/work/canonical-update-f723.diff",
+  "patch_sha256": "3310d44a9d73172907c1ab7bc0c9014a4e76bcc11dce71a12fbe6aef864a594b"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "name": "/fcpi-access-gateway-1",
+    "state": "running",
+    "started": "2026-10-03T07:30:57.906313949Z",
+    "oom": false,
+    "restarts": 0,
+    "health": "healthy"
+  },
+  {
+    "name": "/fcpi-retrieval-service-1",
+    "state": "running",
+    "started": "2026-10-03T07:30:42.288903914Z",
+    "oom": false,
+    "restarts": 0,
+    "health": "healthy"
+  },
+  {
+    "name": "/fcpi-fixture-m5-1",
+    "state": "running",
+    "started": "2026-10-01T22:26:42.423391036Z",
+    "oom": false,
+    "restarts": 0,
+    "health": "healthy"
+  }
+]

@@ -1,0 +1,31 @@
+{
+  "utc": "2026-10-03T17:54:52.326Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "end_source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "command": [
+    "scripts/m2/pi-retrieval-tests.sh",
+    "static",
+    "browser",
+    "browser-redirect"
+  ],
+  "runs": [
+    {
+      "phase": "static",
+      "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+      "sha256": "8ea8221c193cfaa7bc127a349ee7bbe23f1d1797a9ce21f1033d60748ff1f2ad",
+      "exit_code": 0
+    },
+    {
+      "phase": "browser",
+      "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+      "sha256": "83177f972433a8a2bd854951b8e3f59cd02dc1b2e59fff558db69a458990325d",
+      "exit_code": 0
+    },
+    {
+      "phase": "browser-redirect",
+      "path": "evidence/M9/regression/M2/raw/rt-browser-redirect.txt",
+      "sha256": "e7cbef4d61e31f1af4808fd452bc4af0215c176020e07fc13b22827fd0819a25",
+      "exit_code": 0
+    }
+  ]
+}

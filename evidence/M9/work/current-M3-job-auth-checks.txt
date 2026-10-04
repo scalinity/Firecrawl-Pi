@@ -1,0 +1,6 @@
+M3-A01 PASS               authorized-scrape-crawl-batch-map
+M3-A02 FAIL               pagination-private-origin-stable  — pages=[5,5,2]; next URLs on the private origin with the external id=true; unique documents=12; same documents after expiry and recreation=false; internal host in the transcript=false
+M3-A03 PASS               credentials-missing-invalid-revoked-scope-owner
+M3-J03 PASS               acknowledged-jobs-tracked-through-crashes-k4-k5
+M3-J04 PASS               idempotent-requests-and-conflicting-reuse
+M3-J07 PASS               cancellation-stops-new-work

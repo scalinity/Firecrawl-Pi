@@ -1,0 +1,55 @@
+{
+  "schema": "fcpi.collection/v1",
+  "receipts": [
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M5/raw/e2e-fixture.txt",
+      "test_id": "fixture",
+      "started_utc": "2026-10-03T18:31:48.734Z",
+      "completed_utc": "2026-10-03T18:36:49.999Z",
+      "before": {
+        "local": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+        "pi": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+        "pi_tree_sha256": "9ceab514b0ea7fd3f11f03d91e95c9c1817172509ffbb273a7b6dd2b1e9b150c",
+        "pi_expected_sha256": "9ceab514b0ea7fd3f11f03d91e95c9c1817172509ffbb273a7b6dd2b1e9b150c",
+        "clean": true
+      },
+      "after": {
+        "local": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+        "pi": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+        "pi_tree_sha256": "9ceab514b0ea7fd3f11f03d91e95c9c1817172509ffbb273a7b6dd2b1e9b150c",
+        "pi_expected_sha256": "9ceab514b0ea7fd3f11f03d91e95c9c1817172509ffbb273a7b6dd2b1e9b150c",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "0c8d8cea2be8dfe79b1309b7f8b58f777c4fb8f5cbb81ad5a9e04624623abd5d",
+      "private_record": "M5-fixture-1791052609999.json",
+      "private_record_sha256": "651d58fa5cbf374d7f3113efe345e87dfef2ab5f8377615394a41291cfcb8513"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M5/raw/e2e-live.txt",
+      "test_id": "current-real-provider-live",
+      "started_utc": "2026-10-03T21:11:38.928Z",
+      "completed_utc": "2026-10-03T21:12:40.379Z",
+      "before": {
+        "local": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+        "pi": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+        "pi_tree_sha256": "e9707dc2c201f98ce32b6ac3c57de13bd0742edcb466338af4b7886d956756eb",
+        "pi_expected_sha256": "e9707dc2c201f98ce32b6ac3c57de13bd0742edcb466338af4b7886d956756eb",
+        "clean": true
+      },
+      "after": {
+        "local": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+        "pi": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+        "pi_tree_sha256": "e9707dc2c201f98ce32b6ac3c57de13bd0742edcb466338af4b7886d956756eb",
+        "pi_expected_sha256": "e9707dc2c201f98ce32b6ac3c57de13bd0742edcb466338af4b7886d956756eb",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "795be48858cac5bd239148f4a6174c191636dcfc1604ffecbcb9f8583204c48e",
+      "private_record": "M5-current-real-provider-live-1791061960379.json",
+      "private_record_sha256": "9fb0917f6311b7942df12045933f6584de7749d758eee4dbde84446e04eb79bd"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+### meta
+{"utc":"2026-10-03T07:09:20.653Z","phase":"stopped","platform":"darwin","node":"v26.10.0","client":"@modelcontextprotocol/client@2.1.0","deployed_commit":"de9164dc73cc82adba9540a2099be3791a421531","pi_utc":"2026-10-03T07:09:20.616Z"}
+### forward
+{"utc":"2026-10-03T07:09:20.908Z","pid":51067}
+### resources
+{"utc":"2026-10-03T07:09:21Z","label":"start-stopped","mcp":{"instance":"7723bce95cea","started_at":"2026-10-03T07:08:42.504024314Z","peak":57606144,"max":"201326592","current":38993920,"oom_kill":0},"gateway":{"instance":"168063943b73","started_at":"2026-10-03T07:01:41.445590728Z","peak":44580864,"max":"167772160","current":32473088,"oom_kill":0},"core":{"instance":"fc9fbe6cdf11","started_at":"2026-10-03T07:04:22.222572831Z","peak":2050179072,"max":"2684354560","current":1818099712,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4824144}
+{"utc":"2026-10-03T07:09:21Z","label":"before-mcp-stop","mcp":{"instance":"7723bce95cea","started_at":"2026-10-03T07:08:42.504024314Z","peak":57606144,"max":"201326592","current":38993920,"oom_kill":0},"gateway":{"instance":"168063943b73","started_at":"2026-10-03T07:01:41.445590728Z","peak":44580864,"max":"167772160","current":32473088,"oom_kill":0},"core":{"instance":"fc9fbe6cdf11","started_at":"2026-10-03T07:04:22.222572831Z","peak":2050179072,"max":"2684354560","current":1818705920,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4786720}
+### stopped
+{"utc":"2026-10-03T07:09:24.477Z","case":"mcp_state","state":"exited unhealthy"}
+{"utc":"2026-10-03T07:09:26.767Z","case":"mcp_request","status":503,"request_id":"5d1610d6-cab6-40b2-92ce-ab1e0a3c47ec","content_type":"application/json; charset=utf-8","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":"MCP_UNAVAILABLE","rpc_error":null,"result_type":null,"is_error":null,"local_port":60350,"ms":2290}
+{"utc":"2026-10-03T07:09:26.833Z","case":"rest_scrape","status":200,"sentinel":"fcpi-m3-p11-8229"}
+{"utc":"2026-10-03T07:09:26.859Z","case":"rest_platform_status","status":200,"core_live":true}
+{"utc":"2026-10-03T07:09:26.883Z","case":"rest_prior_job","id":"935865a0-2d51-4517-86a0-f725866495f1","status":200,"body_status":"completed"}
+{"utc":"2026-10-03T07:09:31.153Z","case":"rest_crawl_while_stopped","submit_status":200,"id":"92e7f6ab-e7e4-4a26-a694-2e04a8b3e625","status":"completed","docs":2}
+### started
+{"utc":"2026-10-03T07:09:37.697Z","case":"mcp_request","status":200,"request_id":"0463c576-880c-4529-908e-6d8a15a9c202","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":60374,"tools":13,"gateway_unchanged":true}
+### resources
+{"utc":"2026-10-03T07:09:37Z","label":"end-stopped","mcp":{"instance":"7723bce95cea","started_at":"2026-10-03T07:09:31.503571858Z","peak":56262656,"max":"201326592","current":40304640,"oom_kill":0},"gateway":{"instance":"168063943b73","started_at":"2026-10-03T07:01:41.445590728Z","peak":44580864,"max":"167772160","current":32555008,"oom_kill":0},"core":{"instance":"fc9fbe6cdf11","started_at":"2026-10-03T07:04:22.222572831Z","peak":2050179072,"max":"2684354560","current":1820262400,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4816256}
+### connections
+{"utc":"2026-10-03T07:09:38.405Z","hosts":["127.0.0.1:3380"],"total":9,"lookups":[]}
+### forward
+{"utc":"2026-10-03T07:09:38.405Z","pid":51067,"exited_before_end":false}
+### end
+{"utc":"2026-10-03T07:09:38.405Z","exit":0}

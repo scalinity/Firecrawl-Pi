@@ -1,0 +1,66 @@
+{
+  "utc": "2026-10-03T08:00:39.834Z",
+  "source_commit": "e683c919bffb43daeba0cd7c00138a6665fb40ed",
+  "test_id": "M5-S03",
+  "state": "FAIL",
+  "raw_sha256": "b4d635e2cad6e1a8d1a5516064d5728dd3f9de2b2a8ac316a56337f86986db9d",
+  "observed": "Initial and repeated widgets searches returned partial answers because fixture engine r timed out; partial answers correctly did not fill the cache.",
+  "attribution": "Temporary fixture-engine timeout observed; concurrency overlap recorded, causal role UNVERIFIED.",
+  "concurrent_work": "M9 root and isolated Pi fixture suites overlapped this M5 run. Rerun after the suites and M7 fixture driver finish; no cache criterion or request retry changed.",
+  "rerun": {
+    "utc": "2026-10-03T08:21:00.454Z",
+    "state": "PASS",
+    "checks": [
+      {
+        "test_id": "M5-S01",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-S02",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-S03",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-M01",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-E01",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-E02",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-E03",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-E04",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-B02",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-D01",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-D02",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M5-I01",
+        "state": "PASS"
+      }
+    ],
+    "raw_sha256": "e075b0d1d418ffb1b8f1f411079b64884d8f035990200fce0239c0413a229fc2",
+    "execution": "Serialized after root/Pi suites and M7 fixture driver completed; no runtime cache or request-retry change."
+  }
+}

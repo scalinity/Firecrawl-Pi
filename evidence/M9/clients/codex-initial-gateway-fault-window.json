@@ -1,0 +1,34 @@
+{
+  "schema": "fcpi.native-client/v1",
+  "client": "codex",
+  "native_model": "gpt-6-sol",
+  "utc": "2026-10-03T06:57:19.917Z",
+  "private_run": "native-ukX9nG",
+  "source_commit": "09c9b8654b2b51c920c54b88ce2732b201cf7637",
+  "version": "codex-cli 0.157.1",
+  "cwd": "unrelated private directory",
+  "global_config": "~/.codex/config.toml",
+  "authentication": "login keychain header helper",
+  "tools": [
+    {
+      "name": "firecrawl_scrape",
+      "server": "fcpi",
+      "status": "failed"
+    }
+  ],
+  "usable": false,
+  "arrival": [],
+  "arrived": false,
+  "exit_code": 0,
+  "state": "CONFIGURED_PENDING_LIVE",
+  "subscription_usage": {
+    "input_tokens": 91253,
+    "cached_input_tokens": 58880,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 305,
+    "reasoning_output_tokens": 82
+  },
+  "api_equivalent_estimate_usd": null,
+  "invoiced_usd": null,
+  "raw_sha256": "5fbac5b353c51af86d84c74d50bd8a132a15d822abe20f181f474a5c70a7ef33"
+}

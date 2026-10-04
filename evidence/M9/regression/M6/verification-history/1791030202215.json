@@ -1,0 +1,376 @@
+{
+  "schema": "fcpi.m6.verification/v1",
+  "runner": "scripts/m6/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (L01, L02) from the fixture and host checks.",
+  "results": [
+    {
+      "test_id": "M6-B00",
+      "name": "baseline-matches-m5-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-G01",
+      "name": "images-pinned-built-and-running",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-P01",
+      "name": "patch-series-and-coverage",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-G02",
+      "name": "suites-pass-in-the-running-images",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R01",
+      "name": "direct-and-proxied-egress-fixture",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5ccd1eddde730ab00d178d89f2c24f5bce676cf668100154b7cf22b76aa7b63f",
+      "expected": "the same fixture target seen from both routes: a basic request arrives from the direct route with no tunnel and proxyUsed basic; a stealth request arrives through the fixture proxy's exit in one tunnel, under a 24-character session id with Decodo's session duration, with proxyUsed stealth; each is one attempt of the strategy its route names",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; direct {\"via\":\"direct\",\"host\":\"m6.fixture.fcpi.test\"} [[\"direct_http\"]]; residential {\"via\":\"proxy\",\"host\":\"m6.fixture.fcpi.test\"} [[\"residential_http\"]] tunnels=1",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R02",
+      "name": "browser-subresources-follow-the-route",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5ccd1eddde730ab00d178d89f2c24f5bce676cf668100154b7cf22b76aa7b63f",
+      "expected": "a stealth request for a script shell renders on the residential route (residential_http, then residential_browser); the page's HTTP and browser loads and both of its images reach the target through the proxy, every tunnel under one exit, none directly",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; strategies=[[\"residential_http\",\"residential_browser\"]]; hits=/js-subres@proxy,/js-subres@proxy,/px/1.gif@proxy,/px/2.gif@proxy; tunnels=4 exits=exit-4",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R03",
+      "name": "protected-and-bulk-work-never-uses-home-egress",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5ccd1eddde730ab00d178d89f2c24f5bce676cf668100154b7cf22b76aa7b63f",
+      "expected": "with the residential route unavailable (Decodo selected, paid dispatch off, no credential): a stealth scrape and a proxy-first domain are PROXY_REQUIRED with no attempt and no target request; a bulk crawl and a bulk batch are 429 PROXY_REQUIRED and a local-only bulk crawl 400 PROXY_REQUIRED, with no receipt and no target request; beside them an ordinary scrape and a five-page crawl reach the target directly (the controls); with the fixture proxy, a 25-page crawl and a 21-URL batch finish with every request of the bulk domain, robots.txt and sitemaps included, through the proxy under a route hold that is released at the end; once the route is gone again, that keyed crawl replayed returns its own receipt while the same crawl under a new key is 429 PROXY_REQUIRED, with no receipt added (review W4); with the route's budget exhausted and with its breaker open, stealth and bulk work are refused with no target request",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; refusals: stealth PROXY_REQUIRED, proxy-first PROXY_REQUIRED, bulk crawl 429 PROXY_REQUIRED, bulk batch 429, basic bulk 400; receipts 763→763; bulk crawl 25 docs, 28 hits all via proxy=true; batch 21 docs",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R04",
+      "name": "controlled-escalation",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5ccd1eddde730ab00d178d89f2c24f5bce676cf668100154b7cf22b76aa7b63f",
+      "expected": "an auto request for a page whose HTTP answer is a script shell and whose direct render is a challenge goes direct_http, direct_browser, residential_browser and returns the page rendered through the proxy; a 403 challenge and a 200 challenge on the direct route each go direct_http then residential_http and return the article; no acquisition passes four attempts",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; js_challenge: [[\"direct_http\",\"direct_browser\",\"residential_browser\"]]; challenge_403: [[\"direct_http\",\"residential_http\"]]; challenge_200: [[\"direct_http\",\"residential_http\"]]",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R05",
+      "name": "failure-rules-401-429-403-404-5xx",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5ccd1eddde730ab00d178d89f2c24f5bce676cf668100154b7cf22b76aa7b63f",
+      "expected": "spec §9.2 through REST on the direct route: 401 is AUTH_REQUIRED after one attempt; an unknown 403 is ACCESS_DENIED after one; 404 returns the page with status 404 after one; 500 gets exactly one same-tier retry and keeps its status; 429 is RATE_LIMITED with Retry-After 30 after one; none reaches the proxy; the cooled-down domain then refuses a stealth request as RATE_LIMITED with no target request and no tunnel (a rate limit is respected on every route, never rotated around)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; 401=AUTH_REQUIRED/[[\"direct_http\"]]; unknown_403=ACCESS_DENIED/[[\"direct_http\"]]; 404=200/[[\"direct_http\"]]; 500=200/[[\"direct_http\",\"direct_http\"]]; 429=RATE_LIMITED/[[\"direct_http\"]]; cooldown_all_routes=RATE_LIMITED/[[\"residential_http\"]]",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R06",
+      "name": "learning-ttl-probe-and-attempt-limits",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5ccd1eddde730ab00d178d89f2c24f5bce676cf668100154b7cf22b76aa7b63f",
+      "expected": "on one domain: the first direct challenge is pending (no preference), the second sets a residential preference of 24 hours (consistent_challenges); the third acquisition starts residential and never reaches the home connection; after the preference expires one probe goes direct, meets the challenge, renews the preference (probe_confirmed) and escalates; the table holds at most 5,000 rows; no acquisition in the phase used more than four attempts, and none retried the same tier more than once",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; o1 {\"p\":null,\"c\":1}; o2 residential/86400/consistent_challenges; o3 [[\"residential_http\"]]; probe [[\"direct_http\",\"residential_http\"]] probe_confirmed; acquisitions=93, max attempts=3",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R07",
+      "name": "provider-outage-and-isolation",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5ccd1eddde730ab00d178d89f2c24f5bce676cf668100154b7cf22b76aa7b63f",
+      "expected": "the fixture proxy answering 407, 402 and never answering gives PROVIDER_AUTH_FAILED, PROVIDER_BILLING and PROVIDER_UNREACHABLE, each one residential attempt with no target request; the three open the provider's breaker (readiness: PROVIDER_UNAVAILABLE); with it open a stealth request is PROXY_REQUIRED with no attempt, while an ordinary request reaches the target directly (AC23); the domain those failures touched learned nothing",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; PROVIDER_AUTH_FAILED,PROVIDER_BILLING,PROVIDER_UNREACHABLE; breaker PROVIDER_UNAVAILABLE; refused PROXY_REQUIRED; direct 200 [[\"direct_http\"]]; route null",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R08",
+      "name": "simultaneous-clients-pacing-and-cost",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R09",
+      "name": "proxy-reservations-settlement-and-hard-cap",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f27f058eb997c6e97ebd485585a629eb6c63fb319e88b8e5f39aa6793d0e3d1",
+      "expected": "every residential attempt reserved one attempt's maximum (10 MB at $4/GB, 40,000 micro-USD) and every search tunnel its own (2 MB, 8,000) before anything was sent; every settled row's actual is the rate card's price for its measured bytes, above its reservation only for an attempt cut at its cap and then by at most one chunk; the residential echo's settled bytes are at least what the fixture proxy relayed for its session; the 12 MB page past its reservation is SIZE_LIMIT after one attempt; no proxy row exists for the production phase; the paid proxy caps are zero and paid dispatch is off",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; proxy rows=71 (settled 67, uncertain 0); echo settled bytes=860 relayed=503; size limit SIZE_LIMIT",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R10",
+      "name": "provider-usage-reconciliation",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R11",
+      "name": "search-residential-engines-fixture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-R12",
+      "name": "every-acquisition-records-its-route",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-L01",
+      "name": "live-proxied-egress-differs",
+      "utc": "2026-10-03T10:29:51Z",
+      "repository_sha": "6e4382479c64be21be3177e2c62f13adb244a0dc",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": null,
+      "expected": "with an approved Decodo credential and budget: the same public echo seen directly and through Decodo shows two different addresses, the proxied one with proxyUsed stealth and a settled proxy reservation; without them, BLOCKED_CREDENTIAL, and no live proxy request is made",
+      "evidence_class": "live",
+      "state": "NOT_RUN",
+      "actual": "evidence missing: evidence/M9/regression/M6/raw/e2e-live.txt",
+      "exit_code": null,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-L02",
+      "name": "live-search-residential-engines",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-C01",
+      "name": "capabilities-and-mcp-catalog",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-X02",
+      "name": "network-and-container-posture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-X03",
+      "name": "retrieval-log-hygiene",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-M01",
+      "name": "memory-within-caps",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-L03",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    },
+    {
+      "test_id": "M6-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M6/verification.json"
+    }
+  ]
+}

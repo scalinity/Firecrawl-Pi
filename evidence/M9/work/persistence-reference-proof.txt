@@ -1,0 +1,2 @@
+{"utc":"2026-10-03T08:37:44.893Z","referenced":5156,"manifest_sha256":"3f54da95d3ce869a18cb86d639f7e0dcdc79f13811b2fa822be53d5f15d6728b","missing":0,"content_mismatches":0}
+{"utc":"2026-10-03T08:30:30.409Z","service":"access-gateway","build":"922d9afbf45fce8e9f5ace18b9b6a578be7ca897","event":"job","instance":"17aa29ef-4fc5-42ec-8099-b88672b57d2a","action":"swept","expired":0,"deleted":0,"keys":0,"artifact":0,"page_cache":1,"page_version":0,"files":7}

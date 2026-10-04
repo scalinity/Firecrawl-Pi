@@ -1,0 +1,16 @@
+{
+  "utc": "2026-10-03T04:09:22.326Z",
+  "test_id": "M9-GLOBAL-INSTALL",
+  "status": "CONFIGURED_PENDING_LIVE",
+  "private_endpoint": true,
+  "authentication": "macOS login keychain via native HTTP header helpers",
+  "existing_claude_servers_preserved": 7,
+  "existing_codex_servers_preserved": 12,
+  "versions": {
+    "claude": "2.1.288 (Claude Code)",
+    "codex": "codex-cli 0.157.1"
+  },
+  "helper_sha256": "fc3d5b28afb19ddce0aa82849a07df713c12bc08ee761353b8fe047a8ef8ba7f",
+  "hosted_profiles_enabled": false,
+  "verification_note": "Initial string comparison rejected nondeterministic CLI map ordering; semantic comparison and idempotent configuration verification pass. CLI helper redaction is compared against the private TOML value."
+}

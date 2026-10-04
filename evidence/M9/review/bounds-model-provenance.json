@@ -1,0 +1,30 @@
+{
+  "source_commit": "a0ae1edd3924707326696a6422184254c33c4d37",
+  "working_delta": true,
+  "utc": "2026-10-03T09:08:04.084Z",
+  "mechanism": "two fresh native contexts, exact diff, read-only Read/Grep, requested model",
+  "models": [
+    {
+      "role": "debugger",
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "turns": 6,
+      "api_equivalent_estimate_usd": 0.2423718,
+      "invoiced_usd": null,
+      "subscription": "Max",
+      "raw_sha256": "860024b4f2b08486cfdef2ceafd51e092ac0eb95eeedc1ada6050a6c6aba7df2"
+    },
+    {
+      "role": "auditor",
+      "models": [
+        "claude-opus-5-5"
+      ],
+      "turns": 8,
+      "api_equivalent_estimate_usd": 0.3673196,
+      "invoiced_usd": null,
+      "subscription": "Max",
+      "raw_sha256": "f56625d867115223ac8aca692cdab216c08c83766d5c25f7a7e384c590d51cbb"
+    }
+  ]
+}

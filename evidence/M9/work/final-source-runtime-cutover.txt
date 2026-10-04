@@ -1,0 +1,27 @@
+### meta
+utc=2026-10-03T17:51:43Z source_commit=82a11536707e3fb6d4fe76497e857b137c5e2184
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=35 create_host_path=false
+ Container fcpi-retrieval-service-1 Recreate 
+ Container fcpi-retrieval-service-1 Recreated 
+ Container fcpi-retrieval-service-1 Starting 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-retrieval-service-1 Healthy 
+/var/lib/firecrawl-pi/releases/20261003T175153Z-82a11536707e.json
+### health
+access-gateway running healthy
+browser-worker running healthy
+firecrawl-core running healthy
+fixture running healthy
+fixture-m2 running healthy
+fixture-m3 running healthy
+fixture-m5 running healthy
+fixture-m6 running healthy
+fixture-m7 running healthy
+mcp-gateway running healthy
+nuq-postgres running healthy
+rabbitmq running healthy
+redis running healthy
+retrieval-service running healthy
+searxng running healthy
+end

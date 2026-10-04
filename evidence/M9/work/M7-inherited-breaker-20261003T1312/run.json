@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-03T13:12:01.701Z",
+  "source_commit": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+  "end_source_commit": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+  "command": [
+    "scripts/m7/e2e.mjs",
+    "fixture"
+  ],
+  "runs": [
+    {
+      "phase": "fixture",
+      "path": "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+      "sha256": "cdd8018fa0112bcbc0990df7714445770d5279b7e3d0ddeed4262c8327c9050d",
+      "exit_code": 0
+    }
+  ]
+}

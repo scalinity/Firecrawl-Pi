@@ -1,0 +1,29 @@
+### meta
+{"utc":"2026-10-03T18:47:30.511Z","client":"@mendable/firecrawl-js@4.31.1","node":"v26.10.0","env_FIRECRAWL_API_URL_set":false}
+### client
+{"utc":"2026-10-03T18:47:30.512Z","apiUrl":"http://127.0.0.1:3380"}
+### scrape
+{"utc":"2026-10-03T18:47:30.587Z","sentinel":"fcpi-m3-p02-d64d","links":3,"url":"http://m3.fixture.fcpi.test:8080/p02","statusCode":200}
+### map
+{"utc":"2026-10-03T18:47:30.766Z","links":["http://m3.fixture.fcpi.test:8080","http://m3.fixture.fcpi.test:8080/p01","http://m3.fixture.fcpi.test:8080/p02","http://m3.fixture.fcpi.test:8080/p03","http://m3.fixture.fcpi.test:8080/p04","http://m3.fixture.fcpi.test:8080/p05","http://m3.fixture.fcpi.test:8080/p06","http://m3.fixture.fcpi.test:8080/p07","http://m3.fixture.fcpi.test:8080/p08","http://m3.fixture.fcpi.test:8080/p09","http://m3.fixture.fcpi.test:8080/p10","http://m3.fixture.fcpi.test:8080/p11"]}
+### crawl
+{"utc":"2026-10-03T18:47:48.567Z","status":"completed","completed":4,"total":4,"docs":4,"urls":["http://m3.fixture.fcpi.test:8080/","http://m3.fixture.fcpi.test:8080/p01","http://m3.fixture.fcpi.test:8080/p02","http://m3.fixture.fcpi.test:8080/p03"],"expiresAt":"2026-10-10T18:47:48.558Z"}
+### batch
+{"utc":"2026-10-03T18:47:48.874Z","case":"start_twice_same_key","id":"0a5f7405-820a-49be-a575-5d8fbc48e1dd","first_id":"0a5f7405-820a-49be-a575-5d8fbc48e1dd","url_on_private_origin":true}
+{"utc":"2026-10-03T18:48:03.266Z","case":"status","status":"completed","docs":2,"sentinels":["fcpi-m3-p05-f853","fcpi-m3-p06-53f2"]}
+### crawl_errors
+{"utc":"2026-10-03T18:48:03.273Z","errors":0,"robotsBlocked":[],"error":null}
+### cancel
+{"utc":"2026-10-03T18:48:07.346Z","cancel_returned":true,"final_status":"cancelled","docs":2}
+### refused
+{"utc":"2026-10-03T18:48:10.576Z","refused":false}
+### connections
+{"utc":"2026-10-03T18:48:10.576Z","hosts":["127.0.0.1:3380"],"total":2,"lookups":[]}
+### ledger
+{"utc":"2026-10-03T18:48:11.115Z","id":"d23c8908-ff78-4e8f-9bdc-3aadb57c5679","kind":"crawl","state":"SUCCEEDED","upstream":"01a10317-c0e6-7527-bdb9-35f74c8bb2c8","cancel_requested":false,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":7}
+{"utc":"2026-10-03T18:48:11.115Z","id":"0a5f7405-820a-49be-a575-5d8fbc48e1dd","kind":"batch","state":"SUCCEEDED","upstream":"01a10318-06b6-7338-a351-86fc1ce4384d","cancel_requested":false,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":2}
+{"utc":"2026-10-03T18:48:11.115Z","id":"7e20627b-d0c1-43c1-89c1-1f65cc010b9d","kind":"crawl","state":"RUNNING","upstream":"01a10318-412e-76ac-ba55-4a206b29c2c6","cancel_requested":true,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":11}
+### resources
+{"utc":"2026-10-03T18:48:11Z","label":"end-sdk-compat","gateway":{"instance":"a92264002c78","started_at":"2026-10-03T18:00:26.744088496Z","peak":83591168,"max":"167772160","current":37634048,"oom_kill":0},"core":{"instance":"3367bc77d4d6","started_at":"2026-10-03T18:28:23.831210571Z","peak":2065448960,"max":"2684354560","current":1899462656,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4822928}
+### end
+{"utc":"2026-10-03T18:48:11.537Z","exit":0}

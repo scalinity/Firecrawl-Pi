@@ -1,0 +1,20 @@
+### meta
+{"utc":"2026-10-03T07:25:43.252Z","vantage":"workstation over the tailnet","origin_scheme":"https:","origin_port":"8443"}
+### tls
+{"utc":"2026-10-03T07:25:43.344Z","case":"status_with_read_token","status":200,"error":null,"tls_authorized":true,"tls_protocol":"TLSv1.3","cert_issuer_org":"Let's Encrypt","cert_subject_matches":true,"cert_valid_to":"Dec 25 11:27:29 2026 GMT","core_live":true}
+{"utc":"2026-10-03T07:25:43.352Z","case":"status_without_token","status":401,"code":"UNAUTHORIZED","tls_authorized":true}
+{"utc":"2026-10-03T07:25:43.363Z","case":"job_list_urls","status":200,"results_url_on_tailnet_origin":true}
+{"utc":"2026-10-03T07:25:43.439Z","case":"foreign_host_header","status":421,"code":"MISDIRECTED"}
+### tailnet_ports
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":22,"owner":"host","result":"timeout"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":53,"owner":"host","result":"timeout"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":80,"owner":"host","result":"timeout"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":443,"owner":"host","result":"timeout"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":1884,"owner":"host","result":"timeout"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":8080,"owner":"host","result":"timeout"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":8443,"owner":"tailscaled","result":"open"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":9001,"owner":"host","result":"timeout"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":35237,"owner":"tailscaled","result":"open"}
+{"utc":"2026-10-03T07:25:47.668Z","case":"tailnet_port","port":49128,"owner":"tailscaled","result":"timeout"}
+### end
+{"utc":"2026-10-03T07:25:47.668Z","exit":0}

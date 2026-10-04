@@ -1,0 +1,6 @@
+### meta
+utc=2026-10-03T21:15:27.067Z source_commit=909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab
+container=53eb3c633ee3 started_at=2026-10-03T21:10:36.676807778Z
+lines=56 search=5 model_call=5 parse=3 extraction=4 proxy_request=6 residential_route=7 budget_loaded=1 selection_loaded=4 acquisition=18 acquisition_with_route_fields=18 route_held=0 route_released=0 proxy_reconciled=0 enhanced=2 webhook_attempt=0 renders_with_extras=1 provider_key_like=0 client_token_like=0 bearer=0 proxy_authorization=0 basic_credential=0 session_username=0 signature=0 fixture_credential=0 fixture_credential_readable=yes zyte_fixture_key=0 zyte_fixture_key_readable=yes webhook_secret=0 webhook_secret_readable=yes cloud_host=0
+budget_policy_sha256_logged=72a49e1cdedab5c6e436553a3763a29fb0626bda6d50bbee7d85abfca604d12b budget_policy_sha256_deployed=2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea
+switches_logged={"browser_extras":true,"webhook_delivery":"enabled","enhancers":["zyte-api","fcpi-fixture-zyte","fcpi-fixture-zyte-small"]}

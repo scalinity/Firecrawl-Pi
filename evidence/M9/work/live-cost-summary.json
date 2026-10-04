@@ -1,0 +1,101 @@
+{
+  "utc": "2026-10-03T22:16:27.129Z",
+  "source_commit": "111341f8726208a21484eb436dae9c39bbe4a213",
+  "ledger_raw_sha256": "82289284e73b98da6f697fb76722715263ed9d69abc92cbab766cf46182217bd",
+  "m9": {
+    "row_count": 25,
+    "states": {
+      "SETTLED": 22,
+      "UNCERTAIN": 2,
+      "RELEASED": 1
+    },
+    "providers": {
+      "decodo": {
+        "settled_micro_usd": 977,
+        "retained_micro_usd": 16000,
+        "free_credits": 0,
+        "measured_bytes": 243180
+      },
+      "openai": {
+        "settled_micro_usd": 7544,
+        "retained_micro_usd": 0,
+        "free_credits": 0,
+        "measured_bytes": 0
+      },
+      "llamaparse": {
+        "settled_micro_usd": 0,
+        "retained_micro_usd": 0,
+        "free_credits": 9,
+        "measured_bytes": 0
+      },
+      "zyte": {
+        "settled_micro_usd": 2540,
+        "retained_micro_usd": 0,
+        "free_credits": 0,
+        "measured_bytes": 675
+      }
+    },
+    "paid_settled_micro_usd": 11061,
+    "paid_upper_micro_usd": 27061
+  },
+  "project": {
+    "row_count": 39,
+    "states": {
+      "SETTLED": 36,
+      "UNCERTAIN": 2,
+      "RELEASED": 1
+    },
+    "providers": {
+      "openai": {
+        "settled_micro_usd": 7714,
+        "retained_micro_usd": 0,
+        "free_credits": 0,
+        "measured_bytes": 0
+      },
+      "llamaparse": {
+        "settled_micro_usd": 0,
+        "retained_micro_usd": 0,
+        "free_credits": 15,
+        "measured_bytes": 0
+      },
+      "zyte": {
+        "settled_micro_usd": 6350,
+        "retained_micro_usd": 0,
+        "free_credits": 0,
+        "measured_bytes": 1927
+      },
+      "decodo": {
+        "settled_micro_usd": 1517,
+        "retained_micro_usd": 16000,
+        "free_credits": 0,
+        "measured_bytes": 377771
+      }
+    },
+    "paid_settled_micro_usd": 15581,
+    "paid_upper_micro_usd": 31581
+  },
+  "uncertain": [
+    {
+      "call_key": "proxy:search:764d9480-ebe7-4ee3-a7c6-1fe19f48cfcf",
+      "retained_micro_usd": 8000,
+      "measured_usage": null
+    },
+    {
+      "call_key": "proxy:search:af088e95-a507-4251-97e2-b876ae2c3140",
+      "retained_micro_usd": 8000,
+      "measured_usage": null
+    }
+  ],
+  "provider_basis": {
+    "openai": "Provider token usage times versioned rate card; invoice absent",
+    "decodo": "Locally measured bytes times versioned rate card; uncertain tunnels retain whole reservation",
+    "zyte": "Conservative maximum rate-card price; invoice absent"
+  },
+  "parser_paid_usd": 0,
+  "invoiced_usd": null,
+  "paid_dispatch": false,
+  "provider_caps_zero": true,
+  "first_window_authorization": "CLOSED",
+  "retry_window_authorization": "CLOSED",
+  "next_paid_execution": "REQUIRES_FRESH_OWNER_AUTHORIZATION"
+}

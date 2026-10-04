@@ -1,0 +1,64 @@
+{
+  "utc": "2026-10-03T17:56:19.516Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "milestone_state": "IN_PROGRESS",
+  "source_frozen": true,
+  "provider_window": "AUTHORIZED_NOT_OPENED",
+  "new_backend_paid_execution": 0,
+  "soak": {
+    "state": "NOT_RUN",
+    "required_hours": 24
+  },
+  "review": {
+    "model": "claude-opus-5-5",
+    "completed_reports": 26,
+    "incomplete_attempts": 2,
+    "all_saved_findings_disposed": true
+  },
+  "code_and_fixtures": [
+    {
+      "path": "services/retrieval/src/acquire.mjs",
+      "sha256": "708b9c65b6ee0d5b57bc40d4e66189f121b22cc2faaa716141a8f73353a8449a"
+    },
+    {
+      "path": "services/retrieval/src/proxy.mjs",
+      "sha256": "ecac08b2105e1cfad31593b4e1cd57fe6dc346bda32f894e838a0040f506a116"
+    },
+    {
+      "path": "services/browser/src/server.mjs",
+      "sha256": "78f1e70fff9ddb4d7f0217bcb27aaf909e8a9a4fc3466a20233e1c5d9fbc6f64"
+    },
+    {
+      "path": "scripts/m2/pi-retrieval-tests.sh",
+      "sha256": "c19bec26701ac9a44d901123f621318cc420603d7007da0f0435ff038af11ce7"
+    },
+    {
+      "path": "scripts/m2/retrieval-e2e.mjs",
+      "sha256": "d1fbb0cbc6fb100fc6d7d95a9347d81a5e5262d818e1117855e718a0574b4c7d"
+    },
+    {
+      "path": "scripts/m2/verify.mjs",
+      "sha256": "991f8c8bbb906aabd8407da3a2c13e57a7a469ecfee494d0050dbc74420cead0"
+    },
+    {
+      "path": "scripts/m3/e2e.mjs",
+      "sha256": "9f1ea0b2de7617f49a71bbaec1997c8c2898be62fc029d3595a574e354572930"
+    },
+    {
+      "path": "scripts/m9/validation.sh",
+      "sha256": "90101b94fdc610eb961b94d7d3fa545b91eebbd550bf340f4b1f44be662a0ea6"
+    },
+    {
+      "path": "tests/fixtures/m2/site/postload-denied.html",
+      "sha256": "746a9dd491b2a80d428043cd30f365dd340d24c6adfd892fd6a440f4eb851d79"
+    },
+    {
+      "path": "tests/fixtures/m2/server.mjs",
+      "sha256": "06dc91fb21389c66234ae729d03cd2a1f5aceae02ce85073ce879bb12fd24cdd"
+    },
+    {
+      "path": "tests/contracts/m9-validation-policy.test.mjs",
+      "sha256": "d0542ef5ff285c6d2689f68f0d0222f3de67573509206d2cf71e4c0f8421fffa"
+    }
+  ]
+}

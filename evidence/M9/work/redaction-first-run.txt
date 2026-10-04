@@ -1,0 +1,11 @@
+file://<repository root>/scripts/m9/redaction.mjs:23
+const positive=controls.map(path=>({path,sha256:sha(read(path)),hits:rules.flatMap(([name,re])=>[...read(path).matchAll(re)].map(()=>name))}));if(positive.some(x=>!x.hits.length))throw Error('Redaction positive control silent');
+                                                                                                                                                                                         ^
+
+Error: Redaction positive control silent
+    at file://<repository root>/scripts/m9/redaction.mjs:23:186
+    at ModuleJob.run (node:internal/modules/esm/module_job:569:25)
+    at async node:internal/modules/esm/loader:650:26
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:105:5)
+
+Node.js v26.10.0

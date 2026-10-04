@@ -1,0 +1,214 @@
+TAP version 13
+# Subtest: actual input identity binds independently of the verifier revision
+ok 1 - actual input identity binds independently of the verifier revision
+  ---
+  duration_ms: 1.657375
+  type: 'test'
+  ...
+# Subtest: private producer records cannot be missing, tampered or substituted
+ok 2 - private producer records cannot be missing, tampered or substituted
+  ---
+  duration_ms: 0.101583
+  type: 'test'
+  ...
+# Subtest: soak and counter intervals bind their start and every controlled sample
+ok 3 - soak and counter intervals bind their start and every controlled sample
+  ---
+  duration_ms: 0.415375
+  type: 'test'
+  ...
+# Subtest: NUL porcelain rejects both code paths of staged renames and copies
+ok 4 - NUL porcelain rejects both code paths of staged renames and copies
+  ---
+  duration_ms: 0.117792
+  type: 'test'
+  ...
+# Subtest: unstamped inputs need receipts; body and immutable image stamps cannot supply identity
+ok 5 - unstamped inputs need receipts; body and immutable image stamps cannot supply identity
+  ---
+  duration_ms: 0.073833
+  type: 'test'
+  ...
+# Subtest: real wrapper preserves producer bytes, stdin, relative env and side outputs; failures invalidate receipts
+ok 6 - real wrapper preserves producer bytes, stdin, relative env and side outputs; failures invalidate receipts
+  ---
+  duration_ms: 1344.208875
+  type: 'test'
+  ...
+# Subtest: directory hashes include exact names and bytes and refuse symbolic links
+ok 7 - directory hashes include exact names and bytes and refuse symbolic links
+  ---
+  duration_ms: 1.27725
+  type: 'test'
+  ...
+# Subtest: missing, edited, failed or summary-only evidence cannot grant acceptance
+ok 8 - missing, edited, failed or summary-only evidence cannot grant acceptance
+  ---
+  duration_ms: 1.007625
+  type: 'test'
+  ...
+# Subtest: incident acceptance requires actual model and every enforced resource bound
+ok 9 - incident acceptance requires actual model and every enforced resource bound
+  ---
+  duration_ms: 1.023667
+  type: 'test'
+  ...
+# Subtest: every generated corpus and research request is admitted by the actual gateway contract
+ok 10 - every generated corpus and research request is admitted by the actual gateway contract
+  ---
+  duration_ms: 1.371375
+  type: 'test'
+  ...
+# Subtest: the two original rejected request fields fail fixture admission before any dispatch
+ok 11 - the two original rejected request fields fail fixture admission before any dispatch
+  ---
+  duration_ms: 0.826708
+  type: 'test'
+  ...
+# Subtest: stale review, dirty or mismatched source/contracts, closed/expired/oversized consent block dispatch
+ok 12 - stale review, dirty or mismatched source/contracts, closed/expired/oversized consent block dispatch
+  ---
+  duration_ms: 0.195709
+  type: 'test'
+  ...
+# Subtest: live responses are tied to the exact audited window and bounded timestamps
+ok 13 - live responses are tied to the exact audited window and bounded timestamps
+  ---
+  duration_ms: 0.156
+  type: 'test'
+  ...
+# Subtest: 400 responses, missing polls, failed jobs, empty results and incomplete corpus cannot report success
+ok 14 - 400 responses, missing polls, failed jobs, empty results and incomplete corpus cannot report success
+  ---
+  duration_ms: 0.158125
+  type: 'test'
+  ...
+# Subtest: immutable accepted bytes plus bounded concurrent measurements pass
+ok 15 - immutable accepted bytes plus bounded concurrent measurements pass
+  ---
+  duration_ms: 33.944875
+  type: 'test'
+  ...
+# Subtest: tampered historical evidence never passes
+ok 16 - tampered historical evidence never passes
+  ---
+  duration_ms: 26.71475
+  type: 'test'
+  ...
+# Subtest: assessment decision, provenance, complete path coverage and hash are mandatory
+ok 17 - assessment decision, provenance, complete path coverage and hash are mandatory
+  ---
+  duration_ms: 291.735333
+  type: 'test'
+  ...
+# Subtest: lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+ok 18 - lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+  ---
+  duration_ms: 146.753334
+  type: 'test'
+  ...
+# Subtest: duplicate frames, non-JSON sample, large gaps and short runs are rejected
+ok 19 - duplicate frames, non-JSON sample, large gaps and short runs are rejected
+  ---
+  duration_ms: 117.088125
+  type: 'test'
+  ...
+# Subtest: boot or container restart and wrong service names fail even if health recovers
+ok 20 - boot or container restart and wrong service names fail even if health recovers
+  ---
+  duration_ms: 69.510292
+  type: 'test'
+  ...
+# Subtest: incident must overlap real successful traffic with memory headroom and no swap
+ok 21 - incident must overlap real successful traffic with memory headroom and no swap
+  ---
+  duration_ms: 95.704792
+  type: 'test'
+  ...
+# Subtest: OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+ok 22 - OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+  ---
+  duration_ms: 197.912875
+  type: 'test'
+  ...
+# Subtest: timestamps, sustained request bins, required classes and window alignment matter
+ok 23 - timestamps, sustained request bins, required classes and window alignment matter
+  ---
+  duration_ms: 73.348083
+  type: 'test'
+  ...
+# Subtest: every latency must be finite and satisfy the canonical bound
+ok 24 - every latency must be finite and satisfy the canonical bound
+  ---
+  duration_ms: 72.784542
+  type: 'test'
+  ...
+# Subtest: Redis denials, wrong principal and measurements outside the run fail
+ok 25 - Redis denials, wrong principal and measurements outside the run fail
+  ---
+  duration_ms: 95.957708
+  type: 'test'
+  ...
+# Subtest: source equivalence covers only three pure evaluators and refuses rename deletions
+ok 26 - source equivalence covers only three pure evaluators and refuses rename deletions
+  ---
+  duration_ms: 0.132791
+  type: 'test'
+  ...
+# Subtest: runtime sources never import evidence-only helper or verifier
+ok 27 - runtime sources never import evidence-only helper or verifier
+  ---
+  duration_ms: 24.485875
+  type: 'test'
+  ...
+# Subtest: compose equality allows only exact reviewed mounts and changed images
+ok 28 - compose equality allows only exact reviewed mounts and changed images
+  ---
+  duration_ms: 15.805625
+  type: 'test'
+  ...
+# Subtest: the immutable old failed Cloud probe is explained without changing its FAIL
+ok 29 - the immutable old failed Cloud probe is explained without changing its FAIL
+  ---
+  duration_ms: 3.042875
+  type: 'test'
+  ...
+# Subtest: Redis memory headroom and zero eviction/error counters are measured
+ok 30 - Redis memory headroom and zero eviction/error counters are measured
+  ---
+  duration_ms: 92.962125
+  type: 'test'
+  ...
+# Subtest: live Cloud audit covers the completed authorized window and actual paid container
+ok 31 - live Cloud audit covers the completed authorized window and actual paid container
+  ---
+  duration_ms: 0.351833
+  type: 'test'
+  ...
+# Subtest: AC16 uses p95 latency while keeping successful startup outliers visible
+ok 32 - AC16 uses p95 latency while keeping successful startup outliers visible
+  ---
+  duration_ms: 70.842
+  type: 'test'
+  ...
+# Subtest: live driver changes invalidate corpus/research proof while preserving independent unchanged executions
+ok 33 - live driver changes invalidate corpus/research proof while preserving independent unchanged executions
+  ---
+  duration_ms: 0.08775
+  type: 'test'
+  ...
+# Subtest: unpaid rechecks preserve the complete frozen corpus, first failure and paid-window attribution
+ok 34 - unpaid rechecks preserve the complete frozen corpus, first failure and paid-window attribution
+  ---
+  duration_ms: 5.9575
+  type: 'test'
+  ...
+1..34
+# tests 34
+# suites 0
+# pass 34
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1585.027167

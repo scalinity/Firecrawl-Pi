@@ -1,0 +1,238 @@
+{
+  "utc": "2026-10-04T00:08:54.253Z",
+  "milestone_state": "BLOCKED",
+  "scope": "M9 only plus three explicitly authorized owning-M2 fixes",
+  "runtime_changes_after_targeted_resource_proof": false,
+  "public_corpus": {
+    "denominator": 20,
+    "initial_usable": 15,
+    "final_usable": 17,
+    "rate": 0.85,
+    "required_rate": 0.9,
+    "state": "FAIL",
+    "classes": {
+      "static": {
+        "denominator": 9,
+        "usable": 7
+      },
+      "js": {
+        "denominator": 2,
+        "usable": 2
+      },
+      "documentation": {
+        "denominator": 7,
+        "usable": 7
+      },
+      "document": {
+        "denominator": 1,
+        "usable": 1
+      },
+      "lawful-difficult": {
+        "denominator": 1,
+        "usable": 0
+      }
+    },
+    "final_strategy_distribution": {
+      "direct_browser": 4,
+      "residential_http": 2,
+      "direct_http": 13,
+      "enhanced": 1
+    },
+    "latency_ms": {
+      "median": 1643,
+      "p95": 8916,
+      "maximum": 13103
+    },
+    "failed_ids": [
+      "P01",
+      "P02",
+      "P19"
+    ],
+    "cumulative_attempts": {
+      "P01": 3,
+      "P02": 3,
+      "P07": 3,
+      "P08": 3,
+      "P19": 3
+    },
+    "fourth_attempts": "NOT_AUTHORIZED"
+  },
+  "providers": {
+    "utc": "2026-10-03T22:16:27.129Z",
+    "source_commit": "111341f8726208a21484eb436dae9c39bbe4a213",
+    "ledger_raw_sha256": "82289284e73b98da6f697fb76722715263ed9d69abc92cbab766cf46182217bd",
+    "m9": {
+      "row_count": 25,
+      "states": {
+        "SETTLED": 22,
+        "UNCERTAIN": 2,
+        "RELEASED": 1
+      },
+      "providers": {
+        "decodo": {
+          "settled_micro_usd": 977,
+          "retained_micro_usd": 16000,
+          "free_credits": 0,
+          "measured_bytes": 243180
+        },
+        "openai": {
+          "settled_micro_usd": 7544,
+          "retained_micro_usd": 0,
+          "free_credits": 0,
+          "measured_bytes": 0
+        },
+        "llamaparse": {
+          "settled_micro_usd": 0,
+          "retained_micro_usd": 0,
+          "free_credits": 9,
+          "measured_bytes": 0
+        },
+        "zyte": {
+          "settled_micro_usd": 2540,
+          "retained_micro_usd": 0,
+          "free_credits": 0,
+          "measured_bytes": 675
+        }
+      },
+      "paid_settled_micro_usd": 11061,
+      "paid_upper_micro_usd": 27061
+    },
+    "project": {
+      "row_count": 39,
+      "states": {
+        "SETTLED": 36,
+        "UNCERTAIN": 2,
+        "RELEASED": 1
+      },
+      "providers": {
+        "openai": {
+          "settled_micro_usd": 7714,
+          "retained_micro_usd": 0,
+          "free_credits": 0,
+          "measured_bytes": 0
+        },
+        "llamaparse": {
+          "settled_micro_usd": 0,
+          "retained_micro_usd": 0,
+          "free_credits": 15,
+          "measured_bytes": 0
+        },
+        "zyte": {
+          "settled_micro_usd": 6350,
+          "retained_micro_usd": 0,
+          "free_credits": 0,
+          "measured_bytes": 1927
+        },
+        "decodo": {
+          "settled_micro_usd": 1517,
+          "retained_micro_usd": 16000,
+          "free_credits": 0,
+          "measured_bytes": 377771
+        }
+      },
+      "paid_settled_micro_usd": 15581,
+      "paid_upper_micro_usd": 31581
+    },
+    "uncertain": [
+      {
+        "call_key": "proxy:search:764d9480-ebe7-4ee3-a7c6-1fe19f48cfcf",
+        "retained_micro_usd": 8000,
+        "measured_usage": null
+      },
+      {
+        "call_key": "proxy:search:af088e95-a507-4251-97e2-b876ae2c3140",
+        "retained_micro_usd": 8000,
+        "measured_usage": null
+      }
+    ],
+    "provider_basis": {
+      "openai": "Provider token usage times versioned rate card; invoice absent",
+      "decodo": "Locally measured bytes times versioned rate card; uncertain tunnels retain whole reservation",
+      "zyte": "Conservative maximum rate-card price; invoice absent"
+    },
+    "parser_paid_usd": 0,
+    "invoiced_usd": null,
+    "paid_dispatch": false,
+    "provider_caps_zero": true,
+    "first_window_authorization": "CLOSED",
+    "retry_window_authorization": "CLOSED",
+    "next_paid_execution": "REQUIRES_FRESH_OWNER_AUTHORIZATION"
+  },
+  "resource_reuse": {
+    "samples": 144,
+    "minimum_available_mib": 4516,
+    "slice_peak_mib": 3117,
+    "incident_peak_mib": 173,
+    "controlled_static_p95_ms": 97,
+    "controlled_static_max_ms": 14056,
+    "requests": 93,
+    "p95_ms": {
+      "static": 105,
+      "js": 5063,
+      "status": 26,
+      "mcp_list": 16
+    }
+  },
+  "incident": "VERIFIED_LIVE manual proof; automatic activation held",
+  "hosted_access": "NOT_ENABLED",
+  "acceptance": "All 25 system criterion rows PASS; conditional AC22 NOT_REQUIRED. Full acceptance is blocked by the unchanged 17/20 corpus result.",
+  "provenance": [
+    {
+      "path": "evidence/M9/corpus.json",
+      "sha256": "18e4989930aa3f88a1ea3c616b9edb8d3eb497e5d6d69c9eb13f6005c00ca6c3"
+    },
+    {
+      "path": "evidence/M9/work/corpus-freeze.json",
+      "sha256": "4d9a0d2559cc90558f2c92efb21cf0f2dbae196250e2cd992b8fa5d19060fa54"
+    },
+    {
+      "path": "evidence/M9/work/frozen-corpus-criterion-contradiction.json",
+      "sha256": "f374011fabf19e92a5bc620cc014eb7cb341e263698c3aa3074d76146bd51625"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/corpus-rechecks.json",
+      "sha256": "ff3a1a3c49ae1c9274d39dc31c23fb5bd530885056b2627a027858efc8a94da9"
+    },
+    {
+      "path": "evidence/M9/regression/M8/raw/corpus-final-rechecks.json",
+      "sha256": "ff8f402182a652bceb96e838cfe513894d99be9adaf0718a29e6ce1a17edb4a6"
+    },
+    {
+      "path": "evidence/M9/research-flow.json",
+      "sha256": "8d63895d9ddcf21b87823d2aa75e0a920827fd4b6579ba21b86825c262f76587"
+    },
+    {
+      "path": "evidence/M9/work/live-cost-summary.json",
+      "sha256": "c14cf63c21388149da64e174a1b567ca459bb47c5d206d6e8ca9364a14751b46"
+    },
+    {
+      "path": "evidence/M9/resource-reuse.json",
+      "sha256": "122c8abdeeaa5f0df566ec5d2d7b04e6ba61fceacceaeb2ee3f0836ba5b36b6a"
+    },
+    {
+      "path": "deploy/versions.lock.json",
+      "sha256": "0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a"
+    },
+    {
+      "path": "patches/series.json",
+      "sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96"
+    },
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    },
+    {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea"
+    }
+  ],
+  "preserved_limitations": [
+    "Original corpus criteria/membership unchanged; no Markdown title injection",
+    "Real enhanced-target failure retained; synthetic routing is not anti-bot success",
+    "M8 historical B00/X04 unchanged",
+    "Supplemental M5 legacy failures/current equivalents unchanged",
+    "Costs estimated, invoices unavailable; uncertain reserves retained",
+    "Single-host fault domain; automatic incident activation held",
+    "No push, publish, history rewrite, successor kickoff or second24-hour soak"
+  ]
+}

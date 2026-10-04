@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-03T22:28:22.295Z",
+  "source_commit": "96dfc37a4ccc1ac7c885ed131b2ea5da5d5477b4",
+  "exit_code": 1,
+  "cause": "Actual gateway fixture rejects actions wait milliseconds=0; minimum is1",
+  "private_started": false,
+  "acquisition_attempts": 0,
+  "paid_execution": 0,
+  "disposition": "Correct final static wait to1ms, preserve collector failure receipt, rerun actual admission before any dispatch"
+}

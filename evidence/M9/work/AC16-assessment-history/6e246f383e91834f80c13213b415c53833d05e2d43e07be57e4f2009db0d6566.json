@@ -1,0 +1,136 @@
+{
+  "schema": "fcpi.m9-resource-applicability/v1",
+  "utc": "2026-10-03T19:46:30.265Z",
+  "source_commit": "82a11536707e3fb6d4fe76497e857b137c5e2184",
+  "accepted_baseline": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+  "owner_instruction": "Reuse accepted M8 AC16 unless runtime changes materially invalidate its resource/stability assumptions; no duplicate 24-hour soak without exact four-part justification.",
+  "historical_inputs": [
+    {
+      "path": "evidence/M8/verification.json",
+      "sha256": "8986ddf76d253eccfd00ccd26ead66b9d014305cebe9997535e51647d8804642"
+    },
+    {
+      "path": "evidence/M8/raw/soak.txt",
+      "sha256": "85971bcf6f4095b65a31945f41c80e0c098547c716597571f0237deebbbc2d92"
+    },
+    {
+      "path": "evidence/M8/raw/redis-soak.txt",
+      "sha256": "d7f41a463ed89f91cfbce12824b30c2c896fcf81cb9f1b1849f64d95078934ae"
+    },
+    {
+      "path": "evidence/M8/INTERPRETATION.md",
+      "sha256": "8b380d655c7f7b836bebc7e0c42d0406dc4c7b2b775aedcf210425441ce55a1e"
+    }
+  ],
+  "changed_runtime_paths": [
+    "deploy/browser/Dockerfile",
+    "deploy/compose.yaml",
+    "deploy/host/fcpi-incident.service",
+    "deploy/host/fcpi-incident.timer",
+    "deploy/policies/budget.json",
+    "deploy/versions.lock.json",
+    "scripts/ops/backup.sh",
+    "scripts/ops/lib.sh",
+    "scripts/ops/notify-ntfy.sh",
+    "scripts/ops/redis-cli.sh",
+    "scripts/ops/restore.jq",
+    "scripts/ops/status.sh",
+    "scripts/ops/tick.sh",
+    "scripts/ops/verify.sh",
+    "services/access/server.mjs",
+    "services/access/src/config.mjs",
+    "services/access/src/incidents.mjs",
+    "services/access/test/config.test.mjs",
+    "services/access/test/incidents.test.mjs",
+    "services/browser/src/server.mjs",
+    "services/retrieval/Dockerfile",
+    "services/retrieval/src/acquire.mjs",
+    "services/retrieval/src/budget.mjs",
+    "services/retrieval/src/enhanced.mjs",
+    "services/retrieval/src/extract.mjs",
+    "services/retrieval/src/parse.mjs",
+    "services/retrieval/src/provider.mjs",
+    "services/retrieval/src/proxy.mjs",
+    "services/retrieval/src/residential.mjs",
+    "services/retrieval/src/server.mjs",
+    "services/retrieval/test/acquire.test.mjs",
+    "services/retrieval/test/m5-budget.test.mjs",
+    "services/retrieval/test/m5-extract.test.mjs",
+    "services/retrieval/test/m5-parse.test.mjs",
+    "services/retrieval/test/m6-residential.test.mjs",
+    "services/retrieval/test/m7-enhanced.test.mjs",
+    "services/retrieval/test/provider-lease.test.mjs",
+    "services/retrieval/test/proxy.test.mjs"
+  ],
+  "assessment": [
+    {
+      "component": "Firecrawl API/NuQ/Postgres/Redis/RabbitMQ/SearXNG/MCP",
+      "decision": "Unchanged core binaries, data-service versions, concurrency, queue topology, memory/swap caps and storage tuning. Existing long-duration measurements remain relevant."
+    },
+    {
+      "component": "retrieval-service",
+      "decision": "Provider accounting bounded in PRE-M9; M9 adds only refusal correlation, host-only logging and error classification. No new acquisition strategy, queue, retry or browser permit. Unit, live Chromium fixture and provider isolation tests are current."
+    },
+    {
+      "component": "browser-worker",
+      "decision": "Main-frame request listeners record only latest target and tunnel failure; existing context/page/task lifecycle and caps unchanged. Chromium and package lock unchanged. Current denial/positive controls and process-cleanup/failure injection verify behavior."
+    },
+    {
+      "component": "access-gateway",
+      "decision": "Adds fixed, bounded signed incident-action paths and mounts. Existing ordinary paths and cgroup160MiB preserved. Current authentication, replay/expiry, native clients and 77 access fixtures cover changed behavior."
+    },
+    {
+      "component": "incident agent",
+      "decision": "New subscription CLI runs only in a separately bounded768MiB/330s unit, no swap, one investigation; timer256MiB. Accepted minimum host reserve4822MiB is ample for this bound, but concurrent actual resource evidence is required before inheritance is accepted."
+    }
+  ],
+  "targeted_plan": "One 30-minute controlled mixed fixture resource run at unchanged concurrency; fresh bounded incident invocation during that window; current fault/reboot/heap/backup/restore/rollback results; fresh Redis commandstats with zero denials. Preserve and recompute historical 24-hour evidence without retagging it.",
+  "state": "APPLICABILITY_PENDING_TARGETED_TESTS",
+  "duplicate_24h_soak": "NOT_SCHEDULED",
+  "soak_execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+  "accepted_verification_source": "286bb544a44fe9cae8ee56f6b9c0a02b0e1a5e93",
+  "accepted_repository_baseline": "55d756c5fb12fc5e741ab4145c47a7d7fdee1237",
+  "runtime_delta_paths": [
+    "services",
+    "deploy",
+    "scripts/ops",
+    "scripts/m9/incident-agent.sh",
+    "scripts/m9/incident-prepare.sh",
+    "scripts/m9/incident-control.sh",
+    "scripts/m9/incident-hook.sh"
+  ],
+  "runtime_delta_sha256": "ecab0048c103339b5e2b59dad773267490c3800352cc57f5895decb57bd83b54",
+  "historical_recomputed": {
+    "utc": "2026-10-03T19:50:27.128Z",
+    "path": "evidence/M9/resource-baseline/verification.json",
+    "checks": [
+      "M8-S01",
+      "M8-S02",
+      "M8-S04",
+      "M8-O04"
+    ],
+    "state": "PASS",
+    "note": "Recomputed unchanged historical bytes using current verifier; not a new execution or a current-source24h run."
+  },
+  "baseline_recomputation": {
+    "checks": [
+      {
+        "test_id": "M8-O04",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M8-S01",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M8-S02",
+        "state": "PASS"
+      },
+      {
+        "test_id": "M8-S04",
+        "state": "PASS"
+      }
+    ],
+    "execution_source": "6366dd8b5b080c3059203412cabd6b8ad7d7832b"
+  }
+}

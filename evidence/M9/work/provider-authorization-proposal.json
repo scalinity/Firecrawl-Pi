@@ -1,0 +1,76 @@
+{
+  "schema": "fcpi.m9-provider-authorization-proposal/v1",
+  "utc": "2026-10-03T15:25:58.456Z",
+  "source_commit": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+  "state": "NOT_AUTHORIZED",
+  "scope": "M9 acceptance",
+  "duration_minutes": 45,
+  "category_cumulative_caps": {
+    "llm_micro_usd": 20000,
+    "proxy_micro_usd": 100000,
+    "enhanced_micro_usd": 100000,
+    "paid_total_micro_usd": 220000,
+    "parser_credits_month": 20,
+    "parser_credits_pre_m9": 6,
+    "parser_new_credits_maximum": 14,
+    "parser_paid_micro_usd": 0
+  },
+  "providers": {
+    "model": "OpenAI gpt-6-luna",
+    "residential": "Decodo",
+    "enhanced": "Zyte",
+    "complex_parser": "LlamaParse cost-effective free credits"
+  },
+  "steps": [
+    {
+      "id": "M5-fresh-live",
+      "command": "node scripts/m5/e2e.mjs live",
+      "scope": "Three real search queries, four model cases, two fresh nonced complex/scanned parser jobs and cache evidence"
+    },
+    {
+      "id": "M6-fresh-live",
+      "command": "node scripts/m6/e2e.mjs live",
+      "scope": "Real residential egress, basic/stealth retrieval, browser subresources and search"
+    },
+    {
+      "id": "M7-fresh-live",
+      "command": "node scripts/m7/e2e.mjs live --held-only",
+      "scope": "Real enhanced retrieval/cache and one controlled synthetic challenge route; no universal anti-bot success claim"
+    },
+    {
+      "id": "M9-frozen-corpus-and-research",
+      "command": "node scripts/m9/live.mjs",
+      "scope": "Exactly twenty frozen public targets and five-step representative research flow"
+    }
+  ],
+  "constraints": [
+    "No reuse of expired PRE-M9 grant",
+    "Independent fixtures and review/address first",
+    "Source-bound consent and absolute expiry required",
+    "Stop timer armed before enablement",
+    "All retries/repairs consume the same caps",
+    "At most three acquisition attempts per logical page",
+    "At most two pages per parser submission",
+    "No paid parser, subscriptions, purchases, reloads, upgrades or alternate providers",
+    "Restore production paid dispatch false and every cap zero at stop or any failure",
+    "Keep measured ledger estimates distinct from provider invoices"
+  ],
+  "inputs": [
+    {
+      "path": "scripts/m9/validation.sh",
+      "sha256": "917c86050a5ff753afae0bbb16a43e18eba199501296c3f4d4c013fe90e7a9ec"
+    },
+    {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea"
+    },
+    {
+      "path": "deploy/policies/egress.json",
+      "sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c"
+    },
+    {
+      "path": "evidence/M9/work/corpus-freeze.json",
+      "sha256": "4d9a0d2559cc90558f2c92efb21cf0f2dbae196250e2cd992b8fa5d19060fa54"
+    }
+  ]
+}

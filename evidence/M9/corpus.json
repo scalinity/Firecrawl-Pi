@@ -1,0 +1,498 @@
+{
+  "schema": "fcpi.public-corpus/v1",
+  "utc": "2026-10-03T22:30:43.995Z",
+  "source_commit": "cf93d5a61fe3940fbe574d3d7642818793fa3205",
+  "window_consent_sha256": "d0b5bfbd21edfe96f079f97edc95babda3f9258c47a5c9a4fc66298cceec2e33",
+  "corpus_sha256": "c1e735e869798c0491421e73d8439ee856df9cffaa030887c13bc4334f117d6a",
+  "denominator": 20,
+  "domain_count": 12,
+  "usable": 17,
+  "completed": 20,
+  "results": [
+    {
+      "id": "P01",
+      "domain": "example.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": false,
+      "criteria": [
+        {
+          "criterion_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+          "passed": false
+        }
+      ],
+      "content_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+      "bytes": 1342,
+      "elapsed_ms": 2105,
+      "fcpi": {
+        "strategy": "direct_browser",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P02",
+      "domain": "example.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": false,
+      "criteria": [
+        {
+          "criterion_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+          "passed": false
+        }
+      ],
+      "content_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+      "bytes": 1342,
+      "elapsed_ms": 2150,
+      "fcpi": {
+        "strategy": "direct_browser",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P03",
+      "domain": "httpbin.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "04772b402e9a404e92672e35bc696cacf3d0ab78af207004e2436c66750a3b27",
+          "passed": true
+        }
+      ],
+      "content_sha256": "fba39612d1b025d070757b2abfdf39f8de73cbbcf848d9cfe44136f363d9da57",
+      "bytes": 3625,
+      "elapsed_ms": 1643,
+      "fcpi": {
+        "strategy": "residential_http",
+        "attempts": 1,
+        "proxy_bytes": 10809,
+        "proxy_micro_usd": 44,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P04",
+      "domain": "httpbin.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "92f33e0c60ff0852d1a2ab2f67abe130378e354050a5bc086a5f324225778643",
+          "passed": true
+        }
+      ],
+      "content_sha256": "b97bb262fd528d7d26c005ac013526425d4bdccf8869cba83418f875f11323e0",
+      "bytes": 144,
+      "elapsed_ms": 3916,
+      "fcpi": {
+        "strategy": "residential_http",
+        "attempts": 1,
+        "proxy_bytes": 7270,
+        "proxy_micro_usd": 30,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P05",
+      "domain": "quotes.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+          "passed": true
+        }
+      ],
+      "content_sha256": "a1a6cc5b9ccb4ef93e472a3ace015d7d1837fab5c309ea6af765dda966e71072",
+      "bytes": 4359,
+      "elapsed_ms": 784,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P06",
+      "domain": "quotes.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "238b82329de4591be36fcb6c2dd5363b634a9e7e2371672abadaa93bc477fc85",
+          "passed": true
+        }
+      ],
+      "content_sha256": "bfaaa9d087a1970783f926c5a060260ed445a0d78ab6109e1833987ce7e9ca41",
+      "bytes": 6553,
+      "elapsed_ms": 731,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P07",
+      "domain": "quotes.toscrape.com",
+      "page_class": "js",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+          "passed": true
+        }
+      ],
+      "content_sha256": "26f68e278714c23c5584ced819d67281b30370c0eca599f85333b16375492b89",
+      "bytes": 1786,
+      "elapsed_ms": 4568,
+      "fcpi": {
+        "strategy": "direct_browser",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P08",
+      "domain": "quotes.toscrape.com",
+      "page_class": "js",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "930cf9e7c367bb802de67e2dd9d8a769402e7f79944ad755cdd1406be3e563e4",
+          "passed": true
+        }
+      ],
+      "content_sha256": "53ef42cf68a1e1da7625ec194da3da391972b4cdd6e859c9b4b401ccad648bd3",
+      "bytes": 1794,
+      "elapsed_ms": 13103,
+      "fcpi": {
+        "strategy": "direct_browser",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P09",
+      "domain": "books.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "d53bd7e0174c0d53cfd5df069eb643902c7da4645326b81e52732b068af3c1cb",
+          "passed": true
+        }
+      ],
+      "content_sha256": "0c3b6d3951adb589c628f3d2d6024c55bad800a3e912f060ea6f544e6da7a790",
+      "bytes": 9242,
+      "elapsed_ms": 1159,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P10",
+      "domain": "books.toscrape.com",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "9d948c73e0ad7a5a213a5e7e00b962531ca6b07992a06bd8c2fc2ac5ae23c51b",
+          "passed": true
+        }
+      ],
+      "content_sha256": "b9bc04a91d9cd6d8f5cc787aa86be26496e25017f61012e81aeec082921fad18",
+      "bytes": 7922,
+      "elapsed_ms": 1797,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P11",
+      "domain": "developer.mozilla.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "b27ad06d123c6145fba7e9217a4cfbf2488b4743810ed8c8ff14ad01a5bbe515",
+          "passed": true
+        }
+      ],
+      "content_sha256": "85c40df5ccade2966609bebbd5e041db53fb019ee5a9b1bb24e6c1cc9ffb969a",
+      "bytes": 19796,
+      "elapsed_ms": 964,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P12",
+      "domain": "developer.mozilla.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "56d6f32151ad8474f40d7b939c2161ee2bbf10023f4af1dbb3e13260ebdc6342",
+          "passed": true
+        }
+      ],
+      "content_sha256": "823dcfb7d73e41b10c137cc976518d73eb8493b481da4cfe6578615aa16a8a92",
+      "bytes": 21897,
+      "elapsed_ms": 2097,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P13",
+      "domain": "nodejs.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "72ede065fad02e5d9fe5681dd9022b26a1cc357ed0ded8e7ba24fab98b18347f",
+          "passed": true
+        }
+      ],
+      "content_sha256": "cd6bb63a3911cd74accc9ce864a350b8d33e503db5a2a03561d33632e59e5989",
+      "bytes": 488079,
+      "elapsed_ms": 2475,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P14",
+      "domain": "nodejs.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "56d6f32151ad8474f40d7b939c2161ee2bbf10023f4af1dbb3e13260ebdc6342",
+          "passed": true
+        }
+      ],
+      "content_sha256": "93004281ac9bbbdd50329a27ded6a806575cac349df1baa3f3d2601270d1dfd4",
+      "bytes": 209415,
+      "elapsed_ms": 1033,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P15",
+      "domain": "docs.python.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "18885f27b5af9012df19e496460f9294d5ab76128824c6f993787004f6d9a7db",
+          "passed": true
+        }
+      ],
+      "content_sha256": "6c50156b60f8c9757f341fab11063f531def1fc0dd4ddfbf266651b56bbcdb4a",
+      "bytes": 23354,
+      "elapsed_ms": 1188,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P16",
+      "domain": "www.w3.org",
+      "page_class": "document",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "41417fb420a737c8064205cf4b7fac3fc7ce6bad26417be5b4f6f6012d92c951",
+          "passed": true
+        }
+      ],
+      "content_sha256": "79d19a177dd0d6be0bc2c4c4c80766737307686bd74b2ba1597459ab0e5171ca",
+      "bytes": 20,
+      "elapsed_ms": 8916,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P17",
+      "domain": "www.w3.org",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "7605425c77512652e2ab94af37a11afd86084f677375d3edd81f9035a8495434",
+          "passed": true
+        }
+      ],
+      "content_sha256": "0ce20b4d09358e729e84623cc7029db161981b083d86b8de5ee37b8937692ef8",
+      "bytes": 287237,
+      "elapsed_ms": 801,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P18",
+      "domain": "react.dev",
+      "page_class": "documentation",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "01fad993ff61aca9a1f2f07100c95eb1559d8b6440a00cb974a92810a6b5a2dc",
+          "passed": true
+        }
+      ],
+      "content_sha256": "9be50c66d524ddd1bfc89c99a1087a33fc280152b08661bbb47b56f6e9cdf697",
+      "bytes": 19328,
+      "elapsed_ms": 1174,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    },
+    {
+      "id": "P19",
+      "domain": "www.scrapingcourse.com",
+      "page_class": "lawful-difficult",
+      "status": 500,
+      "usable": false,
+      "criteria": [
+        {
+          "criterion_sha256": "562be6087cac8848bcc4ba7f4e99aa44d26f3ec68b0f1cf60e18bc15a1f70a9a",
+          "passed": false
+        }
+      ],
+      "content_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "elapsed_ms": 7519,
+      "fcpi": {
+        "strategy": "enhanced",
+        "attempts": 3,
+        "proxy_bytes": 12243,
+        "proxy_micro_usd": 49,
+        "enhanced_micro_usd": 0
+      },
+      "failure": "SCRAPE_FCPI_RETRIEVAL"
+    },
+    {
+      "id": "P20",
+      "domain": "www.iana.org",
+      "page_class": "static",
+      "status": 200,
+      "usable": true,
+      "criteria": [
+        {
+          "criterion_sha256": "6ecc30f307d5443aca21d74d9dd696a8b9316a520a32403554525e3425fcd51e",
+          "passed": true
+        }
+      ],
+      "content_sha256": "7ec157a7098711406af1b4bfa1141445d0ccbac19415e58498d673fb8bdfd882",
+      "bytes": 2490,
+      "elapsed_ms": 506,
+      "fcpi": {
+        "strategy": "direct_http",
+        "attempts": 1,
+        "proxy_bytes": 0,
+        "proxy_micro_usd": 0,
+        "enhanced_micro_usd": 0
+      },
+      "failure": null
+    }
+  ],
+  "evidence_mode": "INITIAL_BATCH_PLUS_UNPAID_RECHECKS",
+  "initial_usable": 15,
+  "recheck_source_commit": "3751b8d56dbc2d9beadcba73d796ff7da0e679ce",
+  "rechecks": "evidence/M9/regression/M8/raw/corpus-final-rechecks.json",
+  "prior_rechecks": "evidence/M9/regression/M8/raw/corpus-rechecks.json"
+}

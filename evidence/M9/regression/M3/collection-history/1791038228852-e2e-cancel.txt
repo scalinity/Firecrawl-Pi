@@ -1,0 +1,23 @@
+### meta
+{"utc":"2026-10-03T14:16:55.072Z","phase":"cancel","source_commit":"3ae7bcbf7acf3dc6b5521dc2e0f22d78937af837","vantage":"workstation through an SSH forward of 127.0.0.1:3380","platform":"darwin","node":"v26.10.0"}
+### slow_crawl
+{"utc":"2026-10-03T14:16:56.256Z","case":"submit","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"222d28f179e46d75ecf10d57908aa222a07663edb84f5823529953529117a7b5","id":"49909782-f9c2-41ad-a96b-4037d9649a4b"}
+### queued_crawl
+{"utc":"2026-10-03T14:17:06.185Z","case":"submit_while_other_runs","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"f400b1e07e699376d3f904de854352c1d0fd8717afbc042b0a713f040dc2e5ef","id":"2cd0e5db-b205-41e3-8134-082335a2a4d3","ledger_state":"RECEIVED"}
+{"utc":"2026-10-03T14:17:06.949Z","case":"cancel","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"a0af58eabbdc165960166eac02d0515f7d631a86d262e5f74af474e283dc7521","ledger_state":"CANCELLED","marker_groups":0}
+### slow_crawl
+{"utc":"2026-10-03T14:17:07.434Z","case":"cancel","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"a0af58eabbdc165960166eac02d0515f7d631a86d262e5f74af474e283dc7521","body":{"status":"cancelled"},"at":"2026-10-03T14:17:07.419Z"}
+{"utc":"2026-10-03T14:17:21.071Z","case":"finished","state":"CANCELLED","archived":6,"completed":6,"total":6,"marker_groups":1,"cancel_at":"2026-10-03T14:17:07.419Z","fixture_requests":[{"path":"/slow/s01","answered":"2026-10-03T14:16:59.917Z","started":"2026-10-03T14:16:57.917Z"},{"path":"/slow/s02","answered":"2026-10-03T14:17:01.998Z","started":"2026-10-03T14:16:59.998Z"},{"path":"/slow/s03","answered":"2026-10-03T14:17:04.055Z","started":"2026-10-03T14:17:02.055Z"},{"path":"/slow/s04","answered":"2026-10-03T14:17:06.144Z","started":"2026-10-03T14:17:04.144Z"},{"path":"/slow/s05","answered":"2026-10-03T14:17:08.212Z","started":"2026-10-03T14:17:06.212Z"}],"events":["RECEIVED","SUBMITTING","QUEUED","RUNNING","CANCELLED"],"queued_job_after":"CANCELLED","queued_job_marker_groups":0}
+### finished_job
+{"utc":"2026-10-03T14:17:21.082Z","case":"cancel_finished","status":409,"code":null,"error":"Crawl is already completed","www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"ca65ad15780f0ee7abe30f815c1e55ddbbff055a7cbc6dd76e796d30e36f6f2d"}
+### restore
+{"utc":"2026-10-03T14:17:22.652Z","firecrawl-core":{"was":"running","now":"running healthy"},"access-gateway":{"was":"running","now":"running healthy"}}
+### resources
+{"utc":"2026-10-03T14:17:22Z","label":"end-cancel","gateway":{"instance":"a9150e4dfead","started_at":"2026-10-03T12:36:27.00131701Z","peak":99893248,"max":"167772160","current":78856192,"oom_kill":0},"core":{"instance":"17ab747b3fe4","started_at":"2026-10-03T12:38:24.20986853Z","peak":2042871808,"max":"2684354560","current":1869479936,"oom_kill":0},"vmstat_oom_kill":0,"mem_available_kib":4770096}
+### ledger
+{"utc":"2026-10-03T14:17:23.591Z","id":"49909782-f9c2-41ad-a96b-4037d9649a4b","kind":"crawl","state":"CANCELLED","upstream":"01a10220-089a-71fa-8f5c-e88a091ef9f3","cancel_requested":true,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":13}
+{"utc":"2026-10-03T14:17:23.592Z","id":"2cd0e5db-b205-41e3-8134-082335a2a4d3","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+### forward
+{"utc":"2026-10-03T14:17:23.592Z","pid":556,"local":"127.0.0.1:3380","remote":"127.0.0.1:3380","exited_before_end":false}
+### end
+{"utc":"2026-10-03T14:17:23.592Z","exit":0}

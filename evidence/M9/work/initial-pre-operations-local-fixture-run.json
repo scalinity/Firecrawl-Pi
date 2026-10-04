@@ -1,0 +1,10 @@
+{
+  "utc": "2026-10-03T10:10:12.163Z",
+  "source_commit": "591dff27ec9acb603fa8d6356141912cf475a158",
+  "exit_code": 0,
+  "raw_sha256": "372920fd83c1b5422651a95101c579cdc90e2ae2ec6cd42be9973e49acc9bbb2",
+  "patch_sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96",
+  "versions_lock_sha256": "f7f6fe3c9a19d5de036f6a7cbbc6c50be7317895a73c11394497c184a1b6026f",
+  "command": "node --test --test-reporter=tap tests/contracts/m9-*.test.mjs tests/contracts/m8-admission-*.test.mjs tests/contracts/m8-restore-compose.test.mjs tests/contracts/pre-m9-verdicts.test.mjs",
+  "tests": 26
+}

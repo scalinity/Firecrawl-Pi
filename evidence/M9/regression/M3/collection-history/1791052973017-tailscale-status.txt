@@ -1,0 +1,25 @@
+### meta
+utc=2026-10-03T15:23:57Z source_commit=f72333f81d2c4753bf83d0db359e9ca6c99ef3da
+### keyring
+primary_keys=1 primary_fpr=2596A99EAAB33821893C0A79458CA832957F5868
+### tailscale
+version=1.102.4 tailscaled=active enabled=enabled
+backend=Running magicdns_suffix_set=true self_online=true tailnet_addresses=2 peers=1
+corp_dns=false route_all=false run_ssh=false advertise_routes=0 exit_node=false hostname=fcpi
+### serve
+{"tcp":["8443"],"web":[{"host_port":"<pi-tailnet-name-host>:8443","handlers":{"/":"http://127.0.0.1:3380"}}],"funnel":0}
+### origins_file
+3380:3380 600
+https://<pi-tailnet-name-host>:8443
+### guard
+guard_file_sha256=147030152ec16c3fb044b6d33940c84a3da0fcaa3cf7f8011b09c4147683c38b tailnet_rules=3
+### resolv
+resolv_conf_sha256=de08881cd2a06e1a3dba4a62ca41abfe418f74f4ede94e596105a813bc9662cf nameservers=1
+### listeners
+udp 0.0.0.0:41641
+udp *:41641
+tcp <tailnet-address>:35237
+tcp <tailnet-address>:8443
+tcp [<tailnet-address-v6>]:49128
+tcp [<tailnet-address-v6>]:8443
+end

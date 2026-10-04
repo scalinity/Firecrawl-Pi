@@ -1,0 +1,70 @@
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 816B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 188.20kB done
+#4 DONE 0.1s
+
+#5 [1/6] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.1s done
+#5 DONE 0.1s
+
+#6 [2/6] WORKDIR /srv/access
+#6 CACHED
+
+#7 [3/6] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/6] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 1.083 
+#8 1.083 added 14 packages, and audited 15 packages in 803ms
+#8 1.084 
+#8 1.084 found 0 vulnerabilities
+#8 1.258 npm warn using --force Recommended protections disabled.
+#8 1.439 v22.23.3
+#8 1.789 fcpi-access-gateway@0.3.0 /srv/access
+#8 1.789 `-- pg@8.23.0
+#8 1.789   +-- pg-cloudflare@1.4.0
+#8 1.789   +-- pg-connection-string@2.14.0
+#8 1.789   +-- UNMET OPTIONAL DEPENDENCY pg-native@>=3.0.1
+#8 1.789   +-- pg-pool@3.14.0
+#8 1.789   | `-- pg@8.23.0 deduped
+#8 1.789   +-- pg-protocol@1.16.0
+#8 1.789   +-- pg-types@2.2.0
+#8 1.789   | +-- pg-int8@1.0.1
+#8 1.789   | +-- postgres-array@2.0.0
+#8 1.789   | +-- postgres-bytea@1.0.1
+#8 1.789   | +-- postgres-date@1.0.7
+#8 1.789   | `-- postgres-interval@1.2.0
+#8 1.789   |   `-- xtend@4.0.2
+#8 1.789   `-- pgpass@1.0.5
+#8 1.789     `-- split2@4.2.0
+#8 1.789 
+#8 DONE 5.2s
+
+#9 [5/6] COPY server.mjs ./
+#9 DONE 0.7s
+
+#10 [6/6] COPY src ./src
+#10 DONE 0.3s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 0.5s done
+#11 exporting manifest sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb 0.0s done
+#11 exporting config sha256:f2c20a4aa3a947b14f677fa335e4fc6fd3177a241a5f1e2ea740aa37bc3fb36c 0.0s done
+#11 naming to docker.io/fcpi/access-gateway:m9 done
+#11 unpacking to docker.io/fcpi/access-gateway:m9
+#11 unpacking to docker.io/fcpi/access-gateway:m9 1.8s done
+#11 DONE 2.3s
+image_id=sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb platform=linux/arm64 user=3380:3380

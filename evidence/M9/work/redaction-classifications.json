@@ -1,0 +1,1537 @@
+[
+  {
+    "path": "deploy/searxng/entrypoint.sh",
+    "rule": "url-credentials",
+    "value_sha256": "f46a17ecb1a2604a4b34961f4d5c4c2974d9873f236dc63ed4f94cde9657e4d9",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "deploy/versions.lock.json",
+    "rule": "local-path",
+    "value_sha256": "24cb946f8c471ffa2ffa273ac8dd454939e9ae8e33bb3a700813ebcb57eea192",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "evidence/M2/raw/rt-ssrf.txt",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "evidence/M3/review/REVIEW.md",
+    "rule": "tailnet-name",
+    "value_sha256": "143bd553efce202e8e24af3b9b2a5b4dac158c1eb7948156cf9fb48ef84f9608",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "scripts/m1/pi-init.sh",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m1/pi-native-proofs.sh",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m1/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m1/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m1/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m1/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m2/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m2/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m2/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m2/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "a292bd21d13aadabad89deadb6f716d469972dcf853f83c7cdec351a92ee4ff0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "8d77bdd14943ff910340c883591cfe6e4e1e31484380cf2088dc6976139c07d0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "e48cb6c83acbe84bd92a966afd8d36dbb22200cae33dba5e0ce6f0d86e855dfb",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "143bd553efce202e8e24af3b9b2a5b4dac158c1eb7948156cf9fb48ef84f9608",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "9fee1dbd126b61ad5eb62f3d8f5e212f23c9b2e198dc972306821b4b2b9df745",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m3/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "8160b689c8825f3b2bd3c94e601febb64f427e0fdc98d4043b6c1883d7b07ff3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "a292bd21d13aadabad89deadb6f716d469972dcf853f83c7cdec351a92ee4ff0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "8d77bdd14943ff910340c883591cfe6e4e1e31484380cf2088dc6976139c07d0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "e48cb6c83acbe84bd92a966afd8d36dbb22200cae33dba5e0ce6f0d86e855dfb",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "143bd553efce202e8e24af3b9b2a5b4dac158c1eb7948156cf9fb48ef84f9608",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "9fee1dbd126b61ad5eb62f3d8f5e212f23c9b2e198dc972306821b4b2b9df745",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m4/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "8160b689c8825f3b2bd3c94e601febb64f427e0fdc98d4043b6c1883d7b07ff3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "a292bd21d13aadabad89deadb6f716d469972dcf853f83c7cdec351a92ee4ff0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "8d77bdd14943ff910340c883591cfe6e4e1e31484380cf2088dc6976139c07d0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "e48cb6c83acbe84bd92a966afd8d36dbb22200cae33dba5e0ce6f0d86e855dfb",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "143bd553efce202e8e24af3b9b2a5b4dac158c1eb7948156cf9fb48ef84f9608",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "9fee1dbd126b61ad5eb62f3d8f5e212f23c9b2e198dc972306821b4b2b9df745",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "8160b689c8825f3b2bd3c94e601febb64f427e0fdc98d4043b6c1883d7b07ff3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "token",
+    "value_sha256": "22513d47a92229e38609da13aeedc1536566ea98f93e6887195c4319850dd259",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m5/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f46a17ecb1a2604a4b34961f4d5c4c2974d9873f236dc63ed4f94cde9657e4d9",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "a292bd21d13aadabad89deadb6f716d469972dcf853f83c7cdec351a92ee4ff0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "8d77bdd14943ff910340c883591cfe6e4e1e31484380cf2088dc6976139c07d0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "e48cb6c83acbe84bd92a966afd8d36dbb22200cae33dba5e0ce6f0d86e855dfb",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "143bd553efce202e8e24af3b9b2a5b4dac158c1eb7948156cf9fb48ef84f9608",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "9fee1dbd126b61ad5eb62f3d8f5e212f23c9b2e198dc972306821b4b2b9df745",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "8160b689c8825f3b2bd3c94e601febb64f427e0fdc98d4043b6c1883d7b07ff3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "token",
+    "value_sha256": "22513d47a92229e38609da13aeedc1536566ea98f93e6887195c4319850dd259",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m6/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f46a17ecb1a2604a4b34961f4d5c4c2974d9873f236dc63ed4f94cde9657e4d9",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "a292bd21d13aadabad89deadb6f716d469972dcf853f83c7cdec351a92ee4ff0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "8d77bdd14943ff910340c883591cfe6e4e1e31484380cf2088dc6976139c07d0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "e48cb6c83acbe84bd92a966afd8d36dbb22200cae33dba5e0ce6f0d86e855dfb",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "143bd553efce202e8e24af3b9b2a5b4dac158c1eb7948156cf9fb48ef84f9608",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "9fee1dbd126b61ad5eb62f3d8f5e212f23c9b2e198dc972306821b4b2b9df745",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "8160b689c8825f3b2bd3c94e601febb64f427e0fdc98d4043b6c1883d7b07ff3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "token",
+    "value_sha256": "22513d47a92229e38609da13aeedc1536566ea98f93e6887195c4319850dd259",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m7/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f46a17ecb1a2604a4b34961f4d5c4c2974d9873f236dc63ed4f94cde9657e4d9",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "6415f7d155af9388c907947dd2c2fb8268c1d4a32ffbca15373dbb595c859b9f",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "7c56d71596c6058d27915ce5ad5d4c203aa13713244c073c631682045b2b2535",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fe45911415b4ef435a1dcbce394a8a2120668095cf83d992bffd398b187351f1",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "a292bd21d13aadabad89deadb6f716d469972dcf853f83c7cdec351a92ee4ff0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "8d77bdd14943ff910340c883591cfe6e4e1e31484380cf2088dc6976139c07d0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "e48cb6c83acbe84bd92a966afd8d36dbb22200cae33dba5e0ce6f0d86e855dfb",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "143bd553efce202e8e24af3b9b2a5b4dac158c1eb7948156cf9fb48ef84f9608",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "9fee1dbd126b61ad5eb62f3d8f5e212f23c9b2e198dc972306821b4b2b9df745",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "8160b689c8825f3b2bd3c94e601febb64f427e0fdc98d4043b6c1883d7b07ff3",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "token",
+    "value_sha256": "22513d47a92229e38609da13aeedc1536566ea98f93e6887195c4319850dd259",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f46a17ecb1a2604a4b34961f4d5c4c2974d9873f236dc63ed4f94cde9657e4d9",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m8/verify.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "14221594a2a10977a47e88a6c588af7c417c06926126d6b85bf9b07a740211d0",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m9/collect.mjs",
+    "rule": "local-path",
+    "value_sha256": "344f4e1b1e8debdbd109c34d7f28c25299fd64d6779c104b9cf2d8b9f28af8ba",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-agent.sh",
+    "rule": "local-path",
+    "value_sha256": "24cb946f8c471ffa2ffa273ac8dd454939e9ae8e33bb3a700813ebcb57eea192",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-apply.sh",
+    "rule": "local-path",
+    "value_sha256": "2b4998e30fa2cfcdaf65901ea1142d1ef17d9196ab18a8c692c6d46a4d1f1a5e",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-auth.sh",
+    "rule": "local-path",
+    "value_sha256": "f1c1c48ede02cce7c9ec7df82f9164e982492f0b6039488204bf83f9d107f6de",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-auth.sh",
+    "rule": "local-path",
+    "value_sha256": "24cb946f8c471ffa2ffa273ac8dd454939e9ae8e33bb3a700813ebcb57eea192",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-prepare.sh",
+    "rule": "local-path",
+    "value_sha256": "24cb946f8c471ffa2ffa273ac8dd454939e9ae8e33bb3a700813ebcb57eea192",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-prepare.sh",
+    "rule": "local-path",
+    "value_sha256": "f1c1c48ede02cce7c9ec7df82f9164e982492f0b6039488204bf83f9d107f6de",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-prepare.sh",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-prepare.sh",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/incident-prepare.sh",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/pi-control-fixtures.sh",
+    "rule": "local-path",
+    "value_sha256": "bf440a22197a27864f1a3ad1901bceacb7dc039be6a464132b82fe7b9bdaecd5",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/pi-control-fixtures.sh",
+    "rule": "local-path",
+    "value_sha256": "7149ccd5a4494f6abbf39488448aead1b3006f2236c601335b98be9c452c8553",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/pi-control-fixtures.sh",
+    "rule": "local-path",
+    "value_sha256": "2b4998e30fa2cfcdaf65901ea1142d1ef17d9196ab18a8c692c6d46a4d1f1a5e",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/pi-control-fixtures.sh",
+    "rule": "local-path",
+    "value_sha256": "c25bed61382ab99f50953d5cd349d399acb988217ca9353146ef4ae8e537eb56",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/pi-control-fixtures.sh",
+    "rule": "local-path",
+    "value_sha256": "e009b90518dbbac064597ef1f3c6b9971079272a9903676e1a62c7e5d9832280",
+    "kind": "functional_owner_path",
+    "reason": "Required installed owner runtime or credential isolation path; no credential value"
+  },
+  {
+    "path": "scripts/m9/redaction.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "824c5f3b30944e595a7d5c5522f7b34dca87fa6ccf67f8c0031083deedd42fc9",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "scripts/m9/redaction.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f1bbd12a018c8e321213ae24afe37a413d259f3402c5ae9d38bc9b8d33b5601a",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "services/access/test/validate.test.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "services/retrieval/src/ssrf.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+    "kind": "code_construct",
+    "reason": "Pattern or substitution code constructs the value; not a literal credential"
+  },
+  {
+    "path": "services/retrieval/test/m5-extract.test.mjs",
+    "rule": "token",
+    "value_sha256": "22513d47a92229e38609da13aeedc1536566ea98f93e6887195c4319850dd259",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "services/retrieval/test/ssrf.test.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "9fee1dbd126b61ad5eb62f3d8f5e212f23c9b2e198dc972306821b4b2b9df745",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "services/retrieval/test/ssrf.test.mjs",
+    "rule": "tailnet-address",
+    "value_sha256": "8160b689c8825f3b2bd3c94e601febb64f427e0fdc98d4043b6c1883d7b07ff3",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "services/retrieval/test/ssrf.test.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "services/retrieval/test/ssrf.test.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "e48cb6c83acbe84bd92a966afd8d36dbb22200cae33dba5e0ce6f0d86e855dfb",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "tests/contracts/m1-gateway.test.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "fdda8961c7346f6e935394f6a3c69be76d6d8ff3f18251e3cb5c4f6b65f296e3",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "tests/contracts/m3-gateway.test.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "a292bd21d13aadabad89deadb6f716d469972dcf853f83c7cdec351a92ee4ff0",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "tests/contracts/m3-gateway.test.mjs",
+    "rule": "tailnet-name",
+    "value_sha256": "8d77bdd14943ff910340c883591cfe6e4e1e31484380cf2088dc6976139c07d0",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "tests/contracts/m9-redis.test.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "4f8d3c2180f054746dc0b4e5a82afbe8b18d1b2606dcb341f785b62d89b26c57",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "tests/contracts/m9-redis.test.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "90a4ae30a0bb67cfca3cf8b1128ca94fa43397bd501948a7a832e8ee0fd19731",
+    "kind": "synthetic_fixture",
+    "reason": "Existing explicit synthetic negative-test or review control"
+  },
+  {
+    "path": "evidence/M9/incident-proof.json",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/incident-proof.json",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/incident-proof.json",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/incident-proof.json",
+    "rule": "local-path",
+    "value_sha256": "ce806491f890c713231e75f9a72cd5220b5710bba33e35d464938025848365e8",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/regression/M2/raw/initial-learned-browser-rt-ssrf.txt",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "synthetic_fixture",
+    "note": "Fixed reserved MagicDNS-address SSRF refusal target, not an owner node address."
+  },
+  {
+    "path": "evidence/M9/regression/M2/raw/rt-ssrf.txt",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "synthetic_fixture",
+    "note": "Fixed reserved MagicDNS-address SSRF refusal target, not an owner node address."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-AUDITOR.md",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-AUDITOR.md",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-AUDITOR.md",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-DEBUGGER.md",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-DEBUGGER.md",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-DEBUGGER.md",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-INITIAL-AUDITOR.md",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-INITIAL-DEBUGGER.md",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-INITIAL-DEBUGGER.md",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DELTA-INITIAL-DEBUGGER.md",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/review/DIAGNOSTIC-AUDITOR.md",
+    "rule": "local-path",
+    "value_sha256": "24cb946f8c471ffa2ffa273ac8dd454939e9ae8e33bb3a700813ebcb57eea192",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "evidence/M9/work/incident-namespace-failure.txt",
+    "rule": "local-path",
+    "value_sha256": "704cddece472d53de9a77e0a7e3d868e00ed9fe8a5ab0061267edeabc984fbe5",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-diagnostic-proof.json",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-diagnostic-proof.json",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-diagnostic-proof.json",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-diagnostic-proof.json",
+    "rule": "local-path",
+    "value_sha256": "ce806491f890c713231e75f9a72cd5220b5710bba33e35d464938025848365e8",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-source-read-proof.json",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-source-read-proof.json",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-source-read-proof.json",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "evidence/M9/work/initial-incident-source-read-proof.json",
+    "rule": "local-path",
+    "value_sha256": "ce806491f890c713231e75f9a72cd5220b5710bba33e35d464938025848365e8",
+    "kind": "functional_owner_path",
+    "note": "Actual declared namespace/binary path required for source-bound isolation proof; no credential content."
+  },
+  {
+    "path": "scripts/m9/evidence-checks.mjs",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "scripts/m9/evidence-checks.mjs",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "scripts/m9/evidence-checks.mjs",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "scripts/m9/evidence-checks.mjs",
+    "rule": "local-path",
+    "value_sha256": "ce806491f890c713231e75f9a72cd5220b5710bba33e35d464938025848365e8",
+    "kind": "code_construct",
+    "note": "Pinned trusted incident namespace/binary path definition or its review example."
+  },
+  {
+    "path": "tests/contracts/m9-evidence-bound.test.mjs",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "synthetic_fixture",
+    "note": "Pinned incident-namespace path or intentionally wrong bind tuple used only in refusal controls."
+  },
+  {
+    "path": "tests/contracts/m9-evidence-bound.test.mjs",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "synthetic_fixture",
+    "note": "Pinned incident-namespace path or intentionally wrong bind tuple used only in refusal controls."
+  },
+  {
+    "path": "tests/contracts/m9-evidence-bound.test.mjs",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "synthetic_fixture",
+    "note": "Pinned incident-namespace path or intentionally wrong bind tuple used only in refusal controls."
+  },
+  {
+    "path": "tests/contracts/m9-evidence-bound.test.mjs",
+    "rule": "local-path",
+    "value_sha256": "ce806491f890c713231e75f9a72cd5220b5710bba33e35d464938025848365e8",
+    "kind": "synthetic_fixture",
+    "note": "Pinned incident-namespace path or intentionally wrong bind tuple used only in refusal controls."
+  },
+  {
+    "path": "tests/contracts/m9-evidence-bound.test.mjs",
+    "rule": "local-path",
+    "value_sha256": "24cb946f8c471ffa2ffa273ac8dd454939e9ae8e33bb3a700813ebcb57eea192",
+    "kind": "synthetic_fixture",
+    "note": "Pinned incident-namespace path or intentionally wrong bind tuple used only in refusal controls."
+  },
+  {
+    "path": "tests/contracts/m9-evidence-bound.test.mjs",
+    "rule": "local-path",
+    "value_sha256": "4cf6860ce13141319153ce8a2a0c8367b05a9af60248e279fd77a0fe1e045b6f",
+    "kind": "synthetic_fixture",
+    "note": "Pinned incident-namespace path or intentionally wrong bind tuple used only in refusal controls."
+  },
+  {
+    "path": "evidence/M9/regression/M2/collection-history/1791033189376-rt-ssrf.txt",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "synthetic_fixture",
+    "note": "Same exact synthetic SSRF-denial fixture target in preserved failed collector history; original source and bytes retained."
+  },
+  {
+    "path": "evidence/M9/regression/M2/collection-history/1791041038463-rt-ssrf.txt",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "synthetic_fixture",
+    "reason": "Declared CGNAT denial target, not the owner Tailnet address"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-remediated.diff",
+    "rule": "url-credentials",
+    "value_sha256": "f5d04091a67558241d7bf729519ef5311d8832c476dfad1ecd904ddaccfdb55d",
+    "kind": "synthetic_fixture",
+    "reason": "Explicit synthetic URL user/password in regression fixtures or review example; never a provider credential"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "c15b1ba9ffd91f18a12149bdf2bc2fa0d7d7a655ff55c15e6f6c8398ef5d20f4",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "7adbaae93fffd5fe46b6ff1f74f1fad151d6d4c6d4caab9d2095062dee8daeb4",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "b0eef5a4d821256cd389a05092f8c8c3661af93ef7a6e3e6faf694858e9a4efd",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "1b2fb4ec15467ad9372ce2bc03095a369b2115ef8190119e4e9a37851ddb0ea7",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "7e5237b8801d38eda1fdb6e498e4f7c1b240abdd70e15bbaa572ef2c496fbb47",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "7c8e299f80380272b41f085f1341920a695e77a7c0dff53a7ecc6b19f33a9841",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "39a25522b20c7bcafcd259f742b4ff1a707da5df47b210a4973b1147762a9cb3",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "512e1e9b09496bd2a88952631f3cb77aa420f7d38bc1fbe6a861dd1ac1d61f3e",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "f078a62e78c12c46c3c22ddcd16972f9ba3c7d5547b327b630c9e9c12a2bbf4c",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "9be3818d0835f62402f3fcd9dcfee48226878461d1f329baa1f9d2cd1fcc35cd",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "e74b49affc49b5569006f171eb32d8d0c0870de8127881852a4179f413e444c4",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "61e4ef259d37487d05b227e9ab8ec8dac3081ffcebd7278cc2916150e1a0d0d7",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "c42cc7f2cdd6aa8fb106aaf3b6027386af11c4b106c1794547737f69ce2104a0",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "e3dd611959696cb11310a55c0a312a3c043b321ab8274bcd1a8d985c5b4c8b25",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "2ae00d3460441c73bea93dc21e40344d268874f138b9aa11b3903dab1db295f4",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "f25089b72fd7bc376749e9167327b0046d468f6d76ee317b70db55ba0322785e",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "35d955a0b4c5c177e2ec8eac2682d1e906d67de3202939040643e8f429060105",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "7b1f42d7cf49e11e3c891b0aaf67f78eeaee5a2248e46aaee98f91247dde0a95",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "9fbdfca3a863d29daa1e676ca430954096115a8ba4f7e22d87a34a9382c54413",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "a8df533f8f83f7474c73abbfc0dd3bd8b64f425258527dfdd1cb5c0dbd9594db",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "7a826326d90cfe7e1f33a354a5868736cb8a8f1e983cfe788de44b2ef2bb85e2",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "80dec512757f54b3495484294faedd38c18d4424d4d19fe386f13d8a2e20e199",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "ef802dc356629ff36881aa0e82f9196d61a50a9346bea963550bda3c4a25c8a1",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "704ba332bff1e57a066e8a805c5aefe394f825349827e079198c0c2567cba3af",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "08c37c2f6c8633cae31eb95b17fc3b975ea0f8f1dca7a64ca4da21c468cabb43",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "b8f7eb80ebb480528a5fcbdabc2d31394004b7375caaf0c07ebea96ba1b26f9c",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-retrieval-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "985197e99929153641ae8caf9400dde11f2e1f6c44c8327a895087b3df1c5afb",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-review-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "4e69947577699b7d0792efeb50efddf039acd235d40df2de60bf3afb6b06b4d1",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-review-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "022f5960a13c9a75e5b3add34bf22153d41f0364ee56432302b623d68c672b0d",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-REG12-review-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "80d2e789bf80a7a682c637b7457c49c346b96e558d57947ac1e80b372e78871d",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-credential-classification-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "1f0383392aa89a8ff5d14a409ffc52972b75b050ccecb1db9edb11638ccf7670",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-credential-classification-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "484c5d8a0df85a447114d4af4b3347e04c988be3631eb72e850c23d6d1d6815b",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-credential-classification-fixtures.txt",
+    "rule": "local-path",
+    "value_sha256": "279e42ec3ce814ac89b43444c707cfb5aef9df3a30ed4bb2fdfc458b5632b87c",
+    "kind": "functional_owner_path",
+    "reason": "Repository test/module stack location in immutable failed test evidence; functional source provenance, no private material"
+  },
+  {
+    "path": "evidence/M9/work/M2-final-address.diff",
+    "rule": "url-credentials",
+    "value_sha256": "f5d04091a67558241d7bf729519ef5311d8832c476dfad1ecd904ddaccfdb55d",
+    "kind": "synthetic_fixture",
+    "reason": "Explicit synthetic URL user/password in regression fixtures or review example; never a provider credential"
+  },
+  {
+    "path": "evidence/M9/work/final-remediation-candidate.diff",
+    "rule": "url-credentials",
+    "value_sha256": "f5d04091a67558241d7bf729519ef5311d8832c476dfad1ecd904ddaccfdb55d",
+    "kind": "synthetic_fixture",
+    "reason": "Explicit synthetic URL user/password in regression fixtures or review example; never a provider credential"
+  },
+  {
+    "path": "scripts/m2/retrieval-e2e.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f5d04091a67558241d7bf729519ef5311d8832c476dfad1ecd904ddaccfdb55d",
+    "kind": "synthetic_fixture",
+    "reason": "Explicit synthetic URL user/password in regression fixtures or review example; never a provider credential"
+  },
+  {
+    "path": "services/retrieval/test/acquire.test.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f5d04091a67558241d7bf729519ef5311d8832c476dfad1ecd904ddaccfdb55d",
+    "kind": "synthetic_fixture",
+    "reason": "Explicit synthetic URL user/password in regression fixtures or review example; never a provider credential"
+  },
+  {
+    "path": "services/retrieval/test/proxy.test.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f5d04091a67558241d7bf729519ef5311d8832c476dfad1ecd904ddaccfdb55d",
+    "kind": "synthetic_fixture",
+    "reason": "Explicit synthetic URL user/password in regression fixtures or review example; never a provider credential"
+  },
+  {
+    "path": "evidence/M9/review/FINAL-REMEDIATION-AUDITOR.md",
+    "rule": "url-credentials",
+    "value_sha256": "f473289d4aa9d4a33aea53b6f28d7de3632c479304f82dfd42ab05cbf0c2af9f",
+    "kind": "synthetic_fixture",
+    "reason": "Reviewers explicitly use u:p as a hypothetical private-redirect fixture example; not a configured credential"
+  },
+  {
+    "path": "evidence/M9/review/FINAL-REMEDIATION-DEBUGGER.md",
+    "rule": "url-credentials",
+    "value_sha256": "f473289d4aa9d4a33aea53b6f28d7de3632c479304f82dfd42ab05cbf0c2af9f",
+    "kind": "synthetic_fixture",
+    "reason": "Reviewers explicitly use u:p as a hypothetical private-redirect fixture example; not a configured credential"
+  },
+  {
+    "path": "evidence/M9/regression/M2/collection-history/1791052975107-rt-ssrf.txt",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "synthetic_fixture",
+    "reason": "Exact canonical 100.100.100.100 CGNAT/Tailnet denial fixture, not the deployment endpoint."
+  },
+  {
+    "path": "evidence/M9/work/AC16-candidate-fixtures-cloud-post-review.txt",
+    "rule": "local-path",
+    "value_sha256": "d2b24d5e825f1c69fcfd662a8ad5b989c63019279a86944b50c0a2e33a410c99",
+    "kind": "functional_owner_path",
+    "reason": "Exact local validation fixture location/stack frame; contains no agent session history or secret and preserves failed test provenance."
+  },
+  {
+    "path": "evidence/M9/work/AC16-candidate-fixtures-cloud-post-review.txt",
+    "rule": "local-path",
+    "value_sha256": "11c9cb1f2c95c93c70e2c9aae15227e55547e641d4f7b693dee69938112c7163",
+    "kind": "functional_owner_path",
+    "reason": "Exact local validation fixture location/stack frame; contains no agent session history or secret and preserves failed test provenance."
+  },
+  {
+    "path": "evidence/M9/work/AC16-candidate-fixtures-post-review.txt",
+    "rule": "local-path",
+    "value_sha256": "7e891189ea13f94eceb5387a57cafc658f657dbfee1456ff5f1bcbf5fe13b0fa",
+    "kind": "functional_owner_path",
+    "reason": "Exact local validation fixture location/stack frame; contains no agent session history or secret and preserves failed test provenance."
+  },
+  {
+    "path": "evidence/M9/work/AC16-candidate-fixtures-redis.txt",
+    "rule": "local-path",
+    "value_sha256": "6aba44626e380ec353e7e2cf51bd6e6b09cd36bbac28d5adaae2e342faef85bc",
+    "kind": "functional_owner_path",
+    "reason": "Exact local validation fixture location/stack frame; contains no agent session history or secret and preserves failed test provenance."
+  },
+  {
+    "path": "evidence/M9/work/AC16-candidate-fixtures-redis.txt",
+    "rule": "local-path",
+    "value_sha256": "7b1572f58eac69485715907aa2300eec6791da1b6fe2461a60aea6a3f1bfebc0",
+    "kind": "functional_owner_path",
+    "reason": "Exact local validation fixture location/stack frame; contains no agent session history or secret and preserves failed test provenance."
+  },
+  {
+    "path": "evidence/M9/work/incident-proof-history/e69e0944-591dff27ec9acb603fa8d6356141912cf475a158.json",
+    "rule": "local-path",
+    "value_sha256": "264b83008cb8ca4266230c7ca9c8bfd3a3308c5170a2e50f49d12e0b7a12977f",
+    "kind": "functional_owner_path",
+    "reason": "Exact functional systemd denial/native binary bind paths; these enforce secret/runtime-state inaccessibility rather than expose their contents."
+  },
+  {
+    "path": "evidence/M9/work/incident-proof-history/e69e0944-591dff27ec9acb603fa8d6356141912cf475a158.json",
+    "rule": "local-path",
+    "value_sha256": "08000bf221dc83116ace2ad5a17eec341cd090aebbd721c90770474a6f5aa62c",
+    "kind": "functional_owner_path",
+    "reason": "Exact functional systemd denial/native binary bind paths; these enforce secret/runtime-state inaccessibility rather than expose their contents."
+  },
+  {
+    "path": "evidence/M9/work/incident-proof-history/e69e0944-591dff27ec9acb603fa8d6356141912cf475a158.json",
+    "rule": "local-path",
+    "value_sha256": "d64437f97047dbf60eb0a4ad5a0768fbcaef2a0349d89fc81f05dfa297d55339",
+    "kind": "functional_owner_path",
+    "reason": "Exact functional systemd denial/native binary bind paths; these enforce secret/runtime-state inaccessibility rather than expose their contents."
+  },
+  {
+    "path": "evidence/M9/work/incident-proof-history/e69e0944-591dff27ec9acb603fa8d6356141912cf475a158.json",
+    "rule": "local-path",
+    "value_sha256": "ce806491f890c713231e75f9a72cd5220b5710bba33e35d464938025848365e8",
+    "kind": "functional_owner_path",
+    "reason": "Exact functional systemd denial/native binary bind paths; these enforce secret/runtime-state inaccessibility rather than expose their contents."
+  },
+  {
+    "path": "evidence/M9/work/redaction-classifications.json",
+    "rule": "tailnet-address",
+    "value_sha256": "1b4d903a6d7936b0c2d8265de71cc7f3ac773eecfcd9b3fe3c40deb1776c01ff",
+    "kind": "synthetic_fixture",
+    "reason": "Explanation names the same controlled CGNAT denial literal."
+  },
+  {
+    "path": "evidence/M9/work/resource-verifier-tests.txt",
+    "rule": "local-path",
+    "value_sha256": "cdf7cf5002ff0a642b9133179e10432baafdd66b59275ddce965d3c97b1247e9",
+    "kind": "functional_owner_path",
+    "reason": "Preserved native test failure location within the project; no secret or agent runtime-state contents."
+  },
+  {
+    "path": "evidence/M9/work/resource-verifier-tests-tracked-fixture-failure.txt",
+    "rule": "local-path",
+    "value_sha256": "cdf7cf5002ff0a642b9133179e10432baafdd66b59275ddce965d3c97b1247e9",
+    "kind": "functional_owner_path",
+    "reason": "Preserved native test failure location within the project; no secret or agent runtime-state contents."
+  },
+  {
+    "path": "evidence/M9/work/resource-verifier-tests.txt",
+    "rule": "local-path",
+    "value_sha256": "4b0db4340519eaff19c8cd9af814521698024392d2a3f565838e8deff9d47229",
+    "kind": "functional_owner_path",
+    "reason": "Preserved native test failure location within the project; no secret or agent runtime-state contents."
+  },
+  {
+    "path": "evidence/M9/work/resource-verifier-tests-tracked-fixture-failure.txt",
+    "rule": "local-path",
+    "value_sha256": "4b0db4340519eaff19c8cd9af814521698024392d2a3f565838e8deff9d47229",
+    "kind": "functional_owner_path",
+    "reason": "Preserved native test failure location within the project; no secret or agent runtime-state contents."
+  },
+  {
+    "path": "evidence/M9/review/UNPAID-RECHECKS-AUDITOR.md",
+    "line": 31,
+    "rule": "tailnet-name",
+    "value_sha256": "8f1de35a987d5859df45d1660ec097915ab4701f668d76c0c0aae5cd37b11e42",
+    "classification": null,
+    "kind": "synthetic_fixture",
+    "reason": "Synthetic origin-regex counterexample in independent review; no real endpoint."
+  }
+]

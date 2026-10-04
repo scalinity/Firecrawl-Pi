@@ -1,0 +1,27 @@
+{
+  "utc": "2026-10-03T21:15:26.323Z",
+  "source_commit": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+  "raw_sha256": "fb7992fe22cc27ec6f8249e55870b25f74fd7bc07ad6b941b69a32cd95a21b7d",
+  "steps": [
+    {
+      "step": "search",
+      "status": 200,
+      "count": 3
+    },
+    {
+      "step": "map",
+      "status": 200,
+      "count": 1
+    },
+    {
+      "step": "retrieve",
+      "status": 400,
+      "bytes": 0
+    },
+    {
+      "step": "extract_submit",
+      "status": 400,
+      "id": null
+    }
+  ]
+}

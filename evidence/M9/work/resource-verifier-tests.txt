@@ -1,0 +1,130 @@
+TAP version 13
+# Subtest: immutable accepted bytes plus bounded concurrent measurements pass
+ok 1 - immutable accepted bytes plus bounded concurrent measurements pass
+  ---
+  duration_ms: 46.378625
+  type: 'test'
+  ...
+# Subtest: tampered historical evidence never passes
+ok 2 - tampered historical evidence never passes
+  ---
+  duration_ms: 37.545792
+  type: 'test'
+  ...
+# Subtest: assessment decision, provenance, complete path coverage and hash are mandatory
+ok 3 - assessment decision, provenance, complete path coverage and hash are mandatory
+  ---
+  duration_ms: 358.512167
+  type: 'test'
+  ...
+# Subtest: lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+ok 4 - lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+  ---
+  duration_ms: 184.146417
+  type: 'test'
+  ...
+# Subtest: duplicate frames, non-JSON sample, large gaps and short runs are rejected
+ok 5 - duplicate frames, non-JSON sample, large gaps and short runs are rejected
+  ---
+  duration_ms: 150.473459
+  type: 'test'
+  ...
+# Subtest: boot or container restart and wrong service names fail even if health recovers
+ok 6 - boot or container restart and wrong service names fail even if health recovers
+  ---
+  duration_ms: 93.697583
+  type: 'test'
+  ...
+# Subtest: incident must overlap real successful traffic with memory headroom and no swap
+ok 7 - incident must overlap real successful traffic with memory headroom and no swap
+  ---
+  duration_ms: 132.079166
+  type: 'test'
+  ...
+# Subtest: OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+ok 8 - OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+  ---
+  duration_ms: 260.189083
+  type: 'test'
+  ...
+# Subtest: timestamps, sustained request bins, required classes and window alignment matter
+ok 9 - timestamps, sustained request bins, required classes and window alignment matter
+  ---
+  duration_ms: 102.869083
+  type: 'test'
+  ...
+# Subtest: every latency must be finite and satisfy the canonical bound
+ok 10 - every latency must be finite and satisfy the canonical bound
+  ---
+  duration_ms: 103.919167
+  type: 'test'
+  ...
+# Subtest: Redis denials, wrong principal and measurements outside the run fail
+ok 11 - Redis denials, wrong principal and measurements outside the run fail
+  ---
+  duration_ms: 134.991542
+  type: 'test'
+  ...
+# Subtest: source equivalence covers only three pure evaluators and refuses rename deletions
+ok 12 - source equivalence covers only three pure evaluators and refuses rename deletions
+  ---
+  duration_ms: 0.285417
+  type: 'test'
+  ...
+# Subtest: runtime sources never import evidence-only helper or verifier
+ok 13 - runtime sources never import evidence-only helper or verifier
+  ---
+  duration_ms: 48.870375
+  type: 'test'
+  ...
+# Subtest: compose equality allows only exact reviewed mounts and changed images
+ok 14 - compose equality allows only exact reviewed mounts and changed images
+  ---
+  duration_ms: 32.575792
+  type: 'test'
+  ...
+# Subtest: the immutable old failed Cloud probe is explained without changing its FAIL
+ok 15 - the immutable old failed Cloud probe is explained without changing its FAIL
+  ---
+  duration_ms: 3.745625
+  type: 'test'
+  ...
+# Subtest: Redis memory headroom and zero eviction/error counters are measured
+ok 16 - Redis memory headroom and zero eviction/error counters are measured
+  ---
+  duration_ms: 114.608125
+  type: 'test'
+  ...
+# Subtest: live Cloud audit covers the completed authorized window and actual paid container
+ok 17 - live Cloud audit covers the completed authorized window and actual paid container
+  ---
+  duration_ms: 0.418834
+  type: 'test'
+  ...
+# Subtest: AC16 uses p95 latency while keeping successful startup outliers visible
+ok 18 - AC16 uses p95 latency while keeping successful startup outliers visible
+  ---
+  duration_ms: 86.804625
+  type: 'test'
+  ...
+# Subtest: live driver changes invalidate corpus/research proof while preserving independent unchanged executions
+ok 19 - live driver changes invalidate corpus/research proof while preserving independent unchanged executions
+  ---
+  duration_ms: 0.114792
+  type: 'test'
+  ...
+# Subtest: unpaid rechecks preserve the complete frozen corpus, first failure and paid-window attribution
+ok 20 - unpaid rechecks preserve the complete frozen corpus, first failure and paid-window attribution
+  ---
+  duration_ms: 7.742084
+  type: 'test'
+  ...
+1..20
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2135.396292

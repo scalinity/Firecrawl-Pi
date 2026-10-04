@@ -1,0 +1,29 @@
+{
+  "checked_utc": "2026-10-03T15:11:15.144Z",
+  "configured_limit": 4,
+  "utc_day": "2026-10-03",
+  "launches": [
+    {
+      "incident_id": "59d5d64c",
+      "launched_utc": "2026-10-03T08:42:03Z",
+      "day": "2026-10-03"
+    },
+    {
+      "incident_id": "9bb97947",
+      "launched_utc": "2026-10-03T09:15:52Z",
+      "day": "2026-10-03"
+    },
+    {
+      "incident_id": "17685034",
+      "launched_utc": "2026-10-03T09:51:27Z",
+      "day": "2026-10-03"
+    },
+    {
+      "incident_id": "e69e0944",
+      "launched_utc": "2026-10-03T10:11:33Z",
+      "day": "2026-10-03"
+    }
+  ],
+  "state": "NOT_RUN",
+  "current_source_proof_held_until": "2026-10-04T00:00:00Z"
+}

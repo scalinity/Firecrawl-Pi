@@ -1,0 +1,973 @@
+{
+  "schema": "fcpi.m8.verification/v1",
+  "runner": "scripts/m8/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (K03, N01, N02) from the fixture and host checks.",
+  "results": [
+    {
+      "test_id": "M8-B00",
+      "name": "baseline-matches-m7-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-G01",
+      "name": "images-built-and-running-deployed-code-is-head",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-G02",
+      "name": "suites-pass-in-the-running-images",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-H01",
+      "name": "host-units-timers-slice-and-command",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-H02",
+      "name": "swap-denied-across-a-systemd-reload",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-H03",
+      "name": "containers-outside-the-project-reported",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-H04",
+      "name": "durable-boot-records",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-R01",
+      "name": "normal-reboot-ready-within-five-minutes",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "01c11ff2bb233d682ed771a0a29ef4d66dbd293b3e7d872ffa050a2885fd59dd",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt",
+        "evidence/M9/regression/M8/reboots/"
+      ],
+      "expected": "after an orderly systemctl reboot and no SSH action on the Pi until it was ready, the new boot's own record (fcpi-boot-record.service) shows the stack active and REST, MCP and a fixture scrape answering within 300 s of kernel start; the ended boot shows its shutdown markers; fcpi status is healthy afterwards with swap denied to every container",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; ssh back after 56 s; {\"stack_active_after_boot_s\":\"48\",\"ready_after_boot_s\":\"44\",\"recorded_utc\":\"2026-10-03T19:42:13Z\",\"stack_state\":\"active\"}; ended boot {\"last\":\"2026-10-03T19:41:13+00:00\",\"shutdown_markers\":\"973\",\"watchdog_reboot\":\"no\",\"loss_utc\":\"2026-10-03T19:41:12+00:00\",\"sudo_commands\":\"0\",\"ssh_logins\":\"0\",\"sessions\":\"0\",\"console_logins\":\"0\",\"undervoltage\":\"0\"}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-R02",
+      "name": "docker-restart-recovers-without-action",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "a dockerd restart (containers stopped and revived by their restart policies) is healthy again, REST and MCP ready, within 300 s, fcpi-stack.service still active; a crawl acknowledged just before reaches a terminal state with its receipt kept; swap denied to every container afterwards",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; ready after 17 s; job {\"state\":\"SUCCEEDED\",\"completed\":12,\"total\":12,\"archived\":12,\"errorCount\":0,\"error\":null}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-R03",
+      "name": "missing-data-mount-refuses-writers",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "with an empty tmpfs mounted over the data directory (a missing data filesystem), dockerd's gated start fails through its start limit and fcpi-stack.service fails, the data check logs its refusal, no dockerd runs, and nothing is written to the empty mount point; with the filesystem back the stack is ready without other action, its data ID unchanged and swap denied (M1 R13 observed through the start limit)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; {\"utc\":\"2026-10-03T19:40:02Z\",\"step\":\"refused\",\"docker_start_exit\":1,\"docker\":\"Result=exit-code NRestarts=3 ActiveState=failed\",\"stack_start_exit\":1,\"shadow_entries\":0,\"dockerd_processes\":0,\"data_check_failures_logged\":4}; recovered {\"ready_after_s\":1,\"data_id_unchanged\":true}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I01",
+      "name": "mcp-crash-restarts-mcp-alone",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "an MCP process killed by SIGKILL is restarted by its restart policy alone; REST serves a fixture scrape while it is down; afterwards a new MCP request reads a crawl by the job handle it was given before the crash",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; {\"utc\":\"2026-10-03T19:21:14Z\",\"step\":\"mcp_after\",\"back_after_s\":4,\"restarts_delta\":1,\"handle_call_status\":200,\"handle_call_ok\":true,\"handle_result\":{\"isError\":null,\"error\":null,\"text\":\"{\\\"id\\\":\\\"b096a3f2-f683-41fd-bbf1-a237357307a2\\\",\\\"status\\\":\\\"scraping\\\",\\\"completed\\\":12,\\\"total\\\":12,\\\"creditsUsed\\\":-1,\\\"expiresAt\\\":\\\"2026-10-10T19:21:13.901Z\\\",\\\"skip\\\":0,\\\"ret\"}}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I02",
+      "name": "api-child-crash-recovers-typed",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "the core's API child killed by SIGKILL: fcpi status shows the API down, the gateway answers a scrape with a typed status, never 502; the core is healthy again within 600 s; a crawl acknowledged before reaches a terminal state with its receipt kept",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; during {\"utc\":\"2026-10-03T19:21:22Z\",\"step\":\"rest_during\",\"status\":503,\"ms\":4019,\"code\":\"UPSTREAM_UNAVAILABLE\",\"class\":null,\"error\":\"The core is unavailable.\",\"sentinel\":false}; {\"utc\":\"2026-10-03T19:21:44Z\",\"step\":\"recovered\",\"ready_after_s\":18,\"container_restarts_delta\":1,\"container_restarted\":true}; job {\"state\":\"SUCCEEDED\",\"completed\":12,\"total\":12,\"archived\":12,\"errorCount\":0,\"error\":null}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I03",
+      "name": "worker-death-shown-as-degraded-and-recovered",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "the NuQ worker hung (SIGSTOP): fcpi status shows the worker down while the API is still live (a live API with a dead worker is degraded, not healthy); the supervisor restarts the core once Docker marks it unhealthy, and it is ready within 600 s; a new crawl completes",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; detected {\"healthy\":false,\"api\":true,\"worker\":false,\"rest\":true,\"ledger\":true,\"mcp\":true,\"queue_ok\":true,\"search\":true,\"browser\":true,\"admission\":{\"dispatch\":\"open\",\"browser\":\"open\",\"reasons\":[]},\"incidents\":[],\"not_healthy\":[]}; {\"ready_after_s\":103,\"restarts\":-1}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I04",
+      "name": "postgres-down-fails-closed-and-reconciles",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "with PostgreSQL stopped: a crawl submission is refused with a typed 503 and nothing acknowledged, never 502; the gateway's status route still answers with the ledger down; fcpi status names the ledger and the database; after it starts, the same idempotency key is accepted once and a second submission returns the same job, which completes",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; submit {\"utc\":\"2026-10-03T19:28:47Z\",\"step\":\"submit_during\",\"status\":503,\"ms\":5016,\"code\":\"PLATFORM_UNAVAILABLE\",\"class\":null,\"error\":\"The job ledger is unavailable, so nothing was accepted; retry later.\"}; scrape {\"utc\":\"2026-10-03T19:28:58Z\",\"step\":\"scrape_during\",\"status\":503,\"ms\":10991,\"code\":\"UPSTREAM_UNAVAILABLE\",\"class\":null,\"error\":\"The core is unavailable.\",\"sentinel\":false}; idempotent {\"utc\":\"2026-10-03T19:29:44Z\",\"step\":\"idempotent\",\"first\":\"fc9df9a5-526d-400b-9f57-892121908c98\",\"second\":\"fc9df9a5-526d-400b-9f57-892121908c98\",\"same\":true,\"idempotency_rows\":\"1\"}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I05",
+      "name": "redis-down-stops-dispatch-and-recovers",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I06",
+      "name": "rabbitmq-down-stops-dispatch-and-recovers",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I07",
+      "name": "browser-crash-contained",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "Chromium killed during a render: the render's answer is a typed failure, never 502; no browser permit is left held and no Chromium process is left; while the worker relaunches its browser any refusal is typed and retryable, and a script-rendered page renders within a minute; the data services stay healthy; Chromium killed as a render starts (10 ms after the worker reports it busy, before its context exists): that render still ends with a typed answer, never 502, and a script-rendered page is served again within 90 s, every refusal before it typed",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; killed {\"utc\":\"2026-10-03T19:20:11Z\",\"step\":\"render_killed\",\"chrome_processes_killed\":6,\"answer\":\"500 Retrieval failed: BROWSER_ERROR. browser.newContext: Target page, context or browser has been closed\"}; next {\"status\":200,\"sentinel\":true,\"permits\":\"0\",\"left\":\"0\",\"tries\":1,\"served_after_s\":4,\"refusals\":[]}; start_killed {\"killed\":7,\"answer\":{\"status\":500,\"class\":\"BROWSER_UNAVAILABLE\"},\"next\":200,\"sentinel\":true,\"served_after_s\":12,\"refusals\":2}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I08",
+      "name": "search-outage-isolated-and-not-resurrected",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "with SearXNG stopped: search answers a typed failure, not an empty success, never 502; scrape, map and crawl still work; the supervisor does not start the stopped service (three ticks later it is still exited) and fcpi status shows search not ready while the core is; started again, search returns results",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; search {\"utc\":\"2026-10-03T19:13:46Z\",\"step\":\"search_during\",\"status\":503,\"ms\":2039,\"code\":\"SEARCH_BACKEND_UNAVAILABLE\",\"class\":null,\"error\":\"the search backend did not accept a connection within 2000 ms\",\"results\":4}; searxng exited; after {\"utc\":\"2026-10-03T19:16:01Z\",\"step\":\"search_after\",\"status\":200,\"ms\":114,\"code\":null,\"class\":null,\"error\":null,\"ready_after_s\":7,\"results\":453}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I09",
+      "name": "proxy-outage-never-spills-to-the-home-ip",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "with the residential route selected and its proxy down: a bulk crawl of the M3 site (past the bulk mark) is refused PROXY_REQUIRED at submission, or runs only residential attempts that fail as the proxy's failures, with no direct attempt to its domain and no page archived; a low-risk fixture scrape goes on directly",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; bulk {\"utc\":\"2026-10-03T19:19:13Z\",\"step\":\"bulk_submit\",\"status\":200,\"ms\":106,\"code\":null,\"class\":null,\"error\":null,\"job\":\"709f8578-af26-4f49-89d1-af18f8da2ea3\"} {\"state\":\"PARTIAL\",\"completed\":0,\"total\":0,\"archived\":0,\"errorCount\":1,\"error\":null} errors {\"utc\":\"2026-10-03T19:19:33Z\",\"step\":\"bulk_errors\",\"classes\":[\"PROXY_REQUIRED\"],\"count\":1}; direct attempts 0, residential 3",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I10",
+      "name": "model-parser-enhanced-outage-isolated",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "with the fixture model, parser and enhanced provider down: extraction and a scan-only PDF answer typed failures, never 502; an ordinary scrape and a crawl are unaffected; with them back, extraction succeeds",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; extract {\"utc\":\"2026-10-03T19:17:12Z\",\"step\":\"extract_during\",\"status\":503,\"ms\":112,\"code\":\"PROVIDER_UNREACHABLE\",\"class\":null,\"error\":\"The page was scraped, but its json format failed: fixture model.fixture.fcpi.test does not resolve\"}; parse {\"utc\":\"2026-10-03T19:17:12Z\",\"step\":\"parse_during\",\"status\":500,\"ms\":50,\"code\":\"SCRAPE_FCPI_RETRIEVAL\",\"class\":\"DNS_FAILURE\",\"error\":\"Retrieval failed: DNS_FAILURE. fixture m5.fixture.fcpi.test does not resolve\"}; after {\"utc\":\"2026-10-03T19:18:02Z\",\"step\":\"extract_after\",\"status\":200,\"ms\":84,\"code\":null,\"class\":null,\"error\":null,\"ready_after_s\":0}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I11",
+      "name": "network-outage-bounded-and-recovered-without-restart",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "with the retrieval service's egress network disconnected (no Internet and no DNS for it): a public URL fails typed, never 502, and teaches its domain nothing hostile; fixture work and the status route go on; reconnected, name resolution works again with no restart of the service",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; public {\"utc\":\"2026-10-03T19:20:03Z\",\"step\":\"public_during\",\"status\":500,\"ms\":45,\"code\":\"SCRAPE_FCPI_RETRIEVAL\",\"class\":\"DNS_FAILURE\",\"error\":\"Retrieval failed: DNS_FAILURE. example.com: ECONNREFUSED\"}; route none|0|none; dns after true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I12",
+      "name": "disk-pressure-stops-admission-and-deletes-nothing",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I13",
+      "name": "memory-pressure-pauses-and-nothing-of-the-project-is-killed",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I14",
+      "name": "thermal-pressure-pauses-browser-work-only",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-I15",
+      "name": "supervisor-bounded-restarts-then-incident",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "an MCP process frozen (SIGSTOP) turns unhealthy and the supervisor restarts it, at most three times in 15 minutes; the fourth time an incident opens instead and no fourth restart is made; REST serves throughout; restarted by hand it recovers",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; rounds [{\"s\":106,\"r\":1,\"n\":0},{\"s\":112,\"r\":2,\"n\":0},{\"s\":106,\"r\":3,\"n\":0},{\"s\":109,\"r\":3,\"n\":1}]",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-O01",
+      "name": "status-names-each-failure-independently",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "fcpi status --json, read during each injected failure, names that component and not the others: the API down with the ledger up; the worker down with the API live; the ledger and the database down; Redis down; RabbitMQ down; search not ready with the core ready; dispatch paused for memory and for disk; the browser paused, dispatch open, for temperature",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "named correctly: api=true worker=true ledger=true redis=true rabbitmq=true search=true memory=true disk=true thermal=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-O02",
+      "name": "one-notice-per-incident-and-its-recovery",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "each incident the injected failures opened (disk_critical, memory_low, temperature_high, foreign_container, the supervisor's exhausted budget) produced exactly one opened notice while it lasted, across several ticks, and exactly one cleared notice after it (the local outbox and the journal; delivery to an owner channel is N01)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-O03",
+      "name": "logs-bounded-and-diagnostics-redacted",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "9f00d433bf24bf2217ba0cea8bc8636e376e6b4654dec74aae579aaaf3ca7ab6",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt"
+      ],
+      "expected": "every project container's log is within its rotation bound (10 MiB x 3 for the services, 5 MiB x 2 for the dependencies); /var/log/firecrawl-pi stays under 200 MiB; fcpi doctor writes a bundle of at most 5 MiB after searching it for every secret value and finding none; with real secrets planted (--self-test), one of them from a file with no final newline, it finds every one, refuses and keeps nothing",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; logs over bound=none of 15; ops logs 107336444 B; bundle 48198 B 47 files; self-test exit 1",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-O04",
+      "name": "the-gateway-never-answers-502",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "a47900af800d9536aacaa1035da96ecf7a824d9b11f6bc79c5080d5920e1eb1c",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/faults.txt",
+        "evidence/M9/regression/M8/raw/soak.txt"
+      ],
+      "expected": "no answer the gateway gave in the injected failures or the soak is HTTP 502 (a client library retries 502 by resubmitting); the fault cases and the soak together hold at least 1,000 gateway answers",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "answers=4539, 502s=0",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-S01",
+      "name": "24-hour-paced-soak",
+      "utc": "2026-10-03T22:09:55Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "1173120766c4d96768486b044fa0c2a5bafca85a855161879cf1d7f344447356",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/soak.txt"
+      ],
+      "expected": "a 24-hour paced fixture soak (every minute a static scrape and the status, and on a fixed schedule script-rendered pages, MCP, search, map, PDFs, extraction, crawls, batches, screenshots and change checks): at least 95 % of its minutes sampled; no OOM kill in any project container or the host; no throttle or undervoltage flag; at least 1 GiB available in every sample; the oldest queued item never older than 5 minutes; disk free space within 2 GiB of the start; every request succeeds except any refused 503 HOST_PRESSURE while a backup held the platform; p95 at most 5 s for static pages, 20 s for script-rendered ones, 2 s for status and MCP discovery; swap denied to every container throughout",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; window 2026-10-01T22:53:57Z..2026-10-02T22:53:57Z (24.0 h); samples=1390; requests static:1439/1440 status:1439/1440 js:288/288 mcp_list:288/288 mcp_scrape:288/288 search:144/144 pdf:96/96 map:144/144 extract:96/96 crawl_submit:48/48 crawl_done:48/48 screenshot:48/48 batch_submit:48/48 batch_done:48/48 changes:24/24; failed=2 (held by a backup 2; ); missed minutes=0; log damage samples/2026-10-01.jsonl 3537 NUL bytes, 0 lines dropped; min available 4822 MiB; max oldest queued 0 s; p95 ms {\"static\":104,\"js\":1794,\"status\":22,\"mcp_list\":18}; disk free 34772488192→34672648192",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-S02",
+      "name": "memory-within-caps-and-measured-budget",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "862cad15524e42cc40c1e5e12560562f13945a5acfe4ec587bf2c303e282bea1",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/soak.txt",
+        "docs/FIRECRAWL_PI_SPEC.md"
+      ],
+      "expected": "over the soak every project service's memory peak stays under 90 % of its cap and the project as a whole under fcpi.slice's MemoryHigh; spec §22's measured column (idle as the soak's lowest current value, normal as its median, peak as its highest peak, in MiB) equals what the soak's samples give",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; project at most 3409 MiB against fcpi.slice MemoryHigh 5632 MiB; over 90 %=none; spec rows=15, differing=none; measured {\"fixture\":{\"idle\":33,\"normal\":38,\"peak\":62,\"cap\":96,\"frac\":0.644},\"firecrawl-core\":{\"idle\":1279,\"normal\":1787,\"peak\":1955,\"cap\":2560,\"frac\":0.764},\"redis\":{\"idle\":7,\"normal\":8,\"peak\":16,\"cap\":320,\"frac\":0.049},\"access-gateway\":{\"idle\":21,\"normal\":40,\"peak\":58,\"cap\":160,\"frac\":0.365},\"fixture-m7\":{\"idle\":15,\"normal\":21,\"peak\":41,\"cap\":96,\"frac\":0.43},\"retrieval-service\":{\"idle\":24,\"normal\":50,\"peak\":76,\"cap\":448,\"frac\":0.17},\"nuq-postgres\":{\"idle\":67,\"normal\":90,\"peak\":129,\"cap\":640,\"frac\":0.201},\"rabbitmq\":{\"idle\":121,\"normal\":158,\"peak\":197,\"cap\":512,\"frac\":0.384},\"searxng\":{\"idle\":82,\"normal\":84,\"peak\":92,\"cap\":320,\"frac\":0.289},\"fixture-m6\":{\"idle\":29,\"normal\":35,\"peak\":55,\"cap\":96,\"frac\":0.57},\"browser-worker\":{\"idle\":66,\"normal\":140,\"peak\":193,\"cap\":1536,\"frac\":0.125},\"mcp-gateway\":{\"idle\":31,\"normal\":42,\"peak\":69,\"cap\":192,\"frac\":0.358},\"fixture-m3\":{\"idle\":21,\"normal\":28,\"peak\":50,\"cap\":96,\"frac\":0.516},\"fixture-m5\":{\"idle\":16,\"normal\":18,\"peak\":39,\"cap\":128,\"frac\":0.306},\"fixture-m2\":{\"idle\":15,\"normal\":19,\"peak\":40,\"cap\":192,\"frac\":0.211}}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-S03",
+      "name": "postgres-write-settings-measured-on-the-card",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-S04",
+      "name": "redis-user-narrowed-to-the-measured-command-set",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "ccddad102d3a4eddac7e0741ee7778cedcf3cce88fc6edaa477491265327d0cc",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/redis-measured.txt",
+        "evidence/M9/regression/M8/raw/redis-soak.txt"
+      ],
+      "expected": "the command set the core used across every suite and a paced workload (INFO commandstats) is the narrowed user's allowance; the core connects as that user; the default user is off; across the 24-hour soak no command was rejected and the ACL log holds no denial (M1 R11)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; measured 23 commands: set,zpopmin,client|setname,info,hmget,hmset,eval,expire,lrange,hget,smembers,del,exists,zrange,rpoplpush,ping,zrangebyscore,evalsha,bzpopmin,srem,scard,xtrim,sadd; allowed get,set,mget,del,exists,expire,pexpire,pttl,keys,scan,type,rename,time,incr,incrby,hget,hset,hmget,hmset,hsetnx,hdel,hexists,hgetall,hincrby,hlen,lpush,rpush,lpop,rpop,llen,lindex,lpos,lrange,lrem,lset,ltrim,rpoplpush,sadd,srem,spop,scard,sismember,smembers,zadd,zrem,zcard,zcount,zscore,zpopmin,bzpopmin,zrange,zrangebyscore,zrevrange,zrevrangebyscore,zremrangebyrank,zremrangebyscore,xadd,xread,xtrim,eval,evalsha,script|load,script|exists,multi,exec,discard,info,client|setname,client|list,ping,quit; rejected lines 0",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-S05",
+      "name": "core-heap-holds-large-pages-at-384-mib",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "7c76e4182a55a8fd493ac69bf2093679deb362540805e61f64c5a4de06f668e7",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/heap.txt"
+      ],
+      "expected": "with each core child's heap ceiling at 384 MiB: the API child's live heap at rest is read after a full GC; pages of 400 KiB, 614 KiB (M4's F1 size), 1, 1.5 and 2 MiB scraped as Markdown, HTML and raw HTML each answer 200 with their sentinel, or a typed refusal, never 502; the core logs no heap failure and does not restart; the live heap after each is recorded",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; at rest 226.4 MiB; 400 KiB: 200, heap 226.1 MiB; 614 KiB: 200, heap 226.2 MiB; 1024 KiB: 200, heap 226 MiB; 1536 KiB: 200, heap 225.3 MiB; 2048 KiB: 200, heap 225.3 MiB",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-K01",
+      "name": "coordinated-backup-on-the-fixture-repository",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "ee302e307befc084e94d93e737bfa0752e4b7196273df467b88a9c1d18efd9bc",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/backup-fixture.txt"
+      ],
+      "expected": "fcpi backup against the fixture repository: at most five minutes of quiescence with a crawl in flight, the stack healthy after, both snapshots (data and secrets) written, retention applied after them, the staging copy removed, fcpi status showing the backup's age, no notice opened for a condition the hold itself causes while the ticks during it read the hold; the repository is on the Pi's own card and says so (not the off-device backup, K03)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; {\"utc\":\"2026-10-03T19:45:32Z\",\"run\":\"20261003T194424Z\",\"result\":\"PASS\",\"snapshot_data\":\"4845e36c61a62d4103d33479a0c692778c9115e27bd33d53fed2d9bf81e22871\",\"snapshot_secrets\":\"ecf443f9913a8bfda7ccccc1f91f2a581e5a8105f45fe352776564a51a687a50\",\"data_added\":213923028,\"quiesce_s\":45,\"quiesce_exceeded\":false,\"upload_s\":22,\"drained\":false,\"repository_kind\":\"local\",\"offdevice\":\"no\",\"stack_healthy_after\":true,\"source_commit\":\"82a11536707e3fb6d4fe76497e857b137c5e2184\",\"versions_lock_sha256\":\"0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a\",\"platform_schema_version\":3,\"canary_results\":3,\"inflight_jobs\":1,\"snapshot_images\":null,\"forget_exit\":0}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-K02",
+      "name": "isolated-restore-proves-the-backup",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "ee302e307befc084e94d93e737bfa0752e4b7196273df467b88a9c1d18efd9bc",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/backup-fixture.txt"
+      ],
+      "expected": "fcpi restore-test restores that backup into Compose project fcpi-restore (every host path it names under its own directory, checked before it starts; every network internal, no egress, webhooks suppressed, paid dispatch off): the manifest verifies, the configuration matches the backup's, every canary result's documents hash as they did before the backup and another principal gets 404, the in-flight job's receipt is still tracked, artifacts hash and are refused to another principal, a REST fixture scrape and MCP tools/list and a scrape tool call work, no webhook is delivered; then the copy is removed",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; PASS in 228 s; failing checks: none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-K03",
+      "name": "off-device-backup-and-restore",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "1ba70b6f627cec82be808e08558689107d3da7d495af770a7d0e2ae668bab6d7",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/backup-live.txt"
+      ],
+      "expected": "a backup to the owner's off-device repository (FCPI_BACKUP_OFFDEVICE=yes) passes, the repository holds a recovery key besides the Pi's, and fcpi restore-test restores it with every check passing",
+      "evidence_class": "live",
+      "state": "PASS",
+      "actual": "offdevice=yes keys=2 backup=PASS restore=PASS",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-N01",
+      "name": "incident-notice-reaches-the-owner-channel",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "f433565367e29919ee369abe31f5226e7bd67a7e92138fdf8702ee3ef4598773",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/notify-live.txt"
+      ],
+      "expected": "one injected incident (the tick's temperature_high, held across several ticks) and its recovery reach the owner's ntfy topic through FCPI_ALERT_COMMAND: one opened and one cleared notice however many ticks judged it, each delivered once on its first attempt, and ntfy's server holding exactly those two messages under one incident id (the owner's phone receipt is recorded apart, as the human part)",
+      "evidence_class": "live",
+      "state": "PASS",
+      "actual": "failed=none; {\"from\":\"2026-10-03T20:07:18Z\",\"to\":\"2026-10-03T20:08:35Z\",\"opened_notices\":1,\"cleared_notices\":1,\"ticks_reading_injected\":5}; [{\"id\":\"20261003T200718Z-opened-temperature_high\",\"kind\":\"opened\",\"incident\":\"temperature_high\",\"incident_id\":\"a6007a35\",\"delivered\":true,\"attempts\":1},{\"id\":\"20261003T200829Z-cleared-temperature_high\",\"kind\":\"cleared\",\"incident\":\"temperature_high\",\"incident_id\":\"a6007a35\",\"delivered\":true,\"attempts\":1}]",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-N02",
+      "name": "external-watchdog-notices-a-lost-heartbeat-once",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b829ca8d683b7e335dcab568d5dac48c7067cb7207b312db022ba2e3eae27c4b",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/watchdog-live.txt"
+      ],
+      "expected": "with the Pi's heartbeat stopped (the Pi still running), the VPS watchdog installed from the repository opens one heartbeat_missing incident after at least three consecutive missed checks and sends one urgent notice, sends nothing more while the outage lasts, and once the heartbeat returns clears it and sends one recovery notice with the outage's duration; ntfy's server holds exactly those two messages under one incident id",
+      "evidence_class": "live",
+      "state": "PASS",
+      "actual": "failed=none; {\"from\":\"2026-10-03T20:08:36Z\",\"heartbeat_stopped\":\"2026-10-03T20:08:39Z\",\"opened_seen\":\"2026-10-03T20:13:54Z\",\"heartbeat_started\":\"2026-10-03T20:16:57Z\",\"to\":\"2026-10-03T20:19:04Z\",\"opened\":true,\"cleared\":true}; events [\"opened\",\"cleared\"]; ntfy 2 messages",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-U01",
+      "name": "upgrade-and-rollback-rehearsed-in-isolation",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "84b039b6d03a9753533074feff29229cf7c21db30721413cf66b07e30d3eb292",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/rehearsal.txt"
+      ],
+      "expected": "in the isolated restored copy: a reversible configuration change passes its checks and passes again when reverted; a candidate image that refuses this release's configuration fails its start and, rolled back to the baseline image, the copy passes its checks; after the candidate ledger migration to version 4 the baseline gateway refuses the migrated ledger, and the rollback that restores the pre-migration database from the backup with the baseline images brings the copy back to version 3 with every check passing",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; steps baseline,candidate_config,reverted_config,candidate_image,rolled_back_image,migrated,rolled_back_schema",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-U02",
+      "name": "upgrade-and-rollback-plans-read-only",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "6b48634c772a2a89987c6f68cdfd8f0bb791a75e755cdaf1324a2c9d7fa358ec",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/plans.txt"
+      ],
+      "expected": "fcpi upgrade --plan against a staged candidate (M7's release) names the image changes, the ledger schema the candidate reaches against the database's, whether the change is schema-sensitive and the rollback that follows, and the steps of spec §27; fcpi rollback --plan names the previous recorded release and whether a data restore is needed; the deployed tree's hash is the same before and after",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; upgrade 82a1153→19f047f changes 3 sensitive false; rollback to da4b451 restore false",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "d5739e760922867bf1a71d4f2e6d872e3c8be63e9e972d4a3870dcee73398898",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/guard-window-open.txt",
+        "evidence/M9/regression/M8/raw/egress-probe.txt",
+        "evidence/M9/regression/M8/raw/core-logs-final.txt"
+      ],
+      "expected": "across one window, from a guard-counter snapshot before the first phase to the egress probe after the last, with the guard's table not reloaded (or reloaded only by the window's own reboot, whose counters are then read per boot): the guard accepted no web and no proxy-port connection (every M8 phase uses internal fixtures only); the core's saved logs classify every Cloud line",
+      "evidence_class": "fixture-or-host",
+      "state": "FAIL",
+      "actual": "failed=core_logs; guard handle 10→10, web accepted delta=0, proxy-port delta=0; core logs=44",
+      "exit_code": 1,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-X02",
+      "name": "network-and-container-posture",
+      "utc": "2026-10-03T22:09:56Z",
+      "repository_sha": "111341f8726208a21484eb436dae9c39bbe4a213",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "175a5582415181992ccd0cc861beb9c5e3e281752c352e97c3f7ac6f16208def",
+      "input_paths": [
+        "evidence/M9/regression/M8/raw/stack.txt",
+        "evidence/M9/regression/M8/rendered-compose.json"
+      ],
+      "expected": "all fifteen containers run aarch64 under fcpi.slice, whose memory.swap.max is 0 above every one of them (each scope's own limit is reported); the only host publication is 127.0.0.1:3380; the gateway and the retrieval service mount the admission directory read-only and name PI_ADMISSION_FILE; the core's health check reports its API and worker apart; Redis, read as the operator's user after the narrowing, reports AOF on and its last write ok",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; publications=access-gateway 3300/tcp -> 127.0.0.1:3380; cgroups=15; scopes with their own limit lifted (the slice holds)=none",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+      },
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-L03",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    },
+    {
+      "test_id": "M8-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M8/verification.json"
+    }
+  ]
+}

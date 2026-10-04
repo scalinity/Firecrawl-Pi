@@ -1,0 +1,12 @@
+PASS missing OAuth checked before worktree
+PASS mismatched binary checked before worktree
+PASS four UTC launches block fifth
+PASS active agent blocks another launch
+PASS stale apply cannot execute tests or deployment
+PASS empty failed resume is terminal and removes auth
+PASS outage notice survives missing action infrastructure
+PASS named bounded source file permitted
+PASS policy, ignored nested bytes and existing tests denied
+PASS new direct unit test permitted
+warning: remote HEAD refers to nonexistent ref, unable to checkout
+PASS standalone candidate metadata readable without root mirror access

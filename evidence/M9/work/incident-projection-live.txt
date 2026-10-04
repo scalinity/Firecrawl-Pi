@@ -1,0 +1,14 @@
+Started fcpi-incident-17685034.service - [systemd-run] /usr/bin/env -i PATH=/usr/local/bin:/usr/bin:/bin HOME=/home/danny CLAUDE_CONFIG_DIR=/var/lib/firecrawl-pi/incidents/work/17685034/run/auth /bin/bash /opt/firecrawl-pi/scripts/m9/incident-agent.sh 17685034.
+fcpi-incident-17685034.service: Deactivated successfully.
+fcpi-incident-17685034.service: Consumed 2.846s CPU time, 178.1M memory peak.
+  520 19614 /var/lib/firecrawl-pi/incidents/work/17685034/input.json
+{
+  "incident_id": "17685034",
+  "source_commit": "68c6c1e08bcb04a358eff035d1ddc8fc23f41e95",
+  "original_files": 44,
+  "diagnostic_files": 44,
+  "omitted_files": 0,
+  "omitted_excerpts": 36,
+  "bundle_sha256": "2c96e2bc1c3ba2c1fe08105594d53eab71737b39a4f79a8b4ea1f21dc14e5951",
+  "full_manifest_sha256": "c5d7583b64d5fdc8b4e5937d4f8a529664b9d2ca113deec20c5b71f3505d0f7f"
+}

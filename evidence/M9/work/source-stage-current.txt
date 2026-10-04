@@ -1,0 +1,3 @@
+From /tmp/tmp.abk8xpDTJS
+   68c6c1e08..591dff27e  main       -> main
+staged_source_sha=591dff27ec9acb603fa8d6356141912cf475a158

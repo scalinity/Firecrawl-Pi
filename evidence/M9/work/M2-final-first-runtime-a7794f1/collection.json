@@ -1,0 +1,130 @@
+{
+  "schema": "fcpi.collection/v1",
+  "receipts": [
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M2/raw/unit-tests.txt",
+      "test_id": "current-isolated",
+      "started_utc": "2026-10-03T14:59:27.544Z",
+      "completed_utc": "2026-10-03T15:02:37.090Z",
+      "before": {
+        "local": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi_tree_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "pi_expected_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "clean": true
+      },
+      "after": {
+        "local": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi_tree_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "pi_expected_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "70b04a18f61b0e990d7ded78e1765d3a38e5685c7ca80a75755455845fb72dd7",
+      "private_record": "M2-current-isolated-1791039757090.json",
+      "private_record_sha256": "e1fa5856ca67a0ee250e94ec9b650400e0107af6611a506f591df07f6b816ba9"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M2/raw/rt-ssrf.txt",
+      "test_id": "current-ssrf",
+      "started_utc": "2026-10-03T15:23:58.060Z",
+      "completed_utc": "2026-10-03T15:24:09.755Z",
+      "before": {
+        "local": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi_tree_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "pi_expected_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "clean": true
+      },
+      "after": {
+        "local": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi": "f72333f81d2c4753bf83d0db359e9ca6c99ef3da",
+        "pi_tree_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "pi_expected_sha256": "6c699cd2e441d8853f7484af666e18bca3edd1525b955dd46e83a11f203b3d4f",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "d0e5985f0cfc5b287bf93a5b2cac4cdcb500d4f81de9ac9eedfdd92df45f8992",
+      "private_record": "M2-current-ssrf-1791041049755.json",
+      "private_record_sha256": "df1ef12fad04b5da7ff63f50f2fdbc9c7fb0f9dbd9b242e65304e1b81327b60b"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M2/raw/rt-static.txt",
+      "test_id": "static",
+      "started_utc": "2026-10-03T17:22:09.620Z",
+      "completed_utc": "2026-10-03T17:22:35.986Z",
+      "before": {
+        "local": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi_tree_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "pi_expected_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "clean": true
+      },
+      "after": {
+        "local": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi_tree_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "pi_expected_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "e51186611030248ff4ebab10f90d3d5f6e5550af6526890a9f5cbb575a56d21b",
+      "private_record": "M2-static-1791048155986.json",
+      "private_record_sha256": "cba1bbe434919e6f1859e62d38242f8848c43f07d51d58f143e081411506f42f"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M2/raw/rt-browser.txt",
+      "test_id": "browser",
+      "started_utc": "2026-10-03T17:22:36.357Z",
+      "completed_utc": "2026-10-03T17:23:03.824Z",
+      "before": {
+        "local": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi_tree_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "pi_expected_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "clean": true
+      },
+      "after": {
+        "local": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi_tree_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "pi_expected_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "196cb726a5502c2ba3616b27916483dbddad3e7bb4d5af44ed4eb72da2b1b749",
+      "private_record": "M2-browser-1791048183824.json",
+      "private_record_sha256": "e625e65df0d59fe3186fb06c24e3f2d34418f0066d02c731f94917b764a0f3b1"
+    },
+    {
+      "schema": "fcpi.collection-receipt/v1",
+      "path": "evidence/M9/regression/M2/raw/rt-browser-redirect.txt",
+      "test_id": "browser-redirect",
+      "started_utc": "2026-10-03T17:23:04.237Z",
+      "completed_utc": "2026-10-03T17:24:03.514Z",
+      "before": {
+        "local": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi_tree_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "pi_expected_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "clean": true
+      },
+      "after": {
+        "local": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi": "a7794f162fac5b2cf6724151e8fdb67db533906b",
+        "pi_tree_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "pi_expected_sha256": "d7c9eb184833dbfe17bbae07aaa8b818c6fc1295abc11634db7eb99c7e24bc84",
+        "clean": true
+      },
+      "exit_code": 0,
+      "sha256": "4ecc99db6ee8595cae1412bd653b9ce8eabd82ad8278506876b624081b41e5e2",
+      "private_record": "M2-browser-redirect-1791048243514.json",
+      "private_record_sha256": "c2441bba94ea776a06dfad75621df4f0e976d1321f53e1cfc3901426066060fe"
+    }
+  ]
+}

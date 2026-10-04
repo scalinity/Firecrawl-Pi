@@ -1,0 +1,24 @@
+{
+  "utc": "2026-10-03T17:38:28.847Z",
+  "source_commit": "da4b4510479131f119d27f52c12f7d718590c8f9",
+  "owning_milestone": "M2",
+  "execution_session": "Run Firecrawl M9",
+  "state": "PASS",
+  "test_id": "M2-S03",
+  "actual": "wrong-class cases=none; actual attempt outcomes={\"SSRF_DENIED\":16,\"CLOUD_DENIED\":4}; proxy refusals=22, joined=true; public cross-host positive=true; own 403 unchanged=true; aborted navigation denied=true; permits=true; health=true",
+  "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+  "configuration_fixture_hash": "20643dc7694b3cfae89e602508f6a3693c52c95754f064a19b44549044ef2ccf",
+  "image_digests_platform": {
+    "platform": "linux/arm64",
+    "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+    "retrieval": "sha256:acc94e9c2dbe05ee5740585417d34f4860195c78e9764fd0625546035d8ff483",
+    "browser": "sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3"
+  },
+  "input": {
+    "path": "evidence/M9/regression/M2/raw/rt-browser-redirect.txt",
+    "sha256": "1502a4618657909df4cb742c70bb53fc6140999a0de1ee2187852eeae965d303"
+  },
+  "authorization": "work/owner-authorizations-20261003.json",
+  "retry_routing_security_change": false,
+  "original_failures_preserved": true
+}

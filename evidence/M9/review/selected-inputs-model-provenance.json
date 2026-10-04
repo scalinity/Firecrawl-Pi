@@ -1,0 +1,37 @@
+{
+  "utc": "2026-10-03T13:51:50.688Z",
+  "results": [
+    {
+      "role": "debugger",
+      "source_commit": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "model": "claude-opus-5-5",
+      "fresh_context": true,
+      "tools": "Read,Glob,Grep",
+      "command_mechanism": "Native independent CLI equivalent to review-2; exact requested model",
+      "raw_result_sha256": "7194b64af0275dcf6a997e6f243efbd578925fd889a5a3393d880bbead9413c0",
+      "original_report_sha256": "2c64697015d8f2519a9a534bf46733b9a330223a89bb3c8267eaf3827867c1cb",
+      "saved_report": "evidence/M9/review/SELECTED-INPUTS-DEBUGGER.md",
+      "saved_sha256": "01db22ec84dc10ded095c35a765d2a288f9aad71002266f92569dd8fb3a5a5f0",
+      "normalization": "Removed leading commentary before first requested report heading; original result retained privately.",
+      "api_equivalent_estimate_usd": 4.526586199999999,
+      "invoiced_usd": null,
+      "turns": 55
+    },
+    {
+      "role": "auditor",
+      "source_commit": "010d6f9e84f732783ab94745a8b5b05cc0f8d2eb",
+      "model": "claude-opus-5-5",
+      "fresh_context": true,
+      "tools": "Read,Glob,Grep",
+      "command_mechanism": "Native independent CLI equivalent to review-2; exact requested model",
+      "raw_result_sha256": "c1b23a143eb0816445b3e8a298fa7b3adf61ea16a7c42d47ba9183ee6fde32e8",
+      "original_report_sha256": "f182d8b74fbaa0b7290e887b0f61b007fe8002cca35cffbf799b8a9800fde747",
+      "saved_report": "evidence/M9/review/SELECTED-INPUTS-AUDITOR.md",
+      "saved_sha256": "d12c068bd688a28d28196c1efe7318c4ee7f7cbc80eae7aa5c69e27d47235d65",
+      "normalization": "Removed leading commentary before first requested report heading; original result retained privately.",
+      "api_equivalent_estimate_usd": 5.171193799999999,
+      "invoiced_usd": null,
+      "turns": 58
+    }
+  ]
+}

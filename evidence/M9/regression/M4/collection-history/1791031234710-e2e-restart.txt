@@ -1,0 +1,26 @@
+### meta
+{"utc":"2026-10-03T07:08:39.587Z","phase":"restart","platform":"darwin","node":"v26.10.0","client":"@modelcontextprotocol/client@2.1.0","deployed_commit":"de9164dc73cc82adba9540a2099be3791a421531","pi_utc":"2026-10-03T07:08:39.550Z"}
+### forward
+{"utc":"2026-10-03T07:08:39.842Z","pid":50055}
+### resources
+{"utc":"2026-10-03T07:08:40Z","label":"start-restart","mcp":{"instance":"7723bce95cea","started_at":"2026-10-02T07:31:40.825215049Z","peak":71139328,"max":"201326592","current":50151424,"oom_kill":0},"gateway":{"instance":"168063943b73","started_at":"2026-10-03T07:01:41.445590728Z","peak":42303488,"max":"167772160","current":31703040,"oom_kill":0},"core":{"instance":"fc9fbe6cdf11","started_at":"2026-10-03T07:04:22.222572831Z","peak":2050179072,"max":"2684354560","current":1814904832,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4818320}
+### before_restart
+{"utc":"2026-10-03T07:08:41.598Z","case":"crawl_started","id":"935865a0-2d51-4517-86a0-f725866495f1","sdk_id":"1e32e949-d9c7-401b-9935-5aa049c5260e","status":200,"request_id":"24f6372c-269c-40a7-bfa4-bfa9106b235a","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":60257,"started_at":"2026-10-02T07:31:40.825215049Z","gateway_started_at":"2026-10-03T07:01:41.445590728Z"}
+### resources
+{"utc":"2026-10-03T07:08:41Z","label":"before-mcp-restart","mcp":{"instance":"7723bce95cea","started_at":"2026-10-02T07:31:40.825215049Z","peak":71139328,"max":"201326592","current":50151424,"oom_kill":0},"gateway":{"instance":"168063943b73","started_at":"2026-10-03T07:01:41.445590728Z","peak":42303488,"max":"167772160","current":31932416,"oom_kill":0},"core":{"instance":"fc9fbe6cdf11","started_at":"2026-10-03T07:04:22.222572831Z","peak":2050179072,"max":"2684354560","current":1813250048,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4821392}
+### during_restart
+{"utc":"2026-10-03T07:08:42.724Z","case":"rest_crawl_status","status":200,"body_status":"scraping"}
+### after_restart
+{"utc":"2026-10-03T07:08:49.744Z","case":"restarted","restarted_at":"2026-10-03T07:08:42.685Z","started_at":"2026-10-03T07:08:42.504024314Z","gateway_started_at":"2026-10-03T07:01:41.445590728Z","started_changed":true,"gateway_unchanged":true}
+{"utc":"2026-10-03T07:09:02.572Z","case":"status_new_connection","id":"935865a0-2d51-4517-86a0-f725866495f1","status":"completed","request_id":"c9d6b8d8-76b6-4613-b550-ecb9a3b6b5ce","content_type":"application/json","sse":false,"session_header":null,"www_authenticate":null,"acao":null,"code":null,"rpc_error":null,"result_type":"complete","is_error":null,"local_port":60317,"completed":6,"returned":6,"crawl_local_port":60257,"status_local_ports":[60284,60293,60297,60302,60306,60315,60317]}
+{"utc":"2026-10-03T07:09:17.278Z","case":"sdk_client_across_restart","id":"1e32e949-d9c7-401b-9935-5aa049c5260e","status":"completed","completed":3,"exchanges_with_session":0,"initialize_sent":false}
+### pi_view
+{"utc":"2026-10-03T07:09:19.513Z","case":"instances","crawl_instance":"45c3dc16-b1b9-4336-a699-52bb103dabb0","status_instances":["eb7fb6e9-b230-43af-9afb-fd7e3dc591fd"],"started_instances":["eb7fb6e9-b230-43af-9afb-fd7e3dc591fd"]}
+### resources
+{"utc":"2026-10-03T07:09:19Z","label":"end-restart","mcp":{"instance":"7723bce95cea","started_at":"2026-10-03T07:08:42.504024314Z","peak":57606144,"max":"201326592","current":38993920,"oom_kill":0},"gateway":{"instance":"168063943b73","started_at":"2026-10-03T07:01:41.445590728Z","peak":44580864,"max":"167772160","current":32473088,"oom_kill":0},"core":{"instance":"fc9fbe6cdf11","started_at":"2026-10-03T07:04:22.222572831Z","peak":2050179072,"max":"2684354560","current":1818116096,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4856320}
+### connections
+{"utc":"2026-10-03T07:09:20.091Z","hosts":["127.0.0.1:3380"],"total":11,"lookups":[]}
+### forward
+{"utc":"2026-10-03T07:09:20.091Z","pid":50055,"exited_before_end":false}
+### end
+{"utc":"2026-10-03T07:09:20.091Z","exit":0}

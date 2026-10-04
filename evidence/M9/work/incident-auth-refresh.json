@@ -1,0 +1,9 @@
+{
+  "utc": "2026-10-03T06:57:49.154Z",
+  "test_id": "M9-SUBSCRIPTION-REFRESH",
+  "refresh_exit": 0,
+  "valid_max_token": true,
+  "state": "PASS",
+  "api_billing": false,
+  "output": "owner-private; no credentials in evidence"
+}

@@ -1,0 +1,405 @@
+{
+  "schema": "fcpi.m4.verification/v1",
+  "runner": "scripts/m4/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main.",
+  "results": [
+    {
+      "test_id": "M4-B00",
+      "name": "baseline-matches-m3-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-G01",
+      "name": "images-pinned-built-and-running",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-G02",
+      "name": "suites-pass-in-the-running-images",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-K01",
+      "name": "official-sdk-locked-and-request-factory-used",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P01",
+      "name": "modern-discovery-and-calls-without-initialize-or-session",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b55621ec3040314625fcaeb822f368eced8e0a83bce5c902ceb0e9e6232cd283",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-wire.txt",
+        "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+        "evidence/M9/regression/M4/raw/e2e-restart.txt"
+      ],
+      "expected": "server/discover answers 2026-07-28 only, tools without listChanged, a 60 s private cache hint and the server's identity in result metadata; a tools/call on a fresh connection with no discovery or initialize before it scrapes the fixture as one JSON answer with resultType complete; the SDK client pinned to 2026-07-28 negotiates it by server/discover, never sends initialize, sends MCP-Protocol-Version, Mcp-Method equal to the body's method and Mcp-Name on each tools/call, with the envelope's revision on every request, and scrapes, maps, crawls, reads the crawl to completed and reads its receipt to SUCCEEDED; no answer anywhere carries Mcp-Session-Id; the MCP service logged these calls as modern 2026-07-28 for the validated client",
+      "state": "PASS",
+      "actual": "failed=none; SDK exchanges=18 (POST 18), methods=server/discover,tools/list,tools/call; raw answers checked for a session header=35; receipt=SUCCEEDED",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P02",
+      "name": "malformed-missing-mismatched-metadata-rejected",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "6d6fd5aac187a717678efae94e2e7c9a677eeb10dea5b4097e3534161cbdc987",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-wire.txt"
+      ],
+      "expected": "on the modern path: a missing MCP-Protocol-Version, a missing Mcp-Method, an Mcp-Method or Mcp-Name that disagrees with the body, and a header revision that disagrees with the envelope are 400 -32020; the modern header without the envelope and a malformed envelope are 400 -32602; an unsupported revision is 400 -32022; none of those eight JSON-bodied requests reached the server factory on either leg (the SDK's classification rejects them first), so none was served as a 2025-era request; a body that is not JSON is 400 -32700, answered by the SDK's legacy leg, which handles every non-JSON body, as its parse error; none of the nine reached the fixture and the MCP service logged no tool call for any of them, while the well-formed control reached the factory on the modern leg, reached the fixture and was logged (D5 obligation 1)",
+      "state": "PASS",
+      "actual": "cases=9, answered otherwise=none; JSON-bodied cases that reached the factory=none; the non-JSON body served on=legacy; the control served on=modern; fixture requests for rejected cases=0, for the control=1; codes=-32020,-32020,-32020,-32020,-32020,-32602,-32602,-32022,-32700",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P03",
+      "name": "json-and-request-scoped-sse",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b5a236e9d1b11148545dce3eb51bf52984d1ca43d3e82e5a2bd8417adfc293aa",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-wire.txt",
+        "evidence/M9/regression/M4/raw/e2e-tailnet.txt"
+      ],
+      "expected": "a modern call without a progress token is one application/json answer; the same call with a progress token is a text/event-stream answer carrying the progress notification with that token before the result; the MCP service logged that exchange as an event stream; 2025-era answers are streams; through Tailscale Serve the SDK client's progress call streamed and delivered its notification",
+      "state": "PASS",
+      "actual": "failed=none; JSON=application/json; progress call=text/event-stream messages=[\"notifications/progress\",\"result\"]; logged as text/event-stream; tailnet SSE exchanges=1",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P04",
+      "name": "cancellation",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "c2cb662b4bfc5a9e40a41835162f43939c49dc507f18e8bf5d8ffb780acf2f48",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-cancel.txt"
+      ],
+      "expected": "a modern tools/call with JSON-RPC id 0, aborted while the fixture held its page (the page started before the abort), is logged by the MCP service as cancelled with id 0, and the gateway logged its /mcp exchange and the MCP service's scrape call as 499 (D5 obligation 3); a 2025-era call whose connection closes mid-call is cancelled the same way; the 2025-era SDK client's notifications/cancelled is acknowledged and, served statelessly by another instance, is recorded with how the running call ended, ok when the notification reached another instance as stateless serving expects, or cancelled were it honoured (the spec promises no legacy return channel; the check records the limitation, it does not require it); firecrawl_cancel_crawl answers cancelled twice, the crawl and its receipt end CANCELLED with its completed pages archived and no slow page started more than 2.5 s after the cancel; cancelling a finished crawl is the gateway's 409 as a tool error",
+      "state": "PASS",
+      "actual": "failed=none; modern id 0 cancelled, gateway [{\"status\":499,\"mcp_method\":\"tools/call\"}]/499; legacy close cancelled; legacy notification: 1 acknowledged, call ok (ok: the notification reached another instance; cancelled: it was honoured); crawl CANCELLED archived=4, slow pages started after cancel+2.5 s=0 of 3; finished crawl=409",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P05",
+      "name": "deterministic-catalog",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "5293edf605ab83e00c6e95a38b947063a349b2be4467a03b4720f7c186d9421a",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-wire.txt",
+        "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+        "evidence/M9/regression/M4/raw/e2e-stopped.txt",
+        "deploy/policies/capabilities.json"
+      ],
+      "expected": "tools/list answers the manifest's nine tools sorted by name, byte-identical for two principals and both eras, and again from the SDK clients of both eras and after the MCP service was stopped and started; modern answers carry the 60 s private cache hint; each tool's annotations and argument names are the ones generated from the manifest (scrape: its route's fields less the gateway-set origin; crawl and batch: plus idempotencyKey); capabilities list the omitted tools with their not_enabled reasons; subscriptions/listen is refused -32603",
+      "state": "PASS",
+      "actual": "failed=none; tools=13 sha=5efc68d773e3; omitted=",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P06",
+      "name": "2025-11-25-stateless-compatibility",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "3da3f3d42b24c3caeb1c43b1d9fd0ca887d70a5016d2da4b37eeb0ea771e64cf",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-wire.txt",
+        "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+        "evidence/M9/regression/M4/raw/e2e-tailnet.txt"
+      ],
+      "expected": "a raw 2025-era initialize negotiates 2025-11-25 with no session header, and a later tools/call with no session scrapes the fixture; GET and DELETE on /mcp (the 2025 session operations) and a modern GET are 405; the SDK client at its 2025-11-25 default initializes, lists, scrapes and crawls to completed with no session header on any answer, and over the tailnet does the same; the MCP service logged its calls as legacy 2025-11-25",
+      "state": "PASS",
+      "actual": "failed=none; raw initialize=2025-11-25; SDK negotiated=2025-11-25, exchanges=14; legacy tool records=11",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P07",
+      "name": "two-independent-clients-and-owner-isolation",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "3bb9e37f679e8d07c73646c82dab2fa9564ea90f03e791de29ab2e1af6bdca45",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-sdk.txt",
+        "evidence/M9/regression/M4/raw/e2e-tailnet.txt"
+      ],
+      "expected": "two SDK clients with their own tokens and principals call the same endpoint at once (their calls overlap in time) and both get their pages; the MCP service logged each call under its own validated client and principal; another principal's job answers exactly as an unknown id does, through MCP; over the tailnet a modern and a 2025-era client of different principals both succeed",
+      "state": "PASS",
+      "actual": "failed=none; overlap=74 ms; client/principal pairs logged=m4a/m4-owner,m4b/m4-other; foreign job=404 identical to unknown=true",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P08",
+      "name": "new-tcp-connection-between-related-calls",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "fd28995628debc41fd160f16093c3abc4c48ebe6889ec2ff1bbd8d4c5a226ac7",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-restart.txt"
+      ],
+      "expected": "the crawl and every later status call of the same job each went over a TCP connection of its own (distinct local ports, none the crawl's), and the job was resolved to completed with its six pages through them",
+      "state": "PASS",
+      "actual": "crawl port=52661; status calls=5, distinct=5; status=completed completed=6",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P09",
+      "name": "mcp-restart-between-crawl-and-status",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "fd28995628debc41fd160f16093c3abc4c48ebe6889ec2ff1bbd8d4c5a226ac7",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-restart.txt"
+      ],
+      "expected": "a crawl accepted by one MCP process is read to completed by another after the MCP container restarted (its start time changed, the gateway's did not): the MCP log names a different process instance for the status calls than for the crawl, and that instance started in the window; the SDK client that existed before the restart reads its own crawl to completed afterwards, with no initialize and no session header; the REST route answered the job during the restart",
+      "state": "PASS",
+      "actual": "failed=none; crawl instance=31cf143c, status instances=afd623a2; SDK client across restart=completed",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-P10",
+      "name": "rest-serves-with-mcp-stopped",
+      "utc": "2026-10-03T21:09:41Z",
+      "repository_sha": "909d997f5ce0000e91a1bd7bd6cc5053abb2a2ab",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "a94f7d97dce643d0f99052d2399d3f71ef4cae0b7976fe56b945bb242d3fecd3",
+      "input_paths": [
+        "evidence/M9/regression/M4/raw/e2e-stopped.txt"
+      ],
+      "expected": "with the MCP container stopped, /mcp answers 503 MCP_UNAVAILABLE within 3 s while a REST scrape, the platform status (core live), a job created before and a crawl submitted and finished during the stop all answer through REST; started again, /mcp lists the tools; the gateway was never restarted",
+      "state": "PASS",
+      "actual": "failed=none; /mcp while stopped=503 MCP_UNAVAILABLE in 2266 ms; REST crawl while stopped=completed",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549"
+      },
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-A01",
+      "name": "authorization-and-boundary-through-mcp",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-A02",
+      "name": "tool-payload-bounded-and-marked",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-O01",
+      "name": "independent-mcp-observability",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-X03",
+      "name": "mcp-network-and-container-posture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-L01",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-M01",
+      "name": "memory-within-caps",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-M02",
+      "name": "mcp-memory-envelope-measured",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-R01",
+      "name": "real-target-clients",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-H01",
+      "name": "unplanned-reset-recovered",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    },
+    {
+      "test_id": "M4-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M4/verification.json"
+    }
+  ]
+}

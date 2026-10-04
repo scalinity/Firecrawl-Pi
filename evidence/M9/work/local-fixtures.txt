@@ -1,0 +1,24 @@
+✔ one authenticated action survives restart and concurrent replay (15.165459ms)
+✔ a URL alone, wrong MAC, payload, or expired grant never approves (5.334667ms)
+✔ a changed patch or action invalidates an issued MAC (4.8995ms)
+✔ unbound fixes and unknown actions cannot be issued (0.878834ms)
+✔ the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network (3.582917ms)
+✔ every host path the copy names is under its directory (15.490084ms)
+✔ the copy runs only the kept services, publishes nothing and reaches no egress network (0.137167ms)
+✔ every network is internal, isolated, renamed and moved off production's addresses (0.136834ms)
+✔ webhook delivery and paid dispatch are off in the copy (0.304084ms)
+✔ incident file guard permits bounded reads and a proposed source fix (922.087458ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1143.941292ms)
+✔ a symlink cannot expose an outside file or redirect a write (27.296625ms)
+✔ INFO uses the operator without the password in argv (379.590459ms)
+✔ key scans and fixture writes use the narrowed core user (178.112083ms)
+✔ the preserved pre-M8 deployment remains readable (112.035ms)
+✔ unexpected users and missing passwords fail closed (155.460875ms)
+ℹ tests 16
+ℹ suites 0
+ℹ pass 16
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2181.131083

@@ -1,0 +1,23 @@
+### meta
+{"utc":"2026-10-03T18:27:22.324Z","phase":"cancel","source_commit":"82a11536707e3fb6d4fe76497e857b137c5e2184","vantage":"workstation through an SSH forward of 127.0.0.1:3380","platform":"darwin","node":"v26.10.0"}
+### slow_crawl
+{"utc":"2026-10-03T18:27:23.488Z","case":"submit","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"1679e4651420836905940d26238d010c3c086c023fd9c8f75b4ffe5ef0a501ba","id":"488a1000-8ba8-4a78-8150-d56468ee6cbd"}
+### queued_crawl
+{"utc":"2026-10-03T18:27:29.256Z","case":"submit_while_other_runs","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"e5d02638592ba109599d761063cdcadb57e7ed87962e44c85a56ca4f4fcf4ab2","id":"f6909149-89d0-41c5-8646-dfeb6dcffb42","ledger_state":"RECEIVED"}
+{"utc":"2026-10-03T18:27:29.848Z","case":"cancel","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"a0af58eabbdc165960166eac02d0515f7d631a86d262e5f74af474e283dc7521","ledger_state":"CANCELLED","marker_groups":0}
+### slow_crawl
+{"utc":"2026-10-03T18:27:30.115Z","case":"cancel","status":200,"code":null,"error":null,"www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"a0af58eabbdc165960166eac02d0515f7d631a86d262e5f74af474e283dc7521","body":{"status":"cancelled"},"at":"2026-10-03T18:27:30.085Z"}
+{"utc":"2026-10-03T18:27:43.302Z","case":"finished","state":"CANCELLED","archived":4,"completed":4,"total":4,"marker_groups":1,"cancel_at":"2026-10-03T18:27:30.085Z","fixture_requests":[{"path":"/slow/s01","answered":"2026-10-03T18:27:26.565Z","started":"2026-10-03T18:27:24.565Z"},{"path":"/slow/s02","answered":"2026-10-03T18:27:28.602Z","started":"2026-10-03T18:27:26.602Z"},{"path":"/slow/s03","answered":"2026-10-03T18:27:30.638Z","started":"2026-10-03T18:27:28.638Z"}],"events":["RECEIVED","SUBMITTING","QUEUED","RUNNING","CANCELLED"],"queued_job_after":"CANCELLED","queued_job_marker_groups":0}
+### finished_job
+{"utc":"2026-10-03T18:27:43.317Z","case":"cancel_finished","status":409,"code":null,"error":"Crawl is already completed","www_authenticate":null,"retry_after":null,"acao":null,"body_sha256":"ca65ad15780f0ee7abe30f815c1e55ddbbff055a7cbc6dd76e796d30e36f6f2d"}
+### restore
+{"utc":"2026-10-03T18:27:44.272Z","firecrawl-core":{"was":"running","now":"running healthy"},"access-gateway":{"was":"running","now":"running healthy"}}
+### resources
+{"utc":"2026-10-03T18:27:44Z","label":"end-cancel","gateway":{"instance":"a92264002c78","started_at":"2026-10-03T18:00:26.744088496Z","peak":48365568,"max":"167772160","current":33636352,"oom_kill":0},"core":{"instance":"bed62f9ccff2","started_at":"2026-10-03T18:01:04.200792059Z","peak":2052243456,"max":"2684354560","current":1829158912,"oom_kill":0},"vmstat_oom_kill":1,"mem_available_kib":4933968}
+### ledger
+{"utc":"2026-10-03T18:27:45.064Z","id":"488a1000-8ba8-4a78-8150-d56468ee6cbd","kind":"crawl","state":"CANCELLED","upstream":"01a10305-54c0-71cd-acd2-a885a80248a3","cancel_requested":true,"dispatch_attempts":1,"marker_groups":1,"upstream_rows":13}
+{"utc":"2026-10-03T18:27:45.064Z","id":"f6909149-89d0-41c5-8646-dfeb6dcffb42","kind":"crawl","state":"CANCELLED","upstream":null,"cancel_requested":true,"dispatch_attempts":0,"marker_groups":0,"upstream_rows":0}
+### forward
+{"utc":"2026-10-03T18:27:45.064Z","pid":17068,"local":"127.0.0.1:3380","remote":"127.0.0.1:3380","exited_before_end":false}
+### end
+{"utc":"2026-10-03T18:27:45.064Z","exit":0}

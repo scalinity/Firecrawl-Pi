@@ -1,0 +1,519 @@
+{
+  "schema": "fcpi.m7.verification/v1",
+  "runner": "scripts/m7/verify.mjs",
+  "repository_sha_note": "Each result records the commit checked out when it ran, with code_dirty; the commit that stores this file is a later one on main. evidence_class separates the live checks (E05, L02) from the fixture and host checks.",
+  "results": [
+    {
+      "test_id": "M7-B00",
+      "name": "baseline-matches-m6-after",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-G01",
+      "name": "images-pinned-built-and-running",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-P01",
+      "name": "patch-series-and-coverage",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-G02",
+      "name": "suites-pass-in-the-running-images",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-E01",
+      "name": "automatic-escalation-ends-at-one-enhanced-dispatch",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "with the fixture enhancer selected and no residential route: a 403 and a 200 challenge go direct_http then enhanced, and a script shell whose render is a challenge goes direct_http, direct_browser, then enhanced in browser mode, each returning the target's page as the provider fetched it with proxyUsed stealth and one provider request; route enhanced goes to the provider alone; with the fixture proxy too, a challenge goes direct_http, residential_http, enhanced and the script shell uses all four attempts (direct_http, direct_browser, residential_browser, enhanced); a stealth request stops at the residential route and never reaches the provider; the targets saw each route's request",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; auto_403_to_enhanced: [[\"direct_http\",\"enhanced\"]] calls=1; auto_200_to_enhanced: [[\"direct_http\",\"enhanced\"]] calls=1; auto_js_to_enhanced_browser: [[\"direct_http\",\"direct_browser\",\"enhanced\"]] calls=1; route_enhanced_alone: [[\"enhanced\"]] calls=1; waterfall_http: [[\"direct_http\",\"residential_http\",\"enhanced\"]] calls=1; waterfall_browser_four_attempts: [[\"direct_http\",\"direct_browser\",\"residential_browser\",\"enhanced\"]] calls=1; stealth_stops_at_residential: [[\"residential_http\"]] calls=0",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-E02",
+      "name": "four-attempts-one-enhanced-no-paid-retry-multiplication",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "across the fixture phase: no acquisition uses more than four attempts or more than one enhanced strategy; every provider request the fixture received is one logged enhanced dispatch (as many requests as dispatch lines, none repeated for a page); a page challenged by the provider too gets exactly one request and a typed failure; every enhanced ledger row is one per logical page, and a charged one (a 200) settled at the card's highest-tier price for its mode (1270 or 16080 micro-USD) while the free failures were released",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; acquisitions=71, max attempts=4, dispatch lines=17, provider requests=17; ledger rows=32 (settled 13, released 18, uncertain 1)",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-E03",
+      "name": "target-and-provider-errors-apart",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "a target's own outcome through the provider is judged as the target's: its 404 is the page with status 404, its 401 is AUTH_REQUIRED, its 429 is RATE_LIMITED and cools the domain on every route (a later basic request is refused with no target request), and an answer ending at a Cloud host is CLOUD_DENIED; the provider's own failures are its own: a ban (520) is BLOCKED_PUBLIC_CONTENT and released free, a request with no answer is ENHANCED_UNCERTAIN and stays reserved, a rate limit (429) and a refused key (401) are PROVIDER_RATE_LIMITED and PROVIDER_AUTH_FAILED and released free, each after one request; none of them changes the domain's routing record",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; 404→404, 401→AUTH_REQUIRED, 429→RATE_LIMITED (cooldown 30 s), cloud→CLOUD_DENIED; provider 520→BLOCKED_PUBLIC_CONTENT RELEASED, silent→ENHANCED_UNCERTAIN UNCERTAIN, 429→PROVIDER_RATE_LIMITED, 401→PROVIDER_AUTH_FAILED; m7esc route={\"preferred\":null,\"challenges\":0,\"failures\":1,\"last_failure_class\":\"BLOCKED_PUBLIC_CONTENT\"}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-E04",
+      "name": "outage-and-exhausted-budget-without-cloud",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "with the production selection (Zyte, paid dispatch off, whether its key is present or absent) a request for the enhanced tier is ENHANCED_REQUIRED and an auto challenge BLOCKED_PUBLIC_CONTENT naming both unavailable tiers, with no provider request and no attempt beyond the direct one, while an ordinary page is fetched directly; with the small fixture category full (concurrent reservations granted exactly the room left) the next dispatch is refused as ENHANCED_REQUIRED (BUDGET_EXHAUSTED) before any request; after three counted provider failures the breaker is open, the tier is refused with no request, and direct scrapes and MCP scrapes go on (AC23)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; production ENHANCED_REQUIRED/BLOCKED_PUBLIC_CONTENT; race granted 15 of 15 expected (cap 20000, used 0); exhausted ENHANCED_REQUIRED; breaker open; direct 200, mcp 200",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-E05",
+      "name": "live-enhanced-request",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "210690ddb6ed9512efc0faaca0c21d2206f19f798573b47ba2306eda2f23d807",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-live.txt"
+      ],
+      "expected": "with a Zyte key, an approved enhanced budget and paid dispatch: route enhanced fetches a permitted public target (example.com) through the provider, the answer is the page, and its ledger row is SETTLED at the card's price; without them the check is BLOCKED_CREDENTIAL and the record shows no live request was made",
+      "evidence_class": "live",
+      "state": "PASS",
+      "actual": "status 200; ledger {\"provider\":\"zyte\",\"subject\":\"zyte-api\",\"reserved\":1270,\"actual\":1270,\"state\":\"SETTLED\",\"usage\":{\"mode\":\"http\",\"bytes\":577,\"requests\":1,\"requestId\":null,\"targetStatus\":200}}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-B01",
+      "name": "screenshots-correct-and-bounded",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+        "evidence/M9/regression/M7/raw/stack.txt",
+        "evidence/M9/regression/M7/raw/artifacts/"
+      ],
+      "expected": "a viewport screenshot of the three-band page is a 1280 x 800 PNG, red where the first band is; a full-page one is 1280 x 3000 with red, green and blue at the bands' heights; a full-page capture of the 25,000 px page is 1280 x 20,000 and marked truncated in the answer and the artifact's headers; each capture came back as an artifact address, not image data, with its PNG's own dimensions, and was rendered in one direct_browser attempt; a stealth request's screenshot is rendered on the residential route; through MCP the screenshot is an artifact address too; two captures of incompressible pixels just under the worker's 8 MiB (6.5 to 8 MiB between them) are stored whole, the case M01's gateway sample measures, and one capture just over it is refused as RESOURCE_LIMIT with no artifact; and the core runs the whole window without a restart",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; viewport 1280x800 255,0,0; full 1280x3000; clipped 1280x20000 truncated=true; residential [[\"residential_browser\"]]; mcp urls=1; worst case 200 artifacts=2 bytes=7521119; over the bound RESOURCE_LIMIT; core restarts=0 started=2026-10-03T18:28:23.831210571Z",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-B02",
+      "name": "action-subset-correct-bounded-and-refused-outside-it",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+        "evidence/M9/regression/M7/raw/artifacts/"
+      ],
+      "expected": "on the action page, a selector wait, a click, a scroll, a content capture and a screenshot run in order: the capture holds the late element, the section the click revealed and the content the scroll loaded, and the screenshot is an artifact of 1280 x 800; a click on a same-host link loads that document, which the retrieval service counts against the domain (the phase's only counted action navigation); a click on a link to another host fails the render as ACTION_FAILED (the page may not leave its host) and the other host is never requested; executeJavascript, write, press, pdf, clicking every match, eleven actions, 16 s of waits, a screenshot's quality, the json format with a screenshot and a screenshot on a batch are each refused 400 UNSUPPORTED_OPTION naming the option, before any attempt or target request",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; capture {\"url\":\"http://m7shot.fixture.fcpi.test:8080/actions?f=5700c3ee\",\"has_click_text\":true,\"has_late\":true,\"has_scrolled\":true,\"chars\":1168}; samehost 200 scrape http://m7shot.fixture.fcpi.test:8080/article counted [{\"attempt_id\":\"ca9466cd-68a8-4d0b-9829-768e325b32d8\",\"count\":1}]; offhost ACTION_FAILED; refused execute_javascript:400/actions.executeJavascript,write:400/actions.write,press:400/actions.press,pdf:400/actions.pdf,click_all:400/actions[0].all,eleven_actions:400/actions,waits_past_15s:400/actions,screenshot_quality:400/formats.screenshot.quality,json_with_screenshot:400/formats.json,screenshot_on_batch:400/formats.screenshot",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-B03",
+      "name": "artifacts-owner-bound-and-expiring",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "an artifact is served to its principal (200), and answers another principal's token exactly as an unknown id does (404 NOT_FOUND), a request with no token 401, a malformed id 400, and once past its retention 410 EXPIRED",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; {\"utc\":\"2026-10-03T18:53:50.261Z\",\"case\":\"owner_and_expiry\",\"owner_before\":200,\"other\":404,\"other_body\":{\"success\":false,\"code\":\"NOT_FOUND\",\"error\":\"Artifact not found\"},\"none\":401,\"unknown\":404,\"bad_id\":400,\"expired\":410,\"expired_code\":\"EXPIRED\"}",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-B04",
+      "name": "contexts-and-processes-cleaned",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "a render whose actions run past the browser attempt's deadline fails typed (TIMEOUT) and a render whose Chromium is killed fails typed (a crash class) with the kill observed; after each the worker is idle, it launches a fresh browser, the next render with a screenshot succeeds, and the Chromium process count returns to within the warm browser's own (no context outlives its render)",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; timeout TIMEOUT, crash BROWSER_CRASHED (killed 7); chrome processes before 6, after timeout 6, after crash 0, final 6",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-C01",
+      "name": "cache-scope-freshness-expiry-and-billing",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "a successful 2xx scrape is stored and the same principal's same request within maxAge is a hit (cacheState hit, no attempt, no target request); another principal, other options, maxAge 0, a plain scrape that asked nothing of the cache, a request with storeInCache false, a 500 page, a 404 page and an expired entry are each a miss that reaches the target; a cached enhanced answer is served again with no provider request and no new ledger row",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; first_miss_stored:miss/1 hit:hit/0 other_principal_miss:miss/1 other_options_miss:miss/1 max_age_zero_miss:miss/1 plain_first:miss/1 plain_not_kept:miss/1 store_false_first:miss/1 store_false_not_kept:miss/1 error_500_first:miss/2 error_500_not_kept:miss/2 error_404_first:miss/1 error_404_not_kept:miss/1 expired_miss:miss/1 enhanced_first:miss/1 enhanced_hit:hit/0 enhanced_ledger:-/-",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-C02",
+      "name": "parse-cache-owner-scoped",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "M5 review S1: a scan-only PDF parsed for one principal is a cache hit for that principal's second scrape (no upload) and a fresh parse for another principal (one more upload), each returning the document's text; the parse cache holds one row per principal, keyed by two different sixteen-hex owner tags",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; uploads [4,5,5,6]; owners 406fb03b2a6f5e76,dfc694f0c0425c01",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-C03",
+      "name": "change-detection",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "b140ed1a98c56d3d95aa8fd6a4244df3c482a62a412b030c0f2934b3b8749256",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt"
+      ],
+      "expected": "a page's first look is new, the same text again is same, a real text change is changed with a line diff showing the added line, an error page and a bot interstitial at the same URL are 422 NOT_COMPARED and replace nothing (the next successful look at the version seen before them is same), a later change is changed again, and another principal's first look at the page is new",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; first_new:new unchanged_same:same text_changed:changed error_page_not_compared:NOT_COMPARED challenge_not_compared:NOT_COMPARED after_failures_same:same changed_again:changed other_principal_new:new",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-W01",
+      "name": "webhooks-signed-retried-deduplicated-and-restricted",
+      "utc": "2026-10-03T21:38:12Z",
+      "repository_sha": "c1e6fa19e25059311987cc5cabe868b391ca0404",
+      "worktree_dirty": true,
+      "code_dirty": false,
+      "upstream_sha": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
+      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "config_or_fixture_hash": "fc9e1d880bc6145a0a01320b82a388aaf2139dbab8b1e3d0a6fed3b4b5ee8216",
+      "input_paths": [
+        "evidence/M9/regression/M7/raw/e2e-fixture.txt",
+        "deploy/policies/capabilities.json"
+      ],
+      "expected": "a batch naming the approved receiver gets its started and completed events delivered and accepted by the receiver's signature and timestamp check, each once; a receiver refusing twice sees the same event id three times and accepts it once, the receipt showing DELIVERED after three attempts; a receiver that never accepts sees the event limits.webhooks.maxAttempts times and the receipt shows it DEAD; a private address, a public host and an unlisted path on the approved host are refused 400 before any receipt; the receiver refuses a stale timestamp and a tampered body (401) and acknowledges a replay as a duplicate",
+      "evidence_class": "fixture-or-host",
+      "state": "PASS",
+      "actual": "failed=none; delivered [\"batch_scrape.completed:DELIVERED:1\",\"batch_scrape.started:DELIVERED:1\"]; retried [\"batch_scrape.completed:DELIVERED:3\"]; dead [\"batch_scrape.completed:DEAD:5\"] received 5; unapproved 400,400,400",
+      "exit_code": 0,
+      "image_digests_platform": {
+        "platform": "linux/arm64",
+        "api": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+        "retrieval": "sha256:703f076d7a0a78c0c9fa80957e86708a0960b1816f9671828e5a3ce9441d04ba",
+        "gateway": "sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb",
+        "mcp": "sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d",
+        "searxng": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+        "browser": "sha256:f05d6bc2e18c310581403aede194e4e024787e7fbac037a5eeabe20d418ae549",
+        "fixture_m6": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
+        "fixture_m7": "sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e"
+      },
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-W02",
+      "name": "webhooks-suppressed-during-restore",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-K01",
+      "name": "capability-manifest-and-mcp-catalog",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-L02",
+      "name": "public-sample-documented",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-X01",
+      "name": "zero-firecrawl-cloud-attempts",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-X02",
+      "name": "network-and-container-posture",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-X03",
+      "name": "retrieval-log-hygiene",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-M01",
+      "name": "memory-within-caps",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-X04",
+      "name": "unrelated-state-unchanged",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-X05",
+      "name": "secret-and-identifier-redaction-scan",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-L03",
+      "name": "lock-and-compose-consistent",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    },
+    {
+      "test_id": "M7-V01",
+      "name": "review-record-complete",
+      "state": "NOT_RUN",
+      "actual": "never run",
+      "evidence_path": "evidence/M9/regression/M7/verification.json"
+    }
+  ]
+}

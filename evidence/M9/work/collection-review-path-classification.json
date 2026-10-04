@@ -1,0 +1,17 @@
+{
+  "utc": "2026-10-03T12:14:25.746Z",
+  "path": "evidence/M9/review/COLLECTION-AUDITOR.md",
+  "kind": "code_construct",
+  "reason": "Reviewer demonstration of the obsolete absolute-root join; no such output was created. Owner-private original preserved before exact literal replacements.",
+  "original_sha256": "2896f8e9f8ea1f2b6e93242ed20cc443da83b1f697dc4faba236d8300221ab6d",
+  "values": [
+    {
+      "value_sha256": "a82cc932cbf0870b1906f8fa4c94e5afd6ac7fc4281bfb00fe436ab0a9a78e83",
+      "kind": "code_construct"
+    },
+    {
+      "value_sha256": "35d11fafad7a6cd721c416d7288dfea3f8b0e7e65e4b905141b78d4540c0d02f",
+      "kind": "code_construct"
+    }
+  ]
+}

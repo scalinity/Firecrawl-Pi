@@ -1,0 +1,11 @@
+{
+  "utc": "2026-10-03T16:42:01.654Z",
+  "state": "FAIL",
+  "test_id": "M9-VALIDATION-POLICY",
+  "expected": "Actual window policy loads through production budget validator",
+  "actual": "paidTotal.caps: unknown month; missing -",
+  "source_sha256": "917c86050a5ff753afae0bbb16a43e18eba199501296c3f4d4c013fe90e7a9ec",
+  "policy_sha256": "99564f496a3c6e8693c894be7068786dcd70ad4a5a8775ade379d72bcaef4ad8",
+  "paid_dispatch_enabled": false,
+  "provider_window_opened": false
+}
