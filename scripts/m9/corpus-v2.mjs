@@ -95,6 +95,7 @@ export function fullRunVerdict(spec, freeze, raw, record, window) {
         window.consent_sha256 !== raw.consent_sha256 || !finiteTime(window.started_utc) || !finiteTime(window.closed_utc) ||
         !finiteTime(window.expires_at) || window.expires_at !== window.consent.expires_at || window.started_utc !== window.consent.opened_at ||
         Date.parse(window.expires_at) <= Date.parse(window.started_utc) || Date.parse(window.expires_at) - Date.parse(window.started_utc) > 2700000 ||
+        window.expires_at.slice(0,7)!==window.started_utc.slice(0,7) ||
         Date.parse(window.closed_utc) > Date.parse(window.expires_at) ||
         !finiteTime(raw.started_utc) || !finiteTime(raw.completed_utc) || !finiteTime(window.required_work_finished_utc) ||
         Date.parse(raw.completed_utc) < Date.parse(raw.started_utc) || Date.parse(raw.started_utc) < Date.parse(window.started_utc) ||

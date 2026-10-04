@@ -16,6 +16,7 @@ export function ready({ consent, window, head, deployed, dirty, reviewed, now })
     consent.request_plan_authorized === true && /^[0-9a-f]{64}$/.test(consent.request_plan_sha256 ?? '') && window.request_plan_sha256 === consent.request_plan_sha256 &&
     window.started_utc === consent.opened_at && window.expires_at === consent.expires_at &&
     Number.isFinite(start) && Number.isFinite(end) && start <= now && end-now>=2520000 && end > start && end - start <= 2700000 &&
+    new Date(start).toISOString().slice(0,7)===new Date(end).toISOString().slice(0,7) &&
     consent.new_llm_micro_usd === 0 && consent.llm_micro_usd === 0 && consent.new_parser_credits <= 3 &&
     ['new_proxy_micro_usd', 'new_enhanced_micro_usd', 'new_parser_credits'].every(k => Number.isSafeInteger(consent[k]) && consent[k] >= 0);
 }
