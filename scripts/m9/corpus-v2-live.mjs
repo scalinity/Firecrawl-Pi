@@ -32,7 +32,7 @@ async function main() {
   const oldText = readFileSync(homedir() + '/.local/share/firecrawl-pi/m9/corpus.json', 'utf8');
   const specText = readFileSync(privateDir + '/corpus.json', 'utf8'), spec = JSON.parse(specText), freeze = j(base + '/freeze.json');
   const previous = j(homedir() + '/.local/share/firecrawl-pi/m9/live/corpus-final-rechecks.json');
-  const initial=j(homedir()+'/\.local/share/firecrawl-pi/m9/live/history/20261003-first-real/corpus.json');
+  const initial=j(homedir()+'/.local/share/firecrawl-pi/m9/live/history/20261003-first-real/corpus.json');
   const sources = Object.fromEntries(['P01', 'P02'].map(id => [id, { html: readFileSync(privateDir + '/' + id + '-source.html', 'utf8'),
     document: previous.results.find(r => r.id === id).response.json.data,initial_document:initial.results[Number(id.slice(1))-1].json.data }]));
   if (!historicalIntact() || !revisionIntegrity(oldText, specText, j('evidence/M9/work/corpus-freeze.json'), freeze, sources,readFileSync(base+'/source-inspection.json','utf8'))) throw Error('Historical evidence or justified revision changed');
@@ -93,6 +93,8 @@ async function main() {
         resolve({ status: res.statusCode, gateway_request_id: res.headers['x-request-id'], json, elapsed_ms: Date.now() - started,
           started_utc: new Date(started).toISOString(), completed_utc: new Date().toISOString() }); });
     });
+    const hardDeadline=setTimeout(()=>req.destroy(Error('Gateway absolute deadline')),Math.min(115000,left));
+    req.on('close',()=>clearTimeout(hardDeadline));
     req.on('error', () => reject(Error('Private gateway request failed'))); req.on('timeout', () => req.destroy(Error('Gateway timeout'))); req.end(data);
   });
   const seen = new Set(raw.acquisitions_before);

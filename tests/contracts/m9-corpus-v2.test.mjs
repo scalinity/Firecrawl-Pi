@@ -124,10 +124,10 @@ test('cleanup requires fresh post-close runtime proof and absent validation over
   for(const bad of [{...current,utc:iso(19)},{...current,utc:'invalid'}, {...current,checks:{...current.checks,validation_absent:false}}, {...current,checks:{...current.checks,paid:false}}]) assert.equal(cleanupFresh(bad,window),false);
 });
 test('fixture gate requires the exact three affected suites, counts, source and file hashes',()=>{
-  const text='# tests 44\n# fail 0\n# cancelled 0\n# skipped 0\n',r={source_commit:source,exit_code:0,raw_sha256:digest(text),argv:['--test','--test-reporter=tap',...fixturePaths],files:fixturePaths.map(path=>({path,sha256:digest(path)}))};
+  const text='# tests 49\n# fail 0\n# cancelled 0\n# skipped 0\n',r={source_commit:source,exit_code:0,raw_sha256:digest(text),argv:['--test','--test-reporter=tap',...fixturePaths],files:fixturePaths.map(path=>({path,sha256:digest(path)}))};
   assert.equal(fixturesComplete(r,text,source,digest),true);
   for(const change of [x=>x.files.pop(),x=>x.argv.pop(),x=>x.source_commit='b'.repeat(40),x=>x.files[0].sha256='wrong',x=>x.exit_code=1]){const x=structuredClone(r);change(x);assert.equal(fixturesComplete(x,text,source,digest),false);}
-  assert.equal(fixturesComplete({...r,raw_sha256:digest(text.replace('44','1'))},text.replace('44','1'),source,digest),false);
+  assert.equal(fixturesComplete({...r,raw_sha256:digest(text.replace('49','1'))},text.replace('49','1'),source,digest),false);
 });
 test('frozen request plan and all per-page attempt bounds are checked even for failed rows', () => {
   for (const change of [f => f.raw.results[18].response.acquisition.attempts_used = 4, f => f.raw.results[18].response.acquisition.attempts_used = 0,
