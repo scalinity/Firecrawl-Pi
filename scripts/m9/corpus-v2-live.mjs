@@ -13,6 +13,7 @@ export function ready({ consent, window, head, deployed, dirty, reviewed, now })
   return consent?.scope === 'M9 acceptance' && consent.purpose === 'M9 corpus revision 2' && window?.state === 'OPEN' &&
     consent.source_commit === head && window.source_commit === head && deployed === head && dirty === false && reviewed === true &&
     window.corpus_sha256 === consent.corpus_sha256 && window.consent_sha256 === digest(JSON.stringify(consent)) &&
+    consent.request_plan_authorized === true && /^[0-9a-f]{64}$/.test(consent.request_plan_sha256 ?? '') && window.request_plan_sha256 === consent.request_plan_sha256 &&
     window.started_utc === consent.opened_at && window.expires_at === consent.expires_at &&
     Number.isFinite(start) && Number.isFinite(end) && start <= now && now < end && end > start && end - start <= 2700000 &&
     consent.new_llm_micro_usd === 0 && consent.llm_micro_usd === 0 && consent.new_parser_credits <= 3 &&
@@ -42,7 +43,7 @@ async function main() {
   const reviewed = gate.state === 'REMEDIATION_COMPLETE' && gate.criterion_integrity === 'APPROVED_AFTER_REMEDIATION' &&
     gate.review_sha256 === digest(readFileSync(base + '/review/REVIEW.md')) && gate.freeze_sha256 === digest(readFileSync(base + '/freeze.json')) &&
     proofPaths.every(p => gate.files?.[p] === digest(readFileSync(p))) && gate.findings.every(f => ['FIXED', 'REJECTED'].includes(f.disposition));
-  if (window.corpus_sha256 !== freeze.sha256 || !before.clean || !ready({ consent, window, head, deployed: before.pi, dirty: codeDirty(git('status', '--porcelain=v1', '-z', '--untracked-files=all')), reviewed, now: Date.now() }))
+  if (window.corpus_sha256 !== freeze.sha256 || window.request_plan_sha256 !== freeze.request_plan_sha256 || !before.clean || !ready({ consent, window, head, deployed: before.pi, dirty: codeDirty(git('status', '--porcelain=v1', '-z', '--untracked-files=all')), reviewed, now: Date.now() }))
     throw Error('Exact clean/deployed/reviewed revision and fresh owner window required');
   const status = () => JSON.parse(pi('sudo -n /opt/firecrawl-pi/scripts/fcpi status --json'));
   const statusBefore = status();

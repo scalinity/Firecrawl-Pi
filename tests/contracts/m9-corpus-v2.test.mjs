@@ -12,14 +12,16 @@ function fixture() {
   const oldText = JSON.stringify(original), oldFreeze = { sha256: digest(oldText) };
   const spec = { ...structuredClone(original), schema: 'fcpi.m9-corpus/v2', revision: 2, minimum_usable: 18, prior_sha256: oldFreeze.sha256, frozen_at: iso(-50) };
   for (const t of spec.targets.slice(0, 2)) { t.required_text = 'Complete source purpose statement\\.'; t.required_title = 'Sample identity'; }
-  const text = JSON.stringify(spec), freeze = { revision: 2, count: 20, frozen_at: spec.frozen_at, sha256: digest(text), prior_sha256: oldFreeze.sha256,
+  const text = JSON.stringify(spec), freeze = { revision: 2, count: 20, frozen_at: spec.frozen_at, sha256: digest(text), prior_sha256: oldFreeze.sha256, request_plan_sha256:digest(JSON.stringify(requestPlan(spec))),
     minimum_usable: 18, required_rate: .9, targets: spec.targets.map(t => ({ id: t.id, domain: new URL(t.url).hostname, page_class: t.page_class,
       max_attempts: 3, criteria_sha256: digest(JSON.stringify({ required_text: t.required_text, ...(t.required_title ? { required_title: t.required_title } : {}) })) })) };
   const sources = Object.fromEntries(['P01', 'P02'].map(id => [id, { html: '<html><head><title>Sample identity</title></head><body><p>Complete source purpose statement.</p></body></html>',
     document: { metadata: { title: 'Sample identity' }, markdown: 'Complete source purpose statement.' } }]));
   const consent = { source_commit: source, scope: 'M9 acceptance', purpose: 'M9 corpus revision 2', corpus_sha256: freeze.sha256,
+    request_plan_authorized:true,request_plan_sha256:freeze.request_plan_sha256,
     opened_at: iso(0), expires_at: iso(2700), llm_micro_usd: 0, new_llm_micro_usd: 0, new_proxy_micro_usd: 40200, new_enhanced_micro_usd: 1270, new_parser_credits: 3 };
   const window = { state: 'CLOSED', purpose: consent.purpose, source_commit: source, corpus_sha256: freeze.sha256, consent,
+    request_plan_sha256:freeze.request_plan_sha256,
     consent_sha256: digest(JSON.stringify(consent)), started_utc: iso(0), expires_at: iso(2700), required_work_finished_utc: iso(25), closed_utc: iso(26) };
   const raw = { revision: 2, source_commit: source, corpus_sha256: freeze.sha256, consent_sha256: window.consent_sha256,
     started_utc: iso(.1), completed_utc: iso(25), acquisitions_before: ['old-acquisition'], results: spec.targets.map((t, i) => ({
@@ -125,6 +127,7 @@ test('driver requires fresh, exact reviewed/deployed authorization with zero mod
   assert.equal(ready(args), true);
   for (const change of [{ deployed: 'b'.repeat(40) }, { dirty: true }, { reviewed: false }, { now: Date.parse(iso(2700)) }, { window: f.window },
     { consent: { ...f.consent, new_llm_micro_usd: 1 } }, { consent: { ...f.consent, new_parser_credits: 6 } }]) assert.equal(ready({ ...args, ...change }), false);
+  assert.equal(ready({...args,consent:{...f.consent,request_plan_authorized:false}}),false);
 });
 test('old gate applicability allows only the exact revision proof files, never runtime/security/routing changes', () => {
   assert.equal(unchangedImplementation(['scripts/m9/corpus-v2.mjs']), true);

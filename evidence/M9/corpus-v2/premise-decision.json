@@ -52,5 +52,15 @@
       "source_change_since_freeze": "UNKNOWN; no pre-freeze HTML was retained. Do not label this as a proven later source change.",
       "language_variant": "The independent HTTPS response is English-only (577 bytes), while the historical browser HTML includes translations (2373 bytes). Both place identity in title and contain the same English body-purpose sentence."
     }
-  ]
+  ],
+  "request_profile": {
+    "state": "PENDING_EXPLICIT_OWNER_AUTHORIZATION",
+    "frozen_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+    "all_targets": "Fresh maxAge=0, storeInCache=false, Markdown only",
+    "P07": "Existing wait action 1000ms; onlyMainContent=false",
+    "P08": "Existing wait action 10000ms; onlyMainContent=false",
+    "difference_from_initial_batch": "Two JS request options were absent from initial batch, but were used in the preserved final 17/20 diagnostic lineage",
+    "criterion_changes": "P01/P02 assertions only; other18 criteria and P19 unchanged",
+    "new_runtime_or_routing_change": false
+  }
 }

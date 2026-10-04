@@ -177,5 +177,7 @@
     }
   ],
   "private_storage": "owner-only versioned corpus; exact URLs and body criteria excluded from Git",
-  "measurements_at_freeze": 0
+  "measurements_at_freeze": 0,
+  "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e",
+  "request_plan_requires_explicit_owner_authorization": true
 }

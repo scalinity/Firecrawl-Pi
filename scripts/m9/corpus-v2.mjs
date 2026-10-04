@@ -19,7 +19,7 @@ export function revisionIntegrity(oldText, text, oldFreeze, freeze, sources) {
         spec.schema !== 'fcpi.m9-corpus/v2' || spec.revision !== 2 || freeze.revision !== 2 ||
         spec.minimum_usable !== 18 || freeze.minimum_usable !== 18 || freeze.required_rate !== .9 ||
         old.targets?.length !== 20 || spec.targets?.length !== 20 || freeze.targets?.length !== 20 ||
-        !finiteTime(freeze.frozen_at) || spec.frozen_at !== freeze.frozen_at) return false;
+        !finiteTime(freeze.frozen_at) || spec.frozen_at !== freeze.frozen_at || freeze.request_plan_sha256 !== digest(JSON.stringify(requestPlan(spec)))) return false;
     for (let i = 0; i < 20; i++) {
       const before = old.targets[i], after = spec.targets[i], row = freeze.targets[i];
       const changed = ['P01', 'P02'].includes(before.id);
@@ -83,6 +83,7 @@ export function fullRunVerdict(spec, freeze, raw, record, window) {
         window?.state !== 'CLOSED' || window.purpose !== 'M9 corpus revision 2' || window.corpus_sha256 !== freeze.sha256 ||
         window.source_commit !== raw.source_commit || window.consent?.source_commit !== raw.source_commit ||
         window.consent.scope !== 'M9 acceptance' || window.consent.purpose !== 'M9 corpus revision 2' || window.consent.corpus_sha256 !== freeze.sha256 ||
+        window.consent.request_plan_authorized !== true || window.consent.request_plan_sha256 !== freeze.request_plan_sha256 || window.request_plan_sha256 !== freeze.request_plan_sha256 ||
         digest(JSON.stringify(window.consent)) !== window.consent_sha256 ||
         window.consent_sha256 !== raw.consent_sha256 || !finiteTime(window.started_utc) || !finiteTime(window.closed_utc) ||
         !finiteTime(window.expires_at) || window.expires_at !== window.consent.expires_at || window.started_utc !== window.consent.opened_at ||
