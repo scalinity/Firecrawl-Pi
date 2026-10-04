@@ -1,0 +1,52 @@
+{
+  "schema": "fcpi.m9-corpus-source-inspection/v1",
+  "source_commit": "c72e89215b45049bf30905144f2ad7010dbd18bf",
+  "utc": "2026-10-04T00:20:38.846Z",
+  "web_sources": [
+    "https://example.com/",
+    "https://example.org/",
+    "https://www.iana.org/help/example-domains"
+  ],
+  "observations": [
+    {
+      "id": "P01",
+      "started_utc": "2026-10-04T00:20:38.465Z",
+      "completed_utc": "2026-10-04T00:20:38.603Z",
+      "source_status": 200,
+      "source_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+      "source_bytes": 577,
+      "title": "Example Domain",
+      "body_has_old_phrase": false,
+      "body_has_current_purpose": true,
+      "historical_response_status": 200,
+      "historical_title": "Example Domain",
+      "historical_markdown_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+      "historical_markdown_has_old_phrase": false,
+      "historical_markdown_has_current_purpose": true,
+      "historical_raw_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
+      "body_contains_all_normalized_paragraphs": false,
+      "independent_inspection": "DIRECT_HTTPS_SOURCE_READ_NOT_CORPUS_EXECUTION",
+      "provider_spend_usd": 0
+    },
+    {
+      "id": "P02",
+      "started_utc": "2026-10-04T00:20:38.603Z",
+      "completed_utc": "2026-10-04T00:20:38.845Z",
+      "source_status": 200,
+      "source_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+      "source_bytes": 577,
+      "title": "Example Domain",
+      "body_has_old_phrase": false,
+      "body_has_current_purpose": true,
+      "historical_response_status": 200,
+      "historical_title": "Example Domain",
+      "historical_markdown_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+      "historical_markdown_has_old_phrase": false,
+      "historical_markdown_has_current_purpose": true,
+      "historical_raw_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
+      "body_contains_all_normalized_paragraphs": false,
+      "independent_inspection": "DIRECT_HTTPS_SOURCE_READ_NOT_CORPUS_EXECUTION",
+      "provider_spend_usd": 0
+    }
+  ]
+}

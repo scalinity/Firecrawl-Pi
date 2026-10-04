@@ -1,0 +1,56 @@
+{
+  "schema": "fcpi.m9-corpus-premise-decision/v1",
+  "utc": "2026-10-04T00:28:57.311Z",
+  "state": "PROPOSED_PENDING_INDEPENDENT_REVIEW",
+  "historical_run": "IMMUTABLE_17_OF_20_FAIL",
+  "new_results": "NOT_RUN",
+  "denominator": 20,
+  "minimum_usable": 18,
+  "P19": "UNCHANGED_NOT_WAIVED",
+  "decisions": [
+    {
+      "id": "P01",
+      "classification": "INCORRECT_TEST_FORMULATION",
+      "old_assertion": "HTTP success and the expected identity phrase in Markdown body",
+      "old_required_text_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "new_assertion": "HTTP success AND the complete current English documentation-purpose sentence in Markdown body AND the exact expected identity in canonical metadata.title",
+      "new_required_text_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
+      "new_required_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "intended_capability": "Correct ordinary static-page content and identity, with body and title/metadata handled as separate normalized document fields (SPEC 31.1 and AC03)",
+      "intent_authority": "Original row page_class=static plus canonical static-content/metadata assertions; no preserved instruction or pre-freeze source establishes a title-to-body insertion requirement",
+      "source_evidence": {
+        "independent_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+        "historical_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
+        "historical_markdown_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+        "identity_in_title_only": true,
+        "real_body_returned": true
+      },
+      "why_not_retrieval_failure": "The expected title is returned in metadata and the current visible source purpose text is present in returned Markdown; missing title duplication does not demonstrate lost body content",
+      "why_not_easier": "Metadata alone cannot pass. The replacement still requires nonempty actual body content, now a longer source-backed body assertion, and additionally requires exact metadata title. Wrong title, empty body, title-only body or missing source-purpose content all fail.",
+      "source_change_since_freeze": "UNKNOWN; no pre-freeze HTML was retained. Do not label this as a proven later source change.",
+      "language_variant": "The independent HTTPS response is English-only (577 bytes), while the historical browser HTML includes translations (2373 bytes). Both place identity in title and contain the same English body-purpose sentence."
+    },
+    {
+      "id": "P02",
+      "classification": "INCORRECT_TEST_FORMULATION",
+      "old_assertion": "HTTP success and the expected identity phrase in Markdown body",
+      "old_required_text_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "new_assertion": "HTTP success AND the complete current English documentation-purpose sentence in Markdown body AND the exact expected identity in canonical metadata.title",
+      "new_required_text_sha256": "893108b7b7254c97401d40453eac4b43af092eb79647d98ac82606f4f5b376fd",
+      "new_required_title_sha256": "162b81548a8db0ab220f7137405fb003019c266883d4181869662ad7eafdbc4d",
+      "intended_capability": "Correct ordinary static-page content and identity, with body and title/metadata handled as separate normalized document fields (SPEC 31.1 and AC03)",
+      "intent_authority": "Original row page_class=static plus canonical static-content/metadata assertions; no preserved instruction or pre-freeze source establishes a title-to-body insertion requirement",
+      "source_evidence": {
+        "independent_sha256": "25ddf2c883e0d1958ea971d279a7e4f0fd446724ee3db7db19dadabd4a62e484",
+        "historical_html_sha256": "2a8c9c642abfc65cece67d424b8fdad66020afb07dda9ce0fa91396eb69ba9f4",
+        "historical_markdown_sha256": "9405b1d765b65f4f2f2197a6fdd12b112c5d27476f6626028a80c4452b288bc2",
+        "identity_in_title_only": true,
+        "real_body_returned": true
+      },
+      "why_not_retrieval_failure": "The expected title is returned in metadata and the current visible source purpose text is present in returned Markdown; missing title duplication does not demonstrate lost body content",
+      "why_not_easier": "Metadata alone cannot pass. The replacement still requires nonempty actual body content, now a longer source-backed body assertion, and additionally requires exact metadata title. Wrong title, empty body, title-only body or missing source-purpose content all fail.",
+      "source_change_since_freeze": "UNKNOWN; no pre-freeze HTML was retained. Do not label this as a proven later source change.",
+      "language_variant": "The independent HTTPS response is English-only (577 bytes), while the historical browser HTML includes translations (2373 bytes). Both place identity in title and contain the same English body-purpose sentence."
+    }
+  ]
+}

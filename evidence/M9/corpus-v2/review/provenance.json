@@ -1,0 +1,73 @@
+{
+  "utc": "2026-10-04T01:01:35.028Z",
+  "workflow": "Native two fresh read-only Opus 5.5 reviewers; equivalent /review-2, no model substitution",
+  "agents": [
+    {
+      "role": "debugger",
+      "model": "claude-opus-5-5",
+      "auth": "existing Claude Max OAuth",
+      "model_substitution": false,
+      "raw_sha256": "227d1a1f1980d1251d5ba39305426179f6bc70bc0d6fb5bec36ad5a9016acc2b",
+      "prompt_sha256": "77189e9a237585ba9d8d4f991596f8acc5d1bb4b9f484dae6d11e32ea3e6b2f5",
+      "reported_api_equivalent_cost_usd": 1.3429854,
+      "model_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 44,
+          "outputTokens": 22830,
+          "cacheReadInputTokens": 1148047,
+          "cacheCreationInputTokens": 82075,
+          "webSearchRequests": 0,
+          "costUSD": 1.3429854,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 15791,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "actual_invoice_usd": null,
+      "session_id_sha256": "38959cfe0960e7ca4878bb39760943247b1c07340188c7eb74f8c3182354054b",
+      "is_error": false,
+      "turns": 32
+    },
+    {
+      "role": "auditor",
+      "model": "claude-opus-5-5",
+      "auth": "existing Claude Max OAuth",
+      "model_substitution": false,
+      "raw_sha256": "39e9a40e1edad316938f1e45648b2be95fff81b2fa64eec8210fc4802f2ef55e",
+      "prompt_sha256": "e3c2ded2d31ca9092cb271574552bba61dbc21f476c66a752c1a181d4a24ceb2",
+      "reported_api_equivalent_cost_usd": 1.2412565999999998,
+      "model_usage": {
+        "claude-opus-5-5": {
+          "inputTokens": 34,
+          "outputTokens": 20566,
+          "cacheReadInputTokens": 870323,
+          "cacheCreationInputTokens": 81967,
+          "webSearchRequests": 0,
+          "costUSD": 1.2412565999999998,
+          "contextWindow": 1000000,
+          "maxOutputTokens": 128000,
+          "thinkingTokens": 14021,
+          "canonicalModel": "claude-opus-5-5",
+          "provider": "firstParty",
+          "costBasis": "list"
+        }
+      },
+      "actual_invoice_usd": null,
+      "session_id_sha256": "71fa8d14cfb208041477ae374b35266579781d75edcd0ff6420282506c486372",
+      "is_error": false,
+      "turns": 29
+    }
+  ],
+  "reviewed_base_commit": "c72e89215b45049bf30905144f2ad7010dbd18bf",
+  "reviewed_uncommitted_files": {
+    "scripts/m9/corpus-v2.mjs": "9a1030e5d746dca2a7de76350003538cb808fcc565ce63408f5b0679414d8734",
+    "scripts/m9/corpus-v2-live.mjs": "1d5482579929640d424f21982c4112252991a90302f914688d4a3a99b5ec5958",
+    "scripts/m9/corpus-v2-verify.mjs": "c0463bce4571050f22249b7bee37c642b19a4a2a334bb6bf45d9651ecb08f25e",
+    "tests/contracts/m9-corpus-v2.test.mjs": "b40f7fbb0968d45e6d07244e05f5412f863373663f77e66d635dc13977eefa82",
+    "scripts/m9/collect.mjs": "cd515d31efbc1b95cba5cfdea72f81bccf66ba9e6c5ce04effbfab73172f8a3a",
+    "scripts/m9/redaction.mjs": "e507966820a378515d966a410d97b87230cb7da53867d4d53653209c8f8c4aef"
+  }
+}

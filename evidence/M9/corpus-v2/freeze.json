@@ -1,0 +1,181 @@
+{
+  "schema": "fcpi.m9-corpus-freeze/v2",
+  "revision": 2,
+  "frozen_at": "2026-10-04T00:28:57.311Z",
+  "sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+  "prior_sha256": "c1e735e869798c0491421e73d8439ee856df9cffaa030887c13bc4334f117d6a",
+  "prior_freeze": "evidence/M9/work/corpus-freeze.json",
+  "count": 20,
+  "minimum_usable": 18,
+  "required_rate": 0.9,
+  "max_attempts": 3,
+  "classification": "INCORRECT_TEST_FORMULATION",
+  "source_inspection_sha256": "9c1c6b0254ef9d3809de61aca2cf707f3d6ed4365ccd8da4f4a317237dd07560",
+  "routing_policy_unchanged": true,
+  "policies": [
+    {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea"
+    },
+    {
+      "path": "deploy/policies/egress.json",
+      "sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c"
+    },
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    },
+    {
+      "path": "deploy/versions.lock.json",
+      "sha256": "0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a"
+    },
+    {
+      "path": "patches/series.json",
+      "sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96"
+    }
+  ],
+  "targets": [
+    {
+      "id": "P01",
+      "page_class": "static",
+      "domain": "example.com",
+      "criteria_sha256": "0146eb8ace8895b7dfef93f62838ea7c9b8048324bbe1837d9a9075e076d99a4",
+      "max_attempts": 3
+    },
+    {
+      "id": "P02",
+      "page_class": "static",
+      "domain": "example.org",
+      "criteria_sha256": "0146eb8ace8895b7dfef93f62838ea7c9b8048324bbe1837d9a9075e076d99a4",
+      "max_attempts": 3
+    },
+    {
+      "id": "P03",
+      "page_class": "static",
+      "domain": "httpbin.org",
+      "criteria_sha256": "f739865691eb2c93c1d0d197f2926ab6b79cbb6bd94ca3182dfc267ab0448bf6",
+      "max_attempts": 3
+    },
+    {
+      "id": "P04",
+      "page_class": "static",
+      "domain": "httpbin.org",
+      "criteria_sha256": "07aa351e3b52c4a2bd089e4db3a783ee4f17fb888634a85cac2c78845210e9e0",
+      "max_attempts": 3
+    },
+    {
+      "id": "P05",
+      "page_class": "static",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "1902c4d15ce76794ca7fedbe01444ef9c7751de41f6bad9b9a71cda51bb03f6f",
+      "max_attempts": 3
+    },
+    {
+      "id": "P06",
+      "page_class": "static",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "a11d8f16635004a7ab7fb9e14f44f28d02b417f1c65a67b0cefa3f79b919de7f",
+      "max_attempts": 3
+    },
+    {
+      "id": "P07",
+      "page_class": "js",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "1902c4d15ce76794ca7fedbe01444ef9c7751de41f6bad9b9a71cda51bb03f6f",
+      "max_attempts": 3
+    },
+    {
+      "id": "P08",
+      "page_class": "js",
+      "domain": "quotes.toscrape.com",
+      "criteria_sha256": "1902c4d15ce76794ca7fedbe01444ef9c7751de41f6bad9b9a71cda51bb03f6f",
+      "max_attempts": 3
+    },
+    {
+      "id": "P09",
+      "page_class": "static",
+      "domain": "books.toscrape.com",
+      "criteria_sha256": "7f62eca172415df22c5494c9cfc9028331f30393ae84b06dd55f3276f80ec183",
+      "max_attempts": 3
+    },
+    {
+      "id": "P10",
+      "page_class": "static",
+      "domain": "books.toscrape.com",
+      "criteria_sha256": "35ae945b263bd4c1d2404d46122f1799cc863084c97deeb0e6ea4a05d6a67b34",
+      "max_attempts": 3
+    },
+    {
+      "id": "P11",
+      "page_class": "documentation",
+      "domain": "developer.mozilla.org",
+      "criteria_sha256": "8c0758cfacf296292029aa11d975f42aa68699c0aad37de56ab701b9a7f50a64",
+      "max_attempts": 3
+    },
+    {
+      "id": "P12",
+      "page_class": "documentation",
+      "domain": "developer.mozilla.org",
+      "criteria_sha256": "4f03f32cd46792ea1169000e4398a2f37dbbdd5ecbd64cc8873665b72821e087",
+      "max_attempts": 3
+    },
+    {
+      "id": "P13",
+      "page_class": "documentation",
+      "domain": "nodejs.org",
+      "criteria_sha256": "aade3b4d62abdad1bd2f01827b43db8205e4be45502422fb936eb718fa7e95fe",
+      "max_attempts": 3
+    },
+    {
+      "id": "P14",
+      "page_class": "documentation",
+      "domain": "nodejs.org",
+      "criteria_sha256": "4f03f32cd46792ea1169000e4398a2f37dbbdd5ecbd64cc8873665b72821e087",
+      "max_attempts": 3
+    },
+    {
+      "id": "P15",
+      "page_class": "documentation",
+      "domain": "docs.python.org",
+      "criteria_sha256": "cd22250cee865ac969e7dbb2e7a9bddbec823409bee939436889b93cfaad5139",
+      "max_attempts": 3
+    },
+    {
+      "id": "P16",
+      "page_class": "document",
+      "domain": "www.w3.org",
+      "criteria_sha256": "ab0bc1eec3e8e59e0b70daf2834fdfd52054894a55af6733fdce2efcf331b506",
+      "max_attempts": 3
+    },
+    {
+      "id": "P17",
+      "page_class": "documentation",
+      "domain": "www.w3.org",
+      "criteria_sha256": "17b1f2c5abe988de641fba4d4a841d9f2d9c28726e80031eb9017bef1c5484a1",
+      "max_attempts": 3
+    },
+    {
+      "id": "P18",
+      "page_class": "documentation",
+      "domain": "react.dev",
+      "criteria_sha256": "d3b273a293aced2582ec6d118dacff4a1857bda4373ba2a8e503610208035427",
+      "max_attempts": 3
+    },
+    {
+      "id": "P19",
+      "page_class": "lawful-difficult",
+      "domain": "www.scrapingcourse.com",
+      "criteria_sha256": "5851857693d913fcc85bf758a1d6fcae6d4e816ab47a568e798ef7965acebd14",
+      "max_attempts": 3
+    },
+    {
+      "id": "P20",
+      "page_class": "static",
+      "domain": "www.iana.org",
+      "criteria_sha256": "cc2fc5ca119ceb9449fd8cde11a6e9d5e40146ceb43cf71a7eeb13c2ea585b58",
+      "max_attempts": 3
+    }
+  ],
+  "private_storage": "owner-only versioned corpus; exact URLs and body criteria excluded from Git",
+  "measurements_at_freeze": 0
+}

@@ -1,0 +1,32 @@
+{
+  "utc": "2026-10-04T00:20:38.464Z",
+  "source_commit": "c72e89215b45049bf30905144f2ad7010dbd18bf",
+  "thread": "01a0ffc9-2dbf-7892-8248-fe282fcc5cf4",
+  "scope": "M9 P01/P02 premise investigation and, only if justified and freshly funded, one complete 20-target revision rerun",
+  "owned_paths": [
+    "evidence/M9/corpus-v2",
+    "scripts/m9/corpus-v2*.mjs",
+    "tests/contracts/m9-corpus-v2.test.mjs",
+    "scripts/m9/collect.mjs",
+    "scripts/m9/redaction.mjs",
+    "docs/FIRECRAWL_PI_SPEC.md",
+    "docs/FIRECRAWL_PI_MILESTONES.md",
+    "ORCHESTRATION.html"
+  ],
+  "active_project_sessions": 1,
+  "active_worktrees": 1,
+  "provider_authorization": "NONE_ACTIVE",
+  "production_paid_dispatch": false,
+  "paid_caps": "ZERO",
+  "request_sha256": "fddb7fefa4577048b7ff294fd8e5c4bf4d33d1f11dd3b6411298181e5b3a64b3",
+  "forbidden": [
+    "historical evidence mutation",
+    "unrelated runtime work",
+    "push",
+    "publication",
+    "history rewrite",
+    "threshold relaxation",
+    "target removal",
+    "P19 waiver"
+  ]
+}
