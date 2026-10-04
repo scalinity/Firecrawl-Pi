@@ -36,7 +36,7 @@
       "source": "evidence/M0/sources/firecrawl-tags-latest.txt",
       "retrieved_utc": "2026-09-25T04:04:44Z",
       "status": "candidate",
-      "reason": "No post-2026-07-30 Firecrawl advisory affects self-hosted v2.11.162 (evidence/M0/security-review.md \u00a7C); the self-host guide still pins v2.11.162. Not adopted."
+      "reason": "No post-2026-07-30 Firecrawl advisory affects self-hosted v2.11.162 (evidence/M0/security-review.md §C); the self-host guide still pins v2.11.162. Not adopted."
     },
     "known_open_issues_at_pin": [
       "Transitive ip-address@6.4.0 (GHSA-mwp4-54f8-5fhr / CVE-2026-69192): octal/leading-zero IP SSRF forms; deferred upstream at every tag. Handled by the project SSRF layer (M2).",
@@ -51,7 +51,7 @@
       "verified_current_stable_utc": "2026-09-25T03:14:49Z",
       "newer_revision": "none (only the rolling draft)",
       "compatibility_revision": "2025-11-25",
-      "source": "evidence/M0/security-review.md \u00a7A",
+      "source": "evidence/M0/security-review.md §A",
       "observed": "both revisions on the wire in M4 (evidence/M4/raw/e2e-wire.txt, e2e-sdk.txt, e2e-tailnet.txt)"
     },
     "packages": {
@@ -340,7 +340,7 @@
           "platform": "linux/arm64",
           "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3.13.7.index.json",
           "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3.13.7.arm64.json",
-          "why": "same major as upstream compose, without the management plugin (spec \u00a722)",
+          "why": "same major as upstream compose, without the management plugin (spec §22)",
           "role": "recorded fallback if 4.x fails for a 4.x-specific reason (D3); not used"
         }
       ],
@@ -419,7 +419,7 @@
           "NUQ_WORKER_COUNT": "1",
           "USE_DB_AUTHENTICATION": "false",
           "SCRAPE_MAX_ATTEMPTS": "1",
-          "ALLOW_LOCAL_WEBHOOKS": "true (the M1 fixture-only exception in spec \u00a729; contained as recorded in evidence/M1/INTERPRETATION.md and checked by V18)",
+          "ALLOW_LOCAL_WEBHOOKS": "true (the M1 fixture-only exception in spec §29; contained as recorded in evidence/M1/INTERPRETATION.md and checked by V18)",
           "DISABLE_WEBHOOK_DELIVERY": "true",
           "USE_GO_MARKDOWN_PARSER": "unset (Go library inert; upstream default)",
           "BULL_AUTH_KEY": "unset",
@@ -497,7 +497,7 @@
       }
     },
     "excluded": {
-      "foundationdb": "foundationdb/foundationdb:7.3.63 server/init excluded by the selected architecture (spec \u00a75); not resolved."
+      "foundationdb": "foundationdb/foundationdb:7.3.63 server/init excluded by the selected architecture (spec §5); not resolved."
     },
     "nuq_postgres": {
       "role": "NuQ PostgreSQL image, built on the Pi from deploy/nuq-postgres (decision D6)",
@@ -1544,12 +1544,12 @@
       {
         "file": "0003-pi-resilient-engine-adapter.patch",
         "sha256": "da924612efbdd8d516d61b41a815144f0ad7baa35989c7fc30d0c5ff98c9a757",
-        "reason": "The engine registration and result translation spec \u00a78.1 requires; every page acquisition goes to the retrieval service."
+        "reason": "The engine registration and result translation spec §8.1 requires; every page acquisition goes to the retrieval service."
       },
       {
         "file": "0004-guarded-auxiliary-downloads.patch",
         "sha256": "776cf0dd6bf9f76da49cd8080b20861ea48470aa4fea27bcb36dc612e927b585",
-        "reason": "File downloads and map's redirect resolution fetched directly with the core's own dispatcher (spec \u00a78.4)."
+        "reason": "File downloads and map's redirect resolution fetched directly with the core's own dispatcher (spec §8.4)."
       },
       {
         "file": "0005-search-without-direct-fallback.patch",
@@ -1564,22 +1564,22 @@
       {
         "file": "0007-typed-search-failures.patch",
         "sha256": "d8ac7472c2b3e29307f527791bea9a12f3daa826438c5b2e57e9746a7f42b47b",
-        "reason": "A search backend failure became an empty result at three layers: searxng_search and search both returned {} on any error, and patch 0005 returned {} when SearXNG had no results (review finding S6, spec \u00a713)."
+        "reason": "A search backend failure became an empty result at three layers: searxng_search and search both returned {} on any error, and patch 0005 returned {} when SearXNG had no results (review finding S6, spec §13)."
       },
       {
         "file": "0008-document-policy-and-parser-fallback.patch",
         "sha256": "4d2dceb7475a98d9629f4f976c0cf887c7845ad5ecb9e0232b00511a4aafbbf9",
-        "reason": "Native PDF parsing returned empty markdown as success for a scan-only document, had no page cap, and fell back to a pdf-parse whose bundled pdf.js 1.10 refuses some valid files; spec \u00a715 asks for native parsing first, typed refusals and a budgeted complex-document fallback."
+        "reason": "Native PDF parsing returned empty markdown as success for a scan-only document, had no page cap, and fell back to a pdf-parse whose bundled pdf.js 1.10 refuses some valid files; spec §15 asks for native parsing first, typed refusals and a budgeted complex-document fallback."
       },
       {
         "file": "0009-residential-route-option.patch",
         "sha256": "ba1e00400742cfb2b0e741aa329c836e442dd643d4f8c367c19942073d0dc5e5",
-        "reason": "The scrape option proxy (auto, basic, stealth) never reached the retrieval service, so a caller could not ask for the residential route and a bulk job's pages could not start on it (spec \u00a710.2); proxyUsed always said basic."
+        "reason": "The scrape option proxy (auto, basic, stealth) never reached the retrieval service, so a caller could not ask for the residential route and a bulk job's pages could not start on it (spec §10.2); proxyUsed always said basic."
       },
       {
         "file": "0010-enhanced-route-browser-extras-and-owner.patch",
         "sha256": "ba5886138f2100b8aeefa75ea4c3b489c1a6c6c815053c3498e53f13be34f800",
-        "reason": "The enhanced proxy option was refused and screenshots and actions were unregistered, so M7 could offer neither (spec \u00a711, \u00a712); an engine result with target status 401, 403 or 429 would start upstream's AddFeatureError retry outside the page's budget; and the parse cache's owner was the core's single team id (M5 review S1)."
+        "reason": "The enhanced proxy option was refused and screenshots and actions were unregistered, so M7 could offer neither (spec §11, §12); an engine result with target status 401, 403 or 429 would start upstream's AddFeatureError retry outside the page's budget; and the parse cache's owner was the core's single team id (M5 review S1)."
       }
     ],
     "manifest": "patches/series.json (symbols, tests and the call-site coverage of each traced path)"
@@ -2070,7 +2070,7 @@
       "source": "Debian 13 (trixie) main, arm64, apt with Debian's archive signatures",
       "binary": "/usr/bin/restic",
       "binary_sha256": "80d615c1c49b7ccd8121e9ce4e1944da274d3d2f28c24f8d54ec70d9d8957803",
-      "purpose": "encrypted off-device backups (spec \u00a726); installed by scripts/m8/pi-init-m8.sh",
+      "purpose": "encrypted off-device backups (spec §26); installed by scripts/m8/pi-init-m8.sh",
       "evidence": "evidence/M8/raw/init-m8.txt"
     },
     "claude_code": {
