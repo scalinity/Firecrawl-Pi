@@ -92,11 +92,13 @@ export function corpusResult(spec, raw) {
 
 export function fullRunVerdict(spec, freeze, raw, record, window) {
   try {
-    if(!normalizationProof(raw.normalization_preflight?.ids,raw.normalization_preflight?.bindings,raw.normalization_preflight?.stored))return false;
+    if(!normalizationProof(raw.normalization_preflight?.ids,raw.normalization_preflight?.bindings,raw.normalization_preflight?.stored) ||
+      !Number.isSafeInteger(raw.core_timeout_ms)||raw.core_timeout_ms<=0||raw.core_timeout_ms>110000)return false;
     if (freeze.minimum_usable !== 18 || freeze.count !== 20 || raw.revision !== 2 || raw.corpus_sha256 !== freeze.sha256 ||
         window?.state !== 'CLOSED' || window.purpose !== 'M9 corpus revision 2' || window.corpus_sha256 !== freeze.sha256 ||
         window.source_commit !== raw.source_commit || window.consent?.source_commit !== raw.source_commit ||
         window.consent.scope !== 'M9 acceptance' || window.consent.purpose !== 'M9 corpus revision 2' || window.consent.corpus_sha256 !== freeze.sha256 ||
+        window.consent.budget_month_start!==new Date(window.started_utc).toISOString().slice(0,7)+'-01' ||
         window.consent.request_plan_authorized !== true || window.consent.request_plan_sha256 !== freeze.request_plan_sha256 || window.request_plan_sha256 !== freeze.request_plan_sha256 ||
         !equal(window.consent.browser_request_options,browserOptions) ||
         digest(JSON.stringify(window.consent)) !== window.consent_sha256 ||

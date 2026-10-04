@@ -20,13 +20,13 @@ function fixture() {
   for(const s of Object.values(sources)){s.document.rawHtml=s.html;s.initial_document=structuredClone(s.document);}
   const inspectionText=JSON.stringify({observations:Object.entries(sources).map(([id,s])=>({id,source_sha256:digest(s.html),historical_markdown_sha256:digest(s.document.markdown),historical_raw_html_sha256:digest(s.document.rawHtml),initial_profile_markdown_sha256:digest(s.initial_document.markdown),initial_profile_title_sha256:digest(s.initial_document.metadata.title)}))});freeze.source_inspection_sha256=digest(inspectionText);
   const consent = { source_commit: source, scope: 'M9 acceptance', purpose: 'M9 corpus revision 2', corpus_sha256: freeze.sha256,
-    request_plan_authorized:true,request_plan_sha256:freeze.request_plan_sha256,browser_request_options:structuredClone(browserOptions),
+    request_plan_authorized:true,request_plan_sha256:freeze.request_plan_sha256,browser_request_options:structuredClone(browserOptions),budget_month_start:'2026-10-01',
     opened_at: iso(0), expires_at: iso(2700), llm_micro_usd: 0, new_llm_micro_usd: 0, new_proxy_micro_usd: 40200, new_enhanced_micro_usd: 1270, new_parser_credits: 3 };
   const window = { state: 'CLOSED', purpose: consent.purpose, source_commit: source, corpus_sha256: freeze.sha256, consent,
     request_plan_sha256:freeze.request_plan_sha256,
     consent_sha256: digest(JSON.stringify(consent)), started_utc: iso(0), expires_at: iso(2700), required_work_finished_utc: iso(25), closed_utc: iso(26) };
   const raw = { revision: 2, source_commit: source, corpus_sha256: freeze.sha256, consent_sha256: window.consent_sha256,
-    started_utc: iso(.1), completed_utc: iso(25), acquisitions_before: ['old-acquisition'], results: spec.targets.map((t, i) => ({
+    started_utc: iso(.1), completed_utc: iso(25), core_timeout_ms:110000,acquisitions_before: ['old-acquisition'], results: spec.targets.map((t, i) => ({
       id: t.id, request: requestPlan(spec)[i], expected_url_hmac: digest(t.url).slice(0,32), dispatch_started_utc: iso(i + 1), response: { status: i === 18 ? 500 : 200,
         gateway_request_id: `10000000-0000-4000-8000-${String(i).padStart(12, '0')}`, started_utc: iso(i + 1.01), completed_utc: iso(i + 1.02), elapsed_ms: 10,
         json: i === 18 ? { success: false, code: 'BLOCKED_PUBLIC_CONTENT' } : { success: true, data: { markdown: i < 2 ? 'Complete source purpose statement.' : t.required_text,
@@ -175,6 +175,8 @@ test('readable browser option consent is exact and UTC times use the same accept
   assert.equal(ready({...args,consent:{...f.consent,browser_request_options:[]}}),false);
   assert.equal(canonicalTime('2026-10-04T01:00:00Z'),true);assert.equal(canonicalTime(iso(0)),true);
   for(const t of ['2026-10-04T01:00:00+00:00','2026-10-31T24:00:00Z','not-time'])assert.equal(canonicalTime(t),false);
+  assert.equal(ready({...args,consent:{...f.consent,budget_month_start:'2026-11-01'}}),false);
+  f.raw.core_timeout_ms=115000;rebuild(f);assert.equal(verdict(f),false);
 });
 test('old gate applicability allows only the exact revision proof files, never runtime/security/routing changes', () => {
   assert.equal(unchangedImplementation(['scripts/m9/corpus-v2.mjs']), true);

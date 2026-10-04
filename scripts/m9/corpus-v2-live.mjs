@@ -18,6 +18,7 @@ export function ready({ consent, window, head, deployed, dirty, reviewed, now })
     window.started_utc === consent.opened_at && window.expires_at === consent.expires_at &&
     canonicalTime(consent.opened_at) && canonicalTime(consent.expires_at) && start <= now && end-now>=2520000 && end > start && end - start <= 2700000 &&
     new Date(start).toISOString().slice(0,7)===new Date(end).toISOString().slice(0,7) &&
+    consent.budget_month_start===new Date(now).toISOString().slice(0,7)+'-01' &&
     consent.new_llm_micro_usd === 0 && consent.llm_micro_usd === 0 && consent.new_parser_credits <= 3 &&
     ['new_proxy_micro_usd', 'new_enhanced_micro_usd', 'new_parser_credits'].every(k => Number.isSafeInteger(consent[k]) && consent[k] >= 0);
 }
@@ -53,6 +54,9 @@ async function main() {
   const status = () => JSON.parse(pi('sudo -n /opt/firecrawl-pi/scripts/fcpi status --json'));
   const statusBefore = status();
   if (!statusBefore.healthy || statusBefore.capabilities.providers.paidDispatch !== true) throw Error('Authorized healthy validation runtime required');
+  const timeoutText=pi('sudo -n docker inspect fcpi-access-gateway-1 | jq -r \' .[0].Config.Env[]|select(startswith("PI_CORE_TIMEOUT_MS="))|sub("^PI_CORE_TIMEOUT_MS=";"")\'').trim();
+  const coreTimeout=timeoutText===''?110000:Number(timeoutText);
+  if(!Number.isSafeInteger(coreTimeout)||coreTimeout<=0||coreTimeout>110000)throw Error('Gateway timeout lacks the proven client-deadline margin');
   const activeBudget = JSON.parse(pi('sudo -n cat /etc/firecrawl-pi/m9-validation/budget.json'));
   const activeRouting = JSON.parse(pi('sudo -n cat /etc/firecrawl-pi/m9-validation/egress.json'));
   if (activeRouting.attempts.maxPerPage !== 3 || activeBudget.parsing.maxPages !== 2 || activeBudget.validationExpiresAt !== consent.expires_at ||
@@ -86,7 +90,7 @@ async function main() {
   const audit = () => pi('sudo -n bash /opt/firecrawl-pi/scripts/m7/pi-retrieval-log-scan.sh');
   const raw = { revision: 2, source_commit: head, corpus_sha256: freeze.sha256, consent_sha256: window.consent_sha256,
     started_utc: new Date().toISOString(), before, status_before: statusBefore, acquisitions_before: acquisitionIds(),
-    ledger_before: ledger(), month_usage_before: usageBefore, normalization_preflight:{ids:priorIds,bindings,stored:stored.filter(r=>priorIds.includes(r.logical_id))},cloud_before: audit(), results: [] };
+    ledger_before: ledger(), month_usage_before: usageBefore, core_timeout_ms:coreTimeout,normalization_preflight:{ids:priorIds,bindings,stored:stored.filter(r=>priorIds.includes(r.logical_id))},cloud_before: audit(), results: [] };
   const privatePath = privateDir + '/run.json'; mkdirSync(privateDir, { recursive: true, mode: 0o700 });
   writeFileSync(privatePath, JSON.stringify(raw), { mode: 0o600, flag: 'wx' });
   const save = () => writeFileSync(privatePath, JSON.stringify(raw), { mode: 0o600 });
