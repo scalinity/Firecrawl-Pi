@@ -3,7 +3,7 @@
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { execFileSync, spawnSync } from 'node:child_process';
 import { homedir } from 'node:os';
-import { base, digest, historyCommit, historicalIntact, unchangedImplementation, proofPaths, revisionIntegrity, fullRunVerdict, cloudContinuity, budgetAdmission, cleanupFresh } from './corpus-v2.mjs';
+import { base, digest, historyCommit, historicalIntact, unchangedImplementation, proofPaths, revisionIntegrity, fullRunVerdict, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete } from './corpus-v2.mjs';
 import { codeDirty } from './collection.mjs';
 const git = (...args) => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
 const json = path => existsSync(path) ? JSON.parse(readFileSync(path)) : null;
@@ -28,9 +28,7 @@ const review = gate?.state === 'REMEDIATION_COMPLETE' && gate.criterion_integrit
   gate.findings.every(x => ['FIXED', 'REJECTED'].includes(x.disposition)) && proofPaths.every(p => gate.files?.[p] === digest(readFileSync(p)));
 replace('M9-REVIEW', applicable && review ? 'PASS' : 'NOT_RUN', { revision_review: base + '/review/REVIEW.md' });
 const tests = json(base + '/fixtures.json'), testPath = base + '/fixtures.txt';
-const fixtures = tests?.source_commit === head && tests.exit_code === 0 && tests.raw_sha256 === digest(readFileSync(testPath)) &&
-  /^# fail 0$/m.test(readFileSync(testPath, 'utf8')) && !/^not ok /m.test(readFileSync(testPath, 'utf8')) &&
-  tests.files.every(x => x.sha256 === digest(readFileSync(x.path)));
+const fixtures = tests && existsSync(testPath) && fixturesComplete(tests,readFileSync(testPath,'utf8'),head);
 replace('M9-RESOURCE-EVALUATOR-TESTS', fixtures ? 'PASS' : 'NOT_RUN', { current_fixture_record: base + '/fixtures.json' });
 const current = json(base + '/current/versions.json');
 const raw = json(privateDir + '/run.json'), record = json(base + '/corpus.json'), window = json(base + '/live-window.json');

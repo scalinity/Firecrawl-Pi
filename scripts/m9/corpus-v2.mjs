@@ -142,6 +142,15 @@ export function cleanupFresh(current, window) {
     current.checks?.validation_absent === true && current.checks?.zero_caps === true && current.checks?.paid === true && current.checks?.cloud === true;
 }
 
+export const fixturePaths=['tests/contracts/m9-corpus-v2.test.mjs','tests/contracts/m9-live.test.mjs','tests/contracts/m9-resource-reuse.test.mjs'];
+export function fixturesComplete(record,text,head,hashFile=path=>digest(readFileSync(path))) {
+  const count=Number(text.match(/^# tests (\d+)$/m)?.[1]);
+  return record?.source_commit===head && record.exit_code===0 && record.raw_sha256===digest(text) && count>=44 &&
+    /^# fail 0$/m.test(text) && /^# cancelled 0$/m.test(text) && /^# skipped 0$/m.test(text) && !/^not ok /m.test(text) &&
+    equal(record.argv,['--test','--test-reporter=tap',...fixturePaths]) && Array.isArray(record.files) &&
+    fixturePaths.every(path=>record.files.some(x=>x.path===path)) && record.files.every(x=>x.sha256===hashFile(x.path));
+}
+
 export function historicalIntact() {
   const manifest = JSON.parse(readFileSync(base + '/history-preservation.json'));
   const names = execFileSync('git', ['ls-tree', '-r', '--name-only', historyCommit, '--', 'evidence/M9'], { encoding: 'utf8' }).trim().split('\n').sort();
