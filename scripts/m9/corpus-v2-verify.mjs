@@ -24,6 +24,7 @@ const integrity = revisionIntegrity(readFileSync(homedir() + '/.local/share/fire
   json('evidence/M9/work/corpus-freeze.json'), freeze, sources,readFileSync(base+'/source-inspection.json','utf8')) && freeze.policies.every(x => digest(readFileSync(x.path)) === x.sha256);
 const gate = json(base + '/review/gate.json');
 const review = gate?.state === 'REMEDIATION_COMPLETE' && gate.criterion_integrity === 'APPROVED_AFTER_REMEDIATION' &&
+  gate.premise_sha256===digest(readFileSync(base+'/premise-decision.json')) &&
   gate.review_sha256 === digest(readFileSync(base + '/review/REVIEW.md')) && gate.freeze_sha256 === digest(readFileSync(base + '/freeze.json')) &&
   gate.findings.every(x => ['FIXED', 'REJECTED'].includes(x.disposition)) && proofPaths.every(p => gate.files?.[p] === digest(readFileSync(p)));
 replace('M9-REVIEW', applicable && review ? 'PASS' : 'NOT_RUN', { revision_review: base + '/review/REVIEW.md' });

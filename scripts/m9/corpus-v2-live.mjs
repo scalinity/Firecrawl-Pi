@@ -43,6 +43,7 @@ async function main() {
   const consent = JSON.parse(pi('sudo -n cat /etc/firecrawl-pi/m9-validation/consent.json'));
   const window = j(base + '/live-window.json'), gate = j(base + '/review/gate.json');
   const reviewed = gate.state === 'REMEDIATION_COMPLETE' && gate.criterion_integrity === 'APPROVED_AFTER_REMEDIATION' &&
+    gate.premise_sha256===digest(readFileSync(base+'/premise-decision.json')) &&
     gate.review_sha256 === digest(readFileSync(base + '/review/REVIEW.md')) && gate.freeze_sha256 === digest(readFileSync(base + '/freeze.json')) &&
     proofPaths.every(p => gate.files?.[p] === digest(readFileSync(p))) && gate.findings.every(f => ['FIXED', 'REJECTED'].includes(f.disposition));
   if (window.corpus_sha256 !== freeze.sha256 || window.request_plan_sha256 !== freeze.request_plan_sha256 || !before.clean || !ready({ consent, window, head, deployed: before.pi, dirty: codeDirty(git('status', '--porcelain=v1', '-z', '--untracked-files=all')), reviewed, now: Date.now() }))
