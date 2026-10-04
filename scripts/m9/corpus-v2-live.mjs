@@ -65,7 +65,12 @@ async function main() {
   if (!origin) throw Error('Private authenticated TLS origin absent');
   const token = execFileSync('security', ['find-generic-password', '-a', 'fcpi', '-s', 'fcpi mcp codex', '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim();
   const sql = text => pi('sudo -n docker exec -i fcpi-nuq-postgres-1 psql -U postgres -d postgres -At -q -X -v ON_ERROR_STOP=1', text);
-  const acquisitionRows = () => JSON.parse(sql("SELECT coalesce(json_agg(r),'[]') FROM (SELECT logical_id,url_hmac FROM fcpi_retrieval.acquisition ORDER BY logical_id) r;"));
+  const acquisitionRows = (hmac=null,ids=null) => {
+    if(hmac!==null && !/^[0-9a-f]{32}$/.test(hmac))throw Error('Invalid target binding');
+    if(ids!==null && (ids.length!==20 || ids.some(id=>!/^[0-9a-f-]{36}$/.test(id))))throw Error('Invalid historical receipt IDs');
+    const where=hmac!==null?` WHERE url_hmac='${hmac}'`:ids!==null?` WHERE logical_id IN (${ids.map(id=>"'"+id+"'").join(',')})`:'';
+    return JSON.parse(sql("SELECT coalesce(json_agg(r),'[]') FROM (SELECT logical_id,url_hmac FROM fcpi_retrieval.acquisition"+where+" ORDER BY logical_id) r;"));
+  };
   const acquisitionIds = () => acquisitionRows().map(x=>x.logical_id);
   const ledger = () => JSON.parse(sql("SELECT coalesce(json_agg(r ORDER BY r.call_key),'[]') FROM (SELECT call_key, logical_id, category, provider, unit, reserved, actual, state, usage FROM fcpi_retrieval.budget_reservation WHERE provider IN ('openai','decodo','zyte','llamaparse')) r;"));
   const monthUsage = () => JSON.parse(sql("SELECT coalesce(json_agg(r),'[]') FROM (SELECT category, (reserved+settled)::float8 AS used FROM fcpi_retrieval.budget_usage WHERE period='month' AND period_start=date_trunc('month',now() AT TIME ZONE 'UTC')::date) r;"));
@@ -76,7 +81,7 @@ async function main() {
   const bindings = JSON.parse(pi("sudo -n docker exec -i fcpi-retrieval-service-1 node --input-type=module -e '" + oracle + "'", JSON.stringify(spec.targets.map(t => t.url))));
   if (bindings.length !== 20 || bindings.some(x => !/^[0-9a-f]{32}$/.test(x))) throw Error('Exact target bindings unavailable');
   const priorIds=initial.results.map(r=>r.acquisition?.logical_id??r.json?.data?.metadata?.scrapeId);
-  const stored=acquisitionRows();
+  const stored=acquisitionRows(null,priorIds);
   if(!normalizationProof(priorIds,bindings,stored))throw Error('Zero-cost historical URL-normalization preflight failed');
   const audit = () => pi('sudo -n bash /opt/firecrawl-pi/scripts/m7/pi-retrieval-log-scan.sh');
   const raw = { revision: 2, source_commit: head, corpus_sha256: freeze.sha256, consent_sha256: window.consent_sha256,
@@ -107,7 +112,7 @@ async function main() {
     try { item.response = await call(item.request); } catch (e) { item.dispatch_error = e.message; save(); throw Error('Recorded request incomplete; do not restart this revision batch'); }
     save();
     const response = item.response, supplied = response.json?.data?.metadata?.scrapeId;
-    const fresh = acquisitionRows().filter(row => !seen.has(row.logical_id));
+    const fresh = acquisitionRows(item.expected_url_hmac).filter(row => !seen.has(row.logical_id));
     const id = correlationId(supplied,fresh,item.expected_url_hmac);
     if (id) {
       for (let poll = 0; poll < 5; poll++) {
