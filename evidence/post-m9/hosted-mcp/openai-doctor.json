@@ -1,0 +1,91 @@
+{
+  "result": "fail",
+  "failed_checks": [
+    "oauth_metadata"
+  ],
+  "checks": [
+    {
+      "id": "config_source",
+      "status": "PASS",
+      "summary": "profile file: /etc/firecrawl-pi/hosted-mcp/openai.yaml"
+    },
+    {
+      "id": "profile_load",
+      "status": "PASS",
+      "summary": "/etc/firecrawl-pi/hosted-mcp/openai.yaml"
+    },
+    {
+      "id": "tunnel_id",
+      "status": "PASS",
+      "summary": "sha256:dd08e4f6446a64ea05ae2b5e91122108a74e88ec508e32b7c53db002c1a60281"
+    },
+    {
+      "id": "control_plane_api_key",
+      "status": "PASS",
+      "summary": "configured"
+    },
+    {
+      "id": "tunnels_management_url",
+      "status": "PASS",
+      "summary": "https://platform.openai.com/settings/organization/tunnels"
+    },
+    {
+      "id": "runtime_api_keys_url",
+      "status": "PASS",
+      "summary": "https://platform.openai.com/settings/organization/api-keys"
+    },
+    {
+      "id": "admin_api_keys_url",
+      "status": "PASS",
+      "summary": "https://platform.openai.com/settings/organization/admin-keys"
+    },
+    {
+      "id": "chatgpt_connector_settings_url",
+      "status": "PASS",
+      "summary": "https://chatgpt.com/#settings/Connectors"
+    },
+    {
+      "id": "mcp_target",
+      "status": "PASS",
+      "summary": "http://127.0.0.1:3380/mcp"
+    },
+    {
+      "id": "mcp_server_reachable",
+      "status": "PASS",
+      "summary": "HTTP 401 from http://127.0.0.1:3380/mcp"
+    },
+    {
+      "id": "oauth_metadata",
+      "status": "FAIL",
+      "summary": "oauth discovery invalid metadata from http://127.0.0.1:3380: protected resource metadata missing resource",
+      "why": "HTTP MCP servers that rely on DCR/PRMD should expose the protected-resource metadata and authorization-server metadata contract or readiness can stay degraded.",
+      "evidence": [
+        "oauth discovery invalid metadata from http://127.0.0.1:3380: protected resource metadata missing resource"
+      ],
+      "next": [
+        "verify the MCP server exposes GET /.well-known/oauth-protected-resource/mcp",
+        "verify authorization_servers[0] resolves to GET /.well-known/oauth-authorization-server",
+        "inspect /readyz and the logged oauth_discovery_urls after startup"
+      ]
+    },
+    {
+      "id": "health_listener",
+      "status": "PASS",
+      "summary": "ephemeral bind ok on http://127.0.0.1:35875",
+      "next": [
+        "inspect startup summary or HEALTH_URL_FILE for the final /ui URL"
+      ]
+    },
+    {
+      "id": "ui",
+      "status": "PASS",
+      "summary": "ephemeral port; inspect startup summary or HEALTH_URL_FILE for the final /ui URL"
+    },
+    {
+      "id": "codex_plugin",
+      "status": "SKIP",
+      "summary": "Codex not detected locally"
+    }
+  ],
+  "exit_code": 2
+}

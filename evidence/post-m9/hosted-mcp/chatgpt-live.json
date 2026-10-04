@@ -1,0 +1,45 @@
+{
+  "schema": "fcpi.hosted-product-proof/v1",
+  "utc": "2026-10-04T04:07:35.481575+00:00",
+  "source_commit": "2c1888b6a4a0fc119e339b4c3f2a6fefb465c3d6",
+  "deployed_commit": "3ea0f520211190a1a18a80da769a90700f23be49",
+  "product": "ChatGPT",
+  "status": "VERIFIED_LIVE",
+  "hosted_product_invocation": true,
+  "app_name": "Firecrawl Pi",
+  "app_identity_sha256": "11454ef32edb4cee73af87822e86502106da0b725c9aa095dce47570f91fc0df",
+  "conversation_identity_sha256": "2759bebb0aa8665b8e18869564b17400fa5012e5479a9d29d623ce37d3721cfe",
+  "transport": "OpenAI Secure MCP Tunnel, fixed private loopback /mcp destination",
+  "principal": "chatgpt-tunnel",
+  "owner_action": "Created tunnel with workspace association, created dedicated restricted Read+Use runtime key and configured Pi, then accepted risk and created custom plugin",
+  "ui_observation": {
+    "app_connected": true,
+    "test_prompt_mentions_only_pi_app": true,
+    "response_complete": true,
+    "result": "Succeeded. Heading: Static fixture. First sentence: This page is the controlled static target for milestone M1. HTTP200 from Firecrawl Pi."
+  },
+  "controlled_target": "http://m1.fixture.fcpi.test:8080/static.html",
+  "correlated_tool_event": {
+    "utc": "2026-10-04T04:03:34.138Z",
+    "event": "tool",
+    "client": "chatgpttunnel",
+    "principal": "chatgpt-tunnel",
+    "tool": "firecrawl_scrape",
+    "is_error": false,
+    "outcome": "ok",
+    "downstream": {
+      "route": "scrape",
+      "status": 200,
+      "code": null,
+      "request_id": "4b2e4b86-0acb-43aa-968a-7288020bdf99"
+    },
+    "request_id": "93c02dfd-8749-4154-8df7-fec08317f80c",
+    "era": "modern",
+    "protocol_version": "2026-07-28"
+  },
+  "additional_observed_tool_events": "A later firecrawl_search event under the same principal is retained in raw filtered logs but is not claimed as this controlled scrape test.",
+  "cloud_audit": "cloud-audit.json",
+  "cloud_service_attempts": 0,
+  "historical_m9_evidence_modified": false,
+  "firecrawl_cloud_attempts": 0
+}

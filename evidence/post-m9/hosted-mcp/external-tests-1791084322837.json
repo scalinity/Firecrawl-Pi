@@ -1,0 +1,98 @@
+{
+  "schema": "fcpi.hosted-mcp-proof/v1",
+  "utc": "2026-10-04T03:24:34.145Z",
+  "source_commit": "c7fd84ecd614939a2ce368d604555dd269619716",
+  "deployed_commit": "c7fd84ecd614939a2ce368d604555dd269619716",
+  "vantage": "public DNS and forced public destination, bypassing Tailnet resolution",
+  "hosted_product_invocation": false,
+  "public_destination_sha256": "2d2508f5417a4993b6dc8e309468428aba245c7f57ac5bfe6c5c42d79e4fd851",
+  "public_preflight": [
+    {
+      "destination_sha256": "2d2508f5417a4993b6dc8e309468428aba245c7f57ac5bfe6c5c42d79e4fd851",
+      "status": 404,
+      "tls": true
+    }
+  ],
+  "principal": "claude-remote",
+  "token_sha256": "e2b9e02e587314b85686a39cf9c6ab00a1c6a8d800b2b6bce923364833547c7d",
+  "records": [
+    {
+      "id": "route:/",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/health",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/v2/scrape",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/admin",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/platform/v1/artifacts/x",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/random",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/mcp/",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/mcp?url=https://example.com",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "missing-auth",
+      "state": "PASS",
+      "status": 401
+    },
+    {
+      "id": "bad-auth-throttle",
+      "state": "PASS",
+      "status": 429
+    },
+    {
+      "id": "modern-catalog",
+      "state": "PASS",
+      "status": 200,
+      "tools": [
+        "firecrawl_batch_scrape",
+        "firecrawl_batch_status",
+        "firecrawl_cancel_batch",
+        "firecrawl_cancel_crawl",
+        "firecrawl_capabilities",
+        "firecrawl_check_crawl_status",
+        "firecrawl_crawl",
+        "firecrawl_extract",
+        "firecrawl_extract_status",
+        "firecrawl_get_result",
+        "firecrawl_map",
+        "firecrawl_scrape",
+        "firecrawl_search"
+      ],
+      "request_id": "906b6a37-fff0-4e93-b873-36308fbfea01",
+      "session": null
+    },
+    {
+      "id": "transport-or-response",
+      "state": "FAIL",
+      "error": "ECONNRESET"
+    }
+  ],
+  "state": "FAIL"
+}

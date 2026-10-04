@@ -1,0 +1,30 @@
+[
+  {
+    "path": "scripts/hosted-mcp/redaction.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "824c5f3b30944e595a7d5c5522f7b34dca87fa6ccf67f8c0031083deedd42fc9",
+    "kind": "code_construct",
+    "reason": "sed patterns extract credential substrings on the Pi; no literal credential value"
+  },
+  {
+    "path": "scripts/hosted-mcp/redaction.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "f1bbd12a018c8e321213ae24afe37a413d259f3402c5ae9d38bc9b8d33b5601a",
+    "kind": "code_construct",
+    "reason": "sed patterns extract credential substrings on the Pi; no literal credential value"
+  },
+  {
+    "path": "services/hosted-mcp/test_ingress.py",
+    "rule": "tailnet-name",
+    "value_sha256": "c8601780e868a1a6412aefcb21778c292505e94da47005de9f55345152d05c4f",
+    "kind": "synthetic_fixture",
+    "reason": "Synthetic Host validation authority; no real tailnet identifier"
+  },
+  {
+    "path": "scripts/hosted-mcp/redaction.mjs",
+    "rule": "url-credentials",
+    "value_sha256": "b60da2b5f2a259dee088dc87ac6bf5f39c9a80dcad9c37c66855c6e178ac2a50",
+    "kind": "code_construct",
+    "reason": "Constructs a synthetic URL userinfo positive control for embedded-secret hashing"
+  }
+]

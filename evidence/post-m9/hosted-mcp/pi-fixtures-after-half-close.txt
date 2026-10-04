@@ -1,0 +1,69 @@
+active
+{"utc": "2026-10-04T04:01:36.585779+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.586727+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.587456+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.588130+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.589453+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.590168+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.590876+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.591560+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.592231+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.592881+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.593540+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.594188+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.594853+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.595503+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.596146+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.596774+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.597408+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.598035+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.598683+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.599687+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.600325+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.600951+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.601577+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.602201+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.602840+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.603464+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.604093+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.604716+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.605348+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.605998+00:00", "service": "hosted-mcp-ingress", "status": 401, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.606644+00:00", "service": "hosted-mcp-ingress", "status": 429, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.609680+00:00", "service": "hosted-mcp-ingress", "status": 200, "outcome": "completed"}
+{"utc": "2026-10-04T04:01:36.612944+00:00", "service": "hosted-mcp-ingress", "status": 200, "outcome": "completed"}
+.{"utc": "2026-10-04T04:01:36.614708+00:00", "service": "hosted-mcp-ingress", "status": 200, "outcome": "completed"}
+.{"utc": "2026-10-04T04:01:36.618084+00:00", "service": "hosted-mcp-ingress", "status": 499, "outcome": "cancelled"}
+.{"utc": "2026-10-04T04:01:36.621570+00:00", "service": "hosted-mcp-ingress", "status": 200, "outcome": "completed"}
+.{"utc": "2026-10-04T04:01:36.645838+00:00", "service": "hosted-mcp-ingress", "status": 200, "outcome": "completed"}
+{"utc": "2026-10-04T04:01:36.665322+00:00", "service": "hosted-mcp-ingress", "status": 200, "outcome": "completed"}
+.{"utc": "2026-10-04T04:01:36.668097+00:00", "service": "hosted-mcp-ingress", "status": 421, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.668827+00:00", "service": "hosted-mcp-ingress", "status": 421, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.669537+00:00", "service": "hosted-mcp-ingress", "status": 413, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.670218+00:00", "service": "hosted-mcp-ingress", "status": 400, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.670914+00:00", "service": "hosted-mcp-ingress", "status": 400, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.671558+00:00", "service": "hosted-mcp-ingress", "status": 400, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.672203+00:00", "service": "hosted-mcp-ingress", "status": 400, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.672845+00:00", "service": "hosted-mcp-ingress", "status": 431, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.674823+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.675448+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.676063+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.676669+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.677278+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.677892+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.678518+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.679613+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.680243+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.680854+00:00", "service": "hosted-mcp-ingress", "status": 404, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.682887+00:00", "service": "hosted-mcp-ingress", "status": 503, "outcome": "refused"}
+...{"utc": "2026-10-04T04:01:36.685896+00:00", "service": "hosted-mcp-ingress", "status": 502, "outcome": "refused"}
+{"utc": "2026-10-04T04:01:36.689197+00:00", "service": "hosted-mcp-ingress", "status": 499, "outcome": "cancelled"}
+.{"utc": "2026-10-04T04:01:36.691359+00:00", "service": "hosted-mcp-ingress", "status": 499, "outcome": "cancelled"}
+{"utc": "2026-10-04T04:01:36.694244+00:00", "service": "hosted-mcp-ingress", "status": 200, "outcome": "completed"}
+..{"utc": "2026-10-04T04:01:36.697208+00:00", "service": "hosted-mcp-ingress", "status": 400, "outcome": "refused"}
+.{"utc": "2026-10-04T04:01:36.711398+00:00", "service": "hosted-mcp-ingress", "status": 502, "outcome": "refused"}
+.....
+----------------------------------------------------------------------
+Ran 17 tests in 0.140s
+
+OK

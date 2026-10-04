@@ -1,0 +1,39 @@
+{
+  "schema": "fcpi.hosted-overview-render/v1",
+  "utc": "2026-10-04T04:21:11.501Z",
+  "url": "http://localhost:8765/ORCHESTRATION.html",
+  "checks": [
+    {
+      "theme": "light",
+      "width": 1440,
+      "scroll_width": 1440,
+      "banner": "✓M9 ACCEPTED — 19/20 targets (95%); 43/43 checks PASS. The fresh revision2 run retains all targets and the 90% threshold. P19 remains a real Zyte520 target ban; the original17/20 failure stays immutable. Independent Opus5.5 review is fully addressed. New measured proxy traffic: 30,350bytes, estimated at $0.000123; invoices unavailable. All grants are closed. Paid dispatch is off, caps are zero, Cloud is disabled and 15containers are healthy. The accepted M8 soak is reused. ChatGPT and Claude hosted MCP are VERIFIED_LIVE. Automatic investigation remains off. No successor or publication.",
+      "state": "PASS"
+    },
+    {
+      "theme": "dark",
+      "width": 1440,
+      "scroll_width": 1440,
+      "banner": "✓M9 ACCEPTED — 19/20 targets (95%); 43/43 checks PASS. The fresh revision2 run retains all targets and the 90% threshold. P19 remains a real Zyte520 target ban; the original17/20 failure stays immutable. Independent Opus5.5 review is fully addressed. New measured proxy traffic: 30,350bytes, estimated at $0.000123; invoices unavailable. All grants are closed. Paid dispatch is off, caps are zero, Cloud is disabled and 15containers are healthy. The accepted M8 soak is reused. ChatGPT and Claude hosted MCP are VERIFIED_LIVE. Automatic investigation remains off. No successor or publication.",
+      "state": "PASS"
+    },
+    {
+      "theme": "light",
+      "width": 390,
+      "scroll_width": 390,
+      "banner": "✓M9 ACCEPTED — 19/20 targets (95%); 43/43 checks PASS. The fresh revision2 run retains all targets and the 90% threshold. P19 remains a real Zyte520 target ban; the original17/20 failure stays immutable. Independent Opus5.5 review is fully addressed. New measured proxy traffic: 30,350bytes, estimated at $0.000123; invoices unavailable. All grants are closed. Paid dispatch is off, caps are zero, Cloud is disabled and 15containers are healthy. The accepted M8 soak is reused. ChatGPT and Claude hosted MCP are VERIFIED_LIVE. Automatic investigation remains off. No successor or publication.",
+      "state": "PASS"
+    },
+    {
+      "theme": "dark",
+      "width": 390,
+      "scroll_width": 390,
+      "banner": "✓M9 ACCEPTED — 19/20 targets (95%); 43/43 checks PASS. The fresh revision2 run retains all targets and the 90% threshold. P19 remains a real Zyte520 target ban; the original17/20 failure stays immutable. Independent Opus5.5 review is fully addressed. New measured proxy traffic: 30,350bytes, estimated at $0.000123; invoices unavailable. All grants are closed. Paid dispatch is off, caps are zero, Cloud is disabled and 15containers are healthy. The accepted M8 soak is reused. ChatGPT and Claude hosted MCP are VERIFIED_LIVE. Automatic investigation remains off. No successor or publication.",
+      "state": "PASS"
+    }
+  ],
+  "page_errors": [],
+  "external_request_attempts": [],
+  "state": "PASS",
+  "screenshots": "Temporary screenshots inspected and deleted; no UI credentials captured."
+}

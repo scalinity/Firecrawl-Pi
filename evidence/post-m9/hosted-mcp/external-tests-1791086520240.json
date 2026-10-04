@@ -1,0 +1,155 @@
+{
+  "schema": "fcpi.hosted-mcp-proof/v1",
+  "utc": "2026-10-04T03:53:53.677Z",
+  "source_commit": "19d5bdc2814b803b4909232afd15cf8a017b016a",
+  "deployed_commit": "19d5bdc2814b803b4909232afd15cf8a017b016a",
+  "vantage": "public DNS and forced public destination, bypassing Tailnet resolution",
+  "hosted_product_invocation": false,
+  "configured_host_sha256": "e4727f34893afc1e6b960c21329b561cdaa7fc5949a2a3436d4a7d48a32ac674",
+  "configured_port": "443",
+  "public_destination_sha256": "2d2508f5417a4993b6dc8e309468428aba245c7f57ac5bfe6c5c42d79e4fd851",
+  "public_preflight": [
+    {
+      "destination_sha256": "2d2508f5417a4993b6dc8e309468428aba245c7f57ac5bfe6c5c42d79e4fd851",
+      "status": 404,
+      "tls": true
+    }
+  ],
+  "principal": "claude-remote",
+  "token_sha256": "e2b9e02e587314b85686a39cf9c6ab00a1c6a8d800b2b6bce923364833547c7d",
+  "records": [
+    {
+      "id": "route:/",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/health",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/v2/scrape",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/admin",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/platform/v1/artifacts/x",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/random",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/mcp/",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "route:/mcp?url=https://example.com",
+      "state": "PASS",
+      "status": 404
+    },
+    {
+      "id": "missing-auth",
+      "state": "PASS",
+      "status": 401
+    },
+    {
+      "id": "bad-auth-throttle",
+      "state": "PASS",
+      "status": 429
+    },
+    {
+      "id": "explicit-default-port",
+      "state": "PASS",
+      "status": 200
+    },
+    {
+      "id": "modern-catalog",
+      "state": "PASS",
+      "status": 200,
+      "tools": [
+        "firecrawl_batch_scrape",
+        "firecrawl_batch_status",
+        "firecrawl_cancel_batch",
+        "firecrawl_cancel_crawl",
+        "firecrawl_capabilities",
+        "firecrawl_check_crawl_status",
+        "firecrawl_crawl",
+        "firecrawl_extract",
+        "firecrawl_extract_status",
+        "firecrawl_get_result",
+        "firecrawl_map",
+        "firecrawl_scrape",
+        "firecrawl_search"
+      ],
+      "request_id": "901d85d7-7512-4668-b066-f13b12683357",
+      "session": null
+    },
+    {
+      "id": "host",
+      "state": "PASS",
+      "status": null,
+      "public_relay_rejected_host": "ECONNRESET",
+      "loopback_expected_status": 421
+    },
+    {
+      "id": "origin",
+      "state": "PASS",
+      "status": 403
+    },
+    {
+      "id": "body-cap",
+      "state": "PASS",
+      "status": 413
+    },
+    {
+      "id": "legacy-initialize",
+      "state": "PASS",
+      "status": 200,
+      "protocol": "2025-11-25",
+      "session": null
+    },
+    {
+      "id": "legacy-new-connection",
+      "state": "PASS",
+      "status": 200,
+      "session": null
+    },
+    {
+      "id": "controlled-scrape",
+      "state": "PASS",
+      "status": 200,
+      "is_error": false,
+      "expected_heading": "Static fixture",
+      "markdown_sha256": "d9c20472599f59ba6952ee917e7e4f3ae78ce9b85a708e879c44a49f639a5832",
+      "request_id": "20e6d9d4-372b-4003-92c7-be4d742e7912"
+    },
+    {
+      "id": "ssrf",
+      "state": "PASS",
+      "status": 200,
+      "is_error": true,
+      "expected_class": "SSRF_DENIED",
+      "observed_error": "{\"error\":{\"httpStatus\":500,\"code\":\"SCRAPE_FCPI_RETRIEVAL\",\"message\":\"Retrieval failed: SSRF_DENIED. metadata.google.internal is a reserved or local name\"}}"
+    },
+    {
+      "id": "cloud-destination-denial",
+      "state": "PASS",
+      "status": 200,
+      "is_error": true,
+      "expected_class": "CLOUD_DENIED",
+      "observed_error": "{\"error\":{\"httpStatus\":500,\"code\":\"SCRAPE_FCPI_RETRIEVAL\",\"message\":\"Retrieval failed: CLOUD_DENIED. api.firecrawl.dev is a Firecrawl Cloud service destination\"}}"
+    }
+  ],
+  "state": "PASS"
+}

@@ -1,0 +1,208 @@
+{
+  "schema": "fcpi.hosted-search-observation/v1",
+  "utc": "2026-10-04T04:25:23.601098+00:00",
+  "positive_log_lines": 127,
+  "scope_window": "Whole current SearXNG container log; application timestamps retained without timezone inference",
+  "error_counts": {
+    "null": 21,
+    "duckduckgo": 5,
+    "brave": 5
+  },
+  "diagnostic_term_counts": {
+    "duckduckgo": 5,
+    "brave": 9,
+    "error": 66,
+    "disconnected": 31,
+    "retry": 31
+  },
+  "events": [
+    {
+      "log_timestamp": "2026-10-03 19:08:55",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:08:55",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:08:55",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:15:57",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:15:57",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:15:57",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:38:44",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:38:44",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:38:44",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:40:13",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:40:13",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:40:13",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:42:03",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:42:03",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:42:03",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:44:41",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:44:41",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:44:41",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:52:58",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:52:58",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-03 19:52:58",
+      "engine": null,
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:04:31",
+      "engine": "duckduckgo",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:04:31",
+      "engine": "brave",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:04:43",
+      "engine": "duckduckgo",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:04:43",
+      "engine": "brave",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:05:02",
+      "engine": "duckduckgo",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:05:02",
+      "engine": "brave",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:05:23",
+      "engine": "duckduckgo",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:05:23",
+      "engine": "brave",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:07:30",
+      "engine": "duckduckgo",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    },
+    {
+      "log_timestamp": "2026-10-04 04:07:30",
+      "engine": "brave",
+      "classification": "disconnect diagnostic",
+      "attribution": "preceding timestamp and engine log context"
+    }
+  ],
+  "state": "DISCONNECT_DIAGNOSTICS_OBSERVED",
+  "scope": "Existing search backend; read only. No engine configuration changed. This does not quantify relevance or establish novelty evidence."
+}

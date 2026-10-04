@@ -1,0 +1,45 @@
+{
+  "schema": "fcpi.hosted-product-proof/v1",
+  "utc": "2026-10-04T04:13:47.979231+00:00",
+  "source_commit": "2c1888b6a4a0fc119e339b4c3f2a6fefb465c3d6",
+  "deployed_commit": "3ea0f520211190a1a18a80da769a90700f23be49",
+  "product": "Claude remote connector",
+  "status": "VERIFIED_LIVE",
+  "hosted_product_invocation": true,
+  "connector_name": "Firecrawl Pi HTTPS",
+  "connector_identity_sha256": "fc10211a39ca43ada5c57782dfe7ac5ab5e8fdf62c5f8eecc9ee51098ccd6b40",
+  "conversation_identity_sha256": "9595e7beec0821f8725129092b4331be2c5c305c74bebf06d6252978e5d2b5a2",
+  "transport": "Anthropic cloud -> HTTPS Funnel443 -> MCP-only loopback ingress -> fixed private /mcp -> local Firecrawl",
+  "principal": "claude-remote",
+  "owner_action": "Approved Funnel; pasted full Authorization Bearer credential and submitted corrected HTTPS connector",
+  "ui_observation": {
+    "connected_connector_has_13_tools": true,
+    "connector_enabled_in_new_conversation": true,
+    "response_complete": true,
+    "result": "Succeeded. Heading: Static fixture. First sentence: This page is the controlled static target for milestone M1.",
+    "scrape_id": "01a1051b-365a-731d-8d99-37befe4a84b9"
+  },
+  "controlled_target": "http://m1.fixture.fcpi.test:8080/static.html",
+  "correlated_tool_event": {
+    "utc": "2026-10-04T04:10:31.968Z",
+    "event": "tool",
+    "client": "clauderemote",
+    "principal": "claude-remote",
+    "tool": "firecrawl_scrape",
+    "is_error": false,
+    "outcome": "ok",
+    "downstream": {
+      "route": "scrape",
+      "status": 200,
+      "code": null,
+      "request_id": "80808dfb-41cb-440e-b314-08f50ea04af6"
+    },
+    "request_id": "8da3b920-34c9-4b7f-87d9-c544b5822c97",
+    "era": "modern",
+    "protocol_version": "2026-07-28"
+  },
+  "cloud_audit": "cloud-audit.json",
+  "historical_m9_evidence_modified": false,
+  "old_failed_connector": "Retained unchanged; owner deletion confirmation was requested but not granted. It is not the verified connector.",
+  "firecrawl_cloud_attempts": 0
+}

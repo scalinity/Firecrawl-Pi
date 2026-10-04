@@ -1,0 +1,225 @@
+{
+  "utc": "2026-10-04T04:21:25Z",
+  "commit": "3ea0f520211190a1a18a80da769a90700f23be49",
+  "versions_lock_sha256": "d61f22a07f8e57be381f2e3c99ebeea0a2f631ebf49f0cdb258645dd35cf9f68",
+  "healthy": true,
+  "services": {
+    "retrieval-service": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:11.669891926-04:00",
+      "mem_mib": 52,
+      "peak_mib": 70,
+      "limit_mib": 448,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:20:36.017974694-04:00",
+      "mem_mib": 29,
+      "peak_mib": 48,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "access-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:18.861000299-04:00",
+      "mem_mib": 45,
+      "peak_mib": 58,
+      "limit_mib": 160,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m7": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:20:44.720205345-04:00",
+      "mem_mib": 20,
+      "peak_mib": 38,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "firecrawl-core": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:03.194152822-04:00",
+      "mem_mib": 1920,
+      "peak_mib": 1972,
+      "limit_mib": 2560,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "nuq-postgres": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:14.228031489-04:00",
+      "mem_mib": 203,
+      "peak_mib": 222,
+      "limit_mib": 640,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "rabbitmq": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:11.526229378-04:00",
+      "mem_mib": 182,
+      "peak_mib": 217,
+      "limit_mib": 512,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "redis": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:09.929297723-04:00",
+      "mem_mib": 11,
+      "peak_mib": 18,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "searxng": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:09.558998444-04:00",
+      "mem_mib": 126,
+      "peak_mib": 134,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m6": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:20:33.575828497-04:00",
+      "mem_mib": 30,
+      "peak_mib": 50,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "browser-worker": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:11.555962486-04:00",
+      "mem_mib": 413,
+      "peak_mib": 471,
+      "limit_mib": 1536,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "mcp-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:21:25.364566789-04:00",
+      "mem_mib": 44,
+      "peak_mib": 63,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m3": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:20:40.952101799-04:00",
+      "mem_mib": 29,
+      "peak_mib": 48,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m2": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:20:33.781589638-04:00",
+      "mem_mib": 29,
+      "peak_mib": 48,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m5": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-04T00:20:32.946399294-04:00",
+      "mem_mib": 17,
+      "peak_mib": 37,
+      "limit_mib": 128,
+      "swap_denied": true,
+      "oom_kills": 0
+    }
+  },
+  "rest": {
+    "ready": true,
+    "status": 200,
+    "ms": 23,
+    "core_live": true,
+    "ledger_ok": true,
+    "jobs": {
+      "EXPIRED": 233,
+      "CANCELLED": 29,
+      "FAILED": 11,
+      "PARTIAL": 29,
+      "SUCCEEDED": 656
+    },
+    "archive": {
+      "bytes": 194092122,
+      "quotaBytes": 10737418240
+    }
+  },
+  "mcp": {
+    "ready": true,
+    "status": 200,
+    "ms": 14,
+    "tools": 13,
+    "protocol": "2026-07-28"
+  },
+  "queue": {
+    "ok": true,
+    "queued": 0,
+    "oldest_queued_s": 0,
+    "active": 0,
+    "open_jobs": 0
+  },
+  "backup": {
+    "last_success": "2026-10-03T19:56:14Z",
+    "age_h": 8.4,
+    "offdevice": "yes",
+    "last_attempt": {
+      "utc": "2026-10-03T19:56:14Z",
+      "result": "PASS",
+      "error": null
+    },
+    "last_restore_test": {
+      "utc": "2026-10-03T20:05:28Z",
+      "result": "PASS",
+      "error": null
+    }
+  },
+  "provider_controls": {
+    "paidDispatch": false,
+    "budgetPolicySha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
+    "paid_caps_zero": true
+  }
+}

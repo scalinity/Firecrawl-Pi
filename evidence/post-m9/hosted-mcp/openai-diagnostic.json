@@ -1,0 +1,45 @@
+{
+  "vendor_health_exit": 0,
+  "vendor_health": {
+    "locator": {
+      "kind": "port",
+      "port": 3382,
+      "resolved_base_url": "http://127.0.0.1:3382"
+    },
+    "process": {
+      "pid": 1153985,
+      "running": true
+    },
+    "base_url": "http://127.0.0.1:3382",
+    "ui_url": "http://127.0.0.1:3382/ui",
+    "healthz": {
+      "url": "http://127.0.0.1:3382/healthz",
+      "ok": true,
+      "status": 200,
+      "body": "live"
+    },
+    "readyz": {
+      "url": "http://127.0.0.1:3382/readyz",
+      "ok": true,
+      "status": 200,
+      "body": "ready (mcp startup probe timed out: mcp probe timed out after 2s: context deadline exceeded)"
+    },
+    "control_plane_poll": {
+      "url": "http://127.0.0.1:3382/metrics",
+      "value": 1791085268,
+      "ok": true
+    },
+    "result": "ok"
+  },
+  "authenticated_fixed_mcp": {
+    "status": 200,
+    "count": 13,
+    "request_id": "726f01d7-b3a6-4ea6-aac8-ca7270369def",
+    "session": null
+  },
+  "principal": "chatgpt-tunnel",
+  "hosted_product_invocation": false,
+  "utc": "2026-10-04T03:41:28.035455+00:00",
+  "source_commit": "19d5bdc2814b803b4909232afd15cf8a017b016a",
+  "state": "PASS"
+}

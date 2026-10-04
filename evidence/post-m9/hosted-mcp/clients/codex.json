@@ -1,0 +1,52 @@
+{
+  "schema": "fcpi.native-client/v1",
+  "client": "codex",
+  "native_model": "gpt-6-sol",
+  "utc": "2026-10-04T03:24:58.422Z",
+  "private_run": "native-FuDuQa",
+  "source_commit": "c7fd84ecd614939a2ce368d604555dd269619716",
+  "version": "codex-cli 0.157.1",
+  "cwd": "unrelated private directory",
+  "global_config": "~/.codex/config.toml",
+  "authentication": "login keychain header helper",
+  "tools": [
+    {
+      "name": "firecrawl_scrape",
+      "server": "fcpi",
+      "status": "completed"
+    }
+  ],
+  "usable": true,
+  "arrival": [
+    {
+      "utc": "2026-10-04T03:24:53.487Z",
+      "event": "tool",
+      "client": "m9codex",
+      "tool": "firecrawl_scrape",
+      "is_error": false,
+      "outcome": "ok",
+      "downstream": {
+        "route": "scrape",
+        "status": 200,
+        "code": null,
+        "request_id": "74e8e9d6-6375-4994-8b8d-0415ab107645"
+      },
+      "request_id": "f5bd3b65-c416-4f00-9510-379d31820cd3",
+      "era": "legacy",
+      "protocol_version": "2025-06-18"
+    }
+  ],
+  "arrived": true,
+  "exit_code": 0,
+  "state": "VERIFIED_LIVE",
+  "subscription_usage": {
+    "input_tokens": 106382,
+    "cached_input_tokens": 66944,
+    "cache_write_input_tokens": 0,
+    "output_tokens": 330,
+    "reasoning_output_tokens": 147
+  },
+  "api_equivalent_estimate_usd": null,
+  "invoiced_usd": null,
+  "raw_sha256": "a5c7eff3c7aa8f117e4f6ad91d595938f7c2c82a2aa797177d6c70d939dcbec5"
+}

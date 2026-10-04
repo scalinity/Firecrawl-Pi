@@ -1,0 +1,63 @@
+{
+  "schema": "fcpi.hosted-inventory-fixtures/v1",
+  "utc": "2026-10-04T04:30:09.464143+00:00",
+  "cases": [
+    {
+      "case": "missing-key",
+      "exit_code": 75,
+      "expected_admitted": false,
+      "actual_admitted": false,
+      "plaintext_fixture_not_emitted": true,
+      "state": "PASS"
+    },
+    {
+      "case": "empty-key",
+      "exit_code": 75,
+      "expected_admitted": false,
+      "actual_admitted": false,
+      "plaintext_fixture_not_emitted": true,
+      "state": "PASS"
+    },
+    {
+      "case": "newline-only-key",
+      "exit_code": 75,
+      "expected_admitted": false,
+      "actual_admitted": false,
+      "plaintext_fixture_not_emitted": true,
+      "state": "PASS"
+    },
+    {
+      "case": "missing-auth",
+      "exit_code": 75,
+      "expected_admitted": false,
+      "actual_admitted": false,
+      "plaintext_fixture_not_emitted": true,
+      "state": "PASS"
+    },
+    {
+      "case": "empty-auth",
+      "exit_code": 75,
+      "expected_admitted": false,
+      "actual_admitted": false,
+      "plaintext_fixture_not_emitted": true,
+      "state": "PASS"
+    },
+    {
+      "case": "invalid-auth",
+      "exit_code": 75,
+      "expected_admitted": false,
+      "actual_admitted": false,
+      "plaintext_fixture_not_emitted": true,
+      "state": "PASS"
+    },
+    {
+      "case": "complete",
+      "exit_code": 0,
+      "expected_admitted": true,
+      "actual_admitted": true,
+      "plaintext_fixture_not_emitted": true,
+      "state": "PASS"
+    }
+  ],
+  "state": "PASS"
+}

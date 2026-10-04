@@ -1,0 +1,106 @@
+{
+  "schema": "fcpi.hosted-closeout/v1",
+  "utc": "2026-10-04T04:34:57.260632+00:00",
+  "source_commit": "48f07063e1cf218f8ef14be5e4ef2090bdd60327",
+  "deployed_commit_during_live_calls": "3ea0f520211190a1a18a80da769a90700f23be49",
+  "state": "PASS",
+  "conditions": {
+    "chatgpt_actual_hosted_call": true,
+    "claude_actual_hosted_call": true,
+    "external-tests.json": true,
+    "loopback-tests.json": true,
+    "openai-recovery.json": true,
+    "resources-after-half-close.json": true,
+    "snapshot-diff.json": true,
+    "overview-render.json": true,
+    "cloud-audit.json": true,
+    "redaction.json": true,
+    "redaction-inventory-fixtures.json": true,
+    "private_rest_mcp_healthy": true,
+    "paid_controls": true,
+    "native_claude": true,
+    "native_codex_accepted_model": true,
+    "instructions_equal": true,
+    "historical_evidence_unchanged": true,
+    "all_new_source_committed": true
+  },
+  "proofs": [
+    {
+      "path": "chatgpt-live.json",
+      "sha256": "09ee43fde723ece2efdefb9d93847f95c1b9858f7abc4058f2afa8d9a1bcfdda"
+    },
+    {
+      "path": "claude-live.json",
+      "sha256": "012e31c8a6160a79014522601fa99c1faaac33f6e2ee1afc08281fae4bd40270"
+    },
+    {
+      "path": "external-tests.json",
+      "sha256": "9c0fc31d90a6bc04b751d615342624926f477fb6108ff9877c4ca6e19d67c614"
+    },
+    {
+      "path": "loopback-tests.json",
+      "sha256": "1171741dfafc93d850863645ce8f2b3a7f17f79fbb368d0de01029484d7ff884"
+    },
+    {
+      "path": "openai-recovery.json",
+      "sha256": "cf5c54f1a690053282e351aa40ec9a435f05fe8a62752e503ff806fd9130fdb5"
+    },
+    {
+      "path": "resources-after-half-close.json",
+      "sha256": "cbbbfddb7eb0c16741887d89d429a22010b543738f518ea7abd89e7b9a25c55e"
+    },
+    {
+      "path": "snapshot-before.txt",
+      "sha256": "bb98446ec5061054655bf806347868f365403376622ea0a2a6afe8dc55dc28ff"
+    },
+    {
+      "path": "snapshot-after.txt",
+      "sha256": "9da00f68644590adef035cc1a35e2243d744bbcb8aa1642b5cdcf46002562ac6"
+    },
+    {
+      "path": "snapshot-diff.json",
+      "sha256": "0c4a47d156735e40a6a72fb61877fbeea993f9a5dbb56bf4716cc2469cabbc80"
+    },
+    {
+      "path": "cloud-audit.json",
+      "sha256": "e96a83cf378b0d8f50d553e1a447a5d4a196b0e344a8bfe291ec64cdc8a17f5b"
+    },
+    {
+      "path": "hosted-runtime.json",
+      "sha256": "ca66382497581d67640cf32da370f6475fb89ef173c4a76cdfbceedcec31cd55"
+    },
+    {
+      "path": "status-final.json",
+      "sha256": "72c2d907365450a36a39e0b1aaafb1d443ef71e0bf89777d3067a500a16bd31b"
+    },
+    {
+      "path": "overview-render.json",
+      "sha256": "92306d91e25762ed274507fd48cc586c09e2943e472995070a5f549c61567bd5"
+    },
+    {
+      "path": "redaction-inventory-fixtures.json",
+      "sha256": "96591a222d4a0f629a17559d26ab75662e2317e981a0023db6c326646e9a72a7"
+    },
+    {
+      "path": "review/REVIEW.md",
+      "sha256": "020532b4c9f83aad0a806c08413b4b59b423f3655bbb05555801ecdc9e2a284a"
+    },
+    {
+      "path": "CLOSEOUT.md",
+      "sha256": "c0a1c07e261fb82b76f70c1f1a8ced39dc78b3449919ea845cafb78b903ba5ac"
+    }
+  ],
+  "redaction_report": "redaction.json",
+  "readiness": {
+    "ChatGPT": "VERIFIED_LIVE",
+    "Claude_remote": "VERIFIED_LIVE"
+  },
+  "limitations": [
+    "Codex current default model unsupported by CLI account; native MCP passed with accepted gpt-6-sol override",
+    "Vendor OAuth doctor FAIL retained; runtime health/catalog/recovery PASS",
+    "Funnel incremental resource delta UNKNOWN",
+    "Search relevance not established; engine disconnect diagnostics retained",
+    "Old Claude connector retained pending optional deletion consent"
+  ],
+  "final_archive": "Closing evidence commit deployed after these checks; final response records exact HEAD and Pi marker"
+}

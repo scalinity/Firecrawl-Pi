@@ -1,0 +1,6 @@
+{
+  "state": "FAIL",
+  "criterion": "startup_probe must change to succeeded after MCP return",
+  "observed": "tunnel ready with retained startup timed_out status",
+  "reason": "Vendor records startup probe once, not continuously; raw failure retained. Official live health and authenticated MCP diagnostic follow separately."
+}

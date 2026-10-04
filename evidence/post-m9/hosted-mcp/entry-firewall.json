@@ -1,0 +1,45 @@
+{
+  "tables": {
+    "table ip nat {": {
+      "same": true,
+      "before_lines": 27,
+      "current_lines": 27
+    },
+    "table ip6 mangle {": {
+      "same": true,
+      "before_lines": 11,
+      "current_lines": 11
+    },
+    "table ip6 nat {": {
+      "same": true,
+      "before_lines": 23,
+      "current_lines": 23
+    },
+    "table ip6 filter {": {
+      "same": false,
+      "before_lines": 46,
+      "current_lines": 46
+    },
+    "table ip filter {": {
+      "same": false,
+      "before_lines": 89,
+      "current_lines": 89
+    },
+    "table ip mangle {": {
+      "same": true,
+      "before_lines": 11,
+      "current_lines": 11
+    },
+    "table inet fcpi_guard {": {
+      "same": false,
+      "before_lines": 49,
+      "current_lines": 49
+    },
+    "table ip raw {": {
+      "same": false,
+      "before_lines": 8,
+      "current_lines": 8
+    }
+  },
+  "note": "Current project guard is compared structurally against last raw M9 regression; source marker and all containers match accepted final M9 HEAD."
+}

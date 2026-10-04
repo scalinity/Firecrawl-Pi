@@ -1,0 +1,98 @@
+{
+  "schema": "fcpi.hosted-recovery/v1",
+  "probe_sha256": "c6b7ff1318dd3007b934c710138b770b9f5a811891b1a3a81f22843c3a565ccd",
+  "source_commit": "19d5bdc2814b803b4909232afd15cf8a017b016a",
+  "rows": [
+    {
+      "label": "before-tunnel-restart",
+      "utc": "2026-10-04T03:42:56.119675+00:00",
+      "exit_code": 0,
+      "health": {
+        "locator": {
+          "kind": "port",
+          "port": 3382,
+          "resolved_base_url": "http://127.0.0.1:3382"
+        },
+        "process": {
+          "pid": 1153985,
+          "running": true
+        },
+        "base_url": "http://127.0.0.1:3382",
+        "ui_url": "http://127.0.0.1:3382/ui",
+        "healthz": {
+          "url": "http://127.0.0.1:3382/healthz",
+          "ok": true,
+          "status": 200,
+          "body": "live"
+        },
+        "readyz": {
+          "url": "http://127.0.0.1:3382/readyz",
+          "ok": true,
+          "status": 200,
+          "body": "ready (mcp startup probe timed out: mcp probe timed out after 2s: context deadline exceeded)"
+        },
+        "control_plane_poll": {
+          "url": "http://127.0.0.1:3382/metrics",
+          "value": 1791085359,
+          "ok": true
+        },
+        "result": "ok"
+      }
+    },
+    {
+      "label": "before-catalog",
+      "utc": "2026-10-04T03:42:56.140091+00:00",
+      "status": 200,
+      "tools": 13,
+      "session": null,
+      "request_id": "0619273c-2c49-48dc-a995-3a4f133cd21c",
+      "principal": "chatgpt-tunnel",
+      "hosted_product_invocation": false
+    },
+    {
+      "label": "after-tunnel-restart",
+      "utc": "2026-10-04T03:42:59.180063+00:00",
+      "exit_code": 2,
+      "health": {
+        "locator": {
+          "kind": "port",
+          "port": 3382,
+          "resolved_base_url": "http://127.0.0.1:3382"
+        },
+        "process": {
+          "pid": 1166708,
+          "running": true
+        },
+        "base_url": "http://127.0.0.1:3382",
+        "ui_url": "http://127.0.0.1:3382/ui",
+        "healthz": {
+          "url": "http://127.0.0.1:3382/healthz",
+          "ok": true,
+          "status": 200,
+          "body": "live"
+        },
+        "readyz": {
+          "url": "http://127.0.0.1:3382/readyz",
+          "ok": true,
+          "status": 200,
+          "body": "ready"
+        },
+        "control_plane_poll": {
+          "url": "http://127.0.0.1:3382/metrics",
+          "ok": false,
+          "error": "no successful control-plane poll observed"
+        },
+        "result": "fail"
+      }
+    },
+    {
+      "label": "end",
+      "utc": "2026-10-04T03:42:59.180138+00:00",
+      "state": "FAIL",
+      "error": "Runtime health failed"
+    }
+  ],
+  "exit_code": 1,
+  "state": "FAIL",
+  "hosted_product_invocation": false
+}

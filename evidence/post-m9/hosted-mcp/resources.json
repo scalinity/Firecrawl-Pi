@@ -1,0 +1,48 @@
+{
+  "schema": "fcpi.hosted-resources/v1",
+  "seconds": 60.564654,
+  "samples": 13,
+  "services": {
+    "fcpi-hosted-mcp.service": {
+      "memory_current_mib_min": 12.09375,
+      "memory_current_mib_max": 12.09375,
+      "memory_peak_mib": 16.046875,
+      "cpu_one_core_percent": 0.0,
+      "pid_unchanged": true,
+      "active_all": true,
+      "restarts_unchanged": true
+    },
+    "fcpi-openai-tunnel.service": {
+      "memory_current_mib_min": 11.90625,
+      "memory_current_mib_max": 12.90625,
+      "memory_peak_mib": 18.609375,
+      "cpu_one_core_percent": 0.04140368737184564,
+      "pid_unchanged": true,
+      "active_all": true,
+      "restarts_unchanged": true
+    },
+    "tailscaled.service": {
+      "memory_current_mib_min": 100.46875,
+      "memory_current_mib_max": 102.5,
+      "memory_peak_mib": 104.265625,
+      "cpu_one_core_percent": 0.5590339870512593,
+      "pid_unchanged": true,
+      "active_all": true,
+      "restarts_unchanged": true
+    }
+  },
+  "combined_added_ram_mib_max": 25.0,
+  "minimum_host_available_mib": 4742.0625,
+  "conditions": {
+    "bounded_sixty_second_samples": true,
+    "host_headroom": true,
+    "slice_cap_preserved": true,
+    "slice_below_high": true,
+    "no_host_oom_change": true,
+    "no_throttle": true,
+    "stable_services": true
+  },
+  "state": "PASS",
+  "funnel_delta": "UNKNOWN: shares existing tailscaled process; no pre-Funnel process RAM measurement",
+  "new_24h_soak": "NOT_SCHEDULED"
+}

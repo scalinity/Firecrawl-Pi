@@ -1,0 +1,12 @@
+{
+  "candidate": "a5e1c90",
+  "reported_finding": "CA1-1",
+  "remote_key_suffix_bytes": [
+    10
+  ],
+  "expected": [
+    10
+  ],
+  "state": "PASS",
+  "disposition": "REJECTED: old source already encoded one newline; restrictive creation mode fixed separately"
+}

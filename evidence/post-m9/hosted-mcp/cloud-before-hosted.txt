@@ -1,0 +1,4 @@
+container=c4bef2639f33 started_at=2026-10-04T02:01:53.310588352Z
+lines=92 search=0 model_call=0 parse=0 extraction=0 proxy_request=0 residential_route=0 budget_loaded=1 selection_loaded=1 acquisition=86 acquisition_with_route_fields=86 route_held=0 route_released=0 proxy_reconciled=0 enhanced=0 webhook_attempt=0 renders_with_extras=0 provider_key_like=0 client_token_like=0 bearer=0 proxy_authorization=0 basic_credential=0 session_username=0 signature=0 fixture_credential=0 fixture_credential_readable=yes zyte_fixture_key=0 zyte_fixture_key_readable=yes webhook_secret=0 webhook_secret_readable=yes cloud_host=0
+budget_policy_sha256_logged=2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea budget_policy_sha256_deployed=2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea
+switches_logged={"browser_extras":true,"webhook_delivery":"enabled","enhancers":["zyte-api","fcpi-fixture-zyte","fcpi-fixture-zyte-small"]}

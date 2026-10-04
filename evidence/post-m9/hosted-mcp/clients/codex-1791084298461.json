@@ -1,0 +1,22 @@
+{
+  "schema": "fcpi.native-client/v1",
+  "client": "codex",
+  "native_model": "current global configuration",
+  "utc": "2026-10-04T03:20:26.120Z",
+  "private_run": "native-aFaBBr",
+  "source_commit": "c7fd84ecd614939a2ce368d604555dd269619716",
+  "version": "codex-cli 0.157.1",
+  "cwd": "unrelated private directory",
+  "global_config": "~/.codex/config.toml",
+  "authentication": "login keychain header helper",
+  "tools": [],
+  "usable": false,
+  "arrival": [],
+  "arrived": false,
+  "exit_code": 1,
+  "state": "CONFIGURED_PENDING_LIVE",
+  "subscription_usage": null,
+  "api_equivalent_estimate_usd": null,
+  "invoiced_usd": null,
+  "raw_sha256": "2efc9c6eedb6f1edf66d63725930040b3da0535dc64df47aa57cb735c757715a"
+}

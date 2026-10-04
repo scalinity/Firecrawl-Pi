@@ -1,0 +1,10 @@
+dedicated hosted credentials configured; no secret output
+0.0.15+a390c168ff1b2d14e73a95991c186c6aba3ff5a0 (git sha: a390c168ff1b2d14e73a95991c186c6aba3ff5a0)
+Claude loopback ingress started; OpenAI tunnel awaits dedicated runtime key and tunnel identity; Funnel unchanged
+Available on the internet:
+
+https://<hosted-mcp-host>/
+|-- proxy http://127.0.0.1:3381
+
+Funnel started and running in the background.
+To disable the proxy, run: tailscale funnel --https=443 off

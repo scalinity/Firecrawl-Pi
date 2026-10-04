@@ -1,0 +1,6 @@
+{
+  "container_id": "c7be7805a31435cdba578bc3458b3dc8d1f9a9b5722782fe69393a73d5f33e8a",
+  "container_name": "/fcpi-mcp-gateway-1",
+  "sandbox_key": "/var/run/docker/netns/664e66b21805",
+  "started_at": "2026-10-04T03:45:14.388415793Z"
+}

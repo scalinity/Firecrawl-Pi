@@ -1,0 +1,22 @@
+{
+  "utc": "2026-10-04T03:54:07.163157+00:00",
+  "deployed_commit": "19d5bdc2814b803b4909232afd15cf8a017b016a",
+  "tunnel_client": {
+    "version": "0.0.15+a390c168ff1b2d14e73a95991c186c6aba3ff5a0 (git sha: a390c168ff1b2d14e73a95991c186c6aba3ff5a0)",
+    "binary_sha256": "7764a78fc39ee04d1fc2ae74436df019d85de2a9d93de7c82030e14ef5ae93a0"
+  },
+  "tailscale": {
+    "version": "1.102.4\n  tailscale commit: 3caf7d9e7dcaba589cfc58beda596929733e4fea\n  long version: 1.102.4-t3caf7d9e7-g084ee3b64\n  other commit: 084ee3b64537a1276e56fc38cdf0a711da9f4936\n  go version: go1.26.6 (tailscale/go 7275f792d4)",
+    "binary_sha256": "93c3558f592200133b377dd9f96eac9b278b9057f7ae6b8656b15f4fa05506d0"
+  },
+  "python": {
+    "version": "Python 3.13.5",
+    "binary_sha256": "273cb29e073b748379ba546affa562283ed795f84ff230349e12ce610e60975c",
+    "package_version": "3.13.5-2+deb13u5"
+  },
+  "units": {
+    "fcpi-hosted-mcp.service": "ea7c01e8b0d83f5944b65ddacc7e02aeddd2d53663b100c2c7b201097ae26396",
+    "fcpi-openai-tunnel.service": "87085611bd378f38767eff51a654cf7e80fdc69dad56a27efe5f86827af7fe5f"
+  },
+  "configured_claude_port": "443"
+}

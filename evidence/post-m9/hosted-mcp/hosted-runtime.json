@@ -1,0 +1,82 @@
+{
+  "utc": "2026-10-04T04:11:04.255454+00:00",
+  "deployed_commit": "3ea0f520211190a1a18a80da769a90700f23be49",
+  "host_sha256": "8909c4811ef1d1fe72510cd3c756034cce055d163558e001eb28441eae3cabd9",
+  "serve_funnel": {
+    "TCP": {
+      "443": {
+        "HTTPS": true
+      },
+      "8443": {
+        "HTTPS": true
+      }
+    },
+    "Web": {
+      "<pi-hostname>:443": {
+        "Handlers": {
+          "/": {
+            "Proxy": "http://127.0.0.1:3381"
+          }
+        }
+      },
+      "<pi-hostname>:8443": {
+        "Handlers": {
+          "/": {
+            "Proxy": "http://127.0.0.1:3380"
+          }
+        }
+      }
+    },
+    "AllowFunnel": {
+      "<pi-hostname>:443": true
+    }
+  },
+  "units": {
+    "fcpi-hosted-mcp.service": {
+      "MainPID": "1209717",
+      "NRestarts": "0",
+      "Slice": "fcpi.slice",
+      "CPUQuotaPerSecUSec": "200ms",
+      "MemoryMax": "67108864",
+      "TasksMax": "16",
+      "DynamicUser": "yes",
+      "ActiveState": "active",
+      "UnitFileState": "enabled"
+    },
+    "fcpi-openai-tunnel.service": {
+      "MainPID": "1171260",
+      "NRestarts": "0",
+      "Slice": "fcpi.slice",
+      "CPUQuotaPerSecUSec": "300ms",
+      "MemoryMax": "201326592",
+      "TasksMax": "64",
+      "DynamicUser": "yes",
+      "ActiveState": "active",
+      "UnitFileState": "enabled"
+    }
+  },
+  "credentials": {
+    "openai-runtime-key": {
+      "mode": "0o600",
+      "uid": 0,
+      "value_sha256": "99dce717d101270602bc7b84f13ab7beee2dc84ebdc923ab757519ae4d3b5b0c"
+    },
+    "openai-mcp-auth": {
+      "mode": "0o600",
+      "uid": 0,
+      "value_sha256": "95e05e00ef39c472126ba1fc0f8204939ea83750f0f9ffc34f2d0fa7e4d73b87"
+    },
+    "chatgpttunnel.token": {
+      "mode": "0o600",
+      "uid": 0,
+      "value_sha256": "05b32a44c48a5f372f1e908d878a09daab8d607c14da3a15028748bf1f5f46b7"
+    },
+    "clauderemote.token": {
+      "mode": "0o600",
+      "uid": 0,
+      "value_sha256": "e2b9e02e587314b85686a39cf9c6ab00a1c6a8d800b2b6bce923364833547c7d"
+    }
+  },
+  "claude_configured_port": "443",
+  "claude_token_sha256": "e2b9e02e587314b85686a39cf9c6ab00a1c6a8d800b2b6bce923364833547c7d"
+}

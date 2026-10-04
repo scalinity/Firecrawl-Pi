@@ -1,0 +1,148 @@
+{
+  "schema": "fcpi.hosted-snapshot-diff/v1",
+  "utc": "2026-10-04T04:25:23.619423+00:00",
+  "state": "PASS",
+  "conditions": {
+    "all_changes_attributed": true,
+    "same_boot": true,
+    "same_container_rows": true,
+    "firewall_unchanged": true,
+    "network_rules_unchanged": true,
+    "modules_swap_unchanged": true
+  },
+  "before_sha256": "bb98446ec5061054655bf806347868f365403376622ea0a2a6afe8dc55dc28ff",
+  "after_sha256": "9da00f68644590adef035cc1a35e2243d744bbcb8aa1642b5cdcf46002562ac6",
+  "changes": [
+    {
+      "section": "systemd_enabled",
+      "change": "added",
+      "line": "fcpi-hosted-mcp.service",
+      "count": 1,
+      "reason": "Authorized new hosted services"
+    },
+    {
+      "section": "systemd_enabled",
+      "change": "added",
+      "line": "fcpi-openai-tunnel.service",
+      "count": 1,
+      "reason": "Authorized new hosted services"
+    },
+    {
+      "section": "ss_listen",
+      "change": "removed",
+      "line": "tcp 127.0.0.1:5053 users:((\"dnscrypt-proxy\",pid=1141,fd=7),(\"systemd\",pid=1,fd=147))",
+      "count": 1,
+      "reason": "Descriptor numbers changed; same DNS listener and process IDs"
+    },
+    {
+      "section": "ss_listen",
+      "change": "removed",
+      "line": "udp 127.0.0.1:5053 users:((\"dnscrypt-proxy\",pid=1141,fd=8),(\"systemd\",pid=1,fd=148))",
+      "count": 1,
+      "reason": "Descriptor numbers changed; same DNS listener and process IDs"
+    },
+    {
+      "section": "ss_listen",
+      "change": "added",
+      "line": "tcp 127.0.0.1:3381 users:((\"python3\",pid=1209717,fd=6))",
+      "count": 1,
+      "reason": "Authorized loopback ingress and tunnel health listeners"
+    },
+    {
+      "section": "ss_listen",
+      "change": "added",
+      "line": "tcp 127.0.0.1:3382 users:((\"tunnel-client\",pid=1171260,fd=3))",
+      "count": 1,
+      "reason": "Authorized loopback ingress and tunnel health listeners"
+    },
+    {
+      "section": "ss_listen",
+      "change": "added",
+      "line": "tcp 127.0.0.1:5053 users:((\"dnscrypt-proxy\",pid=1141,fd=7),(\"systemd\",pid=1,fd=195))",
+      "count": 1,
+      "reason": "Descriptor numbers changed; same DNS listener and process IDs"
+    },
+    {
+      "section": "ss_listen",
+      "change": "added",
+      "line": "udp 127.0.0.1:5053 users:((\"dnscrypt-proxy\",pid=1141,fd=8),(\"systemd\",pid=1,fd=197))",
+      "count": 1,
+      "reason": "Descriptor numbers changed; same DNS listener and process IDs"
+    },
+    {
+      "section": "findmnt",
+      "change": "removed",
+      "line": "/run/docker/netns/3fd3bb7f6c77 nsfs[net:[4026532689]] nsfs rw",
+      "count": 1,
+      "reason": "MCP stop/start recovery changed its network namespace; same container ID; current namespace verified in mcp-network-observation.json"
+    },
+    {
+      "section": "findmnt",
+      "change": "added",
+      "line": "/run/credentials/fcpi-openai-tunnel.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap",
+      "count": 1,
+      "reason": "systemd runtime credential mount for the authorized tunnel"
+    },
+    {
+      "section": "findmnt",
+      "change": "added",
+      "line": "/run/docker/netns/664e66b21805 nsfs[net:[4026532690]] nsfs rw",
+      "count": 1,
+      "reason": "MCP stop/start recovery changed its network namespace; same container ID; current namespace verified in mcp-network-observation.json"
+    },
+    {
+      "section": "systemd_running",
+      "change": "removed",
+      "line": "session-4198.scope",
+      "count": 1,
+      "reason": "Snapshot SSH session"
+    },
+    {
+      "section": "systemd_running",
+      "change": "added",
+      "line": "fcpi-hosted-mcp.service",
+      "count": 1,
+      "reason": "Authorized new hosted services"
+    },
+    {
+      "section": "systemd_running",
+      "change": "added",
+      "line": "fcpi-openai-tunnel.service",
+      "count": 1,
+      "reason": "Authorized new hosted services"
+    },
+    {
+      "section": "systemd_running",
+      "change": "added",
+      "line": "session-5182.scope",
+      "count": 1,
+      "reason": "Snapshot SSH session"
+    },
+    {
+      "section": "meta",
+      "change": "removed",
+      "line": "2026-10-04T02:57:15Z",
+      "count": 1,
+      "reason": "Elapsed snapshot time"
+    },
+    {
+      "section": "meta",
+      "change": "added",
+      "line": "2026-10-04T04:20:29Z",
+      "count": 1,
+      "reason": "Elapsed snapshot time"
+    }
+  ],
+  "unexplained": [],
+  "unchanged_sections_sha256": {
+    "docker_activation": "b68747a187e6aa578b46a63097aa4fd9bb96db0fc58ec0c00ffa186351a504b3",
+    "docker_ps": "f77cda457456f0d810f7ab509996aecc931ff80b483edaeb2ab02113d11eb84f",
+    "lsmod": "b2f1d029bf32165fc278471aa23264c6a34d3701989bad9b67d292e04e631c6e",
+    "firewall": "36043c93c3fcf410b9f92b0eb7a72906eda35aa90fbe0d4233079d5ad1cdfc43",
+    "swap_zram": "d5bb88e3de5dee4ee791f255151922e1d63bcd0f2640c0e851de6ab6a58c71ad",
+    "nft_tables": "9db984575b5066d909496fdff4dd65322968a31258fad8125dc181cc4d84bdfc",
+    "nft_chains": "d5b97eb0e7bbfe3576f6dae85aa2a6f792ec1cf61d46b677b64602d29d991d7d",
+    "forwarding": "da3b4ed93097061ff95fdff7bb761e92ab717f8e9184b33a29c7ada6c02091c9"
+  },
+  "scope": "Post-M9 session only; older M9 entry comparison retained separately. Serve/Funnel and systemd bounds are independently captured in hosted-runtime.json. No host reboot was performed."
+}

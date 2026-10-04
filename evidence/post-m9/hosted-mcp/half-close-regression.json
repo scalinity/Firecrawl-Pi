@@ -1,0 +1,24 @@
+{
+  "utc": "2026-10-04T03:58:07.303586+00:00",
+  "baseline_commit": "19d5bdc2814b803b4909232afd15cf8a017b016a",
+  "test": "complete authenticated request, write_eof, delayed JSON/SSE, continue reading",
+  "records": [
+    {
+      "label": "before",
+      "state": "FAIL",
+      "tests": 1,
+      "errors": 0,
+      "failures": 1,
+      "output": "F\n======================================================================\nFAIL: test_half_close_still_receives_delayed_json_and_sse (hosted_fixture.Tests.test_half_close_still_receives_delayed_json_and_sse)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/runners.py\", line 128, in run\n    return self._loop.run_until_complete(task)\n           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^\n  File \"/opt/homebrew/Cellar/python@3.14/3.14.8/Frameworks/Python.framework/Versions/3.14/lib/python3.14/asyncio/base_events.py\", line 720, in run_until_complete\n    return future.result()\n           ~~~~~~~~~~~~~^^\n  File \"<repository-root>/services/hosted-mcp/test_ingress.py\", line 156, in test_half_close_still_receives_delayed_json_and_sse\n    self.assertEqual(actual, response)\n    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^\nAssertionError: b'' != b'HTTP/1.1 200 OK\\r\\nContent-Length: 2\\r\\n\\r\\n{}'\n\n----------------------------------------------------------------------\nRan 1 test in 0.007s\n\nFAILED (failures=1)\n"
+    },
+    {
+      "label": "after",
+      "state": "PASS",
+      "tests": 1,
+      "errors": 0,
+      "failures": 0,
+      "output": ".\n----------------------------------------------------------------------\nRan 1 test in 0.030s\n\nOK\n"
+    }
+  ],
+  "state": "PASS"
+}

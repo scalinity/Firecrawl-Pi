@@ -1,0 +1,7 @@
+created chatgpttunnel principal=chatgpt-tunnel scopes=read,scrape,map,search,crawl,batch,extract token_file=/etc/firecrawl-pi/secrets/clients/chatgpttunnel.token
+created clauderemote principal=claude-remote scopes=read,scrape,map,search,crawl,batch,extract token_file=/etc/firecrawl-pi/secrets/clients/clauderemote.token
+dedicated hosted credentials configured; no secret output
+0.0.15+a390c168ff1b2d14e73a95991c186c6aba3ff5a0 (git sha: a390c168ff1b2d14e73a95991c186c6aba3ff5a0)
+Claude loopback ingress started; OpenAI tunnel awaits dedicated runtime key and tunnel identity; Funnel unchanged
+Created symlink '/etc/systemd/system/multi-user.target.wants/fcpi-hosted-mcp.service' → '/etc/systemd/system/fcpi-hosted-mcp.service'.
+Created symlink '/etc/systemd/system/multi-user.target.wants/fcpi-openai-tunnel.service' → '/etc/systemd/system/fcpi-openai-tunnel.service'.

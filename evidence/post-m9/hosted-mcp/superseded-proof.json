@@ -1,0 +1,15 @@
+{
+  "utc": "2026-10-04T04:02:21.192455+00:00",
+  "reason": "Prior driver runs derived Host from stale :10000 configuration while using TLS port443. They do not substantiate bare/default443 authority or loaded corrected ingress source. Historical files retained. Fresh runs record configured_port=443 and code_dirty.",
+  "superseded_files": [
+    "external-tests-1791084274345.json",
+    "external-tests-1791085902545.json",
+    "external-tests-1791084322837.json",
+    "external-tests-1791084403860.json",
+    "loopback-tests-1791084305289.json",
+    "loopback-tests-1791084888451.json",
+    "loopback-tests-1791085936981.json",
+    "external-tests-1791084906921.json"
+  ],
+  "owner_reported_error": "Claude URL preflight HTTP421 at03:49:28Z; live config still expected old :10000 authority; committed migration and service restart applied03:50UTC."
+}

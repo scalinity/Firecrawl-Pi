@@ -1,0 +1,204 @@
+{
+  "schema": "fcpi.hosted-recovery/v1",
+  "probe_sha256": "379121bdb1ad221c7c35b50aad044480f69d35d31bd35bfe5a0794bf337607ef",
+  "source_commit": "19d5bdc2814b803b4909232afd15cf8a017b016a",
+  "rows": [
+    {
+      "label": "before-tunnel-restart",
+      "utc": "2026-10-04T03:44:41.557571+00:00",
+      "exit_code": 0,
+      "health": {
+        "locator": {
+          "kind": "port",
+          "port": 3382,
+          "resolved_base_url": "http://127.0.0.1:3382"
+        },
+        "process": {
+          "pid": 1166708,
+          "running": true
+        },
+        "base_url": "http://127.0.0.1:3382",
+        "ui_url": "http://127.0.0.1:3382/ui",
+        "healthz": {
+          "url": "http://127.0.0.1:3382/healthz",
+          "ok": true,
+          "status": 200,
+          "body": "live"
+        },
+        "readyz": {
+          "url": "http://127.0.0.1:3382/readyz",
+          "ok": true,
+          "status": 200,
+          "body": "ready"
+        },
+        "control_plane_poll": {
+          "url": "http://127.0.0.1:3382/metrics",
+          "value": 1791085467,
+          "ok": true
+        },
+        "result": "ok"
+      },
+      "wait_attempts": 0
+    },
+    {
+      "label": "before-catalog",
+      "utc": "2026-10-04T03:44:41.577616+00:00",
+      "status": 200,
+      "tools": 13,
+      "session": null,
+      "request_id": "ad3a96f1-f3a5-42de-9d7d-5731856a0e24",
+      "principal": "chatgpt-tunnel",
+      "hosted_product_invocation": false
+    },
+    {
+      "label": "after-tunnel-restart",
+      "utc": "2026-10-04T03:45:13.553496+00:00",
+      "exit_code": 0,
+      "health": {
+        "locator": {
+          "kind": "port",
+          "port": 3382,
+          "resolved_base_url": "http://127.0.0.1:3382"
+        },
+        "process": {
+          "pid": 1171260,
+          "running": true
+        },
+        "base_url": "http://127.0.0.1:3382",
+        "ui_url": "http://127.0.0.1:3382/ui",
+        "healthz": {
+          "url": "http://127.0.0.1:3382/healthz",
+          "ok": true,
+          "status": 200,
+          "body": "live"
+        },
+        "readyz": {
+          "url": "http://127.0.0.1:3382/readyz",
+          "ok": true,
+          "status": 200,
+          "body": "ready"
+        },
+        "control_plane_poll": {
+          "url": "http://127.0.0.1:3382/metrics",
+          "value": 1791085512,
+          "ok": true
+        },
+        "result": "ok"
+      },
+      "wait_attempts": 14
+    },
+    {
+      "label": "after-catalog",
+      "utc": "2026-10-04T03:45:13.559099+00:00",
+      "status": 200,
+      "tools": 13,
+      "session": null,
+      "request_id": "46535c82-aa8d-4640-ac67-df16b2966755",
+      "principal": "chatgpt-tunnel",
+      "hosted_product_invocation": false
+    },
+    {
+      "label": "mcp-down-tunnel-still-polling",
+      "utc": "2026-10-04T03:45:14.305754+00:00",
+      "exit_code": 0,
+      "health": {
+        "locator": {
+          "kind": "port",
+          "port": 3382,
+          "resolved_base_url": "http://127.0.0.1:3382"
+        },
+        "process": {
+          "pid": 1171260,
+          "running": true
+        },
+        "base_url": "http://127.0.0.1:3382",
+        "ui_url": "http://127.0.0.1:3382/ui",
+        "healthz": {
+          "url": "http://127.0.0.1:3382/healthz",
+          "ok": true,
+          "status": 200,
+          "body": "live"
+        },
+        "readyz": {
+          "url": "http://127.0.0.1:3382/readyz",
+          "ok": true,
+          "status": 200,
+          "body": "ready"
+        },
+        "control_plane_poll": {
+          "url": "http://127.0.0.1:3382/metrics",
+          "value": 1791085512,
+          "ok": true
+        },
+        "result": "ok"
+      },
+      "wait_attempts": 0
+    },
+    {
+      "label": "private-rest-while-mcp-down",
+      "utc": "2026-10-04T03:45:14.319573+00:00",
+      "status": 200
+    },
+    {
+      "label": "after-mcp-return",
+      "utc": "2026-10-04T03:45:20.775062+00:00",
+      "exit_code": 0,
+      "health": {
+        "locator": {
+          "kind": "port",
+          "port": 3382,
+          "resolved_base_url": "http://127.0.0.1:3382"
+        },
+        "process": {
+          "pid": 1171260,
+          "running": true
+        },
+        "base_url": "http://127.0.0.1:3382",
+        "ui_url": "http://127.0.0.1:3382/ui",
+        "healthz": {
+          "url": "http://127.0.0.1:3382/healthz",
+          "ok": true,
+          "status": 200,
+          "body": "live"
+        },
+        "readyz": {
+          "url": "http://127.0.0.1:3382/readyz",
+          "ok": true,
+          "status": 200,
+          "body": "ready"
+        },
+        "control_plane_poll": {
+          "url": "http://127.0.0.1:3382/metrics",
+          "value": 1791085512,
+          "ok": true
+        },
+        "result": "ok"
+      },
+      "wait_attempts": 0
+    },
+    {
+      "label": "after-mcp-return-catalog",
+      "utc": "2026-10-04T03:45:20.947922+00:00",
+      "status": 200,
+      "tools": 13,
+      "session": null,
+      "request_id": "830c9780-f27d-4d2e-8235-0a004bd15b73",
+      "principal": "chatgpt-tunnel",
+      "hosted_product_invocation": false
+    },
+    {
+      "label": "identities",
+      "utc": "2026-10-04T03:45:20.990144+00:00",
+      "mcp_start_changed": true,
+      "gateway_start_unchanged": true
+    },
+    {
+      "label": "end",
+      "utc": "2026-10-04T03:45:20.990207+00:00",
+      "state": "PASS"
+    }
+  ],
+  "exit_code": 0,
+  "state": "PASS",
+  "hosted_product_invocation": false
+}
