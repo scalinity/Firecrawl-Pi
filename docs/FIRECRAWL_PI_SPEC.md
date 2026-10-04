@@ -599,24 +599,27 @@ Bind the gateway's host publication only to loopback, with a non-conflicting por
 
 For local clients that cannot use Tailscale, prefer a deliberately configured LAN HTTPS path with the same application authentication. Plain HTTP is acceptable only over host loopback or explicitly isolated service networks; do not silently weaken TLS for remote clients. Certificate expiry and renewal failure are observable operational events.
 
-### 19.2 Hosted access without opening the Pi
+### 19.2 Selected hosted reachability
 
-**Preferred optional OpenAI route:** use OpenAI Secure MCP Tunnel when the user's platform organization, product, and account controls support it. The documented tunnel client makes outbound requests and forwards them to a local MCP endpoint, avoiding an inbound public Pi port. It is an OpenAI-specific reachability option, not a universal bridge for all hosted agents. Account permissions, tunnel association, and the actual ChatGPT/API product surface must be verified. [V: O19–O20]
+**ChatGPT: VERIFIED_LIVE.** OpenAI Secure MCP Tunnel runs on the Pi as non-root `fcpi-openai-tunnel.service`, using pinned ARM64 tunnel-client v0.0.15. It polls OpenAI over outbound HTTPS and forwards only to fixed `http://127.0.0.1:3380/mcp`; this path adds no inbound public listener and does not depend on the Mac. A dedicated restricted Platform runtime key has only Tunnels Read + Use. The tunnel is associated with the owner's ChatGPT workspace. Separate `chatgpt-tunnel` bearer authentication is injected from a systemd credential file for discovery and tool requests. Product “No authentication” means no OAuth flow; the private MCP remains authenticated. The Pro account's current Plugins → Add → Create custom MCP server → Tunnel UI is verified, including a real Firecrawl Pi scrape; full write/modify product capability is not claimed. [V: O19–O21]
 
-The tunnel client uses a dedicated local gateway credential and bounded tool scopes; the tunnel's API key is distinct from LLM billing and Firecrawl credentials. Pin its release/digest, verify forwarding of modern headers and JSON/SSE, and run the same authentication/cloud-independence tests. Keep tunnel availability out of the core readiness dependency graph. Do not assume its existence enables custom MCP tools in every ChatGPT mode.
+**Claude remote: VERIFIED_LIVE.** The selected HTTPS transport is owner-approved Tailscale Funnel on port443, forwarding to the non-root loopback-only `fcpi-hosted-mcp.service` at127.0.0.1:3381. It accepts only exact `/mcp`, only the configured hostname (bare or explicit443), and only the dedicated `claude-remote` bearer credential. Every other route is404; REST/admin/health/artifacts and data services remain private. The ingress forwards only to fixed127.0.0.1:3380/mcp, strips spoofable identity headers, denies redirects, and bounds headers16KiB/body1MiB/response8MiB, active exchanges2, connections8 and exchange time130s. Downstream gateway authentication, Origin and SSRF checks remain enabled. The current Claude fixed request-header mechanism supports `Authorization: Bearer <token>` with No sign-in; it is not a public OAuth conformance claim. The credential is kept in macOS Keychain; `scripts/hosted-mcp/claude-token.sh` copies the complete header value. Public technical tests and a real Claude cloud fixture scrape pass, with dedicated principal and MCP/backend request-ID correlation. The verified connector is named Firecrawl Pi HTTPS; the failed old-port entry is not this connection. Private Tailscale Serve stays on8443. [V: O22–O23]
 
-For a different hosted agent that cannot join the Tailnet, the approved migration path is an outbound tunnel or HTTPS reverse-proxy ingress with **MCP-compatible OAuth authorization**, not an unauthenticated public URL. Cloudflare Tunnel or Tailscale Funnel can be evaluated as transport options, but neither replaces application authentication. They are not selected or activated by this specification. A browser-only access challenge or a service-token mechanism unsupported by the actual MCP client is not a complete interoperability solution.
+Both services use bounded systemd resources in the unchanged fcpi.slice. Start the OpenAI runtime after network/stack startup, with its configured startup probe and fixed MCP destination; official runtime health verifies ready/control-plane polling. Service failure is independent of private REST/MCP. Tunnel restart and MCP stop/return recovery are proven. Vendor doctor incorrectly assumes unauthenticated OAuth discovery for this static-header profile and remains a recorded diagnostic failure; official runtime health and authenticated catalog checks pass. Request-direction TCP half-close preserves delayed JSON/SSE responses; actual reset/failed writes cancel, and uncertain graceful departure remains bounded by the exchange deadline. Neither path changes provider budgets or permits Firecrawl Cloud. Post-acceptance evidence lives only under `evidence/post-m9/hosted-mcp/`; historical M9 acceptance is immutable.
+
+Anthropic also documents an MCP tunnel research preview for Managed Agents/Messages API; it is not selected for the Claude web/Desktop connector path or claimed as verified here. [O24]
 
 ```mermaid
 flowchart TB
-    L[Mac / LAN / Tailnet clients] --> TS[Private Tailnet HTTPS]
-    TS --> G[Gateway on Pi loopback]
-    O[Supported hosted OpenAI product] --> OT[OpenAI tunnel service]
-    P[Optional outbound tunnel-client] --> OT
-    P --> G
-    X[Other hosted provider] -. no direct LAN reachability .-> N[Needs separately approved authenticated ingress]
-    N -. disabled initially .-> G
-    G --> M[MCP]
+    L[Mac / LAN / Tailnet clients] --> TS[Private Tailnet HTTPS 8443]
+    TS --> G[Private gateway on Pi loopback]
+    O[ChatGPT Firecrawl Pi app] --> OT[OpenAI tunnel service]
+    P[Pi outbound tunnel-client] --> OT
+    P -->|fixed authenticated /mcp| G
+    C[Claude cloud connector] --> TF[Public HTTPS Funnel 443]
+    TF --> I[Loopback MCP-only authenticated ingress]
+    I -->|fixed /mcp only| G
+    G --> M[Stateless MCP]
     G --> F[Private REST]
 ```
 
@@ -1113,11 +1116,11 @@ Do not manufacture a single numerical “Cloud parity percentage” from arbitra
 | Screenshots/actions | Managed advanced browser | Bounded custom browser integration | Partial | VERIFIED_LOCAL: controlled captures/actions pass; No arbitrary browser session/CDP/product parity; AC11 |
 | Agent research | Cloud Agent product | Calling agents compose tools | Functional workflow substitution | VERIFIED_LIVE: complete search → map → retrieve → extract → poll flow passed in the closed retry window; original admission failure retained; Not the same Cloud Agent API/implementation |
 | Modern MCP | Product/client-dependent server | Explicit stable stateless SDK adapter | Required standards target | VERIFIED_LIVE: stateless/restart/connection tests and two native global clients pass; Actual wire/client verification; AC12/13 |
-| Hosted access | Public managed endpoint | Optional account-gated tunnel | Partial until activated | NOT_REQUIRED: hosted profile NOT_ENABLED; onboarding SUPPORTED_NOT_CONFIGURED; Per-product reachability/auth; AC22 |
+| Hosted access | Public managed endpoint | OpenAI outbound tunnel; authenticated Claude MCP-only Funnel | Product-specific access | ChatGPT VERIFIED_LIVE; Claude VERIFIED_LIVE with public technical checks PASS; dedicated identities, zero Cloud attempts; post-M9 evidence |
 | Operations/recovery | Vendor-operated service | Owner-operated backup/health/recovery | Dependable personal-service target | VERIFIED_LIVE: current reboot/fault/restore/rollback and bounded incident proof pass; Single power/network/storage fault domain; AC15/18/19 |
 | Cloud credit independence | Cloud account quota | No Cloud calls on supported paths | Complete target for selected subset | VERIFIED_LIVE: current denial interpretation and actual paid/unpaid zero-Cloud scans pass; Requires zero-call proof; AC24 |
 
-The row states above describe current M9 evidence, with source hashes and per-gate detail in `evidence/M9/capabilities.json` and `evidence/M9/acceptance.json`. M9 full acceptance is still ungranted. Production paid dispatch is false and all paid provider caps are zero, so verified external capability requires a new owner-approved window to execute. Exact Cloud product internals, proprietary research/index services, enterprise features, globally managed scale, interactive Browser/Interact sessions, specialized media extraction, and managed SLA remain unavailable or outside scope. Supported outcome substitutes are explicitly named rather than labeled native parity. [F01, F15–F21]
+The row states above use accepted revision2 M9 evidence in `evidence/M9/corpus-v2/acceptance.json`, with hosted access separately recorded under `evidence/post-m9/hosted-mcp/`. Historical M9 acceptance and its conditional AC22 NOT_REQUIRED record are unchanged. Production paid dispatch is false and all paid provider caps are zero, so verified external capability requires a new owner-approved window to execute. Exact Cloud product internals, proprietary research/index services, enterprise features, globally managed scale, interactive Browser/Interact sessions, specialized media extraction, and managed SLA remain unavailable or outside scope. Supported outcome substitutes are explicitly named rather than labeled native parity. [F01, F15–F21]
 
 ## 34. Risks and mitigations
 
@@ -1262,6 +1265,10 @@ Research date: **2026-09-22**. Public vendor documentation describes products; p
 | O18 | https://restic.readthedocs.io/en/stable/030_preparing_a_new_repo.html and https://restic.readthedocs.io/en/stable/060_forget.html | Encrypted repository/destinations and retention/prune semantics; configured recovery remains a project test obligation |
 | O19 | https://developers.openai.com/api/docs/guides/secure-mcp-tunnels | Outbound-only hosted connectivity, account association and limitations |
 | O20 | https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt | Product-level MCP reachability/availability constraints |
+| O21 | https://github.com/openai/tunnel-client/tree/v0.0.15 | Pinned ARM64 client, static headers, credential references, runtime permissions and health |
+| O22 | https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp | Remote connector network/authentication requirements and fixed request headers |
+| O23 | https://tailscale.com/docs/features/tailscale-funnel | Public HTTPS Funnel, supported ports and owner consent |
+| O24 | https://github.com/anthropics/claude-plugins-official/blob/main/plugins/mcp-tunnels/README.md | Anthropic MCP tunnel research preview, Managed Agents/Messages API scope |
 
 **End of canonical specification.** Implementation and milestone status are governed by `FIRECRAWL_PI_MILESTONES.md`.
 
