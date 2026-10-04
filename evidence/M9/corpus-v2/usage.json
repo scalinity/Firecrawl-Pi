@@ -1,0 +1,55 @@
+{
+  "utc": "2026-10-04T01:42:25.800Z",
+  "source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+  "new_corpus": "NOT_RUN",
+  "new_provider_calls": 0,
+  "new_paid_cost_micro_usd": 0,
+  "new_parser_free_credits": 0,
+  "project_ledger": {
+    "reservations": [
+      {
+        "state": "RELEASED",
+        "count": 1
+      },
+      {
+        "state": "SETTLED",
+        "count": 36
+      },
+      {
+        "state": "UNCERTAIN",
+        "count": 2
+      }
+    ],
+    "month_usage": [
+      {
+        "category": "enhanced",
+        "period_start": "2026-10-01",
+        "reserved": 0,
+        "settled": 6350
+      },
+      {
+        "category": "llm",
+        "period_start": "2026-10-01",
+        "reserved": 0,
+        "settled": 7714
+      },
+      {
+        "category": "parser",
+        "period_start": "2026-10-01",
+        "reserved": 0,
+        "settled": 15
+      },
+      {
+        "category": "proxy",
+        "period_start": "2026-10-01",
+        "reserved": 16000,
+        "settled": 1517
+      }
+    ]
+  },
+  "prior_estimated_paid_micro_usd": 15581,
+  "prior_uncertain_proxy_micro_usd": 16000,
+  "project_conservative_upper_micro_usd": 31581,
+  "invoices": null,
+  "native_reviews": "Existing Claude MaxOAuth; reported API-equivalent usage separate from project ledger and not invoices"
+}

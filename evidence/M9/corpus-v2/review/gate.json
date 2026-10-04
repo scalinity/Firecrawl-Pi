@@ -1,0 +1,201 @@
+{
+  "schema": "fcpi.m9-corpus-v2-review-gate/v1",
+  "utc": "2026-10-04T01:40:13.183Z",
+  "source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+  "state": "REMEDIATION_COMPLETE",
+  "criterion_integrity": "APPROVED_AFTER_REMEDIATION",
+  "review_sha256": "1b04f7408c46c85faf4a3021f24cbb2ade1003aded8f83e98acc0aef3646aa1b",
+  "freeze_sha256": "36c61a7f77327c56c884fef0cd9206c32647d1c2cb97f780e07d09298f8416b4",
+  "premise_sha256": "e39c53a3c7745507632ac30fe788249cdc7de6c538b05fb1b019dab671db16a4",
+  "files": {
+    "scripts/m9/corpus-v2.mjs": "00f7666d0c6741746ccb0efbf23d86ca8aff10cfc9b79ed026ed29689fbeb977",
+    "scripts/m9/corpus-v2-live.mjs": "a82e09aefb1f5bc0bfaea33137bef56bb80ccbcb6ac65c4bce3bb6fadbe3e28b",
+    "scripts/m9/corpus-v2-verify.mjs": "714962f618243dde2a55e7fe0062eea44855ba1762335efc29ced0b6c6241af9",
+    "tests/contracts/m9-corpus-v2.test.mjs": "610da9a5edc61e7ea9ebdea68cd45f5127fcdcacd0524a00ba6abab285668d5d",
+    "scripts/m9/collect.mjs": "208d32034e723270c4d24c5d7c6ebdf5ff81ea2c6d729d5f627d114af09a86ea",
+    "scripts/m9/redaction.mjs": "e507966820a378515d966a410d97b87230cb7da53867d4d53653209c8f8c4aef"
+  },
+  "findings": [
+    {
+      "id": "R01",
+      "disposition": "FIXED",
+      "commit": "086428f",
+      "reason": "Fresh post-close collection and runtime validation-overlay absence, with negative fixtures"
+    },
+    {
+      "id": "R02",
+      "disposition": "FIXED",
+      "commit": "3ebdc9e",
+      "reason": "Frozen request_plan_sha256; live driver refuses without explicit owner authorization of recovered JS caller options"
+    },
+    {
+      "id": "R03",
+      "disposition": "FIXED",
+      "commit": "68b86dd",
+      "reason": "Owner-required classification enum retained with CURRENT_SOURCE_FORMULATION_ONLY, neutral observed condition and author/source-history UNKNOWN; correction is not a historical-author claim"
+    },
+    {
+      "id": "R04",
+      "disposition": "FIXED",
+      "commit": "1f2da4f",
+      "reason": "Source/old rawHTML/Markdown and matching initial request-profile hashes all pinned; tamper fixtures"
+    },
+    {
+      "id": "R05",
+      "disposition": "FIXED",
+      "commit": "c2b1df8",
+      "reason": "Exact3suite argv/file hashes/counts required; final49-test minimum in11d5ce5"
+    },
+    {
+      "id": "R06",
+      "disposition": "FIXED",
+      "commit": "cb9f598",
+      "reason": "Fresh receipt and exact target binding select amid concurrent other targets; duplicate/ambiguous log fixtures"
+    },
+    {
+      "id": "R07",
+      "disposition": "FIXED",
+      "commit": "bbb6ca6",
+      "reason": "Before dispatch compare all20 oracle HMACs to stored historical acquisition hashes; actual zero-provider preflightPASS"
+    },
+    {
+      "id": "R08",
+      "disposition": "FIXED",
+      "commit": "11d5ce5",
+      "reason": "Requires≥42minutes remaining; each request has115s absolute deadline bounded by grant expiry. Proposed20×145s admission floor exceeds45minutes and cannot be granted; slow all-timeout batch remainsFAIL, not a guaranteed finish"
+    },
+    {
+      "id": "R09",
+      "disposition": "FIXED",
+      "commit": "8bdb360",
+      "reason": "Fresh gates carry FRESH_REVISION_2 and their execution source; stale finding_count removed"
+    },
+    {
+      "id": "R10",
+      "disposition": "REJECTED",
+      "commit": null,
+      "reason": "No defect: both real P01/P02 criteria are literal-regex equivalents, including escaped trailing period. Hash-backed criterion-literal-proof.jsonPASS"
+    },
+    {
+      "id": "R11",
+      "disposition": "FIXED",
+      "commit": "614cd55",
+      "reason": "Recovered successes report null terminal failure; real failures retained"
+    },
+    {
+      "id": "R12",
+      "disposition": "FIXED",
+      "commit": "80399bb",
+      "reason": "UTC-month-crossing windows refused by readiness and acceptance"
+    },
+    {
+      "id": "R13",
+      "disposition": "FIXED",
+      "commit": "10b296a",
+      "reason": "Public complete-run record includes request-plan and per-request hashes"
+    },
+    {
+      "id": "R14",
+      "disposition": "FIXED",
+      "commit": "bc7a733",
+      "reason": "Source/cleanup/fixture/admission/correlation/history mutation cases tested;49affectedtestsPASS"
+    },
+    {
+      "id": "R15",
+      "severity": "Critical",
+      "disposition": "FIXED",
+      "commit": "0c370a1",
+      "reason": "Both actual historical rawHTML bodies lack old phrase, contain the purpose sentence and expected title; helper independently verifies all three."
+    },
+    {
+      "id": "R16",
+      "severity": "Critical",
+      "disposition": "FIXED",
+      "commit": "deb821b",
+      "reason": "Semantic source mutations rebind hashes before assertions; separate tampering fixtures remain. Raw-body identity/omitted-purpose/wrong-title regressions explicitly FAIL."
+    },
+    {
+      "id": "R17",
+      "severity": "Warning",
+      "disposition": "FIXED",
+      "commit": "d804ebc",
+      "reason": "Review gate pins premise_sha256 in driver and verifier; qualified freeze classification and reviewed/execution-held state retained."
+    },
+    {
+      "id": "R18",
+      "severity": "Warning",
+      "disposition": "FIXED",
+      "commit": "897a99f",
+      "reason": "Record states old criteria permit at most17/20 with still-failing P19; correction can decide acceptance. No historical rescore."
+    },
+    {
+      "id": "R19",
+      "severity": "Suggestion",
+      "disposition": "FIXED",
+      "commit": "936a8f7",
+      "reason": "Dispatch refuses unless115s request deadline plus15s cleanup margin remain."
+    },
+    {
+      "id": "R20",
+      "severity": "Suggestion",
+      "disposition": "FIXED",
+      "commit": "c9f0907",
+      "reason": "Fresh consent must repeat exact readable P07/P08 wait_ms and onlyMainContent options, plus frozen plan hash."
+    },
+    {
+      "id": "R21",
+      "severity": "Warning",
+      "disposition": "FIXED",
+      "commit": "c9f0907",
+      "reason": "Canonical UTC times accept ISO seconds or milliseconds; offsets and24:00normalization reject; month comparisons use parsedUTC."
+    },
+    {
+      "id": "R22",
+      "severity": "Suggestion",
+      "disposition": "FIXED",
+      "commit": "35380d9",
+      "reason": "After single baseline read, per-request DB reads select only exact url_hmac; historical preflight selects exactly20 validated receipt IDs."
+    },
+    {
+      "id": "R23",
+      "severity": "Warning",
+      "disposition": "FIXED",
+      "commit": "88242fc",
+      "reason": "Consent budget month must match live UTC month; historical preflight revalidates retained rows before any dispatch. October applicability and30day retention documented; later month must rederive."
+    },
+    {
+      "id": "R24",
+      "severity": "Warning",
+      "disposition": "FIXED",
+      "commit": "88242fc",
+      "reason": "Zero-provider live observation confirms core110000ms vs client115000ms; driver rechecks≤110000before dispatch and stores it in raw receipt."
+    },
+    {
+      "id": "R25",
+      "severity": "Suggestion",
+      "disposition": "REJECTED",
+      "commit": null,
+      "reason": "Accepted privacy limitation, not a defect: request/criterion hashes permit guess confirmation and are integrity evidence, not confidentiality; private full URLs/content remain off Git."
+    },
+    {
+      "id": "R26",
+      "severity": "Suggestion",
+      "disposition": "REJECTED",
+      "commit": null,
+      "reason": "No correctness defect: concurrent same-target requests cause explicit ambiguity FAIL; no false success. Session/queue exclusivity will be rechecked before live, without a redundant owner command."
+    },
+    {
+      "id": "R27",
+      "disposition": "FIXED",
+      "commit": "da24186",
+      "reason": "Preserve actual fixture/current execution SHA across documentation/evidence-only checkpoints; exact services/deploy/scripts/tests/patches diff must be empty. No source retagging."
+    },
+    {
+      "id": "R28",
+      "disposition": "FIXED",
+      "reason": "Preserve raw Git -z output; direct acceptance integration checks evidence-only changes as code_dirty=false. Affected52suite rerunPASS.",
+      "commit": "4ff50a0"
+    }
+  ],
+  "live_execution": "HELD_FOR_FRESH_EXACT_OWNER_GRANT_AND_READABLE_JS_OPTION_CONSENT"
+}

@@ -1,0 +1,51 @@
+{
+  "test_id": "M9-V2-AFFECTED-FIXTURES",
+  "source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+  "started_utc": "2026-10-04T01:40:31.218Z",
+  "completed_utc": "2026-10-04T01:40:32.839Z",
+  "argv": [
+    "--test",
+    "--test-reporter=tap",
+    "tests/contracts/m9-corpus-v2.test.mjs",
+    "tests/contracts/m9-live.test.mjs",
+    "tests/contracts/m9-resource-reuse.test.mjs"
+  ],
+  "expected": "All52 affected cases PASS; no provider calls",
+  "exit_code": 0,
+  "raw_sha256": "77e327e0c420dce0bb76fc2eff5a340aee3c7c27239f1b702bd964263efe9319",
+  "files": [
+    {
+      "path": "scripts/m9/corpus-v2.mjs",
+      "sha256": "00f7666d0c6741746ccb0efbf23d86ca8aff10cfc9b79ed026ed29689fbeb977"
+    },
+    {
+      "path": "scripts/m9/corpus-v2-live.mjs",
+      "sha256": "a82e09aefb1f5bc0bfaea33137bef56bb80ccbcb6ac65c4bce3bb6fadbe3e28b"
+    },
+    {
+      "path": "scripts/m9/corpus-v2-verify.mjs",
+      "sha256": "714962f618243dde2a55e7fe0062eea44855ba1762335efc29ced0b6c6241af9"
+    },
+    {
+      "path": "tests/contracts/m9-corpus-v2.test.mjs",
+      "sha256": "610da9a5edc61e7ea9ebdea68cd45f5127fcdcacd0524a00ba6abab285668d5d"
+    },
+    {
+      "path": "scripts/m9/collect.mjs",
+      "sha256": "208d32034e723270c4d24c5d7c6ebdf5ff81ea2c6d729d5f627d114af09a86ea"
+    },
+    {
+      "path": "scripts/m9/redaction.mjs",
+      "sha256": "e507966820a378515d966a410d97b87230cb7da53867d4d53653209c8f8c4aef"
+    },
+    {
+      "path": "tests/contracts/m9-live.test.mjs",
+      "sha256": "ac18492cc4732913722ffc98f96bc98c1327c0678602b32140c34660a537b985"
+    },
+    {
+      "path": "tests/contracts/m9-resource-reuse.test.mjs",
+      "sha256": "6e14e90218e62f592cdc705baf96565f99aa21c4cd4b67b85f5c58b0c54dd1f0"
+    }
+  ],
+  "provider_calls": 0
+}

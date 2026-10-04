@@ -178,8 +178,9 @@
     },
     {
       "id": "R28",
-      "disposition": "PENDING",
-      "reason": "Verifier/direct driver helper trims leading spaces from NUL-delimited Git porcelain, so evidence-only edits can be misclassified as dirty code. Actual pending runner observed40/43PASS but code_dirty=true."
+      "disposition": "FIXED",
+      "reason": "Preserve raw Git -z output; direct acceptance integration checks evidence-only changes as code_dirty=false. Affected52suite rerunPASS.",
+      "commit": "4ff50a0"
     }
   ],
   "remaining_owner_inputs": [

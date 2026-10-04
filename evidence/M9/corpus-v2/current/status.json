@@ -1,0 +1,458 @@
+{
+  "utc": "2026-10-04T01:42:25Z",
+  "commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+  "versions_lock_sha256": "0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a",
+  "services": {
+    "retrieval-service": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:41:57.913332688-04:00",
+      "mem_mib": 37,
+      "peak_mib": 56,
+      "limit_mib": 448,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:41:33.317776648-04:00",
+      "mem_mib": 24,
+      "peak_mib": 43,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "access-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:10.844168658-04:00",
+      "mem_mib": 43,
+      "peak_mib": 57,
+      "limit_mib": 160,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m7": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:23.104772358-04:00",
+      "mem_mib": 18,
+      "peak_mib": 38,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "firecrawl-core": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:41:59.573899781-04:00",
+      "mem_mib": 1840,
+      "peak_mib": 1955,
+      "limit_mib": 2560,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "nuq-postgres": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:22.6402471-04:00",
+      "mem_mib": 190,
+      "peak_mib": 214,
+      "limit_mib": 640,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "rabbitmq": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:01.592725704-04:00",
+      "mem_mib": 166,
+      "peak_mib": 217,
+      "limit_mib": 512,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "redis": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:41:59.891717295-04:00",
+      "mem_mib": 10,
+      "peak_mib": 18,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "searxng": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:41:58.876386597-04:00",
+      "mem_mib": 125,
+      "peak_mib": 133,
+      "limit_mib": 320,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m6": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:08.760222653-04:00",
+      "mem_mib": 31,
+      "peak_mib": 50,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "browser-worker": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:01.6334165-04:00",
+      "mem_mib": 412,
+      "peak_mib": 454,
+      "limit_mib": 1536,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "mcp-gateway": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:41:58.546684036-04:00",
+      "mem_mib": 43,
+      "peak_mib": 63,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m3": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:41:43.251897118-04:00",
+      "mem_mib": 29,
+      "peak_mib": 48,
+      "limit_mib": 96,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m2": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:08.670699487-04:00",
+      "mem_mib": 29,
+      "peak_mib": 48,
+      "limit_mib": 192,
+      "swap_denied": true,
+      "oom_kills": 0
+    },
+    "fixture-m5": {
+      "state": "running",
+      "health": "healthy",
+      "restarts": 0,
+      "check_at": "2026-10-03T21:42:14.646238694-04:00",
+      "mem_mib": 17,
+      "peak_mib": 37,
+      "limit_mib": 128,
+      "swap_denied": true,
+      "oom_kills": 0
+    }
+  },
+  "core": {
+    "api": true,
+    "worker": true,
+    "heartbeat_at": "2026-10-03T21:41:59.573899781-04:00",
+    "check": "api=ok worker=ok"
+  },
+  "rest": {
+    "ready": true,
+    "status": 200,
+    "ms": 26,
+    "core_live": true,
+    "ledger_ok": true,
+    "jobs": {
+      "EXPIRED": 227,
+      "CANCELLED": 27,
+      "FAILED": 10,
+      "PARTIAL": 28,
+      "SUCCEEDED": 654
+    },
+    "archive": {
+      "bytes": 193590388,
+      "quotaBytes": 10737418240
+    }
+  },
+  "mcp": {
+    "ready": true,
+    "status": 200,
+    "ms": 16,
+    "tools": 13,
+    "protocol": "2026-07-28"
+  },
+  "capabilities": {
+    "scrape": true,
+    "browser": true,
+    "search": true,
+    "providers": {
+      "selection": {
+        "search": "live",
+        "extractionModel": "gpt-6-luna",
+        "parser": "llamaparse-cost-effective",
+        "proxy": "decodo-residential",
+        "enhanced": "zyte-api",
+        "source": "file"
+      },
+      "paidDispatch": false,
+      "budgetPolicySha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
+      "providers": {
+        "openai": {
+          "kind": "model",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-model": {
+          "kind": "model",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "llamaparse": {
+          "kind": "parser",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-parser": {
+          "kind": "parser",
+          "paid": false,
+          "credential": "not_required",
+          "breaker": "closed"
+        },
+        "decodo": {
+          "kind": "proxy",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-proxy": {
+          "kind": "proxy",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "zyte": {
+          "kind": "enhanced",
+          "paid": true,
+          "credential": "present",
+          "breaker": "closed"
+        },
+        "fixture-zyte": {
+          "kind": "enhanced",
+          "paid": false,
+          "credential": "present",
+          "breaker": "closed"
+        }
+      },
+      "budgets": [
+        {
+          "category": "enhanced",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 0,
+          "settled": 6350
+        },
+        {
+          "category": "llm",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 0,
+          "settled": 7714
+        },
+        {
+          "category": "parser",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 0,
+          "settled": 15
+        },
+        {
+          "category": "proxy",
+          "period": "month",
+          "period_start": "2026-10-01",
+          "reserved": 16000,
+          "settled": 1517
+        }
+      ],
+      "caps": {
+        "llm": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "parser": {
+          "paid": true,
+          "unit": "credits",
+          "caps": {
+            "month": 0
+          }
+        },
+        "fixture": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 100000
+          }
+        },
+        "fixture_parser": {
+          "paid": false,
+          "unit": "credits",
+          "caps": {
+            "day": 3000
+          }
+        },
+        "proxy": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_proxy": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000000
+          }
+        },
+        "fixture_proxy_race": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 130000
+          }
+        },
+        "enhanced": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 0,
+            "month": 0
+          }
+        },
+        "fixture_enhanced": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 5000000
+          }
+        },
+        "fixture_enhanced_small": {
+          "paid": false,
+          "unit": "micro_usd",
+          "caps": {
+            "day": 20000
+          }
+        }
+      }
+    }
+  },
+  "queue": {
+    "ok": true,
+    "queued": 0,
+    "oldest_queued_s": 0,
+    "active": 0,
+    "open_jobs": 0
+  },
+  "host": {
+    "sample_age_s": 8,
+    "mem": {
+      "total_mib": 8062,
+      "available_mib": 4796,
+      "swap_used_mib": 15
+    },
+    "temp_c": 44.1,
+    "injected_temp": false,
+    "throttled": "0x0",
+    "disk": {
+      "size": 62295171072,
+      "free": 29576810496,
+      "free_pct": 47.4,
+      "inodes_free_pct": 83.2
+    },
+    "host_oom_kill": 0
+  },
+  "admission": {
+    "utc": "2026-10-04T01:42:17Z",
+    "dispatch": "open",
+    "browser": "open",
+    "reasons": [],
+    "age_s": 8
+  },
+  "incidents": {},
+  "foreign_containers": [],
+  "probe": {
+    "utc": "2026-10-04T01:39:32Z",
+    "boot": "7f34310353ce995681f52fc20ec3e815ec21b5c8cbbc96dccd92caa12a287aa5",
+    "ok": true,
+    "held": false,
+    "consecutive_failures": 0,
+    "scrape": {
+      "ok": true,
+      "status": 200,
+      "ms": 63,
+      "code": null
+    },
+    "mcp": {
+      "ok": true,
+      "status": 200,
+      "ms": 14
+    },
+    "platform": {
+      "ok": true,
+      "ms": 17,
+      "core_live": true,
+      "ledger_ok": true,
+      "providers": "{\"selection\":{\"search\":\"live\",\"extractionModel\":\"gpt-6-luna\",\"parser\":\"llamaparse-cost-effective\",\"proxy\":\"decodo-residential\",\"enhanced\":\"zyte-api\",\"source\":\"file\"},\"paidDispatch\":false,\"budgetPolicySha256\":\"2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea\",\"providers\":{\"openai\":{\"kind\":\"model\",\"paid\":true,\"credential\":\"present\",\"breaker\":\"closed\"},\"fixture-model\":{\"kind\":\"model\",\"paid\":false,\"credential\":\"not_required\",\"breaker\":\"closed\"},\"llamaparse\":{\"kind\":\"parser\",\"paid\":true,\"credential\":\"present\",\"breaker\":\"closed\"},\"fixture-parser\":{\"kind\":\"parser\",\"paid\":false,\"creden"
+    },
+    "redis_acl_denials": 0
+  },
+  "backup": {
+    "last_success": "2026-10-03T19:56:14Z",
+    "age_h": 5.7,
+    "offdevice": "yes",
+    "last_attempt": {
+      "utc": "2026-10-03T19:56:14Z",
+      "result": "PASS",
+      "error": null
+    },
+    "last_restore_test": {
+      "utc": "2026-10-03T20:05:28Z",
+      "result": "PASS",
+      "error": null
+    }
+  },
+  "healthy": true
+}

@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m9-redaction/v1",
-  "utc": "2026-10-04T01:02:04.058Z",
-  "source_commit": "c72e89215b45049bf30905144f2ad7010dbd18bf",
+  "utc": "2026-10-04T01:46:00.621Z",
+  "source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
   "positive_controls": 4,
   "controls": [
     {
@@ -1929,56 +1929,36 @@
   ],
   "inputs": [
     {
-      "path": "evidence/M9/corpus-v2/freeze.json",
-      "sha256": "6b43a82833a7a5c5bd422e6b3e0ef5cebbef324a8c5b4489de68fed9d95dad61"
+      "path": "evidence/M9/corpus-v2/closeout.json",
+      "sha256": "d4d9803a0e95db44d26ec7e829ab57ab7ade70fd5300f5df6d09ab9826143b8f"
     },
     {
-      "path": "evidence/M9/corpus-v2/history-preservation.json",
-      "sha256": "3989032002bd3c5332768d248e4d5305a4bdc267b797f38a56f8adfba1537358"
+      "path": "evidence/M9/corpus-v2/current/status.json",
+      "sha256": "eb9c732eda807a54d39c8dbca7ad90be72cf3325471d0d93a647de0f2ca2cc3f"
     },
     {
-      "path": "evidence/M9/corpus-v2/ownership.json",
-      "sha256": "e4c7dc874698b9a1542d2e3b8b9946860041a45ae830f3908b66b9166ae8864c"
+      "path": "evidence/M9/corpus-v2/current/versions.json",
+      "sha256": "574d1cab5bd2a12dca83c2128738c355870de685afa62f9a5d3e802123bd2284"
     },
     {
-      "path": "evidence/M9/corpus-v2/premise-decision.json",
-      "sha256": "59346167a5dd980dac3f1b0cd33beac4602f2e0878f82eab0775a4bae7840cc7"
+      "path": "evidence/M9/corpus-v2/deployment-preservation.json",
+      "sha256": "970161717e1a6acff6402b932fb36da3005d724c2001e21b0c6c7143854ff1ab"
     },
     {
-      "path": "evidence/M9/corpus-v2/review/AUDITOR.md",
-      "sha256": "9929d3dc6f59b52bd6c7df94eca8e42d9a68533a41f68e48df6ea410dd951888"
+      "path": "evidence/M9/corpus-v2/fixtures.json",
+      "sha256": "776f3cc88963b7a0cba5667c666dd38f31248fa45ff7da52d4ef9d33d99c53d6"
     },
     {
-      "path": "evidence/M9/corpus-v2/review/DEBUGGER.md",
-      "sha256": "48032e3f26896644319e6e49a6a586a7d6b594cd029a478302b1070d4232880e"
+      "path": "evidence/M9/corpus-v2/fixtures.txt",
+      "sha256": "77e327e0c420dce0bb76fc2eff5a340aee3c7c27239f1b702bd964263efe9319"
     },
     {
-      "path": "evidence/M9/corpus-v2/review/REVIEW.md",
-      "sha256": "5dec3da04b220872cc18b92a1c2f598224456b602c6038794404ebc5d31f2111"
+      "path": "evidence/M9/corpus-v2/review/gate.json",
+      "sha256": "0c36fcca9b7229fcfd7c1687ca20567cd3167a24132af721f209517579866ed7"
     },
     {
-      "path": "evidence/M9/corpus-v2/review/provenance.json",
-      "sha256": "a1903e7fd5436dba54446f607eee2384a2999c09f2cee579a57c20c65a4f5a95"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/source-inspection.json",
-      "sha256": "9c1c6b0254ef9d3809de61aca2cf707f3d6ed4365ccd8da4f4a317237dd07560"
-    },
-    {
-      "path": "scripts/m9/corpus-v2-live.mjs",
-      "sha256": "1d5482579929640d424f21982c4112252991a90302f914688d4a3a99b5ec5958"
-    },
-    {
-      "path": "scripts/m9/corpus-v2-verify.mjs",
-      "sha256": "c0463bce4571050f22249b7bee37c642b19a4a2a334bb6bf45d9651ecb08f25e"
-    },
-    {
-      "path": "scripts/m9/corpus-v2.mjs",
-      "sha256": "9a1030e5d746dca2a7de76350003538cb808fcc565ce63408f5b0679414d8734"
-    },
-    {
-      "path": "tests/contracts/m9-corpus-v2.test.mjs",
-      "sha256": "b40f7fbb0968d45e6d07244e05f5412f863373663f77e66d635dc13977eefa82"
+      "path": "evidence/M9/corpus-v2/usage.json",
+      "sha256": "0de2a319bd0f9d3ac4ad09b07ff0545e90978cb0d61d18fc913e907e6e4fab30"
     },
     {
       "path": ".gitignore",
@@ -1994,7 +1974,7 @@
     },
     {
       "path": "ORCHESTRATION.html",
-      "sha256": "fa8fd6752f5778e621f1eca51899d494b425e110a0f5b74f9f858b1a7f86871e"
+      "sha256": "27f63fcd345bdcfe4bd01e46e51ce99618104062fb4c422630782896f8e47264"
     },
     {
       "path": "deploy/browser/Dockerfile",
@@ -2230,11 +2210,11 @@
     },
     {
       "path": "docs/FIRECRAWL_PI_MILESTONES.md",
-      "sha256": "c2797f0587f1fe9318c0ae95abd472d8059ae8074796a4a831cad765eabd8d12"
+      "sha256": "9c94038ee0a8f9a9119588b4c0ede771c95111e027e710a1616690f1f0334ccf"
     },
     {
       "path": "docs/FIRECRAWL_PI_SPEC.md",
-      "sha256": "66f53f1f839f61b19e4841b2e21797d43ad5910f778bb3e77de564dac5f090b7"
+      "sha256": "f0e08c59a9bd9205ffd6dba5ebecc51e6ecbdd415b390b09493f0758141b56b4"
     },
     {
       "path": "evidence/M0/INTERPRETATION.md",
@@ -5551,6 +5531,70 @@
     {
       "path": "evidence/M9/cloud-window.json",
       "sha256": "8d169beb6917c0a80b7ac949c87a6be052646275280cae221e84af033e20ea59"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/budget-plan.json",
+      "sha256": "6f298da0da0380e33892c6abfa6e83ec1aa13971f79448dce058c7fa80f238fb"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/criterion-literal-proof.json",
+      "sha256": "014ff8e8098249340d5e5cbc35826c422ff60e565672ddc15dd9577ecc073709"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/freeze.json",
+      "sha256": "36c61a7f77327c56c884fef0cd9206c32647d1c2cb97f780e07d09298f8416b4"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/gateway-deadline.json",
+      "sha256": "d172acdbd1384272a15b5b9df49dbda68056c2513b2b9a1e98a73eb909eb3360"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/history-preservation.json",
+      "sha256": "3989032002bd3c5332768d248e4d5305a4bdc267b797f38a56f8adfba1537358"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/normalization-preflight.json",
+      "sha256": "52bbdc0b3c7c709b27439bc974cc916e242edab7f77099c150ecd0e66154a336"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/ownership.json",
+      "sha256": "e4c7dc874698b9a1542d2e3b8b9946860041a45ae830f3908b66b9166ae8864c"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/premise-decision.json",
+      "sha256": "e39c53a3c7745507632ac30fe788249cdc7de6c538b05fb1b019dab671db16a4"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/AUDITOR-REMEDIATION.md",
+      "sha256": "11099233dee8f6d7ab1b0671e53f266852c4b78cca80fa3e1023a61b5d4c52f2"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/AUDITOR.md",
+      "sha256": "9929d3dc6f59b52bd6c7df94eca8e42d9a68533a41f68e48df6ea410dd951888"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/DEBUGGER-REMEDIATION.md",
+      "sha256": "15dc15079bece5b7ef4d678b8a3e9ad114a5ab345924eacd9f355b3bc2f1c4f8"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/DEBUGGER.md",
+      "sha256": "48032e3f26896644319e6e49a6a586a7d6b594cd029a478302b1070d4232880e"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/REVIEW.md",
+      "sha256": "1b04f7408c46c85faf4a3021f24cbb2ade1003aded8f83e98acc0aef3646aa1b"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/dispositions.json",
+      "sha256": "affb01ca65f86b107cf35d101558cebe5b944148887a68846b4f48495404b6c7"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/provenance.json",
+      "sha256": "7e1b0a01676432ecc7d0f57a11b047884ced3a18462221547733351e95b1969b"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/source-inspection.json",
+      "sha256": "f7431fddfe3685826fa268418eea9c18bf064e5573883bd190784d2d64f48812"
     },
     {
       "path": "evidence/M9/corpus.json",
@@ -9846,11 +9890,23 @@
     },
     {
       "path": "scripts/m9/collect.mjs",
-      "sha256": "cd515d31efbc1b95cba5cfdea72f81bccf66ba9e6c5ce04effbfab73172f8a3a"
+      "sha256": "208d32034e723270c4d24c5d7c6ebdf5ff81ea2c6d729d5f627d114af09a86ea"
     },
     {
       "path": "scripts/m9/collection.mjs",
       "sha256": "469dd9bb30fa498d9a593204676409fa1898c5f70588c91135222ca5b7c6ef13"
+    },
+    {
+      "path": "scripts/m9/corpus-v2-live.mjs",
+      "sha256": "a82e09aefb1f5bc0bfaea33137bef56bb80ccbcb6ac65c4bce3bb6fadbe3e28b"
+    },
+    {
+      "path": "scripts/m9/corpus-v2-verify.mjs",
+      "sha256": "714962f618243dde2a55e7fe0062eea44855ba1762335efc29ced0b6c6241af9"
+    },
+    {
+      "path": "scripts/m9/corpus-v2.mjs",
+      "sha256": "00f7666d0c6741746ccb0efbf23d86ca8aff10cfc9b79ed026ed29689fbeb977"
     },
     {
       "path": "scripts/m9/diagnosis.schema.json",
@@ -10515,6 +10571,10 @@
     {
       "path": "tests/contracts/m9-collection.test.mjs",
       "sha256": "86af6ff65735b12cbe59810bc3f3fc9d1bb6fe3b00ca0af4a8460e6aed5db61d"
+    },
+    {
+      "path": "tests/contracts/m9-corpus-v2.test.mjs",
+      "sha256": "610da9a5edc61e7ea9ebdea68cd45f5127fcdcacd0524a00ba6abab285668d5d"
     },
     {
       "path": "tests/contracts/m9-evidence-bound.test.mjs",

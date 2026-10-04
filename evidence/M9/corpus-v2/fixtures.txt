@@ -1,0 +1,322 @@
+TAP version 13
+# Subtest: revision requires independent visible body and correctly separated title for both cases
+ok 1 - revision requires independent visible body and correctly separated title for both cases
+  ---
+  duration_ms: 2.973708
+  type: 'test'
+  ...
+# Subtest: 18 other rows, P19, threshold and attempts cannot change
+ok 2 - 18 other rows, P19, threshold and attempts cannot change
+  ---
+  duration_ms: 2.410291
+  type: 'test'
+  ...
+# Subtest: identity text already present in the source body disproves the premise correction
+ok 3 - identity text already present in the source body disproves the premise correction
+  ---
+  duration_ms: 1.096542
+  type: 'test'
+  ...
+# Subtest: source title alone, script-only purpose or missing historical body cannot justify correction
+ok 4 - source title alone, script-only purpose or missing historical body cannot justify correction
+  ---
+  duration_ms: 1.063292
+  type: 'test'
+  ...
+# Subtest: matching historical rawHTML hash cannot hide a real lost-body identity regression
+ok 5 - matching historical rawHTML hash cannot hide a real lost-body identity regression
+  ---
+  duration_ms: 0.911458
+  type: 'test'
+  ...
+# Subtest: source, initial profile and historical Markdown hashes bind justification to measured inputs
+ok 6 - source, initial profile and historical Markdown hashes bind justification to measured inputs
+  ---
+  duration_ms: 0.801375
+  type: 'test'
+  ...
+# Subtest: new body content AND exact metadata identity are required; metadata never replaces body
+ok 7 - new body content AND exact metadata identity are required; metadata never replaces body
+  ---
+  duration_ms: 0.477125
+  type: 'test'
+  ...
+# Subtest: recovered success carries no terminal failure while real target failure remains visible
+ok 8 - recovered success carries no terminal failure while real target failure remains visible
+  ---
+  duration_ms: 0.226
+  type: 'test'
+  ...
+# Subtest: all 20 request bodies pass actual gateway validation; native formats and routing remain selected
+ok 9 - all 20 request bodies pass actual gateway validation; native formats and routing remain selected
+  ---
+  duration_ms: 1.080541
+  type: 'test'
+  ...
+# Subtest: 19/20 including the unchanged real-type P19 failure passes; no success is fabricated
+ok 10 - 19/20 including the unchanged real-type P19 failure passes; no success is fabricated
+  ---
+  duration_ms: 0.668333
+  type: 'test'
+  ...
+# Subtest: 18/20 passes and 17/20 still fails the exact same threshold
+ok 11 - 18/20 passes and 17/20 still fails the exact same threshold
+  ---
+  duration_ms: 0.982458
+  type: 'test'
+  ...
+# Subtest: old rows, duplicate or mixed acquisition IDs cannot be presented as a complete new run
+ok 12 - old rows, duplicate or mixed acquisition IDs cannot be presented as a complete new run
+  ---
+  duration_ms: 2.25075
+  type: 'test'
+  ...
+# Subtest: failed requests cannot borrow an unrelated fresh acquisition with a different target binding
+ok 13 - failed requests cannot borrow an unrelated fresh acquisition with a different target binding
+  ---
+  duration_ms: 0.948667
+  type: 'test'
+  ...
+# Subtest: driver correlation handles concurrent other targets and rejects ambiguity or duplicate log events
+ok 14 - driver correlation handles concurrent other targets and rejects ambiguity or duplicate log events
+  ---
+  duration_ms: 0.076125
+  type: 'test'
+  ...
+# Subtest: zero-cost normalization proof requires all20 original IDs bound to the actual target hashes
+ok 15 - zero-cost normalization proof requires all20 original IDs bound to the actual target hashes
+  ---
+  duration_ms: 0.322333
+  type: 'test'
+  ...
+# Subtest: actual log-scan format binds both zero-Cloud counts to the same running container
+ok 16 - actual log-scan format binds both zero-Cloud counts to the same running container
+  ---
+  duration_ms: 0.197167
+  type: 'test'
+  ...
+# Subtest: absolute monthly caps may not authorize more than the new incremental owner grant
+ok 17 - absolute monthly caps may not authorize more than the new incremental owner grant
+  ---
+  duration_ms: 0.264375
+  type: 'test'
+  ...
+# Subtest: cleanup requires fresh post-close runtime proof and absent validation overlays
+ok 18 - cleanup requires fresh post-close runtime proof and absent validation overlays
+  ---
+  duration_ms: 0.06175
+  type: 'test'
+  ...
+# Subtest: fixture gate requires the exact three affected suites, counts, source and file hashes
+ok 19 - fixture gate requires the exact three affected suites, counts, source and file hashes
+  ---
+  duration_ms: 0.200458
+  type: 'test'
+  ...
+# Subtest: frozen request plan and all per-page attempt bounds are checked even for failed rows
+ok 20 - frozen request plan and all per-page attempt bounds are checked even for failed rows
+  ---
+  duration_ms: 1.432458
+  type: 'test'
+  ...
+# Subtest: missing/nonfinite times, reordered dispatch and expired windows fail closed
+ok 21 - missing/nonfinite times, reordered dispatch and expired windows fail closed
+  ---
+  duration_ms: 2.300792
+  type: 'test'
+  ...
+# Subtest: false public grades, different consent/source or a rescored historical record fail
+ok 22 - false public grades, different consent/source or a rescored historical record fail
+  ---
+  duration_ms: 1.668417
+  type: 'test'
+  ...
+# Subtest: driver requires fresh, exact reviewed/deployed authorization with zero model spending
+ok 23 - driver requires fresh, exact reviewed/deployed authorization with zero model spending
+  ---
+  duration_ms: 0.369708
+  type: 'test'
+  ...
+# Subtest: late dispatch refuses before provider work unless deadline and cleanup margin remain
+ok 24 - late dispatch refuses before provider work unless deadline and cleanup margin remain
+  ---
+  duration_ms: 0.205833
+  type: 'test'
+  ...
+# Subtest: readable browser option consent is exact and UTC times use the same accepted formats
+ok 25 - readable browser option consent is exact and UTC times use the same accepted formats
+  ---
+  duration_ms: 0.453583
+  type: 'test'
+  ...
+# Subtest: old gate applicability allows only the exact revision proof files, never runtime/security/routing changes
+ok 26 - old gate applicability allows only the exact revision proof files, never runtime/security/routing changes
+  ---
+  duration_ms: 0.028916
+  type: 'test'
+  ...
+# Subtest: historical905-file preservation rejects dropped names, altered bytes, commit drift and tracked mutations
+ok 27 - historical905-file preservation rejects dropped names, altered bytes, commit drift and tracked mutations
+  ---
+  duration_ms: 2.2555
+  type: 'test'
+  ...
+# Subtest: every generated corpus and research request is admitted by the actual gateway contract
+ok 28 - every generated corpus and research request is admitted by the actual gateway contract
+  ---
+  duration_ms: 1.046666
+  type: 'test'
+  ...
+# Subtest: the two original rejected request fields fail fixture admission before any dispatch
+ok 29 - the two original rejected request fields fail fixture admission before any dispatch
+  ---
+  duration_ms: 0.875375
+  type: 'test'
+  ...
+# Subtest: stale review, dirty or mismatched source/contracts, closed/expired/oversized consent block dispatch
+ok 30 - stale review, dirty or mismatched source/contracts, closed/expired/oversized consent block dispatch
+  ---
+  duration_ms: 0.197709
+  type: 'test'
+  ...
+# Subtest: live responses are tied to the exact audited window and bounded timestamps
+ok 31 - live responses are tied to the exact audited window and bounded timestamps
+  ---
+  duration_ms: 0.153083
+  type: 'test'
+  ...
+# Subtest: 400 responses, missing polls, failed jobs, empty results and incomplete corpus cannot report success
+ok 32 - 400 responses, missing polls, failed jobs, empty results and incomplete corpus cannot report success
+  ---
+  duration_ms: 0.151958
+  type: 'test'
+  ...
+# Subtest: immutable accepted bytes plus bounded concurrent measurements pass
+ok 33 - immutable accepted bytes plus bounded concurrent measurements pass
+  ---
+  duration_ms: 31.731166
+  type: 'test'
+  ...
+# Subtest: tampered historical evidence never passes
+ok 34 - tampered historical evidence never passes
+  ---
+  duration_ms: 26.306375
+  type: 'test'
+  ...
+# Subtest: assessment decision, provenance, complete path coverage and hash are mandatory
+ok 35 - assessment decision, provenance, complete path coverage and hash are mandatory
+  ---
+  duration_ms: 288.337125
+  type: 'test'
+  ...
+# Subtest: lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+ok 36 - lock or runtime changes, missing bound receipts, wrong source and wrong incident fail
+  ---
+  duration_ms: 141.4345
+  type: 'test'
+  ...
+# Subtest: duplicate frames, non-JSON sample, large gaps and short runs are rejected
+ok 37 - duplicate frames, non-JSON sample, large gaps and short runs are rejected
+  ---
+  duration_ms: 114.192083
+  type: 'test'
+  ...
+# Subtest: boot or container restart and wrong service names fail even if health recovers
+ok 38 - boot or container restart and wrong service names fail even if health recovers
+  ---
+  duration_ms: 67.604916
+  type: 'test'
+  ...
+# Subtest: incident must overlap real successful traffic with memory headroom and no swap
+ok 39 - incident must overlap real successful traffic with memory headroom and no swap
+  ---
+  duration_ms: 93.944833
+  type: 'test'
+  ...
+# Subtest: OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+ok 40 - OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail
+  ---
+  duration_ms: 189.016833
+  type: 'test'
+  ...
+# Subtest: timestamps, sustained request bins, required classes and window alignment matter
+ok 41 - timestamps, sustained request bins, required classes and window alignment matter
+  ---
+  duration_ms: 69.53
+  type: 'test'
+  ...
+# Subtest: every latency must be finite and satisfy the canonical bound
+ok 42 - every latency must be finite and satisfy the canonical bound
+  ---
+  duration_ms: 69.858084
+  type: 'test'
+  ...
+# Subtest: Redis denials, wrong principal and measurements outside the run fail
+ok 43 - Redis denials, wrong principal and measurements outside the run fail
+  ---
+  duration_ms: 94.927958
+  type: 'test'
+  ...
+# Subtest: source equivalence covers only three pure evaluators and refuses rename deletions
+ok 44 - source equivalence covers only three pure evaluators and refuses rename deletions
+  ---
+  duration_ms: 0.175625
+  type: 'test'
+  ...
+# Subtest: runtime sources never import evidence-only helper or verifier
+ok 45 - runtime sources never import evidence-only helper or verifier
+  ---
+  duration_ms: 24.010459
+  type: 'test'
+  ...
+# Subtest: compose equality allows only exact reviewed mounts and changed images
+ok 46 - compose equality allows only exact reviewed mounts and changed images
+  ---
+  duration_ms: 15.962959
+  type: 'test'
+  ...
+# Subtest: the immutable old failed Cloud probe is explained without changing its FAIL
+ok 47 - the immutable old failed Cloud probe is explained without changing its FAIL
+  ---
+  duration_ms: 3.001958
+  type: 'test'
+  ...
+# Subtest: Redis memory headroom and zero eviction/error counters are measured
+ok 48 - Redis memory headroom and zero eviction/error counters are measured
+  ---
+  duration_ms: 93.139
+  type: 'test'
+  ...
+# Subtest: live Cloud audit covers the completed authorized window and actual paid container
+ok 49 - live Cloud audit covers the completed authorized window and actual paid container
+  ---
+  duration_ms: 1.354334
+  type: 'test'
+  ...
+# Subtest: AC16 uses p95 latency while keeping successful startup outliers visible
+ok 50 - AC16 uses p95 latency while keeping successful startup outliers visible
+  ---
+  duration_ms: 69.969833
+  type: 'test'
+  ...
+# Subtest: live driver changes invalidate corpus/research proof while preserving independent unchanged executions
+ok 51 - live driver changes invalidate corpus/research proof while preserving independent unchanged executions
+  ---
+  duration_ms: 0.104042
+  type: 'test'
+  ...
+# Subtest: unpaid rechecks preserve the complete frozen corpus, first failure and paid-window attribution
+ok 52 - unpaid rechecks preserve the complete frozen corpus, first failure and paid-window attribution
+  ---
+  duration_ms: 7.067458
+  type: 'test'
+  ...
+1..52
+# tests 52
+# suites 0
+# pass 52
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1547.851708

@@ -1,0 +1,98 @@
+{
+  "utc": "2026-10-04T01:35:55.294Z",
+  "source_before_snapshot_sha256": "684166ea350db3bbbaa34842d8b6098b39b916e437e92ea6312ae19dbae62aec",
+  "source_after_snapshot_sha256": "5a773a07c8f7e635aa2c4ff46aca4ef6580e7fe9f92ebe2dae84563091e25782",
+  "sections": [
+    {
+      "name": "meta",
+      "unchanged": false,
+      "before_sha256": "23ca131599346f36ca65b295127aa0371deccb2d2077f482430995ff9b88a880",
+      "after_sha256": "5ca6a977dbb2c8b47e56675d141c38ee594ef0351c0abd07e346aac117934f21"
+    },
+    {
+      "name": "systemd_running",
+      "unchanged": false,
+      "before_sha256": "a808560f1562ddfcd6d78eaa5ba07779bf2fe5cfaa370df6a44d08f24e9c87da",
+      "after_sha256": "46ab208359db79cc55479e557cf6c7bb437c17b5b1b484a0fb6eee425115cad8"
+    },
+    {
+      "name": "systemd_enabled",
+      "unchanged": true,
+      "before_sha256": "fac15e26a3c5b810e061a064a764867700e2bbee0c9d11c8149b05791e7ade54",
+      "after_sha256": "fac15e26a3c5b810e061a064a764867700e2bbee0c9d11c8149b05791e7ade54"
+    },
+    {
+      "name": "docker_activation",
+      "unchanged": true,
+      "before_sha256": "b68747a187e6aa578b46a63097aa4fd9bb96db0fc58ec0c00ffa186351a504b3",
+      "after_sha256": "b68747a187e6aa578b46a63097aa4fd9bb96db0fc58ec0c00ffa186351a504b3"
+    },
+    {
+      "name": "docker_ps",
+      "unchanged": true,
+      "before_sha256": "4d98f36b0e8ce9934e3f7c1202d1ca55da1189a5525727d407f82cbbcf5c1a61",
+      "after_sha256": "4d98f36b0e8ce9934e3f7c1202d1ca55da1189a5525727d407f82cbbcf5c1a61"
+    },
+    {
+      "name": "lsmod",
+      "unchanged": true,
+      "before_sha256": "b2f1d029bf32165fc278471aa23264c6a34d3701989bad9b67d292e04e631c6e",
+      "after_sha256": "b2f1d029bf32165fc278471aa23264c6a34d3701989bad9b67d292e04e631c6e"
+    },
+    {
+      "name": "ss_listen",
+      "unchanged": true,
+      "before_sha256": "4dae41a12d9f1a8887a63cd6718c1680d4e6e09a110581bc132891a74a0280bf",
+      "after_sha256": "4dae41a12d9f1a8887a63cd6718c1680d4e6e09a110581bc132891a74a0280bf"
+    },
+    {
+      "name": "findmnt",
+      "unchanged": true,
+      "before_sha256": "2c5cd96f1289b6c29e634bb7f02335dffb2455747eb625fa1a67176bc2d38f88",
+      "after_sha256": "2c5cd96f1289b6c29e634bb7f02335dffb2455747eb625fa1a67176bc2d38f88"
+    },
+    {
+      "name": "firewall",
+      "unchanged": true,
+      "before_sha256": "36043c93c3fcf410b9f92b0eb7a72906eda35aa90fbe0d4233079d5ad1cdfc43",
+      "after_sha256": "36043c93c3fcf410b9f92b0eb7a72906eda35aa90fbe0d4233079d5ad1cdfc43"
+    },
+    {
+      "name": "swap_zram",
+      "unchanged": true,
+      "before_sha256": "d5bb88e3de5dee4ee791f255151922e1d63bcd0f2640c0e851de6ab6a58c71ad",
+      "after_sha256": "d5bb88e3de5dee4ee791f255151922e1d63bcd0f2640c0e851de6ab6a58c71ad"
+    },
+    {
+      "name": "nft_tables",
+      "unchanged": true,
+      "before_sha256": "9db984575b5066d909496fdff4dd65322968a31258fad8125dc181cc4d84bdfc",
+      "after_sha256": "9db984575b5066d909496fdff4dd65322968a31258fad8125dc181cc4d84bdfc"
+    },
+    {
+      "name": "nft_chains",
+      "unchanged": true,
+      "before_sha256": "d5b97eb0e7bbfe3576f6dae85aa2a6f792ec1cf61d46b677b64602d29d991d7d",
+      "after_sha256": "d5b97eb0e7bbfe3576f6dae85aa2a6f792ec1cf61d46b677b64602d29d991d7d"
+    },
+    {
+      "name": "forwarding",
+      "unchanged": true,
+      "before_sha256": "da3b4ed93097061ff95fdff7bb761e92ab717f8e9184b33a29c7ada6c02091c9",
+      "after_sha256": "da3b4ed93097061ff95fdff7bb761e92ab717f8e9184b33a29c7ada6c02091c9"
+    }
+  ],
+  "metadata_unchanged_keys": [
+    "boot_id_sha256"
+  ],
+  "metadata_changed_keys": [],
+  "expected": "File-only M9 proof deployment; no service image/container, network, storage or unit mutation",
+  "provider_calls": 0,
+  "boot_unchanged": true,
+  "observed_lifecycle_deltas": [
+    "two timers no longer in --state=running sample; both rechecked active/waiting",
+    "ephemeral SSH session scopes differ"
+  ],
+  "timers_recheck_sha256": "d74ebdf88d76ecaf72c4321ffe8f4dba896bec33332c179c9c82c77d3e8c0cda",
+  "preserved": "Container identities/images, mounts, listeners, firewall, forwarding, enabled units and network tables exact-byte unchanged; no unit/container operation performed by file-only deployment"
+}

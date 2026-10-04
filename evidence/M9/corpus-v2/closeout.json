@@ -1,0 +1,198 @@
+{
+  "schema": "fcpi.m9-corpus-v2-held-closeout/v1",
+  "utc": "2026-10-04T01:45:54.766Z",
+  "execution_source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+  "state": "BLOCKED",
+  "classifications": [
+    {
+      "id": "P01",
+      "classification": "INCORRECT_TEST_FORMULATION",
+      "basis": "CURRENT_SOURCE_FORMULATION_ONLY",
+      "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended"
+    },
+    {
+      "id": "P02",
+      "classification": "INCORRECT_TEST_FORMULATION",
+      "basis": "CURRENT_SOURCE_FORMULATION_ONLY",
+      "original_author_intent": "UNKNOWN: no preserved author statement settles whether identity or literal Markdown location was intended"
+    }
+  ],
+  "new_revision": 2,
+  "original_corpus": {
+    "usable": 17,
+    "denominator": 20,
+    "state": "FAIL",
+    "evidence": "evidence/M9/corpus.json",
+    "history_files": 905,
+    "unchanged": true
+  },
+  "new_corpus": {
+    "state": "NOT_RUN",
+    "denominator": 20,
+    "minimum_usable": 18,
+    "sha256": "3e758faf1f06553b90ccfd142f3b034e61d5628b7d6d377c6d0dc3b9396c771b",
+    "request_plan_sha256": "55b89646470514eb193272b4fdd1ae05ecad4b4097e0ce589f6b01c89d9c6f9e"
+  },
+  "review": {
+    "model": "claude-opus-5-5",
+    "model_substitution": false,
+    "criterion_integrity": "APPROVED_AFTER_REMEDIATION",
+    "findings": 28,
+    "fixed": 25,
+    "rejected": 3,
+    "unresolved": 0
+  },
+  "tests": {
+    "affected_fixtures": {
+      "state": "PASS",
+      "count": 52
+    },
+    "zero_provider_normalization": {
+      "state": "PASS",
+      "count": 20
+    },
+    "current_runtime": {
+      "state": "PASS",
+      "checks": 17
+    },
+    "full_runner": {
+      "state": "BLOCKED",
+      "pass": 40,
+      "total": 43,
+      "exit_code": 1,
+      "pending": [
+        "M9-CORPUS",
+        "M9-V2-CLOUD",
+        "M9-V2-USAGE"
+      ]
+    }
+  },
+  "new_usage": {
+    "paid_micro_usd": 0,
+    "parser_free_credits": 0,
+    "provider_calls": 0
+  },
+  "health": {
+    "healthy": true,
+    "containers": 15,
+    "paid_dispatch": false,
+    "provider_caps_zero": true,
+    "cloud_enabled": false,
+    "validation_overlay_absent": true
+  },
+  "remaining": [
+    "Fresh exact≤45minute grant for Decodo40200μUSD/Zyte1270μUSD/parser≤3freecredits",
+    "Explicit readable P07/P08 caller-option consent before live",
+    "Full fresh20run; Cloud scan/accounting/cleanup after it"
+  ],
+  "preserved_limitations": [
+    "P19 original Zyte520/banned remains a real visible failure; no universal anti-bot success claim",
+    "Original author intent/source-change chronology UNKNOWN",
+    "Two uncertain old proxy outcomes retain16000μUSD; invoices unavailable",
+    "Hosted ingress NOT_ENABLED; automatic incident activation held",
+    "M8accepted24hAC16reuse; no second24hsoak",
+    "M8historicalB00/X04 and supplemental M5legacyFAIL/currentequivalentPASS remain unchanged",
+    "Request/criterion integrity hashes are guess-confirmable, not confidentiality"
+  ],
+  "unrelated_host_evidence": "evidence/M9/corpus-v2/deployment-preservation.json",
+  "inputs": [
+    {
+      "path": "scripts/m9/corpus-v2.mjs",
+      "sha256": "00f7666d0c6741746ccb0efbf23d86ca8aff10cfc9b79ed026ed29689fbeb977"
+    },
+    {
+      "path": "scripts/m9/corpus-v2-live.mjs",
+      "sha256": "a82e09aefb1f5bc0bfaea33137bef56bb80ccbcb6ac65c4bce3bb6fadbe3e28b"
+    },
+    {
+      "path": "scripts/m9/corpus-v2-verify.mjs",
+      "sha256": "714962f618243dde2a55e7fe0062eea44855ba1762335efc29ced0b6c6241af9"
+    },
+    {
+      "path": "tests/contracts/m9-corpus-v2.test.mjs",
+      "sha256": "610da9a5edc61e7ea9ebdea68cd45f5127fcdcacd0524a00ba6abab285668d5d"
+    },
+    {
+      "path": "scripts/m9/collect.mjs",
+      "sha256": "208d32034e723270c4d24c5d7c6ebdf5ff81ea2c6d729d5f627d114af09a86ea"
+    },
+    {
+      "path": "scripts/m9/redaction.mjs",
+      "sha256": "e507966820a378515d966a410d97b87230cb7da53867d4d53653209c8f8c4aef"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/freeze.json",
+      "sha256": "36c61a7f77327c56c884fef0cd9206c32647d1c2cb97f780e07d09298f8416b4"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/source-inspection.json",
+      "sha256": "f7431fddfe3685826fa268418eea9c18bf064e5573883bd190784d2d64f48812"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/premise-decision.json",
+      "sha256": "e39c53a3c7745507632ac30fe788249cdc7de6c538b05fb1b019dab671db16a4"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/history-preservation.json",
+      "sha256": "3989032002bd3c5332768d248e4d5305a4bdc267b797f38a56f8adfba1537358"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/REVIEW.md",
+      "sha256": "1b04f7408c46c85faf4a3021f24cbb2ade1003aded8f83e98acc0aef3646aa1b"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/gate.json",
+      "sha256": "0c36fcca9b7229fcfd7c1687ca20567cd3167a24132af721f209517579866ed7"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/review/provenance.json",
+      "sha256": "7e1b0a01676432ecc7d0f57a11b047884ced3a18462221547733351e95b1969b"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/fixtures.json",
+      "sha256": "776f3cc88963b7a0cba5667c666dd38f31248fa45ff7da52d4ef9d33d99c53d6"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/fixtures.txt",
+      "sha256": "77e327e0c420dce0bb76fc2eff5a340aee3c7c27239f1b702bd964263efe9319"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/current/versions.json",
+      "sha256": "574d1cab5bd2a12dca83c2128738c355870de685afa62f9a5d3e802123bd2284"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/current/status.json",
+      "sha256": "eb9c732eda807a54d39c8dbca7ad90be72cf3325471d0d93a647de0f2ca2cc3f"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/normalization-preflight.json",
+      "sha256": "52bbdc0b3c7c709b27439bc974cc916e242edab7f77099c150ecd0e66154a336"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/usage.json",
+      "sha256": "0de2a319bd0f9d3ac4ad09b07ff0545e90978cb0d61d18fc913e907e6e4fab30"
+    },
+    {
+      "path": "patches/series.json",
+      "sha256": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96"
+    },
+    {
+      "path": "deploy/versions.lock.json",
+      "sha256": "0390f2a46d5dcd6107a588480a29ab4ccb32683e47f306bcf115221f8970a42a"
+    },
+    {
+      "path": "deploy/policies/budget.json",
+      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea"
+    },
+    {
+      "path": "deploy/policies/egress.json",
+      "sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c"
+    },
+    {
+      "path": "deploy/policies/capabilities.json",
+      "sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682"
+    }
+  ],
+  "remote_main_observed": "5ab47b979c9e243f62f46035714aa83a94d7b090",
+  "published": false
+}
