@@ -26,6 +26,9 @@ class Writer:
     def close(self):
         self.closed = True
 
+    async def wait_closed(self):
+        await asyncio.Event().wait()
+
 
 class Tests(unittest.IsolatedAsyncioTestCase):
     def setUp(self):
@@ -108,7 +111,7 @@ class Tests(unittest.IsolatedAsyncioTestCase):
         connect.assert_not_called()
         self.assertEqual(self.ingress.active, 2)
 
-    async def test_disconnect_closes_upstream_before_headers_and_between_sse(self):
+    async def test_reset_closes_upstream_before_headers_and_between_sse(self):
         for response in (b'', b'HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\r\ndata: progress\n\n'):
             source = asyncio.StreamReader()
             source.feed_data(f'POST /mcp HTTP/1.1\r\nHost: {HOST}\r\nAuthorization: Bearer {TOKEN}\r\nContent-Length: 2\r\n\r\n{{}}'.encode())
@@ -120,11 +123,88 @@ class Tests(unittest.IsolatedAsyncioTestCase):
                 task = asyncio.create_task(self.ingress.handle(source, Writer()))
                 while not upstream.data:
                     await asyncio.sleep(0)
-                source.feed_eof()
+                source.set_exception(ConnectionResetError('synthetic client reset'))
                 await asyncio.wait_for(task, 1)
             self.assertTrue(upstream.closed)
             self.assertEqual(self.ingress.active, 0)
             self.assertEqual(self.ingress.connections, 0)
+
+    async def test_half_close_still_receives_delayed_json_and_sse(self):
+        for response in (b'HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}',
+                         b'HTTP/1.1 200 OK\r\nContent-Type: text/event-stream\r\n\r\ndata: result\n\n'):
+            async def serve_upstream(reader, writer):
+                await reader.readuntil(b'\r\n\r\n')
+                await reader.readexactly(2)
+                await asyncio.sleep(0.01)
+                writer.write(response)
+                await writer.drain()
+                writer.close()
+                await writer.wait_closed()
+            upstream_server = await asyncio.start_server(serve_upstream, '127.0.0.1', 0)
+            upstream_port = upstream_server.sockets[0].getsockname()[1]
+            real_connect = asyncio.open_connection
+            async def fixed_fixture(_host, _port, **kwargs):
+                return await real_connect('127.0.0.1', upstream_port, **kwargs)
+            ingress_server = await asyncio.start_server(self.ingress.handle, '127.0.0.1', 0)
+            try:
+                with patch.object(module.asyncio, 'open_connection', fixed_fixture):
+                    reader, writer = await real_connect('127.0.0.1', ingress_server.sockets[0].getsockname()[1])
+                    writer.write(f'POST /mcp HTTP/1.1\r\nHost: {HOST}\r\nAuthorization: Bearer {TOKEN}\r\nContent-Length: 2\r\n\r\n{{}}'.encode())
+                    await writer.drain()
+                    writer.write_eof()
+                    actual = await asyncio.wait_for(reader.read(), 1)
+                    self.assertEqual(actual, response)
+                    writer.close()
+                    await writer.wait_closed()
+                self.assertEqual(self.ingress.active, 0)
+                self.assertEqual(self.ingress.connections, 0)
+            finally:
+                ingress_server.close()
+                upstream_server.close()
+                await ingress_server.wait_closed()
+                await upstream_server.wait_closed()
+
+    async def test_failed_response_write_cancels_upstream(self):
+        class GoneWriter(Writer):
+            async def drain(self):
+                raise ConnectionResetError('synthetic closed response direction')
+        source = asyncio.StreamReader()
+        source.feed_data(f'POST /mcp HTTP/1.1\r\nHost: {HOST}\r\nAuthorization: Bearer {TOKEN}\r\nContent-Length: 2\r\n\r\n{{}}'.encode())
+        upstream_reader = asyncio.StreamReader()
+        upstream_reader.feed_data(b'HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\n{}')
+        upstream = Writer()
+        with patch.object(module.asyncio, 'open_connection', AsyncMock(return_value=(upstream_reader, upstream))):
+            await asyncio.wait_for(self.ingress.handle(source, GoneWriter()), 1)
+        self.assertTrue(upstream.closed)
+        self.assertEqual(self.ingress.active, 0)
+
+    async def test_trailing_request_bytes_are_rejected(self):
+        source = asyncio.StreamReader()
+        source.feed_data(f'POST /mcp HTTP/1.1\r\nHost: {HOST}\r\nAuthorization: Bearer {TOKEN}\r\nContent-Length: 2\r\n\r\n{{}}extra'.encode())
+        upstream = Writer()
+        reply = Writer()
+        with patch.object(module.asyncio, 'open_connection', AsyncMock(return_value=(asyncio.StreamReader(), upstream))):
+            await asyncio.wait_for(self.ingress.handle(source, reply), 1)
+        self.assertTrue(reply.data.startswith(b'HTTP/1.1 400'))
+        self.assertTrue(upstream.closed)
+        self.assertEqual(self.ingress.active, 0)
+
+    async def test_unresponsive_half_closed_exchange_times_out_and_releases_permit(self):
+        source = asyncio.StreamReader()
+        source.feed_data(f'POST /mcp HTTP/1.1\r\nHost: {HOST}\r\nAuthorization: Bearer {TOKEN}\r\nContent-Length: 2\r\n\r\n{{}}'.encode())
+        source.feed_eof()
+        upstream = Writer()
+        reply = Writer()
+        real_timeout = asyncio.timeout
+        def bounded_fixture(seconds):
+            return real_timeout(0.01 if seconds == 130 else seconds)
+        with patch.object(module.asyncio, 'open_connection', AsyncMock(return_value=(asyncio.StreamReader(), upstream))), \
+             patch.object(module.asyncio, 'timeout', bounded_fixture):
+            await asyncio.wait_for(self.ingress.handle(source, reply), 1)
+        self.assertTrue(reply.data.startswith(b'HTTP/1.1 502'))
+        self.assertTrue(upstream.closed)
+        self.assertEqual(self.ingress.active, 0)
+        self.assertEqual(self.ingress.connections, 0)
 
 
 if __name__ == '__main__':

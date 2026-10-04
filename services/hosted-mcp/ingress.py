@@ -129,8 +129,12 @@ class Ingress:
                 # A redirect is never forwarded to a hosted caller (including its Location).
                 if 300 <= status < 400:
                     raise Refusal(502)
-                writer.write(response)
-                sent = True
+                try:
+                    writer.write(response)
+                    sent = True
+                    await writer.drain()
+                except (ConnectionError, OSError):
+                    raise CallerGone()
                 size = len(response)
                 while True:
                     chunk = await ur.read(32768)
@@ -140,19 +144,31 @@ class Ingress:
                     if size > RESPONSE_BYTES:
                         outcome = "response_too_large"
                         break
-                    writer.write(chunk)
-                    await writer.drain()
+                    try:
+                        writer.write(chunk)
+                        await writer.drain()
+                    except (ConnectionError, OSError):
+                        raise CallerGone()
                 if outcome != "response_too_large":
                     outcome = "completed"
             forward_task = asyncio.create_task(forward_response())
-            watch_task = asyncio.create_task(reader.read(1))
+            async def watch_caller():
+                try:
+                    if await reader.read(1):
+                        raise Refusal(400)
+                    # A FIN ends the request direction, not the response direction.
+                    # Only transport loss/reset or failed response writes prove departure.
+                    await writer.wait_closed()
+                except (ConnectionError, OSError):
+                    pass
+                raise CallerGone()
+            watch_task = asyncio.create_task(watch_caller())
             async with asyncio.timeout(130):
                 done, _ = await asyncio.wait({forward_task, watch_task}, return_when=asyncio.FIRST_COMPLETED)
-                if watch_task in done:
-                    if watch_task.result():
-                        raise Refusal(400)
-                    raise CallerGone()
-                await forward_task
+                if forward_task in done:
+                    await forward_task
+                else:
+                    await watch_task
         except CallerGone:
             status, outcome = 499, "cancelled"
         except Refusal as exc:
