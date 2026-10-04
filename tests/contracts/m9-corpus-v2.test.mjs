@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent,normalizationProof } from '../../scripts/m9/corpus-v2.mjs';
+import { revisionIntegrity, requestPlan, targetResult, corpusResult, fullRunVerdict, digest, unchangedImplementation, cloudContinuity, budgetAdmission, cleanupFresh, fixturesComplete,fixturePaths,correlationId,correlationEvent,normalizationProof,historyManifestVerdict,historyCommit } from '../../scripts/m9/corpus-v2.mjs';
 import { ready } from '../../scripts/m9/corpus-v2-live.mjs';
 import { validateBody } from '../../services/access/src/validate.mjs';
 const source = 'a'.repeat(40), iso = n => new Date(Date.parse('2026-10-04T01:00:00Z') + n * 1000).toISOString();
@@ -162,4 +162,10 @@ test('old gate applicability allows only the exact revision proof files, never r
   assert.equal(unchangedImplementation(['scripts/m9/corpus-v2.mjs']), true);
   for (const path of ['services/retrieval/src/acquire.mjs', 'deploy/policies/egress.json', 'patches/0010-enhanced-route-browser-extras-and-owner.patch',
     'scripts/ops/tick.sh', 'tests/contracts/m2-scan.test.mjs', 'scripts/m9/incident-agent.sh']) assert.equal(unchangedImplementation([path]), false);
+});
+test('historical905-file preservation rejects dropped names, altered bytes, commit drift and tracked mutations',()=>{
+  const names=Array.from({length:905},(_,i)=>'evidence/M9/old-'+i+'.json'),m={repository_commit:historyCommit,files:names.map(path=>({path,sha256:digest(path)}))};
+  assert.equal(historyManifestVerdict(m,names,digest,''),true);
+  for(const change of [x=>x.repository_commit=source,x=>x.files.pop(),x=>x.files[0].sha256='wrong']){const x=structuredClone(m);change(x);assert.equal(historyManifestVerdict(x,names,digest,''),false);}
+  assert.equal(historyManifestVerdict(m,names.slice(1),digest,''),false);assert.equal(historyManifestVerdict(m,names,digest,'evidence/M9/acceptance.json'),false);
 });

@@ -175,9 +175,13 @@ export function normalizationProof(ids,bindings,stored) {
 export function historicalIntact() {
   const manifest = JSON.parse(readFileSync(base + '/history-preservation.json'));
   const names = execFileSync('git', ['ls-tree', '-r', '--name-only', historyCommit, '--', 'evidence/M9'], { encoding: 'utf8' }).trim().split('\n').sort();
-  return manifest.repository_commit === historyCommit && names.length === 905 && equal(names, manifest.files.map(x => x.path).sort()) &&
-    manifest.files.every(x => digest(readFileSync(x.path)) === x.sha256) &&
-    execFileSync('git', ['diff', '--name-only', historyCommit, '--', ...names], { encoding: 'utf8' }).trim() === '';
+  const changed=execFileSync('git', ['diff', '--name-only', historyCommit, '--', ...names], { encoding: 'utf8' }).trim();
+  return historyManifestVerdict(manifest,names,path=>digest(readFileSync(path)),changed);
+}
+
+export function historyManifestVerdict(manifest,names,hashFile,changed) {
+  return manifest.repository_commit===historyCommit && names.length===905 && equal([...names].sort(),manifest.files.map(x=>x.path).sort()) &&
+    manifest.files.every(x=>hashFile(x.path)===x.sha256) && changed==='';
 }
 
 // Exact new proof paths only; existing backend, policy, patch, ops and test bytes
