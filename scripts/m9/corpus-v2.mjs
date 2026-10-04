@@ -158,7 +158,7 @@ export function cleanupFresh(current, window) {
 export const fixturePaths=['tests/contracts/m9-corpus-v2.test.mjs','tests/contracts/m9-live.test.mjs','tests/contracts/m9-resource-reuse.test.mjs'];
 export function fixturesComplete(record,text,head,hashFile=path=>digest(readFileSync(path))) {
   const count=Number(text.match(/^# tests (\d+)$/m)?.[1]);
-  return record?.source_commit===head && record.exit_code===0 && record.raw_sha256===digest(text) && count>=49 &&
+  return record?.source_commit===head && record.exit_code===0 && record.raw_sha256===digest(text) && count>=52 &&
     /^# fail 0$/m.test(text) && /^# cancelled 0$/m.test(text) && /^# skipped 0$/m.test(text) && !/^not ok /m.test(text) &&
     equal(record.argv,['--test','--test-reporter=tap',...fixturePaths]) && Array.isArray(record.files) &&
     fixturePaths.every(path=>record.files.some(x=>x.path===path)) && record.files.every(x=>x.sha256===hashFile(x.path));
