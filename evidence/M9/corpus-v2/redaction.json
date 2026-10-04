@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m9-redaction/v1",
-  "utc": "2026-10-04T01:46:00.621Z",
-  "source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+  "utc": "2026-10-04T01:47:53.919Z",
+  "source_commit": "6b6205a6c1aa39f46e64eda416fbd98d1425e711",
   "positive_controls": 4,
   "controls": [
     {
@@ -1928,38 +1928,6 @@
     }
   ],
   "inputs": [
-    {
-      "path": "evidence/M9/corpus-v2/closeout.json",
-      "sha256": "d4d9803a0e95db44d26ec7e829ab57ab7ade70fd5300f5df6d09ab9826143b8f"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/current/status.json",
-      "sha256": "eb9c732eda807a54d39c8dbca7ad90be72cf3325471d0d93a647de0f2ca2cc3f"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/current/versions.json",
-      "sha256": "574d1cab5bd2a12dca83c2128738c355870de685afa62f9a5d3e802123bd2284"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/deployment-preservation.json",
-      "sha256": "970161717e1a6acff6402b932fb36da3005d724c2001e21b0c6c7143854ff1ab"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/fixtures.json",
-      "sha256": "776f3cc88963b7a0cba5667c666dd38f31248fa45ff7da52d4ef9d33d99c53d6"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/fixtures.txt",
-      "sha256": "77e327e0c420dce0bb76fc2eff5a340aee3c7c27239f1b702bd964263efe9319"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/review/gate.json",
-      "sha256": "0c36fcca9b7229fcfd7c1687ca20567cd3167a24132af721f209517579866ed7"
-    },
-    {
-      "path": "evidence/M9/corpus-v2/usage.json",
-      "sha256": "0de2a319bd0f9d3ac4ad09b07ff0545e90978cb0d61d18fc913e907e6e4fab30"
-    },
     {
       "path": ".gitignore",
       "sha256": "e7637732f446228e73388f88b9879baf2fc2ed9e8d3b4557668cb64705b07701"
@@ -5537,8 +5505,32 @@
       "sha256": "6f298da0da0380e33892c6abfa6e83ec1aa13971f79448dce058c7fa80f238fb"
     },
     {
+      "path": "evidence/M9/corpus-v2/closeout.json",
+      "sha256": "d4d9803a0e95db44d26ec7e829ab57ab7ade70fd5300f5df6d09ab9826143b8f"
+    },
+    {
       "path": "evidence/M9/corpus-v2/criterion-literal-proof.json",
       "sha256": "014ff8e8098249340d5e5cbc35826c422ff60e565672ddc15dd9577ecc073709"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/current/status.json",
+      "sha256": "eb9c732eda807a54d39c8dbca7ad90be72cf3325471d0d93a647de0f2ca2cc3f"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/current/versions.json",
+      "sha256": "574d1cab5bd2a12dca83c2128738c355870de685afa62f9a5d3e802123bd2284"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/deployment-preservation.json",
+      "sha256": "970161717e1a6acff6402b932fb36da3005d724c2001e21b0c6c7143854ff1ab"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/fixtures.json",
+      "sha256": "776f3cc88963b7a0cba5667c666dd38f31248fa45ff7da52d4ef9d33d99c53d6"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/fixtures.txt",
+      "sha256": "77e327e0c420dce0bb76fc2eff5a340aee3c7c27239f1b702bd964263efe9319"
     },
     {
       "path": "evidence/M9/corpus-v2/freeze.json",
@@ -5589,12 +5581,20 @@
       "sha256": "affb01ca65f86b107cf35d101558cebe5b944148887a68846b4f48495404b6c7"
     },
     {
+      "path": "evidence/M9/corpus-v2/review/gate.json",
+      "sha256": "0c36fcca9b7229fcfd7c1687ca20567cd3167a24132af721f209517579866ed7"
+    },
+    {
       "path": "evidence/M9/corpus-v2/review/provenance.json",
       "sha256": "7e1b0a01676432ecc7d0f57a11b047884ced3a18462221547733351e95b1969b"
     },
     {
       "path": "evidence/M9/corpus-v2/source-inspection.json",
       "sha256": "f7431fddfe3685826fa268418eea9c18bf064e5573883bd190784d2d64f48812"
+    },
+    {
+      "path": "evidence/M9/corpus-v2/usage.json",
+      "sha256": "0de2a319bd0f9d3ac4ad09b07ff0545e90978cb0d61d18fc913e907e6e4fab30"
     },
     {
       "path": "evidence/M9/corpus.json",

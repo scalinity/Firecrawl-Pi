@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m9-acceptance/v3",
-  "utc": "2026-10-04T01:43:22.433Z",
-  "source_commit": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+  "utc": "2026-10-04T01:47:54.011Z",
+  "source_commit": "6b6205a6c1aa39f46e64eda416fbd98d1425e711",
   "state": "BLOCKED",
   "code_dirty": false,
   "exit_code": 1,
@@ -4629,7 +4629,7 @@
       "test_id": "M9-REDACTION",
       "state": "PASS",
       "evidence_mode": "FRESH_REVISION_2",
-      "execution_source": "4ff50a0a3315c0f08bad66efa0a0a2351d8bec9a",
+      "execution_source": "6b6205a6c1aa39f46e64eda416fbd98d1425e711",
       "current_scan": "evidence/M9/corpus-v2/redaction.json"
     },
     {
