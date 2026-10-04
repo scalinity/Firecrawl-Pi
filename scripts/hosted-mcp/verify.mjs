@@ -63,6 +63,7 @@ function raw({path='/mcp',auth=token,host=config.host.replace(/:443$/,''),header
 const rpc=(method,params={},opts={})=>raw({...opts,headers:{'mcp-protocol-version':modern,'mcp-method':method,...(method==='tools/call'?{'mcp-name':params.name}:{}),...(opts.headers??{})},body:{jsonrpc:'2.0',id:1,method,params:{...params,_meta:meta}}});
 function check(id,pass,evidence){records.push({id,state:pass?'PASS':'FAIL',...evidence});console.log(JSON.stringify({check:id,state:pass?'PASS':'FAIL'}));}
 try{
+ if(!/^[a-z0-9.-]+\.ts\.net:443$/.test(config.host))throw Error('Configured ingress host is not port 443');
  deployedCommit=pi('cat /opt/firecrawl-pi/.fcpi-source-commit').trim();
  await openTransport();
  for(const path of ['/','/health','/v2/scrape','/admin','/platform/v1/artifacts/x','/random','/mcp/','/mcp?url=https://example.com']){const r=await raw({path,auth:null});check('route:'+path,r.status===404,{status:r.status});}
@@ -85,8 +86,8 @@ try{
 }catch(e){check('transport-or-response',false,{error:e.code??e.message});
 }finally{
  if(tunnel&&tunnel.pid&&tunnel.exitCode===null&&tunnel.signalCode===null){tunnel.kill();await Promise.race([tunnelCompletion,new Promise(r=>setTimeout(r,2000))]);if(tunnel.exitCode===null&&tunnel.signalCode===null)tunnel.kill('SIGKILL');}
- const out={schema:'fcpi.hosted-mcp-proof/v1',utc:new Date().toISOString(),source_commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),deployed_commit:deployedCommit,vantage:publicMode?'public DNS and forced public destination, bypassing Tailnet resolution':'SSH loopback forward',hosted_product_invocation:false,public_destination_sha256:publicIP?createHash('sha256').update(publicIP).digest('hex'):null,public_preflight:preflight,principal:'claude-remote',token_sha256:config.token_sha256,records,state:records.every(x=>x.state==='PASS')?'PASS':'FAIL'};
+ const codeDirty=execFileSync('git',['status','--porcelain','--untracked-files=all'],{encoding:'utf8'}).split('\n').some(line=>line&&!line.slice(3).startsWith('evidence/'));
+ const out={schema:'fcpi.hosted-mcp-proof/v1',utc:new Date().toISOString(),source_commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),code_dirty:codeDirty,deployed_commit:deployedCommit,vantage:publicMode?'public DNS and forced public destination, bypassing Tailnet resolution':'SSH loopback forward',hosted_product_invocation:false,configured_host_sha256:createHash('sha256').update(config.host).digest('hex'),configured_port:config.host.split(':').at(-1),public_destination_sha256:publicIP?createHash('sha256').update(publicIP).digest('hex'):null,public_preflight:preflight,principal:'claude-remote',token_sha256:config.token_sha256,records,state:!codeDirty&&records.every(x=>x.state==='PASS')?'PASS':'FAIL'};
  const output=base+(publicMode?'external-tests.json':'loopback-tests.json');if(existsSync(output))renameSync(output,output.replace('.json',`-${Date.now()}.json`));writeFileSync(output,JSON.stringify(out,null,2)+'\n');
  console.log(JSON.stringify({state:out.state,checks:records.length,failed:records.filter(x=>x.state==='FAIL')}));process.exitCode=out.state==='PASS'?0:1;
 }
-
