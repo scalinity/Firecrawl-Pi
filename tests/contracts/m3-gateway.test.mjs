@@ -343,6 +343,7 @@ test("a crawl is admitted, mapped, archived and paginated from the archive after
   const running = await H.call("GET", `/v2/crawl/${id}`, { token: T.a });
   assert.equal(running.json.status, "scraping");
   assert.equal(running.json.next, undefined);
+  assert.equal(running.json.fcpi, undefined, "a running job's outcome is not yet known");
   H.core.complete(up, 12, 1);
   const done = await waitFor(async () => { const j = await H.job(id); return ["SUCCEEDED", "PARTIAL"].includes(j.state) && j; }, 15000, "archive");
   assert.equal(done.state, "PARTIAL");
@@ -356,6 +357,8 @@ test("a crawl is admitted, mapped, archived and paginated from the archive after
     const p = await H.call("GET", next, { token: T.a });
     assert.equal(p.status, 200);
     assert.equal(p.json.status, "completed");
+    // "completed" also names a job one of whose pages failed: its outcome says so, and why.
+    assert.deepEqual(p.json.fcpi, { state: "PARTIAL", failed: 1, failures: [{ class: "SCRAPE_NOT_FOUND", count: 1, detail: "Not found", urls: ["http://m3.fixture.fcpi.test:8080/missing0"] }] });
     seen.push(...p.json.data.map((d) => d.metadata.scrapeId));
     pages += 1;
     if (p.json.next) { assert.ok(p.json.next.startsWith(`${ORIGIN}/v2/crawl/${id}?skip=`), p.json.next); next = p.json.next.slice(ORIGIN.length); } else next = null;

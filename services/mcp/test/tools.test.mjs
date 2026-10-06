@@ -260,3 +260,14 @@ test("fitDocument cuts content captures too, largest first, and names each cut (
   assert.ok(cuts["actions.scrapes[0].html"].returnedBytes < 200000);
   assert.equal(doc.actions.scrapes[1].html.length, 200000, "only as much as needed is cut");
 });
+
+test("a finished job's outcome reaches the agent beside its native status; a core's -1 credits are left out", () => {
+  const T = byName(makeTools(m()));
+  const fcpi = { state: "PARTIAL", failed: 19, failures: [{ class: "DIRECT_LIMIT", count: 19, detail: "300 direct navigations to this domain in the last hour", urls: ["https://b.example/1"], retryAt: "2026-10-06T10:08:55.530Z" }] };
+  const r = T.firecrawl_check_crawl_status.shape({ status: 200, json: { success: true, status: "completed", completed: 1, total: 20, creditsUsed: -1, data: [{ markdown: "x" }], fcpi }, headers: {} }, { id: "0190f1a0-0000-7000-8000-000000000000" });
+  assert.deepEqual(r.payload.fcpi, fcpi);
+  assert.equal(r.payload.status, "completed");
+  assert.equal("creditsUsed" in r.payload, false);
+  const b = T.firecrawl_batch_status.shape({ status: 200, json: { success: true, status: "completed", completed: 2, total: 2, creditsUsed: 2, data: [], fcpi: { state: "SUCCEEDED", failed: 0 } }, headers: {} }, { id: "0190f1a0-0000-7000-8000-000000000000" });
+  assert.deepEqual([b.payload.creditsUsed, b.payload.fcpi], [2, { state: "SUCCEEDED", failed: 0 }]);
+});

@@ -43,6 +43,7 @@ import { makeChanges } from "./src/changes.mjs";
 import { makeOutbox } from "./src/outbox.mjs";
 import { makeAdmission } from "./src/admission.mjs";
 import { makeIncidentActions } from "./src/incidents.mjs";
+import { jobOutcome } from "./src/outcome.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -252,8 +253,9 @@ async function status(ctx, route, id) {
   // Always success true: a finished job's outcome is its status ("failed" with its error). The official
   // client throws on success false and retries it as an unknown error until the job expires
   // (apps/js-sdk/firecrawl/src/v2/utils/errorHandler.ts), even for a job the core refused.
+  // fcpi: the job's own outcome (src/outcome.mjs), since "completed" also names a job some of whose pages failed.
   const head = { success: true, status: nativeStatus(job.state), completed: job.archived, total: job.total ?? job.archived, creditsUsed: job.credits_used ?? 0,
-    expiresAt, ...(next ? { next } : {}), ...(job.error ? { error: job.error } : {}), createdAt: iso(job.created_at), completedAt: iso(job.finished_at) };
+    expiresAt, ...(next ? { next } : {}), ...(job.error ? { error: job.error } : {}), createdAt: iso(job.created_at), completedAt: iso(job.finished_at), fcpi: jobOutcome(job) };
   const res = ctx.res;
   res.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", "x-request-id": ctx.id });
   // One pipeline for the whole answer (the head, each archived document, the close), so no document

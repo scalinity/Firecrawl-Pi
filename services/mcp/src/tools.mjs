@@ -184,8 +184,10 @@ function shape(kind, tool, r, args, m, omitted) {
       next: `Poll it with ${{ "crawl.submit": "firecrawl_check_crawl_status", "batch.submit": "firecrawl_batch_status", "extract.submit": "firecrawl_extract_status" }[tool.route]} and this id; its receipt is firecrawl_get_result.` } };
     case "status": {
       const skip = args.skip ?? 0, data = Array.isArray(b.data) ? b.data : [];
-      const payload = { id: args.id, status: b.status, completed: b.completed ?? 0, total: b.total ?? 0, creditsUsed: b.creditsUsed ?? 0, expiresAt: b.expiresAt ?? null,
-        ...(b.error ? { error: b.error } : {}), skip, returned: 0, nextSkip: null, data: [] };
+      // A finished job's fcpi is its outcome (its state, and its failed pages grouped by why): "completed" also names a
+      // job some of whose pages failed. A self-hosted core counts no credits (-1), which is left out rather than shown.
+      const payload = { id: args.id, status: b.status, completed: b.completed ?? 0, total: b.total ?? 0, ...(b.creditsUsed >= 0 ? { creditsUsed: b.creditsUsed } : {}), expiresAt: b.expiresAt ?? null,
+        ...(b.error ? { error: b.error } : {}), ...(b.fcpi ? { fcpi: b.fcpi } : {}), skip, returned: 0, nextSkip: null, data: [] };
       // Each document is measured once against a running total (the page is never re-serialized per
       // document), and a document too large alone is cut in place: the parsed answer is this call's own,
       // so no copy of it is made.
