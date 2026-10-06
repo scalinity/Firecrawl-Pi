@@ -14,9 +14,13 @@ class MemStore {
   async admitSearchQuery(perHour) { if (this.sent >= perHour) return { admitted: false }; this.sent++; return { admitted: true }; }
 }
 // The fake backend answers by the query: SearXNG's JSON shape, with unresponsive_engines as [name, reason] pairs.
+// /config lists the engines the backend loaded when a test sets backend.loaded; otherwise it is absent (404), as on a
+// backend that does not serve it, and nothing is concluded from it.
 function backend(req, res) {
-  const u = new URL(req.url, "http://x"), q = u.searchParams.get("q"), engines = u.searchParams.get("engines").split(",");
+  const u = new URL(req.url, "http://x");
   const send = (status, body) => { const b = Buffer.from(typeof body === "string" ? body : JSON.stringify(body)); res.writeHead(status, { "content-type": "application/json" }).end(b); };
+  if (u.pathname === "/config") { backend.configReads = (backend.configReads ?? 0) + 1; return backend.loaded ? send(200, { engines: backend.loaded.map((name) => ({ name, enabled: false })) }) : send(404, "Not Found"); }
+  const q = u.searchParams.get("q"), engines = u.searchParams.get("engines").split(",");
   if (q === "down500") return send(500, "Internal Server Error");
   if (q === "notjson") return send(200, "<html>");
   if (q === "stall") return; // never answers
@@ -108,4 +112,19 @@ test("the engines are the selection's, never the caller's; the query is logged o
     assert.ok(r.logs.every((l) => !JSON.stringify(l).includes("secret project")));
     assert.equal(normalizeQuery(" A  b\tC "), "a b c");
   } finally { await r.srv.close(); }
+});
+
+test("a selected engine the backend has not loaded is reported as not answering, the answer is partial and not cached; /config is read once a while", async () => {
+  backend.loaded = ["duckduckgo", "brave"]; // bing, selected, was never loaded
+  backend.configReads = 0;
+  const r = await rig();
+  try {
+    const a = await r.q("widgets");
+    assert.deepEqual(a.body.unresponsive_engines, [{ engine: "bing", reason: "not loaded by the search backend" }]);
+    assert.deepEqual(a.body.fcpi.answered, ["duckduckgo", "brave"]);
+    assert.equal(a.body.fcpi.partial, true);
+    assert.equal(r.store.puts, 0, "a partial answer is never cached");
+    await r.q("gadgets");
+    assert.equal(backend.configReads, 1, "the loaded set is read at most every ten minutes");
+  } finally { backend.loaded = null; await r.srv.close(); }
 });

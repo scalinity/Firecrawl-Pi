@@ -8,7 +8,9 @@
 // Identical normalized queries are answered from the cache for 15 minutes; only a complete answer (every
 // engine answered) is stored, so neither an outage nor a partial list is ever replayed as the truth. At most
 // 60 queries an hour reach the backend (SEARCH_RATE_LIMITED past that). The engines are the deployment's
-// choice, from the policy and the host's selection (fixture or live), never the caller's.
+// choice, from the policy and the host's selection (fixture or live), never the caller's. A selected engine the
+// backend has not loaded (SearXNG skips it without a word: an engine its defaults mark inactive is never loaded)
+// is reported as not answering, so a search served by fewer engines than chosen says so.
 import http from "node:http";
 import { createHash } from "node:crypto";
 import { Denied } from "./ssrf.mjs";
@@ -41,7 +43,23 @@ function backendGet(url, deadlineMs, signal) {
   });
 }
 
+// The engines the backend has loaded, from SearXNG's /config (a disabled engine is listed, since a request may name
+// it; an inactive one is not loaded at all). Read at most every ten minutes; null when it cannot be read, and then
+// nothing is concluded from it.
+export const LOADED_TTL_MS = 10 * 60e3;
 export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log }) {
+  let loaded = { at: -Infinity, names: null };
+  async function loadedEngines(signal) {
+    if (Date.now() - loaded.at < LOADED_TTL_MS) return loaded.names;
+    let names = null;
+    try {
+      const r = await backendGet(new URL("/config", searchUrl), 2000, signal);
+      const cfg = r.status === 200 ? JSON.parse(r.body.toString("utf8")) : null;
+      if (Array.isArray(cfg?.engines)) names = new Set(cfg.engines.map((e) => e?.name).filter((n) => typeof n === "string"));
+    } catch { /* unreadable: nothing is concluded */ }
+    loaded = { at: Date.now(), names };
+    return names;
+  }
   return async function search(inboundUrl, signal) {
     const policy = getPolicy(), S = policy.search;
     const inbound = new URL(inboundUrl, "http://x");
@@ -68,6 +86,7 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log })
     url.searchParams.set("pageno", String(pageno));
     url.searchParams.set("language", language);
     url.searchParams.set("engines", engines.join(","));
+    const loadedNow = loadedEngines(signal);
     let r;
     try { r = await backendGet(url, S.deadlineMs, signal); } catch (e) { done(e.failureClass); throw e; }
     if (r.status !== 200) { done("backend_error", { status: r.status }); throw new Denied("SEARCH_BACKEND_ERROR", `the search backend answered HTTP ${r.status}`, { retryable: r.status >= 500 }); }
@@ -83,6 +102,8 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log })
       const [name, why] = Array.isArray(u) ? u : [u?.name ?? u, u?.error ?? ""];
       if (engines.includes(name)) failed.set(name, String(why ?? "").slice(0, 120));
     }
+    const names = await loadedNow;
+    for (const e of engines) if (names && !names.has(e) && !failed.has(e)) failed.set(e, "not loaded by the search backend");
     const answered = engines.filter((e) => !failed.has(e));
     const unresponsive = [...failed].map(([engine, reason]) => ({ engine, reason }));
     if (!results.length && !answered.length) {
