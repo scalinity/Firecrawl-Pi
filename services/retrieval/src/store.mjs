@@ -9,20 +9,21 @@ import { observe } from "./route.mjs";
 // { go: true } | { waitMs } | { failure }. The cooldown, the one navigation in flight and the gap hold on every
 // route, since pacing applies across all egress IPs and clients; the hourly and daily caps count the home
 // connection's navigations alone (direct: false for a residential navigation). Both caps are rolling windows:
-// hourOldest and dayOldest, the oldest navigation each window counts, say when the window next has room.
-export function paceDecision({ now, state, hourCount, dayCount, hourOldest = null, dayOldest = null, limits, direct = true }) {
+// hourExit and dayExit are the time of the navigation whose leaving its window frees a slot (the window's oldest when it
+// holds exactly the cap; a later one when it holds more, since unpaced navigations are recorded and a cap may be lowered).
+export function paceDecision({ now, state, hourCount, dayCount, hourExit = null, dayExit = null, limits, direct = true }) {
   if (state.cooldown_until && state.cooldown_until > now) {
     const retryAfter = Math.ceil((state.cooldown_until - now) / 1000);
     return { failure: { class: "RATE_LIMITED", detail: "the domain is cooling down after a rate limit", retryable: true, retryAfter } };
   }
   // The caps come before any wait, so work the policy will refuse fails at once. Past them the page waits for the
   // window to free a navigation; it never moves to the residential route, which answers blocks, not volume (spec §10.2).
-  const until = (oldest, windowMs) => (oldest ? Math.max(1, Math.ceil((oldest.getTime() + windowMs - now.getTime()) / 1000)) : null);
+  const until = (exit, windowMs) => (exit ? Math.max(1, Math.ceil((exit.getTime() + windowMs - now.getTime()) / 1000)) : null);
   if (direct && limits.perDomainPerHour !== null && hourCount >= limits.perDomainPerHour) {
-    return { failure: { class: "DIRECT_LIMIT", detail: `${limits.perDomainPerHour} direct navigations to this domain in the last hour, the home connection's allowance`, retryable: true, retryAfter: until(hourOldest, 3600e3), directCap: "domain_hour" } };
+    return { failure: { class: "DIRECT_LIMIT", detail: `${limits.perDomainPerHour} direct navigations to this domain in the last hour, the home connection's allowance`, retryable: true, retryAfter: until(hourExit, 3600e3), directCap: "domain_hour" } };
   }
   if (direct && limits.platformPerDay !== null && dayCount >= limits.platformPerDay) {
-    return { failure: { class: "DIRECT_LIMIT", detail: `${limits.platformPerDay} direct navigations across the platform in the last day, the home connection's allowance`, retryable: true, retryAfter: until(dayOldest, 86400e3), directCap: "platform_day" } };
+    return { failure: { class: "DIRECT_LIMIT", detail: `${limits.platformPerDay} direct navigations across the platform in the last day, the home connection's allowance`, retryable: true, retryAfter: until(dayExit, 86400e3), directCap: "platform_day" } };
   }
   if (state.holder && state.hold_until && state.hold_until > now) return { waitMs: Math.min(state.hold_until - now, 250) };
   if (state.last_nav_at && limits.minNavigationGapMs > 0) {
@@ -143,11 +144,21 @@ export class Store {
       const s = (await c.query(
         `INSERT INTO fcpi_retrieval.domain_state (domain) VALUES ($1) ON CONFLICT (domain) DO UPDATE SET domain = EXCLUDED.domain
          RETURNING holder, hold_until, last_nav_at, cooldown_until, cooldown_s, now() AS now`, [domain])).rows[0];
-      const hour = (await c.query(
-        "SELECT count(*), min(at) AS oldest FROM fcpi_retrieval.direct_nav WHERE domain = $1 AND at > now() - interval '1 hour'", [domain])).rows[0];
-      const day = (await c.query(
-        "SELECT count(*), min(at) AS oldest FROM fcpi_retrieval.direct_nav WHERE NOT fixture AND at > now() - interval '1 day'")).rows[0];
-      const d = paceDecision({ now: s.now, state: s, hourCount: Number(hour.count), dayCount: Number(day.count), hourOldest: hour.oldest, dayOldest: day.oldest, limits, direct });
+      // The caps count the home connection's navigations alone, so a residential navigation reads neither window.
+      let hourCount = 0, dayCount = 0, hourExit = null, dayExit = null;
+      if (direct) {
+        hourCount = Number((await c.query(
+          "SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE domain = $1 AND at > now() - interval '1 hour'", [domain])).rows[0].count);
+        dayCount = Number((await c.query(
+          "SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE NOT fixture AND at > now() - interval '1 day'")).rows[0].count);
+        // At or past a cap, the navigation whose leaving frees a slot: the (count - cap + 1)-th oldest of its window.
+        const cap = limits.perDomainPerHour, dcap = limits.platformPerDay;
+        if (cap !== null && hourCount >= cap) hourExit = (await c.query(
+          "SELECT at FROM fcpi_retrieval.direct_nav WHERE domain = $1 AND at > now() - interval '1 hour' ORDER BY at OFFSET $2 LIMIT 1", [domain, hourCount - cap])).rows[0]?.at ?? null;
+        if (dcap !== null && dayCount >= dcap) dayExit = (await c.query(
+          "SELECT at FROM fcpi_retrieval.direct_nav WHERE NOT fixture AND at > now() - interval '1 day' ORDER BY at OFFSET $1 LIMIT 1", [dayCount - dcap])).rows[0]?.at ?? null;
+      }
+      const d = paceDecision({ now: s.now, state: s, hourCount, dayCount, hourExit, dayExit, limits, direct });
       if (!d.go) return d;
       await c.query(
         "UPDATE fcpi_retrieval.domain_state SET holder = $2, hold_until = now() + ($3::int * interval '1 millisecond'), last_nav_at = now() WHERE domain = $1",

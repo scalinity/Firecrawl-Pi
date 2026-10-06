@@ -54,8 +54,9 @@ export class FakeStore {
     const now = new Date(), s = this.state(domain);
     const hour = this.navs.filter((n) => n.domain === domain && n.tier === "direct" && now - n.at < 3600e3);
     const day = this.navs.filter((n) => !n.fixture && n.tier === "direct" && now - n.at < 86400e3);
-    const oldest = (l) => (l.length ? new Date(Math.min(...l.map((n) => +n.at))) : null);
-    const d = paceDecision({ now, state: s, hourCount: hour.length, dayCount: day.length, hourOldest: oldest(hour), dayOldest: oldest(day), limits, direct: tier === "direct" });
+    // The navigation whose leaving frees a slot: the (count - cap + 1)-th oldest, as the Store's SQL picks it.
+    const exit = (l, cap) => (cap !== null && l.length >= cap ? new Date([...l.map((n) => +n.at)].sort((a, b) => a - b)[l.length - cap]) : null);
+    const d = paceDecision({ now, state: s, hourCount: hour.length, dayCount: day.length, hourExit: exit(hour, limits.perDomainPerHour), dayExit: exit(day, limits.platformPerDay), limits, direct: tier === "direct" });
     if (!d.go) return d;
     Object.assign(s, { holder, hold_until: new Date(+now + holdMs), last_nav_at: now });
     this.navs.push({ domain, fixture, at: now, tier });

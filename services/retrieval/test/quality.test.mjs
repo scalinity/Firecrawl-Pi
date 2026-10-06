@@ -52,12 +52,12 @@ test("direct pacing: gap, one in flight, the hourly and daily caps, cooldowns", 
   assert.deepEqual(paceDecision({ now, state: s({}), hourCount: 299, dayCount: 4999, limits }), { go: true });
   // Past either allowance the page waits for its rolling window to free a navigation: DIRECT_LIMIT, retryable, with
   // the seconds until the oldest counted navigation leaves the window (spec §10.2).
-  const hourCap = paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, hourOldest: new Date(now - 59 * 60e3), limits });
+  const hourCap = paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, hourExit: new Date(now - 59 * 60e3), limits });
   assert.deepEqual([hourCap.failure.class, hourCap.failure.retryable, hourCap.failure.retryAfter, hourCap.failure.directCap], ["DIRECT_LIMIT", true, 60, "domain_hour"]);
-  const dayCap = paceDecision({ now, state: s({}), hourCount: 3, dayCount: 5000, dayOldest: new Date(now - 23 * 3600e3), limits });
+  const dayCap = paceDecision({ now, state: s({}), hourCount: 3, dayCount: 5000, dayExit: new Date(now - 23 * 3600e3), limits });
   assert.deepEqual([dayCap.failure.class, dayCap.failure.retryAfter, dayCap.failure.directCap], ["DIRECT_LIMIT", 3600, "platform_day"]);
   assert.equal(paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, limits }).failure.retryAfter, null, "no oldest navigation known, no invented time");
-  assert.equal(paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, hourOldest: new Date(now - 3600e3 + 10), limits }).failure.retryAfter, 1, "never 0");
+  assert.equal(paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, hourExit: new Date(now - 3600e3 + 10), limits }).failure.retryAfter, 1, "never 0");
   // A residential navigation is not counted against the home connection's allowance.
   assert.deepEqual(paceDecision({ now, state: s({}), hourCount: 300, dayCount: 5000, limits, direct: false }), { go: true });
   // A capped domain is refused at once, not after waiting out its gap.

@@ -75,6 +75,21 @@ test("after expiry one probe is claimed at a time, and a hold is finite and rele
   } finally { await store.close(); }
 });
 
+test("past a cap, retryAfter is when the navigation whose leaving frees a slot leaves, whatever the window holds beyond the cap (review R11)", opts, async () => {
+  const store = await fresh();
+  try {
+    const limits = { perDomainInFlight: 1, minNavigationGapMs: 0, perDomainPerHour: 2, platformPerDay: 5000 };
+    // Four direct navigations in the hour, two past the cap of two (unpaced ones are recorded, and a cap may be lowered):
+    // a slot frees only when the third oldest leaves, 30 minutes from now.
+    await sql("INSERT INTO fcpi_retrieval.direct_nav (domain, fixture, at) SELECT 'x.example', false, now() - make_interval(mins => m) FROM unnest(ARRAY[50, 40, 30, 20]) m");
+    const capped = await store.paceDirect("x.example", randomUUID(), limits, 30000, false, "direct");
+    assert.equal(capped.failure?.class, "DIRECT_LIMIT");
+    assert.ok(capped.failure.retryAfter > 1790 && capped.failure.retryAfter <= 1800, `retryAfter ${capped.failure.retryAfter}`);
+    // A residential navigation reads neither window and goes.
+    assert.equal((await store.paceDirect("x.example", randomUUID(), limits, 30000, false, "residential")).go, true);
+  } finally { await store.close(); }
+});
+
 test("residential navigations share the domain's gap and hold but are not counted against the direct caps", opts, async () => {
   const store = await fresh();
   try {
