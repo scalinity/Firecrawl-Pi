@@ -10,11 +10,10 @@ use_default_settings:
     # defaults; the fixture engines are defined below. Brave and DuckDuckGo refuse the home connection and
     # are routed residential, so they are queried only once the residential route is approved. Bing's HTML
     # answer for a multi-term query is generic popular sites (code.org for "code review benchmark ..."),
-    # so it is not kept.
+    # so it is not kept. Mojeek and Startpage answer the home connection with a JavaScript and a
+    # proof-of-work captcha, and this SearXNG leaves both inactive (never loaded), so they are not kept.
     keep_only:
       - yahoo
-      - mojeek
-      - startpage
       - duckduckgo
       - brave
 
