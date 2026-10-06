@@ -55,6 +55,10 @@ const noteId = (d) => { const id = d?.metadata?.scrapeId; if (id) scrapeIds.add(
 
 const started = new Date();
 const tests = {};
+// The proxy ledger's day and month rows (reserved plus settled micro-USD), read before and after, so a paid run measures
+// what it spent rather than assuming it.
+const proxyLedger = async () => { const c = await mcp("firecrawl_capabilities", {}); return Object.fromEntries((c.payload.providers?.budgets ?? []).filter((b) => b.category === "proxy").map((b) => [b.period, b.reserved + b.settled])); };
+const ledgerBefore = PAID ? await proxyLedger() : null;
 
 // T1: a static catalogue page, default options.
 {
@@ -237,27 +241,52 @@ async function crawl(args, label) {
   ]) };
 }
 
-// T9 (--paid): the residential route when asked for, metered against the approved budget.
+// T9, T10 (--paid): the residential route when asked for, and the fallback search engine when the home connection's
+// engine answers too few, each metered against the approved budget.
 if (PAID) {
   const url = "https://books.toscrape.com/catalogue/page-4.html";
+  const gt = (await direct(url)).text;
+  const titles = [...gt.matchAll(/<h3><a href="[^"]+" title="([^"]+)"/g)].map((m) => unescape(m[1]));
   const r = await mcp("firecrawl_scrape", { url, formats: ["markdown"], proxy: "stealth" });
   noteId(r.payload.data);
-  tests.residential_route = { url, ms: r.ms, proxyUsed: r.payload.data?.metadata?.proxyUsed ?? null, error: r.isError ? r.payload : null };
+  const md = norm(r.payload.data?.markdown ?? "");
+  tests.residential_route = { url, ms: r.ms, proxyUsed: r.payload.data?.metadata?.proxyUsed ?? null, error: r.isError ? r.payload : null, titles: `${titles.filter((t) => md.includes(norm(t))).length}/${titles.length}` };
+  const query = `fcpi residential fallback probe ${Date.now().toString(36)} zqxvw`;
+  const q = await mcp("firecrawl_search", { query, limit: 5 });
+  tests.search_fallback = { query, ms: q.ms, results: (q.payload.data?.web ?? []).length, warning: q.payload.warning ?? null, error: q.isError ? q.payload : null };
 }
 
 // Each page's acquisition record, from the retrieval service's log.
 const since = Math.floor(started.getTime() / 1000) - 5;
 const logs = ssh(`sudo -n docker logs --since ${since} fcpi-retrieval-service-1 2>&1 | grep -E '"event":"(acquisition|fetch)"' || true`).split("\n").filter(Boolean).map((l) => { try { return JSON.parse(l.slice(l.indexOf("{"))); } catch { return null; } }).filter(Boolean);
 const acq = logs.filter((l) => l.event === "acquisition"), fetches = logs.filter((l) => l.event === "fetch");
+if (PAID) {
+  const raw = ssh(`sudo -n docker logs --since ${Math.floor(started.getTime() / 1000) - 5} fcpi-retrieval-service-1 2>&1 | grep -E '"event":"(search|proxy_tunnel_closed)"' || true`).split("\n").filter(Boolean).map((l) => { try { return JSON.parse(l.slice(l.indexOf("{"))); } catch { return null; } }).filter(Boolean);
+  const searches = raw.filter((l) => l.event === "search" && l.fallback === true);
+  const brave = raw.filter((l) => l.event === "proxy_tunnel_closed" && l.target_host === "search.brave.com" && l.route === "residential");
+  const after = await proxyLedger();
+  const spent = { day: (after.day ?? 0) - (ledgerBefore.day ?? 0), month: (after.month ?? 0) - (ledgerBefore.month ?? 0) };
+  const stealth = acq.find((l) => (l.strategies ?? []).some((x) => x.startsWith("residential")));
+  Object.assign(tests.residential_route, { spent_micro_usd: spent, ...grade([
+    c("the stealth page took the residential route", JSON.stringify(stealth?.strategies) === '["residential_http"]', JSON.stringify(stealth?.strategies ?? null)),
+    c("its content is every title on the page", tests.residential_route.titles === "20/20", tests.residential_route.titles),
+    c("its spend was metered into the proxy ledger", (stealth?.proxy_micro_usd ?? 0) > 0 && spent.day > 0, `${stealth?.proxy_micro_usd ?? 0} micro-USD; ledger day +${spent.day}`),
+  ]) });
+  Object.assign(tests.search_fallback, { searches_with_fallback: searches.length, brave_tunnels: brave.map((b) => ({ out: b.bytes_out, in: b.bytes_in })), ...grade([
+    c("the home connection's engine answered too few, so the fallback was asked", searches.length >= 1, searches.map((x) => x.outcome).join(",") || "none"),
+    c("Brave answered through the residential route", brave.some((b) => b.bytes_in > 0) && !(searches[0]?.unresponsive > 0), JSON.stringify(brave.map((b) => b.bytes_in))),
+    c("the search answered without an error", !tests.search_fallback.error, JSON.stringify(tests.search_fallback.error ?? "no error")),
+  ]) });
+}
 const mine = acq.filter((l) => scrapeIds.has(l.logical_id));
 const spend = logs.reduce((n, l) => n + (l.proxy_micro_usd ?? 0), 0);
 const byId = Object.fromEntries(mine.map((l) => [l.logical_id, { strategies: l.strategies, route: l.route_reason, escalations: l.escalations, verdict: l.verdict, failure: l.failure, ms: l.ms, proxy_micro_usd: l.proxy_micro_usd }]));
 const residential = acq.filter((l) => (l.strategies ?? []).some((s) => s.startsWith("residential")));
-const wanted = PAID ? 1 : 0;
+const wanted = PAID ? 1 : 0; // the stealth page; search tunnels are not acquisitions
 tests.home_connection_first = { acquisitions_in_window: acq.length, matched_to_answers: mine.length, fetches_in_window: fetches.length, proxy_micro_usd: spend, residential_acquisitions: residential.length, ...grade([
   c("the log was read (positive control: every answer's scrapeId found)", mine.length > 0 && mine.length >= scrapeIds.size - 1, `${mine.length}/${scrapeIds.size}`),
   c(PAID ? "only the stealth page took the residential route" : "every acquisition stayed on the home connection", residential.length === wanted, residential.length),
-  c(PAID ? "the stealth page's spend was metered" : "nothing was spent", PAID ? spend > 0 : spend === 0, spend),
+  c(PAID ? "only the stealth page's acquisition spent" : "nothing was spent", PAID ? spend > 0 && acq.filter((l) => (l.proxy_micro_usd ?? 0) > 0).length === 1 : spend === 0, spend),
   c("the JS page was rendered in the browser after its HTTP shell", Object.values(byId).some((x) => JSON.stringify(x.strategies) === '["direct_http","direct_browser"]'), "see acquisitions"),
   c("a waitFor page started in the browser", Object.values(byId).some((x) => (x.escalations ?? []).includes("wait_for")), "see acquisitions"),
 ]) };
