@@ -36,3 +36,13 @@ test("a clean job says so; malformed entries are grouped, never thrown on; detai
   assert.deepEqual(o.failures.map((f) => [f.class, f.count]), [["ERROR", 2], ["TARGET_ERROR", 1]]);
   assert.equal(o.failures[1].detail.length, 300);
 });
+
+test("the gateway's notes about the record are reported apart from the failed pages they cannot be counted as (review R14)", () => {
+  const errors = [refused("https://b.example/1", "DIRECT_LIMIT", "the allowance", 60),
+    { id: "fcpi:job-1:ERRORS_TRUNCATED:1", timestamp: at, url: "", code: "ERRORS_TRUNCATED", error: "120 further per-item errors and 0 further robots-blocked URLs were not archived" },
+    { id: "fcpi:job-1:UPSTREAM_ERRORS_LOST:2", timestamp: at, url: "", code: "UPSTREAM_ERRORS_LOST", error: "the core forgot this job before its per-item errors were archived; they are unknown" }];
+  const o = jobOutcome({ state: "PARTIAL", errors: { errors, robotsBlocked: [] } });
+  assert.equal(o.failed, 1);
+  assert.deepEqual(o.failures.map((f) => f.class), ["DIRECT_LIMIT"]);
+  assert.deepEqual(o.notes.map((n) => n.code), ["ERRORS_TRUNCATED", "UPSTREAM_ERRORS_LOST"]);
+});
