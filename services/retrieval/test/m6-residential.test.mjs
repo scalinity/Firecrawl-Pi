@@ -127,6 +127,23 @@ test("auto: a challenge on the direct route escalates once to the residential ro
   } finally { await fx.close(); }
 });
 
+test("auto: an edge network refusing the home connection's address moves the page to the residential route, metered against its budget; basic stops", async () => {
+  const fx = await startFixture();
+  try {
+    const { acquire, store } = rig(fx);
+    const url = `${base(fx)}/edge-block`;
+    const r = await acquire(req(url));
+    assert.equal(r.ok, true, JSON.stringify(r.failure));
+    assert.deepEqual(r.strategies, ["direct_http", "residential_http"]);
+    assert.deepEqual(r.route.escalations, ["direct_http->residential_http"]);
+    assert.match(Buffer.from(r.body).toString(), /edge refused the home address/);
+    assert.ok(r.proxy.bytes > 0 && r.proxy.microUsd > 0, JSON.stringify(r.proxy));
+    assert.equal([...store.ledger.rows.values()].filter((x) => x.state === "SETTLED").length, 1);
+    const basic = await acquire(req(url, { route: "basic" }));
+    assert.deepEqual([basic.failure.class, basic.strategies], ["BLOCKED_PUBLIC_CONTENT", ["direct_http"]]);
+  } finally { await fx.close(); }
+});
+
 test("auto without the route answers a challenge as BLOCKED_PUBLIC_CONTENT; basic never escalates; the residential route's own challenge is final", async () => {
   const fx = await startFixture();
   try {

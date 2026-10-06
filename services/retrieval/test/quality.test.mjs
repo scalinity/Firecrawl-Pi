@@ -162,3 +162,15 @@ test("a short page whose inline scripts hold the content is a JS shell that earn
   // A short page with a small inline script stays as it is.
   assert.equal(classify({ ...page, body: '<body><p>All systems operational. Last checked five minutes ago.</p><script>window.dataLayer=[];</script></body>' }).verdict, "adequate");
 });
+
+test("an edge network refusing the connection's address (Akamai, Cloudflare 1020) is a block the residential route may answer; a site's own 403 is not", () => {
+  const akamai = '<HTML><HEAD>\n<TITLE>Access Denied</TITLE>\n</HEAD><BODY>\n<H1>Access Denied</H1>\n \nYou don\'t have permission to access "http&#58;&#47;&#47;www&#46;shop&#46;example&#47;" on this server.<P>\nReference&#32;&#35;18&#46;5e1c2d17&#46;1759740000&#46;2f3a\n<P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;5e1c2d17&#46;1759740000&#46;2f3a</P>\n</BODY>\n</HTML>\n';
+  const cloudflare = '<!DOCTYPE html><html><head><title>Access denied | www.shop.example used Cloudflare to restrict access</title></head><body><div class="cf-error-details"><h1>Error 1020</h1></div></body></html>';
+  for (const body of [akamai, cloudflare]) {
+    const v = classify({ ...page, status: 403, body });
+    assert.deepEqual([v.verdict, v.failure.class, v.failure.retryable], ["challenge", "BLOCKED_PUBLIC_CONTENT", true]);
+  }
+  // Only on a 403: an article that quotes either page is an article.
+  assert.equal(classify({ ...page, body: `<article><p>${"An essay about edge networks and their error pages. ".repeat(12)}</p><pre>${cloudflare.replace(/</g, "&lt;")}</pre></article>` }).verdict, "adequate");
+  assert.equal(classify({ ...page, status: 403, body: "<h1>Forbidden</h1><p>Members only.</p>" }).failure.class, "ACCESS_DENIED");
+});

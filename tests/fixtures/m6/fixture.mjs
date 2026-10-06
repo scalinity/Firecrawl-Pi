@@ -81,6 +81,8 @@ export function makeProxy(state, { credentialSha256, resolve = async (h) => h })
 
 const page = (title, body) => `<!doctype html><html><head><meta charset="utf-8"><title>${title}</title></head><body><main><h1>${title}</h1>${body}</main></body></html>`;
 const ARTICLE = (who) => page("Residential fixture article", `<p>This article reached the client ${who}. It carries enough ordinary prose to be read as the page's own content, with no sign of client-side rendering and no interstitial of any kind.</p><p>Second paragraph, for a fuller page.</p>`);
+// Akamai's "Access Denied" page for a refused address, its reference host entity-encoded as Akamai serves it (quality.mjs).
+const EDGE_BLOCK = '<HTML><HEAD>\n<TITLE>Access Denied</TITLE>\n</HEAD><BODY>\n<H1>Access Denied</H1>\n \nYou don\'t have permission to access this page on this server.<P>\nReference&#32;&#35;18&#46;fcf1a7&#46;1759740000&#46;6e\n<P>https&#58;&#47;&#47;errors&#46;edgesuite&#46;net&#47;18&#46;fcf1a7&#46;1759740000&#46;6e</P>\n</BODY>\n</HTML>\n';
 // A public-content bot interstitial, recognised by its challenge platform's script path (quality.mjs).
 const CHALLENGE = page("Just a moment...", `<div id="challenge-running"></div><script src="/cdn-cgi/challenge-platform/h/b/orchestrate/jsch/v1"></script><noscript>Enable JavaScript and cookies to continue</noscript>`);
 // A script shell whose script writes the page: an article for a proxied peer, a challenge for a direct one. The
@@ -117,6 +119,8 @@ export function makeTarget(state) {
       case "/challenge200": return via === "proxy" ? html(200, ARTICLE("through the proxy after a challenge")) : html(200, CHALLENGE);
       // Challenged on every route: nothing further may answer it before M7.
       case "/always-challenge": return html(403, CHALLENGE);
+      // An edge network refusing the home route's address (Akamai's reference page), the article for the residential one.
+      case "/edge-block": return via === "proxy" ? html(200, ARTICLE("through the proxy after the edge refused the home address")) : html(403, EDGE_BLOCK);
       // HTTP sees a script shell on both routes; the rendered page is a challenge directly and an article proxied.
       case "/js-challenge": return html(200, SHELL(via === "proxy" ? `<main><h1>Rendered through the proxy</h1><p>${"Rendered residential content. ".repeat(12)}</p></main>` : `<div id="challenge-running"></div><script src="/cdn-cgi/challenge-platform/h/b/orchestrate/jsch/v1"></script>`));
       // A script shell whose rendered page loads two images from its own host: in a residential browser attempt the

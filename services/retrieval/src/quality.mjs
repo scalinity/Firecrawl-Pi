@@ -17,7 +17,15 @@ const CHALLENGE_MARKERS = [
   // M6: search engines' own CAPTCHA pages (DuckDuckGo's anomaly check, Google's /sorry/ form) and AWS WAF's challenge.
   /\bid=["']anomaly-modal["']/i, /\/anomaly\.js\b/i, /<form\b[^<>]*\baction=["'][^"']*\/sorry\/index\b/i, /\bid=["']captcha-form["']/i, /\bwindow\.gokuProps\b/,
 ];
-const LOGIN_PATH = /\/(log-?in|sign-?in|auth|session|account\/log-?in|users\/sign_in|accounts\/login)(\/|\?|$)/i;
+// Recognised edge refusals of the connection's address on a public page, read only on a 403: Akamai's "Access
+// Denied" page, whose reference points at its error host (entity-encoded as it serves it), and Cloudflare's
+// "used Cloudflare to restrict access" page (errors 1006-1008, 1020). Each names the edge network, not the site's
+// own authorization, so the home connection being refused is a block the residential route may answer (spec §9.2).
+const EDGE_BLOCK_MARKERS = [
+  /\berrors(?:\.|&#46;)edgesuite(?:\.|&#46;)net\b/i,
+  /<title>\s*Access denied \| [^<]{1,253} used Cloudflare to restrict access\s*<\/title>/i,
+];
+const LOGIN_PATH =/\/(log-?in|sign-?in|auth|session|account\/log-?in|users\/sign_in|accounts\/login)(\/|\?|$)/i;
 
 export const isTextual = (contentType) => !contentType || TEXT_TYPES.test(contentType);
 export const isHtml = (contentType) => !contentType || HTML_TYPES.test(contentType);
@@ -109,6 +117,9 @@ export function classify({ status, contentType, body, finalUrl, requestedUrl, re
   const challenge = html && CHALLENGE_MARKERS.some((re) => re.test(text));
   if (challenge) {
     return { verdict: "challenge", failure: { class: "BLOCKED_PUBLIC_CONTENT", detail: "the target served a bot interstitial", retryable: true, retryAfter: null } };
+  }
+  if (status === 403 && html && EDGE_BLOCK_MARKERS.some((re) => re.test(text))) {
+    return { verdict: "challenge", failure: { class: "BLOCKED_PUBLIC_CONTENT", detail: "the target's edge network refused this connection's address", retryable: true, retryAfter: null } };
   }
   if (status === 403) return { verdict: "access_denied", failure: { class: "ACCESS_DENIED", detail: "the target refused access (403)", retryable: false, retryAfter: null } };
   if (status >= 500) return { verdict: "target_error", reasons: [`status ${status}`] };
