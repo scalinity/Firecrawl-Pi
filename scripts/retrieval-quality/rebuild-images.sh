@@ -18,14 +18,13 @@ out=$("${SSH[@]}" "bash -s -- $*" <"$root/scripts/retrieval-quality/pi-build-ima
 mkdir -p "$root/evidence/post-m9/retrieval-quality/raw"
 printf '%s\n' "$out" >>"$root/evidence/post-m9/retrieval-quality/raw/image-build.txt"
 for i in "$@"; do
-  id=$(printf '%s\n' "$out" | sed -n "s#^fcpi/$i:quality id=\(sha256:[0-9a-f]\{64\}\) .*#\1#p")
+  id=$(printf '%s\n' "$out" | sed -n "s#^fcpi/$i:quality-[0-9a-f]\{12\} id=\(sha256:[0-9a-f]\{64\}\) .*#\1#p")
   [ -n "$id" ] || { echo "no $i image id in the build transcript" >&2; exit 1; }
   sed -i '' -E "s#fcpi/$i@sha256:[0-9a-f]{64}#fcpi/$i@$id#" "$root/deploy/compose.yaml"
   # The lock (CLAUDE.md §22) names the same image; it round-trips through JSON.stringify(…, null, 2) byte for byte.
   node -e 'const fs = require("fs"), [f, key, id, commit, ev] = process.argv.slice(1); const l = JSON.parse(fs.readFileSync(f, "utf8"));
     if (!l.images[key]) throw new Error(`no lock entry ${key}`); Object.assign(l.images[key], { image_id: id, built_from_commit: commit, evidence: ev });
-    fs.writeFileSync(f, JSON.stringify(l, null, 2) + "
-");' "$root/deploy/versions.lock.json" "${i//-/_}" "$id" "$(git -C "$root" rev-parse HEAD)" \
+    fs.writeFileSync(f, JSON.stringify(l, null, 2) + "\n");' "$root/deploy/versions.lock.json" "${i//-/_}" "$id" "$(git -C "$root" rev-parse HEAD)" \
     evidence/post-m9/retrieval-quality/raw/image-build.txt
   echo "$i -> $id"
 done
