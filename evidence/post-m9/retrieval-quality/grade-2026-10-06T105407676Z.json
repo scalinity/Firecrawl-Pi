@@ -1,0 +1,952 @@
+{
+  "schema": "fcpi.retrieval-quality-grade/v1",
+  "utc": "2026-10-06T10:54:07.676Z",
+  "finished": "2026-10-06T10:57:07.069Z",
+  "source_commit": "439477428b77e2a8dd1bb78d29d54a4c267b0a02",
+  "code_dirty": true,
+  "deployed_commit": "439477428b77e2a8dd1bb78d29d54a4c267b0a02",
+  "endpoint": "https://<pi-tailnet-host>:8443/mcp",
+  "protocol": "2026-07-28",
+  "paid": false,
+  "tests": {
+    "static_catalogue": {
+      "url": "https://books.toscrape.com/catalogue/page-1.html",
+      "ms": 920,
+      "sha256": "5ca5712df6d110fadbf5e425111bbcf755acce60abcd9bdbd7e3935a3eb68516",
+      "grade": "A+",
+      "passed": 7,
+      "of": 7,
+      "criteria": [
+        {
+          "name": "every title (full, from the link's title)",
+          "pass": true,
+          "measured": "20/20"
+        },
+        {
+          "name": "every price",
+          "pass": true,
+          "measured": "20/20"
+        },
+        {
+          "name": "the result count",
+          "pass": true,
+          "measured": true
+        },
+        {
+          "name": "the next-page link",
+          "pass": true,
+          "measured": true
+        },
+        {
+          "name": "no site navigation (category sidebar) in main content",
+          "pass": true,
+          "measured": "absent"
+        },
+        {
+          "name": "status 200 reported",
+          "pass": true,
+          "measured": 200
+        },
+        {
+          "name": "answered within 15 s",
+          "pass": true,
+          "measured": 920
+        }
+      ]
+    },
+    "js_rendered": {
+      "url": "https://quotes.toscrape.com/js/",
+      "ms": 6886,
+      "sha256": "97f4432ea54d5d6273324d25bd0a500ba26c4e0dd52eaf44cb46d2b7365aba7e",
+      "ground_truth_static_quotes": 0,
+      "grade": "A+",
+      "passed": 6,
+      "of": 6,
+      "criteria": [
+        {
+          "name": "every quote, with default options",
+          "pass": true,
+          "measured": "10/10"
+        },
+        {
+          "name": "every author",
+          "pass": true,
+          "measured": "10/10"
+        },
+        {
+          "name": "every quote's tags",
+          "pass": true,
+          "measured": "10/10"
+        },
+        {
+          "name": "waitFor answers the rendered page too",
+          "pass": true,
+          "measured": "10/10"
+        },
+        {
+          "name": "an actions scrape carries no advice to use the /interact endpoint",
+          "pass": true,
+          "measured": "null"
+        },
+        {
+          "name": "answered within 30 s",
+          "pass": true,
+          "measured": 6886
+        }
+      ]
+    },
+    "real_world_article": {
+      "url": "https://en.wikipedia.org/wiki/Raspberry_Pi",
+      "ms": 3816,
+      "sha256": "ebe44cade9432b982ae46cd8febc90aff76c3bb8944276b0e2150336e61fdeba",
+      "markdown_bytes": 246969,
+      "truncated": null,
+      "link_markup_share": 0.477,
+      "grade": "A+",
+      "passed": 8,
+      "of": 8,
+      "criteria": [
+        {
+          "name": "every h2 section, the last ones included",
+          "pass": true,
+          "measured": "11/11"
+        },
+        {
+          "name": "every h3 subsection",
+          "pass": true,
+          "measured": "35/35"
+        },
+        {
+          "name": "every table (data tables and the infobox)",
+          "pass": true,
+          "measured": "7/4"
+        },
+        {
+          "name": "the article's key facts",
+          "pass": true,
+          "measured": "6/6"
+        },
+        {
+          "name": "the whole article in one answer (nothing cut)",
+          "pass": true,
+          "measured": "complete"
+        },
+        {
+          "name": "no in-page anchor links",
+          "pass": true,
+          "measured": 0
+        },
+        {
+          "name": "link markup under half of the markdown",
+          "pass": true,
+          "measured": "0.477"
+        },
+        {
+          "name": "answered within 30 s",
+          "pass": true,
+          "measured": 3816
+        }
+      ]
+    },
+    "search": {
+      "query": "Raspberry Pi 5 specifications RAM CPU",
+      "ms": 1383,
+      "sha256": "4fbd181cd4ea83e2ef0734e8bdf23fb8a0177fb5c36fafa5a87d9cb24f7c9516",
+      "results": [
+        "https://pip.raspberrypi.com/documents/RP-008348-DS-raspberry-pi-5-product-brief.pdf",
+        "https://www.raspberrypi.com/products/raspberry-pi-5/",
+        "https://community.element14.com/products/raspberry-pi/b/blog/posts/raspberry-pi-5-technical-specifications-and-mechanical-drawings",
+        "https://computerstationnation.com/raspberry-pi-5-8gb-complete-specifications/",
+        "https://www.raspberrypi.com/documentation/hardware/raspberrypi/5/datasheet.pdf",
+        "https://raspberry-projects.com/pi/pi-hardware/raspberry-pi-5/rpi4-model-b-hardware-general-specifications-2",
+        "https://en.wikipedia.org/wiki/Raspberry_Pi"
+      ],
+      "warning": null,
+      "grade": "D",
+      "passed": 4,
+      "of": 6,
+      "criteria": [
+        {
+          "name": "as many results as asked",
+          "pass": false,
+          "measured": "7/8"
+        },
+        {
+          "name": "at least seven of eight about the Raspberry Pi 5",
+          "pass": false,
+          "measured": "5/7"
+        },
+        {
+          "name": "an official raspberrypi.com source in the top three",
+          "pass": true,
+          "measured": true
+        },
+        {
+          "name": "no duplicate URLs",
+          "pass": true,
+          "measured": 7
+        },
+        {
+          "name": "every engine answered",
+          "pass": true,
+          "measured": "none"
+        },
+        {
+          "name": "answered within 20 s",
+          "pass": true,
+          "measured": 1383
+        }
+      ]
+    },
+    "map_with_sitemap": {
+      "url": "https://docs.astral.sh/uv/",
+      "ms": 10172,
+      "sha256": "e403a9e0a120cdd2d5011d9c49943f6699cb650b8aed96ea4c56f9b2692581c5",
+      "sources": {
+        "sitemap": 83,
+        "page": 1
+      },
+      "grade": "A+",
+      "passed": 4,
+      "of": 4,
+      "criteria": [
+        {
+          "name": "every sitemap URL",
+          "pass": true,
+          "measured": "84/84"
+        },
+        {
+          "name": "nothing off the site",
+          "pass": true,
+          "measured": 0
+        },
+        {
+          "name": "says where its links came from",
+          "pass": true,
+          "measured": "{\"sitemap\":83,\"page\":1}"
+        },
+        {
+          "name": "answered within 30 s",
+          "pass": true,
+          "measured": 10172
+        }
+      ]
+    },
+    "map_without_sitemap": {
+      "url": "https://books.toscrape.com/",
+      "ms": 9975,
+      "sha256": "b37e960cf4098a94a939c98bbef19ee79ee96ded0afb0448f8fc9ecb9bcaae55",
+      "sources": {
+        "sitemap": 0,
+        "page": 73
+      },
+      "links": 73,
+      "grade": "A+",
+      "passed": 4,
+      "of": 4,
+      "criteria": [
+        {
+          "name": "every same-site link the start page carries",
+          "pass": true,
+          "measured": "73/73"
+        },
+        {
+          "name": "nothing off the site",
+          "pass": true,
+          "measured": 0
+        },
+        {
+          "name": "says the links came from the start page, and that a crawl finds the rest",
+          "pass": true,
+          "measured": "{\"sources\":{\"sitemap\":0,\"page\":73},\"note\":\"No sitemap listed links here; these are the links the start page carries. A crawl discovers the pages beyond them.\"}"
+        },
+        {
+          "name": "answered within 30 s",
+          "pass": true,
+          "measured": 9975
+        }
+      ]
+    },
+    "crawl_beyond_old_threshold": {
+      "url": "https://books.toscrape.com/catalogue/category/books/mystery_3/index.html",
+      "job": "ea8a8919-db32-4960-b376-3156dd300832",
+      "expected_pages": 34,
+      "fcpi": {
+        "state": "SUCCEEDED",
+        "failed": 0
+      },
+      "grade": "A+",
+      "passed": 4,
+      "of": 4,
+      "criteria": [
+        {
+          "name": "admitted without the residential route (more than 20 pages)",
+          "pass": true,
+          "measured": "admitted"
+        },
+        {
+          "name": "every page of the category, both listing pages and every product",
+          "pass": true,
+          "measured": "34/34"
+        },
+        {
+          "name": "the outcome says SUCCEEDED with nothing failed",
+          "pass": true,
+          "measured": "{\"state\":\"SUCCEEDED\",\"failed\":0}"
+        },
+        {
+          "name": "no -1 credits shown",
+          "pass": true,
+          "measured": "omitted"
+        }
+      ]
+    },
+    "failure_honesty": {
+      "urls": [
+        "https://books.toscrape.com/catalogue/page-3.html",
+        "https://books.toscrape.com:8080/catalogue/page-3.html"
+      ],
+      "job": "9ede305a-cbcf-457e-aeef-7dd5dd37b220",
+      "submit": null,
+      "fcpi": {
+        "state": "PARTIAL",
+        "failed": 1,
+        "failures": [
+          {
+            "class": "SSRF_DENIED",
+            "count": 1,
+            "detail": "port 8080 is not the scheme's default port",
+            "urls": [
+              "https://books.toscrape.com:8080/catalogue/page-3.html"
+            ]
+          }
+        ]
+      },
+      "grade": "A+",
+      "passed": 3,
+      "of": 3,
+      "criteria": [
+        {
+          "name": "the good page is served",
+          "pass": true,
+          "measured": 1
+        },
+        {
+          "name": "the outcome is PARTIAL with one page failed",
+          "pass": true,
+          "measured": "{\"state\":\"PARTIAL\",\"failed\":1,\"failures\":[{\"class\":\"SSRF_DENIED\",\"count\":1,\"detail\":\"port 8080 is not the scheme's default port\",\"urls\":[\"https://books.toscrape.com:8080/catalogue/page-3.html\"]}]}"
+        },
+        {
+          "name": "the failure names its class, a detail and the URL",
+          "pass": true,
+          "measured": "{\"class\":\"SSRF_DENIED\",\"count\":1,\"detail\":\"port 8080 is not the scheme's default port\",\"urls\":[\"https://books.toscrape.com:8080/catalogue/page-3.html\"]}"
+        }
+      ]
+    },
+    "home_connection_first": {
+      "acquisitions_in_window": 63,
+      "matched_to_answers": 50,
+      "fetches_in_window": 2,
+      "proxy_micro_usd": 0,
+      "residential_acquisitions": 0,
+      "grade": "A+",
+      "passed": 5,
+      "of": 5,
+      "criteria": [
+        {
+          "name": "the log was read (positive control: every answer's scrapeId found)",
+          "pass": true,
+          "measured": "50/50"
+        },
+        {
+          "name": "every acquisition stayed on the home connection",
+          "pass": true,
+          "measured": 0
+        },
+        {
+          "name": "nothing was spent",
+          "pass": true,
+          "measured": 0
+        },
+        {
+          "name": "the JS page was rendered in the browser after its HTTP shell",
+          "pass": true,
+          "measured": "see acquisitions"
+        },
+        {
+          "name": "a waitFor page started in the browser",
+          "pass": true,
+          "measured": "see acquisitions"
+        }
+      ]
+    }
+  },
+  "acquisitions": {
+    "01a110d9-7360-7214-adeb-4d4bce155b41": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 615,
+      "proxy_micro_usd": 0
+    },
+    "01a110d9-7828-73eb-8539-07ac97409411": {
+      "strategies": [
+        "direct_http",
+        "direct_browser"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 6818,
+      "proxy_micro_usd": 0
+    },
+    "01a110d9-930c-7608-be0f-63c79a68d624": {
+      "strategies": [
+        "direct_browser"
+      ],
+      "route": "default",
+      "escalations": [
+        "wait_for"
+      ],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 5168,
+      "proxy_micro_usd": 0
+    },
+    "01a110d9-a7ee-76d3-9531-2c00254ffd10": {
+      "strategies": [
+        "direct_browser"
+      ],
+      "route": "default",
+      "escalations": [
+        "browser_extras"
+      ],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 4618,
+      "proxy_micro_usd": 0
+    },
+    "01a110d9-bc25-75bb-9d65-8f0b92401bba": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 1168,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-2bf4-76df-9b0f-3c1bc83c3123": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 1309,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-340b-738f-b802-d6337ec1803a": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2213,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3412-751b-a7e6-ece0768d00ae": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2094,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3417-77b9-8b5b-c2172d0e2693": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2101,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-341f-70ce-a5cd-e596359167d1": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2153,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3425-71db-a6e9-3c6ac01cafd4": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2113,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-342b-755a-95a4-1c75b3e4701d": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2145,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3432-770f-8868-efe51dd7baac": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2156,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-343d-75b0-a6f8-471ec924ee8e": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2120,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3445-709f-b1b4-2eb210bf494f": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2131,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-344c-74aa-b1e8-df40abebee15": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2150,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3451-77fc-b410-fbacb918990f": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2146,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3456-75ab-8f8a-f7204cdb397c": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2147,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-345c-779a-bdac-dd1b71c2242a": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2134,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3463-75ec-bc87-062164520400": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2143,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3468-7781-9bc7-5b70f12d8a07": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2135,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-346d-76ac-9c20-76ce98804626": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2150,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3473-7033-bf7a-7c7f9a5b6396": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2157,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3478-70cf-a7a5-d385161874c2": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2152,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-347d-76ed-833e-41d2b5c812b3": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2149,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3484-753f-b256-4f1bd243e304": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2104,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5664-70ed-bb7b-fb609c21a379": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2142,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-566d-77fe-89a7-cdf6b8d24afc": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2182,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5675-7029-ace3-e550a10f5902": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2168,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5ef1-708f-b68f-e4a35a05e52f": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2156,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5ef6-72f9-97eb-91b1f6d08220": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2148,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-3489-739f-bc8b-c353e16767b3": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 269,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-3685-72bf-a663-4a0322b84879": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2090,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-368c-715c-b38d-594685249a8b": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2146,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-3692-7660-862c-f05b2afbe466": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2172,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-3699-7761-952c-e8b5d7ca5de6": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2179,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36a1-72fd-a4db-b897e3384c3e": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2161,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36a6-75bc-95ba-86b1f339ee88": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2139,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36ab-730d-aa4e-1968e2969f95": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2159,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36b0-70cd-b1ea-67bb30af4dec": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2164,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36b5-730a-88cd-0601440c0301": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2171,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36bb-722b-a518-bb7c88b58a56": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2159,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36c0-7174-99ad-bf068c6e441f": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2161,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36c5-72c2-947e-16a0a0b4650c": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2156,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-36ca-758c-af64-1a82186810dc": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2178,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5efb-74fc-9370-b4ae796eb724": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2396,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5f00-7372-959f-ab80040d4255": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2150,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5f06-769a-ba79-bfb586ac5cbe": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2148,
+      "proxy_micro_usd": 0
+    },
+    "01a110da-5f0b-74bd-8998-bed4a34f3534": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 2166,
+      "proxy_micro_usd": 0
+    },
+    "01a110db-f9c5-7400-b638-dffe937a729b": {
+      "strategies": [
+        "direct_http"
+      ],
+      "route": "default",
+      "escalations": [],
+      "verdict": "adequate",
+      "failure": null,
+      "ms": 275,
+      "proxy_micro_usd": 0
+    }
+  },
+  "summary": {
+    "static_catalogue": "A+",
+    "js_rendered": "A+",
+    "real_world_article": "A+",
+    "search": "D",
+    "map_with_sitemap": "A+",
+    "map_without_sitemap": "A+",
+    "crawl_beyond_old_threshold": "A+",
+    "failure_honesty": "A+",
+    "home_connection_first": "A+"
+  }
+}

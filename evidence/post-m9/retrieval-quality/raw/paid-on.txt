@@ -1,0 +1,4 @@
+paid dispatch: switch on, retrieval service true
+-rw-r--r-- root root
+retrieval-service running healthy
+{"utc":"2026-10-06T12:21:26.786Z","service":"retrieval","build":"0.5.0","event":"budget_loaded","budget_sha256":"7a80415c559817af8592844c07050376410f7723b97f1149b15573b78bec0e96","paid_dispatch":true,"models":["gpt-6-luna","fcpi-fixture-model","fcpi-fixture-ra

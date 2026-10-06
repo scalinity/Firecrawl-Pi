@@ -1,0 +1,62 @@
+{
+  "schema": "fcpi.retrieval-quality-baseline/v1",
+  "utc": "2026-10-06T09:05:00Z",
+  "deployed_commit": "43199b3",
+  "method": "Manual MCP calls (fcpi, Claude Code client) against targets with ground truth fetched directly; the same targets the grader (scripts/retrieval-quality/grade.mjs) later fixed as criteria. Measurements only; no page content kept.",
+  "tests": {
+    "static_catalogue": {
+      "url": "https://books.toscrape.com/catalogue/page-1.html",
+      "titles": "20/20",
+      "prices": "20/20",
+      "result_count": true,
+      "next_link": true,
+      "star_ratings": "not in markdown (CSS class only)",
+      "judged": "A"
+    },
+    "js_rendered": {
+      "url": "https://quotes.toscrape.com/js/",
+      "quotes_default": "0/10",
+      "quotes_waitFor_2000": "0/10 (direct_http, 229 ms; retrieval verdict adequate at 1,758 bytes)",
+      "quotes_with_wait_action": "10/10 (direct_browser)",
+      "judged": "D"
+    },
+    "real_world_article": {
+      "url": "https://en.wikipedia.org/wiki/Raspberry_Pi",
+      "markdown_bytes": 309261,
+      "returned_bytes": 253790,
+      "h2": "9/11 (Further reading and External links cut by the payload limit)",
+      "h3": "35/35",
+      "tables": "4/4",
+      "link_markup_share": 0.57,
+      "in_page_links": 867,
+      "judged": "B"
+    },
+    "search": {
+      "query": "Raspberry Pi 5 specifications RAM CPU",
+      "results": "7/8",
+      "engines_answering": "yahoo only (mojeek and startpage never loaded; found later)",
+      "judged": "A-"
+    },
+    "map": {
+      "with_sitemap": "docs.astral.sh/uv: 84/84",
+      "without_sitemap": "books.toscrape.com: [] (no sitemap, no page links, no warning)",
+      "judged": "C+"
+    },
+    "crawl": {
+      "url": "books.toscrape.com poetry category, limit 20",
+      "pages": "1/20",
+      "status_tool": "completed 1/1, no errors shown",
+      "receipt": "PARTIAL, errorCount 19",
+      "reason": "PROXY_REQUIRED past the direct limits (domain_hour, 20/h), visible only in the Pi's logs",
+      "judged": "B-"
+    },
+    "safety": {
+      "overloaded": "5 concurrent calls: OVERLOADED with retryAfterSeconds 5",
+      "spend": 0,
+      "cloud_calls": 0,
+      "judged": "A"
+    }
+  },
+  "overall": "B",
+  "first_graded_run_after_the_first_deploy": "grade-2026-10-06T105407676Z.json (8/9 A+; search D: 7 results, all from Yahoo)"
+}

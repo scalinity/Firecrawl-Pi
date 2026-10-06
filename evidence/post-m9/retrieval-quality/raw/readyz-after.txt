@@ -1,0 +1,6 @@
+### meta
+utc=2026-10-06T12:58:31Z
+deployed_commit=a1764d25a6ac94bcf26e5a5aa3ffdb1186a828cc
+### readyz (review R16: each paid tier from availability())
+{"ok":true,"enhanced":{"available":false,"reason":"BUDGET_EXHAUSTED","subject":"zyte-api","provider":"zyte","paid":true},"residential":{"available":true,"reason":null,"subject":"decodo-residential","provider":"decodo","paid":true}}
+### end

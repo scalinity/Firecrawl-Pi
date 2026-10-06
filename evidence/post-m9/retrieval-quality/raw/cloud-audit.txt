@@ -1,0 +1,31 @@
+### meta
+utc=2026-10-06T13:09:55Z
+deployed_commit=a1764d25a6ac94bcf26e5a5aa3ffdb1186a828cc
+window_since=2026-10-06T09:00:00Z (this work began with the 09:05Z baseline)
+### per container: log lines read, lines naming firecrawl.dev
+fcpi-access-gateway-1 lines=104 cloud_host_lines=0
+fcpi-browser-worker-1 lines=5 cloud_host_lines=0
+fcpi-firecrawl-core-1 lines=1562 cloud_host_lines=0
+fcpi-fixture-1 lines=15 cloud_host_lines=0
+fcpi-fixture-m2-1 lines=13 cloud_host_lines=0
+fcpi-fixture-m3-1 lines=13 cloud_host_lines=0
+fcpi-fixture-m5-1 lines=0 cloud_host_lines=0
+fcpi-fixture-m6-1 lines=0 cloud_host_lines=0
+fcpi-fixture-m7-1 lines=0 cloud_host_lines=0
+fcpi-mcp-gateway-1 lines=137 cloud_host_lines=0
+fcpi-nuq-postgres-1 lines=2279 cloud_host_lines=0
+fcpi-rabbitmq-1 lines=192 cloud_host_lines=0
+fcpi-redis-1 lines=19 cloud_host_lines=0
+fcpi-retrieval-service-1 lines=80 cloud_host_lines=0
+fcpi-searxng-1 lines=13 cloud_host_lines=0
+### cloud switch (the core does not read it; the services that do, from deploy/compose.yaml)
+fcpi-access-gateway-1 PI_CLOUD_ACCESS_ENABLED=false started=2026-10-06T12:58:03
+fcpi-retrieval-service-1 PI_CLOUD_ACCESS_ENABLED=false started=2026-10-06T12:57:56
+fcpi-mcp-gateway-1 PI_CLOUD_ACCESS_ENABLED=false started=2026-10-06T12:57:52
+### interpretation
+docker logs keeps a container's log only while the container exists: every container above was recreated by the final
+bring-up (raw/up-5.txt; created 12:56Z to 12:57Z), so the lines read cover the final deployment, the final graded run (13:02:38Z to
+13:05:45Z) included, not the earlier deployments of this work. Positive control: the retrieval service's 80 lines hold the
+final run's 51 answers the grader matched by scrapeId. No line names a firecrawl.dev host. The access gateway refuses to
+start unless PI_CLOUD_ACCESS_ENABLED is false (services/access/src/config.mjs:41).
+### end

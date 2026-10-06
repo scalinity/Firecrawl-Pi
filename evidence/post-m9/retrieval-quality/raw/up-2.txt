@@ -1,0 +1,15 @@
+### meta
+utc=2026-10-06T12:04:05Z source_commit=2eaa6729237d76052b529f2593fb971ff71553a8
+### data_check
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=35 create_host_path=false
+### config
+compose_config=valid
+### up
+ Container fcpi-fixture-1 Recreate 
+ Container fcpi-rabbitmq-1 Recreate 
+ Container fcpi-fixture-m2-1 Recreate 
+ Container fcpi-redis-1 Recreate 
+ Container fcpi-fixture-m3-1 Recreate 
+ Container fcpi-fixture-m5-1 Recreate 
+ Container fcpi-mcp-gateway-1 Error response from daemon: No such image: fcpi/mcp-gateway@sha256:b25d206ec8e7d1c0fecbca76bbbac4bcd705998d42d184a5fa24a2d42d85a8c3 
+Error response from daemon: No such image: fcpi/mcp-gateway@sha256:b25d206ec8e7d1c0fecbca76bbbac4bcd705998d42d184a5fa24a2d42d85a8c3

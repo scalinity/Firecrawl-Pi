@@ -1,0 +1,183 @@
+{
+ "schema": "fcpi.snapshot-diff/v1",
+ "utc": "2026-10-06T11:10:14+00:00",
+ "previous_after": "evidence/post-m9/hosted-mcp/snapshot-after.txt",
+ "before": "evidence/post-m9/retrieval-quality/snapshot-before.txt",
+ "evidence_for_attribution": {
+  "43199b3_deploy": "fcpi-retrieval-service-1 and fcpi-searxng-1 created 2026-10-06T04:04:05Z (docker inspect), after commit 43199b3 changed deploy/policies/egress.json and deploy/searxng/settings.yml",
+  "nightly_backup": "fcpi-backup.timer last ran 2026-10-06T03:30:18 EDT (07:30Z); every non-fixture container StartedAt 2026-10-06T07:30:3xZ with RestartCount 0 and unchanged Created",
+  "ssh_sessions": "session scopes of the snapshot's own SSH logins"
+ },
+ "counts": {
+  "UNATTRIBUTED_PREDATES_THIS_WORK": 2,
+  "nightly_fcpi_backup_restart_2026-10-06T07:30Z": 20,
+  "recreated_by_43199b3_deploy_2026-10-06T04:04Z": 12,
+  "ssh_session_scope": 2,
+  "timestamp": 2
+ },
+ "lines": [
+  {
+   "line": "-2026-10-04T04:20:29Z",
+   "attribution": "timestamp"
+  },
+  {
+   "line": "+2026-10-06T10:43:42Z",
+   "attribution": "timestamp"
+  },
+  {
+   "line": "-docker-42b9cf502406d4b9fa1336b5121b4ed5433bec7520f1a788f45089ea84c0a331.scope",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "+docker-8dfb5196efa7bb7c2e2474a40535535c989cce86c2a9e0c7c99a1d157262bf75.scope",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "-docker-c4bef2639f33da0733bc33961fcb82eb3aa4e734453e52955839193cfb2d8662.scope",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "+docker-c9b1bebdb8327fcba03fcb2585c2f04dde9315477784a60c10af6938e6742825.scope",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "-session-5182.scope",
+   "attribution": "ssh_session_scope"
+  },
+  {
+   "line": "+session-38945.scope",
+   "attribution": "ssh_session_scope"
+  },
+  {
+   "line": "-42b9cf502406d4b9fa1336b5121b4ed5433bec7520f1a788f45089ea84c0a331\tfcpi-searxng-1\tsearxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19\trunning",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "+8dfb5196efa7bb7c2e2474a40535535c989cce86c2a9e0c7c99a1d157262bf75\tfcpi-searxng-1\tsearxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19\trunning",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "-c4bef2639f33da0733bc33961fcb82eb3aa4e734453e52955839193cfb2d8662\tfcpi-retrieval-service-1\tfcpi/retrieval@sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235\trunning",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "+c9b1bebdb8327fcba03fcb2585c2f04dde9315477784a60c10af6938e6742825\tfcpi-retrieval-service-1\tfcpi/retrieval@sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235\trunning",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "-tcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=36595,fd=8))",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+tcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=4008467,fd=8))",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/0bef544b6db4 nsfs[net:[4026533509]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/103172cf431c nsfs[net:[4026533510]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/16b2d172a8d3 nsfs[net:[4026532512]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/2c165ae3c617 nsfs[net:[4026532930]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/3039a7aa6584 nsfs[net:[4026532850]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/4178ab4885ce nsfs[net:[4026532608]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/664e66b21805 nsfs[net:[4026532690]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/4e95cc787a3a nsfs[net:[4026533330]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/6db762dfebe6 nsfs[net:[4026533329]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/8d2a114c0021 nsfs[net:[4026533248]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/a629d52ba9f3 nsfs[net:[4026532849]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/run/docker/netns/aaa1775a95ef nsfs[net:[4026533424]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/741061b3b7ca nsfs[net:[4026532933]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/c9892383215d nsfs[net:[4026533425]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/e4d2d1ea8beb nsfs[net:[4026533249]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/e5654396b9f5 nsfs[net:[4026532512]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/eb831365a0ed nsfs[net:[4026532608]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "+/run/docker/netns/fe4cfff58bf1 nsfs[net:[4026532690]] nsfs rw",
+   "attribution": "nightly_fcpi_backup_restart_2026-10-06T07:30Z"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/42b9cf502406d4b9fa1336b5121b4ed5433bec7520f1a788f45089ea84c0a331 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/8dfb5196efa7bb7c2e2474a40535535c989cce86c2a9e0c7c99a1d157262bf75 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/c4bef2639f33da0733bc33961fcb82eb3aa4e734453e52955839193cfb2d8662 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/c9b1bebdb8327fcba03fcb2585c2f04dde9315477784a60c10af6938e6742825 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "recreated_by_43199b3_deploy_2026-10-06T04:04Z"
+  },
+  {
+   "line": "-nft_ruleset_sha256=86344c110bc1bfc51dc465eb32392fdf033778a8df7757aefcd1b42207892844",
+   "attribution": "UNATTRIBUTED_PREDATES_THIS_WORK"
+  },
+  {
+   "line": "+nft_ruleset_sha256=e1e3a82a1d4d6b6d3958b6a180f2b330e59339f266488678d66e6e2b80189a85",
+   "attribution": "UNATTRIBUTED_PREDATES_THIS_WORK"
+  }
+ ],
+ "finding": {
+  "line": "nft_ruleset_sha256 changed between the previous AFTER (2026-10-04T04:20:29Z) and this BEFORE (2026-10-06T10:43:42Z)",
+  "ruled_out": [
+   "/etc/firecrawl-pi/fcpi-guard.nft unchanged since 2026-09-26 and the guard has no dynamic sets",
+   "egress-local sources unchanged since 2026-10-03 (cidrs mtime) and 2026-09-26 (extra)",
+   "tailscaled not restarted or updated since 2026-10-03 (NRestarts=0, 1.102.4 installed 2026-09-26)",
+   "container recreation: the whole stack was recreated at 2026-10-06T10:49Z and the ruleset hash stayed e1e3a82a\u2026"
+  ],
+  "unresolvable_because": "the Pi's 32 MiB journal covers about two hours, and the previous snapshots kept only the whole-ruleset hash",
+  "from_now": "raw/nft-tables-before.txt records each table's hash, so the AFTER comparison localises any further change to one table"
+ }
+}

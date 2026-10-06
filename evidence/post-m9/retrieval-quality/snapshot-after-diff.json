@@ -1,0 +1,540 @@
+{
+ "schema": "fcpi.snapshot-diff/v1",
+ "utc": "2026-10-06T13:06:23+00:00",
+ "before": "evidence/post-m9/retrieval-quality/snapshot-before.txt",
+ "after": "evidence/post-m9/retrieval-quality/snapshot-after.txt",
+ "nft": "every table's hash unchanged (raw/nft-tables-before.txt, raw/nft-tables-after.txt)",
+ "host_state_added": [
+  "/etc/firecrawl-pi/paid-dispatch.env (the owner's paid-dispatch switch, written by fcpi paid on; not part of the snapshot's listing)"
+ ],
+ "counts": {
+  "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)": 116,
+  "service_image_rebuilt_by_this_work": 6,
+  "ssh_session_scope": 2,
+  "tailscaled_socket_rebind (same pid 1153 and port 41641; only file descriptor numbers differ)": 4,
+  "timestamp": 2
+ },
+ "unattributed": 0,
+ "lines": [
+  {
+   "line": "-2026-10-06T10:43:42Z",
+   "attribution": "timestamp"
+  },
+  {
+   "line": "+2026-10-06T13:06:13Z",
+   "attribution": "timestamp"
+  },
+  {
+   "line": "-docker-3377b4e4414ced4991f2e0f85431c0f962c4ff1c0027d5b2828030a6fe9840a6.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-4829e040b654e3018e77804afdc7cebacb46af30e6fb597debd0931cdd3163fe.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-62eb563bbe51aea1007968888cc7cf3a0426c922034ade44191173bf8954eb6f.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-8041b093acf8cabf7052f8cfab2c1769e68c189344132541983188b4b8899f01.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-8b6479fabd2be86dcbeafaebbe9bcc15c622f70b36cc1cb0fe4f8c984ff6db9d.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-8dfb5196efa7bb7c2e2474a40535535c989cce86c2a9e0c7c99a1d157262bf75.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-908635d180447279d025ced1fa46986b7ede530655017255ff11f09646f1e112.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-94205efe8152939e51e5f022f4b56a8bc79f8f19f88f351231a13c44277d5aba.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-990347c8400bc5f360bce3c74a0720634a67073164c37dddc555e6c4f77dd878.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-9b7ab6d3ed26b903d0f3e026e08ff6691971454f3ff982d20229ee47d4f34c24.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-c7be7805a31435cdba578bc3458b3dc8d1f9a9b5722782fe69393a73d5f33e8a.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-c9b1bebdb8327fcba03fcb2585c2f04dde9315477784a60c10af6938e6742825.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-cc3b9877ecc6122b8d5a950230643a0953b9e721e8b2e90f0b69d4e291ec65e4.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-d31c18bdadc58b16c1d24a7a79e98abc3bc6204baeb84a03ac214cf45ad0f0e9.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-docker-d955bfd3e31510ca9a2110c8e8fead12639f46d659c25dd2e2c0197788b7ecea.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-12ad2550805e4b04986d5c755f80220708f4cad1f7ed8d3beb5349d510841934.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-2b21778b3544189209855ee983646cedc5dd340a40066c3f30db3a7a8d97ac20.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-30f0254c83086429a0eb1950533b39d97b9d38f05a078800a96d6adbba8fec6a.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-4f6e863b35cf7f348cf249a299627c9d32ef2a2d616de226099f79b43f6f2246.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-5f807188700ee42f8d87826cda75152025520be6733a99b4cb3eacaed7aae29b.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-71f5757f15468de06493aef48d47f44c72146c7b7f54ab2632868c2c2f2dd6fa.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-7952b1a5d9891a094c5cbb1c0e51c4012b43a96e3f810ae33f8d1de4a7a8d6de.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-80569179634fd491aff33e9ba51661b502688b841a09111a384870e3893fd61f.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-9f6e893322aa05d7ee1f04200f76d4eda094bcd32d93ccd1a4370f017ace00cf.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-b042dba4b04ec59ecc8488853e6a6fee364d23fdf8d81a75b0160907f02309e6.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-c0313c98957a57b3df0dfc96befb316332335082f9d61a45eb2da359b5c9ba79.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-df82694a1599c7441dd016de7f66d2e57bdf980356218ec90b0bf928432e9c40.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-e6a2bacade18eab683a04b768f3ebc5a1575e9137debf66d91923bff19bc19ae.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-f93d278ab1bc7015a6a5634cc0d84276c72356fd576adc8f8defef166a3348b8.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+docker-fa41f19a571357c7ac299a78c671b29ec3a69b2fa65c289d12fcd525ef52a9e3.scope",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-session-38945.scope",
+   "attribution": "ssh_session_scope"
+  },
+  {
+   "line": "+session-40360.scope",
+   "attribution": "ssh_session_scope"
+  },
+  {
+   "line": "-3377b4e4414ced4991f2e0f85431c0f962c4ff1c0027d5b2828030a6fe9840a6\tfcpi-fixture-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-4829e040b654e3018e77804afdc7cebacb46af30e6fb597debd0931cdd3163fe\tfcpi-fixture-m2-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-62eb563bbe51aea1007968888cc7cf3a0426c922034ade44191173bf8954eb6f\tfcpi-nuq-postgres-1\tfcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-8041b093acf8cabf7052f8cfab2c1769e68c189344132541983188b4b8899f01\tfcpi-firecrawl-core-1\tfcpi/firecrawl-api@sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-8b6479fabd2be86dcbeafaebbe9bcc15c622f70b36cc1cb0fe4f8c984ff6db9d\tfcpi-fixture-m5-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-8dfb5196efa7bb7c2e2474a40535535c989cce86c2a9e0c7c99a1d157262bf75\tfcpi-searxng-1\tsearxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-908635d180447279d025ced1fa46986b7ede530655017255ff11f09646f1e112\tfcpi-fixture-m3-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-94205efe8152939e51e5f022f4b56a8bc79f8f19f88f351231a13c44277d5aba\tfcpi-rabbitmq-1\trabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-990347c8400bc5f360bce3c74a0720634a67073164c37dddc555e6c4f77dd878\tfcpi-browser-worker-1\tfcpi/browser@sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-9b7ab6d3ed26b903d0f3e026e08ff6691971454f3ff982d20229ee47d4f34c24\tfcpi-access-gateway-1\tfcpi/access-gateway@sha256:274247d98ac057dfff81811baf8ff85f9b529f37cd68e0eb6139bc48b10806fb\trunning",
+   "attribution": "service_image_rebuilt_by_this_work"
+  },
+  {
+   "line": "-c7be7805a31435cdba578bc3458b3dc8d1f9a9b5722782fe69393a73d5f33e8a\tfcpi-mcp-gateway-1\tfcpi/mcp-gateway@sha256:d97a3198606aaa06bca039ca7f958443c9cc73d29c28986056f1b50ee393ad0d\trunning",
+   "attribution": "service_image_rebuilt_by_this_work"
+  },
+  {
+   "line": "-c9b1bebdb8327fcba03fcb2585c2f04dde9315477784a60c10af6938e6742825\tfcpi-retrieval-service-1\tfcpi/retrieval@sha256:b8923be4d5d4458c51c450b32fa50e5622f5de7817e8c0e7a8656d0206258235\trunning",
+   "attribution": "service_image_rebuilt_by_this_work"
+  },
+  {
+   "line": "-cc3b9877ecc6122b8d5a950230643a0953b9e721e8b2e90f0b69d4e291ec65e4\tfcpi-fixture-m7-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-d31c18bdadc58b16c1d24a7a79e98abc3bc6204baeb84a03ac214cf45ad0f0e9\tfcpi-fixture-m6-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-d955bfd3e31510ca9a2110c8e8fead12639f46d659c25dd2e2c0197788b7ecea\tfcpi-redis-1\tredis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+12ad2550805e4b04986d5c755f80220708f4cad1f7ed8d3beb5349d510841934\tfcpi-nuq-postgres-1\tfcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+2b21778b3544189209855ee983646cedc5dd340a40066c3f30db3a7a8d97ac20\tfcpi-fixture-m5-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+30f0254c83086429a0eb1950533b39d97b9d38f05a078800a96d6adbba8fec6a\tfcpi-fixture-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+4f6e863b35cf7f348cf249a299627c9d32ef2a2d616de226099f79b43f6f2246\tfcpi-redis-1\tredis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+5f807188700ee42f8d87826cda75152025520be6733a99b4cb3eacaed7aae29b\tfcpi-mcp-gateway-1\tfcpi/mcp-gateway@sha256:eebafe80fc3a108490d35ecf834ab3638336e273040d25aad0ecba870b55c172\trunning",
+   "attribution": "service_image_rebuilt_by_this_work"
+  },
+  {
+   "line": "+71f5757f15468de06493aef48d47f44c72146c7b7f54ab2632868c2c2f2dd6fa\tfcpi-rabbitmq-1\trabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+7952b1a5d9891a094c5cbb1c0e51c4012b43a96e3f810ae33f8d1de4a7a8d6de\tfcpi-retrieval-service-1\tfcpi/retrieval@sha256:a9e6502a0af7db4e689fd08decca3b0328cae58994881994fd71a17a42237854\trunning",
+   "attribution": "service_image_rebuilt_by_this_work"
+  },
+  {
+   "line": "+80569179634fd491aff33e9ba51661b502688b841a09111a384870e3893fd61f\tfcpi-fixture-m6-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+9f6e893322aa05d7ee1f04200f76d4eda094bcd32d93ccd1a4370f017ace00cf\tfcpi-fixture-m7-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+b042dba4b04ec59ecc8488853e6a6fee364d23fdf8d81a75b0160907f02309e6\tfcpi-firecrawl-core-1\tfcpi/firecrawl-api@sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+c0313c98957a57b3df0dfc96befb316332335082f9d61a45eb2da359b5c9ba79\tfcpi-searxng-1\tsearxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+df82694a1599c7441dd016de7f66d2e57bdf980356218ec90b0bf928432e9c40\tfcpi-browser-worker-1\tfcpi/browser@sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+e6a2bacade18eab683a04b768f3ebc5a1575e9137debf66d91923bff19bc19ae\tfcpi-fixture-m2-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+f93d278ab1bc7015a6a5634cc0d84276c72356fd576adc8f8defef166a3348b8\tfcpi-access-gateway-1\tfcpi/access-gateway@sha256:0717cdcf64fa62edd3cb0913561d1b76ef8465d274292cc9aa8bbb7aa3080366\trunning",
+   "attribution": "service_image_rebuilt_by_this_work"
+  },
+  {
+   "line": "+fa41f19a571357c7ac299a78c671b29ec3a69b2fa65c289d12fcd525ef52a9e3\tfcpi-fixture-m3-1\tnode@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e\trunning",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-tcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=4008467,fd=8))",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+tcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=575369,fd=8))",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-udp *:41641 users:((\"tailscaled\",pid=1153,fd=22))",
+   "attribution": "tailscaled_socket_rebind (same pid 1153 and port 41641; only file descriptor numbers differ)"
+  },
+  {
+   "line": "+udp *:41641 users:((\"tailscaled\",pid=1153,fd=12))",
+   "attribution": "tailscaled_socket_rebind (same pid 1153 and port 41641; only file descriptor numbers differ)"
+  },
+  {
+   "line": "-udp 0.0.0.0:41641 users:((\"tailscaled\",pid=1153,fd=23))",
+   "attribution": "tailscaled_socket_rebind (same pid 1153 and port 41641; only file descriptor numbers differ)"
+  },
+  {
+   "line": "+udp 0.0.0.0:41641 users:((\"tailscaled\",pid=1153,fd=22))",
+   "attribution": "tailscaled_socket_rebind (same pid 1153 and port 41641; only file descriptor numbers differ)"
+  },
+  {
+   "line": "-/run/docker/netns/103172cf431c nsfs[net:[4026533510]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/10f4542be727 nsfs[net:[4026533761]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/15edab99a02f nsfs[net:[4026533599]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/3039a7aa6584 nsfs[net:[4026532850]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/381e79c17863 nsfs[net:[4026533154]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/3850d59ec59e nsfs[net:[4026532996]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/4e95cc787a3a nsfs[net:[4026533330]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/6d4a2e74ebed nsfs[net:[4026533075]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/741061b3b7ca nsfs[net:[4026532933]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/aeee1e9aa938 nsfs[net:[4026532759]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/c9892383215d nsfs[net:[4026533425]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/e4d2d1ea8beb nsfs[net:[4026533249]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/e5654396b9f5 nsfs[net:[4026532512]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/eb831365a0ed nsfs[net:[4026532608]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/run/docker/netns/fe4cfff58bf1 nsfs[net:[4026532690]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/07155a15af9a nsfs[net:[4026533421]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/140090a282cd nsfs[net:[4026533340]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/32ff511f43a7 nsfs[net:[4026532854]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/3ba697bb1fc1 nsfs[net:[4026533514]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/50dd48587ca4 nsfs[net:[4026532773]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/556b0121602c nsfs[net:[4026533097]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/5a0121cbe13c nsfs[net:[4026533016]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/6d53bcbbd50c nsfs[net:[4026533178]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/885cb87b9645 nsfs[net:[4026533595]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/8e72d39ae86f nsfs[net:[4026532692]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/a517c2b9c115 nsfs[net:[4026532512]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/aa3ba0529197 nsfs[net:[4026532608]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/d078f8be9a98 nsfs[net:[4026532935]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/f8010dee767d nsfs[net:[4026533680]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/run/docker/netns/fe03f9668e59 nsfs[net:[4026533259]] nsfs rw",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/3377b4e4414ced4991f2e0f85431c0f962c4ff1c0027d5b2828030a6fe9840a6 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/4829e040b654e3018e77804afdc7cebacb46af30e6fb597debd0931cdd3163fe overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/62eb563bbe51aea1007968888cc7cf3a0426c922034ade44191173bf8954eb6f overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/8041b093acf8cabf7052f8cfab2c1769e68c189344132541983188b4b8899f01 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/8b6479fabd2be86dcbeafaebbe9bcc15c622f70b36cc1cb0fe4f8c984ff6db9d overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/8dfb5196efa7bb7c2e2474a40535535c989cce86c2a9e0c7c99a1d157262bf75 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/908635d180447279d025ced1fa46986b7ede530655017255ff11f09646f1e112 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/94205efe8152939e51e5f022f4b56a8bc79f8f19f88f351231a13c44277d5aba overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/990347c8400bc5f360bce3c74a0720634a67073164c37dddc555e6c4f77dd878 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/9b7ab6d3ed26b903d0f3e026e08ff6691971454f3ff982d20229ee47d4f34c24 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/c7be7805a31435cdba578bc3458b3dc8d1f9a9b5722782fe69393a73d5f33e8a overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/c9b1bebdb8327fcba03fcb2585c2f04dde9315477784a60c10af6938e6742825 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/cc3b9877ecc6122b8d5a950230643a0953b9e721e8b2e90f0b69d4e291ec65e4 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/d31c18bdadc58b16c1d24a7a79e98abc3bc6204baeb84a03ac214cf45ad0f0e9 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "-/var/lib/docker/rootfs/overlayfs/d955bfd3e31510ca9a2110c8e8fead12639f46d659c25dd2e2c0197788b7ecea overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/12ad2550805e4b04986d5c755f80220708f4cad1f7ed8d3beb5349d510841934 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/2b21778b3544189209855ee983646cedc5dd340a40066c3f30db3a7a8d97ac20 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/30f0254c83086429a0eb1950533b39d97b9d38f05a078800a96d6adbba8fec6a overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/4f6e863b35cf7f348cf249a299627c9d32ef2a2d616de226099f79b43f6f2246 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/5f807188700ee42f8d87826cda75152025520be6733a99b4cb3eacaed7aae29b overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/71f5757f15468de06493aef48d47f44c72146c7b7f54ab2632868c2c2f2dd6fa overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/7952b1a5d9891a094c5cbb1c0e51c4012b43a96e3f810ae33f8d1de4a7a8d6de overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/80569179634fd491aff33e9ba51661b502688b841a09111a384870e3893fd61f overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/9f6e893322aa05d7ee1f04200f76d4eda094bcd32d93ccd1a4370f017ace00cf overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/b042dba4b04ec59ecc8488853e6a6fee364d23fdf8d81a75b0160907f02309e6 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/c0313c98957a57b3df0dfc96befb316332335082f9d61a45eb2da359b5c9ba79 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/df82694a1599c7441dd016de7f66d2e57bdf980356218ec90b0bf928432e9c40 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/e6a2bacade18eab683a04b768f3ebc5a1575e9137debf66d91923bff19bc19ae overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/f93d278ab1bc7015a6a5634cc0d84276c72356fd576adc8f8defef166a3348b8 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  },
+  {
+   "line": "+/var/lib/docker/rootfs/overlayfs/fa41f19a571357c7ac299a78c671b29ec3a69b2fa65c289d12fcd525ef52a9e3 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snaps",
+   "attribution": "containers_recreated_by_this_work (pi-up-m8 and fcpi paid on)"
+  }
+ ]
+}
