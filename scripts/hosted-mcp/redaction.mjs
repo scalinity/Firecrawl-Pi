@@ -4,7 +4,8 @@ import{execFileSync}from'node:child_process';import{readFileSync,writeFileSync,e
 const sha=x=>createHash('sha256').update(x).digest('hex'),read=p=>readFileSync(p,'utf8');
 const t=Object.fromEntries(read('scripts/m1/pi-target.conf').split('\n').filter(l=>/^PI_\w+=/.test(l)).map(l=>[l.split('=')[0],l.slice(l.indexOf('=')+1).replace('$HOME',process.env.HOME)]));
 const command=String.raw`sudo -n bash -s`;
-const evidence='evidence/post-m9/hosted-mcp';
+// Later post-M9 work scans its own evidence directory and the files changed since its base commit.
+const evidence=process.env.FCPI_REDACTION_EVIDENCE??'evidence/post-m9/hosted-mcp';
 // Values remain on the Pi. Only distinct SHA-256 values are returned.
 const extraction=String.raw`set -euo pipefail
 S=/etc/firecrawl-pi/secrets
@@ -65,7 +66,7 @@ for(const path of files){const bytes=readFileSync(path);if(bytes.includes(0))con
  // Both whole tokens and secret substrings (proxy password parts included).
  for(const v of candidates(line))if(secrets.has(sha(v)))real.push({path,line:i+1,rule:'live-secret-hash'});
 });}
-const changed=execFileSync('git',['diff','--name-only','311069d8bae453f29894f09f8e577ff25e9d21f8'],{encoding:'utf8'}).split('\n').filter(x=>x&&existsSync(x));
+const changed=execFileSync('git',['diff','--name-only',process.env.FCPI_REDACTION_BASE??'311069d8bae453f29894f09f8e577ff25e9d21f8'],{encoding:'utf8'}).split('\n').filter(x=>x&&existsSync(x));
 for(const path of [...new Set([...changed,...files.filter(x=>x.startsWith(evidence+'/'))])])if(path!=='scripts/m1/pi-target.conf'&&[t.PI_SSH_TARGET,t.PI_SSH_TARGET.split('@').at(-1),t.PI_LAN_ADDRESS,t.PI_SSH_KEY].some(v=>read(path).includes(v)))real.push({path,rule:'real-private-endpoint'});
 const out={schema:'fcpi.hosted-redaction/v1',utc:new Date().toISOString(),source_commit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),positive_controls:positive.length,controls:positive,prefixed_live_hash_controls:prefixedControls,live_secret_hashes:secrets.size,extraction_sha256:sha(extraction),hosted_runtime_key_hash_included:secrets.has(tagged['hosted-runtime-key']),hosted_mcp_auth_hash_included:secrets.has(tagged['hosted-mcp-auth']),real_secret_hits:real,unclassified_hits:hits.filter(x=>!x.classification),classified_hits:hits.filter(x=>x.classification),inputs,limits:'Checks whole tokens and ordinary assignment, header and URL credential components; arbitrary transformed or truncated encodings are not proven.',state:real.length||hits.some(x=>!x.classification)?'FAIL':'PASS'};
 writeFileSync(output,JSON.stringify(out,null,2)+'\n');console.log(JSON.stringify({state:out.state,files:inputs.length,secret_hashes:secrets.size,real_hits:real.length,unclassified:out.unclassified_hits.length}));process.exitCode=out.state==='PASS'?0:1;
