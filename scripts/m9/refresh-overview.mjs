@@ -12,9 +12,10 @@ const old=blocks['source-data'].data,next=structuredClone(old);
 for(const [key,path] of [['spec','docs/FIRECRAWL_PI_SPEC.md'],['milestones','docs/FIRECRAWL_PI_MILESTONES.md'],['agents','AGENTS.md']]){
  const text=readFileSync(path,'utf8');next[key].lines=text.trimEnd().split('\n');next[key].sha256=createHash('sha256').update(text).digest('hex');
  // Displayed hashes are separate from the data block. Replace their full or
- // abbreviated value only when the old literal occurs exactly once outside it.
- const outside=html.replace(blocks['source-data'].re,'');
+ // abbreviated value only when the old literal occurs exactly once outside it,
+ // read afresh for each length, so the full value's replacement is not counted again.
  for(const size of [64,12]){
+  const outside=html.replace(blocks['source-data'].re,'');
   const a=old[key].sha256.slice(0,size),b=next[key].sha256.slice(0,size);
   if(a===b)continue;const n=outside.split(a).length-1;
   if(n===1){const pos=html.indexOf(a);const dataStart=html.indexOf(blocks['source-data'].text);if(pos>=dataStart&&pos<dataStart+blocks['source-data'].text.length){const last=html.lastIndexOf(a);html=html.slice(0,last)+html.slice(last).replace(a,b);}else html=html.replace(a,b);}
