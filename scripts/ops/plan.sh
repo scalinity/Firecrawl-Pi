@@ -94,8 +94,9 @@ case ${1:-} in
           data_restore_needed: $restore,
           backup_to_restore: (if $restore then $pre else null end) }
       | .steps = (if .data_restore_needed then
-          ["fcpi hold rollback <seconds>", "stop the stack (systemctl stop fcpi-stack)", "restore the data directories from backup \(.backup_to_restore.snapshot // "NONE RECORDED: stop here") (fcpi help restore)",
-           "scripts/m1/deploy.sh of \(.to_commit[0:12]); recreate every service", "reconcile provider spend newer than the backup before paid dispatch returns", "fcpi verify functional; fcpi status; fcpi hold rollback --clear"]
+          ["fcpi hold rollback <seconds>", "stop the stack (systemctl stop fcpi-stack)", "move the paid-dispatch switch aside until spend is reconciled (mv /etc/firecrawl-pi/paid-dispatch.env /etc/firecrawl-pi/paid-dispatch.env.held)",
+           "restore the data directories from backup \(.backup_to_restore.snapshot // "NONE RECORDED: stop here") (fcpi help restore)",
+           "scripts/m1/deploy.sh of \(.to_commit[0:12]); recreate every service", "reconcile provider spend newer than the backup, then fcpi paid on", "fcpi verify functional; fcpi status; fcpi hold rollback --clear"]
         else ["scripts/m1/deploy.sh of \(.to_commit[0:12])", "recreate the services whose images or configuration differ", "fcpi verify functional; fcpi status"] end)' ;;
   *) die "usage: fcpi upgrade --plan <dir> | fcpi rollback --plan | fcpi release" ;;
 esac

@@ -35,13 +35,16 @@ What you need, none of it on the Pi:
    Public images are pulled by the digests the version lock holds. Only with no images snapshot: rebuild from the commit
    (scripts/m2/build-api-image.sh on the workstation, the pi-build-images scripts on the host) and repin
    deploy/compose.yaml to the new digests, a new commit, since the rebuilt digests differ.
-6. Start with webhook delivery suppressed and paid dispatch off (deploy/compose.yaml keeps PI_PAID_DISPATCH_ENABLED
-   "false"), and inspect the ledger before anything can leave:
+6. Start with webhook delivery suppressed and paid dispatch off, and inspect the ledger before anything can leave. The
+   restored host configuration carries the owner's paid-dispatch switch: move it aside first, so every start, a reboot
+   included, runs without paid dispatch:
+     mv /etc/firecrawl-pi/paid-dispatch.env /etc/firecrawl-pi/paid-dispatch.env.held 2>/dev/null || true
      docker compose -p fcpi -f /opt/firecrawl-pi/deploy/compose.yaml -f /opt/firecrawl-pi/deploy/compose.webhooks-suppressed.yaml \
        up -d --wait --wait-timeout 900
    The gateway's outbox then keeps every event PENDING. Once provider spend newer than the backup is reconciled and the
    owner has confirmed that no webhook sent after the backup would be sent twice: systemctl start fcpi-stack, which
-   recreates the retrieval service without the override.
+   recreates the retrieval service without the override; then, if the switch was moved aside, fcpi paid on and remove
+   /etc/firecrawl-pi/paid-dispatch.env.held.
 7. Prove it: fcpi verify ops; fcpi verify functional; fcpi status. Jobs acknowledged after the backup's time are not
    in it: the recovery point is the backup's time (at most a day, spec §26).
 8. Take a new backup at once (fcpi backup), so the repository holds the recovered host's own first snapshot.

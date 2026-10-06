@@ -524,6 +524,12 @@ services:
     restart: unless-stopped
     cgroup_parent: fcpi.slice          # M8: swap denied by the slice (deploy/host/fcpi.slice), which a reload re-asserts
     user: "3310:3310"
+    # The owner's paid-dispatch switch (spec §28.3): PI_PAID_DISPATCH_ENABLED=true in this host file turns paid dispatch on
+    # (fcpi paid on|off). Without the file every start, a reboot or a restore included, runs with paid dispatch off; restore
+    # and rollback move it aside until provider spend newer than the backup is reconciled.
+    env_file:
+      - path: /etc/firecrawl-pi/paid-dispatch.env
+        required: false
     environment:
       PI_RETRIEVAL_LISTEN: 10.231.5.10:3310
       PI_RETRIEVAL_PROXY_LISTEN: 10.231.2.10:3312
@@ -537,7 +543,6 @@ services:
       PI_POSTGRES_USER: fcpi_retrieval
       PI_MAX_URL_ACQUISITIONS: "2"
       PI_MAX_BROWSER_PAGES: "1"
-      PI_PAID_DISPATCH_ENABLED: "false"
       PI_CLOUD_ACCESS_ENABLED: "false"
       # M7: screenshots and the safe action subset (a switch, so the optional capability can be turned off alone), and
       # webhook delivery for the gateway's outbox ("suppressed" holds every event unsent, as a restore does).

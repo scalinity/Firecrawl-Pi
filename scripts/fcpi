@@ -20,6 +20,8 @@
 #   fcpi doctor                     bounded, redacted diagnostic bundle (scripts/ops/doctor.sh)
 #   fcpi hold <name> <seconds> | fcpi hold <name> --clear
 #                                   pause new work by hand (the admission file), or release the pause
+#   fcpi paid on|off|status         the paid-dispatch switch (/etc/firecrawl-pi/paid-dispatch.env); on and off recreate
+#                                   the retrieval service
 #   fcpi help restore               the disaster-recovery procedure
 # Timers run: fcpi tick (every minute), fcpi probe (every five minutes), fcpi heartbeat (every minute, to the VPS
 # watchdog), fcpi boot-record (at boot).
@@ -66,6 +68,22 @@ case $cmd in
     name=${1:?usage: fcpi hold <name> <seconds>|--clear}; [[ $name =~ ^[a-z0-9-]{1,32}$ ]] || die "a hold name is 1-32 of a-z 0-9 -"
     if [ "${2:-}" = --clear ]; then hold_clear "$name"; else [[ ${2:-} =~ ^[0-9]+$ ]] || die "seconds expected"; hold_set "$name" "$2"; fi
     cat "$ADMISSION" ;;
+  paid)
+    # The owner's paid-dispatch switch (spec §28.3), read by the retrieval service through an optional env_file: absent,
+    # every start runs with paid dispatch off. The budget policy's caps still bound what a switched-on service spends.
+    need_root
+    f=/etc/firecrawl-pi/paid-dispatch.env
+    case ${1:-status} in
+      on) printf 'PI_PAID_DISPATCH_ENABLED=true\n' | write_atomic "$f" 0644 || die "could not write $f" ;;
+      off) rm -f "$f" ;;
+      status) ;;
+      *) die "usage: fcpi paid on|off|status" ;;
+    esac
+    # A running retrieval service is recreated to read the switch; a stopped one (a restore, a rollback) is left stopped.
+    if [ "${1:-status}" != status ] && [ -n "$(docker ps -q --filter name=^fcpi-retrieval-service-1$ 2>/dev/null)" ]; then
+      docker compose -p fcpi -f "$REPO/deploy/compose.yaml" up -d --no-deps --force-recreate --wait --wait-timeout 300 retrieval-service >/dev/null 2>&1 || die "recreating the retrieval service failed"
+    fi
+    echo "paid dispatch: switch $([ -f "$f" ] && grep -qx 'PI_PAID_DISPATCH_ENABLED=true' "$f" && echo on || echo off), retrieval service $(docker exec fcpi-retrieval-service-1 printenv PI_PAID_DISPATCH_ENABLED 2>/dev/null || echo unset)" ;;
   jobs)
     need_root
     json=false as=ops limit=20 id=""
