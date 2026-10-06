@@ -6,14 +6,17 @@
 
 const bare = (host) => host.replace(/^www\./i, "").toLowerCase();
 
-// The URL a map starts from: a path whose last segment names a file (index.html) maps the directory that holds
-// it, as a site's own links do; the core would otherwise keep only URLs under the file's own path, which none are.
+// The URL a map starts from: a path whose last segment names a page file (index.html, about.php) maps the directory
+// that holds it, as a site's own links do; the core would otherwise keep only URLs under the file's own path, which
+// none are. Only a page extension names a file: a versioned directory (/3.12), a repository (next.js) or a package
+// (socket.io) is a directory, mapped under its own path (review R3).
+const PAGE_FILE = /\.(?:x?html?|shtml|php\d?|aspx?|jspx?|cfm|cgi)$/i;
 export function mapStartUrl(url) {
   const u = new URL(url);
   u.hash = "";
   u.search = "";
   const last = u.pathname.slice(u.pathname.lastIndexOf("/") + 1);
-  if (last.includes(".")) u.pathname = u.pathname.slice(0, u.pathname.length - last.length);
+  if (PAGE_FILE.test(last)) u.pathname = u.pathname.slice(0, u.pathname.length - last.length);
   return u.href;
 }
 

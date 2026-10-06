@@ -9,6 +9,15 @@ test("a start URL naming a file maps its directory; a directory or bare path is 
   assert.equal(mapStartUrl("https://b.example/catalogue/category/books/poetry_23/index.html?x=1#y"), "https://b.example/catalogue/category/books/poetry_23/");
   assert.equal(mapStartUrl("https://docs.example/uv/"), "https://docs.example/uv/");
   assert.equal(mapStartUrl("https://docs.example/docs"), "https://docs.example/docs");
+  assert.equal(mapStartUrl("https://w.example/about/team.php"), "https://w.example/about/");
+  assert.equal(mapStartUrl("https://w.example/Default.ASPX"), "https://w.example/");
+  // A dotted directory is no file (review R3): a versioned doc set, a repository, a package.
+  for (const u of ["https://docs.python.org/3.12", "https://github.com/vercel/next.js", "https://www.npmjs.com/package/socket.io", "https://w.example/v1.2.3/"]) {
+    assert.equal(mapStartUrl(u), u);
+  }
+  // Its links are kept under its own path, not the parent's.
+  const r = mergeMapLinks({ url: "https://docs.python.org/3.12" }, [], ["https://docs.python.org/3.12/library/", "https://docs.python.org/3.13/library/", "https://docs.python.org/2.7/"]);
+  assert.deepEqual(r.links.map((l) => l.url), ["https://docs.python.org/3.12/library/"]);
 });
 
 test("a site without a sitemap gets its start page's same-site links, once each, without fragments or queries", () => {
