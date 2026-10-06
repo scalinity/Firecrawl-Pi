@@ -77,9 +77,7 @@
     },
     "fallbackEngines": {
       "fixture": [],
-      "live": [
-        "brave"
-      ]
+      "live": []
     },
     "engineHosts": {
       "live": [

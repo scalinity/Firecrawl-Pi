@@ -9,7 +9,7 @@
 // the pages themselves. The MCP token comes from the login keychain (scripts/m9/mcp-headers.sh) and is never printed.
 import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { writeFileSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -252,9 +252,13 @@ if (PAID) {
   noteId(r.payload.data);
   const md = norm(r.payload.data?.markdown ?? "");
   tests.residential_route = { url, ms: r.ms, proxyUsed: r.payload.data?.metadata?.proxyUsed ?? null, error: r.isError ? r.payload : null, titles: `${titles.filter((t) => md.includes(norm(t))).length}/${titles.length}` };
-  const query = `fcpi residential fallback probe ${Date.now().toString(36)} zqxvw`;
-  const q = await mcp("firecrawl_search", { query, limit: 5 });
-  tests.search_fallback = { query, ms: q.ms, results: (q.payload.data?.web ?? []).length, warning: q.payload.warning ?? null, error: q.isError ? q.payload : null };
+  // The fallback search engine is tested only while the policy names one (deploy/policies/egress.json).
+  const fallbackEngines = JSON.parse(readFileSync(join(ROOT, "deploy/policies/egress.json"), "utf8")).search.fallbackEngines.live;
+  if (fallbackEngines.length) {
+    const query = `fcpi residential fallback probe ${Date.now().toString(36)} zqxvw`;
+    const q = await mcp("firecrawl_search", { query, limit: 5 });
+    tests.search_fallback = { query, ms: q.ms, results: (q.payload.data?.web ?? []).length, warning: q.payload.warning ?? null, error: q.isError ? q.payload : null };
+  } else tests.search_fallback_configured = { engines: [], note: "no live fallback engine is configured, so none is tested" };
 }
 
 // Each page's acquisition record, from the retrieval service's log.
@@ -273,7 +277,7 @@ if (PAID) {
     c("its content is every title on the page", tests.residential_route.titles === "20/20", tests.residential_route.titles),
     c("its spend was metered into the proxy ledger", (stealth?.proxy_micro_usd ?? 0) > 0 && spent.day > 0, `${stealth?.proxy_micro_usd ?? 0} micro-USD; ledger day +${spent.day}`),
   ]) });
-  Object.assign(tests.search_fallback, { searches_with_fallback: searches.length, brave_tunnels: brave.map((b) => ({ out: b.bytes_out, in: b.bytes_in })), ...grade([
+  if (tests.search_fallback) Object.assign(tests.search_fallback, { searches_with_fallback: searches.length, brave_tunnels: brave.map((b) => ({ out: b.bytes_out, in: b.bytes_in })), ...grade([
     c("the home connection's engine answered too few, so the fallback was asked", searches.length >= 1, searches.map((x) => x.outcome).join(",") || "none"),
     c("Brave answered through the residential route", brave.some((b) => b.bytes_in > 0) && !(searches[0]?.unresponsive > 0), JSON.stringify(brave.map((b) => b.bytes_in))),
     c("the search answered without an error", !tests.search_fallback.error, JSON.stringify(tests.search_fallback.error ?? "no error")),
@@ -295,7 +299,8 @@ tests.home_connection_first = { acquisitions_in_window: acq.length, matched_to_a
 const out = { schema: "fcpi.retrieval-quality-grade/v1", utc: started.toISOString(), finished: new Date().toISOString(), source_commit: git("rev-parse", "HEAD"),
   code_dirty: git("status", "--porcelain", "--", "services", "deploy", "scripts", "tests") !== "", deployed_commit: ssh("cat /opt/firecrawl-pi/.fcpi-source-commit").trim(),
   endpoint: "https://<pi-tailnet-host>:8443/mcp", protocol: MODERN, paid: PAID, tests, acquisitions: byId,
-  summary: Object.fromEntries(Object.entries(tests).map(([k, v]) => [k, v.grade ?? null])) };
+  summary: Object.fromEntries(Object.entries(tests).filter(([, v]) => v.grade).map(([k, v]) => [k, v.grade])),
+  not_graded: Object.entries(tests).filter(([, v]) => !v.grade).map(([k, v]) => ({ test: k, note: v.note ?? null })) };
 const dir = join(ROOT, "evidence/post-m9/retrieval-quality");
 mkdirSync(dir, { recursive: true });
 const file = join(dir, `grade-${out.utc.replace(/[:.]/g, "").replace("Z", "Z")}.json`);
