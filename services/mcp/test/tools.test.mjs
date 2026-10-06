@@ -278,3 +278,24 @@ test("map passes on how many links each source gave and the core's warning", () 
   const r = T.firecrawl_map.shape({ status: 200, json: { success: true, links: [{ url: "https://a.example/1" }, { url: "https://a.example/2" }], warning: "Only 1 result(s) found.", fcpi }, headers: {} }, {});
   assert.deepEqual(r.payload, { links: [{ url: "https://a.example/1" }, { url: "https://a.example/2" }], warning: "Only 1 result(s) found.", fcpi });
 });
+
+test("in-page anchors are reduced to their text in every document an agent reads; links elsewhere are kept as written", async () => {
+  const { dropInPageLinks } = await import("../src/tools.mjs");
+  const page = "https://w.example/wiki/Pi";
+  const md = `[Jump to content](${page}#bodyContent)\nThe Pi 5 has 16 GB.[\\[72\\]](${page}#cite_note-72) See [ARM](https://w.example/wiki/ARM "ARM") and [Pi](${page}) and [other](https://w.example/wiki/Other#History).\n1. [↑](${page}#cite_ref-1) ![img](https://w.example/i.png)`;
+  const doc = { markdown: md, metadata: { url: page, sourceURL: `${page}?x` } };
+  dropInPageLinks(doc);
+  assert.equal(doc.markdown, `Jump to content\nThe Pi 5 has 16 GB.\\[72\\] See [ARM](https://w.example/wiki/ARM "ARM") and [Pi](${page}) and [other](https://w.example/wiki/Other#History).\n1. ↑ ![img](https://w.example/i.png)`);
+  // A document without its own URL, or without markdown, is left alone.
+  const bare = { markdown: `[a](${page}#x)` };
+  dropInPageLinks(bare);
+  assert.equal(bare.markdown, `[a](${page}#x)`);
+  // Through the scrape, search and status answers.
+  const T = byName(makeTools(m()));
+  const s = T.firecrawl_scrape.shape({ status: 200, json: { success: true, data: { markdown: `x[\\[1\\]](${page}#c1)`, metadata: { url: page } } }, headers: {} }, {});
+  assert.equal(s.payload.data.markdown, "x\\[1\\]");
+  const q = T.firecrawl_search.shape({ status: 200, json: { success: true, data: { web: [{ url: page, markdown: `y[n](${page}#n)`, metadata: { url: page } }] } }, headers: {} }, {});
+  assert.equal(q.payload.data.web[0].markdown, "yn");
+  const st = T.firecrawl_check_crawl_status.shape({ status: 200, json: { success: true, status: "completed", completed: 1, total: 1, data: [{ markdown: `z[t](${page}#t)`, metadata: { sourceURL: page } }] }, headers: {} }, { id: "0190f1a0-0000-7000-8000-000000000000" });
+  assert.equal(st.payload.data[0].markdown, "zt");
+});

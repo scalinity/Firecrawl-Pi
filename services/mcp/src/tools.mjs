@@ -136,6 +136,18 @@ export function fitDocument(payload, doc, budget) {
   return Object.keys(cuts).length ? cuts : null;
 }
 
+// In-page anchors: a link to a fragment of the document's own URL (a footnote marker, a back-reference, a table of
+// contents) leads nowhere an agent can go, and on a reference page such links are a fifth of the markdown. Each is
+// reduced to its text; every other link stays as the core wrote it, and REST answers are untouched. The pattern's
+// quantifiers are bounded, so no markup makes it backtrack (CWE-1333).
+const MD_LINK = /\[([^[\]]{0,500}(?:\[[^[\]]{0,100}\][^[\]]{0,500})?)\]\(([^()\s]{1,2048})(?: "[^"]{0,500}")?\)/g;
+export function dropInPageLinks(doc) {
+  if (!doc || typeof doc.markdown !== "string") return;
+  const own = new Set([doc.metadata?.url, doc.metadata?.sourceURL].filter((u) => typeof u === "string").map((u) => u.split("#")[0]));
+  if (!own.size) return;
+  doc.markdown = doc.markdown.replace(MD_LINK, (whole, text, url) => (url.includes("#") && own.has(url.split("#")[0]) ? text : whole));
+}
+
 // ---- answers ----------------------------------------------------------------------------------------
 const errorOf = (r) => ({ error: { httpStatus: r.status, code: r.json?.code ?? null, message: r.json?.error ?? `The gateway answered ${r.status}.`, ...(r.json?.id ? { id: r.json.id } : {}), ...(r.json?.receipt ? { receipt: r.json.receipt } : {}), ...(r.headers?.["retry-after"] ? { retryAfterSeconds: Number(r.headers["retry-after"]) } : {}) } });
 
@@ -168,6 +180,7 @@ function shape(kind, tool, r, args, m, omitted) {
         // Results in order until the payload limit; a single result too large alone is cut field by field.
         const payload = { data: b.data ?? {}, ...(b.warning ? { warning: b.warning } : {}) };
         const web = Array.isArray(payload.data.web) ? payload.data.web : [];
+        web.forEach(dropInPageLinks);
         const total = web.length;
         while (bytes(payload) > budget && payload.data.web?.length > 1) {
           payload.data.web = payload.data.web.slice(0, Math.floor(payload.data.web.length / 2));
@@ -177,6 +190,7 @@ function shape(kind, tool, r, args, m, omitted) {
         return { payload };
       }
       const payload = { data: b.data ?? null, ...(b.fcpi ? { fcpi: b.fcpi } : {}) };
+      dropInPageLinks(payload.data);
       const cuts = payload.data && typeof payload.data === "object" ? fitDocument(payload, payload.data, budget - 512) : null;
       if (cuts) payload.truncated = { fields: cuts, note: "The page exceeded the tool payload limit, so the fields named here were cut. Ask for fewer formats (markdown alone is smallest), or scrape it as a batch job and read it page by page." };
       return { payload };
@@ -194,6 +208,7 @@ function shape(kind, tool, r, args, m, omitted) {
       // so no copy of it is made.
       let used = bytes(payload);
       for (const doc of data) {
+        dropInPageLinks(doc);
         const size = bytes(doc) + 1;
         if (used + size <= budget - 256) { payload.data.push(doc); used += size; continue; }
         if (payload.data.length) break;
