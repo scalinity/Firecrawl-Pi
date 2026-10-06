@@ -127,6 +127,12 @@ const webhooks = makeWebhooks({ getPolicy, resolvePublic, getSecret: () => readC
 log({ event: "budget_loaded", budget_sha256: budgetSha256, paid_dispatch: env.paidDispatch, models: Object.keys(budget.models), parsers: Object.keys(budget.parsers), proxies: Object.keys(budget.proxies), enhancers: Object.keys(budget.enhancers), browser_extras: env.browserExtras, webhook_delivery: env.webhookDelivery });
 // The residential route as others see it: no secret, only whether it can be used now and why not.
 const routeView = (st) => ({ available: st.available, reason: st.reason, subject: st.subject ?? null, provider: st.providerName ?? null, paid: st.paid ?? null, ...(st.retryAfter ? { retryAfter: st.retryAfter } : {}) });
+// A paid tier's readiness includes its caps, which availability() reads from the ledger (review R16); without the
+// ledger no reservation can be made, so an otherwise available tier is not ready.
+const tierView = async (tier) => {
+  const st = tier.state(), unread = { ...st, available: false, reason: "RETRIEVAL_NOT_READY" };
+  return routeView(!st.available ? st : storeReady ? await tier.availability().catch(() => unread) : unread);
+};
 // Hourly, the selected paid proxy's last closed UTC day is reconciled against its usage report, when paid dispatch is
 // on, it has a report and the report's credential is present (spec §10.3). Only a closed day: today's report moves
 // while attempts are in flight (review C1); repeating the same day charges nothing new.
@@ -222,8 +228,8 @@ const server = http.createServer(async (req, res) => {
       const ok = storeReady && getLocalReady();
       // Search, models and parsers are optional to acquisition: reported, never folded into ok (spec §20, AC23).
       return send(res, ok ? 200 : 503, { ok, store: storeReady, local_networks: getLocalReady(), browser: b.ok === true ? "up" : "down",
-        search_selection: selection.search, providers: Object.fromEntries(Object.entries(budget.providers).map(([n, p]) => [n, breakerState(n, p)])), residential: routeView(residential.state()),
-        enhanced: routeView(enhanced.state()), browser_extras: env.browserExtras, webhook_delivery: env.webhookDelivery });
+        search_selection: selection.search, providers: Object.fromEntries(Object.entries(budget.providers).map(([n, p]) => [n, breakerState(n, p)])), residential: await tierView(residential),
+        enhanced: await tierView(enhanced), browser_extras: env.browserExtras, webhook_delivery: env.webhookDelivery });
     }
     if (req.method === "GET" && path === "/searxng/search") {
       if (!storeReady) return notReady(res);
