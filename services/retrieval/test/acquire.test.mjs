@@ -374,3 +374,75 @@ test("a script-heavy short page is rendered; only a render that shows materially
     assert.equal(same.learned.filter((l) => l.obs?.outcome === "js_rendered").length, 0);
   } finally { t.s.close(); }
 });
+
+// ---- after a failed browser step (review R1, R2) ----------------------------------------------------------------------
+const fail = (cls) => ({ render: async () => ({ ok: false, failure: { class: cls, detail: `stub ${cls}` } }) });
+const policyOne = (port) => policyFor([["t.fixture.fcpi.test", port, "fixture"]]);
+
+test("a page asked to wait whose target is not HTML is served over HTTP: a document the browser downloads, or text it would wrap", async () => {
+  const pdf = Buffer.concat([Buffer.from("%PDF-1.7\n"), Buffer.alloc(64, 0x20)]);
+  const t = await serve((req, res) => (req.url === "/paper" ? res.writeHead(200, { "content-type": "application/pdf" }).end(pdf)
+    : res.writeHead(200, { "content-type": "text/plain; charset=utf-8" }).end("plain notes, line one\nline two\n")));
+  try {
+    const policy = policyOne(t.port);
+    // Chromium turns the PDF's navigation into a download: the render fails, and one HTTP attempt serves the document.
+    const a = await acquirerFor(new FakeStore(), policy, fail("NAVIGATION_FAILED"))({ ...body(`http://t.fixture.fcpi.test:${t.port}/paper`), waitFor: 2000 });
+    assert.equal(a.ok, true, JSON.stringify(a.failure));
+    assert.deepEqual(a.strategies, ["direct_browser", "direct_http"]);
+    assert.deepEqual(a.route.escalations, ["wait_for", "browser_failed:NAVIGATION_FAILED->http"]);
+    assert.equal(Buffer.from(a.bodyBase64, "base64").subarray(0, 8).toString(), "%PDF-1.7");
+    // Text the browser would wrap in its viewer: the render's main response is not HTML, so the HTTP answer is served.
+    const viewer = { render: async (x) => ({ ok: true, status: 200, contentType: "text/plain; charset=utf-8", html: "<html><body><pre>plain notes</pre></body></html>", finalUrl: x.url,
+      subresources: { requests: 0, overLimit: 0 }, proxy: { requests: 1, bytes: 1, capped: false, denied: [] } }) };
+    const b = await acquirerFor(new FakeStore(), policy, viewer)({ ...body(`http://t.fixture.fcpi.test:${t.port}/notes.txt`), waitFor: 2000 });
+    assert.equal(b.ok, true, JSON.stringify(b.failure));
+    assert.deepEqual(b.route.escalations, ["wait_for", "browser_failed:NOT_A_PAGE->http"]);
+    assert.equal(b.body, "plain notes, line one\nline two\n");
+    assert.match(b.contentType, /^text\/plain/);
+  } finally { t.s.close(); }
+});
+
+test("a page asked to wait is served over HTTP when the host has paused browser work", async () => {
+  const t = await serve((req, res) => page(res));
+  try {
+    const acquire = makeAcquirer({ store: new FakeStore(), getPolicy: () => policyOne(t.port), getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [],
+      lookupFixture: async () => ["127.0.0.1"], browser: { render: () => assert.fail("no render while paused") }, urlHmac, log: () => {},
+      admission: { read: async () => ({ browser: "paused", reasons: ["memory"] }) } });
+    const r = await acquire({ ...body(`http://t.fixture.fcpi.test:${t.port}/`), waitFor: 1500 });
+    assert.equal(r.ok, true, JSON.stringify(r.failure));
+    assert.deepEqual(r.strategies, ["direct_http"]);
+    assert.deepEqual(r.route.escalations, ["wait_for", "browser_failed:RESOURCE_BUSY->http"]);
+  } finally { t.s.close(); }
+});
+
+test("a script-held page keeps its HTTP answer when its browser attempt fails for the browser's reasons, never for the page's", async () => {
+  const data = JSON.stringify(Array.from({ length: 12 }, (_, i) => ({ text: `Quote ${i}: words a reader came to this page to read, held in a script.` })));
+  const shell = `<!doctype html><title>q</title><h1>Quotes</h1><p><a href="/login">Login</a></p><script>var data = ${data};</script>`;
+  const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(shell));
+  try {
+    const policy = policyOne(t.port);
+    for (const cls of ["TIMEOUT", "DIRECT_LIMIT", "RESOURCE_LIMIT", "BROWSER_UNAVAILABLE"]) {
+      const r = await acquirerFor(new FakeStore(), policy, fail(cls))(body(`http://t.fixture.fcpi.test:${t.port}/`));
+      assert.equal(r.ok, true, `${cls}: ${JSON.stringify(r.failure)}`);
+      assert.equal(r.body, shell);
+      assert.deepEqual(r.route.escalations, [`browser_failed:${cls}->http_answer`]);
+      assert.equal(r.quality.verdict, "adequate");
+    }
+    // The rendered page showed a denial or a shell, or the caller left: nothing is served in its place.
+    for (const cls of ["ACCESS_DENIED", "RENDER_INCOMPLETE", "CANCELLED", "SSRF_DENIED"]) {
+      const r = await acquirerFor(new FakeStore(), policy, fail(cls))(body(`http://t.fixture.fcpi.test:${t.port}/`));
+      assert.equal(r.failure?.class, cls);
+    }
+  } finally { t.s.close(); }
+});
+
+test("after a failed render a page is not rendered twice: an HTTP answer that is still a structural shell fails as RENDER_INCOMPLETE", async () => {
+  const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(SHELL));
+  try {
+    let renders = 0;
+    const r = await acquirerFor(new FakeStore(), policyOne(t.port), { render: async () => { renders++; return { ok: false, failure: { class: "TIMEOUT", detail: "slow" } }; } })({ ...body(`http://t.fixture.fcpi.test:${t.port}/`), waitFor: 1000 });
+    assert.equal(renders, 1);
+    assert.equal(r.failure.class, "RENDER_INCOMPLETE");
+    assert.deepEqual(r.strategies, ["direct_browser", "direct_http"]);
+  } finally { t.s.close(); }
+});

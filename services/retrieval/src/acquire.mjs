@@ -16,7 +16,7 @@ import { randomUUID, createHmac, createHash } from "node:crypto";
 import { getDomain } from "tldts";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { guardedFetch, CookieJar, USER_AGENT } from "./httpfetch.mjs";
-import { classify, isTextual } from "./quality.mjs";
+import { classify, isTextual, isHtml } from "./quality.mjs";
 import { ROUTES, startTier, startsInBrowser } from "./route.mjs";
 import { Meter, sessionIdFor } from "./residential.mjs";
 import { finalTarget } from "./enhanced.mjs";
@@ -227,6 +227,13 @@ function makeLegs({ residential, urlHmac, getBudget }) {
   return { open, close, closeOpen };
 }
 
+// After a failed browser step (review R1, R2): the classes where the render failed, not the page, so one HTTP attempt
+// may still answer a browser start; and the classes where the rendered page itself showed a block, a denial or a
+// shell, or the caller left, so an HTTP answer already in hand is not served instead.
+const BROWSER_SIDE = new Set(["NAVIGATION_FAILED", "BROWSER_ERROR", "BROWSER_UNAVAILABLE", "BROWSER_CRASHED", "RENDERER_CRASHED", "TIMEOUT",
+  "RESOURCE_BUSY", "RESOURCE_LIMIT", "SIZE_LIMIT", "NOT_A_PAGE"]);
+const PAGE_SIDE = new Set(["CANCELLED", "BLOCKED_PUBLIC_CONTENT", "AUTH_REQUIRED", "ACCESS_DENIED", "SSRF_DENIED", "CLOUD_DENIED", "RENDER_INCOMPLETE"]);
+
 export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolvePublic, lookupFixture, browser, urlHmac, log, residential = NO_ROUTE, getBudget = null,
   enhanced = NO_ENHANCED, extras = false, admission = null }) {
   const { holdPermit, pace, pacedFetch } = makePacer({ store, getPolicy, resolvePublic, lookupFixture, log });
@@ -396,7 +403,11 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           if (!["not_found", "target_error", "js_shell"].includes(verdict.verdict)) await learn(answered, { tier, mode: "http", outcome: "adequate", probe: probed }, { success: true });
           return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: httpRes.body.toString("base64") }) }) };
         }
-        return { browser: true, renderUrl: httpRes.finalUrl, tier, shellChars: verdict.visibleChars ?? 0 };
+        // A length-based shell's HTTP answer was adequate before it earned the render: it is kept, and served if the browser
+        // step fails for its own reasons (review R2). A structural shell has no content to keep.
+        const answer = verdict.structural === true ? null
+          : () => ({ ok: true, body: text, quality: { verdict: "adequate", reasons: [...(verdict.reasons ?? []), "served over HTTP after its browser attempt failed"] } });
+        return { browser: true, renderUrl: httpRes.finalUrl, tier, shellChars: verdict.visibleChars ?? 0, answer };
       }
 
       // One browser attempt on `tier`. shellTier: the tier on which the HTTP attempt just saw a script shell, and
@@ -492,9 +503,13 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           }
           // M7: a render asked for a screenshot that came back without one did not do what was asked.
           const noShot = r.ok && hooks?.screenshot && !r.screenshot?.base64 ? { class: "BROWSER_ERROR", detail: "the render returned no screenshot" } : null;
+          // A document the browser can only display (text it wraps in a viewer) is no rendered page: for a page asked to wait,
+          // the HTTP step serves it as it is (review R1). Other renders, and screenshots and actions, take it as it is.
+          const notPage = r.ok && !hooks && req.waitFor > 0 && r.contentType && !isHtml(r.contentType)
+            ? { class: "NOT_A_PAGE", detail: `the browser's main response was ${r.contentType.split(";")[0].trim()}, not an HTML page`, retryable: false, retryAfter: null } : null;
           const errorPage = r.ok && finalUrl.startsWith("chrome-error:")
             ? { class: "NAVIGATION_FAILED", detail: "the main frame ended on the browser's error page", retryable: false, retryAfter: null } : null;
-          const failure = navigationFailure ?? providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? errorPage ?? noShot ?? (shell
+          const failure = navigationFailure ?? providerFailure ?? (!r.ok ? r.failure : limited ?? verdict.failure ?? errorPage ?? notPage ?? noShot ?? (shell
             ? { class: "RENDER_INCOMPLETE", detail: `the page was still a script shell after rendering (${(verdict.reasons ?? []).join("; ")})` } : null));
           await store.finishAttempt(attemptId, { outcome: failure ? failure.class : "rendered", targetStatus: r.status ?? null, bytes: s?.bytes ?? r.proxy?.bytes ?? null, subresources: r.subresources?.requests ?? null });
           if (verdict?.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(finalUrl, policy)), verdict.failure.retryAfter); } catch { /* unparseable final URL */ } }
@@ -581,17 +596,40 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       if (hooks) result.route.escalations.push("browser_extras");
       else if (waits && start.tier !== "enhanced") result.route.escalations.push("wait_for");
       else if (mode === "browser") result.route.escalations.push("learned_js");
+      // What a failed browser step falls back to (review R1, R2): a page asked to wait (without screenshots or actions)
+      // gets one HTTP attempt after a browser-side failure or a document the browser cannot render; a length-based shell
+      // serves the HTTP answer it has unless the rendered page showed a block, a denial or a shell. The browser is tried
+      // once: an HTTP answer after a failed render is not rendered again. A domain learned to need a browser keeps its
+      // browser-only start.
+      let fallback = waits && !hooks && start.tier !== "enhanced" ? { http: true } : null, rendered = false;
       for (;;) {
         if (signal?.aborted) return fail(CANCELLED); // no attempt is reserved for a caller that left
         const s = tier === "enhanced" ? await enhancedStep(mode) : mode === "http" ? await httpStep(tier) : await browserStep(tier, renderUrl, shellTier, shellChars);
         if (s.done) return s.done;
-        if (s.fail) return fail(s.fail);
+        if (s.fail) {
+          if (mode === "browser" && fallback?.http && BROWSER_SIDE.has(s.fail.class)) {
+            result.route.escalations.push(`browser_failed:${s.fail.class}->http`);
+            mode = "http"; fallback = null; rendered = true;
+            continue;
+          }
+          if (mode === "browser" && fallback?.answer && !PAGE_SIDE.has(s.fail.class)) {
+            result.route.escalations.push(`browser_failed:${s.fail.class}->http_answer`);
+            return finish(fallback.answer());
+          }
+          return fail(s.fail);
+        }
         tier = s.tier ?? tier;
         if (s.retry) { await sleep(700 + Math.floor(Math.random() * 600), signal); continue; }
-        if (s.browser) { mode = "browser"; renderUrl = s.renderUrl; shellTier = tier; shellChars = s.shellChars ?? 0; continue; }
+        if (s.browser) {
+          if (rendered) return s.answer ? finish(s.answer()) : fail({ class: "RENDER_INCOMPLETE", detail: "the page is a script shell, and its one browser attempt failed" });
+          mode = "browser"; renderUrl = s.renderUrl; shellTier = tier; shellChars = s.shellChars ?? 0; fallback = s.answer ? { answer: s.answer } : null;
+          continue;
+        }
         if (s.escalate) {
           // A direct challenge moves to the residential route when it can be had; past it (or without it), an auto page
           // without browser extras gets its one enhanced dispatch (the orchestrator may skip a stage, spec §9.3).
+          // An HTTP answer kept from before the challenge is not served after it: the render showed a block behind it.
+          if (fallback?.answer) fallback = null;
           const routeState = {};
           if (s.to === "residential") {
             const st = await residential.availability();
