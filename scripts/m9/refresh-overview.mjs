@@ -20,6 +20,8 @@ for(const [key,path] of [['spec','docs/FIRECRAWL_PI_SPEC.md'],['milestones','doc
   if(n===1){const pos=html.indexOf(a);const dataStart=html.indexOf(blocks['source-data'].text);if(pos>=dataStart&&pos<dataStart+blocks['source-data'].text.length){const last=html.lastIndexOf(a);html=html.slice(0,last)+html.slice(last).replace(a,b);}else html=html.replace(a,b);}
   else if(n>1)throw Error('Ambiguous displayed hash');
  }
+ // A displayed hash that never matched the old one is skipped above, so confirm the full value now shows the file.
+ if(html.replace(blocks['source-data'].re,'').split(next[key].sha256).length-1!==1)throw Error(`Displayed ${key} hash does not match ${path}`);
 }
 const refs=blocks['ref-data'].data;
 for(const r of Object.values(refs)){
@@ -40,7 +42,8 @@ for(const unit of blocks['unit-data'].data){
 }
 blocks['source-data'].data=next;
 for(const id of Object.keys(blocks)){
- const b=blocks[id],serialized=JSON.stringify(b.data,null,id==='source-data'?undefined:2);
+ // Every < is written as \u003c (CLAUDE.md §33.4), so no embedded text can close the script element.
+ const b=blocks[id],serialized=JSON.stringify(b.data,null,id==='source-data'?undefined:2).replace(/</g,'\\u003c');
  if(JSON.stringify(JSON.parse(serialized))!==JSON.stringify(b.data))throw Error('Round trip failed');
  if((html.match(b.re)||[]).length!==4)throw Error('Block replacement mismatch');
  html=html.replace(b.re,(_,a,c,d)=>a+serialized+d);
