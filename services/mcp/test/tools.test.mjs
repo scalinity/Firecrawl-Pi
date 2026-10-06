@@ -299,3 +299,15 @@ test("in-page anchors are reduced to their text in every document an agent reads
   const st = T.firecrawl_check_crawl_status.shape({ status: 200, json: { success: true, status: "completed", completed: 1, total: 1, data: [{ markdown: `z[t](${page}#t)`, metadata: { sourceURL: page } }] }, headers: {} }, { id: "0190f1a0-0000-7000-8000-000000000000" });
   assert.equal(st.payload.data[0].markdown, "zt");
 });
+
+test("the in-page link pattern stays linear on markup built to make it backtrack (CWE-1333; review R10)", async () => {
+  const { dropInPageLinks } = await import("../src/tools.mjs");
+  const page = "https://w.example/p";
+  for (const [name, markdown] of [["open brackets", "[" + "a".repeat(499) + "[".repeat(1)], ["long texts", ("[" + "a".repeat(499)).repeat(2000)],
+    ["long targets", ("[x](" + "a".repeat(2048)).repeat(500)], ["nested", ("[[" + "b".repeat(100) + "]").repeat(5000)], ["titles", (`[x](${page}#f "` + "q".repeat(500)).repeat(1500)]]) {
+    const doc = { markdown, metadata: { url: page } };
+    const t = Date.now();
+    dropInPageLinks(doc);
+    assert.ok(Date.now() - t < 500, `${name}: ${Date.now() - t} ms for ${markdown.length} characters`);
+  }
+});
