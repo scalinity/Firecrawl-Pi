@@ -332,3 +332,45 @@ test("requests are validated and bodies decoded by their declared charset", asyn
   assert.equal(decodeText(Buffer.from('<meta charset="windows-1252"><p>\x93q\x94</p>', "latin1"), "text/html"), '<meta charset="windows-1252"><p>“q”</p>');
   assert.equal(decodeText(Buffer.from("héllo", "utf8"), "text/html; charset=not-a-charset"), "héllo");
 });
+
+// ---- browser start and browser learning (retrieval quality, 2026-10-06) ------------------------------
+test("a page asking to wait (waitFor > 0) starts in the browser, with no HTTP attempt first, and the browser is told to wait", async () => {
+  const t = await serve((req, res) => page(res));
+  try {
+    const store = new FakeStore(), policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    const seen = [];
+    const r = okRender();
+    const out = await acquirerFor(store, policy, { render: (a) => (seen.push(a), r.render(a)) })({ ...body(`http://t.fixture.fcpi.test:${t.port}/`), waitFor: 2000 });
+    assert.equal(out.ok, true, JSON.stringify(out.failure));
+    assert.deepEqual(out.strategies, ["direct_browser"]);
+    assert.deepEqual(out.route.escalations, ["wait_for"]);
+    assert.equal(seen[0].waitFor, 2000);
+    assert.equal(t.hits.length, 0, "no HTTP fetch before the render");
+    // Without a wait, the same page is fetched over HTTP alone.
+    const plain = await acquirerFor(store, policy, { render: () => assert.fail("no render for a static page") })(body(`http://t.fixture.fcpi.test:${t.port}/`));
+    assert.deepEqual(plain.strategies, ["direct_http"]);
+  } finally { t.s.close(); }
+});
+
+test("a script-heavy short page is rendered; only a render that shows materially more teaches the domain to start in the browser", async () => {
+  const data = JSON.stringify(Array.from({ length: 12 }, (_, i) => ({ text: `Quote ${i}: words a reader came to this page to read, held in a script.` })));
+  const shell = `<!doctype html><title>q</title><h1>Quotes</h1><p><a href="/login">Login</a></p><script>var data = ${data};</script>`;
+  const t = await serve((req, res) => res.writeHead(200, { "content-type": "text/html" }).end(shell));
+  try {
+    const policy = policyFor([["t.fixture.fcpi.test", t.port, "fixture"]]);
+    const full = `<h1>Quotes</h1>${JSON.parse(data).map((q) => `<div class="quote">${q.text}</div>`).join("")}`;
+    // A render that wrote the quotes into the page: the answer is the rendered page, and the domain counts it.
+    const store = new FakeStore();
+    const out = await acquirerFor(store, policy, okRender(full))(body(`http://t.fixture.fcpi.test:${t.port}/`));
+    assert.equal(out.ok, true, JSON.stringify(out.failure));
+    assert.deepEqual(out.strategies, ["direct_http", "direct_browser"]);
+    assert.match(out.body, /Quote 11:/);
+    assert.equal(store.learned.filter((l) => l.obs?.outcome === "js_rendered").length, 1);
+    // A render that left the page as the HTTP fetch saw it: the page is served, and the domain learns nothing about browsers.
+    const same = new FakeStore();
+    const out2 = await acquirerFor(same, policy, okRender(shell))(body(`http://t.fixture.fcpi.test:${t.port}/`));
+    assert.equal(out2.ok, true, JSON.stringify(out2.failure));
+    assert.deepEqual(out2.strategies, ["direct_http", "direct_browser"]);
+    assert.equal(same.learned.filter((l) => l.obs?.outcome === "js_rendered").length, 0);
+  } finally { t.s.close(); }
+});

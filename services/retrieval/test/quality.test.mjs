@@ -128,3 +128,24 @@ test("the PDF magic settles the type at the start of a body, or within the first
   assert.equal(sniffContentType(b("<!doctype html><p>%PDF-1.7</p>"), "application/pdf"), "text/html");
   assert.equal(sniffContentType(b("<p>plain</p>"), "application/pdf"), "application/pdf");
 });
+
+test("a short page whose inline scripts hold the content is a JS shell that earns the browser attempt; metadata and rich pages are not", () => {
+  const data = JSON.stringify(Array.from({ length: 10 }, (_, i) => ({ text: `Quote number ${i} with enough words to look like content`, author: { name: `Author ${i}` }, tags: ["a", "b"] })));
+  const shell = `<html><head><title>Quotes</title></head><body><h1><a href="/">Quotes</a></h1><p><a href="/login">Login</a></p>
+    <script src="/static/jquery.js"></script><script>var data = ${data}; for (var i in data) { document.write("<div class=quote>" + data[i].text + "</div>"); }</script>
+    <footer>Quotes by GoodReads.com. Made with love by a scraping sandbox.</footer></body></html>`;
+  const v = classify({ ...page, body: shell });
+  assert.equal(v.verdict, "js_shell");
+  assert.equal(v.structural, false, "length-based: the rendered page is never failed for it");
+  assert.ok(v.visibleChars < 100 && v.reasons.some((r) => /^script_chars=\d+$/.test(r)), JSON.stringify(v));
+  // JSON-LD is search metadata a static page carries: it renders nothing, so it never makes a shell.
+  const ld = `<html><head><script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Article", description: "x".repeat(4000) })}</script></head><body><p>A short static note about this site, written for the people who read it.</p></body></html>`;
+  assert.equal(classify({ ...page, body: ld }).verdict, "adequate");
+  // A page with plenty of text keeps its HTTP answer, however much script it carries.
+  const rich = `<body><article>${"<p>Real paragraph text that a reader came for. </p>".repeat(20)}</article><script>${"x=1;".repeat(5000)}</script></body>`;
+  const r = classify({ ...page, body: rich });
+  assert.equal(r.verdict, "adequate");
+  assert.ok(r.visibleChars >= 500);
+  // A short page with a small inline script stays as it is.
+  assert.equal(classify({ ...page, body: '<body><p>All systems operational. Last checked five minutes ago.</p><script>window.dataLayer=[];</script></body>' }).verdict, "adequate");
+});

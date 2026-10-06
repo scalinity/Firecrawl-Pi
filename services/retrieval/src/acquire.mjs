@@ -410,11 +410,12 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           if (!["not_found", "target_error", "js_shell"].includes(verdict.verdict)) await learn(answered, { tier, mode: "http", outcome: "adequate", probe: probed }, { success: true });
           return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: httpRes.body.toString("base64") }) }) };
         }
-        return { browser: true, renderUrl: httpRes.finalUrl, tier };
+        return { browser: true, renderUrl: httpRes.finalUrl, tier, shellChars: verdict.visibleChars ?? 0 };
       }
 
-      // One browser attempt on `tier`. shellTier: the tier on which the HTTP attempt just saw a script shell.
-      async function browserStep(tier, renderUrl, shellTier) {
+      // One browser attempt on `tier`. shellTier: the tier on which the HTTP attempt just saw a script shell, and
+      // shellChars the visible text that shell showed.
+      async function browserStep(tier, renderUrl, shellTier, shellChars = 0) {
         if (signal?.aborted) return { fail: CANCELLED };
         const renderTarget = parseTarget(renderUrl, policy);
         const strategy = `${tier}_browser`;
@@ -528,7 +529,9 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
             return { fail: failure };
           }
           await learn(answered, { tier, mode: "browser", outcome: "adequate", probe: probed }, { success: true });
-          if (shellTier === tier) await learn(answered, { tier, mode: "browser", outcome: "js_rendered" });
+          // The domain learns that it needs a browser only from a render that showed materially more than its shell: a
+          // short page the browser left as it was taught nothing, and must not send the domain's later pages to Chromium.
+          if (shellTier === tier && (verdict.visibleChars ?? 0) >= 2 * shellChars + 100) await learn(answered, { tier, mode: "browser", outcome: "js_rendered" });
           return { done: finish({ ok: true, body: r.html, finalUrl, targetStatus: r.status, contentType: r.contentType ?? "text/html; charset=utf-8",
             bytes: r.proxy?.bytes ?? 0, redirects: r.redirects ?? [], quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] },
             subresources: r.subresources, proxyDenied: (r.proxy?.denied ?? []).map(({ urlHash, ...denied }) => denied), ...(hooks ? { screenshot: r.screenshot ?? null, actions: r.actions ?? null } : {}) }) };
@@ -590,19 +593,22 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const s = await enhancedStep(made.mode ?? startMode, true);
         return s.done ?? fail(s.fail);
       }
-      let tier = start.tier, renderUrl = req.url, shellTier = null;
-      // A page with screenshots or actions is rendered from the start; a domain learned to need a browser starts in one.
-      let mode = start.tier === "enhanced" ? startMode : hooks ? "browser" : page && startsInBrowser(record) ? "browser" : "http";
+      let tier = start.tier, renderUrl = req.url, shellTier = null, shellChars = 0;
+      // A page with screenshots or actions is rendered from the start, as is one whose caller asked to wait for it
+      // (waitFor only means anything in a browser); a domain learned to need a browser starts in one.
+      const waits = page && req.waitFor > 0;
+      let mode = start.tier === "enhanced" ? startMode : hooks || waits ? "browser" : page && startsInBrowser(record) ? "browser" : "http";
       if (hooks) result.route.escalations.push("browser_extras");
+      else if (waits && start.tier !== "enhanced") result.route.escalations.push("wait_for");
       else if (mode === "browser") result.route.escalations.push("learned_js");
       for (;;) {
         if (signal?.aborted) return fail(CANCELLED); // no attempt is reserved for a caller that left
-        const s = tier === "enhanced" ? await enhancedStep(mode) : mode === "http" ? await httpStep(tier) : await browserStep(tier, renderUrl, shellTier);
+        const s = tier === "enhanced" ? await enhancedStep(mode) : mode === "http" ? await httpStep(tier) : await browserStep(tier, renderUrl, shellTier, shellChars);
         if (s.done) return s.done;
         if (s.fail) return fail(s.fail);
         tier = s.tier ?? tier;
         if (s.retry) { await sleep(700 + Math.floor(Math.random() * 600), signal); continue; }
-        if (s.browser) { mode = "browser"; renderUrl = s.renderUrl; shellTier = tier; continue; }
+        if (s.browser) { mode = "browser"; renderUrl = s.renderUrl; shellTier = tier; shellChars = s.shellChars ?? 0; continue; }
         if (s.escalate) {
           // A direct challenge moves to the residential route when it can be had; past it (or without it), an auto page
           // without browser extras gets its one enhanced dispatch (the orchestrator may skip a stage, spec §9.3).

@@ -1,8 +1,8 @@
 // Content adequacy and failure classification (FIRECRAWL_PI_SPEC.md §9.2, §9.4). A page is judged
 // by its status, type and structure, never by length alone: a short page with no sign of client
 // rendering is adequate, and a page is a JS shell only when it also carries structure that says
-// the content is rendered by script (scripts present, an empty application mount point, or a
-// noscript notice asking for JavaScript).
+// the content is rendered by script (scripts present, an empty application mount point, a
+// noscript notice asking for JavaScript, or inline scripts holding several times the text shown).
 //   verdicts: adequate | js_shell | challenge | auth_gate | not_found | rate_limited |
 //             access_denied | target_error | binary
 const TEXT_TYPES = /^(text\/|application\/(xhtml\+xml|xml|json|ld\+json|rss\+xml|atom\+xml|javascript)|[^;]*\+(xml|json)\s*(;|$))/i;
@@ -30,8 +30,9 @@ const CLOSER = Object.fromEntries(HIDDEN.map((t) => [t, new RegExp(`</${t}\\s*>`
 const TAG = /^<(\/?)([a-z][a-z0-9-]*)/i;
 
 // Calls onText(start, end) for each run of text outside tags and hidden elements, and
-// onHidden(tag, start, end) with each hidden element's content. A hidden element that never
-// closes is read as an ordinary tag, and later openers of that tag are not searched again.
+// onHidden(tag, start, end, opener) with each hidden element's content and the offset of its opening tag.
+// A hidden element that never closes is read as an ordinary tag, and later openers of that tag are not
+// searched again.
 function walk(html, onText, onHidden) {
   const unclosed = new Set();
   let i = 0;
@@ -56,7 +57,7 @@ function walk(html, onText, onHidden) {
     close.lastIndex = i;
     const found = close.exec(html);
     if (!found) { unclosed.add(name); continue; }
-    onHidden?.(name, i, found.index);
+    onHidden?.(name, i, found.index, lt);
     i = close.lastIndex;
   }
 }
@@ -83,13 +84,19 @@ function emptyMountIn(html) {
   return false;
 }
 
+// A JSON-LD block is search-engine metadata that static pages carry too; it renders nothing.
+const LD_JSON = /\btype\s*=\s*["']?application\/ld\+json/i;
 export function htmlSignals(html) {
   const scripts = (html.match(/<script\b/gi) ?? []).length;
   const notices = [];
-  walk(html, () => {}, (tag, a, b) => { if (tag === "noscript" && notices.length < 16) notices.push(html.slice(a, Math.min(b, a + 4096))); });
+  let scriptChars = 0;
+  walk(html, () => {}, (tag, a, b, opener) => {
+    if (tag === "noscript" && notices.length < 16) notices.push(html.slice(a, Math.min(b, a + 4096)));
+    if (tag === "script" && !LD_JSON.test(html.slice(opener, a))) scriptChars += b - a;
+  });
   const noscript = notices.join(" ");
   const loading = /\bclass=["'][^"'<>]*\b(loading|spinner|skeleton)\b/i.test(html);
-  return { scripts, noscriptAsksForJs: /(enable|requires?|needs?|turn on)[^<]{0,40}javascript|javascript[^<]{0,40}(required|disabled|enable)/i.test(noscript), emptyMount: emptyMountIn(html), loading };
+  return { scripts, scriptChars, noscriptAsksForJs: /(enable|requires?|needs?|turn on)[^<]{0,40}javascript|javascript[^<]{0,40}(required|disabled|enable)/i.test(noscript), emptyMount: emptyMountIn(html), loading };
 }
 
 // status: final HTTP status; contentType; body: string for textual types; finalUrl, requestedUrl.
@@ -118,8 +125,14 @@ export function classify({ status, contentType, body, finalUrl, requestedUrl, re
   // structural: the page itself says its content is rendered by script. Length alone (a short
   // page that carries a script) may earn the one browser attempt, but never fails a rendered page
   // (spec §9.2, §9.4).
-  if (s.noscriptAsksForJs && visible.length < 500) return { verdict: "js_shell", structural: true, reasons: [...reasons, "noscript asks for JavaScript"] };
-  if (s.emptyMount && s.scripts > 0 && visible.length < 500) return { verdict: "js_shell", structural: true, reasons: [...reasons, "empty application mount point"] };
-  if (s.scripts > 0 && visible.length < 200 && (s.loading || visible.length < 40)) return { verdict: "js_shell", structural: s.loading, reasons: [...reasons, s.loading ? "scripted page showing a loading placeholder" : "scripted page with almost no text"] };
-  return { verdict: "adequate", reasons };
+  if (s.noscriptAsksForJs && visible.length < 500) return { verdict: "js_shell", visibleChars: visible.length, structural: true, reasons: [...reasons, "noscript asks for JavaScript"] };
+  if (s.emptyMount && s.scripts > 0 && visible.length < 500) return { verdict: "js_shell", visibleChars: visible.length, structural: true, reasons: [...reasons, "empty application mount point"] };
+  if (s.scripts > 0 && visible.length < 200 && (s.loading || visible.length < 40)) return { verdict: "js_shell", visibleChars: visible.length, structural: s.loading, reasons: [...reasons, s.loading ? "scripted page showing a loading placeholder" : "scripted page with almost no text"] };
+  // A short page whose inline scripts hold several times the text it shows: the content is in the script, waiting
+  // to be rendered (a data array a script writes into the page). Length-based, so it earns the one browser
+  // attempt and never fails a rendered page.
+  if (visible.length < 500 && s.scriptChars >= 1000 && s.scriptChars >= 4 * visible.length) {
+    return { verdict: "js_shell", visibleChars: visible.length, structural: false, reasons: [...reasons, `script_chars=${s.scriptChars}`, "inline scripts hold several times the text the page shows"] };
+  }
+  return { verdict: "adequate", visibleChars: visible.length, reasons };
 }
