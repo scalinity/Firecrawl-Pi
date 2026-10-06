@@ -393,28 +393,42 @@ async function sync(ctx, route) {
 }
 
 // Map (src/maplinks.mjs): the core's map, which reads the site's sitemap, and the links the start page carries, fetched
-// together; a caller asking for the sitemap alone gets only the core's answer. The start page is one ordinary scrape (a
-// paced navigation like any other); when it fails the core's links are answered alone, with the reason. The answer says
-// how many links each source gave.
+// together; a caller asking for the sitemap alone gets only the core's answer. The start page is fetched like a scrape
+// (an ordinary paced acquisition on the auto route, which may take the residential route when the home connection is
+// blocked), so it needs the 'scrape' scope, as search's page acquisition does, and it keeps the map's timeout; without
+// the scope the map answers from the sitemap alone (review R6). A client that leaves cancels both core requests, a core
+// map that fails ends the page fetch at once, and the core's Retry-After is passed on (review R7). The answer says how
+// many links each source gave, and why the page gave none when it did not.
 const MAP_PAGE_NOTE = "No sitemap listed links here; these are the links the start page carries. A crawl discovers the pages beyond them.";
 async function mapWithPageLinks(ctx, route, body) {
   if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   syncInFlight += 1;
+  const ac = new AbortController();
+  const left = () => { if (!ctx.res.writableEnded) ac.abort(); };
+  ctx.res.on("close", left);
   try {
     const start = mapStartUrl(body.url);
-    const page = body.sitemap === "only" ? null : upstream.call("POST", "/v2/scrape", { body: coreBody(ctx, route, { url: body.url, formats: ["links"], onlyMainContent: false }),
-      timeoutMs: cfg.coreTimeoutMs, maxBytes: 8 * 1048576 }).then((r) => r, (e) => ({ error: e.code ?? "UPSTREAM_UNAVAILABLE" }));
+    const wantsPage = body.sitemap !== "only", mayFetch = wantsPage && ctx.client.scopes.has("scrape");
+    const page = !mayFetch ? null : upstream.call("POST", "/v2/scrape", {
+      body: coreBody(ctx, route, { url: body.url, formats: ["links"], onlyMainContent: false, ...(body.timeout ? { timeout: body.timeout } : {}) }),
+      timeoutMs: cfg.coreTimeoutMs, maxBytes: 8 * 1048576, signal: ac.signal }).then((r) => r, (e) => ({ error: e.code ?? "UPSTREAM_UNAVAILABLE" }));
     let r;
-    try { r = await upstream.call("POST", route.path, { body: coreBody(ctx, route, { ...body, url: start }), timeoutMs: cfg.coreTimeoutMs, maxBytes: 8 * 1048576 }); }
+    try { r = await upstream.call("POST", route.path, { body: coreBody(ctx, route, { ...body, url: start }), timeoutMs: cfg.coreTimeoutMs, maxBytes: 8 * 1048576, signal: ac.signal }); }
     catch (e) {
-      await page;
+      ac.abort();
+      if (e.code === "CANCELLED") return ctx.logged(499);
       const timedOut = e.code === "TIMEOUT";
       return ctx.send(timedOut ? 504 : 503, { success: false, code: timedOut ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: timedOut ? "The core did not answer in time." : "The core did not answer." });
     }
-    if (r.status !== 200 || r.json?.success !== true) { await page; return ctx.send(r.status === 200 ? 503 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` }); }
+    if (r.status !== 200 || r.json?.success !== true) {
+      ac.abort();
+      const retryAfter = r.headers?.["retry-after"];
+      return ctx.send(r.status === 200 ? 503 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` }, retryAfter ? { "retry-after": String(retryAfter) } : {});
+    }
     const core = Array.isArray(r.json.links) ? r.json.links : [];
-    if (!page) return ctx.send(200, { ...r.json, fcpi: { sources: { sitemap: core.length } } });
-    const p = await page;
+    if (!wantsPage) return ctx.send(200, { ...r.json, fcpi: { sources: { sitemap: core.length } } });
+    const p = page ? await page : { error: "SCRAPE_SCOPE_REQUIRED" };
+    if (p.error === "CANCELLED") return ctx.logged(499);
     const ok = p.status === 200 && p.json?.success === true;
     const merged = mergeMapLinks(body, core, ok && Array.isArray(p.json.data?.links) ? p.json.data.links : [], M.bodies.map.fields.limit.default);
     const { warning, ...rest } = r.json;
@@ -424,7 +438,7 @@ async function mapWithPageLinks(ctx, route, body) {
     ctx.extra = { map: fcpi.sources };
     // The core's "only N results" warning spoke of its own links; it stands only if the merged answer is that short too.
     return ctx.send(200, { ...rest, links: merged.links, ...(warning && merged.links.length <= 1 ? { warning } : {}), fcpi });
-  } finally { syncInFlight -= 1; }
+  } finally { syncInFlight -= 1; ctx.res.off("close", left); }
 }
 
 // M7: the scrape cache (spec §21.3, AC21). A cached answer is served only to the principal that stored it, only for the
@@ -475,6 +489,11 @@ async function cachedScrape(ctx, route, body) {
   upstream.forward(ctx.res, route.path, coreBody(ctx, route, request), (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id, "x-fcpi-cache": "miss" }, keep);
 }
 
+// The core's advice to use its /interact endpoint, sentence by sentence, with the sentence that introduces it.
+function withoutInteractAdvice(warning) {
+  return warning.split(/(?<=[.!?])\s+/).filter((x) => !/\/interact\b/i.test(x) && !/^You're using the actions parameter\.$/i.test(x.trim())).join(" ").trim();
+}
+
 // M7: a scrape with a screenshot or actions (spec §12). Its answer carries the captures, so it is buffered (at most
 // limits.extras.responseMaxBytes: the worker's 8 MiB of captures as base64 and the page, limits.extras.inFlight at a
 // time, within the gateway's memory; measured with the incompressible fixture, review W10) and every capture is
@@ -501,7 +520,11 @@ async function scrapeWithExtras(ctx, route, body) {
     }
     ctx.extra = { artifacts: artifacts.length };
     // The core advises its /interact endpoint for actions; this deployment does not serve it (the manifest's not_enabled).
-    if (typeof r.json.data.warning === "string" && /\/interact\b/.test(r.json.data.warning)) delete r.json.data.warning;
+    // Only that advice is removed: any other warning in the same string stands (review R12).
+    if (typeof r.json.data.warning === "string") {
+      const kept = withoutInteractAdvice(r.json.data.warning);
+      if (kept) r.json.data.warning = kept; else delete r.json.data.warning;
+    }
     ctx.send(200, { ...r.json, fcpi: { ...(r.json.fcpi ?? {}), artifacts } });
   } finally { extrasInFlight -= 1; syncInFlight -= 1; }
 }

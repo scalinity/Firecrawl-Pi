@@ -29,7 +29,7 @@ const marker = (id, principal = "pa") => originFor(principal, `fcpi:${id}`);
 const [PGHOST, PGPORT = "5432"] = (process.env.FCPI_TEST_PG ?? "").split(":");
 const HOST = "127.0.0.1:3380", ORIGIN = `http://${HOST}`;
 const tok = (label) => `fcpi_${label}_${createHash("sha256").update(label).digest("hex")}`;
-const T = { a: tok("a"), b: tok("b"), ro: tok("ro"), rev: tok("rev") };
+const T = { a: tok("a"), b: tok("b"), ro: tok("ro"), rev: tok("rev"), mo: tok("mo") };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const waitFor = async (fn, ms = 15000, what = "condition") => { const end = Date.now() + ms; for (;;) { const v = await fn(); if (v) return v; if (Date.now() > end) throw new Error(`timed out waiting for ${what}`); await sleep(50); } };
 
@@ -51,7 +51,7 @@ async function admin(db) { const c = new pg.Client({ host: PGHOST, port: Number(
 
 // ---- the fake core -----------------------------------------------------------------------------------
 function fakeCore(dbName) {
-  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false, pagesFailFrom: null, pageDelayMs: 0 };
+  const s = { jobs: new Map(), requests: [], mode: "ok", server: null, port: 0, db: null, held: [], errorsFail: 0, errorsGone: false, pagesFailFrom: null, pageDelayMs: 0, cut: [] };
   const docOf = (id, i, big = false) => ({ markdown: `# page ${i}${big ? "x".repeat(8192) : ""}`, metadata: { sourceURL: `http://m3.fixture.fcpi.test:8080/p${i}`, scrapeId: `${id.slice(0, 8)}-doc-${i}`, statusCode: 200 } });
   const persist = async (kind, id, body) => {
     const data = kind === "crawl" ? { mode: "kickoff", origin: body.origin, crawl_id: id } : { mode: "single_urls", origin: "api", scrapeOptions: { origin: body.origin }, crawl_id: id };
@@ -70,14 +70,26 @@ function fakeCore(dbName) {
       let m;
       if (req.method === "GET" && u.pathname === "/v0/health/liveness") return send(200, { status: "ok" });
       if (req.method === "POST" && (u.pathname === "/v2/scrape" || u.pathname === "/v2/map")) {
+        // A request the gateway gave up on is recorded as cut (review R7).
+        res.on("close", () => { if (!res.writableEnded) s.cut.push(`${u.pathname} ${body?.url ?? ""}`); });
         if (/slow/.test(body?.url ?? "")) await sleep(1500);
+        // Map cases (review R6, R7, R10), by a marker in the URL: the core's map rate-limited (its page fetch slow), a site
+        // with no sitemap links, a start page the core could not fetch, and the core's "only N results" warning.
+        const target = body?.url ?? "";
+        if (u.pathname === "/v2/map" && /maplimit/.test(target)) return send(429, { success: false, code: "RATE_LIMITED", error: "rate limited" }, { "retry-after": "7" });
+        if (u.pathname === "/v2/scrape" && /maplimit/.test(target)) await sleep(3000);
+        if (u.pathname === "/v2/scrape" && /pagefail/.test(target)) return send(503, { success: false, error: "core busy" });
+        if (u.pathname === "/v2/map" && /nositemap/.test(target)) return send(200, { success: true, links: [] });
+        if (u.pathname === "/v2/map" && /warn/.test(target)) return send(200, { success: true, links: [{ url: target }], warning: "Only 1 result(s) found. For broader coverage, try mapping the base domain" });
         // As the pinned core answers: its Cloud challenge, and cors()'s wildcard on every response.
         const cloud = { "www-authenticate": 'Bearer resource_metadata="https://www.firecrawl.dev/.well-known/oauth-protected-resource"', "access-control-allow-origin": "*", "x-powered-by": "Express" };
         // M7: a target URL's st parameter is the page's status, as the core reports it in metadata.statusCode.
         let st = null; try { st = Number(new URL(body.url).searchParams.get("st")) || null; } catch { /* not a URL */ }
-        // A scrape asking for links answers the page's links: two of the site's (one with a fragment), one elsewhere.
-        const links = body?.formats?.includes("links") ? (() => { const o = new URL(body.url).origin; return [`${o}/a`, `${o}/b#top`, `${o}/a`, "https://elsewhere.example/"]; })() : null;
-        return send(200, u.pathname === "/v2/scrape" ? { success: true, data: { markdown: "# fixture", ...(links ? { links } : {}), metadata: { sourceURL: body.url, ...(st ? { statusCode: st } : {}) } } } : { success: true, links: [{ url: body.url }] }, cloud);
+        // A scrape asking for links answers the page's links: two under the page's own path (one with a fragment), one
+        // repeated, one elsewhere.
+        const links = body?.formats?.includes("links") ? (() => { const b = body.url.replace(/\/?$/, "/"); return [`${b}a`, `${b}b#top`, `${b}a`, "https://elsewhere.example/"]; })() : null;
+        const warning = Array.isArray(body?.actions) && body.actions.length ? { warning: "You're using the actions parameter. For a more reliable and flexible experience, try the /interact endpoint instead. Another note stays." } : {};
+        return send(200, u.pathname === "/v2/scrape" ? { success: true, data: { markdown: "# fixture", ...(links ? { links } : {}), ...warning, metadata: { sourceURL: body.url, ...(st ? { statusCode: st } : {}) } } } : { success: true, links: [{ url: body.url }] }, cloud);
       }
       if (req.method === "POST" && (m = u.pathname.match(/^\/v2\/(crawl|batch\/scrape)$/))) {
         const kind = m[1] === "crawl" ? "crawl" : "batch";
@@ -149,7 +161,7 @@ async function harness({ manifest = testManifest(), settleMs = 800, extraEnv = {
   await db.query(SCHEMA);
   const dir = h.dir = mkdtempSync(join(tmpdir(), "fcpi-m3-"));
   writeFileSync(join(dir, "manifest.json"), JSON.stringify(manifest));
-  writeFileSync(join(dir, "clients"), clientsText([["a", "pa", ALL], ["b", "pb", ALL], ["ro", "pa", "read"], ["rev", "pa", ALL]]));
+  writeFileSync(join(dir, "clients"), clientsText([["a", "pa", ALL], ["b", "pb", ALL], ["ro", "pa", "read"], ["rev", "pa", ALL], ["mo", "pa", "map"]]));
   const art = join(dir, "art"); const cred = join(dir, "cred");
   mkdirSync(art); mkdirSync(cred);
   writeFileSync(join(art, ".fcpi-artifact-root"), "test\n");
@@ -265,6 +277,57 @@ test("a valid token scrapes; upstream's Cloud challenge is stripped; only the ga
   const only = await H.call("POST", "/v2/map", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/index.html", sitemap: "only" } });
   assert.deepEqual([only.status, only.json.links, only.json.fcpi], [200, [{ url: "http://m3.fixture.fcpi.test:8080/" }], { sources: { sitemap: 1 } }]);
   assert.deepEqual(H.core.requests.slice(n).map((r) => [r.url, r.body.url]), [["/v2/map", "http://m3.fixture.fcpi.test:8080/"]]);
+});
+
+test("map: the start page's links need the scrape scope and keep the map's timeout; a failed page fetch, a site without sitemap links and the core's warning are reported (review R6, R10)", async () => {
+  const base = "http://m3.fixture.fcpi.test:8080";
+  // A map-only token: no page fetch, the sitemap alone, and why.
+  let n = H.core.requests.length;
+  const mo = await H.call("POST", "/v2/map", { token: T.mo, body: { url: `${base}/` } });
+  assert.equal(mo.status, 200);
+  assert.deepEqual(mo.json.fcpi, { sources: { sitemap: 1, page: 0 }, pageError: "SCRAPE_SCOPE_REQUIRED" });
+  assert.deepEqual(H.core.requests.slice(n).map((r) => r.url), ["/v2/map"]);
+  // The map's timeout reaches the page fetch.
+  n = H.core.requests.length;
+  await H.call("POST", "/v2/map", { token: T.a, body: { url: `${base}/t`, timeout: 5000 } });
+  assert.equal(H.core.requests.slice(n).find((r) => r.url === "/v2/scrape").body.timeout, 5000);
+  // The core could not fetch the start page: its sitemap links stand, with the reason.
+  const pf = await H.call("POST", "/v2/map", { token: T.a, body: { url: `${base}/pagefail` } });
+  assert.deepEqual([pf.status, pf.json.links, pf.json.fcpi], [200, [{ url: `${base}/pagefail` }], { sources: { sitemap: 1, page: 0 }, pageError: "HTTP 503" }]);
+  // No sitemap links: the start page's links, and the note that a crawl finds the rest.
+  const ns = await H.call("POST", "/v2/map", { token: T.a, body: { url: `${base}/nositemap` } });
+  assert.deepEqual(ns.json.links, [{ url: `${base}/nositemap/a` }, { url: `${base}/nositemap/b` }]);
+  assert.match(ns.json.fcpi.note, /crawl discovers the pages beyond them/);
+  // The core's "only N results" warning: dropped once the page's links make the answer longer, kept for the sitemap alone.
+  const w = await H.call("POST", "/v2/map", { token: T.a, body: { url: `${base}/warn` } });
+  assert.equal(w.json.warning, undefined);
+  assert.equal(w.json.links.length, 3);
+  const wo = await H.call("POST", "/v2/map", { token: T.a, body: { url: `${base}/warn`, sitemap: "only" } });
+  assert.match(wo.json.warning, /^Only 1 result/);
+});
+
+test("map: a core map refused with Retry-After is answered at once with it, and the pending page fetch is cut; a client that leaves cuts both (review R7)", async () => {
+  const base = "http://m3.fixture.fcpi.test:8080";
+  const t0 = Date.now();
+  const r = await H.call("POST", "/v2/map", { token: T.a, body: { url: `${base}/maplimit` } });
+  assert.deepEqual([r.status, r.headers["retry-after"], r.json.code], [429, "7", "RATE_LIMITED"]);
+  assert.ok(Date.now() - t0 < 2500, `answered in ${Date.now() - t0} ms, not after the 3 s page fetch`);
+  await waitFor(() => H.core.cut.some((c) => c === `/v2/scrape ${base}/maplimit`), 5000, "the page fetch cut");
+  // A client that leaves: both core requests (each held 1.5 s by the fake) are cut.
+  const body = JSON.stringify({ url: `${base}/slow-left` });
+  await new Promise((resolve) => {
+    const req = request({ host: "127.0.0.1", port: H.port, method: "POST", path: "/v2/map", headers: { host: HOST, authorization: `Bearer ${T.a}`, "content-type": "application/json", "content-length": Buffer.byteLength(body) } });
+    req.on("error", () => resolve());
+    req.end(body);
+    setTimeout(() => { req.destroy(); resolve(); }, 300);
+  });
+  await waitFor(() => H.core.cut.filter((c) => c.endsWith(`${base}/slow-left`)).length === 2, 5000, "both core requests cut");
+});
+
+test("an actions scrape loses only the core's advice to use /interact, which this deployment does not serve (review R12)", async () => {
+  const r = await H.call("POST", "/v2/scrape", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/act", actions: [{ type: "wait", milliseconds: 10 }] } });
+  assert.equal(r.status, 200, JSON.stringify(r.json));
+  assert.equal(r.json.data.warning, "Another note stays.");
 });
 
 test("Host must be a served origin and a browser Origin is refused", async () => {

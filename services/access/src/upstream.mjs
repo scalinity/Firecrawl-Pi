@@ -18,9 +18,11 @@ export function makeUpstream(cfg) {
   const base = { host: cfg.core.hostname, port: Number(cfg.core.port || 80) };
 
   // A JSON call, buffered, with a response-size ceiling checked against Content-Length before the
-  // body is read. Each call uses its own connection, so `delivered` is exact.
-  function call(method, path, { body, timeoutMs, maxBytes = 16 * 1048576 } = {}) {
+  // body is read. Each call uses its own connection, so `delivered` is exact. A signal, when given, ends the
+  // call as CANCELLED, so a caller that left stops the core's work (review R7). The answer carries its headers.
+  function call(method, path, { body, timeoutMs, maxBytes = 16 * 1048576, signal = null } = {}) {
     return new Promise((resolve, reject) => {
+      if (signal?.aborted) return reject(new UpstreamError("the call was cancelled", { delivered: false, code: "CANCELLED" }));
       const data = body === undefined ? null : Buffer.from(JSON.stringify(body));
       let connected = false, settled = false;
       const done = (fn, v) => { if (!settled) { settled = true; fn(v); } };
@@ -49,7 +51,7 @@ export function makeUpstream(cfg) {
           let json = null;
           try { json = text ? JSON.parse(text) : null; } catch { /* not JSON */ }
           text = null;
-          done(resolve, { status: res.statusCode, json, bytes });
+          done(resolve, { status: res.statusCode, json, bytes, headers: res.headers });
         });
         res.on("error", (e) => done(reject, new UpstreamError(e.message, { delivered: true, code: "RESET" })));
         res.on("aborted", () => done(reject, new UpstreamError("upstream response aborted", { delivered: true, code: "RESET" })));
@@ -57,6 +59,7 @@ export function makeUpstream(cfg) {
       req.on("socket", (s) => { if (!s.connecting) connected = true; else s.once("connect", () => { connected = true; }); });
       req.on("timeout", () => req.destroy(new UpstreamError("upstream timeout", { delivered: connected, code: "TIMEOUT" })));
       req.on("error", (e) => done(reject, e instanceof UpstreamError ? e : new UpstreamError(e.message, { delivered: connected, code: e.code ?? "ERROR" })));
+      signal?.addEventListener("abort", () => req.destroy(new UpstreamError("the call was cancelled", { delivered: connected, code: "CANCELLED" })), { once: true });
       req.end(data ?? undefined);
     });
   }
