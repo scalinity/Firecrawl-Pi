@@ -241,8 +241,11 @@ async function status(ctx, route, id) {
     // `next` only while documents remain past this page, so a client following it never spins on an
     // unfinished job (upstream also sets it for any running job).
     const more = (b.completed ?? 0) > skip + data.length;
+    // fcpi.state is the job's own: the core may already say "completed" while the gateway archives the job, and the outcome
+    // (its failed pages, by class) is known only once the job is finished, so a caller waits for a finished state.
     return ctx.send(200, { success: b.success !== false, status: b.status, completed: b.completed ?? 0, total: b.total ?? 0, creditsUsed: b.creditsUsed ?? 0, expiresAt,
-      ...(more ? { next: self(skip + data.length) } : {}), data, ...(b.createdAt ? { createdAt: b.createdAt } : {}), ...(b.warning ? { warning: b.warning } : {}) });
+      ...(more ? { next: self(skip + data.length) } : {}), data, ...(b.createdAt ? { createdAt: b.createdAt } : {}), ...(b.warning ? { warning: b.warning } : {}),
+      fcpi: { state: job.state } });
   }
   // Finished: served from the archive, whatever the core still holds.
   const pageLimit = limit ?? L.results.pageDefaultLimit;

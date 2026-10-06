@@ -418,7 +418,7 @@ test("a crawl is admitted, mapped, archived and paginated from the archive after
   const running = await H.call("GET", `/v2/crawl/${id}`, { token: T.a });
   assert.equal(running.json.status, "scraping");
   assert.equal(running.json.next, undefined);
-  assert.equal(running.json.fcpi, undefined, "a running job's outcome is not yet known");
+  assert.ok(["QUEUED", "RUNNING"].includes(running.json.fcpi?.state) && Object.keys(running.json.fcpi).length === 1, `a running job states its own state, no outcome yet: ${JSON.stringify(running.json.fcpi)}`);
   H.core.complete(up, 12, 1);
   const done = await waitFor(async () => { const j = await H.job(id); return ["SUCCEEDED", "PARTIAL"].includes(j.state) && j; }, 15000, "archive");
   assert.equal(done.state, "PARTIAL");

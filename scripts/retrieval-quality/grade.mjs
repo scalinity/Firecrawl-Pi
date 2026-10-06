@@ -190,7 +190,8 @@ async function crawl(args, label) {
   let st;
   for (const until = Date.now() + 25 * 60e3; Date.now() < until; ) {
     st = await mcp("firecrawl_check_crawl_status", { id, limit: 20 });
-    if (!st.isError && ["completed", "failed", "cancelled"].includes(st.payload.status)) break;
+    // Finished when the job's own state is final, not when the core first says completed (it may still be archiving).
+    if (!st.isError && ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"].includes(st.payload.fcpi?.state)) break;
     await new Promise((r) => setTimeout(r, 5000));
   }
   const docs = [...(st.payload.data ?? [])];
@@ -227,7 +228,7 @@ async function crawl(args, label) {
   if (!s.isError) {
     for (const until = Date.now() + 10 * 60e3; Date.now() < until; ) {
       st = await mcp("firecrawl_batch_status", { id: s.payload.id });
-      if (!st.isError && ["completed", "failed", "cancelled"].includes(st.payload.status)) break;
+      if (!st.isError && ["SUCCEEDED", "PARTIAL", "FAILED", "CANCELLED"].includes(st.payload.fcpi?.state)) break;
       await new Promise((r) => setTimeout(r, 4000));
     }
     (st?.payload.data ?? []).forEach(noteId);
