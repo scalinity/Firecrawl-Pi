@@ -384,7 +384,7 @@
       },
       "settings": {
         "path": "deploy/searxng/settings.yml",
-        "sha256": "df3a89d38bb39f39ef9272ea9f3dc6236777986d0ce5c7a464af05b7df908536",
+        "sha256": "4e53812d0e96cd2718c02e876bb7ddf8d3adc8005346e43336f24b377ddf2dff",
         "entrypoint": "deploy/searxng/entrypoint.sh",
         "entrypoint_sha256": "a87c687c0ffd6d8742176ebd53b02edb83fa0e3b7aa00a5dad333bf01ef01429"
       },
@@ -1649,7 +1649,7 @@
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "5bed3fab3afc4482c829a022e5a9291e7980a6f110b1b7213817413619aa3682",
+    "capabilities_sha256": "7ca174ac9ccea9b1754b8858c74e0c7b4a32f57bdfa8edd54e809de576b386ad",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
@@ -1660,7 +1660,7 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "2d956a2e3fd1add519f9e74d916d2d7ee17ff5bf1662209253df304b23b5b3ea",
+      "sha256": "7a80415c559817af8592844c07050376410f7723b97f1149b15573b78bec0e96",
       "paid_caps": {
         "llm": {
           "day": 0,
@@ -1670,8 +1670,8 @@
           "month": 0
         },
         "proxy": {
-          "day": 0,
-          "month": 0
+          "day": 500000,
+          "month": 2000000
         },
         "enhanced": {
           "day": 0,
@@ -1679,9 +1679,9 @@
         }
       },
       "paid_total_caps": {
-        "day": 0
+        "day": 500000
       },
-      "paid_dispatch": "PI_PAID_DISPATCH_ENABLED=false in deploy/compose.yaml"
+      "paid_dispatch": "the owner's host switch /etc/firecrawl-pi/paid-dispatch.env (fcpi paid on|off), the retrieval service's optional env file: on since 2026-10-06; absent, every start runs it off"
     },
     "rate_cards": [
       {
@@ -1902,10 +1902,12 @@
           "fcpi fixture r"
         ],
         "live": [
-          "yahoo",
-          "mojeek",
-          "startpage"
+          "yahoo"
         ]
+      },
+      "fallback_engines": {
+        "fixture": [],
+        "live": []
       },
       "live_engine_hosts": [
         "duckduckgo.com",
@@ -1913,9 +1915,7 @@
         "lite.duckduckgo.com",
         "www.bing.com",
         "search.brave.com",
-        "search.yahoo.com",
-        "www.mojeek.com",
-        "www.startpage.com"
+        "search.yahoo.com"
       ],
       "per_hour": 60,
       "cache_seconds": 900,
@@ -1927,8 +1927,6 @@
         "search.brave.com": "residential",
         "www.bing.com": "direct",
         "search.yahoo.com": "direct",
-        "www.mojeek.com": "direct",
-        "www.startpage.com": "direct",
         "searchr.fixture.fcpi.test": "residential"
       }
     },
@@ -1974,14 +1972,14 @@
   },
   "egress": {
     "policy": "deploy/policies/egress.json",
-    "policy_sha256": "22d9d1b509d948cfad6485e2aa1887190184234b6dc7bdb7e4b3e67cdb4dc7ec",
+    "policy_sha256": "355f6945b260949a190981f9da8bb41efd1a0276aebdaa5df8057caf21d12221",
     "residential": {
       "proxyFirstDomains": [
         "m6hard.fixture.fcpi.test"
       ],
       "sessionMinutes": 5,
       "connectTimeoutMs": 10000,
-      "bulkPages": 20,
+      "bulkPages": 300,
       "holdMaxMinutes": 90
     },
     "routing": {
@@ -1994,8 +1992,8 @@
     "direct": {
       "perDomainInFlight": 1,
       "minNavigationGapMs": 2000,
-      "perDomainPerHour": 20,
-      "platformPerDay": 200
+      "perDomainPerHour": 300,
+      "platformPerDay": 5000
     },
     "attempts": {
       "maxPerPage": 4,
