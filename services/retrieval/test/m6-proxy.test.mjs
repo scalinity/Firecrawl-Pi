@@ -144,6 +144,9 @@ test("a residential browser tunnel the provider breaks after it was up ends the 
       assert.equal(r.error, "ECONNRESET", `the broken tunnel's answer was not cut: ${JSON.stringify(r)}`);
       sessions.close("a3");
     });
+    // The client's reset and the tunnel's own error event are separate events: the meter records the break when the
+    // latter arrives, which under load may be a moment after the reset reached the client.
+    for (const until = Date.now() + 2000; !meter.errored && Date.now() < until; ) await new Promise((r) => setTimeout(r, 10));
     assert.equal(meter.errored, true, "the break is recorded on the attempt's meter");
     assert.ok(meter.bytes > 0 && meter.tunnels === 1);
     const s = await residential.settle(st, reservation, meter, "broken tunnel test");
