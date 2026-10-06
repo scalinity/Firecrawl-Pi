@@ -94,6 +94,22 @@ function emptyMountIn(html) {
 
 // A JSON-LD block is search-engine metadata that static pages carry too; it renders nothing.
 const LD_JSON = /\btype\s*=\s*["']?application\/ld\+json/i;
+// The inline script text between offsets a and b, JSON-LD left out. walk() reports <head> as one hidden element, so
+// the scripts inside it (where a page's data blob often sits) are read here, in one forward pass.
+const SCRIPT_OPEN = /<script\b[^<>]*>/gi, SCRIPT_CLOSE = /<\/script\s*>/gi;
+function scriptCharsIn(html, a, b) {
+  let n = 0;
+  SCRIPT_OPEN.lastIndex = a;
+  for (let m; (m = SCRIPT_OPEN.exec(html)) && m.index < b; ) {
+    const start = SCRIPT_OPEN.lastIndex;
+    SCRIPT_CLOSE.lastIndex = start;
+    const c = SCRIPT_CLOSE.exec(html);
+    const end = c && c.index < b ? c.index : b;
+    if (!LD_JSON.test(m[0])) n += end - start;
+    SCRIPT_OPEN.lastIndex = c && c.index < b ? SCRIPT_CLOSE.lastIndex : b;
+  }
+  return n;
+}
 export function htmlSignals(html) {
   const scripts = (html.match(/<script\b/gi) ?? []).length;
   const notices = [];
@@ -101,6 +117,7 @@ export function htmlSignals(html) {
   walk(html, () => {}, (tag, a, b, opener) => {
     if (tag === "noscript" && notices.length < 16) notices.push(html.slice(a, Math.min(b, a + 4096)));
     if (tag === "script" && !LD_JSON.test(html.slice(opener, a))) scriptChars += b - a;
+    if (tag === "head") scriptChars += scriptCharsIn(html, a, b);
   });
   const noscript = notices.join(" ");
   const loading = /\bclass=["'][^"'<>]*\b(loading|spinner|skeleton)\b/i.test(html);

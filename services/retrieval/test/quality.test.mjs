@@ -151,9 +151,19 @@ test("a short page whose inline scripts hold the content is a JS shell that earn
   assert.equal(v.verdict, "js_shell");
   assert.equal(v.structural, false, "length-based: the rendered page is never failed for it");
   assert.ok(v.visibleChars < 100 && v.reasons.some((r) => /^script_chars=\d+$/.test(r)), JSON.stringify(v));
-  // JSON-LD is search metadata a static page carries: it renders nothing, so it never makes a shell.
-  const ld = `<html><head><script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@type": "Article", description: "x".repeat(4000) })}</script></head><body><p>A short static note about this site, written for the people who read it.</p></body></html>`;
-  assert.equal(classify({ ...page, body: ld }).verdict, "adequate");
+  // JSON-LD is search metadata a static page carries: it renders nothing, so it never makes a shell, in the head or
+  // the body; the same text as an ordinary script does.
+  const meta = JSON.stringify({ "@context": "https://schema.org", "@type": "Article", description: "x".repeat(4000) });
+  const note = "<p>A short static note about this site, written for the people who read it.</p>";
+  for (const body of [`<html><head><script type="application/ld+json">${meta}</script></head><body>${note}</body></html>`,
+    `<html><head><title>n</title></head><body>${note}<script type='application/ld+json'>${meta}</script></body></html>`]) {
+    assert.equal(classify({ ...page, body }).verdict, "adequate", body.slice(0, 60));
+  }
+  assert.equal(classify({ ...page, body: `<html><head><title>n</title></head><body>${note}<script>var d = ${meta};</script></body></html>` }).verdict, "js_shell");
+  // A data blob in the head counts like one in the body (walk() reads the head as one element).
+  const head = classify({ ...page, body: `<html><head><title>q</title><script>window.__INITIAL_STATE__ = ${data};</script><script src="/app.js"></script></head><body>${note}</body></html>` });
+  assert.equal(head.verdict, "js_shell");
+  assert.ok(head.reasons.some((r) => /^script_chars=\d{4,}$/.test(r)), JSON.stringify(head.reasons));
   // A page with plenty of text keeps its HTTP answer, however much script it carries.
   const rich = `<body><article>${"<p>Real paragraph text that a reader came for. </p>".repeat(20)}</article><script>${"x=1;".repeat(5000)}</script></body>`;
   const r = classify({ ...page, body: rich });
