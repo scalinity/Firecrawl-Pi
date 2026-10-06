@@ -30,7 +30,9 @@ test("the platform's daily cap holds under concurrent pacers of different domain
     await sql("INSERT INTO fcpi_retrieval.direct_nav (domain, fixture) SELECT 'old-' || g || '.example', false FROM generate_series(1, 199) g");
     const results = await Promise.all(Array.from({ length: 6 }, (_, i) => store.paceDirect(`d${i}.example`, crypto.randomUUID(), direct, 30000, false)));
     assert.equal(results.filter((r) => r.go).length, 1);
-    assert.equal(results.filter((r) => r.failure?.class === "PROXY_REQUIRED").length, 5);
+    const refused = results.filter((r) => r.failure?.class === "DIRECT_LIMIT");
+    assert.equal(refused.length, 5);
+    assert.ok(refused.every((r) => r.failure.directCap === "platform_day" && r.failure.retryAfter > 86000 && r.failure.retryAfter <= 86400));
     assert.equal(Number((await sql("SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE NOT fixture"))[0].count), 200);
   } finally { await store.close(); }
 });

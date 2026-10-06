@@ -1,5 +1,6 @@
 // Bulk jobs and the residential route (FIRECRAWL_PI_SPEC.md §10.2; M6). A crawl whose limit, or a batch whose URL
-// count, passes the manifest's bulkPages (spec §10.2's 20) needs approved proxy egress from the start:
+// count, passes the manifest's bulkPages (spec §10.2's 300, one domain's hourly direct allowance) needs approved proxy
+// egress from the start (no job the manifest admits is that large, so every job starts on the home connection):
 //   - its pages ask the retrieval service for the residential route (the scrape option proxy: "stealth", which the
 //     core carries to every page, external links included);
 //   - before it is submitted to the core, its start URL's domain (a batch's every domain) is held on the residential

@@ -27,7 +27,6 @@ export class FakeStore {
     this.routes.set(domain, next);
     return { row: next, change };
   }
-  async setAttemptStrategy(attemptId, strategy) { this.attempts.find((x) => x.attemptId === attemptId).strategy = strategy; }
   async openAcquisition(id, _h, deadline) {
     let a = this.acq.get(id);
     if (!a) this.acq.set(id, (a = { first_seen: new Date(), deadline, attempts: 0 }));
@@ -53,9 +52,10 @@ export class FakeStore {
   }
   async paceDirect(domain, holder, limits, holdMs, fixture, tier = "direct") {
     const now = new Date(), s = this.state(domain);
-    const hourCount = this.navs.filter((n) => n.domain === domain && n.tier === "direct" && now - n.at < 3600e3).length;
-    const dayCount = this.navs.filter((n) => !n.fixture && n.tier === "direct" && now - n.at < 86400e3).length;
-    const d = paceDecision({ now, state: s, hourCount, dayCount, limits, direct: tier === "direct" });
+    const hour = this.navs.filter((n) => n.domain === domain && n.tier === "direct" && now - n.at < 3600e3);
+    const day = this.navs.filter((n) => !n.fixture && n.tier === "direct" && now - n.at < 86400e3);
+    const oldest = (l) => (l.length ? new Date(Math.min(...l.map((n) => +n.at))) : null);
+    const d = paceDecision({ now, state: s, hourCount: hour.length, dayCount: day.length, hourOldest: oldest(hour), dayOldest: oldest(day), limits, direct: tier === "direct" });
     if (!d.go) return d;
     Object.assign(s, { holder, hold_until: new Date(+now + holdMs), last_nav_at: now });
     this.navs.push({ domain, fixture, at: now, tier });

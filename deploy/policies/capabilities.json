@@ -221,7 +221,7 @@
     "bodyBytes": 1048576,
     "crawl": { "deadlineMinutes": 30 },
     "batch": { "maxUrls": 25, "hardMaxUrls": 100, "deadlineMinutes": 30 },
-    "proxy": { "bulkPages": 20, "holdMinutes": 60 },
+    "proxy": { "bulkPages": 300, "holdMinutes": 60 },
     "extract": { "maxUrls": 10, "deadlineMinutes": 20, "scrapeTimeoutMs": 60000, "maxDocumentBytes": 1048576 },
     "admission": { "maxOpenJobs": 20, "maxOpenUnits": 500, "activeUpstreamJobs": 1, "maxSyncInFlight": 4, "maxStatusReadsInFlight": 2 },
     "results": { "pageDefaultLimit": 100, "pageMaxLimit": 100, "pageMaxBytes": 10485760, "retentionDays": 7, "metadataDays": 30, "idempotencyHours": 24, "archiveResponseMaxBytes": 16777216 },

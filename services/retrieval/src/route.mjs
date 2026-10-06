@@ -7,9 +7,10 @@
 //   enhanced M7: the enhanced provider from the start, one dispatch, and nothing else (a known difficult target);
 //   auto     the cheapest permitted route: direct, unless the domain is held for a bulk job, listed proxy-first,
 //            or has learned that it blocks the home connection; residential after a public-content challenge on
-//            the direct route, or once the direct limits for the domain or the platform are spent; and (M7) the
-//            enhanced provider once, after a challenge on the residential route or on the direct one when the
-//            residential route cannot be had.
+//            the direct route; and (M7) the enhanced provider once, after a challenge on the residential route or on
+//            the direct one when the residential route cannot be had. Past the direct limits for the domain or the
+//            platform a page fails as DIRECT_LIMIT until the window frees: the residential route answers blocks, not
+//            volume.
 // Whatever the route, work that needs the residential route and cannot have it fails as PROXY_REQUIRED: it is
 // never sent from the home connection instead (spec §10.2).
 export const ROUTES = new Set(["auto", "basic", "stealth", "enhanced"]);

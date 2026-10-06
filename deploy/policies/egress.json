@@ -3,8 +3,8 @@
   "direct": {
     "perDomainInFlight": 1,
     "minNavigationGapMs": 2000,
-    "perDomainPerHour": 20,
-    "platformPerDay": 200
+    "perDomainPerHour": 300,
+    "platformPerDay": 5000
   },
   "fixtureLimits": {
     "perDomainInFlight": 1,
@@ -109,7 +109,7 @@
     "proxyFirstDomains": ["m6hard.fixture.fcpi.test"],
     "sessionMinutes": 5,
     "connectTimeoutMs": 10000,
-    "bulkPages": 20,
+    "bulkPages": 300,
     "holdMaxMinutes": 90
   },
   "routing": {

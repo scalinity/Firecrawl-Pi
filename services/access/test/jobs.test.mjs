@@ -103,7 +103,7 @@ test("a held job that goes back to the queue gives its hold up, so a job waiting
     assert.deepEqual(h.calls.releases, ["job-1"]);
   }
   // Uncertain, and no upstream job carries its key once the settle window has passed.
-  const job = { id: "job-2", kind: "crawl", request: { url: "https://a.example/", limit: 30 }, submission_key: "fcpi:job-2", settled: true };
+  const job = { id: "job-2", kind: "crawl", request: { url: "https://a.example/", limit: 30, scrapeOptions: { proxy: "stealth" } }, submission_key: "fcpi:job-2", settled: true };
   h = harness({ hold: held, core: accepted, uncertain: [job] });
   await h.jobs.kick();
   await flush();

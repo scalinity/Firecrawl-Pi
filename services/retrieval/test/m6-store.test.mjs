@@ -87,8 +87,10 @@ test("residential navigations share the domain's gap and hold but are not counte
     await store.releaseDomain("r.example", h1);
     assert.equal((await store.paceDirect("r.example", randomUUID(), limits, 30000, false, "residential")).go, true);
     const capped = await store.paceDirect("r.example", randomUUID(), limits, 30000, false, "direct");
-    assert.equal(capped.failure?.class, "PROXY_REQUIRED");
+    assert.equal(capped.failure?.class, "DIRECT_LIMIT");
     assert.equal(capped.failure.directCap, "domain_hour");
+    // The window's one direct navigation, made a moment ago, leaves it in just under an hour.
+    assert.ok(capped.failure.retryAfter > 3500 && capped.failure.retryAfter <= 3600, `retryAfter ${capped.failure.retryAfter}`);
     const [{ n }] = await sql("SELECT count(*)::int AS n FROM fcpi_retrieval.direct_nav WHERE domain = 'r.example'");
     assert.equal(n, 1, "only the direct navigation was counted");
   } finally { await store.close(); }

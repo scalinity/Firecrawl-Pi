@@ -565,13 +565,23 @@ test("M7: a webhook destination is checked before any receipt; a retry of an acc
 });
 
 test("a page of a hundred archived documents is served whole, without piling listeners on the response", async (t) => {
-  // A crawl of 100 pages is a bulk job (spec §10.2): it is admitted only with the residential route, and holds its domain.
+  // Every crawl the manifest admits is within one domain's hourly direct allowance (spec §10.2's 300): the largest is
+  // sent as it was asked, and holds nothing.
   const routes = await fakeRoutes();
   t.after(routes.close);
   const h = await harness({ extraEnv: { PI_EXTRACT_URL: `http://127.0.0.1:${routes.port}/` } });
-  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 100 }) });
+  const big = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 200 }) });
+  assert.equal(big.status, 200);
+  assert.equal(h.core.submissions().at(-1).body.scrapeOptions?.proxy, undefined, "a large crawl starts on the home connection");
+  const bigUp = await waitFor(() => h.core.upstreamOf(big.json.id), 15000, "mapping");
+  assert.equal(routes.calls.some((c) => c.path === "/internal/route-hold" && c.body.jobId === big.json.id), false);
+  // One upstream job runs at a time: this one finishes before the next is sent.
+  h.core.complete(bigUp, 1);
+  await waitFor(async () => (await h.job(big.json.id)).state === "SUCCEEDED", 15000, "the large crawl archived");
+  // A crawl whose pages ask for the residential route is admitted only with it, and holds its domain.
+  const r = await h.call("POST", "/v2/crawl", { token: T.a, body: crawlBody({ limit: 100, scrapeOptions: { proxy: "stealth" } }) });
   assert.equal(r.status, 200);
-  assert.equal(h.core.submissions().at(-1).body.scrapeOptions.proxy, "stealth", "a bulk job's pages ask for the residential route");
+  assert.equal(h.core.submissions().at(-1).body.scrapeOptions.proxy, "stealth", "its pages ask for the residential route");
   const up = await waitFor(() => h.core.upstreamOf(r.json.id), 15000, "mapping");
   h.core.complete(up, 100);
   await waitFor(async () => (await h.job(r.json.id)).state === "SUCCEEDED", 15000, "archived");

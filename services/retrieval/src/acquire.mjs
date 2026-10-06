@@ -7,7 +7,8 @@
 // navigation is paced per registrable domain on every route. A residential attempt first reserves its maximum
 // proxy spend and settles at the bytes its tunnels carried (residential.mjs). Work that needs the residential
 // route and cannot have it fails as PROXY_REQUIRED, and a challenge nothing further may answer as
-// BLOCKED_PUBLIC_CONTENT: neither is ever retried from the home connection. M7: an auto page challenged on the residential
+// BLOCKED_PUBLIC_CONTENT: neither is ever retried from the home connection. A page past the home connection's
+// allowance fails as DIRECT_LIMIT with the time it frees up; the residential route answers blocks, not volume. M7: an auto page challenged on the residential
 // route (or on the direct one, when the residential route cannot be had) gets one enhanced dispatch, the waterfall's last
 // tier (enhanced.mjs), and a request may ask for that tier alone; a page may carry screenshots and the safe action subset,
 // which only a local or residential browser attempt serves.
@@ -315,17 +316,6 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       const learn = (d, obs, outcome) => store.learnRoute(d, obs, policy.routing, outcome)
         .catch((e) => log({ event: "route_learn_failed", domain_hash: urlHmac(d), error: e.code ?? e.message }));
       const answering = (url) => { try { return domainOf(parseTarget(url, policy)); } catch { return domain; } };
-      // The direct limits are spent: an auto request moves this same attempt to the residential route, or stops; the
-      // home connection is never used past them (spec §10.2). One helper for the HTTP and browser steps (review S1, S17).
-      async function escalateAtCap(attemptId, mode, cap, legDeadline) {
-        const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: `past the direct limits (${cap.directCap}), this acquisition`, deadline: legDeadline, signal });
-        if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { failure: o.failure }; }
-        const leg = track(o.leg);
-        await store.setAttemptStrategy(attemptId, `residential_${mode}`);
-        result.strategies[result.strategies.length - 1] = result.strategy = `residential_${mode}`;
-        result.route.escalations.push(`direct_cap:${cap.directCap}`);
-        return { leg };
-      }
       const jar = new CookieJar();
       const page = req.purpose === "page" && req.expect === "html" && !req.fast;
       const retried = { direct: false, residential: false };
@@ -347,13 +337,9 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         note(attemptId, ordinal, `${tier}_http`);
         let leg = null, paced;
         if (tier === "direct") {
+          // Past the direct allowance the page waits for it (DIRECT_LIMIT, with its retryAfter): the residential route
+          // answers a block, never volume (spec §10.2).
           paced = await pace(target, attemptId, deadline, signal, "direct");
-          if (paced.failure?.directCap && req.route === "auto") {
-            const e = await escalateAtCap(attemptId, "http", paced.failure, deadline);
-            if (e.failure) return { fail: e.failure };
-            leg = e.leg; tier = "residential";
-            paced = await pace(target, attemptId, deadline, signal, "residential");
-          }
         } else {
           const o = await legs.open({ logicalId: req.logicalAcquisitionId, attemptId, why: "this attempt", deadline, signal });
           if (o.failure) { await store.finishAttempt(attemptId, { outcome: o.failure.class }); return { fail: o.failure }; }
@@ -442,12 +428,6 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           }
           // Paced inside the try, so a database error while pacing still frees the browser permit.
           paced = await pace(renderTarget, attemptId, browserDeadline, signal, tier);
-          if (paced.failure?.directCap && req.route === "auto" && tier === "direct") {
-            const e = await escalateAtCap(attemptId, "browser", paced.failure, browserDeadline);
-            if (e.failure) return { fail: e.failure };
-            leg = e.leg; tier = "residential";
-            paced = await pace(renderTarget, attemptId, browserDeadline, signal, "residential");
-          }
           if (paced.failure) {
             if (leg) await settle(leg, `not sent: ${paced.failure.class}`);
             await store.finishAttempt(attemptId, { outcome: paced.failure.class });
@@ -670,7 +650,7 @@ export function retryAfterSeconds(v) {
 // for a job, listed proxy-first or learned to block the home connection is fetched on the residential route or
 // refused as PROXY_REQUIRED, like a page; an auxiliary download is never the probe after a preference expires.
 // The request carries no route of its own (the core sends none), so it never escalates to the paid route: past
-// the direct limits it is refused as PROXY_REQUIRED, and a basic job's downloads never pay (review W7). Resolves { status, headers, body, finalUrl } or throws Denied; finalUrl is the serialized URL,
+// the direct limits it is refused as DIRECT_LIMIT, and a basic job's downloads never pay (review W7). Resolves { status, headers, body, finalUrl } or throws Denied; finalUrl is the serialized URL,
 // which a response header can carry (a raw one may hold characters it cannot: review finding S10).
 // Its logical id is the caller's, or one derived from the purpose, method, URL and a ten-minute
 // window, so repeated downloads of one URL (upstream retries, NuQ requeues, a second crawl of the

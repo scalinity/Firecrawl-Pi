@@ -9,24 +9,28 @@ import { RequestError, validateBody } from "../src/validate.mjs";
 
 const M = JSON.parse(readFileSync(process.env.FCPI_TEST_MANIFEST ?? new URL("../../../deploy/policies/capabilities.json", import.meta.url), "utf8"));
 
-test("the manifest's bulk threshold is spec §10.2's 20, and a hold outlasts a job", () => {
+test("the manifest's bulk threshold is spec §10.2's 300, one domain's hourly direct allowance, and a hold outlasts a job", () => {
   checkManifest(M);
-  assert.throws(() => checkManifest({ ...M, limits: { ...M.limits, proxy: { bulkPages: 50, holdMinutes: 60 } } }), /bulkPages/);
-  assert.throws(() => checkManifest({ ...M, limits: { ...M.limits, proxy: { bulkPages: 20, holdMinutes: 40 } } }), /holdMinutes/);
+  assert.equal(M.limits.proxy.bulkPages, 300);
+  assert.throws(() => checkManifest({ ...M, limits: { ...M.limits, proxy: { bulkPages: 20, holdMinutes: 60 } } }), /bulkPages/);
+  assert.throws(() => checkManifest({ ...M, limits: { ...M.limits, proxy: { bulkPages: 300, holdMinutes: 40 } } }), /holdMinutes/);
 });
 
-test("a crawl past 20 pages, or a batch past 20 URLs, is bulk and asks for the residential route; 20 or fewer are not touched", () => {
-  const crawl = { url: "https://example.org/", limit: 50 };
-  assert.equal(pagesOf("crawl", crawl), 50);
+test("every job the manifest admits starts on the home connection; only a job past 300 pages would be bulk and ask for the residential route", () => {
+  // The largest crawl and batch the manifest admits are within one domain's hourly direct allowance.
+  assert.ok(M.bodies.crawl.fields.limit.max <= M.limits.proxy.bulkPages && M.limits.batch.hardMaxUrls <= M.limits.proxy.bulkPages);
+  const largest = { url: "https://example.org/", limit: M.bodies.crawl.fields.limit.max };
+  assert.deepEqual(routeBody("crawl", largest, M), { body: largest, bulk: false, needsRoute: false });
+  const batch = { urls: Array.from({ length: M.limits.batch.hardMaxUrls }, (_, i) => `https://example.org/${i}`) };
+  assert.deepEqual(routeBody("batch", batch, M), { body: batch, bulk: false, needsRoute: false });
+  // The rule itself, past the allowance: the pages ask for the residential route, and options the caller gave are kept.
+  const crawl = { url: "https://example.org/", limit: 301 };
+  assert.equal(pagesOf("crawl", crawl), 301);
   assert.equal(isBulk("crawl", crawl, M), true);
   assert.deepEqual(routeBody("crawl", crawl, M), { body: { ...crawl, scrapeOptions: { proxy: "stealth" } }, bulk: true, needsRoute: true });
-  // Scrape options the caller gave are kept beside the route.
   assert.deepEqual(routeBody("crawl", { ...crawl, scrapeOptions: { formats: ["markdown"] } }, M).body.scrapeOptions, { formats: ["markdown"], proxy: "stealth" });
-  const small = { url: "https://example.org/", limit: 20 };
-  assert.deepEqual(routeBody("crawl", small, M), { body: small, bulk: false, needsRoute: false });
-  const batch = { urls: Array.from({ length: 21 }, (_, i) => `https://example.org/${i}`) };
-  assert.equal(routeBody("batch", batch, M).body.proxy, "stealth");
-  assert.equal(routeBody("batch", { urls: batch.urls.slice(0, 20) }, M).bulk, false);
+  assert.equal(routeBody("batch", { urls: Array.from({ length: 301 }, (_, i) => `https://example.org/${i}`) }, M).body.proxy, "stealth");
+  assert.equal(isBulk("crawl", { url: "https://example.org/", limit: 300 }, M), false);
   assert.equal(isBulk("scrape", { url: "https://example.org/" }, M), false);
 });
 
@@ -38,11 +42,14 @@ test("a crawl with no limit takes the manifest's default of 20 pages, and is not
 });
 
 test("a local-only (basic) bulk job is refused outright", () => {
-  assert.throws(() => routeBody("crawl", { url: "https://example.org/", limit: 21, scrapeOptions: { proxy: "basic" } }, M), (e) => e instanceof RequestError && e.code === "PROXY_REQUIRED" && e.status === 400);
-  assert.throws(() => routeBody("batch", { urls: Array.from({ length: 21 }, (_, i) => `https://e.org/${i}`), proxy: "basic" }, M), /direct egress only/);
+  assert.throws(() => routeBody("crawl", { url: "https://example.org/", limit: 301, scrapeOptions: { proxy: "basic" } }, M), (e) => e instanceof RequestError && e.code === "PROXY_REQUIRED" && e.status === 400);
+  assert.throws(() => routeBody("batch", { urls: Array.from({ length: 301 }, (_, i) => `https://e.org/${i}`), proxy: "basic" }, M), /direct egress only/);
   // M7 review W15: a bulk job asking for the enhanced provider is refused by name, never rewritten to stealth.
-  assert.throws(() => routeBody("crawl", { url: "https://example.org/", limit: 21, scrapeOptions: { proxy: "enhanced" } }, M), (e) => e instanceof RequestError && e.code === "UNSUPPORTED_OPTION" && e.extra.option === "scrapeOptions.proxy");
-  assert.throws(() => routeBody("batch", { urls: Array.from({ length: 21 }, (_, i) => `https://e.org/${i}`), proxy: "enhanced" }, M), (e) => e.code === "UNSUPPORTED_OPTION" && e.extra.option === "proxy");
+  assert.throws(() => routeBody("crawl", { url: "https://example.org/", limit: 301, scrapeOptions: { proxy: "enhanced" } }, M), (e) => e instanceof RequestError && e.code === "UNSUPPORTED_OPTION" && e.extra.option === "scrapeOptions.proxy");
+  assert.throws(() => routeBody("batch", { urls: Array.from({ length: 301 }, (_, i) => `https://e.org/${i}`), proxy: "enhanced" }, M), (e) => e.code === "UNSUPPORTED_OPTION" && e.extra.option === "proxy");
+  // Within the allowance a local-only job is admitted as it is: it runs on the home connection, as it asked.
+  const basic = { url: "https://example.org/", limit: 200, scrapeOptions: { proxy: "basic" } };
+  assert.deepEqual(routeBody("crawl", basic, M), { body: basic, bulk: false, needsRoute: false });
   // A small enhanced job holds its domains on the residential route, so its auxiliary downloads never leave direct.
   const small = { url: "https://example.org/", limit: 5, scrapeOptions: { proxy: "enhanced" } };
   assert.deepEqual(routeBody("crawl", small, M), { body: small, bulk: false, needsRoute: true });
@@ -65,5 +72,6 @@ test("a job of any size whose pages ask for the residential route needs it, and 
   assert.equal(routeBody("batch", { urls: ["https://a.example/"], proxy: "stealth" }, M).needsRoute, true);
   assert.equal(routeBody("crawl", small, M).needsRoute, false);
   assert.equal(routeBody("crawl", { ...small, scrapeOptions: { proxy: "basic" } }, M).needsRoute, false);
-  assert.equal(routeBody("crawl", { url: "https://example.org/", limit: 21 }, M).needsRoute, true);
+  assert.equal(routeBody("crawl", { url: "https://example.org/", limit: 200 }, M).needsRoute, false);
+  assert.equal(routeBody("crawl", { url: "https://example.org/", limit: 301 }, M).needsRoute, true);
 });

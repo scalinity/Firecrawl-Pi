@@ -103,7 +103,7 @@ export function checkManifest(m, { mcp = false } = {}) {
   pos(L.batch.deadlineMinutes, "limits.batch.deadlineMinutes", 30);
   // M6: spec §10.2's bulk threshold, and a hold that outlasts a job's deadline and its stall grace, within the
   // retrieval service's own ceiling (residential.holdMaxMinutes, 90).
-  if (!L.proxy || L.proxy.bulkPages !== 20) throw new Error("capability manifest: limits.proxy.bulkPages is spec §10.2's 20");
+  if (!L.proxy || L.proxy.bulkPages !== 300) throw new Error("capability manifest: limits.proxy.bulkPages is spec §10.2's 300");
   pos(L.proxy.holdMinutes, "limits.proxy.holdMinutes", 90);
   if (L.proxy.holdMinutes < Math.max(L.crawl.deadlineMinutes, L.batch.deadlineMinutes) + 30) throw new Error("capability manifest: limits.proxy.holdMinutes must outlast a job's deadline and its 30-minute stall grace");
   if (L.extract) {

@@ -43,16 +43,25 @@ test("missing pages and target errors keep the native result; binaries are binar
 
 test("direct pacing: gap, one in flight, the hourly and daily caps, cooldowns", () => {
   const now = new Date("2026-09-26T12:00:00Z");
-  const limits = { perDomainInFlight: 1, minNavigationGapMs: 2000, perDomainPerHour: 20, platformPerDay: 200 };
+  const limits = { perDomainInFlight: 1, minNavigationGapMs: 2000, perDomainPerHour: 300, platformPerDay: 5000 };
   const s = (o) => ({ holder: null, hold_until: null, last_nav_at: null, cooldown_until: null, ...o });
   assert.deepEqual(paceDecision({ now, state: s({}), hourCount: 0, dayCount: 0, limits }), { go: true });
   assert.equal(paceDecision({ now, state: s({ last_nav_at: new Date(now - 500) }), hourCount: 1, dayCount: 1, limits }).waitMs, 1500);
   assert.ok(paceDecision({ now, state: s({ holder: "h", hold_until: new Date(+now + 10000) }), hourCount: 1, dayCount: 1, limits }).waitMs > 0);
   assert.deepEqual(paceDecision({ now, state: s({ holder: "h", hold_until: new Date(now - 1) }), hourCount: 1, dayCount: 1, limits }), { go: true });
-  assert.equal(paceDecision({ now, state: s({}), hourCount: 20, dayCount: 20, limits }).failure.class, "PROXY_REQUIRED");
-  assert.equal(paceDecision({ now, state: s({}), hourCount: 3, dayCount: 200, limits }).failure.class, "PROXY_REQUIRED");
+  assert.deepEqual(paceDecision({ now, state: s({}), hourCount: 299, dayCount: 4999, limits }), { go: true });
+  // Past either allowance the page waits for its rolling window to free a navigation: DIRECT_LIMIT, retryable, with
+  // the seconds until the oldest counted navigation leaves the window (spec §10.2).
+  const hourCap = paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, hourOldest: new Date(now - 59 * 60e3), limits });
+  assert.deepEqual([hourCap.failure.class, hourCap.failure.retryable, hourCap.failure.retryAfter, hourCap.failure.directCap], ["DIRECT_LIMIT", true, 60, "domain_hour"]);
+  const dayCap = paceDecision({ now, state: s({}), hourCount: 3, dayCount: 5000, dayOldest: new Date(now - 23 * 3600e3), limits });
+  assert.deepEqual([dayCap.failure.class, dayCap.failure.retryAfter, dayCap.failure.directCap], ["DIRECT_LIMIT", 3600, "platform_day"]);
+  assert.equal(paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, limits }).failure.retryAfter, null, "no oldest navigation known, no invented time");
+  assert.equal(paceDecision({ now, state: s({}), hourCount: 300, dayCount: 300, hourOldest: new Date(now - 3600e3 + 10), limits }).failure.retryAfter, 1, "never 0");
+  // A residential navigation is not counted against the home connection's allowance.
+  assert.deepEqual(paceDecision({ now, state: s({}), hourCount: 300, dayCount: 5000, limits, direct: false }), { go: true });
   // A capped domain is refused at once, not after waiting out its gap.
-  assert.equal(paceDecision({ now, state: s({ last_nav_at: new Date(now - 500) }), hourCount: 20, dayCount: 20, limits }).failure.class, "PROXY_REQUIRED");
+  assert.equal(paceDecision({ now, state: s({ last_nav_at: new Date(now - 500) }), hourCount: 300, dayCount: 300, limits }).failure.class, "DIRECT_LIMIT");
   const cool = paceDecision({ now, state: s({ cooldown_until: new Date(+now + 30000) }), hourCount: 0, dayCount: 0, limits });
   assert.equal(cool.failure.class, "RATE_LIMITED");
   assert.equal(cool.failure.retryAfter, 30);
@@ -73,9 +82,13 @@ test("the deployed policy loads; a looser or unknown one does not", () => {
   const text = readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8");
   const p = loadPolicy(text);
   assert.equal(p.attempts.maxPerPage, 4);
+  assert.deepEqual([p.direct.minNavigationGapMs, p.direct.perDomainPerHour, p.direct.platformPerDay], [2000, 300, 5000]);
   const mutate = (f) => { const j = JSON.parse(text); f(j); return JSON.stringify(j); };
   assert.throws(() => loadPolicy(mutate((j) => { j.attempts.maxPerPage = 5; })));
-  assert.throws(() => loadPolicy(mutate((j) => { j.direct.perDomainPerHour = 40; })));
+  assert.throws(() => loadPolicy(mutate((j) => { j.direct.perDomainPerHour = 301; })), /300 per domain per hour/);
+  assert.throws(() => loadPolicy(mutate((j) => { j.direct.platformPerDay = 5001; })), /5000 per day/);
+  assert.throws(() => loadPolicy(mutate((j) => { j.direct.perDomainPerHour = null; })));
+  assert.doesNotThrow(() => loadPolicy(mutate((j) => { j.direct.perDomainPerHour = 40; })), "a tighter allowance loads");
   assert.throws(() => loadPolicy(mutate((j) => { j.direct.minNavigationGapMs = 500; })));
   assert.throws(() => loadPolicy(mutate((j) => { j.extra = 1; })));
   assert.throws(() => loadPolicy(mutate((j) => { j.cloudDenylist = ["example.com"]; })));

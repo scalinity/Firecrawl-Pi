@@ -81,8 +81,8 @@ export function loadPolicy(text) {
     if (l.platformPerDay !== null) int(l.platformPerDay, 1, 100000, `${name}.platformPerDay`);
   }
   // Spec §10.2's defaults may be tightened, never loosened.
-  if (p.direct.minNavigationGapMs < 2000 || p.direct.perDomainPerHour === null || p.direct.perDomainPerHour > 20 || p.direct.platformPerDay === null || p.direct.platformPerDay > 200) {
-    throw new Error("policy.direct may not be looser than spec §10.2 (2 s, 20 per domain per hour, 200 per day)");
+  if (p.direct.minNavigationGapMs < 2000 || p.direct.perDomainPerHour === null || p.direct.perDomainPerHour > 300 || p.direct.platformPerDay === null || p.direct.platformPerDay > 5000) {
+    throw new Error("policy.direct may not be looser than spec §10.2 (2 s, 300 per domain per hour, 5000 per day)");
   }
   if (JSON.stringify(p.ports) !== "[80,443]") throw new Error("policy.ports must be [80, 443]");
   int(p.maxRedirects, 0, 20, "maxRedirects");
@@ -138,13 +138,14 @@ export function loadPolicy(text) {
   for (const h of hosts) if (!Object.hasOwn(routes, h)) throw new Error(`search.engineRoutes must name the live engine host ${h}`);
   // M6: residential routing (spec §9.5, §10.2). proxyFirstDomains are the explicit, finite overrides: registrable domains
   // (or fixture hosts) that start on the residential route. bulkPages is spec §10.2's threshold past which a job needs
-  // approved proxy egress from the start; holdMaxMinutes bounds a job's route hold.
+  // approved proxy egress from the start: one domain's hourly direct allowance, so every job within it starts on the home
+  // connection; holdMaxMinutes bounds a job's route hold.
   exactKeys(p.residential, ["proxyFirstDomains", "sessionMinutes", "connectTimeoutMs", "bulkPages", "holdMaxMinutes"], "residential");
   const R = p.residential;
   if (!Array.isArray(R.proxyFirstDomains) || R.proxyFirstDomains.length > 500 || R.proxyFirstDomains.some((d) => typeof d !== "string" || !/^[a-z0-9.-]+\.[a-z]{2,}$/.test(d))) throw new Error("residential.proxyFirstDomains must list at most 500 domain names");
   int(R.sessionMinutes, 1, 1440, "residential.sessionMinutes");
   int(R.connectTimeoutMs, 1000, 30000, "residential.connectTimeoutMs");
-  if (R.bulkPages !== 20) throw new Error("residential.bulkPages is spec §10.2's 20");
+  if (R.bulkPages !== 300) throw new Error("residential.bulkPages is spec §10.2's 300");
   int(R.holdMaxMinutes, 10, 240, "residential.holdMaxMinutes");
   // Spec §9.5's domain learning: at most 5,000 records, two consistent observations before a preference changes, a
   // 24-hour preference extended by successes to at most seven days, and one bounded cheaper probe after it expires.
