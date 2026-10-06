@@ -57,7 +57,8 @@ const prefixedControls=[...controlSecrets].flatMap((expected,i)=>{
 });
 if(prefixedControls.some(x=>!x.detected))throw Error('Prefixed live-hash positive control silent');
 const classificationsPath=evidence+'/redaction-classifications.json';
-const classifications=[...JSON.parse(read('evidence/M9/work/redaction-classifications.json')),...(existsSync(classificationsPath)?JSON.parse(read(classificationsPath)):[])];
+// A classification names an exact value in a file, so earlier post-M9 work's still holds for a later scan.
+const classifications=[...JSON.parse(read('evidence/M9/work/redaction-classifications.json')),...[...new Set(['evidence/post-m9/hosted-mcp/redaction-classifications.json',classificationsPath])].filter(existsSync).flatMap(p=>JSON.parse(read(p)))];
 const output=evidence+'/redaction.json';
 const files=execFileSync('git',['ls-files','--cached','--others','--exclude-standard'],{encoding:'utf8'}).split('\n').filter(x=>x&&existsSync(x)&&!controls.includes(x)&&x!==output&&!['evidence/M9/redaction.json','evidence/M9/acceptance.json','evidence/M9/corpus-v2/redaction.json','evidence/M9/corpus-v2/acceptance.json'].includes(x)&&! /\.(?:png|jpg|pdf|gz|bundle)$/.test(x));
 const hits=[],real=[];const inputs=[];
