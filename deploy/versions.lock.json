@@ -571,7 +571,7 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:55b8dd37ea4def9c3555625e4b8af6351debab2c74b0b3aa42a2739a95e56d59",
+      "image_id": "sha256:a9e6502a0af7db4e689fd08decca3b0328cae58994881994fd71a17a42237854",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
@@ -579,7 +579,7 @@
       },
       "evidence": "evidence/post-m9/retrieval-quality/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "a5677a0ae61adb189a7a33812ea6a8e142f5ad02",
+      "built_from_commit": "01106615f90a41c9718ede5d464e4abf1fef589a",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -677,10 +677,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work",
       "status": "selected",
-      "image_id": "sha256:55cbf527640754b2f7adc8d26cfce98fd2597a0dbec7d6d3018a1652c0dc5093",
+      "image_id": "sha256:0717cdcf64fa62edd3cb0913561d1b76ef8465d274292cc9aa8bbb7aa3080366",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "11e4ea36797f4232cf95df6b5f2dd8b727d79e6b",
+      "built_from_commit": "01106615f90a41c9718ede5d464e4abf1fef589a",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"

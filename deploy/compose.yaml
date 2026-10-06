@@ -310,7 +310,7 @@ services:
   # deployed commit (scripts/m3/pi-build-gateway.sh) on the digest-pinned node base. Targets are no
   # longer limited to fixtures here: every acquisition passes the retrieval service's policy (M2).
   access-gateway:
-    image: fcpi/access-gateway@sha256:55cbf527640754b2f7adc8d26cfce98fd2597a0dbec7d6d3018a1652c0dc5093
+    image: fcpi/access-gateway@sha256:0717cdcf64fa62edd3cb0913561d1b76ef8465d274292cc9aa8bbb7aa3080366
     platform: linux/arm64
     pull_policy: never
     hostname: access-gateway
@@ -517,7 +517,7 @@ services:
   # is that bridge's host address (the host's resolver), so no lookup leaves through the host's own
   # namespace past the guard (evidence/M1/closeout/CLOSEOUT.md).
   retrieval-service:
-    image: fcpi/retrieval@sha256:55b8dd37ea4def9c3555625e4b8af6351debab2c74b0b3aa42a2739a95e56d59
+    image: fcpi/retrieval@sha256:a9e6502a0af7db4e689fd08decca3b0328cae58994881994fd71a17a42237854
     platform: linux/arm64
     pull_policy: never
     hostname: retrieval-service
