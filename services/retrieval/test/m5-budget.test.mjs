@@ -19,10 +19,12 @@ test("an absolute validation lease expires even with the paid switch still on an
   for (const v of [null, "2026-02-30T02:00:00Z", "2026-10-03", "bad"]) assert.throws(() => loadBudgetPolicy(mutate((p) => { p.validationExpiresAt = v; })), /validationExpiresAt/);
 });
 
-test("the deployed budget policy loads: every paid cap zero, the default model and parser paid, fixtures unpaid", () => {
+test("the deployed budget policy loads: the proxy's approved low cap, every other paid cap zero, the default model and parser paid, fixtures unpaid", () => {
   const b = loadBudgetPolicy(RAW);
-  for (const c of Object.values(b.categories).filter((c) => c.paid)) for (const v of Object.values(c.caps)) assert.equal(v, 0);
-  assert.equal(b.paidTotal.caps.day, 0);
+  // The owner's approval (2026-10-06): the residential proxy alone, at $0.50 a day and $2 a month.
+  assert.deepEqual(b.categories.proxy.caps, { day: 500000, month: 2000000 });
+  assert.equal(b.paidTotal.caps.day, 500000);
+  for (const [name, c] of Object.entries(b.categories).filter(([n, c]) => c.paid && n !== "proxy")) for (const v of Object.values(c.caps)) assert.equal(v, 0, name);
   assert.equal(b.providers[b.models[b.extraction.defaultModel].provider].paid, true);
   assert.equal(b.providers[b.parsers[b.parsing.defaultParser].provider].paid, true);
   assert.equal(b.extraction.maxInputTokens, 32000);
