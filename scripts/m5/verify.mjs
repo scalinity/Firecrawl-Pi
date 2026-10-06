@@ -56,7 +56,7 @@ const BUDGET = () => json("deploy/policies/budget.json");
 const cardFor = (subject) => BUDGET().rateCards.find((r) => r.subject === subject && r.effectiveTo === null);
 const modelCost = (card, u) => { const cached = Math.min(u.cachedTokens ?? 0,u.promptTokens), written = Math.min(u.cacheWriteTokens ?? 0,u.promptTokens-cached); return Math.ceil(((u.promptTokens-cached-written)*card.inputPerMTok+cached*card.cachedInputPerMTok+written*(card.cacheWritePerMTok ?? card.inputPerMTok)+u.completionTokens*card.outputPerMTok)/1e6); };
 const FIXTURE_ENGINES = ["fcpi fixture", "fcpi fixture b", "fcpi fixture r"];
-const LIVE_ENGINES = ["duckduckgo", "bing", "brave"];
+const LIVE_ENGINES = ["yahoo", "mojeek", "startpage"];
 
 // ---- redaction (M4's rules and controls, M5's live secrets) ------------------------------------------
 const M0_CONTROL = "tests/contracts/m0-redaction-control.txt", M1_CONTROL = "tests/contracts/m1-redaction-control.txt", M3_CONTROL = "tests/contracts/m3-redaction-control.txt";
@@ -324,7 +324,7 @@ const checks = {
       const e = LIVE(), c = (k) => one(e.live_search, k);
       const ev = e.live_search_log?.[0]?.events ?? [], eg = e.live_search_log?.[0]?.egress ?? [];
       const hosts = json("deploy/policies/egress.json").search.engineHosts.live;
-      const named = /^Partial search result: \d+ engine\(s\) did not answer \((duckduckgo|bing|brave): /;
+      const named = /^Partial search result: \d+ engine\(s\) did not answer \((yahoo|mojeek|startpage|duckduckgo|bing|brave): /;
       const warned = ["results", "nothing_matches"].map(c).filter((x) => x?.status === 200 && x.warning);
       const cond = { run_whole: endOk(e), results: c("results")?.status === 200 && c("results").results >= 1,
         nothing: c("nothing_matches")?.status === 200 || /^SEARCH_/.test(c("nothing_matches")?.code ?? ""),

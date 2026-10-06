@@ -6,11 +6,16 @@
 # fixture engine through, and while it is "live" only the live engines' hosts (deploy/policies/egress.json).
 use_default_settings:
   engines:
-    # The live engine set (policy search.engines.live), kept from SearXNG's defaults; the fixture engine
-    # is defined below.
+    # The engines the policy can name (search.engines.live is the subset queried), kept from SearXNG's
+    # defaults; the fixture engines are defined below. Brave and DuckDuckGo refuse the home connection and
+    # are routed residential, so they are queried only once the residential route is approved. Bing's HTML
+    # answer for a multi-term query is generic popular sites (code.org for "code review benchmark ..."),
+    # so it is not kept.
     keep_only:
+      - yahoo
+      - mojeek
+      - startpage
       - duckduckgo
-      - bing
       - brave
 
 general:
@@ -55,10 +60,6 @@ plugins:
     active: false
 
 engines:
-  # SearXNG ships Bing disabled; the live set enables it (an entry named like a default engine is merged
-  # into it). The retrieval service names the engines on every query either way.
-  - name: bing
-    disabled: false
   # The controlled engine (tests/fixtures/m5/providers.mjs searchHandler), reached through the search
   # proxy like every other engine, for the fixture phase's results, empty answers and failures.
   - name: fcpi fixture

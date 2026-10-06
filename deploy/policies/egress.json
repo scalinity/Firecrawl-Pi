@@ -72,9 +72,9 @@
         "fcpi fixture r"
       ],
       "live": [
-        "duckduckgo",
-        "bing",
-        "brave"
+        "yahoo",
+        "mojeek",
+        "startpage"
       ]
     },
     "engineHosts": {
@@ -83,7 +83,10 @@
         "html.duckduckgo.com",
         "lite.duckduckgo.com",
         "www.bing.com",
-        "search.brave.com"
+        "search.brave.com",
+        "search.yahoo.com",
+        "www.mojeek.com",
+        "www.startpage.com"
       ]
     },
     "engineRoutes": {
@@ -92,6 +95,9 @@
       "lite.duckduckgo.com": "residential",
       "search.brave.com": "residential",
       "www.bing.com": "direct",
+      "search.yahoo.com": "direct",
+      "www.mojeek.com": "direct",
+      "www.startpage.com": "direct",
       "searchr.fixture.fcpi.test": "residential"
     },
     "perHour": 60,

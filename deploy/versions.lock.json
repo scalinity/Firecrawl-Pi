@@ -384,7 +384,7 @@
       },
       "settings": {
         "path": "deploy/searxng/settings.yml",
-        "sha256": "e7b1548ceebe4f916cc3fe458e4d35fbe488839cba526cd9e4c643fd8641d1fd",
+        "sha256": "df3a89d38bb39f39ef9272ea9f3dc6236777986d0ce5c7a464af05b7df908536",
         "entrypoint": "deploy/searxng/entrypoint.sh",
         "entrypoint_sha256": "a87c687c0ffd6d8742176ebd53b02edb83fa0e3b7aa00a5dad333bf01ef01429"
       },
@@ -1902,9 +1902,9 @@
           "fcpi fixture r"
         ],
         "live": [
-          "duckduckgo",
-          "bing",
-          "brave"
+          "yahoo",
+          "mojeek",
+          "startpage"
         ]
       },
       "live_engine_hosts": [
@@ -1912,7 +1912,10 @@
         "html.duckduckgo.com",
         "lite.duckduckgo.com",
         "www.bing.com",
-        "search.brave.com"
+        "search.brave.com",
+        "search.yahoo.com",
+        "www.mojeek.com",
+        "www.startpage.com"
       ],
       "per_hour": 60,
       "cache_seconds": 900,
@@ -1923,6 +1926,9 @@
         "lite.duckduckgo.com": "residential",
         "search.brave.com": "residential",
         "www.bing.com": "direct",
+        "search.yahoo.com": "direct",
+        "www.mojeek.com": "direct",
+        "www.startpage.com": "direct",
         "searchr.fixture.fcpi.test": "residential"
       }
     },
@@ -1968,7 +1974,7 @@
   },
   "egress": {
     "policy": "deploy/policies/egress.json",
-    "policy_sha256": "552f3fae1224e35de769cf42c9ea4f63714f8aca8598b94821319dea3376de5c",
+    "policy_sha256": "22d9d1b509d948cfad6485e2aa1887190184234b6dc7bdb7e4b3e67cdb4dc7ec",
     "residential": {
       "proxyFirstDomains": [
         "m6hard.fixture.fcpi.test"
