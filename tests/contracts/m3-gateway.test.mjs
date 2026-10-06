@@ -75,7 +75,9 @@ function fakeCore(dbName) {
         const cloud = { "www-authenticate": 'Bearer resource_metadata="https://www.firecrawl.dev/.well-known/oauth-protected-resource"', "access-control-allow-origin": "*", "x-powered-by": "Express" };
         // M7: a target URL's st parameter is the page's status, as the core reports it in metadata.statusCode.
         let st = null; try { st = Number(new URL(body.url).searchParams.get("st")) || null; } catch { /* not a URL */ }
-        return send(200, u.pathname === "/v2/scrape" ? { success: true, data: { markdown: "# fixture", metadata: { sourceURL: body.url, ...(st ? { statusCode: st } : {}) } } } : { success: true, links: [{ url: body.url }] }, cloud);
+        // A scrape asking for links answers the page's links: two of the site's (one with a fragment), one elsewhere.
+        const links = body?.formats?.includes("links") ? (() => { const o = new URL(body.url).origin; return [`${o}/a`, `${o}/b#top`, `${o}/a`, "https://elsewhere.example/"]; })() : null;
+        return send(200, u.pathname === "/v2/scrape" ? { success: true, data: { markdown: "# fixture", ...(links ? { links } : {}), metadata: { sourceURL: body.url, ...(st ? { statusCode: st } : {}) } } } : { success: true, links: [{ url: body.url }] }, cloud);
       }
       if (req.method === "POST" && (m = u.pathname.match(/^\/v2\/(crawl|batch\/scrape)$/))) {
         const kind = m[1] === "crawl" ? "crawl" : "batch";
@@ -253,6 +255,16 @@ test("a valid token scrapes; upstream's Cloud challenge is stripped; only the ga
   const map = await H.call("POST", "/v2/map", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/" } });
   assert.equal(map.status, 200);
   assert.equal(map.headers["access-control-allow-origin"], undefined);
+  // The core's sitemap links first, then the start page's own same-site links, each once, without fragments.
+  assert.deepEqual(map.json.links, [{ url: "http://m3.fixture.fcpi.test:8080/" }, { url: "http://m3.fixture.fcpi.test:8080/a" }, { url: "http://m3.fixture.fcpi.test:8080/b" }]);
+  assert.deepEqual(map.json.fcpi, { sources: { sitemap: 1, page: 2 } });
+  const page = H.core.requests.filter((r) => r.url === "/v2/scrape").at(-1);
+  assert.deepEqual(page.body, { url: "http://m3.fixture.fcpi.test:8080/", formats: ["links"], onlyMainContent: false, origin: originFor("pa", "map") });
+  // A start URL naming a file maps its directory; a caller asking for the sitemap alone gets the core's answer alone.
+  const n = H.core.requests.length;
+  const only = await H.call("POST", "/v2/map", { token: T.a, body: { url: "http://m3.fixture.fcpi.test:8080/index.html", sitemap: "only" } });
+  assert.deepEqual([only.status, only.json.links, only.json.fcpi], [200, [{ url: "http://m3.fixture.fcpi.test:8080/" }], { sources: { sitemap: 1 } }]);
+  assert.deepEqual(H.core.requests.slice(n).map((r) => [r.url, r.body.url]), [["/v2/map", "http://m3.fixture.fcpi.test:8080/"]]);
 });
 
 test("Host must be a served origin and a browser Origin is refused", async () => {

@@ -240,7 +240,7 @@
         "description": "Fetch one public web page through the private Firecrawl platform and return its content in the requested formats. Waits for the page (up to 110 s). A result larger than the tool payload limit comes back as a marked excerpt with the sizes of what was cut. A screenshot, and each screenshot action, comes back as the address of an artifact only your token can read, and neither is combined with the json format in one call; maxAge (milliseconds) serves your own cached answer when it is younger than that; proxy enhanced asks for the budgeted enhanced provider alone.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true } },
       { "name": "firecrawl_map", "route": "map", "title": "Map a site's URLs",
-        "description": "Discover the URLs of a public site from its sitemap and links, without scraping each page.",
+        "description": "Discover the URLs of a public site from its sitemap and the links on its start page, without scraping each page. fcpi.sources says how many links each source gave; a site with no sitemap yields its start page's links, and a crawl discovers the pages beyond them.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true } },
       { "name": "firecrawl_search", "route": "search", "title": "Search the web",
         "description": "Search the web through the platform's private SearXNG and return the results' URLs, titles and snippets; with scrapeOptions.formats, each result page is scraped too. A search whose engines all failed, or whose backend is down, is an error naming the failure, never an empty list; a partial result says which engines did not answer.",

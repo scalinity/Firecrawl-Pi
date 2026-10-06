@@ -271,3 +271,10 @@ test("a finished job's outcome reaches the agent beside its native status; a cor
   const b = T.firecrawl_batch_status.shape({ status: 200, json: { success: true, status: "completed", completed: 2, total: 2, creditsUsed: 2, data: [], fcpi: { state: "SUCCEEDED", failed: 0 } }, headers: {} }, { id: "0190f1a0-0000-7000-8000-000000000000" });
   assert.deepEqual([b.payload.creditsUsed, b.payload.fcpi], [2, { state: "SUCCEEDED", failed: 0 }]);
 });
+
+test("map passes on how many links each source gave and the core's warning", () => {
+  const T = byName(makeTools(m()));
+  const fcpi = { sources: { sitemap: 0, page: 2 }, note: "No sitemap listed links here." };
+  const r = T.firecrawl_map.shape({ status: 200, json: { success: true, links: [{ url: "https://a.example/1" }, { url: "https://a.example/2" }], warning: "Only 1 result(s) found.", fcpi }, headers: {} }, {});
+  assert.deepEqual(r.payload, { links: [{ url: "https://a.example/1" }, { url: "https://a.example/2" }], warning: "Only 1 result(s) found.", fcpi });
+});

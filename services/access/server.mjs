@@ -44,6 +44,7 @@ import { makeOutbox } from "./src/outbox.mjs";
 import { makeAdmission } from "./src/admission.mjs";
 import { makeIncidentActions } from "./src/incidents.mjs";
 import { jobOutcome } from "./src/outcome.mjs";
+import { mapStartUrl, mergeMapLinks } from "./src/maplinks.mjs";
 
 const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), service: "access-gateway", ...o }));
 const cfg = loadConfig(process.env);
@@ -384,10 +385,46 @@ async function sync(ctx, route) {
   // M7: a scrape with a screenshot or actions returns captures, stored as artifacts before the answer leaves (below).
   const extras = route.id === "scrape" && ((body.formats ?? []).some((f) => (typeof f === "object" ? f.type : f) === "screenshot") || (body.actions ?? []).length > 0);
   if (extras) return scrapeWithExtras(ctx, route, body);
+  if (route.id === "map") return mapWithPageLinks(ctx, route, body);
   if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   if (route.id === "scrape") return cachedScrape(ctx, route, body);
   syncInFlight += 1;
   upstream.forward(ctx.res, route.path, coreBody(ctx, route, body), (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
+}
+
+// Map (src/maplinks.mjs): the core's map, which reads the site's sitemap, and the links the start page carries, fetched
+// together; a caller asking for the sitemap alone gets only the core's answer. The start page is one ordinary scrape (a
+// paced navigation like any other); when it fails the core's links are answered alone, with the reason. The answer says
+// how many links each source gave.
+const MAP_PAGE_NOTE = "No sitemap listed links here; these are the links the start page carries. A crawl discovers the pages beyond them.";
+async function mapWithPageLinks(ctx, route, body) {
+  if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
+  syncInFlight += 1;
+  try {
+    const start = mapStartUrl(body.url);
+    const page = body.sitemap === "only" ? null : upstream.call("POST", "/v2/scrape", { body: coreBody(ctx, route, { url: body.url, formats: ["links"], onlyMainContent: false }),
+      timeoutMs: cfg.coreTimeoutMs, maxBytes: 8 * 1048576 }).then((r) => r, (e) => ({ error: e.code ?? "UPSTREAM_UNAVAILABLE" }));
+    let r;
+    try { r = await upstream.call("POST", route.path, { body: coreBody(ctx, route, { ...body, url: start }), timeoutMs: cfg.coreTimeoutMs, maxBytes: 8 * 1048576 }); }
+    catch (e) {
+      await page;
+      const timedOut = e.code === "TIMEOUT";
+      return ctx.send(timedOut ? 504 : 503, { success: false, code: timedOut ? "UPSTREAM_TIMEOUT" : "UPSTREAM_UNAVAILABLE", error: timedOut ? "The core did not answer in time." : "The core did not answer." });
+    }
+    if (r.status !== 200 || r.json?.success !== true) { await page; return ctx.send(r.status === 200 ? 503 : r.status, r.json ?? { success: false, code: "UPSTREAM_ERROR", error: `The core answered ${r.status}.` }); }
+    const core = Array.isArray(r.json.links) ? r.json.links : [];
+    if (!page) return ctx.send(200, { ...r.json, fcpi: { sources: { sitemap: core.length } } });
+    const p = await page;
+    const ok = p.status === 200 && p.json?.success === true;
+    const merged = mergeMapLinks(body, core, ok && Array.isArray(p.json.data?.links) ? p.json.data.links : [], M.bodies.map.fields.limit.default);
+    const { warning, ...rest } = r.json;
+    const fcpi = { sources: { sitemap: core.length, page: merged.added },
+      ...(ok ? {} : { pageError: p.error ?? p.json?.code ?? `HTTP ${p.status}` }),
+      ...(core.length === 0 && merged.added > 0 ? { note: MAP_PAGE_NOTE } : {}) };
+    ctx.extra = { map: fcpi.sources };
+    // The core's "only N results" warning spoke of its own links; it stands only if the merged answer is that short too.
+    return ctx.send(200, { ...rest, links: merged.links, ...(warning && merged.links.length <= 1 ? { warning } : {}), fcpi });
+  } finally { syncInFlight -= 1; }
 }
 
 // M7: the scrape cache (spec §21.3, AC21). A cached answer is served only to the principal that stored it, only for the

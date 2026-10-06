@@ -154,7 +154,8 @@ function shape(kind, tool, r, args, m, omitted) {
   switch (kind) {
     case "sync": {
       if (tool.route === "map") {
-        const payload = { links: b.links ?? [] };
+        // The gateway's fcpi says how many links the sitemap and the start page each gave (and why the page gave none).
+        const payload = { links: b.links ?? [], ...(b.warning ? { warning: b.warning } : {}), ...(b.fcpi ? { fcpi: b.fcpi } : {}) };
         const total = payload.links.length;
         // Measured with the marker in place, so the marker cannot push the answer past the limit.
         while (bytes(payload) > budget && payload.links.length) {
