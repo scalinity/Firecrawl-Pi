@@ -44,21 +44,24 @@ function backendGet(url, deadlineMs, signal) {
 }
 
 // The engines the backend has loaded, from SearXNG's /config (a disabled engine is listed, since a request may name
-// it; an inactive one is not loaded at all). Read at most every ten minutes; null when it cannot be read, and then
-// nothing is concluded from it.
-export const LOADED_TTL_MS = 10 * 60e3;
-export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log }) {
-  let loaded = { at: -Infinity, names: null };
-  async function loadedEngines(signal) {
-    if (Date.now() - loaded.at < LOADED_TTL_MS) return loaded.names;
-    let names = null;
-    try {
-      const r = await backendGet(new URL("/config", searchUrl), 2000, signal);
-      const cfg = r.status === 200 ? JSON.parse(r.body.toString("utf8")) : null;
-      if (Array.isArray(cfg?.engines)) names = new Set(cfg.engines.map((e) => e?.name).filter((n) => typeof n === "string"));
-    } catch { /* unreadable: nothing is concluded */ }
-    loaded = { at: Date.now(), names };
-    return names;
+// it; an inactive one is not loaded at all). A read is kept ten minutes; a failed one, from which nothing is concluded,
+// thirty seconds. Concurrent searches share one read, which no single caller's cancellation ends (review R13).
+export const LOADED_TTL_MS = 10 * 60e3, LOADED_RETRY_MS = 30e3;
+export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, clock = Date.now }) {
+  let loaded = { until: -Infinity, names: null }, reading = null;
+  function loadedEngines() {
+    if (clock() < loaded.until) return Promise.resolve(loaded.names);
+    reading ??= (async () => {
+      let names = null;
+      try {
+        const r = await backendGet(new URL("/config", searchUrl), 2000, null);
+        const cfg = r.status === 200 ? JSON.parse(r.body.toString("utf8")) : null;
+        if (Array.isArray(cfg?.engines)) names = new Set(cfg.engines.map((e) => e?.name).filter((n) => typeof n === "string"));
+      } catch { /* unreadable: nothing is concluded */ }
+      loaded = { until: clock() + (names ? LOADED_TTL_MS : LOADED_RETRY_MS), names };
+      return names;
+    })().finally(() => { reading = null; });
+    return reading;
   }
   return async function search(inboundUrl, signal) {
     const policy = getPolicy(), S = policy.search;
@@ -86,7 +89,7 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log })
     url.searchParams.set("pageno", String(pageno));
     url.searchParams.set("language", language);
     url.searchParams.set("engines", engines.join(","));
-    const loadedNow = loadedEngines(signal);
+    const loadedNow = loadedEngines();
     let r;
     try { r = await backendGet(url, S.deadlineMs, signal); } catch (e) { done(e.failureClass); throw e; }
     if (r.status !== 200) { done("backend_error", { status: r.status }); throw new Denied("SEARCH_BACKEND_ERROR", `the search backend answered HTTP ${r.status}`, { retryable: r.status >= 500 }); }

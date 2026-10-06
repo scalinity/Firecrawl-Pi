@@ -128,3 +128,25 @@ test("a selected engine the backend has not loaded is reported as not answering,
     assert.equal(backend.configReads, 1, "the loaded set is read at most every ten minutes");
   } finally { backend.loaded = null; await r.srv.close(); }
 });
+
+test("concurrent searches share one /config read; a failed read is retried after thirty seconds, a good one kept ten minutes (review R13)", async () => {
+  let t = 1_000_000;
+  backend.loaded = null; // /config answers 404 first
+  backend.configReads = 0;
+  const srv = await serve(backend);
+  try {
+    const search = makeSearcher({ store: new MemStore(), getPolicy: () => POLICY, getSelection: () => ({ search: "live" }), searchUrl: `http://127.0.0.1:${srv.port}/search`, log: () => {}, clock: () => t });
+    const q = (x) => search(`/searxng/search?q=${x}&format=json&pageno=1`);
+    await Promise.all([q("a1"), q("a2"), q("a3")]);
+    assert.equal(backend.configReads, 1, "one shared read");
+    backend.loaded = ["duckduckgo", "brave"];
+    t += 29e3; await q("b");
+    assert.equal(backend.configReads, 1, "a failed read is kept thirty seconds");
+    t += 2e3;
+    const c = await q("c");
+    assert.equal(backend.configReads, 2);
+    assert.deepEqual(c.body.unresponsive_engines, [{ engine: "bing", reason: "not loaded by the search backend" }]);
+    t += 9 * 60e3; await q("d");
+    assert.equal(backend.configReads, 2, "a good read is kept ten minutes");
+  } finally { backend.loaded = null; await srv.close(); }
+});
