@@ -500,6 +500,8 @@ async function scrapeWithExtras(ctx, route, body) {
       return ctx.send(500, { success: false, code: e.code, error: `The gateway could not store a capture: ${e.message}.` });
     }
     ctx.extra = { artifacts: artifacts.length };
+    // The core advises its /interact endpoint for actions; this deployment does not serve it (the manifest's not_enabled).
+    if (typeof r.json.data.warning === "string" && /\/interact\b/.test(r.json.data.warning)) delete r.json.data.warning;
     ctx.send(200, { ...r.json, fcpi: { ...(r.json.fcpi ?? {}), artifacts } });
   } finally { extrasInFlight -= 1; syncInFlight -= 1; }
 }
