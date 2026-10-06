@@ -89,6 +89,10 @@ test("the deployed policy loads; a looser or unknown one does not", () => {
   assert.throws(() => loadPolicy(mutate((j) => { j.direct.platformPerDay = 5001; })), /5000 per day/);
   assert.throws(() => loadPolicy(mutate((j) => { j.direct.perDomainPerHour = null; })));
   assert.doesNotThrow(() => loadPolicy(mutate((j) => { j.direct.perDomainPerHour = 40; })), "a tighter allowance loads");
+  // The fallback engines: required, and never one the selection already queries.
+  assert.throws(() => loadPolicy(mutate((j) => { delete j.search.fallbackEngines; })), /fallbackEngines/);
+  assert.throws(() => loadPolicy(mutate((j) => { j.search.fallbackEngines.live = [j.search.engines.live[0]]; })), /fallbackEngines/);
+  assert.doesNotThrow(() => loadPolicy(mutate((j) => { j.search.fallbackEngines.live = ["brave"]; })));
   assert.throws(() => loadPolicy(mutate((j) => { j.direct.minNavigationGapMs = 500; })));
   assert.throws(() => loadPolicy(mutate((j) => { j.extra = 1; })));
   assert.throws(() => loadPolicy(mutate((j) => { j.cloudDenylist = ["example.com"]; })));

@@ -75,6 +75,10 @@
         "yahoo"
       ]
     },
+    "fallbackEngines": {
+      "fixture": [],
+      "live": []
+    },
     "engineHosts": {
       "live": [
         "duckduckgo.com",

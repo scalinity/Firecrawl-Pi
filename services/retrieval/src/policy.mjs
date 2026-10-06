@@ -113,8 +113,15 @@ export function loadPolicy(text) {
   }
   // Search (spec §13): the engine sets the host's selection chooses between, the hosts the live set may
   // reach through the search proxy, and the backend's limits, which may be tightened, never loosened.
-  exactKeys(p.search, ["engines", "engineHosts", "engineRoutes", "perHour", "cacheSeconds", "deadlineMs", "maxResults"], "search");
+  exactKeys(p.search, ["engines", "fallbackEngines", "engineHosts", "engineRoutes", "perHour", "cacheSeconds", "deadlineMs", "maxResults"], "search");
   exactKeys(p.search.engines, ["fixture", "live"], "search.engines");
+  // The engines a search asks only when the selection's own engines failed or answered too few (search.mjs): those the
+  // home connection cannot reach, on the residential route.
+  exactKeys(p.search.fallbackEngines, ["fixture", "live"], "search.fallbackEngines");
+  for (const k of ["fixture", "live"]) {
+    const l = p.search.fallbackEngines[k];
+    if (!Array.isArray(l) || l.length > 6 || l.some((e) => typeof e !== "string" || !/^[a-z0-9 ._-]{1,40}$/.test(e) || p.search.engines[k].includes(e))) throw new Error(`search.fallbackEngines.${k} must list 0 to 6 engine names the selection does not already query`);
+  }
   for (const k of ["fixture", "live"]) {
     const l = p.search.engines[k];
     if (!Array.isArray(l) || l.length === 0 || l.length > 6 || l.some((e) => typeof e !== "string" || !/^[a-z0-9 ._-]{1,40}$/.test(e))) throw new Error(`search.engines.${k} must list 1 to 6 engine names`);
