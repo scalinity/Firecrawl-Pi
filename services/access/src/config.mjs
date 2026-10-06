@@ -104,6 +104,9 @@ export function checkManifest(m, { mcp = false } = {}) {
   // M6: spec §10.2's bulk threshold, and a hold that outlasts a job's deadline and its stall grace, within the
   // retrieval service's own ceiling (residential.holdMaxMinutes, 90).
   if (!L.proxy || L.proxy.bulkPages !== 300) throw new Error("capability manifest: limits.proxy.bulkPages is spec §10.2's 300");
+  // The residential route answers a block of the home connection, never volume (spec §35), so no job the manifest
+  // admits is bulk (review R21).
+  if ((m.bodies.crawl?.fields.limit.max ?? 0) > L.proxy.bulkPages || L.batch.hardMaxUrls > L.proxy.bulkPages) throw new Error("capability manifest: the largest crawl and batch must stay within limits.proxy.bulkPages, so no admitted job is bulk");
   pos(L.proxy.holdMinutes, "limits.proxy.holdMinutes", 90);
   if (L.proxy.holdMinutes < Math.max(L.crawl.deadlineMinutes, L.batch.deadlineMinutes) + 30) throw new Error("capability manifest: limits.proxy.holdMinutes must outlast a job's deadline and its 30-minute stall grace");
   if (L.extract) {

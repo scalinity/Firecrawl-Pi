@@ -14,6 +14,9 @@ test("the manifest's bulk threshold is spec §10.2's 300, one domain's hourly di
   assert.equal(M.limits.proxy.bulkPages, 300);
   assert.throws(() => checkManifest({ ...M, limits: { ...M.limits, proxy: { bulkPages: 20, holdMinutes: 60 } } }), /bulkPages/);
   assert.throws(() => checkManifest({ ...M, limits: { ...M.limits, proxy: { bulkPages: 300, holdMinutes: 40 } } }), /holdMinutes/);
+  // A manifest that would admit a bulk job stops startup (review R21).
+  const crawl = { ...M.bodies.crawl, fields: { ...M.bodies.crawl.fields, limit: { ...M.bodies.crawl.fields.limit, max: 301 } } };
+  assert.throws(() => checkManifest({ ...M, bodies: { ...M.bodies, crawl } }), /no admitted job is bulk/);
 });
 
 test("every job the manifest admits starts on the home connection; only a job past 300 pages would be bulk and ask for the residential route", () => {
