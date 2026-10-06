@@ -107,7 +107,6 @@ export class Store {
     });
   }
 
-
   async finishAttempt(attemptId, { outcome, targetStatus = null, bytes = null, subresources = null }) {
     await this.pool.query(
       `UPDATE fcpi_retrieval.attempt SET finished_at = now(), outcome = $2, target_status = $3, bytes = $4, subresources = $5 WHERE attempt_id = $1`,

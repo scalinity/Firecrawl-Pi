@@ -25,7 +25,7 @@ const EDGE_BLOCK_MARKERS = [
   /\berrors(?:\.|&#46;)edgesuite(?:\.|&#46;)net\b/i,
   /<title>\s*Access denied \| [^<]{1,253} used Cloudflare to restrict access\s*<\/title>/i,
 ];
-const LOGIN_PATH =/\/(log-?in|sign-?in|auth|session|account\/log-?in|users\/sign_in|accounts\/login)(\/|\?|$)/i;
+const LOGIN_PATH = /\/(log-?in|sign-?in|auth|session|account\/log-?in|users\/sign_in|accounts\/login)(\/|\?|$)/i;
 
 export const isTextual = (contentType) => !contentType || TEXT_TYPES.test(contentType);
 export const isHtml = (contentType) => !contentType || HTML_TYPES.test(contentType);

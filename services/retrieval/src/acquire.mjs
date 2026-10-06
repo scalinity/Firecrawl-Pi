@@ -386,8 +386,8 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         const answered = answering(httpRes.finalUrl), probed = probe && tier === "direct" && answered === domain;
         if (verdict.verdict === "challenge") {
           await learn(answered, { tier, mode: "http", outcome: "challenge", probe: probed }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
-          if (req.route === "auto") return { escalate: true, mode: "http", from: `${tier}_http`, to: tier === "direct" ? "residential" : "enhanced", detail: `the target served a bot interstitial to the ${tier} route`, tier };
-          return { fail: { ...verdict.failure, detail: tier === "residential" ? "the target served a bot interstitial on the residential route, and a stealth request goes no further" : "the target served a bot interstitial, and a local-only (basic) request does not escalate" }, tier };
+          if (req.route === "auto") return { escalate: true, mode: "http", from: `${tier}_http`, to: tier === "direct" ? "residential" : "enhanced", detail: `${verdict.failure.detail} on the ${tier} route`, tier };
+          return { fail: { ...verdict.failure, detail: tier === "residential" ? `${verdict.failure.detail} on the residential route, and a stealth request goes no further` : `${verdict.failure.detail}, and a local-only (basic) request does not escalate` }, tier };
         }
         if (verdict.failure) { await learn(answered, null, { success: false, failureClass: verdict.failure.class }); return { fail: verdict.failure, tier }; }
         if (verdict.verdict !== "js_shell" || !page) {
@@ -501,8 +501,8 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
           const answered = answering(finalUrl), probed = probe && tier === "direct" && answered === domain;
           if (verdict?.verdict === "challenge") {
             await learn(answered, { tier, mode: "browser", outcome: "challenge", probe: probed }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
-            if (req.route === "auto") return { escalate: true, mode: "browser", from: `${tier}_browser`, to: tier === "direct" ? "residential" : "enhanced", detail: `the rendered page was a bot interstitial on the ${tier} route`, renderUrl };
-            return { fail: { ...verdict.failure, detail: tier === "residential" ? "the rendered page was a bot interstitial on the residential route, and a stealth request goes no further" : "the rendered page was a bot interstitial, and a local-only (basic) request does not escalate" } };
+            if (req.route === "auto") return { escalate: true, mode: "browser", from: `${tier}_browser`, to: tier === "direct" ? "residential" : "enhanced", detail: `in the rendered page, ${verdict.failure.detail} on the ${tier} route`, renderUrl };
+            return { fail: { ...verdict.failure, detail: tier === "residential" ? `in the rendered page, ${verdict.failure.detail} on the residential route, and a stealth request goes no further` : `in the rendered page, ${verdict.failure.detail}, and a local-only (basic) request does not escalate` } };
           }
           if (failure) {
             if (!failure.provider && verdict?.failure) await learn(answered, null, { success: false, failureClass: failure.class });
@@ -560,7 +560,7 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         await finishAttempt({ outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: a.status, bytes });
         Object.assign(result, { finalUrl: a.finalUrl, targetStatus: a.status, contentType: ct ?? null, bytes, redirects: [], quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
         if (verdict.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(a.finalUrl, policy)), verdict.failure.retryAfter); } catch { /* refused above */ } }
-        if (verdict.verdict === "challenge") return { fail: { ...verdict.failure, retryable: false, detail: "the enhanced provider's answer was itself a bot interstitial; nothing further is tried" } };
+        if (verdict.verdict === "challenge") return { fail: { ...verdict.failure, retryable: false, detail: "the enhanced provider's answer was itself a bot interstitial or an edge refusal; nothing further is tried" } };
         if (verdict.failure) return { fail: verdict.failure };
         // A script shell the provider returned unrendered needed a browser; one dispatch is all a page gets.
         if (verdict.verdict === "js_shell" && page && (zmode === "http" || verdict.structural === true)) {
