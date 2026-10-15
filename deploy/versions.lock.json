@@ -571,15 +571,15 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:a9e6502a0af7db4e689fd08decca3b0328cae58994881994fd71a17a42237854",
+      "image_id": "sha256:e2a96b88f140aceeede30616b2c5eecf8b1f97be3dd724ffd577cdf50de1d260",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
       },
-      "evidence": "evidence/post-m9/retrieval-quality/raw/image-build.txt",
+      "evidence": "evidence/playground/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "01106615f90a41c9718ede5d464e4abf1fef589a",
+      "built_from_commit": "4bcb097126f8ae8ada4d39bee7564395d142fcec",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -677,10 +677,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work",
       "status": "selected",
-      "image_id": "sha256:0717cdcf64fa62edd3cb0913561d1b76ef8465d274292cc9aa8bbb7aa3080366",
+      "image_id": "sha256:e7f6edf3455d83bd8008fd7f5cd83230ce8ee002eff69949123da4f9c1c77678",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "01106615f90a41c9718ede5d464e4abf1fef589a",
+      "built_from_commit": "4bcb097126f8ae8ada4d39bee7564395d142fcec",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -747,7 +747,7 @@
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
         }
       },
-      "evidence": "evidence/post-m9/retrieval-quality/raw/image-build.txt"
+      "evidence": "evidence/playground/raw/image-build.txt"
     },
     "mcp_gateway": {
       "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tool offers the action subset, the screenshot format and the cache options since M7",
