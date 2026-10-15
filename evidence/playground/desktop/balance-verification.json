@@ -1,0 +1,68 @@
+{
+  "schema": "fcpi.playground-balance-verification/v1",
+  "utc": "2026-10-15T19:47:16.710588+00:00",
+  "source_base_commit": "be3597e02db1a4d8d9a42e317ac5268dccb34cd5",
+  "implementation_sha256": {
+    "LLM-DEMO.html": "2e2ec8f518ab60df55f6382066753db04e9c00c9e80216e0dbbc42f6b107135d",
+    "tests/playground-ui.browser.js": "a1a157485f82ce9ce584f4037ae5a2bc2dc7cc1f27b5c8373fb8863a77ea0fe4"
+  },
+  "package_binary_sha256": "b0bd562447a5c16bb045fc7a204eb5bd3f74469fb8cf627dbacc86e3608cd9f5",
+  "checks": [
+    {
+      "id": "node-runtime",
+      "state": "PASS",
+      "tests": 43,
+      "exit_code": 0
+    },
+    {
+      "id": "browser-scenarios",
+      "state": "PASS",
+      "scenarios": 6,
+      "file": "tests/playground-ui.browser.js",
+      "balance_coverage": [
+        "20.00 to 19.95 after fixture extraction",
+        "Agent completion refresh",
+        "30-second polling with reserved work",
+        "unavailable ledger replaces balance with unknown",
+        "exhausted balance clamps to zero"
+      ]
+    },
+    {
+      "id": "macos-package",
+      "command": "npm run package",
+      "cwd": "desktop",
+      "state": "PASS",
+      "exit_code": 0
+    },
+    {
+      "id": "macos-signature",
+      "command": "codesign --verify --deep --strict <bundle>",
+      "state": "PASS",
+      "exit_code": 0
+    },
+    {
+      "id": "real-pi-ledger",
+      "state": "PASS",
+      "cap_micro_usd": 20000000,
+      "settled_micro_usd": 35306,
+      "reserved_micro_usd": 0,
+      "displayed_remaining_usd": "19.96"
+    },
+    {
+      "id": "native-appearance",
+      "state": "PASS",
+      "observed": [
+        "Pi connected",
+        "LLM remaining $19.96",
+        "no monthly or approval wording",
+        "no card border"
+      ]
+    }
+  ],
+  "behavior": "The current LLM category cap minus settled and reserved usage. Reads the existing private status endpoint on load, after runs, on focus, and every 30 seconds while visible. Missing or invalid ledger data displays an unknown balance.",
+  "limits": [
+    "Balance decrement scenarios use fixtures; no new paid model call was made for this change.",
+    "Pi operational qualification and full acceptance suites were not rerun."
+  ],
+  "orchestration": "No change needed: milestone eligibility, order and ownership are unchanged."
+}

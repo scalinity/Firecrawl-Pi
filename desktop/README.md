@@ -9,7 +9,10 @@ crawls remain on the Pi, as in the browser playground.
 
 The icon comes from the supplied PNG in `icon-source.png`. Generated macOS icons
 are in `src-tauri/icons/`. Content renders Markdown; the Markdown tab keeps its
-source text. Pinned Marked and DOMPurify distributions and their licenses are
+source text. The sidebar reads the remaining LLM balance from the Pi ledger,
+subtracting both settled usage and reservations for work in progress. It refreshes
+after runs, when the app regains focus, and every 30 seconds while visible.
+Pinned Marked and DOMPurify distributions and their licenses are
 bundled from `scripts/playground/vendor/`.
 
 The app needs Node.js 22 or newer and the existing Pi SSH key/configuration.

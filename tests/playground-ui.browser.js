@@ -102,5 +102,40 @@ async (page) => {
     await markdownTab.screenshot({path:'.playwright-mcp/fcpi-markdown-390.png',fullPage:true});
     results.push({check:'formatted default Content, exact raw Markdown, XSS removal and 390px layout',state:'PASS'});
   } finally {await markdownTab.close();}
+  const balanceTab = await page.context().newPage();
+  let settled=0,reserved=0,available=true;
+  try {
+    await balanceTab.clock.install();
+    await balanceTab.route('**/api/status',route=>route.fulfill({json:{status:200,data:{core:{live:true},ledger:{ok:true},providers:available?{
+      caps:{llm:{unit:'micro_usd',caps:{month:20000000}}},
+      budgets:[{category:'llm',period:'month',settled,reserved}]
+    }:null}}}));
+    await balanceTab.route('**/api/run',route=>{settled+=50000;return route.fulfill({json:{status:200,data:{success:true,data:{markdown:'Balance fixture'}}}});});
+    await balanceTab.goto('http://localhost:8767/LLM-DEMO.html');
+    await balanceTab.locator('#llm-balance').filter({hasText:'$20.00'}).waitFor();
+    if(/approved|month/.test(await balanceTab.locator('.budget').textContent()))throw Error('Subscription wording remains');
+    await balanceTab.locator('#target').fill('https://example.com/');
+    await balanceTab.locator('#llm').check();
+    await balanceTab.locator('#run').click();
+    await balanceTab.locator('#llm-balance').filter({hasText:'$19.95'}).waitFor();
+    reserved=100000;
+    await balanceTab.clock.fastForward(30000);
+    await balanceTab.locator('#llm-balance').filter({hasText:'$19.85'}).waitFor();
+    if(!/\$0.10 in progress/.test(await balanceTab.locator('#llm-balance-note').textContent()))throw Error('Reserved spending is not explained');
+    reserved=0;settled=75000;
+    await balanceTab.locator('[data-tool="agent"]').first().click();
+    await balanceTab.locator('#agent-task').fill('Read the fixture.');
+    await balanceTab.route('**/api/agent',route=>{settled+=50000;return route.fulfill({contentType:'application/x-ndjson',body:JSON.stringify({type:'result',result:{status:200,data:{success:true,status:'completed',answer:'Fixture answer',findings:[],sources:[],documents:[],steps:[],usage:null}}})+'\n'});});
+    await balanceTab.locator('#run').click();
+    await balanceTab.locator('#llm-balance').filter({hasText:'$19.88'}).waitFor();
+    available=false;
+    await balanceTab.locator('#connection').click();
+    await balanceTab.locator('#llm-balance').filter({hasText:'—'}).waitFor();
+    if(!/unavailable/.test(await balanceTab.locator('#llm-balance-note').textContent()))throw Error('Missing usage looks like a known balance');
+    available=true;settled=21000000;
+    await balanceTab.locator('#connection').click();
+    await balanceTab.locator('#llm-balance').filter({hasText:'$0.00'}).waitFor();
+    results.push({check:'live LLM balance after extraction and Agent, periodic reservation refresh, unavailable state and exhausted cap',state:'PASS'});
+  } finally {await balanceTab.close();}
   return results;
 }
