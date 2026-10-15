@@ -48,6 +48,12 @@ async (page) => {
     });
     await native.goto('http://localhost:8767/LLM-DEMO.html');
     await native.locator('#window-controls').waitFor({state:'visible'});
+    const controls = await native.evaluate(() => {
+      const group = document.querySelector('#window-controls').getBoundingClientRect();
+      const header = document.querySelector('.topbar').getBoundingClientRect();
+      return {top:group.top-header.top,right:header.right-group.right,buttons:[...document.querySelectorAll('#window-controls button')].map(button=>{const r=button.getBoundingClientRect();return {width:r.width,height:r.height,top:r.top};})};
+    });
+    if(controls.top!==12||controls.right!==12||controls.buttons.some(button=>button.width!==32||button.height!==32||button.top!==controls.buttons[0].top))throw Error('Desktop controls lack symmetric corner spacing: '+JSON.stringify(controls));
     for (const id of ['window-minimize','window-maximize','window-close']) await native.locator('#'+id).click();
     await native.locator('.topbar').dispatchEvent('mousedown',{button:0,detail:1});
     await native.locator('.topbar').dispatchEvent('mousedown',{button:0,detail:2});
