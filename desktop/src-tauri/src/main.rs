@@ -105,7 +105,11 @@ fn open_source(url: &Url) {
         && url.username().is_empty()
         && url.password().is_none()
     {
-        let _ = Command::new("/usr/bin/open").arg(url.as_str()).spawn();
+        if let Ok(mut child) = Command::new("/usr/bin/open").arg(url.as_str()).spawn() {
+            thread::spawn(move || {
+                let _ = child.wait();
+            });
+        }
     }
 }
 
