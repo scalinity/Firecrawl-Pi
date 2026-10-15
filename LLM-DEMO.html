@@ -13,6 +13,7 @@
 @media(max-width:1000px){.sidebar{width:185px}.brand{padding-left:20px}.app{margin-left:185px}.main{padding:32px 26px 24px}.topbar{padding:0 26px}.keyboard{display:none}.tool-tabs button{padding:9px 14px}.llm-fields{grid-template-columns:1fr}.llm-fields textarea{min-height:115px}.comparison{grid-template-columns:1fr}.comparison .document+.document{border-left:0;border-top:1px solid var(--line)}}
 @media(max-width:680px){.sidebar{display:none}.app{margin-left:0}.topbar{height:59px;padding:0 19px}.workspace-name{font-size:11px;gap:7px}.workspace-name .sub,.workspace-name .slash{display:none}.connection{font-size:10px;padding-right:0}.main{padding:30px 18px 22px}.intro{margin-bottom:23px}.intro h1{font-size:27px;letter-spacing:-1px}.intro p{font-size:11px;max-width:275px}.tool-tabs{width:100%;gap:2px;padding:4px;margin-bottom:14px}.tool-tabs button{padding:10px 0;justify-content:center;gap:7px;flex:1;font-size:11px}.tool-tabs svg{width:14px;height:14px}.input-area{padding:19px 17px}.target{font-size:15px}.field-label{font-size:9px}.options-row{padding:13px 15px;gap:10px}.llm-label{font-size:11px;gap:7px}.optional{display:none}.primary{font-size:11px;padding:10px 12px;gap:11px}.llm-fields{padding:17px 15px;gap:16px}.examples{gap:6px;margin-bottom:23px}.chip{font-size:9px;padding:7px 8px}.examples>span{width:100%;margin-bottom:3px}.result-bar{padding:0 13px;gap:8px}.result-tabs{gap:15px}.result-actions button{font-size:9px}.document{padding:18px 16px}.footer{font-size:9px}.history-list time{display:none}.job-controls input{flex-basis:100%}.output{max-height:560px}.result-meta{gap:12px}.limit-wrap{font-size:11px}.agent-task{font-size:15px;min-height:105px}.agent-fields{padding:17px 15px}.agent-options .agent-budget{flex-basis:100%}.agent-options .primary{margin-left:auto}.agent-options .limit-wrap{flex:1}.agent-section{padding:18px 16px}.agent-details summary{padding:14px 16px}.progress-head{padding:11px 12px}.progress-head span{display:block;margin-left:0;margin-top:3px}.agent-step{padding:11px 12px;grid-template-columns:16px minmax(0,1fr) auto;gap:7px}.step-state{max-width:70px}.tool-tabs button{gap:5px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.header-actions{display:flex;align-items:center;gap:15px}.window-controls{display:flex;gap:5px;padding-left:14px;border-left:1px solid var(--line)}.window-controls button{width:29px;height:28px;border:0;border-radius:5px;background:transparent;color:#999;font-size:19px;line-height:1}.window-controls button:hover{background:#282828;color:#fff}#window-close:hover{background:#9e3322}.desktop .topbar{user-select:none;-webkit-user-select:none}.desktop .workspace-name{pointer-events:none}
 </style>
 </head>
 <body>
@@ -40,7 +41,7 @@
 <div class="sidebar-bottom"><div class="budget"><div class="budget-top"><svg><use href="#i-chip"/></svg>LLM budget</div><strong>$20<small>/ month · approved limit</small></strong><p>Used by extraction and Agent.<br>Actual usage appears with each run.<br>Retrieval costs are separate.</p></div><p class="local-note"><span class="dot"></span>Local workspace · private Pi gateway</p></div>
 </aside>
 <div class="app">
-<header class="topbar"><div class="workspace-name"><span class="workspace-icon">Pi</span>Personal workspace<span class="slash">/</span><span class="sub">Playground</span></div><button class="connection" id="connection" title="Check the Pi gateway connection"><span class="dot"></span><span id="connection-label">Connecting to Pi…</span></button></header>
+<header class="topbar"><div class="workspace-name"><span class="workspace-icon">Pi</span>Personal workspace<span class="slash">/</span><span class="sub">Playground</span></div><div class="header-actions"><button class="connection" id="connection" title="Check the Pi gateway connection"><span class="dot"></span><span id="connection-label">Connecting to Pi…</span></button><div class="window-controls" id="window-controls" hidden><button type="button" id="window-minimize" aria-label="Minimize window" title="Minimize">−</button><button type="button" id="window-maximize" aria-label="Maximize or restore window" title="Maximize or restore">□</button><button type="button" id="window-close" aria-label="Close window" title="Close">×</button></div></div></header>
 <main class="main">
 <div class="intro"><div><p class="eyebrow">Firecrawl Pi / Live playground</p><h1>The web, through your Pi.</h1><p>Send a request. Inspect the response. Add a model when you need one.</p></div><span class="keyboard"><kbd>⌘ ↵</kbd>to run</span></div>
 <div class="tool-tabs" role="group" aria-label="Choose a tool">
@@ -80,6 +81,22 @@
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
+if (window.__TAURI__?.window) {
+  document.documentElement.classList.add('desktop');
+  $('window-controls').hidden=false;
+  const nativeWindow=window.__TAURI__.window.getCurrentWindow();
+  const windowAction=action=>action().catch(()=>activity('The window action could not finish. Use the application menu.','error'));
+  $('window-minimize').addEventListener('click',()=>windowAction(()=>nativeWindow.minimize()));
+  $('window-maximize').addEventListener('click',()=>windowAction(()=>nativeWindow.toggleMaximize()));
+  $('window-close').addEventListener('click',()=>windowAction(()=>nativeWindow.close()));
+  const header=document.querySelector('.topbar');
+  header.addEventListener('mousedown',event=>{
+    if(event.button!==0||event.target.closest('button,a,input,textarea,select'))return;
+    event.preventDefault();
+    if(event.detail===2)windowAction(()=>nativeWindow.toggleMaximize());
+    else windowAction(()=>nativeWindow.startDragging());
+  });
+}
 const sampleURL = 'https://www.python.org/downloads/release/python-3140/';
 const defaultSchema = {type:'object',properties:{title:{type:['string','null']},summary:{type:['string','null']},topics:{type:'array',items:{type:'string'}}},required:['title','summary','topics'],additionalProperties:false};
 const releaseSchema = {type:'object',properties:{version:{type:['string','null']},release_date:{type:['string','null']},release_stage:{type:['string','null']},superseded_by:{type:['string','null']},macos_installer_url:{type:['string','null']},windows_x64_installer_url:{type:['string','null']},security_support_end:{type:['string','null']}},required:['version','release_date','release_stage','superseded_by','macos_installer_url','windows_x64_installer_url','security_support_end'],additionalProperties:false};

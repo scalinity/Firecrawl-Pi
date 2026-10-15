@@ -1,5 +1,8 @@
 # Local playground
 
+The [Tauri desktop wrapper](../../desktop/README.md) opens the same playground in a
+native macOS window without a title bar and manages its own local server.
+
 From the repository root, run:
 
 ```sh

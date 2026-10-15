@@ -3,3 +3,5 @@ node_modules/
 .codex/
 .playwright-mcp/
 .env
+desktop/src-tauri/target/
+desktop/src-tauri/gen/

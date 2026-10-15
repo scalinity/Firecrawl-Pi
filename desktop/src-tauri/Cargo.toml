@@ -1,0 +1,12 @@
+[package]
+name = "firecrawl-pi"
+version = "0.1.0"
+description = "Local Firecrawl Pi playground"
+edition = "2021"
+
+[build-dependencies]
+tauri-build = "=2.7.3"
+
+[dependencies]
+tauri = "=2.12.4"
+serde_json = "=1.0.145"
