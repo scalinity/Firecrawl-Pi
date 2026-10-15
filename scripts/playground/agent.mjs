@@ -233,6 +233,13 @@ export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
       if (findings.length && text(decision.answer)) answer = text(decision.answer);
       if (input.schema && decision.result !== undefined) result = decision.result;
       if (stopForSignal()) break;
+      const failedUnit = response.fcpi?.extraction?.units?.find(unit => unit.ok === false);
+      if (failedUnit) {
+        const failure = failedUnit.failure?.class;
+        stop(typeof failure === 'string' && /^[A-Z0-9_]{1,80}$/.test(failure) ? failure : 'EXTRACTION_PARTIAL',
+          'Page extraction did not finish; no further requests were sent.');
+        break;
+      }
       if (decision.next_action === 'finish') {
         completed = decision.complete === true && findings.length > 0 && Boolean(answer) && !extractionPartial && (!input.schema || object(result) && missingRequired(result, input.schema).length === 0);
         if (!completed) addLimitation('The model stopped before a complete answer with verified evidence was available.');

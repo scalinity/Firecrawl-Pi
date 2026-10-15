@@ -14,6 +14,22 @@ const page = (url, { json = decision(url), markdown = '# Measurement\nThe measur
     fcpi: { extraction: { model: 'gpt-6.1-sol', reasoningEffort: 'xhigh', usage: { ...usage }, ...extraction } } },
 });
 const searchResults = (...urls) => ({ status: 200, data: { success: true, data: { web: urls.map(url => ({ url, title: 'Search result' })) } } });
+
+test('a successful earlier extraction unit cannot dispatch again after a later unit fails', async () => {
+  for (const failure of ['BUDGET_EXHAUSTED', 'PROVIDER_RATE_LIMITED', 'PROVIDER_UNCERTAIN']) {
+    const f = fixture([page(first, { links: [second],
+      json: decision(first, { complete: false, next_action: 'visit', next_url: second }),
+      extraction: { units: [{ ok: true }, { ok: false, failure: { class: failure } }] }
+    })]);
+    const output = await runAgent({ prompt: 'Find the measurement', urls: [first], maxPages: 2 }, f);
+    assert.equal(f.calls.length, 1);
+    assert.equal(output.status, 'partial');
+    assert.equal(output.code, failure);
+    assert.equal(output.documents.length, 1);
+    assert.equal(output.findings.length, 1);
+    assert.equal(output.usage.costMicroUsd, usage.costMicroUsd);
+  }
+});
 function fixture(responses) {
   const calls = [];
   return { calls, forward: async (request, signal) => {
