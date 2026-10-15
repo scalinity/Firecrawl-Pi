@@ -1,0 +1,38 @@
+{
+  "before": "evidence/post-m9/retrieval-quality/snapshot-after.txt",
+  "after": "evidence/playground/snapshot-before.txt",
+  "removed": [
+    "docker_ps\t7952b1a5d9891a094c5cbb1c0e51c4012b43a96e3f810ae33f8d1de4a7a8d6de\tfcpi-retrieval-service-1\tfcpi/retrieval@sha256:a9e6502a0af7db4e689fd08decca3b0328cae58994881994fd71a17a42237854\trunning",
+    "findmnt\t/run/docker/netns/07155a15af9a nsfs[net:[4026533421]] nsfs rw",
+    "findmnt\t/run/docker/netns/32ff511f43a7 nsfs[net:[4026532854]] nsfs rw",
+    "findmnt\t/run/docker/netns/50dd48587ca4 nsfs[net:[4026532773]] nsfs rw",
+    "findmnt\t/run/docker/netns/556b0121602c nsfs[net:[4026533097]] nsfs rw",
+    "findmnt\t/run/docker/netns/5a0121cbe13c nsfs[net:[4026533016]] nsfs rw",
+    "findmnt\t/run/docker/netns/6d53bcbbd50c nsfs[net:[4026533178]] nsfs rw",
+    "findmnt\t/run/docker/netns/885cb87b9645 nsfs[net:[4026533595]] nsfs rw",
+    "findmnt\t/run/docker/netns/aa3ba0529197 nsfs[net:[4026532608]] nsfs rw",
+    "findmnt\t/run/docker/netns/f8010dee767d nsfs[net:[4026533680]] nsfs rw",
+    "findmnt\t/var/lib/docker/rootfs/overlayfs/7952b1a5d9891a094c5cbb1c0e51c4012b43a96e3f810ae33f8d1de4a7a8d6de overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4484/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4452/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4451/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1820/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/288/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4485/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4485/work",
+    "firewall\tnft_ruleset_sha256=e1e3a82a1d4d6b6d3958b6a180f2b330e59339f266488678d66e6e2b80189a85",
+    "ss_listen\ttcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=575369,fd=8))",
+    "ss_listen\tudp 0.0.0.0:41641 users:((\"tailscaled\",pid=1153,fd=22))",
+    "systemd_running\tdocker-7952b1a5d9891a094c5cbb1c0e51c4012b43a96e3f810ae33f8d1de4a7a8d6de.scope"
+  ],
+  "added": [
+    "docker_ps\t7f8152248941bec643ec3ad7443887caefed79e1387e2cecf9937b3858cf7b7c\tfcpi-retrieval-service-1\tfcpi/retrieval@sha256:a9e6502a0af7db4e689fd08decca3b0328cae58994881994fd71a17a42237854\trunning",
+    "findmnt\t/run/docker/netns/053d7a3e63c7 nsfs[net:[4026533680]] nsfs rw",
+    "findmnt\t/run/docker/netns/4c68a7649c48 nsfs[net:[4026532771]] nsfs rw",
+    "findmnt\t/run/docker/netns/6a0dfd95830d nsfs[net:[4026532852]] nsfs rw",
+    "findmnt\t/run/docker/netns/8033ded1fedc nsfs[net:[4026533421]] nsfs rw",
+    "findmnt\t/run/docker/netns/955fe6c0e6c2 nsfs[net:[4026532608]] nsfs rw",
+    "findmnt\t/run/docker/netns/b3e7174d75e4 nsfs[net:[4026533595]] nsfs rw",
+    "findmnt\t/run/docker/netns/b8ac4fe7bd78 nsfs[net:[4026533014]] nsfs rw",
+    "findmnt\t/run/docker/netns/f440919859a7 nsfs[net:[4026533095]] nsfs rw",
+    "findmnt\t/run/docker/netns/f8e06d3ae947 nsfs[net:[4026533176]] nsfs rw",
+    "findmnt\t/var/lib/docker/rootfs/overlayfs/7f8152248941bec643ec3ad7443887caefed79e1387e2cecf9937b3858cf7b7c overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4516/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4452/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4451/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1820/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/288/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4517/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4517/work",
+    "firewall\tnft_ruleset_sha256=86344c110bc1bfc51dc465eb32392fdf033778a8df7757aefcd1b42207892844",
+    "ss_listen\ttcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=3704077,fd=8))",
+    "ss_listen\tudp 0.0.0.0:41641 users:((\"tailscaled\",pid=1153,fd=13))",
+    "systemd_running\tdocker-7f8152248941bec643ec3ad7443887caefed79e1387e2cecf9937b3858cf7b7c.scope"
+  ]
+}

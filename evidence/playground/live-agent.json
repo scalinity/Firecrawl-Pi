@@ -1,0 +1,53 @@
+{
+  "utc": "2026-10-15T18:39:58.381371+00:00",
+  "state": "FAIL",
+  "evidence_id": "ev_9dd808bb112767b8a846f3d5bd003d2415cd361fc6003fe6c7dd3fc1180e0d0b",
+  "receipt_sha256": "12b89fbe309c9cbf59009e50d55a991ae02a797ea2b7a38e62a2da1280c9be9c",
+  "status": "partial",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "xhigh",
+  "usage": {
+    "calls": 1,
+    "reused": 0,
+    "promptTokens": 4473,
+    "completionTokens": 434,
+    "costMicroUsd": 13286,
+    "cachedTokens": 0,
+    "cacheWriteTokens": 0
+  },
+  "elapsedMs": 12463,
+  "answer": "Python 3.14.0 was released on October 7, 2025. It is a stable release.",
+  "findings_count": 2,
+  "sources": [
+    {
+      "url": "https://www.python.org/downloads/release/python-3140/",
+      "title": "Python Release Python 3.14.0 | Python.org"
+    }
+  ],
+  "steps": [
+    {
+      "id": "step-1",
+      "index": 1,
+      "tool": "scrape",
+      "input": "https://www.python.org/downloads/release/python-3140/",
+      "state": "done",
+      "httpStatus": 200,
+      "elapsedMs": 12457,
+      "costMicroUsd": 13286
+    }
+  ],
+  "limitations": [
+    "$.next_url: required, but no document held a value for it; $.next_query: required, but no document held a value for it",
+    "The model stopped before a complete answer with verified evidence was available."
+  ],
+  "documents": [
+    {
+      "url": "https://www.python.org/downloads/release/python-3140/",
+      "markdown_sha256": "c10d4716645d494280557e15e15f62a93c37d37f92d5641a4f6a82bd5b3351ab",
+      "markdown_chars": 12664
+    }
+  ],
+  "browser_capture_limitations": [
+    "All scenario actions completed. The event capture reports incomplete because a selected GET request body was not exposed. The Agent request and response bodies were captured; no claim of complete network causality."
+  ]
+}

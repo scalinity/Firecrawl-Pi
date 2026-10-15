@@ -1,0 +1,76 @@
+{
+  "schema": "fcpi.playground-verification/v1",
+  "utc": "2026-10-15T18:42:57.615773+00:00",
+  "source_commit": "8b7d7c448d0aef923b1c0c0cb526c8bc848ef2b9",
+  "code_dirty": false,
+  "image_source_commit": "4bcb097126f8ae8ada4d39bee7564395d142fcec",
+  "pi_deployment_commit": "21ac35e0a2f2479bf7d95a9284c66def92dd77e2",
+  "checks": [
+    {
+      "id": "web-agent-access",
+      "state": "PASS",
+      "tests": 61,
+      "exit_code": 0,
+      "command": "node --test tests/playground.test.mjs tests/playground-agent.test.mjs services/access/test/validate.test.mjs services/access/test/jsonscrape.test.mjs services/access/test/extractor.test.mjs",
+      "evidence": "raw/web-tests.txt"
+    },
+    {
+      "id": "runtime-budget-extraction",
+      "state": "PASS",
+      "tests": 39,
+      "exit_code": 0,
+      "command": "node --test --test-timeout=120000 test/m5-budget.test.mjs test/m5-extract.test.mjs (isolated retrieval layout; policy and fixtures linked as the production test runners expect)",
+      "evidence": "raw/runtime-tests.txt"
+    },
+    {
+      "id": "live-browser-agent",
+      "state": "PASS",
+      "evidence": "live-agent-rerun.json",
+      "prior_failed_receipt": "live-agent.json",
+      "cost_micro_usd": 13306,
+      "configured_reasoning_effort": "xhigh",
+      "resolved_model": "gpt-6.1-sol"
+    },
+    {
+      "id": "native-arm64-images",
+      "state": "PASS",
+      "exit_code": 0,
+      "evidence": "raw/image-build.txt"
+    },
+    {
+      "id": "deployment-health",
+      "state": "PASS",
+      "exit_code": 0,
+      "evidence": "raw/deployment.txt",
+      "unrelated_container_identities_unchanged": 13
+    },
+    {
+      "id": "host-snapshot",
+      "state": "FAIL",
+      "evidence": "snapshot-after-diff.json",
+      "limitation": "Whole ruleset digest changed on project container recreation and returned to the previous accepted AFTER digest; the earlier entry drift is not historically explained. Tables, chains, forwarding, unrelated service state, and listener addresses/ports are unchanged.",
+      "reason": "The whole-ruleset hash change is not exactly attributed; it returned to the prior accepted snapshot digest after the two authorized container recreations. No claim of a fully explained host comparison."
+    },
+    {
+      "id": "hosted-agent-backend-parity",
+      "state": "NOT_RUN",
+      "reason": "Private Spark 2 implementation is not present in downloaded client artifacts; no hosted Agent task submitted."
+    }
+  ],
+  "browser_qa": {
+    "agent_desktop": "ev_0fcad50b9926183e7e33bd2d55d4df02b5c8ab285d1216fe1203707dafb4c2a3",
+    "agent_390px": "ev_c42eaa168e1896c3fe312730f874848309f2fbcf5b486ddfab9d8c50f1513f1f",
+    "overview_light_390px": "ev_880b93381d86f6aa542ee55f95823ce4a9f6c61ec8134b4e6fd569e234947903",
+    "overview_light_desktop": "ev_196f95dbaefdb2c117d6cf6fe2b84dbafd7b6db77aede4559aea3a2e6188e9d0",
+    "overview_dark_390px": "ev_1e63f2c5c7a8eaddbad07aa0f68442028025784b6e591e8493e0951883d37e33",
+    "overview_dark_desktop": "ev_aa7daddb6d44a76d28cd964488c4d9df48a6d98b02a7b20c5c8f7f5bf6fee070",
+    "page_errors": 0
+  },
+  "inputs": {
+    "deploy/policies/budget.json": "be15e926e841cce0e1f49bc6530085a2af28f0058501edd2ea8e9fdd2b4a28d1",
+    "deploy/policies/capabilities.json": "66c52e32ad326138e998bf7633d7af7fdc4816c94c7ee631f8fc980b664787a3",
+    "patches/series.json": "e2a8f11e506927a50f1e1de14ef25a5fe2a88bc39b5d8ed5bbee4245fec74d96",
+    "scripts/playground/agent.mjs": "4ba1f4636a18d9856aeae040d9592d46e58f2bf373c27885b86ede23b9084f6e",
+    "LLM-DEMO.html": "04dc8858ecdd5da7310c956794ce1f302465572a35f868407791909281d91d70"
+  }
+}

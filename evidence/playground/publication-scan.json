@@ -1,0 +1,12 @@
+{
+  "schema": "fcpi.hosted-redaction/v1",
+  "utc": "2026-10-15T18:45:08.884Z",
+  "source_commit": "8b7d7c448d0aef923b1c0c0cb526c8bc848ef2b9",
+  "positive_controls": 4,
+  "live_secret_hashes": 52,
+  "real_secret_hits": [],
+  "unclassified_hits": [],
+  "state": "PASS",
+  "scope": "Working tree with outgoing changed-file endpoint checks; full historical scan was not rerun for this incremental push.",
+  "new_hit_classification": "URL userinfo in Agent/bridge rejection fixtures is synthetic test data; exact value hashes were classified outside Git before publication."
+}

@@ -1,0 +1,47 @@
+✔ an absolute validation lease expires even with the paid switch still on and after a month rollover (PRE-M9 C1) (1.882ms)
+✔ the deployed budget policy loads: approved proxy and monthly LLM caps, other paid caps zero, paid defaults and unpaid fixtures (0.741583ms)
+✔ the budget policy refuses what would open a gap (0.790208ms)
+✔ rate cards apply by effective date; a card that has ended is none (0.157875ms)
+✔ costs round up; the reservation bounds any byte-level tokenizer's count (0.214458ms)
+✔ Luna prices cache writes separately and reserves at the highest input rate (0.291791ms)
+✔ Sol reasoning and output limits are model policy while the default extraction keeps Luna's limits (0.348875ms)
+✔ the breaker opens after its failures, admits one probe, and closes on its success (0.107417ms)
+✔ strict schemas: every property required and nullable (a chunk may lack a value); required ones judged on the merge (0.48825ms)
+✔ inherited names are not schema properties, and __proto__ is refused as a name (review S3) (0.151ms)
+✔ the egress policy's search section and the host selection are validated (1.152958ms)
+✔ a model lease expiring while waiting for its slot sends nothing and releases its reservation (PRE-M9 C1) (8.497542ms)
+✔ malformed HTTP 200 model answers settle conservatively and exhaust only the one repair (PRE-M9 W1) (7.114875ms)
+✔ Luna request parameters and cache-write usage stay inside the reservation (1.181375ms)
+✔ xhigh extraction uses the selected policy, omits temperature, and reserves its larger output allowance (1.017042ms)
+✔ a mismatched requested reasoning effort is refused before any provider request or reservation (0.487542ms)
+✔ a provider returning another model is accounted but never accepted or repaired (6.391209ms)
+✔ Sol extraction cannot claim its requested identity when the provider omits the model (1.444792ms)
+✔ missing provider token usage remains unknown while conservative settlement stays visible (1.538209ms)
+✔ disconnect after a settled invalid answer sends no repair and retains its accounting (1.076625ms)
+✔ disconnect after a settled first chunk sends no later model calls (4.813167ms)
+✔ a repair denied before dispatch preserves the already-settled first call's usage (0.986ms)
+✔ settled model calls cannot be reused after reasoning or output policy changes (1.403709ms)
+✔ a model-specific request timeout extends only that model's provider wait (1202.463709ms)
+✔ a schema-valid extraction settles from the provider's usage, keeps nulls and names its source (1.173625ms)
+✔ an invalid answer gets exactly one repair, in the same logical budget (1.612042ms)
+✔ refusals before any spend: unknown model, stale rate card, paid dispatch off, missing credential, zero cap (1.286209ms)
+✔ provider refusals are classified: a refused request is released, an answered one settled (6.038583ms)
+✔ three provider failures open the breaker: the next call is refused without a request (1.507208ms)
+✔ a logical unit retried under a different input cap is refused rather than merged from other chunks (review S11) (1.002542ms)
+✔ no request is started with less than a second of the deadline left, and the gate refuses a passed deadline (review W14) (0.346542ms)
+✔ a unit retried while its call is still in flight is EXTRACTION_IN_FLIGHT, retryable, then reuses the answer (review W13) (3001.946041ms)
+✔ a reuse-only extraction returns stored answers and sends nothing new (review S12) (2.201542ms)
+✔ a rate limit stops the extraction's later units: the provider is asked once (review S8) (1.620625ms)
+✔ a half-open probe that ends without a verdict hands the probe back (review W10) (1105.629833ms)
+✔ an unanswered call stays reserved and is never sent again; a settled one is reused without a charge (1506.139917ms)
+✔ long documents are chunked under the input cap and merged with each part's provenance; conflicts are reported (736.63175ms)
+✔ a required value that no document holds stays null and is named, not invented (0.871833ms)
+✔ schemas beyond the supported subset are refused before any request (0.632459ms)
+ℹ tests 39
+ℹ suites 0
+ℹ pass 39
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95470.072417

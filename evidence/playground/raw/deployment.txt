@@ -1,0 +1,33 @@
+utc=2026-10-15T18:38:06Z
+source_commit=21ac35e0a2f2479bf7d95a9284c66def92dd77e2
+fcpi-data-check: OK uuid=15f4c6be-1102-4331-9904-f78e78afd1fd data_id=match binds=35 create_host_path=false
+ Container fcpi-access-gateway-1 Recreate
+ Container fcpi-retrieval-service-1 Recreate
+ Container fcpi-access-gateway-1 Recreated
+ Container fcpi-retrieval-service-1 Recreated
+ Container fcpi-retrieval-service-1 Starting
+ Container fcpi-access-gateway-1 Starting
+ Container fcpi-retrieval-service-1 Started
+ Container fcpi-access-gateway-1 Started
+ Container fcpi-access-gateway-1 Waiting
+ Container fcpi-retrieval-service-1 Waiting
+ Container fcpi-retrieval-service-1 Healthy
+ Container fcpi-access-gateway-1 Healthy
+fcpi-access-gateway-1 Up 5 seconds (healthy)
+fcpi-browser-worker-1 Up 11 hours (healthy)
+fcpi-firecrawl-core-1 Up 11 hours (healthy)
+fcpi-fixture-1 Up 9 days (healthy)
+fcpi-fixture-m2-1 Up 9 days (healthy)
+fcpi-fixture-m3-1 Up 9 days (healthy)
+fcpi-fixture-m5-1 Up 9 days (healthy)
+fcpi-fixture-m6-1 Up 9 days (healthy)
+fcpi-fixture-m7-1 Up 9 days (healthy)
+fcpi-mcp-gateway-1 Up 11 hours (healthy)
+fcpi-nuq-postgres-1 Up 11 hours (healthy)
+fcpi-rabbitmq-1 Up 11 hours (healthy)
+fcpi-redis-1 Up 11 hours (healthy)
+fcpi-retrieval-service-1 Up 6 seconds (healthy)
+fcpi-searxng-1 Up 11 hours (healthy)
+/fcpi-retrieval-service-1 image=sha256:e2a96b88f140aceeede30616b2c5eecf8b1f97be3dd724ffd577cdf50de1d260 health=healthy
+/fcpi-access-gateway-1 image=sha256:e7f6edf3455d83bd8008fd7f5cd83230ce8ee002eff69949123da4f9c1c77678 health=healthy
+transient_containers=0

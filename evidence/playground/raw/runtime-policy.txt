@@ -1,0 +1,5 @@
+utc=2026-10-15T18:39:07Z
+source_commit=21ac35e0a2f2479bf7d95a9284c66def92dd77e2
+/fcpi-retrieval-service-1 image=sha256:e2a96b88f140aceeede30616b2c5eecf8b1f97be3dd724ffd577cdf50de1d260 FCPI_SOURCE_COMMIT=4bcb097126f8ae8ada4d39bee7564395d142fcec
+/fcpi-access-gateway-1 image=sha256:e7f6edf3455d83bd8008fd7f5cd83230ce8ee002eff69949123da4f9c1c77678 FCPI_SOURCE_COMMIT=4bcb097126f8ae8ada4d39bee7564395d142fcec
+{"budget_sha256": "be15e926e841cce0e1f49bc6530085a2af28f0058501edd2ea8e9fdd2b4a28d1", "caps": {"llm": {"month": 20000000}, "proxy": {"day": 1000000, "month": 2000000}, "shared": {"day": 1000000}, "parser": {"month": 0}, "enhanced": {"day": 0, "month": 0}}, "agent_model": {"provider": "openai", "category": "llm", "reasoningEffort": "xhigh", "maxOutputTokens": 16000, "requestTimeoutMs": 90000}, "ordinary_extraction_model": "gpt-6-luna"}

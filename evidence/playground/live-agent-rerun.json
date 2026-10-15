@@ -1,0 +1,49 @@
+{
+  "utc": "2026-10-15T18:41:42.667564+00:00",
+  "state": "PASS",
+  "evidence_id": "ev_698adb2a7d6d135edd626dde7cd74a1c01f20d51b9235be348e9d16734e349de",
+  "receipt_sha256": "11f55fe3b02e1656b316ed9f14fce5c4c4e8987bfd4afbd7c47924f0a0e89cf3",
+  "status": "completed",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "xhigh",
+  "effort_confirmation": "configured and sent; provider response confirms model identity, not reasoning effort",
+  "usage": {
+    "calls": 1,
+    "reused": 0,
+    "promptTokens": 4473,
+    "completionTokens": 436,
+    "costMicroUsd": 13306,
+    "cachedTokens": 0,
+    "cacheWriteTokens": 0
+  },
+  "elapsedMs": 8961,
+  "answer": "Python 3.14.0 was released on October 7, 2025. It is a stable release.",
+  "findings_count": 2,
+  "sources": [
+    {
+      "url": "https://www.python.org/downloads/release/python-3140/",
+      "title": "Python Release Python 3.14.0 | Python.org"
+    }
+  ],
+  "steps": [
+    {
+      "id": "step-1",
+      "index": 1,
+      "tool": "scrape",
+      "input": "https://www.python.org/downloads/release/python-3140/",
+      "state": "done",
+      "httpStatus": 200,
+      "elapsedMs": 8957,
+      "costMicroUsd": 13306
+    }
+  ],
+  "limitations": [],
+  "documents": [
+    {
+      "url": "https://www.python.org/downloads/release/python-3140/",
+      "markdown_sha256": "c10d4716645d494280557e15e15f62a93c37d37f92d5641a4f6a82bd5b3351ab",
+      "markdown_chars": 12664
+    }
+  ],
+  "quotes_verified": true
+}
