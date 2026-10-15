@@ -25,15 +25,45 @@ Search returns web results; Map discovers links; Crawl submits a durable job wit
 Job IDs can be pasted into the crawl controls after reloading. An uncertain crawl
 submission reuses its idempotency key when retried in the same tab.
 
+Agent takes a task of up to 1,200 characters, up to three optional starting URLs,
+and a 1–5 page limit (default three). Its optional Result schema editor accepts a
+JSON object schema; leave it blank for the ordinary answer, findings, and sources.
+When supplied, the structured result appears alongside those in the response.
+It requests GPT-6.1-Sol with xhigh reasoning through the existing budgeted extraction
+path. The response reports the provider's model identity, available usage, and
+accounted cost. Missing token counts remain unknown; a conservative reservation cost
+is identified in response warnings. The xhigh effort is configured and sent with each
+model request; provider responses do not confirm that setting.
+An unavailable model or unsupported setting fails explicitly, without a model fallback.
+The model can direct follow-up searches and reads within five page dispatches, three
+searches, eight tool calls, and 360 seconds. A page extraction can use more than one
+model call for chunking or repair; actual model calls, tokens, and cost are reported
+rather than inferred from page count. Budget denials and errors stop further work.
+
+The Agent activity list streams actual search and scrape events. Its final response
+includes an answer, source URLs, quoted findings, limitations, and a tool trace.
+Source documents and raw JSON remain inspectable in the response. This is a local,
+session-bound workflow, not a durable Agent job or a claim of Firecrawl Cloud Agent
+API parity. Stop agent, closing the page, or losing its connection stops future
+steps; already dispatched calls may finish and consume budget. There is no hidden
+background run and no automatic retry. A stopped or interrupted session retains
+the step summaries received by the browser and labels incomplete results honestly.
+
 Examples only fill the composer. Only Run submits work. Opening the page makes a
-read-only gateway health check. LLM extraction starts off and uses the existing
-approved policy when enabled; normal retrieval can still use separately budgeted
-proxy routing. No budget or provider setting is changed by the playground.
+read-only gateway health check. Scrape's LLM extraction starts off; Agent always uses
+a model. Both use the existing approved policy, and normal retrieval can still use
+separately budgeted proxy routing. No budget or provider setting is changed by
+opening or using the playground.
 
-Responses and recent requests are held in tab memory, not saved automatically.
-Save JSON downloads the current response to a local file. Scraped content is displayed
-as text, never executed as HTML. Closing the tab does not cancel a durable crawl;
-use its job ID to check or cancel it. A lost synchronous response may still have
-consumed retrieval/model budget: the playground never automatically retries it.
+Responses, source documents, and recent requests are held in tab memory, not saved
+automatically. Save JSON explicitly downloads the current response to a local file.
+Scraped content and model output are displayed as text, never executed as HTML.
+Closing the tab does not cancel a durable crawl; use its job ID to check or cancel it.
+A lost synchronous response may still have consumed retrieval/model budget: the
+playground never automatically retries it.
 
-Run the local bridge checks with `node --test tests/playground.test.mjs`.
+Run the local bridge and Agent checks with:
+
+```sh
+node --test tests/playground.test.mjs tests/playground-agent.test.mjs
+```

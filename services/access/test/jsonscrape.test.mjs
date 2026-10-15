@@ -40,7 +40,74 @@ test("an extracted page: its json, markdown only when asked, the logical id, and
   assert.deepEqual(r.calls.core[0].formats, ["markdown"]);
   const { body, timeoutMs } = r.calls.extract[0];
   assert.equal(body.logicalId, "scrape:req-1");
+  assert.equal(Object.hasOwn(body, "model"), false, "ordinary extraction keeps the adapter's configured default model");
+  assert.equal(Object.hasOwn(body, "reasoningEffort"), false, "ordinary extraction does not enable reasoning implicitly");
   assert.equal(timeoutMs - (Date.parse(body.deadline) - t0) >= 4900, true, "the gateway waits five seconds past the deadline it sends");
+});
+
+test("explicit Sol/xhigh reaches only the budgeted extractor and returns its measured identity, effort and usage", async () => {
+  const usage = { calls: 1, promptTokens: 32, completionTokens: 8, costMicroUsd: 17 };
+  const r = rig({ extract: () => answer({ model: "gpt-6.1-sol", reasoningEffort: "xhigh", usage }) });
+  const json = { ...BODY.formats[0], prompt: "Read the price", model: "gpt-6.1-sol", reasoningEffort: "xhigh" };
+  const out = await r.go({ ...BODY, formats: ["markdown", json] });
+  assert.equal(out.status, 200);
+  assert.equal(r.calls.core.length, 1);
+  assert.equal(r.calls.extract.length, 1);
+  assert.deepEqual(r.calls.core[0].formats, ["markdown"], "the upstream native model path receives no JSON format or model options");
+  assert.equal(r.calls.core[0].model, undefined);
+  assert.equal(r.calls.core[0].reasoningEffort, undefined);
+  const request = r.calls.extract[0].body;
+  assert.equal(request.model, "gpt-6.1-sol");
+  assert.equal(request.reasoningEffort, "xhigh");
+  assert.equal(request.prompt, "Read the price");
+  assert.deepEqual(request.schema, SCHEMA);
+  assert.deepEqual(request.documents, [{ url: BODY.url, markdown: "Price: 1" }]);
+  assert.equal(out.body.fcpi.extraction.model, "gpt-6.1-sol");
+  assert.equal(out.body.fcpi.extraction.reasoningEffort, "xhigh");
+  assert.deepEqual(out.body.fcpi.extraction.usage, usage);
+});
+
+test("JSON extraction metadata reports the adapter's actual model and effort rather than echoing requested values", async () => {
+  const r = rig({ extract: () => answer({ model: "reported-model", reasoningEffort: null }) });
+  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "gpt-6.1-sol", reasoningEffort: "xhigh" }] });
+  assert.equal(out.body.fcpi.extraction.model, "reported-model");
+  assert.equal(out.body.fcpi.extraction.reasoningEffort, null);
+});
+
+test("a denied repair preserves the initial paid call's actual model, effort and settled usage on failure", async () => {
+  const usage = { calls: 1, reused: 0, promptTokens: 80, completionTokens: 24, cachedTokens: 0, cacheWriteTokens: 0, costMicroUsd: 31 };
+  const units = [{ url: BODY.url, part: 1, ok: false, failure: { class: "BUDGET_EXHAUSTED" } }];
+  const r = rig({ extract: () => ({ status: 402, json: { ok: false, model: "gpt-6.1-sol", requestedModel: "gpt-6.1-sol",
+    reasoningEffort: "xhigh", usage, units, failure: { class: "BUDGET_EXHAUSTED", detail: "repair reservation denied" } } }) });
+  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "gpt-6.1-sol", reasoningEffort: "xhigh" }] });
+  assert.equal(out.status, 402);
+  assert.equal(out.body.success, false);
+  assert.equal(out.body.code, "BUDGET_EXHAUSTED");
+  assert.equal(out.body.fcpi.extraction.model, "gpt-6.1-sol");
+  assert.equal(out.body.fcpi.extraction.reasoningEffort, "xhigh");
+  assert.deepEqual(out.body.fcpi.extraction.usage, usage);
+  assert.deepEqual(out.body.fcpi.extraction.units, units);
+});
+
+test("an acquisition that exhausts the request deadline cannot start fresh extraction", async t => {
+  let now = Date.now();
+  t.mock.method(Date, "now", () => now);
+  const r = rig({ core: () => { now += 30001; return page(); }, extract: () => answer() });
+  const out = await r.go();
+  assert.equal(out.status, 504);
+  assert.equal(out.body.code, "REQUEST_TIMEOUT");
+  assert.equal(r.calls.core.length, 1);
+  assert.equal(r.calls.extract.length, 0);
+});
+
+test("an unsuccessful extraction without a typed failure stays failed and retains unknown metadata", async () => {
+  const out = await rig({ extract: () => ({ status: 200, json: { ok: false } }) }).go();
+  assert.equal(out.status, 500);
+  assert.equal(out.body.success, false);
+  assert.equal(out.body.code, "EXTRACTION_FAILED");
+  assert.equal(out.body.fcpi.extraction.usage, null);
+  assert.equal(out.body.fcpi.extraction.model, null);
+  assert.equal(out.body.fcpi.extraction.reasoningEffort, null);
 });
 
 test("a part of the page no answer came for is named in a warning and the units are returned (review S9)", async () => {

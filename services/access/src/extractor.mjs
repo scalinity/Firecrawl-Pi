@@ -13,27 +13,43 @@ export class ExtractorError extends Error {
 
 export function makeExtractor({ url, token }) {
   const base = new URL(url);
-  function call(method, path, body, timeoutMs) {
+  function call(method, path, body, timeoutMs, signal) {
     return new Promise((resolve, reject) => {
+      if (signal?.aborted) return reject(new ExtractorError("the call was cancelled", { code: "CANCELLED", delivered: false }));
       const data = body === undefined ? null : Buffer.from(JSON.stringify(body));
       let connected = false, settled = false;
-      const done = (fn, v) => { if (!settled) { settled = true; fn(v); } };
+      const done = (fn, v) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        signal?.removeEventListener("abort", abort);
+        fn(v);
+      };
+      const stop = (code, message) => {
+        done(reject, new ExtractorError(message, { code, delivered: connected }));
+        req.destroy();
+      };
+      const abort = () => stop("CANCELLED", "the call was cancelled");
       const req = request({ host: base.hostname, port: Number(base.port || 80), method, path, agent: false, timeout: timeoutMs,
         headers: { authorization: `Bearer ${token}`, accept: "application/json", ...(data ? { "content-type": "application/json", "content-length": data.length } : {}) } }, (res) => {
         const chunks = [];
         let n = 0;
-        res.on("data", (c) => { n += c.length; if (n > 8 * 1048576) { res.destroy(); done(reject, new ExtractorError("answer exceeds 8 MiB", { code: "TOO_LARGE", delivered: true })); } else chunks.push(c); });
+        res.on("data", (c) => { n += c.length; if (n > 8 * 1048576) { done(reject, new ExtractorError("answer exceeds 8 MiB", { code: "TOO_LARGE", delivered: true })); res.destroy(); } else chunks.push(c); });
         res.on("end", () => { let json = null; try { json = JSON.parse(Buffer.concat(chunks).toString("utf8")); } catch { /* not JSON */ } done(resolve, { status: res.statusCode, json }); });
         res.on("error", () => done(reject, new ExtractorError("answer cut off", { code: "RESET", delivered: true })));
+        res.on("aborted", () => done(reject, new ExtractorError("answer cut off", { code: "RESET", delivered: true })));
       });
+      const timer = setTimeout(() => stop("TIMEOUT", "timeout"), timeoutMs);
       req.on("socket", (s) => { if (!s.connecting) connected = true; else s.once("connect", () => { connected = true; }); });
-      req.on("timeout", () => req.destroy(new ExtractorError("timeout", { code: "TIMEOUT", delivered: connected })));
+      req.on("timeout", () => stop("TIMEOUT", "timeout"));
       req.on("error", (e) => done(reject, e instanceof ExtractorError ? e : new ExtractorError(e.message, { code: e.code ?? "ERROR", delivered: connected })));
-      req.end(data ?? undefined);
+      signal?.addEventListener("abort", abort, { once: true });
+      if (signal?.aborted) abort();
+      if (!req.destroyed) req.end(data ?? undefined);
     });
   }
   return {
-    extract: (body, timeoutMs) => call("POST", "/internal/extract", body, timeoutMs),
+    extract: (body, timeoutMs, signal) => call("POST", "/internal/extract", body, timeoutMs, signal),
     providers: () => call("GET", "/internal/providers", undefined, 5000),
     // M6: the residential route's availability, and a bulk job's route hold on its domains (src/routing.mjs).
     routes: () => call("GET", "/internal/routes", undefined, 5000),

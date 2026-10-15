@@ -21,10 +21,10 @@ test("an absolute validation lease expires even with the paid switch still on an
 
 test("the deployed budget policy loads: approved proxy and monthly LLM caps, other paid caps zero, paid defaults and unpaid fixtures", () => {
   const b = loadBudgetPolicy(RAW);
-  // Approved allowances: proxy $0.50/day and $2/month; LLM $0.50/day and $5/month, sharing $0.50/day total.
-  assert.deepEqual(b.categories.proxy.caps, { day: 500000, month: 2000000 });
-  assert.deepEqual(b.categories.llm.caps, { day: 500000, month: 5000000 });
-  assert.equal(b.paidTotal.caps.day, 500000);
+  // Proxy $1/day and $2/month; LLM $20/month; paid work shares the $1/day cap.
+  assert.deepEqual(b.categories.proxy.caps, { day: 1000000, month: 2000000 });
+  assert.deepEqual(b.categories.llm.caps, { month: 20000000 });
+  assert.equal(b.paidTotal.caps.day, 1000000);
   for (const [name, c] of Object.entries(b.categories).filter(([n, c]) => c.paid && !["proxy", "llm"].includes(n))) for (const v of Object.values(c.caps)) assert.equal(v, 0, name);
   assert.equal(b.providers[b.models[b.extraction.defaultModel].provider].paid, true);
   assert.equal(b.providers[b.parsers[b.parsing.defaultParser].provider].paid, true);
@@ -68,12 +68,29 @@ test("costs round up; the reservation bounds any byte-level tokenizer's count", 
 
 test("Luna prices cache writes separately and reserves at the highest input rate", () => {
   const b = loadBudgetPolicy(RAW), card = rateCardFor(b, "gpt-6-luna", new Date("2026-10-02T12:00:00Z"));
-  assert.deepEqual(Object.keys(b.models).filter((m) => b.providers[b.models[m].provider].paid), ["gpt-6-luna"]);
+  assert.deepEqual(Object.keys(b.models).filter((m) => b.providers[b.models[m].provider].paid), ["gpt-6-luna", "gpt-6.1-sol"]);
   assert.equal(b.models["gpt-6-luna"].reasoningEffort, "none");
   assert.equal(modelCost(card, { promptTokens: 1000000, cachedTokens: 200000, cacheWriteTokens: 300000, completionTokens: 100000 }), 139500);
   assert.equal(maxModelCost(card, 1000000, 100000), 175000);
   assert.throws(() => loadBudgetPolicy(mutate((j) => { j.models["gpt-6-luna"].reasoningEffort = "high"; })), /reasoningEffort/);
   assert.throws(() => loadBudgetPolicy(mutate((j) => { j.rateCards[0].cacheWritePerMTok = -1; })), /cacheWritePerMTok/);
+});
+
+test("Sol reasoning and output limits are model policy while the default extraction keeps Luna's limits", () => {
+  const b = loadBudgetPolicy(RAW);
+  assert.equal(b.extraction.defaultModel, "gpt-6-luna");
+  assert.equal(b.extraction.maxOutputTokens, 4000);
+  assert.equal(b.models["gpt-6.1-sol"].reasoningEffort, "xhigh");
+  assert.equal(b.models["gpt-6.1-sol"].maxOutputTokens, 16000);
+  assert.equal(b.models["gpt-6.1-sol"].requestTimeoutMs, 90000);
+  const card = rateCardFor(b, "gpt-6.1-sol", new Date("2026-10-15T12:00:00Z"));
+  assert.deepEqual([card.inputPerMTok, card.cachedInputPerMTok, card.cacheWritePerMTok, card.outputPerMTok], [2000000, 100000, 2500000, 10000000]);
+  for (const edit of [
+    j => { j.models["gpt-6.1-sol"].reasoningEffort = "none"; },
+    j => { j.models["gpt-6.1-sol"].maxOutputTokens = 16001; },
+    j => { j.models["gpt-6.1-sol"].requestTimeoutMs = 90001; },
+    j => { j.models["gpt-6-luna"].maxOutputTokens = 16000; },
+  ]) assert.throws(() => loadBudgetPolicy(mutate(edit)));
 });
 
 test("the breaker opens after its failures, admits one probe, and closes on its success", () => {

@@ -86,6 +86,184 @@ test("Luna request parameters and cache-write usage stay inside the reservation"
   } finally { await r.srv.close(); }
 });
 
+test("xhigh extraction uses the selected policy, omits temperature, and reserves its larger output allowance", async () => {
+  let sent;
+  const r = await rig({ mutate: b => {
+    Object.assign(b.models["fcpi-fixture-model"], { reasoningEffort: "xhigh", maxOutputTokens: 16000, requestTimeoutMs: 90000 });
+  }, handler: async (q, s) => {
+    const chunks = []; for await (const chunk of q) chunks.push(chunk);
+    sent = JSON.parse(Buffer.concat(chunks));
+    s.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ model: "fcpi-fixture-model", choices: [{ message: { content: JSON.stringify({ product: "Fixture Widget", price: null, in_stock: null, feature: null }) }, finish_reason: "stop" }],
+      usage: { prompt_tokens: 100, completion_tokens: 20 } }));
+  } });
+  try {
+    const out = await r.extract(req({ reasoningEffort: "xhigh" }));
+    assert.equal(out.ok, true);
+    assert.equal(out.reasoningEffort, "xhigh");
+    assert.equal(sent.reasoning_effort, "xhigh");
+    assert.equal(sent.max_completion_tokens, 16000);
+    assert.equal(Object.hasOwn(sent, "temperature"), false);
+    assert.deepEqual(sent.prompt_cache_options, { mode: "explicit" });
+    assert.equal(sent.service_tier, "default");
+    assert.equal(sent.store, false);
+    const row = [...r.store.rows.values()][0];
+    assert.ok(row.reserved >= 16000 * 1600000 / 1e6);
+    assert.ok(row.actual < row.reserved);
+    assert.equal(out.usage.completionTokens, 20);
+    const event = r.logs.find(event => event.event === "model_call" && event.outcome === "answered");
+    assert.equal(event.reasoning_effort, "xhigh");
+    assert.equal(event.output_cap_tokens, 16000);
+  } finally { await r.srv.close(); }
+});
+
+test("a mismatched requested reasoning effort is refused before any provider request or reservation", async () => {
+  const r = await rig({ mutate: b => { b.models["fcpi-fixture-model"].reasoningEffort = "none"; } });
+  try {
+    await assert.rejects(r.extract(req({ reasoningEffort: "xhigh" })), error => error.failureClass === "INVALID_REQUEST");
+    assert.equal(r.calls(), 0);
+    assert.equal(r.store.rows.size, 0);
+  } finally { await r.srv.close(); }
+});
+
+test("a provider returning another model is accounted but never accepted or repaired", async () => {
+  let calls = 0;
+  const r = await rig({ mutate: b => { b.extraction.maxInputTokens = 1000; }, handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    calls++;
+    s.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ model: "a-different-model", choices: [{ message: { content: JSON.stringify({ product: "Fixture Widget", price: null, in_stock: null, feature: null }) }, finish_reason: "stop" }],
+      usage: { prompt_tokens: 100, completion_tokens: 20 } }));
+  } });
+  try {
+    const out = await r.extract(req({ documents: [DOC("Extra content.\n\n".repeat(500))] }));
+    assert.equal(out.ok, false);
+    assert.equal(out.failure.class, "MODEL_MISMATCH");
+    assert.equal(out.model, "a-different-model");
+    assert.equal(out.requestedModel, "fcpi-fixture-model");
+    assert.equal(out.usage.calls, 1);
+    assert.ok(out.units.length > 1);
+    assert.ok(out.units.every(unit => unit.failure.class === "MODEL_MISMATCH"));
+    assert.equal(calls, 1);
+    assert.deepEqual(r.store.states(), ["SETTLED"]);
+  } finally { await r.srv.close(); }
+});
+
+test("Sol extraction cannot claim its requested identity when the provider omits the model", async () => {
+  let calls = 0;
+  const r = await rig({ mutate: b => {
+    b.models["gpt-6.1-sol"] = { ...b.models["fcpi-fixture-model"], reasoningEffort: "xhigh" };
+  }, handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    calls++;
+    s.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ product: "Fixture Widget", price: null, in_stock: null, feature: null }) }, finish_reason: "stop" }],
+      usage: { prompt_tokens: 100, completion_tokens: 20 } }));
+  } });
+  try {
+    const out = await r.extract(req({ model: "gpt-6.1-sol", reasoningEffort: "xhigh" }));
+    assert.equal(out.ok, false);
+    assert.equal(out.failure.class, "MODEL_IDENTITY_UNVERIFIED");
+    assert.equal(out.model, null);
+    assert.equal(out.requestedModel, "gpt-6.1-sol");
+    assert.equal(calls, 1);
+  } finally { await r.srv.close(); }
+});
+
+test("missing provider token usage remains unknown while conservative settlement stays visible", async () => {
+  const r = await rig();
+  try {
+    const out = await r.extract(req({ prompt: "fcpi-mode=no-usage" }));
+    assert.equal(out.ok, true);
+    assert.equal(out.usage.promptTokens, null);
+    assert.equal(out.usage.completionTokens, null);
+    assert.equal(out.usage.cachedTokens, null);
+    assert.equal(out.usage.cacheWriteTokens, null);
+    assert.equal(out.usage.calls, 1);
+    assert.ok(out.usage.costMicroUsd > 0);
+    assert.match(out.warnings.join(" "), /usage was not reported/);
+    const row = [...r.store.rows.values()][0];
+    assert.equal(out.usage.costMicroUsd, row.reserved);
+  } finally { await r.srv.close(); }
+});
+
+test("disconnect after a settled invalid answer sends no repair and retains its accounting", async () => {
+  const r = await rig();
+  const controller = new AbortController();
+  const call = r.adapter.call.bind(r.adapter);
+  r.adapter.call = async args => { const answer = await call(args); controller.abort(); return answer; };
+  try {
+    const out = await r.extract(req({ prompt: "fcpi-mode=invalid-once" }), controller.signal);
+    assert.equal(out.ok, false);
+    assert.equal(out.failure.class, "CANCELLED");
+    assert.equal(r.calls(), 1);
+    assert.equal(out.usage.calls, 1);
+    assert.deepEqual(r.store.states(), ["SETTLED"]);
+  } finally { await r.srv.close(); }
+});
+
+test("disconnect after a settled first chunk sends no later model calls", async () => {
+  const r = await rig({ mutate: b => { b.extraction.maxInputTokens = 1000; } });
+  const controller = new AbortController();
+  const call = r.adapter.call.bind(r.adapter);
+  r.adapter.call = async args => { const answer = await call(args); controller.abort(); return answer; };
+  try {
+    const out = await r.extract(req({ documents: [DOC("Extra content.\n\n".repeat(500))] }), controller.signal);
+    assert.ok(out.units.length > 1);
+    assert.equal(out.units[0].ok, true);
+    assert.ok(out.units.slice(1).every(unit => unit.failure.class === "CANCELLED"));
+    assert.equal(r.calls(), 1);
+    assert.equal(out.usage.calls, 1);
+    assert.deepEqual(r.store.states(), ["SETTLED"]);
+  } finally { await r.srv.close(); }
+});
+
+test("a repair denied before dispatch preserves the already-settled first call's usage", async () => {
+  const r = await rig();
+  const call = r.adapter.call.bind(r.adapter);
+  r.adapter.call = async args => {
+    const answer = await call(args);
+    r.budget.categories.fixture.caps.day = r.store.used("fixture");
+    return answer;
+  };
+  try {
+    const out = await r.extract(req({ prompt: "fcpi-mode=invalid-once" }));
+    assert.equal(out.ok, false);
+    assert.equal(out.failure.class, "BUDGET_EXHAUSTED");
+    assert.equal(r.calls(), 1);
+    assert.equal(out.usage.calls, 1);
+    assert.ok(out.usage.promptTokens > 0);
+    assert.equal(out.usage.costMicroUsd, [...r.store.rows.values()][0].actual);
+  } finally { await r.srv.close(); }
+});
+
+test("settled model calls cannot be reused after reasoning or output policy changes", async () => {
+  for (const update of [model => { model.reasoningEffort = "xhigh"; }, model => { model.maxOutputTokens = 3000; }]) {
+    const r = await rig({ mutate: b => { b.models["fcpi-fixture-model"].reasoningEffort = "none"; } });
+    try {
+      const input = req();
+      assert.equal((await r.extract(input)).ok, true);
+      update(r.budget.models["fcpi-fixture-model"]);
+      const repeated = await r.extract(input);
+      assert.equal(repeated.ok, false);
+      assert.equal(repeated.failure.class, "LOGICAL_ID_CONFLICT");
+      assert.equal(r.calls(), 1);
+    } finally { await r.srv.close(); }
+  }
+});
+
+test("a model-specific request timeout extends only that model's provider wait", async () => {
+  const r = await rig({ timeoutMs: 1000, mutate: b => {
+    Object.assign(b.models["fcpi-fixture-model"], { reasoningEffort: "xhigh", requestTimeoutMs: 3000 });
+  }, handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    await new Promise(resolve => setTimeout(resolve, 1200));
+    s.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ product: "Fixture Widget", price: null, in_stock: null, feature: null }) }, finish_reason: "stop" }],
+      usage: { prompt_tokens: 100, completion_tokens: 20 } }));
+  } });
+  try {
+    assert.equal((await r.extract(req())).ok, true);
+    assert.equal(r.budget.extraction.requestTimeoutMs, 1000);
+  } finally { await r.srv.close(); }
+});
+
 test("a schema-valid extraction settles from the provider's usage, keeps nulls and names its source", async () => {
   const r = await rig();
   try {
@@ -271,6 +449,8 @@ test("an unanswered call stays reserved and is never sent again; a settled one i
     const logicalId = `test:${crypto.randomUUID()}`;
     const out = await r.extract(req({ logicalId, prompt: "fcpi-mode=slow" }));
     assert.equal(out.failure.class, "PROVIDER_UNCERTAIN");
+    assert.equal(out.usage.calls, null);
+    assert.equal(out.usage.costMicroUsd, null);
     assert.deepEqual(r.store.states(), ["UNCERTAIN"]);
     const used = r.store.used("fixture");
     assert.ok(used > 0, "the whole reservation stays counted");

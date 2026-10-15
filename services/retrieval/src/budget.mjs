@@ -83,8 +83,14 @@ export function loadBudgetPolicy(text) {
   }
   const subjectOf = (kind, map) => {
     for (const [name, m] of Object.entries(map)) {
-      exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort"] : []);
-      if (kind === "model" && m.reasoningEffort !== undefined && m.reasoningEffort !== "none") throw new Error(`model ${name}.reasoningEffort must be none`);
+      exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort", "maxOutputTokens", "requestTimeoutMs"] : []);
+      if (kind === "model") {
+        if (m.reasoningEffort !== undefined && !["none", "xhigh"].includes(m.reasoningEffort)) throw new Error(`model ${name}.reasoningEffort must be none or xhigh`);
+        if (name === "gpt-6-luna" && m.reasoningEffort !== "none") throw new Error("model gpt-6-luna.reasoningEffort must be none");
+        if (name === "gpt-6.1-sol" && m.reasoningEffort !== "xhigh") throw new Error("model gpt-6.1-sol.reasoningEffort must be xhigh");
+        if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort === "xhigh" ? 16000 : 4000, `model ${name}.maxOutputTokens`);
+        if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 90000, `model ${name}.requestTimeoutMs`);
+      }
       const prov = p.providers[m.provider], cat = p.categories[m.category];
       if (!prov || prov.kind !== kind) throw new Error(`${kind} ${name} names ${m.provider}, which is not a ${kind} provider`);
       if (!cat) throw new Error(`${kind} ${name} names unknown category ${m.category}`);

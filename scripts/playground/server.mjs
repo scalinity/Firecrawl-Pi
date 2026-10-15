@@ -6,6 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { loadManifest } from '../../services/access/client.mjs';
 import { validateBody, checkUrl } from '../../services/access/src/validate.mjs';
+import { validateAgentInput, runAgent } from './agent.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const manifest = loadManifest();
@@ -16,11 +17,17 @@ const object = v => v && typeof v === 'object' && !Array.isArray(v);
 // Fixed code, JSON on stdin. Never interpolate request input into a remote shell command.
 // Refuse redirects so the gateway credential can only reach its loopback origin.
 const remote = String.raw`
-import json, sys, urllib.request, urllib.error
+import json, sys, os, threading, urllib.request, urllib.error
 class NoRedirect(urllib.request.HTTPRedirectHandler):
     def redirect_request(self, *args, **kwargs): return None
 try:
-    q = json.load(sys.stdin)
+    q = json.loads(sys.stdin.readline())
+    # Keep stdin open for this request's lifetime. SSH disconnect turns it into EOF;
+    # exiting closes urllib's socket so the gateway can cancel remaining extraction.
+    def watch_connection():
+        sys.stdin.read(1)
+        os._exit(0)
+    threading.Thread(target=watch_connection, daemon=True).start()
     with open('/etc/firecrawl-pi/secrets/clients/' + q['client'] + '.token') as f:
         token = f.read().strip()
     headers = {'Authorization': 'Bearer ' + token, 'Accept': 'application/json'}
@@ -53,6 +60,7 @@ export function sshForward() {
   const client = process.env.FCPI_PLAYGROUND_CLIENT ?? 'm9codex';
   if (!target || !key || !/^[a-z0-9_-]{1,40}$/.test(client)) throw Error('Invalid playground SSH configuration');
   return (request, signal) => new Promise((resolveResult, reject) => {
+    if (signal?.aborted) return reject(signal.reason ?? Error('Disconnected'));
     const child = spawn('ssh', ['-i', key, '-o', 'IdentitiesOnly=yes', '-o', 'BatchMode=yes',
       '-o', 'ConnectTimeout=8', target, 'sudo -n python3 -c ' + quote(remote)],
       { stdio: ['pipe', 'pipe', 'ignore'] });
@@ -68,10 +76,11 @@ export function sshForward() {
     const timer = setTimeout(() => finish(Error('Pi timeout')), (request.timeout + 10) * 1000);
     signal?.addEventListener('abort', abort, { once: true });
     if (signal?.aborted) abort();
+    child.stdout.setEncoding('utf8');
     child.stdout.on('data', chunk => {
-      bytes += chunk.length;
+      bytes += Buffer.byteLength(chunk);
       if (bytes > 9 * 1024 * 1024) return finish(Error('Pi response too large'));
-      text += chunk.toString();
+      text += chunk;
     });
     child.on('error', finish);
     child.stdin.on('error', () => finish(Error('Pi connection closed')));
@@ -83,7 +92,7 @@ export function sshForward() {
         finish(null, value);
       } catch { finish(Error('Pi response invalid')); }
     });
-    child.stdin.end(JSON.stringify({ ...request, client }));
+    if (!settled) child.stdin.write(JSON.stringify({ ...request, client }) + '\n');
   });
 }
 
@@ -129,14 +138,16 @@ export function prepareRequest(endpoint, input) {
 }
 
 export async function startServer({ port = 8767, forward = sshForward() } = {}) {
-  let active = 0;
+  let active = 0, activeAgents = 0;
   const server = createServer(async (req, res) => {
     const expected = new Set([`localhost:${server.address().port}`, `127.0.0.1:${server.address().port}`]);
+    const headers = type => ({ 'content-type': type + '; charset=utf-8', 'cache-control': 'no-store',
+      'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer',
+      'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" });
     const send = (status, data, type = 'application/json') => {
-      if (res.destroyed) return;
-      res.writeHead(status, { 'content-type': type + '; charset=utf-8', 'cache-control': 'no-store',
-        'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer',
-        'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" });
+      if (res.destroyed || res.writableEnded) return;
+      if (res.headersSent) return res.end();
+      res.writeHead(status, headers(type));
       res.end(type === 'application/json' ? JSON.stringify(data) : data);
     };
     if (!expected.has(req.headers.host)) return send(403, { error: 'Use localhost to open the playground.' });
@@ -144,10 +155,11 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
     const endpoint = req.url;
     if (req.method === 'GET' && ['/', '/LLM-DEMO.html'].includes(endpoint)) return send(200, readFileSync(resolve(root, 'LLM-DEMO.html')), 'text/html');
     if (req.method === 'GET' && endpoint === '/favicon.ico') { res.writeHead(204); return res.end(); }
-    if (req.method !== 'POST' || !['/api/run', '/api/status', '/api/crawl-status', '/api/crawl-cancel'].includes(endpoint)) return send(404, { error: 'Not found' });
+    if (req.method !== 'POST' || !['/api/run', '/api/agent', '/api/status', '/api/crawl-status', '/api/crawl-cancel'].includes(endpoint)) return send(404, { error: 'Not found' });
     if (req.headers['content-type']?.split(';')[0].trim() !== 'application/json') return send(415, { error: 'Use application/json.' });
     const controller = new AbortController();
-    res.on('close', () => { if (!res.writableEnded) controller.abort(); });
+    const disconnected = () => { if (!res.writableEnded) controller.abort(); };
+    res.once('close', disconnected);
     try {
       let bytes = 0, chunks = [];
       for await (const chunk of req) {
@@ -157,11 +169,69 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
       }
       let input;
       try { input = JSON.parse(Buffer.concat(chunks).toString()); } catch { throw bad('Invalid JSON.'); }
-      const request = prepareRequest(endpoint, input);
+      const isAgent = endpoint === '/api/agent';
+      const request = isAgent ? validateAgentInput(input) : prepareRequest(endpoint, input);
       if (active >= 3) return send(429, { error: 'The playground is busy. Wait for the current request.' });
+      if (isAgent && activeAgents) return send(429, { error: 'An Agent run is already active. Wait for it to finish or cancel it.' });
+      controller.signal.throwIfAborted();
       active++;
       const started = performance.now();
       try {
+        if (isAgent) {
+          activeAgents++;
+          const steps = new Map();
+          const deadline = setTimeout(() => controller.abort(), 360000);
+          const finishAgent = payload => {
+            if (res.destroyed || res.writableEnded) return;
+            res.end(JSON.stringify({ type: 'result', result: { status: 200, data: payload,
+              elapsedMs: Math.round(performance.now() - started), request: {
+                method: 'WORKFLOW', path: 'fcpi search → scrape + JSON', body: request } } }) + '\n');
+          };
+          try {
+            // Headers acknowledge a synchronous stream, never a durable job receipt.
+            res.writeHead(200, headers('application/x-ndjson'));
+            res.flushHeaders();
+            const emit = async event => {
+              controller.signal.throwIfAborted();
+              if (res.destroyed || res.writableEnded) throw Error('Disconnected');
+              if (event?.type !== 'step' || !object(event.step)) throw Error('Invalid progress event');
+              steps.set(event.step.id, event.step);
+              if (res.write(JSON.stringify(event) + '\n')) return;
+              await new Promise((resolveDrain, rejectDrain) => {
+                const cleanup = () => {
+                  res.removeListener('drain', drained);
+                  res.removeListener('close', stopped);
+                  controller.signal.removeEventListener('abort', stopped);
+                };
+                const drained = () => { cleanup(); resolveDrain(); };
+                const stopped = () => { cleanup(); rejectDrain(Error('Stream closed')); };
+                res.once('drain', drained);
+                res.once('close', stopped);
+                controller.signal.addEventListener('abort', stopped, { once: true });
+                if (res.destroyed || controller.signal.aborted) stopped();
+              });
+            };
+            const result = await runAgent(request, {
+              signal: controller.signal, emit,
+              forward: (next, signal) => {
+                controller.signal.throwIfAborted();
+                return forward(next, signal ?? controller.signal);
+              }
+            });
+            finishAgent(result);
+          } catch {
+            const cancelled = controller.signal.aborted;
+            const message = cancelled ? 'The Agent run was cancelled or reached its six-minute limit. Work already sent may have consumed budget.' :
+              'The Agent run could not finish. No automatic retry was made.';
+            finishAgent({ success: false, status: cancelled ? 'cancelled' : 'failed', answer: '',
+              findings: [], sources: [], documents: [], steps: [...steps.values()], usage: null, model: null,
+              reasoningEffort: null, code: cancelled ? 'AGENT_CANCELLED' : 'AGENT_FAILED', limitations: [message] });
+          } finally {
+            clearTimeout(deadline);
+            activeAgents--;
+          }
+          return;
+        }
         const result = await forward(request, controller.signal);
         send(result.status, { ...result, elapsedMs: Math.round(performance.now() - started),
           request: { method: request.method, path: request.path, ...(request.body ? { body: request.body } : {}),
@@ -170,6 +240,8 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
     } catch (error) {
       send(error.status ?? 503, { error: error.status ? error.message :
         'Cannot reach the Pi. Check its connection and SSH access. No automatic retry was made.' });
+    } finally {
+      res.removeListener('close', disconnected);
     }
   });
   server.requestTimeout = 150000;

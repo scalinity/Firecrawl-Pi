@@ -206,7 +206,9 @@ function track(req, res) {
   res.on("close", () => { inflight--; });
   // A caller that goes away cancels its work: the render, the fetch, the search and every wait stop.
   const abort = new AbortController();
+  req.once("aborted", () => abort.abort());
   res.on("close", () => { if (!res.writableFinished) abort.abort(); });
+  if (req.aborted) abort.abort();
   return abort;
 }
 function onError(res, path, e) {

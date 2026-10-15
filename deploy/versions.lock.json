@@ -1649,7 +1649,7 @@
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "7ca174ac9ccea9b1754b8858c74e0c7b4a32f57bdfa8edd54e809de576b386ad",
+    "capabilities_sha256": "66c52e32ad326138e998bf7633d7af7fdc4816c94c7ee631f8fc980b664787a3",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
@@ -1660,17 +1660,16 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "7a80415c559817af8592844c07050376410f7723b97f1149b15573b78bec0e96",
+      "sha256": "be15e926e841cce0e1f49bc6530085a2af28f0058501edd2ea8e9fdd2b4a28d1",
       "paid_caps": {
         "llm": {
-          "day": 0,
-          "month": 0
+          "month": 20000000
         },
         "parser": {
           "month": 0
         },
         "proxy": {
-          "day": 500000,
+          "day": 1000000,
           "month": 2000000
         },
         "enhanced": {
@@ -1679,11 +1678,22 @@
         }
       },
       "paid_total_caps": {
-        "day": 500000
+        "day": 1000000
       },
       "paid_dispatch": "the owner's host switch /etc/firecrawl-pi/paid-dispatch.env (fcpi paid on|off), the retrieval service's optional env file: on since 2026-10-06; absent, every start runs it off"
     },
     "rate_cards": [
+      {
+        "id": "openai/gpt-6.1-sol@2026-10-15",
+        "subject": "gpt-6.1-sol",
+        "effectiveFrom": "2026-10-15",
+        "effectiveTo": null,
+        "inputPerMTok": 2000000,
+        "cachedInputPerMTok": 100000,
+        "cacheWritePerMTok": 2500000,
+        "outputPerMTok": 10000000,
+        "source": "https://developers.openai.com/api/docs/pricing and /api/docs/models/gpt-6.1-sol, observed 2026-10-15: Standard, below 272K context; implicit cache writes disabled"
+      },
       {
         "id": "openai/gpt-6-luna@2026-10-02",
         "subject": "gpt-6-luna",
@@ -1806,6 +1816,13 @@
         "provider": "openai",
         "category": "llm",
         "reasoningEffort": "none"
+      },
+      "gpt-6.1-sol": {
+        "provider": "openai",
+        "category": "llm",
+        "reasoningEffort": "xhigh",
+        "maxOutputTokens": 16000,
+        "requestTimeoutMs": 90000
       },
       "fcpi-fixture-model": {
         "provider": "fixture-model",

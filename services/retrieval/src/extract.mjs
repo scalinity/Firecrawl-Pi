@@ -30,7 +30,9 @@ export class ExtractionFailure extends Error {
 const fail = (c, d, x) => new ExtractionFailure(c, d, x);
 // Refusals that hold for every later call as much as this one: the job stops at the first.
 const STOPPING = new Set(["MODEL_NOT_ALLOWED", "RATE_CARD_MISSING", "PAID_DISPATCH_DISABLED", "BLOCKED_CREDENTIAL", "BUDGET_EXHAUSTED",
-  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_RATE_LIMITED", "PROVIDER_UNCERTAIN", "EXTRACTION_UNCERTAIN", "EXTRACTION_IN_FLIGHT", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
+  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_RATE_LIMITED", "PROVIDER_UNCERTAIN", "MODEL_MISMATCH", "MODEL_IDENTITY_UNVERIFIED", "EXTRACTION_UNCERTAIN", "EXTRACTION_IN_FLIGHT", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
+const BEFORE_DISPATCH = new Set(["MODEL_NOT_ALLOWED", "RATE_CARD_MISSING", "PAID_DISPATCH_DISABLED", "BLOCKED_CREDENTIAL", "BUDGET_EXHAUSTED",
+  "PROVIDER_UNAVAILABLE", "PROVIDER_UNREACHABLE", "EXTRACTION_IN_FLIGHT", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
 
 export function canonical(v) {
   if (Array.isArray(v)) return `[${v.map(canonical).join(",")}]`;
@@ -73,10 +75,11 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const hold = {};
     try { return await callOnce(args, hold); } finally { if (hold.probe && hold.breaker.probing) hold.breaker.neutral(); }
   }
-  async function callOnce({ logicalId, callKey, kind, model, messages, schema, maxOutputTokens, requestHash, deadline, signal, reuseOnly = false }, hold) {
+  async function callOnce({ logicalId, callKey, kind, model, reasoningEffort, messages, schema, maxOutputTokens, requestHash, deadline, signal, reuseOnly = false }, hold) {
     const budget = getBudget();
     const m = budget.models[model];
     if (!m) throw fail("MODEL_NOT_ALLOWED", `model '${String(model).slice(0, 80)}' is not in the budget policy's allowlist`);
+    if (reasoningEffort !== undefined && reasoningEffort !== (m.reasoningEffort ?? null)) throw fail("MODEL_NOT_ALLOWED", "the requested reasoning effort does not match the selected model policy");
     const prov = budget.providers[m.provider], cat = budget.categories[m.category];
     const card = rateCardFor(budget, model);
     if (!card) throw fail("RATE_CARD_MISSING", `no rate card for '${model}' is in effect today; a model without a known price is refused`);
@@ -90,10 +93,10 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const probe = breaker.state() === "half_open";
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${m.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
     Object.assign(hold, { breaker, probe });
-    const body = { model, messages, temperature: 0, n: 1, response_format: { type: "json_schema", json_schema: { name: "extraction", strict: true, schema } },
+    const body = { model, messages, ...(m.reasoningEffort === "xhigh" ? {} : { temperature: 0 }), n: 1, response_format: { type: "json_schema", json_schema: { name: "extraction", strict: true, schema } },
       [prov.maxTokensParam]: maxOutputTokens, ...(prov.store === false ? { store: false } : {}),
-      // The selected Luna contract keeps deterministic extraction and disables implicit cache writes.
-      ...(m.reasoningEffort === "none" ? { reasoning_effort: "none", prompt_cache_options: { mode: "explicit" }, service_tier: "default" } : {}) };
+      // Selected model settings stay policy-owned; cache writes are explicit for either effort.
+      ...(m.reasoningEffort ? { reasoning_effort: m.reasoningEffort, prompt_cache_options: { mode: "explicit" }, service_tier: "default" } : {}) };
     const payload = Buffer.from(JSON.stringify(body));
     const amount = maxModelCost(card, payload.length, maxOutputTokens);
     const { day, month } = periodStarts();
@@ -103,11 +106,12 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       breaker.neutral();
       if (r.existing.request_hash !== requestHash) throw fail("LOGICAL_ID_CONFLICT", `call ${callKey} was made before for a different request`);
       if (r.existing.state === "SETTLED" && r.existing.result) {
-        log({ event: "model_call", logical_id: logicalId, call: callKey, reused: true, cost_micro_usd: Number(r.existing.actual) });
+        log({ event: "model_call", logical_id: logicalId, call: callKey, model, reasoning_effort: m.reasoningEffort ?? null,
+          output_cap_tokens: maxOutputTokens, reused: true, cost_micro_usd: Number(r.existing.actual) });
         return { ...r.existing.result, usage: r.existing.usage, cost: Number(r.existing.actual), reused: true, reservationId: r.existing.id };
       }
       // A call another request is still making: its answer will be stored, so a later retry reuses it (review W13).
-      if (r.existing.state === "RESERVED" && Date.now() - Date.parse(r.existing.created_at) < LONGEST_EXTRACTION_MS + budget.extraction.requestTimeoutMs) {
+      if (r.existing.state === "RESERVED" && Date.now() - Date.parse(r.existing.created_at) < LONGEST_EXTRACTION_MS + (m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs)) {
         throw fail("EXTRACTION_IN_FLIGHT", `call ${callKey} is still being made by an earlier request; retry once it has settled`, { retryable: true, retryAfter: 30 });
       }
       throw fail("EXTRACTION_UNCERTAIN", `call ${callKey} was sent before and its outcome is unknown (${r.existing.state}); it is not sent again`);
@@ -143,7 +147,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       // so its retry reuses it instead of paying twice; only the next call is not made.
       answer = await providerRequest({ baseUrl: prov.baseUrl, path: "/chat/completions", body: payload, getPolicy, resolvePublic, lookupFixture, authorize,
         headers: { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
-        timeoutMs: Math.min(budget.extraction.requestTimeoutMs, deadline - Date.now()) });
+        timeoutMs: Math.min(m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs, deadline - Date.now()) });
     } catch (e) {
       gate.give();
       if (!(e instanceof ProviderError)) throw e;
@@ -192,6 +196,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const result = { resolvedModel: typeof json?.model === "string" ? json.model : null, content: typeof msg.content === "string" ? msg.content : null, refusal: msg.refusal ?? null, finishReason: json?.choices?.[0]?.finish_reason ?? null };
     await store.settleBudget(res.id, cost, { usage, result, detail: usage ? (cost > amount ? `settled above the reservation by ${cost - amount}` : null) : "usage absent from the answer; settled at the reservation" });
     log({ event: "model_call", logical_id: logicalId, call: callKey, kind, model, outcome: "answered", prompt_tokens: usage?.promptTokens ?? null, completion_tokens: usage?.completionTokens ?? null,
+      reasoning_effort: m.reasoningEffort ?? null, output_cap_tokens: maxOutputTokens,
       cached_tokens: usage?.cachedTokens ?? null, cache_write_tokens: usage?.cacheWriteTokens ?? null, resolved_model: result.resolvedModel,
       reserved_micro_usd: amount, cost_micro_usd: cost, finish_reason: result.finishReason, ms: Date.now() - started });
     return { ...result, usage, cost, reused: false, reservationId: res.id };
@@ -262,6 +267,10 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     if (typeof logicalId !== "string" || !/^[A-Za-z0-9:._-]{8,200}$/.test(logicalId)) bad("logicalId must be 8-200 of A-Z a-z 0-9 : . _ -");
     const model = req.model ?? getSelection().extractionModel ?? X.defaultModel;
     if (typeof model !== "string") bad("model must be a string");
+    const modelPolicy = budget.models[model];
+    const reasoningEffort = modelPolicy?.reasoningEffort ?? null;
+    if (req.reasoningEffort !== undefined && req.reasoningEffort !== reasoningEffort) bad("reasoningEffort must match the selected model's budget policy");
+    const maxOutputTokens = modelPolicy?.maxOutputTokens ?? X.maxOutputTokens;
     if (prompt !== null && (typeof prompt !== "string" || prompt.length > X.maxPromptChars)) bad(`prompt must be a string of at most ${X.maxPromptChars} characters`);
     if (systemPrompt !== null && (typeof systemPrompt !== "string" || systemPrompt.length > X.maxPromptChars)) bad(`systemPrompt must be a string of at most ${X.maxPromptChars} characters`);
     if (!Array.isArray(documents) || documents.length === 0 || documents.length > X.maxDocuments) bad(`documents must list 1 to ${X.maxDocuments} documents`);
@@ -295,10 +304,11 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     if (chunks.length > X.maxChunks) throw fail("INPUT_TOO_LARGE", `the documents need ${chunks.length} extraction units of at most ${X.maxInputTokens} input tokens; at most ${X.maxChunks} are allowed`);
     // The input cap and the fixed instructions decide the chunks, so a unit's stored answers are reused only
     // when both are unchanged (review S11).
-    const requestHash = sha(canonical({ model, schema, prompt, systemPrompt, docs: docs.map((d) => [d.url, sha(d.markdown)]), maxInputTokens: X.maxInputTokens, instructions: sha(SYSTEM) }));
+    const requestHash = sha(canonical({ model, reasoningEffort, schema, prompt, systemPrompt, docs: docs.map((d) => [d.url, sha(d.markdown)]), maxInputTokens: X.maxInputTokens, maxOutputTokens, instructions: sha(SYSTEM) }));
     let data = null;
     const sources = {}, outcomes = [];
     const usage = { calls: 0, reused: 0, promptTokens: 0, completionTokens: 0, cachedTokens: 0, cacheWriteTokens: 0, costMicroUsd: 0 };
+    let resolvedModel = null;
     let stop = null;
     for (const [i, c] of chunks.entries()) {
       const src = c.parts > 1 ? `${c.url}#part=${c.part}/${c.parts}` : c.url;
@@ -307,8 +317,23 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
       if (stop) { outcomes.push({ url: c.url, part: c.part, ok: false, failure: stop }); continue; }
       const messages = [{ role: "system", content: instructions },
         { role: "user", content: `${task}Content of ${c.url}${c.parts > 1 ? ` (part ${c.part} of ${c.parts})` : ""}, between the markers:\n<<<CONTENT\n${c.text}\nCONTENT>>>` }];
-      const account = (r) => { usage.calls++; if (r.reused) usage.reused++; usage.promptTokens += r.usage?.promptTokens ?? 0; usage.completionTokens += r.usage?.completionTokens ?? 0; usage.cachedTokens += r.usage?.cachedTokens ?? 0; usage.cacheWriteTokens += r.usage?.cacheWriteTokens ?? 0; usage.costMicroUsd += r.cost ?? 0; };
+      const account = (r) => {
+        if (usage.calls !== null) usage.calls++;
+        if (r.reused && usage.reused !== null) usage.reused++;
+        for (const key of ["promptTokens", "completionTokens", "cachedTokens", "cacheWriteTokens"]) {
+          const value = r.usage?.[key];
+          if (!Number.isSafeInteger(value) || value < 0) usage[key] = null;
+          else if (usage[key] !== null) usage[key] += value;
+        }
+        if (!Number.isSafeInteger(r.cost) || r.cost < 0) usage.costMicroUsd = null;
+        else if (usage.costMicroUsd !== null) usage.costMicroUsd += r.cost;
+        if (!r.usage) warnings.push("provider usage was not reported for a model call; token totals are unknown and its reservation remains the accounted cost");
+        resolvedModel = typeof r.resolvedModel === "string" ? r.resolvedModel : null;
+      };
+      let accountedCall = false;
       const judge = (r) => {
+        if (r.resolvedModel && r.resolvedModel !== model) throw fail("MODEL_MISMATCH", "the provider returned a model identity different from the requested model; no fallback is accepted");
+        if (model === "gpt-6.1-sol" && !r.resolvedModel) throw fail("MODEL_IDENTITY_UNVERIFIED", "the provider did not report the requested Sol model identity");
         if (r.refusal) return { refused: r.refusal };
         if (r.finishReason === "length") return { limit: true };
         let v;
@@ -317,25 +342,33 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
         return errors.length ? { errors, raw: r.content } : { value: v };
       };
       try {
-        const base = { logicalId, model, schema: strict, maxOutputTokens: X.maxOutputTokens, requestHash, deadline, signal, reuseOnly: req.reuseOnly === true };
+        const base = { logicalId, model, reasoningEffort, schema: strict, maxOutputTokens, requestHash, deadline, signal, reuseOnly: req.reuseOnly === true };
         let r = await adapter.call({ ...base, callKey: `${logicalId}:${i}:extract`, kind: "extract", messages });
         account(r);
+        accountedCall = true;
         let j = judge(r);
         if (j.errors && X.maxRepairs > 0) {
+          if (signal?.aborted) throw fail("CANCELLED", "the caller cancelled after the settled model call; no repair was sent");
           // The one repair, in the same logical budget: the model sees its answer and what was wrong with it.
+          accountedCall = false;
           r = await adapter.call({ ...base, callKey: `${logicalId}:${i}:repair`, kind: "repair",
             messages: [...messages, { role: "assistant", content: String(r.content ?? "").slice(0, 16000) },
               { role: "user", content: `That answer does not match the required JSON schema:\n${j.errors.slice(0, 10).join("\n")}\nReturn only the corrected JSON.` }] });
           account(r);
+          accountedCall = true;
           j = judge(r);
         }
         if (j.refused) throw fail("EXTRACTION_REFUSED", `the model refused: ${String(j.refused).slice(0, 200)}`);
-        if (j.limit) throw fail("EXTRACTION_OUTPUT_LIMIT", `the answer reached the ${X.maxOutputTokens}-token output cap before it was complete`);
+        if (j.limit) throw fail("EXTRACTION_OUTPUT_LIMIT", `the answer reached the ${maxOutputTokens}-token output cap before it was complete`);
         if (j.errors) throw fail("EXTRACTION_INVALID_OUTPUT", `the answer did not match the schema after ${X.maxRepairs} repair: ${j.errors.slice(0, 3).join("; ")}`);
         data = merge(data, j.value, strict, "$", src, sources, warnings);
         outcomes.push({ url: c.url, part: c.part, ok: true });
       } catch (e) {
         if (!(e instanceof ExtractionFailure)) throw e;
+        if (!accountedCall && !BEFORE_DISPATCH.has(e.failureClass)) {
+          for (const key of Object.keys(usage)) usage[key] = null;
+          warnings.push("a model call failed without an accounting receipt; its usage and cost totals are unknown");
+        }
         outcomes.push({ url: c.url, part: c.part, ok: false, failure: e.toJSON() });
         if (STOPPING.has(e.failureClass)) stop = e.toJSON();
       }
@@ -345,7 +378,7 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     // A required value no document held stays null and is named, never filled in.
     const missing = ok ? missingRequired(data, schema) : [];
     for (const m of missing) warnings.push(`${m}: required, but no document held a value for it`);
-    const out = { ok, logicalId, model, data: ok ? data : null, sources, warnings, missingRequired: missing, units: outcomes, usage,
+    const out = { ok, logicalId, model: resolvedModel, requestedModel: model, reasoningEffort, data: ok ? data : null, sources, warnings, missingRequired: missing, units: outcomes, usage,
       ...(ok ? {} : { failure: failed[0]?.failure ?? { class: "EXTRACTION_FAILED", detail: "no unit produced an answer", retryable: false, retryAfter: null } }) };
     if (Buffer.byteLength(JSON.stringify(out)) > X.resultMaxBytes) throw fail("RESULT_TOO_LARGE", `the extracted data exceeds ${X.resultMaxBytes} bytes`);
     log({ event: "extraction", logical_id: logicalId, model, units: chunks.length, units_ok: outcomes.length - failed.length, calls: usage.calls, reused: usage.reused,

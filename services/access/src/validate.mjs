@@ -41,7 +41,11 @@ function checkFormats(v, manifest) {
     if (out.some((x) => (typeof x === "string" ? x : x.type) === type)) continue;
     if (opts) {
       const { type: _t, ...rest } = typeof f === "object" ? f : {};
-      out.push({ type, ...checkObject(rest, opts, manifest, `formats.${type}`) });
+      const checked = checkObject(rest, opts, manifest, `formats.${type}`);
+      if (type === "json" && ((checked.model !== undefined) !== (checked.reasoningEffort !== undefined))) {
+        throw bad("json model and reasoningEffort must be supplied together");
+      }
+      out.push({ type, ...checked });
       continue;
     }
     if (typeof f === "object" && Object.keys(f).some((k) => k !== "type")) throw bad(`format '${type}' takes no options`);

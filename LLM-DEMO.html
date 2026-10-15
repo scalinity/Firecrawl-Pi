@@ -7,9 +7,11 @@
 :root{color-scheme:dark;--bg:#0a0a0a;--panel:#141414;--raised:#1c1c1c;--line:#282828;--text:#ededed;--muted:#a1a1a1;--orange:#ff5b0a;--green:#83cd9c}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input,textarea,select{font:inherit}button,a,input,textarea,select{-webkit-tap-highlight-color:transparent}button{cursor:pointer}button:disabled{opacity:.45;cursor:wait}button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--orange);outline-offset:4px}button{color:inherit}a{color:inherit}button svg{width:17px;height:17px}svg{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}[hidden]{display:none!important}.mono,pre,code{font-family:"SFMono-Regular",Consolas,monospace}.sidebar{width:216px;position:fixed;inset:0 auto 0 0;border-right:1px solid var(--line);display:flex;flex-direction:column;background:#0c0c0c}.brand{height:72px;display:flex;align-items:center;gap:10px;padding:0 24px;font-size:22px;letter-spacing:-.7px;font-weight:650;border-bottom:1px solid var(--line)}.brand svg{width:26px;height:29px;color:var(--orange);stroke-width:1.9}.brand span{color:var(--muted);font-weight:400;font-size:12px;letter-spacing:0;margin-left:1px}.nav-label{font-size:10px;letter-spacing:1.3px;color:#767676;text-transform:uppercase;margin:29px 23px 11px}.nav{display:grid;gap:5px;padding:0 12px}.nav button{display:flex;align-items:center;gap:11px;text-align:left;border:0;background:none;color:var(--muted);padding:12px;border-radius:9px;font-size:13px}.nav button svg{width:18px;height:18px}.nav button:hover{background:#161616;color:var(--text)}.nav button[aria-current=true]{background:#24140c;color:var(--orange)}.sidebar-bottom{margin-top:auto;padding:18px 14px;border-top:1px solid var(--line)}.budget{border:1px solid var(--line);border-radius:11px;padding:15px;background:#121212}.budget-top{display:flex;gap:9px;align-items:center;font-weight:550;font-size:12px}.budget-top svg{color:var(--orange);width:17px;height:17px}.budget strong{font-size:24px;font-weight:550;letter-spacing:-1px;display:block;margin:13px 0 5px}.budget strong small{font-size:11px;font-weight:400;letter-spacing:0;color:var(--muted);margin-left:5px}.budget p{color:var(--muted);font-size:11px;line-height:1.6;margin:0}.local-note{display:flex;gap:7px;align-items:center;font-size:10px;color:#777;margin:16px 7px 0}.dot{width:6px;height:6px;border-radius:50%;background:var(--green);display:inline-block;flex-shrink:0}.app{margin-left:216px;min-height:100vh}.topbar{height:72px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;border-bottom:1px solid var(--line);gap:12px}.workspace-name{display:flex;align-items:center;gap:10px;font-size:12px}.workspace-icon{width:26px;height:26px;display:grid;place-items:center;background:#21170f;color:var(--orange);border:1px solid #49301e;border-radius:7px;font:11px "SFMono-Regular",monospace}.slash{color:#444;margin:0 4px}.workspace-name .sub{color:var(--muted)}.connection{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);border:0;background:none;padding:8px}.connection .dot{background:#666}.connection.connected .dot{background:var(--green)}.connection.failed .dot{background:#e99070}.main{width:min(1060px,100%);margin:auto;padding:42px 40px 28px}.intro{display:flex;justify-content:space-between;align-items:end;margin-bottom:27px;gap:20px}.eyebrow{font-size:10px;letter-spacing:1.5px;color:var(--orange);text-transform:uppercase;margin:0 0 11px}.intro h1{font-size:30px;font-weight:500;letter-spacing:-1.2px;margin:0 0 10px;line-height:1.18}.intro p{font-size:12px;color:var(--muted);margin:0;line-height:1.7}.keyboard{font-size:10px;color:#777;white-space:nowrap;margin-bottom:4px}.keyboard kbd{font:10px inherit;border:1px solid #383838;border-radius:4px;padding:3px 5px;margin-right:5px}.tool-tabs{display:flex;gap:5px;padding:5px;background:#111;border:1px solid var(--line);border-radius:11px;width:fit-content;margin-bottom:18px}.tool-tabs button{display:flex;gap:8px;align-items:center;border:1px solid transparent;background:none;color:var(--muted);padding:9px 17px;border-radius:7px;font-size:12px}.tool-tabs button[aria-pressed=true]{background:#242424;border-color:#363636;color:var(--text);box-shadow:0 1px 3px #0007}.tool-tabs button[aria-pressed=true] svg{color:var(--orange)}.composer{border:1px solid #333;border-radius:15px;background:var(--panel);overflow:hidden;box-shadow:0 12px 45px #0003}.input-area{padding:22px 23px 17px}.field-label{display:block;font-size:10px;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:12px}.target{display:block;width:100%;border:0;background:transparent;color:var(--text);font-size:18px;line-height:1.6;letter-spacing:-.3px;padding:0;outline-offset:7px!important}.target::placeholder{color:#626262}.options-row{display:flex;align-items:center;justify-content:space-between;gap:16px;border-top:1px solid var(--line);padding:14px 22px;background:#171717;min-height:66px}.llm-label{display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px}.switch{position:relative;width:31px;height:18px;display:inline-block}.switch input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;margin:0}.track{display:block;width:31px;height:18px;background:#393939;border-radius:20px;pointer-events:none}.track:after{content:"";display:block;width:12px;height:12px;position:absolute;left:3px;top:3px;background:#a9a9a9;border-radius:50%;transition:transform .16s}.switch input:checked+.track{background:var(--orange)}.switch input:checked+.track:after{transform:translateX(13px);background:white}.switch input:focus-visible+.track{outline:2px solid var(--orange);outline-offset:4px}.optional{color:#777;font-size:10px;margin-left:3px}.limit-wrap{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}.limit-wrap input{width:60px;padding:6px 8px;color:var(--text);background:#222;border:1px solid #3a3a3a;border-radius:6px}.primary{border:1px solid #ff762c;background:var(--orange);color:#fff;border-radius:8px;font-size:12px;font-weight:550;padding:10px 17px;display:flex;gap:19px;align-items:center;white-space:nowrap;box-shadow:0 2px 10px #ff5b0a14}.primary:hover{background:#ff6b20}.primary svg{width:14px;height:14px}.llm-fields{padding:20px 22px;border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1.1fr;gap:20px}.llm-fields label{display:block;color:var(--muted);font-size:11px}.llm-fields textarea{width:100%;resize:vertical;display:block;margin-top:9px;background:#0e0e0e;border:1px solid #333;border-radius:8px;color:#d2d2d2;padding:12px;font-size:11px;line-height:1.65;min-height:182px}.llm-fields .note{grid-column:1/-1;margin:0;color:#999;font-size:11px;line-height:1.6}.llm-fields .note strong{color:#ddd;font-weight:500}.helper{margin:12px 0 24px;font-size:11px;color:#828282;line-height:1.6;display:flex;gap:9px;align-items:start}.helper svg{height:14px;width:14px;margin-top:2px;color:#777}.examples{display:flex;gap:8px;align-items:center;margin:0 0 29px;flex-wrap:wrap}.examples>span{font-size:10px;color:#777;margin-right:3px}.chip,.small-button{background:#141414;border:1px solid var(--line);border-radius:6px;color:#aaa;font-size:10px;padding:7px 10px}.chip:hover,.small-button:hover{border-color:#555;color:var(--text)}.activity{display:flex;align-items:center;gap:8px;font-size:11px;line-height:1.6;color:var(--muted);margin-bottom:15px;min-height:18px}.activity.error{color:#f8aa8d}.activity.busy .activity-icon{width:10px;height:10px;border:1.5px solid #444;border-top-color:var(--orange);border-radius:50%;animation:spin .8s linear infinite}.activity:not(.busy) .activity-icon{display:none}@keyframes spin{to{transform:rotate(360deg)}}.result-panel{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0e0e0e}.result-bar{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);padding:0 16px;min-height:49px;gap:12px}.result-tabs{display:flex;gap:18px;align-self:stretch}.result-tabs button{border:0;border-bottom:2px solid transparent;background:none;font-size:11px;color:#8d8d8d;padding:15px 0 13px}.result-tabs button[aria-selected=true]{color:var(--text);border-bottom-color:var(--orange)}.result-actions{display:flex;gap:7px}.result-actions button{background:none;border:0;color:#999;font-size:10px;padding:6px}.result-actions button:hover{color:white}.empty{padding:45px 20px;text-align:center;color:#777}.empty svg{color:#555;width:30px;height:30px;margin-bottom:14px}.empty h2{font-size:13px;font-weight:500;color:#b3b3b3;margin:0 0 8px}.empty p{font-size:11px;line-height:1.7;margin:0}.output{max-height:620px;overflow:auto;min-height:170px}.code-view{padding:21px;margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;line-height:1.8;color:#bbb;tab-size:2}.document{padding:20px 22px;min-width:0}.document h3{font-size:13px;margin:0 0 8px;font-weight:500;overflow-wrap:anywhere}.source-link{display:block;font:10px "SFMono-Regular",monospace;color:#878787;text-decoration:none;overflow-wrap:anywhere;line-height:1.7;margin-bottom:17px}.source-link:hover{color:var(--orange)}.document pre{white-space:pre-wrap;overflow-wrap:anywhere;margin:0;font-size:11px;color:#bcbcbc;line-height:1.85}.comparison{display:grid;grid-template-columns:1fr 1fr}.comparison .document+.document{border-left:1px solid var(--line)}.output-label{font-size:9px;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin:0 0 17px}.record-row{border-bottom:1px solid #242424;padding:11px 0;display:grid;grid-template-columns:minmax(80px,.8fr) minmax(0,1.2fr);gap:14px;font-size:11px;line-height:1.7}.record-row dt{color:#888;overflow-wrap:anywhere}.record-row dd{margin:0;color:#ddd;white-space:pre-wrap;overflow-wrap:anywhere;font-family:"SFMono-Regular",monospace}.record{margin:0}.record-row dd.null{color:#777}.warning{color:#dba88a;background:#241b13;border:1px solid #46301e;padding:12px 15px;font-size:11px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}.result-meta{padding:12px 17px;border-top:1px solid var(--line);font:10px "SFMono-Regular",monospace;color:#858585;display:flex;gap:17px;flex-wrap:wrap;line-height:1.6}.result-meta .good{color:var(--green)}.link-list{list-style:none;margin:0;padding:0}.link-list li{padding:17px 21px;border-bottom:1px solid #222}.link-list li:last-child{border:0}.link-list a{font-size:12px;text-decoration:none;color:#ddd;overflow-wrap:anywhere;line-height:1.65}.link-list a:hover{color:var(--orange)}.link-list p{font-size:11px;line-height:1.7;color:#999;margin:7px 0 0;overflow-wrap:anywhere}.link-list small{display:block;font:10px "SFMono-Regular",monospace;color:#737373;margin-top:6px;overflow-wrap:anywhere}.job-controls{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap}.job-controls input{min-width:0;flex:1;background:#171717;border:1px solid #333;border-radius:6px;padding:8px 9px;color:#bbb;font-size:10px}.history-section{margin-top:28px}.section-label{display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#777;letter-spacing:.5px;text-transform:uppercase;margin:0 0 11px}.history-list{display:grid;gap:6px}.history-list button{display:flex;align-items:center;gap:12px;background:transparent;border:1px solid #202020;border-radius:7px;padding:11px 13px;text-align:left;font-size:11px;min-width:0}.history-list .history-op{color:#888;width:45px;flex-shrink:0}.history-list .history-input{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;color:#aaa}.history-list time{font-size:10px;color:#666;white-space:nowrap}.history-list .status{font-size:9px;color:var(--green)}.history-list .status.failed{color:#e7997a}.footer{display:flex;justify-content:space-between;margin-top:26px;padding-top:18px;border-top:1px solid #202020;font-size:10px;color:#646464;gap:15px;line-height:1.6}
 .sidebar{overflow-y:auto}.brand{flex:0 0 72px}.sidebar-bottom{flex-shrink:0}
+.agent-schema{margin-top:17px;padding-top:15px;border-top:1px solid var(--line)}.agent-schema summary{font-size:11px;color:#aaa;cursor:pointer}.agent-schema summary span{color:#777;font-size:10px;margin-left:5px}.agent-schema label{margin-top:15px}.agent-fields .agent-schema textarea{min-height:145px}
+.agent-task{resize:vertical;min-height:85px;max-height:280px;font-size:17px;line-height:1.65}.agent-fields{padding:18px 22px;border-top:1px solid var(--line)}.agent-fields label{display:block;font-size:11px;color:var(--muted)}.agent-fields textarea{display:block;width:100%;min-height:78px;resize:vertical;margin-top:10px;padding:10px 12px;border:1px solid #333;border-radius:8px;background:#0e0e0e;color:#ccc;font:11px/1.8 "SFMono-Regular",Consolas,monospace}.field-hint{color:#777;font-size:10px;line-height:1.65;margin:8px 0 0}.agent-budget{font-size:10px;line-height:1.7;color:#aaa;flex:1}.agent-budget strong{font-weight:500;color:#ddd}.agent-options{flex-wrap:wrap}.agent-progress{border:1px solid #333;border-radius:10px;background:#111;margin:0 0 18px;overflow:hidden}.progress-head{display:flex;justify-content:space-between;gap:15px;align-items:center;padding:12px 15px;border-bottom:1px solid var(--line);font-size:11px}.progress-head span{color:#999;font-size:10px;margin-left:8px}.agent-steps{list-style:none;padding:0;margin:0}.agent-step{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:9px;padding:12px 15px;border-bottom:1px solid #222;font-size:10px;line-height:1.7;align-items:start}.agent-step:last-child{border-bottom:0}.step-number{color:#686868;font-family:"SFMono-Regular",monospace}.step-detail{min-width:0}.step-tool{color:#ddd;font-size:11px}.step-input{display:block;color:#888;overflow-wrap:anywhere}.step-state{color:#aaa;font-size:9px;text-align:right;max-width:110px}.step-state.done{color:var(--green)}.step-state.failed{color:#e7997b}.agent-section{padding:20px 22px;border-bottom:1px solid var(--line);min-width:0}.agent-section:last-child{border-bottom:0}.agent-answer{font-size:12px;line-height:1.85;white-space:pre-wrap;overflow-wrap:anywhere;color:#d5d5d5;margin:0;max-width:80ch}.finding{padding:16px 0;border-bottom:1px solid #242424}.finding:last-child{padding-bottom:0;border-bottom:0}.finding p{margin:0;color:#d6d6d6;font-size:12px;line-height:1.7;overflow-wrap:anywhere}.finding blockquote{border-left:2px solid #494949;margin:12px 0;padding:0 0 0 13px;color:#999;font-size:11px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}.finding .source-link{margin-bottom:0}.agent-details{border-top:1px solid var(--line)}.agent-details summary{padding:15px 22px;font-size:11px;color:#aaa;cursor:pointer;line-height:1.6}.agent-details summary:hover{color:#eee}.agent-details .document{border-top:1px solid var(--line)}.history-list .status.incomplete{color:#dba88a}
 @media(min-width:1500px){.main{padding-top:65px}.intro{margin-bottom:35px}.intro h1{font-size:36px}.main{width:1100px}}
 @media(max-width:1000px){.sidebar{width:185px}.brand{padding-left:20px}.app{margin-left:185px}.main{padding:32px 26px 24px}.topbar{padding:0 26px}.keyboard{display:none}.tool-tabs button{padding:9px 14px}.llm-fields{grid-template-columns:1fr}.llm-fields textarea{min-height:115px}.comparison{grid-template-columns:1fr}.comparison .document+.document{border-left:0;border-top:1px solid var(--line)}}
-@media(max-width:680px){.sidebar{display:none}.app{margin-left:0}.topbar{height:59px;padding:0 19px}.workspace-name{font-size:11px;gap:7px}.workspace-name .sub,.workspace-name .slash{display:none}.connection{font-size:10px;padding-right:0}.main{padding:30px 18px 22px}.intro{margin-bottom:23px}.intro h1{font-size:27px;letter-spacing:-1px}.intro p{font-size:11px;max-width:275px}.tool-tabs{width:100%;gap:2px;padding:4px;margin-bottom:14px}.tool-tabs button{padding:10px 0;justify-content:center;gap:7px;flex:1;font-size:11px}.tool-tabs svg{width:14px;height:14px}.input-area{padding:19px 17px}.target{font-size:15px}.field-label{font-size:9px}.options-row{padding:13px 15px;gap:10px}.llm-label{font-size:11px;gap:7px}.optional{display:none}.primary{font-size:11px;padding:10px 12px;gap:11px}.llm-fields{padding:17px 15px;gap:16px}.examples{gap:6px;margin-bottom:23px}.chip{font-size:9px;padding:7px 8px}.examples>span{width:100%;margin-bottom:3px}.result-bar{padding:0 13px;gap:8px}.result-tabs{gap:15px}.result-actions button{font-size:9px}.document{padding:18px 16px}.footer{font-size:9px}.history-list time{display:none}.job-controls input{flex-basis:100%}.output{max-height:560px}.result-meta{gap:12px}.limit-wrap{font-size:11px}}
+@media(max-width:680px){.sidebar{display:none}.app{margin-left:0}.topbar{height:59px;padding:0 19px}.workspace-name{font-size:11px;gap:7px}.workspace-name .sub,.workspace-name .slash{display:none}.connection{font-size:10px;padding-right:0}.main{padding:30px 18px 22px}.intro{margin-bottom:23px}.intro h1{font-size:27px;letter-spacing:-1px}.intro p{font-size:11px;max-width:275px}.tool-tabs{width:100%;gap:2px;padding:4px;margin-bottom:14px}.tool-tabs button{padding:10px 0;justify-content:center;gap:7px;flex:1;font-size:11px}.tool-tabs svg{width:14px;height:14px}.input-area{padding:19px 17px}.target{font-size:15px}.field-label{font-size:9px}.options-row{padding:13px 15px;gap:10px}.llm-label{font-size:11px;gap:7px}.optional{display:none}.primary{font-size:11px;padding:10px 12px;gap:11px}.llm-fields{padding:17px 15px;gap:16px}.examples{gap:6px;margin-bottom:23px}.chip{font-size:9px;padding:7px 8px}.examples>span{width:100%;margin-bottom:3px}.result-bar{padding:0 13px;gap:8px}.result-tabs{gap:15px}.result-actions button{font-size:9px}.document{padding:18px 16px}.footer{font-size:9px}.history-list time{display:none}.job-controls input{flex-basis:100%}.output{max-height:560px}.result-meta{gap:12px}.limit-wrap{font-size:11px}.agent-task{font-size:15px;min-height:105px}.agent-fields{padding:17px 15px}.agent-options .agent-budget{flex-basis:100%}.agent-options .primary{margin-left:auto}.agent-options .limit-wrap{flex:1}.agent-section{padding:18px 16px}.agent-details summary{padding:14px 16px}.progress-head{padding:11px 12px}.progress-head span{display:block;margin-left:0;margin-top:3px}.agent-step{padding:11px 12px;grid-template-columns:16px minmax(0,1fr) auto;gap:7px}.step-state{max-width:70px}.tool-tabs button{gap:5px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -19,6 +21,7 @@
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
 <symbol id="i-map" viewBox="0 0 24 24"><path d="m3 5 6-2 6 2 6-2v16l-6 2-6-2-6 2zm6-2v16m6-14v16"/></symbol>
 <symbol id="i-crawl" viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><path d="M12 7v5M5 17v-5h14v5"/></symbol>
+<symbol id="i-agent" viewBox="0 0 24 24"><path d="m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5zM19 3v4m-2-2h4"/></symbol>
 <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
 <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/></symbol>
 <symbol id="i-chip" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4m6-4v4M9 18v4m6-4v4M2 9h4m-4 6h4m12-6h4m-4 6h4M10 10h4v4h-4z"/></symbol>
@@ -31,9 +34,10 @@
 <button data-tool="search" aria-current="false"><svg><use href="#i-search"/></svg>Search the web</button>
 <button data-tool="map" aria-current="false"><svg><use href="#i-map"/></svg>Map a website</button>
 <button data-tool="crawl" aria-current="false"><svg><use href="#i-crawl"/></svg>Crawl a website</button>
+<button data-tool="agent" aria-current="false"><svg><use href="#i-agent"/></svg>Agent</button>
 </nav>
 <p class="nav-label">In this session</p><nav class="nav"><button id="history-link"><svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h16"/></svg>Recent requests</button></nav>
-<div class="sidebar-bottom"><div class="budget"><div class="budget-top"><svg><use href="#i-chip"/></svg>LLM extraction budget</div><strong>$5<small>/ month · approved limit</small></strong><p>Extraction is off by default.<br>Actual usage appears with each run.<br>Retrieval costs are separate.</p></div><p class="local-note"><span class="dot"></span>Local workspace · private Pi gateway</p></div>
+<div class="sidebar-bottom"><div class="budget"><div class="budget-top"><svg><use href="#i-chip"/></svg>LLM budget</div><strong>$20<small>/ month · approved limit</small></strong><p>Used by extraction and Agent.<br>Actual usage appears with each run.<br>Retrieval costs are separate.</p></div><p class="local-note"><span class="dot"></span>Local workspace · private Pi gateway</p></div>
 </aside>
 <div class="app">
 <header class="topbar"><div class="workspace-name"><span class="workspace-icon">Pi</span>Personal workspace<span class="slash">/</span><span class="sub">Playground</span></div><button class="connection" id="connection" title="Check the Pi gateway connection"><span class="dot"></span><span id="connection-label">Connecting to Pi…</span></button></header>
@@ -44,21 +48,26 @@
 <button data-tool="search" aria-pressed="false"><svg><use href="#i-search"/></svg>Search</button>
 <button data-tool="map" aria-pressed="false"><svg><use href="#i-map"/></svg>Map</button>
 <button data-tool="crawl" aria-pressed="false"><svg><use href="#i-crawl"/></svg>Crawl</button>
+<button data-tool="agent" aria-pressed="false"><svg><use href="#i-agent"/></svg>Agent</button>
 </div>
 <form id="request-form" class="composer">
-<div class="input-area"><label for="target" class="field-label" id="input-label">Page URL</label><input id="target" class="target" type="url" autocomplete="off" spellcheck="false" required placeholder="https://example.com" aria-describedby="tool-help"></div>
+<div class="input-area"><label for="target" class="field-label" id="input-label">Page URL</label><input id="target" class="target" type="url" autocomplete="off" spellcheck="false" required placeholder="https://example.com" aria-describedby="tool-help"><textarea id="agent-task" class="target agent-task" maxlength="1200" placeholder="What would you like the agent to find?" aria-describedby="tool-help" hidden disabled></textarea></div>
+<div class="agent-fields" id="agent-fields" hidden><label for="agent-urls">Starting URLs <span class="optional">optional</span><textarea id="agent-urls" spellcheck="false" maxlength="6144" placeholder="https://example.com" aria-describedby="agent-urls-hint"></textarea></label><p class="field-hint" id="agent-urls-hint">One URL per line, up to 3. Leave blank to discover sources through search.</p>
+<details class="agent-schema"><summary>Result schema <span>optional</span></summary><label for="agent-schema">JSON Schema<textarea id="agent-schema" class="mono" spellcheck="false" maxlength="16384" placeholder='{"type":"object","properties":{"answer":{"type":"string"}},"required":["answer"]}' aria-describedby="agent-schema-hint"></textarea></label><p class="field-hint" id="agent-schema-hint">Leave blank for a written answer. Add a JSON object schema to also return structured results.</p></details></div>
 <div class="llm-fields" id="llm-fields" hidden>
 <label>What should the model extract?<textarea id="prompt" maxlength="4000">Extract the page title, a short factual summary, and the main topics. Use only information on this page. Use null when a fact is absent.</textarea></label>
 <label for="schema">JSON schema <textarea id="schema" class="mono" spellcheck="false" aria-label="JSON schema"></textarea></label>
 <p class="note"><strong>The Pi retrieves the page; the remote model turns its text into these fields.</strong> This uses the existing LLM budget. Markdown and structured JSON come back together.</p>
 </div>
-<div class="options-row"><label class="llm-label" id="llm-control"><span class="switch"><input type="checkbox" id="llm" aria-controls="llm-fields"><span class="track"></span></span>LLM extraction<span class="optional">optional</span></label>
+<div class="options-row" id="options-row"><label class="llm-label" id="llm-control"><span class="switch"><input type="checkbox" id="llm" aria-controls="llm-fields"><span class="track"></span></span>LLM extraction<span class="optional">optional</span></label>
+<span class="agent-budget" id="agent-budget" hidden><strong>Uses GPT-6.1-Sol · xhigh</strong><br>Existing LLM budget</span>
 <label class="limit-wrap" id="limit-control" hidden><span id="limit-label">Results</span><input type="number" id="limit" min="1" max="10" value="5" aria-label="Maximum results or pages"></label>
 <button class="primary" type="submit" id="run"><span id="run-label">Run scrape</span><svg><use href="#i-arrow"/></svg></button></div>
 </form>
 <p class="helper" id="tool-help"><svg aria-hidden="true"><use href="#i-info"/></svg><span id="help-text">Returns readable Markdown. Turn on LLM extraction to also get structured fields.</span></p>
 <div class="examples"><span>TRY AN EXAMPLE</span><button class="chip" data-example="python">Python release</button><button class="chip" data-example="example">Example page</button><button class="chip" id="llm-example">Try LLM extraction ↗</button></div>
 <div class="activity" id="activity" role="status" aria-live="polite"><span class="activity-icon"></span><span id="activity-text">Ready when you are. Requests run on your real Pi.</span></div>
+<section class="agent-progress" id="agent-progress" hidden aria-label="Live Agent activity"><div class="progress-head"><div>Agent activity <span>Actual search and scrape calls</span></div><button type="button" class="small-button" id="cancel-agent">Stop agent</button></div><ol class="agent-steps" id="agent-steps" role="log" aria-live="polite" aria-relevant="additions text"></ol></section>
 <section class="result-panel" aria-label="Live response">
 <div class="result-bar"><div class="result-tabs" role="tablist" aria-label="Response view"><button role="tab" aria-selected="true" data-view="content">Content</button><button role="tab" aria-selected="false" data-view="json">JSON</button><button role="tab" aria-selected="false" data-view="request">Request</button></div><div class="result-actions"><button id="copy" type="button" disabled>Copy</button><button id="save" type="button" disabled>Save JSON ↓</button></div></div>
 <div class="job-controls" id="job-controls" hidden><input id="job-id" aria-label="Crawl job ID" placeholder="Crawl job ID"><button type="button" class="small-button" id="refresh-job">Refresh</button><button type="button" class="small-button" id="cancel-job">Cancel crawl</button></div>
@@ -78,26 +87,36 @@ const config = {
 scrape:{label:'Page URL',placeholder:'https://example.com',help:'Returns readable Markdown. Turn on LLM extraction to also get structured fields.',limit:5},
 search:{label:'Search query',placeholder:'What would you like to find?',help:'Searches through your Pi’s SearXNG service. Returns web results without an extraction model.',limit:5},
 map:{label:'Website URL',placeholder:'https://example.com',help:'Discovers links from the site’s sitemap and page links. No extraction model is called.',limit:10},
-crawl:{label:'Starting URL',placeholder:'https://example.com',help:'Starts a durable crawl with a small page limit. Use Refresh to fetch progress and results, or Cancel to stop it.',limit:3}
+crawl:{label:'Starting URL',placeholder:'https://example.com',help:'Starts a durable crawl with a small page limit. Use Refresh to fetch progress and results, or Cancel to stop it.',limit:3},
+agent:{label:'What should the agent find?',placeholder:'Find the release date and key changes in Python 3.14.0. Cite official sources.',help:'Searches, reads pages, and follows up using your Pi and a remote model. Up to 5 pages, 3 searches, 8 tool calls, and 6 minutes. Keep this tab open. Stopping ends future steps; dispatched work may still use budget.',limit:3}
 };
-let tool='scrape', view='content', busy=false, current=null, history=[], started=0, tick=null, pendingCrawl=null;
-let drafts={scrape:'',search:'',map:'',crawl:''};
+let tool='scrape', view='content', busy=false, current=null, history=[], started=0, tick=null, pendingCrawl=null, activeAgent=null;
+let drafts={scrape:'',search:'',map:'',crawl:'',agent:''};
 $('schema').value=JSON.stringify(defaultSchema,null,2);
 function selectTool(next){
-  if(busy)return;
-  drafts[tool]=$('target').value;tool=next;
+  if(busy||!config[next])return;
+  drafts[tool]=$(tool==='agent'?'agent-task':'target').value;tool=next;
+  const isAgent=tool==='agent';
   document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===tool;if(b.hasAttribute('aria-pressed'))b.setAttribute('aria-pressed',on);else b.setAttribute('aria-current',on);});
-  $('target').type=tool==='search'?'text':'url';$('target').value=drafts[tool];$('target').placeholder=config[tool].placeholder;
-  $('input-label').textContent=config[tool].label;$('help-text').textContent=config[tool].help;
+  $('target').type=tool==='search'?'text':'url';$('target').value=isAgent?'':drafts[tool];$('target').placeholder=config[tool].placeholder;
+  $('target').hidden=isAgent;$('target').required=!isAgent;$('target').disabled=isAgent;
+  $('agent-task').hidden=!isAgent;$('agent-task').required=isAgent;$('agent-task').disabled=!isAgent;$('agent-task').value=drafts.agent;
+  $('input-label').htmlFor=isAgent?'agent-task':'target';$('input-label').textContent=config[tool].label;$('help-text').textContent=config[tool].help;
   $('llm-control').hidden=tool!=='scrape';$('limit-control').hidden=tool==='scrape';$('llm-fields').hidden=tool!=='scrape'||!$('llm').checked;
-  $('limit-label').textContent=tool==='crawl'?'Max. pages':'Results';$('limit').value=config[tool].limit;
+  $('agent-fields').hidden=!isAgent;$('agent-budget').hidden=!isAgent;$('options-row').classList.toggle('agent-options',isAgent);
+  $('limit-label').textContent=['crawl','agent'].includes(tool)?'Max. pages':'Results';$('limit').max=isAgent?'5':'10';$('limit').value=config[tool].limit;
+  $('llm-example').hidden=isAgent;document.querySelector('[data-example="example"]').textContent=isAgent?'Find official sources':'Example page';
   $('run-label').textContent='Run '+tool;$('job-controls').hidden=tool!=='crawl';
 }
 document.querySelectorAll('[data-tool]').forEach(b=>b.addEventListener('click',()=>selectTool(b.dataset.tool)));
-$('llm').addEventListener('change',()=>{$('llm-fields').hidden=!$('llm').checked;});
+$('llm').addEventListener('change',()=>{$('llm-fields').hidden=tool!=='scrape'||!$('llm').checked;});
 function useExample(which,withLLM=false){
   if(busy)return;
   if(withLLM)selectTool('scrape');
+  if(tool==='agent'){
+    $('agent-task').value=which==='python'?'Find the release date and key changes in Python 3.14.0. Cite official sources.':'Find the official Python documentation for free-threaded Python. Explain what it supports and cite the sources.';
+    $('agent-urls').value=which==='python'?sampleURL:'';$('limit').value=which==='python'?'1':'3';$('agent-task').focus();return;
+  }
   $('target').value=tool==='search'?(which==='python'?'Python 3.14 release notes':'example domain'):(which==='python'?sampleURL:'https://example.com');
   if(withLLM){
     $('llm').checked=true;$('llm').dispatchEvent(new Event('change'));
@@ -124,10 +143,10 @@ async function checkConnection(){
 }
 $('connection').addEventListener('click',checkConnection);
 function setBusy(value){
-  busy=value;$('run').disabled=value;$('target').disabled=value;$('llm').disabled=value;
-  $('refresh-job').disabled=value;$('cancel-job').disabled=value;
+  busy=value;$('run').disabled=value;$('target').disabled=value||tool==='agent';$('agent-task').disabled=value||tool!=='agent';$('llm').disabled=value;
+  for(const id of ['limit','prompt','schema','agent-urls','agent-schema','refresh-job','cancel-job'])$(id).disabled=value;
   document.querySelectorAll('[data-tool],.chip').forEach(b=>b.disabled=value);
-  if(value){started=Date.now();tick=setInterval(()=>activity('Running on your Pi · '+Math.floor((Date.now()-started)/1000)+'s elapsed. Please keep this tab open.','busy'),1000);}
+  if(value){started=Date.now();tick=setInterval(()=>activity((tool==='agent'?'Agent working':'Running on your Pi')+' · '+Math.floor((Date.now()-started)/1000)+'s elapsed. Please keep this tab open.','busy'),1000);}
   else{clearInterval(tick);$('run-label').textContent='Run '+tool;}
 }
 function node(tag,text,className){const el=document.createElement(tag);if(text!==undefined)el.textContent=text;if(className)el.className=className;return el;}
@@ -149,6 +168,7 @@ function documentView(doc,heading){
 }
 function renderContent(container,r){
   const data=r.data;
+  if(current.operation==='agent'){renderAgent(container,data??{status:'failed',error:r.error});return;}
   if(r.status>=400||data?.success===false||r.error){
     container.append(node('div',(data?.code?data.code+'\n':'')+(data?.error??r.error??'The request failed.'),'warning'));return;
   }
@@ -184,19 +204,50 @@ function renderContent(container,r){
   }
   container.append(node('pre',format(data),'code-view'));
 }
+function renderAgent(container,data){
+  if(!data||typeof data!=='object'){container.append(node('div','No Agent result was returned. See JSON for the response.','warning'));return;}
+  if(data.status==='running'){container.append(node('div','The agent is working. Search and scrape activity appears above as it arrives.','document'));return;}
+  if(data.status!=='completed')container.append(node('div',data.status==='cancelled'?'This Agent session was stopped. Only results received before it stopped are shown.':data.status==='partial'?'The agent returned a partial result. Check its limitations below.':(data.error??data.code??'The agent did not complete this task.'),'warning'));
+  if(data.answer){const answer=node('article',undefined,'agent-section');answer.append(node('p','Answer','output-label'),node('p',data.answer,'agent-answer'));container.append(answer);}
+  if(Array.isArray(data.findings)&&data.findings.length){
+    const findings=node('section',undefined,'agent-section');findings.append(node('p','Grounded findings','output-label'));
+    for(const finding of data.findings){const item=node('article',undefined,'finding');item.append(node('p',finding.claim??''));if(finding.quote)item.append(node('blockquote',finding.quote));if(finding.source_url)item.append(safeLink(finding.source_url,finding.source_url,'source-link'));findings.append(item);}container.append(findings);
+  }
+  if(Array.isArray(data.sources)&&data.sources.length){
+    const sources=node('section',undefined,'agent-section');sources.append(node('p','Sources','output-label'));
+    for(const source of data.sources)sources.append(safeLink(source.url,source.title||source.url,'source-link'));container.append(sources);
+  }
+  if(data.result!==undefined){const structured=node('details',undefined,'agent-details');structured.append(node('summary','Structured result'),node('pre',format(data.result),'code-view'));container.append(structured);}
+  if(Array.isArray(data.limitations)&&data.limitations.length)container.append(node('div',data.limitations.map(x=>typeof x==='string'?x:format(x)).join('\n'),'warning'));
+  if(Array.isArray(data.steps)&&data.steps.length){const trace=node('details',undefined,'agent-details');trace.open=data.status!=='completed';trace.append(node('summary','Tool activity ('+data.steps.length+')'),agentStepsView(data.steps));container.append(trace);}
+  if(Array.isArray(data.documents)&&data.documents.length){const raw=node('details',undefined,'agent-details');raw.append(node('summary','Source documents ('+data.documents.length+')'));for(const doc of data.documents)raw.append(documentView({markdown:doc.markdown,metadata:{title:doc.title,sourceURL:doc.url}}));container.append(raw);}
+}
+function agentStepsView(steps){
+  const list=node('ol',undefined,'agent-steps');
+  (Array.isArray(steps)?steps:[]).forEach((step,index)=>{
+    const li=node('li',undefined,'agent-step'),detail=node('div',undefined,'step-detail');
+    detail.append(node('span',step.tool==='search'?'Search':'Read page','step-tool'),node('span',step.input??'','step-input'));
+    const state=step.state==='done'?'Done':step.state==='failed'?'Failed':activeAgent?'Running':'Last seen running';
+    li.append(node('span',String(step.index??index+1),'step-number'),detail,node('span',state+(typeof step.elapsedMs==='number'?' · '+(step.elapsedMs/1000).toFixed(1)+'s':''),'step-state '+(step.state==='done'?'done':step.state==='failed'?'failed':'')));list.append(li);
+  });
+  return list;
+}
 function render(){
   if(!current)return;
   const r=current.result;$('output').replaceChildren();
   if(view==='content')renderContent($('output'),r);else $('output').append(node('pre',jsonText(),'code-view'));
-  const meta=$('result-meta');meta.replaceChildren(node('span','HTTP '+r.status,r.status<400?'good':''));
-  if(r.elapsedMs!==undefined)meta.append(node('span',(r.elapsedMs/1000).toFixed(2)+'s'));
-  const x=r.data?.fcpi?.extraction;
-  if(x){
-    meta.append(node('span',x.model??'LLM extraction'));
-    const u=x.usage??{};const cost=u.costMicroUsd;
-    if(cost!==undefined)meta.append(node('span','$'+(cost/1000000).toFixed(6)+' model cost'));
-    if(u.promptTokens!==undefined)meta.append(node('span',u.promptTokens+' in / '+(u.completionTokens??0)+' out'));
-    if(u.calls!==undefined)meta.append(node('span',u.calls+' model call'+(u.calls===1?'':'s')+(u.reused?' · '+u.reused+' reused':'')));
+  const meta=$('result-meta');const isAgent=current.operation==='agent',agentComplete=r.data?.status==='completed';
+  meta.replaceChildren(node('span',r.status?'HTTP '+r.status:'Agent workflow',r.status>0&&r.status<400&&(!isAgent||agentComplete)?'good':''));
+  if(typeof r.elapsedMs==='number')meta.append(node('span',(r.elapsedMs/1000).toFixed(2)+'s'));
+  const x=isAgent?r.data:r.data?.fcpi?.extraction;
+  if(x&&(isAgent||x.model)){
+    if(x.model)meta.append(node('span',x.model));
+    const effort=x.reasoningEffort??x.reasoning?.effort;if(effort)meta.append(node('span',effort+' reasoning requested'));
+    const u=x.usage??{},known=value=>typeof value==='number'&&Number.isFinite(value);
+    if(u.costMicroUsd!==undefined)meta.append(node('span',known(u.costMicroUsd)?'$'+(u.costMicroUsd/1000000).toFixed(6)+' model cost':'Model cost not reported'));
+    if(u.promptTokens!==undefined||u.completionTokens!==undefined)meta.append(node('span',(known(u.promptTokens)?u.promptTokens:'not reported')+' in / '+(known(u.completionTokens)?u.completionTokens:'not reported')+' out'));
+    if(u.calls!==undefined)meta.append(node('span',known(u.calls)?u.calls+' model call'+(u.calls===1?'':'s')+(known(u.reused)&&u.reused?' · '+u.reused+' reused':''):'Model call count not reported'));
+    if(isAgent&&!x.usage)meta.append(node('span','Model usage unconfirmed'));
     if(x.missingRequired?.length)$('output').append(node('div','Required fields absent from source: '+x.missingRequired.join(', '),'warning'));
   }else meta.append(node('span',current.llm?'LLM requested · see response':'No extraction model'));
   if(r.data?.status)meta.append(node('span',r.data.status+(r.data.total!==undefined?' · '+(r.data.completed??0)+'/'+r.data.total+' pages':'')));
@@ -207,11 +258,68 @@ document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',(
 function renderHistory(){
   $('history').hidden=!history.length;$('history-list').replaceChildren();
   history.forEach(item=>{
-    const button=node('button');button.type='button';const failed=item.result.status>=400||item.result.data?.success===false;
-    button.append(node('span',item.operation,'history-op'),node('span',item.input+(item.llm?' · LLM':''),'history-input'),node('span',failed?'ERROR':'OK','status'+(failed?' failed':'')),node('time',new Date(item.at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})+' ET'));
+    const button=node('button');button.type='button';const outcome=resultOutcome(item);
+    button.append(node('span',item.operation,'history-op'),node('span',item.input+(item.llm?' · LLM':''),'history-input'),node('span',outcome.label,'status '+outcome.className),node('time',new Date(item.at).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})+' ET'));
     button.addEventListener('click',()=>{if(busy)return;current=item;render();activity('Showing a previous response. No new request was sent.');});$('history-list').append(button);
   });
 }
+function resultOutcome(item){
+  const state=item.result.data?.status;
+  if(state==='cancelled')return {label:'CANCELLED',className:'incomplete'};
+  if(state==='partial')return {label:'PARTIAL',className:'incomplete'};
+  if(state==='failed'||item.result.status>=400||item.result.data?.success===false||item.result.error)return {label:'ERROR',className:'failed'};
+  if(item.operation==='agent'&&state!=='completed')return {label:'PARTIAL',className:'incomplete'};
+  return {label:'OK',className:''};
+}
+async function runAgent(payload){
+  const controller=new AbortController();activeAgent={controller,cancelled:false,timedOut:false,steps:[]};
+  const session=activeAgent;
+  current={operation:'agent',input:payload.prompt,llm:true,at:Date.now(),result:{status:0,data:{status:'running',steps:session.steps},request:{method:'WORKFLOW',path:'fcpi search → scrape + JSON',body:payload}}};
+  setBusy(true);$('agent-progress').hidden=false;$('agent-steps').replaceChildren();$('cancel-agent').disabled=false;$('cancel-agent').textContent='Stop agent';render();activity('Starting the Agent task on your Pi…','busy');
+  const timeout=setTimeout(()=>{session.timedOut=true;controller.abort();},370000);
+  let finalResult=null;
+  function receive(line){
+    if(!line.trim())return;
+    const event=JSON.parse(line);
+    if(event.type==='step'&&event.step&&!finalResult){
+      const step=event.step,key=step.id??step.index;
+      const index=key===undefined?-1:session.steps.findIndex(x=>(x.id??x.index)===key);
+      if(index<0)session.steps.push({...step});else session.steps[index]={...session.steps[index],...step};
+      $('agent-steps').replaceChildren(...agentStepsView(session.steps).children);
+    }else if(event.type==='result'&&event.result&&!finalResult)finalResult=event.result;
+  }
+  try{
+    const response=await fetch('/api/agent',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(payload),signal:controller.signal});
+    if(!response.ok||!response.headers.get('content-type')?.includes('application/x-ndjson')){
+      const result=await response.json();result.status??=response.status;finalResult=result;
+    }else{
+      if(!response.body)throw new Error('Missing response stream');
+      const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='';
+      for(;;){
+        const chunk=await reader.read();if(chunk.done)break;
+        buffer+=decoder.decode(chunk.value,{stream:true});
+        let newline;while((newline=buffer.indexOf('\n'))>=0){receive(buffer.slice(0,newline));buffer=buffer.slice(newline+1);}
+      }
+      buffer+=decoder.decode();if(buffer.trim())receive(buffer);
+      if(!finalResult)throw new Error('The stream ended without a final result');
+    }
+  }catch{
+    if(!finalResult){
+      const state=session.cancelled?'cancelled':session.steps.length?'partial':'failed';
+      const message=session.cancelled?'The browser stopped this Agent session.':session.timedOut?'The Agent response timed out.':'The Agent connection ended before a final response arrived.';
+      finalResult={status:0,elapsedMs:Date.now()-started,data:{success:false,status:state,steps:session.steps,limitations:[message+' Already dispatched retrieval or model work may finish and consume budget. No automatic retry was made.']},request:current.result.request};
+    }
+  }finally{
+    clearTimeout(timeout);activeAgent=null;setBusy(false);$('agent-progress').hidden=true;
+    if(finalResult.data&&typeof finalResult.data==='object'&&!Array.isArray(finalResult.data))finalResult.data.steps??=session.steps;
+    finalResult.request??=current.result.request;
+    current.result=finalResult;history.unshift(current);history=history.slice(0,8);render();renderHistory();
+    const state=finalResult.data?.status;
+    activity(state==='completed'?'Agent task complete. Answer, sources, and actual usage are below.':state==='cancelled'?'Agent stopped. Previously dispatched work may still consume budget.':state==='partial'?'Agent returned a partial result. Check its limitations below.':'The Agent task did not complete. See the response below.',state==='completed'?'':'error');
+  }
+}
+$('cancel-agent').addEventListener('click',()=>{if(activeAgent){activeAgent.cancelled=true;$('cancel-agent').disabled=true;$('cancel-agent').textContent='Stopping…';activeAgent.controller.abort();}});
+window.addEventListener('pagehide',()=>{if(activeAgent)activeAgent.controller.abort();});
 async function submit(endpoint,payload,description){
   setBusy(true);activity('Sending '+description+' to your Pi…','busy');
   try{
@@ -224,6 +332,20 @@ async function submit(endpoint,payload,description){
 }
 $('request-form').addEventListener('submit',event=>{
   event.preventDefault();if(busy)return;
+  if(tool==='agent'){
+    const urls=$('agent-urls').value.split(/\r?\n/).map(x=>x.trim()).filter(Boolean),prompt=$('agent-task').value.trim(),maxPages=Number($('limit').value);
+    if(!prompt){activity('Describe the task before running the agent.','error');$('agent-task').focus();return;}
+    if(prompt.length>1200){activity('Keep the Agent task to 1,200 characters or fewer.','error');$('agent-task').focus();return;}
+    if(urls.length>3){activity('Use up to 3 starting URLs, one per line.','error');$('agent-urls').focus();return;}
+    for(const url of urls){let parsed;try{parsed=new URL(url);}catch{}if(!parsed||!['http:','https:'].includes(parsed.protocol)||parsed.username||parsed.password){activity('Starting URLs must be HTTP or HTTPS URLs without embedded credentials.','error');$('agent-urls').focus();return;}}
+    if(!Number.isInteger(maxPages)||maxPages<1||maxPages>5){activity('Choose a maximum of 1–5 pages.','error');$('limit').focus();return;}
+    const payload={prompt,urls,maxPages},rawSchema=$('agent-schema').value.trim();
+    if(rawSchema){
+      try{payload.schema=JSON.parse(rawSchema);}catch{activity('The Agent result schema is invalid JSON. Fix it before running.','error');$('agent-schema').focus();return;}
+      if(!payload.schema||typeof payload.schema!=='object'||Array.isArray(payload.schema)){activity('The Agent result schema must be a JSON object.','error');$('agent-schema').focus();return;}
+    }
+    runAgent(payload);return;
+  }
   const payload={operation:tool,input:$('target').value.trim(),limit:Number($('limit').value),llm:tool==='scrape'&&$('llm').checked};
   if(payload.llm){try{payload.schema=JSON.parse($('schema').value);payload.prompt=$('prompt').value;}catch{activity('The JSON schema is invalid. Fix it before running.','error');$('schema').focus();return;}}
   if(tool==='crawl'){

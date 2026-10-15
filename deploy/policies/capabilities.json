@@ -62,7 +62,7 @@
       "video": "media extraction is not offered (spec §6)"
     },
     "objects": {
-      "json": { "schema": { "type": "schema", "required": true }, "prompt": { "type": "string", "maxLength": 4000 } },
+      "json": { "schema": { "type": "schema", "required": true }, "prompt": { "type": "string", "maxLength": 4000 }, "model": { "type": "const", "value": "gpt-6.1-sol" }, "reasoningEffort": { "type": "const", "value": "xhigh" } },
       "screenshot": { "fullPage": { "type": "boolean" } }
     }
   },
