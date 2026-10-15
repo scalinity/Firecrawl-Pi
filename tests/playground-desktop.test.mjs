@@ -38,14 +38,20 @@ test('packaged runtime starts independently and closes sockets on parent EOF', {
   assert.equal((await fetch(url, { headers: { Origin: 'https://example.com' } })).status, 403);
   // Hold a partially sent request open: parent exit must not wait for its body timeout.
   const pending = http.request(new URL('/api/run', url), {
-    method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': '100' }
+    method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': '100', Expect: '100-continue' }
   });
   pending.on('error', () => {});
+  const accepted = once(pending, 'continue');
   pending.flushHeaders();
-  pending.write('{');
+  await accepted;
+  await new Promise((resolveWrite, reject) => pending.write('{', error => error ? reject(error) : resolveWrite()));
+  assert.ok(pending.socket && !pending.socket.destroyed);
+  const closed = new Promise(resolveClose => pending.once('close', resolveClose));
+  const stopping = performance.now();
   child.stdin.end();
   const [code] = await exited;
-  pending.destroy();
+  await closed;
+  assert.ok(performance.now() - stopping < 3000, 'shutdown must close an established request within three seconds');
   assert.equal(code, 0, errors);
   await assert.rejects(fetch(url));
 });
