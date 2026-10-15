@@ -1,0 +1,76 @@
+utc=2026-10-15T21:33:18Z source_commit=dacb577644efaa092cb67f7dc7d6b31c2b98c296
+mem_available_kib_before=4498256
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 759B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.1s
+
+#4 [internal] load build context
+#4 transferring context: 371.23kB done
+#4 DONE 0.1s
+
+#5 [1/5] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.1s done
+#5 DONE 0.2s
+
+#6 [2/5] WORKDIR /srv/retrieval
+#6 CACHED
+
+#7 [3/5] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts --no-audit && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 1.251 
+#8 1.251 added 16 packages in 961ms
+#8 1.253 npm notice
+#8 1.253 npm notice New major version of npm available! 10.9.9 -> 12.2.0
+#8 1.253 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#8 1.253 npm notice To update run: npm install -g npm@12.2.0
+#8 1.253 npm notice
+#8 1.427 npm warn using --force Recommended protections disabled.
+#8 1.644 v22.23.3
+#8 1.997 fcpi-retrieval@0.5.0 /srv/retrieval
+#8 1.997 +-- pg@8.23.0
+#8 1.997 | +-- pg-cloudflare@1.4.0
+#8 1.997 | +-- pg-connection-string@2.14.0
+#8 1.997 | +-- UNMET OPTIONAL DEPENDENCY pg-native@>=3.0.1
+#8 1.997 | +-- pg-pool@3.14.0
+#8 1.997 | | `-- pg@8.23.0 deduped
+#8 1.997 | +-- pg-protocol@1.16.0
+#8 1.997 | +-- pg-types@2.2.0
+#8 1.997 | | +-- pg-int8@1.0.1
+#8 1.997 | | +-- postgres-array@2.0.0
+#8 1.997 | | +-- postgres-bytea@1.0.1
+#8 1.997 | | +-- postgres-date@1.0.7
+#8 1.997 | | `-- postgres-interval@1.2.0
+#8 1.997 | |   `-- xtend@4.0.2
+#8 1.997 | `-- pgpass@1.0.5
+#8 1.997 |   `-- split2@4.2.0
+#8 1.997 `-- tldts@7.4.15
+#8 1.997   `-- tldts-core@7.4.15
+#8 1.997 
+#8 DONE 3.7s
+
+#9 [5/5] COPY src ./src
+#9 DONE 0.5s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 0.5s done
+#10 exporting manifest sha256:300b999ea383a92dd06489f432941248dd9d165bcda26099d09e3d0b0da07046 0.0s done
+#10 exporting config sha256:743a19cad0bedaaa5e7f931cc08eb8c1aacd513f54c3a9f5d08691462ecc09c1 0.0s done
+#10 naming to docker.io/fcpi/retrieval:serper-20261015 done
+#10 unpacking to docker.io/fcpi/retrieval:serper-20261015
+#10 unpacking to docker.io/fcpi/retrieval:serper-20261015 0.2s done
+#10 DONE 0.8s
+image_id=sha256:300b999ea383a92dd06489f432941248dd9d165bcda26099d09e3d0b0da07046 os=linux arch=arm64 size=355327435 user=3310:3310
+mem_available_kib_after=4433504
