@@ -1,6 +1,7 @@
 // The native parent owns stdin. EOF also covers an unexpected parent exit.
 import { startServer } from './server.mjs';
 
+if (Number(process.versions.node.split('.')[0]) < 22) throw Error('FCPI_NODE_TOO_OLD');
 const server = await startServer({ port: 0 });
 let stopping = false;
 function stop() {
