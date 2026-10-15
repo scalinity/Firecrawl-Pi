@@ -341,7 +341,8 @@ async function submit(endpoint,payload,description){
   setBusy(true);activity('Sending '+description+' to your Pi…','busy');
   try{
     const result=await api(endpoint,payload);current={operation:payload.operation??'crawl',input:payload.input??payload.id,llm:payload.llm??false,result,at:Date.now()};
-    if(payload.operation==='crawl'&&result.data?.id)pendingCrawl=null;
+    if(payload.operation==='crawl'&&(result.data?.id||
+      result.status===400&&typeof result.error==='string'&&!('data' in result)))pendingCrawl=null;
     history.unshift(current);history=history.slice(0,8);render();renderHistory();
     activity(result.status>=400||result.data?.success===false?(result.data?.code??'Request failed')+' · see the response below.':'Response received from your Pi.',result.status>=400||result.data?.success===false?'error':'');
   }catch(e){activity(e.name==='TimeoutError'?'The local request timed out. Work may still be running on the Pi; no automatic retry was made.':'The local server could not complete the request. Keep the playground server running; no automatic retry was made.','error');}
