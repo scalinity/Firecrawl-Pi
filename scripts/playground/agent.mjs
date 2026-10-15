@@ -1,7 +1,7 @@
 // A bounded calling-agent workflow. Acquisition and model calls stay behind the Pi gateway.
 import { loadManifest } from '../../services/access/client.mjs';
 import { validateBody, checkUrl } from '../../services/access/src/validate.mjs';
-import { checkSchema, toStrict, validate, missingRequired } from '../../services/retrieval/src/jsonschema.mjs';
+import { checkSchema, toStrict, validate } from '../../services/retrieval/src/jsonschema.mjs';
 
 const manifest = loadManifest();
 const routes = Object.fromEntries(manifest.routes.map(r => [r.id, r]));
@@ -40,6 +40,16 @@ function decisionSchema(resultSchema) {
   // Only the chosen action needs a URL/query; strict provider output still includes null slots.
   schema.required = ['complete', 'next_action', 'findings', 'limitations', ...(resultSchema ? ['result'] : [])];
   return schema;
+}
+
+// Nullable extraction output is incomplete when a chosen shape still lacks a required fact.
+function hasRequiredResult(value, schema) {
+  if (value === null || value === undefined) return true;
+  if (schema.anyOf) return schema.anyOf.some(branch => validate(value, toStrict(branch)).length === 0 && hasRequiredResult(value, branch));
+  if (object(value)) return (schema.required ?? []).every(key => value[key] !== null && value[key] !== undefined) &&
+    Object.entries(schema.properties ?? {}).every(([key, sub]) => hasRequiredResult(value[key], sub));
+  if (Array.isArray(value)) return value.every(item => hasRequiredResult(item, schema.items));
+  return true;
 }
 
 export function validateAgentInput(raw) {
@@ -255,7 +265,7 @@ export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
         break;
       }
       if (decision.next_action === 'finish') {
-        completed = decision.complete === true && findings.length > 0 && Boolean(answer) && !extractionPartial && (!input.schema || object(result) && missingRequired(result, input.schema).length === 0);
+        completed = decision.complete === true && findings.length > 0 && Boolean(answer) && !extractionPartial && (!input.schema || object(result) && hasRequiredResult(result, input.schema));
         if (!completed) addLimitation('The model stopped before a complete answer with verified evidence was available.');
         break;
       }

@@ -88,6 +88,19 @@ test('unsupported result-schema roots are rejected before any gateway dispatch',
   }
 });
 
+test('required facts inside the matching anyOf result branch control completion', async () => {
+  const schema = { type: 'object', properties: { item: { anyOf: [
+    { type: 'object', properties: { value: { type: ['string', 'null'] } }, required: ['value'] },
+    { type: 'string' }
+  ] } }, required: ['item'] };
+  for (const [result, expected] of [[{ item: { value: null } }, 'partial'], [{ item: { value: 'forty-two' } }, 'completed'], [{ item: 'forty-two' }, 'completed']]) {
+    const f = fixture([page(first, { json: decision(first, { result }) })]);
+    const output = await runAgent({ prompt: 'Find the measurement', urls: [first], schema }, f);
+    assert.equal(output.status, expected);
+    assert.deepEqual(output.result, result);
+  }
+});
+
 test('unused action fields stay nullable without producing missing-fact warnings in the real extraction schema', async () => {
   const f = fixture([request => {
     const schema = request.body.formats.find(format => format.type === 'json').schema;
