@@ -30,5 +30,25 @@ async (page) => {
       results.push({ check: uncertain ? 'uncertain crawl stays protected' : 'locally rejected crawl can be corrected', state: 'PASS' });
     } finally { await tab.close(); }
   }
+  const native = await page.context().newPage();
+  try {
+    await native.route('**/api/status', route => route.fulfill({ json: { status: 200, data: { core: { live: true } } } }));
+    await native.addInitScript(() => {
+      window.nativeCalls = [];
+      window.__TAURI__ = { window: { getCurrentWindow: () => Object.fromEntries(
+        ['minimize','toggleMaximize','close','startDragging'].map(name => [name, () => { window.nativeCalls.push(name); return Promise.resolve(); }])
+      ) } };
+    });
+    await native.goto('http://localhost:8767/LLM-DEMO.html');
+    await native.locator('#window-controls').waitFor({state:'visible'});
+    for (const id of ['window-minimize','window-maximize','window-close']) await native.locator('#'+id).click();
+    await native.locator('.topbar').dispatchEvent('mousedown',{button:0,detail:1});
+    await native.locator('.topbar').dispatchEvent('mousedown',{button:0,detail:2});
+    await native.locator('.topbar').dispatchEvent('mousedown',{button:2,detail:1});
+    await native.locator('#connection').dispatchEvent('mousedown',{button:0,detail:1});
+    const calls = await native.evaluate(() => window.nativeCalls);
+    if (JSON.stringify(calls) !== JSON.stringify(['minimize','toggleMaximize','close','startDragging','toggleMaximize'])) throw Error('Native command or drag wiring differs: '+JSON.stringify(calls));
+    results.push({check:'desktop controls and header drag wiring (mock native API)',state:'PASS'});
+  } finally { await native.close(); }
   return results;
 }

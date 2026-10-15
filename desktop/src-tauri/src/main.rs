@@ -14,6 +14,13 @@ struct Backend(Child);
 
 impl Backend {
     fn start(script: PathBuf) -> Result<(Self, Url), Box<dyn std::error::Error>> {
+        Self::start_with_timeout(script, Duration::from_secs(15))
+    }
+
+    fn start_with_timeout(
+        script: PathBuf,
+        timeout: Duration,
+    ) -> Result<(Self, Url), Box<dyn std::error::Error>> {
         let candidates = match std::env::var_os("FCPI_NODE") {
             Some(node) => vec![node],
             None => vec![
@@ -77,7 +84,7 @@ impl Backend {
                 .map(|_| line);
             let _ = tx.send(result);
         });
-        let line = match rx.recv_timeout(Duration::from_secs(15)) {
+        let line = match rx.recv_timeout(timeout) {
             Ok(Ok(line)) if !line.is_empty() => line,
             other => {
                 let timed_out = matches!(other, Err(mpsc::RecvTimeoutError::Timeout));
@@ -87,30 +94,17 @@ impl Backend {
                     .unwrap_or_default();
                 let detail = startup_diagnostic(&bytes);
                 return Err(io::Error::other(if timed_out {
-                    format!("The local backend did not become ready within 15 seconds. {detail}")
+                    format!(
+                        "The local backend did not become ready within {} seconds. {detail}",
+                        timeout.as_secs_f64()
+                    )
                 } else {
                     format!("The local backend exited before becoming ready. {detail}")
                 })
                 .into());
             }
         };
-        let ready: serde_json::Value = serde_json::from_str(&line)?;
-        let url = Url::parse(
-            ready["url"]
-                .as_str()
-                .ok_or_else(|| io::Error::other("Missing backend URL"))?,
-        )?;
-        if url.scheme() != "http"
-            || url.host_str() != Some("127.0.0.1")
-            || url.port().is_none_or(|port| port == 0)
-            || url.path() != "/LLM-DEMO.html"
-            || !url.username().is_empty()
-            || url.password().is_some()
-            || url.query().is_some()
-            || url.fragment().is_some()
-        {
-            return Err(io::Error::other("Invalid local backend URL").into());
-        }
+        let url = readiness_url(&line)?;
         Ok((backend, url))
     }
 
@@ -135,10 +129,7 @@ impl Drop for Backend {
 }
 
 fn open_source(url: &Url) {
-    if matches!(url.scheme(), "http" | "https")
-        && url.username().is_empty()
-        && url.password().is_none()
-    {
+    if allows_source(url) {
         if let Ok(mut child) = Command::new("/usr/bin/open").arg(url.as_str()).spawn() {
             thread::spawn(move || {
                 let _ = child.wait();
@@ -176,6 +167,41 @@ fn startup_failed(message: &str) {
         "--", &detail]).status();
 }
 
+fn readiness_url(line: &str) -> Result<Url, Box<dyn std::error::Error>> {
+    let ready: serde_json::Value = serde_json::from_str(line)?;
+    let url = Url::parse(
+        ready["url"]
+            .as_str()
+            .ok_or_else(|| io::Error::other("Missing backend URL"))?,
+    )?;
+    if url.scheme() != "http"
+        || url.host_str() != Some("127.0.0.1")
+        || url.port().is_none_or(|port| port == 0)
+        || url.path() != "/LLM-DEMO.html"
+        || !url.username().is_empty()
+        || url.password().is_some()
+        || url.query().is_some()
+        || url.fragment().is_some()
+    {
+        return Err(io::Error::other("Invalid local backend URL").into());
+    }
+    Ok(url)
+}
+
+fn allows_navigation(url: &Url, origin: &str) -> bool {
+    url.origin().ascii_serialization() == origin && matches!(url.path(), "/" | "/LLM-DEMO.html")
+}
+
+fn allows_download(url: &Url, origin: &str) -> bool {
+    url.scheme() == "blob" && url.origin().ascii_serialization() == origin
+}
+
+fn allows_source(url: &Url) -> bool {
+    matches!(url.scheme(), "http" | "https")
+        && url.username().is_empty()
+        && url.password().is_none()
+}
+
 fn main() {
     let result = tauri::Builder::default()
         .setup(|app| {
@@ -191,13 +217,13 @@ fn main() {
                     bundled
                 };
                 let (backend, url) = Backend::start(script)?;
-                let origin = url.origin();
+                let origin = url.origin().ascii_serialization();
                 let download_origin = origin.clone();
                 app.add_capability(
                     CapabilityBuilder::new("playground-window")
                         .window("main")
                         .local(false)
-                        .remote(format!("{}/*", url.origin().ascii_serialization()))
+                        .remote(format!("{}/*", origin))
                         .permission("core:window:allow-close")
                         .permission("core:window:allow-minimize")
                         .permission("core:window:allow-toggle-maximize")
@@ -212,14 +238,12 @@ fn main() {
                     .background_color(tauri::webview::Color(12, 12, 12, 255))
                     .on_download(move |_, event| match event {
                         tauri::webview::DownloadEvent::Requested { url, .. } => {
-                            url.scheme() == "blob" && url.origin() == download_origin
+                            allows_download(&url, &download_origin)
                         }
                         tauri::webview::DownloadEvent::Finished { .. } => true,
                         _ => false,
                     })
-                    .on_navigation(move |next| {
-                        next.origin() == origin && matches!(next.path(), "/" | "/LLM-DEMO.html")
-                    })
+                    .on_navigation(move |next| allows_navigation(next, &origin))
                     .on_new_window(|url, _| {
                         open_source(&url);
                         NewWindowResponse::Deny
@@ -249,5 +273,148 @@ fn main() {
             startup_failed(&error.to_string());
             std::process::exit(1);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static NEXT_FIXTURE: AtomicUsize = AtomicUsize::new(0);
+
+    struct Script(PathBuf);
+    impl Script {
+        fn new(code: &str) -> Self {
+            let path = std::env::temp_dir().join(format!(
+                "fcpi-native-{}-{}.mjs",
+                std::process::id(),
+                NEXT_FIXTURE.fetch_add(1, Ordering::Relaxed)
+            ));
+            std::fs::write(&path, code).unwrap();
+            Self(path)
+        }
+    }
+    impl Drop for Script {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_file(&self.0);
+        }
+    }
+
+    #[test]
+    fn readiness_rejects_foreign_malformed_and_credentialed_urls() {
+        let valid = "http://127.0.0.1:49152/LLM-DEMO.html";
+        assert!(readiness_url(&serde_json::json!({"url":valid}).to_string()).is_ok());
+        for url in [
+            "http://localhost:49152/LLM-DEMO.html",
+            "https://127.0.0.1:49152/LLM-DEMO.html",
+            "http://127.0.0.1:0/LLM-DEMO.html",
+            "http://127.0.0.1/LLM-DEMO.html",
+            "http://name:password@127.0.0.1:49152/LLM-DEMO.html",
+            "http://127.0.0.1:49152/other",
+            "http://127.0.0.1:49152/LLM-DEMO.html?q=1",
+            "http://127.0.0.1:49152/LLM-DEMO.html#part",
+        ] {
+            assert!(
+                readiness_url(&serde_json::json!({"url":url}).to_string()).is_err(),
+                "{url}"
+            );
+        }
+        for raw in ["", "{}", "{bad", "{\"url\":3}"] {
+            assert!(readiness_url(raw).is_err());
+        }
+    }
+
+    #[test]
+    fn native_url_boundaries_match_only_the_owned_origin() {
+        let origin = "http://127.0.0.1:49152";
+        for url in [
+            "http://127.0.0.1:49152/",
+            "http://127.0.0.1:49152/LLM-DEMO.html",
+        ] {
+            assert!(allows_navigation(&Url::parse(url).unwrap(), origin));
+        }
+        for url in [
+            "http://127.0.0.1:49153/LLM-DEMO.html",
+            "https://example.com/",
+            "http://127.0.0.1:49152/api/run",
+            "blob:http://127.0.0.1:49152/id",
+        ] {
+            assert!(!allows_navigation(&Url::parse(url).unwrap(), origin));
+        }
+        assert!(allows_download(
+            &Url::parse("blob:http://127.0.0.1:49152/id").unwrap(),
+            origin
+        ));
+        for url in [
+            "blob:https://example.com/id",
+            "blob:http://127.0.0.1:49153/id",
+            "https://example.com/file",
+            "data:text/plain,hello",
+        ] {
+            assert!(!allows_download(&Url::parse(url).unwrap(), origin));
+        }
+        for url in ["https://example.com/source", "http://example.com/"] {
+            assert!(allows_source(&Url::parse(url).unwrap()));
+        }
+        for url in [
+            "file:///tmp/fixture",
+            "javascript:alert(1)",
+            "https://name:password@example.com/",
+        ] {
+            assert!(!allows_source(&Url::parse(url).unwrap()));
+        }
+    }
+
+    #[test]
+    fn startup_diagnostics_report_classes_without_echoing_private_text() {
+        assert!(
+            startup_diagnostic(b"ERR_MODULE_NOT_FOUND secret-fixture-value")
+                .contains("MODULE_NOT_FOUND")
+        );
+        assert!(
+            !startup_diagnostic(b"ERR_MODULE_NOT_FOUND secret-fixture-value")
+                .contains("secret-fixture-value")
+        );
+        assert!(startup_diagnostic(b"FCPI_NODE_TOO_OLD").contains("22"));
+        assert!(startup_diagnostic(b"SyntaxError").contains("SyntaxError"));
+        assert!(startup_diagnostic(b"pi-target.conf: missing").contains("SSH"));
+        assert!(startup_diagnostic(b"unknown secret-fixture-value").contains("recognized"));
+    }
+
+    #[test]
+    fn startup_failure_preserves_a_safe_diagnostic() {
+        let script =
+            Script::new("console.error('FCPI_NODE_TOO_OLD private-fixture');process.exit(1);");
+        let error = match Backend::start(script.0.clone()) {
+            Ok(_) => panic!("unexpected startup"),
+            Err(error) => error.to_string(),
+        };
+        assert!(error.contains("22 or newer"));
+        assert!(!error.contains("private-fixture"));
+    }
+
+    #[test]
+    fn backend_startup_deadline_is_bounded() {
+        let script =
+            Script::new("process.stdin.resume();process.stdin.on('end',()=>process.exit(0));");
+        let start = Instant::now();
+        let error = match Backend::start_with_timeout(script.0.clone(), Duration::from_millis(100))
+        {
+            Ok(_) => panic!("unexpected startup"),
+            Err(error) => error.to_string(),
+        };
+        assert!(error.contains("did not become ready"));
+        assert!(start.elapsed() < Duration::from_secs(5));
+    }
+
+    #[test]
+    fn backend_forces_and_reaps_a_child_that_ignores_parent_eof() {
+        let script = Script::new("console.log(JSON.stringify({url:'http://127.0.0.1:49152/LLM-DEMO.html'}));process.stdin.resume();setInterval(()=>{},1000);");
+        let (mut backend, _) = Backend::start(script.0.clone()).unwrap();
+        let start = Instant::now();
+        backend.stop();
+        assert!(backend.0.try_wait().unwrap().is_some());
+        assert!(start.elapsed() < Duration::from_secs(5));
     }
 }
