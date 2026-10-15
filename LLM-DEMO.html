@@ -14,6 +14,7 @@
 @media(max-width:680px){.sidebar{display:none}.app{margin-left:0}.topbar{height:59px;padding:0 19px}.workspace-name{font-size:11px;gap:7px}.workspace-name .sub,.workspace-name .slash{display:none}.connection{font-size:10px;padding-right:0}.main{padding:30px 18px 22px}.intro{margin-bottom:23px}.intro h1{font-size:27px;letter-spacing:-1px}.intro p{font-size:11px;max-width:275px}.tool-tabs{width:100%;gap:2px;padding:4px;margin-bottom:14px}.tool-tabs button{padding:10px 0;justify-content:center;gap:7px;flex:1;font-size:11px}.tool-tabs svg{width:14px;height:14px}.input-area{padding:19px 17px}.target{font-size:15px}.field-label{font-size:9px}.options-row{padding:13px 15px;gap:10px}.llm-label{font-size:11px;gap:7px}.optional{display:none}.primary{font-size:11px;padding:10px 12px;gap:11px}.llm-fields{padding:17px 15px;gap:16px}.examples{gap:6px;margin-bottom:23px}.chip{font-size:9px;padding:7px 8px}.examples>span{width:100%;margin-bottom:3px}.result-bar{padding:0 13px;gap:8px}.result-tabs{gap:15px}.result-actions button{font-size:9px}.document{padding:18px 16px}.footer{font-size:9px}.history-list time{display:none}.job-controls input{flex-basis:100%}.output{max-height:560px}.result-meta{gap:12px}.limit-wrap{font-size:11px}.agent-task{font-size:15px;min-height:105px}.agent-fields{padding:17px 15px}.agent-options .agent-budget{flex-basis:100%}.agent-options .primary{margin-left:auto}.agent-options .limit-wrap{flex:1}.agent-section{padding:18px 16px}.agent-details summary{padding:14px 16px}.progress-head{padding:11px 12px}.progress-head span{display:block;margin-left:0;margin-top:3px}.agent-step{padding:11px 12px;grid-template-columns:16px minmax(0,1fr) auto;gap:7px}.step-state{max-width:70px}.tool-tabs button{gap:5px}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .header-actions{display:flex;align-items:center;gap:15px}.window-controls{display:flex;gap:5px;padding-left:14px;border-left:1px solid var(--line)}.window-controls button{width:29px;height:28px;border:0;border-radius:5px;background:transparent;color:#999;font-size:19px;line-height:1}.window-controls button:hover{background:#282828;color:#fff}#window-close:hover{background:#9e3322}.desktop .topbar{user-select:none;-webkit-user-select:none}.desktop .workspace-name{pointer-events:none}
+.markdown-body{font-size:13px;line-height:1.8;color:#c9c9c9;overflow-wrap:anywhere}.markdown-body>:first-child{margin-top:0}.markdown-body>:last-child{margin-bottom:0}.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{color:#eee;line-height:1.35;font-weight:600;letter-spacing:-.3px;margin:1.7em 0 .65em}.markdown-body h1{font-size:26px}.markdown-body h2{font-size:21px;border-bottom:1px solid var(--line);padding-bottom:.45em}.markdown-body h3{font-size:17px}.markdown-body h4{font-size:14px}.markdown-body p{margin:.8em 0}.markdown-body a{color:#ff8b50;text-decoration:underline;text-underline-offset:3px}.markdown-body strong{color:#eee;font-weight:600}.markdown-body ul,.markdown-body ol{padding-left:24px;margin:.9em 0}.markdown-body li{margin:.3em 0}.markdown-body li>p{margin:.3em 0}.markdown-body blockquote{margin:1.1em 0;padding:4px 17px;border-left:3px solid #5e3a25;color:#aaa;background:#19140f}.markdown-body code{font-size:.88em;border:1px solid #303030;background:#202020;padding:2px 5px;border-radius:4px;color:#e3c7b7}.markdown-body pre{max-width:100%;overflow:auto;white-space:pre;overflow-wrap:normal;border:1px solid #303030;border-radius:8px;background:#151515;padding:15px;margin:1.1em 0;line-height:1.7}.markdown-body pre code{font-size:11px;border:0;padding:0;background:none;color:#d7d7d7}.markdown-body table{display:block;width:max-content;max-width:100%;overflow:auto;border-collapse:collapse;font-size:11px;margin:1.3em 0;line-height:1.6}.markdown-body th,.markdown-body td{border:1px solid #333;padding:9px 12px;min-width:90px;vertical-align:top;text-align:left}.markdown-body th{background:#222;color:#eee;font-weight:600}.markdown-body tr:nth-child(even){background:#151515}.markdown-body hr{border:0;border-top:1px solid #333;margin:1.7em 0}.markdown-body del{color:#888}
 </style>
 </head>
 <body>
@@ -70,7 +71,7 @@
 <div class="activity" id="activity" role="status" aria-live="polite"><span class="activity-icon"></span><span id="activity-text">Ready when you are. Requests run on your real Pi.</span></div>
 <section class="agent-progress" id="agent-progress" hidden aria-label="Live Agent activity"><div class="progress-head"><div>Agent activity <span>Actual search and scrape calls</span></div><button type="button" class="small-button" id="cancel-agent">Stop agent</button></div><ol class="agent-steps" id="agent-steps" role="log" aria-live="polite" aria-relevant="additions text"></ol></section>
 <section class="result-panel" aria-label="Live response">
-<div class="result-bar"><div class="result-tabs" role="tablist" aria-label="Response view"><button role="tab" aria-selected="true" data-view="content">Content</button><button role="tab" aria-selected="false" data-view="json">JSON</button><button role="tab" aria-selected="false" data-view="request">Request</button></div><div class="result-actions"><button id="copy" type="button" disabled>Copy</button><button id="save" type="button" disabled>Save JSON ↓</button></div></div>
+<div class="result-bar"><div class="result-tabs" role="tablist" aria-label="Response view"><button role="tab" aria-selected="true" data-view="content">Content</button><button role="tab" aria-selected="false" data-view="markdown">Markdown</button><button role="tab" aria-selected="false" data-view="json">JSON</button><button role="tab" aria-selected="false" data-view="request">Request</button></div><div class="result-actions"><button id="copy" type="button" disabled>Copy</button><button id="save" type="button" disabled>Save JSON ↓</button></div></div>
 <div class="job-controls" id="job-controls" hidden><input id="job-id" aria-label="Crawl job ID" placeholder="Crawl job ID"><button type="button" class="small-button" id="refresh-job">Refresh</button><button type="button" class="small-button" id="cancel-job">Cancel crawl</button></div>
 <div class="output" id="output"><div class="empty"><svg aria-hidden="true"><use href="#i-scrape"/></svg><h2>Your response will appear here</h2><p>Enter a URL above, or choose an example.<br>Nothing runs until you press the orange button.</p></div></div>
 <div class="result-meta" id="result-meta"><span>LOCAL → PI → WEB</span><span id="model-state">LLM off</span><span>No Firecrawl Cloud fallback</span></div>
@@ -78,6 +79,8 @@
 <section class="history-section" id="history" hidden><div class="section-label"><span>Recent requests</span><span>Kept in this tab only</span></div><div class="history-list" id="history-list"></div></section>
 <footer class="footer"><span>fcpi · Your self-hosted web acquisition backend</span><span>Existing routing and spending limits apply to every request.</span></footer>
 </main></div>
+<script src="/assets/marked.js"></script>
+<script src="/assets/dompurify.js"></script>
 <script>
 'use strict';
 const $ = id => document.getElementById(id);
@@ -174,13 +177,40 @@ function safeLink(url,label,className){
 }
 function format(value){return JSON.stringify(value,null,2);}
 function jsonText(){return current?format(view==='request'?current.result.request:current.result.data??current.result):'';}
-function documentView(doc,heading){
+function markdownView(markdown,baseURL){
+  if(!window.marked?.parse||!window.DOMPurify?.sanitize)return node('pre',markdown,'code-view');
+  const div=node('div',undefined,'markdown-body');
+  const fragment=DOMPurify.sanitize(marked.parse(markdown,{gfm:true}),{
+    RETURN_DOM_FRAGMENT:true,ALLOW_DATA_ATTR:false,ALLOW_ARIA_ATTR:false,
+    ALLOWED_TAGS:['h1','h2','h3','h4','h5','h6','p','br','hr','strong','em','del','blockquote','ul','ol','li','pre','code','a','table','thead','tbody','tr','th','td','sup','sub'],
+    ALLOWED_ATTR:['href','title','colspan','rowspan','align','start']
+  });
+  for(const a of fragment.querySelectorAll('a')){
+    let url;try{url=new URL(a.getAttribute('href'),baseURL);}catch{}
+    if(!url||!['http:','https:'].includes(url.protocol)||url.username||url.password){a.replaceWith(...a.childNodes);continue;}
+    a.href=url.href;a.target='_blank';a.rel='noopener noreferrer';
+  }
+  div.append(fragment);return div;
+}
+function responseDocuments(){
+  const data=current?.result.data;
+  if(current?.operation==='agent')return (Array.isArray(data?.documents)?data.documents:[]).map(d=>({markdown:d.markdown,metadata:{title:d.title,sourceURL:d.url}})).filter(d=>typeof d.markdown==='string');
+  const pages=Array.isArray(data?.data)?data.data:[data?.data];
+  return pages.filter(d=>d&&typeof d.markdown==='string');
+}
+function renderMarkdown(container){
+  const docs=responseDocuments();
+  if(!docs.length){container.append(node('div','This response has no Markdown. Use Content or JSON to inspect it.','document'));return;}
+  for(const doc of docs)container.append(documentView(doc,undefined,true));
+}
+function documentView(doc,heading,raw=false){
   const div=node('article',undefined,'document');
   if(heading)div.append(node('p',heading,'output-label'));
   if(doc.metadata?.title)div.append(node('h3',doc.metadata.title));
   const url=doc.metadata?.sourceURL??doc.metadata?.url;
   if(url)div.append(safeLink(url,url,'source-link'));
-  div.append(node('pre',doc.markdown??'No Markdown was returned.'));
+  const markdown=doc.markdown??'No Markdown was returned.';
+  div.append(raw?node('pre',markdown):markdownView(markdown,url));
   return div;
 }
 function renderContent(container,r){
@@ -225,7 +255,7 @@ function renderAgent(container,data){
   if(!data||typeof data!=='object'){container.append(node('div','No Agent result was returned. See JSON for the response.','warning'));return;}
   if(data.status==='running'){container.append(node('div','The agent is working. Search and scrape activity appears above as it arrives.','document'));return;}
   if(data.status!=='completed')container.append(node('div',data.status==='cancelled'?'This Agent session was stopped. Only results received before it stopped are shown.':data.status==='partial'?'The agent returned a partial result. Check its limitations below.':(data.error??data.code??'The agent did not complete this task.'),'warning'));
-  if(data.answer){const answer=node('article',undefined,'agent-section');answer.append(node('p','Answer','output-label'),node('p',data.answer,'agent-answer'));container.append(answer);}
+  if(data.answer){const answer=node('article',undefined,'agent-section');answer.append(node('p','Answer','output-label'),markdownView(data.answer));container.append(answer);}
   if(Array.isArray(data.findings)&&data.findings.length){
     const findings=node('section',undefined,'agent-section');findings.append(node('p','Grounded findings','output-label'));
     for(const finding of data.findings){const item=node('article',undefined,'finding');item.append(node('p',finding.claim??''));if(finding.quote)item.append(node('blockquote',finding.quote));if(finding.source_url)item.append(safeLink(finding.source_url,finding.source_url,'source-link'));findings.append(item);}container.append(findings);
@@ -252,7 +282,8 @@ function agentStepsView(steps){
 function render(){
   if(!current)return;
   const r=current.result;$('output').replaceChildren();
-  if(view==='content')renderContent($('output'),r);else $('output').append(node('pre',jsonText(),'code-view'));
+  if(view==='content')renderContent($('output'),r);else if(view==='markdown')renderMarkdown($('output'));else $('output').append(node('pre',jsonText(),'code-view'));
+  $('output').scrollTop=0;
   const meta=$('result-meta');const isAgent=current.operation==='agent',agentComplete=r.data?.status==='completed';
   meta.replaceChildren(node('span',r.status?'HTTP '+r.status:'Agent workflow',r.status>0&&r.status<400&&(!isAgent||agentComplete)?'good':''));
   if(typeof r.elapsedMs==='number')meta.append(node('span',(r.elapsedMs/1000).toFixed(2)+'s'));
@@ -376,7 +407,7 @@ $('request-form').addEventListener('submit',event=>{
 $('refresh-job').addEventListener('click',()=>submit('/api/crawl-status',{id:$('job-id').value.trim()},'crawl status'));
 $('cancel-job').addEventListener('click',()=>submit('/api/crawl-cancel',{id:$('job-id').value.trim()},'crawl cancellation'));
 document.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key==='Enter'&&!busy){event.preventDefault();$('request-form').requestSubmit();}});
-$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(view==='content'?$('output').innerText:jsonText());$('copy').textContent='Copied';setTimeout(()=>$('copy').textContent='Copy',1300);}catch{activity('Clipboard access is unavailable. Select the text to copy it.','error');}});
+$('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(view==='markdown'?responseDocuments().map(d=>d.markdown).join('\n\n'):view==='content'?$('output').innerText:jsonText());$('copy').textContent='Copied';setTimeout(()=>$('copy').textContent='Copy',1300);}catch{activity('Clipboard access is unavailable. Select the text to copy it.','error');}});
 $('save').addEventListener('click',async()=>{
   if(!current)return;
   const json=format(current.result);

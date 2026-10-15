@@ -72,5 +72,29 @@ async (page) => {
     if(!await native.locator('#save').isEnabled())throw Error('Save did not recover after an error');
     results.push({check:'native JSON export, dialog cancellation and write failure (mock native API)',state:'PASS'});
   } finally { await native.close(); }
+  const markdownTab = await page.context().newPage();
+  const markdown = '# Release notes\n\n**Stable** and *readable*.\n\n| Platform | Installer |\n| --- | --- |\n| macOS | Universal |\n\n- First item\n- Second item\n\n> A quoted note\n\n```js\nconst text = "<unsafe>";\n```\n\n[Documentation](https://example.com/docs)\n\n[Unsafe](javascript:alert(1))\n<img src="https://example.com/tracker" onerror="window.markdownXss=1">\n<svg onload="window.markdownXss=1"></svg><script>window.markdownXss=1</script><style>body{display:none}</style><iframe src="https://example.com/frame"></iframe><form><input id="run" name="__TAURI__"></form>\n';
+  try {
+    await markdownTab.route('**/api/status',route=>route.fulfill({json:{status:200,data:{core:{live:true},ledger:{ok:true}}}}));
+    await markdownTab.route('**/api/run',route=>route.fulfill({json:{status:200,data:{success:true,data:{markdown,metadata:{title:'Fixture release notes',sourceURL:'https://example.com/'}}}}}));
+    await markdownTab.goto('http://localhost:8767/LLM-DEMO.html');
+    await markdownTab.locator('#target').fill('https://example.com/');
+    await markdownTab.locator('#run').click();
+    await markdownTab.locator('#output .markdown-body h1').waitFor();
+    if(await markdownTab.locator('[data-view="content"]').getAttribute('aria-selected')!=='true')throw Error('Content is not the default view');
+    if(await markdownTab.locator('#output table tbody tr').count()!==1||await markdownTab.locator('#output strong').textContent()!=='Stable'||await markdownTab.locator('#output pre code').textContent()!=='const text = "<unsafe>";\n')throw Error('Markdown structure was not rendered');
+    if(await markdownTab.locator('#output script,#output img,#output svg,#output style,#output iframe,#output form,#output input,#output [onerror],#output a[href^="javascript:"],#output unsafe').count())throw Error('Unsafe Markdown output survived');
+    if(await markdownTab.evaluate(()=>window.markdownXss))throw Error('Untrusted content executed');
+    if(await markdownTab.locator('#output a[href="https://example.com/docs"]').getAttribute('rel')!=='noopener noreferrer')throw Error('Source link lacks isolation');
+    await markdownTab.locator('[data-view="markdown"]').click();
+    if(await markdownTab.locator('#output article pre').textContent()!==markdown)throw Error('Raw Markdown changed');
+    if(await markdownTab.locator('#output .markdown-body').count())throw Error('Markdown tab parsed the source');
+    await markdownTab.locator('[data-view="content"]').click();
+    await markdownTab.setViewportSize({width:390,height:844});
+    const overflow=await markdownTab.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+    if(overflow)throw Error('Formatted content overflows the phone viewport');
+    await markdownTab.screenshot({path:'.playwright-mcp/fcpi-markdown-390.png',fullPage:true});
+    results.push({check:'formatted default Content, exact raw Markdown, XSS removal and 390px layout',state:'PASS'});
+  } finally {await markdownTab.close();}
   return results;
 }

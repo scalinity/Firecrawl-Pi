@@ -8,7 +8,9 @@ Closing the window or quitting the application stops its local backend. Durable
 crawls remain on the Pi, as in the browser playground.
 
 The icon comes from the supplied PNG in `icon-source.png`. Generated macOS icons
-are in `src-tauri/icons/`; no third-party frontend code is bundled.
+are in `src-tauri/icons/`. Content renders Markdown; the Markdown tab keeps its
+source text. Pinned Marked and DOMPurify distributions and their licenses are
+bundled from `scripts/playground/vendor/`.
 
 The app needs Node.js 22 or newer and the existing Pi SSH key/configuration.
 It checks Homebrew's Apple Silicon and Intel Node locations, then PATH.

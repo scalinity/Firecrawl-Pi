@@ -13,6 +13,10 @@ const manifest = loadManifest();
 const routes = Object.fromEntries(manifest.routes.map(r => [r.id, r]));
 const bad = message => Object.assign(Error(message), { status: 400 });
 const object = v => v && typeof v === 'object' && !Array.isArray(v);
+const assets = new Map([
+  ['/assets/marked.js', resolve(root,'scripts/playground/vendor/marked.js')],
+  ['/assets/dompurify.js', resolve(root,'scripts/playground/vendor/dompurify.js')]
+]);
 
 // Fixed code, JSON on stdin. Never interpolate request input into a remote shell command.
 // Refuse redirects so the gateway credential can only reach its loopback origin.
@@ -144,7 +148,7 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
     const expected = new Set([`localhost:${server.address().port}`, `127.0.0.1:${server.address().port}`]);
     const headers = type => ({ 'content-type': type + '; charset=utf-8', 'cache-control': 'no-store',
       'x-content-type-options': 'nosniff', 'referrer-policy': 'no-referrer',
-      'content-security-policy': "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" });
+      'content-security-policy': "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'self'; img-src 'self' data:; frame-ancestors 'none'; base-uri 'none'; form-action 'none'" });
     const send = (status, data, type = 'application/json') => {
       if (res.destroyed || res.writableEnded) return;
       if (res.headersSent) return res.end();
@@ -155,6 +159,7 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
     if (req.headers.origin && req.headers.origin !== `http://${req.headers.host}`) return send(403, { error: 'Cross-origin requests are refused.' });
     const endpoint = req.url;
     if (req.method === 'GET' && ['/', '/LLM-DEMO.html'].includes(endpoint)) return send(200, readFileSync(resolve(root, 'LLM-DEMO.html')), 'text/html');
+    if (req.method === 'GET' && assets.has(endpoint)) return send(200, readFileSync(assets.get(endpoint)), 'text/javascript');
     if (req.method === 'GET' && endpoint === '/favicon.ico') { res.writeHead(204); return res.end(); }
     if (req.method !== 'POST' || !['/api/run', '/api/agent', '/api/status', '/api/crawl-status', '/api/crawl-cancel'].includes(endpoint)) return send(404, { error: 'Not found' });
     if (req.headers['content-type']?.split(';')[0].trim() !== 'application/json') return send(415, { error: 'Use application/json.' });

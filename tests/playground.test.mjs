@@ -53,6 +53,13 @@ test('serves only the playground; repository files and cross-origin callers cann
   assert.match(page.headers.get('content-security-policy'), /frame-ancestors 'none'/);
   assert.match(await page.text(), /Live playground/);
   assert.equal((await fetch(origin + '/scripts/m1/pi-target.conf')).status, 404);
+  for (const path of ['/assets/marked.js','/assets/dompurify.js']) {
+    const asset=await fetch(origin+path);
+    assert.equal(asset.status,200);
+    assert.match(asset.headers.get('content-type'),/^text\/javascript/);
+  }
+  assert.equal((await fetch(origin+'/assets/versions.json')).status,404);
+  assert.equal((await fetch(origin+'/assets/../server.mjs')).status,404);
   const count = calls.length;
   assert.equal((await post('/api/status', {}, { origin: 'https://untrusted.example' })).status, 403);
   assert.equal((await post('/api/status', {}, { origin: 'null' })).status, 403);

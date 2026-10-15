@@ -70,3 +70,9 @@ Run the local bridge and Agent checks with:
 ```sh
 node --test tests/playground.test.mjs tests/playground-agent.test.mjs
 ```
+
+The default Content tab formats returned Markdown as headings, tables, lists and code.
+The Markdown tab displays the exact source; Copy there copies the raw Markdown.
+Rendering uses local, pinned Marked and DOMPurify distributions. Release URLs, hashes
+and licenses are in `vendor/`; no CDN request is required. Source HTML is sanitized
+and remote images are not loaded automatically.
