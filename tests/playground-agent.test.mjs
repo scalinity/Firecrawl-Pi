@@ -80,6 +80,14 @@ function fixture(responses) {
   } };
 }
 
+test('unsupported result-schema roots are rejected before any gateway dispatch', async () => {
+  for (const schema of [null, false, {}, { type: 'string' }, { type: 'number' }, { type: 'array', items: { type: 'string' } }]) {
+    const f = fixture([]);
+    await assert.rejects(runAgent({ prompt: 'Find a fact', urls: [first], schema }, f), /Result schema:/);
+    assert.equal(f.calls.length, 0);
+  }
+});
+
 test('unused action fields stay nullable without producing missing-fact warnings in the real extraction schema', async () => {
   const f = fixture([request => {
     const schema = request.body.formats.find(format => format.type === 'json').schema;

@@ -52,7 +52,7 @@ export function validateAgentInput(raw) {
   const maxPages = raw.maxPages ?? 3;
   if (!Number.isInteger(maxPages) || maxPages < 1 || maxPages > 5) throw bad('The page limit must be an integer from 1 to 5.');
   if (raw.schema !== undefined) {
-    try { checkSchema(decisionSchema(raw.schema), limits); }
+    try { checkSchema(raw.schema, limits); checkSchema(decisionSchema(raw.schema), limits); }
     catch (error) { throw bad(`Result schema: ${error.message}`); }
   }
   return { prompt: raw.prompt.trim(), urls: [...new Set(normalized)], maxPages,
