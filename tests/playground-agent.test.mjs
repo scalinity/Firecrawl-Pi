@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { runAgent, validateAgentInput } from '../scripts/playground/agent.mjs';
+import { missingRequired, toStrict, validate } from '../services/retrieval/src/jsonschema.mjs';
 
 const first = 'https://research.example/first';
 const second = 'https://research.example/second';
@@ -26,6 +27,20 @@ function fixture(responses) {
     return typeof response === 'function' ? response(request, signal) : structuredClone(response);
   } };
 }
+
+test('unused action fields stay nullable without producing missing-fact warnings in the real extraction schema', async () => {
+  const f = fixture([request => {
+    const schema = request.body.formats.find(format => format.type === 'json').schema;
+    const output = decision(first);
+    assert.deepEqual(validate(output, toStrict(schema)), []);
+    const missing = missingRequired(output, schema);
+    assert.deepEqual(missing, []);
+    return page(first, { warning: missing.join('; ') });
+  }]);
+  const result = await runAgent(validateAgentInput({ prompt: 'Find the measurement', urls: [first], maxPages: 1 }), { forward: f.forward });
+  assert.equal(result.status, 'completed');
+  assert.equal(result.success, true);
+});
 
 test('validates all controls before dispatch and normalizes URL fragments', async () => {
   assert.deepEqual(validateAgentInput({ prompt: '  Compare measurements  ', urls: [first + '#intro', first], maxPages: 2 }),

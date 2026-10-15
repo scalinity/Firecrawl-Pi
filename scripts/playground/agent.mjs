@@ -37,7 +37,8 @@ function decisionSchema(resultSchema) {
       ...(resultSchema ? { result: resultSchema } : {}),
     },
   };
-  schema.required = Object.keys(schema.properties);
+  // Only the chosen action needs a URL/query; strict provider output still includes null slots.
+  schema.required = ['complete', 'next_action', 'findings', 'limitations', ...(resultSchema ? ['result'] : [])];
   return schema;
 }
 
