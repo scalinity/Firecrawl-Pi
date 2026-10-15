@@ -35,6 +35,32 @@ async function rig(selection = "live", store = new MemStore()) {
   return { srv, store, logs, q: (query) => search(`/searxng/search?q=${encodeURIComponent(query)}&format=json&pageno=1`) };
 }
 
+test("Google is primary, cached without local search; Yahoo fallback states Google failure; fixtures never call Google", async () => {
+  const srv = await serve(backend), store = new MemStore(); let googleCalls = 0, fail = false, selection = "live";
+  const google = { selected: () => "serper-google", search: async () => { googleCalls++; if (fail) throw { failureClass: "SEARCH_CREDITS_EXHAUSTED" }; return [{ url: "https://example.org/google", title: "Google", content: "snippet" }]; } };
+  const search = makeSearcher({ store, getPolicy: () => POLICY, getSelection: () => ({ search: selection }), google, searchUrl: `http://127.0.0.1:${srv.port}/search`, log: () => {} });
+  try {
+    const a = await search("/search?q=google");
+    assert.deepEqual(a.body.fcpi.engines, ["google (Serper)"]);
+    assert.equal((await search("/search?q=google")).body.fcpi.cache, "hit"); assert.equal(googleCalls, 1);
+    fail = true;
+    const b = await search("/search?q=fallback");
+    assert.equal(b.body.fcpi.fallback, true); assert.equal(b.body.fcpi.partial, true);
+    assert.deepEqual(b.body.unresponsive_engines, [{ engine: "google (Serper)", reason: "SEARCH_CREDITS_EXHAUSTED" }]);
+    selection = "fixture";
+    await search("/search?q=fixture"); assert.equal(googleCalls, 2);
+  } finally { await srv.close(); }
+});
+
+test("a failed cache insert preserves valid Google results without calling an unavailable Yahoo", async () => {
+  const store = new MemStore(); store.searchCachePut = async () => { throw new Error("database temporarily unavailable"); };
+  const search = makeSearcher({ store, getPolicy: () => POLICY, getSelection: () => ({ search: "live" }),
+    google: { selected: () => "serper-google", search: async () => [{ url: "https://example.org/google", title: "Google", content: "snippet" }] },
+    searchUrl: "http://127.0.0.1:1/search", log: () => {} });
+  const r = await search("/search?q=google");
+  assert.deepEqual(r.body.fcpi.answered, ["google (Serper)"]); assert.equal(r.body.fcpi.fallback, false);
+});
+
 test("results come back with their engines; a non-http(s) result is dropped; a complete answer is cached", async () => {
   const r = await rig();
   try {

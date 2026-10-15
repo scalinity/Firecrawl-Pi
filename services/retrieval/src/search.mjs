@@ -49,7 +49,7 @@ function backendGet(url, deadlineMs, signal) {
 export const LOADED_TTL_MS = 10 * 60e3, LOADED_RETRY_MS = 30e3;
 // A search tries to gather the spec's largest result count (§13: ten) before it asks a fallback engine.
 export const FILL_TO = 10;
-export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, clock = Date.now }) {
+export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, clock = Date.now, google }) {
   let loaded = { until: -Infinity, names: null }, reading = null;
   function loadedEngines() {
     if (clock() < loaded.until) return Promise.resolve(loaded.names);
@@ -78,7 +78,8 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, c
     if (!/^[A-Za-z-]{1,16}$/.test(language)) throw new Denied("INVALID_REQUEST", "language must be a language tag");
     const selection = getSelection().search;
     const engines = S.engines[selection];
-    const key = sha(JSON.stringify([normalizeQuery(q), language, pageno, engines]));
+    const googleSubject = selection === "live" ? google?.selected() : null;
+    const key = sha(JSON.stringify([normalizeQuery(q), language, pageno, engines, googleSubject]));
     const t0 = Date.now();
     const done = (outcome, extra = {}) => log({ event: "search", selection, engines, query_sha256: key.slice(0, 16), outcome, ms: Date.now() - t0, ...extra });
     const cached = await store.searchCacheGet(key);
@@ -91,6 +92,23 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, c
     // (review R8). The phases share the backend deadline.
     const fallback = S.fallbackEngines?.[selection] ?? [];
     const deadline = t0 + S.deadlineMs;
+    let googleFailure = null;
+    if (googleSubject) {
+      let googleResults;
+      try {
+        googleResults = await google.search(q, language, { signal, timeoutMs: Math.max(1, deadline - Date.now() - 2000) });
+      } catch (e) {
+        if (e.failureClass === "CANCELLED" || signal?.aborted) throw new Denied("CANCELLED", "the caller cancelled");
+        googleFailure = e.failureClass ?? "SEARCH_PROVIDER_ERROR";
+      }
+      if (googleResults) {
+        const body = { results: googleResults.slice(0, S.maxResults), unresponsive_engines: [], fcpi: { cache: "miss", engines: ["google (Serper)"], answered: ["google (Serper)"], partial: false, empty: googleResults.length === 0, pages: 1, fallback: false, provider: "serper" } };
+        try { await store.searchCachePut(key, body, S.cacheSeconds); }
+        catch { log({ event: "search_cache_write_failed", provider: "serper" }); }
+        done("results", { provider: "serper", results: body.results.length });
+        return { status: 200, body };
+      }
+    }
     async function ask(engs, page) {
       const url = new URL(searchUrl);
       url.searchParams.set("q", q);
@@ -115,6 +133,7 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, c
     }
     const loadedNow = loadedEngines();
     const results = [], seen = new Set(), failed = new Map(), queried = [...engines];
+    if (googleFailure) { queried.unshift("google (Serper)"); failed.set("google (Serper)", googleFailure); }
     const add = (rs) => { for (const x of rs) if (!seen.has(x.url) && results.length < S.maxResults) { seen.add(x.url); results.push(x); } };
     const notLoaded = (engs, names) => { for (const e of engs) if (names && !names.has(e) && !failed.has(e)) failed.set(e, "not loaded by the search backend"); };
     let first;
@@ -147,7 +166,7 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, c
       done("engines_failed", { unresponsive: unresponsive.length });
       throw new Denied("SEARCH_ENGINES_FAILED", `no search engine answered: ${unresponsive.map((u) => `${u.engine} (${u.reason || "no reason"})`).join(", ")}`, { retryable: true, retryAfter: 60 });
     }
-    const usedFallback = queried.length > engines.length;
+    const usedFallback = !!googleFailure || queried.length > engines.length;
     const body = { results, unresponsive_engines: unresponsive, fcpi: { cache: "miss", engines: queried, answered, partial: unresponsive.length > 0, empty: results.length === 0, pages, fallback: usedFallback } };
     if (!unresponsive.length) await store.searchCachePut(key, body, S.cacheSeconds);
     done(results.length ? (unresponsive.length ? "partial" : "results") : (unresponsive.length ? "empty_partial" : "empty"), { results: results.length, unresponsive: unresponsive.length, pages, fallback: usedFallback });

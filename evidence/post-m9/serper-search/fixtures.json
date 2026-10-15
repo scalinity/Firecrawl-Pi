@@ -1,0 +1,37 @@
+{
+  "schema": "fcpi.serper-fixture-verification/v1",
+  "utc": "2026-10-15T21:31:53.047126+00:00",
+  "base_commit": "148d0c4c6bf83c3a160d7f2d514fb1c3eda2c180",
+  "state": "PASS",
+  "source_hashes": {
+    "services/retrieval/src/serper.mjs": "89953ba489804ae8a1ff785f7f64cbd99470596d39b5def80cbc6908c238c556",
+    "services/retrieval/src/search.mjs": "f945a0e55bd71c81f0f30fe9aae7694a78e58400c1c556d984eebccb9b522ccc",
+    "services/retrieval/src/budget.mjs": "71747a09f5c4599ba59b645a121bc4a2998500d05aa1bd9af2114e9c6c946eef",
+    "services/retrieval/src/store.mjs": "48e3026c531740e817f1c6bf08e3eb401349c967b12266bcf57f2525ec377f48",
+    "deploy/policies/budget.json": "5b8272361b4cc144f8067bccba07c604c3d316ec582d65e00b73b954581a35a2",
+    "deploy/nuq-postgres/fcpi-retrieval-schema.sql": "fe1dc421dd731c6d52c601028f54e2f9a6dbff8f4a0d321c0af924885105f741"
+  },
+  "checks": [
+    {
+      "id": "pi-native-arm64-retrieval-suite",
+      "command": "node --test --test-timeout=120000 test/*.test.mjs",
+      "execution": "isolated Docker network and throwaway PostgreSQL17; candidate source, policy and schema mounted read-only; no production database",
+      "tests": 255,
+      "passed": 255,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "report": "evidence/post-m9/serper-search/raw/pi-fixtures.txt"
+    },
+    {
+      "id": "focused-remediation-local",
+      "tests": 33,
+      "passed": 33,
+      "failed": 0,
+      "exit_code": 0
+    }
+  ],
+  "live_serper_search": "NOT_RUN",
+  "money_spent": 0,
+  "review": "evidence/post-m9/serper-search/review/REVIEW.md"
+}

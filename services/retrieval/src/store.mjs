@@ -209,11 +209,16 @@ export class Store {
     const EXHAUSTED = Symbol("exhausted");
     try {
       return await this.#tx(async (c) => {
+        if (r.lifetimeCap !== undefined) await c.query("SELECT pg_advisory_xact_lock(hashtextextended($1, 0))", [`fcpi.allocation:${r.category}`]);
         const prior = (await c.query("SELECT * FROM fcpi_retrieval.budget_reservation WHERE call_key = $1 FOR UPDATE", [r.callKey])).rows[0];
         // A released call never reached the provider and cost nothing: a retry may reserve it again. The
         // released row is kept under a suffixed key, so what it was released for stays readable (review S4).
         if (prior && prior.state !== "RELEASED") return { existing: prior };
         if (prior) await c.query("UPDATE fcpi_retrieval.budget_reservation SET call_key = call_key || '#released-' || id WHERE id = $1", [prior.id]);
+        if (r.lifetimeCap !== undefined) {
+          const used = Number((await c.query(`SELECT COALESCE(SUM(CASE WHEN state = 'SETTLED' THEN actual WHEN state IN ('RESERVED', 'UNCERTAIN') THEN reserved ELSE 0 END), 0) AS used FROM fcpi_retrieval.budget_reservation WHERE category = $1`, [r.category])).rows[0].used);
+          if (used + r.amount > r.lifetimeCap) throw Object.assign(new Error("exhausted"), { [EXHAUSTED]: { category: r.category, period: "allocation", cap: r.lifetimeCap, used } });
+        }
         const notices = [];
         for (const p of periods) {
           const start = p.period === "day" ? r.day : r.month;
@@ -458,7 +463,7 @@ export class Store {
       AND (preferred IS NULL OR expires_at < now() - interval '7 days') AND NOT prefer_browser`);
     // Usage records outlive the 30 days of job metadata (spec §21.3) so a month's spend stays explainable;
     // an unsettled reservation is never pruned, since it still counts against its cap.
-    await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED')");
+    await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED') AND kind <> 'search'");
     // A settled call's stored answer (page content) serves only a retry of its logical unit, so it goes after
     // the seven days that job results and parse caches keep; the amounts and usage stay (review W9).
     await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET result = NULL WHERE result IS NOT NULL AND settled_at < now() - interval '7 days'");

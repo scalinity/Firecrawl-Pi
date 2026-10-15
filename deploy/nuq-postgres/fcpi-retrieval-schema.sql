@@ -146,7 +146,7 @@ CREATE INDEX IF NOT EXISTS parse_cache_expires ON fcpi_retrieval.parse_cache (ex
 -- what was measured locally, kind reconcile), and M7's enhanced provider, whose one dispatch per logical page is keyed by
 -- the page (kind enhanced), so a retried page finds the dispatch it already made instead of paying for another.
 ALTER TABLE fcpi_retrieval.budget_reservation DROP CONSTRAINT IF EXISTS budget_reservation_kind_check;
-ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile', 'enhanced'));
+ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile', 'enhanced', 'search'));
 
 -- M6: domain routing (spec §9.5), at most 5,000 rows keyed by registrable domain (a fixture by its host): a learned
 -- residential preference with its set time, expiry and probe, the script-shell learning, and outcome counters. A

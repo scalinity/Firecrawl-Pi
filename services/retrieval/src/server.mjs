@@ -39,6 +39,7 @@ import { makeWebhooks } from "./webhook.mjs";
 import { readCredential } from "./provider.mjs";
 import { Denied, hostMatches, parseTarget } from "./ssrf.mjs";
 import { makeAdmission } from "./admission.mjs";
+import { makeSerper } from "./serper.mjs";
 
 const env = loadEnv(process.env);
 const BUILD = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
@@ -114,13 +115,14 @@ const enhanced = makeEnhanced({ getBudget, getPolicy, getSelection, providersDir
 const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, browser, urlHmac, log, residential, getBudget, enhanced, extras: env.browserExtras,
   admission: makeAdmission(env.admissionFile) });
 const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log, residential, getBudget });
-const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log });
 const common = { store, getBudget, paidDispatch: env.paidDispatch, providersDir: env.providersDir, getPolicy, resolvePublic, log };
+const google = makeSerper(common);
+const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log, google });
 const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
 // A provider's breaker lives in the adapter of its kind (review W6).
-const breakerState = (name, p) => (p.kind === "parser" ? parse.breakerState(name) : p.kind === "proxy" ? residential.breakerState(name) : p.kind === "enhanced" ? enhanced.breakerState(name) : adapter.breakerState(name));
+const breakerState = (name, p) => (p.kind === "search" ? google.breakerState(name) : p.kind === "parser" ? parse.breakerState(name) : p.kind === "proxy" ? residential.breakerState(name) : p.kind === "enhanced" ? enhanced.breakerState(name) : adapter.breakerState(name));
 // M7: webhook delivery for the gateway's outbox (src/webhook.mjs); the signing secret is read at each use, so one placed
 // later needs no restart.
 const webhooks = makeWebhooks({ getPolicy, resolvePublic, getSecret: () => readCredential(env.credentialsDir, "webhook_signing_secret"), delivery: env.webhookDelivery, log });

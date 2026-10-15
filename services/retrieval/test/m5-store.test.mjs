@@ -25,6 +25,22 @@ const base = (over = {}) => ({ id: crypto.randomUUID(), callKey: `k:${crypto.ran
   provider: "fixture-model", subject: "fcpi-fixture-race", kind: "extract", unit: "micro_usd", rateCard: "card", requestHash: "h", amount: 30000, day: "2026-09-26", month: "2026-09-01", notifyAt: 0.8, ...over });
 const usage = async (store) => (await store.budgetUsage("2026-09-26", "2026-09-01")).map((u) => `${u.category}/${u.period}:${u.reserved}+${u.settled}`);
 
+test("finite search credits serialize reservations across months and survive pruning", opts, async () => {
+  const store = await fresh();
+  const reservation = (n) => base({ category: "serper_trial", kind: "search", unit: "credits", amount: 1, caps: { month: 10 }, lifetimeCap: 3, day: `2026-${n % 2 ? "10" : "11"}-15`, month: `2026-${n % 2 ? "10" : "11"}-01` });
+  try {
+    const rs = await Promise.all(Array.from({ length: 12 }, (_, i) => store.reserveBudget(reservation(i))));
+    const rows = rs.filter((r) => r.reservation).map((r) => r.reservation);
+    assert.equal(rows.length, 3); assert.equal(rs.filter((r) => r.exhausted?.period === "allocation").length, 9);
+    await store.settleBudget(rows[0].id, 1, {});
+    await store.markBudgetUncertain(rows[1].id, "sent without answer");
+    await store.pool.query("UPDATE fcpi_retrieval.budget_reservation SET created_at = now() - interval '100 days'");
+    await store.prune(); assert.equal((await store.reserveBudget(reservation(1))).exhausted.period, "allocation");
+    await store.releaseBudget(rows[2].id, "not sent");
+    assert.ok((await store.reserveBudget(reservation(1))).reservation);
+  } finally { await store.close(); }
+});
+
 test("twelve concurrent reservations against a cap that holds three: exactly three succeed (CLAUDE.md §11, AC25)", opts, async () => {
   const store = await fresh();
   try {

@@ -26,7 +26,8 @@ export function paidDispatchActive(policy, enabled, now = Date.now()) {
 
 export function loadBudgetPolicy(text) {
   const p = JSON.parse(text);
-  exact(p, TOP_KEYS, "budget policy", ["validationExpiresAt"]);
+  exact(p, TOP_KEYS, "budget policy", ["validationExpiresAt", "searches", "searching"]);
+  p.searches ??= {};
   if (p.validationExpiresAt !== undefined && (typeof p.validationExpiresAt !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(p.validationExpiresAt)
     || !Number.isFinite(Date.parse(p.validationExpiresAt)) || new Date(p.validationExpiresAt).toISOString().replace(".000Z", "Z") !== p.validationExpiresAt)) throw new Error("validationExpiresAt must be an exact UTC timestamp");
   if (p.schema !== "fcpi.budget-policy/v1") throw new Error("budget policy schema must be fcpi.budget-policy/v1");
@@ -45,9 +46,17 @@ export function loadBudgetPolicy(text) {
   nonNegInt(p.paidTotal.caps.day, "paidTotal.caps.day");
   for (const [name, v] of Object.entries(p.providers)) {
     exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "usageDedicated", "session", "api"]);
-    if (!["model", "parser", "proxy", "enhanced"].includes(v.kind)) throw new Error(`provider ${name}.kind must be model, parser, proxy or enhanced`);
+    if (!["model", "parser", "proxy", "enhanced", "search"].includes(v.kind)) throw new Error(`provider ${name}.kind is unsupported`);
     const u = new URL(v.baseUrl);
     const fixture = /\.fixture\.fcpi\.test$/.test(u.hostname);
+    if (v.kind === "search") {
+      if (v.paid !== false || v.api !== "serper-v1" || typeof v.credential !== "string" || !/^[a-z0-9_]{3,64}$/.test(v.credential))
+        throw new Error(`provider ${name}: Serper uses an existing credit allocation and a credential file`);
+      if (u.origin !== "https://google.serper.dev" && !(fixture && u.protocol === "http:"))
+        throw new Error(`provider ${name}: unsupported search origin`);
+      if (u.pathname !== "/" || u.search || u.hash || u.username || u.password) throw new Error(`provider ${name}: search baseUrl must be an origin`);
+      continue;
+    }
     // M7: an enhanced-retrieval provider always authenticates, a fixture one included, so the credential's path is
     // exercised end to end; a paid one is a public https service and an unpaid one a project fixture. Only Zyte API's
     // documented contract is implemented (enhanced.mjs).
@@ -95,7 +104,7 @@ export function loadBudgetPolicy(text) {
       if (!prov || prov.kind !== kind) throw new Error(`${kind} ${name} names ${m.provider}, which is not a ${kind} provider`);
       if (!cat) throw new Error(`${kind} ${name} names unknown category ${m.category}`);
       if (cat.paid !== prov.paid) throw new Error(`${kind} ${name}: a paid provider draws on a paid category and an unpaid one on an unpaid category`);
-      if (cat.unit !== (kind === "parser" ? "credits" : "micro_usd")) throw new Error(`${kind} ${name}: category ${m.category} counts the wrong unit`);
+      if (cat.unit !== (["parser", "search"].includes(kind) ? "credits" : "micro_usd")) throw new Error(`${kind} ${name}: category ${m.category} counts the wrong unit`);
       if (kind === "parser" && (typeof m.tier !== "string" || typeof m.version !== "string")) throw new Error(`parser ${name} needs a tier and a version`);
     }
   };
@@ -103,15 +112,19 @@ export function loadBudgetPolicy(text) {
   subjectOf("parser", p.parsers);
   subjectOf("proxy", p.proxies);
   subjectOf("enhanced", p.enhancers);
+  subjectOf("search", p.searches);
   if (!Array.isArray(p.rateCards)) throw new Error("rateCards must be a list");
   const ids = new Set();
   for (const r of p.rateCards) {
+    const isSearch = Object.hasOwn(p.searches, r.subject);
     const isParser = Object.hasOwn(p.parsers, r.subject), isProxy = Object.hasOwn(p.proxies, r.subject), isEnhancer = Object.hasOwn(p.enhancers, r.subject);
-    if (!Object.hasOwn(p.models, r.subject) && !isParser && !isProxy && !isEnhancer) throw new Error(`rate card ${r.id} names an unknown subject ${r.subject}`);
-    exact(r, isParser ? ["id", "subject", "effectiveFrom", "effectiveTo", "creditsPerPage", "microUsdPerCredit", "source"]
+    if (!Object.hasOwn(p.models, r.subject) && !isParser && !isProxy && !isEnhancer && !isSearch) throw new Error(`rate card ${r.id} names an unknown subject ${r.subject}`);
+    exact(r, isSearch ? ["id", "subject", "effectiveFrom", "effectiveTo", "creditsPerSearch", "source"]
+      : isParser ? ["id", "subject", "effectiveFrom", "effectiveTo", "creditsPerPage", "microUsdPerCredit", "source"]
       : isProxy ? ["id", "subject", "effectiveFrom", "effectiveTo", "microUsdPerGB", "billing", "source"]
       : isEnhancer ? ["id", "subject", "effectiveFrom", "effectiveTo", "microUsdPerHttpRequest", "microUsdPerBrowserRequest", "billing", "source"]
-      : ["id", "subject", "effectiveFrom", "effectiveTo", "inputPerMTok", "cachedInputPerMTok", "outputPerMTok", "source"], `rate card ${r.id}`, !isParser && !isProxy && !isEnhancer ? ["cacheWritePerMTok"] : []);
+      : ["id", "subject", "effectiveFrom", "effectiveTo", "inputPerMTok", "cachedInputPerMTok", "outputPerMTok", "source"], `rate card ${r.id}`, !isParser && !isProxy && !isEnhancer && !isSearch ? ["cacheWritePerMTok"] : []);
+    if (isSearch && r.creditsPerSearch !== 1) throw new Error("Serper search must reserve one credit");
     if (r.cacheWritePerMTok !== undefined) posInt(r.cacheWritePerMTok, 1, 1e9, `rate card ${r.id}.cacheWritePerMTok`);
     // M7: Zyte prices a request by the target's tier, which no answer reports; the card holds the highest tier's price for
     // each request type, and a successful response is charged at it (spec §28.3: a conservative maximum).
@@ -128,7 +141,7 @@ export function loadBudgetPolicy(text) {
       // Bytes are priced per decimal GB (1e9 bytes, the larger count of the two readings of "GB"), both directions.
       posInt(r.microUsdPerGB, 1, 1e9, `rate card ${r.id}.microUsdPerGB`);
       if (r.billing !== "upload_plus_download_per_1e9_bytes") throw new Error(`rate card ${r.id}.billing must be upload_plus_download_per_1e9_bytes`);
-    } else if (!isEnhancer) for (const k of ["inputPerMTok", "cachedInputPerMTok", "outputPerMTok"]) posInt(r[k], 1, 1e9, `rate card ${r.id}.${k}`);
+    } else if (!isEnhancer && !isSearch) for (const k of ["inputPerMTok", "cachedInputPerMTok", "outputPerMTok"]) posInt(r[k], 1, 1e9, `rate card ${r.id}.${k}`);
   }
   // Two cards for one subject may not both be in effect on any day.
   for (const a of p.rateCards) for (const b of p.rateCards) {
@@ -169,6 +182,13 @@ export function loadBudgetPolicy(text) {
   if (p.enhancing.defaultEnhancer !== null && !Object.hasOwn(p.enhancers, p.enhancing.defaultEnhancer)) throw new Error("enhancing.defaultEnhancer must be a listed enhancer or null");
   posInt(p.enhancing.requestTimeoutMs, 1000, 40000, "enhancing.requestTimeoutMs");
   posInt(p.enhancing.maxResponseBytes, 65536, 48 * 1048576, "enhancing.maxResponseBytes");
+  if (p.searching !== undefined) {
+    exact(p.searching, ["defaultSearch", "allocationCredits", "requestTimeoutMs", "maxResponseBytes"], "searching");
+    if (p.searching.defaultSearch !== null && !Object.hasOwn(p.searches, p.searching.defaultSearch)) throw new Error("searching.defaultSearch must be listed or null");
+    posInt(p.searching.allocationCredits, 0, 2443, "searching.allocationCredits");
+    posInt(p.searching.requestTimeoutMs, 1000, 8000, "searching.requestTimeoutMs");
+    posInt(p.searching.maxResponseBytes, 65536, 4 * 1048576, "searching.maxResponseBytes");
+  }
   exact(p.breaker, ["failures", "windowMs", "openMs"], "breaker");
   posInt(p.breaker.failures, 1, 20, "breaker.failures");
   posInt(p.breaker.windowMs, 1000, 3600000, "breaker.windowMs");
