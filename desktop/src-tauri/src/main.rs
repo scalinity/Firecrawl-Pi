@@ -124,6 +124,7 @@ fn main() {
             };
             let (backend, url) = Backend::start(script)?;
             let origin = url.origin();
+            let download_origin = origin.clone();
             app.add_capability(
                 CapabilityBuilder::new("playground-window")
                     .window("main")
@@ -141,6 +142,13 @@ fn main() {
                 .min_inner_size(760.0, 560.0)
                 .decorations(false)
                 .background_color(tauri::webview::Color(12, 12, 12, 255))
+                .on_download(move |_, event| match event {
+                    tauri::webview::DownloadEvent::Requested { url, .. } => {
+                        url.scheme() == "blob" && url.origin() == download_origin
+                    }
+                    tauri::webview::DownloadEvent::Finished { .. } => true,
+                    _ => false,
+                })
                 .on_navigation(move |next| {
                     next.origin() == origin && matches!(next.path(), "/" | "/LLM-DEMO.html")
                 })
