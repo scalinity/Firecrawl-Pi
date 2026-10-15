@@ -14,6 +14,7 @@ use_default_settings:
     # proof-of-work captcha, and this SearXNG leaves both inactive (never loaded), so they are not kept.
     keep_only:
       - yahoo
+      - google
       - duckduckgo
       - brave
 
@@ -59,6 +60,8 @@ plugins:
     active: false
 
 engines:
+  - name: google
+    disabled: false
   # The controlled engine (tests/fixtures/m5/providers.mjs searchHandler), reached through the search
   # proxy like every other engine, for the fixture phase's results, empty answers and failures.
   - name: fcpi fixture

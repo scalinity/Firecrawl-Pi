@@ -384,7 +384,7 @@
       },
       "settings": {
         "path": "deploy/searxng/settings.yml",
-        "sha256": "4e53812d0e96cd2718c02e876bb7ddf8d3adc8005346e43336f24b377ddf2dff",
+        "sha256": "17455f45fa32be258c377a0cf1e9330e910ece8ffb0526ed2f0dc525748cf168",
         "entrypoint": "deploy/searxng/entrypoint.sh",
         "entrypoint_sha256": "a87c687c0ffd6d8742176ebd53b02edb83fa0e3b7aa00a5dad333bf01ef01429"
       },
@@ -1989,7 +1989,7 @@
   },
   "egress": {
     "policy": "deploy/policies/egress.json",
-    "policy_sha256": "355f6945b260949a190981f9da8bb41efd1a0276aebdaa5df8057caf21d12221",
+    "policy_sha256": "62b80a3170220cbf25a1ee75906a5da8aa2892692bfff99fb512a2c3a670289e",
     "residential": {
       "proxyFirstDomains": [
         "m6hard.fixture.fcpi.test"

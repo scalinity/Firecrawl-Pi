@@ -77,7 +77,7 @@
     },
     "fallbackEngines": {
       "fixture": [],
-      "live": []
+      "live": ["google"]
     },
     "engineHosts": {
       "live": [
@@ -86,7 +86,8 @@
         "lite.duckduckgo.com",
         "www.bing.com",
         "search.brave.com",
-        "search.yahoo.com"
+        "search.yahoo.com",
+        "www.google.com"
       ]
     },
     "engineRoutes": {
@@ -96,6 +97,7 @@
       "search.brave.com": "residential",
       "www.bing.com": "direct",
       "search.yahoo.com": "direct",
+      "www.google.com": "residential",
       "searchr.fixture.fcpi.test": "residential"
     },
     "perHour": 60,
