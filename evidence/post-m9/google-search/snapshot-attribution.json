@@ -1,0 +1,48 @@
+{
+  "schema": "fcpi.google-search-snapshot-attribution/v1",
+  "source_commit": "8be396df0aa384e3e9237a36ce659557866aaf02",
+  "private_inputs_sha256": {
+    "snapshot-before.txt": "95296a6dd8400a212d75ba9dac31a292e7e46846249aebc07709d2c248e020e0",
+    "snapshot-after.txt": "21aa701775c114040183a0be481434a9862ae4dbfd6618464145fa56a94d96bc",
+    "final-network-check.txt": "28f279f71d550d03090be7a77d730777114fca4167a6d87a3c74b1e8486570ff"
+  },
+  "boot_unchanged": true,
+  "docker_inventory_unchanged": true,
+  "previous_after_comparison": {
+    "removed": 1,
+    "added": 1,
+    "attribution": "Only trailing whitespace differs on the identical zram algorithm/size line; no configuration delta."
+  },
+  "session_comparison": {
+    "removed": 3,
+    "added": 4,
+    "attributions": {
+      "findmnt": "Two Docker network namespace mounts replaced by restarting retrieval-service and searxng; current SandboxKey values match the two added mounts.",
+      "systemd_running": "The existing enabled fcpi-probe.timer appeared while triggering; its final observed state is active/waiting.",
+      "firewall": {
+        "before_ruleset_sha256": "e1e3a82a1d4d6b6d3958b6a180f2b330e59339f266488678d66e6e2b80189a85",
+        "after_ruleset_sha256": "86344c110bc1bfc51dc465eb32392fdf033778a8df7757aefcd1b42207892844",
+        "only_three_drop_rules_reordered": true,
+        "before_order_as_after_rule_indices": [
+          2,
+          0,
+          1
+        ],
+        "other_table_hashes_match": 7,
+        "semantics": "Three terminal DROP rules have distinct destination addresses, so their order does not change which traffic is dropped.",
+        "owned_namespace_mapping": [
+          "/fcpi-retrieval-service-1 /var/run/docker/netns/505ce17839bc",
+          "/fcpi-searxng-1 /var/run/docker/netns/6a4ded63423d"
+        ],
+        "probe_timer": [
+          "ActiveState=active",
+          "SubState=waiting",
+          "UnitFileState=enabled"
+        ]
+      }
+    },
+    "unattributed_lines": 0
+  },
+  "collector_note": "M0 snapshot-diff.sh takes no arguments, so the initial invocation compared its historical defaults. This record uses a fresh section-keyed comparison of the actual private snapshots, excluding only meta and SSH session scopes.",
+  "state": "PASS"
+}

@@ -1,0 +1,97 @@
+{
+  "schema": "fcpi.google-search-verification/v1",
+  "utc": "2026-10-15T20:14:17.050089+00:00",
+  "source_commit": "8be396df0aa384e3e9237a36ce659557866aaf02",
+  "configuration": {
+    "settings_sha256": "24d7a5bb407ff8d66eef5f91209cf21b87b61f96dbd5ddf1d6639fc2c61eb5c2",
+    "policy_sha256": "07de48fc8bc118828008c9c5c2c6c9ca84238ec07768d12330eba547914b5dc0",
+    "primary": [
+      "yahoo"
+    ],
+    "automatic_fallback": [],
+    "google_loaded": true,
+    "google_host": "www.google.com",
+    "google_route": "residential",
+    "searxng_image": "sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19",
+    "images_rebuilt": false
+  },
+  "checks": [
+    {
+      "id": "fixture-search-budget-proxy-quality",
+      "state": "PASS",
+      "tests": 37,
+      "exit_code": 0,
+      "basis": "Workstation Node with an isolated copy of service tests/source and the same fixture/policy directory layout used by the container harness.",
+      "initial_attempt": "FAIL: direct repository invocation lacked the harness fixture/policy layout; corrected isolated invocation passed."
+    },
+    {
+      "id": "pinned-searxng-yaml",
+      "state": "PASS",
+      "basis": "Parsed the proposed settings with the existing pinned SearXNG container Python/PyYAML; Google retained and enabled."
+    },
+    {
+      "id": "deployment",
+      "state": "PASS",
+      "exit_code": 0,
+      "deployed_commits": [
+        "c40430fd90d619e5d896c73e460229a08ecdca86",
+        "8be396df0aa384e3e9237a36ce659557866aaf02"
+      ],
+      "archive_files": 2436,
+      "stale_files_removed": 0,
+      "hash_verification": true
+    },
+    {
+      "id": "running-google-engine-and-route",
+      "state": "PASS",
+      "basis": "Running SearXNG /config includes google; retrieval service reads the matching policy hash, Yahoo primary, no automatic fallback and residential Google route."
+    },
+    {
+      "id": "google-results-through-firecrawl",
+      "state": "FAIL",
+      "capability": "UNAVAILABLE",
+      "query": "site:docs.python.org/3.14/whatsnew/3.14.html \"PEP 750\"",
+      "http_status": 200,
+      "results": 0,
+      "warning": "Partial search result: 1 engine(s) did not answer (google: access denied).",
+      "request_count": 1,
+      "observed_proxy_route": "residential",
+      "proxy_tunnel_status": 200,
+      "note": "SearXNG reported Google access denied. The HTTP 200 envelope does not establish Google success."
+    },
+    {
+      "id": "ordinary-firecrawl-search",
+      "state": "PASS",
+      "query": "Python 3.14 release notes",
+      "http_status": 200,
+      "results": 5,
+      "warning": null,
+      "official_result": "https://docs.python.org/3/whatsnew/3.14.html"
+    },
+    {
+      "id": "container-health",
+      "state": "PASS",
+      "healthy": 15,
+      "total": 15
+    },
+    {
+      "id": "snapshot-preservation",
+      "state": "PASS",
+      "report": "evidence/post-m9/google-search/snapshot-attribution.json"
+    }
+  ],
+  "cost": {
+    "provider": "decodo-residential",
+    "google_search_tunnels": 1,
+    "settled_ledger_estimate_micro_usd": 34,
+    "maximum_reserved_micro_usd": 8000,
+    "reservation_state": "SETTLED",
+    "provider_invoice": "NOT_RUN",
+    "budget_policy_changed": false
+  },
+  "limits": [
+    "Useful Google results remain unavailable on the tested route.",
+    "No CAPTCHA solving, IP cycling, alternate paid provider, home-IP retry or image upgrade was attempted.",
+    "Full milestone acceptance, recovery, soak and provider qualification suites were not rerun."
+  ]
+}
