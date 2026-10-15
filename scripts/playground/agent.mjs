@@ -180,11 +180,19 @@ export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
     if (!response) return null;
     const rows = Array.isArray(response.data?.web) ? response.data.web : Array.isArray(response.data) ? response.data : null;
     if (!rows) { stop('INVALID_SEARCH_RESPONSE', 'The search response did not contain a readable result list.'); return null; }
+    let next = null;
     for (const row of rows.slice(0, 10)) {
       const url = urlOf(row?.url);
-      if (url && candidates.size < 100) candidates.set(url, text(row.title).slice(0, 240) || null);
+      if (!url) continue;
+      if (!candidates.has(url) && candidates.size >= 100) {
+        const stale = [...candidates.keys()].find(value => !visited.has(value));
+        if (stale) candidates.delete(stale);
+      }
+      if (candidates.has(url) || candidates.size < 100) {
+        candidates.set(url, text(row.title).slice(0, 240) || null);
+        if (!visited.has(url)) next ??= url;
+      }
     }
-    const next = [...candidates.keys()].find(url => !visited.has(url));
     if (!next) stop('NO_SEARCH_RESULTS', 'Search returned no usable unvisited URLs.');
     return next;
   }

@@ -46,6 +46,26 @@ test('a later page can resolve the actual extractor missing-required warning', a
   assert.deepEqual(output.result, { measurement: 42 });
   assert.ok(output.limitations.some(value => value.includes('no document held a value')));
 });
+
+test('follow-up searches choose their current results ahead of older page candidates', async () => {
+  const focused = 'https://research.example/focused';
+  for (const links of [[second], Array.from({ length: 100 }, (_, i) => `https://research.example/old-${i}`)]) {
+    const f = fixture([page(first, { links, json: decision(first, { complete: false, next_action: 'search', next_query: 'focused measurement' }) }),
+      searchResults(focused), page(focused)]);
+    const output = await runAgent({ prompt: 'Find the measurement', urls: [first], maxPages: 2 }, f);
+    assert.equal(output.status, 'completed');
+    assert.equal(f.calls[2].body.url, focused);
+    assert.equal(f.calls.length, 3);
+  }
+});
+
+test('an empty follow-up search does not silently visit an old candidate', async () => {
+  const f = fixture([page(first, { links: [second], json: decision(first, { complete: false, next_action: 'search', next_query: 'focused measurement' }) }), searchResults()]);
+  const output = await runAgent({ prompt: 'Find the measurement', urls: [first], maxPages: 2 }, f);
+  assert.equal(output.code, 'NO_SEARCH_RESULTS');
+  assert.equal(output.status, 'partial');
+  assert.equal(f.calls.length, 2);
+});
 function fixture(responses) {
   const calls = [];
   return { calls, forward: async (request, signal) => {
