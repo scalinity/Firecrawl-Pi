@@ -230,25 +230,40 @@ fn main() {
                         .permission("core:window:allow-start-dragging"),
                 )?;
                 app.manage(Mutex::new(backend));
-                tauri::WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url))
-                    .title("Firecrawl Pi")
-                    .inner_size(1180.0, 800.0)
-                    .min_inner_size(760.0, 560.0)
-                    .decorations(false)
-                    .background_color(tauri::webview::Color(12, 12, 12, 255))
-                    .on_download(move |_, event| match event {
-                        tauri::webview::DownloadEvent::Requested { url, .. } => {
-                            allows_download(&url, &download_origin)
-                        }
-                        tauri::webview::DownloadEvent::Finished { .. } => true,
-                        _ => false,
-                    })
-                    .on_navigation(move |next| allows_navigation(next, &origin))
-                    .on_new_window(|url, _| {
-                        open_source(&url);
-                        NewWindowResponse::Deny
-                    })
-                    .build()?;
+                let window =
+                    tauri::WebviewWindowBuilder::new(app, "main", WebviewUrl::External(url))
+                        .title("Firecrawl Pi")
+                        .inner_size(1180.0, 800.0)
+                        .min_inner_size(760.0, 560.0)
+                        .decorations(true)
+                        .title_bar_style(tauri::TitleBarStyle::Overlay)
+                        .hidden_title(true)
+                        .background_color(tauri::webview::Color(12, 12, 12, 255))
+                        .on_download(move |_, event| match event {
+                            tauri::webview::DownloadEvent::Requested { url, .. } => {
+                                allows_download(&url, &download_origin)
+                            }
+                            tauri::webview::DownloadEvent::Finished { .. } => true,
+                            _ => false,
+                        })
+                        .on_navigation(move |next| allows_navigation(next, &origin))
+                        .on_new_window(|url, _| {
+                            open_source(&url);
+                            NewWindowResponse::Deny
+                        })
+                        .build()?;
+                // Setup runs on the main thread; Tauri owns this NSWindow for its lifetime.
+                // Keep its native rounded frame while the existing header owns the controls.
+                let native = unsafe { &*(window.ns_window()? as *const objc2_app_kit::NSWindow) };
+                for button in [
+                    objc2_app_kit::NSWindowButton::CloseButton,
+                    objc2_app_kit::NSWindowButton::MiniaturizeButton,
+                    objc2_app_kit::NSWindowButton::ZoomButton,
+                ] {
+                    if let Some(button) = native.standardWindowButton(button) {
+                        button.setHidden(true);
+                    }
+                }
                 Ok(())
             };
             // Tauri runs setup after build(), so handle its errors here instead of panicking.

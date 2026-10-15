@@ -1,7 +1,8 @@
 # Firecrawl Pi desktop
 
-A macOS Tauri window for the existing local playground. The native title bar is
-removed. Drag empty space in the existing header to move the window; double-click
+A macOS Tauri window for the existing local playground. The native title bar and
+traffic lights are hidden; macOS retains its rounded corners and window shadow.
+Drag empty space in the existing header to move the window; double-click
 it to maximize or restore. The header buttons minimize, maximize/restore, and close.
 Closing the window or quitting the application stops its local backend. Durable
 crawls remain on the Pi, as in the browser playground.
@@ -11,6 +12,7 @@ are in `src-tauri/icons/`; no third-party frontend code is bundled.
 
 The app needs Node.js 22 or newer and the existing Pi SSH key/configuration.
 It checks Homebrew's Apple Silicon and Intel Node locations, then PATH.
+macOS may request local-network access to connect to the Pi over SSH.
 `FCPI_NODE` overrides that executable. Gateway credentials remain on the Pi.
 The bundle contains only the explicit runtime file list in `tauri.conf.json`.
 Each launch starts its own loopback server on an available port; it does not need
