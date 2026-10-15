@@ -142,7 +142,8 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
     assert.equal(out.failure.class, "BLOCKED_CREDENTIAL");
   } finally { await p.srv.close(); }
   // With paid dispatch on and a credential present, the zero cap still refuses before any request leaves.
-  const z = await rig({ paidDispatch: true, creds: { openai_api_key: "sk-test-not-a-real-key-0000000000" } });
+  const z = await rig({ paidDispatch: true, creds: { openai_api_key: "sk-test-not-a-real-key-0000000000" },
+    mutate: (b) => { b.categories.llm.caps = { day: 0, month: 0 }; } });
   try {
     const out = await z.extract(req({ model: "gpt-6-luna" }));
     assert.equal(out.failure.class, "BUDGET_EXHAUSTED");

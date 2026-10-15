@@ -1,0 +1,124 @@
+{
+  "schema": "fcpi.llm-budget-activation/v1",
+  "utc": "2026-10-15T17:24:41.520236+00:00",
+  "policy_commit": "4ad9534934eadd01e0f88959ab29b3f54d893509",
+  "policy_sha256": "ec6356ae52ef917e252a911b6ca15d7b398169e906049fcdb4635df5633a09b1",
+  "authorization": {
+    "category": "llm",
+    "monthly_micro_usd": 5000000,
+    "daily_micro_usd": 500000,
+    "shared_paid_daily_micro_usd": 500000,
+    "renewal": "calendar month, UTC",
+    "source": "Explicit approval of $5 per month on 2026-10-15"
+  },
+  "live": {
+    "state": "PASS",
+    "protocol": "2026-07-28",
+    "transport": "stateless Streamable HTTP",
+    "tool": "firecrawl_scrape",
+    "format": "json",
+    "target": "https://example.com",
+    "principal": "owner",
+    "model": "gpt-6-luna",
+    "calls": 1,
+    "cost_micro_usd": 21,
+    "month_settled_micro_usd_after": 7735,
+    "month_reserved_micro_usd_after": 0,
+    "content_result": {
+      "title": null,
+      "missing_required": [
+        "$.title"
+      ]
+    },
+    "limit": "This verifies budget authorization and model dispatch; the returned null title is not successful field extraction.",
+    "negative_probes": [
+      {
+        "token_label": "ops",
+        "code": "INSUFFICIENT_SCOPE",
+        "model_calls": 0
+      },
+      {
+        "token_label": "owner",
+        "code": "INSUFFICIENT_SCOPE",
+        "model_calls": 0
+      }
+    ]
+  },
+  "services": {
+    "healthy": true,
+    "rest_ready": true,
+    "mcp_ready": true,
+    "paid_dispatch": true,
+    "all_service_health_checks": true
+  },
+  "tests": {
+    "local_budget_tests": {
+      "state": "PASS",
+      "passed": 10
+    },
+    "initial_pi_suite": {
+      "state": "FAIL",
+      "passed": 27,
+      "failed": 1,
+      "cancelled": 1,
+      "reason": "The zero-budget test inherited production caps; set zero caps explicitly. The runner also used 60 seconds while the existing slow fixture holds a 90-second timer."
+    },
+    "first_corrected_pi_suite": {
+      "state": "FAIL",
+      "passed": 28,
+      "failed": 0,
+      "cancelled": 1,
+      "reason": "The 60-second runner timeout was shorter than the existing 90-second slow fixture timer."
+    },
+    "final_pi_suite": {
+      "state": "PASS",
+      "passed": 28,
+      "failed": 0,
+      "cancelled": 0,
+      "timeout_ms": 120000,
+      "duration_ms": 94459.07819,
+      "network": "none",
+      "source": "Deployed source image and policy; revised extraction test supplied over stdin into disposable tmpfs.",
+      "revised_test_sha256": "8a6147094e52355f913a8f800ddb913983e5c1c900a9f187a08e39f601fe75ac"
+    }
+  },
+  "overview": {
+    "sources_refreshed": true,
+    "visible_budget_text_updated": true,
+    "light_dark_and_390px": "PASS",
+    "screenshots_deleted": true
+  },
+  "publication": {
+    "gitleaks_outgoing_commits": 44,
+    "gitleaks": "PASS",
+    "working_tree_live_hash_scan": "PASS",
+    "live_secret_hashes": 52,
+    "real_hits": 0,
+    "unclassified_hits": 0,
+    "history_findings_classified": {
+      "synthetic_fixture": "fixture-user:fixture-password URLs in acquisition tests",
+      "code_construct": "credential URL extraction expressions and synthetic URL control in the redaction scanner",
+      "functional_owner_path": "installed incident-agent executable path in versions.lock.json"
+    }
+  },
+  "scope": "Budget configuration and related verification only; no build, model upgrade, provider activation, or milestone acceptance change.",
+  "host_snapshot": {
+    "before_sha256": "30d4f7ae19b2c9f65cf86b43202f821eceff3c29c4fe519b9a2c99b1140a26c3",
+    "after_sha256": "393733040d9c3a866b0ade3cae508d1b29132f2253d992e1eb2b6736af65ab28",
+    "changed_sections": [
+      "docker_ps",
+      "findmnt",
+      "firewall",
+      "systemd_running"
+    ],
+    "diff_sha256": "868c599bfa065030be976610760f992395f4195cfbe5bfec6a63cd903ab2e6e2",
+    "attribution": "Retrieval container, systemd scope and its network/rootfs mounts changed on recreation. No test containers remained. The nftables whole-ruleset hash changed; an exact before/after ruleset was not captured, so that rule delta remains unverified. The incident timer is project-owned; its running state is transient."
+  },
+  "private_receipts": {
+    "budget-tests.tap": "c75445946382a4435447234060dfee7fa255cc06ee2a5293a0e283e58dcf4008",
+    "pi-tests.tap": "73c4635225cf469befb6ae82e110ed810fa6e5557354d98eb45aae8a8abacf55",
+    "pi-tests-fixed.tap": "d295f2aa173340b9dfe3667952db03afd138297df94b14010af05831be1ffa5b",
+    "pi-tests-final.tap": "86b42da1172ac0cd97ade34e8240473b106f0ee97cbb4b64f8dae7a9316a9b7c",
+    "live-authorized-probe.json": "f45f1ad93b7438646667dc96170a4dc08d98bae4691b26359b63895dce12f586"
+  }
+}
