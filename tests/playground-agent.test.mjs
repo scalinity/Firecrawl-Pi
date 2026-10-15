@@ -30,6 +30,22 @@ test('a successful earlier extraction unit cannot dispatch again after a later u
     assert.equal(output.usage.costMicroUsd, usage.costMicroUsd);
   }
 });
+
+test('a later page can resolve the actual extractor missing-required warning', async () => {
+  const schema = { type: 'object', properties: { measurement: { type: 'number' } }, required: ['measurement'] };
+  const f = fixture([request => {
+    const json = decision(first, { complete: false, next_action: 'visit', next_url: second, result: { measurement: null } });
+    const missing = missingRequired(json, request.body.formats.find(format => format.type === 'json').schema);
+    assert.deepEqual(missing, ['$.result.measurement']);
+    return page(first, { json, links: [second], warning: missing.map(path => `${path}: required, but no document held a value for it`).join('; '),
+      extraction: { missingRequired: missing } });
+  }, page(second, { json: decision(second, { result: { measurement: 42 } }) })]);
+  const output = await runAgent({ prompt: 'Find the measurement', urls: [first], maxPages: 2, schema }, f);
+  assert.equal(output.status, 'completed');
+  assert.equal(f.calls.length, 2);
+  assert.deepEqual(output.result, { measurement: 42 });
+  assert.ok(output.limitations.some(value => value.includes('no document held a value')));
+});
 function fixture(responses) {
   const calls = [];
   return { calls, forward: async (request, signal) => {

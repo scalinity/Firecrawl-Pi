@@ -209,7 +209,13 @@ export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
       documents.push(document); sourceDocuments.set(next, document); sourceDocuments.set(actualUrl, document); visited.add(actualUrl);
       sources.push({ url: actualUrl, title: text(doc.metadata?.title).slice(0, 240) || candidates.get(next) || null });
       for (const url of discoverLinks(doc, actualUrl)) if (candidates.size < 100) candidates.set(url, candidates.get(url) ?? null);
-      if (text(doc.warning)) { addLimitation(text(doc.warning).slice(0, 600)); extractionPartial = true; }
+      if (text(doc.warning)) {
+        addLimitation(text(doc.warning).slice(0, 600));
+        const missingWarnings = new Set((response.fcpi?.extraction?.missingRequired ?? [])
+          .map(path => `${path}: required, but no document held a value for it`));
+        // A later page can supply a missing fact. Other warnings still mark incomplete source/extraction.
+        if (text(doc.warning).split('; ').some(warning => !missingWarnings.has(warning))) extractionPartial = true;
+      }
       if (response.fcpi?.extraction?.units?.some(unit => unit.ok === false)) { addLimitation('Some page extraction units failed; their missing findings are unknown.'); extractionPartial = true; }
       if (model !== MODEL || reasoningEffort !== EFFORT) { stop('MODEL_MISMATCH', 'The gateway did not confirm the requested model and reasoning effort; no fallback was requested.'); break; }
       const decision = doc.json;
