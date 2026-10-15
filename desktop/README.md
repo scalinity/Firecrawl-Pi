@@ -17,6 +17,8 @@ macOS may request local-network access to connect to the Pi over SSH.
 The bundle contains only the explicit runtime file list in `tauri.conf.json`.
 Each launch starts its own loopback server on an available port; it does not need
 the separately running browser development server.
+Save JSON opens the macOS Save dialog. Export accepts only a JSON result from the
+owned playground window; it exposes no general filesystem commands.
 
 Install the pinned desktop CLI with `npm ci` in this directory. After explicit
 authorization to compile, `npm run dev` launches Tauri development mode and

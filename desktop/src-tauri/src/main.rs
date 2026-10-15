@@ -11,6 +11,43 @@ use std::{
 use tauri::{ipc::CapabilityBuilder, webview::NewWindowResponse, Manager, Url, WebviewUrl};
 
 struct Backend(Child);
+struct BackendOrigin(String);
+
+fn validate_export(json: &str) -> Result<(), String> {
+    if json.len() > 9 * 1024 * 1024 {
+        return Err("The JSON result is too large to save.".into());
+    }
+    let value: serde_json::Value =
+        serde_json::from_str(json).map_err(|_| "The result is not valid JSON.".to_string())?;
+    if !value.is_object() {
+        return Err("The result must be a JSON object.".into());
+    }
+    Ok(())
+}
+
+#[tauri::command]
+async fn save_result(window: tauri::WebviewWindow, json: String) -> Result<bool, String> {
+    let origin = window.state::<BackendOrigin>();
+    let url = window
+        .url()
+        .map_err(|_| "The playground URL is unavailable.".to_string())?;
+    if window.label() != "main" || !allows_navigation(&url, &origin.0) {
+        return Err("Saving is only available in the playground window.".into());
+    }
+    validate_export(&json)?;
+    let Some(file) = rfd::AsyncFileDialog::new()
+        .set_file_name("fcpi-result.json")
+        .add_filter("JSON result", &["json"])
+        .save_file()
+        .await
+    else {
+        return Ok(false);
+    };
+    file.write(json.as_bytes())
+        .await
+        .map_err(|_| "The selected file could not be written.".to_string())?;
+    Ok(true)
+}
 
 impl Backend {
     fn start(script: PathBuf) -> Result<(Self, Url), Box<dyn std::error::Error>> {
@@ -192,10 +229,6 @@ fn allows_navigation(url: &Url, origin: &str) -> bool {
     url.origin().ascii_serialization() == origin && matches!(url.path(), "/" | "/LLM-DEMO.html")
 }
 
-fn allows_download(url: &Url, origin: &str) -> bool {
-    url.scheme() == "blob" && url.origin().ascii_serialization() == origin
-}
-
 fn allows_source(url: &Url) -> bool {
     matches!(url.scheme(), "http" | "https")
         && url.username().is_empty()
@@ -204,6 +237,7 @@ fn allows_source(url: &Url) -> bool {
 
 fn main() {
     let result = tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![save_result])
         .setup(|app| {
             let start = || -> Result<(), Box<dyn std::error::Error>> {
                 let bundled = app
@@ -218,7 +252,7 @@ fn main() {
                 };
                 let (backend, url) = Backend::start(script)?;
                 let origin = url.origin().ascii_serialization();
-                let download_origin = origin.clone();
+                app.manage(BackendOrigin(origin.clone()));
                 app.add_capability(
                     CapabilityBuilder::new("playground-window")
                         .window("main")
@@ -227,7 +261,8 @@ fn main() {
                         .permission("core:window:allow-close")
                         .permission("core:window:allow-minimize")
                         .permission("core:window:allow-toggle-maximize")
-                        .permission("core:window:allow-start-dragging"),
+                        .permission("core:window:allow-start-dragging")
+                        .permission("allow-save-result"),
                 )?;
                 app.manage(Mutex::new(backend));
                 let window =
@@ -239,13 +274,6 @@ fn main() {
                         .title_bar_style(tauri::TitleBarStyle::Overlay)
                         .hidden_title(true)
                         .background_color(tauri::webview::Color(12, 12, 12, 255))
-                        .on_download(move |_, event| match event {
-                            tauri::webview::DownloadEvent::Requested { url, .. } => {
-                                allows_download(&url, &download_origin)
-                            }
-                            tauri::webview::DownloadEvent::Finished { .. } => true,
-                            _ => false,
-                        })
                         .on_navigation(move |next| allows_navigation(next, &origin))
                         .on_new_window(|url, _| {
                             open_source(&url);
@@ -357,18 +385,6 @@ mod tests {
         ] {
             assert!(!allows_navigation(&Url::parse(url).unwrap(), origin));
         }
-        assert!(allows_download(
-            &Url::parse("blob:http://127.0.0.1:49152/id").unwrap(),
-            origin
-        ));
-        for url in [
-            "blob:https://example.com/id",
-            "blob:http://127.0.0.1:49153/id",
-            "https://example.com/file",
-            "data:text/plain,hello",
-        ] {
-            assert!(!allows_download(&Url::parse(url).unwrap(), origin));
-        }
         for url in ["https://example.com/source", "http://example.com/"] {
             assert!(allows_source(&Url::parse(url).unwrap()));
         }
@@ -379,6 +395,15 @@ mod tests {
         ] {
             assert!(!allows_source(&Url::parse(url).unwrap()));
         }
+    }
+
+    #[test]
+    fn export_rejects_invalid_non_object_and_oversized_json() {
+        assert!(validate_export("{\"success\":true}").is_ok());
+        for json in ["", "{bad", "null", "[]", "true"] {
+            assert!(validate_export(json).is_err());
+        }
+        assert!(validate_export(&" ".repeat(9 * 1024 * 1024 + 1)).is_err());
     }
 
     #[test]

@@ -33,9 +33,16 @@ async (page) => {
   const native = await page.context().newPage();
   try {
     await native.route('**/api/status', route => route.fulfill({ json: { status: 200, data: { core: { live: true } } } }));
+    await native.route('**/api/run', route => route.fulfill({json:{status:200,data:{success:true,data:{markdown:'Native export fixture',metadata:{sourceURL:'https://example.com/'}}}}}));
     await native.addInitScript(() => {
       window.nativeCalls = [];
-      window.__TAURI__ = { window: { getCurrentWindow: () => Object.fromEntries(
+      window.savedResults = [];
+      window.saveOutcome = true;
+      window.__TAURI__ = { core: { invoke: async (command,payload) => {
+        window.savedResults.push({command,payload});
+        if(window.saveOutcome==='error')throw Error('fixture failure');
+        return window.saveOutcome;
+      } }, window: { getCurrentWindow: () => Object.fromEntries(
         ['minimize','toggleMaximize','close','startDragging'].map(name => [name, () => { window.nativeCalls.push(name); return Promise.resolve(); }])
       ) } };
     });
@@ -49,6 +56,21 @@ async (page) => {
     const calls = await native.evaluate(() => window.nativeCalls);
     if (JSON.stringify(calls) !== JSON.stringify(['minimize','toggleMaximize','close','startDragging','toggleMaximize'])) throw Error('Native command or drag wiring differs: '+JSON.stringify(calls));
     results.push({check:'desktop controls and header drag wiring (mock native API)',state:'PASS'});
+    await native.locator('#target').fill('https://example.com/');
+    await native.locator('#run').click();
+    await native.waitForFunction(() => !document.querySelector('#run').disabled);
+    await native.locator('#save').click();
+    await native.getByText('JSON result saved.',{exact:true}).waitFor();
+    const saved = await native.evaluate(() => window.savedResults);
+    if(saved.length!==1||saved[0].command!=='save_result'||JSON.parse(saved[0].payload.json).data.data.markdown!=='Native export fixture')throw Error('Native save received the wrong result');
+    await native.evaluate(() => {window.saveOutcome=false;});
+    await native.locator('#save').click();
+    await native.getByText('Save cancelled.',{exact:true}).waitFor();
+    await native.evaluate(() => {window.saveOutcome='error';});
+    await native.locator('#save').click();
+    await native.getByText('The JSON result could not be saved.',{exact:false}).waitFor();
+    if(!await native.locator('#save').isEnabled())throw Error('Save did not recover after an error');
+    results.push({check:'native JSON export, dialog cancellation and write failure (mock native API)',state:'PASS'});
   } finally { await native.close(); }
   return results;
 }

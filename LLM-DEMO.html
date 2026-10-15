@@ -377,7 +377,20 @@ $('refresh-job').addEventListener('click',()=>submit('/api/crawl-status',{id:$('
 $('cancel-job').addEventListener('click',()=>submit('/api/crawl-cancel',{id:$('job-id').value.trim()},'crawl cancellation'));
 document.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key==='Enter'&&!busy){event.preventDefault();$('request-form').requestSubmit();}});
 $('copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText(view==='content'?$('output').innerText:jsonText());$('copy').textContent='Copied';setTimeout(()=>$('copy').textContent='Copy',1300);}catch{activity('Clipboard access is unavailable. Select the text to copy it.','error');}});
-$('save').addEventListener('click',()=>{if(!current)return;const blob=new Blob([format(current.result)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=node('a');a.href=url;a.download='fcpi-'+current.operation+'-'+new Date(current.at).toISOString().replaceAll(':','-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
+$('save').addEventListener('click',async()=>{
+  if(!current)return;
+  const json=format(current.result);
+  if(window.__TAURI__?.core?.invoke){
+    $('save').disabled=true;
+    try{
+      const saved=await window.__TAURI__.core.invoke('save_result',{json});
+      activity(saved?'JSON result saved.':'Save cancelled.');
+    }catch{activity('The JSON result could not be saved. Try again and choose a writable location.','error');}
+    finally{$('save').disabled=false;}
+    return;
+  }
+  const blob=new Blob([json],{type:'application/json'});const url=URL.createObjectURL(blob);const a=node('a');a.href=url;a.download='fcpi-'+current.operation+'-'+new Date(current.at).toISOString().replaceAll(':','-')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
 $('history-link').addEventListener('click',()=>{if(history.length)$('history').scrollIntoView({behavior:'smooth',block:'start'});else activity('No requests yet. Run a tool to start your session history.');});
 checkConnection();
 </script>
