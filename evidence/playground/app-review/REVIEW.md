@@ -71,4 +71,16 @@ None.
 
 ### Remediation outcomes
 
-Pending /address. Attribution tags DB1/CA1 refer to the debugger/auditor lanes in this pair (DB2/CA2).
+All findings addressed with focused regression coverage:
+
+| Finding | Outcome | Commit |
+| --- | --- | --- |
+| A1 | Fixed: retain evidence and stop on any failed extraction unit before another dispatch. | `54a9af2` |
+| A2 | Fixed: later grounded results can resolve earlier missing facts; incomplete acquisition remains partial. | `943ce1d` |
+| A3 | Fixed: follow-up selection uses the current search results; empty results stop. | `013b567` |
+| A4 | Fixed: definitive local rejection permits correction; uncertain submissions retain their original key. | `ca5d2f7` |
+| A5 | Fixed: reject null, scalar and array root schemas before dispatch. | `d2f220c` |
+| A6 | Fixed: check required unknown values in matching anyOf branches. | `a9c1f66` |
+| A7 | Fixed: remote Python serializes UTF-8 without ASCII expansion; actual serializer tested with a 5.4 MB Unicode response. | `3a4528b` |
+
+Verification: 43 Node tests passed across the desktop, bridge and Agent suites. Browser regression checks passed for corrected local rejection and preserved uncertain submission. The earlier review verdict above records the original findings. Attribution tags DB1/CA1 refer to the debugger/auditor lanes in this pair (DB2/CA2).

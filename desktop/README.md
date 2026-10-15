@@ -27,7 +27,12 @@ authorization to compile, `npm run dev` launches Tauri development mode and
 `npm run package` produces
 `src-tauri/target/release/bundle/macos/Firecrawl Pi.app`.
 These commands compile Rust. No frontend bundler or public service is involved.
-The package is for local use; no signing identity, updater, or publication is configured.
+The package is for local use; no updater or publication is configured.
+For stable macOS local-network permission across rebuilds, set
+`APPLE_SIGNING_IDENTITY` to an existing Apple Development identity in the login
+keychain when packaging. The identity is local configuration and is never stored
+in this repository. Ad-hoc signatures change when the executable changes and can
+lose their existing local-network permission.
 
 From the repository root, the non-compiling runtime checks are:
 

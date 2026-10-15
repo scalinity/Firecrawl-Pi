@@ -60,4 +60,14 @@ Reviewed `dd53fc3...0fe74d3` with two independent specialists, DB1 (debugger) an
 
 ### Remediation outcomes
 
-Pending /address. Native compilation remains held until all requested review findings are addressed.
+All source findings addressed; native coverage limits remain explicit:
+
+| Finding | Outcome | Commit |
+| --- | --- | --- |
+| T1 | Fixed: use an origin-checked native JSON Save dialog. Actual Save and Cancel verified; the earlier Blob handler hung WebKit while requesting Downloads access and was replaced. | `ec80f9d` |
+| T2 | Fixed: reap the external-browser launcher in a waiting thread. | `ac9c0d7` |
+| T3 | Fixed: add native URL/startup/deadline/forced-reap tests and mocked command/drag coverage. Actual Save, Cancel, Copy, close, quit and rounded corners verified after compilation. | `1f10259`, `ec80f9d` |
+| T4 | Fixed: wait for HTTP 100 Continue and completed partial write before shutting down. | `c651142` |
+| T5 | Fixed: retain bounded diagnostic classes, suppress private stderr text, and handle setup failure without a panic. | `438dd23` |
+
+Verification: 43 Node tests, five browser scenarios, seven Rust tests, Rust formatting and the macOS release package passed. Native Save wrote a JSON result whose hash and parsed contents were checked outside the repository; Cancel preserved that file. Actual Copy, close and quit succeeded, and closing/quitting reaped the owned backend. Maximize/restore changed the captured window geometry. Minimize and dragging were dispatched, but their final geometry was not independently measured. External source-link launch and an end-to-end foreign-origin IPC rejection are NOT_RUN; URL predicate and mocked command tests cover the corresponding source boundaries. The earlier review verdict above records the original findings.

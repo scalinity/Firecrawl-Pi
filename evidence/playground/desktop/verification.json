@@ -1,0 +1,111 @@
+{
+  "schema": "fcpi.playground-desktop-verification/v1",
+  "utc": "2026-10-15T19:42:29.845264+00:00",
+  "source_commit": "75df9bc96aaf7b5bd75f6e86ba0a23ef5001dcae",
+  "artifact": {
+    "bundle": "desktop/src-tauri/target/release/bundle/macos/Firecrawl Pi.app",
+    "binary_sha256": "2b45e5d5f31bec8e1b08fda6b7853dfc1a91b09a7021caf061600a752900a14b",
+    "icon_source_sha256": "997f2ded5447fbfab5c9f17296629c78e3bc7744f8727ac25086d2d8c18b80f9",
+    "html_sha256": "506f757969561c6bc84d849609a2085f21ff920685914ad88567ef068200d1d1"
+  },
+  "checks": [
+    {
+      "id": "node-runtime",
+      "command": "node --test tests/playground-desktop.test.mjs tests/playground.test.mjs tests/playground-agent.test.mjs",
+      "state": "PASS",
+      "tests": 43,
+      "exit_code": 0
+    },
+    {
+      "id": "browser-regressions",
+      "file": "tests/playground-ui.browser.js",
+      "state": "PASS",
+      "scenarios": 5,
+      "includes": [
+        "equal 32px buttons; 12px top and right padding",
+        "local correction and uncertain submissions",
+        "native control and Save command mocks",
+        "formatted Content and exact raw Markdown",
+        "sanitization and 390px layout"
+      ]
+    },
+    {
+      "id": "rust-native-helpers",
+      "command": "cargo test --manifest-path desktop/src-tauri/Cargo.toml",
+      "state": "PASS",
+      "tests": 7,
+      "exit_code": 0,
+      "basis": "Run after native JSON export remediation; Rust source unchanged by later Markdown and control spacing changes."
+    },
+    {
+      "id": "rust-format",
+      "command": "cargo fmt --manifest-path desktop/src-tauri/Cargo.toml --check",
+      "state": "PASS",
+      "exit_code": 0
+    },
+    {
+      "id": "macos-package",
+      "command": "npm run package",
+      "cwd": "desktop",
+      "state": "PASS",
+      "exit_code": 0
+    },
+    {
+      "id": "signature",
+      "command": "codesign --verify --deep --strict <bundle>",
+      "state": "PASS",
+      "exit_code": 0,
+      "identity": "Existing local Apple Development identity; no identity stored in Git."
+    },
+    {
+      "id": "final-native-scrape",
+      "state": "PASS",
+      "target": "https://www.python.org/downloads/release/python-3140/",
+      "http_status": 200,
+      "displayed_elapsed_seconds": 0.54,
+      "llm_enabled": false
+    },
+    {
+      "id": "native-visual",
+      "state": "PASS",
+      "observed": [
+        "rounded macOS window corners",
+        "equal corner padding and centered window icons",
+        "Content, Markdown, JSON and Request tabs",
+        "Pi connected after signed rebuild"
+      ]
+    },
+    {
+      "id": "native-save-copy-close",
+      "state": "PASS",
+      "basis": "Observed before final appearance changes; native implementation unchanged.",
+      "observed": [
+        "JSON Save writes a parsed result",
+        "Cancel leaves saved file unchanged",
+        "Copy reports success",
+        "window close and Cmd-Q stop owned backend"
+      ]
+    },
+    {
+      "id": "native-external-link-launch",
+      "state": "NOT_RUN"
+    },
+    {
+      "id": "native-foreign-origin-ipc-end-to-end",
+      "state": "NOT_RUN",
+      "coverage": "URL predicate tests only; actual Tauri enforcement not independently exercised."
+    },
+    {
+      "id": "native-drag-minimize-geometry",
+      "state": "NOT_RUN",
+      "coverage": "Actions dispatched and command wiring tested; final geometry not independently measured."
+    }
+  ],
+  "limits": [
+    "Local desktop/playground verification only; no new milestone or Pi operational qualification.",
+    "Initial Blob Save handler hung WebKit and was replaced by native Save.",
+    "Ad-hoc signing caused local-network access failures; final bundle uses an existing stable development identity.",
+    "Full provider, recovery, host-snapshot and M9 acceptance suites were not rerun."
+  ],
+  "orchestration": "No assertions changed: this work adds local desktop/playground behavior without changing milestone order, ownership or eligibility."
+}
