@@ -77,7 +77,7 @@
     },
     "fallbackEngines": {
       "fixture": [],
-      "live": ["google"]
+      "live": []
     },
     "engineHosts": {
       "live": [
