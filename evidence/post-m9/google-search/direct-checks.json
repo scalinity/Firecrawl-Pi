@@ -1,0 +1,79 @@
+{
+  "schema": "fcpi.google-direct-diagnostics/v1",
+  "recorded_utc": "2026-10-15T20:56:21Z",
+  "source_commit": "3a5dbe8",
+  "query": "Python 3.14 release notes",
+  "new_google_navigation_requests": 4,
+  "production_policy_changed": false,
+  "new_paid_dispatches": 0,
+  "firecrawl_cloud_dispatches": 0,
+  "checks": [
+    {
+      "id": "pi-direct-wml-urllib",
+      "state": "FAIL",
+      "route": "Pi host direct, proxy handler disabled",
+      "path": "/wml/search",
+      "user_agent_family": "Nokia",
+      "http_status": 403,
+      "bytes": 1637,
+      "response_sha256": "801bc0431a2c3893b946f52a68625f1647a906537a63ba2bbb00cd3eb1f1b2d9",
+      "elapsed_seconds": 5.529,
+      "title": "Error 403 (Forbidden)!!1",
+      "result_headings": false,
+      "contains_python_docs": false
+    },
+    {
+      "id": "pi-direct-web-urllib",
+      "state": "FAIL",
+      "route": "Pi host direct, proxy handler disabled",
+      "path": "/search",
+      "user_agent_family": "desktop Chrome",
+      "http_status": 200,
+      "bytes": 93444,
+      "response_sha256": "b29c24e53ce0f032c07d5881e4bdc97173c7dc38354c06c54108a67e4c11b5a3",
+      "elapsed_seconds": 0.217,
+      "title": "Google Search",
+      "result_headings": false,
+      "contains_python_docs": false,
+      "javascript_bootstrap_marker": true
+    },
+    {
+      "id": "pi-direct-wml-curl-cffi",
+      "state": "FAIL",
+      "route": "Pi host network, existing SearXNG virtual environment, trust_env=false",
+      "path": "/wml/search",
+      "user_agent_family": "Nokia",
+      "impersonate": "chrome99_android",
+      "http_status": 403,
+      "bytes": 1637,
+      "response_sha256": "801bc0431a2c3893b946f52a68625f1647a906537a63ba2bbb00cd3eb1f1b2d9",
+      "elapsed_seconds": 1.064,
+      "title": "Error 403 (Forbidden)!!1",
+      "result_headings": false,
+      "contains_python_docs": false
+    },
+    {
+      "id": "workstation-fresh-chromium",
+      "state": "FAIL",
+      "route": "workstation browser, fresh isolated context",
+      "javascript_enabled": true,
+      "navigation_status": 200,
+      "final_host": "www.google.com",
+      "final_path": "/sorry/index",
+      "classification": "unusual-traffic challenge",
+      "result_headings": 0,
+      "matching_official_python_results": 0,
+      "context_closed": true,
+      "captcha_answered": false,
+      "page_error": "solveSimpleChallenge is not defined"
+    }
+  ],
+  "limits": [
+    "All four tested paths failed to produce usable results; no universal Google unavailability claim.",
+    "An existing ordinary browser profile was not used.",
+    "SearchAPI and Serper live integration tests are NOT_RUN; no account or trial activation.",
+    "The four navigation requests do not count Chromium subresource requests.",
+    "Individual request start timestamps were not retained; recorded_utc is receipt preparation time.",
+    "No production regression suite was rerun because no production configuration or source changed."
+  ]
+}
