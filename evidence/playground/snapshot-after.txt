@@ -300,7 +300,7 @@ nft_ruleset_sha256=e1e3a82a1d4d6b6d3958b6a180f2b330e59339f266488678d66e6e2b80189
 iptables_legacy_sha256=SKIPPED ip_tables module not loaded or iptables-legacy-save absent
 ### swap_zram
 swap /dev/zram0 partition 2097136 100
-zram zram0 disksize=2147483648 algo=lzo-rle lzo lz4 [zstd] 
+zram zram0 disksize=2147483648 algo=lzo-rle lzo lz4 [zstd]
 end
 ### nft_tables
 table inet fcpi_guard
