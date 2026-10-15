@@ -45,7 +45,8 @@ try:
     with response:
         raw = response.read(8 * 1024 * 1024 + 1)
         if len(raw) > 8 * 1024 * 1024: raise ValueError('response limit')
-        print(json.dumps({'status': response.status, 'data': json.loads(raw)}))
+        sys.stdout.buffer.write((json.dumps({'status': response.status, 'data': json.loads(raw)},
+                                ensure_ascii=False, separators=(',', ':')) + '\n').encode('utf-8'))
 except Exception:
     print(json.dumps({'status': 503, 'data': {'success': False, 'code': 'PI_UNAVAILABLE',
           'error': 'The Pi gateway did not return a readable response. No automatic retry was made.'}}))

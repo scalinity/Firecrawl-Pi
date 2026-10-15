@@ -170,6 +170,40 @@ test('Agent rejects invalid input, origin, Host, media type, and oversized bodie
   assert.equal(dispatches, 0);
 });
 
+test('remote Python forwards a large UTF-8 response without ASCII expansion', { timeout: 10000 }, async t => {
+  const directory = await mkdtemp(join(tmpdir(), 'fcpi-playground-unicode-'));
+  const originalPath = process.env.PATH;
+  t.after(async () => {
+    if (originalPath === undefined) delete process.env.PATH;
+    else process.env.PATH = originalPath;
+    await rm(directory, { recursive: true, force: true });
+  });
+  const python = [
+    'import sys, shlex, json, io, builtins, urllib.request',
+    'command = shlex.split(sys.argv[1])',
+    'assert command[:4] == ["sudo", "-n", "python3", "-c"]',
+    'raw = json.dumps({"text": "汉" * 1800000}, ensure_ascii=False).encode("utf-8")',
+    'assert len(raw) < 8 * 1024 * 1024',
+    'real_open = builtins.open',
+    'builtins.open = lambda p, *a, **k: io.StringIO("synthetic-fixture-token") if p.startswith("/etc/firecrawl-pi/secrets/clients/") else real_open(p, *a, **k)',
+    'class Response(io.BytesIO):',
+    '    status = 200',
+    'class Opener:',
+    '    def open(self, *args, **kwargs): return Response(raw)',
+    'urllib.request.build_opener = lambda *args: Opener()',
+    'exec(command[4])'
+  ].join('\n');
+  await writeFile(join(directory, 'ssh'), '#!' + process.execPath + '\n' +
+    "const {spawn}=require('node:child_process');\n" +
+    "const child=spawn('python3',['-c'," + JSON.stringify(python) + ",process.argv.at(-1)],{stdio:'inherit'});\n" +
+    "child.on('exit',code=>process.exit(code??1));\n", { mode: 0o700 });
+  process.env.PATH = directory + delimiter + originalPath;
+  const result = await sshForward()({ method: 'GET', path: '/platform/v1/status', timeout: 3 });
+  assert.equal(result.status, 200);
+  assert.equal(result.data.text.length, 1800000);
+  assert.equal(result.data.text, '汉'.repeat(1800000));
+});
+
 test('Agent streams progress before completion and returns the workflow wrapper without a durable job claim', { timeout: 5000 }, async t => {
   const dispatched = deferred(), release = deferred();
   const requests = [];
