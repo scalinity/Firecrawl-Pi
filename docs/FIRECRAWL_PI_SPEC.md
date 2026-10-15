@@ -45,7 +45,7 @@ Build a **private, centrally accessible web-acquisition service**, not a public 
 
 **Selected MCP:** stable **`2026-07-28`**, stateless Streamable HTTP at `/mcp`, official TypeScript SDK v2 with `@modelcontextprotocol/server@2.1.0`; SDK-provided stateless compatibility for `2025-11-25`. The modern request factory, not an old transport with its session option turned off, is the implementation model. [V: M01–M07]
 
-**Selected gap closures:** SearXNG on the Pi; Decodo residential HTTP proxies; Zyte API pay-as-you-go enhanced retrieval; a replaceable, budgeted remote OpenAI-compatible extraction provider; native document parsing with LlamaParse as an optional-account, bounded complex-document fallback; local artifact storage; automated encrypted off-device backups. Bright Data is the alternate raw-proxy supplier, and ScrapingBee is the alternate enhanced provider. [D, with E sources in §§10–15]
+**Selected gap closures:** Serper Google search from a fixed existing-credit allocation, with private SearXNG/Yahoo fallback on the Pi; Decodo residential HTTP proxies; Zyte API pay-as-you-go enhanced retrieval; a replaceable, budgeted remote OpenAI-compatible extraction provider; native document parsing with LlamaParse as an optional-account, bounded complex-document fallback; local artifact storage; automated encrypted off-device backups. Bright Data is the alternate raw-proxy supplier, and ScrapingBee is the alternate enhanced provider. [D, with E sources in §§10–15]
 
 **Important engineering decision:** a proxy setting or a replacement Playwright URL alone does not implement this specification. The pinned Playwright connector returns HTML/status only, and the native engine registry does not expose its screenshots/actions through that connector. Add a **small, tested, version-pinned retrieval integration patch**, with most behavior outside Firecrawl. Do not recreate Fire Engine or broadly fork Firecrawl. [V: F06–F07; D: §8]
 
@@ -125,7 +125,7 @@ Legend: **N** native; **C** configured native; **S** additional self-hosted serv
 | Single-page scrape | Fetch and Playwright exist | N plus guarded retrieval integration | Required; HTML/Markdown correctness, AC03 |
 | Crawl | Queue/worker infrastructure must be operated | C; retain native traversal | Required; bounded graph, resume/cancel, AC04/14 |
 | Map | Cloud coverage may use services/indexes absent locally | C/P; sitemap and discovered-link utility | Required local mapping, not complete global discovery, AC05 |
-| Web search | Search backend and quality need configuration | C+S; SearXNG, bounded fallback interface | Required web results, AC06 |
+| Web search | Search backend and quality need configuration | C+S; Serper Google results, private SearXNG fallback | Required web results, AC06 |
 | Batch scrape | Queue and result lifetime need durable operation | C plus durable admission | Required, AC04/14 |
 | Markdown | Native conversion | N | Required; usable text, not challenge content, AC03 |
 | HTML / raw HTML | Native output formats | N | Required; correct final URL and format, AC03 |
@@ -199,7 +199,8 @@ flowchart TD
     G -->|extraction route| R
     F --> R[Retrieval and provider service]
     R --> B[Isolated Chromium worker]
-    R --> S[SearXNG]
+    R --> S[SearXNG fallback]
+    R --> SG[Serper Google search]
     R --> L[Approved remote LLM]
     R --> P[Complex-document provider]
     R --> X[Residential proxy / enhanced provider]
@@ -465,7 +466,7 @@ The private gateway exposes a **Firecrawl-compatible v2 subset**, not an unquali
 | `POST /v2/scrape` | Bounded synchronous scrape; native supported formats/options; 90-second acquisition budget inside a 110-second gateway deadline |
 | `POST /v2/crawl`; status/cancel routes | Native bounded crawl, externally stable job ID, status/results pagination and cancellation |
 | `POST /v2/map` | The core's sitemap map merged with the start page's same-site links (a start URL naming a page file maps its directory; `sitemap: "only"` keeps the sitemap alone; the start page is fetched like a scrape, needs the `scrape` scope and keeps the map's timeout); `fcpi.sources` counts each source; bounded URL count and acquisition policy |
-| `POST /v2/search` | SearXNG-backed results; requested result scraping uses the same guarded acquisition path |
+| `POST /v2/search` | Serper Google results with Yahoo fallback; requested result scraping uses the same guarded acquisition path |
 | `POST /v2/batch/scrape`; status/cancel routes | Bounded list of URLs, per-item outcomes, explicit job ID |
 | `POST /v2/extract`; status route | Explicit-URL extraction subset run as a durable gateway job; model budget and schema validation |
 | `/platform/v1/status` | Authenticated capability/health summary; no secrets or page contents |

@@ -1,0 +1,82 @@
+[
+  {
+    "utc": "2026-10-15T21:35:47.345Z",
+    "service": "retrieval",
+    "build": "0.5.0",
+    "event": "search_provider",
+    "provider": "serper",
+    "logical_id": "5f45a7c3-6e7f-40bc-82c1-ee7abe8eb337",
+    "query_sha256": "17c3688e97f4a5855f8798684cfab8ff72416a2acbaf8f195cd2a5935ff382bf",
+    "credits": 1,
+    "outcome": "results"
+  },
+  {
+    "utc": "2026-10-15T21:35:47.347Z",
+    "service": "retrieval",
+    "build": "0.5.0",
+    "event": "search",
+    "selection": "live",
+    "engines": [
+      "yahoo"
+    ],
+    "query_sha256": "76c3ed53cbcb4277",
+    "outcome": "results",
+    "ms": 2465,
+    "provider": "serper",
+    "results": 10
+  },
+  {
+    "utc": "2026-10-15T21:35:47.371Z",
+    "service": "retrieval",
+    "build": "0.5.0",
+    "event": "search",
+    "selection": "live",
+    "engines": [
+      "yahoo"
+    ],
+    "query_sha256": "76c3ed53cbcb4277",
+    "outcome": "cache_hit",
+    "ms": 1,
+    "results": 10
+  },
+  {
+    "utc": "2026-10-15T21:35:48.535Z",
+    "service": "retrieval",
+    "build": "0.5.0",
+    "event": "search_provider",
+    "provider": "serper",
+    "logical_id": "59b55d5e-2eb9-48a8-bb16-4e031211d532",
+    "query_sha256": "19e4516f31fa1bcd3ff73f4c24ac85657860f1554ea630173673458fb7dcd931",
+    "credits": 1,
+    "outcome": "results"
+  },
+  {
+    "utc": "2026-10-15T21:35:48.537Z",
+    "service": "retrieval",
+    "build": "0.5.0",
+    "event": "search",
+    "selection": "live",
+    "engines": [
+      "yahoo"
+    ],
+    "query_sha256": "91b55f9250e2ed0d",
+    "outcome": "results",
+    "ms": 1144,
+    "provider": "serper",
+    "results": 10
+  },
+  {
+    "utc": "2026-10-15T21:35:48.557Z",
+    "service": "retrieval",
+    "build": "0.5.0",
+    "event": "search",
+    "selection": "live",
+    "engines": [
+      "yahoo"
+    ],
+    "query_sha256": "91b55f9250e2ed0d",
+    "outcome": "cache_hit",
+    "ms": 1,
+    "results": 10
+  }
+]

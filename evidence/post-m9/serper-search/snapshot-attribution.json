@@ -1,0 +1,40 @@
+{
+  "schema": "fcpi.serper-host-verification/v1",
+  "utc": "2026-10-15T21:38:57.200436+00:00",
+  "state": "PASS",
+  "snapshot_before_sha256": "0a60a299f2d77375158e2d9539b39cbf8d8b2597b662309710785656ad0661b4",
+  "snapshot_after_sha256": "fcea8f4dbce8b453d08fbbc3b773ece4bd2da1e9c851b5988b1070686e1a7e98",
+  "complete": true,
+  "boot_unchanged": true,
+  "changed_sections": {
+    "meta": {
+      "removed": 1,
+      "added": 1
+    },
+    "systemd_running": {
+      "removed": 2,
+      "added": 2
+    },
+    "docker_ps": {
+      "removed": 1,
+      "added": 1
+    },
+    "findmnt": {
+      "removed": 2,
+      "added": 2
+    }
+  },
+  "attribution": {
+    "meta": "capture timestamp",
+    "systemd_running": "owned retrieval Docker scope replacement and transient capture SSH sessions",
+    "docker_ps": "only fcpi-retrieval-service-1 changed identity and image",
+    "findmnt": "retrieval overlay mount and network namespace replacement"
+  },
+  "all_other_sections_identical": true,
+  "firewall_ruleset_sha256": "86344c110bc1bfc51dc465eb32392fdf033778a8df7757aefcd1b42207892844",
+  "firewall_exactly_unchanged": true,
+  "project_healthy": true,
+  "foreign_containers": 0,
+  "unattributed_changes": 0,
+  "raw_snapshots": "retained privately outside the repository"
+}

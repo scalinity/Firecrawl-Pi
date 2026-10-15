@@ -1,0 +1,84 @@
+[
+  {
+    "check": "provider_status",
+    "status": 200,
+    "serper": {
+      "kind": "search",
+      "paid": false,
+      "credential": "present",
+      "breaker": "closed"
+    },
+    "selection": {
+      "search": "live",
+      "extractionModel": "gpt-6-luna",
+      "parser": "llamaparse-cost-effective",
+      "proxy": "decodo-residential",
+      "enhanced": "zyte-api",
+      "source": "file"
+    },
+    "caps": {
+      "paid": false,
+      "unit": "credits",
+      "caps": {
+        "month": 2443
+      }
+    },
+    "usage": [
+      {
+        "category": "serper_trial",
+        "period": "month",
+        "period_start": "2026-10-01",
+        "reserved": 0,
+        "settled": 2
+      }
+    ]
+  },
+  {
+    "check": "serper_ledger",
+    "provider": "serper",
+    "kind": "search",
+    "state": "SETTLED",
+    "rate_card": "serper/trial-search@2026-10-15",
+    "reserved": 1,
+    "actual": 1,
+    "usage": {
+      "credits": 1
+    }
+  },
+  {
+    "check": "serper_ledger",
+    "provider": "serper",
+    "kind": "search",
+    "state": "SETTLED",
+    "rate_card": "serper/trial-search@2026-10-15",
+    "reserved": 1,
+    "actual": 1,
+    "usage": {
+      "credits": 1
+    }
+  },
+  {
+    "check": "live_provider_dispatches",
+    "provider": "serper",
+    "kind": "search",
+    "calls": 2
+  },
+  {
+    "check": "health",
+    "containers": 15,
+    "healthy": 15
+  },
+  {
+    "check": "runtime",
+    "image": "sha256:300b999ea383a92dd06489f432941248dd9d165bcda26099d09e3d0b0da07046",
+    "user": "3310:3310",
+    "oom_killed": false,
+    "cloud_disabled": true
+  },
+  {
+    "check": "credential_permissions",
+    "uid": 3310,
+    "gid": 3310,
+    "mode": "600"
+  }
+]

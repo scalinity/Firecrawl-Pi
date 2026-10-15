@@ -1,0 +1,132 @@
+{
+  "schema": "fcpi.serper-live-verification/v1",
+  "utc": "2026-10-15T21:38:57.201168+00:00",
+  "state": "PASS",
+  "capability": "VERIFIED_LIVE",
+  "implementation_commit": "dacb577644efaa092cb67f7dc7d6b31c2b98c296",
+  "deployed_commit": "b19a676a9f63b55871ac84ef8db5a0939dec7fee",
+  "image_id": "sha256:300b999ea383a92dd06489f432941248dd9d165bcda26099d09e3d0b0da07046",
+  "platform": "linux/arm64",
+  "policy_sha256": "5b8272361b4cc144f8067bccba07c604c3d316ec582d65e00b73b954581a35a2",
+  "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+  "fixtures": {
+    "state": "PASS",
+    "passed": 255,
+    "failed": 0,
+    "skipped": 0,
+    "report": "evidence/post-m9/serper-search/fixtures.json"
+  },
+  "review": {
+    "report": "evidence/post-m9/serper-search/review/REVIEW.md",
+    "findings": 4,
+    "fixed": 4,
+    "unresolved": 0,
+    "model_substitution": "GPT-6.1 Sol; Opus 5.5 unavailable"
+  },
+  "live": {
+    "since": "2026-10-15T21:35:44.336Z",
+    "before": {
+      "balance": 2443,
+      "rateLimit": 5
+    },
+    "immediate_after": {
+      "balance": 2442,
+      "rateLimit": 5
+    },
+    "after": {
+      "balance": 2441,
+      "rateLimit": 5,
+      "utc": "2026-10-15T21:36:18.164Z"
+    },
+    "credits_used": 2,
+    "checks": [
+      {
+        "interface": "rest",
+        "status": 200,
+        "results": 5,
+        "elapsed_ms": 2496,
+        "warning": null,
+        "urls": [
+          "https://docs.python.org/3/whatsnew/3.14.html",
+          "https://docs.python.org/3/whatsnew/changelog.html",
+          "https://www.reddit.com/r/Python/comments/1noegsu/python_314_what_you_need_to_know/",
+          "https://www.python.org/downloads/release/python-3147/",
+          "https://realpython.com/python314-new-features/"
+        ]
+      },
+      {
+        "interface": "mcp",
+        "status": 200,
+        "results": 5,
+        "elapsed_ms": 25,
+        "warning": null,
+        "urls": [
+          "https://docs.python.org/3/whatsnew/3.14.html",
+          "https://docs.python.org/3/whatsnew/changelog.html",
+          "https://www.reddit.com/r/Python/comments/1noegsu/python_314_what_you_need_to_know/",
+          "https://www.python.org/downloads/release/python-3147/",
+          "https://realpython.com/python314-new-features/"
+        ]
+      },
+      {
+        "interface": "mcp",
+        "status": 200,
+        "results": 5,
+        "elapsed_ms": 1166,
+        "warning": null,
+        "urls": [
+          "https://www.raspberrypi.com/products/raspberry-pi-5/",
+          "https://pip.raspberrypi.com/documents/RP-008348-DS-raspberry-pi-5-product-brief.pdf",
+          "https://www.pishop.us/product/raspberry-pi-5-16gb/?srsltid=AU7gw4VDUG8hj8FbznC2rEvojz7Ft6ospZmA40J2xcHokEr1rrGvw_Qa",
+          "https://www.amazon.com/Raspberry-Pi-8GB-SC1112-Quad-core/dp/B0CK2FCG1K",
+          "https://www.richardelectronics.com/blog/projects/raspberry%20pi/raspberry-pi-5-pinout-specs-datasheet-projects"
+        ]
+      },
+      {
+        "interface": "rest",
+        "status": 200,
+        "results": 5,
+        "elapsed_ms": 19,
+        "warning": null,
+        "urls": [
+          "https://www.raspberrypi.com/products/raspberry-pi-5/",
+          "https://pip.raspberrypi.com/documents/RP-008348-DS-raspberry-pi-5-product-brief.pdf",
+          "https://www.pishop.us/product/raspberry-pi-5-16gb/?srsltid=AU7gw4VDUG8hj8FbznC2rEvojz7Ft6ospZmA40J2xcHokEr1rrGvw_Qa",
+          "https://www.amazon.com/Raspberry-Pi-8GB-SC1112-Quad-core/dp/B0CK2FCG1K",
+          "https://www.richardelectronics.com/blog/projects/raspberry%20pi/raspberry-pi-5-pinout-specs-datasheet-projects"
+        ]
+      }
+    ]
+  },
+  "assertions": {
+    "rest_results": true,
+    "modern_stateless_mcp_results": true,
+    "no_mcp_session_header": true,
+    "shared_cache_hits": 2,
+    "serper_dispatches": 2,
+    "settled_credits": 2,
+    "other_provider_dispatches": 0,
+    "new_monetary_spending": 0,
+    "cloud_access_disabled": true,
+    "all_15_containers_healthy": true,
+    "credential_uid": 3310,
+    "credential_mode": "0600",
+    "firewall_exactly_unchanged": true,
+    "unrelated_host_state_unchanged": true
+  },
+  "verification_corrections": [
+    {
+      "classification": "verifier",
+      "initial_result": "FAIL",
+      "reason": "MCP tool payload omits the REST success envelope; the first assertion incorrectly required it. Retained response bodies were rechecked using the actual MCP schema, without replaying queries.",
+      "final_result": "PASS"
+    },
+    {
+      "classification": "provider_account_visibility",
+      "observation": "The immediate account balance showed one of the two credits; the later read-only account poll showed both, agreeing with the two settled ledger rows. No additional search was issued."
+    }
+  ],
+  "packaging_note": "An initial packaging attempt observed the prior deployment marker while source copy was in progress. It was never pinned or run. The final packaging asserted the fully verified deployed implementation commit before building.",
+  "host_report": "evidence/post-m9/serper-search/snapshot-attribution.json",
+  "remaining_checks": "Search-plus-scrape and paid Serper top-up are NOT_RUN; this change makes no claims about them."
+}
