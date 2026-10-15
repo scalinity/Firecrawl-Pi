@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:,">
+<title>What the model adds · Firecrawl Pi</title>
+<style>
+:root{--paper:#f3f7fa;--surface:#fff;--ink:#233844;--muted:#586f7c;--line:#d8e3e9;--orange:#b74419;--orange-soft:#fff0e6;--blue:#1e5f8c;--blue-soft:#e8f2fa;--green:#216d58;--green-soft:#e8f3ee;--code:#263e4c;--shadow:0 18px 55px #203b4b0a;color-scheme:light}
+:root[data-theme="dark"]{--paper:#192d39;--surface:#223b4a;--ink:#edf4f8;--muted:#b1c6d1;--line:#3e5868;--orange:#ffb38a;--orange-soft:#47362e;--blue:#9dd1f4;--blue-soft:#254759;--green:#a3dbc5;--green-soft:#254b43;--code:#e0edf5;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.55 "Avenir Next",Avenir,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,a,summary{touch-action:manipulation}button{font:inherit;cursor:pointer;color:inherit}a{color:var(--blue)}a:hover{text-decoration-thickness:2px}button:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--orange);outline-offset:4px}button:disabled{cursor:wait}pre,code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace}pre{white-space:pre-wrap;overflow-wrap:anywhere}button{border:0}h1,h2,h3,p{margin:0}.shell{max-width:1240px;margin:auto;padding:0 36px}.header{border-bottom:1px solid var(--line)}.header-inner{height:80px;display:flex;align-items:center;justify-content:space-between;gap:16px}.wordmark{font-size:22px;font-weight:750;letter-spacing:-1px;text-decoration:none;color:var(--ink);display:flex;align-items:center;gap:11px}.mark{width:27px;height:27px;display:grid;grid-template-columns:repeat(2,1fr);gap:3px;transform:rotate(-7deg)}.mark i{background:var(--orange);border-radius:2px}.wordmark small{font-size:14px;letter-spacing:0;font-weight:500;color:var(--muted);border-left:1px solid var(--line);padding-left:15px;margin-left:5px}.header-tools{display:flex;align-items:center;gap:20px}.captured{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}.dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex:none}.theme-button{padding:7px 12px;border:1px solid var(--line);background:var(--surface);border-radius:7px;font-size:12px}
+.hero{padding:55px 0 31px;display:grid;grid-template-columns:minmax(0,1fr) 270px;gap:44px;align-items:end}.hero h1{font-size:clamp(35px,4.15vw,54px);font-weight:650;line-height:1.09;letter-spacing:-2px;max-width:770px}.hero p{max-width:650px;font-size:17px;color:var(--muted);margin-top:22px;line-height:1.65}.capture-stamp{padding:20px 0 5px 22px;border-left:2px solid var(--line);font-size:13px;color:var(--muted)}.capture-stamp strong{display:block;color:var(--ink);font-size:15px;font-weight:600;margin-bottom:5px}.capture-stamp time{display:block;margin-bottom:12px}.capture-stamp span{font-size:12px;display:block}
+.source-bar{display:flex;align-items:center;gap:15px;border:1px solid var(--line);border-radius:12px;padding:18px 20px;background:var(--surface);margin:5px 0 28px}.python-tile{width:44px;height:44px;display:grid;place-items:center;font-size:19px;font-weight:700;color:var(--blue);background:var(--blue-soft);border-radius:10px;flex:none}.source-bar .source-info{min-width:0}.source-bar strong{font-size:15px;display:block}.source-bar a{font-size:12px;overflow-wrap:anywhere;text-decoration:none}.source-tag{margin-left:auto;flex:none;color:var(--muted);font-size:12px;background:var(--paper);padding:6px 11px;border-radius:5px}
+.comparison-title{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:14px}.comparison-title h2{font-size:20px;letter-spacing:-.4px;font-weight:600}.comparison-title p{font-size:12px;color:var(--muted);margin-top:3px}.plain-button{background:transparent;border:1px solid var(--line);border-radius:7px;padding:9px 13px;font-size:12px;font-weight:600;flex:none}.plain-button:hover{background:var(--surface)}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 38px minmax(0,1fr);align-items:stretch}.pane{min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:13px;overflow:hidden;box-shadow:var(--shadow)}.pane-head{padding:20px 23px 15px;display:flex;justify-content:space-between;align-items:start;gap:15px;min-height:86px}.pane-head h3{font-size:17px;font-weight:650;letter-spacing:-.3px}.pane-head p{font-size:12px;color:var(--muted);margin-top:3px}.pill{font-size:11px;padding:4px 8px;border-radius:4px;background:var(--paper);color:var(--muted);white-space:nowrap}.pill.model{background:var(--orange-soft);color:var(--orange)}.transfer{display:grid;place-items:center;color:var(--muted)}.transfer svg{width:24px;height:24px}
+.source-meta{padding:0 23px 12px;font-size:11px;color:var(--muted);display:flex;justify-content:space-between;gap:12px}.source-view{margin:0 15px;border:1px solid var(--line);border-radius:8px;min-height:355px;max-height:355px;overflow:auto;background:var(--paper);scrollbar-gutter:stable;padding:18px 19px}.source-section{padding:0 0 22px}.source-section:last-child{padding-bottom:0}.source-section .section-note{display:block;color:var(--muted);font-size:10px;margin-bottom:9px}.source-section pre{font-size:11px;line-height:1.8;color:var(--code);margin:0}.source-section pre mark{background:var(--orange-soft);color:var(--orange);box-shadow:0 0 0 3px var(--orange-soft);border-radius:2px}.source-ellipsis{font-size:11px;font-style:italic;color:var(--muted);margin:-7px 0 16px}.source-caption{padding:14px 23px 19px;color:var(--muted);font-size:12px;min-height:63px}
+.record-heading{display:flex;justify-content:space-between;align-items:center;padding:0 23px 12px;gap:10px}.result-count{color:var(--green);font-size:11px}.view-switch{display:flex;background:var(--paper);padding:3px;border-radius:6px}.view-switch button{padding:4px 10px;border-radius:4px;font-size:11px;background:transparent;color:var(--muted)}.view-switch button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px #203b4b18}
+.record{margin:0 15px;min-height:355px;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--blue-soft)}.record-row{display:grid;grid-template-columns:132px minmax(0,1fr) 14px;align-items:center;gap:8px;width:100%;padding:13px 16px;min-height:49px;background:transparent;text-align:left;border-bottom:1px solid color-mix(in srgb,var(--blue) 13%,transparent);font-size:12px}.record-row:last-child{border-bottom:0}.record-row:hover,.record-row[aria-pressed="true"]{background:var(--surface)}.record-row[aria-pressed="true"]{box-shadow:inset 3px 0 var(--orange)}.field-label{color:var(--muted);font-size:11px}.field-value{font-weight:600;overflow-wrap:anywhere}.field-chevron{font-size:15px;color:var(--blue)}.record-row.missing{background:color-mix(in srgb,var(--paper) 75%,transparent)}.null-value{color:var(--muted);font-weight:500;display:flex;gap:9px;align-items:center;flex-wrap:wrap}.null-value code{font-size:11px;padding:1px 5px;border:1px solid var(--line);border-radius:3px}.json-view{margin:0;min-height:355px;max-height:355px;overflow:auto;padding:17px;font-size:11px;line-height:1.9;color:var(--code);background:var(--blue-soft)}[hidden]{display:none!important}.record-caption{padding:14px 23px 19px;color:var(--muted);font-size:12px;min-height:63px}.record-caption strong{font-weight:600;color:var(--ink)}
+.trace{margin-top:15px;border-radius:8px;border:1px solid var(--line);background:var(--surface);padding:15px 19px;display:grid;grid-template-columns:155px minmax(0,1fr);gap:15px;align-items:start}.trace-label{font-size:12px;font-weight:600;display:flex;gap:8px;align-items:center}.trace-label svg{width:16px;height:16px;color:var(--orange);flex:none}.trace p{font-size:12px;color:var(--muted)}.trace blockquote{font-size:13px;margin:8px 0 0;color:var(--ink);overflow-wrap:anywhere}.trace .trace-note{font-size:11px;margin-top:7px}.trace code{font-size:11px}
+.cost-line{display:grid;grid-template-columns:1fr 1fr;gap:38px;margin-top:16px}.cost-item{display:flex;justify-content:space-between;align-items:baseline;gap:18px;padding:9px 3px}.cost-item span{font-size:12px;color:var(--muted)}.cost-item strong{font-size:16px;letter-spacing:-.4px;font-weight:600;white-space:nowrap}.cost-item small{display:block;font-size:11px;color:var(--muted);margin-top:2px}
+.explanation{display:grid;grid-template-columns:1fr 1fr;gap:56px;margin:43px 0 36px;padding-top:30px;border-top:1px solid var(--line)}.explanation h2{font-size:20px;letter-spacing:-.5px;font-weight:600;margin-bottom:11px}.explanation p{font-size:13px;line-height:1.8;color:var(--muted);max-width:550px}.explanation p+p{margin-top:12px}.local-label,.remote-label{display:inline-flex;align-items:center;gap:7px;font-size:11px;padding:3px 7px;border-radius:4px;margin-bottom:9px}.local-label{background:var(--green-soft);color:var(--green)}.remote-label{background:var(--orange-soft);color:var(--orange)}.pipeline{margin-top:19px;padding:17px 0;display:flex;align-items:center;gap:9px;font-size:11px;flex-wrap:wrap}.pipeline .node{padding:6px 9px;border:1px solid var(--line);border-radius:5px;white-space:nowrap}.pipeline .node.remote{background:var(--orange-soft);border-color:transparent;color:var(--orange)}.pipeline .arrow{color:var(--muted)}.pipeline .output{font-weight:600}
+.inspector{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:21px;overflow:hidden}.inspector summary{padding:17px 20px;cursor:pointer;font-size:13px;font-weight:600}.inspector-inner{border-top:1px solid var(--line);padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:22px}.inspector h3{font-size:12px;font-weight:600;margin-bottom:8px}.inspector pre{font-size:10px;line-height:1.8;max-height:310px;overflow:auto;margin:0;background:var(--paper);border-radius:6px;padding:13px}.copy-button{margin-top:10px;padding:7px 11px;background:var(--blue-soft);color:var(--blue);border-radius:5px;font-size:11px}
+.limit-note{font-size:12px;color:var(--muted);line-height:1.7;max-width:900px;margin:0 0 38px;padding-left:14px;border-left:2px solid var(--line)}.limit-note strong{font-weight:600;color:var(--ink)}footer{border-top:1px solid var(--line);padding:21px 0 31px;display:flex;justify-content:space-between;gap:22px;color:var(--muted);font-size:11px}.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.pane.replaying{opacity:.52}.pane.replaying .record-row{pointer-events:none}.stage-banner{font-size:12px;color:var(--orange);min-height:23px;margin:8px 0}
+@media(max-width:920px){.hero{grid-template-columns:1fr;gap:19px}.capture-stamp{display:none}.workspace{grid-template-columns:minmax(0,1fr) 26px minmax(0,1fr)}.pane-head{padding:17px 17px 12px}.pane-head .pill{display:none}.source-meta{padding-left:17px;padding-right:17px}.record-heading{padding-left:17px;padding-right:17px}.record-row{grid-template-columns:102px minmax(0,1fr) 12px;padding:13px 11px}.cost-line{gap:26px}.explanation{gap:32px}.source-tag{display:none}}
+@media(max-width:650px){.shell{padding:0 20px}.header-inner{height:66px}.wordmark small,.captured{display:none}.hero{padding:34px 0 25px}.hero h1{font-size:36px;letter-spacing:-1.25px}.hero p{font-size:15px;margin-top:17px}.source-bar{padding:14px;margin-bottom:26px;gap:12px}.source-bar a{font-size:11px}.source-bar strong{font-size:13px}.python-tile{width:37px;height:37px;font-size:16px}.comparison-title{align-items:start;gap:13px}.comparison-title h2{font-size:18px}.plain-button{font-size:11px;padding:8px 9px}.workspace{grid-template-columns:1fr;gap:11px}.transfer{height:17px}.transfer svg{transform:rotate(90deg);width:18px;height:18px}.source-view{min-height:240px;max-height:240px}.source-caption,.record-caption{min-height:0}.pane-head{min-height:78px}.record{min-height:0}.record-row{grid-template-columns:116px minmax(0,1fr) 12px;padding:12px 13px}.json-view{min-height:340px}.trace{grid-template-columns:1fr;gap:7px;padding:15px}.cost-line{grid-template-columns:1fr;gap:0}.cost-item{padding:13px 3px}.cost-item+.cost-item{border-top:1px solid var(--line)}.explanation{grid-template-columns:1fr;gap:26px;margin-top:27px;padding-top:25px}.inspector-inner{grid-template-columns:1fr;padding:15px}.limit-note{margin-bottom:26px}footer{flex-direction:column;gap:7px}.pipeline{margin-top:12px;gap:6px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<header class="header"><div class="shell header-inner">
+<a class="wordmark" href="#top" aria-label="Firecrawl Pi demo"><span class="mark" aria-hidden="true"><i></i><i></i><i></i><i></i></span>fcpi <small>What the model adds</small></a>
+<div class="header-tools"><span class="captured"><span class="dot"></span>Captured from your Pi</span><button class="theme-button" id="theme">Dark appearance</button></div>
+</div></header>
+<main class="shell" id="top">
+<section class="hero">
+<div><h1>Your scraper reads the page.<br>The model makes the record.</h1><p>A real example: turn Python’s release page into a version-tracker entry. Both outputs below came from the same request through your Firecrawl Pi.</p></div>
+<aside class="capture-stamp"><strong>A real run, kept for you to explore.</strong><time id="capture-time"></time><span>This page replays a captured result.<br>Opening it makes no new paid calls.</span></aside>
+</section>
+<div class="source-bar"><div class="python-tile" aria-hidden="true">Py</div><div class="source-info"><strong>Python 3.14.0 release page</strong><a href="https://www.python.org/downloads/release/python-3140/" target="_blank" rel="noopener noreferrer">python.org/downloads/release/python-3140/</a></div><span class="source-tag">A real, archived release</span></div>
+<div class="comparison-title"><div><h2>The same page, with and without extraction</h2><p>Select a field on the right to trace it back to the page.</p></div><button class="plain-button" id="replay">Replay captured steps</button></div>
+<div class="stage-banner" id="stage" aria-live="polite">Captured result. Explore it without spending anything.</div>
+<section class="workspace" aria-label="Scraped page and model extraction comparison">
+<article class="pane" id="raw-pane">
+<div class="pane-head"><div><h3>Without LLM extraction</h3><p>fcpi returns the page as readable text.</p></div><span class="pill">Markdown</span></div>
+<div class="source-meta"><span id="source-size"></span><span>Selected source passages</span></div>
+<div class="source-view" id="source-view" tabindex="0" aria-label="Excerpts from the actual scraped Markdown"></div>
+<p class="source-caption">Your agent can already read this. There is no extra model call inside fcpi.</p>
+</article>
+<div class="transfer" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M3 12h17m-6-6 6 6-6 6" stroke="currentColor" stroke-width="1.5"/></svg></div>
+<article class="pane" id="result-pane">
+<div class="pane-head"><div><h3>With LLM extraction</h3><p>fcpi also returns the fields you asked for.</p></div><span class="pill model">One model call</span></div>
+<div class="record-heading"><span class="result-count" id="result-count"></span><div class="view-switch" role="group" aria-label="Result appearance"><button id="view-record" aria-pressed="true">Record</button><button id="view-json" aria-pressed="false">JSON</button></div></div>
+<div class="record" id="record"></div>
+<pre class="json-view" id="json-view" hidden tabindex="0" aria-label="Actual JSON returned by fcpi"></pre>
+<p class="record-caption"><strong>Usable by a script.</strong> Dates are normalized, links are selected, and missing facts stay <code>null</code>.</p>
+</article>
+</section>
+<div class="trace" id="trace" aria-live="polite">
+<div class="trace-label"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M8 6H5a4 4 0 0 0 0 8h3m4-8h3a4 4 0 0 1 0 8h-3M6 10h8" stroke="currentColor" stroke-width="1.5"/></svg><span id="trace-label">Follow a field</span></div>
+<div><p id="trace-description">Click “Release date” to see how the page’s date becomes a predictable value.</p><blockquote id="trace-quote" hidden></blockquote><p class="trace-note" id="trace-note">The passages are real source text. The field-to-passage links are added by this explainer.</p></div>
+</div>
+<div class="cost-line">
+<div class="cost-item"><div><span>Extra fcpi model cost</span><small>Scraping alone; other retrieval costs are separate.</small></div><strong>$0</strong></div>
+<div class="cost-item"><div><span>Metered model cost for this run</span><small id="token-count"></small></div><strong id="model-cost"></strong></div>
+</div>
+<section class="explanation" aria-label="What the extra call does">
+<div><span class="local-label">On your Raspberry Pi</span><h2>The scraper gets the content.</h2><p>fcpi fetches the page and cleans it into Markdown. Scraping, crawling, mapping, and search can work without fcpi calling an extraction model. Claude can read that text itself as part of your chat.</p><div class="pipeline" aria-label="Without extraction: webpage to Pi to Markdown"><span class="node">Webpage</span><span class="arrow" aria-hidden="true">›</span><span class="node">Your Pi</span><span class="arrow" aria-hidden="true">›</span><span class="output">Markdown to your agent</span></div></div>
+<div><span class="remote-label" id="remote-model"></span><h2>The model fills your chosen shape.</h2><p>You supply a prompt and a JSON schema—the names and types of fields you want. fcpi sends cleaned page text to the configured remote model, then checks the returned data and keeps track of its cost.</p><div class="pipeline" aria-label="With extraction: Pi to remote model to validated JSON"><span class="node">Your Pi</span><span class="arrow" aria-hidden="true">›</span><span class="node remote">Remote model</span><span class="arrow" aria-hidden="true">›</span><span class="output">JSON to your agent</span></div></div>
+</section>
+<details class="inspector" id="inspector"><summary>See the actual request, returned JSON, and usage</summary><div class="inspector-inner"><div><h3>What this request asked fcpi to do</h3><pre id="request-code" tabindex="0"></pre></div><div><h3>What fcpi returned</h3><pre id="response-code" tabindex="0"></pre><button class="copy-button" id="copy-json">Copy returned JSON</button><span class="sr-only" id="copy-status" role="status"></span></div></div></details>
+<p class="limit-note"><strong>The useful limit:</strong> the page does not state a security-support end date, so the returned value is <code>null</code>. LLM extraction doesn’t create missing facts or get around a blocked website. Our first target, Raspberry Pi’s product page, was blocked before extraction; no model ran for it.</p>
+<footer><span id="footer-capture"></span><span>$5/month for LLM extraction. Shared paid limit: $0.50/day.</span></footer>
+</main>
+<script id="demo-data" type="application/json">{"capturedAt":"2026-10-15T17:28:37.512Z","elapsedMs":2063,"url":"https://www.python.org/downloads/release/python-3140/","markdownCharacters":12664,"excerpts":[{"key":"notice","label":"Release notice and date","text":"Note: Python 3.14.0 has been superseded by [Python 3.14.8](https://www.python.org/downloads/release/python-3148/)\n.\n\n**Release date:** Oct. 7, 2025"},{"key":"release","label":"Release description","text":"This is the stable release of Python 3.14.0\n===========================================\n\nPython 3.14.0 is the newest major release of the Python programming language, and it contains many new features and optimisations compared to Python 3.13."},{"key":"mac","label":"macOS download section","text":"### macOS\n\n[Download macOS 64-bit universal2 installer](https://www.python.org/ftp/python/3.14.0/python-3.14.0-macos11.pkg)"},{"key":"windows","label":"Windows download row","text":"| [Windows installer (64-bit)](https://www.python.org/ftp/python/3.14.0/python-3.14.0-amd64.exe) | Windows | Recommended | 28.5 MB | [.sigstore](https://www.python.org/ftp/python/3.14.0/python-3.14.0-amd64.exe.sigstore) |     | [SPDX](https://www.python.org/ftp/python/3.14.0/python-3.14.0-amd64.exe.spdx.json) | `cf642108b97545a30ac055b94657a0e6` |"}],"model":"gpt-6-luna","result":{"version":"3.14.0","release_date":"2025-10-07","release_stage":"stable","superseded_by":"3.14.8","macos_installer_url":"https://www.python.org/ftp/python/3.14.0/python-3.14.0-macos11.pkg","windows_x64_installer_url":"https://www.python.org/ftp/python/3.14.0/python-3.14.0-amd64.exe","security_support_end":null},"sources":{"$":["https://www.python.org/downloads/release/python-3140/"]},"missingRequired":["$.security_support_end"],"usage":{"calls":1,"reused":0,"promptTokens":4396,"completionTokens":113,"cachedTokens":0,"cacheWriteTokens":0,"costMicroUsd":497},"request":{"tool":"firecrawl_scrape","arguments":{"url":"https://www.python.org/downloads/release/python-3140/","formats":["markdown",{"type":"json","schema":{"type":"object","properties":{"version":{"type":"string","description":"The Python release version this page describes."},"release_date":{"type":"string","description":"The release date in YYYY-MM-DD form, using only the date on the page."},"release_stage":{"type":"string","description":"The release stage, for example stable, as explicitly stated on the page."},"superseded_by":{"type":"string","description":"The version explicitly linked in the page's 'has been superseded by' note."},"macos_installer_url":{"type":"string","description":"The actual .pkg URL for the macOS universal2 installer for this release."},"windows_x64_installer_url":{"type":"string","description":"The actual .exe URL for the Windows 64-bit installer for this release, not ARM64."},"security_support_end":{"type":"string","description":"Security support end date, only if this page explicitly gives one; otherwise null."}},"required":["version","release_date","release_stage","superseded_by","macos_installer_url","windows_x64_installer_url","security_support_end"]},"prompt":"Build a release-tracker record using only this page. Read the superseded notice, release date, stable-release heading and download table. Dates should use YYYY-MM-DD. Copy download URLs exactly. Do not use knowledge from outside the page. If the page does not state when security support ends, return null for that field. This is an archived release record, not a recommendation to install it."}],"onlyMainContent":true,"timeout":60000}},"initialTargetFailure":{"url":"https://www.raspberrypi.com/products/raspberry-pi-5/","failure":"BLOCKED_PUBLIC_CONTENT","enhancedBlocked":"BUDGET_EXHAUSTED","modelCalls":0}}</script>
+<script>
+"use strict";
+const D = JSON.parse(document.getElementById("demo-data").textContent);
+const $ = (id) => document.getElementById(id);
+const names = {
+version:"Version",release_date:"Release date",release_stage:"Release stage",superseded_by:"Superseded by",
+macos_installer_url:"macOS installer",windows_x64_installer_url:"Windows 64-bit installer",security_support_end:"Security support ends"
+};
+const traceMap = {
+version:{section:"release",find:"Python 3.14.0",quote:"This is the stable release of Python 3.14.0",detail:"The release number is selected from the page, ready to use as a field."},
+release_date:{section:"notice",find:"Oct. 7, 2025",quote:"Release date: Oct. 7, 2025",detail:"The model turns the written date into the requested YYYY-MM-DD form."},
+release_stage:{section:"release",find:"stable",quote:"This is the stable release of Python 3.14.0",detail:"“Stable” is stated by this release page. It does not mean this archived version is the latest one."},
+superseded_by:{section:"notice",find:"Python 3.14.8",quote:"Python 3.14.0 has been superseded by Python 3.14.8",detail:"The newer version comes from the page’s superseded notice, as it appeared when captured."},
+macos_installer_url:{section:"mac",find:D.result.macos_installer_url,quote:D.result.macos_installer_url,detail:"The model selects the macOS universal2 installer link from the available downloads."},
+windows_x64_installer_url:{section:"windows",find:D.result.windows_x64_installer_url,quote:D.result.windows_x64_installer_url,detail:"The model selects the 64-bit Windows installer, rather than the ARM64 or 32-bit alternatives."}
+};
+const date = new Date(D.capturedAt).toLocaleString("en-US",{timeZone:"America/New_York",month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+$("capture-time").textContent=date+" ET";
+$("footer-capture").textContent="Live capture: "+date+" ET · Same-page Markdown + JSON";
+$("source-size").textContent=D.markdownCharacters.toLocaleString("en-US")+" characters returned";
+$("token-count").textContent=D.usage.promptTokens.toLocaleString("en-US")+" input + "+D.usage.completionTokens+" output tokens";
+$("model-cost").textContent="$"+(D.usage.costMicroUsd/1000000).toFixed(6);
+$("remote-model").textContent=D.model+" · remote";
+const found=Object.values(D.result).filter(v=>v!==null).length;
+$("result-count").textContent=found+" fields found · "+(Object.keys(D.result).length-found)+" missing";
+function renderSource(selected) {
+  const root=$("source-view");root.replaceChildren();
+  D.excerpts.forEach((part,index)=>{
+    if(index){const gap=document.createElement("div");gap.className="source-ellipsis";gap.textContent="… other page content …";root.append(gap);}
+    const section=document.createElement("section");section.className="source-section";section.id="source-"+part.key;
+    const note=document.createElement("span");note.className="section-note";note.textContent=part.label;section.append(note);
+    const pre=document.createElement("pre");
+    const t=selected&&traceMap[selected],at=t&&t.section===part.key&&t.find?part.text.indexOf(t.find):-1;
+    if(at>=0){pre.append(document.createTextNode(part.text.slice(0,at)));const mark=document.createElement("mark");mark.textContent=t.find;pre.append(mark,document.createTextNode(part.text.slice(at+t.find.length)));}
+    else pre.textContent=part.text;
+    section.append(pre);root.append(section);
+  });
+}
+renderSource();
+Object.entries(D.result).forEach(([key,value])=>{
+  const row=document.createElement("button");row.className="record-row"+(value===null?" missing":"");row.dataset.field=key;row.setAttribute("aria-pressed","false");
+  const label=document.createElement("span");label.className="field-label";label.textContent=names[key];
+  const text=document.createElement("span");text.className="field-value";
+  if(value===null){text.classList.add("null-value");const code=document.createElement("code");code.textContent="null";text.append(code,document.createTextNode("Not on this page"));}
+  else if(key.endsWith("_url"))text.textContent=value.split("/").at(-1);
+  else text.textContent=value;
+  const arrow=document.createElement("span");arrow.className="field-chevron";arrow.setAttribute("aria-hidden","true");arrow.textContent="‹";
+  row.append(label,text,arrow);row.addEventListener("click",()=>selectField(key));$("record").append(row);
+});
+function selectField(key) {
+  document.querySelectorAll(".record-row").forEach(row=>row.setAttribute("aria-pressed",String(row.dataset.field===key)));
+  renderSource(key);$("trace-label").textContent=names[key];const t=traceMap[key];
+  if(t){$("trace-description").textContent=t.detail;$("trace-quote").textContent=t.quote;$("trace-quote").hidden=false;const section=$("source-"+t.section);$("source-view").scrollTo({top:section.offsetTop-$("source-view").offsetTop-12,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth"});}
+  else{$("trace-description").textContent="The source page does not give this date. fcpi returns null and reports it as a missing required field, instead of filling it from outside knowledge.";$("trace-quote").hidden=true;}
+  $("trace-note").textContent=t?"Source passages are excerpted from this run. These clickable field links are supplied by the explainer; fcpi returned the page URL as provenance.":"Required means “report whether it is present,” not “invent a value.” Inspect the response to see missingRequired.";
+}
+const actualJSON=JSON.stringify(D.result,null,2);
+$("json-view").textContent=actualJSON;
+$("request-code").textContent=JSON.stringify(D.request,null,2);
+$("response-code").textContent=JSON.stringify({json:D.result,extraction:{model:D.model,sources:D.sources,missingRequired:D.missingRequired,usage:D.usage}},null,2);
+function setView(json){$("record").hidden=json;$("json-view").hidden=!json;$("view-record").setAttribute("aria-pressed",String(!json));$("view-json").setAttribute("aria-pressed",String(json));}
+$("view-record").addEventListener("click",()=>setView(false));$("view-json").addEventListener("click",()=>setView(true));
+$("theme").addEventListener("click",()=>{const dark=document.documentElement.dataset.theme!=="dark";document.documentElement.dataset.theme=dark?"dark":"light";$("theme").textContent=dark?"Light appearance":"Dark appearance";});
+$("copy-json").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(actualJSON);$("copy-json").textContent="JSON copied";$("copy-status").textContent="Returned JSON copied to clipboard.";}catch{$("copy-json").textContent="Select the JSON above to copy";$("copy-status").textContent="Clipboard unavailable. Select the JSON above to copy it.";}});
+let replayTimer;
+$("replay").addEventListener("click",()=>{
+  clearTimeout(replayTimer);setView(false);$("replay").disabled=true;$("result-pane").classList.add("replaying");
+  $("stage").textContent="Replay 1 of 3: your Pi fetched the release page and returned Markdown.";
+  const delay=matchMedia("(prefers-reduced-motion: reduce)").matches?0:950;
+  replayTimer=setTimeout(()=>{$("stage").textContent="Replay 2 of 3: the remote model read the text and the seven-field schema.";
+    replayTimer=setTimeout(()=>{$("result-pane").classList.remove("replaying");selectField("release_date");$("stage").textContent="Replay 3 of 3: fcpi returned six values, one null, and the measured model usage. No new calls were made.";$("replay").disabled=false;},delay);
+  },delay);
+});
+</script>
+</body>
+</html>
