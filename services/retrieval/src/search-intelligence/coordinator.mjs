@@ -46,8 +46,9 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   // ---- cache identities (spec §17): content and configuration, never request ids, deadlines or transient state --------------
   function aggregateKey(request, roster, selection) {
     const r = request;
+    // The limits that shape the pool, shortlist and passages are part of the answer's identity: a changed limit is a new answer.
     return `si.aggregate/v1:${sha256(JSON.stringify({ v: VERSIONS, q: normalizeQueryText(r.originalQuery), lang: r.language, limit: r.limit, mode: r.resultMode, c: r.constraints, si: r.intelligence,
-      roster, selection, searxng: getBudget().searching.searxngMode, contracts: Object.fromEntries([...Object.entries(general), ...Object.entries(docs)].map(([k, a]) => [k, a.contractVersion])),
+      roster, selection, searxng: getBudget().searching.searxngMode, limits: getPolicy().search.intelligence, contracts: Object.fromEntries([...Object.entries(general), ...Object.entries(docs)].map(([k, a]) => [k, a.contractVersion])),
       jev: decisions?.identity?.() ?? null }))}`;
   }
   const providerKey = (adapter, request, selection) => `si.provider/v1:${adapter.id}:${sha256(JSON.stringify({ c: adapter.contractVersion, e: adapter.cacheIdentity(request), k: request.constraints, lang: request.language, selection }))}`;

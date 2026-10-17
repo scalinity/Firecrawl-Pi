@@ -653,6 +653,20 @@ test("a provider's retryAt is one ISO instant whether its lane failed on the ref
   } finally { await h.close(); }
 });
 
+test("an answer stored under one set of limits is not served after a limit that shapes it changes", async () => {
+  const h = await harness();
+  try {
+    const first = await h.coordinator.search(request({ originalQuery: "limits shape answers" }), { signal: new AbortController().signal });
+    assert.notEqual(first.body.search.cache.mode, "hit");
+    h.policy.search.intelligence.candidates.shortlistMax -= 1;
+    const second = await h.coordinator.search(request({ originalQuery: "limits shape answers" }), { signal: new AbortController().signal });
+    assert.notEqual(second.body.search.cache.mode, "hit", "a changed limit is a new answer");
+    const third = await h.coordinator.search(request({ originalQuery: "limits shape answers" }), { signal: new AbortController().signal });
+    assert.equal(third.body.search.cache.mode, "hit", "the control: unchanged limits are served the stored answer");
+    assert.equal(h.store.admissions, 2);
+  } finally { await h.close(); }
+});
+
 // ---- deadlines and late DNS -------------------------------------------------------------------------------------------------------
 test("a deadline that passes while DNS is pending sends nothing when DNS later answers; the uncancelled control connects", async () => {
   let connections = 0;
