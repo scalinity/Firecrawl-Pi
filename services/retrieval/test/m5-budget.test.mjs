@@ -87,7 +87,8 @@ test("Opus reasoning and output limits are model policy while the default extrac
   assert.equal(b.extraction.defaultModel, "claude-haiku-5-5");
   assert.equal(b.extraction.maxOutputTokens, 4000);
   assert.equal(b.models["claude-opus-5-5"].reasoningEffort, "high");
-  assert.equal(b.models["claude-opus-5-5"].maxOutputTokens, 16000);
+  // Measured 2026-10-17: 9,000 output tokens in 59.5 s non-streaming (about 151 tokens/s), so 16,000 could not finish inside the 90 s cap.
+  assert.equal(b.models["claude-opus-5-5"].maxOutputTokens, 8000);
   assert.equal(b.models["claude-opus-5-5"].requestTimeoutMs, 90000);
   const card = rateCardFor(b, "claude-opus-5-5", new Date("2026-10-17T12:00:00Z"));
   assert.deepEqual([card.inputPerMTok, card.cachedInputPerMTok, card.cacheWritePerMTok, card.outputPerMTok], [4000000, 200000, 5000000, 20000000]);
