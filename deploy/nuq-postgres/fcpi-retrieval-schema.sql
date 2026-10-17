@@ -145,8 +145,34 @@ CREATE INDEX IF NOT EXISTS parse_cache_expires ON fcpi_retrieval.parse_cache (ex
 -- proxy spending (a reservation per attempt, kind proxy, and the difference a provider's own usage report shows over
 -- what was measured locally, kind reconcile), and M7's enhanced provider, whose one dispatch per logical page is keyed by
 -- the page (kind enhanced), so a retried page finds the dispatch it already made instead of paying for another.
+-- Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §18): a documentation search, a documentation read
+-- and a decision are each one metered operation of their own kind; a search is any general engine's.
 ALTER TABLE fcpi_retrieval.budget_reservation DROP CONSTRAINT IF EXISTS budget_reservation_kind_check;
-ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile', 'enhanced', 'search'));
+ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_kind_check CHECK (kind IN ('extract', 'repair', 'parse', 'proxy', 'reconcile', 'enhanced', 'search', 'docs_search', 'docs_read', 'decision'));
+-- A request counter (Brave, Context7) is its own unit: a request is neither a provider credit nor zero micro-USD.
+ALTER TABLE fcpi_retrieval.budget_reservation DROP CONSTRAINT IF EXISTS budget_reservation_unit_check;
+ALTER TABLE fcpi_retrieval.budget_reservation ADD CONSTRAINT budget_reservation_unit_check CHECK (unit IN ('micro_usd', 'credits', 'requests'));
+
+-- Search intelligence: each provider account's availability, kept apart from its service breaker (spec §15, §16): a quota
+-- exhausted, a rate limit, an authentication failure or a held contract stops new dispatch to that provider alone and
+-- survives a restart. retry_basis says whether retry_at is the provider's documented reset, a local estimate, or unknown
+-- (then retry_at is null and only a credential change or an operator re-enable resumes it). credential_epoch fingerprints
+-- the credential the state was observed with, so a new key is a new epoch.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.provider_availability (
+  provider           text NOT NULL,
+  profile            text NOT NULL DEFAULT 'default',
+  state              text NOT NULL CHECK (state IN ('available', 'rate_limited', 'quota_exhausted', 'auth_failed', 'contract_hold')),
+  reason             text,
+  provider_code      text,
+  observed_at        timestamptz NOT NULL DEFAULT now(),
+  retry_at           timestamptz,
+  retry_basis        text NOT NULL DEFAULT 'unknown' CHECK (retry_basis IN ('documented', 'estimated', 'unknown')),
+  credential_epoch   text,
+  contract_failures  integer NOT NULL DEFAULT 0 CHECK (contract_failures >= 0),
+  balance            jsonb,
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (provider, profile)
+);
 
 -- M6: domain routing (spec §9.5), at most 5,000 rows keyed by registrable domain (a fixture by its host): a learned
 -- residential preference with its set time, expiry and probe, the script-shell learning, and outcome counters. A

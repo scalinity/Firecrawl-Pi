@@ -63,14 +63,23 @@ export class Store {
   // the status lists, rather than held unseen. Returns how many were marked and what they hold.
   async ready(permits, startedAt = new Date()) {
     await this.pool.query("SELECT 1");
+    // Search intelligence (spec §18.3): a search, documentation or decision operation still RESERVED was possibly sent by the
+    // process that stopped; it is marked UNCERTAIN like a model call, never replayed or refunded.
     const swept = (await this.pool.query(`UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = 'the retrieval service stopped while the call was in flight'
-      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair') AND created_at < $1 RETURNING reserved::float8 AS reserved`, [startedAt])).rows;
+      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair', 'search', 'docs_search', 'docs_read', 'decision') AND created_at < $1 RETURNING kind, unit, reserved::float8 AS reserved`, [startedAt])).rows;
     await this.pool.query("UPDATE fcpi_retrieval.permit SET holder = NULL, lease_until = NULL WHERE holder IS NOT NULL");
     await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE holder IS NOT NULL");
     for (const [kind, n] of Object.entries(permits)) {
       await this.pool.query("INSERT INTO fcpi_retrieval.permit (kind, slot) SELECT $1, g FROM generate_series(0, $2::int - 1) g ON CONFLICT DO NOTHING", [kind, n]);
     }
-    return { orphaned: swept.length, orphanedReserved: swept.reduce((n, r) => n + r.reserved, 0) };
+    // The model calls' micro-USD as before; the other operations by kind and unit, since their units differ.
+    const models = swept.filter((r) => ["extract", "repair"].includes(r.kind));
+    const operations = {};
+    for (const r of swept.filter((x) => !["extract", "repair"].includes(x.kind))) {
+      const k = `${r.kind}:${r.unit}`;
+      operations[k] = { count: (operations[k]?.count ?? 0) + 1, reserved: (operations[k]?.reserved ?? 0) + r.reserved };
+    }
+    return { orphaned: models.length, orphanedReserved: models.reduce((n, r) => n + r.reserved, 0), orphanedOperations: operations };
   }
 
   async #tx(fn) {
@@ -207,9 +216,14 @@ export class Store {
   // condition against the newest row version when concurrent callers queue on the row lock, so no race
   // passes a cap. Returns { reservation } for a new one, { existing } when the call key was already
   // reserved (a retried request), or { exhausted: { category, period, cap, used } }.
+  // reportingPeriods (search intelligence, spec §18.1): periods totalled with no ceiling, for a category with no cap in them.
+  // A period both capped and reported keeps its cap. The reservation records every period it drew on, so its settlement
+  // returns exactly those rows.
   async reserveBudget(r) {
     const rate = r.paidTotalRate ?? 1;
-    const periods = lockOrder([...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap, amount: r.amount })),
+    const capped = Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap, amount: r.amount }));
+    const reported = (r.reportingPeriods ?? []).filter((period) => !Object.hasOwn(r.caps, period)).map((period) => ({ category: r.category, period, cap: null, amount: r.amount }));
+    const periods = lockOrder([...capped, ...reported,
       ...(r.paidTotalCap != null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap, amount: Math.ceil(r.amount * rate) }] : [])]);
     const EXHAUSTED = Symbol("exhausted");
     try {
@@ -228,17 +242,18 @@ export class Store {
         for (const p of periods) {
           const start = p.period === "day" ? r.day : r.month;
           await c.query("INSERT INTO fcpi_retrieval.budget_usage (category, period, period_start) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING", [p.category, p.period, start]);
+          // A reporting-only period has no ceiling: the row counts the reservation and refuses nothing.
           const u = await c.query(
             `UPDATE fcpi_retrieval.budget_usage SET reserved = reserved + $4
-             WHERE category = $1 AND period = $2 AND period_start = $3 AND reserved + settled + $4 <= $5
+             WHERE category = $1 AND period = $2 AND period_start = $3 AND ($5::bigint IS NULL OR reserved + settled + $4 <= $5)
              RETURNING reserved, settled, notified`, [p.category, p.period, start, p.amount, p.cap]);
           if (u.rowCount === 0) {
             const used = (await c.query("SELECT reserved + settled AS used FROM fcpi_retrieval.budget_usage WHERE category = $1 AND period = $2 AND period_start = $3", [p.category, p.period, start])).rows[0];
             throw Object.assign(new Error("exhausted"), { [EXHAUSTED]: { category: p.category, period: p.period, cap: p.cap, used: Number(used?.used ?? 0) } });
           }
           const row = u.rows[0], total = Number(row.reserved) + Number(row.settled);
-          // The notification threshold (spec §28.3: notify at 80%): crossed once per period row.
-          if (!row.notified && p.cap > 0 && total >= r.notifyAt * p.cap) {
+          // The notification threshold (spec §28.3: notify at 80%): crossed once per period row. A reporting-only period has none.
+          if (p.cap !== null && !row.notified && p.cap > 0 && total >= r.notifyAt * p.cap) {
             await c.query("UPDATE fcpi_retrieval.budget_usage SET notified = true WHERE category = $1 AND period = $2 AND period_start = $3", [p.category, p.period, start]);
             notices.push({ category: p.category, period: p.period, used: total, cap: p.cap });
           }
@@ -246,7 +261,8 @@ export class Store {
         const reservation = (await c.query(
           `INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, state, day_start, month_start, paid_total, periods, paid_total_rate)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'RESERVED', $12, $13, $14, $15, $16) RETURNING *`,
-          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap != null, Object.keys(r.caps).sort(), rate])).rows[0];
+          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap != null,
+            [...new Set([...Object.keys(r.caps), ...reported.map((p) => p.period)])].sort(), rate])).rows[0];
         return { reservation, notices };
       });
     } catch (e) {
@@ -364,6 +380,11 @@ export class Store {
   async searchCacheGet(key) {
     return (await this.pool.query("SELECT response FROM fcpi_retrieval.search_cache WHERE key = $1 AND expires_at > now()", [key])).rows[0]?.response ?? null;
   }
+  // Search intelligence: an entry with when it was stored and when it expires, so a recombination never outlives its inputs.
+  async searchCacheEntry(key) {
+    const row = (await this.pool.query("SELECT response, created_at, expires_at FROM fcpi_retrieval.search_cache WHERE key = $1 AND expires_at > now()", [key])).rows[0];
+    return row ? { response: row.response, createdAt: row.created_at, expiresAt: row.expires_at } : null;
+  }
   async searchCachePut(key, response, ttlS) {
     await this.pool.query(`INSERT INTO fcpi_retrieval.search_cache (key, response, expires_at) VALUES ($1, $2, now() + $3 * interval '1 second')
       ON CONFLICT (key) DO UPDATE SET response = EXCLUDED.response, created_at = now(), expires_at = EXCLUDED.expires_at`, [key, JSON.stringify(response), ttlS]);
@@ -453,11 +474,26 @@ export class Store {
     return (await this.pool.query("SELECT job_id FROM fcpi_retrieval.route_hold WHERE domain = $1 AND until > now() LIMIT 1", [domain])).rowCount === 1;
   }
 
+  // ---- provider availability (search intelligence, spec §15, §16) --------------------------------------------
+  async availabilityRows() {
+    return (await this.pool.query("SELECT * FROM fcpi_retrieval.provider_availability ORDER BY provider, profile")).rows;
+  }
+  // One provider account's state, replaced whole: what is observed now is the state.
+  async setAvailability({ provider, profile = "default", state, reason = null, providerCode = null, retryAt = null, retryBasis = "unknown", credentialEpoch = null, contractFailures = 0, balance = null }) {
+    return (await this.pool.query(`INSERT INTO fcpi_retrieval.provider_availability (provider, profile, state, reason, provider_code, observed_at, retry_at, retry_basis, credential_epoch, contract_failures, balance, updated_at)
+      VALUES ($1, $2, $3, $4, $5, now(), $6, $7, $8, $9, $10, now())
+      ON CONFLICT (provider, profile) DO UPDATE SET state = EXCLUDED.state, reason = EXCLUDED.reason, provider_code = EXCLUDED.provider_code, observed_at = now(), retry_at = EXCLUDED.retry_at,
+        retry_basis = EXCLUDED.retry_basis, credential_epoch = EXCLUDED.credential_epoch, contract_failures = EXCLUDED.contract_failures, balance = COALESCE(EXCLUDED.balance, fcpi_retrieval.provider_availability.balance), updated_at = now()
+      RETURNING *`, [provider, profile, state, reason, providerCode, retryAt, retryBasis, credentialEpoch, contractFailures, balance ? JSON.stringify(balance) : null])).rows[0];
+  }
+
   // Bounded history: attempt rows and navigation counts older than their use are removed, and so is
   // a domain's pacing row once it holds nothing a decision reads: no live hold, no cooldown ended
   // within the hour that doubling looks back over, no navigation within direct_nav's two days
   // (review finding S5).
-  async prune() {
+  // retainCategories: the categories whose reservations sum to a lifetime allocation (Serper's credits, spec §18.3): their
+  // rows are kept whatever their age, since pruning them would return spent credits. Without it, search rows are kept, as before.
+  async prune({ retainCategories = null } = {}) {
     await this.pool.query("DELETE FROM fcpi_retrieval.direct_nav WHERE at < now() - interval '2 days'");
     await this.pool.query(
       `DELETE FROM fcpi_retrieval.domain_state WHERE (holder IS NULL OR hold_until < now())
@@ -473,7 +509,8 @@ export class Store {
       AND (preferred IS NULL OR expires_at < now() - interval '7 days') AND NOT prefer_browser`);
     // Usage records outlive the 30 days of job metadata (spec §21.3) so a month's spend stays explainable;
     // an unsettled reservation is never pruned, since it still counts against its cap.
-    await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED') AND kind <> 'search'");
+    if (retainCategories) await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED') AND NOT (category = ANY($1::text[]))", [retainCategories]);
+    else await this.pool.query("DELETE FROM fcpi_retrieval.budget_reservation WHERE created_at < now() - interval '90 days' AND state IN ('SETTLED', 'RELEASED') AND kind <> 'search'");
     // A settled call's stored answer (page content) serves only a retry of its logical unit, so it goes after
     // the seven days that job results and parse caches keep; the amounts and usage stay (review W9).
     await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET result = NULL WHERE result IS NOT NULL AND settled_at < now() - interval '7 days'");
