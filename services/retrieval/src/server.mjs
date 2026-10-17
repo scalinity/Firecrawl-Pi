@@ -7,6 +7,8 @@
 //                           parser (the PDF's bytes in, markdown or a typed failure out)
 //   GET  /searxng/search    the SearXNG-compatible route the core's search uses (src/search.mjs); on this
 //                           internal network only, as upstream's search client sends no credential
+//   POST /internal/search   search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2): the core's trusted
+//                           search request, answered by the aggregate coordinator (or the legacy profile when selected)
 //   GET  /healthz, /readyz  liveness; readiness of the database, the policy and the local networks, with the
 //                           browser, the search backend and each provider reported on their own
 // On the gateway's listener (fcpi_model, M5), the gateway's credential:
@@ -31,7 +33,7 @@ import { makeBrowserClient } from "./browser.mjs";
 import { makeAcquirer, makeFetcher, makeUrlHmac, domainOf } from "./acquire.mjs";
 import { makeResidential } from "./residential.mjs";
 import { reconcileDay } from "./reconcile.mjs";
-import { makeSearcher } from "./search.mjs";
+import { makeSearcher, makeSearxngBackend } from "./search.mjs";
 import { makeModelAdapter, makeExtractor, ExtractionFailure } from "./extract.mjs";
 import { makeParser } from "./parse.mjs";
 import { makeEnhanced } from "./enhanced.mjs";
@@ -40,6 +42,16 @@ import { readCredential } from "./provider.mjs";
 import { Denied, hostMatches, parseTarget } from "./ssrf.mjs";
 import { makeAdmission } from "./admission.mjs";
 import { makeSerper } from "./serper.mjs";
+import { makeAvailability } from "./search-intelligence/availability.mjs";
+import { makePermits } from "./search-intelligence/permits.mjs";
+import { makeDispatch } from "./search-intelligence/adapters/common.mjs";
+import { makeSerperLane } from "./search-intelligence/adapters/serper.mjs";
+import { makeBrave } from "./search-intelligence/adapters/brave.mjs";
+import { makeExa } from "./search-intelligence/adapters/exa.mjs";
+import { makeDeepseek } from "./search-intelligence/adapters/deepseek.mjs";
+import { makeTavily } from "./search-intelligence/adapters/tavily.mjs";
+import { makeSearxngLane } from "./search-intelligence/adapters/searxng.mjs";
+import { makeCoordinator } from "./search-intelligence/coordinator.mjs";
 
 const env = loadEnv(process.env);
 const BUILD = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version;
@@ -48,6 +60,9 @@ const log = (o) => console.log(JSON.stringify({ utc: new Date().toISOString(), s
 const basePolicy = loadPolicy(readFileSync(env.policyFile, "utf8"));
 const budget = loadBudgetPolicy(readFileSync(env.budgetFile, "utf8"));
 const budgetSha256 = createHash("sha256").update(readFileSync(env.budgetFile)).digest("hex");
+const policySha256 = createHash("sha256").update(readFileSync(env.policyFile)).digest("hex");
+// The aggregate profile runs only with its limits stated (spec §14): a missing block stops startup rather than guessing.
+if (budget.searching?.profile === "aggregate" && !basePolicy.search.intelligence) throw new Error("the aggregate search profile needs search.intelligence in the egress policy");
 let localCidrs = null;
 function reloadLocal() {
   try {
@@ -82,10 +97,16 @@ const store = new Store({ ...env.postgres, password: readSecret(env.credentialsD
 let storeReady = false;
 const startedAt = new Date();
 (async function connect() {
-  try { const { orphaned, orphanedReserved } = await store.ready(env.permits, startedAt); storeReady = true; log({ event: "store_ready", orphaned_model_calls: orphaned, orphaned_reserved_micro_usd: orphanedReserved }); }
+  try {
+    const { orphaned, orphanedReserved, orphanedOperations } = await store.ready(env.permits, startedAt); storeReady = true;
+    log({ event: "store_ready", orphaned_model_calls: orphaned, orphaned_reserved_micro_usd: orphanedReserved, orphaned_operations: orphanedOperations });
+    await availability.refresh();
+  }
   catch (e) { log({ event: "store_unavailable", error: e.code ?? e.message }); setTimeout(connect, 2000); }
 })();
-setInterval(() => store.prune().catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();
+// Serper's credits are a lifetime allocation summed over its rows: those rows are kept whatever their age (spec §18.3).
+const allocationCategories = [...new Set(Object.values(budget.searches).filter((s) => budget.providers[s.provider].api === "serper-v1").map((s) => s.category))];
+setInterval(() => store.prune({ retainCategories: allocationCategories }).catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();
 
 const resolvePublic = makePublicResolver({ server: env.resolver });
 // M6: the residential proxy route (spec §10), shared by pages, auxiliary downloads, the browser and search.
@@ -118,12 +139,24 @@ const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.per
 const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log, residential, getBudget });
 const common = { store, getBudget, paidDispatch: env.paidDispatch, providersDir: env.providersDir, getPolicy, resolvePublic, log };
 const google = makeSerper(common);
-const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log, google });
+const searxngBackend = makeSearxngBackend({ getPolicy, getSelection, searchUrl: env.searchUrl });
+const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log, google, backend: searxngBackend });
+// Search intelligence (spec §5, §8, §15): availability apart from the breakers, the outbound permits, the shared metered
+// dispatch, the five general lanes, SearXNG's backend lane and the coordinator. Credentials are read at each call, as before.
+const intelligenceLimits = () => basePolicy.search.intelligence;
+const availability = makeAvailability({ store, log });
+const permits = makePermits(basePolicy.search.intelligence ?? { apiPermits: { total: 1, perProvider: 1 }, decisionPermits: { total: 1, perSearch: 1 }, refStreams: { total: 1, perSearch: 1 }, deepseekQps: 1 });
+const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic, readKey: (name) => readCredential(env.providersDir, name), paidDispatch: env.paidDispatch, permits, availability, log });
+const general = { serper: makeSerperLane({ serper: google, limits: intelligenceLimits, permits, availability }), brave: makeBrave({ dispatch, limits: intelligenceLimits }),
+  exa: makeExa({ dispatch, limits: intelligenceLimits }), deepseek: makeDeepseek({ dispatch, limits: intelligenceLimits, permits }), tavily: makeTavily({ dispatch, limits: intelligenceLimits }) };
+const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, getConfigHashes: () => ({ budgetSha256, policySha256 }), dispatch, general,
+  searxng: makeSearxngLane({ backend: searxngBackend, limits: intelligenceLimits }), availability, legacy: search, log });
 const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
-// A provider's breaker lives in the adapter of its kind (review W6).
-const breakerState = (name, p) => (p.kind === "search" ? google.breakerState(name) : p.kind === "parser" ? parse.breakerState(name) : p.kind === "proxy" ? residential.breakerState(name) : p.kind === "enhanced" ? enhanced.breakerState(name) : adapter.breakerState(name));
+// A provider's breaker lives in the adapter of its kind (review W6); the search-intelligence providers' in their shared dispatch.
+const breakerState = (name, p) => (p.kind === "search" && p.api === "serper-v1" ? google.breakerState(name) : ["search", "documentation", "decision"].includes(p.kind) ? dispatch.breakerState(name)
+  : p.kind === "parser" ? parse.breakerState(name) : p.kind === "proxy" ? residential.breakerState(name) : p.kind === "enhanced" ? enhanced.breakerState(name) : adapter.breakerState(name));
 // M7: webhook delivery for the gateway's outbox (src/webhook.mjs); the signing secret is read at each use, so one placed
 // later needs no restart.
 const webhooks = makeWebhooks({ getPolicy, resolvePublic, getSecret: () => readCredential(env.credentialsDir, "webhook_signing_secret"), delivery: env.webhookDelivery, log });
@@ -203,6 +236,10 @@ async function providerStatus() {
     // Calls sent whose answer never came, still holding their reservations this month: [{ category, count, reserved }].
     uncertain,
     caps: Object.fromEntries(Object.entries(budget.categories).map(([k, c]) => [k, { paid: c.paid, unit: c.unit, caps: c.caps }])),
+    // Search intelligence (spec §21.2): each provider account's condition apart from its breaker, never a credential fingerprint.
+    searchIntelligence: { profile: budget.searching?.profile ?? "legacy", searxngMode: budget.searching?.searxngMode ?? null, permits: permits.snapshot(), tasks: coordinator.tasks(), counters: coordinator.counters(),
+      availability: availability.rows().map((r) => ({ provider: r.provider, state: r.state, reason: r.reason, providerCode: r.provider_code, observedAt: r.observed_at ?? null, retryAt: r.retry_at ?? null,
+        retryBasis: r.retry_basis, contractFailures: r.contract_failures, balance: r.balance ?? null })) },
   };
 }
 
@@ -242,13 +279,20 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === "GET" && path === "/searxng/search") {
       if (!storeReady) return notReady(res);
-      const r = await search(req.url, abort.signal);
+      // The legacy internal route: the legacy search under the legacy profile, otherwise an aggregate search with validated
+      // defaults and explicit legacy attribution, answered in SearXNG's shape (spec §19.2).
+      const r = await coordinator.legacyGet(req.url, abort.signal);
       return send(res, r.status, r.body);
     }
-    if (!["/internal/acquire", "/internal/fetch", "/internal/parse"].includes(path)) return send(res, 404, { error: "not_found" });
+    if (!["/internal/acquire", "/internal/fetch", "/internal/parse", "/internal/search"].includes(path)) return send(res, 404, { error: "not_found" });
     if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed" });
     if (!authorized(req, coreTokenHash)) return send(res, 401, { error: "unauthorized" });
     if (!storeReady) return notReady(res);
+    // Search intelligence: the core's trusted search request (small JSON), answered by the coordinator.
+    if (path === "/internal/search") {
+      const r = await coordinator.search(await readJson(req, 65536), { signal: abort.signal });
+      return send(res, r.status, r.body);
+    }
     if (path === "/internal/parse") {
       // A document past the parser's limit is DOCUMENT_TOO_LARGE, and a page count that is not a number is a
       // malformed request rather than a count of zero (review S10).
@@ -328,7 +372,10 @@ for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, async () => {
   for (const s of [server, extractServer]) { s.close(); s.closeAllConnections?.(); }
   const until = Date.now() + 8000;
   while (inflight > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 100));
+  // Search work outlives its response only to close what it reserved: cancelled now, it is given the rest of the stop window
+  // to settle or mark its operations uncertain before the pool closes (spec §14.2, §18.3).
+  const leftOver = await coordinator.drain(Math.max(1000, until + 8000 - Date.now()));
   // A model call whose caller had already gone is cut here; its row is marked UNCERTAIN at the next start.
-  log({ event: "stopping", requests_in_flight: inflight, model_calls_running: adapter.running() });
+  log({ event: "stopping", requests_in_flight: inflight, model_calls_running: adapter.running(), search_tasks_left: leftOver });
   store.close().finally(() => process.exit(0));
 });

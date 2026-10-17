@@ -347,3 +347,22 @@ test("a lane that outlives its provider deadline is reported as a timeout and it
     assert.equal([...h.store.rows.values()].find((x) => x.provider === "fixture-exa").state, "UNCERTAIN", "sent and unanswered: the charge is unknown");
   } finally { await h.close(); }
 });
+
+test("the legacy profile is the rollback: the new route serves the accepted search in the new shape and runs no aggregate lane", async () => {
+  const { makeCoordinator } = await import("../src/search-intelligence/coordinator.mjs");
+  const h = await harness({ mutateBudget: (b) => { b.searching.profile = "legacy"; } });
+  let legacyCalls = 0;
+  const legacy = async (url) => { legacyCalls++; assert.match(url, /^\/searxng\/search\?q=rollback\+check&language=en$/);
+    return { status: 200, body: { results: [{ url: "https://legacy.example/a", title: "A", content: "c" }], unresponsive_engines: [{ engine: "google (Serper)", reason: "SEARCH_PROVIDER_HTTP_500" }], fcpi: { cache: "miss", engines: ["google (Serper)", "yahoo"], answered: ["yahoo"] } } }; };
+  const coordinator = makeCoordinator({ store: h.store, getBudget: () => h.budget, getPolicy: () => h.policy, getSelection: () => ({ search: "fixture" }), dispatch: h.dispatch, general: {}, availability: h.availability, legacy });
+  try {
+    const r = await coordinator.search(request({ originalQuery: "rollback check" }), { signal: new AbortController().signal });
+    assert.equal(legacyCalls, 1);
+    assert.equal(r.body.search.profile, "legacy");
+    assert.equal(r.body.search.outcome, "partial");
+    assert.deepEqual(r.body.web, [{ url: "https://legacy.example/a", title: "A", description: "c" }]);
+    assert.match(r.body.warning, /google \(Serper\): SEARCH_PROVIDER_HTTP_500/);
+    assert.equal(Object.values(h.servers).reduce((n, s) => n + s.seen.length, 0), 0);
+    assert.equal(h.store.admissions, 0, "the legacy search does its own admission");
+  } finally { await h.close(); }
+});
