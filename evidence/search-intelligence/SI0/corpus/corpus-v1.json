@@ -1,0 +1,3410 @@
+{
+  "schema": "fcpi.si-corpus/v1",
+  "version": 1,
+  "asOf": "2026-10-17T00:00:00Z",
+  "author": "fresh-context corpus agent (independent of the implementation)",
+  "splitRule": "Fixed before any query was written or labelled: within each category the ten queries are numbered 1-10 in authoring order; positions 3 and 8 are 'tuning', positions 1, 2, 4, 5, 6, 7, 9, 10 are 'heldout'. Query id = Q{(categoryIndex-1)*10 + position:03d}.",
+  "requestMapping": "constraints.includeDomains/excludeDomains map to the top-level request fields; constraints.publishedAfter/publishedBefore/dateMode map to the same-named searchIntelligence fields; searchIntelligence (when non-null) is sent as given.",
+  "categories": [
+    {
+      "key": "software_documentation",
+      "index": 1,
+      "variation": "API usage, configuration, migration, explicit docs requests"
+    },
+    {
+      "key": "github_repositories",
+      "index": 2,
+      "variation": "repository identity, current implementation, releases, issues"
+    },
+    {
+      "key": "coding_infrastructure_research",
+      "index": 3,
+      "variation": "protocols, integration failures, competing implementations"
+    },
+    {
+      "key": "mlx_local_inference",
+      "index": 4,
+      "variation": "versioned APIs, quantization, performance mechanisms"
+    },
+    {
+      "key": "scientific_technical_research",
+      "index": 5,
+      "variation": "original papers, methods, limitations, replication"
+    },
+    {
+      "key": "recent_models_tools",
+      "index": 6,
+      "variation": "official announcements, specifications, release chronology"
+    },
+    {
+      "key": "time_sensitive",
+      "index": 7,
+      "variation": "explicit dates, relative windows resolved once against asOf, updates"
+    },
+    {
+      "key": "general_web",
+      "index": 8,
+      "variation": "navigational, factual, comparative, exploratory"
+    },
+    {
+      "key": "difficult_semantic",
+      "index": 9,
+      "variation": "paraphrases, indirect descriptions, terminology mismatch"
+    },
+    {
+      "key": "ambiguous_documentation",
+      "index": 10,
+      "variation": "technical meaning vs ordinary-language meaning vs genuine uncertainty"
+    },
+    {
+      "key": "duplicate_near_duplicate",
+      "index": 11,
+      "variation": "syndication, mirrors, independent reporting of one event, page fragments"
+    },
+    {
+      "key": "explicit_version_domain_constraints",
+      "index": 12,
+      "variation": "correct version, obsolete version, restricted domain, constraint that should produce no match"
+    }
+  ],
+  "queries": [
+    {
+      "id": "Q001",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "Next.js 15 generateMetadata await params Promise app router",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "api_usage",
+        "migration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "next",
+            "version": "15"
+          }
+        ],
+        "programmingLanguage": "typescript"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "next",
+        "version": "15"
+      },
+      "requiredEvidence": [
+        "generateMetadata signature receiving { params, searchParams }",
+        "statement that params is a Promise in Next.js 15 and must be awaited",
+        "code example awaiting params inside generateMetadata"
+      ],
+      "expectNoMatch": false,
+      "notes": "Version matters: params became async in Next.js 15."
+    },
+    {
+      "id": "Q002",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "PostgreSQL 17 documentation pg_stat_statements configuration parameters",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "version_constraint",
+        "configuration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "required",
+        "libraries": [
+          {
+            "name": "postgresql",
+            "version": "17"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": {
+        "library": "postgresql",
+        "version": "17"
+      },
+      "requiredEvidence": [
+        "pg_stat_statements.max parameter with its default of 5000",
+        "pg_stat_statements.track values top, all, none",
+        "requirement to load the module via shared_preload_libraries"
+      ],
+      "expectNoMatch": false,
+      "notes": "Explicit docs request for a versioned manual page."
+    },
+    {
+      "id": "Q003",
+      "category": "software_documentation",
+      "split": "tuning",
+      "query": "urllib3 Retry backoff_factor status_forcelist allowed_methods mount on requests Session HTTPAdapter",
+      "secondaryTags": [
+        "docs_positive",
+        "api_usage",
+        "configuration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "urllib3"
+          },
+          {
+            "name": "requests"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Retry parameter names total, backoff_factor, status_forcelist, allowed_methods",
+        "the backoff formula derived from backoff_factor",
+        "HTTPAdapter(max_retries=Retry(...)) mounted with session.mount"
+      ],
+      "expectNoMatch": false,
+      "notes": "allowed_methods replaced the older method_whitelist name."
+    },
+    {
+      "id": "Q004",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators. how do I convert a validator that uses pre=True and the values argument",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "long_query",
+        "migration",
+        "stack_trace"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "pydantic",
+            "version": "2"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "pydantic",
+        "version": "2"
+      },
+      "requiredEvidence": [
+        "@field_validator with mode='before' as the replacement for pre=True",
+        "ValidationInfo (info.data) as the replacement for the values argument",
+        "the official Pydantic V2 migration guide section on validators"
+      ],
+      "expectNoMatch": false,
+      "notes": "Warning text pasted verbatim; backticks preserved."
+    },
+    {
+      "id": "Q005",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "docker compose depends_on condition: service_healthy healthcheck example",
+      "secondaryTags": [
+        "docs_positive",
+        "configuration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "docker compose"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "long-form depends_on syntax with a condition key",
+        "condition values service_started, service_healthy, service_completed_successfully",
+        "healthcheck keys test, interval, timeout, retries"
+      ],
+      "expectNoMatch": false,
+      "notes": "Compose specification / Docker docs are the expected sources."
+    },
+    {
+      "id": "Q006",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "SQLAlchemy 2.0 docs select() joinedload relationship eager loading example",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "version_constraint",
+        "api_usage"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "required",
+        "libraries": [
+          {
+            "name": "sqlalchemy",
+            "version": "2.0"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": {
+        "library": "sqlalchemy",
+        "version": "2.0"
+      },
+      "requiredEvidence": [
+        "2.0-style select(...).options(joinedload(...)) example",
+        "requirement to call unique() on results with joined eager loading of collections",
+        "the relationship loading techniques page of the SQLAlchemy 2.0 docs"
+      ],
+      "expectNoMatch": false,
+      "notes": "1.x Query-style examples are the wrong version."
+    },
+    {
+      "id": "Q007",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "tokio::select! cancellation safety which methods are cancel safe documentation",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "api_usage"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "required",
+        "libraries": [
+          {
+            "name": "tokio"
+          }
+        ],
+        "programmingLanguage": "rust"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the 'Cancellation safety' section of the tokio::select! documentation",
+        "at least one method listed as cancel safe (e.g. mpsc::Receiver::recv)",
+        "at least one method listed as not cancel safe (e.g. AsyncReadExt::read_exact)"
+      ],
+      "expectNoMatch": false,
+      "notes": "Exact macro path tokio::select! preserved."
+    },
+    {
+      "id": "Q008",
+      "category": "software_documentation",
+      "split": "tuning",
+      "query": "HorizontalPodAutoscaler autoscaling/v2 behavior scaleDown stabilizationWindowSeconds default",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "configuration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "kubernetes"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "kubernetes autoscaling API",
+        "version": "autoscaling/v2"
+      },
+      "requiredEvidence": [
+        "field path behavior.scaleDown.stabilizationWindowSeconds",
+        "default scale-down stabilization window of 300 seconds",
+        "scaling policies of type Pods or Percent with periodSeconds"
+      ],
+      "expectNoMatch": false,
+      "notes": "API group version is the version constraint."
+    },
+    {
+      "id": "Q009",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "systemd Restart=on-failure StartLimitIntervalSec StartLimitBurst which section [Unit] or [Service]",
+      "secondaryTags": [
+        "docs_positive",
+        "configuration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "systemd"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Restart= values and the table of exit causes that trigger a restart",
+        "StartLimitIntervalSec= and StartLimitBurst= documented as [Unit] options",
+        "default rate limit of 5 starts per 10 seconds (DefaultStartLimitBurst/DefaultStartLimitIntervalSec)"
+      ],
+      "expectNoMatch": false,
+      "notes": "Brackets and option spellings preserved."
+    },
+    {
+      "id": "Q010",
+      "category": "software_documentation",
+      "split": "heldout",
+      "query": "Vite 6 migration guide from v5 breaking changes",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "version_constraint",
+        "migration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "required",
+        "libraries": [
+          {
+            "name": "vite",
+            "version": "6"
+          }
+        ],
+        "programmingLanguage": "javascript"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": {
+        "library": "vite",
+        "version": "6"
+      },
+      "requiredEvidence": [
+        "the official 'Migration from v5' page",
+        "the changed default value of resolve.conditions",
+        "Sass modern API used by default"
+      ],
+      "expectNoMatch": false,
+      "notes": "Guides for other majors are wrong-version results."
+    },
+    {
+      "id": "Q011",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "llama.cpp github",
+      "secondaryTags": [
+        "docs_negative",
+        "navigational",
+        "repository_identity"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "repository URL github.com/ggml-org/llama.cpp",
+        "README describing LLM inference in C/C++"
+      ],
+      "expectNoMatch": false,
+      "notes": "Repo moved from ggerganov/llama.cpp to ggml-org; either URL resolves."
+    },
+    {
+      "id": "Q012",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "pgvector HNSW index build source code hnswbuild.c",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "implementation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "file src/hnswbuild.c in the pgvector/pgvector repository",
+        "the index build entry code for HNSW",
+        "handling of the in-memory build bounded by maintenance_work_mem"
+      ],
+      "expectNoMatch": false,
+      "notes": "Source code, not user docs, is the target."
+    },
+    {
+      "id": "Q013",
+      "category": "github_repositories",
+      "split": "tuning",
+      "query": "astral-sh/uv latest release changelog",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "release",
+        "freshness"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the newest release tag with its publication date (GitHub Releases or CHANGELOG.md)",
+        "the list of changes in that release"
+      ],
+      "expectNoMatch": false,
+      "notes": "Latest as of capture time; no date window stated."
+    },
+    {
+      "id": "Q014",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "microsoft/TypeScript issue \"Type instantiation is excessively deep and possibly infinite\" TS2589",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "issue",
+        "quoted_phrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "an issue in microsoft/TypeScript reporting error TS2589",
+        "a maintainer explanation of why the instantiation depth limit is hit",
+        "the issue's resolution state or a workaround"
+      ],
+      "expectNoMatch": false,
+      "notes": "Quoted error text preserved exactly."
+    },
+    {
+      "id": "Q015",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "official Model Context Protocol TypeScript SDK repository",
+      "secondaryTags": [
+        "docs_negative",
+        "navigational",
+        "repository_identity"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "repository URL github.com/modelcontextprotocol/typescript-sdk",
+        "the npm package name(s) published from that repository"
+      ],
+      "expectNoMatch": false,
+      "notes": "Repository identity, not usage docs."
+    },
+    {
+      "id": "Q016",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "redis/redis AGPLv3 license Redis 8 open source again",
+      "secondaryTags": [
+        "docs_negative",
+        "repository_state",
+        "release"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the repository license file listing RSALv2, SSPLv1 and AGPLv3",
+        "the Redis 8 release or announcement adding the AGPLv3 option",
+        "the date of the licensing change"
+      ],
+      "expectNoMatch": false,
+      "notes": "Current state of the repository's licensing."
+    },
+    {
+      "id": "Q017",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "huggingface/transformers \"Some weights of the model checkpoint at\" \"were not used when initializing\" expected or bug",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "issue",
+        "quoted_phrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the exact warning text emitted by transformers",
+        "a maintainer explanation of when the warning is expected (e.g. pretraining checkpoint into a task head)",
+        "the issue or forum thread where this is discussed"
+      ],
+      "expectNoMatch": false,
+      "notes": "Two quoted fragments of one warning."
+    },
+    {
+      "id": "Q018",
+      "category": "github_repositories",
+      "split": "tuning",
+      "query": "neovim v0.11.0 release notes github",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "version_constraint",
+        "release"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "neovim",
+            "version": "0.11.0"
+          }
+        ]
+      },
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "neovim",
+        "version": "0.11.0"
+      },
+      "requiredEvidence": [
+        "release tag v0.11.0 on neovim/neovim",
+        "the release date",
+        "headline changes such as vim.lsp.config / vim.lsp.enable"
+      ],
+      "expectNoMatch": false,
+      "notes": ":help news-0.11 is an acceptable docs-side source."
+    },
+    {
+      "id": "Q019",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "how does ripgrep decide a file is binary implementation in BurntSushi/ripgrep grep-searcher",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "implementation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "binary detection based on NUL bytes",
+        "BinaryDetection modes (quit vs convert) in grep-searcher",
+        "behaviour of the -a/--text and --binary flags"
+      ],
+      "expectNoMatch": false,
+      "notes": "Asks for implementation, not only user docs."
+    },
+    {
+      "id": "Q020",
+      "category": "github_repositories",
+      "split": "heldout",
+      "query": "pytorch/pytorch MPS \"is not currently implemented for the MPS device\" PYTORCH_ENABLE_MPS_FALLBACK=1 tracking issue",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "issue",
+        "quoted_phrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the error text 'is not currently implemented for the MPS device'",
+        "environment variable PYTORCH_ENABLE_MPS_FALLBACK=1 falling back to CPU",
+        "the general MPS operator coverage tracking issue in pytorch/pytorch"
+      ],
+      "expectNoMatch": false,
+      "notes": "The fallback variable is also documented in PyTorch docs."
+    },
+    {
+      "id": "Q021",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "HTTP/2 head-of-line blocking over TCP vs HTTP/3 QUIC independent streams",
+      "secondaryTags": [
+        "docs_negative",
+        "protocol"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "explanation that one lost TCP segment stalls all HTTP/2 streams",
+        "QUIC per-stream loss recovery",
+        "reference to RFC 9000 or RFC 9114"
+      ],
+      "expectNoMatch": false,
+      "notes": "Conceptual protocol comparison."
+    },
+    {
+      "id": "Q022",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "nginx proxy_pass websocket 400 Bad Request missing Upgrade header",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "integration_failure"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "nginx"
+          }
+        ]
+      },
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "proxy_http_version 1.1 directive",
+        "proxy_set_header Upgrade $http_upgrade and Connection \"upgrade\"",
+        "explanation that hop-by-hop headers are not forwarded by default"
+      ],
+      "expectNoMatch": false,
+      "notes": "nginx's WebSocket proxying page is a valid docs source."
+    },
+    {
+      "id": "Q023",
+      "category": "coding_infrastructure_research",
+      "split": "tuning",
+      "query": "Redis Streams vs Kafka vs RabbitMQ Streams for a small self-hosted event log",
+      "secondaryTags": [
+        "docs_negative",
+        "comparison"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "consumer group / offset semantics of each system",
+        "retention and persistence model of each",
+        "operational footprint comparison for a single small host"
+      ],
+      "expectNoMatch": false,
+      "notes": "Competing implementations."
+    },
+    {
+      "id": "Q024",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "```\nError: connect ECONNREFUSED ::1:5432\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1555:16)\n```\npg Pool connects with psql but fails from Node 18 using host localhost",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "version_constraint",
+        "code_fence",
+        "long_query",
+        "integration_failure",
+        "stack_trace"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "node",
+            "version": "18"
+          },
+          {
+            "name": "pg"
+          }
+        ],
+        "programmingLanguage": "javascript"
+      },
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "node",
+        "version": "18"
+      },
+      "requiredEvidence": [
+        "Node.js 17+ returns DNS results in verbatim order so localhost can resolve to ::1 first",
+        "fixes: 127.0.0.1, listening on ::1, or dns.setDefaultResultOrder('ipv4first') / --dns-result-order",
+        "the Node.js dns documentation for setDefaultResultOrder"
+      ],
+      "expectNoMatch": false,
+      "notes": "Node 20 added autoSelectFamily by default, so the version changes the answer."
+    },
+    {
+      "id": "Q025",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "gRPC deadline propagation grpc-timeout header across service hops",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "protocol"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the grpc-timeout header format in the gRPC over HTTP/2 protocol spec",
+        "how a deadline propagates to downstream calls",
+        "DEADLINE_EXCEEDED status semantics"
+      ],
+      "expectNoMatch": false,
+      "notes": "Protocol spec plus implementation behaviour."
+    },
+    {
+      "id": "Q026",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "TLS 1.3 0-RTT early data replay attacks which servers disable it by default",
+      "secondaryTags": [
+        "docs_negative",
+        "protocol"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "RFC 8446 discussion of 0-RTT replay",
+        "the default early-data setting of at least one named server (e.g. nginx ssl_early_data off)",
+        "recommendation to allow only idempotent requests in 0-RTT"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q027",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "curl works but python requests SSL: CERTIFICATE_VERIFY_FAILED unable to get local issuer certificate macOS",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "integration_failure"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "requests uses certifi's CA bundle rather than the macOS keychain",
+        "Install Certificates.command for python.org installs",
+        "REQUESTS_CA_BUNDLE or verify= to point at a CA bundle"
+      ],
+      "expectNoMatch": false,
+      "notes": "Error text preserved."
+    },
+    {
+      "id": "Q028",
+      "category": "coding_infrastructure_research",
+      "split": "tuning",
+      "query": "PgBouncer transaction mode error: prepared statement \"S_1\" already exists, fix with max_prepared_statements?",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "integration_failure",
+        "quoted_phrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "max_prepared_statements setting and the PgBouncer version that introduced it",
+        "why server-side prepared statements break under transaction pooling",
+        "a client-side workaround such as disabling prepared statements"
+      ],
+      "expectNoMatch": false,
+      "notes": "Author recalls support arriving in PgBouncer 1.21.0; unverified."
+    },
+    {
+      "id": "Q029",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "Caddy vs Traefik vs nginx automatic HTTPS reverse proxy for docker compose -kubernetes",
+      "secondaryTags": [
+        "docs_negative",
+        "comparison",
+        "negation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "automatic certificate issuance behaviour of each proxy",
+        "how each discovers Docker services (labels vs static config)",
+        "a comparison not centred on Kubernetes ingress"
+      ],
+      "expectNoMatch": false,
+      "notes": "Minus-term exclusion preserved."
+    },
+    {
+      "id": "Q030",
+      "category": "coding_infrastructure_research",
+      "split": "heldout",
+      "query": "OAuth 2.1 changes from OAuth 2.0 PKCE required implicit grant removed",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "protocol"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the draft-ietf-oauth-v2-1 document",
+        "PKCE required for the authorization code grant",
+        "implicit and resource owner password credentials grants omitted",
+        "exact redirect URI string matching"
+      ],
+      "expectNoMatch": false,
+      "notes": "Spec text rather than library docs."
+    },
+    {
+      "id": "Q031",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "```python\nfrom mlx_lm import load, generate\ntext = generate(model, tokenizer, prompt=prompt, temp=0.7)\n```\nTypeError: generate_step() got an unexpected keyword argument 'temp' in mlx-lm",
+      "secondaryTags": [
+        "docs_positive",
+        "code_fence",
+        "long_query",
+        "versioned_api",
+        "stack_trace"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "mlx-lm"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "make_sampler from mlx_lm.sample_utils taking temp and top_p",
+        "passing sampler=make_sampler(...) to generate or stream_generate",
+        "the mlx-lm release or commit after which temp was no longer accepted"
+      ],
+      "expectNoMatch": false,
+      "notes": "Version-dependent API; author does not know the exact release, so no versionConstraint."
+    },
+    {
+      "id": "Q032",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "mlx_lm.convert --q-bits 4 --q-group-size 64 what does group size do to quality and size",
+      "secondaryTags": [
+        "docs_positive",
+        "quantization"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "mlx-lm"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "mlx_lm.convert flags -q/--quantize, --q-bits, --q-group-size",
+        "group-wise affine quantization with a scale and bias per group",
+        "defaults of 4 bits and group size 64"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q033",
+      "category": "mlx_local_inference",
+      "split": "tuning",
+      "query": "MLX lazy evaluation when is the graph actually computed mx.eval",
+      "secondaryTags": [
+        "docs_positive",
+        "performance"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "mlx"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the MLX 'Lazy Evaluation' documentation page",
+        "mx.eval forcing computation",
+        "implicit evaluation triggers such as printing, .item() or NumPy conversion"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q034",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "mx.fast.scaled_dot_product_attention mask parameter \"causal\" signature",
+      "secondaryTags": [
+        "docs_positive",
+        "api_usage",
+        "quoted_phrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "mlx"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "signature of mlx.core.fast.scaled_dot_product_attention (q, k, v, *, scale, mask)",
+        "the accepted types of the mask argument",
+        "support for grouped-query attention with fewer key/value heads"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q035",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "why is prompt processing compute-bound but token generation memory-bandwidth-bound on Apple Silicon with MLX",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "performance"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "explanation that each decoded token reads all weights (bandwidth-bound)",
+        "explanation that prefill processes many tokens at once (compute-bound)",
+        "memory bandwidth figure for at least one named M-series chip"
+      ],
+      "expectNoMatch": false,
+      "notes": "Mechanism explanation; docs not required."
+    },
+    {
+      "id": "Q036",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "mlx_lm.server OpenAI-compatible /v1/chat/completions supported request parameters",
+      "secondaryTags": [
+        "docs_positive",
+        "api_usage"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "mlx-lm"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "command to start mlx_lm.server with --model and --port",
+        "the /v1/chat/completions endpoint",
+        "list of supported request fields (e.g. temperature, max_tokens, stream)"
+      ],
+      "expectNoMatch": false,
+      "notes": "SERVER.md in mlx-lm is an acceptable source."
+    },
+    {
+      "id": "Q037",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "MLX DWQ vs 4-bit vs 8-bit quantized model perplexity comparison",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "quantization"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "what DWQ (distilled weight quantization) is in mlx-lm",
+        "perplexity or benchmark numbers for the compared bit widths",
+        "the model and evaluation dataset used"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q038",
+      "category": "mlx_local_inference",
+      "split": "tuning",
+      "query": "sudo sysctl iogpu.wired_limit_mb macOS 15 MLX large model wired memory",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "version_constraint",
+        "performance"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "mlx-lm"
+          }
+        ]
+      },
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "macOS",
+        "version": "15"
+      },
+      "requiredEvidence": [
+        "the sysctl key iogpu.wired_limit_mb",
+        "mlx-lm guidance or warning about wired memory on macOS 15 or later",
+        "the MLX API that sets the wired memory limit"
+      ],
+      "expectNoMatch": false,
+      "notes": "OS version gates the wired-limit behaviour."
+    },
+    {
+      "id": "Q039",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "mx.compile shapeless=True when does MLX recompile a function",
+      "secondaryTags": [
+        "docs_positive",
+        "performance"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "mlx"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the MLX compilation documentation",
+        "recompilation triggers when input shapes, dtypes or the number of inputs change",
+        "shapeless=True behaviour and its caveats"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q040",
+      "category": "mlx_local_inference",
+      "split": "heldout",
+      "query": "llama.cpp Metal vs MLX tokens per second same model same Mac benchmark without Ollama",
+      "secondaryTags": [
+        "docs_negative",
+        "performance",
+        "comparison",
+        "negation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "tokens/s for both runtimes on a named Mac",
+        "the model and quantization used",
+        "prompt processing and generation reported separately"
+      ],
+      "expectNoMatch": false,
+      "notes": "'without Ollama' must be respected."
+    },
+    {
+      "id": "Q041",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "Attention Is All You Need Vaswani 2017 arXiv",
+      "secondaryTags": [
+        "docs_negative",
+        "original_paper",
+        "navigational"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "arXiv identifier 1706.03762",
+        "author list beginning with Ashish Vaswani",
+        "BLEU 28.4 on WMT 2014 English-German for the big model"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q042",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "FlashAttention tiling and recomputation how it reduces HBM reads",
+      "secondaryTags": [
+        "docs_negative",
+        "method"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Dao et al. 2022 paper (arXiv 2205.14135)",
+        "tiling of Q, K, V blocks in on-chip SRAM with online softmax",
+        "IO complexity analysis compared with standard attention"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q043",
+      "category": "scientific_technical_research",
+      "split": "tuning",
+      "query": "limitations of BLEU for machine translation evaluation Callison-Burch re-evaluating",
+      "secondaryTags": [
+        "docs_negative",
+        "limitation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Callison-Burch, Osborne and Koehn 2006 'Re-evaluating the Role of BLEU in Machine Translation Research'",
+        "cases where BLEU disagrees with human judgments"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q044",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "Chinchilla scaling laws replication attempt Besiroglu 2024 Epoch AI approach 3 discrepancy",
+      "secondaryTags": [
+        "docs_negative",
+        "replication"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the paper 'Chinchilla Scaling: A replication attempt' (arXiv 2404.10102)",
+        "claim that the original Approach 3 parametric fit is inconsistent with Approaches 1 and 2",
+        "re-estimated parameters or confidence intervals"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q045",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "the paper that introduced freezing pretrained weights and training small rank-decomposition matrices injected into each Transformer layer",
+      "secondaryTags": [
+        "docs_negative",
+        "long_query",
+        "original_paper",
+        "indirect_description"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Hu et al. 2021 LoRA (arXiv 2106.09685)",
+        "update rule W0 + BA with rank r",
+        "reduction in trainable parameters versus full fine-tuning"
+      ],
+      "expectNoMatch": false,
+      "notes": "Never names LoRA."
+    },
+    {
+      "id": "Q046",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "GPTQ vs AWQ weight quantization methods differences activation-aware",
+      "secondaryTags": [
+        "docs_negative",
+        "method",
+        "comparison"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "GPTQ (Frantar et al., arXiv 2210.17323) approximate second-order layer-wise quantization",
+        "AWQ (Lin et al., arXiv 2306.00978) protecting salient channels using activation statistics",
+        "reported accuracy or perplexity comparison"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q047",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "Open Science Collaboration 2015 Estimating the reproducibility of psychological science replication rate",
+      "secondaryTags": [
+        "docs_negative",
+        "replication"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Science 2015 article replicating 100 studies",
+        "36% of replications with statistically significant results",
+        "replication effect sizes about half of the originals"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q048",
+      "category": "scientific_technical_research",
+      "split": "tuning",
+      "query": "HNSW original paper Malkov Yashunin hierarchical navigable small world graphs",
+      "secondaryTags": [
+        "docs_negative",
+        "original_paper"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "arXiv 1603.09320",
+        "parameters M, efConstruction and ef",
+        "publication in IEEE TPAMI"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q049",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "BM25 vs dense retrieval zero-shot generalization BEIR benchmark results limitations",
+      "secondaryTags": [
+        "docs_negative",
+        "limitation",
+        "comparison"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "BEIR paper Thakur et al. 2021 (arXiv 2104.08663)",
+        "nDCG@10 per dataset for BM25 and dense retrievers",
+        "finding that BM25 is a strong zero-shot baseline"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q050",
+      "category": "scientific_technical_research",
+      "split": "heldout",
+      "query": "Raft paper In Search of an Understandable Consensus Algorithm Ongaro Ousterhout",
+      "secondaryTags": [
+        "docs_negative",
+        "original_paper"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "USENIX ATC 2014 publication",
+        "leader election with randomized election timeouts",
+        "log matching and safety properties"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q051",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "gpt-oss-120b model card license active parameters",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "announcement",
+        "specification"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Apache 2.0 license",
+        "total and active parameter counts (about 117B total, 5.1B active)",
+        "MXFP4 quantization of the MoE weights",
+        "the release date"
+      ],
+      "expectNoMatch": false,
+      "notes": "Released August 2025 per author knowledge."
+    },
+    {
+      "id": "Q052",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "Model Context Protocol specification 2025-06-18 changelog structured tool output elicitation",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "version_constraint",
+        "specification"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "Model Context Protocol",
+            "version": "2025-06-18"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": {
+        "library": "Model Context Protocol",
+        "version": "2025-06-18"
+      },
+      "requiredEvidence": [
+        "the 2025-06-18 key changes / changelog page",
+        "structured tool output (outputSchema / structuredContent)",
+        "elicitation added",
+        "JSON-RPC batching removed"
+      ],
+      "expectNoMatch": false,
+      "notes": "Spec revision date is the version."
+    },
+    {
+      "id": "Q053",
+      "category": "recent_models_tools",
+      "split": "tuning",
+      "query": "Claude Sonnet 4.5 release date Anthropic announcement",
+      "secondaryTags": [
+        "docs_negative",
+        "chronology",
+        "announcement"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "release date September 29, 2025",
+        "the announcement post on anthropic.com",
+        "the API model identifier"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q054",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "Llama 4 Scout and Maverick active parameters experts context window Meta announcement",
+      "secondaryTags": [
+        "docs_negative",
+        "announcement",
+        "specification"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "17B active parameters for both models",
+        "16 experts (Scout) vs 128 experts (Maverick)",
+        "Scout's 10M-token context window",
+        "announcement date April 5, 2025"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q055",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "Qwen3 release model sizes Qwen3-235B-A22B Qwen3-30B-A3B -Qwen2.5",
+      "secondaryTags": [
+        "docs_negative",
+        "announcement",
+        "specification",
+        "negation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the release date",
+        "dense sizes and the MoE sizes 30B-A3B and 235B-A22B",
+        "hybrid thinking / non-thinking mode",
+        "license"
+      ],
+      "expectNoMatch": false,
+      "notes": "Minus-term excludes the previous generation."
+    },
+    {
+      "id": "Q056",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "What's New In Python 3.14 free-threaded build officially supported template strings",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "version_constraint",
+        "specification",
+        "chronology"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "python",
+            "version": "3.14"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": {
+        "library": "python",
+        "version": "3.14"
+      },
+      "requiredEvidence": [
+        "the 'What's New In Python 3.14' page",
+        "PEP 779 supported status for the free-threaded build",
+        "PEP 750 template string literals",
+        "release date October 7, 2025"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q057",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "OpenAI GPT-5 launch date and the API models gpt-5 gpt-5-mini gpt-5-nano",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "chronology",
+        "announcement"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "launch date August 7, 2025",
+        "the three API model names",
+        "API pricing or the reasoning_effort parameter"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q058",
+      "category": "recent_models_tools",
+      "split": "tuning",
+      "query": "Anthropic model deprecations retirement date Claude 3 Opus",
+      "secondaryTags": [
+        "docs_positive",
+        "chronology"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the model deprecations page with its table",
+        "retirement date for claude-3-opus-20240229",
+        "the recommended replacement model"
+      ],
+      "expectNoMatch": false,
+      "notes": "Anthropic platform docs are the expected source."
+    },
+    {
+      "id": "Q059",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "what changed in the MCP 2025-11-25 specification compared with 2025-06-18",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "specification",
+        "chronology"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "Model Context Protocol",
+            "version": "2025-11-25"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "Model Context Protocol",
+        "version": "2025-11-25"
+      },
+      "requiredEvidence": [
+        "the 2025-11-25 changelog page",
+        "the list of key changes in that revision",
+        "the revision's publication date"
+      ],
+      "expectNoMatch": false,
+      "notes": "Author does not assert specific 2025-11-25 changes."
+    },
+    {
+      "id": "Q060",
+      "category": "recent_models_tools",
+      "split": "heldout",
+      "query": "Gemini 2.5 Pro general availability date and per-million-token pricing above 200k context",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "chronology",
+        "specification"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the general availability date",
+        "input and output prices per 1M tokens for prompts at or below and above 200k tokens",
+        "an official Google source"
+      ],
+      "expectNoMatch": false,
+      "notes": "Pricing page in Gemini API docs is acceptable."
+    },
+    {
+      "id": "Q061",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "Node.js security releases in the last 30 days",
+      "secondaryTags": [
+        "docs_negative",
+        "time_window",
+        "relative_window"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2026-09-17T00:00:00Z",
+        "publishedBefore": "2026-10-17T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "a nodejs.org security release post dated within the window",
+        "CVE identifiers fixed",
+        "affected release lines and patched versions"
+      ],
+      "expectNoMatch": false,
+      "notes": "'last 30 days' resolved against asOf. If none occurred, an empty in-window result is correct; unverified."
+    },
+    {
+      "id": "Q062",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "Python 3.14.0 release date October 2025",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "version_constraint",
+        "time_window",
+        "explicit_date"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2025-10-01T00:00:00Z",
+        "publishedBefore": "2025-11-01T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "python",
+        "version": "3.14.0"
+      },
+      "requiredEvidence": [
+        "python.org release page for Python 3.14.0",
+        "release date 2025-10-07",
+        "the release announcement"
+      ],
+      "expectNoMatch": false,
+      "notes": "Explicit month resolved to its calendar bounds."
+    },
+    {
+      "id": "Q063",
+      "category": "time_sensitive",
+      "split": "tuning",
+      "query": "Kubernetes minor releases published this year",
+      "secondaryTags": [
+        "docs_negative",
+        "time_window",
+        "relative_window"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2026-01-01T00:00:00Z",
+        "publishedBefore": "2026-10-17T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "release announcement(s) dated in 2026 on kubernetes.io",
+        "version numbers with their release dates"
+      ],
+      "expectNoMatch": false,
+      "notes": "'this year' resolved to 2026-01-01 through asOf."
+    },
+    {
+      "id": "Q064",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "Chrome stable channel update past week",
+      "secondaryTags": [
+        "docs_negative",
+        "time_window",
+        "relative_window"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2026-10-10T00:00:00Z",
+        "publishedBefore": "2026-10-17T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "a Chrome Releases blog post dated within the window",
+        "the stable version number",
+        "the list of security fixes"
+      ],
+      "expectNoMatch": false,
+      "notes": "'past week' resolved to the 7 days before asOf."
+    },
+    {
+      "id": "Q065",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "latest PostgreSQL minor release announcement",
+      "secondaryTags": [
+        "docs_negative",
+        "update",
+        "freshness"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "a postgresql.org news post announcing minor releases",
+        "the set of version numbers released together",
+        "the release date"
+      ],
+      "expectNoMatch": false,
+      "notes": "No window stated; quarterly schedule suggests 2026-08-13 unless an out-of-cycle release followed. Unverified."
+    },
+    {
+      "id": "Q066",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "AWS us-east-1 outage October 2025 root cause DynamoDB DNS",
+      "secondaryTags": [
+        "docs_negative",
+        "time_window",
+        "explicit_date",
+        "independent_reporting"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2025-10-01T00:00:00Z",
+        "publishedBefore": "2025-11-01T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "AWS post-event summary for the us-east-1 disruption",
+        "root cause described as a race condition in DynamoDB DNS management automation",
+        "dates and duration of impact (October 19-20, 2025, Pacific time)"
+      ],
+      "expectNoMatch": false,
+      "notes": "Explicit month resolved to calendar bounds."
+    },
+    {
+      "id": "Q067",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "Rust stable releases in the last 90 days",
+      "secondaryTags": [
+        "docs_negative",
+        "time_window",
+        "relative_window"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2026-07-19T00:00:00Z",
+        "publishedBefore": "2026-10-17T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Rust blog release announcements dated within the window",
+        "the Rust version numbers announced",
+        "their release dates"
+      ],
+      "expectNoMatch": false,
+      "notes": "'last 90 days' resolved against asOf; six-week cadence implies about two releases."
+    },
+    {
+      "id": "Q068",
+      "category": "time_sensitive",
+      "split": "tuning",
+      "query": "npm supply chain attack September 2025 chalk debug compromised maintainer",
+      "secondaryTags": [
+        "docs_negative",
+        "time_window",
+        "explicit_date"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2025-09-01T00:00:00Z",
+        "publishedBefore": "2025-10-01T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "affected package names including chalk and debug",
+        "date of the compromise (September 8, 2025)",
+        "the malicious payload's behaviour (browser crypto-wallet hijacking)"
+      ],
+      "expectNoMatch": false,
+      "notes": "Explicit month resolved to calendar bounds."
+    },
+    {
+      "id": "Q069",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "GitHub changelog posts from yesterday",
+      "secondaryTags": [
+        "docs_negative",
+        "time_window",
+        "relative_window"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "publishedAfter": "2026-10-16T00:00:00Z",
+        "publishedBefore": "2026-10-17T00:00:00Z",
+        "dateMode": "strict_publication"
+      },
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "github.blog/changelog entries dated 2026-10-16",
+        "the titles of those entries"
+      ],
+      "expectNoMatch": false,
+      "notes": "'yesterday' resolved to the UTC day before asOf. Unverified that entries exist."
+    },
+    {
+      "id": "Q070",
+      "category": "time_sensitive",
+      "split": "heldout",
+      "query": "CA/Browser Forum ballot SC-081 TLS certificate validity reduction schedule March 15 2026",
+      "secondaryTags": [
+        "docs_negative",
+        "explicit_date",
+        "update"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "ballot SC-081 adoption",
+        "200-day maximum validity from March 15, 2026",
+        "later steps of 100 days (2027) and 47 days (2029)",
+        "reduction of domain validation reuse periods"
+      ],
+      "expectNoMatch": false,
+      "notes": "Dates are subject matter, not a publication window; no date constraint."
+    },
+    {
+      "id": "Q071",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "hacker news",
+      "secondaryTags": [
+        "docs_negative",
+        "navigational"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the news.ycombinator.com front page",
+        "site identified as Hacker News run by Y Combinator"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q072",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "boiling point of water at 2000 m altitude",
+      "secondaryTags": [
+        "docs_negative",
+        "factual"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "boiling point of about 93 degrees C at 2000 m",
+        "atmospheric pressure at that altitude (about 79-80 kPa)"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q073",
+      "category": "general_web",
+      "split": "tuning",
+      "query": "Raspberry Pi 5 official 27W USB-C power supply specs",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "factual"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "5.1 V, 5 A output",
+        "USB Power Delivery support",
+        "USB peripheral current limit with a 3 A supply versus the 27W supply"
+      ],
+      "expectNoMatch": false,
+      "notes": "Raspberry Pi documentation is an acceptable source."
+    },
+    {
+      "id": "Q074",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "Kindle Paperwhite vs Kobo Clara BW for borrowing library ebooks",
+      "secondaryTags": [
+        "docs_negative",
+        "comparison"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Kobo's built-in OverDrive/Libby integration",
+        "how Kindle library borrowing works (Libby, US only)",
+        "comparison of the two devices"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q075",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "how do heat pumps keep working below -20C not geothermal",
+      "secondaryTags": [
+        "docs_negative",
+        "exploratory",
+        "negation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "capacity or COP figures for cold-climate air-source heat pumps at low temperatures",
+        "defrost cycle explanation",
+        "role of variable-speed or vapor-injection compressors"
+      ],
+      "expectNoMatch": false,
+      "notes": "'not geothermal' must be respected."
+    },
+    {
+      "id": "Q076",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "usps tracking",
+      "secondaryTags": [
+        "docs_negative",
+        "navigational"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the tools.usps.com tracking page",
+        "an official usps.com host"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q077",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "how many moons does Saturn have",
+      "secondaryTags": [
+        "docs_negative",
+        "factual",
+        "freshness"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the current confirmed moon count with the date it was stated",
+        "an authoritative source such as NASA, the IAU or the Minor Planet Center"
+      ],
+      "expectNoMatch": false,
+      "notes": "Count changes over time; judge against captured date."
+    },
+    {
+      "id": "Q078",
+      "category": "general_web",
+      "split": "tuning",
+      "query": "is learning touch typing worth it for a programmer who already types fast with two fingers",
+      "secondaryTags": [
+        "docs_negative",
+        "exploratory"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "typing speed or error figures comparing touch typing with hunt-and-peck",
+        "practical guidance on the switching cost"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q079",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "Signal vs WhatsApp vs Telegram end-to-end encryption by default",
+      "secondaryTags": [
+        "docs_negative",
+        "comparison"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Telegram cloud chats are not end-to-end encrypted by default (Secret Chats only)",
+        "WhatsApp uses the Signal Protocol for default end-to-end encryption",
+        "metadata or backup differences"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q080",
+      "category": "general_web",
+      "split": "heldout",
+      "query": "national parks in Utah",
+      "secondaryTags": [
+        "docs_negative",
+        "factual"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the five parks: Arches, Bryce Canyon, Canyonlands, Capitol Reef, Zion",
+        "an official NPS or state source"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q081",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "git command to temporarily shelve uncommitted changes without committing them and bring them back later",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "paraphrase",
+        "negation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "git stash push, git stash pop / apply",
+        "the git-stash documentation"
+      ],
+      "expectNoMatch": false,
+      "notes": "Never names git stash."
+    },
+    {
+      "id": "Q082",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "Python function default list keeps growing between calls",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "indirect_description"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "default argument values are evaluated once at function definition",
+        "the None-sentinel idiom",
+        "the official Python tutorial or FAQ warning"
+      ],
+      "expectNoMatch": false,
+      "notes": "Mutable default argument pitfall."
+    },
+    {
+      "id": "Q083",
+      "category": "difficult_semantic",
+      "split": "tuning",
+      "query": "algorithm that evicts whichever cached item hasn't been used for the longest time",
+      "secondaryTags": [
+        "docs_negative",
+        "paraphrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the name least recently used (LRU)",
+        "an O(1) implementation with a hash map and doubly linked list"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q084",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "two concurrent transactions each check that at least one doctor stays on call, both remove themselves, both commit, and now nobody is on call: what is this anomaly called and which isolation level prevents it",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "long_query",
+        "terminology_mismatch",
+        "indirect_description"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the term 'write skew'",
+        "that snapshot isolation / REPEATABLE READ permits it",
+        "that SERIALIZABLE (e.g. PostgreSQL SSI) prevents it"
+      ],
+      "expectNoMatch": false,
+      "notes": "PostgreSQL isolation docs are an acceptable source."
+    },
+    {
+      "id": "Q085",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "JavaScript run a callback after an object is garbage collected",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "terminology_mismatch"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "FinalizationRegistry and register()",
+        "caveat that cleanup callbacks are not guaranteed to run or be timely",
+        "relation to WeakRef"
+      ],
+      "expectNoMatch": false,
+      "notes": "MDN is the expected source."
+    },
+    {
+      "id": "Q086",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "make the browser stop guessing a file's type from its contents and trust my Content-Type header",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "paraphrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the header X-Content-Type-Options: nosniff",
+        "MIME sniffing explanation",
+        "blocking behaviour for script and style destinations"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q087",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "the observation that adding people to a late software project makes it later",
+      "secondaryTags": [
+        "docs_negative",
+        "paraphrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the name Brooks's law",
+        "The Mythical Man-Month (1975)",
+        "communication overhead or ramp-up explanation"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q088",
+      "category": "difficult_semantic",
+      "split": "tuning",
+      "query": "find out which process is listening on port 8080 linux",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "paraphrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "ss -ltnp or lsof -i :8080",
+        "how to read the PID and process name from the output"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q089",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "the tendency to finish tasks as early as possible even when it costs extra effort, the opposite of procrastination",
+      "secondaryTags": [
+        "docs_negative",
+        "indirect_description",
+        "terminology_mismatch"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the term 'precrastination'",
+        "Rosenbaum, Gong and Potts 2014 (Psychological Science) bucket-carrying experiments"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q090",
+      "category": "difficult_semantic",
+      "split": "heldout",
+      "query": "```\nerror[E0502]: cannot borrow `v` as mutable because it is also borrowed as immutable\n```\nhappens when I push to a Vec while iterating over it",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "code_fence",
+        "long_query",
+        "stack_trace",
+        "terminology_mismatch"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the rustc error index entry for E0502",
+        "explanation that the iterator's immutable borrow is still alive at the push",
+        "a fix such as iterating over indices or collecting first"
+      ],
+      "expectNoMatch": false,
+      "notes": "Compiler output pasted with backticks."
+    },
+    {
+      "id": "Q091",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "React to this poem about autumn leaves",
+      "secondaryTags": [
+        "docs_negative",
+        "ordinary_language"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "a poem about autumn leaves or a written response to one",
+        "no React (JavaScript library) documentation in top results"
+      ],
+      "expectNoMatch": false,
+      "notes": "Must not be treated as a React docs query."
+    },
+    {
+      "id": "Q092",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "React 19 use() hook migrate from useContext",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "technical_meaning",
+        "migration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "react",
+            "version": "19"
+          }
+        ],
+        "programmingLanguage": "javascript"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "react",
+        "version": "19"
+      },
+      "requiredEvidence": [
+        "the use API reference on react.dev",
+        "use(Context) may be called inside conditionals and loops, unlike useContext",
+        "availability of use in React 19"
+      ],
+      "expectNoMatch": false,
+      "notes": "Must be treated as docs."
+    },
+    {
+      "id": "Q093",
+      "category": "ambiguous_documentation",
+      "split": "tuning",
+      "query": "how to get rust off a cast iron pan",
+      "secondaryTags": [
+        "docs_negative",
+        "ordinary_language"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "scrubbing with steel wool or a vinegar soak",
+        "re-seasoning with oil in the oven"
+      ],
+      "expectNoMatch": false,
+      "notes": "Ordinary meaning of rust."
+    },
+    {
+      "id": "Q094",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "rust lifetime elision rules",
+      "secondaryTags": [
+        "docs_positive",
+        "technical_meaning"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "programmingLanguage": "rust"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the three lifetime elision rules",
+        "The Rust Programming Language or the Rust Reference section on elision"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q095",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "swift current",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "genuine_uncertainty"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "a page clearly about either Swift Current, Saskatchewan or the current Swift language release",
+        "unambiguous identification of which sense the page addresses"
+      ],
+      "expectNoMatch": false,
+      "notes": "Genuinely ambiguous: city vs current Swift version; either sense is acceptable."
+    },
+    {
+      "id": "Q096",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "go context cancel propagate to goroutines",
+      "secondaryTags": [
+        "docs_positive",
+        "technical_meaning"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "programmingLanguage": "go"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "context.WithCancel returning a CancelFunc",
+        "goroutines selecting on ctx.Done()",
+        "the context package documentation on pkg.go.dev"
+      ],
+      "expectNoMatch": false,
+      "notes": "'go' is the language here."
+    },
+    {
+      "id": "Q097",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "rails migration",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "genuine_uncertainty"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the Rails guide on Active Record Migrations",
+        "commands bin/rails generate migration and bin/rails db:migrate"
+      ],
+      "expectNoMatch": false,
+      "notes": "Railway/rail-transport sense possible; Rails sense judged more likely."
+    },
+    {
+      "id": "Q098",
+      "category": "ambiguous_documentation",
+      "split": "tuning",
+      "query": "spring boot actuator health show-details",
+      "secondaryTags": [
+        "docs_positive",
+        "technical_meaning",
+        "configuration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "spring-boot"
+          }
+        ],
+        "programmingLanguage": "java"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "property management.endpoint.health.show-details",
+        "values never, when-authorized, always"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q099",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "kafka on the shore themes",
+      "secondaryTags": [
+        "docs_negative",
+        "ordinary_language"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "discussion of themes in Haruki Murakami's novel Kafka on the Shore",
+        "no Apache Kafka content in top results"
+      ],
+      "expectNoMatch": false,
+      "notes": "Literary meaning."
+    },
+    {
+      "id": "Q100",
+      "category": "ambiguous_documentation",
+      "split": "heldout",
+      "query": "pandas merge vs join difference",
+      "secondaryTags": [
+        "docs_positive",
+        "technical_meaning"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "pandas"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "DataFrame.merge joins on columns by default",
+        "DataFrame.join joins on the index by default",
+        "default how values (inner for merge, left for join)"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q101",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "xz utils backdoor CVE-2024-3094 discovery Andres Freund",
+      "secondaryTags": [
+        "docs_negative",
+        "near_duplicate",
+        "independent_reporting"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "CVE-2024-3094",
+        "affected versions xz 5.6.0 and 5.6.1",
+        "discovery by Andres Freund reported on oss-security on March 29, 2024"
+      ],
+      "expectNoMatch": false,
+      "notes": "Many outlets reported one event."
+    },
+    {
+      "id": "Q102",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "CrowdStrike Channel File 291 outage July 19 2024 root cause",
+      "secondaryTags": [
+        "docs_negative",
+        "near_duplicate",
+        "independent_reporting"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "Channel File 291 content update",
+        "date July 19, 2024",
+        "CrowdStrike root cause analysis (input field count mismatch / out-of-bounds read)",
+        "Microsoft estimate of about 8.5 million affected devices"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q103",
+      "category": "duplicate_near_duplicate",
+      "split": "tuning",
+      "query": "os.path.join absolute path component discards previous components",
+      "secondaryTags": [
+        "docs_positive",
+        "near_duplicate",
+        "mirror"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "os.path.join documentation stating an absolute component discards previous components",
+        "the docs.python.org os.path page or a faithful mirror"
+      ],
+      "expectNoMatch": false,
+      "notes": "Python docs are widely mirrored."
+    },
+    {
+      "id": "Q104",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "Log4Shell CVE-2021-44228 is log4j-core 2.14.1 vulnerable and which version fixed it",
+      "secondaryTags": [
+        "docs_negative",
+        "docs_ambiguous",
+        "version_constraint",
+        "near_duplicate",
+        "independent_reporting"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_negative",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "log4j-core",
+        "version": "2.14.1"
+      },
+      "requiredEvidence": [
+        "affected range 2.0-beta9 through 2.14.1",
+        "fix in 2.15.0 and follow-up releases 2.16.0 / 2.17.0 / 2.17.1",
+        "the Apache Log4j security page or an equivalent advisory"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q105",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "tar extract to a specific directory -C man page",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "near_duplicate",
+        "mirror"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "required"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "-C, --directory option description",
+        "example tar -xf archive.tar -C /target/dir"
+      ],
+      "expectNoMatch": false,
+      "notes": "Man pages are mirrored on many hosts."
+    },
+    {
+      "id": "Q106",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "Rust book derive Debug print struct {:#?} chapter 5",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "near_duplicate",
+        "page_fragment"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "programmingLanguage": "rust"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the 'Adding Useful Functionality with Derived Traits' section",
+        "{:?} and {:#?} format specifiers",
+        "the dbg! macro"
+      ],
+      "expectNoMatch": false,
+      "notes": "Answer is one section of a longer page."
+    },
+    {
+      "id": "Q107",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "Heartbleed CVE-2014-0160 OpenSSL 1.0.1f affected 1.0.1g fixed",
+      "secondaryTags": [
+        "docs_negative",
+        "version_constraint",
+        "near_duplicate",
+        "independent_reporting"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "negative",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "OpenSSL",
+        "version": "1.0.1f"
+      },
+      "requiredEvidence": [
+        "CVE-2014-0160",
+        "affected OpenSSL 1.0.1 through 1.0.1f",
+        "fixed in 1.0.1g",
+        "heartbeat extension over-read of up to 64 KB"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q108",
+      "category": "duplicate_near_duplicate",
+      "split": "tuning",
+      "query": "MDN Array.prototype.toSorted",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "near_duplicate",
+        "mirror",
+        "navigational"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "programmingLanguage": "javascript"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "toSorted returns a new array without mutating the original",
+        "ES2023 specification / browser compatibility table"
+      ],
+      "expectNoMatch": false,
+      "notes": "MDN content is mirrored by DevDocs and others."
+    },
+    {
+      "id": "Q109",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "python requests quickstart r.json() example",
+      "secondaryTags": [
+        "docs_positive",
+        "near_duplicate",
+        "syndication"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "requests"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "requests.get example",
+        "r.status_code and r.json() usage",
+        "the Requests documentation quickstart page"
+      ],
+      "expectNoMatch": false,
+      "notes": "README content syndicated across GitHub, PyPI and the docs site."
+    },
+    {
+      "id": "Q110",
+      "category": "duplicate_near_duplicate",
+      "split": "heldout",
+      "query": "Twelve-Factor App \"Store config in the environment\"",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_ambiguous",
+        "near_duplicate",
+        "mirror",
+        "page_fragment",
+        "quoted_phrase"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": null,
+      "documentationRelevance": "ambiguous_positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "the factor III Config text",
+        "statement that config varies between deploys and belongs in environment variables"
+      ],
+      "expectNoMatch": false,
+      "notes": "12factor.net is translated and mirrored widely."
+    },
+    {
+      "id": "Q111",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "Django 5.2 release notes composite primary keys",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "version_constraint",
+        "restricted_domain",
+        "correct_version"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "includeDomains": [
+          "docs.djangoproject.com"
+        ]
+      },
+      "searchIntelligence": {
+        "documentation": "required",
+        "libraries": [
+          {
+            "name": "django",
+            "version": "5.2"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": {
+        "library": "django",
+        "version": "5.2"
+      },
+      "requiredEvidence": [
+        "the Django 5.2 release notes page",
+        "CompositePrimaryKey support",
+        "the LTS designation of 5.2"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q112",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "Python 2.7 urllib2.urlopen timeout parameter",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "obsolete_version"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "python",
+            "version": "2.7"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "python",
+        "version": "2.7"
+      },
+      "requiredEvidence": [
+        "urllib2.urlopen signature with the timeout argument from the 2.7 docs",
+        "timeout given in seconds (added in 2.6)",
+        "a docs.python.org/2.7 page"
+      ],
+      "expectNoMatch": false,
+      "notes": "Python 3 urllib.request pages are wrong-version results."
+    },
+    {
+      "id": "Q113",
+      "category": "explicit_version_domain_constraints",
+      "split": "tuning",
+      "query": "useSyncExternalStore subscribe getSnapshot",
+      "secondaryTags": [
+        "docs_positive",
+        "restricted_domain"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "includeDomains": [
+          "react.dev"
+        ]
+      },
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "react"
+          }
+        ],
+        "programmingLanguage": "javascript"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot?) signature",
+        "requirement that getSnapshot returns a cached value when the store has not changed"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q114",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "kubectl rollout restart deployment without downtime",
+      "secondaryTags": [
+        "docs_positive",
+        "restricted_domain",
+        "negation"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "excludeDomains": [
+          "stackoverflow.com",
+          "medium.com"
+        ]
+      },
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "kubernetes"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "kubectl rollout restart deployment/<name> syntax",
+        "rolling update strategy (maxUnavailable / maxSurge) explanation"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q115",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "webpack 4 optimization.splitChunks cacheGroups vendors",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "obsolete_version"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "webpack",
+            "version": "4"
+          }
+        ],
+        "programmingLanguage": "javascript"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "webpack",
+        "version": "4"
+      },
+      "requiredEvidence": [
+        "webpack 4 SplitChunksPlugin documentation",
+        "default cache group named vendors (renamed defaultVendors in webpack 5)",
+        "a test: /[\\\\/]node_modules[\\\\/]/ example"
+      ],
+      "expectNoMatch": false,
+      "notes": "Current webpack 5 docs are the wrong version."
+    },
+    {
+      "id": "Q116",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "pandas 2.0 DataFrame.append removed use pd.concat",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "correct_version",
+        "migration"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {},
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "pandas",
+            "version": "2.0"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "pandas",
+        "version": "2.0"
+      },
+      "requiredEvidence": [
+        "pandas 2.0.0 release notes listing removal of DataFrame.append",
+        "its deprecation in 1.4.0",
+        "a pd.concat replacement example"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q117",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "What's New In Python 4.0",
+      "secondaryTags": [
+        "docs_positive",
+        "docs_explicit",
+        "version_constraint",
+        "no_match_expected",
+        "restricted_domain",
+        "nonexistent_version"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "includeDomains": [
+          "docs.python.org"
+        ]
+      },
+      "searchIntelligence": {
+        "documentation": "required",
+        "libraries": [
+          {
+            "name": "python",
+            "version": "4.0"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": true,
+      "versionConstraint": {
+        "library": "python",
+        "version": "4.0"
+      },
+      "requiredEvidence": [
+        "absence of any 'What's New In Python 4.0' page on docs.python.org",
+        "the newest What's New page on the domain being for a 3.x release"
+      ],
+      "expectNoMatch": true,
+      "notes": "Python 4.0 does not exist; returning 3.x pages as if 4.0 is a failure."
+    },
+    {
+      "id": "Q118",
+      "category": "explicit_version_domain_constraints",
+      "split": "tuning",
+      "query": "PostgreSQL 17 MERGE RETURNING clause",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "restricted_domain",
+        "correct_version"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "includeDomains": [
+          "www.postgresql.org"
+        ]
+      },
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "postgresql",
+            "version": "17"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "postgresql",
+        "version": "17"
+      },
+      "requiredEvidence": [
+        "MERGE ... RETURNING syntax in the PostgreSQL 17 docs",
+        "the merge_action() function",
+        "PostgreSQL 17 release notes mention"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    },
+    {
+      "id": "Q119",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "pandas read_parquet engine pyarrow",
+      "secondaryTags": [
+        "docs_positive",
+        "no_match_expected",
+        "restricted_domain"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "includeDomains": [
+          "kubernetes.io"
+        ]
+      },
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "pandas"
+          }
+        ],
+        "programmingLanguage": "python"
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": null,
+      "requiredEvidence": [
+        "no page on kubernetes.io documenting pandas.read_parquet",
+        "an empty result or an explicit no-match"
+      ],
+      "expectNoMatch": true,
+      "notes": "Domain restriction contradicts the subject; correct answer is no match."
+    },
+    {
+      "id": "Q120",
+      "category": "explicit_version_domain_constraints",
+      "split": "heldout",
+      "query": "Terraform AWS provider v5 aws_s3_bucket_acl resource replaces acl argument",
+      "secondaryTags": [
+        "docs_positive",
+        "version_constraint",
+        "restricted_domain",
+        "correct_version"
+      ],
+      "asOf": "2026-10-17T00:00:00Z",
+      "constraints": {
+        "includeDomains": [
+          "registry.terraform.io"
+        ]
+      },
+      "searchIntelligence": {
+        "documentation": "auto",
+        "libraries": [
+          {
+            "name": "hashicorp/aws",
+            "version": "5"
+          }
+        ]
+      },
+      "documentationRelevance": "positive",
+      "documentationExplicit": false,
+      "versionConstraint": {
+        "library": "hashicorp/aws",
+        "version": "5"
+      },
+      "requiredEvidence": [
+        "aws_s3_bucket_acl resource documentation",
+        "note that the acl argument on aws_s3_bucket is deprecated",
+        "the S3 bucket refactor described in the version 4 upgrade guide"
+      ],
+      "expectNoMatch": false,
+      "notes": ""
+    }
+  ]
+}
