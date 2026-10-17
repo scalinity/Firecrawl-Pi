@@ -36,9 +36,11 @@ It requests Claude Opus 5.5 at high effort through the existing budgeted extract
 path, on its own Anthropic key. The response reports the provider's model identity, available usage, and
 accounted cost. Missing token counts remain unknown; a conservative reservation cost
 is identified in response warnings. The high effort is configured and sent with each
-model request; provider responses do not confirm that setting. A result schema is
-grammar-constrained by the provider only up to 16 nullable fields; a larger one is sent as
-prompt text and its answer is checked locally, with one repair. The model-call log records which.
+model request; provider responses do not confirm that setting. The provider
+constrains a model's output with a grammar only up to 16 nullable fields in all. The Agent's own
+decision uses 10 of them, so a result schema of more than five fields (nested ones included) sends
+the whole decision as prompt text; its answer is then checked locally against the full schema, with
+one repair, and the model-call log records which way each call went.
 An unavailable model or unsupported setting fails explicitly, without a model fallback.
 The model can direct follow-up searches and reads within five page dispatches, three
 searches, eight tool calls, and 360 seconds. A page extraction can use more than one

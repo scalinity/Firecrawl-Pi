@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { runAgent, validateAgentInput } from '../scripts/playground/agent.mjs';
 import { missingRequired, toStrict, validate } from '../services/retrieval/src/jsonschema.mjs';
 import { loadManifest } from '../services/access/client.mjs';
+import { unions, MAX_UNIONS } from '../services/retrieval/src/anthropic.mjs';
 
 const first = 'https://research.example/first';
 const second = 'https://research.example/second';
@@ -80,6 +81,21 @@ function fixture(responses) {
     return typeof response === 'function' ? response(request, signal) : structuredClone(response);
   } };
 }
+
+test('the Agent\'s own decision fields use 10 of the provider grammar\'s 16 union slots, so a result schema may add five fields', async () => {
+  // Every property is a nullable union in the strict form, nested ones and the result object itself included.
+  const flat = n => ({ type: 'object', properties: Object.fromEntries(Array.from({ length: n }, (_, i) => [`f${i}`, { type: 'string' }])), required: ['f0'] });
+  const counted = [];
+  for (const fields of [0, 5, 6]) {
+    const f = fixture([request => {
+      counted.push(unions(toStrict(request.body.formats.find(format => format.type === 'json').schema)));
+      return page(first);
+    }]);
+    await runAgent({ prompt: 'Find the measurement', urls: [first], ...(fields ? { schema: flat(fields) } : {}) }, f);
+  }
+  assert.deepEqual(counted, [10, 16, 17]);
+  assert.ok(counted[1] <= MAX_UNIONS && counted[2] > MAX_UNIONS, 'five result fields fit the grammar; six do not');
+});
 
 test('unsupported result-schema roots are rejected before any gateway dispatch', async () => {
   for (const schema of [null, false, {}, { type: 'string' }, { type: 'number' }, { type: 'array', items: { type: 'string' } }]) {
