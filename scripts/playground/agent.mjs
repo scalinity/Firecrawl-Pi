@@ -20,7 +20,8 @@ const EFFORT = 'high';
 // 300 s = 425 s in deploy/compose.yaml), so the gateway's REQUEST_TIMEOUT answer arrives, and names the cause, before the wait
 // ends; if those values change, change this with them.
 export const AGENT_RUN_MS = 900000;
-const PAGE_REQUEST_SECONDS = 435, SEARCH_REQUEST_SECONDS = 125;
+export const PAGE_REQUEST_SECONDS = 435;
+const SEARCH_REQUEST_SECONDS = 125;
 // A page read waits on a paid model call that, once sent, runs and is billed whether or not the Agent is still listening, so
 // one is not started when the run has too little time left to wait for it (measured reads take 30 to 110 s).
 const PAGE_MIN_MS = 150000;
