@@ -105,7 +105,7 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
     deepseek: makeDeepseek({ dispatch, limits, permits }), tavily: makeTavily({ dispatch, limits }) };
   const backend = sx ? makeSearxngBackend({ getPolicy, getSelection, searchUrl: `http://127.0.0.1:${sx.port}/search` }) : null;
   const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, decisions, log });
-  return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper,
+  return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper, general, getBudget, getPolicy, getSelection,
     close: async () => { for (const s of Object.values(servers)) await s.close(); await sx?.close(); } };
 }
 

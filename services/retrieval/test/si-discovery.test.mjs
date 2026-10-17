@@ -442,6 +442,20 @@ test("the paid-dispatch switch and a missing credential are explicit exclusions,
   } finally { await h.close(); }
 });
 
+test("a roster subject with no adapter is skipped under its lane id, never its budget provider's name", async () => {
+  const h = await harness();
+  try {
+    const { makeCoordinator } = await import("../src/search-intelligence/coordinator.mjs");
+    const { brave, ...general } = h.general;
+    const c = makeCoordinator({ store: h.store, getBudget: h.getBudget, getPolicy: h.getPolicy, getSelection: h.getSelection, dispatch: h.dispatch, general, availability: h.availability });
+    const r = await c.search(request({ originalQuery: "missing adapter" }), { signal: new AbortController().signal });
+    const s = r.body.search;
+    assert.deepEqual([s.providers.brave?.status, s.providers.brave?.reason, s.providers.brave?.detail], ["skipped", "not_configured", "adapter_missing"]);
+    assert.equal(s.providers["fixture-brave"], undefined);
+    assert.match(r.body.warning, /Brave/);
+  } finally { await h.close(); }
+});
+
 test("a complete answer is cached whole and served again without admission or dispatch, labelled reuse", async () => {
   const h = await harness();
   try {

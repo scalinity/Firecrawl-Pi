@@ -16,6 +16,7 @@ import { Denied } from "../ssrf.mjs";
 import { validateSearchRequest, outcome, skipped, failed, validated, GENERAL, DOCUMENTATION, VERSIONS, RESPONSE_SCHEMA } from "./contracts.mjs";
 import { prepareCandidates, buildPool, sha256, normalizeQueryText } from "./normalize.mjs";
 import { fuse, literalRelevance, shortlist, blend, selectFinal } from "./rank.mjs";
+import { SEARCH_APIS } from "../budget.mjs";
 
 const LABEL = { serper: "Serper", brave: "Brave", exa: "Exa", deepseek: "DeepSeek", tavily: "Tavily", context7: "Context7", ref: "Ref", searxng: "SearXNG", jev: "Jev" };
 const REASON_TEXT = { not_configured: "not configured", temporarily_unavailable: "unavailable", breaker_open: "paused after repeated failures", rate_limited: "rate limited",
@@ -95,7 +96,8 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   // Preflight for one roster subject: eligible ({ sub, pre }) or a skipped outcome. A rate limit that lifts within two seconds,
   // well inside the discovery window, is waited out rather than skipped.
   async function admitLane(adapter, map, subjectName, request, selection, signal, closeAt) {
-    if (!adapter) return { skip: skipped(dispatch.subject(map, subjectName)?.provider ?? subjectName, "not_configured", "adapter_missing") };
+    // A missing adapter is reported under its API's lane id, as every other outcome is.
+    if (!adapter) return { skip: skipped(SEARCH_APIS[dispatch.subject(map, subjectName)?.prov?.api]?.lane ?? subjectName, "not_configured", "adapter_missing") };
     const sub = dispatch.subject(map, subjectName);
     let pre = dispatch.preflight(sub, { selection, breakerState: adapter.breakerState });
     if (!pre.eligible && pre.reason === "rate_limited" && pre.retryAt && pre.retryAt - clock() <= Math.min(2000, closeAt - clock() - 1000)) {

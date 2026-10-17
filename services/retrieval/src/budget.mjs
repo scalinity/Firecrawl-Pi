@@ -21,14 +21,14 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 // Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §18): each external search, documentation and decision
 // API is one adapter contract at one fixed origin. A fixture provider of the same API is a project fixture over http.
 export const SEARCH_APIS = Object.freeze({
-  "serper-v1": { kind: "search", origin: "https://google.serper.dev" },
-  "brave-web-v1": { kind: "search", origin: "https://api.search.brave.com" },
-  "exa-search-v1": { kind: "search", origin: "https://api.exa.ai" },
-  "deepseek-search-v1": { kind: "search", origin: "https://api.deepseek.com" },
-  "tavily-search-v1": { kind: "search", origin: "https://api.tavily.com" },
-  "context7-v3": { kind: "documentation", origin: "https://context7.com" },
-  "ref-mcp-v1": { kind: "documentation", origin: "https://api.ref.tools" },
-  "openrouter-decisions-v1": { kind: "decision", origin: "https://openrouter.ai" },
+  "serper-v1": { kind: "search", origin: "https://google.serper.dev", lane: "serper" },
+  "brave-web-v1": { kind: "search", origin: "https://api.search.brave.com", lane: "brave" },
+  "exa-search-v1": { kind: "search", origin: "https://api.exa.ai", lane: "exa" },
+  "deepseek-search-v1": { kind: "search", origin: "https://api.deepseek.com", lane: "deepseek" },
+  "tavily-search-v1": { kind: "search", origin: "https://api.tavily.com", lane: "tavily" },
+  "context7-v3": { kind: "documentation", origin: "https://context7.com", lane: "context7" },
+  "ref-mcp-v1": { kind: "documentation", origin: "https://api.ref.tools", lane: "ref" },
+  "openrouter-decisions-v1": { kind: "decision", origin: "https://openrouter.ai", lane: "jev" },
 });
 // The aggregate profile's exact rosters: one subject of each API, never fewer (spec §4: no engine is silently omitted).
 export const GENERAL_APIS = ["serper-v1", "brave-web-v1", "exa-search-v1", "deepseek-search-v1", "tavily-search-v1"];
