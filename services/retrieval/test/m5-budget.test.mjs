@@ -127,6 +127,18 @@ test("a model on the Messages API states its effort, and each rule about that pr
   ]) assert.throws(() => loadBudgetPolicy(mutate(edit)), why);
 });
 
+test("the gateway's allowlisted model and effort pair names a budget model at exactly that effort, with a price in effect", () => {
+  // The pair is written in the budget policy, the capability manifest, the Agent and its label; a half-done swap
+  // would otherwise fail only at runtime (MODEL_NOT_ALLOWED, or the gateway refusing the request).
+  const manifest = JSON.parse(readFileSync(new URL("../policy/capabilities.json", import.meta.url), "utf8"));
+  const pair = manifest.formats.objects.json, b = loadBudgetPolicy(RAW);
+  const model = b.models[pair.model.value];
+  assert.ok(model, `the manifest allowlists ${pair.model.value}, which the budget policy does not list`);
+  assert.equal(model.reasoningEffort, pair.reasoningEffort.value);
+  assert.ok(rateCardFor(b, pair.model.value), "the allowlisted model has a rate card in effect");
+  assert.equal(b.providers[model.provider].paid, true);
+});
+
 test("the breaker opens after its failures, admits one probe, and closes on its success", () => {
   let t = 0;
   const b = new Breaker({ failures: 3, windowMs: 60000, openMs: 300000 }, () => t);
