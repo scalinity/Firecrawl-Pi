@@ -214,7 +214,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       const complete = !generalMissing.length && !docsMissing.length && (!docsActive || docsOutcomes.length === DOCUMENTATION.length);
       const lanes = [...generalOutcomes, ...docsOutcomes];
       const summary = Object.fromEntries([...lanes, ...(searxngOutcome ? [searxngOutcome] : [])].map((o) => [o.provider, { status: o.status, reason: o.reason, detail: o.detail, fromCache: o.fromCache,
-        elapsedMs: o.durationMs, queueMs: o.queueMs, resultCount: o.upstreamResultCount, eligibleCount: o.candidates.length, filteredEmpty: !!o.filteredEmpty, dispatchState: o.dispatchState, ...(o.retryAt ? { retryAt: o.retryAt } : {}),
+        elapsedMs: o.durationMs, queueMs: o.queueMs, resultCount: o.upstreamResultCount, eligibleCount: o.candidates.length, filteredEmpty: !!o.filteredEmpty, dispatchState: o.dispatchState, ...(o.retryAt ? { retryAt: iso(o.retryAt) } : {}),
         ...(o.suboperations?.length ? { suboperations: o.suboperations.slice(0, 12) } : {}) }]));
       const warnings = [];
       for (const o of [...generalMissing, ...docsMissing]) warnings.push(`${o.provider}_${o.status === "partial" ? "partial" : o.reason}`);

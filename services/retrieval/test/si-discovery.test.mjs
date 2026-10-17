@@ -555,6 +555,19 @@ test("a settlement the ledger refuses is counted as an accounting failure and th
   } finally { await h.close(); }
 });
 
+test("a provider's retryAt is one ISO instant whether its lane failed on the refusal or was skipped while cooling down", async () => {
+  const h = await harness({ handlers: { exa: () => ({ status: 429, body: { requestId: "r", error: "slow down", tag: "RATE_LIMIT_EXCEEDED" }, headers: { "retry-after": "120" } }) } });
+  try {
+    const ISO = /^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d\.\d{3}Z$/;
+    const failed = (await h.coordinator.search(request({ originalQuery: "retry at one" }), { signal: new AbortController().signal })).body.search.providers.exa;
+    const skipped = (await h.coordinator.search(request({ originalQuery: "retry at two" }), { signal: new AbortController().signal })).body.search.providers.exa;
+    assert.deepEqual([failed.status, skipped.status], ["failed", "skipped"]);
+    assert.match(failed.retryAt, ISO);
+    assert.match(skipped.retryAt, ISO);
+    assert.equal(failed.retryAt, skipped.retryAt, "the same documented reset");
+  } finally { await h.close(); }
+});
+
 // ---- deadlines and late DNS -------------------------------------------------------------------------------------------------------
 test("a deadline that passes while DNS is pending sends nothing when DNS later answers; the uncancelled control connects", async () => {
   let connections = 0;
