@@ -14,9 +14,11 @@ import { credentialEpoch } from "../availability.mjs";
 
 const FIXTURE = /\.fixture\.fcpi\.test$/;
 
-export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, lookupFixture, readKey, paidDispatch, permits, availability, request = providerRequest, log = () => {}, onAccountingFailure = () => {} }) {
+export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, lookupFixture, readKey, paidDispatch, permits, availability, request = providerRequest, log = () => {} }) {
   const breakers = new Map();
   const breakerFor = (provider) => breakers.get(provider) ?? breakers.set(provider, new Breaker(getBudget().breaker)).get(provider);
+  // Ledger closings that failed (spec §18.2: recorded as an operational accounting failure, never reported as zero cost).
+  let accountingFailures = 0;
 
   // A subject of one of the budget policy's maps (searches, documentationSearches, decisions), or null when it is not listed.
   function subject(map, name) {
@@ -69,7 +71,7 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
       if (closed) return null;
       closed = true;
       try { return await fn(...args); }
-      catch (e) { log({ event: "si_accounting_failed", provider: sub.provider, subject: sub.name, step: what, error: e.code ?? e.message }); onAccountingFailure(); return null; }
+      catch (e) { log({ event: "si_accounting_failed", provider: sub.provider, subject: sub.name, step: what, error: e.code ?? e.message }); accountingFailures++; return null; }
     };
     return {
       settle: once((actual, fields = {}) => store.settleBudget(reservation.id, actual, fields), "settle"),
@@ -140,7 +142,8 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     }
   }
 
-  return { subject, preflight, report, call, breakerState: (provider) => breakerFor(provider).state(), breakers: () => Object.fromEntries([...breakers].map(([k, v]) => [k, v.state()])) };
+  return { subject, preflight, report, call, breakerState: (provider) => breakerFor(provider).state(), breakers: () => Object.fromEntries([...breakers].map(([k, v]) => [k, v.state()])),
+    counters: () => ({ accountingFailures }) };
 }
 
 // A provider's JSON answer, or null when it is not JSON (a contract failure for the caller to name).

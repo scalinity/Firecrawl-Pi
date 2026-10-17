@@ -29,7 +29,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   const tasks = new Set();
   const track = (p) => { tasks.add(p); p.finally(() => tasks.delete(p)).catch(() => {}); return p; };
   const flights = new Map();
-  let accountingFailures = 0, cacheFailures = 0;
+  let cacheFailures = 0;
 
   const limits = () => getPolicy().search.intelligence;
   // A roster subject's adapter, by its provider's API (the roster's order is configuration, never a pairing).
@@ -339,7 +339,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     while (tasks.size && clock() < until) await sleep(50);
     return tasks.size;
   }
-  return { search, legacyGet, drain, tasks: () => tasks.size, counters: () => ({ accountingFailures, cacheFailures }), aggregateKey };
+  return { search, legacyGet, drain, tasks: () => tasks.size, counters: () => ({ accountingFailures: dispatch.counters?.().accountingFailures ?? 0, cacheFailures }), aggregateKey };
 }
 
 const oldest = (lanes) => {

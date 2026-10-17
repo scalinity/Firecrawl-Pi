@@ -431,6 +431,20 @@ test("a ledger outage stops dispatch: no reservation, no request", async () => {
   } finally { await h.close(); }
 });
 
+test("a settlement the ledger refuses is counted as an accounting failure and the reservation stays durable, never zero", async () => {
+  const h = await harness();
+  const settle = h.store.settleBudget.bind(h.store);
+  h.store.settleBudget = async (id, actual, f) => { const r = [...h.store.rows.values()].find((x) => x.id === id); if (r?.provider !== "fixture-serper") throw Object.assign(new Error("db down"), { code: "ECONNRESET" }); return settle(id, actual, f); };
+  try {
+    assert.equal(h.coordinator.counters().accountingFailures, 0);
+    await h.coordinator.search(request({ originalQuery: "ledger refuses settlement" }), { signal: new AbortController().signal });
+    assert.equal(h.coordinator.counters().accountingFailures, 4, "one per metered lane whose settlement failed");
+    const metered = [...h.store.rows.values()].filter((x) => x.provider !== "fixture-serper");
+    assert.deepEqual(metered.map((x) => x.state), ["RESERVED", "RESERVED", "RESERVED", "RESERVED"], "held at the reservation, swept to UNCERTAIN at the next start");
+    assert.equal(h.logs.filter((l) => l.event === "si_accounting_failed").length, 4);
+  } finally { await h.close(); }
+});
+
 // ---- deadlines and late DNS -------------------------------------------------------------------------------------------------------
 test("a deadline that passes while DNS is pending sends nothing when DNS later answers; the uncancelled control connects", async () => {
   let connections = 0;
