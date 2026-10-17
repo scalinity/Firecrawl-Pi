@@ -517,7 +517,7 @@ services:
   # is that bridge's host address (the host's resolver), so no lookup leaves through the host's own
   # namespace past the guard (evidence/M1/closeout/CLOSEOUT.md).
   retrieval-service:
-    image: fcpi/retrieval@sha256:0ad6be7f8a58dddbe25f3039291870fb08864b976764f9d0122d84766433a96b
+    image: fcpi/retrieval@sha256:a88400c908e22ddcf845c7c34745674ee4d6f9071ab7a310fe7793d598fec155
     platform: linux/arm64
     pull_policy: never
     hostname: retrieval-service

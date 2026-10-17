@@ -1,0 +1,78 @@
+utc=2026-10-17T11:04:45Z source_commit=f3cec798ba3ebf040a0ee1845a62ea4b2dcf52f0
+mem_available_kib_before=4890368
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 759B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 381.29kB 0.0s done
+#4 DONE 0.1s
+
+#5 [1/5] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.1s done
+#5 DONE 0.1s
+
+#6 [2/5] WORKDIR /srv/retrieval
+#6 CACHED
+
+#7 [3/5] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts --no-audit && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 1.459 
+#8 1.459 added 16 packages in 1s
+#8 1.460 npm notice
+#8 1.460 npm notice New major version of npm available! 10.9.9 -> 12.2.0
+#8 1.460 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#8 1.460 npm notice To update run: npm install -g npm@12.2.0
+#8 1.460 npm notice
+#8 1.608 npm warn using --force Recommended protections disabled.
+#8 1.803 v22.23.3
+#8 2.150 fcpi-retrieval@0.5.0 /srv/retrieval
+#8 2.150 +-- pg@8.23.0
+#8 2.150 | +-- pg-cloudflare@1.4.0
+#8 2.150 | +-- pg-connection-string@2.14.0
+#8 2.150 | +-- UNMET OPTIONAL DEPENDENCY pg-native@>=3.0.1
+#8 2.150 | +-- pg-pool@3.14.0
+#8 2.150 | | `-- pg@8.23.0 deduped
+#8 2.150 | +-- pg-protocol@1.16.0
+#8 2.150 | +-- pg-types@2.2.0
+#8 2.150 | | +-- pg-int8@1.0.1
+#8 2.150 | | +-- postgres-array@2.0.0
+#8 2.150 | | +-- postgres-bytea@1.0.1
+#8 2.150 | | +-- postgres-date@1.0.7
+#8 2.150 | | `-- postgres-interval@1.2.0
+#8 2.150 | |   `-- xtend@4.0.2
+#8 2.150 | `-- pgpass@1.0.5
+#8 2.150 |   `-- split2@4.2.0
+#8 2.150 `-- tldts@7.4.15
+#8 2.150   `-- tldts-core@7.4.15
+#8 2.150 
+#8 DONE 7.6s
+
+#9 [5/5] COPY src ./src
+#9 DONE 0.2s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 2.6s done
+#10 exporting manifest sha256:a88400c908e22ddcf845c7c34745674ee4d6f9071ab7a310fe7793d598fec155 0.1s done
+#10 exporting config sha256:67e7b64affe142229dd0fe1ecb2f2a13d8bf91a885f18a54e42fe19f41d7d224 0.0s done
+#10 naming to docker.io/fcpi/retrieval:anthropic-enum-20261017 done
+#10 unpacking to docker.io/fcpi/retrieval:anthropic-enum-20261017
+#10 unpacking to docker.io/fcpi/retrieval:anthropic-enum-20261017 0.3s done
+#10 DONE 3.0s
+build_exit=0
+image_id=sha256:a88400c908e22ddcf845c7c34745674ee4d6f9071ab7a310fe7793d598fec155 os=linux arch=arm64 size=355338728 user=3310:3310
+image env: FCPI_SOURCE_COMMIT=f3cec798ba3ebf040a0ee1845a62ea4b2dcf52f0
+mem_available_kib_after=4841440
+leftover_transient_containers=0

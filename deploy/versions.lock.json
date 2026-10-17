@@ -571,15 +571,15 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:0ad6be7f8a58dddbe25f3039291870fb08864b976764f9d0122d84766433a96b",
+      "image_id": "sha256:a88400c908e22ddcf845c7c34745674ee4d6f9071ab7a310fe7793d598fec155",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
       },
-      "evidence": "evidence/post-m9/anthropic-models/raw/image-package.txt",
+      "evidence": "evidence/post-m9/anthropic-models/raw/image-package-enum-fix.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "a037d3bc25c3c759eca4cefba0093b2badfb0c8e",
+      "built_from_commit": "f3cec798ba3ebf040a0ee1845a62ea4b2dcf52f0",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
