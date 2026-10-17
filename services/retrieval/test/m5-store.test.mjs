@@ -223,3 +223,26 @@ test("search admission holds its hourly cap under concurrent queries; the cache 
     assert.deepEqual(await store.parseCacheGet("p"), { pages: 2, markdown: "# m" });
   } finally { await store.close(); }
 });
+
+test("at start, a model call left RESERVED by a stopped service becomes UNCERTAIN and is listed; later and other rows are not touched", opts, async () => {
+  const store = await fresh();
+  try {
+    const caps = { month: 10000000 };
+    const orphan = (await store.reserveBudget(base({ category: "llm", caps, amount: 5000 }))).reservation;
+    const repair = (await store.reserveBudget(base({ category: "llm", caps, amount: 3000, kind: "repair" }))).reservation;
+    const proxy = (await store.reserveBudget(base({ category: "proxy", caps, amount: 700, kind: "proxy" }))).reservation;
+    const settled = (await store.reserveBudget(base({ category: "llm", caps, amount: 100 }))).reservation;
+    await store.settleBudget(settled.id, 50, {});
+    await store.pool.query("UPDATE fcpi_retrieval.budget_reservation SET created_at = now() - interval '1 hour'");
+    const startedAt = new Date();
+    const live = (await store.reserveBudget(base({ category: "llm", caps, amount: 2000 }))).reservation;
+    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 2 });
+    const state = async (id) => (await store.pool.query("SELECT state, detail FROM fcpi_retrieval.budget_reservation WHERE id = $1", [id])).rows[0];
+    for (const r of [orphan, repair]) assert.deepEqual(await state(r.id), { state: "UNCERTAIN", detail: "the retrieval service stopped while the call was in flight" });
+    assert.equal((await state(proxy.id)).state, "RESERVED", "only model calls are swept");
+    assert.equal((await state(live.id)).state, "RESERVED", "a call this process made is left alone");
+    assert.equal((await state(settled.id)).state, "SETTLED");
+    assert.deepEqual(await store.uncertainHolds("2026-09-01"), [{ category: "llm", count: 2, reserved: 8000 }]);
+    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 0 }, "a second start finds nothing more");
+  } finally { await store.close(); }
+});

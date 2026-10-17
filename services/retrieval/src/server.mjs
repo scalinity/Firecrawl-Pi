@@ -80,8 +80,9 @@ const coreTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_core
 const gatewayTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_gateway_token_sha256"), "retrieval_gateway_token_sha256");
 const store = new Store({ ...env.postgres, password: readSecret(env.credentialsDir, "retrieval_postgres_password") });
 let storeReady = false;
+const startedAt = new Date();
 (async function connect() {
-  try { await store.ready(env.permits); storeReady = true; log({ event: "store_ready" }); }
+  try { const { orphaned } = await store.ready(env.permits, startedAt); storeReady = true; log({ event: "store_ready", orphaned_model_calls: orphaned }); }
   catch (e) { log({ event: "store_unavailable", error: e.code ?? e.message }); setTimeout(connect, 2000); }
 })();
 setInterval(() => store.prune().catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();

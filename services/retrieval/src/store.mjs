@@ -58,14 +58,19 @@ export class Store {
 
   // One retrieval service runs per deployment, so at its start every lease and domain hold belongs
   // to a process that no longer exists: they are reclaimed rather than left to expire, so a restart
-  // does not stall acquisitions for a lease period (review finding W3).
-  async ready(permits) {
+  // does not stall acquisitions for a lease period (review finding W3). A model call still RESERVED from before this
+  // process started was in flight when the last one stopped: its outcome is unknown, so it is marked UNCERTAIN, which
+  // the status lists, rather than held unseen. Returns how many were marked.
+  async ready(permits, startedAt = new Date()) {
     await this.pool.query("SELECT 1");
+    const orphaned = (await this.pool.query(`UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = 'the retrieval service stopped while the call was in flight'
+      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair') AND created_at < $1`, [startedAt])).rowCount;
     await this.pool.query("UPDATE fcpi_retrieval.permit SET holder = NULL, lease_until = NULL WHERE holder IS NOT NULL");
     await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE holder IS NOT NULL");
     for (const [kind, n] of Object.entries(permits)) {
       await this.pool.query("INSERT INTO fcpi_retrieval.permit (kind, slot) SELECT $1, g FROM generate_series(0, $2::int - 1) g ON CONFLICT DO NOTHING", [kind, n]);
     }
+    return { orphaned };
   }
 
   async #tx(fn) {
