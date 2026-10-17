@@ -1015,7 +1015,8 @@ The sections above state what must hold. This one states how the project's work 
 - Snapshot around every session that changes the Pi, because unrelated services share this host:
   - before the first change, take a BEFORE snapshot with `scripts/m1/snapshot.sh` and compare it with the previous AFTER snapshot, where only SSH session scopes may differ;
   - after the last change, take the AFTER snapshot;
-  - attribute every line of their diff; an unexplained line is a finding.
+  - attribute every line of their diff; an unexplained line is a finding;
+  - judge the firewall by `scripts/host/firewall-fingerprint.py`, not the snapshot's raw `nft_ruleset_sha256` alone: Docker adds a container's "drop direct access" rules when it starts, so recreating containers re-orders them in `table ip raw` and flips the raw hash between two values without changing what any packet meets. Capture `ssh <pi> 'sudo -n nft -s list ruleset'` (private, not committed; it holds the LAN addresses) before and after, and compare the canonical hashes; the project's own `inet fcpi_guard` table is hashed separately and must not move.
 - Keep these host invariants, and change one only with evidence:
   - **dockerd's start is gated.** Its ExecStartPre runs the data check, then loads `inet fcpi_guard` from `/etc/firecrawl-pi/fcpi-guard.nft`, and either failing keeps dockerd down. Docker therefore serves only this project: no container outlives a test unless it belongs to Compose project `fcpi`.
   - **The gateway's bridge stays closed.** The guard closes `fcpi-access` except for replies to the loopback publication.
