@@ -571,15 +571,15 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:300b999ea383a92dd06489f432941248dd9d165bcda26099d09e3d0b0da07046",
+      "image_id": "sha256:0ad6be7f8a58dddbe25f3039291870fb08864b976764f9d0122d84766433a96b",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
       },
-      "evidence": "evidence/post-m9/serper-search/raw/image-package.txt",
+      "evidence": "evidence/post-m9/anthropic-models/raw/image-package.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "dacb577644efaa092cb67f7dc7d6b31c2b98c296",
+      "built_from_commit": "a037d3bc25c3c759eca4cefba0093b2badfb0c8e",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -1649,7 +1649,7 @@
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "66c52e32ad326138e998bf7633d7af7fdc4816c94c7ee631f8fc980b664787a3",
+    "capabilities_sha256": "9483018d17c74f9438b5914cda6f766c8d296f60e334c558c43d05b4810bad89",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
@@ -1660,7 +1660,7 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "5b8272361b4cc144f8067bccba07c604c3d316ec582d65e00b73b954581a35a2",
+      "sha256": "91a041496ec0575c1980dd15267a3b65630c3d5d9857ca633f82c71976fe2ebe",
       "paid_caps": {
         "llm": {
           "month": 20000000
@@ -1698,26 +1698,26 @@
         "source": "https://serper.dev: existing trial credits; POST /search, num=10, one credit. Allocation fixed at the 2443-credit account balance observed 2026-10-15; no purchases or reload."
       },
       {
-        "id": "openai/gpt-6.1-sol@2026-10-15",
-        "subject": "gpt-6.1-sol",
-        "effectiveFrom": "2026-10-15",
+        "id": "anthropic/claude-opus-5-5@2026-10-17",
+        "subject": "claude-opus-5-5",
+        "effectiveFrom": "2026-10-17",
         "effectiveTo": null,
-        "inputPerMTok": 2000000,
-        "cachedInputPerMTok": 100000,
-        "cacheWritePerMTok": 2500000,
-        "outputPerMTok": 10000000,
-        "source": "https://developers.openai.com/api/docs/pricing and /api/docs/models/gpt-6.1-sol, observed 2026-10-15: Standard, below 272K context; implicit cache writes disabled"
+        "inputPerMTok": 4000000,
+        "cachedInputPerMTok": 200000,
+        "cacheWritePerMTok": 5000000,
+        "outputPerMTok": 20000000,
+        "source": "https://platform.claude.com/docs/en/about-claude/pricing, observed 2026-10-17: base input $4, cache hit $0.20, 5-minute cache write $5, output $20 per MTok; no cache_control is sent, so nothing is written to the cache"
       },
       {
-        "id": "openai/gpt-6-luna@2026-10-02",
-        "subject": "gpt-6-luna",
-        "effectiveFrom": "2026-10-02",
+        "id": "anthropic/claude-haiku-5-5@2026-10-17",
+        "subject": "claude-haiku-5-5",
+        "effectiveFrom": "2026-10-17",
         "effectiveTo": null,
         "inputPerMTok": 100000,
         "cachedInputPerMTok": 10000,
         "cacheWritePerMTok": 125000,
         "outputPerMTok": 500000,
-        "source": "https://developers.openai.com/api/docs/pricing and /api/docs/models/gpt-6-luna, observed 2026-10-02: Standard, below 272K context; implicit cache writes disabled"
+        "source": "https://platform.claude.com/docs/en/about-claude/pricing, observed 2026-10-17: the rate card for prompts up to 100,000 tokens (input $0.10, cache hit $0.01, 5-minute cache write $0.125, output $0.50 per MTok); extraction input is capped at 32,000 estimated tokens per call, which keeps an ordinary page far below the 100,000-token threshold of the higher rate card; the cap is an estimate, not a bound (text heavy in emoji or rare scripts tokenises at several tokens per character), every call logs its reported prompt_tokens, and a prompt over the threshold would be priced below the higher card"
       },
       {
         "id": "fixture/fcpi-fixture-model@2026-09-26",
@@ -1826,16 +1826,16 @@
       }
     ],
     "models": {
-      "gpt-6-luna": {
-        "provider": "openai",
+      "claude-haiku-5-5": {
+        "provider": "anthropic",
         "category": "llm",
         "reasoningEffort": "none"
       },
-      "gpt-6.1-sol": {
-        "provider": "openai",
+      "claude-opus-5-5": {
+        "provider": "anthropic-agent",
         "category": "llm",
-        "reasoningEffort": "xhigh",
-        "maxOutputTokens": 16000,
+        "reasoningEffort": "high",
+        "maxOutputTokens": 8000,
         "requestTimeoutMs": 90000
       },
       "fcpi-fixture-model": {
@@ -1865,19 +1865,28 @@
         "version": "fixture-1"
       }
     },
-    "default_model": "gpt-6-luna",
+    "default_model": "claude-haiku-5-5",
     "default_parser": "llamaparse-cost-effective",
     "providers": {
-      "openai": {
+      "anthropic": {
         "kind": "model",
-        "base_url": "https://api.openai.com/v1",
+        "base_url": "https://api.anthropic.com",
         "paid": true,
-        "credential_file": "openai_api_key"
+        "api": "anthropic-messages",
+        "credential_file": "anthropic_api_key"
+      },
+      "anthropic-agent": {
+        "kind": "model",
+        "base_url": "https://api.anthropic.com",
+        "paid": true,
+        "api": "anthropic-messages",
+        "credential_file": "agent_anthropic_api_key"
       },
       "fixture-model": {
         "kind": "model",
         "base_url": "http://model.fixture.fcpi.test:8080/v1",
         "paid": false,
+        "api": "openai-chat",
         "credential_file": null
       },
       "llamaparse": {
