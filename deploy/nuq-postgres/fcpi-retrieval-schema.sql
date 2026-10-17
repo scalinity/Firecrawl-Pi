@@ -223,6 +223,72 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.proxy_reconciliation (
   at                    timestamptz NOT NULL DEFAULT now()
 );
 
+-- Search intelligence operational records (spec §21.1): one row per logical execution, one per external operation outcome or
+-- availability/circuit transition, and daily reductions behind a watermark. Cost stays in the ledger: these refer to it by
+-- logical id and call key and never copy its mutable totals. No raw query or page text: a query is kept as its fingerprint,
+-- a URL without its query string. Retention (store.mjs prune): runs 30 days, events 14 days and only once reduced, daily 90.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_run (
+  logical_id       uuid PRIMARY KEY,
+  request_id       text NOT NULL,
+  principal_id     text NOT NULL,
+  fingerprint      text NOT NULL,
+  profile          text NOT NULL,
+  selection        text NOT NULL,
+  result_mode      text NOT NULL,
+  accepted_at      timestamptz NOT NULL,
+  completed_at     timestamptz,
+  outcome          text CHECK (outcome IN ('complete', 'partial', 'failed', 'cancelled')),
+  cache_mode       text,
+  docs_active      boolean,
+  docs_reason      text,
+  ranking_mode     text,
+  versions         jsonb NOT NULL,
+  summary          jsonb,
+  trace            jsonb,
+  trace_truncated  boolean NOT NULL DEFAULT false
+);
+CREATE INDEX IF NOT EXISTS search_run_accepted ON fcpi_retrieval.search_run (accepted_at);
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_event (
+  event_id        uuid PRIMARY KEY,
+  logical_id      uuid,
+  operation       text,
+  provider        text NOT NULL,
+  event_type      text NOT NULL CHECK (event_type IN ('lane', 'decision', 'docs_activation', 'ref_read', 'evidence', 'availability', 'breaker')),
+  observed_at     timestamptz NOT NULL,
+  started_at      timestamptz,
+  duration_ms     integer,
+  queue_ms        integer,
+  status          text,
+  reason          text,
+  code            text,
+  retry_at        timestamptz,
+  result_count    integer,
+  eligible_count  integer,
+  cache_origin    text,
+  dispatch_state  text,
+  detail          jsonb
+);
+CREATE INDEX IF NOT EXISTS search_event_observed ON fcpi_retrieval.search_event (observed_at);
+CREATE INDEX IF NOT EXISTS search_event_logical ON fcpi_retrieval.search_event (logical_id);
+-- A day's counts, durations (total and a fixed-bucket histogram) and ledger-linked usage, by low-cardinality profile and
+-- provider ('*' for the run itself). Recomputed whole for the days a reduction covers, so a repeat changes nothing.
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_daily (
+  day        date NOT NULL,
+  profile    text NOT NULL,
+  provider   text NOT NULL,
+  metric     text NOT NULL,
+  n          bigint NOT NULL,
+  total_ms   bigint,
+  histogram  jsonb,
+  amount     numeric,
+  PRIMARY KEY (day, profile, provider, metric)
+);
+CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_reduction (
+  name             text PRIMARY KEY,
+  reduced_through  date NOT NULL,
+  updated_at       timestamptz NOT NULL DEFAULT now()
+);
+
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'fcpi_retrieval') THEN
