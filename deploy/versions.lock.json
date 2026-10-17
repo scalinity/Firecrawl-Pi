@@ -571,15 +571,15 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:bea1d942c581eebf1b02b722ca3a908ade52679e567816859fcdb0118d70f2bd",
+      "image_id": "sha256:8529c32d141db44977b2ac06f5a4417990d012578a8e88b5784946adc3f6817d",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
       },
-      "evidence": "evidence/post-m9/anthropic-limits/raw/image-package-uncapped.txt",
+      "evidence": "evidence/post-m9/anthropic-limits/raw/image-package-final.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "3b31ed6a53e241f17c3a4eb6433592d5336071d4",
+      "built_from_commit": "8c87bd8fac538d2cb9daeb96cffb50772b7acf9d",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -1649,7 +1649,7 @@
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "9483018d17c74f9438b5914cda6f766c8d296f60e334c558c43d05b4810bad89",
+    "capabilities_sha256": "5f1a67b56d0cff0da8f5c6fb2705edec0f8c1e6e5b2707d0d627cd7ea54c3862",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
@@ -1660,7 +1660,7 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "cb681b6c86d7d5136adc6c73c51703b3e893a92bf76119070342aa2a3b78d845",
+      "sha256": "fc0af624b3c34c71d074526c7ba4dd7c4c2e798de28b79efd50b1eafc163b5c9",
       "paid_caps": {
         "llm": {
           "month": 20000000
