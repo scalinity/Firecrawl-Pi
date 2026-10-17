@@ -125,14 +125,6 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     const timings = { admittedAt: iso(tAdmit) };
     try {
       if (!roster) throw new Denied("SEARCH_BACKEND_UNAVAILABLE", "the aggregate profile has no roster for this selection");
-      // 3. General lanes: preflight all, then launch all before awaiting any.
-      const generalAdapters = roster.generalSubjects.map((name) => adapterFor("searches", name, general));
-      const generalAdmits = await Promise.all(roster.generalSubjects.map((name, i) => admitLane(generalAdapters[i], "searches", name, request, selection, parent.signal, discoveryClose)));
-      const generalTasks = generalAdmits.map((a, i) => {
-        const adapter = generalAdapters[i];
-        if (a.skip) return Promise.resolve(a.skip);
-        return runLane({ adapter, sub: a.sub, pre: a.pre, request, selection, signal: parent.signal, deadlineAt: Math.min(discoveryClose, clock() + L.providerTimeoutsMs[adapter.id]) });
-      });
       // SearXNG: alongside (additional), or as fallback when a general lane is ineligible now or fails while two seconds remain,
       // or as augmentation when every general answer is empty. At most one orchestration.
       const mode = getBudget().searching.searxngMode;
@@ -145,7 +137,18 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
         searxngTask = runLane({ adapter: searxng, sub: null, pre: null, request, selection, signal: parent.signal, deadlineAt: Math.min(discoveryClose, clock() + L.providerTimeoutsMs.searxng), useCache: false });
       };
       if (mode === "additional") launchSearxng("additional");
-      else if (generalAdmits.some((a) => a.skip)) launchSearxng("general_lane_ineligible");
+      // 3. General lanes: each is admitted and launched on its own, so a lane waiting out a short rate limit holds back no other
+      // (spec §5.1: launch every eligible lane before awaiting any result). A lane task never rejects.
+      const generalAdapters = roster.generalSubjects.map((name) => adapterFor("searches", name, general));
+      const generalTasks = roster.generalSubjects.map((name, i) => (async () => {
+        const adapter = generalAdapters[i];
+        const a = await admitLane(adapter, "searches", name, request, selection, parent.signal, discoveryClose);
+        if (a.skip) { launchSearxng("general_lane_ineligible"); return a.skip; }
+        return runLane({ adapter, sub: a.sub, pre: a.pre, request, selection, signal: parent.signal, deadlineAt: Math.min(discoveryClose, clock() + L.providerTimeoutsMs[adapter.id]) });
+      })().catch((e) => {
+        log({ event: "si_admission_threw", subject: name, error: e?.message?.slice(0, 200) });
+        return failed(generalAdapters[i]?.id ?? name, "internal_failure", "admission_threw");
+      }));
       generalTasks.forEach((t) => t.then((o) => { if (mode === "fallback" && o.status === "failed") launchSearxng("general_lane_failed"); }));
       // 4. Documentation: activation decided now when explicit, otherwise in parallel with discovery (spec §13).
       let docsTasks = [], activation = { active: false, reason: "documentation_layer_unavailable", classifierVersion: VERSIONS.classifier, uncertainty: null };

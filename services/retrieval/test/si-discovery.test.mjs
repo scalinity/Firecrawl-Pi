@@ -172,6 +172,20 @@ test("all five general engines are dispatched before any completes, and arrival 
   assert.deepEqual(a.body.web.map((w) => w.fcpi.search.documentId), b.body.web.map((w) => w.fcpi.search.documentId));
 });
 
+test("a lane waiting out a short rate limit holds back no other lane", async () => {
+  const h = await harness();
+  // Exa is rate limited for 1.2 s: within the two seconds a lane waits rather than skips.
+  h.store.avail.set("fixture-exa", { provider: "fixture-exa", profile: "default", state: "rate_limited", reason: "rate_limited", provider_code: null,
+    retry_at: new Date(Date.now() + 1200), retry_basis: "documented", credential_epoch: null, contract_failures: 0 });
+  try {
+    const t0 = Date.now();
+    const r = await h.coordinator.search(request({ originalQuery: "one lane waits" }), { signal: new AbortController().signal });
+    assert.equal(r.body.search.coverage.general.successful, 5, "Exa ran once its limit lifted");
+    for (const n of ["serper", "brave", "deepseek", "tavily"]) assert.ok(h.servers[n].seen[0].at - t0 < 500, `${n} was dispatched without waiting for Exa`);
+    assert.ok(h.servers.exa.seen[0].at - t0 >= 1100, "Exa waited out its limit");
+  } finally { await h.close(); }
+});
+
 test("a failed engine leaves a partial answer naming it; a valid empty engine is still coverage", async () => {
   const h = await harness({ handlers: { exa: () => ({ status: 500, body: { requestId: "r", error: "boom", tag: "INTERNAL" } }), tavily: (q) => ({ status: 200, body: { query: q, results: [], usage: { credits: 2 } } }) } });
   try {
