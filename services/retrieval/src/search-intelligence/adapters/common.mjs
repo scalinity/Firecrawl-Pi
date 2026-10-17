@@ -19,6 +19,9 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
   const breakerFor = (provider) => breakers.get(provider) ?? breakers.set(provider, new Breaker(getBudget().breaker)).get(provider);
   // Ledger closings that failed (spec §18.2: recorded as an operational accounting failure, never reported as zero cost).
   let accountingFailures = 0;
+  // Reservations not yet closed, by the lane that opened them (its preflight object): what an adapter leaves open when it
+  // ends, by a throw or an oversight, is marked uncertain at once rather than waiting for the next start's sweep.
+  const openBy = new WeakMap();
 
   // A subject of one of the budget policy's maps (searches, documentationSearches, decisions), or null when it is not listed.
   function subject(map, name) {
@@ -65,20 +68,31 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
 
   // A reservation's one closing; each method acts once and swallows nothing silently: a ledger failure is logged and counted,
   // and the reservation stays durable (RESERVED, swept to UNCERTAIN at the next start), never reported as zero.
-  function closer(reservation, sub) {
+  function closer(reservation, sub, owner = null) {
     let closed = false;
+    const self = {};
     const once = (fn, what) => async (...args) => {
       if (closed) return null;
       closed = true;
+      if (owner) openBy.get(owner)?.delete(self);
       try { return await fn(...args); }
       catch (e) { log({ event: "si_accounting_failed", provider: sub.provider, subject: sub.name, step: what, error: e.code ?? e.message }); accountingFailures++; return null; }
     };
-    return {
+    Object.assign(self, {
       settle: once((actual, fields = {}) => store.settleBudget(reservation.id, actual, fields), "settle"),
       release: once((detail) => store.releaseBudget(reservation.id, detail), "release"),
       uncertain: once((detail, usage = null) => store.markBudgetUncertain(reservation.id, detail, usage), "uncertain"),
       get closed() { return closed; }, reservation,
-    };
+    });
+    if (owner) { if (!openBy.has(owner)) openBy.set(owner, new Set()); openBy.get(owner).add(self); }
+    return self;
+  }
+
+  // Marks every reservation the owner left open as uncertain (its call may have been sent); returns how many there were.
+  async function closeUnclosed(owner, detail) {
+    const open = owner ? [...(openBy.get(owner) ?? [])] : [];
+    for (const c of open) await c.uncertain(detail);
+    return open.length;
   }
 
   const reasonOfTransport = (e) => e.code === "CANCELLED" ? "cancelled" : e.capacity ? "capacity_unavailable" : e.timedOut ? "timeout" : e.code === "PAID_DISPATCH_DISABLED" ? "platform_restricted"
@@ -107,7 +121,7 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     if (r.exhausted) { br.neutral(); return { ok: false, reason: "platform_restricted", detail: `cap:${r.exhausted.category}/${r.exhausted.period}`, dispatchState: "not_sent", queueMs: Date.now() - t0 }; }
     if (r.existing) { br.neutral(); return { ok: false, reason: "internal_failure", detail: "operation_already_recorded", dispatchState: r.existing.state === "RELEASED" ? "not_sent" : "possibly_sent", queueMs: Date.now() - t0 }; }
     for (const notice of r.notices ?? []) log({ event: "budget_threshold", ...notice });
-    const close = closer(r.reservation, sub);
+    const close = closer(r.reservation, sub, pre);
     let releasePermit = null;
     // Not sent: an unreachable service (DNS or connection failure) is a genuine transport failure (spec §15); a capacity wait,
     // the caller's cancellation, a deadline that passed and a local refusal before send (NOT_READY, an SSRF denial, the paid
@@ -142,7 +156,7 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     }
   }
 
-  return { subject, preflight, report, call, breakerState: (provider) => breakerFor(provider).state(), breakers: () => Object.fromEntries([...breakers].map(([k, v]) => [k, v.state()])),
+  return { subject, preflight, report, call, closeUnclosed, breakerState: (provider) => breakerFor(provider).state(), breakers: () => Object.fromEntries([...breakers].map(([k, v]) => [k, v.state()])),
     counters: () => ({ accountingFailures }) };
 }
 

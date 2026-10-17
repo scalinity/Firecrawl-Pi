@@ -456,6 +456,26 @@ test("a roster subject with no adapter is skipped under its lane id, never its b
   } finally { await h.close(); }
 });
 
+test("a reservation an adapter leaves open when it throws is marked uncertain as the lane ends, never left reserved", async () => {
+  const h = await harness();
+  try {
+    const { makeCoordinator } = await import("../src/search-intelligence/coordinator.mjs");
+    const real = h.general.brave;
+    // Brave's call is answered, then the adapter throws before closing its reservation.
+    const throwing = { ...real, async search(request, ctx) {
+      const res = await h.dispatch.call({ sub: ctx.sub, pre: ctx.pre, kind: "search", callKey: `search:${request.logicalSearchId}:brave:search:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
+        requestHash: "x", amount: 1, signal: ctx.signal, deadlineAt: ctx.deadlineAt, timeoutMs: 2000, maxBytes: 1 << 20, http: { method: "GET", path: "/res/v1/web/search?q=x", headers: {} } });
+      assert.equal(res.ok, true);
+      throw new Error("parser bug");
+    } };
+    const c = makeCoordinator({ store: h.store, getBudget: h.getBudget, getPolicy: h.getPolicy, getSelection: h.getSelection, dispatch: h.dispatch, general: { ...h.general, brave: throwing }, availability: h.availability, log: (o) => h.logs.push(o) });
+    const r = await c.search(request({ originalQuery: "adapter throws" }), { signal: new AbortController().signal });
+    assert.deepEqual([r.body.search.providers.brave.reason, r.body.search.providers.brave.detail], ["internal_failure", "adapter_threw"]);
+    assert.equal([...h.store.rows.values()].find((x) => x.provider === "fixture-brave").state, "UNCERTAIN");
+    assert.equal(h.logs.filter((l) => l.event === "si_unclosed_reservation").length, 1);
+  } finally { await h.close(); }
+});
+
 test("a complete answer is cached whole and served again without admission or dispatch, labelled reuse", async () => {
   const h = await harness();
   try {

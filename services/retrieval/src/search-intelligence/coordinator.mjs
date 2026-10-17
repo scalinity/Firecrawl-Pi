@@ -75,6 +75,11 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     const work = track((async () => {
       try { return await adapter.search(request, { sub, pre, signal: child.signal, deadlineAt, selection, kind }); }
       catch (e) { log({ event: "si_adapter_threw", provider: adapter.id, error: e?.message?.slice(0, 200) }); return failed(adapter.id, "internal_failure", "adapter_threw", { kind }); }
+      finally {
+        // Exactly one close per reservation does not rest on the adapter remembering it: whatever it left open is uncertain now.
+        const left = pre ? await dispatch.closeUnclosed?.(pre, "the adapter ended without closing its reservation") : 0;
+        if (left) log({ event: "si_unclosed_reservation", provider: adapter.id, count: left });
+      }
     })());
     // The lane's hard bound: past its deadline (plus a short grace for the transport's own timer) it is cancelled and reported
     // as timed out; the adapter keeps closing its reservation in the background, tracked, and can send nothing more. The grace
