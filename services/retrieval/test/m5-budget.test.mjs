@@ -216,5 +216,8 @@ test("the egress policy's search section and the host selection are validated", 
   assert.deepEqual(defaultSelection(b), { search: "fixture", extractionModel: "claude-haiku-5-5", parser: "llamaparse-cost-effective", proxy: "decodo-residential", enhanced: "zyte-api" });
   assert.equal(loadSelection(JSON.stringify({ search: "live", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b).search, "live");
   assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "gpt-4o", parser: "fcpi-fixture-parser" }), p, b), /extractionModel/);
+  // A default request runs inside the ordinary deadline, which would cut a model that reasons off with its whole reservation held.
+  assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "claude-opus-5-5", parser: "fcpi-fixture-parser" }), p, b), /without a reasoning effort/);
+  assert.equal(loadSelection(JSON.stringify({ search: "live", extractionModel: "claude-haiku-5-5", parser: "fcpi-fixture-parser" }), p, b).extractionModel, "claude-haiku-5-5");
   assert.throws(() => loadSelection(JSON.stringify({ search: "everything", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b), /search/);
 });

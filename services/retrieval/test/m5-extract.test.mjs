@@ -395,6 +395,34 @@ test("no request is started with less than a second of the deadline left, and th
   } finally { await r.srv.close(); }
 });
 
+test("a model that reasons is not started with less than a minute left (or its whole timeout, when shorter); one that does not reason is", async () => {
+  // A reasoning call that the deadline cuts off keeps its whole reservation as uncertain and is never resent, so the floor is
+  // the cost of starting one that cannot finish. The Messages-API fixture here answers at once; only the floor decides.
+  const deadlineIn = (ms) => new Date(Date.now() + ms).toISOString();
+  for (const { timeout, tooShort, enough, floor } of [{ timeout: 90000, tooShort: 20000, enough: 65000, floor: /less than 60 s/ }, { timeout: 30000, tooShort: 20000, enough: 40000, floor: /less than 30 s/ }]) {
+    const seen = {};
+    const r = await rig({ mutate: (b) => { messagesApi({ "fcpi-fixture-model": "high" })(b); Object.assign(b.models["fcpi-fixture-model"], { maxOutputTokens: 16000, requestTimeoutMs: timeout }); },
+      handler: recording(answerWith(), seen) });
+    try {
+      const cut = await r.extract(req({ reasoningEffort: "high", deadline: deadlineIn(tooShort) }));
+      assert.equal(cut.failure.class, "DEADLINE_EXCEEDED", `${timeout} ms model, ${tooShort} ms left`);
+      assert.match(cut.failure.detail, floor);
+      assert.equal(seen.calls ?? 0, 0, "nothing was sent");
+      assert.equal(r.store.rows.size, 0, "nothing was reserved");
+      const ok = await r.extract(req({ reasoningEffort: "high", deadline: deadlineIn(enough) }));
+      assert.equal(ok.ok, true, `${timeout} ms model, ${enough} ms left`);
+      assert.equal(seen.calls, 1);
+    } finally { await r.srv.close(); }
+  }
+  const seen = {};
+  const quick = await rig({ mutate: messagesApi(), handler: recording(answerWith(), seen) });
+  try {
+    const ok = await quick.extract(req({ deadline: deadlineIn(5000) }));
+    assert.equal(ok.ok, true, "a model with no reasoning effort needs only a second");
+    assert.equal(seen.calls, 1);
+  } finally { await quick.srv.close(); }
+});
+
 test("a unit retried while its call is still in flight is EXTRACTION_IN_FLIGHT, retryable, then reuses the answer (review W13)", async () => {
   const r = await rig();
   try {

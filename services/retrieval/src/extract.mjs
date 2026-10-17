@@ -43,6 +43,9 @@ export function canonical(v) {
 }
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 const MIN_REQUEST_MS = 1000;
+// A model that reasons runs for seconds to minutes and, once sent, is billed whether or not the caller waits; a call the deadline cuts off
+// keeps its whole reservation as uncertain. So it is not started with less than a minute left (or its whole timeout, if shorter).
+const REASONING_MIN_START_MS = 60000;
 // The longest an extraction runs (the engine's deadline cap): a reservation still RESERVED within this and
 // one request timeout of its creation may belong to a call still waiting or in flight.
 const LONGEST_EXTRACTION_MS = 900000;
@@ -102,8 +105,10 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     if (!authorize()) throw fail("PAID_DISPATCH_DISABLED", `'${model}' has no active paid dispatch authorization`);
     const cred = readCredential(providersDir, prov.credential);
     if (prov.credential && !cred) throw fail("BLOCKED_CREDENTIAL", `provider ${m.provider} has no credential in this deployment`);
-    // A request needs at least a second before the caller's deadline: none is started past it (review W14).
-    if (deadline - Date.now() < MIN_REQUEST_MS) throw fail("DEADLINE_EXCEEDED", "less than a second of the deadline is left; no request is started", { retryable: true });
+    // A request needs time before the caller's deadline: none is started past it (review W14).
+    const minStartMs = m.reasoningEffort && m.reasoningEffort !== "none" ? Math.min(REASONING_MIN_START_MS, m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs) : MIN_REQUEST_MS;
+    const minStartText = minStartMs === MIN_REQUEST_MS ? "a second" : `${minStartMs / 1000} s`;
+    if (deadline - Date.now() < minStartMs) throw fail("DEADLINE_EXCEEDED", `less than ${minStartText} of the deadline is left; no request is started`, { retryable: true });
     const breaker = breakerOf(m.provider);
     const probe = breaker.state() === "half_open";
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${m.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
@@ -151,11 +156,11 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       await store.releaseBudget(res.id, "no model request slot before the deadline");
       throw signal?.aborted ? fail("CANCELLED", "the caller cancelled") : fail("RESOURCE_BUSY", "another model request held the one slot until the deadline", { retryable: true });
     }
-    if (deadline - Date.now() < MIN_REQUEST_MS) {
+    if (deadline - Date.now() < minStartMs) {
       gate.give();
       breaker.neutral();
       await store.releaseBudget(res.id, "the wait for the model slot left no time before the deadline");
-      throw fail("DEADLINE_EXCEEDED", "the wait for the model slot left less than a second before the deadline; no request is started", { retryable: true });
+      throw fail("DEADLINE_EXCEEDED", `the wait for the model slot left less than ${minStartText} before the deadline; no request is started`, { retryable: true });
     }
     const started = Date.now();
     let answer;

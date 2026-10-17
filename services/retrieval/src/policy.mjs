@@ -227,6 +227,9 @@ export function loadSelection(text, policy, budget) {
   s.enhanced = enhanced === undefined ? budget.enhancing.defaultEnhancer : enhanced;
   if (!["fixture", "live"].includes(s.search)) throw new Error("selection.search must be fixture or live");
   if (!Object.hasOwn(budget.models, s.extractionModel)) throw new Error("selection.extractionModel must be a model the budget policy lists");
+  // A default request runs inside the ordinary deadline, which would cut a model that reasons off with its whole reservation held:
+  // such a model is chosen per request (the Agent's explicit pair), never as the default.
+  if (![undefined, "none"].includes(budget.models[s.extractionModel].reasoningEffort)) throw new Error("selection.extractionModel must be a model without a reasoning effort; a model that reasons is chosen per request");
   if (!Object.hasOwn(budget.parsers, s.parser)) throw new Error("selection.parser must be a parser the budget policy lists");
   return s;
 }
