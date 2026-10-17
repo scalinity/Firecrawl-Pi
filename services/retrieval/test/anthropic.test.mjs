@@ -86,6 +86,10 @@ test("missing or malformed usage and content read as unknown, never as zero", ()
   const none = readMessages({ model: "m", stop_reason: "end_turn", content: [] });
   assert.equal(none.content, null);
   assert.ok(none.counts.some((n) => !Number.isSafeInteger(n)), "the adapter settles at the reservation when counts are unusable");
+  // One count present does not make the others zero.
+  const partial = readMessages({ model: "m", stop_reason: "end_turn", content: [{ type: "text", text: "{}" }], usage: { output_tokens: 2 } });
+  assert.equal(Number.isSafeInteger(partial.counts[0]), false, "no input_tokens: the prompt count is unknown, not the cache counts alone");
+  assert.equal(partial.counts[1], 2);
   assert.equal(readMessages(null).resolvedModel, null);
   assert.equal(readMessages({ content: "text", stop_reason: "end_turn" }).content, null);
 });

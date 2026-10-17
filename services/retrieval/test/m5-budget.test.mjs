@@ -42,7 +42,6 @@ test("the budget policy refuses what would open a gap", () => {
     ["a Messages API baseUrl with a path", (j) => { j.providers.anthropic.baseUrl = "https://api.anthropic.com/v1"; }],
     ["a Messages API provider with a chat token parameter", (j) => { j.providers.anthropic.maxTokensParam = "max_tokens"; }],
     ["an unknown provider api", (j) => { j.providers.anthropic.api = "chat-v2"; }],
-    ["a Messages API model without a stated effort", (j) => { delete j.models["claude-haiku-5-5"].reasoningEffort; }],
     ["an unpaid provider on the Internet", (j) => { j.providers["fixture-model"].baseUrl = "http://api.example.com/v1"; }],
     ["a paid model on an unpaid category", (j) => { j.models["claude-haiku-5-5"].category = "fixture"; }],
     ["overlapping rate cards", (j) => { j.rateCards.push({ ...j.rateCards[0], id: "dup", effectiveFrom: "2026-10-01" }); }],

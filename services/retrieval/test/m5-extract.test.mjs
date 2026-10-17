@@ -623,6 +623,21 @@ test("Messages API: even a model that does not reason must report which model an
   try { assert.equal((await chat.extract(req())).ok, true); } finally { await chat.srv.close(); }
 });
 
+test("Messages API: usage that reports only some counts is unusable, and the call settles at its whole reservation", async () => {
+  for (const usage of [{ output_tokens: 20 }, { input_tokens: 60 }, { input_tokens: "60", output_tokens: 20 }, { input_tokens: 60, output_tokens: -1 }]) {
+    const r = await rig({ mutate: messagesApi(), handler: recording(answerWith({ usage })) });
+    try {
+      const out = await r.extract(req());
+      assert.equal(out.ok, true, JSON.stringify(usage));
+      const row = [...r.store.rows.values()][0];
+      assert.equal(row.usage, null, JSON.stringify(usage));
+      assert.equal(row.actual, row.reserved, "never less than the call could have cost");
+      assert.equal(out.usage.promptTokens, null);
+      assert.match(out.warnings.join(" "), /usage was not reported/);
+    } finally { await r.srv.close(); }
+  }
+});
+
 test("Messages API: a refusal and a token-cap stop are settled calls with their own failure class", async () => {
   for (const [over, cls, detail] of [
     [{ stop_reason: "refusal", stop_details: { type: "refusal", category: "cyber", explanation: null }, content: [] }, "EXTRACTION_REFUSED", /cyber/],
@@ -646,6 +661,8 @@ test("Messages API failures are classified: a refused request is released, a pro
     [401, error("authentication_error", "invalid x-api-key"), "PROVIDER_AUTH_FAILED", "RELEASED", false],
     [402, error("billing_error", "Payment required"), "PROVIDER_BILLING", "RELEASED", false],
     [400, error("invalid_request_error", "Your credit balance is too low to access the Anthropic API."), "PROVIDER_BILLING", "RELEASED", false],
+    // The error type alone marks a billing refusal: no 402 status and no words about a balance.
+    [400, error("billing_error", "Account problem"), "PROVIDER_BILLING", "RELEASED", false],
     [429, error("rate_limit_error", "Number of request tokens has exceeded your rate limit"), "PROVIDER_RATE_LIMITED", "RELEASED", true],
     [529, error("overloaded_error", "Overloaded"), "PROVIDER_ERROR", "RELEASED", true],
     [400, error("invalid_request_error", "Schemas contains too many parameters with union types (17 parameters with type arrays or anyOf)."), "PROVIDER_REJECTED", "RELEASED", false],
