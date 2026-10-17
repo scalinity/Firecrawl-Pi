@@ -22,6 +22,16 @@ test("a permit pool grants up to its limit, queues the rest, and a release is co
   assert.deepEqual(pool.snapshot(), { held: {}, waiting: 0 });
 });
 
+test("a key whose permits are all returned is dropped: a finished search leaves no entry behind", async () => {
+  const pool = new PermitPool();
+  for (let i = 0; i < 50; i++) {
+    const release = await pool.acquire([{ key: "jev", limit: 4 }, { key: `search:s${i}`, limit: 2 }], `s${i}`);
+    release();
+  }
+  assert.equal(pool.held.size, 0, "no per-search key outlives its search");
+  assert.equal(pool.bySearch.size, 0);
+});
+
 test("a freed permit goes to the waiting search that holds the fewest, then the oldest", async () => {
   const pool = new PermitPool();
   const a1 = await pool.acquire(api(2), "A");

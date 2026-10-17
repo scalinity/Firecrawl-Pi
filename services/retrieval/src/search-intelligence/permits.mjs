@@ -20,7 +20,7 @@ export class PermitPool {
     return () => {
       if (released) return;
       released = true;
-      for (const { key } of keys) this.held.set(key, this.held.get(key) - 1);
+      for (const { key } of keys) { const n = this.held.get(key) - 1; if (n) this.held.set(key, n); else this.held.delete(key); }
       this.bySearch.set(searchId, this.bySearch.get(searchId) - 1);
       if (!this.bySearch.get(searchId)) this.bySearch.delete(searchId);
       this.#drain();
