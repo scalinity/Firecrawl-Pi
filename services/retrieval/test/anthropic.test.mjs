@@ -75,6 +75,10 @@ test("stop reasons map to the adapter\x27s words, and a refusal carries its cate
   assert.equal(stop("pause_turn").finishReason, "pause_turn");
   assert.equal(stop("refusal", { stop_details: { type: "refusal", category: "bio", explanation: null } }).refusal, "bio");
   assert.equal(stop("refusal").refusal, "refusal");
+  // The label is whichever of category and explanation says something; an empty string is not a label, and a refusal is never read as an answer.
+  assert.equal(stop("refusal", { stop_details: { type: "refusal", category: null, explanation: "Declined by policy." } }).refusal, "Declined by policy.");
+  assert.equal(stop("refusal", { stop_details: { type: "refusal", category: null, explanation: "" } }).refusal, "refusal");
+  assert.equal(stop("refusal", { stop_details: { type: "refusal", category: "", explanation: null } }).refusal, "refusal");
   assert.equal(stop("end_turn").refusal, null);
 });
 

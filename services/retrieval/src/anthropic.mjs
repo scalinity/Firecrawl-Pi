@@ -58,7 +58,8 @@ export function readMessages(json, { guided = false } = {}) {
   return {
     resolvedModel: typeof json?.model === "string" ? json.model : null,
     content: text.length ? (guided ? unfence(joined) : joined) : null,
-    refusal: reason === "refusal" ? String(json?.stop_details?.category ?? json?.stop_details?.explanation ?? "refusal").slice(0, 200) : null,
+    // stop_reason decides a refusal; its label falls through empty strings so a refusal is never read as an answer.
+    refusal: reason === "refusal" ? String(json?.stop_details?.category || json?.stop_details?.explanation || "refusal").slice(0, 200) : null,
     finishReason: reason === "max_tokens" || reason === "model_context_window_exceeded" ? "length" : reason === "end_turn" ? "stop" : reason,
     counts: [u?.input_tokens + read + written, u?.output_tokens, read, written],
   };
