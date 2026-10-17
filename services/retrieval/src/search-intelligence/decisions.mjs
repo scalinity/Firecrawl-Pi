@@ -154,8 +154,8 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
         } else if (response.status === 429) { reason = "rate_limited"; retryAt = parseRetryAfter(response.headers["retry-after"]); }
         else if (response.status === 401 || response.status === 403) reason = "auth_failed";
         else if ([400, 404, 413].includes(response.status)) reason = "contract_failure";
-        if (response.status < 500) await close.release(`OpenRouter Decisions answered HTTP ${response.status}${source ? ` (${source})` : ""}`);
-        else await close.uncertain(`OpenRouter Decisions answered HTTP ${response.status}; whether it was charged is not documented`);
+        // Whether a failed request is charged is not documented (SI0 contract evidence §7): uncertain (spec §18.2).
+        await close.uncertain(`OpenRouter Decisions answered HTTP ${response.status}${source ? ` (${source})` : ""}; whether it was charged is not documented`);
         const verdict = { reason, retryAt, retryBasis: retryAt ? (retryBasis ?? "documented") : null, providerCode: source ?? `http_${response.status}`, detail: source ?? `http_${response.status}` };
         await dispatch.report(sub, pre.epoch, verdict);
         return { ok: false, reason, detail: verdict.detail };

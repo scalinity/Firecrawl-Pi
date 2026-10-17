@@ -55,8 +55,8 @@ export function makeContext7({ dispatch, limits }) {
       else if (response.status === 401 || response.status === 403) reason = "auth_failed";
       else if (response.status === 400) reason = "unsupported_request";
       else if (response.status === 404) reason = "contract_failure";
-      if (response.status < 500) await close.release(`Context7 answered HTTP ${response.status}${code ? ` ${code}` : ""}`);
-      else await close.uncertain(`Context7 answered HTTP ${response.status}; whether the call counted is not documented`);
+      // Whether a refused call counts against the plan is not documented (SI0 contract evidence §5): uncertain (spec §18.2).
+      await close.uncertain(`Context7 answered HTTP ${response.status}${code ? ` ${code}` : ""}; whether the call counted is not documented`);
       return { scope, status: "failed", reason, detail: code ?? `http_${response.status}`, retryAt, providerCode: code ?? `http_${response.status}` };
     }
     await close.settle(1, { usage: { requests: 1 }, detail: "Context7 search" });

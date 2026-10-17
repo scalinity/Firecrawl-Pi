@@ -114,11 +114,10 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
     }
   }
 
-  // Settles a billable answer: a recognized answer costs its credit; an error text's charge is unknown (kept uncertain), except
-  // an authentication refusal, which no documented plan charges.
+  // Settles a billable answer: a recognized answer costs its credit; any other answer, an authentication refusal included, is
+  // kept uncertain, since the hosted server's error charging is not documented (SI0 contract evidence §6, spec §18.2).
   async function closeFor(close, parsed, credits) {
     if (["results", "empty", "text"].includes(parsed.kind)) return close.settle(credits, { usage: { credits }, detail: "Ref tool call" });
-    if (parsed.kind === "error" && parsed.reason === "auth_failed") return close.release("Ref refused the credential");
     return close.uncertain(`Ref answered without a recognized result (${parsed.detail}); whether it charged is unknown`);
   }
 

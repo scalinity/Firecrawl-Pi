@@ -43,3 +43,26 @@ test("a Context7 scope that gets no answer is one breaker verdict: two cut conne
     assert.equal(h.dispatch.breakerState("fixture-context7"), "closed");
   } finally { await h.close(); }
 });
+
+test("answered Jev and Context7 refusals keep their reservations, since neither documents a failed call as unbilled", async () => {
+  const row = (h, p) => [...h.store.rows.values()].filter((x) => x.provider === p);
+  const h = await harness({ handlers: {
+    openrouter: () => ({ status: 402, body: { error: { code: 402, message: "Insufficient credits", metadata: { limit_source: "openrouter_credits" } } } }),
+    context7: (q, e) => /nodocs/.test(new URL(e.url, "http://x").searchParams.get("query") ?? "") ? { status: 404, body: { error: "no_documentation_found", message: "No documentation matched" } } : { status: 400, body: { error: "validation_error", message: "bad" } },
+  } });
+  try {
+    const decisions = makeDecisions({ dispatch: h.dispatch, store: h.store, limits: limitsOf(h), permits: h.permits });
+    const { sub, pre } = decisions.preflight("fixture", "fcpi-fixture-jev");
+    const req = docsRequest("jev refused");
+    const r = await decisions.decide({ body: jevBody(req.originalQuery), kind: "decision", purpose: "rerank", request: req, sub, pre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    assert.deepEqual([r.ok, r.reason], [false, "quota_exhausted"]);
+    assert.deepEqual(row(h, "fixture-openrouter").map((x) => x.state), ["UNCERTAIN"]);
+    const context7 = makeContext7({ dispatch: h.dispatch, limits: limitsOf(h) });
+    const csub = h.dispatch.subject("documentationSearches", "fcpi-fixture-context7");
+    const cpre = h.dispatch.preflight(csub, { selection: "fixture" });
+    await context7.search(docsRequest("context7 refused"), { sub: csub, pre: cpre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    await context7.search(docsRequest("context7 nodocs"), { sub: csub, pre: cpre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    const c7 = row(h, "fixture-context7").map((x) => [x.state, x.actual]);
+    assert.deepEqual(c7, [["UNCERTAIN", null], ["SETTLED", 1]], "the refusal is uncertain; the documented no-match counts one request");
+  } finally { await h.close(); }
+});
