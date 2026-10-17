@@ -575,6 +575,25 @@ test("a ledger outage stops dispatch: no reservation, no request", async () => {
   } finally { await h.close(); }
 });
 
+test("a monetary cap that appears after preflight refuses a call with no stated valuation: no reservation, no request", async () => {
+  const h = await harness();
+  try {
+    // Live Brave is a paid provider whose money per request is unknown; the fixture subject plays it (a fixture provider is
+    // never paid in a validated budget, so the flag is set on this subject's copy only).
+    const fixture = h.dispatch.subject("searches", "fcpi-fixture-brave");
+    const sub = { ...fixture, prov: { ...fixture.prov, paid: true } };
+    const pre = h.dispatch.preflight(sub, { selection: "fixture" });
+    assert.equal(pre.eligible, true, "the control: no monetary cap at preflight");
+    assert.equal(sub.card.microUsdPerRequest ?? null, null, "Brave's money per request is unknown");
+    h.budget.paidTotal.caps.day = 1_000_000; // a reload adds a daily monetary cap
+    const res = await h.dispatch.call({ sub, pre, kind: "search", callKey: "search:cap-reload:brave:search:v1", logicalId: "cap-reload", searchId: "cap-reload", requestHash: "x", amount: 1,
+      signal: new AbortController().signal, deadlineAt: Date.now() + 2000, timeoutMs: 2000, maxBytes: 1 << 20, http: { method: "GET", path: "/res/v1/web/search?q=x", headers: {} } });
+    assert.deepEqual([res.ok, res.reason, res.detail, res.dispatchState], [false, "platform_restricted", "valuation_unavailable", "not_sent"]);
+    assert.equal(h.store.rows.size, 0);
+    assert.equal(h.servers.brave.seen.length, 0);
+  } finally { await h.close(); }
+});
+
 test("a settlement the ledger refuses is counted as an accounting failure and the reservation stays durable, never zero", async () => {
   const h = await harness();
   const settle = h.store.settleBudget.bind(h.store);

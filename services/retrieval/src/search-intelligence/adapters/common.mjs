@@ -105,12 +105,16 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     const b = getBudget();
     const br = breakerFor(sub.provider);
     if (!br.admit()) return { ok: false, reason: "breaker_open", detail: "breaker_open", dispatchState: "not_sent", queueMs: 0 };
+    // A shared monetary cap is weighed only in micro-USD: with no stated valuation for this unit the call is refused, never
+    // counted at an assumed one micro-USD per unit (spec §18.1). Preflight refuses it first; the budget can reload in between.
+    const paidTotalCap = sub.prov.paid ? (b.paidTotal.caps.day ?? null) : null;
+    const paidTotalRate = sub.cat.unit === "micro_usd" ? 1 : (sub.card.microUsdPerCredit ?? sub.card.microUsdPerRequest ?? null);
+    if (paidTotalCap !== null && paidTotalRate === null) { br.neutral(); return { ok: false, reason: "platform_restricted", detail: "valuation_unavailable", dispatchState: "not_sent", queueMs: 0 }; }
     let r;
     try {
       const { day, month } = periodStarts();
-      const paidTotalCap = sub.prov.paid ? (b.paidTotal.caps.day ?? null) : null;
       r = await store.reserveBudget({ id: randomUUID(), callKey, logicalId, category: sub.category, provider: sub.provider, subject: sub.name, kind, unit: sub.cat.unit, rateCard: sub.card.id,
-        requestHash, amount, day, month, caps: sub.cat.caps, reportingPeriods: ["day", "month"], paidTotalCap, paidTotalRate: sub.cat.unit === "micro_usd" ? 1 : (sub.card.microUsdPerCredit ?? sub.card.microUsdPerRequest ?? 1),
+        requestHash, amount, day, month, caps: sub.cat.caps, reportingPeriods: ["day", "month"], paidTotalCap, paidTotalRate,
         notifyAt: b.notifyAtFraction });
     } catch (e) {
       // No reservation, no dispatch: a ledger outage never authorizes an unaccounted call.
