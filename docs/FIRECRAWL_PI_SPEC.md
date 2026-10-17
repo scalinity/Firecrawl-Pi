@@ -478,7 +478,7 @@ M1/M3 must verify the pinned methods and route suffixes for every native status/
 
 Set `FIRECRAWL_API_URL` explicitly in clients that support it; library constructor options must likewise set the actual base URL. A client-side environment name is not necessarily a Firecrawl server variable. For project clients, missing/invalid base URL is a startup error, not permission to use a vendor default. Use separate local gateway credentials rather than a Firecrawl Cloud key.
 
-The optional localhost playground is a calling agent over this existing subset: prompt, up to three starting URLs, optional result schema, one to five page dispatches, at most three searches/eight tool dispatches, and a six-minute session deadline. It streams step/result records, verifies quotations against retrieved Markdown, and reports partial or unknown outcomes honestly. It is a foreground client workflow, not a durable `/v2/agent` service or a claim to Spark 2 parity. Closing it prevents later dispatch; already-sent provider work can still settle.
+The optional localhost playground is a calling agent over this existing subset: prompt, up to three starting URLs, optional result schema, one to five page dispatches, at most three searches/eight tool dispatches, and a 15-minute session deadline (a page read that uses its whole 435-second wait takes about seven minutes, so two of those fill it; a usual read is far shorter). It streams step/result records, verifies quotations against retrieved Markdown, and reports partial or unknown outcomes honestly. It is a foreground client workflow, not a durable `/v2/agent` service or a claim to Spark 2 parity. Closing it prevents later dispatch; already-sent provider work can still settle.
 
 ### 16.2 Durable admission and idempotency
 
