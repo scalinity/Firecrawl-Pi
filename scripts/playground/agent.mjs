@@ -14,8 +14,8 @@ const normalizedText = value => value.normalize('NFKC').replace(/\s+/gu, ' ').tr
 const MODEL = 'claude-opus-5-5';
 const EFFORT = 'high';
 // Reading a page waits on the reasoning model, which can take minutes (its 300 s timeout, after a page fetch of up to 110 s
-// and the gateway's margins), so a page request waits as long as the gateway's extended deadline and a run as long as a few
-// of them. A search answers in seconds and keeps its original bound.
+// and the gateway's margins), so a page request waits as long as the gateway's extended deadline and a run as long as two
+// reads that use their whole wait (a usual read is far shorter, so the five-page limit still binds first). A search answers in seconds and keeps its original bound.
 // The page wait is ten seconds past the gateway's own abort timer (PI_CORE_TIMEOUT_MS 110 s + 15 s + PI_MODEL_EXTRACT_EXTRA_MS
 // 300 s = 425 s in deploy/compose.yaml), so the gateway's REQUEST_TIMEOUT answer arrives, and names the cause, before the wait
 // ends; if those values change, change this with them.

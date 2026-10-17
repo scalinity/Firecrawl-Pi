@@ -102,7 +102,7 @@ test('a page read waits as long as the gateway\'s extended deadline for the reas
   const output = await runAgent({ prompt: 'Find the measurement' }, f);
   assert.equal(output.status, 'completed');
   assert.deepEqual(f.calls.map(call => [call.path, call.timeout]), [['/v2/search', 125], ['/v2/scrape', 435]]);
-  // The whole run is bounded at fifteen minutes, long enough for a few such reads.
+  // The whole run is bounded at fifteen minutes, long enough for two reads that each use their whole wait.
   assert.equal(AGENT_RUN_MS, 900000);
 });
 
