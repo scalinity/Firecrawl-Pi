@@ -1,0 +1,17 @@
+utc=2026-10-17T17:51:51Z source_commit=a9ec1f55b944c74c69cf805ca75573432cbbdbee
+mem_available_kib_before=4704240
+retrieval build_exit=0 log_lines=71
+#10 unpacking to docker.io/fcpi/retrieval:stream-20261017
+#10 unpacking to docker.io/fcpi/retrieval:stream-20261017 0.2s done
+#10 DONE 1.6s
+retrieval image_id=sha256:8c6af33f574b4db9294e2b15936ecf1ce54f8f0373c4b353e7b0e069f5e47420 os=linux arch=arm64 size=355350655 user=3310:3310
+retrieval image env: FCPI_SOURCE_COMMIT=a9ec1f55b944c74c69cf805ca75573432cbbdbee
+access-gateway build_exit=0 log_lines=77
+#11 unpacking to docker.io/fcpi/access-gateway:stream-20261017
+#11 unpacking to docker.io/fcpi/access-gateway:stream-20261017 1.1s done
+#11 DONE 2.1s
+access-gateway image_id=sha256:0d6a521895865a1da8161921c3f1e472775b1e51c39ff4d5e5329dd472e59649 os=linux arch=arm64 size=350620359 user=3380:3380
+access-gateway image env: FCPI_SOURCE_COMMIT=a9ec1f55b944c74c69cf805ca75573432cbbdbee
+mem_available_kib_after=4502208
+leftover_transient_containers=0
+end_marker=reached utc=2026-10-17T17:52:08Z
