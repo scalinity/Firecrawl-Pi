@@ -139,7 +139,7 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
       try {
         // The rate token is taken last, just before the send. Taken before the permit, tokens could wait out a permit and then
         // be spent together, bursting past the provider's documented rate on the wire; the per-provider permit cap bounds what
-        // this order costs (at most perProvider global permits wait on the token, each under 1/QPS seconds).
+        // this order costs: at most perProvider global permits wait on the token, none longer than perProvider/QPS seconds.
         releasePermit = await permits.api(sub.provider, searchId, { signal, deadlineAt });
         if (rate) await rate.take({ signal, deadlineAt });
       } catch (e) { return await unsentFailure(e); }
