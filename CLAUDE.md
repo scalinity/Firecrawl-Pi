@@ -130,7 +130,7 @@ Selected initial providers are:
 
 - **Decodo** for raw residential proxy traffic.
 - **Zyte** for enhanced retrieval.
-- A replaceable, budgeted **OpenAI-compatible remote model** for LLM-backed extraction.
+- A replaceable, budgeted **remote model** for LLM-backed extraction: Anthropic **Claude Haiku 5.5** by default, and **Claude Opus 5.5** (high effort) for the playground Agent, each on its own key.
 - **LlamaParse** as the bounded complex-document fallback.
 - **Bright Data** is the alternate raw-proxy provider.
 - **ScrapingBee** is the alternate enhanced provider.

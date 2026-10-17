@@ -1,0 +1,15 @@
+utc_start=2026-10-17T10:56:36Z
+selection_before={"search":"live","extractionModel":"gpt-6-luna","parser":"llamaparse-cost-effective","proxy":"decodo-residential","enhanced":"zyte-api"}
+ Container fcpi-mcp-gateway-1 Started 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-access-gateway-1 Waiting 
+ Container fcpi-mcp-gateway-1 Waiting 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-mcp-gateway-1 Healthy 
+ Container fcpi-retrieval-service-1 Healthy 
+compose_exit=0
+--- selection helper output ---
+selection applied: search=live model=claude-haiku-5-5 parser=llamaparse-cost-effective proxy=decodo-residential enhanced=zyte-api utc=2026-10-17T10:56:46Z
+selection_helper_exit=0
+utc_end=2026-10-17T10:56:50Z

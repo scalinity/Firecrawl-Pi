@@ -1,0 +1,48 @@
+{
+  "schema": "fcpi.anthropic-fixture-verification/v1",
+  "utc": "2026-10-17T11:13:25.609790+00:00",
+  "tested_commit": "47781881f44b600662b75406544a35625759fccd",
+  "state": "PASS",
+  "source_hashes": {
+    "services/retrieval/src/anthropic.mjs": "96d74093df45dee8954b637db6f2c8623b8a54f216dba80ee479d59740a2caf1",
+    "services/retrieval/src/extract.mjs": "98c6787d57c89499ea4d27fd0664a25fbcf57792a762fe1c68a967291fe76ec0",
+    "services/retrieval/src/budget.mjs": "2d3d9327102278907b3a812e09b508ce286b4e13b1c143a7b857dd36ba00c14f",
+    "deploy/policies/budget.json": "91a041496ec0575c1980dd15267a3b65630c3d5d9857ca633f82c71976fe2ebe",
+    "deploy/policies/capabilities.json": "9483018d17c74f9438b5914cda6f766c8d296f60e334c558c43d05b4810bad89",
+    "scripts/playground/agent.mjs": "79400af2ccea3429c036804d4f2cb2850753d41b8c0f3b74e1faee1bfac4d68f",
+    "deploy/nuq-postgres/fcpi-retrieval-schema.sql": "fe1dc421dd731c6d52c601028f54e2f9a6dbff8f4a0d321c0af924885105f741"
+  },
+  "checks": [
+    {
+      "id": "retrieval-suite-native-arm64-with-postgresql",
+      "command": "scripts/m5/unit-tests-local.sh  (node --test --test-timeout=120000 test/*.test.mjs)",
+      "execution": "Colima VM (aarch64), image fcpi/retrieval:local built from the working tree, throwaway PostgreSQL 17 on an internal network, source/policy/schema mounted read-only",
+      "tests": 277,
+      "passed": 277,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "access-gateway-suite",
+      "command": "FCPI_TEST_MANIFEST=deploy/policies/capabilities.json node --test test/*.test.mjs (services/access)",
+      "tests": 93,
+      "passed": 93,
+      "failed": 0,
+      "skipped": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "playground-desktop-agent-suites",
+      "command": "node --test tests/playground-desktop.test.mjs tests/playground.test.mjs tests/playground-agent.test.mjs",
+      "tests": 44,
+      "passed": 44,
+      "failed": 0,
+      "skipped": 0,
+      "state": "PASS"
+    }
+  ],
+  "mutation_checks": "each new assertion was shown to fail against its mutation in a scratch copy: empty-answer repair, refusal label operator, effort-only identity check, billing_error type check, defaulted input_tokens (pure reader and adapter), the manifest/policy effort pair, request-id logging, the grammar rewrite",
+  "note": "The full suite also ran at an earlier commit (274/274, before the nullable-enum fix); the run recorded here is at the deployed commit."
+}

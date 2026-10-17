@@ -1,0 +1,113 @@
+{
+  "schema": "fcpi.anthropic-live-verification/v1",
+  "utc": "2026-10-17T11:13:25.609790+00:00",
+  "state": "PASS_WITH_ONE_OPEN_ITEM",
+  "capability": {
+    "default_extraction_claude_haiku_5_5": "VERIFIED_LIVE",
+    "agent_claude_opus_5_5_high": "VERIFIED_LIVE"
+  },
+  "scope_of_live_proof": "one default-model extraction and one Agent run through the Pi gateway on a stable public page; the frozen M9 corpus ran on the former model and was not rerun",
+  "implementation_commit": "f3cec798ba3ebf040a0ee1845a62ea4b2dcf52f0",
+  "deployed_commit": "47781881f44b600662b75406544a35625759fccd",
+  "image_id": "sha256:a88400c908e22ddcf845c7c34745674ee4d6f9071ab7a310fe7793d598fec155",
+  "platform": "linux/arm64",
+  "superseded_image_id": "sha256:0ad6be7f8a58dddbe25f3039291870fb08864b976764f9d0122d84766433a96b",
+  "policy_sha256": "91a041496ec0575c1980dd15267a3b65630c3d5d9857ca633f82c71976fe2ebe",
+  "capabilities_sha256": "9483018d17c74f9438b5914cda6f766c8d296f60e334c558c43d05b4810bad89",
+  "fixtures": {
+    "state": "PASS",
+    "passed": 277,
+    "failed": 0,
+    "skipped": 0,
+    "report": "evidence/post-m9/anthropic-models/fixtures.json"
+  },
+  "review": {
+    "report": "evidence/post-m9/anthropic-models/review/REVIEW.md",
+    "agents": "debugger and code-auditor, each pinned to the opus alias (designated Opus 5.5)",
+    "findings": 15,
+    "critical": 0,
+    "fixed": 12,
+    "resolved_at_cutover": 2,
+    "rejected": 1,
+    "unresolved": 0,
+    "found_after_review_by_the_live_step": 1
+  },
+  "cutover": {
+    "first": {
+      "utc": "2026-10-17T10:56:36Z-10:56:50Z",
+      "services": [
+        "retrieval-service",
+        "access-gateway",
+        "mcp-gateway"
+      ],
+      "evidence": "evidence/post-m9/anthropic-models/raw/cutover-1.txt"
+    },
+    "second": {
+      "utc": "2026-10-17T11:06:46Z-11:06:57Z",
+      "services": [
+        "retrieval-service"
+      ],
+      "evidence": "evidence/post-m9/anthropic-models/raw/cutover-2.txt"
+    },
+    "selection": {
+      "search": "live",
+      "extractionModel": "claude-haiku-5-5",
+      "source": "file"
+    },
+    "in_flight_jobs": 0,
+    "other_containers_untouched": 12
+  },
+  "live": {
+    "default_extraction": {
+      "http": 200,
+      "model": "claude-haiku-5-5",
+      "reasoningEffort": "none",
+      "prompt_tokens": 424,
+      "completion_tokens": 36,
+      "cost_micro_usd": 61,
+      "answer_correct": true,
+      "evidence": "evidence/post-m9/anthropic-models/raw/live-haiku-default-extraction.json"
+    },
+    "agent": {
+      "status": "completed",
+      "model": "claude-opus-5-5",
+      "reasoningEffort": "high",
+      "prompt_tokens": 1150,
+      "completion_tokens": 238,
+      "cost_micro_usd": 9360,
+      "findings_verified_against_page": 2,
+      "wall_ms": 6908,
+      "evidence": "evidence/post-m9/anthropic-models/raw/live-agent-opus.json"
+    },
+    "ledger": {
+      "rows": 7,
+      "settled": 5,
+      "released": 2,
+      "reserved_or_uncertain": 0,
+      "settled_micro_usd": 9586,
+      "evidence": "evidence/post-m9/anthropic-models/raw/ledger.txt"
+    }
+  },
+  "spend": {
+    "through_the_pi_ledger_micro_usd": 9586,
+    "direct_probes_from_the_workstation_usd_approx": 0.23,
+    "note": "the direct probes (raw/probes-transcribed.md) bypass the Pi, so they are not in its ledger or against its caps; no cap, authorization or dispatch setting was changed"
+  },
+  "live_defect_found": {
+    "title": "nullable enums refused by the grammar compiler",
+    "fixed_in": "f3cec798ba3ebf040a0ee1845a62ea4b2dcf52f0",
+    "released_attempts": 2
+  },
+  "host": {
+    "attribution": "evidence/post-m9/anthropic-models/snapshot-attribution.json",
+    "unattributed_changes": 1,
+    "open_item": "nft ruleset hash differs between BEFORE and AFTER; AFTER equals the hash recorded on 2026-10-15; cause not established"
+  },
+  "not_run": [
+    "rollback",
+    "the frozen M9 corpus on the new models",
+    "any paid call beyond the probes above",
+    "ChatGPT/Claude hosted MCP clients"
+  ],
+  "keys": "placed from stdin as uid 3310 mode 0600; presence only is printed; the former OpenAI key file remains on the Pi unused"
+}

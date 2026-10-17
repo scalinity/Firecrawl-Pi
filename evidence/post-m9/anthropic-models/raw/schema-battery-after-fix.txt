@@ -1,0 +1,15 @@
+# Which strict-schema shapes the Messages API grammar accepts, sent through services/retrieval/src/anthropic.mjs to claude-haiku-5-5. Run after the nullable-enum fix (f3cec79).
+ACCEPT  plain strings and numbers          unions= 4 guided=false out=22
+ACCEPT  string enum, required              unions= 1 guided=false out=10
+ACCEPT  string enum, optional              unions= 2 guided=false out=14
+ACCEPT  integer enum                       unions= 1 guided=false out=8
+ACCEPT  boolean enum                       unions= 1 guided=false out=8
+ACCEPT  array of strings                   unions= 1 guided=false out=14
+ACCEPT  array of objects                   unions= 3 guided=false out=21
+ACCEPT  nested object                      unions= 3 guided=false out=18
+ACCEPT  caller anyOf                       unions= 2 guided=false out=14
+ACCEPT  caller null union                  unions= 1 guided=false out=7
+ACCEPT  description and title keywords     unions= 1 guided=false out=12
+ACCEPT  enum inside array items            unions= 1 guided=false out=8
+ACCEPT  Agent decision schema              unions=10 guided=false out=89
+ACCEPT  Agent decision + 2-field result    unions=13 guided=false out=64

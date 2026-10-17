@@ -1,0 +1,9 @@
+# Every Anthropic reservation in the ledger since the cutover (fcpi_retrieval.budget_reservation), read-only. Amounts are micro-USD.
+# columns: utc | provider | subject | kind | state | reserved | actual | rate card
+10:57:30 | anthropic | claude-haiku-5-5 | extract | SETTLED | 2124 | 52 | anthropic/claude-haiku-5-5@2026-10-17
+10:57:41 | anthropic | claude-haiku-5-5 | extract | SETTLED | 2124 | 52 | anthropic/claude-haiku-5-5@2026-10-17
+10:57:52 | anthropic | claude-haiku-5-5 | extract | SETTLED | 2121 | 61 | anthropic/claude-haiku-5-5@2026-10-17
+10:58:00 | anthropic-agent | claude-opus-5-5 | extract | RELEASED | 172425 | 0 | anthropic/claude-opus-5-5@2026-10-17
+10:58:10 | anthropic-agent | claude-opus-5-5 | extract | RELEASED | 172425 | 0 | anthropic/claude-opus-5-5@2026-10-17
+11:07:02 | anthropic-agent | claude-opus-5-5 | extract | SETTLED | 172495 | 9360 | anthropic/claude-opus-5-5@2026-10-17
+11:07:18 | anthropic | claude-haiku-5-5 | extract | SETTLED | 2121 | 61 | anthropic/claude-haiku-5-5@2026-10-17

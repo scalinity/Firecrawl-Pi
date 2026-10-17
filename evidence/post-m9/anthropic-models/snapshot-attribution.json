@@ -1,0 +1,66 @@
+{
+  "schema": "fcpi.host-attribution/v1",
+  "utc": "2026-10-17T11:12:05.561923+00:00",
+  "state": "ATTRIBUTED_WITH_ONE_OPEN_ITEM",
+  "snapshot_before_sha256": "5e17f23ef1c590dbc7d319941fee9fa4428f9e36a7f2e6749a0b7d74aa9d9454",
+  "snapshot_after_sha256": "72a71ce1150fdbc232c2a285bd228e925e34aa123279a2ce23a74a7768b15ce5",
+  "raw_snapshots": "retained privately outside the repository, as for the Serper change",
+  "entry_comparison": "NOT_RUN: the previous session's AFTER snapshot is not retained (it was kept privately), so the BEFORE snapshot could not be compared with the state the last session left",
+  "sections_total": 13,
+  "changed_sections": {
+    "meta": {
+      "removed": 1,
+      "added": 1
+    },
+    "systemd_running": {
+      "removed": 4,
+      "added": 4
+    },
+    "docker_ps": {
+      "removed": 3,
+      "added": 3
+    },
+    "ss_listen": {
+      "removed": 1,
+      "added": 1
+    },
+    "findmnt": {
+      "removed": 6,
+      "added": 6
+    },
+    "firewall": {
+      "removed": 1,
+      "added": 1
+    }
+  },
+  "boot_unchanged": true,
+  "attribution": {
+    "meta": "capture timestamp",
+    "systemd_running": "three Docker scopes replaced (the access gateway, the MCP gateway and the retrieval service, which this session recreated) and one transient capture SSH session",
+    "docker_ps": "only fcpi-access-gateway-1, fcpi-mcp-gateway-1 and fcpi-retrieval-service-1 changed container identity; the gateway and MCP images are unchanged; retrieval moved from fcpi/retrieval@sha256:300b999e to @sha256:a88400c9 (the Anthropic image, built from f3cec79)",
+    "findmnt": "the overlay root filesystems and network-namespace mounts of those three containers",
+    "ss_listen": "the docker-proxy process for the access gateway's loopback publication (127.0.0.1:3380) has a new PID after the container was recreated; same address and port",
+    "firewall": "OPEN: see firewall_open_item"
+  },
+  "all_other_sections_identical": true,
+  "sections_identical": 7,
+  "firewall_open_item": {
+    "status": "UNATTRIBUTED",
+    "before_nft_ruleset_sha256": "e1e3a82a1d4d6b6d3958b6a180f2b330e59339f266488678d66e6e2b80189a85",
+    "after_nft_ruleset_sha256": "86344c110bc1bfc51dc465eb32392fdf033778a8df7757aefcd1b42207892844",
+    "facts": [
+      "The hash is nft -s list ruleset | sha256sum (stateless, so counters are excluded). Only the hash of the BEFORE ruleset was kept, so the two states cannot be diffed.",
+      "The AFTER hash equals the ruleset hash recorded after the Serper change on 2026-10-15 (evidence/post-m9/serper-search/snapshot-attribution.json). The BEFORE hash is the odd one out.",
+      "The AFTER hash was stable across four consecutive samples.",
+      "The guard's one dynamic set (egress_local_v4) is replaced only by fcpi-egress-local.sh at dockerd and stack start. The journal for the window shows no run of it and no fcpi-stack restart, and no NetworkManager state change.",
+      "This session ran no nft or iptables command and changed no firewall file. It recreated three containers with docker compose, which rewrites Docker's own iptables-nft tables. Only one container-specific rule exists in Docker's chains, so rule order does not explain the difference.",
+      "The firecrawl-core and browser-worker containers last started at 07:30-07:31Z, before this session began, and the BEFORE snapshot was taken at 10:48Z; this session did not start them."
+    ],
+    "judgement": "Not established whether the BEFORE state or the recreation caused the difference. AFTER matches the last recorded ruleset. The owner may want to compare the next AFTER snapshot of any future session against 86344c11."
+  },
+  "project_healthy": true,
+  "project_containers": 15,
+  "foreign_containers": 0,
+  "transient_test_containers_left": 0,
+  "unattributed_changes": 1
+}

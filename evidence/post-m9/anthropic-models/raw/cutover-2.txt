@@ -1,0 +1,12 @@
+utc_start=2026-10-17T11:06:46Z
+in_flight_jobs=0
+ Container fcpi-retrieval-service-1 Starting 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-retrieval-service-1 Healthy 
+compose_exit=0
+image=sha256:a88400c908e22ddcf845c7c34745674ee4d6f9071ab7a310fe7793d598fec155
+FCPI_SOURCE_COMMIT=f3cec798ba3ebf040a0ee1845a62ea4b2dcf52f0
+selection={"search":"live","extractionModel":"claude-haiku-5-5","source":"file"}
+startup_complaints=0
+utc_end=2026-10-17T11:06:57Z
