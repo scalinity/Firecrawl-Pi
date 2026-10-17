@@ -103,7 +103,27 @@
     "perHour": 60,
     "cacheSeconds": 900,
     "deadlineMs": 10000,
-    "maxResults": 20
+    "maxResults": 20,
+    "intelligence": {
+      "discoveryMs": 12000,
+      "providerTimeoutsMs": { "serper": 7000, "brave": 6000, "exa": 10000, "deepseek": 8000, "tavily": 10000, "context7": 10000, "ref": 10000, "searxng": 10000 },
+      "classifierMs": 800,
+      "semanticMs": 8000,
+      "refReadMs": 2000,
+      "evidenceMs": 4000,
+      "responseMarginMs": 250,
+      "apiPermits": { "total": 28, "perProvider": 4 },
+      "decisionPermits": { "total": 4, "perSearch": 2 },
+      "refStreams": { "total": 4, "perSearch": 1 },
+      "deepseekQps": 5,
+      "candidates": { "serper": 10, "general": 20, "docsPerProvider": 12, "searxng": 10, "poolMax": 128, "shortlistMax": 48, "seedPerProvider": 4 },
+      "decisionBatch": { "maxCandidates": 8, "maxBytes": 24000, "maxDuplicatePairs": 20 },
+      "responseBytes": { "serper": 524288, "brave": 524288, "deepseek": 524288, "exa": 1048576, "tavily": 1048576, "context7": 1048576, "ref": 1048576, "jev": 262144 },
+      "workingSetBytes": 2097152,
+      "cacheSeconds": { "success": 900, "empty": 60, "timeSensitive": 90, "decision": 900 },
+      "evidence": { "maxDocuments": 10, "maxTextBytes": 524288, "maxBodyBytes": 786432, "maxDocumentBytes": 49152, "maxPassagesPerDocument": 6 },
+      "traceMaxBytes": 65536
+    }
   },
   "residential": {
     "proxyFirstDomains": ["m6hard.fixture.fcpi.test"],

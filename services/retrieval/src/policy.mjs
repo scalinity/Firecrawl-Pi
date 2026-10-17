@@ -69,6 +69,32 @@ function exactKeys(obj, keys, where) {
 }
 const int = (v, lo, hi, where) => { if (!Number.isInteger(v) || v < lo || v > hi) throw new Error(`${where} must be an integer in ${lo}..${hi}`); return v; };
 
+// Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §5, §8, §12, §14, §17, §21): the aggregate profile's limits,
+// each an integer between a floor and the spec's initial value, which may be tightened, never loosened.
+const INTELLIGENCE = {
+  discoveryMs: [1000, 12000],
+  providerTimeoutsMs: { serper: [1000, 8000], brave: [1000, 6000], exa: [1000, 10000], deepseek: [1000, 8000], tavily: [1000, 10000], context7: [1000, 10000], ref: [1000, 10000], searxng: [1000, 10000] },
+  classifierMs: [100, 800], semanticMs: [1000, 8000], refReadMs: [500, 2000], evidenceMs: [500, 4000], responseMarginMs: [0, 1000],
+  apiPermits: { total: [1, 28], perProvider: [1, 4] },
+  decisionPermits: { total: [1, 4], perSearch: [1, 2] },
+  refStreams: { total: [1, 4], perSearch: [1, 1] },
+  deepseekQps: [1, 5],
+  candidates: { serper: [1, 10], general: [1, 20], docsPerProvider: [1, 12], searxng: [1, 10], poolMax: [10, 128], shortlistMax: [1, 48], seedPerProvider: [0, 4] },
+  decisionBatch: { maxCandidates: [1, 8], maxBytes: [4096, 24000], maxDuplicatePairs: [0, 20] },
+  responseBytes: { serper: [65536, 524288], brave: [65536, 524288], deepseek: [65536, 524288], exa: [65536, 1048576], tavily: [65536, 1048576], context7: [65536, 1048576], ref: [65536, 1048576], jev: [65536, 262144] },
+  workingSetBytes: [262144, 2097152],
+  cacheSeconds: { success: [0, 900], empty: [0, 60], timeSensitive: [0, 90], decision: [0, 900] },
+  evidence: { maxDocuments: [1, 10], maxTextBytes: [1024, 524288], maxBodyBytes: [4096, 786432], maxDocumentBytes: [1024, 49152], maxPassagesPerDocument: [1, 6] },
+  traceMaxBytes: [4096, 65536],
+};
+function checkLimits(obj, spec, where) {
+  exactKeys(obj, Object.keys(spec), where);
+  for (const [k, s] of Object.entries(spec)) {
+    if (Array.isArray(s)) int(obj[k], s[0], s[1], `${where}.${k}`);
+    else checkLimits(obj[k], s, `${where}.${k}`);
+  }
+}
+
 export function loadPolicy(text) {
   const p = JSON.parse(text);
   exactKeys(p, POLICY_KEYS, "policy");
@@ -113,7 +139,10 @@ export function loadPolicy(text) {
   }
   // Search (spec §13): the engine sets the host's selection chooses between, the hosts the live set may
   // reach through the search proxy, and the backend's limits, which may be tightened, never loosened.
-  exactKeys(p.search, ["engines", "fallbackEngines", "engineHosts", "engineRoutes", "perHour", "cacheSeconds", "deadlineMs", "maxResults"], "search");
+  const { intelligence, ...legacySearch } = p.search;
+  exactKeys(legacySearch, ["engines", "fallbackEngines", "engineHosts", "engineRoutes", "perHour", "cacheSeconds", "deadlineMs", "maxResults"], "search");
+  // The aggregate profile's limits; the legacy profile reads none of them.
+  if (intelligence !== undefined) checkLimits(intelligence, INTELLIGENCE, "search.intelligence");
   exactKeys(p.search.engines, ["fixture", "live"], "search.engines");
   // The engines a search asks only when the selection's own engines failed or answered too few (search.mjs): those the
   // home connection cannot reach, on the residential route.
