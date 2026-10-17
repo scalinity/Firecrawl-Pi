@@ -22,8 +22,11 @@ function fieldSchema(spec, m, ctx = {}) {
     case "integer": return { type: "integer", minimum: spec.min, maximum: spec.max, ...(spec.default !== undefined ? { default: spec.default } : {}) };
     case "number": return { type: "number", ...(spec.exclusiveMin ? { exclusiveMinimum: spec.min } : { minimum: spec.min }), maximum: spec.max };
     case "enum": return { type: "string", enum: [...spec.values] };
-    case "string": return { type: "string", maxLength: spec.maxLength };
+    case "string": return { type: "string", maxLength: spec.maxLength, ...(spec.minLength ? { minLength: spec.minLength } : {}) };
     case "strings": case "regexes": return { type: "array", items: { type: "string", minLength: 1, maxLength: spec.maxLength }, maxItems: spec.maxItems };
+    // Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.1): a UTC instant, and a bounded list of objects.
+    case "instant": return { type: "string", format: "date-time", pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,3})?Z$" };
+    case "objects": return { type: "array", maxItems: spec.maxItems, items: objectSchema(fieldsOf(m, { extends: spec.fieldset, fields: {} }), m, {}, {}) };
     case "url": return { type: "string", minLength: 1, maxLength: 2048 };
     case "urls": return { type: "array", items: { type: "string", minLength: 1, maxLength: 2048 }, minItems: 1, maxItems: ctx.maxUrls ?? m.limits.batch.maxUrls };
     case "formats": {
@@ -148,6 +151,25 @@ export function dropInPageLinks(doc) {
   doc.markdown = doc.markdown.replace(MD_LINK, (whole, text, url) => (url.includes("#") && own.has(url.split("#")[0]) ? text : whole));
 }
 
+// Search intelligence (spec §19.3): a search answer over the tool limit loses its optional detail first — passage text, score
+// detail, auxiliary-context text and per-scope suboperations — each counted, before any result is dropped. Coverage, each
+// provider's outcome and reason, every result's original source URL and version qualification, and cache provenance stay.
+export function compactSearchMeta(payload, budget) {
+  const cut = {};
+  const count = (k) => { cut[k] = (cut[k] ?? 0) + 1; };
+  const rows = (Array.isArray(payload.data?.web) ? payload.data.web : []).map((w) => w?.fcpi?.search).filter((s) => s && typeof s === "object");
+  const top = payload.fcpi?.search;
+  const steps = [
+    () => { for (const s of rows) for (const p of s.passages ?? []) if (typeof p.text === "string" && p.text.length > 200) { p.text = p.text.slice(0, 200); p.truncated = true; count("passageText"); } },
+    () => { for (const s of rows) if (s.scores) { s.scores = { final: s.scores.final }; count("scoreDetail"); } },
+    () => { for (const a of top?.documentation?.auxiliaryContext ?? []) if (typeof a.text === "string" && a.text.length > 300) { a.text = a.text.slice(0, 300); a.truncated = { ...(a.truncated ?? {}), mcp: true }; count("auxiliaryText"); } },
+    () => { for (const p of Object.values(top?.providers ?? {})) if (p?.suboperations) { delete p.suboperations; count("suboperations"); } },
+    () => { for (const s of rows) if (Array.isArray(s.passages) && s.passages.length) { s.passages = s.passages.map(({ text, ...rest }) => ({ ...rest, text: undefined, omitted: true })); count("passages"); } },
+  ];
+  for (const step of steps) { if (bytes(payload) <= budget) break; step(); }
+  return Object.keys(cut).length ? cut : null;
+}
+
 // ---- answers ----------------------------------------------------------------------------------------
 const errorOf = (r) => ({ error: { httpStatus: r.status, code: r.json?.code ?? null, message: r.json?.error ?? `The gateway answered ${r.status}.`, ...(r.json?.id ? { id: r.json.id } : {}), ...(r.json?.receipt ? { receipt: r.json.receipt } : {}), ...(r.headers?.["retry-after"] ? { retryAfterSeconds: Number(r.headers["retry-after"]) } : {}) } });
 
@@ -177,14 +199,17 @@ function shape(kind, tool, r, args, m, omitted) {
         return { payload };
       }
       if (tool.route === "search") {
-        // Results in order until the payload limit; a single result too large alone is cut field by field.
-        const payload = { data: b.data ?? {}, ...(b.warning ? { warning: b.warning } : {}) };
+        // Results in order until the payload limit; a single result too large alone is cut field by field. The search's own
+        // fcpi metadata is kept; its optional detail is cut before any result (compactSearchMeta).
+        const payload = { data: b.data ?? {}, ...(b.warning ? { warning: b.warning } : {}), ...(b.fcpi ? { fcpi: b.fcpi } : {}) };
         const web = Array.isArray(payload.data.web) ? payload.data.web : [];
         web.forEach(dropInPageLinks);
         const total = web.length;
+        const metaCuts = bytes(payload) > budget ? compactSearchMeta(payload, budget) : null;
+        if (metaCuts) payload.truncated = { fcpi: metaCuts, note: "Optional search detail (passage text, score detail, auxiliary context text) was shortened to fit the tool payload limit; coverage and sources are complete." };
         while (bytes(payload) > budget && payload.data.web?.length > 1) {
           payload.data.web = payload.data.web.slice(0, Math.floor(payload.data.web.length / 2));
-          payload.truncated = { results: { originalCount: total, returnedCount: payload.data.web.length }, note: "The results exceeded the tool payload limit; ask for fewer results or fewer scrape formats." };
+          payload.truncated = { ...payload.truncated, results: { originalCount: total, returnedCount: payload.data.web.length }, note: "The results exceeded the tool payload limit; ask for fewer results or fewer scrape formats." };
         }
         if (bytes(payload) > budget && payload.data.web?.length === 1) payload.truncated = { ...payload.truncated, fields: fitDocument(payload, payload.data.web[0], budget - 512) };
         return { payload };
