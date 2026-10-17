@@ -4,7 +4,7 @@
 // uncertain one, chunking with provenance, nulls kept and conflicts reported.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { makeModelAdapter, makeExtractor, makeGate } from "../src/extract.mjs";
+import { makeModelAdapter, makeExtractor } from "../src/extract.mjs";
 import { fixtures, serve, policyFor, lookupFixture, budgetFor, providersDir, FakeLedger } from "./m5-helpers.mjs";
 
 const SCHEMA = { type: "object", properties: { product: { type: "string" }, price: { type: "number" }, in_stock: { type: "boolean" }, feature: { type: "array", items: { type: "string" } } }, required: ["product"] };
@@ -17,19 +17,20 @@ async function rig({ mutate, paidDispatch = false, creds = {}, timeoutMs, handle
   const store = new FakeLedger();
   const logs = [];
   const adapter = makeModelAdapter({ store, getBudget: () => budget, paidDispatch, providersDir: providersDir(creds), getPolicy: () => policyFor({ "model.fixture.fcpi.test": srv.port }),
-    resolvePublic: async () => { throw new Error("no public resolution in tests"); }, lookupFixture, log: (o) => logs.push(o), gate: makeGate() });
+    resolvePublic: async () => { throw new Error("no public resolution in tests"); }, lookupFixture, log: (o) => logs.push(o) });
   const extract = makeExtractor({ adapter, getBudget: () => budget, getSelection: () => ({ extractionModel: "fcpi-fixture-model" }), log: (o) => logs.push(o) });
   return { srv, budget, store, adapter, extract, logs, calls: () => fixtures.providerStats().model.calls };
 }
 const req = (over = {}) => ({ logicalId: `test:${crypto.randomUUID()}`, schema: SCHEMA, documents: [DOC()], ...over });
 
-test("a model lease expiring while waiting for its slot sends nothing and releases its reservation (PRE-M9 C1)", async () => {
+test("a model lease expiring after its reservation sends nothing and releases its reservation (PRE-M9 C1)", async () => {
   const r = await rig({ paidDispatch: true });
   try {
     r.budget.providers["fixture-model"].paid = true;
     r.budget.paidTotal.caps.day = 1000000;
     r.budget.validationExpiresAt = new Date(Date.now() + 60000).toISOString();
-    r.adapter.gate.take = async () => { r.budget.validationExpiresAt = new Date(0).toISOString(); return true; };
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async (x) => { const out = await reserve(x); r.budget.validationExpiresAt = new Date(0).toISOString(); return out; };
     const out = await r.extract(req());
     assert.equal(out.failure.class, "PAID_DISPATCH_DISABLED");
     assert.equal(r.calls(), 0);
@@ -37,17 +38,22 @@ test("a model lease expiring while waiting for its slot sends nothing and releas
   } finally { await r.srv.close(); }
 });
 
-test("a call that never gets the one model slot sends nothing, releases its reservation and tells the caller when to retry", async () => {
-  // One model request runs at a time, and a model that reasons holds the slot for minutes: another caller waits out its deadline.
-  const r = await rig();
+test("model calls from separate requests run at the same time; none waits for another", async () => {
+  let open = 0, most = 0;
+  const r = await rig({ mutate: messagesApi(), handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    most = Math.max(most, ++open);
+    await new Promise((res) => setTimeout(res, 300));
+    open--;
+    answerWith()(s);
+  } });
   try {
-    r.adapter.gate.take = async () => false;
-    const out = await r.extract(req());
-    assert.equal(out.failure.class, "RESOURCE_BUSY");
-    assert.equal(out.failure.retryable, true);
-    assert.equal(out.failure.retryAfter, 30);
-    assert.equal(r.calls(), 0);
-    assert.deepEqual(r.store.states(), ["RELEASED"]);
+    const t0 = Date.now();
+    const outs = await Promise.all([1, 2, 3].map(() => r.extract(req())));
+    assert.deepEqual(outs.map((o) => o.ok), [true, true, true]);
+    assert.equal(most, 3, "all three were in flight together");
+    assert.ok(Date.now() - t0 < 800, `three 300 ms calls took ${Date.now() - t0} ms`);
+    assert.deepEqual(r.store.states(), ["SETTLED", "SETTLED", "SETTLED"]);
   } finally { await r.srv.close(); }
 });
 
@@ -398,14 +404,13 @@ test("a logical unit retried under a different input cap is refused rather than 
   } finally { await r.srv.close(); }
 });
 
-test("no request is started with less than a second of the deadline left, and the gate refuses a passed deadline (review W14)", async () => {
+test("no request is started with less than a second of the deadline left (review W14)", async () => {
   const r = await rig();
   try {
     const out = await r.extract(req({ deadline: new Date(Date.now() + 500).toISOString() }));
     assert.equal(out.failure.class, "DEADLINE_EXCEEDED");
     assert.equal(r.calls(), 0);
     assert.equal(r.store.rows.size, 0, "nothing reserved");
-    assert.equal(await makeGate().take(Date.now() - 1), false);
   } finally { await r.srv.close(); }
 });
 

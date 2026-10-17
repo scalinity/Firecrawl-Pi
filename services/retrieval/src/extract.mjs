@@ -5,8 +5,7 @@
 // The adapter, for each call: the model must be listed (MODEL_NOT_ALLOWED), have a rate card in effect
 // (RATE_CARD_MISSING), be unpaid or have paid dispatch enabled (PAID_DISPATCH_DISABLED), have its
 // credential (BLOCKED_CREDENTIAL) and a closed breaker (PROVIDER_UNAVAILABLE). Then the call's maximum
-// cost is reserved atomically (BUDGET_EXHAUSTED), the one active model request is taken, the provider is
-// called once with no retry, and the reservation is settled from the provider's own usage counts:
+// cost is reserved atomically (BUDGET_EXHAUSTED), the provider is called once with no retry, and the reservation is settled from the provider's own usage counts:
 // released when the request never left, kept whole when its outcome is unknown. A call key names each
 // call inside its logical unit, so a retried request reuses a settled call's stored answer and never
 // sends one that is still unaccounted for.
@@ -50,25 +49,6 @@ const REASONING_MIN_START_MS = 60000;
 // one request timeout of its creation may belong to a call still waiting or in flight.
 const LONGEST_EXTRACTION_MS = 900000;
 
-// One active model request for the whole service (spec §14), waited for until the caller's deadline.
-export function makeGate() {
-  let busy = false;
-  const waiters = [];
-  return {
-    async take(deadline, signal) {
-      if (Date.now() >= deadline || signal?.aborted) return false;
-      while (busy) {
-        if (Date.now() >= deadline || signal?.aborted) return false;
-        await new Promise((r) => { const t = setTimeout(r, Math.min(250, Math.max(1, deadline - Date.now()))); waiters.push(() => { clearTimeout(t); r(); }); });
-      }
-      busy = true;
-      return true;
-    },
-    give() { busy = false; waiters.splice(0).forEach((w) => w()); },
-    get busy() { return busy; },
-  };
-}
-
 // The provider's own id for a request (Anthropic's request-id, or the usual x-request-id): not a secret, and what a
 // disputed or uncertain charge is matched by in the provider's console.
 const requestIdOf = (headers) => { const v = headers?.["request-id"] ?? headers?.["x-request-id"]; return typeof v === "string" ? v.slice(0, 100) : null; };
@@ -82,7 +62,7 @@ function readChat(json) {
     counts: [u?.prompt_tokens, u?.completion_tokens, u?.prompt_tokens_details?.cached_tokens ?? 0, u?.prompt_tokens_details?.cache_write_tokens ?? 0] };
 }
 
-export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir, getPolicy, resolvePublic, lookupFixture, log, gate = makeGate() }) {
+export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir, getPolicy, resolvePublic, lookupFixture, log }) {
   const breakers = new Map();
   const breakerOf = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
 
@@ -151,16 +131,10 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       throw fail("DEADLINE_EXCEEDED", "the job is past its deadline and this unit has no stored answer; nothing new is sent");
     }
     for (const n of r.notices ?? []) log({ event: "budget_threshold", category: n.category, period: n.period, used: n.used, cap: n.cap });
-    if (!(await gate.take(deadline, signal))) {
+    if (signal?.aborted) {
       breaker.neutral();
-      await store.releaseBudget(res.id, "no model request slot before the deadline");
-      throw signal?.aborted ? fail("CANCELLED", "the caller cancelled") : fail("RESOURCE_BUSY", "another model request held the one slot until the deadline", { retryable: true, retryAfter: 30 });
-    }
-    if (deadline - Date.now() < minStartMs) {
-      gate.give();
-      breaker.neutral();
-      await store.releaseBudget(res.id, "the wait for the model slot left no time before the deadline");
-      throw fail("DEADLINE_EXCEEDED", `the wait for the model slot left less than ${minStartText} before the deadline; no request is started`, { retryable: true });
+      await store.releaseBudget(res.id, "the caller cancelled before the call left");
+      throw fail("CANCELLED", "the caller cancelled");
     }
     const started = Date.now();
     let answer;
@@ -171,7 +145,6 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
         headers: messagesApi ? messagesHeaders(cred) : { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
         timeoutMs: Math.min(m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs, deadline - Date.now()) });
     } catch (e) {
-      gate.give();
       if (!(e instanceof ProviderError)) throw e;
       breaker[["CANCELLED", "PAID_DISPATCH_DISABLED"].includes(e.code) ? "neutral" : "failure"]();
       if (!e.sent) {
@@ -183,7 +156,6 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: "uncertain", reserved_micro_usd: amount, ms: Date.now() - started });
       throw fail("PROVIDER_UNCERTAIN", `the request to ${m.provider} may have been processed and no answer came; its reservation of ${amount} micro-USD stays counted`);
     }
-    gate.give();
     let json = null;
     try { json = JSON.parse(answer.body.toString("utf8")); } catch { /* classified below */ }
     const code = json?.error?.code ?? json?.error?.type ?? null;
@@ -227,7 +199,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     return { ...result, usage, cost, reused: false, reservationId: res.id };
   }
 
-  return { call, breakerState: (name) => breakers.get(name)?.state() ?? "closed", gate };
+  return { call, breakerState: (name) => breakers.get(name)?.state() ?? "closed" };
 }
 
 // ---- the engine ----------------------------------------------------------------------------------------
