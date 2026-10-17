@@ -571,15 +571,15 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
       "status": "selected",
-      "image_id": "sha256:c55c90937cadb4b0cef7b7f59253b6b0ada9f4ade863a3144a398960f0c5a408",
+      "image_id": "sha256:bea1d942c581eebf1b02b722ca3a908ade52679e567816859fcdb0118d70f2bd",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
       },
-      "evidence": "evidence/post-m9/anthropic-limits/raw/image-package.txt",
+      "evidence": "evidence/post-m9/anthropic-limits/raw/image-package-uncapped.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "2b37772c58a56dd605a43558d7cac7d27216551d",
+      "built_from_commit": "3b31ed6a53e241f17c3a4eb6433592d5336071d4",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
@@ -1660,7 +1660,7 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "b6c04b07248e4c4795723292b22ca5d6b5d9e8c2fdeacaac464b4519fe334e54",
+      "sha256": "cb681b6c86d7d5136adc6c73c51703b3e893a92bf76119070342aa2a3b78d845",
       "paid_caps": {
         "llm": {
           "month": 20000000
@@ -1833,7 +1833,7 @@
         "provider": "anthropic-agent",
         "category": "llm",
         "reasoningEffort": "high",
-        "maxOutputTokens": 20000,
+        "maxOutputTokens": 128000,
         "requestTimeoutMs": 300000
       },
       "fcpi-fixture-model": {
