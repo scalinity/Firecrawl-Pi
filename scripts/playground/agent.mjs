@@ -11,8 +11,8 @@ const limits = { maxBytes: 16384, maxDepth: 6, maxProperties: 100 };
 const usageKeys = ['calls', 'reused', 'promptTokens', 'completionTokens', 'costMicroUsd', 'cachedTokens', 'cacheWriteTokens'];
 const text = value => typeof value === 'string' ? value.trim() : '';
 const normalizedText = value => value.normalize('NFKC').replace(/\s+/gu, ' ').trim();
-const MODEL = 'gpt-6.1-sol';
-const EFFORT = 'xhigh';
+const MODEL = 'claude-opus-5-5';
+const EFFORT = 'high';
 
 function urlOf(raw, base) {
   if (typeof raw !== 'string' || raw.length > 2048) return null;

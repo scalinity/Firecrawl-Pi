@@ -21,7 +21,7 @@ const agentResponse = (extra = {}) => ({ status: 200, data: { success: true, dat
   json: { answer: 'A verified fact.', complete: true, next_action: 'finish', next_url: null,
     next_query: null, findings: [{ claim: 'A verified fact.', quote: 'a verified fact',
       source_url: 'https://example.com/' }], limitations: [], ...extra }
-}, fcpi: { extraction: { model: 'gpt-6.1-sol', reasoningEffort: 'xhigh', usage: { calls: 1, reused: 0,
+}, fcpi: { extraction: { model: 'claude-opus-5-5', reasoningEffort: 'high', usage: { calls: 1, reused: 0,
   promptTokens: 100, completionTokens: 25, costMicroUsd: 2, cachedTokens: 0, cacheWriteTokens: 0 } } } } });
 const deferred = () => {
   let resolve;

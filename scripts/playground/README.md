@@ -32,11 +32,13 @@ Agent takes a task of up to 1,200 characters, up to three optional starting URLs
 and a 1–5 page limit (default three). Its optional Result schema editor accepts a
 JSON object schema; leave it blank for the ordinary answer, findings, and sources.
 When supplied, the structured result appears alongside those in the response.
-It requests GPT-6.1-Sol with xhigh reasoning through the existing budgeted extraction
-path. The response reports the provider's model identity, available usage, and
+It requests Claude Opus 5.5 at high effort through the existing budgeted extraction
+path, on its own Anthropic key. The response reports the provider's model identity, available usage, and
 accounted cost. Missing token counts remain unknown; a conservative reservation cost
-is identified in response warnings. The xhigh effort is configured and sent with each
-model request; provider responses do not confirm that setting.
+is identified in response warnings. The high effort is configured and sent with each
+model request; provider responses do not confirm that setting. A result schema is
+grammar-constrained by the provider only up to 16 nullable fields; a larger one is sent as
+prompt text and its answer is checked locally, with one repair. The model-call log records which.
 An unavailable model or unsupported setting fails explicitly, without a model fallback.
 The model can direct follow-up searches and reads within five page dispatches, three
 searches, eight tool calls, and 360 seconds. A page extraction can use more than one

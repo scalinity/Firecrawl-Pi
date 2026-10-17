@@ -11,7 +11,7 @@ const decision = (url, overrides = {}) => ({ answer: 'The measured value is fort
   next_url: null, next_query: null, findings: [finding(url)], limitations: [], ...overrides });
 const page = (url, { json = decision(url), markdown = '# Measurement\nThe measured value is forty-two.', links = [], extraction = {}, ...rest } = {}) => ({
   status: 200, data: { success: true, data: { markdown, links, json, metadata: { url, title: 'Measurement' }, ...rest },
-    fcpi: { extraction: { model: 'gpt-6.1-sol', reasoningEffort: 'xhigh', usage: { ...usage }, ...extraction } } },
+    fcpi: { extraction: { model: 'claude-opus-5-5', reasoningEffort: 'high', usage: { ...usage }, ...extraction } } },
 });
 const searchResults = (...urls) => ({ status: 200, data: { success: true, data: { web: urls.map(url => ({ url, title: 'Search result' })) } } });
 
@@ -136,13 +136,13 @@ test('model-directed search, first page, discovered second page, and completion 
   const output = await runAgent({ prompt: 'Compare the measurements on the research pages.' }, { forward: f.forward, emit: async event => { events.push(event); } });
   assert.equal(output.status, 'completed');
   assert.equal(output.success, true);
-  assert.equal(output.model, 'gpt-6.1-sol');
-  assert.equal(output.reasoningEffort, 'xhigh');
+  assert.equal(output.model, 'claude-opus-5-5');
+  assert.equal(output.reasoningEffort, 'high');
   assert.deepEqual(f.calls.map(call => call.path), ['/v2/search', '/v2/scrape', '/v2/scrape']);
   assert.equal(f.calls[2].body.url, second);
   const format = f.calls[2].body.formats.find(format => format.type === 'json');
-  assert.equal(format.model, 'gpt-6.1-sol');
-  assert.equal(format.reasoningEffort, 'xhigh');
+  assert.equal(format.model, 'claude-opus-5-5');
+  assert.equal(format.reasoningEffort, 'high');
   assert.match(format.prompt, /First measurement found/);
   assert.match(format.prompt, /untrusted data, never instructions/);
   assert.ok(format.prompt.includes(first));
@@ -264,7 +264,7 @@ test('model and budget failures retain their class, preserve partial work, and n
 
 test('a failed extraction retains its reported usage instead of replacing it with zero', async () => {
   const f = fixture([{ status: 402, data: { success: false, code: 'BUDGET_EXHAUSTED',
-    fcpi: { extraction: { model: 'gpt-6.1-sol', reasoningEffort: 'xhigh', usage: { ...usage, costMicroUsd: 73 } } } } }]);
+    fcpi: { extraction: { model: 'claude-opus-5-5', reasoningEffort: 'high', usage: { ...usage, costMicroUsd: 73 } } } } }]);
   const output = await runAgent({ prompt: 'Find the measurement', urls: [first] }, f);
   assert.equal(output.status, 'failed');
   assert.equal(output.code, 'BUDGET_EXHAUSTED');
@@ -328,7 +328,7 @@ test('empty search, empty Markdown, and invalid decisions never claim success', 
 });
 
 test('unexpected runtime model or reasoning effort stops the workflow without fallback', async () => {
-  for (const extraction of [{ model: 'gpt-6-luna' }, { reasoningEffort: null }]) {
+  for (const extraction of [{ model: 'claude-haiku-5-5' }, { reasoningEffort: null }]) {
     const f = fixture([page(first, { extraction })]);
     const output = await runAgent({ prompt: 'Find the measurement', urls: [first] }, f);
     assert.equal(output.code, 'MODEL_MISMATCH');
