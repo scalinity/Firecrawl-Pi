@@ -16,8 +16,14 @@ const EFFORT = 'high';
 // Reading a page waits on the reasoning model, which can take minutes (its 300 s timeout, after a page fetch of up to 110 s
 // and the gateway's margins), so a page request waits as long as the gateway's extended deadline and a run as long as a few
 // of them. A search answers in seconds and keeps its original bound.
+// The page wait is ten seconds past the gateway's own abort timer (PI_CORE_TIMEOUT_MS 110 s + 15 s + PI_MODEL_EXTRACT_EXTRA_MS
+// 300 s = 425 s in deploy/compose.yaml), so the gateway's REQUEST_TIMEOUT answer arrives, and names the cause, before the wait
+// ends; if those values change, change this with them.
 export const AGENT_RUN_MS = 900000;
-const PAGE_REQUEST_SECONDS = 425, SEARCH_REQUEST_SECONDS = 125;
+const PAGE_REQUEST_SECONDS = 435, SEARCH_REQUEST_SECONDS = 125;
+// A page read waits on a paid model call that, once sent, runs and is billed whether or not the Agent is still listening, so
+// one is not started when the run has too little time left to wait for it (measured reads take 30 to 110 s).
+const PAGE_MIN_MS = 150000;
 
 function urlOf(raw, base) {
   if (typeof raw !== 'string' || raw.length > 2048) return null;
@@ -109,14 +115,14 @@ function discoverLinks(document, base) {
   return links.map(link => urlOf(typeof link === 'string' ? link : link?.url ?? link?.href, base)).filter(Boolean);
 }
 
-export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
+export async function runAgent(raw, { forward, signal, emit = () => {}, runMs = AGENT_RUN_MS } = {}) {
   const input = validateAgentInput(raw);
   if (typeof forward !== 'function') throw TypeError('The Pi gateway forward function is required.');
   const schema = decisionSchema(input.schema);
-  const started = performance.now(), deadline = started + AGENT_RUN_MS;
+  const started = performance.now(), deadline = started + runMs;
   const deadlineController = new AbortController();
   const runSignal = signal ? AbortSignal.any([signal, deadlineController.signal]) : deadlineController.signal;
-  const timer = setTimeout(() => deadlineController.abort(), AGENT_RUN_MS);
+  const timer = setTimeout(() => deadlineController.abort(), runMs);
   const candidates = new Map(input.urls.map(url => [url, null]));
   const visited = new Set(), documents = [], sources = [], findings = [], steps = [], limitations = [];
   const sourceDocuments = new Map(), queries = new Set();
@@ -128,13 +134,14 @@ export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
   const cancelled = () => signal?.aborted;
   const stopForSignal = () => {
     if (!runSignal.aborted) return false;
-    stop(cancelled() ? 'CANCELLED' : 'DEADLINE_EXCEEDED', cancelled() ? 'The research run was cancelled; no further requests were sent.' : 'The six-minute research deadline was reached.');
+    stop(cancelled() ? 'CANCELLED' : 'DEADLINE_EXCEEDED', cancelled() ? 'The research run was cancelled; no further requests were sent.' : `The ${Math.round(runMs / 1000)}-second research deadline was reached.`);
     return true;
   };
   async function dispatch(tool, body, label) {
     if (stopForSignal()) return null;
     if (steps.length >= 8) { stop('TOOL_LIMIT', 'The eight-request limit was reached before the task was complete.'); return null; }
     const remainingMs = deadline - performance.now();
+    if (tool === 'scrape' && remainingMs < PAGE_MIN_MS) { stop('DEADLINE_EXCEEDED', 'Too little time remained to wait for a page read; none was sent.'); return null; }
     if (remainingMs < 1000) { stop('DEADLINE_EXCEEDED', 'Less than a second remained; no further request was sent.'); return null; }
     const route = routes[tool];
     const normalizedBody = validateBody(route.body, body, manifest).body;

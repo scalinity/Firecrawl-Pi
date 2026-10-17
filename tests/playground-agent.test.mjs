@@ -73,7 +73,7 @@ function fixture(responses) {
   return { calls, forward: async (request, signal) => {
     assert.equal(signal.aborted, false);
     calls.push(structuredClone(request));
-    assert.ok(request.timeout >= 1 && request.timeout <= (request.path === '/v2/scrape' ? 425 : 125));
+    assert.ok(request.timeout >= 1 && request.timeout <= (request.path === '/v2/scrape' ? 435 : 125));
     assert.equal(request.method, 'POST');
     assert.ok(['/v2/search', '/v2/scrape'].includes(request.path));
     const response = responses[calls.length - 1];
@@ -101,9 +101,37 @@ test('a page read waits as long as the gateway\'s extended deadline for the reas
   const f = fixture([searchResults(first), page(first)]);
   const output = await runAgent({ prompt: 'Find the measurement' }, f);
   assert.equal(output.status, 'completed');
-  assert.deepEqual(f.calls.map(call => [call.path, call.timeout]), [['/v2/search', 125], ['/v2/scrape', 425]]);
+  assert.deepEqual(f.calls.map(call => [call.path, call.timeout]), [['/v2/search', 125], ['/v2/scrape', 435]]);
   // The whole run is bounded at fifteen minutes, long enough for a few such reads.
   assert.equal(AGENT_RUN_MS, 900000);
+});
+
+test('a page read is not started when the run has too little time left to wait for it; a search still is', async () => {
+  // A paid page read, once sent, runs and is billed whether or not the Agent is listening, so it needs 150 s of the run.
+  const refused = fixture([]);
+  const out = await runAgent({ prompt: 'Find the measurement', urls: [first] }, { forward: refused.forward, runMs: 100000 });
+  assert.equal(refused.calls.length, 0, 'no request was sent');
+  assert.equal(out.code, 'DEADLINE_EXCEEDED');
+  assert.match(out.limitations.join(' '), /Too little time remained to wait for a page read/);
+  const searched = fixture([searchResults(first)]);
+  const second = await runAgent({ prompt: 'Find the measurement' }, { forward: searched.forward, runMs: 100000 });
+  assert.deepEqual(searched.calls.map(call => call.path), ['/v2/search'], 'the search is sent, the page read after it is not');
+  assert.equal(second.code, 'DEADLINE_EXCEEDED');
+  const allowed = fixture([page(first)]);
+  const read = await runAgent({ prompt: 'Find the measurement', urls: [first] }, { forward: allowed.forward, runMs: 200000 });
+  assert.equal(read.status, 'completed', 'with 150 s or more left the read goes ahead');
+});
+
+test('the three limits nest: the Agent\'s own deadline ends the run first, then the server\'s timer, then the page\'s', async () => {
+  const { readFileSync } = await import('node:fs');
+  const html = readFileSync(new URL('../LLM-DEMO.html', import.meta.url), 'utf8');
+  const server = readFileSync(new URL('../scripts/playground/server.mjs', import.meta.url), 'utf8');
+  const serverMs = AGENT_RUN_MS + Number(server.match(/controller\.abort\(\), AGENT_RUN_MS \+ (\d+)\)/)?.[1]);
+  const pageMs = Number(html.match(/controller\.abort\(\);\},(\d+)\)/)?.[1]);
+  assert.ok(serverMs > AGENT_RUN_MS, 'the server\'s timer is after the Agent\'s, so the Agent returns the findings it verified');
+  assert.ok(pageMs > serverMs, `the page\'s timer (${pageMs} ms) is after the server\'s (${serverMs} ms), or the UI abandons runs the server is still serving`);
+  assert.match(html, /15 minutes/, 'the help text states the real limit');
+  assert.doesNotMatch(html + server, /six-minute|6 minutes/);
 });
 
 test('unsupported result-schema roots are rejected before any gateway dispatch', async () => {

@@ -186,7 +186,8 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
         if (isAgent) {
           activeAgents++;
           const steps = new Map();
-          const deadline = setTimeout(() => controller.abort(), AGENT_RUN_MS);
+          // Fifteen seconds past the Agent's own deadline, so that deadline ends the run and returns what it verified; the page's timer is later still.
+          const deadline = setTimeout(() => controller.abort(), AGENT_RUN_MS + 15000);
           const finishAgent = payload => {
             if (res.destroyed || res.writableEnded) return;
             res.end(JSON.stringify({ type: 'result', result: { status: 200, data: payload,
@@ -227,7 +228,7 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
             finishAgent(result);
           } catch {
             const cancelled = controller.signal.aborted;
-            const message = cancelled ? 'The Agent run was cancelled or reached its six-minute limit. Work already sent may have consumed budget.' :
+            const message = cancelled ? `The Agent run was cancelled or reached its ${AGENT_RUN_MS / 60000}-minute limit. Work already sent may have consumed budget.` :
               'The Agent run could not finish. No automatic retry was made.';
             finishAgent({ success: false, status: cancelled ? 'cancelled' : 'failed', answer: '',
               findings: [], sources: [], documents: [], steps: [...steps.values()], usage: null, model: null,

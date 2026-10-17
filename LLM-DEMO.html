@@ -108,7 +108,7 @@ scrape:{label:'Page URL',placeholder:'https://example.com',help:'Returns readabl
 search:{label:'Search query',placeholder:'What would you like to find?',help:'Searches through your Pi’s SearXNG service. Returns web results without an extraction model.',limit:5},
 map:{label:'Website URL',placeholder:'https://example.com',help:'Discovers links from the site’s sitemap and page links. No extraction model is called.',limit:10},
 crawl:{label:'Starting URL',placeholder:'https://example.com',help:'Starts a durable crawl with a small page limit. Use Refresh to fetch progress and results, or Cancel to stop it.',limit:3},
-agent:{label:'What should the agent find?',placeholder:'Find the release date and key changes in Python 3.14.0. Cite official sources.',help:'Searches, reads pages, and follows up using your Pi and a remote model. Up to 5 pages, 3 searches, 8 tool calls, and 6 minutes. Keep this tab open. Stopping ends future steps; dispatched work may still use budget.',limit:3}
+agent:{label:'What should the agent find?',placeholder:'Find the release date and key changes in Python 3.14.0. Cite official sources.',help:'Searches, reads pages, and follows up using your Pi and a remote model. Up to 5 pages, 3 searches, 8 tool calls, and 15 minutes. Keep this tab open. Stopping ends future steps; dispatched work may still use budget.',limit:3}
 };
 let tool='scrape', view='content', busy=false, current=null, history=[], started=0, tick=null, pendingCrawl=null, activeAgent=null;
 let drafts={scrape:'',search:'',map:'',crawl:'',agent:''};
@@ -339,7 +339,7 @@ async function runAgent(payload){
   const session=activeAgent;
   current={operation:'agent',input:payload.prompt,llm:true,at:Date.now(),result:{status:0,data:{status:'running',steps:session.steps},request:{method:'WORKFLOW',path:'fcpi search → scrape + JSON',body:payload}}};
   setBusy(true);$('agent-progress').hidden=false;$('agent-steps').replaceChildren();$('cancel-agent').disabled=false;$('cancel-agent').textContent='Stop agent';render();activity('Starting the Agent task on your Pi…','busy');
-  const timeout=setTimeout(()=>{session.timedOut=true;controller.abort();},370000);
+  const timeout=setTimeout(()=>{session.timedOut=true;controller.abort();},930000); /* scripts/playground/agent.mjs AGENT_RUN_MS (900 s) plus the server's margin and one more */
   let finalResult=null;
   function receive(line){
     if(!line.trim())return;
