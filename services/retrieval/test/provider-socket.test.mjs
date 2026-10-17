@@ -37,3 +37,20 @@ test("a connection that never completes ends unsent within idleMs, so its reserv
     (e) => e.code === "PROVIDER_UNREACHABLE" && e.sent === false);
   assert.ok(Date.now() - t0 < 2000, `ended after ${Date.now() - t0} ms, not at the 10 s ceiling`);
 });
+
+test("the pinned lookup answers asynchronously, so a connect that fails at once reaches the request's error handler", async () => {
+  const { pinnedLookup } = await import("../src/resolve.mjs");
+  for (const options of [{}, { all: true }]) {
+    let answered = null, synchronous = true;
+    pinnedLookup("192.0.2.7")("h.example", options, (err, address, family) => { answered = { err, address, family, synchronous }; });
+    synchronous = false;
+    assert.equal(answered, null, "not answered during the call");
+    await new Promise((r) => setImmediate(r));
+    assert.equal(answered.synchronous, false);
+    assert.equal(answered.err, null);
+    assert.deepEqual(options.all ? answered.address : [answered.address, answered.family], options.all ? [{ address: "192.0.2.7", family: 4 }] : ["192.0.2.7", 4]);
+  }
+  // The two-argument form (options omitted) answers the same way.
+  const two = await new Promise((r) => pinnedLookup("192.0.2.8")("h.example", (err, address) => r(address)));
+  assert.equal(two, "192.0.2.8");
+});

@@ -52,11 +52,14 @@ async function defaultFixtureLookup(host) {
 }
 
 // A net/tls lookup function that answers only with the pinned address, in both callback forms
-// Node uses (a single address, or all addresses when autoSelectFamily asks for them).
+// Node uses (a single address, or all addresses when autoSelectFamily asks for them). It answers
+// asynchronously, as DNS does: answered synchronously, a connect that fails at once (ENETUNREACH when
+// the host has no route) emits its error before the HTTP request has attached its listener, and the
+// error becomes an uncaught exception that ends the process.
 export function pinnedLookup(address) {
   return (_host, options, callback) => {
     const cb = typeof options === "function" ? options : callback;
-    if (options && typeof options === "object" && options.all) cb(null, [{ address, family: 4 }]);
-    else cb(null, address, 4);
+    const all = options && typeof options === "object" && options.all;
+    setImmediate(() => (all ? cb(null, [{ address, family: 4 }]) : cb(null, address, 4)));
   };
 }
