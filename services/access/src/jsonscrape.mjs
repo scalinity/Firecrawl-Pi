@@ -66,6 +66,9 @@ export function makeJsonScrape({ cfg, M, upstream, extractor }) {
         missingRequired: x.json?.missingRequired, units, usage: x.json?.usage ?? null };
       if (x.status !== 200 || x.json?.ok !== true) {
         const f = x.json?.failure ?? { class: "EXTRACTION_FAILED", detail: `the extraction service answered ${x.status} without a successful extraction` };
+        // The model call outlasted the deadline and runs on, billed. Its answer is stored under this request's own id, which
+        // no later request can name, so a repeat would send a new paid call: no retry is offered.
+        if (f.class === "EXTRACTION_STILL_RUNNING") return ctx.send(504, { success: false, code: f.class, error: "The page was scraped, but its model call outlasted this request's deadline. The call runs to its end and is billed; repeating this request starts a new paid call.", fcpi: { extraction } });
         return ctx.send(x.status !== 200 ? x.status : 500, { success: false, code: f.class, error: `The page was scraped, but its json format failed: ${f.detail}`, fcpi: { extraction } }, f.retryAfter ? { "retry-after": String(f.retryAfter) } : {});
       }
       doc.json = x.json.data;

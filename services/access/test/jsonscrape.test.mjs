@@ -190,3 +190,14 @@ test("the gateway's own failures are never 502, which a client library retries b
   out = await rig({ extract: () => ({ status: 200, json: { ok: false, failure: { class: "EXTRACTION_FAILED", detail: "no answer" } } }) }).go();
   assert.deepEqual([out.status, out.body.code], [500, "EXTRACTION_FAILED"]);
 });
+
+test("a model call still running at the deadline is a 504 with no retry offered, because a repeat cannot reuse it and would pay again", async () => {
+  const r = rig({ extract: () => ({ status: 504, json: { ok: false, units: [{ url: "https://a.example/p", part: 1, ok: false }], usage: { calls: 1, costMicroUsd: null },
+    failure: { class: "EXTRACTION_STILL_RUNNING", detail: "the model call was still running", retryable: true, retryAfter: 30 } } }) });
+  const sent = await r.go();
+  assert.equal(sent.status, 504);
+  assert.equal(sent.body.code, "EXTRACTION_STILL_RUNNING");
+  assert.match(sent.body.error, /repeating this request starts a new paid call/);
+  assert.equal(sent.headers["retry-after"], undefined, "no retry is invited");
+  assert.equal(sent.body.fcpi.extraction.usage.costMicroUsd, null, "the running call's cost is not reported as known");
+});

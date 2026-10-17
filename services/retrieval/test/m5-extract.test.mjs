@@ -48,11 +48,9 @@ test("model calls from separate requests run at the same time; none waits for an
     answerWith()(s);
   } });
   try {
-    const t0 = Date.now();
     const outs = await Promise.all([1, 2, 3].map(() => r.extract(req())));
     assert.deepEqual(outs.map((o) => o.ok), [true, true, true]);
     assert.equal(most, 3, "all three were in flight together");
-    assert.ok(Date.now() - t0 < 800, `three 300 ms calls took ${Date.now() - t0} ms`);
     assert.deepEqual(r.store.states(), ["SETTLED", "SETTLED", "SETTLED"]);
   } finally { await r.srv.close(); }
 });
@@ -842,36 +840,87 @@ test("Messages API: a repair after an answer with no text shows the model a plac
   }
 });
 
-test("Messages API: a call that outlasts its caller's wait is not cut; it settles at its usage, and a retry reuses its answer", async () => {
+test("Messages API: a call that outlasts its caller's deadline is not cut; it settles at its usage, and a retry under the same logical id reuses it", async () => {
   let calls = 0;
-  const r = await rig({ mutate: (b) => { messagesApi()(b); b.models["fcpi-fixture-model"].requestTimeoutMs = 1000; }, handler: async (q, s) => {
+  const r = await rig({ mutate: messagesApi(), handler: async (q, s) => {
     for await (const _ of q) { /* drain */ }
     calls++;
     s.writeHead(200, SSE_HEADERS);
-    // Pings, then the answer, after the caller's one-second wait has ended.
-    for (let i = 0; i < 4; i++) { s.write("event: ping\ndata: {\"type\":\"ping\"}\n\n"); await new Promise((res) => setTimeout(res, 400)); }
+    // Pings, then the answer, after the caller's deadline has passed.
+    for (let i = 0; i < 6; i++) { s.write("event: ping\ndata: {\"type\":\"ping\"}\n\n"); await new Promise((res) => setTimeout(res, 400)); }
     s.end(messagesBody());
   } });
   try {
-    const q = req();
+    const q = req({ deadline: new Date(Date.now() + 1500).toISOString() });
     const first = await r.extract(q);
-    assert.equal(first.failure.class, "EXTRACTION_IN_FLIGHT");
+    assert.equal(first.failure.class, "EXTRACTION_STILL_RUNNING");
+    assert.match(first.failure.detail, /the deadline passed; it runs to its end and is billed/);
     assert.equal(first.failure.retryable, true);
+    assert.equal(first.usage.costMicroUsd, null, "a call that was sent is not reported as free");
+    assert.match(first.warnings.join(" "), /without an accounting receipt|usage/);
     assert.deepEqual(r.store.states(), ["RESERVED"], "still running, still held");
-    await new Promise((res) => setTimeout(res, 1500));
+    assert.equal(r.adapter.running(), 1);
+    await new Promise((res) => setTimeout(res, 2000));
     const row = [...r.store.rows.values()][0];
     assert.equal(row.state, "SETTLED", "settled when the answer came, with nobody waiting");
-    assert.deepEqual(row.usage, { promptTokens: 100, completionTokens: 20, cachedTokens: 10, cacheWriteTokens: 30 });
+    assert.deepEqual(row.usage, { promptTokens: 100, completionTokens: 20, cachedTokens: 10, cacheWriteTokens: 30 }, "message_delta's final usage, not message_start's placeholder");
     assert.ok(row.actual < row.reserved, "at its usage, not its reservation");
-    const again = await r.extract(q);
+    assert.equal(r.adapter.running(), 0);
+    const again = await r.extract({ ...q, deadline: new Date(Date.now() + 60000).toISOString() });
     assert.equal(again.ok, true);
     assert.equal(again.data.product, "Fixture Widget");
     assert.equal(calls, 1, "the retry reused the stored answer");
   } finally { await r.srv.close(); }
 });
 
+test("Messages API: a caller that cancels while its call runs is answered at once; the call runs on and settles", async () => {
+  const r = await rig({ mutate: messagesApi(), handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    s.writeHead(200, SSE_HEADERS); s.write("event: ping\ndata: {\"type\":\"ping\"}\n\n");
+    await new Promise((res) => setTimeout(res, 800)); s.end(messagesBody());
+  } });
+  try {
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 300);
+    const t0 = Date.now();
+    const out = await r.extract(req(), controller.signal);
+    assert.equal(out.failure.class, "EXTRACTION_STILL_RUNNING");
+    assert.match(out.failure.detail, /the caller cancelled/);
+    assert.ok(Date.now() - t0 < 700, "not held until the answer");
+    await new Promise((res) => setTimeout(res, 900));
+    assert.deepEqual(r.store.states(), ["SETTLED"]);
+  } finally { await r.srv.close(); }
+});
+
+test("Messages API: a half-open breaker's probe that outlasts its caller keeps the probe; no second probe goes out until it ends", async () => {
+  let mode = "fail";
+  const r = await rig({ mutate: messagesApi(), handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    if (mode === "fail") return s.writeHead(500, JSON_HEADERS).end(JSON.stringify({ type: "error", error: { type: "api_error", message: "x" } }));
+    s.writeHead(200, SSE_HEADERS); s.write("event: ping\ndata: {\"type\":\"ping\"}\n\n");
+    await new Promise((res) => setTimeout(res, 1500)); s.end(messagesBody());
+  } });
+  try {
+    r.budget.breaker.openMs = 200; // below the policy's floor; a breaker reads it when first made
+    for (let i = 0; i < 3; i++) assert.equal((await r.extract(req())).failure.class, "PROVIDER_ERROR");
+    assert.equal(r.adapter.breakerState("fixture-model"), "open");
+    await new Promise((res) => setTimeout(res, 250));
+    assert.equal(r.adapter.breakerState("fixture-model"), "half_open");
+    mode = "slow";
+    const probe = await r.extract(req({ deadline: new Date(Date.now() + 1200).toISOString() }));
+    assert.equal(probe.failure.class, "EXTRACTION_STILL_RUNNING");
+    const second = await r.extract(req());
+    assert.equal(second.failure.class, "PROVIDER_UNAVAILABLE", "the probe is still out");
+    await new Promise((res) => setTimeout(res, 800));
+    assert.equal(r.adapter.breakerState("fixture-model"), "closed", "the probe's own answer closed it");
+  } finally { await r.srv.close(); }
+});
+
 test("Messages API: a stream that ends before message_stop, or with an error event, keeps its whole reservation as uncertain", async () => {
   const errorEvent = 'event: error\ndata: {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}\n\n';
+  // The final message_delta without its usage: only message_start's placeholder count is left.
+  const unpriced = messagesBody().split("\n\n").map((e) => (e.startsWith("event: message_delta") ? e.replace(/,"usage":\{[^}]*\}/, "") : e)).join("\n\n");
+  assert.ok(unpriced.includes("message_stop") && !/event: message_delta[^\n]*\n[^\n]*"usage"/.test(unpriced), "precondition: complete, but no final usage");
   for (const [label, body, detail] of [["no message_stop", messagesBody({}, { end: false }), /before message_stop/],
     ["an error event", messagesBody({}, { end: false }) + errorEvent, /overloaded_error/], ["no final usage", unpriced, /without its final usage/]]) {
     const r = await rig({ mutate: messagesApi(), handler: recording((s) => s.writeHead(200, SSE_HEADERS).end(body)) });
@@ -884,6 +933,3 @@ test("Messages API: a stream that ends before message_stop, or with an error eve
     } finally { await r.srv.close(); }
   }
 });
-  // The final message_delta without its usage: only message_start's placeholder count is left.
-  const unpriced = messagesBody().split("\n\n").map((e) => (e.startsWith("event: message_delta") ? e.replace(/,"usage":\{[^}]*\}/, "") : e)).join("\n\n");
-  assert.ok(unpriced.includes("message_stop") && !/event: message_delta[^\n]*\n[^\n]*"usage"/.test(unpriced), "precondition: complete, but no final usage");

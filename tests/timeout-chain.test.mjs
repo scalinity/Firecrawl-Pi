@@ -1,6 +1,6 @@
-// A reasoning-model call can take minutes, and every layer between the caller and the provider has a timeout of its own. A call
-// that one layer abandons while the layers below it keep going is billed and its answer is thrown away, so the timeouts must
-// nest: each layer outlasts the one beneath it. This reads the real values (the budget policy, the deployed Compose file, the
+// A reasoning-model call can take minutes, and every layer between the caller and the provider has a timeout of its own. A sent
+// call is never cut (it runs to its end and is billed), so an answer that arrives after a layer above has given up reaches
+// nobody on a json scrape; the timeouts must nest, each layer outlasting the one beneath it, so the model's own timeout fits. This reads the real values (the budget policy, the deployed Compose file, the
 // capability manifest, the Agent, the server and the page) and pins the order, so changing one layer without the others fails here.
 import { test } from "node:test";
 import assert from "node:assert/strict";

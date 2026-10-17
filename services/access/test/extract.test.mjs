@@ -135,15 +135,17 @@ test("a page's failure is archived, so a resumed job sends the same documents ra
   assert.deepEqual(r.store.finished.errors.errors.map((e) => e.code), ["TARGET_HTTP_503"]);
 });
 
-test("a call still in flight at the extraction service keeps the job RUNNING, and the next round finishes it (review W13)", async () => {
-  let n = 0;
-  const r = await rig({ job: { request: REQ }, core: (b) => page(b.url, "Price: 1"),
-    extract: (body) => (n++ === 0 ? { status: 409, json: { ok: false, units: [], failure: { class: "EXTRACTION_IN_FLIGHT", detail: "still being made", retryable: true, retryAfter: 30 } } } : ok(body)) });
-  await r.run();
-  assert.equal(r.store.job.state, "RUNNING");
-  assert.equal(r.logs.at(-1).action, "extraction_deferred");
-  await r.run();
-  assert.equal(r.store.finished.to, "SUCCEEDED");
+test("a call still in flight, or still running past the round's deadline, keeps the job RUNNING, and the next round finishes it (review W13)", async () => {
+  for (const [cls, status] of [["EXTRACTION_IN_FLIGHT", 409], ["EXTRACTION_STILL_RUNNING", 504]]) {
+    let n = 0;
+    const r = await rig({ job: { request: REQ }, core: (b) => page(b.url, "Price: 1"),
+      extract: (body) => (n++ === 0 ? { status, json: { ok: false, units: [], failure: { class: cls, detail: "still being made", retryable: true, retryAfter: 30 } } } : ok(body)) });
+    await r.run();
+    assert.equal(r.store.job.state, "RUNNING", cls);
+    assert.equal(r.logs.at(-1).action, "extraction_deferred", cls);
+    await r.run();
+    assert.equal(r.store.finished.to, "SUCCEEDED", cls);
+  }
 });
 
 test("a job resumed past its deadline with every page archived makes one reuse-only call and can still finish (review S12)", async () => {

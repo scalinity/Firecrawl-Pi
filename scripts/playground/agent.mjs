@@ -13,7 +13,7 @@ const text = value => typeof value === 'string' ? value.trim() : '';
 const normalizedText = value => value.normalize('NFKC').replace(/\s+/gu, ' ').trim();
 const MODEL = 'claude-opus-5-5';
 const EFFORT = 'high';
-// Reading a page waits on the reasoning model, which can take minutes (its 300 s timeout, after a page fetch of up to 110 s
+// Reading a page waits on the reasoning model, which can take minutes (the 300 s its policy allows, after a page fetch of up to 110 s
 // and the gateway's margins), so a page request waits as long as the gateway's extended deadline and a run as long as two
 // reads that use their whole wait (a usual read is far shorter, so the five-page limit still binds first). A search answers in seconds and keeps its original bound.
 // The page wait is ten seconds past the gateway's own abort timer (PI_CORE_TIMEOUT_MS 110 s + 15 s + PI_MODEL_EXTRACT_EXTRA_MS

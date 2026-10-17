@@ -155,7 +155,7 @@ const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, I
   // M5: extraction and parsing
   MODEL_NOT_ALLOWED: 400, PARSER_NOT_ALLOWED: 400, RATE_CARD_MISSING: 503, PAID_DISPATCH_DISABLED: 402, BUDGET_EXHAUSTED: 402, BLOCKED_CREDENTIAL: 503,
   PARSER_REQUIRED: 422, PROVIDER_UNAVAILABLE: 503, PROVIDER_UNREACHABLE: 503, PROVIDER_UNCERTAIN: 502, PROVIDER_AUTH_FAILED: 502, PROVIDER_BILLING: 502,
-  PROVIDER_RATE_LIMITED: 503, PROVIDER_ERROR: 502, PROVIDER_REJECTED: 502, EXTRACTION_UNCERTAIN: 409, EXTRACTION_IN_FLIGHT: 409, LOGICAL_ID_CONFLICT: 409,
+  PROVIDER_RATE_LIMITED: 503, PROVIDER_ERROR: 502, PROVIDER_REJECTED: 502, EXTRACTION_UNCERTAIN: 409, EXTRACTION_IN_FLIGHT: 409, EXTRACTION_STILL_RUNNING: 504, LOGICAL_ID_CONFLICT: 409,
   SCHEMA_INVALID: 400, SCHEMA_TOO_LARGE: 400, SCHEMA_TOO_DEEP: 400, SCHEMA_UNSUPPORTED: 400, INPUT_TOO_LARGE: 413, NO_CONTENT: 422, RESULT_TOO_LARGE: 413,
   DOCUMENT_TOO_LARGE: 413, DOCUMENT_TOO_MANY_PAGES: 413, UNSUPPORTED_CONTENT: 415, PARSE_FAILED: 502, PARSE_EMPTY: 502,
   // M6: proxy reconciliation
@@ -192,6 +192,7 @@ async function providerStatus() {
   const usage = storeReady ? await store.budgetUsage(day, month).catch(() => null) : null;
   const uncertain = storeReady ? await store.uncertainHolds(month).catch(() => null) : null;
   return {
+    modelCallsRunning: adapter.running(),
     selection: { ...selection, source: selectionSource },
     paidDispatch: paidDispatchActive(budget, env.paidDispatch),
     budgetPolicySha256: budgetSha256,
@@ -327,5 +328,7 @@ for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, async () => {
   for (const s of [server, extractServer]) { s.close(); s.closeAllConnections?.(); }
   const until = Date.now() + 8000;
   while (inflight > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 100));
+  // A model call whose caller had already gone is cut here; its row is marked UNCERTAIN at the next start.
+  log({ event: "stopping", requests_in_flight: inflight, model_calls_running: adapter.running() });
   store.close().finally(() => process.exit(0));
 });

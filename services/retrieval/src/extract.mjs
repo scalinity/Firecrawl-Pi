@@ -7,8 +7,8 @@
 // credential (BLOCKED_CREDENTIAL) and a closed breaker (PROVIDER_UNAVAILABLE). Then the call's maximum
 // cost is reserved atomically (BUDGET_EXHAUSTED), the provider is called once with no retry, and the
 // reservation is settled from the provider's own usage counts: released when the request never left, kept
-// whole when its outcome is unknown. A call that is sent runs to its end even when the caller stops waiting
-// for it (EXTRACTION_IN_FLIGHT), so its answer is settled and stored. A call key names each
+// whole when its outcome is unknown. A call that is sent runs to its end even when its caller's deadline passes
+// (EXTRACTION_STILL_RUNNING), so it is settled at its usage and its answer stored. A call key names each
 // call inside its logical unit, so a retried request reuses a settled call's stored answer and never
 // sends one that is still unaccounted for.
 //
@@ -33,7 +33,8 @@ export class ExtractionFailure extends Error {
 const fail = (c, d, x) => new ExtractionFailure(c, d, x);
 // Refusals that hold for every later call as much as this one: the job stops at the first.
 const STOPPING = new Set(["MODEL_NOT_ALLOWED", "RATE_CARD_MISSING", "PAID_DISPATCH_DISABLED", "BLOCKED_CREDENTIAL", "BUDGET_EXHAUSTED",
-  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_RATE_LIMITED", "PROVIDER_UNCERTAIN", "MODEL_MISMATCH", "MODEL_IDENTITY_UNVERIFIED", "EXTRACTION_UNCERTAIN", "EXTRACTION_IN_FLIGHT", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
+  "PROVIDER_UNAVAILABLE", "PROVIDER_AUTH_FAILED", "PROVIDER_BILLING", "PROVIDER_RATE_LIMITED", "PROVIDER_UNCERTAIN", "MODEL_MISMATCH", "MODEL_IDENTITY_UNVERIFIED", "EXTRACTION_UNCERTAIN", "EXTRACTION_IN_FLIGHT", "EXTRACTION_STILL_RUNNING", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
+// EXTRACTION_STILL_RUNNING is not here: its call was sent and will be billed.
 const BEFORE_DISPATCH = new Set(["MODEL_NOT_ALLOWED", "RATE_CARD_MISSING", "PAID_DISPATCH_DISABLED", "BLOCKED_CREDENTIAL", "BUDGET_EXHAUSTED",
   "PROVIDER_UNAVAILABLE", "PROVIDER_UNREACHABLE", "EXTRACTION_IN_FLIGHT", "LOGICAL_ID_CONFLICT", "RESOURCE_BUSY", "CANCELLED", "DEADLINE_EXCEEDED"]);
 
@@ -68,14 +69,16 @@ function readChat(json) {
 
 export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir, getPolicy, resolvePublic, lookupFixture, log }) {
   const breakers = new Map();
+  let running = 0; // sent calls whose caller has stopped waiting
   const breakerOf = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
 
   // messages: the chat; schema: the strict schema; returns { content, refusal, finishReason, usage, cost, reused, reservationId }.
   // A call that took a half-open breaker's one probe and ended with no verdict (a database error, say)
-  // hands the probe back, so the breaker cannot stay shut until a restart (review W10).
+  // hands the probe back, so the breaker cannot stay shut until a restart (review W10). A call still running after its caller
+  // stopped waiting keeps the probe: its own outcome settles it.
   async function call(args) {
     const hold = {};
-    try { return await callOnce(args, hold); } finally { if (hold.probe && hold.breaker.probing) hold.breaker.neutral(); }
+    try { return await callOnce(args, hold); } finally { if (hold.probe && !hold.detached && hold.breaker.probing) hold.breaker.neutral(); }
   }
   async function callOnce({ logicalId, callKey, kind, model, reasoningEffort, messages, schema, maxOutputTokens, requestHash, deadline, signal, reuseOnly = false }, hold) {
     const budget = getBudget();
@@ -142,17 +145,28 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       throw fail("CANCELLED", "the caller cancelled");
     }
     const started = Date.now();
-    // The caller waits for the call up to its own deadline and, for a streamed call, the model's timeout; the call itself is
-    // not cut there. A cut-off call could never be priced (its usage arrives with the end of its answer) and would keep its
-    // whole reservation as uncertain, so it runs to its end, is settled and stored, and a retry of the request reuses it. A
-    // call to the chat API is not streamed and ends at the model's timeout itself.
-    const waitMs = messagesApi ? Math.min(m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs, deadline - Date.now()) : deadline - Date.now();
-    const outcome = finish({ prov, messagesApi, wire, payload, cred, authorize, breaker, res, amount, card, m, model, kind, logicalId, callKey, maxOutputTokens, started });
-    let timer;
-    const waited = await Promise.race([outcome.then((v) => ({ v }), (e) => ({ e })), new Promise((r) => { timer = setTimeout(() => r(null), Math.max(0, waitMs)); })]);
+    // The caller waits for the call until its own deadline, or until it cancels; the call itself is not cut there. A cut-off
+    // call could never be priced (its usage arrives with the end of its answer) and would keep its whole reservation as
+    // uncertain, so it runs to its end and is settled, and its answer is stored under its call key: a caller whose logical id is
+    // stable (an extract job) reuses it on retry; one whose id is its own request's (a json scrape) cannot. A call to the chat
+    // API is not streamed and ends at the model's timeout itself.
+    const outcome = finish({ prov, messagesApi, wire, payload, cred, authorize, breaker, probe: hold.probe, res, amount, card, m, model, kind, logicalId, callKey, maxOutputTokens, started });
+    let timer, onAbort;
+    const waited = await Promise.race([outcome.then((v) => ({ v }), (e) => ({ e })),
+      new Promise((r) => { timer = setTimeout(() => r(null), Math.max(0, deadline - Date.now())); onAbort = () => r(null); signal?.addEventListener("abort", onAbort, { once: true }); })]);
     clearTimeout(timer);
+    signal?.removeEventListener("abort", onAbort);
     if (waited === null) {
-      throw fail("EXTRACTION_IN_FLIGHT", `the model call is still running after ${Math.round((Date.now() - started) / 1000)} s; it runs to its end and is settled, and a retry of this request reuses its answer`, { retryable: true, retryAfter: 30 });
+      hold.detached = true;
+      running++;
+      outcome.then(() => {}, (e) => {
+        // Ledger and provider outcomes are logged by finish; anything else would otherwise go unseen.
+        if (!(e instanceof ExtractionFailure)) {
+          if (hold.probe && breaker.probing) breaker.neutral();
+          log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: "failed_after_caller_left", error: String(e.code ?? e.message).slice(0, 200) });
+        }
+      }).finally(() => { running--; });
+      throw fail("EXTRACTION_STILL_RUNNING", `the model call was still running after ${Math.round((Date.now() - started) / 1000)} s, when ${signal?.aborted ? "the caller cancelled" : "the deadline passed"}; it runs to its end and is billed, and its answer is stored under call ${callKey}`, { retryable: true, retryAfter: 30 });
     }
     if (waited.e) throw waited.e;
     return waited.v;
@@ -160,7 +174,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
 
   // Sends one reserved call and closes its reservation: released when it never left, kept whole when its outcome is unknown,
   // settled from the provider's usage when it answered.
-  async function finish({ prov, messagesApi, wire, payload, cred, authorize, breaker, res, amount, card, m, model, kind, logicalId, callKey, maxOutputTokens, started }) {
+  async function finish({ prov, messagesApi, wire, payload, cred, authorize, breaker, probe, res, amount, card, m, model, kind, logicalId, callKey, maxOutputTokens, started }) {
     let answer;
     try {
       // No cancellation reaches a request once it is out: a caller that left gets its answer settled and stored,
@@ -168,9 +182,10 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       // its ceiling and by silence; a call to the chat API, which is not streamed, by the model's timeout.
       answer = await providerRequest({ baseUrl: prov.baseUrl, path: wire.path, body: payload, getPolicy, resolvePublic, lookupFixture, authorize,
         headers: messagesApi ? messagesHeaders(cred) : { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
-        ...(messagesApi ? { timeoutMs: CALL_CEILING_MS, idleMs: STREAM_IDLE_MS, maxBytes: 16 * 1048576 } : { timeoutMs: m.requestTimeoutMs ?? getBudget().extraction.requestTimeoutMs }) });
+        // A streamed answer is about 100 bytes of event framing per few tokens: 128 bytes a token, plus a megabyte, bounds it.
+        ...(messagesApi ? { timeoutMs: CALL_CEILING_MS, idleMs: STREAM_IDLE_MS, maxBytes: 1048576 + 128 * maxOutputTokens } : { timeoutMs: m.requestTimeoutMs ?? getBudget().extraction.requestTimeoutMs }) });
     } catch (e) {
-      if (!(e instanceof ProviderError)) throw e;
+      if (!(e instanceof ProviderError)) { if (probe) breaker.neutral(); throw e; }
       breaker[["CANCELLED", "PAID_DISPATCH_DISABLED"].includes(e.code) ? "neutral" : "failure"]();
       if (!e.sent) {
         await store.releaseBudget(res.id, `not sent: ${e.code}`);
@@ -235,7 +250,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     return { ...result, usage, cost, reused: false, reservationId: res.id };
   }
 
-  return { call, breakerState: (name) => breakers.get(name)?.state() ?? "closed" };
+  return { call, breakerState: (name) => breakers.get(name)?.state() ?? "closed", running: () => running };
 }
 
 // ---- the engine ----------------------------------------------------------------------------------------

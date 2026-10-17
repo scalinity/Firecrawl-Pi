@@ -22,7 +22,7 @@ export function cutText(s, max) {
 
 // The extraction service's refusals that a later round resolves (a call still in flight, the service not
 // ready or failing internally): the job stays RUNNING and is tried again until its deadline (review W13).
-const TRANSIENT = new Set(["EXTRACTION_IN_FLIGHT", "RETRIEVAL_NOT_READY", "RETRIEVAL_ERROR"]);
+const TRANSIENT = new Set(["EXTRACTION_IN_FLIGHT", "EXTRACTION_STILL_RUNNING", "RETRIEVAL_NOT_READY", "RETRIEVAL_ERROR"]);
 
 export function makeExtractJobs({ cfg, store, upstream, archive, extractor, log }) {
   const instance = randomUUID();
