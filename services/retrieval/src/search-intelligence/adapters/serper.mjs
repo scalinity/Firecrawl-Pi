@@ -15,6 +15,8 @@ function reasonOf(e) {
   if (cls === "SEARCH_PROVIDER_BREAKER_OPEN") return ["breaker_open", "breaker_open"];
   // The fixed allocation of existing credits is spent: Serper's account quota as this deployment holds it.
   if (cls === "SEARCH_CREDITS_EXHAUSTED") return ["quota_exhausted", "local_allocation_exhausted"];
+  // The same logical operation is already in the ledger (common.mjs reports it the same way).
+  if (cls === "SEARCH_OPERATION_RECORDED") return ["internal_failure", "operation_already_recorded"];
   if (cls === "CANCELLED") return ["cancelled", "cancelled"];
   if (cls === "SEARCH_PROVIDER_TIMEOUT") return ["timeout", "timeout"];
   // The search's absolute deadline reached the transport: before send (PROVIDER_TIMEOUT) or after it, with no answer.

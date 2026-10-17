@@ -47,6 +47,9 @@ export function makeSerper({ store, getBudget, getPolicy, providersDir, resolveP
           const r = await store.reserveBudget({ id, callKey: callKey ?? `search:${id}`, logicalId: logicalId ?? id, category: s.category, provider: s.provider,
             subject, kind: "search", unit: "credits", rateCard: card.id, requestHash, amount: card.creditsPerSearch,
             ...periodStarts(), caps: c.caps, lifetimeCap: b.searching.allocationCredits, paidTotalCap: null, notifyAt: b.notifyAtFraction });
+          // The operation's call key is already recorded (a retry of the same logical search): nothing is sent again, and the
+          // earlier operation may have gone out unless it was released. That is not an exhausted allocation.
+          if (r.existing) throw fail("SEARCH_OPERATION_RECORDED", { sent: r.existing.state !== "RELEASED" });
           if (!r.reservation) throw fail("SEARCH_CREDITS_EXHAUSTED");
           reservation = r.reservation;
           if (signal.aborted) throw Object.assign(fail("SEARCH_PROVIDER_TIMEOUT"), { sent: false });
@@ -85,7 +88,7 @@ export function makeSerper({ store, getBudget, getPolicy, providersDir, resolveP
             if (sent || e.sent !== false) await store.markBudgetUncertain(reservation.id, "search dispatch outcome unknown");
             else await store.releaseBudget(reservation.id, "search request not sent");
           }
-          const wasSent = !!reservation && (sent || e.sent !== false);
+          const wasSent = e.failureClass === "SEARCH_OPERATION_RECORDED" ? e.sent : !!reservation && (sent || e.sent !== false);
           if (signal.aborted) throw Object.assign(fail(callerSignal?.aborted ? "CANCELLED" : "SEARCH_PROVIDER_TIMEOUT"), { sent: wasSent, httpStatus, timedOut: !callerSignal?.aborted });
           throw Object.assign(fail(e.failureClass ?? e.code ?? "SEARCH_PROVIDER_ERROR"), { sent: wasSent, httpStatus, timedOut: !!e.timedOut });
         }

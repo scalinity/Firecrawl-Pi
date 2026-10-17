@@ -248,6 +248,21 @@ test("Serper's availability is the fixture provider's own: a 429 cools fixture-s
   } finally { await h.close(); }
 });
 
+test("a retry whose Serper operation is already recorded says so, sends nothing, and is never called quota exhaustion", async () => {
+  const h = await harness({ handlers: { serper: () => ({ status: 500, body: {} }) } });
+  try {
+    const req = request({ originalQuery: "retried search" });
+    const first = await h.coordinator.search(req, { signal: new AbortController().signal });
+    assert.equal(first.body.search.providers.serper.reason, "temporarily_unavailable");
+    assert.equal([...h.store.rows.values()].find((x) => x.provider === "fixture-serper").state, "UNCERTAIN");
+    const again = await h.coordinator.search({ ...req, requestId: `${req.requestId}-retry` }, { signal: new AbortController().signal });
+    const s = again.body.search.providers.serper;
+    assert.deepEqual([s.status, s.reason, s.detail, s.dispatchState], ["failed", "internal_failure", "operation_already_recorded", "possibly_sent"]);
+    assert.equal(h.servers.serper.seen.length, 1, "the recorded operation is not sent again");
+    assert.doesNotMatch(again.body.warning ?? "", /quota/i);
+  } finally { await h.close(); }
+});
+
 test("a rate limit with Retry-After cools the provider down until that time; transport failures do trip the breaker", async () => {
   const h = await harness({ handlers: { exa: () => ({ status: 429, body: { requestId: "r", error: "slow down", tag: "RATE_LIMIT_EXCEEDED" }, headers: { "retry-after": "120" } }), deepseek: () => "destroy" } });
   try {
