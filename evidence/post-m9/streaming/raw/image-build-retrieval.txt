@@ -1,0 +1,11 @@
+utc=2026-10-17T18:02:35Z source_commit=285723653a8039bf7a0c25b68ee7b6016e97cc0f
+mem_available_kib_before=4632608
+retrieval build_exit=0 log_lines=71
+#10 unpacking to docker.io/fcpi/retrieval:lookup-20261017
+#10 unpacking to docker.io/fcpi/retrieval:lookup-20261017 0.2s done
+#10 DONE 0.8s
+retrieval image_id=sha256:bb2ab368a4ebecf6acc53e2280e31816dbbe22da6724889c7f1641ff6d9c500c os=linux arch=arm64 size=355350846 user=3310:3310
+retrieval image env: FCPI_SOURCE_COMMIT=285723653a8039bf7a0c25b68ee7b6016e97cc0f
+mem_available_kib_after=4585392
+leftover_transient_containers=0
+end_marker=reached utc=2026-10-17T18:02:44Z
