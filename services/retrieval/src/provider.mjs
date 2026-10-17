@@ -13,6 +13,7 @@
 // everything from this call's first line, the name resolution included; the exchange ends at it or at timeoutMs from the call,
 // whichever is first. Without it, timeoutMs starts after resolution, as before. Either way the caller's signal is watched from
 // the first line, so a cancellation during a slow lookup ends the call unsent, and a lookup that answers later sends nothing.
+// providerStreamRequest is the same exchange with its answer streamed (search intelligence's MCP bridge for Ref).
 import http from "node:http";
 import https from "node:https";
 import { readFileSync } from "node:fs";
@@ -30,7 +31,9 @@ export function readCredential(dir, name) {
   try { const v = readFileSync(`${dir}/${name}`, "utf8").trim(); return v || null; } catch { return null; }
 }
 
-export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt = null }) {
+// What every provider request does before its socket opens: the target checked by the egress rules and resolved once, both
+// within the caller's deadline and cancellation, and the paid-dispatch authority rechecked. Throws unsent.
+async function prepare({ baseUrl, path, timeoutMs, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt }) {
   const url = new URL(baseUrl.replace(/\/$/, "") + path);
   const policy = getPolicy();
   if (!policy.localCidrs) throw new ProviderError("NOT_READY", "the host's local-network list is not loaded", { sent: false });
@@ -58,6 +61,11 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
   if (late) throw late;
   const mod = url.protocol === "https:" ? https : http;
   if (authorize && !authorize()) throw new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before connection", { sent: false });
+  return { url, target, address, mod, stopAt };
+}
+
+export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt = null }) {
+  const { url, target, address, mod, stopAt } = await prepare({ baseUrl, path, timeoutMs, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt });
   // The body is one buffer or a list of buffers written in order (a multipart upload's parts).
   const parts = body === null ? null : Array.isArray(body) ? body : [body];
   const length = parts ? parts.reduce((n, p) => n + p.length, 0) : 0;
@@ -106,6 +114,81 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
     });
     const timer = setTimeout(() => { req.destroy(new Error("timeout")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : stopAt === null ? "PROVIDER_UNREACHABLE" : "PROVIDER_TIMEOUT", `no answer within ${limitMs} ms`, { sent: written, timedOut: stopAt !== null })); }, limitMs);
     req.on("error", (e) => done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${url.host}: ${e.code ?? e.message}`, { sent: written })));
+    signal?.addEventListener("abort", onAbort, { once: true });
+    if (signal?.aborted) onAbort();
+  });
+}
+
+// The same exchange with its answer streamed: it resolves when the answer's headers arrive, with { status, headers, body }, body
+// a ReadableStream yielding each chunk as it comes, so a result an SSE stream delivers before the server closes the connection
+// is usable at once. The stream stays bounded: maxBytes in all, idleMs of silence (when given) and the deadline end it with an
+// error, as the caller's cancellation does; cancelling the stream closes the connection. onWritten is called when the request's
+// bytes are written, onEnd once however the exchange ends (refused, read to its end, cut off, cancelled), so whatever the caller
+// holds for it (a permit) is returned exactly once.
+export async function providerStreamRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt = null, onWritten = () => {}, onEnd = () => {} }) {
+  let ended = false;
+  const end = () => { if (!ended) { ended = true; onEnd(); } };
+  let prepared;
+  try { prepared = await prepare({ baseUrl, path, timeoutMs, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt }); }
+  catch (e) { end(); throw e; }
+  const { url, target, address, mod, stopAt } = prepared;
+  const payload = body === null ? null : Buffer.isBuffer(body) ? body : Buffer.from(body);
+  const limitMs = stopAt === null ? timeoutMs : Math.max(1, stopAt - Date.now());
+  return new Promise((resolve, reject) => {
+    let written = false, answered = false, finished = false, controller = null, idle = null;
+    // Ends the exchange once: before the answer the promise rejects; after it the body stream errors, or closes when err is null.
+    const finish = (err, destroy = !!err) => {
+      if (finished) return;
+      finished = true;
+      clearTimeout(timer); clearTimeout(idle); signal?.removeEventListener("abort", onAbort);
+      if (destroy) req.destroy();
+      if (!answered) reject(err ?? new ProviderError("PROVIDER_UNCERTAIN", "the exchange ended without an answer", { sent: written }));
+      else if (err) { try { controller.error(err); } catch { /* the reader already cancelled */ } }
+      else { try { controller.close(); } catch { /* the reader already cancelled */ } }
+      end();
+    };
+    const onAbort = () => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written }));
+    const quiet = () => {
+      if (!idleMs || finished) return;
+      clearTimeout(idle);
+      idle = setTimeout(() => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${written ? "nothing arrived" : "no connection"} for ${idleMs} ms`, { sent: written })), idleMs);
+    };
+    const req = mod.request({ host: target.host, port: target.port, method, path: url.pathname + url.search, agent: false, lookup: pinnedLookup(address),
+      servername: target.literal ? undefined : target.host, rejectUnauthorized: true,
+      headers: { ...headers, host: url.host, ...(payload ? { "content-length": payload.length } : {}) } }, (res) => {
+      answered = true;
+      const stream = new ReadableStream({ start(c) { controller = c; }, cancel() { finish(null, true); } });
+      let n = 0;
+      res.on("data", (c) => {
+        if (finished) return;
+        quiet();
+        n += c.length;
+        if (n > maxBytes) finish(new ProviderError("PROVIDER_RESPONSE_TOO_LARGE", `the provider's answer exceeds ${maxBytes} bytes`, { sent: true, status: res.statusCode }));
+        else controller.enqueue(c);
+      });
+      res.on("end", () => finish(null));
+      res.on("error", () => finish(new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
+      res.on("aborted", () => finish(new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
+      resolve({ status: res.statusCode, headers: res.headers, body: stream });
+    });
+    quiet();
+    // As providerRequest: nothing is written before the connection (and TLS) is up and the final authority check passes.
+    const send = () => {
+      if (finished) return;
+      if (signal?.aborted) { finish(new ProviderError("CANCELLED", "the caller cancelled", { sent: false })); return; }
+      if (authorize && !authorize()) { finish(new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before send", { sent: false })); return; }
+      written = true;
+      onWritten();
+      quiet();
+      req.end(payload ?? undefined);
+    };
+    req.on("socket", (s) => {
+      s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
+      if (mod === https) s.once("secureConnect", send);
+    });
+    // The whole exchange, the answer's stream included, ends at the deadline.
+    const timer = setTimeout(() => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : stopAt === null ? "PROVIDER_UNREACHABLE" : "PROVIDER_TIMEOUT", `no complete answer within ${limitMs} ms`, { sent: written, timedOut: stopAt !== null })), limitMs);
+    req.on("error", (e) => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${url.host}: ${e.code ?? e.message}`, { sent: written }), false));
     signal?.addEventListener("abort", onAbort, { once: true });
     if (signal?.aborted) onAbort();
   });
