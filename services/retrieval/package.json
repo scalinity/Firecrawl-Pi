@@ -4,9 +4,15 @@
   "private": true,
   "description": "FCPI retrieval service: the deployment's only acquisition path (FIRECRAWL_PI_SPEC.md §8.3)",
   "type": "module",
-  "engines": { "node": ">=22" },
-  "scripts": { "start": "node src/server.mjs", "test": "node --test test/*.test.mjs" },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
   "dependencies": {
+    "@modelcontextprotocol/client": "2.1.0",
     "pg": "8.23.0",
     "tldts": "7.4.15"
   }
