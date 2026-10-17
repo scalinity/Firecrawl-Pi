@@ -266,6 +266,75 @@ test("an answered refusal keeps its reservation unless the provider documents it
   } finally { await overloaded.close(); }
 });
 
+const ledgerRow = (h, provider) => [...h.store.rows.values()].find((x) => x.provider === provider);
+
+test("each answer closes its reservation as the provider documents its billing", async () => {
+  const h = await harness({ handlers: {
+    deepseek: () => ({ status: 200, body: { results: [] } }),
+    exa: () => ({ status: 200, body: { requestId: "r", results: [{ id: "e0", title: "Exa", url: "https://exa.example.org/doc/1", highlights: ["h"] }] } }),
+    tavily: () => ({ status: 500, body: { detail: { error: "internal" } } }),
+    brave: () => ({ status: 429, body: { type: "ErrorResponse", error: { id: "x", status: 429, code: "QUOTA_LIMITED" } } }),
+  } });
+  try {
+    const r = await h.coordinator.search(request({ originalQuery: "ledger closings" }), { signal: new AbortController().signal });
+    const p = r.body.search.providers;
+    // DeepSeek documents an empty search as free.
+    assert.equal(p.deepseek.status, "success_empty");
+    assert.deepEqual([ledgerRow(h, "fixture-deepseek").state, ledgerRow(h, "fixture-deepseek").actual], ["SETTLED", 0]);
+    // Exa without a reported cost settles at the reservation's documented maximum, labelled an estimate.
+    const exa = ledgerRow(h, "fixture-exa");
+    assert.deepEqual([exa.state, exa.actual], ["SETTLED", exa.reserved]);
+    assert.equal(r.body.search.usage.find((u) => u.provider === "exa").basis, "estimated");
+    // A Tavily server error may have been charged.
+    assert.equal(ledgerRow(h, "fixture-tavily").state, "UNCERTAIN");
+    // Brave is classified by its error code before its status (a 429 carrying QUOTA_LIMITED is quota), and released.
+    assert.deepEqual([p.brave.reason, ledgerRow(h, "fixture-brave").state], ["quota_exhausted", "RELEASED"]);
+  } finally { await h.close(); }
+});
+
+test("a DeepSeek 200 that is not the documented shape keeps its reservation uncertain and is a contract failure", async () => {
+  const h = await harness({ handlers: { deepseek: () => ({ status: 200, body: { unexpected: true } }) } });
+  try {
+    const r = await h.coordinator.search(request({ originalQuery: "malformed answer" }), { signal: new AbortController().signal });
+    assert.deepEqual([r.body.search.providers.deepseek.status, r.body.search.providers.deepseek.reason], ["failed", "contract_failure"]);
+    assert.equal(ledgerRow(h, "fixture-deepseek").state, "UNCERTAIN");
+  } finally { await h.close(); }
+});
+
+test("stopping the service mid-search closes an in-flight reservation as uncertain, never leaves it reserved", async () => {
+  let release, arrived;
+  const gate = new Promise((r) => { release = r; }), sent = new Promise((r) => { arrived = r; });
+  const h = await harness({ handlers: { exa: async (q, e) => { arrived(); await gate; return answers.exa(q, e); } } });
+  try {
+    const search = h.coordinator.search(request({ originalQuery: "drained" }), { signal: new AbortController().signal }).catch((e) => e);
+    await sent;
+    assert.equal(ledgerRow(h, "fixture-exa").state, "RESERVED", "the control: the request is in flight");
+    assert.equal(await h.coordinator.drain(2000), 0, "every tracked task finished within the drain");
+    assert.equal(ledgerRow(h, "fixture-exa").state, "UNCERTAIN", "sent and cut off by the stop: the charge is unknown");
+    assert.equal((await search).failureClass, "CANCELLED");
+  } finally { release(); await h.close(); }
+});
+
+test("identical searches in different deadline classes run as separate executions", async () => {
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const slow = (name) => async (q, e) => { await gate; return answers[name](q, e); };
+  const h = await harness({ handlers: Object.fromEntries(["serper", "brave", "exa", "deepseek", "tavily"].map((n) => [n, slow(n)])) });
+  try {
+    const normal = h.coordinator.search(request({ originalQuery: "two classes", absoluteDeadlineMs: Date.now() + 30000 }), { signal: new AbortController().signal });
+    const short = h.coordinator.search(request({ originalQuery: "two classes", absoluteDeadlineMs: Date.now() + 15000 }), { signal: new AbortController().signal });
+    await new Promise((r) => setTimeout(r, 50));
+    release();
+    const [a, b] = await Promise.all([normal, short]);
+    for (const r of [a, b]) {
+      assert.equal(r.body.search.coverage.general.successful, 5);
+      assert.equal(r.body.search.coalesced, undefined);
+    }
+    assert.equal(h.store.admissions, 2);
+    assert.equal(h.servers.serper.seen.length, 2, "each execution makes its own Serper operation under its own logical id");
+  } finally { await h.close(); }
+});
+
 test("Serper's availability is the fixture provider's own: a 429 cools fixture-serper down and never touches the live row", async () => {
   const h = await harness({ handlers: { serper: () => ({ status: 429, body: { message: "Too many requests" } }) } });
   try {
