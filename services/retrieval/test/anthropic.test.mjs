@@ -3,7 +3,7 @@
 // around it (reservation, settlement, failure classes) is tested through the fixture model in m5-extract.test.mjs.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { messagesHeaders, messagesRequest, readMessages, unions, MAX_UNIONS } from "../src/anthropic.mjs";
+import { messagesHeaders, messagesRequest, readMessages, unions, forGrammar, MAX_UNIONS } from "../src/anthropic.mjs";
 import { toStrict } from "../src/jsonschema.mjs";
 
 const CHAT = [{ role: "system", content: "Extract." }, { role: "user", content: "Content." }];
@@ -48,6 +48,41 @@ test("the grammar limit is 16 union fields: a schema at the limit is a grammar, 
   // At a reasoning effort the effort still travels when the grammar does not.
   const overHigh = messagesRequest({ model: "m", effort: "high", messages: CHAT, schema: toStrict(objectOf(17)), maxOutputTokens: 100 });
   assert.deepEqual(overHigh.body.output_config, { effort: "high" });
+});
+
+// Every node of a schema, with its path.
+const nodes = (s, path = "$") => !s || typeof s !== "object" ? [] : [[path, s], ...Object.entries(s.properties ?? {}).flatMap(([k, v]) => nodes(v, `${path}.${k}`)), ...nodes(s.items, `${path}[]`), ...(s.anyOf ?? []).flatMap((b, i) => nodes(b, `${path}|${i}`))];
+
+test("a nullable enum is sent as an anyOf, because the grammar compiler refuses a type array that carries an enum", () => {
+  const strict = toStrict({ type: "object", required: ["kind"], properties: {
+    kind: { type: "string", enum: ["x", "y"], description: "The kind." }, n: { type: "integer", enum: [1, 2] }, on: { type: "boolean", enum: [true] },
+    mixed: { type: ["string", "number"], enum: ["a", 1, 2.5] }, list: { type: "array", items: { type: "string", enum: ["low", "high"] } },
+    rows: { type: "array", items: { type: "object", properties: { level: { type: "string", enum: ["p", "q"] } }, required: ["level"] } } } });
+  assert.deepEqual(strict.properties.kind.type, ["string", "null"], "precondition: toStrict does produce a type array with an enum");
+  const sent = forGrammar(strict);
+  assert.deepEqual(sent.properties.kind, { description: "The kind.", anyOf: [{ type: "string", enum: ["x", "y"] }, { type: "null" }] });
+  assert.deepEqual(sent.properties.n.anyOf, [{ type: "integer", enum: [1, 2] }, { type: "null" }]);
+  assert.deepEqual(sent.properties.on.anyOf, [{ type: "boolean", enum: [true] }, { type: "null" }]);
+  assert.deepEqual(sent.properties.mixed.anyOf, [{ type: "string", enum: ["a"] }, { type: "number", enum: [1, 2.5] }, { type: "null" }].filter(Boolean), "values go to the branch of their own type");
+  assert.deepEqual(sent.properties.list.items, { type: "string", enum: ["low", "high"] }, "an enum that is not nullable is left alone");
+  assert.deepEqual(sent.properties.rows.anyOf ?? null, null, "an array that is only nullable stays a type array");
+  assert.deepEqual(sent.properties.rows.items.properties.level.anyOf, [{ type: "string", enum: ["p", "q"] }, { type: "null" }], "rewritten at any depth");
+  for (const [path, node] of nodes(sent)) assert.equal(Array.isArray(node.type) && Array.isArray(node.enum), false, `${path} still combines a type array and an enum`);
+  assert.equal(unions(sent), unions(strict), "the union count the grammar limit is judged on is unchanged");
+  assert.deepEqual(strict.properties.kind.enum, ["x", "y", null], "the schema answers are validated against is not rewritten");
+  assert.deepEqual(forGrammar(undefined), undefined);
+});
+
+test("the request carries the rewritten schema in the grammar and the original in the prompt", () => {
+  const strict = toStrict({ type: "object", required: ["kind"], properties: { kind: { type: "string", enum: ["x", "y"] } } });
+  const grammar = messagesRequest({ model: "m", effort: "none", messages: CHAT, schema: strict, maxOutputTokens: 100 });
+  assert.equal(grammar.guided, false);
+  for (const [path, node] of nodes(grammar.body.output_config.format.schema)) assert.equal(Array.isArray(node.type) && Array.isArray(node.enum), false, path);
+  // A guided request puts the schema in the prompt for a model to read, where the type array and the enum say what they mean.
+  const wide = toStrict({ type: "object", properties: { kind: { type: "string", enum: ["x", "y"] }, ...Object.fromEntries(Array.from({ length: 16 }, (_, i) => [`f${i}`, { type: "string" }])) } });
+  const guided = messagesRequest({ model: "m", effort: "none", messages: CHAT, schema: wide, maxOutputTokens: 100 });
+  assert.equal(guided.guided, true);
+  assert.ok(guided.body.system.includes("\"enum\":[\"x\",\"y\",null]"));
 });
 
 test("unions counts type arrays and anyOf wherever they nest", () => {

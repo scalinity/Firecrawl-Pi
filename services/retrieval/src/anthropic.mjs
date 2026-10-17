@@ -23,6 +23,23 @@ export function unions(s) {
   return n + unions(s.items);
 }
 
+// toStrict makes an enum nullable as a type array plus a trailing null, which the grammar compiler refuses ("Enum value
+// 'x' does not match declared type"). The same meaning as an anyOf: one branch per type holding that type's values, and
+// null. Measured 2026-10-17 against every shape toStrict produces: nullable enums were the only ones refused. The schema
+// the engine validates answers against is unchanged; only the copy sent as the grammar is rewritten.
+const sameType = (v, t) => t === "string" ? typeof v === "string" : t === "boolean" ? typeof v === "boolean" : t === "integer" ? Number.isInteger(v) : t === "number" ? typeof v === "number" : false;
+export function forGrammar(s) {
+  if (!s || typeof s !== "object") return s;
+  const out = { ...s };
+  if (s.properties) out.properties = Object.fromEntries(Object.entries(s.properties).map(([k, v]) => [k, forGrammar(v)]));
+  if (s.items) out.items = forGrammar(s.items);
+  if (s.anyOf) out.anyOf = s.anyOf.map(forGrammar);
+  if (!Array.isArray(s.type) || !Array.isArray(s.enum)) return out;
+  const { type, enum: values, ...rest } = out;
+  const typed = type.filter((t) => t !== "null").map((t) => ({ type: t, enum: values.filter((v) => sameType(v, t)) })).filter((b) => b.enum.length);
+  return { ...rest, anyOf: [...typed, ...(type.includes("null") ? [{ type: "null" }] : [])] };
+}
+
 // messages: the chat as the OpenAI-compatible path takes it (a system turn, then the user turn); schema: the
 // strict schema; effort: the model policy's reasoningEffort. "none" is the policy's word for no reasoning, which
 // Haiku accepts as thinking off; any other level is the output effort of a model that always thinks. No
@@ -34,7 +51,7 @@ export function messagesRequest({ model, effort, messages, schema, maxOutputToke
   const system = [...messages.filter((m) => m.role === "system").map((m) => m.content),
     ...(guided ? [`Reply with only one JSON object that matches this JSON Schema, with no text before or after it:\n${JSON.stringify(schema)}`] : [])].join("\n\n");
   const reasons = effort !== undefined && effort !== null && effort !== "none";
-  const output = { ...(reasons ? { effort } : {}), ...(guided ? {} : { format: { type: "json_schema", schema } }) };
+  const output = { ...(reasons ? { effort } : {}), ...(guided ? {} : { format: { type: "json_schema", schema: forGrammar(schema) } }) };
   return {
     path: "/v1/messages", guided,
     body: { model, max_tokens: maxOutputTokens, ...(system ? { system } : {}), messages: messages.filter((m) => m.role !== "system"),

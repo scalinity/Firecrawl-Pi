@@ -579,6 +579,21 @@ test("Messages API request: path, key header, top-level system, thinking off, no
   } finally { await r.srv.close(); }
 });
 
+test("Messages API: a schema with enums is sent so the grammar compiler can accept it (no node pairs a type array with an enum)", async () => {
+  const seen = {};
+  const schema = { type: "object", properties: { action: { type: "string", enum: ["visit", "search", "finish"] }, level: { type: "integer", enum: [1, 2] }, note: { type: "string" } }, required: ["action"] };
+  const r = await rig({ mutate: messagesApi(), handler: recording(answerWith({ content: [{ type: "text", text: JSON.stringify({ action: "visit", level: null, note: null }) }] }), seen) });
+  try {
+    const out = await r.extract(req({ schema }));
+    assert.equal(out.ok, true);
+    assert.equal(out.data.action, "visit", "the answer is validated against the schema as the engine holds it");
+    const walk = (s) => (!s || typeof s !== "object") ? [] : [s, ...Object.values(s.properties ?? {}).flatMap(walk), ...walk(s.items), ...(s.anyOf ?? []).flatMap(walk)];
+    const nodes = walk(seen.sent.output_config.format.schema);
+    assert.ok(nodes.some((n) => Array.isArray(n.enum)), "the enums are still in the grammar");
+    assert.equal(nodes.filter((n) => Array.isArray(n.type) && Array.isArray(n.enum)).length, 0);
+  } finally { await r.srv.close(); }
+});
+
 test("Messages API at high effort sends the effort and the model\x27s own output cap, and never a thinking switch", async () => {
   const seen = {};
   const r = await rig({ mutate: (b) => { messagesApi({ "fcpi-fixture-model": "high" })(b); Object.assign(b.models["fcpi-fixture-model"], { maxOutputTokens: 16000, requestTimeoutMs: 90000 }); },
