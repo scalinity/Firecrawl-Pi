@@ -35,7 +35,7 @@
   "searching": {"defaultSearch": "serper-google", "allocationCredits": 2443, "requestTimeoutMs": 7000, "maxResponseBytes": 1048576},
   "models": {
     "claude-haiku-5-5": { "provider": "anthropic", "category": "llm", "reasoningEffort": "none" },
-    "claude-opus-5-5": { "provider": "anthropic-agent", "category": "llm", "reasoningEffort": "high", "maxOutputTokens": 20000, "requestTimeoutMs": 300000 },
+    "claude-opus-5-5": { "provider": "anthropic-agent", "category": "llm", "reasoningEffort": "high", "maxOutputTokens": 128000, "requestTimeoutMs": 300000 },
     "fcpi-fixture-model": { "provider": "fixture-model", "category": "fixture" },
     "fcpi-fixture-race": { "provider": "fixture-model", "category": "fixture_race" },
     "fcpi-fixture-stale": { "provider": "fixture-model", "category": "fixture" }

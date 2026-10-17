@@ -115,7 +115,7 @@ export function loadBudgetPolicy(text) {
         if (name === "claude-opus-5-5" && m.reasoningEffort !== "high") throw new Error("model claude-opus-5-5.reasoningEffort must be high");
         // The Messages API defaults to medium effort when none is sent, so a model on it states its setting.
         if (messagesApi && m.reasoningEffort === undefined) throw new Error(`model ${name}.reasoningEffort must be stated`);
-        if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 20000 : 4000, `model ${name}.maxOutputTokens`);
+        if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 128000 : 4000, `model ${name}.maxOutputTokens`);
         if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 300000, `model ${name}.requestTimeoutMs`);
       }
       const prov = p.providers[m.provider], cat = p.categories[m.category];

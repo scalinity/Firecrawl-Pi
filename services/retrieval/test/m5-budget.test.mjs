@@ -87,8 +87,9 @@ test("Opus reasoning and output limits are model policy while the default extrac
   assert.equal(b.extraction.defaultModel, "claude-haiku-5-5");
   assert.equal(b.extraction.maxOutputTokens, 4000);
   assert.equal(b.models["claude-opus-5-5"].reasoningEffort, "high");
-  // Measured 2026-10-17: 9,000 output tokens in 59.5 s non-streaming (about 151 tokens/s), so 20,000 take about 132 s and the 300 s timeout leaves a factor of two.
-  assert.equal(b.models["claude-opus-5-5"].maxOutputTokens, 20000);
+  // No output cap in effect: 128,000 is the most the API accepts for this model (128,001 is refused), so it is the cap that never binds.
+  // Measured 2026-10-17: 20,000 tokens in about 190 s (roughly 105 tokens/s), so the 300 s timeout, not the token count, is what bounds a call.
+  assert.equal(b.models["claude-opus-5-5"].maxOutputTokens, 128000);
   assert.equal(b.models["claude-opus-5-5"].requestTimeoutMs, 300000);
   const card = rateCardFor(b, "claude-opus-5-5", new Date("2026-10-17T12:00:00Z"));
   assert.deepEqual([card.inputPerMTok, card.cachedInputPerMTok, card.cacheWritePerMTok, card.outputPerMTok], [4000000, 200000, 5000000, 20000000]);
@@ -98,7 +99,7 @@ test("Opus reasoning and output limits are model policy while the default extrac
     j => { j.models["claude-opus-5-5"].reasoningEffort = "none"; },
     j => { j.models["claude-opus-5-5"].reasoningEffort = "xhigh"; },
     j => { delete j.models["claude-opus-5-5"].reasoningEffort; },
-    j => { j.models["claude-opus-5-5"].maxOutputTokens = 20001; },
+    j => { j.models["claude-opus-5-5"].maxOutputTokens = 128001; },
     j => { j.models["claude-opus-5-5"].requestTimeoutMs = 300001; },
     j => { j.models["claude-haiku-5-5"].maxOutputTokens = 16000; },
   ]) assert.throws(() => loadBudgetPolicy(mutate(edit)));
