@@ -9,9 +9,9 @@ Branch `search-intelligence` (from `main` at `2a62513`), pushed to `origin/searc
 |---|---|---|
 | SI0 reconcile and freeze | IMPLEMENTED | `SI0/corpus/` (frozen corpus, sha256 `b4ae2b8f…f724`), `SI0/provider-contracts-2026-10-17.md`, `SI0/BASELINE.md` |
 | SI1 registry, lifecycle, five-engine discovery | IMPLEMENTED: reviewed (`/review-2`, Opus 5.5) and remediated; every finding has an outcome | `SI1/review/REVIEW.md` (3 critical, 7 warnings, 19 suggestions, 3 found during remediation: 29 fixed, 2 rejected with evidence, 1 deferred to SI6) |
-| SI2 docs and Jev | IN_PROGRESS: Context7 v3, Ref MCP sessions, Jev decisions and documentation activation committed; dispatch metering for Ref, server wiring and coordinator integration next | `services/retrieval/test/si-semantic.test.mjs`, `si-docs-decisions.test.mjs` |
-| SI3 native REST/MCP and evidence | IN_PROGRESS: gateway validation and trusted headers, MCP schema and shaping, playground limitations, core patch 0011 (compiles for linux/arm64) committed; `POST /internal/search/evidence` and `evidence.mjs` next | `services/access/test/search-intelligence.test.mjs`, `services/mcp/test/search-intelligence.test.mjs`, `patches/series.json` |
-| SI4 durable operational evidence | NOT_STARTED | |
+| SI2 docs and Jev | IMPLEMENTED, in review: Context7 v3; Ref over the official MCP client through `adapters/ref-bridge.mjs` (streamed answers, stream slots apart from request permits, withdrawn calls never sent late) metered by `dispatch.meter()`; selected Ref reads and lease ownership in the coordinator; Jev decisions; documentation activation; server wiring. `/review-2` (Opus 5.5) running over `bdf91d8..HEAD` in `services/retrieval` | `services/retrieval/test/si-ref.test.mjs`, `si-docs-search.test.mjs`, `si-jev-search.test.mjs`, `si-docs-decisions.test.mjs`, `si-semantic.test.mjs`; review to `SI2/review/REVIEW.md` |
+| SI3 native REST/MCP and evidence | IN_PROGRESS: gateway validation and trusted headers, MCP schema and shaping, playground limitations, core patch 0011 (compiles for linux/arm64) and `evidence.mjs` committed; the `POST /internal/search/evidence` route waits on the SI2 review (it edits `server.mjs`) | `services/access/test/search-intelligence.test.mjs`, `services/mcp/test/search-intelligence.test.mjs`, `services/retrieval/test/si-evidence.test.mjs`, `patches/series.json` |
+| SI4 durable operational evidence | IN_PROGRESS: `search_run`, `search_event`, `search_daily` and the watermark (schema), Store methods, the daily reduction and retention, `telemetry.mjs` committed; coordinator and server wiring, availability/breaker transition events and status next | `services/retrieval/test/si-telemetry.test.mjs` |
 | SI5 evaluation and integration readiness | NOT_STARTED | |
 | SI6 release preparation | NOT_STARTED; owns the deferred SI1 finding S19 (CLAUDE.md §11 wording on unknown prices) | |
 
@@ -31,10 +31,11 @@ Branch `search-intelligence` (from `main` at `2a62513`), pushed to `origin/searc
 
 - Local retrieval suite: `$SCRATCH/bin/rtx.sh [test files]` (copies the container layout); database suites need the disposable PostgreSQL: Colima started (`colima start`, no flags), container `fcpi-si-testpg` (pinned image, label `fcpi.transient=si-db-tests`, `127.0.0.1:55432`), then `FCPI_TEST_PG=127.0.0.1 PGPORT=55432 CONC=1 rtx.sh`. Stop and remove both at session end (Colima was stopped when this session began).
 - Mutation check of a fix's tests: `$SCRATCH/bin/rtx-at.sh HEAD "src/<file> ..." test/<file>` runs the working tree's tests over `HEAD`'s copies of the named source files; a new test must fail there.
-- Last full run: 375 tests, 375 pass, 0 skipped (with PostgreSQL), at `b52f498`. `serper.test.mjs`'s "deadline covers slow admission and DNS" bounds the caller at 90 ms and can fail under CPU contention (seen once while the full suite ran beside it; three solo runs pass).
+- Last full run: 398 tests, 398 pass, 0 skipped (with PostgreSQL), at `a3e69fc`; since then `si-evidence.test.mjs` (5/5) and `si-telemetry.test.mjs` (6/6, PostgreSQL) pass alone. `serper.test.mjs`'s "deadline covers slow admission and DNS" bounds the caller at 90 ms and can fail under CPU contention (seen once while the full suite ran beside it; three solo runs pass).
 
 ## Next actions
 
-1. SI2: `dispatch.meter()` and `providerStreamRequest`/`makeSafeFetch` for Ref (the single-verdict and billing rules above apply to its reads and searches), server wiring of Context7, Ref, documentation activation and decisions, Ref lease close and at most two reads in the semantic phase, then the SI2 integration tests and `/review-2`.
-2. SI3: `POST /internal/search/evidence` with `evidence.mjs` (drafted, uncommitted), native chain tests including the deadline beyond 15 s, the Pi fixture stack, `deploy/versions.lock.json`.
-3. SI4–SI6 per the kickoff.
+1. SI2: save the review of record to `SI2/review/REVIEW.md`, run `/address`, rerun the affected suites.
+2. SI3: the `POST /internal/search/evidence` route over `evidence.mjs`, native chain tests including the deadline beyond 15 s, the Pi fixture stack.
+3. SI4: wire `telemetry.mjs` into the coordinator (cancelled and failed runs included) and the server (hourly reduction before prune, drained stop), availability and breaker transition events, additive status with the telemetry-loss counter.
+4. SI5–SI6 per the kickoff; `deploy/versions.lock.json` still records the series without patch 0011 (re-pinned with the rebuilt image in SI6).
