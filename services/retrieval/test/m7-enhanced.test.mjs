@@ -79,6 +79,25 @@ test("an enhanced lease expiring during reservation sends no paid request (PRE-M
   } finally { await fx.close(); }
 });
 
+test("a paid enhanced dispatch with no shared daily cap reserves against its category alone, keeps no shared row, and settles", async () => {
+  const fx = await startM7();
+  try {
+    const r = rig(fx, { paidDispatch: true });
+    r.budget.providers["fixture-zyte"].paid = true;
+    assert.equal(r.budget.paidTotal.caps.day, undefined, "precondition: the deployed policy has no shared cap");
+    const asked = [];
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async (x) => { asked.push(x.paidTotalCap); return reserve(x); };
+    const url = at(fx, "/article");
+    const d = await r.enhanced.dispatch({ logicalId: "no-shared-cap", target: parseTarget(url, r.policy), url, mode: "http", deadline: Date.now() + 30000 });
+    assert.equal(d.answer.status, 200, JSON.stringify(d.failure));
+    assert.deepEqual(asked, [null], "the ledger is asked for no shared cap, not for an undefined one");
+    const [row] = rows(r.store);
+    assert.equal(row.state, "SETTLED");
+    assert.equal(row.paid_total, false);
+  } finally { await fx.close(); }
+});
+
 test("the budget policy validates the enhanced provider, its subjects and per-request cards; the selection names an enhancer", () => {
   const b = JSON.parse(readFileSync(new URL("../policy/budget.json", import.meta.url), "utf8"));
   const load = (f) => { const c = structuredClone(b); f(c); return loadBudgetPolicy(JSON.stringify(c)); };

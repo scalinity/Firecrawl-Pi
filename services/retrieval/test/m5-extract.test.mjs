@@ -638,7 +638,7 @@ test("Messages API at high effort sends the effort and the model\x27s own output
   } finally { await r.srv.close(); }
 });
 
-test("with no shared daily cap a paid call is bounded by its own category alone; with one it is also bounded by that", async () => {
+test("with no shared daily cap a paid call is still bounded by its own category; with one it is also bounded by that", async () => {
   // A reservation of at least two million micro-USD: 20,000 output tokens at $100 per million.
   const dear = (b) => { Object.assign(b.models["fcpi-fixture-model"], { reasoningEffort: "xhigh", maxOutputTokens: 20000, requestTimeoutMs: 300000 });
     Object.assign(b.rateCards.find((c) => c.subject === "fcpi-fixture-model"), { outputPerMTok: 100000000 }); };
@@ -651,6 +651,17 @@ test("with no shared daily cap a paid call is bounded by its own category alone;
     assert.ok(row.reserved >= 2000000, `reserved ${row.reserved}`);
     assert.equal(row.paid_total, false, "no shared row is kept when there is no shared cap");
   } finally { await free.srv.close(); }
+  // The same call against a category cap below its reservation: refused by the category, with no shared cap involved.
+  const tight = await rig({ paidDispatch: true, mutate: (b) => { dear(b); b.categories.fixture.caps.day = 1000000; } });
+  try {
+    tight.budget.providers["fixture-model"].paid = true;
+    assert.equal(tight.budget.paidTotal.caps.day, undefined, "precondition: no shared cap");
+    const out = await tight.extract(req({ reasoningEffort: "xhigh" }));
+    assert.equal(out.ok, false);
+    assert.equal(out.failure.class, "BUDGET_EXHAUSTED");
+    assert.match(out.failure.detail, /fixture day budget/);
+    assert.equal(tight.store.rows.size, 0, "nothing was reserved");
+  } finally { await tight.srv.close(); }
   const capped = await rig({ paidDispatch: true, mutate: dear });
   try {
     capped.budget.providers["fixture-model"].paid = true;

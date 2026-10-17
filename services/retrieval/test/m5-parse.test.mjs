@@ -36,6 +36,23 @@ test("a parser lease expiring during reservation sends no upload and releases cr
   } finally { await r.srv.close(); }
 });
 
+test("a paid parser with no shared daily cap reserves against its category alone and keeps no shared row", async () => {
+  const r = await rig({ paidDispatch: true });
+  try {
+    r.budget.providers["fixture-parser"].paid = true;
+    assert.equal(r.budget.paidTotal.caps.day, undefined, "precondition: the deployed policy has no shared cap");
+    const asked = [];
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async (x) => { asked.push(x.paidTotalCap); return reserve(x); };
+    const out = await r.parse(req(docs.scanPdfBytes()));
+    assert.equal(out.ok, true);
+    assert.deepEqual(asked, [null], "the ledger is asked for no shared cap, not for an undefined one");
+    const [row] = [...r.store.rows.values()];
+    assert.equal(row.state, "SETTLED");
+    assert.equal(row.paid_total, false);
+  } finally { await r.srv.close(); }
+});
+
 test("a scan-only page is parsed, its credits settled from the pages returned, cached, and its upload deleted", async () => {
   const r = await rig();
   try {

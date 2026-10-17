@@ -108,6 +108,21 @@ test("a paid category also draws on the paid total's daily cap; a zero cap refus
   } finally { await store.close(); }
 });
 
+test("a paid category with no shared cap (null or undefined) draws on no shared row and records none; a shared cap of zero still refuses", opts, async () => {
+  const store = await fresh();
+  try {
+    // An absent cap must never reach PostgreSQL as NULL: a NULL cap would compare as unknown and refuse or admit by accident.
+    for (const paidTotalCap of [null, undefined]) {
+      const r = await store.reserveBudget(base({ category: "llm", caps: { day: 1000000, month: 1000000 }, paidTotalCap, amount: 10000 }));
+      assert.ok(r.reservation, `paidTotalCap ${paidTotalCap}`);
+      assert.equal(r.reservation.paid_total, false);
+    }
+    assert.deepEqual((await usage(store)).sort(), ["llm/day:20000+0", "llm/month:20000+0"], "no shared row exists");
+    const zero = await store.reserveBudget(base({ category: "llm", caps: { day: 1000000, month: 1000000 }, paidTotalCap: 0, amount: 1 }));
+    assert.equal(zero.exhausted.category, "_paid_total", "a cap of zero is a cap");
+  } finally { await store.close(); }
+});
+
 test("settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2)", opts, async () => {
   const store = await fresh();
   try {

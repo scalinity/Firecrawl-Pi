@@ -18,11 +18,12 @@ const nonNegInt = (v, where) => { if (!Number.isSafeInteger(v) || v < 0) throw n
 const posInt = (v, lo, hi, where) => { if (!Number.isSafeInteger(v) || v < lo || v > hi) throw new Error(`${where} must be an integer in ${lo}..${hi}`); return v; };
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-// A session policy's absolute lease survives process and daemon restarts. Check at dispatch, including
-// after asynchronous waits; already-dispatched work may still settle, poll, and delete its upload.
-// The shared daily cap across the paid categories in micro-USD, or null when the policy sets none.
+// The shared daily cap across the paid categories in micro-USD, or null when the policy sets none. A cap set later counts
+// only the reservations made while it is set, as every category's period row does.
 export const paidTotalDayCap = (policy) => policy.paidTotal.caps.day ?? null;
 
+// A session policy's absolute lease survives process and daemon restarts. Check at dispatch, including
+// after asynchronous waits; already-dispatched work may still settle, poll, and delete its upload.
 export function paidDispatchActive(policy, enabled, now = Date.now()) {
   return enabled && (policy.validationExpiresAt === undefined || now < Date.parse(policy.validationExpiresAt));
 }

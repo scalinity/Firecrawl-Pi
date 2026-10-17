@@ -8,6 +8,7 @@ import { Meter } from "../src/residential.mjs";
 import { pinnedLookup } from "../src/resolve.mjs";
 import { proxyCost } from "../src/budget.mjs";
 import { startFixture, rig, req, m6Policy, m6Budget, M6Store, CRED } from "./m6-helpers.mjs";
+import { providersDir } from "./m5-helpers.mjs";
 
 const base = (fx, host = "m6.fixture.fcpi.test") => `http://${host}:${fx.targetPort}`;
 const hitsOf = (fx, path) => fx.state.hits.filter((h) => h.path === path);
@@ -26,6 +27,53 @@ test("a proxy lease expiring during reservation opens no CONNECT and never spill
     assert.equal(fx.state.tunnels.length, 0);
     assert.equal(fx.state.hits.length, 0);
     assert.deepEqual(r.store.ledger.states(), ["RELEASED"]);
+  } finally { await fx.close(); }
+});
+
+test("a paid proxy with no shared daily cap reserves against its category alone, keeps no shared row, and its request goes through", async () => {
+  const fx = await startFixture();
+  try {
+    const r = rig(fx, { paidDispatch: true });
+    r.budget.providers["fixture-proxy"].paid = true;
+    assert.equal(r.budget.paidTotal.caps.day, undefined, "precondition: the deployed policy has no shared cap");
+    const asked = [];
+    const reserve = r.store.reserveBudget.bind(r.store);
+    r.store.reserveBudget = async (x) => { asked.push(x.paidTotalCap); return reserve(x); };
+    const out = await r.acquire(req(`${base(fx)}/static`, { route: "stealth" }));
+    assert.equal(out.ok, true, JSON.stringify(out.failure));
+    assert.deepEqual(asked, [null], "the ledger is asked for no shared cap, not for an undefined one");
+    const [row] = [...r.store.ledger.rows.values()];
+    assert.equal(row.state, "SETTLED");
+    assert.equal(row.paid_total, false);
+    assert.equal(r.store.ledger.used("_paid_total"), 0);
+  } finally { await fx.close(); }
+});
+
+test("a day's reconciliation charges the shared daily cap only when one is set", async () => {
+  const fx = await startFixture();
+  try {
+    const { reconcileDay } = await import("../src/reconcile.mjs");
+    const day = "2026-09-26";
+    const budgetWith = (sharedDayCap) => {
+      const b = m6Budget(fx);
+      b.providers["fixture-proxy"].paid = true;
+      if (sharedDayCap !== undefined) b.paidTotal.caps.day = sharedDayCap;
+      return b;
+    };
+    const run = async (budget) => {
+      const adjustments = [];
+      const store = { proxyDay: async () => ({ reserved: 0, settledBytes: 0, uncertainBytes: 0, adjustedBytes: 0 }), recordAdjustment: async (a) => { adjustments.push(a); },
+        settleUncertainProxy: async () => 0, recordReconciliation: async () => {} };
+      fx.state.usageByDay.set(day, 1000000);
+      await reconcileDay({ store, getBudget: () => budget, providersDir: providersDir({ fixture_proxy: CRED }), providerName: "fixture-proxy", day, getPolicy: () => m6Policy(fx),
+        resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], log: () => {} });
+      return adjustments;
+    };
+    const none = await run(budgetWith(undefined));
+    assert.equal(none.length, 1, "the day's difference was charged");
+    assert.equal(none[0].paidTotal, false, "no shared cap: no shared row is touched");
+    const capped = await run(budgetWith(1000000));
+    assert.equal(capped[0].paidTotal, true, "a shared cap: the difference counts against it");
   } finally { await fx.close(); }
 });
 

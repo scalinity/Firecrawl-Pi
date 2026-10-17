@@ -47,7 +47,7 @@ export class FakeLedger {
   async reserveBudget(r) {
     const prior = this.rows.get(r.callKey);
     if (prior && prior.state !== "RELEASED") return { existing: prior };
-    const periods = [...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap })), ...(r.paidTotalCap !== null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap }] : [])];
+    const periods = [...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap })), ...(r.paidTotalCap != null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap }] : [])];
     for (const p of periods) {
       const u = this.usage.get(this.#key(p.category, p.period, p.period === "day" ? r.day : r.month)) ?? { reserved: 0, settled: 0 };
       if (u.reserved + u.settled + r.amount > p.cap) return { exhausted: { category: p.category, period: p.period, cap: p.cap, used: u.reserved + u.settled } };
@@ -58,7 +58,7 @@ export class FakeLedger {
       u.reserved += r.amount; this.usage.set(k, u);
     }
     const row = { id: r.id, call_key: r.callKey, logical_id: r.logicalId, category: r.category, provider: r.provider, subject: r.subject, kind: r.kind, request_hash: r.requestHash,
-      reserved: r.amount, actual: null, state: "RESERVED", day_start: r.day, month_start: r.month, paid_total: r.paidTotalCap !== null, result: null, usage: null, created_at: new Date() };
+      reserved: r.amount, actual: null, state: "RESERVED", day_start: r.day, month_start: r.month, paid_total: r.paidTotalCap != null, result: null, usage: null, created_at: new Date() };
     this.rows.set(r.callKey, row);
     return { reservation: row, notices: [] };
   }

@@ -205,7 +205,7 @@ export class Store {
   async reserveBudget(r) {
     const rate = r.paidTotalRate ?? 1;
     const periods = lockOrder([...Object.entries(r.caps).map(([period, cap]) => ({ category: r.category, period, cap, amount: r.amount })),
-      ...(r.paidTotalCap !== null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap, amount: Math.ceil(r.amount * rate) }] : [])]);
+      ...(r.paidTotalCap != null ? [{ category: "_paid_total", period: "day", cap: r.paidTotalCap, amount: Math.ceil(r.amount * rate) }] : [])]);
     const EXHAUSTED = Symbol("exhausted");
     try {
       return await this.#tx(async (c) => {
@@ -241,7 +241,7 @@ export class Store {
         const reservation = (await c.query(
           `INSERT INTO fcpi_retrieval.budget_reservation (id, call_key, logical_id, category, provider, subject, kind, unit, rate_card, request_hash, reserved, state, day_start, month_start, paid_total, periods, paid_total_rate)
            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, 'RESERVED', $12, $13, $14, $15, $16) RETURNING *`,
-          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap !== null, Object.keys(r.caps).sort(), rate])).rows[0];
+          [r.id, r.callKey, r.logicalId, r.category, r.provider, r.subject, r.kind, r.unit, r.rateCard, r.requestHash, r.amount, r.day, r.month, r.paidTotalCap != null, Object.keys(r.caps).sort(), rate])).rows[0];
         return { reservation, notices };
       });
     } catch (e) {
