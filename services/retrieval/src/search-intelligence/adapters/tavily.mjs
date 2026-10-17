@@ -3,8 +3,8 @@
 // results, three chunks per source, no answer or raw content, usage and published dates included, no automatic parameters.
 // Include domains go with include_domains_mode "restrict" (only when there are some: the mode alone is a 400). 432 (plan or key
 // limit) and 433 (pay-as-you-go limit) are quota; 429 is a rate limit with Retry-After. usage.credits settles the call; without
-// it, the documented two credits do. Whether a failed search costs credits is not documented: a refusal (4xx) is released, a
-// server error's charge stays uncertain.
+// it, the documented two credits do. Whether a failed search costs credits is not documented (SI0 contract evidence §4: it is
+// stated only for Extract and Map), so every answered failure keeps its reservation, uncertain (spec §18.2).
 import { outcome } from "../contracts.mjs";
 import { parseRetryAfter } from "../availability.mjs";
 import { parseJson, str } from "./common.mjs";
@@ -42,8 +42,7 @@ export function makeTavily({ dispatch, limits }) {
         else if (response.status === 429) { reason = "rate_limited"; retryAt = parseRetryAfter(response.headers["retry-after"]); }
         else if (response.status === 401) reason = "auth_failed";
         else if (response.status === 400 || response.status === 422) reason = "unsupported_request";
-        if (response.status < 500) await close.release(`Tavily answered HTTP ${response.status}`);
-        else await close.uncertain(`Tavily answered HTTP ${response.status}; whether it was charged is not documented`);
+        await close.uncertain(`Tavily answered HTTP ${response.status}; whether a failed search is charged is not documented`);
         const providerCode = response.status === 432 ? "plan_or_key_limit" : response.status === 433 ? "paygo_limit" : `http_${response.status}`;
         const verdict = { reason, retryAt, retryBasis: retryAt ? "documented" : null, providerCode, detail: providerCode };
         await dispatch.report(ctx.sub, ctx.pre.epoch, verdict);

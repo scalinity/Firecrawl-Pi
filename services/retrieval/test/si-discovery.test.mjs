@@ -231,8 +231,25 @@ test("quota exhaustion suppresses only that provider, does not trip its breaker,
     assert.equal(h.servers.tavily.seen.length, 1, "after the 432 no further Tavily call is sent");
     assert.equal(h.dispatch.breakerState("fixture-tavily"), "closed");
     assert.equal(h.store.avail.get("fixture-tavily").state, "quota_exhausted");
-    assert.equal([...h.store.rows.values()].find((x) => x.provider === "fixture-tavily").state, "RELEASED");
+    // Whether a failed Tavily search is charged is not documented: the answered 432 keeps its reservation.
+    assert.equal([...h.store.rows.values()].find((x) => x.provider === "fixture-tavily").state, "UNCERTAIN");
   } finally { await h.close(); }
+});
+
+test("an answered refusal keeps its reservation unless the provider documents it as unbilled", async () => {
+  const state = (h, p) => [...h.store.rows.values()].find((x) => x.provider === p)?.state;
+  const refused = await harness({ handlers: { exa: () => ({ status: 401, body: { requestId: "r", error: "bad key", tag: "INVALID_API_KEY" } }),
+    brave: () => ({ status: 429, body: { type: "ErrorResponse", error: { code: "RATE_LIMITED", status: 429 } } }) } });
+  try {
+    await refused.coordinator.search(request({ originalQuery: "billing of refusals" }), { signal: new AbortController().signal });
+    assert.equal(state(refused, "fixture-exa"), "UNCERTAIN", "Exa documents only its 503 as unbilled");
+    assert.equal(state(refused, "fixture-brave"), "RELEASED", "Brave bills successful requests only");
+  } finally { await refused.close(); }
+  const overloaded = await harness({ handlers: { exa: () => ({ status: 503, body: { requestId: "r", error: "overloaded", tag: "SERVICE_OVERLOADED" } }) } });
+  try {
+    await overloaded.coordinator.search(request({ originalQuery: "billing of overload" }), { signal: new AbortController().signal });
+    assert.equal(state(overloaded, "fixture-exa"), "RELEASED", "Exa's 503 is documented as not processed and not billed");
+  } finally { await overloaded.close(); }
 });
 
 test("Serper's availability is the fixture provider's own: a 429 cools fixture-serper down and never touches the live row", async () => {

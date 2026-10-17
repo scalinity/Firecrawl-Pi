@@ -41,9 +41,10 @@ export function makeExa({ dispatch, limits }) {
         else if (response.status === 429) { reason = "rate_limited"; retryAt = parseRetryAfter(response.headers["retry-after"]); }
         else if (response.status === 401 || response.status === 403) reason = "auth_failed";
         else if (response.status === 400) reason = "unsupported_request";
-        // A refusal (4xx) or a documented unbilled overload (503) is released; a 500/504's charge is not documented: uncertain.
-        if (response.status < 500 || response.status === 503) await close.release(`Exa answered HTTP ${response.status}${tag ? ` ${tag}` : ""}`);
-        else await close.uncertain(`Exa answered HTTP ${response.status}; whether it was billed is not documented`);
+        // Only the 503 is documented as not processed and not billed (SI0 contract evidence §2); no other status's charge is
+        // documented, so its reservation stays whole, uncertain (spec §18.2).
+        if (response.status === 503) await close.release(`Exa answered HTTP 503${tag ? ` ${tag}` : ""}: documented as not billed`);
+        else await close.uncertain(`Exa answered HTTP ${response.status}${tag ? ` ${tag}` : ""}; whether it was billed is not documented`);
         const verdict = { reason, retryAt, retryBasis: retryAt ? "documented" : null, providerCode: tag ?? `http_${response.status}`, detail: tag ?? `http_${response.status}` };
         await dispatch.report(ctx.sub, ctx.pre.epoch, verdict);
         return outcome({ ...base, ...timing, status: "failed", reason, detail: verdict.detail, retryAt, providerRequestId: requestId, error: { httpStatus: response.status, providerCode: tag, retryable: reason !== "auth_failed", messageCode: `exa_${reason}` } });
