@@ -22,8 +22,11 @@ export function normalizeQuery(q) { return q.normalize("NFC").trim().replace(/\s
 // One request to the SearXNG backend; resolves { status, body } or rejects with a Denied naming the failure.
 function backendGet(url, deadlineMs, signal) {
   return new Promise((resolve, reject) => {
+    // An already-cancelled caller sends nothing: its abort event has fired, and a listener added now would never run.
+    if (signal?.aborted) return reject(new Denied("CANCELLED", "the caller cancelled"));
     let settled = false;
-    const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); fn(v); } };
+    const onAbort = () => { req.destroy(); done(reject, new Denied("CANCELLED", "the caller cancelled")); };
+    const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); signal?.removeEventListener("abort", onAbort); fn(v); } };
     const req = http.get(url, { agent: false, headers: { accept: "application/json" } }, (res) => {
       const chunks = [];
       let n = 0;
@@ -39,7 +42,7 @@ function backendGet(url, deadlineMs, signal) {
     const clear = () => clearTimeout(connectTimer);
     req.on("response", clear); req.on("error", clear); req.on("close", clear);
     req.on("error", (e) => done(reject, new Denied("SEARCH_BACKEND_UNAVAILABLE", `the search backend could not be reached (${e.code ?? e.message})`, { retryable: true })));
-    signal?.addEventListener("abort", () => { req.destroy(); done(reject, new Denied("CANCELLED", "the caller cancelled")); }, { once: true });
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
 

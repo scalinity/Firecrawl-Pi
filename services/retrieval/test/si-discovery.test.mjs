@@ -357,6 +357,32 @@ test("concurrent identical searches share one execution; one caller's cancellati
   } finally { await h.close(); }
 });
 
+test("an abandoned search is never joined: an identical search arriving as it winds down runs anew, and nothing new starts for it", async () => {
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const slow = (name) => async (q, e) => { await gate; return answers[name](q, e); };
+  // A slow SearXNG: were the abandoned search to launch its fallback, it would linger long enough to be joined.
+  let sxRequests = 0;
+  const h = await harness({ handlers: Object.fromEntries(["serper", "brave", "exa", "deepseek", "tavily"].map((n) => [n, slow(n)])),
+    searxng: (req, res) => { if (req.url.startsWith("/search")) sxRequests++; setTimeout(() => json(res, 200, { results: [], unresponsive_engines: [] }), 500); } });
+  try {
+    const leaving = new AbortController();
+    const a = h.coordinator.search(request({ originalQuery: "abandoned" }), { signal: leaving.signal });
+    await new Promise((r) => setTimeout(r, 50));
+    leaving.abort();
+    await assert.rejects(a, (e) => e.failureClass === "CANCELLED");
+    await new Promise((r) => setTimeout(r, 50));
+    const b = h.coordinator.search(request({ originalQuery: "abandoned" }), { signal: new AbortController().signal });
+    await new Promise((r) => setTimeout(r, 50));
+    release();
+    const r = await b;
+    assert.equal(r.body.search.coverage.general.successful, 5);
+    assert.equal(r.body.search.coalesced, undefined, "the second caller ran its own execution");
+    assert.equal(h.store.admissions, 2);
+    assert.equal(sxRequests, 0, "the abandoned search launched no SearXNG fallback");
+  } finally { await h.close(); }
+});
+
 test("a ledger outage stops dispatch: no reservation, no request", async () => {
   const h = await harness();
   h.store.failReserve = true;

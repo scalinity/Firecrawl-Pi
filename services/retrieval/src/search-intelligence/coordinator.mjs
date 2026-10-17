@@ -138,7 +138,8 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       const mode = getBudget().searching.searxngMode;
       let searxngTask = null, searxngWhy = null;
       const launchSearxng = (why) => {
-        if (searxngTask || !searxng) return;
+        // Nothing new starts for a search that is cancelled or past its deadline.
+        if (searxngTask || !searxng || parent.signal.aborted) return;
         if (why !== "additional" && discoveryClose - clock() < 2000) return;
         searxngWhy = why;
         searxngTask = runLane({ adapter: searxng, sub: null, pre: null, request, selection, signal: parent.signal, deadlineAt: Math.min(discoveryClose, clock() + L.providerTimeoutsMs.searxng), useCache: false });
@@ -254,16 +255,20 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     const roster = rosterFor(selection), aggKey = aggregateKey(request, roster, selection);
     const deadlineClass = request.absoluteDeadlineMs - clock() < 20000 ? "short" : "normal";
     let flight = flights.get(aggKey);
+    // Abandoned or expired work is never joinable: closing a flight takes it out of the map before aborting it, so an identical
+    // search arriving while the abandoned one winds down starts its own execution.
+    const close = (fl) => { fl.closed = true; if (flights.get(aggKey) === fl) flights.delete(aggKey); fl.controller.abort(); };
     if (!flight || flight.deadlineClass !== deadlineClass || flight.closed) {
       const controller = new AbortController();
       flight = { deadlineClass, subscribers: 0, controller, closed: false, logicalSearchId: request.logicalSearchId };
-      const deadlineTimer = setTimeout(() => controller.abort(), Math.max(0, request.absoluteDeadlineMs - clock()));
-      flight.promise = track(execute(request, controller.signal, roster, selection, aggKey).finally(() => { clearTimeout(deadlineTimer); flight.closed = true; if (flights.get(aggKey) === flight) flights.delete(aggKey); }));
+      const fl = flight;
+      const deadlineTimer = setTimeout(() => close(fl), Math.max(0, request.absoluteDeadlineMs - clock()));
+      flight.promise = track(execute(request, controller.signal, roster, selection, aggKey).finally(() => { clearTimeout(deadlineTimer); fl.closed = true; if (flights.get(aggKey) === fl) flights.delete(aggKey); }));
       flights.set(aggKey, flight);
     }
     const f = flight;
     f.subscribers++;
-    const leave = () => { f.subscribers--; if (f.subscribers <= 0 && !f.closed) f.controller.abort(); };
+    const leave = () => { f.subscribers--; if (f.subscribers <= 0 && !f.closed) close(f); };
     let onAbort, timer;
     try {
       const gone = new Promise((_, reject) => {
