@@ -51,6 +51,11 @@ import { makeExa } from "./search-intelligence/adapters/exa.mjs";
 import { makeDeepseek } from "./search-intelligence/adapters/deepseek.mjs";
 import { makeTavily } from "./search-intelligence/adapters/tavily.mjs";
 import { makeSearxngLane } from "./search-intelligence/adapters/searxng.mjs";
+import { makeContext7 } from "./search-intelligence/adapters/context7.mjs";
+import { makeRef, makeRefSessionFactory } from "./search-intelligence/adapters/ref.mjs";
+import { makeRefBridge } from "./search-intelligence/adapters/ref-bridge.mjs";
+import { makeDocumentation } from "./search-intelligence/documentation.mjs";
+import { makeDecisions } from "./search-intelligence/decisions.mjs";
 import { makeCoordinator } from "./search-intelligence/coordinator.mjs";
 
 const env = loadEnv(process.env);
@@ -149,8 +154,14 @@ const permits = makePermits(basePolicy.search.intelligence ?? { apiPermits: { to
 const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic, readKey: (name) => readCredential(env.providersDir, name), paidDispatch: env.paidDispatch, permits, availability, log });
 const general = { serper: makeSerperLane({ serper: google, limits: intelligenceLimits, permits, availability }), brave: makeBrave({ dispatch, limits: intelligenceLimits }),
   exa: makeExa({ dispatch, limits: intelligenceLimits }), deepseek: makeDeepseek({ dispatch, limits: intelligenceLimits, permits }), tavily: makeTavily({ dispatch, limits: intelligenceLimits }) };
+// The co-primary documentation lanes (spec §6): Context7 over the shared dispatch; Ref through the official MCP client over the
+// policy-checked bridge, one session per logical search. Jev's decisions (spec §7) rank and classify; documentation activation
+// asks it only about weak cues.
+const refFetch = makeRefBridge({ permits, getPolicy, resolvePublic, getBudget, paidDispatch: env.paidDispatch, limits: intelligenceLimits });
+const docs = { context7: makeContext7({ dispatch, limits: intelligenceLimits }), ref: makeRef({ dispatch, limits: intelligenceLimits, openSession: makeRefSessionFactory({ makeFetch: refFetch, log }), log }) };
+const decisions = makeDecisions({ dispatch, store, limits: intelligenceLimits, permits, log });
 const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, getConfigHashes: () => ({ budgetSha256, policySha256 }), dispatch, general,
-  searxng: makeSearxngLane({ backend: searxngBackend, limits: intelligenceLimits }), availability, legacy: search, log });
+  searxng: makeSearxngLane({ backend: searxngBackend, limits: intelligenceLimits }), docs, documentation: makeDocumentation({ decisions, log }), decisions, availability, legacy: search, log });
 const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
