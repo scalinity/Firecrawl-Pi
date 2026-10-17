@@ -17,7 +17,7 @@
 // repair per chunk inside the same budget, and the chunks' answers merged with each value's source URLs. A
 // value the page does not hold comes back null; two chunks that disagree keep the first and say so.
 import { createHash, randomUUID } from "node:crypto";
-import { rateCardFor, maxModelCost, modelCost, estimateTokens, periodStarts, Breaker, paidDispatchActive } from "./budget.mjs";
+import { rateCardFor, maxModelCost, modelCost, estimateTokens, periodStarts, Breaker, paidDispatchActive, paidTotalDayCap } from "./budget.mjs";
 import { checkSchema, toStrict, validate, missingRequired, SchemaError } from "./jsonschema.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
 import { messagesRequest, messagesHeaders, readMessages } from "./anthropic.mjs";
@@ -117,7 +117,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const payload = Buffer.from(JSON.stringify(wire.body));
     const amount = maxModelCost(card, payload.length, maxOutputTokens);
     const { day, month } = periodStarts();
-    const r = await store.reserveBudget({ id: randomUUID(), callKey, logicalId, category: m.category, caps: cat.caps, paidTotalCap: prov.paid ? budget.paidTotal.caps.day : null,
+    const r = await store.reserveBudget({ id: randomUUID(), callKey, logicalId, category: m.category, caps: cat.caps, paidTotalCap: prov.paid ? paidTotalDayCap(budget) : null,
       provider: m.provider, subject: model, kind, unit: "micro_usd", rateCard: card.id, requestHash, amount, day, month, notifyAt: budget.notifyAtFraction });
     if (r.existing) {
       breaker.neutral();

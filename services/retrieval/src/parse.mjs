@@ -13,7 +13,7 @@
 // JSON configuration) starts a job; GET /api/v2/parse/{id}?expand=markdown answers { job: { status },
 // markdown: { pages: [{ page_number, markdown }] } } until the status is COMPLETED, FAILED or CANCELLED.
 import { createHash, randomUUID } from "node:crypto";
-import { rateCardFor, periodStarts, Breaker, paidDispatchActive } from "./budget.mjs";
+import { rateCardFor, periodStarts, Breaker, paidDispatchActive, paidTotalDayCap } from "./budget.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
 import { ExtractionFailure, canonical } from "./extract.mjs";
 
@@ -76,7 +76,7 @@ export function makeParser({ store, getBudget, getSelection, paidDispatch, provi
     const { day, month } = periodStarts();
     const r = await store.reserveBudget({ id: randomUUID(), callKey: `${logicalId}:parse:${docSha.slice(0, 32)}`, logicalId, category: pp.category, caps: cat.caps,
       // A paid parser's credits also count against the paid total's day, in micro-USD (spec §28.3).
-      paidTotalCap: prov.paid ? budget.paidTotal.caps.day : null, paidTotalRate: card.microUsdPerCredit,
+      paidTotalCap: prov.paid ? paidTotalDayCap(budget) : null, paidTotalRate: card.microUsdPerCredit,
       provider: pp.provider, subject: name, kind: "parse", unit: "credits", rateCard: card.id, requestHash: key, amount, day, month, notifyAt: budget.notifyAtFraction });
     if (r.existing) {
       breaker.neutral();

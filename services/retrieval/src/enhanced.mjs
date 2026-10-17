@@ -32,7 +32,7 @@
 // call key is the logical page's own: a page retried by upstream or NuQ finds its earlier dispatch, and a settled one's
 // answer, when small enough to keep, is used again instead of paying twice.
 import { createHash, randomUUID } from "node:crypto";
-import { Breaker, rateCardFor, periodStarts, paidDispatchActive } from "./budget.mjs";
+import { Breaker, rateCardFor, periodStarts, paidDispatchActive, paidTotalDayCap } from "./budget.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
 import { parseTarget, Denied } from "./ssrf.mjs";
 import { resolveTarget } from "./resolve.mjs";
@@ -87,9 +87,10 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
       const r = rows.find((x) => x.category === st.categoryName && x.period === period);
       if ((r ? r.reserved + r.settled : 0) + need > cap) return { ...st, available: false, reason: "BUDGET_EXHAUSTED", period, cap };
     }
-    if (st.paid) {
+    const shared = paidTotalDayCap(getBudget());
+    if (st.paid && shared !== null) {
       const r = rows.find((x) => x.category === "_paid_total" && x.period === "day");
-      if ((r ? r.reserved + r.settled : 0) + need > getBudget().paidTotal.caps.day) return { ...st, available: false, reason: "BUDGET_EXHAUSTED", period: "day", cap: getBudget().paidTotal.caps.day };
+      if ((r ? r.reserved + r.settled : 0) + need > shared) return { ...st, available: false, reason: "BUDGET_EXHAUSTED", period: "day", cap: shared };
     }
     return st;
   }
@@ -138,7 +139,7 @@ export function makeEnhanced({ getBudget, getPolicy, getSelection, providersDir,
       const amount = priceOf(st.card, mode);
       const { day, month } = periodStarts();
       const r = await store.reserveBudget({ id: randomUUID(), callKey: callKeyOf(logicalId), logicalId, category: st.categoryName, provider: st.providerName, subject: st.subject,
-        kind: "enhanced", unit: "micro_usd", rateCard: st.card.id, requestHash, amount, caps: st.category.caps, paidTotalCap: st.paid ? budget.paidTotal.caps.day : null, paidTotalRate: 1,
+        kind: "enhanced", unit: "micro_usd", rateCard: st.card.id, requestHash, amount, caps: st.category.caps, paidTotalCap: st.paid ? paidTotalDayCap(budget) : null, paidTotalRate: 1,
         day, month, notifyAt: budget.notifyAtFraction });
       for (const n of r.notices ?? []) log({ event: "budget_notice", category: n.category, period: n.period, used: n.used, cap: n.cap });
       if (r.existing) return earlier(r.existing, requestHash);

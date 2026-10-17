@@ -11,7 +11,7 @@
 // deployment alone uses); otherwise other traffic on the account would be charged here (review W13).
 import { randomUUID } from "node:crypto";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
-import { proxyCost, rateCardFor } from "./budget.mjs";
+import { proxyCost, rateCardFor, paidTotalDayCap } from "./budget.mjs";
 import { Denied } from "./ssrf.mjs";
 
 const DAY = /^\d{4}-\d{2}-\d{2}$/;
@@ -63,7 +63,7 @@ export async function reconcileDay({ store, getBudget, providersDir, providerNam
     if (!card) throw new Error(`no rate card for ${subject} on ${day}`);
     adjustment = proxyCost(card, reported - measured);
     if (adjustment > 0) await store.recordAdjustment({ id: randomUUID(), callKey: `reconcile:${providerName}:${day}:${randomUUID()}`, category: s.category, periods: Object.keys(budget.categories[s.category].caps), provider: providerName, subject,
-      rateCard: card.id, amount: adjustment, day, paidTotal: provider.paid, usage: { bytes: reported - measured, reportedBytes: reported, measuredBytes: measured } });
+      rateCard: card.id, amount: adjustment, day, paidTotal: provider.paid && paidTotalDayCap(budget) !== null, usage: { bytes: reported - measured, reportedBytes: reported, measuredBytes: measured } });
   }
   const settledUncertain = await store.settleUncertainProxy(providerName, day, (bytes, subject) => {
     const card = rateCardFor(budget, subject, new Date(`${day}T12:00:00Z`));

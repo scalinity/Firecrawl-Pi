@@ -610,6 +610,31 @@ test("Messages API at high effort sends the effort and the model\x27s own output
   } finally { await r.srv.close(); }
 });
 
+test("with no shared daily cap a paid call is bounded by its own category alone; with one it is also bounded by that", async () => {
+  // A reservation of at least two million micro-USD: 20,000 output tokens at $100 per million.
+  const dear = (b) => { Object.assign(b.models["fcpi-fixture-model"], { reasoningEffort: "xhigh", maxOutputTokens: 20000, requestTimeoutMs: 300000 });
+    Object.assign(b.rateCards.find((c) => c.subject === "fcpi-fixture-model"), { outputPerMTok: 100000000 }); };
+  const free = await rig({ paidDispatch: true, mutate: dear });
+  try {
+    free.budget.providers["fixture-model"].paid = true;
+    const out = await free.extract(req({ reasoningEffort: "xhigh" }));
+    assert.equal(out.ok, true, "the deployed policy has no shared cap");
+    const row = [...free.store.rows.values()][0];
+    assert.ok(row.reserved >= 2000000, `reserved ${row.reserved}`);
+    assert.equal(row.paid_total, false, "no shared row is kept when there is no shared cap");
+  } finally { await free.srv.close(); }
+  const capped = await rig({ paidDispatch: true, mutate: dear });
+  try {
+    capped.budget.providers["fixture-model"].paid = true;
+    capped.budget.paidTotal.caps.day = 1000000;
+    const out = await capped.extract(req({ reasoningEffort: "xhigh" }));
+    assert.equal(out.ok, false);
+    assert.equal(out.failure.class, "BUDGET_EXHAUSTED");
+    assert.match(out.failure.detail, /_paid_total day budget/);
+    assert.equal(capped.store.rows.size, 0, "nothing was reserved");
+  } finally { await capped.srv.close(); }
+});
+
 test("Messages API: a reasoning model must report its identity, and a different identity is refused", async () => {
   for (const [over, cls] of [[{ model: undefined }, "MODEL_IDENTITY_UNVERIFIED"], [{ model: "claude-something-else" }, "MODEL_MISMATCH"]]) {
     const r = await rig({ mutate: messagesApi({ "fcpi-fixture-model": "high" }), handler: recording(answerWith(over)) });

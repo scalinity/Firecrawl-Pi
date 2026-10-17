@@ -30,7 +30,7 @@ import net from "node:net";
 import tls from "node:tls";
 import { Duplex } from "node:stream";
 import { randomUUID } from "node:crypto";
-import { Breaker, rateCardFor, proxyCost, periodStarts, paidDispatchActive } from "./budget.mjs";
+import { Breaker, rateCardFor, proxyCost, periodStarts, paidDispatchActive, paidTotalDayCap } from "./budget.mjs";
 import { readCredential } from "./provider.mjs";
 import { parseTarget, Denied, hostMatches } from "./ssrf.mjs";
 import { resolveTarget } from "./resolve.mjs";
@@ -143,9 +143,10 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
       const r = rows.find((x) => x.category === st.categoryName && x.period === period);
       if ((r ? r.reserved + r.settled : 0) + need > cap) return { ...st, available: false, reason: "BUDGET_EXHAUSTED", period, cap };
     }
-    if (st.paid) {
+    const shared = paidTotalDayCap(getBudget());
+    if (st.paid && shared !== null) {
       const r = rows.find((x) => x.category === "_paid_total" && x.period === "day");
-      if ((r ? r.reserved + r.settled : 0) + need > getBudget().paidTotal.caps.day) return { ...st, available: false, reason: "BUDGET_EXHAUSTED", period: "day", cap: getBudget().paidTotal.caps.day };
+      if ((r ? r.reserved + r.settled : 0) + need > shared) return { ...st, available: false, reason: "BUDGET_EXHAUSTED", period: "day", cap: shared };
     }
     return st;
   }
@@ -157,7 +158,7 @@ export function makeResidential({ getBudget, getPolicy, getSelection, providersD
     const { day, month } = periodStarts();
     const amount = Math.max(1, proxyCost(st.card, bytes));
     const r = await store.reserveBudget({ id: randomUUID(), callKey, logicalId, category: st.categoryName, provider: st.providerName, subject: st.subject, kind, unit: "micro_usd",
-      rateCard: st.card.id, requestHash: `bytes:${bytes}`, amount, caps: st.category.caps, paidTotalCap: st.paid ? budget.paidTotal.caps.day : null, paidTotalRate: 1, day, month, notifyAt: budget.notifyAtFraction });
+      rateCard: st.card.id, requestHash: `bytes:${bytes}`, amount, caps: st.category.caps, paidTotalCap: st.paid ? paidTotalDayCap(budget) : null, paidTotalRate: 1, day, month, notifyAt: budget.notifyAtFraction });
     for (const n of r.notices ?? []) log({ event: "budget_notice", category: n.category, period: n.period, used: n.used, cap: n.cap });
     if (r.exhausted) return { failure: { class: "BUDGET_EXHAUSTED", detail: `the ${r.exhausted.category} ${r.exhausted.period} cap (${r.exhausted.cap} micro-USD) has no room for this attempt's ${amount} micro-USD reservation`, retryable: false, retryAfter: null } };
     if (r.existing) return { failure: { class: "LOGICAL_ID_CONFLICT", detail: "this attempt's proxy reservation already exists", retryable: false, retryAfter: null } };

@@ -20,6 +20,9 @@ const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 // A session policy's absolute lease survives process and daemon restarts. Check at dispatch, including
 // after asynchronous waits; already-dispatched work may still settle, poll, and delete its upload.
+// The shared daily cap across the paid categories in micro-USD, or null when the policy sets none.
+export const paidTotalDayCap = (policy) => policy.paidTotal.caps.day ?? null;
+
 export function paidDispatchActive(policy, enabled, now = Date.now()) {
   return enabled && (policy.validationExpiresAt === undefined || now < Date.parse(policy.validationExpiresAt));
 }
@@ -42,8 +45,9 @@ export function loadBudgetPolicy(text) {
   }
   exact(p.paidTotal, ["unit", "caps"], "paidTotal");
   if (p.paidTotal.unit !== "micro_usd") throw new Error("paidTotal.unit must be micro_usd");
-  exact(p.paidTotal.caps, ["day"], "paidTotal.caps");
-  nonNegInt(p.paidTotal.caps.day, "paidTotal.caps.day");
+  // The shared daily cap is optional: with no day, no cap spans the paid categories and each keeps its own.
+  exact(p.paidTotal.caps, [], "paidTotal.caps", ["day"]);
+  if (p.paidTotal.caps.day !== undefined) nonNegInt(p.paidTotal.caps.day, "paidTotal.caps.day");
   for (const [name, v] of Object.entries(p.providers)) {
     exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "usageDedicated", "session", "api"]);
     if (!["model", "parser", "proxy", "enhanced", "search"].includes(v.kind)) throw new Error(`provider ${name}.kind is unsupported`);
@@ -111,8 +115,8 @@ export function loadBudgetPolicy(text) {
         if (name === "claude-opus-5-5" && m.reasoningEffort !== "high") throw new Error("model claude-opus-5-5.reasoningEffort must be high");
         // The Messages API defaults to medium effort when none is sent, so a model on it states its setting.
         if (messagesApi && m.reasoningEffort === undefined) throw new Error(`model ${name}.reasoningEffort must be stated`);
-        if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 16000 : 4000, `model ${name}.maxOutputTokens`);
-        if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 90000, `model ${name}.requestTimeoutMs`);
+        if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 20000 : 4000, `model ${name}.maxOutputTokens`);
+        if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 300000, `model ${name}.requestTimeoutMs`);
       }
       const prov = p.providers[m.provider], cat = p.categories[m.category];
       if (!prov || prov.kind !== kind) throw new Error(`${kind} ${name} names ${m.provider}, which is not a ${kind} provider`);

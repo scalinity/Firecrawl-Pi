@@ -3,7 +3,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { loadBudgetPolicy, rateCardFor, modelCost, maxModelCost, estimateTokens, Breaker, periodStarts, paidDispatchActive } from "../src/budget.mjs";
+import { loadBudgetPolicy, rateCardFor, modelCost, maxModelCost, estimateTokens, Breaker, periodStarts, paidDispatchActive, paidTotalDayCap } from "../src/budget.mjs";
 import { checkSchema, toStrict, validate, missingRequired } from "../src/jsonschema.mjs";
 import { loadPolicy, loadSelection, defaultSelection } from "../src/policy.mjs";
 
@@ -21,10 +21,10 @@ test("an absolute validation lease expires even with the paid switch still on an
 
 test("the deployed budget policy loads: approved proxy and monthly LLM caps, other paid caps zero, paid defaults and unpaid fixtures", () => {
   const b = loadBudgetPolicy(RAW);
-  // Proxy $1/day and $2/month; LLM $20/month; paid work shares the $1/day cap.
+  // Proxy $1/day and $2/month; LLM $20/month; no shared daily cap across the paid categories (removed 2026-10-17).
   assert.deepEqual(b.categories.proxy.caps, { day: 1000000, month: 2000000 });
   assert.deepEqual(b.categories.llm.caps, { month: 20000000 });
-  assert.equal(b.paidTotal.caps.day, 1000000);
+  assert.equal(paidTotalDayCap(b), null);
   for (const [name, c] of Object.entries(b.categories).filter(([n, c]) => c.paid && !["proxy", "llm"].includes(n))) for (const v of Object.values(c.caps)) assert.equal(v, 0, name);
   assert.equal(b.providers[b.models[b.extraction.defaultModel].provider].paid, true);
   assert.equal(b.providers[b.parsers[b.parsing.defaultParser].provider].paid, true);
@@ -87,9 +87,9 @@ test("Opus reasoning and output limits are model policy while the default extrac
   assert.equal(b.extraction.defaultModel, "claude-haiku-5-5");
   assert.equal(b.extraction.maxOutputTokens, 4000);
   assert.equal(b.models["claude-opus-5-5"].reasoningEffort, "high");
-  // Measured 2026-10-17: 9,000 output tokens in 59.5 s non-streaming (about 151 tokens/s), so 16,000 could not finish inside the 90 s cap.
-  assert.equal(b.models["claude-opus-5-5"].maxOutputTokens, 8000);
-  assert.equal(b.models["claude-opus-5-5"].requestTimeoutMs, 90000);
+  // Measured 2026-10-17: 9,000 output tokens in 59.5 s non-streaming (about 151 tokens/s), so 20,000 take about 132 s and the 300 s timeout leaves a factor of two.
+  assert.equal(b.models["claude-opus-5-5"].maxOutputTokens, 20000);
+  assert.equal(b.models["claude-opus-5-5"].requestTimeoutMs, 300000);
   const card = rateCardFor(b, "claude-opus-5-5", new Date("2026-10-17T12:00:00Z"));
   assert.deepEqual([card.inputPerMTok, card.cachedInputPerMTok, card.cacheWritePerMTok, card.outputPerMTok], [4000000, 200000, 5000000, 20000000]);
   const haiku = rateCardFor(b, "claude-haiku-5-5", new Date("2026-10-17T12:00:00Z"));
@@ -98,8 +98,8 @@ test("Opus reasoning and output limits are model policy while the default extrac
     j => { j.models["claude-opus-5-5"].reasoningEffort = "none"; },
     j => { j.models["claude-opus-5-5"].reasoningEffort = "xhigh"; },
     j => { delete j.models["claude-opus-5-5"].reasoningEffort; },
-    j => { j.models["claude-opus-5-5"].maxOutputTokens = 16001; },
-    j => { j.models["claude-opus-5-5"].requestTimeoutMs = 90001; },
+    j => { j.models["claude-opus-5-5"].maxOutputTokens = 20001; },
+    j => { j.models["claude-opus-5-5"].requestTimeoutMs = 300001; },
     j => { j.models["claude-haiku-5-5"].maxOutputTokens = 16000; },
   ]) assert.throws(() => loadBudgetPolicy(mutate(edit)));
 });
@@ -138,6 +138,18 @@ test("the gateway's allowlisted model and effort pair names a budget model at ex
   assert.equal(model.reasoningEffort, pair.reasoningEffort.value);
   assert.ok(rateCardFor(b, pair.model.value), "the allowlisted model has a rate card in effect");
   assert.equal(b.providers[model.provider].paid, true);
+});
+
+test("the shared daily cap is optional: absent it no cap spans the paid categories, present it is validated", () => {
+  const withCaps = (caps) => loadBudgetPolicy(mutate((j) => { j.paidTotal.caps = caps; }));
+  assert.equal(paidTotalDayCap(withCaps({})), null);
+  assert.equal(paidTotalDayCap(withCaps({ day: 220000 })), 220000, "the M9 validation window's jq sets exactly this field");
+  assert.equal(paidTotalDayCap(withCaps({ day: 0 })), 0, "zero is a cap, not an absent one");
+  for (const [caps, why] of [[{ day: -1 }, /paidTotal\.caps\.day/], [{ day: 1.5 }, /paidTotal\.caps\.day/], [{ week: 5 }, /paidTotal\.caps/]]) assert.throws(() => withCaps(caps), why);
+  // Each paid category keeps its own caps whatever the shared one does.
+  const b = loadBudgetPolicy(RAW);
+  assert.deepEqual(b.categories.proxy.caps, { day: 1000000, month: 2000000 });
+  assert.deepEqual(b.categories.llm.caps, { month: 20000000 });
 });
 
 test("the breaker opens after its failures, admits one probe, and closes on its success", () => {
