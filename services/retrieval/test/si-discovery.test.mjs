@@ -348,6 +348,23 @@ test("Serper's availability is the fixture provider's own: a 429 cools fixture-s
   } finally { await h.close(); }
 });
 
+test("the lifetime allocation is live Serper's alone: the fixture reserves without it and its rows are not kept forever", async () => {
+  const { allocationCategories } = await import("../src/serper.mjs");
+  const h = await harness();
+  const reserves = [];
+  const reserve = h.store.reserveBudget.bind(h.store);
+  h.store.reserveBudget = async (r) => { reserves.push(r); return reserve(r); };
+  try {
+    await h.coordinator.search(request({ originalQuery: "allocation scope" }), { signal: new AbortController().signal });
+    const serper = reserves.find((r) => r.provider === "fixture-serper");
+    assert.equal(serper.lifetimeCap, undefined, "a fixture spends no real credits");
+    const kept = allocationCategories(h.budget);
+    const live = h.budget.searches[h.budget.searching.defaultSearch].category;
+    assert.ok(kept.includes(live), `the live category ${live} is kept`);
+    assert.equal(kept.includes(serper.category), false, "the fixture category is pruned as usual");
+  } finally { await h.close(); }
+});
+
 test("a retry whose Serper operation is already recorded says so, sends nothing, and is never called quota exhaustion", async () => {
   const h = await harness({ handlers: { serper: () => ({ status: 500, body: {} }) } });
   try {

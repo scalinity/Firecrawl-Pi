@@ -9,6 +9,14 @@ import { Breaker, periodStarts, rateCardFor } from "./budget.mjs";
 import { providerRequest, readCredential } from "./provider.mjs";
 import { Denied } from "./ssrf.mjs";
 
+const FIXTURE = /\.fixture\.fcpi\.test$/;
+const isFixture = (provider) => FIXTURE.test(new URL(provider.baseUrl).hostname);
+
+// The categories whose rows are Serper's lifetime allocation, summed at each reservation: pruning keeps all of them
+// (spec §18.3). A fixture provider spends no real credits, so its rows are neither capped by the allocation nor kept.
+export const allocationCategories = (budget) => [...new Set(Object.values(budget.searches)
+  .filter((s) => budget.providers[s.provider].api === "serper-v1" && !isFixture(budget.providers[s.provider])).map((s) => s.category))];
+
 export function makeSerper({ store, getBudget, getPolicy, providersDir, resolvePublic, lookupFixture, log, request = providerRequest }) {
   const breakers = new Map();
   const breakerFor = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
@@ -46,7 +54,7 @@ export function makeSerper({ store, getBudget, getPolicy, providersDir, resolveP
         try {
           const r = await store.reserveBudget({ id, callKey: callKey ?? `search:${id}`, logicalId: logicalId ?? id, category: s.category, provider: s.provider,
             subject, kind: "search", unit: "credits", rateCard: card.id, requestHash, amount: card.creditsPerSearch,
-            ...periodStarts(), caps: c.caps, lifetimeCap: b.searching.allocationCredits, paidTotalCap: null, notifyAt: b.notifyAtFraction });
+            ...periodStarts(), caps: c.caps, lifetimeCap: isFixture(p) ? undefined : b.searching.allocationCredits, paidTotalCap: null, notifyAt: b.notifyAtFraction });
           // The operation's call key is already recorded (a retry of the same logical search): nothing is sent again, and the
           // earlier operation may have gone out unless it was released. That is not an exhausted allocation.
           if (r.existing) throw fail("SEARCH_OPERATION_RECORDED", { sent: r.existing.state !== "RELEASED" });

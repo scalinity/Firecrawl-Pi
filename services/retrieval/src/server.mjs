@@ -41,7 +41,7 @@ import { makeWebhooks } from "./webhook.mjs";
 import { readCredential } from "./provider.mjs";
 import { Denied, hostMatches, parseTarget } from "./ssrf.mjs";
 import { makeAdmission } from "./admission.mjs";
-import { makeSerper } from "./serper.mjs";
+import { makeSerper, allocationCategories } from "./serper.mjs";
 import { makeAvailability } from "./search-intelligence/availability.mjs";
 import { makePermits } from "./search-intelligence/permits.mjs";
 import { makeDispatch } from "./search-intelligence/adapters/common.mjs";
@@ -107,8 +107,7 @@ const startedAt = new Date();
   catch (e) { log({ event: "store_unavailable", error: e.code ?? e.message }); setTimeout(connect, 2000); }
 })();
 // Serper's credits are a lifetime allocation summed over its rows: those rows are kept whatever their age (spec §18.3).
-const allocationCategories = [...new Set(Object.values(budget.searches).filter((s) => budget.providers[s.provider].api === "serper-v1").map((s) => s.category))];
-setInterval(() => store.prune({ retainCategories: allocationCategories }).catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();
+setInterval(() => store.prune({ retainCategories: allocationCategories(getBudget()) }).catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();
 
 const resolvePublic = makePublicResolver({ server: env.resolver });
 // M6: the residential proxy route (spec §10), shared by pages, auxiliary downloads, the browser and search.
