@@ -62,7 +62,7 @@
       "video": "media extraction is not offered (spec §6)"
     },
     "objects": {
-      "json": { "schema": { "type": "schema", "required": true }, "prompt": { "type": "string", "maxLength": 4000 }, "model": { "type": "const", "value": "claude-opus-5-5" }, "reasoningEffort": { "type": "const", "value": "high" } },
+      "json": { "schema": { "type": "schema", "required": true }, "prompt": { "type": "string", "maxLength": 4000 }, "model": { "type": "const", "value": "claude-sonnet-5-5" }, "reasoningEffort": { "type": "const", "value": "high" } },
       "screenshot": { "fullPage": { "type": "boolean" } }
     }
   },

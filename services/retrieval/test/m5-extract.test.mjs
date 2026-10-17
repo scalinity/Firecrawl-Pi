@@ -324,7 +324,7 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
       [{ model: "gpt-4o" }, "MODEL_NOT_ALLOWED"],
       [{ model: "fcpi-fixture-stale" }, "RATE_CARD_MISSING"],
       [{ model: "claude-haiku-5-5" }, "PAID_DISPATCH_DISABLED"],
-      [{ model: "claude-opus-5-5", reasoningEffort: "high" }, "PAID_DISPATCH_DISABLED"],
+      [{ model: "claude-sonnet-5-5", reasoningEffort: "high" }, "PAID_DISPATCH_DISABLED"],
     ];
     for (const [over, cls] of cases) {
       const out = await r.extract(req(over));
@@ -340,10 +340,10 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
     assert.equal(out.failure.class, "BLOCKED_CREDENTIAL");
   } finally { await p.srv.close(); }
   // Each Anthropic key unlocks only its own model: the Agent's key cannot run extraction, nor the other way round.
-  for (const [model, creds] of [["claude-haiku-5-5", { agent_anthropic_api_key: "sk-ant-test-not-a-real-key-000000" }], ["claude-opus-5-5", { anthropic_api_key: "sk-ant-test-not-a-real-key-000000" }]]) {
+  for (const [model, creds] of [["claude-haiku-5-5", { agent_anthropic_api_key: "sk-ant-test-not-a-real-key-000000" }], ["claude-sonnet-5-5", { anthropic_api_key: "sk-ant-test-not-a-real-key-000000" }]]) {
     const w = await rig({ paidDispatch: true, creds });
     try {
-      const out = await w.extract(req({ model, ...(model === "claude-opus-5-5" ? { reasoningEffort: "high" } : {}) }));
+      const out = await w.extract(req({ model, ...(model === "claude-sonnet-5-5" ? { reasoningEffort: "high" } : {}) }));
       assert.equal(out.failure.class, "BLOCKED_CREDENTIAL", model);
       assert.equal(w.store.rows.size, 0);
     } finally { await w.srv.close(); }

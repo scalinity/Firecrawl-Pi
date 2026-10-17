@@ -72,37 +72,44 @@ test("costs round up; the reservation bounds any byte-level tokenizer's count", 
 
 test("Haiku prices cache writes separately and reserves at the highest input rate", () => {
   const b = loadBudgetPolicy(RAW), card = rateCardFor(b, "claude-haiku-5-5", new Date("2026-10-17T12:00:00Z"));
-  assert.deepEqual(Object.keys(b.models).filter((m) => b.providers[b.models[m].provider].paid), ["claude-haiku-5-5", "claude-opus-5-5"]);
+  assert.deepEqual(Object.keys(b.models).filter((m) => b.providers[b.models[m].provider].paid), ["claude-haiku-5-5", "claude-sonnet-5-5"]);
   assert.equal(b.models["claude-haiku-5-5"].reasoningEffort, "none");
   assert.equal(b.providers[b.models["claude-haiku-5-5"].provider].credential, "anthropic_api_key");
-  assert.equal(b.providers[b.models["claude-opus-5-5"].provider].credential, "agent_anthropic_api_key");
+  assert.equal(b.providers[b.models["claude-sonnet-5-5"].provider].credential, "agent_anthropic_api_key");
   assert.equal(modelCost(card, { promptTokens: 1000000, cachedTokens: 200000, cacheWriteTokens: 300000, completionTokens: 100000 }), 139500);
   assert.equal(maxModelCost(card, 1000000, 100000), 175000);
   assert.throws(() => loadBudgetPolicy(mutate((j) => { j.models["claude-haiku-5-5"].reasoningEffort = "high"; })), /reasoningEffort/);
   assert.throws(() => loadBudgetPolicy(mutate((j) => { j.rateCards[0].cacheWritePerMTok = -1; })), /cacheWritePerMTok/);
 });
 
-test("Opus reasoning and output limits are model policy while the default extraction keeps Haiku's limits", () => {
+test("Sonnet reasoning, input and output limits are model policy while the default extraction keeps Haiku's limits", () => {
   const b = loadBudgetPolicy(RAW);
   assert.equal(b.extraction.defaultModel, "claude-haiku-5-5");
   assert.equal(b.extraction.maxOutputTokens, 4000);
-  assert.equal(b.models["claude-opus-5-5"].reasoningEffort, "high");
+  assert.equal(b.models["claude-sonnet-5-5"].reasoningEffort, "high");
   // No output cap in effect: 128,000 is the most the API accepts for this model (128,001 is refused), so it is the cap that never binds.
-  // Measured 2026-10-17: 20,000 tokens in about 190 s (roughly 105 tokens/s), so the 300 s timeout, not the token count, is what bounds a call.
-  assert.equal(b.models["claude-opus-5-5"].maxOutputTokens, 128000);
-  assert.equal(b.models["claude-opus-5-5"].requestTimeoutMs, 300000);
-  const card = rateCardFor(b, "claude-opus-5-5", new Date("2026-10-17T12:00:00Z"));
-  assert.deepEqual([card.inputPerMTok, card.cachedInputPerMTok, card.cacheWritePerMTok, card.outputPerMTok], [4000000, 200000, 5000000, 20000000]);
+  assert.equal(b.models["claude-sonnet-5-5"].maxOutputTokens, 128000);
+  assert.equal(b.models["claude-sonnet-5-5"].requestTimeoutMs, 300000);
+  // The Agent's model reads a whole page in one call; the default extraction keeps its 32,000.
+  assert.equal(b.models["claude-sonnet-5-5"].maxInputTokens, 150000);
+  assert.equal(b.extraction.maxInputTokens, 32000);
+  const card = rateCardFor(b, "claude-sonnet-5-5", new Date("2026-10-17T12:00:00Z"));
+  assert.deepEqual([card.inputPerMTok, card.cachedInputPerMTok, card.cacheWritePerMTok, card.outputPerMTok], [2000000, 100000, 2500000, 10000000]);
   const haiku = rateCardFor(b, "claude-haiku-5-5", new Date("2026-10-17T12:00:00Z"));
   assert.deepEqual([haiku.inputPerMTok, haiku.cachedInputPerMTok, haiku.cacheWritePerMTok, haiku.outputPerMTok], [100000, 10000, 125000, 500000]);
   for (const edit of [
-    j => { j.models["claude-opus-5-5"].reasoningEffort = "none"; },
-    j => { j.models["claude-opus-5-5"].reasoningEffort = "xhigh"; },
-    j => { delete j.models["claude-opus-5-5"].reasoningEffort; },
-    j => { j.models["claude-opus-5-5"].maxOutputTokens = 128001; },
-    j => { j.models["claude-opus-5-5"].requestTimeoutMs = 300001; },
+    j => { j.models["claude-sonnet-5-5"].reasoningEffort = "none"; },
+    j => { j.models["claude-sonnet-5-5"].reasoningEffort = "xhigh"; },
+    j => { delete j.models["claude-sonnet-5-5"].reasoningEffort; },
+    j => { j.models["claude-sonnet-5-5"].maxOutputTokens = 128001; },
+    j => { j.models["claude-sonnet-5-5"].requestTimeoutMs = 300001; },
+    j => { j.models["claude-sonnet-5-5"].maxInputTokens = 200001; },
+    j => { j.models["claude-sonnet-5-5"].maxInputTokens = 999; },
+    // Haiku 5.5 is priced higher above 100,000 prompt tokens; its rate card is the lower one.
+    j => { j.models["claude-haiku-5-5"].maxInputTokens = 80001; },
     j => { j.models["claude-haiku-5-5"].maxOutputTokens = 16000; },
-  ]) assert.throws(() => loadBudgetPolicy(mutate(edit)));
+  ]) assert.throws(() => loadBudgetPolicy(mutate(edit)), /maxInputTokens|maxOutputTokens|requestTimeoutMs|reasoningEffort/);
+  loadBudgetPolicy(mutate((j) => { j.models["claude-haiku-5-5"].maxInputTokens = 80000; j.models["claude-sonnet-5-5"].maxInputTokens = 200000; }));
 });
 
 test("a model on the Messages API states its effort, and each rule about that provider fails for its own reason", () => {
@@ -121,8 +128,8 @@ test("a model on the Messages API states its effort, and each rule about that pr
     [(j) => { j.providers.anthropic.baseUrl = "https://api.anthropic.com.evil.example"; }, /paid Messages API provider is https:\/\/api\.anthropic\.com/],
     [(j) => { j.providers.anthropic.api = "chat-v2"; }, /openai-chat or anthropic-messages/],
     [(j) => { j.models["claude-haiku-5-5"].reasoningEffort = "high"; }, /claude-haiku-5-5\.reasoningEffort must be none/],
-    [(j) => { j.models["claude-opus-5-5"].reasoningEffort = "max"; }, /claude-opus-5-5\.reasoningEffort must be high/],
-    [(j) => { j.models["claude-opus-5-5"].reasoningEffort = "extreme"; }, /must be none, low, medium, high, xhigh or max/],
+    [(j) => { j.models["claude-sonnet-5-5"].reasoningEffort = "max"; }, /claude-sonnet-5-5\.reasoningEffort must be high/],
+    [(j) => { j.models["claude-sonnet-5-5"].reasoningEffort = "extreme"; }, /must be none, low, medium, high, xhigh or max/],
     // The chat API keeps the two settings it was built at: the wider levels are the Messages API's alone.
     [(j) => { j.models["fcpi-fixture-model"].reasoningEffort = "high"; }, /fcpi-fixture-model\.reasoningEffort must be none or xhigh/],
     [(j) => { j.models["fcpi-fixture-model"].reasoningEffort = "max"; }, /must be none or xhigh/],
@@ -217,7 +224,7 @@ test("the egress policy's search section and the host selection are validated", 
   assert.equal(loadSelection(JSON.stringify({ search: "live", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b).search, "live");
   assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "gpt-4o", parser: "fcpi-fixture-parser" }), p, b), /extractionModel/);
   // A default request runs inside the ordinary deadline, which would cut a model that reasons off with its whole reservation held.
-  assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "claude-opus-5-5", parser: "fcpi-fixture-parser" }), p, b), /without a reasoning effort/);
+  assert.throws(() => loadSelection(JSON.stringify({ search: "live", extractionModel: "claude-sonnet-5-5", parser: "fcpi-fixture-parser" }), p, b), /without a reasoning effort/);
   assert.equal(loadSelection(JSON.stringify({ search: "live", extractionModel: "claude-haiku-5-5", parser: "fcpi-fixture-parser" }), p, b).extractionModel, "claude-haiku-5-5");
   assert.throws(() => loadSelection(JSON.stringify({ search: "everything", extractionModel: "fcpi-fixture-model", parser: "fcpi-fixture-parser" }), p, b), /search/);
 });

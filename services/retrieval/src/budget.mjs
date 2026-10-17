@@ -113,11 +113,11 @@ export function loadBudgetPolicy(text) {
         if (m.reasoningEffort !== undefined && !efforts.includes(m.reasoningEffort)) throw new Error(`model ${name}.reasoningEffort must be ${efforts.slice(0, -1).join(", ")} or ${efforts.at(-1)}`);
         // The two production models keep the settings they are priced and tested at.
         if (name === "claude-haiku-5-5" && m.reasoningEffort !== "none") throw new Error("model claude-haiku-5-5.reasoningEffort must be none");
-        if (name === "claude-opus-5-5" && m.reasoningEffort !== "high") throw new Error("model claude-opus-5-5.reasoningEffort must be high");
+        if (name === "claude-sonnet-5-5" && m.reasoningEffort !== "high") throw new Error("model claude-sonnet-5-5.reasoningEffort must be high");
         // The Messages API defaults to medium effort when none is sent, so a model on it states its setting.
         if (messagesApi && m.reasoningEffort === undefined) throw new Error(`model ${name}.reasoningEffort must be stated`);
         // These ceilings are the Messages API's own limits (128,000 output tokens for a model that reasons) and the longest wait the
-        // gateway's extended deadline allows (300 s); they apply to every model, not to Opus alone.
+        // gateway's extended deadline allows (300 s); they apply to every model, not to the Agent's alone.
         if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 128000 : 4000, `model ${name}.maxOutputTokens`);
         if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 300000, `model ${name}.requestTimeoutMs`);
         // A model's own input cap per extraction unit, in place of extraction.maxInputTokens: a model with a large context window can

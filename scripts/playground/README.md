@@ -32,7 +32,7 @@ Agent takes a task of up to 1,200 characters, up to three optional starting URLs
 and a 1–5 page limit (default three). Its optional Result schema editor accepts a
 JSON object schema; leave it blank for the ordinary answer, findings, and sources.
 When supplied, the structured result appears alongside those in the response.
-It requests Claude Opus 5.5 at high effort through the existing budgeted extraction
+It requests Claude Sonnet 5.5 at high effort through the existing budgeted extraction
 path, on its own Anthropic key. The response reports the provider's model identity, available usage, and
 accounted cost. Missing token counts remain unknown; a conservative reservation cost
 is identified in response warnings. The high effort is configured and sent with each

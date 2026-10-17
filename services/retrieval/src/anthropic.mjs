@@ -4,7 +4,7 @@
 //
 // Three differences from the OpenAI-compatible chat API shape the request:
 //   - the system prompt is a top-level field, and max_tokens is always required;
-//   - claude-haiku-5-5 and claude-opus-5-5 both refuse a non-default temperature, so none is sent;
+//   - the 5.5 models refuse a non-default temperature, so none is sent;
 //   - input_tokens excludes the cached tokens that cache_read_input_tokens and cache_creation_input_tokens
 //     report separately, where an OpenAI prompt_tokens count includes them.
 export const ANTHROPIC_VERSION = "2023-06-01";

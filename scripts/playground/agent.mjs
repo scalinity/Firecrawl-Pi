@@ -11,7 +11,7 @@ const limits = { maxBytes: 16384, maxDepth: 6, maxProperties: 100 };
 const usageKeys = ['calls', 'reused', 'promptTokens', 'completionTokens', 'costMicroUsd', 'cachedTokens', 'cacheWriteTokens'];
 const text = value => typeof value === 'string' ? value.trim() : '';
 const normalizedText = value => value.normalize('NFKC').replace(/\s+/gu, ' ').trim();
-const MODEL = 'claude-opus-5-5';
+const MODEL = 'claude-sonnet-5-5';
 const EFFORT = 'high';
 // Reading a page waits on the reasoning model, which can take minutes (the 300 s its policy allows, after a page fetch of up to 110 s
 // and the gateway's margins), so a page request waits as long as the gateway's extended deadline and a run as long as two

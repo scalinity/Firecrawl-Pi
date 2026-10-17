@@ -23,7 +23,7 @@ const answer = (over = {}) => ({ status: 200, json: { ok: true, model: "m", data
   units: [{ url: "https://a.example/p", part: 1, ok: true }], usage: { calls: 1 }, ...over } });
 
 test("a request that names its model gets the extra time for its extraction; every other request keeps the core timeout alone", async () => {
-  const named = { ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" };
+  const named = { ...BODY.formats[0], model: "claude-sonnet-5-5", reasoningEffort: "high" };
   for (const [label, body, extra] of [["named model", { ...BODY, formats: [named] }, 300000], ["default model", BODY, 0]]) {
     const r = rig({ cfg: { modelExtractExtraMs: 300000 }, extract: () => answer() });
     const t0 = Date.now();
@@ -47,7 +47,7 @@ test("the gateway aborts a request 15 s past the core timeout, and a request tha
   // The abort timer is the outer bound the MCP service and the Agent are sized against (tests/timeout-chain.test.mjs), so its value is
   // pinned here on a mocked clock: the extraction's signal must stay live right up to the bound and be cancelled at it.
   t.mock.timers.enable({ apis: ["setTimeout", "Date"] });
-  const named = { ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" };
+  const named = { ...BODY.formats[0], model: "claude-sonnet-5-5", reasoningEffort: "high" };
   const settle = () => new Promise((resolve) => setImmediate(resolve));
   for (const [label, body, cfg, abortAt] of [["a request that names its model", { ...BODY, formats: [named] }, { modelExtractExtraMs: 300000 }, 20000 + 15000 + 300000],
     ["a default request", BODY, { modelExtractExtraMs: 300000 }, 20000 + 15000], ["a named model with no extra configured", { ...BODY, formats: [named] }, {}, 20000 + 15000]]) {
@@ -93,10 +93,10 @@ test("an extracted page: its json, markdown only when asked, the logical id, and
   assert.equal(timeoutMs - (Date.parse(body.deadline) - t0) >= 4900, true, "the gateway waits five seconds past the deadline it sends");
 });
 
-test("explicit Opus/high reaches only the budgeted extractor and returns its measured identity, effort and usage", async () => {
+test("explicit Sonnet/high reaches only the budgeted extractor and returns its measured identity, effort and usage", async () => {
   const usage = { calls: 1, promptTokens: 32, completionTokens: 8, costMicroUsd: 17 };
-  const r = rig({ extract: () => answer({ model: "claude-opus-5-5", reasoningEffort: "high", usage }) });
-  const json = { ...BODY.formats[0], prompt: "Read the price", model: "claude-opus-5-5", reasoningEffort: "high" };
+  const r = rig({ extract: () => answer({ model: "claude-sonnet-5-5", reasoningEffort: "high", usage }) });
+  const json = { ...BODY.formats[0], prompt: "Read the price", model: "claude-sonnet-5-5", reasoningEffort: "high" };
   const out = await r.go({ ...BODY, formats: ["markdown", json] });
   assert.equal(out.status, 200);
   assert.equal(r.calls.core.length, 1);
@@ -105,19 +105,19 @@ test("explicit Opus/high reaches only the budgeted extractor and returns its mea
   assert.equal(r.calls.core[0].model, undefined);
   assert.equal(r.calls.core[0].reasoningEffort, undefined);
   const request = r.calls.extract[0].body;
-  assert.equal(request.model, "claude-opus-5-5");
+  assert.equal(request.model, "claude-sonnet-5-5");
   assert.equal(request.reasoningEffort, "high");
   assert.equal(request.prompt, "Read the price");
   assert.deepEqual(request.schema, SCHEMA);
   assert.deepEqual(request.documents, [{ url: BODY.url, markdown: "Price: 1" }]);
-  assert.equal(out.body.fcpi.extraction.model, "claude-opus-5-5");
+  assert.equal(out.body.fcpi.extraction.model, "claude-sonnet-5-5");
   assert.equal(out.body.fcpi.extraction.reasoningEffort, "high");
   assert.deepEqual(out.body.fcpi.extraction.usage, usage);
 });
 
 test("JSON extraction metadata reports the adapter's actual model and effort rather than echoing requested values", async () => {
   const r = rig({ extract: () => answer({ model: "reported-model", reasoningEffort: null }) });
-  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" }] });
+  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "claude-sonnet-5-5", reasoningEffort: "high" }] });
   assert.equal(out.body.fcpi.extraction.model, "reported-model");
   assert.equal(out.body.fcpi.extraction.reasoningEffort, null);
 });
@@ -125,13 +125,13 @@ test("JSON extraction metadata reports the adapter's actual model and effort rat
 test("a denied repair preserves the initial paid call's actual model, effort and settled usage on failure", async () => {
   const usage = { calls: 1, reused: 0, promptTokens: 80, completionTokens: 24, cachedTokens: 0, cacheWriteTokens: 0, costMicroUsd: 31 };
   const units = [{ url: BODY.url, part: 1, ok: false, failure: { class: "BUDGET_EXHAUSTED" } }];
-  const r = rig({ extract: () => ({ status: 402, json: { ok: false, model: "claude-opus-5-5", requestedModel: "claude-opus-5-5",
+  const r = rig({ extract: () => ({ status: 402, json: { ok: false, model: "claude-sonnet-5-5", requestedModel: "claude-sonnet-5-5",
     reasoningEffort: "high", usage, units, failure: { class: "BUDGET_EXHAUSTED", detail: "repair reservation denied" } } }) });
-  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" }] });
+  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "claude-sonnet-5-5", reasoningEffort: "high" }] });
   assert.equal(out.status, 402);
   assert.equal(out.body.success, false);
   assert.equal(out.body.code, "BUDGET_EXHAUSTED");
-  assert.equal(out.body.fcpi.extraction.model, "claude-opus-5-5");
+  assert.equal(out.body.fcpi.extraction.model, "claude-sonnet-5-5");
   assert.equal(out.body.fcpi.extraction.reasoningEffort, "high");
   assert.deepEqual(out.body.fcpi.extraction.usage, usage);
   assert.deepEqual(out.body.fcpi.extraction.units, units);

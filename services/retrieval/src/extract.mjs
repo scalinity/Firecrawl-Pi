@@ -50,7 +50,7 @@ const MIN_REQUEST_MS = 1000;
 const REASONING_MIN_START_MS = 60000;
 // A Messages API call is streamed: the API sends a ping every 30 s while the model thinks (measured 2026-10-17), so a
 // stream silent for three of those has failed. A call still streaming is never cut by its caller's wait; this ceiling
-// is the only bound on it, past 128,000 output tokens at the slowest rate measured for Opus 5.5 (105 tokens/s, 20 minutes).
+// is the only bound on it, past 128,000 output tokens at the slowest rate measured for a 5.5 model that reasons (105 tokens/s, 20 minutes).
 const STREAM_IDLE_MS = 90000;
 const CALL_CEILING_MS = 1800000;
 
