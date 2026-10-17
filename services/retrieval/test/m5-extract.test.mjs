@@ -37,6 +37,20 @@ test("a model lease expiring while waiting for its slot sends nothing and releas
   } finally { await r.srv.close(); }
 });
 
+test("a call that never gets the one model slot sends nothing, releases its reservation and tells the caller when to retry", async () => {
+  // One model request runs at a time, and a model that reasons holds the slot for minutes: another caller waits out its deadline.
+  const r = await rig();
+  try {
+    r.adapter.gate.take = async () => false;
+    const out = await r.extract(req());
+    assert.equal(out.failure.class, "RESOURCE_BUSY");
+    assert.equal(out.failure.retryable, true);
+    assert.equal(out.failure.retryAfter, 30);
+    assert.equal(r.calls(), 0);
+    assert.deepEqual(r.store.states(), ["RELEASED"]);
+  } finally { await r.srv.close(); }
+});
+
 test("malformed HTTP 200 model answers settle conservatively and exhaust only the one repair (PRE-M9 W1)", async () => {
   for (const body of ["null", "{not-json"]) {
     let calls = 0;

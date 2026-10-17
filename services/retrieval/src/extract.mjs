@@ -154,7 +154,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     if (!(await gate.take(deadline, signal))) {
       breaker.neutral();
       await store.releaseBudget(res.id, "no model request slot before the deadline");
-      throw signal?.aborted ? fail("CANCELLED", "the caller cancelled") : fail("RESOURCE_BUSY", "another model request held the one slot until the deadline", { retryable: true });
+      throw signal?.aborted ? fail("CANCELLED", "the caller cancelled") : fail("RESOURCE_BUSY", "another model request held the one slot until the deadline", { retryable: true, retryAfter: 30 });
     }
     if (deadline - Date.now() < minStartMs) {
       gate.give();
