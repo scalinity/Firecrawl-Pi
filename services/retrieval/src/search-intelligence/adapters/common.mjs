@@ -99,9 +99,9 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
   const reasonOfTransport = (e) => e.code === "CANCELLED" ? "cancelled" : e.capacity ? "capacity_unavailable" : e.timedOut ? "timeout" : e.code === "PAID_DISPATCH_DISABLED" ? "platform_restricted"
     : e.code === "PROVIDER_RESPONSE_TOO_LARGE" ? "contract_failure" : "temporarily_unavailable";
 
-  // One metered HTTP operation. Returns { ok: true, response, close, queueMs, startedAt } for an answer (the caller parses it and
-  // closes the reservation), or { ok: false, reason, detail, dispatchState, queueMs } with the reservation already closed.
-  async function call({ sub, pre, kind, callKey, logicalId, searchId, requestHash, amount, signal, deadlineAt, timeoutMs, maxBytes, http, rate = null }) {
+  // Admission and the reservation, shared by call() and meter(): the breaker's admission, the shared monetary cap's valuation
+  // check, then the reservation under the operation's stable call key. { ok: true, close, t0 } or a refusal, never sent.
+  async function reserve({ sub, pre, kind, callKey, logicalId, requestHash, amount }) {
     const t0 = Date.now();
     const b = getBudget();
     const br = breakerFor(sub.provider);
@@ -126,7 +126,16 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     if (r.exhausted) { br.neutral(); return { ok: false, reason: "platform_restricted", detail: `cap:${r.exhausted.category}/${r.exhausted.period}`, dispatchState: "not_sent", queueMs: Date.now() - t0 }; }
     if (r.existing) { br.neutral(); return { ok: false, reason: "internal_failure", detail: "operation_already_recorded", dispatchState: r.existing.state === "RELEASED" ? "not_sent" : "possibly_sent", queueMs: Date.now() - t0 }; }
     for (const notice of r.notices ?? []) log({ event: "budget_threshold", ...notice });
-    const close = closer(r.reservation, sub, pre);
+    return { ok: true, close: closer(r.reservation, sub, pre), t0 };
+  }
+
+  // One metered HTTP operation. Returns { ok: true, response, close, queueMs, startedAt } for an answer (the caller parses it and
+  // closes the reservation), or { ok: false, reason, detail, dispatchState, queueMs } with the reservation already closed.
+  async function call({ sub, pre, kind, callKey, logicalId, searchId, requestHash, amount, signal, deadlineAt, timeoutMs, maxBytes, http, rate = null }) {
+    const m = await reserve({ sub, pre, kind, callKey, logicalId, requestHash, amount });
+    if (!m.ok) return m;
+    const { close, t0 } = m;
+    const br = breakerFor(sub.provider);
     let releasePermit = null;
     // Not sent: an unreachable service (DNS or connection failure) is a genuine transport failure (spec §15); a capacity wait,
     // the caller's cancellation, a deadline that passed and a local refusal before send (NOT_READY, an SSRF denial, the paid
@@ -164,8 +173,53 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     }
   }
 
-  return { subject, preflight, report, call, closeUnclosed, breakerState: (provider) => breakerFor(provider).state(), breakers: () => Object.fromEntries([...breakers].map(([k, v]) => [k, v.state()])),
+  // A metered operation whose transport is not call()'s own (Ref's tool calls, sent by the MCP client through the policy-checked
+  // bridge): the same admission and reservation, and fail(), the one verdict and the one closing for a call that got no usable
+  // answer. An answer the caller can read is closed and reported by the caller, as after call().
+  async function meter({ sub, pre, kind, callKey, logicalId, requestHash, amount }) {
+    const m = await reserve({ sub, pre, kind, callKey, logicalId, requestHash, amount });
+    if (!m.ok) return m;
+    const { close } = m;
+    // sent: whether the operation's request was written. cancelled: the caller's own cancellation ended it.
+    async function fail(e, { sent, cancelled = false }) {
+      const v = mcpFailure(e, { sent, cancelled });
+      const br = breakerFor(sub.provider);
+      if (v.breaker === "failure") br.failure(); else br.neutral();
+      if (v.dispatchState === "not_sent") await close.release(`not sent: ${v.detail}`);
+      else await close.uncertain(v.dispatchState === "response_received" ? `answered without a result (${v.detail}); whether it charged is unknown` : `dispatch outcome unknown: ${v.detail}`);
+      return { reason: v.reason, detail: v.detail, dispatchState: v.dispatchState };
+    }
+    return { ok: true, close, fail };
+  }
+
+  // A failed exchange that is not a metered operation (an MCP session's initialize or tool listing): it took no admission, so
+  // it can count a failure against the service but never returns a probe slot it does not hold; availability learns the rest.
+  async function observe(sub, epoch, v) {
+    if (v.breaker === "failure") breakerFor(sub.provider).failure();
+    await report(sub, epoch, { reason: v.reason, providerCode: v.detail, detail: v.detail }, { answered: false });
+  }
+
+  return { subject, preflight, report, call, meter, observe, closeUnclosed, breakerState: (provider) => breakerFor(provider).state(), breakers: () => Object.fromEntries([...breakers].map(([k, v]) => [k, v.state()])),
     counters: () => ({ accountingFailures }) };
+}
+
+// What a failed MCP exchange means (an outbound MCP session: Ref, spec §6.2, §15): { reason, detail, dispatchState, breaker }.
+//   answered  an HTTP refusal of the endpoint, a JSON-RPC error or an answer the client could not read: the provider spoke;
+//   not sent  the request was never written: only an unreachable service is a failure of it;
+//   unknown   written and no answer: a timeout or a dropped connection counts against its service.
+export function mcpFailure(e, { sent, cancelled = false }) {
+  const code = typeof e?.code === "string" ? e.code : null;
+  if (Number.isInteger(e?.status)) {
+    const s = e.status;
+    const reason = s === 401 || s === 403 ? "auth_failed" : s === 429 ? "rate_limited" : s === 402 ? "quota_exhausted" : s >= 500 ? "temporarily_unavailable" : "contract_failure";
+    return { reason, detail: `http_${s}`, dispatchState: "response_received", breaker: reason === "temporarily_unavailable" ? "failure" : "neutral" };
+  }
+  if (Number.isInteger(e?.code)) return { reason: "contract_failure", detail: `jsonrpc_${e.code}`, dispatchState: "response_received", breaker: "neutral" };
+  if (code && /^(INVALID_RESULT|UNSUPPORTED_RESULT_TYPE)$|UNEXPECTED_CONTENT/.test(code)) return { reason: "contract_failure", detail: code.toLowerCase(), dispatchState: "response_received", breaker: "neutral" };
+  const reason = cancelled || code === "CANCELLED" ? "cancelled" : e?.capacity ? "capacity_unavailable" : e?.timedOut || code === "REQUEST_TIMEOUT" ? "timeout"
+    : code === "PAID_DISPATCH_DISABLED" ? "platform_restricted" : code === "PROVIDER_RESPONSE_TOO_LARGE" ? "contract_failure" : "temporarily_unavailable";
+  if (!sent) return { reason, detail: code ?? "not_sent", dispatchState: "not_sent", breaker: code === "PROVIDER_UNREACHABLE" ? "failure" : "neutral" };
+  return { reason, detail: code ?? "possibly_sent", dispatchState: "possibly_sent", breaker: reason === "timeout" || reason === "temporarily_unavailable" ? "failure" : "neutral" };
 }
 
 // The skeleton every metered HTTP search adapter shares (Brave, Exa, DeepSeek, Tavily): one dispatch, one closing of the
