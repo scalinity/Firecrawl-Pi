@@ -68,6 +68,8 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
       req.end(parts ? parts.at(-1) : undefined);
     };
     req.on("socket", (s) => {
+      // A reasoning model sends nothing until it has finished, for minutes: keep the idle connection alive through NAT.
+      s.setKeepAlive(true, 30000);
       s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
       if (mod === https) s.once("secureConnect", send);
     });
