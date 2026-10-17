@@ -1,0 +1,227 @@
+{
+  "schema": "fcpi.anthropic-limits-fixture-verification/v1",
+  "utc": "2026-10-17T13:08:24.511866+00:00",
+  "tested_commit": "c7039c7b928bf828eb75842fd3c042e80b9a9b02",
+  "state": "PASS",
+  "source_hashes": {
+    "services/retrieval/src/extract.mjs": "956b6576ffe8f6b4f05ce6394e4e625843877216af9f60c21553c5fc55d51350",
+    "services/retrieval/src/budget.mjs": "9fccdcf9722e1531b3e6044b349570c63c01adeeeba705bec003499b5e18aa92",
+    "services/retrieval/src/store.mjs": "f76505bccf0847d0a152bffc304991ea6f12ad1623a6eb40634bc0a4692a1e7e",
+    "services/retrieval/src/policy.mjs": "2f7cbf50591a48c62f8e6a7a1a1588677ec1a590e4cbc5eb77915d3515dfa307",
+    "services/retrieval/src/provider.mjs": "424d7950bf2fde646a4eb7667429c83f051627fcd1d75009a163359d3fd257e6",
+    "services/access/src/jsonscrape.mjs": "4c78568c415401c4b164cb0e4f52f74763390368bf2a630528c19ecc19791efe",
+    "deploy/policies/budget.json": "fc0af624b3c34c71d074526c7ba4dd7c4c2e798de28b79efd50b1eafc163b5c9",
+    "deploy/policies/capabilities.json": "5f1a67b56d0cff0da8f5c6fb2705edec0f8c1e6e5b2707d0d627cd7ea54c3862",
+    "scripts/playground/agent.mjs": "7ad7a64953e4863671789ef653d99b29a72b0a1b153b4776d3aa41f409adf8fd",
+    "scripts/host/firewall-fingerprint.py": "65975c1426f587c71336f2695a7804d5b50fdf4e34fd2b90774c123520fda979"
+  },
+  "checks": [
+    {
+      "id": "pi-retrieval_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 288,
+      "passed": 288,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "pi-ledger_migration_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 1,
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "pi-gateway_m5_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 24,
+      "passed": 24,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "pi-mcp_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 47,
+      "passed": 47,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "pi-grammars_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 3,
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "pi-gateway_unit_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 32,
+      "passed": 32,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "pi-gateway_contract_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 46,
+      "passed": 46,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "pi-gateway_mcp_contract_tap",
+      "command": "scripts/m5/pi-suites.sh",
+      "execution": "on the Pi, in the images the stack runs, with a throwaway PostgreSQL where the suite needs one",
+      "tests": 4,
+      "passed": 4,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "retrieval-suite-local-no-database",
+      "command": "scratch layout as scripts/m5/unit-tests-local.sh mounts it; node --test 'test/*.test.mjs'",
+      "execution": "workstation Node, no database: the 30 PostgreSQL-backed tests skip here and run in the Pi suite above",
+      "tests": 288,
+      "passed": 258,
+      "failed": 0,
+      "skipped": 30,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "access-gateway-suite-local",
+      "command": "FCPI_TEST_MANIFEST=deploy/policies/capabilities.json node --test test/*.test.mjs (services/access)",
+      "tests": 95,
+      "passed": 95,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "root-suites-local",
+      "command": "node --test tests/*.test.mjs (playground, desktop, Agent, timeout chain, firewall fingerprint)",
+      "tests": 58,
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    }
+  ],
+  "mutation_checks": [
+    {
+      "id": "reasoning-start-floor",
+      "mutation": "services/retrieval/src/extract.mjs: the start floor replaced by the one-second floor",
+      "test": "m5-extract: a model that reasons is not started with less than a minute left",
+      "result": "FAILS"
+    },
+    {
+      "id": "category-cap-passed",
+      "mutation": "services/retrieval/src/extract.mjs: caps: cat.caps replaced by caps: {}",
+      "test": "m5-extract: category cap smaller than a reservation refuses (and five existing tests)",
+      "result": "FAILS"
+    },
+    {
+      "id": "selection-refuses-reasoning-model",
+      "mutation": "services/retrieval/src/policy.mjs: the reasoning-effort refusal disabled",
+      "test": "m5-budget: the host selection is validated",
+      "result": "FAILS"
+    },
+    {
+      "id": "parse-call-site",
+      "mutation": "services/retrieval/src/parse.mjs: paidTotalDayCap(budget) replaced by budget.paidTotal.caps.day",
+      "test": "m5-parse: a paid parser with no shared daily cap",
+      "result": "FAILS"
+    },
+    {
+      "id": "residential-call-site",
+      "mutation": "services/retrieval/src/residential.mjs: the same replacement",
+      "test": "m6-residential: a paid proxy with no shared daily cap",
+      "result": "FAILS"
+    },
+    {
+      "id": "enhanced-call-site",
+      "mutation": "services/retrieval/src/enhanced.mjs: the same replacement",
+      "test": "m7-enhanced: a paid enhanced dispatch with no shared daily cap",
+      "result": "FAILS"
+    },
+    {
+      "id": "reconcile-call-site",
+      "mutation": "services/retrieval/src/reconcile.mjs: paidTotal: provider.paid without the cap test",
+      "test": "m6-residential: a day's reconciliation charges the shared cap only when one is set",
+      "result": "FAILS"
+    },
+    {
+      "id": "gateway-abort-timer-extra",
+      "mutation": "services/access/src/jsonscrape.mjs: + extra dropped from the abort timer",
+      "test": "jsonscrape: the gateway aborts a request 15 s past the core timeout",
+      "result": "FAILS"
+    },
+    {
+      "id": "gateway-abort-timer-margin",
+      "mutation": "services/access/src/jsonscrape.mjs: the 15 s margin widened to 20 s",
+      "test": "jsonscrape: the gateway aborts a request 15 s past the core timeout",
+      "result": "FAILS"
+    },
+    {
+      "id": "gateway-extra-for-every-request",
+      "mutation": "services/access/src/jsonscrape.mjs: the extra granted without json.model",
+      "test": "jsonscrape (two tests)",
+      "result": "FAILS"
+    },
+    {
+      "id": "socket-keep-alive",
+      "mutation": "services/retrieval/src/provider.mjs: the setKeepAlive call removed",
+      "test": "provider-socket: a provider request turns on TCP keep-alive probes",
+      "result": "FAILS"
+    },
+    {
+      "id": "busy-slot-retry-after",
+      "mutation": "services/retrieval/src/extract.mjs: retryAfter: 30 removed from RESOURCE_BUSY",
+      "test": "m5-extract: a call that never gets the one model slot",
+      "result": "FAILS"
+    },
+    {
+      "id": "pg-undefined-shared-cap",
+      "mutation": "the previous retrieval image (sha256:bea1d942\u2026, with the != null test written !== null) running the new database tests",
+      "test": "m5-store: a paid category with no shared cap (null or undefined)",
+      "result": "FAILS",
+      "evidence": "raw/pg-tests-on-previous-image.txt"
+    },
+    {
+      "id": "pg-uncertain-listing",
+      "mutation": "the same previous image, which has no uncertainHolds",
+      "test": "m5-store: calls of uncertain outcome are listed by category",
+      "result": "FAILS",
+      "evidence": "raw/pg-tests-on-previous-image.txt"
+    }
+  ]
+}

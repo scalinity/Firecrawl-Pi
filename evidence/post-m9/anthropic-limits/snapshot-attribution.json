@@ -1,0 +1,64 @@
+{
+ "schema": "fcpi.host-attribution/v1",
+ "utc": "2026-10-17T13:10:07.446137+00:00",
+ "state": "ATTRIBUTED",
+ "snapshot_before_sha256": "c0d08f4af3ee456608391dc4744bbdafbb933ad05b6416b193affffe9c6e3282",
+ "snapshot_after_sha256": "2d48472e18d9efdb71dcca6c2027e5158d11b702c1e637dd9f5c99ddd7317084",
+ "previous_after_sha256": "72a71ce1150fdbc232c2a285bd228e925e34aa123279a2ce23a74a7768b15ce5",
+ "raw_snapshots": "retained privately outside the repository (they hold the Pi's LAN address); hashes recorded here",
+ "entry_comparison": {
+  "compared": "the previous change's AFTER snapshot (11:07Z) with this change's BEFORE snapshot (11:41Z)",
+  "sections_total": 13,
+  "sections_identical": 11,
+  "differences": {
+   "meta": "capture timestamp",
+   "systemd_running": "one transient capture SSH session scope"
+  },
+  "verdict": "only a timestamp and an SSH session scope differ, as the rule allows; the Pi was left as the previous change recorded it"
+ },
+ "sections_total": 13,
+ "changed_sections": {
+  "meta": {
+   "removed": 1,
+   "added": 1
+  },
+  "systemd_running": {
+   "removed": 4,
+   "added": 4
+  },
+  "docker_ps": {
+   "removed": 3,
+   "added": 3
+  },
+  "ss_listen": {
+   "removed": 1,
+   "added": 1
+  },
+  "findmnt": {
+   "removed": 6,
+   "added": 6
+  },
+  "firewall": {
+   "removed": 1,
+   "added": 1
+  }
+ },
+ "boot_unchanged": true,
+ "attribution": {
+  "meta": "capture timestamp",
+  "systemd_running": "three Docker scopes replaced (the access gateway, the MCP gateway and the retrieval service, which this change recreated) and one transient capture SSH session",
+  "docker_ps": "only fcpi-access-gateway-1, fcpi-mcp-gateway-1 and fcpi-retrieval-service-1 changed container identity. Retrieval moved from fcpi/retrieval@sha256:a88400c9 to @sha256:8529c32d (the final Agent-limits image, built from 8c87bd8); the access gateway from @sha256:e7f6edf3 to @sha256:422bf019 (the extra-wait image); the MCP gateway image is unchanged (@sha256:eebafe80) and was recreated to read the changed capability manifest",
+  "findmnt": "the overlay root filesystems and network-namespace mounts of those three containers",
+  "ss_listen": "the docker-proxy process for the access gateway's loopback publication (127.0.0.1:3380) has a new PID after the container was recreated; same address and port",
+  "firewall": "the raw nft_ruleset_sha256 moved from 86344c11 to e1e3a82a, the second of its two known values: recreating containers re-orders three equivalent drop rules in table ip raw chain PREROUTING. The canonical hash (65b18fd5\u2026) and the project's inet fcpi_guard table hash (f291c0ce\u2026) are identical before and after (raw/firewall-final-before.txt, raw/firewall-final-after.txt), and the same four chains are sorted"
+ },
+ "all_other_sections_identical": true,
+ "sections_identical": 7,
+ "firewall_investigation": {
+  "status": "RESOLVED",
+  "resolves": "the open item in evidence/post-m9/anthropic-models/snapshot-attribution.json (the unexplained e1e3a82a BEFORE)",
+  "evidence": "evidence/post-m9/anthropic-limits/raw/firewall-experiment.md; scripts/host/pi-firewall.sh output in raw/firewall-final-before.txt and raw/firewall-final-after.txt",
+  "finding": "Docker adds a container's drop-direct-access rules when the container starts, so recreating containers swaps the order of three pure-match drop rules sharing one verdict; the raw hash has exactly two values, and the earlier BEFORE/AFTER pair was those two values. No packet meets a different rule.",
+  "tooling": "scripts/host/firewall-fingerprint.py (an allowlist: only chains made entirely of pure matches with one shared verdict are sorted) and the Pi-side collector scripts/host/pi-firewall.sh; tests/firewall-fingerprint.test.mjs pins nine behaviour-changing shapes that must keep the order"
+ }
+}

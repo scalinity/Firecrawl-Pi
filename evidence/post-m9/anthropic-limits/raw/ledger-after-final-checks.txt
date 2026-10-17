@@ -1,0 +1,5 @@
+anthropic-agent|claude-opus-5-5|extract|SETTLED|2572505|9380|f|2026-10-17 13:02:56.668209+00
+anthropic|claude-haiku-5-5|extract|SETTLED|2121|58|f|2026-10-17 13:02:54.554795+00
+anthropic-agent|claude-opus-5-5|extract|SETTLED|2565660|270232|f|2026-10-17 12:06:35.321276+00
+anthropic-agent|claude-opus-5-5|extract|SETTLED|405655|402112|f|2026-10-17 11:56:42.930439+00
+paid_total_rows|10

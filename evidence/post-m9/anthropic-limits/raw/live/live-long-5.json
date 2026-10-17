@@ -1,0 +1,1 @@
+{"test":"opus-long-extraction","wall_s":103.9,"http":200,"success":true,"code":null,"variants":12,"model":"claude-opus-5-5","reasoningEffort":"high","usage":{"calls":1,"reused":0,"promptTokens":528,"completionTokens":13406,"cachedTokens":0,"cacheWriteTokens":0,"costMicroUsd":270232},"units":[{"ok":true,"failure":null}],"error":null}

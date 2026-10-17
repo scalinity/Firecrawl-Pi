@@ -1,0 +1,88 @@
+[
+  {
+    "id": "reasoning-start-floor",
+    "mutation": "services/retrieval/src/extract.mjs: the start floor replaced by the one-second floor",
+    "test": "m5-extract: a model that reasons is not started with less than a minute left",
+    "result": "FAILS"
+  },
+  {
+    "id": "category-cap-passed",
+    "mutation": "services/retrieval/src/extract.mjs: caps: cat.caps replaced by caps: {}",
+    "test": "m5-extract: category cap smaller than a reservation refuses (and five existing tests)",
+    "result": "FAILS"
+  },
+  {
+    "id": "selection-refuses-reasoning-model",
+    "mutation": "services/retrieval/src/policy.mjs: the reasoning-effort refusal disabled",
+    "test": "m5-budget: the host selection is validated",
+    "result": "FAILS"
+  },
+  {
+    "id": "parse-call-site",
+    "mutation": "services/retrieval/src/parse.mjs: paidTotalDayCap(budget) replaced by budget.paidTotal.caps.day",
+    "test": "m5-parse: a paid parser with no shared daily cap",
+    "result": "FAILS"
+  },
+  {
+    "id": "residential-call-site",
+    "mutation": "services/retrieval/src/residential.mjs: the same replacement",
+    "test": "m6-residential: a paid proxy with no shared daily cap",
+    "result": "FAILS"
+  },
+  {
+    "id": "enhanced-call-site",
+    "mutation": "services/retrieval/src/enhanced.mjs: the same replacement",
+    "test": "m7-enhanced: a paid enhanced dispatch with no shared daily cap",
+    "result": "FAILS"
+  },
+  {
+    "id": "reconcile-call-site",
+    "mutation": "services/retrieval/src/reconcile.mjs: paidTotal: provider.paid without the cap test",
+    "test": "m6-residential: a day's reconciliation charges the shared cap only when one is set",
+    "result": "FAILS"
+  },
+  {
+    "id": "gateway-abort-timer-extra",
+    "mutation": "services/access/src/jsonscrape.mjs: + extra dropped from the abort timer",
+    "test": "jsonscrape: the gateway aborts a request 15 s past the core timeout",
+    "result": "FAILS"
+  },
+  {
+    "id": "gateway-abort-timer-margin",
+    "mutation": "services/access/src/jsonscrape.mjs: the 15 s margin widened to 20 s",
+    "test": "jsonscrape: the gateway aborts a request 15 s past the core timeout",
+    "result": "FAILS"
+  },
+  {
+    "id": "gateway-extra-for-every-request",
+    "mutation": "services/access/src/jsonscrape.mjs: the extra granted without json.model",
+    "test": "jsonscrape (two tests)",
+    "result": "FAILS"
+  },
+  {
+    "id": "socket-keep-alive",
+    "mutation": "services/retrieval/src/provider.mjs: the setKeepAlive call removed",
+    "test": "provider-socket: a provider request turns on TCP keep-alive probes",
+    "result": "FAILS"
+  },
+  {
+    "id": "busy-slot-retry-after",
+    "mutation": "services/retrieval/src/extract.mjs: retryAfter: 30 removed from RESOURCE_BUSY",
+    "test": "m5-extract: a call that never gets the one model slot",
+    "result": "FAILS"
+  },
+  {
+    "id": "pg-undefined-shared-cap",
+    "mutation": "the previous retrieval image (sha256:bea1d942\u2026, with the != null test written !== null) running the new database tests",
+    "test": "m5-store: a paid category with no shared cap (null or undefined)",
+    "result": "FAILS",
+    "evidence": "raw/pg-tests-on-previous-image.txt"
+  },
+  {
+    "id": "pg-uncertain-listing",
+    "mutation": "the same previous image, which has no uncertainHolds",
+    "test": "m5-store: calls of uncertain outcome are listed by category",
+    "result": "FAILS",
+    "evidence": "raw/pg-tests-on-previous-image.txt"
+  }
+]

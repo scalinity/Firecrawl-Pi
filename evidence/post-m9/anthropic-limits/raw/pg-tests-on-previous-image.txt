@@ -1,0 +1,16 @@
+utc=2026-10-17T13:06:24Z source_commit=c7039c7b928bf828eb75842fd3c042e80b9a9b02 previous_image=fcpi/retrieval@sha256:bea1d942c581eebf1b02b722ca3a908ade52679e567816859fcdb0118d70f2bd
+ok 1 - finite search credits serialize reservations across months and survive pruning
+ok 2 - twelve concurrent reservations against a cap that holds three: exactly three succeed (CLAUDE.md §11, AC25)
+ok 3 - settlement moves the reservation to its actual cost; release gives it all back; uncertain keeps it whole
+ok 4 - a retried call key finds its reservation; a released one may be reserved again
+ok 5 - a paid category also draws on the paid total's daily cap; a zero cap refuses everything
+not ok 6 - a paid category with no shared cap (null or undefined) draws on no shared row and records none; a shared cap of zero still refuses
+not ok 7 - calls of uncertain outcome are listed by category with what they hold, for the month they were made in and no other
+ok 8 - settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2)
+ok 9 - a settlement gives back only the period rows its reservation took, whatever the caps are now (review W2)
+ok 10 - a paid parser's credits count against the paid total's day in micro-USD (review W3)
+ok 11 - pruning clears a week-old settled call's stored answer and keeps its amounts (review W9)
+ok 12 - the 80% threshold is noticed once per period
+ok 13 - search admission holds its hourly cap under concurrent queries; the cache expires
+leftover_transient_containers=0
+end_marker=reached

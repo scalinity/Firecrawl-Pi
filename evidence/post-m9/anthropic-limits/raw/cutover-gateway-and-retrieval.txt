@@ -1,0 +1,16 @@
+utc_start=2026-10-17T11:45:54Z
+in_flight_jobs=0
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-access-gateway-1 Started 
+ Container fcpi-access-gateway-1 Waiting 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+compose_exit=0
+fcpi-retrieval-service-1 image=sha256:c55c90937cadb4b0cef7b7f59253b6b0ada9f4ade863a3144a398960f0c5a408
+fcpi-access-gateway-1 image=sha256:422bf01938842f6dbcc8f167d5a8455d1683266907f74a02e133606f2d918307
+PI_MODEL_EXTRACT_EXTRA_MS=300000
+PI_CORE_TIMEOUT_MS=110000
+selection={"search":"live","extractionModel":"claude-haiku-5-5","source":"file"}
+startup_complaints=0
+end_marker=reached utc=2026-10-17T11:46:07Z

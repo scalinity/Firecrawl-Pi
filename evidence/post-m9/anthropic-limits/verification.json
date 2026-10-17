@@ -1,0 +1,209 @@
+{
+  "schema": "fcpi.anthropic-limits-live-verification/v1",
+  "utc": "2026-10-17T13:13:26.892718+00:00",
+  "state": "PASS",
+  "checks": {
+    "fixtures": true,
+    "pi_cutover_healthy": true,
+    "canonical_firewall_unchanged": true,
+    "guard_table_unchanged": true,
+    "same_chains_sorted": true,
+    "raw_firewall_hash_flipped_only": true,
+    "no_unsettled_llm_rows": true,
+    "new_pg_tests_fail_on_previous_image": true,
+    "default_extraction_haiku": true,
+    "agent_opus_high": true,
+    "mcp_long_call_past_old_limit": true,
+    "review_all_outcomes": true
+  },
+  "capability": {
+    "opus_agent_output_cap_128000_timeout_300s": "VERIFIED_LIVE",
+    "gateway_extra_wait_for_a_named_model": "VERIFIED_LIVE",
+    "mcp_waits_for_a_named_model": "VERIFIED_LIVE",
+    "no_shared_daily_paid_cap": "VERIFIED_LIVE"
+  },
+  "implementation_commit": "8c87bd8fac538d2cb9daeb96cffb50772b7acf9d",
+  "deployed_commit": "c7039c7b928bf828eb75842fd3c042e80b9a9b02",
+  "image_id": "sha256:8529c32d141db44977b2ac06f5a4417990d012578a8e88b5784946adc3f6817d",
+  "platform": "linux/arm64",
+  "policy_sha256": "fc0af624b3c34c71d074526c7ba4dd7c4c2e798de28b79efd50b1eafc163b5c9",
+  "capabilities_sha256": "5f1a67b56d0cff0da8f5c6fb2705edec0f8c1e6e5b2707d0d627cd7ea54c3862",
+  "fixtures": {
+    "state": "PASS",
+    "report": "evidence/post-m9/anthropic-limits/fixtures.json",
+    "checks": 11
+  },
+  "mutation_checks": {
+    "count": 14,
+    "all_fail_as_required": true,
+    "report": "evidence/post-m9/anthropic-limits/raw/mutation-checks.json"
+  },
+  "review": {
+    "report": "evidence/post-m9/anthropic-limits/review/REVIEW.md",
+    "agents": "debugger and code-auditor, each on the opus alias (Opus 5.5)",
+    "critical": 2,
+    "warnings": 10,
+    "suggestions": 11,
+    "unresolved": 0
+  },
+  "cutover": {
+    "evidence": "evidence/post-m9/anthropic-limits/raw/cutover-final.txt",
+    "services": [
+      "retrieval-service",
+      "access-gateway",
+      "mcp-gateway"
+    ],
+    "in_flight_jobs": 0,
+    "selection": {
+      "search": "live",
+      "extractionModel": "claude-haiku-5-5",
+      "source": "file"
+    }
+  },
+  "firewall": {
+    "before": {
+      "utc": "2026-10-17T13:02:44Z source_commit=c7039c7b928bf828eb75842fd3c042e80b9a9b02",
+      "nft_ruleset_sha256": "e1e3a82a1d4d6b6d3958b6a180f2b330e59339f266488678d66e6e2b80189a85",
+      "nft_ruleset_canonical_sha256": "65b18fd52814078a63fe92a78f90dfc3f90c679d3f942b59baac24f263a84ac4",
+      "order_insensitive_chains": "4 ip filter/DOCKER-CT,ip filter/DOCKER-INTERNAL,ip6 filter/ts-input,ip raw/PREROUTING",
+      "guard_table_sha256": "f291c0cec99db9c3ae1efdd3e9473deade3b047e3b3ece07d7cfd205b10a3f88",
+      "fingerprint_exit": "0"
+    },
+    "after": {
+      "utc": "2026-10-17T12:59:42Z source_commit=8c87bd8fac538d2cb9daeb96cffb50772b7acf9d",
+      "nft_ruleset_sha256": "86344c110bc1bfc51dc465eb32392fdf033778a8df7757aefcd1b42207892844",
+      "nft_ruleset_canonical_sha256": "65b18fd52814078a63fe92a78f90dfc3f90c679d3f942b59baac24f263a84ac4",
+      "order_insensitive_chains": "4 ip filter/DOCKER-CT,ip filter/DOCKER-INTERNAL,ip6 filter/ts-input,ip raw/PREROUTING",
+      "guard_table_sha256": "f291c0cec99db9c3ae1efdd3e9473deade3b047e3b3ece07d7cfd205b10a3f88",
+      "fingerprint_exit": "0"
+    }
+  },
+  "live": {
+    "long_extractions": {
+      "live-long-1": {
+        "wall_s": 149.9,
+        "http": 200,
+        "success": true,
+        "output_tokens": 17986,
+        "cost_micro_usd": 930900,
+        "model_calls": 5
+      },
+      "live-long-2": {
+        "wall_s": 191.6,
+        "http": 502,
+        "success": false,
+        "output_tokens": 20000,
+        "cost_micro_usd": 402112,
+        "model_calls": 1
+      },
+      "live-long-3": {
+        "wall_s": 171.7,
+        "http": 502,
+        "success": false,
+        "output_tokens": 20000,
+        "cost_micro_usd": 402112,
+        "model_calls": 1
+      },
+      "live-long-4": {
+        "wall_s": 153.4,
+        "http": 502,
+        "success": false,
+        "output_tokens": 20000,
+        "cost_micro_usd": 402112,
+        "model_calls": 1
+      },
+      "live-long-5": {
+        "wall_s": 103.9,
+        "http": 200,
+        "success": true,
+        "output_tokens": 13406,
+        "cost_micro_usd": 270232,
+        "model_calls": 1
+      }
+    },
+    "mcp_long_call": {
+      "status": 200,
+      "wall_s": 189,
+      "isError": null,
+      "rpcError": null,
+      "success": null,
+      "code": null,
+      "error": null,
+      "variants": 20,
+      "model": "claude-opus-5-5",
+      "reasoningEffort": "high",
+      "usage": {
+        "calls": 1,
+        "reused": 0,
+        "promptTokens": 528,
+        "completionTokens": 25205,
+        "cachedTokens": 0,
+        "cacheWriteTokens": 0,
+        "costMicroUsd": 506212
+      }
+    },
+    "final_images": [
+      {
+        "test": "haiku-default-extraction",
+        "http": 200,
+        "success": true,
+        "wall_ms": 1841,
+        "json": {
+          "purpose": "for use in documentation examples without needing permission",
+          "is_a_service": false
+        },
+        "model": "claude-haiku-5-5",
+        "requestedModel": "claude-haiku-5-5",
+        "reasoningEffort": "none",
+        "usage": {
+          "calls": 1,
+          "reused": 0,
+          "promptTokens": 424,
+          "completionTokens": 31,
+          "cachedTokens": 0,
+          "cacheWriteTokens": 0,
+          "costMicroUsd": 58
+        },
+        "failure": null,
+        "warnings": null
+      },
+      {
+        "test": "opus-agent",
+        "wall_ms": 4141,
+        "status": "completed",
+        "success": true,
+        "code": null,
+        "model": "claude-opus-5-5",
+        "reasoningEffort": "high",
+        "answer": "The page says the domain is for use in documentation examples without needing permission. It explicitly states it is not a service, and advises against relying on it for testing and monitoring purposes.",
+        "findings": 2,
+        "sources": 1,
+        "steps": 1,
+        "usage": {
+          "calls": 1,
+          "reused": 0,
+          "promptTokens": 1150,
+          "completionTokens": 239,
+          "costMicroUsd": 9380,
+          "cachedTokens": 0,
+          "cacheWriteTokens": 0
+        },
+        "limitations": [],
+        "event_types": [
+          "step"
+        ]
+      }
+    ],
+    "ledger": "evidence/post-m9/anthropic-limits/raw/ledger-after-final-checks.txt"
+  },
+  "openai_key_on_pi": "ABSENT (evidence/post-m9/anthropic-limits/raw/provider-secret-names.txt)",
+  "desktop_app": {
+    "installed": "/Applications/Firecrawl Pi.app",
+    "resources_matching_repo": "13 of 13",
+    "signature": "valid (development identity, not notarized)"
+  },
+  "residual_risks": [
+    "about seven calls left uncertain by a 300 s timeout would hold the whole $20 month for every model in the llm category; the status lists them, no operator command settles one",
+    "one model request runs at a time, so a default extraction made during an Opus read can be refused as busy (retry after 30 s)"
+  ]
+}

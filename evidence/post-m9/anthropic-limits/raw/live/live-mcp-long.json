@@ -1,0 +1,1 @@
+{"test":"opus-long-extraction-through-mcp","ssh_exit":0,"result":{"status":200,"wall_s":189,"isError":null,"rpcError":null,"success":null,"code":null,"error":null,"variants":20,"model":"claude-opus-5-5","reasoningEffort":"high","usage":{"calls":1,"reused":0,"promptTokens":528,"completionTokens":25205,"cachedTokens":0,"cacheWriteTokens":0,"costMicroUsd":506212}}}

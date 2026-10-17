@@ -36,3 +36,11 @@ Deploy the commit before the change (`664d47a`) with `scripts/m1/deploy.sh`; set
 `4956d2f` provider, policy and gateway tests · `d9210b1` Agent pin and label · `4ba6ccf` `cb2eb74` `09b5f23` `c6d5f39` `6fea5ae` `7a8bc9d` `615bca6` `7e001a0` `90f52fd` `dd089fe` review fixes · `a037d3b` Opus allowance from measurement · `fbc3db2` first image pin (superseded) · `f3cec79` nullable-enum fix · `4778188` image pin.
 
 Receipts: `verification.json`, `fixtures.json`, `snapshot-attribution.json`, `raw/`, and `review/REVIEW.md`. Historical M5 and M9 acceptance records are unchanged; this is additive post-M9 verification.
+
+## Later resolution (2026-10-17)
+
+Two items above were closed afterwards, and the details are in `evidence/post-m9/anthropic-limits/`:
+
+- **Open host item (the `nft` hash).** Explained and tooled. Docker adds a container's drop rules when the container starts, so recreating containers swaps the order of three equivalent drop rules in `table ip raw` and the raw hash flips between two values (`86344c11…` and `e1e3a82a…`); this session's BEFORE/AFTER pair was those two values. The canonical hash and the project's guard-table hash did not move. See `anthropic-limits/raw/firewall-experiment.md` and `anthropic-limits/snapshot-attribution.json`.
+- **Left in place (`openai_api_key`).** Deleted from the Pi's provider secrets. `OPENAI_API_KEY` and `MODEL_NAME` remain in the workstation's `.env`, untouched.
+- **Opus and the shared daily cap.** The $1 daily shared paid cap no longer exists, and Opus's output allowance and timeouts changed; the figures in the first bullet under "Things worth knowing" describe the state at this change only.

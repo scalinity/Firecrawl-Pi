@@ -1,0 +1,29 @@
+utc_start=2026-10-17T13:02:23Z deployed_commit=c7039c7b928bf828eb75842fd3c042e80b9a9b02
+in_flight_jobs=0
+reserved_model_rows=0
+ Container fcpi-access-gateway-1 Recreate 
+ Container fcpi-mcp-gateway-1 Recreate 
+ Container fcpi-retrieval-service-1 Recreate 
+ Container fcpi-mcp-gateway-1 Recreated 
+ Container fcpi-access-gateway-1 Recreated 
+ Container fcpi-retrieval-service-1 Recreated 
+ Container fcpi-mcp-gateway-1 Starting 
+ Container fcpi-retrieval-service-1 Starting 
+ Container fcpi-access-gateway-1 Starting 
+ Container fcpi-mcp-gateway-1 Started 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-access-gateway-1 Started 
+ Container fcpi-access-gateway-1 Waiting 
+ Container fcpi-mcp-gateway-1 Waiting 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-mcp-gateway-1 Healthy 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+compose_exit=0
+fcpi-retrieval-service-1 image=sha256:8529c32d141db44977b2ac06f5a4417990d012578a8e88b5784946adc3f6817d health=healthy
+fcpi-access-gateway-1 image=sha256:422bf01938842f6dbcc8f167d5a8455d1683266907f74a02e133606f2d918307 health=healthy
+fcpi-mcp-gateway-1 image=sha256:eebafe80fc3a108490d35ecf834ab3638336e273040d25aad0ecba870b55c172 health=healthy
+PI_MODEL_EXTRACT_EXTRA_MS=300000
+PI_CORE_TIMEOUT_MS=110000
+startup_complaints=0
+end_marker=reached utc=2026-10-17T13:02:39Z

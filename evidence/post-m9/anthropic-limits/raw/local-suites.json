@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "id": "retrieval-suite-local-no-database",
+      "command": "scratch layout as scripts/m5/unit-tests-local.sh mounts it; node --test 'test/*.test.mjs'",
+      "execution": "workstation Node, no database: the 30 PostgreSQL-backed tests skip here and run in the Pi suite above",
+      "tests": 288,
+      "passed": 258,
+      "failed": 0,
+      "skipped": 30,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "access-gateway-suite-local",
+      "command": "FCPI_TEST_MANIFEST=deploy/policies/capabilities.json node --test test/*.test.mjs (services/access)",
+      "tests": 95,
+      "passed": 95,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    },
+    {
+      "id": "root-suites-local",
+      "command": "node --test tests/*.test.mjs (playground, desktop, Agent, timeout chain, firewall fingerprint)",
+      "tests": 58,
+      "passed": 58,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "state": "PASS"
+    }
+  ],
+  "tested_commit": "6907870"
+}
