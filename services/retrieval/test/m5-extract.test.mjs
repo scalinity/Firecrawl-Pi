@@ -606,6 +606,23 @@ test("Messages API: a reasoning model must report its identity, and a different 
   }
 });
 
+test("Messages API: even a model that does not reason must report which model answered; the chat API's fixture need not", async () => {
+  // Effort none is the production default model's setting: its identity is checked because the API provides it.
+  const r = await rig({ mutate: messagesApi(), handler: recording(answerWith({ model: undefined })) });
+  try {
+    const out = await r.extract(req());
+    assert.equal(out.ok, false);
+    assert.equal(out.failure.class, "MODEL_IDENTITY_UNVERIFIED");
+    assert.deepEqual(r.store.states(), ["SETTLED"], "the answered call is billed and kept");
+  } finally { await r.srv.close(); }
+  // The same answer on the chat API at effort none is accepted, as before.
+  const chat = await rig({ handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    s.writeHead(200, JSON_HEADERS).end(JSON.stringify({ choices: [{ message: { content: JSON.stringify(ANSWER) }, finish_reason: "stop" }], usage: { prompt_tokens: 10, completion_tokens: 5 } }));
+  } });
+  try { assert.equal((await chat.extract(req())).ok, true); } finally { await chat.srv.close(); }
+});
+
 test("Messages API: a refusal and a token-cap stop are settled calls with their own failure class", async () => {
   for (const [over, cls, detail] of [
     [{ stop_reason: "refusal", stop_details: { type: "refusal", category: "cyber", explanation: null }, content: [] }, "EXTRACTION_REFUSED", /cyber/],

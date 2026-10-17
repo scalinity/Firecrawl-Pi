@@ -283,6 +283,8 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     if (typeof model !== "string") bad("model must be a string");
     const modelPolicy = budget.models[model];
     const reasoningEffort = modelPolicy?.reasoningEffort ?? null;
+    // A reasoning model, and any model on the Messages API (which always names the model that ran), must say which answered.
+    const identityRequired = (reasoningEffort && reasoningEffort !== "none") || budget.providers[modelPolicy?.provider]?.api === "anthropic-messages";
     if (req.reasoningEffort !== undefined && req.reasoningEffort !== reasoningEffort) bad("reasoningEffort must match the selected model's budget policy");
     const maxOutputTokens = modelPolicy?.maxOutputTokens ?? X.maxOutputTokens;
     if (prompt !== null && (typeof prompt !== "string" || prompt.length > X.maxPromptChars)) bad(`prompt must be a string of at most ${X.maxPromptChars} characters`);
@@ -347,7 +349,7 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
       let accountedCall = false;
       const judge = (r) => {
         if (r.resolvedModel && r.resolvedModel !== model) throw fail("MODEL_MISMATCH", "the provider returned a model identity different from the requested model; no fallback is accepted");
-        if (reasoningEffort && reasoningEffort !== "none" && !r.resolvedModel) throw fail("MODEL_IDENTITY_UNVERIFIED", "the provider did not report the identity of the requested reasoning model");
+        if (identityRequired && !r.resolvedModel) throw fail("MODEL_IDENTITY_UNVERIFIED", "the provider did not report the identity of the model that answered");
         if (r.refusal) return { refused: r.refusal };
         if (r.finishReason === "length") return { limit: true };
         let v;
