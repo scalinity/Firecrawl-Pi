@@ -11,6 +11,7 @@ import { randomUUID } from "node:crypto";
 import { Breaker, periodStarts, rateCardFor, paidDispatchActive } from "../../budget.mjs";
 import { providerRequest } from "../../provider.mjs";
 import { credentialEpoch } from "../availability.mjs";
+import { outcome } from "../contracts.mjs";
 
 const FIXTURE = /\.fixture\.fcpi\.test$/;
 
@@ -165,6 +166,48 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
 
   return { subject, preflight, report, call, closeUnclosed, breakerState: (provider) => breakerFor(provider).state(), breakers: () => Object.fromEntries([...breakers].map(([k, v]) => [k, v.state()])),
     counters: () => ({ accountingFailures }) };
+}
+
+// The skeleton every metered HTTP search adapter shares (Brave, Exa, DeepSeek, Tavily): one dispatch, one closing of the
+// reservation, one breaker verdict and the outcome. The adapter supplies its provider's contract:
+//   refusal(response, data)  a non-200 answer: { reason, retryAt?, providerCode, errorCode?, close: "release" | "uncertain", note }
+//   closing(data)            a 200 answer, judged before its shape: { settle, usage, note, fields? } or { uncertain: note }
+//   results(data)            the result list, or null when the answer is not the documented shape
+//   candidate(x, i)          one candidate, or null for an invalid row
+//   answered(data, response) fields every answered outcome carries (a provider request id)
+//   success(data, list)      fields of the successful outcome (its usage)
+export async function meteredSearch({ dispatch, ctx, id, base, call, refusal, closing, results, candidate, answered = () => ({}), success = () => ({}) }) {
+  const res = await dispatch.call(call);
+  if (!res.ok) {
+    // call() has already judged the breaker: this report only informs availability.
+    await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: res.reason }, { answered: false });
+    return outcome({ ...base, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, queueMs: res.queueMs });
+  }
+  const { response, close } = res, data = parseJson(response.body);
+  const common = { ...base, queueMs: res.queueMs, startedAt: res.startedAt, dispatchState: "response_received", ...answered(data, response) };
+  if (response.status !== 200) {
+    const r = refusal(response, data);
+    if (r.close === "release") await close.release(r.note); else await close.uncertain(r.note);
+    const retryAt = r.retryAt ?? null;
+    await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, retryAt, retryBasis: retryAt ? "documented" : null, providerCode: r.providerCode, detail: r.providerCode });
+    return outcome({ ...common, status: "failed", reason: r.reason, detail: r.providerCode, retryAt,
+      error: { httpStatus: response.status, providerCode: r.errorCode === undefined ? r.providerCode : r.errorCode, retryable: r.reason !== "auth_failed", messageCode: `${id}_${r.reason}` } });
+  }
+  // A 200 is closed before its shape is judged: what it was billed does not depend on whether it was usable.
+  const c = closing(data);
+  if (c.uncertain) await close.uncertain(c.uncertain);
+  else await close.settle(c.settle, { usage: c.usage, detail: c.note });
+  const after = { ...common, ...(c.fields ?? {}) };
+  const contractFailure = async (code, detail) => {
+    await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: "contract_failure", providerCode: code });
+    return outcome({ ...after, status: "failed", reason: "contract_failure", detail });
+  };
+  const list = results(data);
+  if (!list) return contractFailure(`${id}_shape`, `${id}_response_shape`);
+  const candidates = list.flatMap((x, i) => { const one = x ? candidate(x, i) : null; return one ? [one] : []; });
+  if (list.length && !candidates.length) return contractFailure(`${id}_results_invalid`, `${id}_results_invalid`);
+  await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: res.startedAt });
+  return outcome({ ...after, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: list.length, candidates, ...success(data, list) });
 }
 
 // A provider's JSON answer, or null when it is not JSON (a contract failure for the caller to name).
