@@ -525,6 +525,20 @@ test("an unanswered call stays reserved and is never sent again; a settled one i
   } finally { await r.srv.close(); }
 });
 
+test("a model's own input cap replaces the extraction's: a page that takes several units at 32,000 tokens is one unit at 150,000", async () => {
+  const filler = Array.from({ length: 2600 }, (_, i) => `Paragraph ${i} carries no facts at all, only words to fill the page.`).join("\n\n");
+  const long = { url: "http://m5.fixture.fcpi.test:8080/extract/long.html", markdown: `Product: Long Widget\n\n${filler}\n\nPrice: 99.95` };
+  const split = await rig();
+  try { assert.ok((await split.extract(req({ documents: [long] }))).units.length >= 2, "precondition: the default cap splits the page"); } finally { await split.srv.close(); }
+  const whole = await rig({ mutate: (b) => { b.models["fcpi-fixture-model"].maxInputTokens = 150000; } });
+  try {
+    const out = await whole.extract(req({ documents: [long] }));
+    assert.equal(out.ok, true);
+    assert.equal(out.units.length, 1, "the whole page in one call");
+    assert.equal(whole.calls(), 1);
+  } finally { await whole.srv.close(); }
+});
+
 test("long documents are chunked under the input cap and merged with each part's provenance; conflicts are reported", async () => {
   const r = await rig();
   try {

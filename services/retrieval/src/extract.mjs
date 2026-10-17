@@ -321,6 +321,7 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     const identityRequired = (reasoningEffort && reasoningEffort !== "none") || budget.providers[modelPolicy?.provider]?.api === "anthropic-messages";
     if (req.reasoningEffort !== undefined && req.reasoningEffort !== reasoningEffort) bad("reasoningEffort must match the selected model's budget policy");
     const maxOutputTokens = modelPolicy?.maxOutputTokens ?? X.maxOutputTokens;
+    const maxInputTokens = modelPolicy?.maxInputTokens ?? X.maxInputTokens;
     if (prompt !== null && (typeof prompt !== "string" || prompt.length > X.maxPromptChars)) bad(`prompt must be a string of at most ${X.maxPromptChars} characters`);
     if (systemPrompt !== null && (typeof systemPrompt !== "string" || systemPrompt.length > X.maxPromptChars)) bad(`systemPrompt must be a string of at most ${X.maxPromptChars} characters`);
     if (!Array.isArray(documents) || documents.length === 0 || documents.length > X.maxDocuments) bad(`documents must list 1 to ${X.maxDocuments} documents`);
@@ -342,8 +343,8 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
     const task = prompt ? `Task: ${prompt}\n\n` : "";
     // Each chunk's content may use what the fixed parts (instructions, task, schema, framing) leave.
     const overhead = estimateTokens(instructions + task + JSON.stringify(strict)) + 64;
-    const room = X.maxInputTokens - overhead;
-    if (room < 500) throw fail("SCHEMA_TOO_LARGE", `the schema and prompt leave ${room} of ${X.maxInputTokens} input tokens for content`);
+    const room = maxInputTokens - overhead;
+    if (room < 500) throw fail("SCHEMA_TOO_LARGE", `the schema and prompt leave ${room} of ${maxInputTokens} input tokens for content`);
     const chunks = [];
     for (const d of docs) {
       const parts = d.markdown.trim() ? splitText(d.markdown, room) : [];
@@ -351,10 +352,10 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
       parts.forEach((text, i) => chunks.push({ url: d.url, part: i + 1, parts: parts.length, text }));
     }
     if (!chunks.length) throw fail("NO_CONTENT", "no document holds text to extract from");
-    if (chunks.length > X.maxChunks) throw fail("INPUT_TOO_LARGE", `the documents need ${chunks.length} extraction units of at most ${X.maxInputTokens} input tokens; at most ${X.maxChunks} are allowed`);
+    if (chunks.length > X.maxChunks) throw fail("INPUT_TOO_LARGE", `the documents need ${chunks.length} extraction units of at most ${maxInputTokens} input tokens; at most ${X.maxChunks} are allowed`);
     // The input cap and the fixed instructions decide the chunks, so a unit's stored answers are reused only
     // when both are unchanged (review S11).
-    const requestHash = sha(canonical({ model, reasoningEffort, schema, prompt, systemPrompt, docs: docs.map((d) => [d.url, sha(d.markdown)]), maxInputTokens: X.maxInputTokens, maxOutputTokens, instructions: sha(SYSTEM) }));
+    const requestHash = sha(canonical({ model, reasoningEffort, schema, prompt, systemPrompt, docs: docs.map((d) => [d.url, sha(d.markdown)]), maxInputTokens, maxOutputTokens, instructions: sha(SYSTEM) }));
     let data = null;
     const sources = {}, outcomes = [];
     const usage = { calls: 0, reused: 0, promptTokens: 0, completionTokens: 0, cachedTokens: 0, cacheWriteTokens: 0, costMicroUsd: 0 };

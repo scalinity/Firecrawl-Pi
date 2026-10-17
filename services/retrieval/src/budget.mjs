@@ -105,7 +105,7 @@ export function loadBudgetPolicy(text) {
   }
   const subjectOf = (kind, map) => {
     for (const [name, m] of Object.entries(map)) {
-      exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort", "maxOutputTokens", "requestTimeoutMs"] : []);
+      exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort", "maxOutputTokens", "requestTimeoutMs", "maxInputTokens"] : []);
       if (kind === "model") {
         // The Messages API takes every level; the chat API was built and tested at none and xhigh only.
         const messagesApi = p.providers[m.provider]?.api === "anthropic-messages";
@@ -120,6 +120,10 @@ export function loadBudgetPolicy(text) {
         // gateway's extended deadline allows (300 s); they apply to every model, not to Opus alone.
         if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 128000 : 4000, `model ${name}.maxOutputTokens`);
         if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 300000, `model ${name}.requestTimeoutMs`);
+        // A model's own input cap per extraction unit, in place of extraction.maxInputTokens: a model with a large context window can
+        // read a whole page in one call. 200,000 stays far inside the 5.5 models' 1M window; Haiku 5.5 is priced higher above
+        // 100,000 prompt tokens, so its cap stays below that by the estimate's margin.
+        if (m.maxInputTokens !== undefined) posInt(m.maxInputTokens, 1000, name === "claude-haiku-5-5" ? 80000 : 200000, `model ${name}.maxInputTokens`);
       }
       const prov = p.providers[m.provider], cat = p.categories[m.category];
       if (!prov || prov.kind !== kind) throw new Error(`${kind} ${name} names ${m.provider}, which is not a ${kind} provider`);
