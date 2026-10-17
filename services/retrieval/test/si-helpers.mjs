@@ -17,6 +17,11 @@ import { makeDeepseek } from "../src/search-intelligence/adapters/deepseek.mjs";
 import { makeTavily } from "../src/search-intelligence/adapters/tavily.mjs";
 import { makeSearxngLane } from "../src/search-intelligence/adapters/searxng.mjs";
 import { makeCoordinator } from "../src/search-intelligence/coordinator.mjs";
+import { makeContext7 } from "../src/search-intelligence/adapters/context7.mjs";
+import { makeRef, makeRefSessionFactory } from "../src/search-intelligence/adapters/ref.mjs";
+import { makeRefBridge } from "../src/search-intelligence/adapters/ref-bridge.mjs";
+import { makeDocumentation } from "../src/search-intelligence/documentation.mjs";
+import { makeDecisions } from "../src/search-intelligence/decisions.mjs";
 
 export { serve, providersDir, budgetFor, lookupFixture };
 export const egress = loadPolicy(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
@@ -52,8 +57,69 @@ export const HOSTS = { serper: "serper.fixture.fcpi.test", brave: "brave.fixture
 // Documentation and decision fixtures: started only when a test gives their handler.
 export const EXTRA_HOSTS = { context7: "context7.fixture.fcpi.test", ref: "ref.fixture.fcpi.test", openrouter: "openrouter.fixture.fcpi.test" };
 
+// Ref's legacy text blocks (SI0 contract evidence §6) for the given URLs.
+export const refBlocks = (urls) => ({ content: urls.map((url, i) => ({ type: "text", text: `overview: Ref overview ${i + 1}\nurl: ${url}\nmoduleId: module-${i + 1}` })) });
+const defaultRefTool = (name, args) => name === "ref_search_documentation"
+  ? refBlocks([1, 2, 3].map((i) => `https://ref.example.org/docs/${i}`))
+  : { content: [{ type: "text", text: `Excerpt of ${args.url}: ${"documented behavior and parameters. ".repeat(12)}` }] };
+// A Ref fixture speaking Streamable HTTP MCP in the 2025 era, as the official client's default handshake expects: initialize
+// issues a session id, tools/list lists the tools, tools/call answers through tool(name, args, entry) on an SSE stream (held
+// open after its result when holdOpen) or as JSON; GET opens a receive stream that stays open; DELETE ends the session.
+// tool may return "destroy" (cut the connection after the request arrived) or { status } (an HTTP refusal). Records everything.
+export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false, receiveStream = true, tools = ["ref_search_documentation", "ref_read_url"], initialize = null } = {}) {
+  const log = [], sessions = new Map(), open = new Set();
+  let n = 0;
+  // A response's close is its connection's end (a request's close only means its body was read).
+  const hold = (req, res) => { open.add(res); res.on("close", () => open.delete(res)); };
+  const raw = async (req, res) => {
+    const text = await readBody(req);
+    const entry = { method: req.method, session: req.headers["mcp-session-id"] ?? null, key: req.headers["x-ref-api-key"] ?? null, headers: req.headers, at: Date.now() };
+    log.push(entry);
+    if (req.method === "GET") {
+      if (!receiveStream) { res.writeHead(405); return res.end(); }
+      res.writeHead(200, { "content-type": "text/event-stream" });
+      res.write(": receive stream\n\n");
+      return hold(req, res);
+    }
+    if (req.method === "DELETE") { entry.closed = sessions.delete(entry.session); res.writeHead(200); return res.end(); }
+    const msg = JSON.parse(text);
+    entry.message = msg;
+    if (msg.method === "initialize") {
+      const a = initialize?.(entry);
+      if (a?.status) { res.writeHead(a.status); return res.end(); }
+      const id = `ref-session-${++n}`;
+      sessions.set(id, { calls: [] });
+      res.writeHead(200, { "content-type": "application/json", "mcp-session-id": id });
+      return res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, result: { protocolVersion: msg.params.protocolVersion, capabilities: { tools: {} }, serverInfo: { name: "ref-fixture", version: "1" } } }));
+    }
+    if (msg.id === undefined) { res.writeHead(202); return res.end(); }
+    if (!sessions.has(entry.session)) { res.writeHead(404); return res.end(); }
+    let result;
+    if (msg.method === "tools/list") {
+      result = { tools: tools.map((name) => ({ name, inputSchema: { type: "object", properties: { [name === "ref_read_url" ? "url" : "query"]: { type: "string" } }, required: [name === "ref_read_url" ? "url" : "query"] }, annotations: { readOnlyHint: true } })) };
+    } else if (msg.method === "tools/call") {
+      entry.tool = msg.params.name; entry.args = msg.params.arguments;
+      sessions.get(entry.session).calls.push({ tool: entry.tool, args: entry.args });
+      result = await tool(msg.params.name, msg.params.arguments, entry);
+      if (result === "destroy") return res.destroy();
+      if (result?.status) { res.writeHead(result.status, { "content-type": "text/plain" }); return res.end("refused"); }
+    } else {
+      res.writeHead(200, { "content-type": "application/json" });
+      return res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, error: { code: -32601, message: "Method not found" } }));
+    }
+    const body = { jsonrpc: "2.0", id: msg.id, result };
+    if (!sse || msg.method !== "tools/call") { res.writeHead(200, { "content-type": "application/json" }); return res.end(JSON.stringify(body)); }
+    res.writeHead(200, { "content-type": "text/event-stream" });
+    res.write(`event: message\ndata: ${JSON.stringify(body)}\n\n`);
+    if (holdOpen) hold(req, res); else res.end();
+  };
+  return { raw, log, sessions, open };
+}
+
 // A fixture server for one provider: records every request (method, url, headers, parsed body) and answers through handler.
+// A handler with raw (a Ref fixture) serves the exchange itself.
 export async function providerServer(name, handler = null) {
+  if (handler?.raw) { const srv = await serve(handler.raw); return { ...srv, seen: handler.log ?? [], fixture: handler, host: HOSTS[name] ?? EXTRA_HOSTS[name], name }; }
   const seen = [];
   const srv = await serve(async (req, res) => {
     const text = await readBody(req);
@@ -70,7 +136,8 @@ export async function providerServer(name, handler = null) {
 }
 
 // The harness: fixture servers for the five general providers (handlers override defaults), a SearXNG backend fixture, the
-// fixture roster's budget pointed at them, and the coordinator. selection is "fixture" throughout.
+// fixture roster's budget pointed at them, and the coordinator. selection is "fixture" throughout. A context7 or ref handler adds
+// that documentation lane (and documentation activation); an openrouter handler adds Jev's decisions.
 export async function harness({ handlers = {}, searxng = null, mutateBudget = () => {}, mutatePolicy = () => {}, perHour = 60, paidDispatch = true, decisions = null } = {}) {
   const servers = {};
   for (const n of Object.keys(HOSTS)) servers[n] = await providerServer(n, handlers[n] ?? null);
@@ -104,8 +171,15 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   const general = { serper: makeSerperLane({ serper, limits, permits, availability }), brave: makeBrave({ dispatch, limits }), exa: makeExa({ dispatch, limits }),
     deepseek: makeDeepseek({ dispatch, limits, permits }), tavily: makeTavily({ dispatch, limits }) };
   const backend = sx ? makeSearxngBackend({ getPolicy, getSelection, searchUrl: `http://127.0.0.1:${sx.port}/search` }) : null;
-  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, decisions, log });
-  return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper, general, getBudget, getPolicy, getSelection,
+  const resolvePublic = async () => ["127.0.0.1"];
+  const makeFetch = makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture, getBudget, paidDispatch, limits });
+  const docs = {};
+  if (servers.context7) docs.context7 = makeContext7({ dispatch, limits });
+  if (servers.ref) docs.ref = makeRef({ dispatch, limits, openSession: makeRefSessionFactory({ makeFetch, log }), log });
+  const jev = decisions ?? (servers.openrouter ? makeDecisions({ dispatch, store, limits, permits, log }) : null);
+  const documentation = Object.keys(docs).length ? makeDocumentation({ decisions: jev, log }) : null;
+  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, docs, documentation, decisions: jev, log });
+  return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper, general, docs, decisions: jev, makeFetch, getBudget, getPolicy, getSelection,
     close: async () => { for (const s of Object.values(servers)) await s.close(); await sx?.close(); } };
 }
 
