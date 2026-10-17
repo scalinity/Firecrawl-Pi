@@ -68,7 +68,12 @@ function checkField(name, spec, v, manifest, path) {
       if (typeof v === "string" && own(spec.refused, v)) throw new RequestError(400, "UNSUPPORTED_OPTION", `'${where}: ${v}' is not supported by this deployment: ${own(spec.refused, v)}.`, { option: `${where}.${v}` });
       if (!spec.values.includes(v)) throw bad(`'${where}' must be one of ${spec.values.join(", ")}`);
       return v;
-    case "string": if (typeof v !== "string" || v.length > spec.maxLength) throw bad(`'${where}' must be a string of at most ${spec.maxLength} characters`); return v;
+    case "string": {
+      if (typeof v !== "string" || v.length > spec.maxLength) throw bad(`'${where}' must be a string of at most ${spec.maxLength} characters`);
+      // A minimum counts the visible text, so blank padding is no name.
+      if (spec.minLength && v.trim().length < spec.minLength) throw bad(`'${where}' must hold at least ${spec.minLength} non-blank character${spec.minLength > 1 ? "s" : ""}`);
+      return v;
+    }
     case "strings": case "regexes": {
       if (!Array.isArray(v) || v.length > spec.maxItems || v.some((s) => typeof s !== "string" || s.length === 0 || s.length > spec.maxLength)) throw bad(`'${where}' must be an array of at most ${spec.maxItems} strings of 1-${spec.maxLength} characters`);
       if (spec.type === "regexes") for (const s of v) { try { new RegExp(s); } catch (e) { throw bad(`'${where}' holds an invalid regular expression: ${e.message}`); } }
@@ -83,6 +88,14 @@ function checkField(name, spec, v, manifest, path) {
       return v;
     }
     case "urls": if (!Array.isArray(v)) throw bad(`'${where}' must be an array of URLs`); return v; // each URL is checked by validateBody
+    // Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §9.1): a UTC instant (ISO 8601 ending in Z), and a bounded
+    // list of objects each checked against its fieldset.
+    case "instant":
+      if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/.test(v) || !Number.isFinite(Date.parse(v))) throw bad(`'${where}' must be an ISO-8601 UTC instant ending in Z`);
+      return v;
+    case "objects":
+      if (!Array.isArray(v) || v.length > spec.maxItems) throw bad(`'${where}' must be an array of at most ${spec.maxItems} objects`);
+      return v.map((o, i) => checkObject(o, fieldsOf(manifest, { extends: spec.fieldset, fields: {} }), manifest, `${where}[${i}]`));
     case "actions": return checkActions(v, spec, where);
     case "webhook": return checkWebhook(v, spec, where);
     case "formats": return checkFormats(v, manifest);
@@ -176,6 +189,14 @@ function checkObject(obj, fields, manifest, path = "", refused = {}) {
 // job may consume (spec §23.1's queue-depth measure).
 export function validateBody(kind, raw, manifest) {
   const body = checkObject(raw, fieldsOf(manifest, manifest.bodies[kind]), manifest, "", manifest.bodies[kind].refused ?? {});
+  // Search (spec §5.3, §9.1): one domain list at a time, as the pinned core requires, refused here before any work; and the
+  // search intelligence options' cross-field rules, so conflicting instructions are refused rather than silently dropped.
+  if (kind === "search") {
+    if (body.includeDomains?.length && body.excludeDomains?.length) throw bad("includeDomains and excludeDomains cannot both be given");
+    const si = body.searchIntelligence;
+    if (si?.documentation === "off" && (si.libraries?.length || si.programmingLanguage !== undefined)) throw bad("'searchIntelligence.libraries' and 'programmingLanguage' need documentation other than off");
+    if (si?.publishedAfter && si?.publishedBefore && !(Date.parse(si.publishedAfter) < Date.parse(si.publishedBefore))) throw bad("'searchIntelligence.publishedAfter' must precede 'publishedBefore'");
+  }
   // The json format runs through the gateway's extraction on /v2/scrape alone; anywhere else it would reach
   // the core's own model path, which this deployment does not enable (spec §14). M7: a screenshot is stored as an
   // owner-bound artifact by the /v2/scrape path alone, so it too is offered there only.

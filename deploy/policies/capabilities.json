@@ -80,6 +80,19 @@
       "proxy": { "type": "enum", "values": ["auto", "basic", "stealth", "enhanced"] },
       "mobile": { "type": "const", "value": false },
       "skipTlsVerification": { "type": "const", "value": false }
+    },
+    "searchIntelligence": {
+      "documentation": { "type": "enum", "values": ["auto", "required", "off"] },
+      "libraries": { "type": "objects", "fieldset": "searchLibrary", "maxItems": 4 },
+      "programmingLanguage": { "type": "string", "minLength": 1, "maxLength": 64 },
+      "publishedAfter": { "type": "instant" },
+      "publishedBefore": { "type": "instant" },
+      "dateMode": { "type": "enum", "values": ["freshness", "strict_publication"] },
+      "evidence": { "type": "enum", "values": ["auto", "off"] }
+    },
+    "searchLibrary": {
+      "name": { "type": "string", "minLength": 1, "maxLength": 200, "required": true },
+      "version": { "type": "string", "minLength": 1, "maxLength": 80 }
     }
   },
   "bodies": {
@@ -145,6 +158,7 @@
         "excludeDomains": { "type": "strings", "maxItems": 20, "maxLength": 253 },
         "timeout": { "type": "integer", "min": 1000, "max": 90000 },
         "scrapeOptions": { "type": "object", "fieldset": "scrapeOptions" },
+        "searchIntelligence": { "type": "object", "fieldset": "searchIntelligence" },
         "origin": { "type": "replaced" }
       },
       "refused": {
@@ -243,7 +257,7 @@
         "description": "Discover the URLs of a public site from its sitemap and the links on its start page, without scraping each page. The start page is fetched like a scrape (it needs the scrape scope, keeps this call's timeout, and takes the residential route only when the home connection is blocked); fcpi.sources says how many links each source gave, and fcpi.pageError why the page gave none. A site with no sitemap yields its start page's links, and a crawl discovers the pages beyond them.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": true } },
       { "name": "firecrawl_search", "route": "search", "title": "Search the web",
-        "description": "Search the web through the platform's private SearXNG and return the results' URLs, titles and snippets; with scrapeOptions.formats, each result page is scraped too. A search whose engines all failed, or whose backend is down, is an error naming the failure, never an empty list; a partial result says which engines did not answer.",
+        "description": "Search the web and return the best results' URLs, titles and snippets (default 5, at most 10). Every search asks five engines together (Serper/Google, Brave, Exa, DeepSeek and Tavily), adds Context7 and Ref documentation when it helps (searchIntelligence.documentation: auto, required or off; libraries with optional versions; programmingLanguage), fuses their results, and reranks them with Jev's relevance advice when it is available; the local SearXNG fills in when engines fail. fcpi.search says which providers answered, which were skipped or failed and why, whether documentation ran, how results were ranked, and whether any of it came from cache; each result's fcpi.search keeps its original source, the providers and ranks that found it and any documentation version qualifications. publishedAfter/publishedBefore (UTC instants) with dateMode strict_publication keep only results whose publication date is known to fall inside. With scrapeOptions.formats, each result page is scraped too and evidence passages are marked. A search no provider could answer is an error naming the failures, never an empty list; a partial result says what is missing. Ranking scores are advice, not proof that a source is correct.",
         "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": false, "openWorldHint": true } },
       { "name": "firecrawl_crawl", "route": "crawl.submit", "title": "Start a crawl",
         "description": "Start a crawl of a public site. Returns the job id as soon as the job is durably recorded; the crawl runs in the background. Poll it with firecrawl_check_crawl_status. Every start carries an idempotency key, yours or one made for it and returned in the answer: to retry, call again with the same arguments and that key, and the same job comes back instead of a second one.",

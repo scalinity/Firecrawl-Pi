@@ -27,7 +27,7 @@ import { createServer } from "node:http";
 import { randomUUID } from "node:crypto";
 import { pipeline } from "node:stream/promises";
 import { loadConfig } from "./src/config.mjs";
-import { makeRegistry, makeFailureLimiter, originFor } from "./src/auth.mjs";
+import { makeRegistry, makeFailureLimiter, originFor, ownerTag } from "./src/auth.mjs";
 import { validateBody, requestHash, RequestError } from "./src/validate.mjs";
 import { makeStore, AdmissionError, SCHEMA_VERSION } from "./src/store.mjs";
 import { openArchive } from "./src/archive.mjs";
@@ -377,6 +377,13 @@ function coreBody(ctx, route, body) {
   const { maxAge: _a, storeInCache: _s, ...rest } = body;
   return { ...rest, origin: originFor(ctx.client.principal, route.id) };
 }
+// Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2): the search's trusted context, built here and sent as
+// the core's allowlisted request headers (upstream.mjs): this request's id, a new logical search id, the principal's owner tag
+// (never the principal's name or token) and the absolute deadline the caller's timeout gives.
+function searchContext(ctx, body) {
+  return { "x-fcpi-search-request-id": ctx.id, "x-fcpi-search-id": randomUUID(), "x-fcpi-search-owner": ownerTag(ctx.client.principal),
+    "x-fcpi-search-deadline-ms": String(Date.now() + (body.timeout ?? 60000)) };
+}
 async function sync(ctx, route) {
   const raw = await readJson(ctx.req);
   const { body } = validateBody(route.body, raw, M);
@@ -392,7 +399,8 @@ async function sync(ctx, route) {
   if (syncInFlight >= L.admission.maxSyncInFlight) return overloaded(ctx);
   if (route.id === "scrape") return cachedScrape(ctx, route, body);
   syncInFlight += 1;
-  upstream.forward(ctx.res, route.path, coreBody(ctx, route, body), (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id });
+  upstream.forward(ctx.res, route.path, coreBody(ctx, route, body), (status) => { syncInFlight -= 1; ctx.logged(status); }, { "x-request-id": ctx.id }, null,
+    route.id === "search" ? searchContext(ctx, body) : null);
 }
 
 // Map (src/maplinks.mjs): the core's map, which reads the site's sitemap, and the links the start page carries, fetched

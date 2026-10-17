@@ -7,6 +7,9 @@ import { request as httpRequest } from "node:http";
 // upstream's Cloud-pointing challenge, and the `Access-Control-Allow-Origin: *` its cors() middleware
 // adds to every answer (apps/api/src/index.ts), since the gateway sends no CORS headers.
 const PASS = new Set(["content-type", "content-length", "retry-after"]);
+// Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2): the only request headers the gateway sends the
+// core besides its own, each built by the gateway (never copied from a client): the search's trusted context.
+const TRUSTED_REQUEST = new Set(["x-fcpi-search-request-id", "x-fcpi-search-id", "x-fcpi-search-owner", "x-fcpi-search-deadline-ms"]);
 
 export class UpstreamError extends Error {
   // delivered: false when no connection to the core was ever established, so the request cannot
@@ -69,8 +72,9 @@ export function makeUpstream(cfg) {
   // resubmitting (a new job, and for an enhanced scrape a second paid dispatch: review W14); after them the client
   // response can only be cut. A client that goes away cancels the upstream request. M7: keep, when given, is told the whole
   // answer once it has been sent (keep.onComplete(status, buffer), the buffer null past keep.maxBytes), and nothing when
-  // the answer failed; the stream to the client is never held back for it.
-  function forward(res, path, body, log, extraHeaders, keep = null) {
+  // the answer failed; the stream to the client is never held back for it. requestHeaders: the gateway's own trusted search
+  // context, filtered to the allowlist above.
+  function forward(res, path, body, log, extraHeaders, keep = null, requestHeaders = null) {
     let settled = false, timedOut = false;
     const finish = (status) => { if (!settled) { settled = true; log(status); } };
     const fail = () => {
@@ -81,8 +85,9 @@ export function makeUpstream(cfg) {
       finish(status);
     };
     const data = Buffer.from(JSON.stringify(body));
+    const trusted = Object.fromEntries(Object.entries(requestHeaders ?? {}).filter(([k, v]) => TRUSTED_REQUEST.has(k) && typeof v === "string" && /^[\x21-\x7e]{1,128}$/.test(v)));
     const up = httpRequest({ ...base, method: "POST", path, timeout: cfg.coreTimeoutMs,
-      headers: { "content-type": "application/json", "content-length": data.length, accept: "application/json" } }, (ur) => {
+      headers: { "content-type": "application/json", "content-length": data.length, accept: "application/json", ...trusted } }, (ur) => {
       const headers = { ...extraHeaders };
       for (const [k, v] of Object.entries(ur.headers)) if (PASS.has(k)) headers[k] = v;
       res.writeHead(ur.statusCode, headers);
