@@ -9,6 +9,10 @@
 //                unknown and the reservation stays counted (spec §24.2).
 // timeoutMs bounds the whole exchange. idleMs, for a streamed answer, also ends one that is silent for that long: from the
 // request's creation (so a stalled connection or handshake ends unsent), then from the send and each chunk received.
+// deadlineAt (search intelligence, docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §14): an absolute time (epoch ms) that bounds
+// everything from this call's first line, the name resolution included; the exchange ends at it or at timeoutMs from the call,
+// whichever is first. Without it, timeoutMs starts after resolution, as before. Either way the caller's signal is watched from
+// the first line, so a cancellation during a slow lookup ends the call unsent, and a lookup that answers later sends nothing.
 import http from "node:http";
 import https from "node:https";
 import { readFileSync } from "node:fs";
@@ -16,7 +20,7 @@ import { parseTarget, Denied } from "./ssrf.mjs";
 import { resolveTarget, pinnedLookup } from "./resolve.mjs";
 
 export class ProviderError extends Error {
-  constructor(code, message, { sent, status = null } = {}) { super(message); this.code = code; this.sent = sent; this.status = status; }
+  constructor(code, message, { sent, status = null, timedOut = false } = {}) { super(message); this.code = code; this.sent = sent; this.status = status; this.timedOut = timedOut; }
 }
 
 // The credential file for a provider, read at each call so a key placed later needs no restart; null
@@ -26,27 +30,43 @@ export function readCredential(dir, name) {
   try { const v = readFileSync(`${dir}/${name}`, "utf8").trim(); return v || null; } catch { return null; }
 }
 
-export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize }) {
+export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt = null }) {
   const url = new URL(baseUrl.replace(/\/$/, "") + path);
   const policy = getPolicy();
   if (!policy.localCidrs) throw new ProviderError("NOT_READY", "the host's local-network list is not loaded", { sent: false });
+  // The latest moment anything may happen, when the caller gave an absolute deadline.
+  const stopAt = deadlineAt === null ? null : Math.min(deadlineAt, Date.now() + timeoutMs);
+  const unsent = () => {
+    if (signal?.aborted) return new ProviderError("CANCELLED", "the caller cancelled", { sent: false });
+    if (stopAt !== null && Date.now() >= stopAt) return new ProviderError("PROVIDER_TIMEOUT", "the deadline passed before the request was sent", { sent: false, timedOut: true });
+    return null;
+  };
+  const early = unsent();
+  if (early) throw early;
   let target, address;
   try {
     target = parseTarget(url.toString(), policy);
-    address = await resolveTarget(target, { resolvePublic, policy, lookupFixture });
+    // The lookup is raced against the caller's signal and the deadline: whichever comes first ends the wait, and a lookup
+    // answering after that is ignored (no socket is ever opened for it).
+    address = await raceUnsent(resolveTarget(target, { resolvePublic, policy, lookupFixture }), signal, stopAt);
   } catch (e) {
+    if (e instanceof ProviderError) throw e;
     if (e instanceof Denied) throw new ProviderError(e.failureClass === "DNS_FAILURE" ? "PROVIDER_UNREACHABLE" : "PROVIDER_DENIED", e.detail, { sent: false });
     throw e;
   }
+  const late = unsent();
+  if (late) throw late;
   const mod = url.protocol === "https:" ? https : http;
   if (authorize && !authorize()) throw new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before connection", { sent: false });
   // The body is one buffer or a list of buffers written in order (a multipart upload's parts).
   const parts = body === null ? null : Array.isArray(body) ? body : [body];
   const length = parts ? parts.reduce((n, p) => n + p.length, 0) : 0;
+  const limitMs = stopAt === null ? timeoutMs : Math.max(1, stopAt - Date.now());
   return new Promise((resolve, reject) => {
     let written = false, settled = false;
     let idle = null;
-    const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); clearTimeout(idle); fn(v); } };
+    const onAbort = () => { req.destroy(new Error("cancelled")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written })); };
+    const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); clearTimeout(idle); signal?.removeEventListener("abort", onAbort); fn(v); } };
     const quiet = () => {
       if (!idleMs || settled) return;
       clearTimeout(idle);
@@ -67,6 +87,7 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
     // headers or a billable body across the handshake while a validation lease can expire.
     const send = () => {
       if (settled) return;
+      if (signal?.aborted) { done(reject, new ProviderError("CANCELLED", "the caller cancelled", { sent: false })); req.destroy(); return; }
       if (authorize && !authorize()) {
         done(reject, new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before send", { sent: false }));
         req.destroy();
@@ -83,8 +104,24 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
       s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
       if (mod === https) s.once("secureConnect", send);
     });
-    const timer = setTimeout(() => { req.destroy(new Error("timeout")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `no answer within ${timeoutMs} ms`, { sent: written })); }, timeoutMs);
+    const timer = setTimeout(() => { req.destroy(new Error("timeout")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : stopAt === null ? "PROVIDER_UNREACHABLE" : "PROVIDER_TIMEOUT", `no answer within ${limitMs} ms`, { sent: written, timedOut: stopAt !== null })); }, limitMs);
     req.on("error", (e) => done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${url.host}: ${e.code ?? e.message}`, { sent: written })));
-    signal?.addEventListener("abort", () => { req.destroy(new Error("cancelled")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written })); }, { once: true });
+    signal?.addEventListener("abort", onAbort, { once: true });
+    if (signal?.aborted) onAbort();
+  });
+}
+
+// A wait that ends unsent when the caller cancels or the deadline passes, whichever comes first, its timer and listener removed
+// either way. What the wrapped promise resolves to afterwards is dropped.
+export function raceUnsent(promise, signal, stopAt) {
+  if (!signal && stopAt === null) return promise;
+  return new Promise((resolve, reject) => {
+    let timer = null;
+    const finish = (fn, v) => { clearTimeout(timer); signal?.removeEventListener("abort", onAbort); fn(v); };
+    const onAbort = () => finish(reject, new ProviderError("CANCELLED", "the caller cancelled", { sent: false }));
+    if (signal?.aborted) return onAbort();
+    signal?.addEventListener("abort", onAbort, { once: true });
+    if (stopAt !== null) timer = setTimeout(() => finish(reject, new ProviderError("PROVIDER_TIMEOUT", "the deadline passed before the request was sent", { sent: false, timedOut: true })), Math.max(0, stopAt - Date.now()));
+    promise.then((v) => finish(resolve, v), (e) => finish(reject, e));
   });
 }
