@@ -203,6 +203,14 @@ export async function runAgent(raw, { forward, signal, emit = () => {}, runMs = 
     if (!response) return null;
     const rows = Array.isArray(response.data?.web) ? response.data.web : Array.isArray(response.data) ? response.data : null;
     if (!rows) { stop('INVALID_SEARCH_RESPONSE', 'The search response did not contain a readable result list.'); return null; }
+    // Search intelligence: what the search could not cover goes into the run's limitations, named by provider and reason.
+    const meta = response.fcpi?.search;
+    if (meta && typeof meta === 'object') {
+      const named = list => (Array.isArray(list) ? list : []).map(m => `${text(m?.provider).slice(0, 20)} (${text(m?.reason ?? m?.status).replaceAll('_', ' ').slice(0, 40)})`).join(', ');
+      if (meta.coverage?.general?.missing?.length) addLimitation(`Search coverage was partial: ${named(meta.coverage.general.missing)} did not contribute.`);
+      if (meta.coverage?.documentation?.activated && meta.coverage.documentation.missing?.length) addLimitation(`Requested documentation was partly unavailable: ${named(meta.coverage.documentation.missing)}.`);
+      if (meta.ranking?.mode === 'rrf_fallback' && meta.coverage?.decisions?.status !== 'not_configured') addLimitation(`Search results were ranked without semantic advice (${text(meta.ranking.reason).replaceAll('_', ' ').slice(0, 60)}).`);
+    }
     let next = null;
     for (const row of rows.slice(0, 10)) {
       const url = urlOf(row?.url);
