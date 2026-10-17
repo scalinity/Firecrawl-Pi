@@ -18,6 +18,25 @@ const nonNegInt = (v, where) => { if (!Number.isSafeInteger(v) || v < 0) throw n
 const posInt = (v, lo, hi, where) => { if (!Number.isSafeInteger(v) || v < lo || v > hi) throw new Error(`${where} must be an integer in ${lo}..${hi}`); return v; };
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
+// Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §18): each external search, documentation and decision
+// API is one adapter contract at one fixed origin. A fixture provider of the same API is a project fixture over http.
+export const SEARCH_APIS = Object.freeze({
+  "serper-v1": { kind: "search", origin: "https://google.serper.dev" },
+  "brave-web-v1": { kind: "search", origin: "https://api.search.brave.com" },
+  "exa-search-v1": { kind: "search", origin: "https://api.exa.ai" },
+  "deepseek-search-v1": { kind: "search", origin: "https://api.deepseek.com" },
+  "tavily-search-v1": { kind: "search", origin: "https://api.tavily.com" },
+  "context7-v3": { kind: "documentation", origin: "https://context7.com" },
+  "ref-mcp-v1": { kind: "documentation", origin: "https://api.ref.tools" },
+  "openrouter-decisions-v1": { kind: "decision", origin: "https://openrouter.ai" },
+});
+// The aggregate profile's exact rosters: one subject of each API, never fewer (spec §4: no engine is silently omitted).
+export const GENERAL_APIS = ["serper-v1", "brave-web-v1", "exa-search-v1", "deepseek-search-v1", "tavily-search-v1"];
+export const DOCUMENTATION_APIS = ["context7-v3", "ref-mcp-v1"];
+export const JEV_MODEL = "typesafe/jev-1.14";
+// How a search, documentation or decision rate card meters one operation, and the category unit each basis counts in.
+const BILLING_UNITS = { credits_per_operation: "credits", micro_usd_per_operation: "micro_usd", requests: "requests", decision_tokens: "micro_usd" };
+
 // The shared daily cap across the paid categories in micro-USD, or null when the policy sets none. A cap set later counts
 // only the reservations made while it is set, as every category's period row does.
 export const paidTotalDayCap = (policy) => policy.paidTotal.caps.day ?? null;
@@ -30,8 +49,10 @@ export function paidDispatchActive(policy, enabled, now = Date.now()) {
 
 export function loadBudgetPolicy(text) {
   const p = JSON.parse(text);
-  exact(p, TOP_KEYS, "budget policy", ["validationExpiresAt", "searches", "searching"]);
+  exact(p, TOP_KEYS, "budget policy", ["validationExpiresAt", "searches", "searching", "documentationSearches", "decisions"]);
   p.searches ??= {};
+  p.documentationSearches ??= {};
+  p.decisions ??= {};
   if (p.validationExpiresAt !== undefined && (typeof p.validationExpiresAt !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(p.validationExpiresAt)
     || !Number.isFinite(Date.parse(p.validationExpiresAt)) || new Date(p.validationExpiresAt).toISOString().replace(".000Z", "Z") !== p.validationExpiresAt)) throw new Error("validationExpiresAt must be an exact UTC timestamp");
   if (p.schema !== "fcpi.budget-policy/v1") throw new Error("budget policy schema must be fcpi.budget-policy/v1");
@@ -39,9 +60,12 @@ export function loadBudgetPolicy(text) {
   for (const [name, c] of Object.entries(p.categories)) {
     exact(c, CAT_KEYS, `category ${name}`);
     if (typeof c.paid !== "boolean") throw new Error(`category ${name}.paid must be a boolean`);
-    if (!["micro_usd", "credits"].includes(c.unit)) throw new Error(`category ${name}.unit must be micro_usd or credits`);
+    if (!["micro_usd", "credits", "requests"].includes(c.unit)) throw new Error(`category ${name}.unit must be micro_usd, credits or requests`);
+    // No cap ({}) is a reporting-only category: its usage is totalled per day and month with no ceiling. Only search,
+    // documentation and decision subjects may draw on one (checked with the subjects below); zero still means no allocation.
+    if (!c.caps || typeof c.caps !== "object" || Array.isArray(c.caps)) throw new Error(`category ${name}.caps must be an object`);
     const periods = Object.keys(c.caps);
-    if (!periods.length || periods.some((k) => !["day", "month"].includes(k))) throw new Error(`category ${name}.caps must name day and/or month`);
+    if (periods.some((k) => !["day", "month"].includes(k))) throw new Error(`category ${name}.caps must name day and/or month`);
     for (const k of periods) nonNegInt(c.caps[k], `category ${name}.caps.${k}`);
   }
   exact(p.paidTotal, ["unit", "caps"], "paidTotal");
@@ -51,15 +75,23 @@ export function loadBudgetPolicy(text) {
   if (p.paidTotal.caps.day !== undefined) nonNegInt(p.paidTotal.caps.day, "paidTotal.caps.day");
   for (const [name, v] of Object.entries(p.providers)) {
     exact(v, ["kind", "baseUrl", "credential", "paid"], `provider ${name}`, ["maxTokensParam", "store", "usageUrl", "usageCredential", "usageDedicated", "session", "api"]);
-    if (!["model", "parser", "proxy", "enhanced", "search"].includes(v.kind)) throw new Error(`provider ${name}.kind is unsupported`);
+    if (!["model", "parser", "proxy", "enhanced", "search", "documentation", "decision"].includes(v.kind)) throw new Error(`provider ${name}.kind is unsupported`);
     const u = new URL(v.baseUrl);
     const fixture = /\.fixture\.fcpi\.test$/.test(u.hostname);
-    if (v.kind === "search") {
-      if (v.paid !== false || v.api !== "serper-v1" || typeof v.credential !== "string" || !/^[a-z0-9_]{3,64}$/.test(v.credential))
+    if (["search", "documentation", "decision"].includes(v.kind)) {
+      const api = Object.hasOwn(SEARCH_APIS, v.api ?? "") ? SEARCH_APIS[v.api] : null;
+      if (!api || api.kind !== v.kind) throw new Error(`provider ${name}.api must be a ${v.kind} API (${Object.keys(SEARCH_APIS).filter((k) => SEARCH_APIS[k].kind === v.kind).join(", ")})`);
+      if (u.pathname !== "/" || u.search || u.hash || u.username || u.password) throw new Error(`provider ${name}: a ${v.kind} baseUrl must be an origin`);
+      // Serper keeps its proven contract: the existing credit allocation (unpaid) and a credential file, fixture or not.
+      if (v.api === "serper-v1" && (v.paid !== false || typeof v.credential !== "string" || !/^[a-z0-9_]{3,64}$/.test(v.credential)))
         throw new Error(`provider ${name}: Serper uses an existing credit allocation and a credential file`);
-      if (u.origin !== "https://google.serper.dev" && !(fixture && u.protocol === "http:"))
-        throw new Error(`provider ${name}: unsupported search origin`);
-      if (u.pathname !== "/" || u.search || u.hash || u.username || u.password) throw new Error(`provider ${name}: search baseUrl must be an origin`);
+      if (fixture) {
+        if (u.protocol !== "http:" || v.paid !== false) throw new Error(`provider ${name}: a fixture ${v.kind} provider is unpaid and served over http`);
+        if (v.credential !== null && !/^[a-z0-9_]{3,64}$/.test(v.credential ?? "")) throw new Error(`provider ${name}.credential must be a file name or null`);
+      } else {
+        if (u.origin !== api.origin) throw new Error(`provider ${name}: unsupported ${v.kind} origin for ${v.api} (only ${api.origin})`);
+        if (typeof v.paid !== "boolean" || typeof v.credential !== "string" || !/^[a-z0-9_]{3,64}$/.test(v.credential)) throw new Error(`provider ${name}: a ${v.kind} provider states paid and names a credential file`);
+      }
       continue;
     }
     // M7: an enhanced-retrieval provider always authenticates, a fixture one included, so the credential's path is
@@ -105,7 +137,7 @@ export function loadBudgetPolicy(text) {
   }
   const subjectOf = (kind, map) => {
     for (const [name, m] of Object.entries(map)) {
-      exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort", "maxOutputTokens", "requestTimeoutMs", "maxInputTokens"] : []);
+      exact(m, kind === "decision" ? ["provider", "category", "model"] : ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort", "maxOutputTokens", "requestTimeoutMs", "maxInputTokens"] : []);
       if (kind === "model") {
         // The Messages API takes every level; the chat API was built and tested at none and xhigh only.
         const messagesApi = p.providers[m.provider]?.api === "anthropic-messages";
@@ -129,8 +161,14 @@ export function loadBudgetPolicy(text) {
       if (!prov || prov.kind !== kind) throw new Error(`${kind} ${name} names ${m.provider}, which is not a ${kind} provider`);
       if (!cat) throw new Error(`${kind} ${name} names unknown category ${m.category}`);
       if (cat.paid !== prov.paid) throw new Error(`${kind} ${name}: a paid provider draws on a paid category and an unpaid one on an unpaid category`);
-      if (cat.unit !== (["parser", "search"].includes(kind) ? "credits" : "micro_usd")) throw new Error(`${kind} ${name}: category ${m.category} counts the wrong unit`);
+      // Serper keeps its credit category; the other search, documentation and decision subjects take the unit their rate
+      // card's billing basis counts in (checked with the rate cards) and may draw on a reporting-only category.
+      const metered = ["search", "documentation", "decision"].includes(kind) && prov.api !== "serper-v1";
+      if (!metered && !Object.keys(cat.caps).length) throw new Error(`${kind} ${name}: category ${m.category} has no cap; only search, documentation and decision subjects may draw on a reporting-only category`);
+      if (!metered && cat.unit !== (["parser", "search"].includes(kind) ? "credits" : "micro_usd")) throw new Error(`${kind} ${name}: category ${m.category} counts the wrong unit`);
       if (kind === "parser" && (typeof m.tier !== "string" || typeof m.version !== "string")) throw new Error(`parser ${name} needs a tier and a version`);
+      // Jev is requested by its exact release, never a moving alias; a fixture decision provider names its own.
+      if (kind === "decision" && (/\.fixture\.fcpi\.test$/.test(new URL(prov.baseUrl).hostname) ? !/^[a-z0-9._/-]{1,80}$/.test(m.model ?? "") : m.model !== JEV_MODEL)) throw new Error(`decision ${name}.model must be ${JEV_MODEL}`);
     }
   };
   subjectOf("model", p.models);
@@ -138,10 +176,37 @@ export function loadBudgetPolicy(text) {
   subjectOf("proxy", p.proxies);
   subjectOf("enhanced", p.enhancers);
   subjectOf("search", p.searches);
+  subjectOf("documentation", p.documentationSearches);
+  subjectOf("decision", p.decisions);
+  // One name per subject across every map, so a rate card names exactly one thing.
+  const subjectMaps = [p.models, p.parsers, p.proxies, p.enhancers, p.searches, p.documentationSearches, p.decisions];
+  for (const [i, a] of subjectMaps.entries()) for (const b of subjectMaps.slice(i + 1)) for (const k of Object.keys(a)) if (Object.hasOwn(b, k)) throw new Error(`subject ${k} is listed twice`);
   if (!Array.isArray(p.rateCards)) throw new Error("rateCards must be a list");
   const ids = new Set();
   for (const r of p.rateCards) {
-    const isSearch = Object.hasOwn(p.searches, r.subject);
+    const searchApi = (map) => (Object.hasOwn(map, r.subject) ? p.providers[map[r.subject].provider].api : null);
+    const isSearch = searchApi(p.searches) === "serper-v1";
+    // A metered search, documentation or decision subject (every one but Serper): billing names how one operation is counted.
+    const meteredApi = (Object.hasOwn(p.searches, r.subject) && !isSearch ? searchApi(p.searches) : null) ?? searchApi(p.documentationSearches) ?? searchApi(p.decisions);
+    if (meteredApi) {
+      const sub = p.searches[r.subject] ?? p.documentationSearches[r.subject] ?? p.decisions[r.subject];
+      const decision = Object.hasOwn(p.decisions, r.subject);
+      if (!Object.hasOwn(BILLING_UNITS, r.billing ?? "") || (decision !== (r.billing === "decision_tokens"))) throw new Error(`rate card ${r.id}.billing must be ${decision ? "decision_tokens" : "credits_per_operation, micro_usd_per_operation or requests"}`);
+      exact(r, ["id", "subject", "effectiveFrom", "effectiveTo", "billing", "source", ...{ credits_per_operation: ["creditsPerOperation"], micro_usd_per_operation: ["microUsdPerOperation"],
+        requests: ["microUsdPerRequest"], decision_tokens: ["inputPerMTok", "outputPerMTok"] }[r.billing]], `rate card ${r.id}`, r.billing === "credits_per_operation" ? ["microUsdPerCredit"] : r.billing === "micro_usd_per_operation" ? ["emptyFree"] : []);
+      if (p.categories[sub.category].unit !== BILLING_UNITS[r.billing]) throw new Error(`rate card ${r.id}: ${r.billing} counts ${BILLING_UNITS[r.billing]}, but category ${sub.category} counts ${p.categories[sub.category].unit}`);
+      if (r.billing === "credits_per_operation") { posInt(r.creditsPerOperation, 1, 100, `rate card ${r.id}.creditsPerOperation`); if (r.microUsdPerCredit !== undefined && r.microUsdPerCredit !== null) posInt(r.microUsdPerCredit, 1, 1e6, `rate card ${r.id}.microUsdPerCredit`); }
+      if (r.billing === "micro_usd_per_operation") { posInt(r.microUsdPerOperation, 1, 1e6, `rate card ${r.id}.microUsdPerOperation`); if (r.emptyFree !== undefined && typeof r.emptyFree !== "boolean") throw new Error(`rate card ${r.id}.emptyFree must be a boolean`); }
+      // A request's monetary price is the plan's, which is often unknown: null records that it is unknown, never zero.
+      if (r.billing === "requests" && r.microUsdPerRequest !== null) posInt(r.microUsdPerRequest, 1, 1e6, `rate card ${r.id}.microUsdPerRequest`);
+      // Only the OpenRouter Decisions card may price output at zero (Jev's documented free output).
+      if (r.billing === "decision_tokens") { posInt(r.inputPerMTok, 1, 1e9, `rate card ${r.id}.inputPerMTok`); nonNegInt(r.outputPerMTok, `rate card ${r.id}.outputPerMTok`); if (r.outputPerMTok === 0 && meteredApi !== "openrouter-decisions-v1") throw new Error(`rate card ${r.id}: only the OpenRouter Decisions card may price output at zero`); }
+      if (typeof r.source !== "string" || !r.source) throw new Error(`rate card ${r.id}.source must name where the price was read`);
+      if (ids.has(r.id)) throw new Error(`rate card ${r.id} appears twice`);
+      ids.add(r.id);
+      if (!DATE.test(r.effectiveFrom) || (r.effectiveTo !== null && (!DATE.test(r.effectiveTo) || r.effectiveTo <= r.effectiveFrom))) throw new Error(`rate card ${r.id}: effective dates must be YYYY-MM-DD, the end after the start`);
+      continue;
+    }
     const isParser = Object.hasOwn(p.parsers, r.subject), isProxy = Object.hasOwn(p.proxies, r.subject), isEnhancer = Object.hasOwn(p.enhancers, r.subject);
     if (!Object.hasOwn(p.models, r.subject) && !isParser && !isProxy && !isEnhancer && !isSearch) throw new Error(`rate card ${r.id} names an unknown subject ${r.subject}`);
     exact(r, isSearch ? ["id", "subject", "effectiveFrom", "effectiveTo", "creditsPerSearch", "source"]
@@ -208,11 +273,36 @@ export function loadBudgetPolicy(text) {
   posInt(p.enhancing.requestTimeoutMs, 1000, 40000, "enhancing.requestTimeoutMs");
   posInt(p.enhancing.maxResponseBytes, 65536, 48 * 1048576, "enhancing.maxResponseBytes");
   if (p.searching !== undefined) {
-    exact(p.searching, ["defaultSearch", "allocationCredits", "requestTimeoutMs", "maxResponseBytes"], "searching");
-    if (p.searching.defaultSearch !== null && !Object.hasOwn(p.searches, p.searching.defaultSearch)) throw new Error("searching.defaultSearch must be listed or null");
-    posInt(p.searching.allocationCredits, 0, 2443, "searching.allocationCredits");
-    posInt(p.searching.requestTimeoutMs, 1000, 8000, "searching.requestTimeoutMs");
-    posInt(p.searching.maxResponseBytes, 65536, 4 * 1048576, "searching.maxResponseBytes");
+    const S = p.searching;
+    exact(S, ["defaultSearch", "allocationCredits", "requestTimeoutMs", "maxResponseBytes"], "searching", ["profile", "generalSubjects", "documentationSubjects", "decisionSubject", "searxngMode", "fixtureRoster"]);
+    if (S.defaultSearch !== null && !Object.hasOwn(p.searches, S.defaultSearch)) throw new Error("searching.defaultSearch must be listed or null");
+    if (S.defaultSearch !== null && p.providers[p.searches[S.defaultSearch].provider].api !== "serper-v1") throw new Error("searching.defaultSearch is the legacy profile's Serper subject");
+    posInt(S.allocationCredits, 0, 2443, "searching.allocationCredits");
+    posInt(S.requestTimeoutMs, 1000, 8000, "searching.requestTimeoutMs");
+    posInt(S.maxResponseBytes, 65536, 4 * 1048576, "searching.maxResponseBytes");
+    // The profile: "legacy" is the accepted Serper-first search with SearXNG fallback, kept as the explicit rollback; "aggregate"
+    // runs the five general engines together (spec §5), with Context7 and Ref when documentation helps and Jev's advice.
+    S.profile ??= "legacy";
+    if (!["aggregate", "legacy"].includes(S.profile)) throw new Error("searching.profile must be aggregate or legacy");
+    const rosterKeys = ["generalSubjects", "documentationSubjects", "decisionSubject"];
+    const roster = (r, where, fixture) => {
+      exact(r, rosterKeys, where);
+      const apiOf = (map, s) => (Object.hasOwn(map, s) ? p.providers[map[s].provider] : null);
+      const check = (list, map, apis, label) => {
+        if (!Array.isArray(list) || list.length !== apis.length || new Set(list).size !== list.length) throw new Error(`${where}.${label} must list exactly ${apis.length} subjects`);
+        const got = list.map((s) => { const prov = apiOf(map, s); if (!prov) throw new Error(`${where}.${label}: ${s} is not listed`); return prov; });
+        if ([...new Set(got.map((x) => x.api))].sort().join() !== [...apis].sort().join()) throw new Error(`${where}.${label} must hold one subject of each of ${apis.join(", ")}`);
+        // A fixture selection never reaches a live provider; the live roster may be pointed at fixtures (tests do).
+        if (fixture && got.some((x) => !/\.fixture\.fcpi\.test$/.test(new URL(x.baseUrl).hostname))) throw new Error(`${where}.${label} must name fixture providers only`);
+      };
+      check(r.generalSubjects, p.searches, GENERAL_APIS, "generalSubjects");
+      check(r.documentationSubjects, p.documentationSearches, DOCUMENTATION_APIS, "documentationSubjects");
+      check([r.decisionSubject], p.decisions, ["openrouter-decisions-v1"], "decisionSubject");
+    };
+    if (S.profile === "aggregate" || rosterKeys.some((k) => k in S)) roster(Object.fromEntries(rosterKeys.map((k) => [k, S[k]])), "searching", false);    S.searxngMode ??= "fallback";
+    if (!["fallback", "additional"].includes(S.searxngMode)) throw new Error("searching.searxngMode must be fallback or additional");
+    // The roster a fixture selection uses: fixture providers of the same APIs, so the aggregate runs end to end without a live call.
+    if (S.fixtureRoster !== undefined) roster(S.fixtureRoster, "searching.fixtureRoster", true);
   }
   exact(p.breaker, ["failures", "windowMs", "openMs"], "breaker");
   posInt(p.breaker.failures, 1, 20, "breaker.failures");
