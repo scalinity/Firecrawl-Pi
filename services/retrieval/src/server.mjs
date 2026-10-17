@@ -189,6 +189,7 @@ async function readJson(req, cap = 1024 * 1024) {
 async function providerStatus() {
   const { day, month } = periodStarts();
   const usage = storeReady ? await store.budgetUsage(day, month).catch(() => null) : null;
+  const uncertain = storeReady ? await store.uncertainHolds(month).catch(() => null) : null;
   return {
     selection: { ...selection, source: selectionSource },
     paidDispatch: paidDispatchActive(budget, env.paidDispatch),
@@ -197,6 +198,8 @@ async function providerStatus() {
       credential: p.credential ? (readCredential(env.providersDir, p.credential) ? "present" : "absent") : "not_required",
       breaker: breakerState(name, p) }])),
     budgets: usage,
+    // Calls sent whose answer never came, still holding their reservations this month: [{ category, count, reserved }].
+    uncertain,
     caps: Object.fromEntries(Object.entries(budget.categories).map(([k, c]) => [k, { paid: c.paid, unit: c.unit, caps: c.caps }])),
   };
 }

@@ -346,6 +346,11 @@ export class Store {
     return (await this.pool.query("SELECT category, period, period_start::text AS period_start, reserved::float8 AS reserved, settled::float8 AS settled FROM fcpi_retrieval.budget_usage WHERE (period = 'day' AND period_start = $1) OR (period = 'month' AND period_start = $2) ORDER BY category, period",
       [day, month])).rows;
   }
+  // What calls of uncertain outcome hold in the month's caps, by category: a call sent whose answer never came keeps its whole
+  // reservation and nothing settles it, so the status must show what is held.
+  async uncertainHolds(month) {
+    return (await this.pool.query("SELECT category, count(*)::int AS count, sum(reserved)::float8 AS reserved FROM fcpi_retrieval.budget_reservation WHERE state = 'UNCERTAIN' AND month_start = $1 GROUP BY category ORDER BY category", [month])).rows;
+  }
   async reservationsFor(logicalId) {
     return (await this.pool.query("SELECT call_key, category, provider, subject, kind, unit, rate_card, reserved::float8 AS reserved, actual::float8 AS actual, state, usage, detail FROM fcpi_retrieval.budget_reservation WHERE logical_id = $1 ORDER BY created_at", [logicalId])).rows;
   }

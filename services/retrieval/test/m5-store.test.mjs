@@ -123,6 +123,21 @@ test("a paid category with no shared cap (null or undefined) draws on no shared 
   } finally { await store.close(); }
 });
 
+test("calls of uncertain outcome are listed by category with what they hold, for the month they were made in and no other", opts, async () => {
+  const store = await fresh();
+  try {
+    const caps = { day: 1000000, month: 1000000 };
+    const a = await store.reserveBudget(base({ category: "llm", caps, amount: 40000 }));
+    const b = await store.reserveBudget(base({ category: "llm", caps, amount: 25000 }));
+    await store.reserveBudget(base({ category: "llm", caps, amount: 5000 }));
+    const other = await store.reserveBudget(base({ category: "proxy", caps, amount: 700 }));
+    for (const r of [a, b, other]) await store.markBudgetUncertain(r.reservation.id, "no answer came");
+    assert.deepEqual(await store.uncertainHolds("2026-09-01"), [{ category: "llm", count: 2, reserved: 65000 }, { category: "proxy", count: 1, reserved: 700 }],
+      "the call still in flight (RESERVED) is not listed");
+    assert.deepEqual(await store.uncertainHolds("2026-10-01"), [], "a month in which nothing was made lists nothing");
+  } finally { await store.close(); }
+});
+
 test("settlements and reservations running at once on one category's day, month and paid-total rows all complete (review W2)", opts, async () => {
   const store = await fresh();
   try {
