@@ -273,7 +273,9 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       if (complete && fullyRanked) {
         const expiries = lanes.filter(validated).map((o) => o.cacheExpiresAt ?? clock() + L.cacheSeconds.success * 1000);
         const ttlS = Math.floor((Math.min(...expiries) - clock()) / 1000);
-        await cachePut(aggKey, body, ttlS);
+        // Keyed now, not at admission: the execution may have learned the decision layer's concrete build, and the next identical
+        // search looks the answer up under that identity.
+        await cachePut(aggregateKey(request, roster, selection), body, ttlS);
       }
       telemetry?.runFinished?.({ request, outcome: search.outcome, search, lanes: all, pool, final, ranking, timings: search.timings });
       return { body, pool, final };
