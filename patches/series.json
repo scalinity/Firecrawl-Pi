@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "6c27ad04a656824bdc2c5b39362aa5acd4f9b82e",
-  "series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+  "result_tree": "3c18897e9db60c78bf3cf624a8b4b680e2dc4a05",
+  "series_sha256": "8a9c530805344bbf682048c11f4562cd41d0bedf09bf936653c2cc64c964a14d",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -156,6 +156,24 @@
         "M7-B01 screenshots and actions through the core",
         "M7-C02 the parse cache is owner-scoped"
       ]
+    },
+    {
+      "file": "0011-search-intelligence-context.patch",
+      "sha256": "767533459c4b59f15692ecdf8746bef53720d513c6f3243ea8469bd0b8fafc7f",
+      "reason": "The aggregate search needs the caller's original query and options, the gateway's trusted request, logical-search, owner and deadline context, and the caller's cancellation at the retrieval service, but executeSearch compiled domain operators into the query, the searxng route dropped every option and aborted at an independent 15 seconds, and the scrape merge rebuilt result rows without their metadata (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2); evidence annotations for acquired pages need a bounded payload of the actual retrieved text (§12).",
+      "symbols": [
+        "apps/api/src/search/fcpi.ts (new): fcpiSearchContext, piIntelligentSearch, mergeWithFcpi, renditionOf, selectWindows, evidencePayload, attachFcpiEvidence",
+        "apps/api/src/controllers/v2/search.ts searchController (context from the x-fcpi-search-* headers, cancellation on close, fcpi.search moved to the top level)",
+        "apps/api/src/controllers/v2/types.ts searchRequestSchema (searchIntelligence)",
+        "apps/api/src/search/execute.ts executeSearch (fcpi context to search(), evidence after the scrape merge)",
+        "apps/api/src/search/v2/index.ts search (a context goes to piIntelligentSearch)",
+        "apps/api/src/search/scrape.ts mergeScrapedContent (mergeWithFcpi)",
+        "apps/api/src/lib/entities.ts WebSearchResult.fcpi, SearchV2Response.fcpiSearch"
+      ],
+      "tests": [
+        "SI3 native chain: REST and MCP search with and without scrape formats carry fcpi.search and row metadata through the merge",
+        "SI3 deadline: an aggregate answer after 15 s but before the request deadline succeeds; a shorter deadline sends nothing late"
+      ]
     }
   ],
   "coverage": [
@@ -204,8 +222,8 @@
     {
       "path": "search queries",
       "reaches": "search/index.ts, search/v2/index.ts -> searxng_search at SEARXNG_ENDPOINT, the retrieval service's SearXNG-compatible route",
-      "covered_by": "0005 removes the DuckDuckGo fallback; 0007 makes the retrieval service's answer final and a failure typed; deploy/compose.yaml points SEARXNG_ENDPOINT at the retrieval service, which asks SearXNG",
-      "call_site": "apps/api/src/search/v2/searxng.ts searxng_search"
+      "covered_by": "0005 removes the DuckDuckGo fallback; 0007 makes the retrieval service's answer final and a failure typed; 0011 sends a search with its trusted context to the retrieval service's authenticated POST /internal/search (aggregate or legacy profile there) within the request's own deadline; deploy/compose.yaml points SEARXNG_ENDPOINT at the retrieval service for the legacy route",
+      "call_site": "apps/api/src/search/v2/searxng.ts searxng_search; apps/api/src/search/fcpi.ts piIntelligentSearch"
     },
     {
       "path": "search result pages",
@@ -230,6 +248,12 @@
       "reaches": "a direct connection from the core",
       "covered_by": "none needed: the core sits only on internal networks, so a direct connection gets ENETUNREACH (M2-E02)",
       "call_site": "deploy/compose.yaml firecrawl-core networks"
+    },
+    {
+      "path": "search evidence",
+      "reaches": "search/execute.ts after mergeScrapedContent -> fcpi.ts attachFcpiEvidence -> the retrieval service's POST /internal/search/evidence with the acquired pages' text windows only",
+      "covered_by": "0011: no URL is fetched and no page is acquired by this path",
+      "call_site": "apps/api/src/search/fcpi.ts attachFcpiEvidence"
     }
   ]
 }
