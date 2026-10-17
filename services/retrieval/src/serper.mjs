@@ -75,7 +75,10 @@ export function makeSerper({ store, getBudget, getPolicy, providersDir, resolveP
           log({ event: "search_provider", provider: s.provider, logical_id: id, query_sha256: requestHash, credits: 1, outcome: "results" });
           return results;
         } catch (e) {
-          const neutral = e.failureClass === "SEARCH_CREDITS_EXHAUSTED" || callerSignal?.aborted || (!reservation && e.failureClass) || [401, 403, 429].includes(httpStatus);
+          // Neutral: no provider verdict. A transport error (e.code) that never left this host — a local refusal, an expired
+          // deadline, the caller's cancellation — judges nothing; an unreachable provider is a genuine failure (spec §15).
+          const neutral = e.failureClass === "SEARCH_CREDITS_EXHAUSTED" || callerSignal?.aborted || (!reservation && e.failureClass) || [401, 403, 429].includes(httpStatus)
+            || (e.code && e.sent === false && e.code !== "PROVIDER_UNREACHABLE");
           if (neutral) breaker.neutral();
           else breaker.failure();
           if (reservation && !closed) {

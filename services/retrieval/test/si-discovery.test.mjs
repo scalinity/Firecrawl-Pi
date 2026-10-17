@@ -308,6 +308,12 @@ test("a local refusal before send judges no provider: the metered breakers stay 
       assert.equal(h.servers[n].seen.length, 0, `${n} was never sent`);
       assert.equal(h.dispatch.breakerState(`fixture-${n}`), "closed", n);
     }
+    // Serper keeps its own breaker: the same local refusal is neutral there too.
+    const serperRows = [...h.store.rows.values()].filter((r) => r.provider === "fixture-serper");
+    assert.equal(serperRows.length, 3);
+    for (const r of serperRows) assert.equal(r.state, "RELEASED");
+    assert.equal(h.servers.serper.seen.length, 0);
+    assert.equal(h.serper.breakerState("fixture-serper"), "closed");
   } finally { await h.close(); }
 });
 
