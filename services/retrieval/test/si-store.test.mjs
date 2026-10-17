@@ -149,5 +149,11 @@ test("the schema applies over a populated baseline database and again, keeping e
     // The service's role has DML on the new table and nothing more.
     const grants = (await c.query("SELECT privilege_type FROM information_schema.role_table_grants WHERE grantee = 'fcpi_retrieval' AND table_name = 'provider_availability' ORDER BY 1")).rows.map((r) => r.privilege_type);
     assert.deepEqual(grants, ["DELETE", "INSERT", "SELECT", "UPDATE"]);
+    // The lifetime allocation's sum reads its category through an index, not the whole table.
+    const idx = (await c.query("SELECT indexdef FROM pg_indexes WHERE schemaname = 'fcpi_retrieval' AND indexname = 'budget_reservation_category'")).rows;
+    assert.match(idx[0]?.indexdef ?? "", /\(category\)/);
+    await c.query("SET enable_seqscan = off"); // this client only; it ends with the test
+    const plan = (await c.query("EXPLAIN SELECT COALESCE(SUM(reserved), 0) FROM fcpi_retrieval.budget_reservation WHERE category = 'serper_trial'")).rows.map((r) => r["QUERY PLAN"]).join("\n");
+    assert.match(plan, /budget_reservation_category/);
   });
 });

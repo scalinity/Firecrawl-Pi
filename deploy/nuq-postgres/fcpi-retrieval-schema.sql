@@ -106,6 +106,8 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.budget_reservation (
 );
 CREATE INDEX IF NOT EXISTS budget_reservation_logical ON fcpi_retrieval.budget_reservation (logical_id);
 CREATE INDEX IF NOT EXISTS budget_reservation_created ON fcpi_retrieval.budget_reservation (created_at);
+-- A finite allocation (Serper's lifetime credits) sums its category's retained rows under an advisory lock at each reservation.
+CREATE INDEX IF NOT EXISTS budget_reservation_category ON fcpi_retrieval.budget_reservation (category);
 -- The category periods a reservation drew on, so its settlement gives back exactly those rows even when
 -- the caps changed in between.
 ALTER TABLE fcpi_retrieval.budget_reservation ADD COLUMN IF NOT EXISTS periods text[];
