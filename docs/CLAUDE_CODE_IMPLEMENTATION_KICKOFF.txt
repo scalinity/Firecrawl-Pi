@@ -1,0 +1,115 @@
+FIRECRAWL PI — AUTONOMOUS SEARCH INTELLIGENCE IMPLEMENTATION
+
+You are the principal implementation engineer for my personal, self-hosted Firecrawl Pi platform. Implement the approved search-intelligence specification completely, with meaningful verification and an evidence-based handoff. Start work after reading the required inputs; do not stop at a plan or repeatedly ask whether to continue.
+
+REPOSITORY AND REQUIRED INPUTS
+
+Repository: https://github.com/scalinity/Firecrawl-Pi
+Expected launch location: the local Firecrawl Pi repository root.
+Primary feature contract: FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md
+If I placed that file under docs/, use docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md and record its location. Do not require the prior chat to reconstruct requirements.
+
+The design inspected main at commit 88d8e4c322be59f6d817541b6691fec5de80ed4a on 2026-10-17. A separate read-only capabilities observation then reported deployed build 2b37772c58a56dd605a43558d7cac7d27216551d. These are reference points, not instructions to reset the checkout or assume the current deployment still has either revision.
+
+Read the complete feature specification, AGENTS.md, CLAUDE.md, docs/FIRECRAWL_PI_SPEC.md, docs/FIRECRAWL_PI_MILESTONES.md, and the current execution context / ORCHESTRATION materials required by the repository. Follow applicable instructions in subdirectories. Inspect the current branch, HEAD, git status, relevant diffs, and source history before modifying files. Use rg for source searches. Verify the actual interfaces and upstream patch series rather than relying only on this prompt's source map.
+
+This owner-requested feature explicitly replaces the older Serper-primary normal-search architecture with the selected five-engine architecture. It authorizes the additional detailed feature specification and continuous implementation across SI0–SI6. Do not stop solely because older instructions discourage a third architecture document or ordinarily request a pause after a milestone. Reconcile the feature into the existing canonical documents. Preserve all unrelated accepted project constraints and historical evidence. Keep AGENTS.md and CLAUDE.md identical if either changes, and refresh ORCHESTRATION's embedded canonical inputs/hashes where the project requires it.
+
+WORKING AUTHORITY AND CONTINUITY
+
+By launching this prompt after reviewing the specification, I authorize the implementation, reversible repository-scoped changes, necessary test setup, focused integration verification, and use of my already configured credentials through the existing project mechanisms and applicable restrictions. Continue autonomously through implementation, debugging, reviews, documentation, and release preparation. Routine implementation choices and fixes do not require another approval.
+
+Preserve unrelated user changes. Create an isolated branch/worktree when appropriate; do not reset, clean, overwrite or stash unrelated work merely to obtain a clean tree. Stage explicit paths when committing. Do not use broad git add -A. Do not modify deployment targets, publish or push unrelated content, or send messages to third parties.
+
+Production cutover remains subject to the owner's actual launch authorization and existing project deployment rules. If those already authorize it, follow the verified deployment procedure after its gates pass. If not, finish the code, tests, evidence and exact deploy/rollback package first, then identify that single remaining live-cutover boundary. Do not pause earlier milestones merely because cutover authorization has not yet been supplied. Never interpret this prompt as permission to bypass a technical approval/access control or an applicable existing dispatch restriction.
+
+Maintain concise progress records in the repository's established manner, linking new evidence under evidence/search-intelligence/SI0 through SI6. Distinguish implemented, fixture-tested, live-verified, measured, failed, blocked and not-run work. Preserve accepted historical milestone artifacts. Keep a compact continuation note with current branch/HEAD, changed files, decisions, commands run, actual results and next action so work can resume after context compaction without restarting.
+
+LOCKED PRODUCT REQUIREMENTS
+
+1. Five general providers participate concurrently in every ordinary uncached live search when eligible: Serper, Brave Search, Exa, DeepSeek Search, Tavily. Valid provider/aggregate cache reuse is explicitly labeled. Never skip a healthy representable engine because a query seems easy, another engine answered first, confidence looks sufficient, or a small usage saving seems attractive.
+
+2. Permitted provider exclusions are only those in the specification: not configured, unavailable, circuit open, rate-limited, quota exhausted, unsupported request contract, cancellation/deadline/capacity, or an existing explicit platform restriction. Attribute every exclusion. Preserve SearXNG as the specified compatible fallback/additional lane and explicit legacy rollback profile. Do not enable previously disabled direct search-engine scraping or residential routes.
+
+3. Context7 and Ref are co-primary documentation sources. When documentation activates, start both concurrently and isolate their failures/quotas. Honor documentation auto|required|off, library/version hints and the high-recall deterministic-plus-Jev detector. Explicit docs requests activate the layer. General engines continue. Do not turn this into a permanent Context7-primary/Ref-fallback chain.
+
+4. Jev is advisory semantic intelligence, primarily relevance reranking. Call only POST https://openrouter.ai/api/alpha/decisions, model typesafe/jev-1.14, with my existing OpenRouter key and the exact model/state/questions contract. Never call TypeSafe directly, use chat-completions for Jev, substitute Jev Router, or use a moving model alias. Keep requested and returned concrete model identities separate.
+
+5. Use independent candidate-specific relevance Score, direct-answer Noul, evidence Noul and source-type Choice decisions. Bind candidate IDs inside question instructions because question keys alone are not model instructions. Validate required fields and optional metadata correctly. Keep the specification's small byte-bounded batches, deterministic RRF blend, conservative duplicate logic and source diversity. Jev failure must leave useful deterministic results available. Do not present its probabilities as proof of factual truth.
+
+6. Preserve original sources, original provider ranks, distinct primary evidence, independent reporting, version-specific documentation and source passages. Repeated discovery of one URL is not independent corroboration. Protect uniquely relevant provider discoveries before semantic shortlisting. Exact domain/version rules remain deterministic and override semantic scores.
+
+7. Post-retrieval evidence advice acts on pages already acquired through native Firecrawl selected-result scraping and the narrowly scoped Ref excerpt path. Link-only search stays link-only. Do not add a second gateway scraper, acquire every candidate, recursively expand retrieval, or replace existing extraction/route/quality logic with Jev.
+
+8. Preserve REST /v2/search, firecrawl_search, data.web, current default five/max ten results, scopes, native credit meaning, errors, scrape/browser/extraction behavior, durable jobs and client compatibility. Public searchIntelligence options and fcpi.search metadata are additive. Preserve metadata through native core mappings, mergeScrapedContent, MCP shaping and the existing app.
+
+9. Successful empty, partial coverage and zero successful discovery providers are different. Never convert provider failure to a successful empty search. Do not let Jev success count as a successful discovery provider. Keep cache/availability/failure/ranking status honest through every client and trace.
+
+10. Reuse existing budgets, reservation/settlement/reconciliation, ledger, admission, safe transport, persistence and credential loading. Add no new hard-spending-limit framework, account reload, spending approval bureaucracy or acceptance criterion titled "No uncontrolled spending." Preserve actual existing limits and uncertainty. Quota exhaustion suppresses only that provider and must not trip or reset its service-health breaker.
+
+11. The future analytics dashboard is deliberately deferred. Implement only the durable, bounded operational records, provenance, ranking decisions, provider/account transitions, usage links, timings, retention and daily operational reduction specified now. Build no dashboard UI, charts, frontend analytics section, analytics API or separate backend service in this run. Keep the planned dashboard prominent in the roadmap/handoff.
+
+SOURCE LOCATIONS AND INTEGRATION TRAPS
+
+Inspect at least services/retrieval/src/search.mjs, serper.mjs, provider.mjs, budget.mjs, policy.mjs, store.mjs and server.mjs; existing quality/route/acquire/extract regression surfaces; services/access/server.mjs and src/validate.mjs/upstream.mjs; deploy/policies/capabilities.json; services/mcp/src/tools.mjs/rest.mjs and package dependencies; deploy/nuq-postgres/fcpi-retrieval-schema.sql; Compose/policies/version locks; patches/series.json and existing search/owner patches; scripts/playground/agent.mjs/server.mjs, LLM-DEMO.html and desktop packaging when affected.
+
+Extend the retrieval service using the focused search-intelligence modules selected in the specification. Do not build a parallel search platform. Current validators accept Serper-only search, impose fixed unit/allocation/deadline assumptions and support only chat/Message model transports; simply adding adapters will not start correctly. Migrate typed configuration and rate cards deliberately while keeping existing category restrictions and Serper's proven one-credit/lifetime-allocation behavior.
+
+The new upstream patch must preserve original query, validated constraints/options, trusted owner/request/logical-search identity and absolute deadline through the actual pinned controller → executeSearch → search/v2 → retrieval path. Do not derive semantic intent from an already rewritten site: query. Replace the independent legacy 15-second adapter ceiling for aggregate mode. Preserve candidate metadata after native scrape merge and call the narrow authenticated /internal/search/evidence hook only with actual retrieved text.
+
+Keep /internal/search authenticated with the existing core credential and preserve the legacy internal /searxng/search wrapper. Do not expose caller-controlled owner, endpoints, model, budget or secret fields. Respect fixture selection: fixture mode must never dispatch real provider calls.
+
+Factor SearXNG into the specified backend-only helper; do not re-enter the current makeSearcher facade from its aggregate lane and accidentally re-admit the query, call Serper twice, or recurse. Ref's MCP bridge needs bounded streaming responses before socket EOF, sharing the existing safe transport checks. Keep persistent receive-stream slots separate from the request permits needed for tool calls. Reporting-only ledger categories need explicit native units and day/month reporting periods independent of enforceable caps; never substitute a default monetary conversion for unknown credit/request pricing.
+
+Transport deadlines must include queue, DNS, admission, connection and response consumption. Establish cancellation authority before awaited pre-send work, recheck it before sending, remove listeners, and track actual child/settlement tasks through shutdown. A losing Promise.race must never send late. Preserve extraction's separately accepted dispatched-model lifetime. Add startup uncertainty recovery for search/docs/decision operations; never refund or replay a possibly sent operation because a process restarted.
+
+Keep billing call identity separate from query-cache identity. Use stable logical search/operation keys and complete request hashes. Retain native provider units and source of usage estimates. Never prune the history needed to preserve lifetime credit consumption. A failed optional telemetry/cache write must not erase valid results; a ledger failure must not authorize unaccounted dispatch.
+
+EXISTING CREDENTIALS AND PROVIDER CONTRACTS
+
+I have already configured relevant credentials locally. Verify actual variable names, presence and deployment loading privately; do not ask me to generate/paste keys unless a required credential is genuinely missing after that inspection. Reuse the existing provider-file/stdin mechanism. Never print, expose, commit or place actual secret values in command arguments, examples, traces, fixtures, reports or screenshots. Do not dump .env or the process environment, and do not blindly run an old staging script whose requirements you have not inspected.
+
+Verify official contracts linked in specification §30 and capture sanitized live shapes when the existing access/policy allows. Key details to preserve:
+
+- Serper keeps its repository-proven ten-result/credits:1 contract; unknown denial tags are not invented quota signals.
+- Brave's current reference has 600 characters AND 75 words. Parse aligned rate windows and relative reset seconds correctly.
+- Exa uses api.exa.ai/search, bounded highlights and actual costDollars when supplied; deprecated crawl-date filters are ignored and must not be used.
+- DeepSeek uses api.deepseek.com/v1/tools/search. Its original query must fit 128 Unicode code points; do not truncate away meaning to make it fit. Respect its documented Search QPS and separate empty/nonempty billing.
+- Tavily advanced search requests usage, uses its exact strict-domain/date/language controls where applicable, and distinguishes 432/433 quota from 429 rate limiting.
+- Context7 v3 is GET context7.com/api/v3/search with type=json. Its generated public OpenAPI may omit v3; use dedicated docs and official SDK types. Requested version is not automatically observed page version.
+- Ref uses api.ref.tools/mcp with isolated per-search session context, real tool contracts and bounded selected reads. Legacy errors may appear as plain text without isError. Do not invent a JSON results envelope or balance endpoint. My approximately 3,993-credit report is a user snapshot, not verified remaining balance or a new cap.
+- OpenRouter's 402 with error.metadata.limit_source=openrouter_in_flight_budget is temporary capacity; ordinary credit/key-cap exhaustion is a different state. Noul has no separate confidence; optional Choice/Score metadata and usage.cost may be absent.
+
+Keep every unsupported or unverified contract case explicit. Do not fabricate provider responses or infer precise balance by subtracting local calls from a shared account's historical snapshot. Do not induce real exhaustion to test quota behavior.
+
+MILESTONES AND VERIFICATION
+
+Execute the full SI0–SI6 sequence in specification §26:
+
+SI0: Reconcile source/instructions, preserve working state, freeze contracts, baseline and evaluation setup.
+SI1: Typed registry, ledger/availability/lifecycle changes, five-engine discovery, deterministic normalization/fusion/caching and SearXNG compatibility.
+SI2: Co-primary docs, pinned Jev decisions, high-recall activation, bounded semantic ranking and conservative deduplication.
+SI3: Real native core/REST/MCP/app integration and post-acquisition evidence annotations.
+SI4: Durable operational events/status/retention with no dashboard.
+SI5: Comparative quality evaluation, targeted live contracts, degraded operation and Pi/integration readiness.
+SI6: Canonical documentation, exact release/rollback package and rollout only within actual launch authority.
+
+Use meaningful targeted tests while developing and one appropriate combined regression/integration pass. Follow the project's current milestone review contract; use the specified independent reviewer when available, or record an allowed substitution and its actual identity/limitations. Fix valid findings and rerun affected checks. Do not repeatedly run unrelated whole-platform/24-hour acceptance campaigns or ask for permission at each milestone.
+
+Verify all-five dispatch before first completion, both-docs activation, valid-empty/partial/all-failed states, each provider quota/rate/auth/contract class, malformed/oversized bodies, original-source/version preservation, unique-provider recall, Jev failure/injection, deadline/late-DNS cancellation with a positive send control, Ref session isolation, coalesced caller cancellation, exact-once ledger closure, crash recovery, retention, schema reapplication and metadata through the real native scrape/MCP chain.
+
+Run actual PostgreSQL-backed tests using the project's disposable database mechanism; unset FCPI_TEST_PG skips are not passes. Verify the patch against the actual pinned and already-patched upstream source and compile the affected native code. Live smoke evidence is distinct from fixture evidence. If a dependency is absent, install/setup it through the existing supported workflow when feasible; otherwise complete unaffected work and identify the precise block.
+
+Include a dynamic successful native aggregate request beyond the old 15-second ceiling but within its original deadline, plus a shorter-deadline/zero-late-send case. Include a Ref SSE result delivered before connection EOF, four receive sessions that do not deadlock tool permits, large Unicode evidence within the hook byte limit, and uncapped request-unit accounting that never assumes one request equals one micro-USD.
+
+For quality evaluation, follow the versioned 120-query corpus, tuning/held-out split, independent source-backed judgment process, fixed candidate snapshots and five required comparisons in §23. Separate aggregation's benefit, Jev's benefit, documentation benefit and degraded behavior. Record evaluator/model/prompt/label provenance; never use Jev's own decisions as acceptance labels or call automated labels human ground truth. Human adjudication is used only when actually available/needed as specified. Keep source snapshots and exact evidence spans. Do not change frozen weights on held-out data, hide failed queries, silently lower targets, or report URL counts as quality improvement.
+
+Report each functional, quality, compatibility, reliability and performance gate independently as pass/fail/blocked/not-run with evidence. A failed quality gate requires diagnosis and bounded remediation; implementation may be complete while independent quality acceptance is still unresolved. Do not call the whole feature accepted merely because unit fixtures pass.
+
+HANDOFF AND COMPLETION
+
+Continue until all authorized implementation and necessary verification work is finished. When a genuine blocker prevents further progress, first finish unaffected work, make the blocked action concrete, then explain exactly what is missing and the smallest action needed. Do not request information already available in the checkout or configured credentials.
+
+Finish with an evidence-based summary: current branch/commits, changed components and resulting behavior, actually executed tests and skipped checks, current live-provider verification status, measured benchmark/latency/resource/usage results, compatibility evidence, review findings and resolutions, deployment status, exact rollout/rollback steps, and unresolved limitations. Identify the deferred analytics dashboard explicitly and the instrumentation now available for it. Link the acceptance matrix and progress/evidence records.
+
+Do the work now. Read the full specification and repository instructions, inspect current state, then proceed through the ordered implementation without unnecessary milestone-by-milestone approval requests.
