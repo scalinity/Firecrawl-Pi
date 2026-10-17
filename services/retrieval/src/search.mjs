@@ -49,7 +49,14 @@ function backendGet(url, deadlineMs, signal) {
 export const LOADED_TTL_MS = 10 * 60e3, LOADED_RETRY_MS = 30e3;
 // A search tries to gather the spec's largest result count (§13: ten) before it asks a fallback engine.
 export const FILL_TO = 10;
-export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, clock = Date.now, google }) {
+
+// The SearXNG backend alone (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §5.4): the selection's engines, their second page
+// when the first holds fewer than fillTo, and the fallback engines when the first failed or still answered fewer, all
+// within one deadline. It admits nothing, reads no cache and calls no other provider: the legacy search below and the
+// aggregate profile's SearXNG lane both call it, and only their callers own admission and the aggregate cache, so neither
+// path can re-admit a query, call Serper twice or recurse. A backend failure is thrown (Denied); engines that did not
+// answer are returned with their reasons.
+export function makeSearxngBackend({ getPolicy, getSelection, searchUrl, clock = Date.now }) {
   let loaded = { until: -Infinity, names: null }, reading = null;
   function loadedEngines() {
     if (clock() < loaded.until) return Promise.resolve(loaded.names);
@@ -65,6 +72,69 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, c
     })().finally(() => { reading = null; });
     return reading;
   }
+  // { results: [{ url, title, content, engines }], queried, failed: Map(engine -> reason), pages, fallbackAsked }
+  async function run(q, language, { signal, deadline, maxResults, fillTo = FILL_TO, onFirstPageFailure = () => {} }) {
+    const S = getPolicy().search, selection = getSelection().search;
+    const engines = S.engines[selection], fallback = S.fallbackEngines?.[selection] ?? [];
+    async function ask(engs, page) {
+      const url = new URL(searchUrl);
+      url.searchParams.set("q", q);
+      url.searchParams.set("format", "json");
+      url.searchParams.set("pageno", String(page));
+      url.searchParams.set("language", language);
+      url.searchParams.set("engines", engs.join(","));
+      const r = await backendGet(url, Math.max(1, deadline - Date.now()), signal);
+      if (r.status !== 200) throw new Denied("SEARCH_BACKEND_ERROR", `the search backend answered HTTP ${r.status}`, { retryable: r.status >= 500 });
+      let data;
+      try { data = JSON.parse(r.body.toString("utf8")); } catch { throw new Denied("SEARCH_BACKEND_ERROR", "the search backend's answer is not JSON"); }
+      if (!data || !Array.isArray(data.results)) throw new Denied("SEARCH_BACKEND_ERROR", "the search backend's answer has no results list");
+      const failed = new Map();
+      for (const u of Array.isArray(data.unresponsive_engines) ? data.unresponsive_engines : []) {
+        const [name, why] = Array.isArray(u) ? u : [u?.name ?? u, u?.error ?? ""];
+        if (engs.includes(name)) failed.set(name, String(why ?? "").slice(0, 120));
+      }
+      const results = data.results
+        .filter((x) => x && typeof x.url === "string" && /^https?:\/\//i.test(x.url) && x.url.length <= 2048)
+        .map((x) => ({ url: x.url, title: typeof x.title === "string" ? x.title.slice(0, 500) : "", content: typeof x.content === "string" ? x.content.slice(0, 2000) : "",
+          engines: (Array.isArray(x.engines) ? x.engines : typeof x.engine === "string" ? [x.engine] : []).filter((e) => typeof e === "string").slice(0, 6) }));
+      return { results, failed };
+    }
+    const loadedNow = loadedEngines();
+    const results = [], seen = new Set(), failed = new Map(), queried = [...engines];
+    const add = (rs) => { for (const x of rs) if (!seen.has(x.url) && results.length < maxResults) { seen.add(x.url); results.push(x); } };
+    const notLoaded = (engs, names) => { for (const e of engs) if (names && !names.has(e) && !failed.has(e)) failed.set(e, "not loaded by the search backend"); };
+    let first;
+    try { first = await ask(engines, 1); } catch (e) { onFirstPageFailure(e); throw e; }
+    add(first.results);
+    for (const [k, v] of first.failed) failed.set(k, v);
+    const names = await loadedNow;
+    notLoaded(engines, names);
+    const live = engines.filter((e) => !failed.has(e));
+    let pages = 1;
+    if (results.length < fillTo && live.length && first.results.length && deadline - Date.now() > 1000) {
+      try { add((await ask(live, 2)).results); pages = 2; }
+      catch (e) { if (e.failureClass === "CANCELLED") throw e; /* the first page's answer stands */ }
+    }
+    let fallbackAsked = false;
+    if (fallback.length && (results.length < fillTo || !live.length) && deadline - Date.now() > 1000) {
+      queried.push(...fallback);
+      fallbackAsked = true;
+      try {
+        const extra = await ask(fallback, 1);
+        add(extra.results);
+        for (const [k, v] of extra.failed) failed.set(k, v);
+        notLoaded(fallback, names);
+      } catch (e) {
+        if (e.failureClass === "CANCELLED") throw e;
+        for (const f of fallback) failed.set(f, String(e.detail ?? e.failureClass).slice(0, 120));
+      }
+    }
+    return { results, queried, failed, pages, fallbackAsked };
+  }
+  return { run, loadedEngines };
+}
+
+export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, clock = Date.now, google, backend = makeSearxngBackend({ getPolicy, getSelection, searchUrl, clock }) }) {
   return async function search(inboundUrl, signal) {
     const policy = getPolicy(), S = policy.search;
     const inbound = new URL(inboundUrl, "http://x");
@@ -90,7 +160,6 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, c
     // results, and the fallback engines (those the home connection cannot reach, on the residential route) only when the
     // first engines failed or still answered fewer: a search spends nothing while the home connection's engines answer it
     // (review R8). The phases share the backend deadline.
-    const fallback = S.fallbackEngines?.[selection] ?? [];
     const deadline = t0 + S.deadlineMs;
     let googleFailure = null;
     if (googleSubject) {
@@ -109,64 +178,22 @@ export function makeSearcher({ store, getPolicy, getSelection, searchUrl, log, c
         return { status: 200, body };
       }
     }
-    async function ask(engs, page) {
-      const url = new URL(searchUrl);
-      url.searchParams.set("q", q);
-      url.searchParams.set("format", "json");
-      url.searchParams.set("pageno", String(page));
-      url.searchParams.set("language", language);
-      url.searchParams.set("engines", engs.join(","));
-      const r = await backendGet(url, Math.max(1, deadline - Date.now()), signal);
-      if (r.status !== 200) throw new Denied("SEARCH_BACKEND_ERROR", `the search backend answered HTTP ${r.status}`, { retryable: r.status >= 500 });
-      let data;
-      try { data = JSON.parse(r.body.toString("utf8")); } catch { throw new Denied("SEARCH_BACKEND_ERROR", "the search backend's answer is not JSON"); }
-      if (!data || !Array.isArray(data.results)) throw new Denied("SEARCH_BACKEND_ERROR", "the search backend's answer has no results list");
-      const failed = new Map();
-      for (const u of Array.isArray(data.unresponsive_engines) ? data.unresponsive_engines : []) {
-        const [name, why] = Array.isArray(u) ? u : [u?.name ?? u, u?.error ?? ""];
-        if (engs.includes(name)) failed.set(name, String(why ?? "").slice(0, 120));
-      }
-      const results = data.results
-        .filter((x) => x && typeof x.url === "string" && /^https?:\/\//i.test(x.url) && x.url.length <= 2048)
-        .map((x) => ({ url: x.url, title: typeof x.title === "string" ? x.title.slice(0, 500) : "", content: typeof x.content === "string" ? x.content.slice(0, 2000) : "" }));
-      return { results, failed };
-    }
-    const loadedNow = loadedEngines();
-    const results = [], seen = new Set(), failed = new Map(), queried = [...engines];
-    if (googleFailure) { queried.unshift("google (Serper)"); failed.set("google (Serper)", googleFailure); }
-    const add = (rs) => { for (const x of rs) if (!seen.has(x.url) && results.length < S.maxResults) { seen.add(x.url); results.push(x); } };
-    const notLoaded = (engs, names) => { for (const e of engs) if (names && !names.has(e) && !failed.has(e)) failed.set(e, "not loaded by the search backend"); };
-    let first;
-    try { first = await ask(engines, 1); } catch (e) { done(e.failureClass); throw e; }
-    add(first.results);
-    for (const [k, v] of first.failed) failed.set(k, v);
-    const names = await loadedNow;
-    notLoaded(engines, names);
-    const live = engines.filter((e) => !failed.has(e));
-    let pages = 1;
-    if (results.length < FILL_TO && live.length && first.results.length && deadline - Date.now() > 1000) {
-      try { add((await ask(live, 2)).results); pages = 2; }
-      catch (e) { if (e.failureClass === "CANCELLED") { done("CANCELLED"); throw e; } /* the first page's answer stands */ }
-    }
-    if (fallback.length && (results.length < FILL_TO || !live.length) && deadline - Date.now() > 1000) {
-      queried.push(...fallback);
-      try {
-        const extra = await ask(fallback, 1);
-        add(extra.results);
-        for (const [k, v] of extra.failed) failed.set(k, v);
-        notLoaded(fallback, names);
-      } catch (e) {
-        if (e.failureClass === "CANCELLED") { done("CANCELLED"); throw e; }
-        for (const f of fallback) failed.set(f, String(e.detail ?? e.failureClass).slice(0, 120));
-      }
-    }
+    // The SearXNG part is the backend's (makeSearxngBackend above); a Serper failure is named first among the engines.
+    // A failure is logged once: the first page's by the backend's hook, a later page's cancellation here.
+    let run, logged = false;
+    try { run = await backend.run(q, language, { signal, deadline, maxResults: S.maxResults, onFirstPageFailure: (e) => { logged = true; done(e.failureClass); } }); }
+    catch (e) { if (e.failureClass === "CANCELLED" && !logged) done("CANCELLED"); throw e; }
+    const results = run.results.map(({ url, title, content }) => ({ url, title, content }));
+    const failed = new Map(googleFailure ? [["google (Serper)", googleFailure], ...run.failed] : run.failed);
+    const queried = googleFailure ? ["google (Serper)", ...run.queried] : run.queried;
+    const pages = run.pages;
     const answered = queried.filter((e) => !failed.has(e));
     const unresponsive = [...failed].map(([engine, reason]) => ({ engine, reason }));
     if (!results.length && !answered.length) {
       done("engines_failed", { unresponsive: unresponsive.length });
       throw new Denied("SEARCH_ENGINES_FAILED", `no search engine answered: ${unresponsive.map((u) => `${u.engine} (${u.reason || "no reason"})`).join(", ")}`, { retryable: true, retryAfter: 60 });
     }
-    const usedFallback = !!googleFailure || queried.length > engines.length;
+    const usedFallback = !!googleFailure || run.fallbackAsked;
     const body = { results, unresponsive_engines: unresponsive, fcpi: { cache: "miss", engines: queried, answered, partial: unresponsive.length > 0, empty: results.length === 0, pages, fallback: usedFallback } };
     if (!unresponsive.length) await store.searchCachePut(key, body, S.cacheSeconds);
     done(results.length ? (unresponsive.length ? "partial" : "results") : (unresponsive.length ? "empty_partial" : "empty"), { results: results.length, unresponsive: unresponsive.length, pages, fallback: usedFallback });
