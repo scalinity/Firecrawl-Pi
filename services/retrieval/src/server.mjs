@@ -94,6 +94,8 @@ const getSelection = () => selection;
 const coreTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_core_token_sha256"), "retrieval_core_token_sha256");
 const gatewayTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_gateway_token_sha256"), "retrieval_gateway_token_sha256");
 const store = new Store({ ...env.postgres, password: readSecret(env.credentialsDir, "retrieval_postgres_password") });
+// Provider availability (search intelligence, spec §15): read at connect and before each search.
+const availability = makeAvailability({ store, log });
 let storeReady = false;
 const startedAt = new Date();
 (async function connect() {
@@ -144,7 +146,6 @@ const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.sea
 // Search intelligence (spec §5, §8, §15): availability apart from the breakers, the outbound permits, the shared metered
 // dispatch, the five general lanes, SearXNG's backend lane and the coordinator. Credentials are read at each call, as before.
 const intelligenceLimits = () => basePolicy.search.intelligence;
-const availability = makeAvailability({ store, log });
 const permits = makePermits(basePolicy.search.intelligence ?? { apiPermits: { total: 1, perProvider: 1 }, decisionPermits: { total: 1, perSearch: 1 }, refStreams: { total: 1, perSearch: 1 }, deepseekQps: 1 });
 const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic, readKey: (name) => readCredential(env.providersDir, name), paidDispatch: env.paidDispatch, permits, availability, log });
 const general = { serper: makeSerperLane({ serper: google, limits: intelligenceLimits, permits, availability }), brave: makeBrave({ dispatch, limits: intelligenceLimits }),
