@@ -6,7 +6,7 @@ import { readFileSync, existsSync } from "node:fs";
 const KNOWN = new Set([
   "PI_GATEWAY_LISTEN_PORT", "PI_CORE_URL", "PI_CORE_TIMEOUT_MS", "PI_GATEWAY_CLIENTS_FILE", "PI_ALLOWED_HOSTS", "PI_ALLOWED_HOSTS_FILE",
   "PI_ALLOWED_ORIGINS", "PI_CAPABILITIES_FILE", "PI_ARTIFACT_ROOT", "PI_CREDENTIALS_DIR", "PI_POSTGRES_HOST",
-  "PI_POSTGRES_DB", "PI_POSTGRES_USER", "PI_GATEWAY_SUBMIT_TIMEOUT_MS", "PI_GATEWAY_SUBMIT_SETTLE_MS",
+  "PI_POSTGRES_DB", "PI_POSTGRES_USER", "PI_MODEL_EXTRACT_EXTRA_MS", "PI_GATEWAY_SUBMIT_TIMEOUT_MS", "PI_GATEWAY_SUBMIT_SETTLE_MS",
   "PI_GATEWAY_POLL_MS", "PI_CLOUD_ACCESS_ENABLED", "PI_MCP_URL",
   // M5: the retrieval service's extraction listener.
   "PI_EXTRACT_URL",
@@ -74,6 +74,9 @@ export function loadConfig(env) {
     port: int(env, "PI_GATEWAY_LISTEN_PORT", 3300, 0, 65535),
     core,
     coreTimeoutMs: int(env, "PI_CORE_TIMEOUT_MS", 110000, 100, 300000),
+    // Extra time the json format grants a request that names its model (the Agent's reasoning model may take minutes);
+    // every other request keeps the core timeout alone.
+    modelExtractExtraMs: int(env, "PI_MODEL_EXTRACT_EXTRA_MS", 0, 0, 600000),
     submitTimeoutMs: int(env, "PI_GATEWAY_SUBMIT_TIMEOUT_MS", 60000, 100, 300000),
     submitSettleMs: int(env, "PI_GATEWAY_SUBMIT_SETTLE_MS", 180000, 0, 3600000),
     pollMs: int(env, "PI_GATEWAY_POLL_MS", 5000, 50, 60000),

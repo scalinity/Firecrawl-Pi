@@ -10,9 +10,9 @@ const M = { limits: { extract: { maxDocumentBytes: 1048576 } } };
 const SCHEMA = { type: "object", properties: { price: { type: "number" } } };
 const BODY = { url: "https://a.example/p", formats: [{ type: "json", schema: SCHEMA }] };
 const page = () => ({ status: 200, json: { success: true, data: { markdown: "Price: 1", metadata: { url: "https://a.example/p", statusCode: 200 } } } });
-function rig({ core = page, extract, scopes = ["scrape", "extract"] } = {}) {
+function rig({ core = page, extract, scopes = ["scrape", "extract"], cfg = {} } = {}) {
   const calls = { core: [], extract: [] };
-  const run = makeJsonScrape({ cfg: { coreTimeoutMs: 20000 }, M,
+  const run = makeJsonScrape({ cfg: { coreTimeoutMs: 20000, ...cfg }, M,
     upstream: { call: async (method, path, opts) => { calls.core.push(opts.body); return core(opts.body); } },
     extractor: { extract: async (body, timeoutMs) => { calls.extract.push({ body, timeoutMs }); return extract(body); } } });
   const sent = {};
@@ -21,6 +21,27 @@ function rig({ core = page, extract, scopes = ["scrape", "extract"] } = {}) {
 }
 const answer = (over = {}) => ({ status: 200, json: { ok: true, model: "m", data: { price: 1 }, sources: { "$": ["https://a.example/p"] }, warnings: [], missingRequired: [],
   units: [{ url: "https://a.example/p", part: 1, ok: true }], usage: { calls: 1 }, ...over } });
+
+test("a request that names its model gets the extra time for its extraction; every other request keeps the core timeout alone", async () => {
+  const named = { ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" };
+  for (const [label, body, extra] of [["named model", { ...BODY, formats: [named] }, 300000], ["default model", BODY, 0]]) {
+    const r = rig({ cfg: { modelExtractExtraMs: 300000 }, extract: () => answer() });
+    const t0 = Date.now();
+    const out = await r.go(body);
+    assert.equal(out.status, 200, label);
+    const { body: sent, timeoutMs } = r.calls.extract[0];
+    const window = Date.parse(sent.deadline) - t0;
+    // The page's own deadline is the core timeout plus ten seconds (20 s here); the named model adds its extra on top.
+    assert.ok(window >= 30000 + extra - 2000 && window <= 30000 + extra + 2000, `${label}: extraction window ${window} ms`);
+    assert.equal(timeoutMs - window >= 4900, true, `${label}: the gateway still waits five seconds past the deadline it sends`);
+  }
+  // Without the setting a named model gets what every request gets.
+  const none = rig({ extract: () => answer() });
+  const t1 = Date.now();
+  await none.go({ ...BODY, formats: [named] });
+  const w = Date.parse(none.calls.extract[0].body.deadline) - t1;
+  assert.ok(w <= 32000, `no setting, no extra: ${w} ms`);
+});
 
 test("the json format needs the 'extract' scope, and nothing is scraped without it (review W7)", async () => {
   const r = rig({ scopes: ["read", "scrape"], extract: () => answer() });

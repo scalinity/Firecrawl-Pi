@@ -8,5 +8,9 @@ test('the full incident configuration passes startup; partial or unknown policy 
   assert.equal(loadConfig(base).incidents.ownerFile,base.PI_INCIDENT_OWNER_FILE);
   assert.throws(()=>loadConfig({...base,PI_INCIDENT_OWNER_FILE:undefined}),/configured together/);
   assert.throws(()=>loadConfig({...base,PI_ENABLE_UNSAFE:'true'}),/unknown configuration/);
+  assert.equal(loadConfig(base).modelExtractExtraMs,0,'absent, a request that names its model gets no more time than any other');
+  assert.equal(loadConfig({...base,PI_MODEL_EXTRACT_EXTRA_MS:'300000'}).modelExtractExtraMs,300000);
+  assert.throws(()=>loadConfig({...base,PI_MODEL_EXTRACT_EXTRA_MS:'600001'}),/PI_MODEL_EXTRACT_EXTRA_MS must be between/);
+  assert.throws(()=>loadConfig({...base,PI_MODEL_EXTRACT_EXTRA_MS:'-1'}),/PI_MODEL_EXTRACT_EXTRA_MS must be an integer/);
  }finally{rmSync(d,{recursive:true,force:true});}
 });

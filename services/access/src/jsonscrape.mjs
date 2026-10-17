@@ -11,7 +11,9 @@ export function makeJsonScrape({ cfg, M, upstream, extractor }) {
     // The json format draws on the model budget: a token that may only scrape cannot spend it (review W7).
     if (!ctx.client.scopes.has("extract")) return ctx.send(403, { success: false, code: "INSUFFICIENT_SCOPE", error: "The json format spends the model budget and needs the 'extract' scope." });
     const t0 = Date.now();
-    const deadline = t0 + cfg.coreTimeoutMs + 10000;
+    // A request that names its model waits on a reasoning model, which can take minutes: its extraction gets that much more.
+    const extra = json.model ? (cfg.modelExtractExtraMs ?? 0) : 0;
+    const deadline = t0 + cfg.coreTimeoutMs + 10000 + extra;
     const controller = new AbortController();
     let disconnected = false;
     const abort = () => controller.abort();
@@ -26,7 +28,7 @@ export function makeJsonScrape({ cfg, M, upstream, extractor }) {
     ctx.res?.once("close", closed);
     ctx.req?.once("aborted", lost);
     // Retain the existing five-second margin for the extraction service to report its deadline outcome.
-    const timer = setTimeout(abort, cfg.coreTimeoutMs + 15000);
+    const timer = setTimeout(abort, cfg.coreTimeoutMs + 15000 + extra);
     try {
       if (gone()) abort();
       if (stopped()) return;

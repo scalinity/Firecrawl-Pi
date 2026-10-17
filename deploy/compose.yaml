@@ -321,6 +321,7 @@ services:
       PI_GATEWAY_LISTEN_PORT: "3300"
       PI_CORE_URL: http://firecrawl-core:3002
       PI_CORE_TIMEOUT_MS: "110000"      # spec §9.3: the 90 s acquisition inside a 110 s gateway deadline
+      PI_MODEL_EXTRACT_EXTRA_MS: "300000" # a json request that names its model (the Agent's) may wait this much longer on it (spec §14)
       PI_GATEWAY_CLIENTS_FILE: /srv/clients/clients
       # The origins the gateway is served at: its loopback publication, as the host and an SSH
       # forward to it present it; and, from the host-side file scripts/m3/pi-tailscale.sh writes,
