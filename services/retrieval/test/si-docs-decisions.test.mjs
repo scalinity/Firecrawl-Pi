@@ -66,3 +66,52 @@ test("answered Jev and Context7 refusals keep their reservations, since neither 
     assert.deepEqual(c7, [["UNCERTAIN", null], ["SETTLED", 1]], "the refusal is uncertain; the documented no-match counts one request");
   } finally { await h.close(); }
 });
+
+// A Context7 v3 answer for vue whose version record says what was served (spec §6.1: requested and observed are separate).
+const vueAnswer = (version) => ({ status: 200, body: { ...(version ? { version: { libraries: [{ libraryId: "/vuejs/docs", ...version }] } } : {}),
+  codeSnippets: [{ libraryId: "/vuejs/docs", codeTitle: "ref()", codeDescription: "Declare reactive state", codeLanguage: "javascript", codeList: [{ language: "javascript", code: "const n = ref(0)" }],
+    codeId: "https://vuejs.org/guide/essentials/reactivity-fundamentals.html", pageTitle: "Reactivity Fundamentals" }], infoSnippets: [] } });
+const versionRequest = (q) => request({ originalQuery: q, intelligence: { documentation: "required", libraries: [{ name: "vue", version: "3.5" }] } });
+const queryOf = (e) => new URL(e.url, "http://x").searchParams.get("query") ?? "";
+
+test("Context7's version scope: another served version is left out and said so; a verified one is observed; none stays unknown", async () => {
+  const h = await harness({ handlers: { context7: (q, e) => /mismatch/.test(queryOf(e)) ? vueAnswer({ served: "3.4.0", status: "fallback" })
+    : /verified/.test(queryOf(e)) ? vueAnswer({ served: "3.5.2", status: "verified" }) : vueAnswer(null) } });
+  try {
+    const context7 = makeContext7({ dispatch: h.dispatch, limits: limitsOf(h) });
+    const sub = h.dispatch.subject("documentationSearches", "fcpi-fixture-context7");
+    const run = async (q) => context7.search(versionRequest(q), { sub, pre: h.dispatch.preflight(sub, { selection: "fixture" }), signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    const mismatch = await run("vue reactivity mismatch");
+    assert.equal(mismatch.status, "success_empty", "nothing of another version is presented as 3.5");
+    assert.match(mismatch.detail, /mismatched version left out/);
+    assert.equal(new URL(h.servers.context7.seen[0].url, "http://x").searchParams.get("version"), "3.5", "one library with a version is a strict scope");
+    const verified = await run("vue reactivity verified");
+    const scope = verified.candidates[0].documentation.scopes[0];
+    assert.deepEqual([scope.requestedVersion, scope.observedVersion, scope.status, scope.basis], ["3.5", "3.5.2", "scope_only", "provider_scope"]);
+    const unknown = await run("vue reactivity unknown");
+    const u = unknown.candidates[0].documentation.scopes[0];
+    assert.deepEqual([u.requestedVersion, u.observedVersion, u.status], ["3.5", null, "unknown"], "a requested version is never reported as observed");
+    assert.equal(unknown.candidates[0].passages[0].observedVersion, null);
+  } finally { await h.close(); }
+});
+
+test("Context7's quota and rate refusals hold only its account, keep their reservations, and never trip the breaker", async () => {
+  const rowsOf = (h) => [...h.store.rows.values()].filter((x) => x.provider === "fixture-context7");
+  for (const [mode, answer] of [["quota", { status: 402, body: { error: "quota_exceeded", message: "Monthly quota reached" } }],
+    ["rate", { status: 429, body: { error: "rate_limited", message: "slow down" }, headers: { "retry-after": "30" } }]]) {
+    const h = await harness({ handlers: { context7: () => answer } });
+    try {
+      const context7 = makeContext7({ dispatch: h.dispatch, limits: limitsOf(h) });
+      const sub = h.dispatch.subject("documentationSearches", "fcpi-fixture-context7");
+      const t0 = Date.now();
+      const o = await context7.search(docsRequest(`context7 ${mode}`), { sub, pre: h.dispatch.preflight(sub, { selection: "fixture" }), signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+      const reason = mode === "quota" ? "quota_exhausted" : "rate_limited";
+      assert.deepEqual([o.status, o.reason], ["failed", reason]);
+      const pre = h.dispatch.preflight(sub, { selection: "fixture" });
+      assert.deepEqual([pre.eligible, pre.reason], [false, reason], `${mode}: the account is held`);
+      if (mode === "rate") assert.ok(pre.retryAt >= t0 + 29000 && pre.retryAt <= Date.now() + 31000, "Retry-After sets when it may be asked again");
+      assert.equal(h.dispatch.breakerState("fixture-context7"), "closed");
+      assert.deepEqual(rowsOf(h).map((x) => x.state), ["UNCERTAIN"], `${mode}: whether the refused call counted is not documented`);
+    } finally { await h.close(); }
+  }
+});
