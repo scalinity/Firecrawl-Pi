@@ -64,7 +64,7 @@ export function makeTavily({ dispatch, limits }) {
         await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: "contract_failure", providerCode: "tavily_results_invalid" });
         return outcome({ ...base, ...timing, status: "failed", reason: "contract_failure", detail: "tavily_results_invalid", providerRequestId: requestId });
       }
-      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true });
+      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: res.startedAt });
       return outcome({ ...base, ...timing, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: data.results.length, candidates, providerRequestId: requestId,
         usage: { credits: measured ? credits : ctx.sub.card.creditsPerOperation, basis: measured ? "provider_reported" : "documented" } });
     },

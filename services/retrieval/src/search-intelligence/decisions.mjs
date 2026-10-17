@@ -169,7 +169,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
         await dispatch.report(sub, pre.epoch, { reason: "contract_failure", providerCode: `jev_${env.why}` });
         return { ok: false, reason: "contract_failure", detail: `jev_${env.why}`, usage: { microUsd: cost ?? byTokens ?? amount } };
       }
-      await dispatch.report(sub, pre.epoch, { success: true });
+      await dispatch.report(sub, pre.epoch, { success: true, dispatchedAt: res.startedAt });
       // A new concrete build starts a new semantic epoch: decisions made by another build are not reused (spec §17).
       if (concrete !== data.model) { if (concrete !== null) { epoch++; log({ event: "si_jev_build_changed", from: concrete, to: data.model }); } concrete = data.model; }
       try { await store.searchCachePut(`si.decision/v1:${sha256(JSON.stringify({ body, identity: identity(), selection }))}`, { model: data.model, answers: data.answers }, L.cacheSeconds.decision); } catch { /* optional */ }

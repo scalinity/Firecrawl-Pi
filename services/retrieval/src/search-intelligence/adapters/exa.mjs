@@ -67,7 +67,7 @@ export function makeExa({ dispatch, limits }) {
         await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: "contract_failure", providerCode: "exa_results_invalid" });
         return outcome({ ...base, ...timing, status: "failed", reason: "contract_failure", detail: "exa_results_invalid", providerRequestId: requestId });
       }
-      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true });
+      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: res.startedAt });
       return outcome({ ...base, ...timing, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: data.results.length, candidates, providerRequestId: requestId,
         usage: measured ? { microUsd: Math.ceil(total * 1e6), basis: "provider_reported" } : { microUsd: ctx.sub.card.microUsdPerOperation, basis: "estimated" } });
     },

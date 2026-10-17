@@ -152,7 +152,7 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
           await dispatch.report(ctx.sub, ctx.pre.epoch, { reason, providerCode: parsed.detail, detail: parsed.detail });
           return outcome({ ...base, status: "failed", reason, detail: parsed.detail, dispatchState: "response_received" });
         }
-        await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true });
+        await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: t0 });
         const retrievedAt = new Date().toISOString();
         const requested = (request.intelligence.libraries ?? []).filter((l) => l.version);
         const candidates = (parsed.kind === "results" ? parsed.docs : []).slice(0, L.candidates.docsPerProvider).map((d, i) => ({

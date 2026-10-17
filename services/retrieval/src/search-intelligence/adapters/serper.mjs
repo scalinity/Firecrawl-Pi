@@ -48,7 +48,7 @@ export function makeSerperLane({ serper, limits, permits, availability }) {
       try {
         const results = await serper.search(normalizeQueryText(request.originalQuery), request.language, { signal: ctx.signal, timeoutMs: L.providerTimeoutsMs.serper, subject: ctx.sub.name,
           callKey: `search:${request.logicalSearchId}:serper:search:v1`, logicalId: request.logicalSearchId, deadlineAt: ctx.deadlineAt });
-        await availability.observe(provider, ctx.pre.epoch, { success: true });
+        await availability.observe(provider, ctx.pre.epoch, { success: true, dispatchedAt: startedAt });
         const candidates = results.slice(0, L.candidates.serper).map((r, i) => ({ url: r.url, title: r.title, description: r.content, rank: i + 1 }));
         return outcome({ ...base, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: results.length, candidates, queueMs, startedAt, dispatchState: "response_received", usage: { credits: 1, basis: "provider_reported" } });
       } catch (e) {

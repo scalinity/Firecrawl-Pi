@@ -47,9 +47,18 @@ export function parseBraveRateHeaders(headers, now = Date.now()) {
 // the ledger anyway), and records each transition, which the telemetry hook persists as an event.
 export function makeAvailability({ store, log = () => {}, clock = Date.now, onTransition = () => {} }) {
   let rows = new Map(), loadedAt = 0;
+  // Writes by sequence, and those still in flight: a read that started before a write cannot replace the row it wrote.
+  let writes = 0;
+  const lastWrite = new Map(), inFlight = new Map();
   const key = (provider, profile = "default") => `${provider}|${profile}`;
   async function refresh() {
-    try { rows = new Map((await store.availabilityRows()).map((r) => [key(r.provider, r.profile), r])); loadedAt = clock(); }
+    const seq = writes;
+    try {
+      const next = new Map((await store.availabilityRows()).map((r) => [key(r.provider, r.profile), r]));
+      for (const [k, r] of rows) if (inFlight.has(k) || (lastWrite.get(k) ?? 0) > seq) next.set(k, r);
+      rows = next;
+      loadedAt = clock();
+    }
     catch (e) { log({ event: "availability_read_failed", error: e.code ?? e.message }); }
     return rows;
   }
@@ -70,16 +79,23 @@ export function makeAvailability({ store, log = () => {}, clock = Date.now, onTr
   async function set(provider, next, why) {
     const prior = rows.get(key(provider));
     const row = { provider, profile: "default", ...next };
-    rows.set(key(provider), { ...prior, provider, profile: "default", state: next.state, reason: next.reason ?? null, provider_code: next.providerCode ?? null, retry_at: next.retryAt ? new Date(next.retryAt) : null,
-      retry_basis: next.retryBasis ?? "unknown", credential_epoch: next.credentialEpoch ?? null, contract_failures: next.contractFailures ?? 0 });
+    const k = key(provider);
+    rows.set(k, { ...prior, provider, profile: "default", state: next.state, reason: next.reason ?? null, provider_code: next.providerCode ?? null, retry_at: next.retryAt ? new Date(next.retryAt) : null,
+      retry_basis: next.retryBasis ?? "unknown", credential_epoch: next.credentialEpoch ?? null, contract_failures: next.contractFailures ?? 0, observed_at: new Date(clock()) });
+    lastWrite.set(k, ++writes);
+    inFlight.set(k, (inFlight.get(k) ?? 0) + 1);
     if (prior?.state !== next.state) onTransition({ provider, from: prior?.state ?? "available", to: next.state, reason: next.reason ?? why, retryAt: next.retryAt ?? null, retryBasis: next.retryBasis ?? "unknown" });
     try { await store.setAvailability({ ...row, retryAt: next.retryAt ? new Date(next.retryAt) : null }); }
     catch (e) { log({ event: "availability_write_failed", provider, error: e.code ?? e.message }); }
+    finally { const n = inFlight.get(k) - 1; if (n) inFlight.set(k, n); else inFlight.delete(k); }
   }
-  // What a dispatched call taught about the account. outcome: { reason, retryAt?, retryBasis?, providerCode? } or a success.
+  // What a dispatched call taught about the account. outcome: { reason, retryAt?, retryBasis?, providerCode? } or a success,
+  // { success: true, dispatchedAt } (ISO or ms): a call dispatched before the current refusal was observed proves nothing about it.
   async function observe(provider, epoch, result, now = clock()) {
     const prior = rows.get(key(provider));
     if (result.success) {
+      const at = result.dispatchedAt == null ? null : new Date(result.dispatchedAt).getTime();
+      if (prior?.observed_at && at !== null && new Date(prior.observed_at).getTime() > at) return;
       if (prior && (prior.state !== "available" || prior.contract_failures)) await set(provider, { state: "available", credentialEpoch: epoch, reason: "observed_success" }, "observed_success");
       return;
     }

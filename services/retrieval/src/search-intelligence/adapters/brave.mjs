@@ -80,7 +80,7 @@ export function makeBrave({ dispatch, limits }) {
         await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: "contract_failure", providerCode: "brave_results_invalid" });
         return outcome({ ...base, ...timing, status: "failed", reason: "contract_failure", detail: "brave_results_invalid", usage: { requests: 1 } });
       }
-      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true });
+      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: res.startedAt });
       return outcome({ ...base, ...timing, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: list.length, candidates,
         usage: { requests: 1, money: "unknown" }, providerRequestId: null, detail: typeof data.query.altered === "string" ? `query_altered` : null });
     },

@@ -75,7 +75,7 @@ export function makeDeepseek({ dispatch, limits, permits }) {
         await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: "contract_failure", providerCode: "deepseek_results_invalid" });
         return outcome({ ...base, ...timing, status: "failed", reason: "contract_failure", detail: "deepseek_results_invalid" });
       }
-      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true });
+      await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: res.startedAt });
       return outcome({ ...base, ...timing, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: data.results.length, candidates,
         usage: { microUsd: data.results.length ? ctx.sub.card.microUsdPerOperation : 0, basis: "documented" } });
     },

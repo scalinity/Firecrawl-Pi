@@ -114,7 +114,7 @@ export function makeContext7({ dispatch, limits }) {
       const subs = results.map((r) => ({ scope: { libraries: r.scope.libraries, version: r.scope.version }, status: r.status, reason: r.reason ?? null, detail: r.detail ?? null }));
       const ok = results.filter((r) => r.status === "ok" || r.status === "empty"), bad = results.filter((r) => r.status === "failed" || r.status === "unsupported");
       for (const r of results.filter((x) => x.status === "failed")) await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, retryAt: r.retryAt ?? null, retryBasis: r.retryAt ? "documented" : null, providerCode: r.providerCode, detail: r.detail });
-      if (ok.length) await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true });
+      if (ok.length) await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: t0 });
       const base = { provider: "context7", kind: "docs_search", startedAt: new Date(t0).toISOString(), dispatchState: results.some((r) => r.status === "ok" || r.status === "empty") ? "response_received" : "not_sent",
         suboperations: subs, auxiliaryContext: aux, usage: { requests: results.filter((r) => ["ok", "empty"].includes(r.status) || r.dispatchState === "possibly_sent").length }, detail: mismatched ? `${mismatched} passage(s) of a mismatched version left out` : null };
       if (!ok.length) {

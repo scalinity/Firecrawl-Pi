@@ -55,7 +55,7 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
   // sibling refused at a half-open breaker never returns the probe's slot.
   async function report(sub, epoch, result, { answered = true } = {}) {
     const br = breakerFor(sub.provider);
-    if (result.success) { br.success(); await availability.observe(sub.provider, epoch, { success: true }); return; }
+    if (result.success) { br.success(); await availability.observe(sub.provider, epoch, { success: true, dispatchedAt: result.dispatchedAt ?? null }); return; }
     if (answered) {
       if (["timeout", "temporarily_unavailable"].includes(result.reason)) br.failure();
       else br.neutral();

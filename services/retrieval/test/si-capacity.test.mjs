@@ -74,3 +74,32 @@ test("three identical contract failures hold the adapter; the hold ends with one
   assert.deepEqual(av.check("p", "e1"), { eligible: true, probe: false });
   assert.equal(rows.get("p").state, "available", "the cleared state is persisted");
 });
+
+test("a read that started before a refusal's write cannot replace it, nor can a write still in flight", async () => {
+  const rows = new Map();
+  let releaseWrite;
+  const writeGate = new Promise((r) => { releaseWrite = r; });
+  const store = { availabilityRows: async () => [...rows.values()], setAvailability: async (r) => { await writeGate; rows.set(r.provider, r); } };
+  const av = makeAvailability({ store });
+  const writing = av.observe("p", "e1", { reason: "quota_exhausted" });
+  // The database does not hold the refusal yet: a refresh now must keep the in-memory row.
+  await av.refresh();
+  assert.deepEqual([av.check("p", "e1").eligible, av.check("p", "e1").reason], [false, "quota_exhausted"]);
+  releaseWrite();
+  await writing;
+  await av.refresh();
+  assert.equal(av.check("p", "e1").reason, "quota_exhausted", "after the write lands, the read agrees");
+});
+
+test("a success from a call dispatched before a refusal was observed does not clear it; a later one does", async () => {
+  let now = 5_000;
+  const rows = new Map();
+  const store = { availabilityRows: async () => [...rows.values()], setAvailability: async (r) => { rows.set(r.provider, r); } };
+  const av = makeAvailability({ store, clock: () => now });
+  await av.observe("p", "e1", { reason: "rate_limited", retryAt: 60_000 });
+  now = 6_000;
+  await av.observe("p", "e1", { success: true, dispatchedAt: 4_000 });
+  assert.equal(av.check("p", "e1").reason, "rate_limited", "dispatched before the refusal: proves nothing about it");
+  await av.observe("p", "e1", { success: true, dispatchedAt: new Date(5_500).toISOString() });
+  assert.deepEqual(av.check("p", "e1"), { eligible: true, probe: false });
+});
