@@ -7,8 +7,8 @@
 //                reservation is released;
 //   sent: true   the request may have reached the provider and no answer came: the outcome is
 //                unknown and the reservation stays counted (spec §24.2).
-// timeoutMs bounds the whole exchange. idleMs, for a streamed answer, also ends one that sends nothing for that long
-// after the request is written; each chunk received restarts it.
+// timeoutMs bounds the whole exchange. idleMs, for a streamed answer, also ends one that is silent for that long: from the
+// request's creation (so a stalled connection or handshake ends unsent), then from the send and each chunk received.
 import http from "node:http";
 import https from "node:https";
 import { readFileSync } from "node:fs";
@@ -50,7 +50,7 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
     const quiet = () => {
       if (!idleMs || settled) return;
       clearTimeout(idle);
-      idle = setTimeout(() => { req.destroy(new Error("idle")); done(reject, new ProviderError("PROVIDER_UNCERTAIN", `nothing arrived for ${idleMs} ms`, { sent: true })); }, idleMs);
+      idle = setTimeout(() => { req.destroy(new Error("idle")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${written ? "nothing arrived" : "no connection"} for ${idleMs} ms`, { sent: written })); }, idleMs);
     };
     const req = mod.request({ host: target.host, port: target.port, method, path: url.pathname + url.search, agent: false, lookup: pinnedLookup(address),
       servername: target.literal ? undefined : target.host, rejectUnauthorized: true,
@@ -62,6 +62,7 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
       res.on("error", () => done(reject, new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
       res.on("aborted", () => done(reject, new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
     });
+    quiet();
     // Send only after connection/TLS and the final authorization check. Do not buffer credential-bearing
     // headers or a billable body across the handshake while a validation lease can expire.
     const send = () => {
