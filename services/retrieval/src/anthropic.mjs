@@ -65,24 +65,30 @@ export function messagesRequest({ model, effort, messages, schema, maxOutputToke
 // carries the message with its input usage, each content block arrives as a start and its deltas, message_delta carries
 // the stop reason and the usage, cumulative, and message_stop ends it. Measured 2026-10-17: input usage within about
 // 3 s, a ping every 30 s while the model thinks, and thinking text never streamed, so a stream that ends before
-// message_stop (complete: false), or with an error event, cannot be priced. Unknown event types are ignored.
+// message_stop, with an error event, or with no usage on a message_delta (message_start's output count is only a
+// placeholder) cannot be priced: complete is false. Unknown event types, and events of an unexpected shape, are ignored.
+const MAX_BLOCKS = 64;
 export function readStream(body) {
-  let message = null, complete = false, error = null;
+  let message = null, stopped = false, priced = false, error = null;
   for (const raw of String(body).split(/\r?\n\r?\n/)) {
     const data = raw.split(/\r?\n/).filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trimStart()).join("\n");
     if (!data) continue;
     let e;
     try { e = JSON.parse(data); } catch { continue; }
-    if (e?.type === "message_start" && e.message && typeof e.message === "object") message = { ...e.message, content: [] };
-    else if (e?.type === "error") error = e.error ?? { type: "error" };
+    if (!e || typeof e !== "object") continue;
+    const block = Number.isInteger(e.index) && e.index >= 0 && e.index < MAX_BLOCKS ? e.index : null;
+    if (e.type === "message_start" && e.message && typeof e.message === "object") message = { model: e.message.model, usage: e.message.usage, content: [] };
+    else if (e.type === "error") error = e.error && typeof e.error === "object" ? e.error : { type: "error" };
     else if (!message) continue;
-    else if (e.type === "content_block_start" && e.content_block) message.content[e.index] = { ...e.content_block };
-    else if (e.type === "content_block_delta" && message.content[e.index] && e.delta?.type === "text_delta") message.content[e.index].text = (message.content[e.index].text ?? "") + e.delta.text;
-    else if (e.type === "message_delta") { Object.assign(message, e.delta ?? {}); if (e.usage) message.usage = { ...message.usage, ...e.usage }; }
-    else if (e.type === "message_stop") complete = true;
+    else if (e.type === "content_block_start" && block !== null && e.content_block && typeof e.content_block === "object") message.content[block] = { type: e.content_block.type, text: e.content_block.text };
+    else if (e.type === "content_block_delta" && block !== null && message.content[block] && e.delta?.type === "text_delta" && typeof e.delta.text === "string") message.content[block].text = (message.content[block].text ?? "") + e.delta.text;
+    else if (e.type === "message_delta") {
+      for (const key of ["stop_reason", "stop_sequence", "stop_details"]) if (e.delta && key in e.delta) message[key] = e.delta[key];
+      if (e.usage && typeof e.usage === "object") { message.usage = { ...message.usage, ...e.usage }; priced = true; }
+    } else if (e.type === "message_stop") stopped = true;
   }
   if (message) message.content = message.content.filter(Boolean);
-  return { message, complete: complete && !error, error };
+  return { message, complete: stopped && priced && !error, error };
 }
 
 // An answer a model fenced as a code block, despite being told to reply with the bare object.

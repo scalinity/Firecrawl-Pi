@@ -585,7 +585,8 @@ const ANSWER = { product: "Fixture Widget", price: null, in_stock: null, feature
 // then message_delta with the stop reason and the cumulative usage, and message_stop. end: false leaves message_stop off.
 const streamOf = ({ content, usage, stop_reason, stop_details, ...head }, { end = true } = {}) => {
   const ev = (type, data) => `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
-  return [ev("message_start", { message: { ...head, content: [], stop_reason: null, usage } }),
+  // message_start's output count is a placeholder, as the API's is: only message_delta's usage is final.
+  return [ev("message_start", { message: { ...head, content: [], stop_reason: null, usage: usage && "output_tokens" in usage ? { ...usage, output_tokens: 1 } : usage } }),
     ...content.flatMap((b, index) => b.type === "text"
       ? [ev("content_block_start", { index, content_block: { type: "text", text: "" } }), ev("content_block_delta", { index, delta: { type: "text_delta", text: b.text } }), ev("content_block_stop", { index })]
       : [ev("content_block_start", { index, content_block: { ...b } }), ev("content_block_stop", { index })]),
@@ -872,7 +873,7 @@ test("Messages API: a call that outlasts its caller's wait is not cut; it settle
 test("Messages API: a stream that ends before message_stop, or with an error event, keeps its whole reservation as uncertain", async () => {
   const errorEvent = 'event: error\ndata: {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}\n\n';
   for (const [label, body, detail] of [["no message_stop", messagesBody({}, { end: false }), /before message_stop/],
-    ["an error event", messagesBody({}, { end: false }) + errorEvent, /overloaded_error/]]) {
+    ["an error event", messagesBody({}, { end: false }) + errorEvent, /overloaded_error/], ["no final usage", unpriced, /without its final usage/]]) {
     const r = await rig({ mutate: messagesApi(), handler: recording((s) => s.writeHead(200, SSE_HEADERS).end(body)) });
     try {
       const out = await r.extract(req());
@@ -883,3 +884,6 @@ test("Messages API: a stream that ends before message_stop, or with an error eve
     } finally { await r.srv.close(); }
   }
 });
+  // The final message_delta without its usage: only message_start's placeholder count is left.
+  const unpriced = messagesBody().split("\n\n").map((e) => (e.startsWith("event: message_delta") ? e.replace(/,"usage":\{[^}]*\}/, "") : e)).join("\n\n");
+  assert.ok(unpriced.includes("message_stop") && !/event: message_delta[^\n]*\n[^\n]*"usage"/.test(unpriced), "precondition: complete, but no final usage");

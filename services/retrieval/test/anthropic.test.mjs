@@ -160,3 +160,20 @@ test("a request is streamed, and a streamed answer reads back as the message a n
   assert.equal(failed.error.type, "overloaded_error");
   assert.deepEqual(readStream("").message, null);
 });
+
+test("a stream of unexpected shapes is read safely: odd indexes, null data and a delta that names other fields are ignored", () => {
+  const ev = (type, data) => `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
+  const body = ev("message_start", { message: { model: "m", content: [], usage: { input_tokens: 5, output_tokens: 1 } } }) + "data: null\n\n"
+    + ev("content_block_start", { index: "__proto__", content_block: { type: "text", text: "x" } })
+    + ev("content_block_start", { index: 1e9, content_block: { type: "text", text: "x" } })
+    + ev("content_block_start", { index: 0, content_block: { type: "text", text: "" } }) + ev("content_block_delta", { index: 0, delta: { type: "text_delta", text: "{}" } })
+    + ev("message_delta", { delta: { stop_reason: "end_turn", content: "overwritten", model: "other" }, usage: { output_tokens: 9 } }) + ev("message_stop", {});
+  const { message, complete } = readStream(body);
+  assert.equal(complete, true);
+  assert.equal(Object.getPrototypeOf(message.content), Array.prototype);
+  assert.deepEqual(message.content, [{ type: "text", text: "{}" }]);
+  assert.equal(message.model, "m", "a delta names only the stop fields");
+  assert.deepEqual(readMessages(message).counts, [5, 9, 0, 0]);
+  // Complete and stopped, but the final usage never came: not priced.
+  assert.equal(readStream(body.replace(', "usage": { "output_tokens": 9 }', "").replace(/,"usage":\{"output_tokens":9\}/, "")).complete, false);
+});

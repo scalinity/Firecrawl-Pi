@@ -187,10 +187,10 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     else try { json = JSON.parse(answer.body.toString("utf8")); } catch { /* classified below */ }
     const code = json?.error?.code ?? json?.error?.type ?? null;
     if (streamed && !streamed.complete) {
-      // The answer began and did not end (an error event, or the stream closed early): what it cost cannot be known, since
-      // thinking is billed but never streamed, so the reservation stays counted.
+      // The answer began and did not end (an error event, the stream closed early, or no final usage): what it cost cannot be
+      // known, since thinking is billed but never streamed, so the reservation stays counted.
       breaker.failure();
-      const why = streamed.error ? `an error event (${String(streamed.error.type).slice(0, 60)})` : "the stream ended before message_stop";
+      const why = streamed.error ? `an error event (${String(streamed.error.type).slice(0, 60)})` : "the stream ended before message_stop or without its final usage";
       await store.markBudgetUncertain(res.id, `streamed answer incomplete: ${why}`);
       log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: "stream_incomplete", provider_request_id: requestIdOf(answer.headers), reserved_micro_usd: amount, ms: Date.now() - started });
       throw fail("PROVIDER_UNCERTAIN", `${m.provider}'s streamed answer ended with ${why}; its reservation of ${amount} micro-USD stays counted`);
