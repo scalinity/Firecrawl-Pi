@@ -304,7 +304,11 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   function personalize(r, request, f) {
     const body = structuredClone(r.body);
     body.search.requestId = request.requestId;
-    if (f.logicalSearchId !== request.logicalSearchId) { body.search.coalesced = true; body.search.callerLogicalSearchId = request.logicalSearchId; }
+    // A caller that joined another's execution spent nothing itself: the spend is reported once, by the execution's own search.
+    if (f.logicalSearchId !== request.logicalSearchId) {
+      body.search.coalesced = true; body.search.callerLogicalSearchId = request.logicalSearchId;
+      body.search.usage = []; body.search.usageOf = f.logicalSearchId;
+    }
     if (r.aggregateHit) {
       body.search.cache = { mode: "hit", servedAt: iso(clock()), originalRetrievedAt: body.search.cache?.originalRetrievedAt ?? null, storedAt: iso(new Date(r.aggregateHit.createdAt).getTime()), expiresAt: iso(new Date(r.aggregateHit.expiresAt).getTime()) };
       for (const p of Object.values(body.search.providers)) p.fromCache = true;

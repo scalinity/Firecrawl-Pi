@@ -571,6 +571,24 @@ test("concurrent identical searches share one execution; one caller's cancellati
   } finally { await h.close(); }
 });
 
+test("a shared execution's spend is reported once: the joining caller carries none and names the search that does", async () => {
+  let release;
+  const gate = new Promise((r) => { release = r; });
+  const slow = (name) => async (q, e) => { await gate; return answers[name](q, e); };
+  const h = await harness({ handlers: Object.fromEntries(["serper", "brave", "exa", "deepseek", "tavily"].map((n) => [n, slow(n)])) });
+  try {
+    const firstReq = request({ originalQuery: "shared spend" }), joinReq = request({ originalQuery: "shared spend" });
+    const first = h.coordinator.search(firstReq, { signal: new AbortController().signal });
+    const joined = h.coordinator.search(joinReq, { signal: new AbortController().signal });
+    await new Promise((r) => setTimeout(r, 50));
+    release();
+    const [a, b] = await Promise.all([first, joined]);
+    assert.ok(a.body.search.usage.length >= 4, "the execution's own search reports what it spent");
+    assert.equal(a.body.search.usageOf, undefined);
+    assert.deepEqual([b.body.search.coalesced, b.body.search.usage, b.body.search.usageOf], [true, [], firstReq.logicalSearchId]);
+  } finally { await h.close(); }
+});
+
 test("an abandoned search is never joined: an identical search arriving as it winds down runs anew, and nothing new starts for it", async () => {
   let release;
   const gate = new Promise((r) => { release = r; });
