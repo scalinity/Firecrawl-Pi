@@ -152,6 +152,21 @@ test("each provider's wire request is the documented one", async () => {
   } finally { await h.close(); }
 });
 
+test("provider snippets become the result's passages and count toward literal relevance; a snippet equal to the description is not repeated", async () => {
+  const h = await harness({ handlers: {
+    brave: (q) => ({ status: 200, body: { query: { original: q }, web: { type: "search", results: [{ title: "Brave page", url: "https://snippets.example.org/brave", description: "general text", extra_snippets: ["the zebra quokka detail lives here"] }] } } }),
+    exa: () => ({ status: 200, body: { requestId: "r", results: [{ id: "e0", title: "Exa page", url: "https://snippets.example.org/exa", highlights: ["only highlight"] }], costDollars: { total: 0.01 } } }),
+  } });
+  try {
+    const r = await h.coordinator.search(request({ originalQuery: "zebra quokka", limit: 10 }), { signal: new AbortController().signal });
+    const row = (u) => r.body.web.find((w) => w.url === u).fcpi.search;
+    const brave = row("https://snippets.example.org/brave");
+    assert.deepEqual(brave.passages.map((p) => [p.kind, p.provider, p.text]), [["provider_snippet", "brave", "the zebra quokka detail lives here"]]);
+    assert.ok(brave.scores.literal > 0, "the query's terms are found in the snippet");
+    assert.deepEqual(row("https://snippets.example.org/exa").passages, [], "Exa's highlight is already its description");
+  } finally { await h.close(); }
+});
+
 // ---- the fan-out ----------------------------------------------------------------------------------------------------------------
 test("all five general engines are dispatched before any completes, and arrival order changes nothing", async () => {
   // Each server holds its answer until all five requests have arrived: a coordinator that awaited one before launching the next

@@ -104,6 +104,13 @@ export function buildPool(lanes, { poolMax, workingSetBytes }) {
       if (!d.best || c.rank < d.best.rank) { d.best = { rank: c.rank, provider: c.provider }; d.title = c.title ?? ""; d.description = c.description ?? ""; d.displayUrl = c.url; }
       if (!d.publication && c.publication) d.publication = { ...c.publication, provider: c.provider };
       for (const p of c.passages ?? []) if (!d.passages.some((x) => x.contentHash === p.contentHash)) d.passages.push(p);
+      // A provider's own snippets of the result (Brave's extra snippets, Exa's highlights) become its passages, so literal
+      // relevance and Jev's excerpts read them; they are the provider's text, not acquired page content.
+      for (const text of c.snippets ?? []) {
+        if (typeof text !== "string" || !text.trim() || text === c.description) continue;
+        const h = contentHash(text);
+        if (!d.passages.some((x) => x.contentHash === h)) d.passages.push({ passageId: sha256(`${c.provider}\n${c.documentId}\n${h}`).slice(0, 24), provider: c.provider, kind: "provider_snippet", text, contentHash: h });
+      }
     }
   }
   const all = [...docs.values()];
