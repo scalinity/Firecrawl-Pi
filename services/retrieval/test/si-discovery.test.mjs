@@ -669,3 +669,16 @@ test("the legacy profile is the rollback: the new route serves the accepted sear
     assert.equal(h.store.admissions, 0, "the legacy search does its own admission");
   } finally { await h.close(); }
 });
+
+test("the legacy rollback forwards a language the legacy facade accepts: es-419 as es, zh-Hant unchanged", async () => {
+  const { makeCoordinator } = await import("../src/search-intelligence/coordinator.mjs");
+  const h = await harness({ mutateBudget: (b) => { b.searching.profile = "legacy"; } });
+  const seen = [];
+  const legacy = async (url) => { seen.push(new URL(url, "http://x").searchParams.get("language")); return { status: 200, body: { results: [], unresponsive_engines: [], fcpi: { cache: "miss" } } }; };
+  const coordinator = makeCoordinator({ store: h.store, getBudget: () => h.budget, getPolicy: () => h.policy, getSelection: () => ({ search: "fixture" }), dispatch: h.dispatch, general: {}, availability: h.availability, legacy });
+  try {
+    for (const language of ["es-419", "zh-Hant", "auto"]) await coordinator.search(request({ originalQuery: "language check", language }), { signal: new AbortController().signal });
+    assert.deepEqual(seen, ["es", "zh-Hant", "auto"]);
+    for (const l of seen) assert.match(l, /^[A-Za-z-]{1,16}$/, "every forwarded tag passes the legacy facade's own check");
+  } finally { await h.close(); }
+});

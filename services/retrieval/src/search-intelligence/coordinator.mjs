@@ -315,7 +315,10 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     if (!legacy) throw new Denied("SEARCH_BACKEND_UNAVAILABLE", "the legacy profile is not available");
     const u = new URL("http://x/searxng/search");
     u.searchParams.set("q", request.originalQuery);
-    u.searchParams.set("language", request.language === "auto" ? "auto" : request.language);
+    // The legacy facade takes letters and hyphens, at most 16 (search.mjs); a tag it would refuse, such as es-419, keeps its
+    // primary subtag: SearXNG and Serper then search that language without the region, rather than refusing the search.
+    const language = request.language === "auto" || /^[A-Za-z-]{1,16}$/.test(request.language) ? request.language : request.language.split("-")[0];
+    u.searchParams.set("language", language);
     const r = await legacy(u.pathname + u.search, signal);
     const b = r.body;
     const web = b.results.slice(0, request.limit).map((x) => ({ url: x.url, title: x.title, description: x.content }));
