@@ -41,7 +41,7 @@ export function makeDeepseek({ dispatch, limits, permits }) {
       const res = await dispatch.call({ sub: ctx.sub, pre: ctx.pre, kind: "search", callKey: `search:${request.logicalSearchId}:deepseek:search:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
         requestHash: sha256(`${DEEPSEEK_CONTRACT}\n${buf}`), amount: ctx.sub.card.microUsdPerOperation, signal: ctx.signal, deadlineAt: ctx.deadlineAt, timeoutMs: L.providerTimeoutsMs.deepseek,
         maxBytes: L.responseBytes.deepseek, rate: permits.deepseek, http: { path: "/v1/tools/search", headers: { "content-type": "application/json", accept: "application/json", authorization: `Bearer ${ctx.pre.key}` }, body: buf } });
-      if (!res.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: res.reason }); return outcome({ ...base, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, queueMs: res.queueMs }); }
+      if (!res.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: res.reason }, { answered: false }); return outcome({ ...base, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, queueMs: res.queueMs }); }
       const { response, close } = res, timing = { queueMs: res.queueMs, startedAt: res.startedAt, dispatchState: "response_received" };
       const data = parseJson(response.body);
       if (response.status !== 200) {

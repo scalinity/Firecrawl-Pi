@@ -48,12 +48,16 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     return { eligible: true, key, epoch, probe: avail.probe };
   }
 
-  // The verdict a call's answer gives the provider's service and account.
-  async function report(sub, epoch, result) {
+  // The verdict a call's answer gives the provider's service and account. call() has already judged the breaker for a result it
+  // returns ok:false (answered: false): reporting that result again only informs availability, so one call is one verdict and a
+  // sibling refused at a half-open breaker never returns the probe's slot.
+  async function report(sub, epoch, result, { answered = true } = {}) {
     const br = breakerFor(sub.provider);
     if (result.success) { br.success(); await availability.observe(sub.provider, epoch, { success: true }); return; }
-    if (["timeout", "temporarily_unavailable"].includes(result.reason)) br.failure();
-    else br.neutral();
+    if (answered) {
+      if (["timeout", "temporarily_unavailable"].includes(result.reason)) br.failure();
+      else br.neutral();
+    }
     if (["quota_exhausted", "rate_limited", "auth_failed", "contract_failure"].includes(result.reason)) await availability.observe(sub.provider, epoch, result);
   }
 
@@ -103,8 +107,11 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     for (const notice of r.notices ?? []) log({ event: "budget_threshold", ...notice });
     const close = closer(r.reservation, sub);
     let releasePermit = null;
+    // Not sent: an unreachable service (DNS or connection failure) is a genuine transport failure (spec §15); a capacity wait,
+    // the caller's cancellation, a deadline that passed and a local refusal before send (NOT_READY, an SSRF denial, the paid
+    // lease) judge nothing about the provider.
     const unsentFailure = async (e) => {
-      br.neutral();
+      if (e.code === "PROVIDER_UNREACHABLE") br.failure(); else br.neutral();
       await close.release(`not sent: ${e.code ?? e.message}`);
       return { ok: false, reason: reasonOfTransport(e), detail: e.code ?? "not_sent", dispatchState: "not_sent", queueMs: Date.now() - t0 };
     };

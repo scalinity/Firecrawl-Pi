@@ -73,10 +73,18 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   const servers = {};
   for (const n of Object.keys(HOSTS)) servers[n] = await providerServer(n, handlers[n] ?? null);
   const sx = searxng ? await serve(searxng) : null;
-  const budget = budgetFor({ mutate: (b) => {
-    for (const [n, s] of Object.entries(servers)) b.providers[`fixture-${n}`].baseUrl = `http://${HOSTS[n]}:${s.port}`;
-    mutateBudget(b);
-  } });
+  let budget;
+  try {
+    budget = budgetFor({ mutate: (b) => {
+      for (const [n, s] of Object.entries(servers)) b.providers[`fixture-${n}`].baseUrl = `http://${HOSTS[n]}:${s.port}`;
+      mutateBudget(b);
+    } });
+  } catch (e) {
+    // A setup failure fails its test; the servers already listening must not keep the process alive.
+    for (const s of Object.values(servers)) await s.close();
+    await sx?.close();
+    throw e;
+  }
   const policy = { ...policyFor(Object.fromEntries(Object.entries(servers).map(([n, s]) => [HOSTS[n], s.port]))), search: structuredClone(egress.search) };
   policy.search.perHour = perHour;
   mutatePolicy(policy);

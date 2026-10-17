@@ -30,7 +30,7 @@ export function makeExa({ dispatch, limits }) {
       const res = await dispatch.call({ sub: ctx.sub, pre: ctx.pre, kind: "search", callKey: `search:${request.logicalSearchId}:exa:search:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
         requestHash: sha256(`${EXA_CONTRACT}\n${buf}`), amount: ctx.sub.card.microUsdPerOperation, signal: ctx.signal, deadlineAt: ctx.deadlineAt, timeoutMs: L.providerTimeoutsMs.exa, maxBytes: L.responseBytes.exa,
         http: { path: "/search", headers: { "content-type": "application/json", accept: "application/json", "x-api-key": ctx.pre.key }, body: buf } });
-      if (!res.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: res.reason }); return outcome({ ...base, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, queueMs: res.queueMs }); }
+      if (!res.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: res.reason }, { answered: false }); return outcome({ ...base, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, queueMs: res.queueMs }); }
       const { response, close } = res, timing = { queueMs: res.queueMs, startedAt: res.startedAt, dispatchState: "response_received" };
       const data = parseJson(response.body);
       const requestId = str(data?.requestId, 128, null) ?? str(response.headers?.["x-request-id"], 128, null);

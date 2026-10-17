@@ -245,6 +245,56 @@ test("a rate limit with Retry-After cools the provider down until that time; tra
     assert.equal(row.retry_basis, "documented");
     assert.equal(h.dispatch.breakerState("fixture-exa"), "closed");
     assert.equal(h.dispatch.breakerState("fixture-deepseek"), "open", "three cut connections in a minute open DeepSeek's breaker");
+    assert.equal(h.servers.deepseek.seen.length, 3, "each cut connection counts once: the breaker opens on the third, not the second");
+  } finally { await h.close(); }
+});
+
+test("one failed call is one breaker verdict: two transport failures leave the breaker closed", async () => {
+  const h = await harness({ handlers: { deepseek: () => "destroy" } });
+  try {
+    for (let i = 0; i < 2; i++) await h.coordinator.search(request({ originalQuery: `two failures ${i}` }), { signal: new AbortController().signal });
+    assert.equal(h.servers.deepseek.seen.length, 2);
+    assert.equal(h.dispatch.breakerState("fixture-deepseek"), "closed");
+  } finally { await h.close(); }
+});
+
+test("a half-open breaker admits one probe while siblings are refused, and the probe's failure reopens it", async () => {
+  let probeGate = null;
+  const h = await harness({ mutateBudget: (b) => { b.breaker = { ...b.breaker, failures: 1, openMs: 1000 }; },
+    handlers: { exa: async () => { if (probeGate) await probeGate; return "destroy"; } } });
+  try {
+    await h.coordinator.search(request({ originalQuery: "open it" }), { signal: new AbortController().signal });
+    assert.equal(h.dispatch.breakerState("fixture-exa"), "open");
+    await new Promise((r) => setTimeout(r, 1050));
+    assert.equal(h.dispatch.breakerState("fixture-exa"), "half_open");
+    let release;
+    probeGate = new Promise((r) => { release = r; });
+    const probe = h.coordinator.search(request({ originalQuery: "probe" }), { signal: new AbortController().signal });
+    await new Promise((r) => setTimeout(r, 30));
+    // Siblings arrive one after another while the probe is in flight: each is refused at the breaker, and a refused sibling's
+    // report never returns the probe's slot (were it returned, the second sibling would be admitted as a second probe).
+    const siblings = [];
+    for (const i of [1, 2]) siblings.push(await h.coordinator.search(request({ originalQuery: `sibling ${i}` }), { signal: new AbortController().signal }));
+    for (const s of siblings) assert.equal(s.body.search.providers.exa.reason, "breaker_open");
+    assert.equal(h.servers.exa.seen.length, 2, "the opening failure and one probe: no second probe went out");
+    release();
+    await probe;
+    assert.equal(h.dispatch.breakerState("fixture-exa"), "open", "the failed probe reopens the breaker");
+  } finally { await h.close(); }
+});
+
+test("a local refusal before send judges no provider: the metered breakers stay closed", async () => {
+  const h = await harness({ mutatePolicy: (p) => { delete p.localCidrs; } });
+  try {
+    for (let i = 0; i < 3; i++) await h.coordinator.search(request({ originalQuery: `not ready ${i}` }), { signal: new AbortController().signal }).catch(() => null);
+    // The control: each metered lane reached its reservation and was refused at the transport, before send.
+    const metered = [...h.store.rows.values()].filter((r) => r.provider !== "fixture-serper");
+    assert.equal(metered.length, 12, "four metered lanes in each of three searches reserved");
+    for (const r of metered) assert.deepEqual([r.state, r.detail], ["RELEASED", "not sent: NOT_READY"]);
+    for (const n of ["brave", "exa", "deepseek", "tavily"]) {
+      assert.equal(h.servers[n].seen.length, 0, `${n} was never sent`);
+      assert.equal(h.dispatch.breakerState(`fixture-${n}`), "closed", n);
+    }
   } finally { await h.close(); }
 });
 

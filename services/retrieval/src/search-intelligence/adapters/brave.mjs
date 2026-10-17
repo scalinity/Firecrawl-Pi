@@ -44,7 +44,7 @@ export function makeBrave({ dispatch, limits }) {
       const res = await dispatch.call({ sub: ctx.sub, pre: ctx.pre, kind: "search", callKey: `search:${request.logicalSearchId}:brave:search:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
         requestHash: sha256(`${BRAVE_CONTRACT}\n${path}`), amount: 1, signal: ctx.signal, deadlineAt: ctx.deadlineAt, timeoutMs: L.providerTimeoutsMs.brave, maxBytes: L.responseBytes.brave,
         http: { method: "GET", path, headers: { accept: "application/json", "x-subscription-token": ctx.pre.key } } });
-      if (!res.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: res.reason }); return outcome({ ...base, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, queueMs: res.queueMs }); }
+      if (!res.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: res.reason }, { answered: false }); return outcome({ ...base, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, queueMs: res.queueMs }); }
       const { response, close } = res, timing = { queueMs: res.queueMs, startedAt: res.startedAt, dispatchState: "response_received" };
       const data = parseJson(response.body);
       if (response.status !== 200) {
