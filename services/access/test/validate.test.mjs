@@ -133,14 +133,14 @@ test("extraction: explicit URLs only, at most ten, a schema required; discovery 
   refused(() => validateBody("extract", { urls: ["https://a.example/"], schema: S, prompt: "x".repeat(4001) }, M), "BAD_REQUEST");
 });
 
-test("json model selection preserves defaults and accepts only the complete Sol/xhigh pair", () => {
+test("json model selection preserves defaults and accepts only the complete Opus/high pair", () => {
   const json = { type: "json", schema: { type: "object", properties: { answer: { type: "string" } } }, prompt: "Read the page" };
   const scrape = { url: "https://example.com", formats: ["markdown", json] };
   const ordinary = validateBody("scrape", scrape, M).body;
   assert.deepEqual(ordinary.formats[1], json);
   assert.equal(Object.hasOwn(ordinary.formats[1], "model"), false);
   assert.equal(Object.hasOwn(ordinary.formats[1], "reasoningEffort"), false);
-  const selected = { ...json, model: "gpt-6.1-sol", reasoningEffort: "xhigh" };
+  const selected = { ...json, model: "claude-opus-5-5", reasoningEffort: "high" };
   const accepted = validateBody("scrape", { ...scrape, formats: ["markdown", selected] }, M).body;
   assert.deepEqual(accepted.formats[1], selected);
   assert.notEqual(requestHash("scrape", accepted), requestHash("scrape", ordinary), "selected model work cannot reuse a default-model cache identity");
@@ -150,14 +150,14 @@ test("json model selection preserves defaults and accepts only the complete Sol/
 test("json rejects half-specified or unsupported model choices before a normalized acquisition body exists", () => {
   const format = { type: "json", schema: { type: "object" } };
   const body = options => ({ url: "https://example.com", formats: [{ ...format, ...options }] });
-  for (const options of [{ model: "gpt-6.1-sol" }, { reasoningEffort: "xhigh" }]) {
+  for (const options of [{ model: "claude-opus-5-5" }, { reasoningEffort: "high" }]) {
     refused(() => validateBody("scrape", body(options), M), "BAD_REQUEST", /must be supplied together/);
   }
   for (const options of [
-    { model: "unknown-model", reasoningEffort: "xhigh" },
-    { model: "gpt-6-luna", reasoningEffort: "xhigh" },
-    { model: "gpt-6.1-sol", reasoningEffort: "low" },
-    { model: "gpt-6.1-sol", reasoningEffort: null },
-    { model: null, reasoningEffort: "xhigh" },
+    { model: "unknown-model", reasoningEffort: "high" },
+    { model: "claude-haiku-5-5", reasoningEffort: "high" },
+    { model: "claude-opus-5-5", reasoningEffort: "low" },
+    { model: "claude-opus-5-5", reasoningEffort: null },
+    { model: null, reasoningEffort: "high" },
   ]) refused(() => validateBody("scrape", body(options), M), "UNSUPPORTED_OPTION", /may only be/);
 });

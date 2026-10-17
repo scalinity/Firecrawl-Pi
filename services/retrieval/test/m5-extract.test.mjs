@@ -60,7 +60,7 @@ test("malformed HTTP 200 model answers settle conservatively and exhaust only th
   }
 });
 
-test("Luna request parameters and cache-write usage stay inside the reservation", async () => {
+test("chat-completions request parameters and cache-write usage stay inside the reservation", async () => {
   let sent;
   const r = await rig({ mutate: (b) => {
     b.models["fcpi-fixture-model"].reasoningEffort = "none";
@@ -147,10 +147,11 @@ test("a provider returning another model is accounted but never accepted or repa
   } finally { await r.srv.close(); }
 });
 
-test("Sol extraction cannot claim its requested identity when the provider omits the model", async () => {
+test("a reasoning-model extraction cannot claim its requested identity when the provider omits the model", async () => {
   let calls = 0;
   const r = await rig({ mutate: b => {
-    b.models["gpt-6.1-sol"] = { ...b.models["fcpi-fixture-model"], reasoningEffort: "xhigh" };
+    b.models["fcpi-fixture-reasoner"] = { ...b.models["fcpi-fixture-model"], reasoningEffort: "xhigh" };
+    b.rateCards.push({ ...b.rateCards.find(c => c.subject === "fcpi-fixture-model"), id: "fixture/fcpi-fixture-reasoner@2026-09-26", subject: "fcpi-fixture-reasoner" });
   }, handler: async (q, s) => {
     for await (const _ of q) { /* drain */ }
     calls++;
@@ -158,11 +159,11 @@ test("Sol extraction cannot claim its requested identity when the provider omits
       usage: { prompt_tokens: 100, completion_tokens: 20 } }));
   } });
   try {
-    const out = await r.extract(req({ model: "gpt-6.1-sol", reasoningEffort: "xhigh" }));
+    const out = await r.extract(req({ model: "fcpi-fixture-reasoner", reasoningEffort: "xhigh" }));
     assert.equal(out.ok, false);
     assert.equal(out.failure.class, "MODEL_IDENTITY_UNVERIFIED");
     assert.equal(out.model, null);
-    assert.equal(out.requestedModel, "gpt-6.1-sol");
+    assert.equal(out.requestedModel, "fcpi-fixture-reasoner");
     assert.equal(calls, 1);
   } finally { await r.srv.close(); }
 });
@@ -255,7 +256,7 @@ test("a model-specific request timeout extends only that model's provider wait",
   }, handler: async (q, s) => {
     for await (const _ of q) { /* drain */ }
     await new Promise(resolve => setTimeout(resolve, 1200));
-    s.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ choices: [{ message: { content: JSON.stringify({ product: "Fixture Widget", price: null, in_stock: null, feature: null }) }, finish_reason: "stop" }],
+    s.writeHead(200, { "content-type": "application/json" }).end(JSON.stringify({ model: "fcpi-fixture-model", choices: [{ message: { content: JSON.stringify({ product: "Fixture Widget", price: null, in_stock: null, feature: null }) }, finish_reason: "stop" }],
       usage: { prompt_tokens: 100, completion_tokens: 20 } }));
   } });
   try {
@@ -304,7 +305,8 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
     const cases = [
       [{ model: "gpt-4o" }, "MODEL_NOT_ALLOWED"],
       [{ model: "fcpi-fixture-stale" }, "RATE_CARD_MISSING"],
-      [{ model: "gpt-6-luna" }, "PAID_DISPATCH_DISABLED"],
+      [{ model: "claude-haiku-5-5" }, "PAID_DISPATCH_DISABLED"],
+      [{ model: "claude-opus-5-5", reasoningEffort: "high" }, "PAID_DISPATCH_DISABLED"],
     ];
     for (const [over, cls] of cases) {
       const out = await r.extract(req(over));
@@ -316,14 +318,23 @@ test("refusals before any spend: unknown model, stale rate card, paid dispatch o
   } finally { await r.srv.close(); }
   const p = await rig({ paidDispatch: true });
   try {
-    const out = await p.extract(req({ model: "gpt-6-luna" }));
+    const out = await p.extract(req({ model: "claude-haiku-5-5" }));
     assert.equal(out.failure.class, "BLOCKED_CREDENTIAL");
   } finally { await p.srv.close(); }
+  // Each Anthropic key unlocks only its own model: the Agent's key cannot run extraction, nor the other way round.
+  for (const [model, creds] of [["claude-haiku-5-5", { agent_anthropic_api_key: "sk-ant-test-not-a-real-key-000000" }], ["claude-opus-5-5", { anthropic_api_key: "sk-ant-test-not-a-real-key-000000" }]]) {
+    const w = await rig({ paidDispatch: true, creds });
+    try {
+      const out = await w.extract(req({ model, ...(model === "claude-opus-5-5" ? { reasoningEffort: "high" } : {}) }));
+      assert.equal(out.failure.class, "BLOCKED_CREDENTIAL", model);
+      assert.equal(w.store.rows.size, 0);
+    } finally { await w.srv.close(); }
+  }
   // With paid dispatch on and a credential present, the zero cap still refuses before any request leaves.
-  const z = await rig({ paidDispatch: true, creds: { openai_api_key: "sk-test-not-a-real-key-0000000000" },
+  const z = await rig({ paidDispatch: true, creds: { anthropic_api_key: "sk-ant-test-not-a-real-key-000000" },
     mutate: (b) => { b.categories.llm.caps = { day: 0, month: 0 }; } });
   try {
-    const out = await z.extract(req({ model: "gpt-6-luna" }));
+    const out = await z.extract(req({ model: "claude-haiku-5-5" }));
     assert.equal(out.failure.class, "BUDGET_EXHAUSTED");
     assert.match(out.failure.detail, /llm day budget has 0 of 0/);
     assert.equal(z.store.rows.size, 0);
@@ -512,4 +523,149 @@ test("schemas beyond the supported subset are refused before any request", async
     ]) await assert.rejects(r.extract(req({ schema })), (e) => e.failureClass === cls);
     assert.equal(r.calls(), 0);
   } finally { await r.srv.close(); }
+});
+
+// ---- the Messages API (src/anthropic.mjs) through the same adapter ---------------------------------------
+// The fixture model switched to the Messages API's shape: an origin base URL, no chat-only settings, and an
+// effort stated on every model that uses it.
+const messagesApi = (efforts = {}) => (b) => {
+  const p = b.providers["fixture-model"];
+  p.api = "anthropic-messages"; p.baseUrl = p.baseUrl.replace(/\/v1$/, ""); delete p.maxTokensParam; delete p.store;
+  for (const name of ["fcpi-fixture-model", "fcpi-fixture-race", "fcpi-fixture-stale"]) b.models[name].reasoningEffort = efforts[name] ?? "none";
+};
+const ANSWER = { product: "Fixture Widget", price: null, in_stock: null, feature: null };
+const messagesBody = (over = {}) => JSON.stringify({ id: "msg_fixture", type: "message", role: "assistant", model: "fcpi-fixture-model", stop_reason: "end_turn",
+  content: [{ type: "thinking", thinking: "", signature: "sig" }, { type: "text", text: JSON.stringify(ANSWER) }],
+  usage: { input_tokens: 60, cache_creation_input_tokens: 30, cache_read_input_tokens: 10, output_tokens: 20 }, ...over });
+const JSON_HEADERS = { "content-type": "application/json" };
+const answerWith = (over) => (s) => s.writeHead(200, JSON_HEADERS).end(messagesBody(over));
+// Records what the adapter sent, then lets the test reply.
+const recording = (reply, seen = {}) => async (q, s) => {
+  const chunks = []; for await (const c of q) chunks.push(c);
+  Object.assign(seen, { url: q.url, headers: q.headers, sent: JSON.parse(Buffer.concat(chunks)), calls: (seen.calls ?? 0) + 1 });
+  reply(s);
+};
+
+test("Messages API request: path, key header, top-level system, thinking off, no sampling, cached usage inside the reservation", async () => {
+  const seen = {};
+  const r = await rig({ paidDispatch: true, creds: { anthropic_api_key: "sk-ant-test-not-a-real-key-000000" },
+    mutate: (b) => { messagesApi()(b); Object.assign(b.rateCards.find((c) => c.subject === "fcpi-fixture-model"), { inputPerMTok: 100000, cachedInputPerMTok: 10000, cacheWritePerMTok: 125000, outputPerMTok: 500000 }); },
+    handler: recording(answerWith(), seen) });
+  try {
+    Object.assign(r.budget.providers["fixture-model"], { paid: true, credential: "anthropic_api_key" });
+    r.budget.paidTotal.caps.day = 1000000;
+    const out = await r.extract(req());
+    assert.equal(out.ok, true);
+    assert.equal(out.model, "fcpi-fixture-model");
+    assert.equal(seen.url, "/v1/messages");
+    assert.equal(seen.headers["x-api-key"], "sk-ant-test-not-a-real-key-000000");
+    assert.equal(seen.headers.authorization, undefined, "the chat API\x27s bearer header is not sent");
+    assert.equal(seen.headers["anthropic-version"], "2023-06-01");
+    const { sent } = seen;
+    assert.equal(sent.max_tokens, 4000);
+    assert.match(sent.system, /^You extract structured data/);
+    assert.deepEqual(sent.messages.map((m) => m.role), ["user"]);
+    assert.deepEqual(sent.thinking, { type: "disabled" });
+    for (const key of ["temperature", "top_p", "top_k", "n", "store", "response_format", "reasoning_effort"]) assert.equal(Object.hasOwn(sent, key), false, key);
+    assert.deepEqual(Object.keys(sent.output_config), ["format"]);
+    assert.equal(sent.output_config.format.type, "json_schema");
+    assert.equal(sent.output_config.format.schema.additionalProperties, false);
+    const row = [...r.store.rows.values()][0];
+    assert.deepEqual(row.usage, { promptTokens: 100, completionTokens: 20, cachedTokens: 10, cacheWriteTokens: 30 }, "input_tokens excludes the cached tokens that the adapter\x27s prompt count includes");
+    assert.equal(row.actual, 20);
+    assert.ok(row.reserved >= row.actual);
+    assert.equal(r.logs.find((l) => l.event === "model_call" && l.outcome === "answered").grammar, "schema");
+  } finally { await r.srv.close(); }
+});
+
+test("Messages API at high effort sends the effort and the model\x27s own output cap, and never a thinking switch", async () => {
+  const seen = {};
+  const r = await rig({ mutate: (b) => { messagesApi({ "fcpi-fixture-model": "high" })(b); Object.assign(b.models["fcpi-fixture-model"], { maxOutputTokens: 16000, requestTimeoutMs: 90000 }); },
+    handler: recording(answerWith(), seen) });
+  try {
+    const out = await r.extract(req({ reasoningEffort: "high" }));
+    assert.equal(out.ok, true);
+    assert.equal(out.reasoningEffort, "high");
+    assert.equal(seen.sent.output_config.effort, "high");
+    assert.equal(seen.sent.output_config.format.type, "json_schema");
+    assert.equal(Object.hasOwn(seen.sent, "thinking"), false, "a model that always thinks is never sent a thinking switch");
+    assert.equal(seen.sent.max_tokens, 16000);
+    assert.ok([...r.store.rows.values()][0].reserved >= 16000 * 1600000 / 1e6);
+  } finally { await r.srv.close(); }
+});
+
+test("Messages API: a reasoning model must report its identity, and a different identity is refused", async () => {
+  for (const [over, cls] of [[{ model: undefined }, "MODEL_IDENTITY_UNVERIFIED"], [{ model: "claude-something-else" }, "MODEL_MISMATCH"]]) {
+    const r = await rig({ mutate: messagesApi({ "fcpi-fixture-model": "high" }), handler: recording(answerWith(over)) });
+    try {
+      const out = await r.extract(req({ reasoningEffort: "high" }));
+      assert.equal(out.ok, false);
+      assert.equal(out.failure.class, cls);
+      assert.deepEqual(r.store.states(), ["SETTLED"], "the answered call is billed and kept");
+    } finally { await r.srv.close(); }
+  }
+});
+
+test("Messages API: a refusal and a token-cap stop are settled calls with their own failure class", async () => {
+  for (const [over, cls, detail] of [
+    [{ stop_reason: "refusal", stop_details: { type: "refusal", category: "cyber", explanation: null }, content: [] }, "EXTRACTION_REFUSED", /cyber/],
+    [{ stop_reason: "max_tokens", content: [{ type: "text", text: "{\"product\":" }] }, "EXTRACTION_OUTPUT_LIMIT", /4000-token output cap/],
+  ]) {
+    const seen = {};
+    const r = await rig({ mutate: messagesApi(), handler: recording(answerWith(over), seen) });
+    try {
+      const out = await r.extract(req());
+      assert.equal(out.failure.class, cls);
+      assert.match(out.failure.detail, detail);
+      assert.equal(seen.calls, 1, "neither is repaired");
+      assert.deepEqual(r.store.states(), ["SETTLED"]);
+    } finally { await r.srv.close(); }
+  }
+});
+
+test("Messages API failures are classified: a refused request is released, a proxy 502 keeps its reservation", async () => {
+  const error = (type, message) => ({ type: "error", error: { type, message } });
+  for (const [status, body, cls, state, retryable] of [
+    [401, error("authentication_error", "invalid x-api-key"), "PROVIDER_AUTH_FAILED", "RELEASED", false],
+    [402, error("billing_error", "Payment required"), "PROVIDER_BILLING", "RELEASED", false],
+    [400, error("invalid_request_error", "Your credit balance is too low to access the Anthropic API."), "PROVIDER_BILLING", "RELEASED", false],
+    [429, error("rate_limit_error", "Number of request tokens has exceeded your rate limit"), "PROVIDER_RATE_LIMITED", "RELEASED", true],
+    [529, error("overloaded_error", "Overloaded"), "PROVIDER_ERROR", "RELEASED", true],
+    [400, error("invalid_request_error", "Schemas contains too many parameters with union types (17 parameters with type arrays or anyOf)."), "PROVIDER_REJECTED", "RELEASED", false],
+    [502, error("api_error", "Bad gateway"), "PROVIDER_UNCERTAIN", "UNCERTAIN", false],
+  ]) {
+    const r = await rig({ mutate: messagesApi(), handler: recording((s) => s.writeHead(status, JSON_HEADERS).end(JSON.stringify(body))) });
+    try {
+      const out = await r.extract(req());
+      assert.equal(out.failure.class, cls, `${status} ${body.error.type}`);
+      assert.equal(out.failure.retryable, retryable, `${status} ${body.error.type}`);
+      assert.deepEqual(r.store.states(), [state], `${status} ${body.error.type}`);
+      if (cls === "PROVIDER_REJECTED") assert.match(out.failure.detail, /union types/, "the provider\x27s reason for refusing the request is kept");
+    } finally { await r.srv.close(); }
+  }
+});
+
+test("a schema over the grammar limit goes to the model as prompt text, and a fenced answer is still checked and accepted", async () => {
+  const names = ["product", ...Array.from({ length: 19 }, (_, i) => `field_${i}`)];
+  const wide = { type: "object", properties: Object.fromEntries(names.map((k) => [k, { type: "string" }])), required: ["product"] };
+  const answer = Object.fromEntries(names.map((k) => [k, k === "product" ? "Fixture Widget" : null]));
+  const seen = {};
+  const r = await rig({ mutate: messagesApi(), handler: recording(answerWith({ content: [{ type: "text", text: `\`\`\`json\n${JSON.stringify(answer)}\n\`\`\`` }] }), seen) });
+  try {
+    const out = await r.extract(req({ schema: wide }));
+    assert.equal(out.ok, true);
+    assert.equal(out.data.product, "Fixture Widget");
+    assert.equal(Object.hasOwn(seen.sent, "output_config"), false, "no grammar, and no effort to send at effort none");
+    assert.match(seen.sent.system, /matches this JSON Schema/);
+    assert.ok(seen.sent.system.includes("\"field_18\""), "the whole schema is in the prompt");
+    assert.equal(seen.calls, 1);
+    assert.equal(r.logs.find((l) => l.event === "model_call" && l.outcome === "answered").grammar, "none");
+  } finally { await r.srv.close(); }
+  // Unconstrained is not unchecked: an answer that breaks the schema is repaired once, then refused.
+  const bad = await rig({ mutate: messagesApi(), handler: recording(answerWith({ content: [{ type: "text", text: "{\"product\": 7}" }] })) });
+  try {
+    const out = await bad.extract(req({ schema: wide }));
+    assert.equal(out.failure.class, "EXTRACTION_INVALID_OUTPUT");
+    assert.equal(bad.store.states().length, 2, "the one repair, no more");
+  } finally { await bad.srv.close(); }
 });

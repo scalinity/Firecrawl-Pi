@@ -19,7 +19,8 @@
   "paidTotal": { "unit": "micro_usd", "caps": { "day": 1000000 } },
   "providers": {
     "serper": {"kind": "search", "baseUrl": "https://google.serper.dev", "credential": "serper_api_key", "paid": false, "api": "serper-v1"},
-    "openai": { "kind": "model", "baseUrl": "https://api.openai.com/v1", "credential": "openai_api_key", "paid": true, "maxTokensParam": "max_completion_tokens", "store": false },
+    "anthropic": { "kind": "model", "baseUrl": "https://api.anthropic.com", "credential": "anthropic_api_key", "paid": true, "api": "anthropic-messages" },
+    "anthropic-agent": { "kind": "model", "baseUrl": "https://api.anthropic.com", "credential": "agent_anthropic_api_key", "paid": true, "api": "anthropic-messages" },
     "fixture-model": { "kind": "model", "baseUrl": "http://model.fixture.fcpi.test:8080/v1", "credential": null, "paid": false, "maxTokensParam": "max_completion_tokens", "store": false },
     "llamaparse": { "kind": "parser", "baseUrl": "https://api.cloud.llamaindex.ai", "credential": "llamaparse_api_key", "paid": true },
     "fixture-parser": { "kind": "parser", "baseUrl": "http://parser.fixture.fcpi.test:8080", "credential": null, "paid": false },
@@ -33,8 +34,8 @@
   "searches": {"serper-google": {"provider": "serper", "category": "serper_trial"}},
   "searching": {"defaultSearch": "serper-google", "allocationCredits": 2443, "requestTimeoutMs": 7000, "maxResponseBytes": 1048576},
   "models": {
-    "gpt-6-luna": { "provider": "openai", "category": "llm", "reasoningEffort": "none" },
-    "gpt-6.1-sol": { "provider": "openai", "category": "llm", "reasoningEffort": "xhigh", "maxOutputTokens": 16000, "requestTimeoutMs": 90000 },
+    "claude-haiku-5-5": { "provider": "anthropic", "category": "llm", "reasoningEffort": "none" },
+    "claude-opus-5-5": { "provider": "anthropic-agent", "category": "llm", "reasoningEffort": "high", "maxOutputTokens": 16000, "requestTimeoutMs": 90000 },
     "fcpi-fixture-model": { "provider": "fixture-model", "category": "fixture" },
     "fcpi-fixture-race": { "provider": "fixture-model", "category": "fixture_race" },
     "fcpi-fixture-stale": { "provider": "fixture-model", "category": "fixture" }
@@ -55,12 +56,12 @@
   },
   "rateCards": [
     {"id": "serper/trial-search@2026-10-15", "subject": "serper-google", "effectiveFrom": "2026-10-15", "effectiveTo": null, "creditsPerSearch": 1, "source": "https://serper.dev: existing trial credits; POST /search, num=10, one credit. Allocation fixed at the 2443-credit account balance observed 2026-10-15; no purchases or reload."},
-    { "id": "openai/gpt-6.1-sol@2026-10-15", "subject": "gpt-6.1-sol", "effectiveFrom": "2026-10-15", "effectiveTo": null,
-      "inputPerMTok": 2000000, "cachedInputPerMTok": 100000, "cacheWritePerMTok": 2500000, "outputPerMTok": 10000000,
-      "source": "https://developers.openai.com/api/docs/pricing and /api/docs/models/gpt-6.1-sol, observed 2026-10-15: Standard, below 272K context; implicit cache writes disabled" },
-    { "id": "openai/gpt-6-luna@2026-10-02", "subject": "gpt-6-luna", "effectiveFrom": "2026-10-02", "effectiveTo": null,
+    { "id": "anthropic/claude-opus-5-5@2026-10-17", "subject": "claude-opus-5-5", "effectiveFrom": "2026-10-17", "effectiveTo": null,
+      "inputPerMTok": 4000000, "cachedInputPerMTok": 200000, "cacheWritePerMTok": 5000000, "outputPerMTok": 20000000,
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing, observed 2026-10-17: base input $4, cache hit $0.20, 5-minute cache write $5, output $20 per MTok; no cache_control is sent, so nothing is written to the cache" },
+    { "id": "anthropic/claude-haiku-5-5@2026-10-17", "subject": "claude-haiku-5-5", "effectiveFrom": "2026-10-17", "effectiveTo": null,
       "inputPerMTok": 100000, "cachedInputPerMTok": 10000, "cacheWritePerMTok": 125000, "outputPerMTok": 500000,
-      "source": "https://developers.openai.com/api/docs/pricing and /api/docs/models/gpt-6-luna, observed 2026-10-02: Standard, below 272K context; implicit cache writes disabled" },
+      "source": "https://platform.claude.com/docs/en/about-claude/pricing, observed 2026-10-17: the rate card for prompts up to 100,000 tokens (input $0.10, cache hit $0.01, 5-minute cache write $0.125, output $0.50 per MTok); extraction input is capped at 32,000 estimated tokens per call, so the higher rate card for longer prompts is not reached" },
     { "id": "fixture/fcpi-fixture-model@2026-09-26", "subject": "fcpi-fixture-model", "effectiveFrom": "2026-09-26", "effectiveTo": null,
       "inputPerMTok": 400000, "cachedInputPerMTok": 100000, "outputPerMTok": 1600000, "source": "fixture: GPT-4.1 Mini's prices, no money" },
     { "id": "fixture/fcpi-fixture-race@2026-09-26", "subject": "fcpi-fixture-race", "effectiveFrom": "2026-09-26", "effectiveTo": null,
@@ -88,7 +89,7 @@
       "microUsdPerHttpRequest": 1270, "microUsdPerBrowserRequest": 16080, "billing": "successful_response_at_highest_tier", "source": "fixture: Zyte's tier-5 prices against a cap with room for one browser request, no money" }
   ],
   "extraction": {
-    "defaultModel": "gpt-6-luna",
+    "defaultModel": "claude-haiku-5-5",
     "maxInputTokens": 32000,
     "maxOutputTokens": 4000,
     "maxRepairs": 1,

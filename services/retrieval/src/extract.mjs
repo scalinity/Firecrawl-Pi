@@ -1,6 +1,6 @@
 // Structured extraction (FIRECRAWL_PI_SPEC.md §14): the budgeted model adapter and the extraction engine
-// on top of it. No model runs on the Pi; calls go to an OpenAI-compatible chat-completions API that the
-// budget policy lists.
+// on top of it. No model runs on the Pi; calls go to the chat-completions or Anthropic Messages API of a
+// provider that the budget policy lists.
 //
 // The adapter, for each call: the model must be listed (MODEL_NOT_ALLOWED), have a rate card in effect
 // (RATE_CARD_MISSING), be unpaid or have paid dispatch enabled (PAID_DISPATCH_DISABLED), have its
@@ -19,6 +19,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { rateCardFor, maxModelCost, modelCost, estimateTokens, periodStarts, Breaker, paidDispatchActive } from "./budget.mjs";
 import { checkSchema, toStrict, validate, missingRequired, SchemaError } from "./jsonschema.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
+import { messagesRequest, messagesHeaders, readMessages } from "./anthropic.mjs";
 
 export class ExtractionFailure extends Error {
   constructor(failureClass, detail, { retryable = false, retryAfter = null } = {}) {
@@ -64,6 +65,15 @@ export function makeGate() {
   };
 }
 
+// The chat-completions answer in the shape the adapter settles (anthropic.mjs reads the Messages API's).
+function readChat(json) {
+  const msg = json?.choices?.[0]?.message ?? {};
+  const u = json?.usage;
+  return { resolvedModel: typeof json?.model === "string" ? json.model : null, content: typeof msg.content === "string" ? msg.content : null, refusal: msg.refusal ?? null,
+    finishReason: json?.choices?.[0]?.finish_reason ?? null,
+    counts: [u?.prompt_tokens, u?.completion_tokens, u?.prompt_tokens_details?.cached_tokens ?? 0, u?.prompt_tokens_details?.cache_write_tokens ?? 0] };
+}
+
 export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir, getPolicy, resolvePublic, lookupFixture, log, gate = makeGate() }) {
   const breakers = new Map();
   const breakerOf = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
@@ -93,11 +103,13 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     const probe = breaker.state() === "half_open";
     if (!breaker.admit()) throw fail("PROVIDER_UNAVAILABLE", `provider ${m.provider} failed repeatedly; its breaker is open`, { retryable: true, retryAfter: breaker.retryAfterS() });
     Object.assign(hold, { breaker, probe });
-    const body = { model, messages, ...(m.reasoningEffort === "xhigh" ? {} : { temperature: 0 }), n: 1, response_format: { type: "json_schema", json_schema: { name: "extraction", strict: true, schema } },
-      [prov.maxTokensParam]: maxOutputTokens, ...(prov.store === false ? { store: false } : {}),
-      // Selected model settings stay policy-owned; cache writes are explicit for either effort.
-      ...(m.reasoningEffort ? { reasoning_effort: m.reasoningEffort, prompt_cache_options: { mode: "explicit" }, service_tier: "default" } : {}) };
-    const payload = Buffer.from(JSON.stringify(body));
+    const messagesApi = prov.api === "anthropic-messages";
+    const wire = messagesApi ? messagesRequest({ model, effort: m.reasoningEffort, messages, schema, maxOutputTokens })
+      : { path: "/chat/completions", body: { model, messages, ...(m.reasoningEffort === "xhigh" ? {} : { temperature: 0 }), n: 1, response_format: { type: "json_schema", json_schema: { name: "extraction", strict: true, schema } },
+        [prov.maxTokensParam]: maxOutputTokens, ...(prov.store === false ? { store: false } : {}),
+        // Selected model settings stay policy-owned; cache writes are explicit for either effort.
+        ...(m.reasoningEffort ? { reasoning_effort: m.reasoningEffort, prompt_cache_options: { mode: "explicit" }, service_tier: "default" } : {}) } };
+    const payload = Buffer.from(JSON.stringify(wire.body));
     const amount = maxModelCost(card, payload.length, maxOutputTokens);
     const { day, month } = periodStarts();
     const r = await store.reserveBudget({ id: randomUUID(), callKey, logicalId, category: m.category, caps: cat.caps, paidTotalCap: prov.paid ? budget.paidTotal.caps.day : null,
@@ -145,8 +157,8 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     try {
       // No cancellation reaches a request once it is out: a caller that left gets its answer settled and stored,
       // so its retry reuses it instead of paying twice; only the next call is not made.
-      answer = await providerRequest({ baseUrl: prov.baseUrl, path: "/chat/completions", body: payload, getPolicy, resolvePublic, lookupFixture, authorize,
-        headers: { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
+      answer = await providerRequest({ baseUrl: prov.baseUrl, path: wire.path, body: payload, getPolicy, resolvePublic, lookupFixture, authorize,
+        headers: messagesApi ? messagesHeaders(cred) : { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
         timeoutMs: Math.min(m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs, deadline - Date.now()) });
     } catch (e) {
       gate.give();
@@ -179,24 +191,26 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       await store.releaseBudget(res.id, `provider answered ${status}${code ? ` (${code})` : ""}`);
       log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: `http_${status}`, provider_code: code, ms: Date.now() - started });
       if (status === 401 || status === 403) { breaker.failure(); throw fail("PROVIDER_AUTH_FAILED", `${m.provider} refused the credential (HTTP ${status})`); }
-      if (status === 402 || code === "insufficient_quota") { breaker.failure(); throw fail("PROVIDER_BILLING", `${m.provider} refused the account's billing (HTTP ${status}${code ? `, ${code}` : ""})`); }
+      // Anthropic reports an empty balance as a 400 whose message names the credit balance.
+      if (status === 402 || code === "insufficient_quota" || code === "billing_error" || (messagesApi && /credit balance/i.test(json?.error?.message ?? ""))) { breaker.failure(); throw fail("PROVIDER_BILLING", `${m.provider} refused the account's billing (HTTP ${status}${code ? `, ${code}` : ""})`); }
       if (status === 429) { breaker.failure(); throw fail("PROVIDER_RATE_LIMITED", `${m.provider} rate-limited the request`, { retryable: true, retryAfter: Number(answer.headers["retry-after"]) || null }); }
       if (status >= 500) { breaker.failure(); throw fail("PROVIDER_ERROR", `${m.provider} failed with HTTP ${status}`, { retryable: true }); }
       breaker.neutral();
-      throw fail("PROVIDER_REJECTED", `${m.provider} rejected the request (HTTP ${status}${code ? `, ${code}` : ""})`);
+      // The Messages API says why (a schema it cannot compile, say); that text describes the request's shape, never its content.
+      const why = messagesApi && typeof json?.error?.message === "string" ? `: ${json.error.message.slice(0, 200)}` : "";
+      throw fail("PROVIDER_REJECTED", `${m.provider} rejected the request (HTTP ${status}${code ? `, ${code}` : ""})${why}`);
     }
     breaker.success();
-    const msg = json?.choices?.[0]?.message ?? {};
-    const u = json?.usage;
-    const counts = [u?.prompt_tokens, u?.completion_tokens, u?.prompt_tokens_details?.cached_tokens ?? 0, u?.prompt_tokens_details?.cache_write_tokens ?? 0];
+    const { counts, ...result } = messagesApi ? readMessages(json, { guided: wire.guided }) : readChat(json);
     const usage = counts.every((n) => Number.isSafeInteger(n) && n >= 0) && counts[2] + counts[3] <= counts[0]
       ? { promptTokens: counts[0], completionTokens: counts[1], cachedTokens: counts[2], cacheWriteTokens: counts[3] } : null;
     // Without the provider's counts the whole reservation is the charge: never less than it could be.
     const cost = usage ? modelCost(card, usage) : amount;
-    const result = { resolvedModel: typeof json?.model === "string" ? json.model : null, content: typeof msg.content === "string" ? msg.content : null, refusal: msg.refusal ?? null, finishReason: json?.choices?.[0]?.finish_reason ?? null };
     await store.settleBudget(res.id, cost, { usage, result, detail: usage ? (cost > amount ? `settled above the reservation by ${cost - amount}` : null) : "usage absent from the answer; settled at the reservation" });
     log({ event: "model_call", logical_id: logicalId, call: callKey, kind, model, outcome: "answered", prompt_tokens: usage?.promptTokens ?? null, completion_tokens: usage?.completionTokens ?? null,
       reasoning_effort: m.reasoningEffort ?? null, output_cap_tokens: maxOutputTokens,
+      // A schema over the Messages API's grammar limit is sent as prompt text; the answer is checked either way.
+      ...(messagesApi ? { grammar: wire.guided ? "none" : "schema" } : {}),
       cached_tokens: usage?.cachedTokens ?? null, cache_write_tokens: usage?.cacheWriteTokens ?? null, resolved_model: result.resolvedModel,
       reserved_micro_usd: amount, cost_micro_usd: cost, finish_reason: result.finishReason, ms: Date.now() - started });
     return { ...result, usage, cost, reused: false, reservationId: res.id };
@@ -333,7 +347,7 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
       let accountedCall = false;
       const judge = (r) => {
         if (r.resolvedModel && r.resolvedModel !== model) throw fail("MODEL_MISMATCH", "the provider returned a model identity different from the requested model; no fallback is accepted");
-        if (model === "gpt-6.1-sol" && !r.resolvedModel) throw fail("MODEL_IDENTITY_UNVERIFIED", "the provider did not report the requested Sol model identity");
+        if (reasoningEffort && reasoningEffort !== "none" && !r.resolvedModel) throw fail("MODEL_IDENTITY_UNVERIFIED", "the provider did not report the identity of the requested reasoning model");
         if (r.refusal) return { refused: r.refusal };
         if (r.finishReason === "length") return { limit: true };
         let v;

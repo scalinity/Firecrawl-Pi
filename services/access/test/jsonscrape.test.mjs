@@ -45,10 +45,10 @@ test("an extracted page: its json, markdown only when asked, the logical id, and
   assert.equal(timeoutMs - (Date.parse(body.deadline) - t0) >= 4900, true, "the gateway waits five seconds past the deadline it sends");
 });
 
-test("explicit Sol/xhigh reaches only the budgeted extractor and returns its measured identity, effort and usage", async () => {
+test("explicit Opus/high reaches only the budgeted extractor and returns its measured identity, effort and usage", async () => {
   const usage = { calls: 1, promptTokens: 32, completionTokens: 8, costMicroUsd: 17 };
-  const r = rig({ extract: () => answer({ model: "gpt-6.1-sol", reasoningEffort: "xhigh", usage }) });
-  const json = { ...BODY.formats[0], prompt: "Read the price", model: "gpt-6.1-sol", reasoningEffort: "xhigh" };
+  const r = rig({ extract: () => answer({ model: "claude-opus-5-5", reasoningEffort: "high", usage }) });
+  const json = { ...BODY.formats[0], prompt: "Read the price", model: "claude-opus-5-5", reasoningEffort: "high" };
   const out = await r.go({ ...BODY, formats: ["markdown", json] });
   assert.equal(out.status, 200);
   assert.equal(r.calls.core.length, 1);
@@ -57,19 +57,19 @@ test("explicit Sol/xhigh reaches only the budgeted extractor and returns its mea
   assert.equal(r.calls.core[0].model, undefined);
   assert.equal(r.calls.core[0].reasoningEffort, undefined);
   const request = r.calls.extract[0].body;
-  assert.equal(request.model, "gpt-6.1-sol");
-  assert.equal(request.reasoningEffort, "xhigh");
+  assert.equal(request.model, "claude-opus-5-5");
+  assert.equal(request.reasoningEffort, "high");
   assert.equal(request.prompt, "Read the price");
   assert.deepEqual(request.schema, SCHEMA);
   assert.deepEqual(request.documents, [{ url: BODY.url, markdown: "Price: 1" }]);
-  assert.equal(out.body.fcpi.extraction.model, "gpt-6.1-sol");
-  assert.equal(out.body.fcpi.extraction.reasoningEffort, "xhigh");
+  assert.equal(out.body.fcpi.extraction.model, "claude-opus-5-5");
+  assert.equal(out.body.fcpi.extraction.reasoningEffort, "high");
   assert.deepEqual(out.body.fcpi.extraction.usage, usage);
 });
 
 test("JSON extraction metadata reports the adapter's actual model and effort rather than echoing requested values", async () => {
   const r = rig({ extract: () => answer({ model: "reported-model", reasoningEffort: null }) });
-  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "gpt-6.1-sol", reasoningEffort: "xhigh" }] });
+  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" }] });
   assert.equal(out.body.fcpi.extraction.model, "reported-model");
   assert.equal(out.body.fcpi.extraction.reasoningEffort, null);
 });
@@ -77,14 +77,14 @@ test("JSON extraction metadata reports the adapter's actual model and effort rat
 test("a denied repair preserves the initial paid call's actual model, effort and settled usage on failure", async () => {
   const usage = { calls: 1, reused: 0, promptTokens: 80, completionTokens: 24, cachedTokens: 0, cacheWriteTokens: 0, costMicroUsd: 31 };
   const units = [{ url: BODY.url, part: 1, ok: false, failure: { class: "BUDGET_EXHAUSTED" } }];
-  const r = rig({ extract: () => ({ status: 402, json: { ok: false, model: "gpt-6.1-sol", requestedModel: "gpt-6.1-sol",
-    reasoningEffort: "xhigh", usage, units, failure: { class: "BUDGET_EXHAUSTED", detail: "repair reservation denied" } } }) });
-  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "gpt-6.1-sol", reasoningEffort: "xhigh" }] });
+  const r = rig({ extract: () => ({ status: 402, json: { ok: false, model: "claude-opus-5-5", requestedModel: "claude-opus-5-5",
+    reasoningEffort: "high", usage, units, failure: { class: "BUDGET_EXHAUSTED", detail: "repair reservation denied" } } }) });
+  const out = await r.go({ ...BODY, formats: [{ ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" }] });
   assert.equal(out.status, 402);
   assert.equal(out.body.success, false);
   assert.equal(out.body.code, "BUDGET_EXHAUSTED");
-  assert.equal(out.body.fcpi.extraction.model, "gpt-6.1-sol");
-  assert.equal(out.body.fcpi.extraction.reasoningEffort, "xhigh");
+  assert.equal(out.body.fcpi.extraction.model, "claude-opus-5-5");
+  assert.equal(out.body.fcpi.extraction.reasoningEffort, "high");
   assert.deepEqual(out.body.fcpi.extraction.usage, usage);
   assert.deepEqual(out.body.fcpi.extraction.units, units);
 });

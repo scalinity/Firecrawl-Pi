@@ -88,16 +88,27 @@ export function loadBudgetPolicy(text) {
     if (v.paid && (u.protocol !== "https:" || fixture || typeof v.credential !== "string")) throw new Error(`provider ${name}: a paid provider is an https service with a credential`);
     if (!v.paid && (!fixture || u.protocol !== "http:" || v.credential !== null)) throw new Error(`provider ${name}: an unpaid provider must be a project fixture without a credential`);
     if (v.credential !== null && !/^[a-z0-9_]{3,64}$/.test(v.credential)) throw new Error(`provider ${name}.credential must be a file name`);
-    if (v.kind === "model" && !["max_completion_tokens", "max_tokens"].includes(v.maxTokensParam)) throw new Error(`provider ${name}.maxTokensParam must be max_completion_tokens or max_tokens`);
+    if (v.kind === "model") {
+      if (v.api !== undefined && !["openai-chat", "anthropic-messages"].includes(v.api)) throw new Error(`provider ${name}.api must be openai-chat or anthropic-messages`);
+      if (v.api === "anthropic-messages") {
+        // The Messages API names its token cap max_tokens itself and has no store switch; its origin takes /v1/messages.
+        if (v.maxTokensParam !== undefined || v.store !== undefined) throw new Error(`provider ${name}: the Messages API takes neither maxTokensParam nor store`);
+        if (u.pathname !== "/" || u.search || u.hash || u.username || u.password) throw new Error(`provider ${name}: a Messages API baseUrl is an origin`);
+        if (v.paid && u.origin !== "https://api.anthropic.com") throw new Error(`provider ${name}: a paid Messages API provider is https://api.anthropic.com`);
+      } else if (!["max_completion_tokens", "max_tokens"].includes(v.maxTokensParam)) throw new Error(`provider ${name}.maxTokensParam must be max_completion_tokens or max_tokens`);
+    }
   }
   const subjectOf = (kind, map) => {
     for (const [name, m] of Object.entries(map)) {
       exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort", "maxOutputTokens", "requestTimeoutMs"] : []);
       if (kind === "model") {
-        if (m.reasoningEffort !== undefined && !["none", "xhigh"].includes(m.reasoningEffort)) throw new Error(`model ${name}.reasoningEffort must be none or xhigh`);
-        if (name === "gpt-6-luna" && m.reasoningEffort !== "none") throw new Error("model gpt-6-luna.reasoningEffort must be none");
-        if (name === "gpt-6.1-sol" && m.reasoningEffort !== "xhigh") throw new Error("model gpt-6.1-sol.reasoningEffort must be xhigh");
-        if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort === "xhigh" ? 16000 : 4000, `model ${name}.maxOutputTokens`);
+        if (m.reasoningEffort !== undefined && !["none", "low", "medium", "high", "xhigh", "max"].includes(m.reasoningEffort)) throw new Error(`model ${name}.reasoningEffort must be none, low, medium, high, xhigh or max`);
+        // The two production models keep the settings they are priced and tested at.
+        if (name === "claude-haiku-5-5" && m.reasoningEffort !== "none") throw new Error("model claude-haiku-5-5.reasoningEffort must be none");
+        if (name === "claude-opus-5-5" && m.reasoningEffort !== "high") throw new Error("model claude-opus-5-5.reasoningEffort must be high");
+        // The Messages API defaults to medium effort when none is sent, so a model on it states its setting.
+        if (p.providers[m.provider]?.api === "anthropic-messages" && m.reasoningEffort === undefined) throw new Error(`model ${name}.reasoningEffort must be stated`);
+        if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 16000 : 4000, `model ${name}.maxOutputTokens`);
         if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 90000, `model ${name}.requestTimeoutMs`);
       }
       const prov = p.providers[m.provider], cat = p.categories[m.category];
