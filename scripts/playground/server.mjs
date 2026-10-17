@@ -6,7 +6,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { resolve } from 'node:path';
 import { loadManifest } from '../../services/access/client.mjs';
 import { validateBody, checkUrl } from '../../services/access/src/validate.mjs';
-import { validateAgentInput, runAgent } from './agent.mjs';
+import { validateAgentInput, runAgent, AGENT_RUN_MS } from './agent.mjs';
 
 const root = fileURLToPath(new URL('../../', import.meta.url));
 const manifest = loadManifest();
@@ -67,7 +67,7 @@ export function sshForward() {
   return (request, signal) => new Promise((resolveResult, reject) => {
     if (signal?.aborted) return reject(signal.reason ?? Error('Disconnected'));
     const child = spawn('ssh', ['-i', key, '-o', 'IdentitiesOnly=yes', '-o', 'BatchMode=yes',
-      '-o', 'ConnectTimeout=8', target, 'sudo -n python3 -c ' + quote(remote)],
+      '-o', 'ConnectTimeout=8', '-o', 'ServerAliveInterval=30', '-o', 'ServerAliveCountMax=4', target, 'sudo -n python3 -c ' + quote(remote)],
       { stdio: ['pipe', 'pipe', 'ignore'] });
     let text = '', bytes = 0, settled = false;
     const finish = (error, result) => {
@@ -186,7 +186,7 @@ export async function startServer({ port = 8767, forward = sshForward() } = {}) 
         if (isAgent) {
           activeAgents++;
           const steps = new Map();
-          const deadline = setTimeout(() => controller.abort(), 360000);
+          const deadline = setTimeout(() => controller.abort(), AGENT_RUN_MS);
           const finishAgent = payload => {
             if (res.destroyed || res.writableEnded) return;
             res.end(JSON.stringify({ type: 'result', result: { status: 200, data: payload,

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { runAgent, validateAgentInput } from '../scripts/playground/agent.mjs';
+import { runAgent, validateAgentInput, AGENT_RUN_MS } from '../scripts/playground/agent.mjs';
 import { missingRequired, toStrict, validate } from '../services/retrieval/src/jsonschema.mjs';
 import { loadManifest } from '../services/access/client.mjs';
 import { unions, MAX_UNIONS } from '../services/retrieval/src/anthropic.mjs';
@@ -73,7 +73,7 @@ function fixture(responses) {
   return { calls, forward: async (request, signal) => {
     assert.equal(signal.aborted, false);
     calls.push(structuredClone(request));
-    assert.ok(request.timeout >= 1 && request.timeout <= 125);
+    assert.ok(request.timeout >= 1 && request.timeout <= (request.path === '/v2/scrape' ? 425 : 125));
     assert.equal(request.method, 'POST');
     assert.ok(['/v2/search', '/v2/scrape'].includes(request.path));
     const response = responses[calls.length - 1];
@@ -95,6 +95,15 @@ test('the Agent\'s own decision fields use 10 of the provider grammar\'s 16 unio
   }
   assert.deepEqual(counted, [10, 16, 17]);
   assert.ok(counted[1] <= MAX_UNIONS && counted[2] > MAX_UNIONS, 'five result fields fit the grammar; six do not');
+});
+
+test('a page read waits as long as the gateway\'s extended deadline for the reasoning model; a search keeps its short bound', async () => {
+  const f = fixture([searchResults(first), page(first)]);
+  const output = await runAgent({ prompt: 'Find the measurement' }, f);
+  assert.equal(output.status, 'completed');
+  assert.deepEqual(f.calls.map(call => [call.path, call.timeout]), [['/v2/search', 125], ['/v2/scrape', 425]]);
+  // The whole run is bounded at fifteen minutes, long enough for a few such reads.
+  assert.equal(AGENT_RUN_MS, 900000);
 });
 
 test('unsupported result-schema roots are rejected before any gateway dispatch', async () => {

@@ -43,7 +43,7 @@ the whole decision as prompt text; its answer is then checked locally against th
 one repair, and the model-call log records which way each call went.
 An unavailable model or unsupported setting fails explicitly, without a model fallback.
 The model can direct follow-up searches and reads within five page dispatches, three
-searches, eight tool calls, and 360 seconds. A page extraction can use more than one
+searches, eight tool calls, and 15 minutes (one reasoning-model page can take several). A page extraction can use more than one
 model call for chunking or repair; actual model calls, tokens, and cost are reported
 rather than inferred from page count. Budget denials and errors stop further work.
 

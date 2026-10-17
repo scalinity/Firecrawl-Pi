@@ -13,6 +13,11 @@ const text = value => typeof value === 'string' ? value.trim() : '';
 const normalizedText = value => value.normalize('NFKC').replace(/\s+/gu, ' ').trim();
 const MODEL = 'claude-opus-5-5';
 const EFFORT = 'high';
+// Reading a page waits on the reasoning model, which can take minutes (its 300 s timeout, after a page fetch of up to 110 s
+// and the gateway's margins), so a page request waits as long as the gateway's extended deadline and a run as long as a few
+// of them. A search answers in seconds and keeps its original bound.
+export const AGENT_RUN_MS = 900000;
+const PAGE_REQUEST_SECONDS = 425, SEARCH_REQUEST_SECONDS = 125;
 
 function urlOf(raw, base) {
   if (typeof raw !== 'string' || raw.length > 2048) return null;
@@ -108,10 +113,10 @@ export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
   const input = validateAgentInput(raw);
   if (typeof forward !== 'function') throw TypeError('The Pi gateway forward function is required.');
   const schema = decisionSchema(input.schema);
-  const started = performance.now(), deadline = started + 360000;
+  const started = performance.now(), deadline = started + AGENT_RUN_MS;
   const deadlineController = new AbortController();
   const runSignal = signal ? AbortSignal.any([signal, deadlineController.signal]) : deadlineController.signal;
-  const timer = setTimeout(() => deadlineController.abort(), 360000);
+  const timer = setTimeout(() => deadlineController.abort(), AGENT_RUN_MS);
   const candidates = new Map(input.urls.map(url => [url, null]));
   const visited = new Set(), documents = [], sources = [], findings = [], steps = [], limitations = [];
   const sourceDocuments = new Map(), queries = new Set();
@@ -141,7 +146,7 @@ export async function runAgent(raw, { forward, signal, emit = () => {} } = {}) {
     let abort;
     try {
       const response = await Promise.race([
-        forward({ method: route.method, path: route.path, body: normalizedBody, timeout: Math.min(125, Math.floor((deadline - performance.now()) / 1000)) }, runSignal),
+        forward({ method: route.method, path: route.path, body: normalizedBody, timeout: Math.min(tool === 'scrape' ? PAGE_REQUEST_SECONDS : SEARCH_REQUEST_SECONDS, Math.floor((deadline - performance.now()) / 1000)) }, runSignal),
         new Promise((_, reject) => { abort = () => reject(Object.assign(Error('Cancelled'), { code: 'CANCELLED' })); runSignal.addEventListener('abort', abort, { once: true }); if (runSignal.aborted) abort(); }),
       ]);
       step.httpStatus = response?.status;
