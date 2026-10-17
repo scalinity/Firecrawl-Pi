@@ -33,20 +33,23 @@ export function makeSerperLane({ serper, limits, permits, availability }) {
     representable: () => ({ ok: true }),
     cacheIdentity: (request) => ({ q: normalizeQueryText(request.originalQuery), hl: request.language === "auto" ? null : request.language.split("-")[0].toLowerCase(), num: 10 }),
     async search(request, ctx) {
+      // Availability and permits belong to the subject's provider (fixture-serper on the fixture roster), never the live
+      // provider's name: a fixture outcome must not change the live account's persisted state (spec §19.2).
+      const provider = ctx.sub.provider;
       const L = limits(), t0 = Date.now(), base = { provider: "serper", kind: "search", constraints: [{ mode: request.constraints.includeDomains.length || request.constraints.excludeDomains.length ? "postfilter" : "none" }] };
       let release;
-      try { release = await permits.api("serper", request.logicalSearchId, { signal: ctx.signal, deadlineAt: ctx.deadlineAt }); }
+      try { release = await permits.api(provider, request.logicalSearchId, { signal: ctx.signal, deadlineAt: ctx.deadlineAt }); }
       catch (e) { return outcome({ ...base, status: "failed", reason: e.capacity ? "capacity_unavailable" : e.code === "CANCELLED" ? "cancelled" : "timeout", detail: e.code, queueMs: Date.now() - t0 }); }
       const queueMs = Date.now() - t0, startedAt = new Date().toISOString();
       try {
         const results = await serper.search(normalizeQueryText(request.originalQuery), request.language, { signal: ctx.signal, timeoutMs: L.providerTimeoutsMs.serper, subject: ctx.sub.name,
           callKey: `search:${request.logicalSearchId}:serper:search:v1`, logicalId: request.logicalSearchId, deadlineAt: ctx.deadlineAt });
-        await availability.observe("serper", ctx.pre.epoch, { success: true });
+        await availability.observe(provider, ctx.pre.epoch, { success: true });
         const candidates = results.slice(0, L.candidates.serper).map((r, i) => ({ url: r.url, title: r.title, description: r.content, rank: i + 1 }));
         return outcome({ ...base, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: results.length, candidates, queueMs, startedAt, dispatchState: "response_received", usage: { credits: 1, basis: "provider_reported" } });
       } catch (e) {
         const [reason, detail] = reasonOf(e);
-        if (["rate_limited", "auth_failed"].includes(reason)) await availability.observe("serper", ctx.pre.epoch, { reason, providerCode: detail, detail });
+        if (["rate_limited", "auth_failed"].includes(reason)) await availability.observe(provider, ctx.pre.epoch, { reason, providerCode: detail, detail });
         return outcome({ ...base, status: "failed", reason, detail, queueMs, startedAt, dispatchState: e.sent ? "possibly_sent" : "not_sent",
           ...(e.httpStatus ? { error: { httpStatus: e.httpStatus, providerCode: null, retryable: reason !== "auth_failed", messageCode: `serper_${reason}` } } : {}) });
       } finally { release(); }

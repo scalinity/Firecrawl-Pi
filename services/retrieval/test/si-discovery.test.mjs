@@ -235,6 +235,19 @@ test("quota exhaustion suppresses only that provider, does not trip its breaker,
   } finally { await h.close(); }
 });
 
+test("Serper's availability is the fixture provider's own: a 429 cools fixture-serper down and never touches the live row", async () => {
+  const h = await harness({ handlers: { serper: () => ({ status: 429, body: { message: "Too many requests" } }) } });
+  try {
+    for (let i = 0; i < 2; i++) {
+      const r = await h.coordinator.search(request({ originalQuery: `serper cool ${i}` }), { signal: new AbortController().signal });
+      assert.deepEqual([r.body.search.providers.serper.status, r.body.search.providers.serper.reason], [i === 0 ? "failed" : "skipped", "rate_limited"]);
+    }
+    assert.equal(h.servers.serper.seen.length, 1, "the cooled-down fixture Serper is not called again");
+    assert.equal(h.store.avail.get("fixture-serper").state, "rate_limited");
+    assert.equal(h.store.avail.has("serper"), false, "the live provider's row is never written by fixture traffic");
+  } finally { await h.close(); }
+});
+
 test("a rate limit with Retry-After cools the provider down until that time; transport failures do trip the breaker", async () => {
   const h = await harness({ handlers: { exa: () => ({ status: 429, body: { requestId: "r", error: "slow down", tag: "RATE_LIMIT_EXCEEDED" }, headers: { "retry-after": "120" } }), deepseek: () => "destroy" } });
   try {
