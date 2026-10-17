@@ -12,9 +12,10 @@
 // sends one that is still unaccounted for.
 //
 // The engine: the caller's schema checked (jsonschema.mjs), each document split into chunks under the
-// input-token cap with its URL kept, one strict Structured Outputs call per chunk, at most one repair per
-// chunk inside the same budget, and the chunks' answers merged with each value's source URLs. A value
-// the page does not hold comes back null; two chunks that disagree keep the first and say so.
+// input-token cap with its URL kept, one strict Structured Outputs call per chunk (a schema over the
+// Messages API's 16-union grammar limit goes as prompt text; the answer is checked the same), at most one
+// repair per chunk inside the same budget, and the chunks' answers merged with each value's source URLs. A
+// value the page does not hold comes back null; two chunks that disagree keep the first and say so.
 import { createHash, randomUUID } from "node:crypto";
 import { rateCardFor, maxModelCost, modelCost, estimateTokens, periodStarts, Breaker, paidDispatchActive } from "./budget.mjs";
 import { checkSchema, toStrict, validate, missingRequired, SchemaError } from "./jsonschema.mjs";
@@ -200,7 +201,8 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       if (status === 429) { breaker.failure(); throw fail("PROVIDER_RATE_LIMITED", `${m.provider} rate-limited the request`, { retryable: true, retryAfter: Number(answer.headers["retry-after"]) || null }); }
       if (status >= 500) { breaker.failure(); throw fail("PROVIDER_ERROR", `${m.provider} failed with HTTP ${status}`, { retryable: true }); }
       breaker.neutral();
-      // The Messages API says why (a schema it cannot compile, say); that text describes the request's shape, never its content.
+      // The Messages API says why (a schema it cannot compile, say). The text is the provider's, capped at 200 characters,
+      // and may quote a fragment of the request such as a property name; it never carries the credential.
       const why = messagesApi && typeof json?.error?.message === "string" ? `: ${json.error.message.slice(0, 200)}` : "";
       throw fail("PROVIDER_REJECTED", `${m.provider} rejected the request (HTTP ${status}${code ? `, ${code}` : ""})${why}`);
     }
