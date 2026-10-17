@@ -299,7 +299,8 @@ export function loadBudgetPolicy(text) {
       check(r.documentationSubjects, p.documentationSearches, DOCUMENTATION_APIS, "documentationSubjects");
       check([r.decisionSubject], p.decisions, ["openrouter-decisions-v1"], "decisionSubject");
     };
-    if (S.profile === "aggregate" || rosterKeys.some((k) => k in S)) roster(Object.fromEntries(rosterKeys.map((k) => [k, S[k]])), "searching", false);    S.searxngMode ??= "fallback";
+    if (S.profile === "aggregate" || rosterKeys.some((k) => k in S)) roster(Object.fromEntries(rosterKeys.map((k) => [k, S[k]])), "searching", false);
+    S.searxngMode ??= "fallback";
     if (!["fallback", "additional"].includes(S.searxngMode)) throw new Error("searching.searxngMode must be fallback or additional");
     // The roster a fixture selection uses: fixture providers of the same APIs, so the aggregate runs end to end without a live call.
     if (S.fixtureRoster !== undefined) roster(S.fixtureRoster, "searching.fixtureRoster", true);
