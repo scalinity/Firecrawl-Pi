@@ -669,3 +669,27 @@ test("a schema over the grammar limit goes to the model as prompt text, and a fe
     assert.equal(bad.store.states().length, 2, "the one repair, no more");
   } finally { await bad.srv.close(); }
 });
+
+test("Messages API: a repair after an answer with no text shows the model a placeholder, because the API refuses an empty assistant turn", async () => {
+  for (const first of [{ content: [] }, { content: [{ type: "text", text: " \n " }] }]) {
+    const sentBodies = [];
+    const r = await rig({ mutate: messagesApi(), handler: async (q, s) => {
+      const chunks = []; for await (const c of q) chunks.push(c);
+      const sent = JSON.parse(Buffer.concat(chunks));
+      sentBodies.push(sent);
+      // What the real API does with a blank assistant turn.
+      if (sent.messages.some((m) => m.role === "assistant" && !String(m.content).trim())) {
+        return s.writeHead(400, JSON_HEADERS).end(JSON.stringify({ type: "error", error: { type: "invalid_request_error", message: "messages: all messages must have non-empty content except for the optional final assistant message" } }));
+      }
+      answerWith(sentBodies.length === 1 ? first : {})(s);
+    } });
+    try {
+      const out = await r.extract(req());
+      assert.equal(out.ok, true, JSON.stringify(first));
+      assert.equal(sentBodies.length, 2, "the one repair");
+      assert.deepEqual(sentBodies[1].messages.map((m) => m.role), ["user", "assistant", "user"]);
+      assert.equal(sentBodies[1].messages[1].content, "(no answer)");
+      assert.deepEqual(r.store.states(), ["SETTLED", "SETTLED"]);
+    } finally { await r.srv.close(); }
+  }
+});

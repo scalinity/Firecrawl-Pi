@@ -364,9 +364,12 @@ export function makeExtractor({ adapter, getBudget, getSelection, log }) {
         if (j.errors && X.maxRepairs > 0) {
           if (signal?.aborted) throw fail("CANCELLED", "the caller cancelled after the settled model call; no repair was sent");
           // The one repair, in the same logical budget: the model sees its answer and what was wrong with it.
+          // An answer with no text (a thinking-only turn, an empty content list) is shown as a placeholder: the
+          // Messages API refuses an empty assistant turn.
           accountedCall = false;
+          const previous = String(r.content ?? "").slice(0, 16000);
           r = await adapter.call({ ...base, callKey: `${logicalId}:${i}:repair`, kind: "repair",
-            messages: [...messages, { role: "assistant", content: String(r.content ?? "").slice(0, 16000) },
+            messages: [...messages, { role: "assistant", content: previous.trim() ? previous : "(no answer)" },
               { role: "user", content: `That answer does not match the required JSON schema:\n${j.errors.slice(0, 10).join("\n")}\nReturn only the corrected JSON.` }] });
           account(r);
           accountedCall = true;
