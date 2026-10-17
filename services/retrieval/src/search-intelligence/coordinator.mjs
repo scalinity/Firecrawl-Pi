@@ -76,8 +76,10 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       catch (e) { log({ event: "si_adapter_threw", provider: adapter.id, error: e?.message?.slice(0, 200) }); return failed(adapter.id, "internal_failure", "adapter_threw", { kind }); }
     })());
     // The lane's hard bound: past its deadline (plus a short grace for the transport's own timer) it is cancelled and reported
-    // as timed out; the adapter keeps closing its reservation in the background, tracked, and can send nothing more.
-    const bound = new Promise((resolve) => { timer = setTimeout(() => { child.abort(); resolve(failed(adapter.id, signal.aborted ? "cancelled" : "timeout", "lane_deadline", { kind, dispatchState: "possibly_sent" })); }, Math.max(0, deadlineAt - clock()) + 250); });
+    // as timed out; the adapter keeps closing its reservation in the background, tracked, and can send nothing more. The grace
+    // stays within half the response margin, so a lane whose deadline is the search's last moment still leaves time to answer.
+    const grace = Math.min(250, Math.floor(L.responseMarginMs / 2));
+    const bound = new Promise((resolve) => { timer = setTimeout(() => { child.abort(); resolve(failed(adapter.id, signal.aborted ? "cancelled" : "timeout", "lane_deadline", { kind, dispatchState: "possibly_sent" })); }, Math.max(0, deadlineAt - clock()) + grace); });
     let o;
     try { o = await Promise.race([work, bound]); }
     finally { clearTimeout(timer); signal.removeEventListener("abort", onParent); }

@@ -611,6 +611,19 @@ test("a stalled Serper is a timeout that may have been sent, whichever of its ow
   } finally { await h.close(); }
 });
 
+test("a lane stuck past a deadline that ends the search still leaves time to answer: partial, not SEARCH_TIMEOUT", async () => {
+  // Exa stalls, and the ledger then hangs while marking its call uncertain, so the lane's own bound is what ends it. The
+  // request's deadline (3 s) binds discovery, so the lane's deadline is the search's last moment before its response margin.
+  const h = await harness({ handlers: { exa: async (q, e) => { await new Promise((r) => setTimeout(r, 4000)); return answers.exa(q, e); } } });
+  const mark = h.store.markBudgetUncertain.bind(h.store);
+  h.store.markBudgetUncertain = async (id, detail) => { await new Promise((r) => setTimeout(r, 2500)); return mark(id, detail); };
+  try {
+    const r = await h.coordinator.search(request({ originalQuery: "stuck lane", absoluteDeadlineMs: Date.now() + 3000 }), { signal: new AbortController().signal });
+    assert.equal(r.body.search.outcome, "partial");
+    assert.deepEqual([r.body.search.providers.exa.reason, r.body.search.providers.exa.detail], ["timeout", "lane_deadline"]);
+  } finally { await h.close(); }
+});
+
 test("the legacy profile is the rollback: the new route serves the accepted search in the new shape and runs no aggregate lane", async () => {
   const { makeCoordinator } = await import("../src/search-intelligence/coordinator.mjs");
   const h = await harness({ mutateBudget: (b) => { b.searching.profile = "legacy"; } });
