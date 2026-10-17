@@ -1,0 +1,94 @@
+{
+  "model": "claude-sonnet-5-5",
+  "effort": "high",
+  "status": 200,
+  "requestId": "req_011Cg87XSpAvrFN6D4vgtgLr",
+  "totalMs": 109971,
+  "firstEventMs": 2723,
+  "maxGapMs": 30003,
+  "maxChunkGapMs": 30003,
+  "bytes": 41326,
+  "counts": {
+    "message_start": 1,
+    "content_block_start": 2,
+    "ping": 4,
+    "content_block_delta:thinking_delta": 1,
+    "content_block_delta:signature_delta": 1,
+    "content_block_stop": 2,
+    "content_block_delta:text_delta": 74,
+    "message_delta": 1,
+    "message_stop": 1
+  },
+  "usageEvents": [
+    {
+      "ms": 2723,
+      "type": "message_start",
+      "delta": null,
+      "usage": {
+        "input_tokens": 294,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 0
+        },
+        "output_tokens": 8,
+        "service_tier": "standard",
+        "inference_geo": "global",
+        "speed": "standard"
+      },
+      "stop": null,
+      "len": 0
+    },
+    {
+      "ms": 109963,
+      "type": "message_delta",
+      "delta": null,
+      "usage": {
+        "input_tokens": 294,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 14285,
+        "output_tokens_details": {
+          "thinking_tokens": 13809
+        }
+      },
+      "stop": "end_turn",
+      "len": 0
+    }
+  ],
+  "last": [
+    {
+      "ms": 109963,
+      "type": "content_block_stop",
+      "delta": null,
+      "usage": null,
+      "stop": null,
+      "len": 0
+    },
+    {
+      "ms": 109963,
+      "type": "message_delta",
+      "delta": null,
+      "usage": {
+        "input_tokens": 294,
+        "cache_creation_input_tokens": 0,
+        "cache_read_input_tokens": 0,
+        "output_tokens": 14285,
+        "output_tokens_details": {
+          "thinking_tokens": 13809
+        }
+      },
+      "stop": "end_turn",
+      "len": 0
+    },
+    {
+      "ms": 109963,
+      "type": "message_stop",
+      "delta": null,
+      "usage": null,
+      "stop": null,
+      "len": 0
+    }
+  ]
+}

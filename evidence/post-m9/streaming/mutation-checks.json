@@ -1,0 +1,142 @@
+{
+ "schema": "fcpi.mutation-checks/v1",
+ "method": "each guard changed in place in the working tree, the named test file run, the file restored and its checksum compared",
+ "checks": [
+  {
+   "commit": "2a905b0",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "a one-at-a-time lock before each send",
+   "caught_by": "model calls from separate requests run at the same time",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "0140e91",
+   "file": "services/retrieval/src/anthropic.mjs",
+   "mutation": "no stream flag in the request",
+   "caught_by": "request streamed (anthropic, m5-extract)",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "0140e91",
+   "file": "services/retrieval/src/provider.mjs",
+   "mutation": "chunks do not restart the idle clock",
+   "caught_by": "steady stream completes",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "0140e91",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "caller waits for the whole call",
+   "caught_by": "call outlasting its caller",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "0140e91",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "call cut at the caller's wait",
+   "caught_by": "call outlasting its caller settles at usage",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "0140e91",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "incomplete stream accepted",
+   "caught_by": "incomplete streams stay uncertain",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "0140e91",
+   "file": "services/retrieval/src/anthropic.mjs",
+   "mutation": "error event ignored",
+   "caught_by": "stream reader; incomplete streams",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "dc4c639",
+   "file": "services/retrieval/src/provider.mjs",
+   "mutation": "idle timer not armed at creation",
+   "caught_by": "connection that never completes",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "cf9722b",
+   "file": "services/retrieval/src/anthropic.mjs",
+   "mutation": "final usage not required",
+   "caught_by": "no final usage stays uncertain (2 tests)",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "cf9722b",
+   "file": "services/retrieval/src/anthropic.mjs",
+   "mutation": "block index unchecked",
+   "caught_by": "stream of unexpected shapes",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "d9348db",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "probe handed back on detach",
+   "caught_by": "half-open probe kept",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "d9348db",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "still-running counted as undispatched",
+   "caught_by": "usage reported unknown, not free",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "d9348db",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "cancellation not in the wait",
+   "caught_by": "caller that cancels is answered at once",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "d9348db",
+   "file": "services/access/src/jsonscrape.mjs",
+   "mutation": "gateway offers a retry",
+   "caught_by": "still-running json scrape is a 504 with no retry",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "d9348db",
+   "file": "services/access/src/extract.mjs",
+   "mutation": "job does not wait for the running call",
+   "caught_by": "job stays RUNNING and finishes next round",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "2d761cf",
+   "file": "services/retrieval/src/extract.mjs",
+   "mutation": "per-model input cap ignored",
+   "caught_by": "a page is one unit at 150,000",
+   "result": "FAIL (caught)",
+   "restored": true
+  },
+  {
+   "commit": "2857236",
+   "file": "services/retrieval/src/resolve.mjs",
+   "mutation": "lookup answered synchronously",
+   "caught_by": "pinned lookup answers asynchronously",
+   "result": "FAIL (caught)",
+   "restored": true
+  }
+ ]
+}

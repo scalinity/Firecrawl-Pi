@@ -49,3 +49,7 @@ Deploy the commit before the change (`e85c588`) with `scripts/m1/deploy.sh`; it 
 `1abb6ab` limits and cap · `a5c53b1` gateway extra wait · `2b37772` Agent wait · `3b31ed6` output cap to the maximum · `61ac9cb` `fbbe89f` firewall fingerprint · `3aee83d` Agent run and page floor · `bf83992` MCP limits and timeout-chain test · `9683d39` `6cfab8d` `53aacb6` `85f00b9` `84cf903` `40c6071` `d8c936a` `d112320` review fixes and tests · `9ed6c77` `8c87bd8` `6907870` documents · image pins `2a9e37b` `7cad489` `c7039c7`.
 
 Receipts: `verification.json`, `fixtures.json`, `snapshot-attribution.json`, `raw/`, and `review/REVIEW.md`. Historical M5 and M9 acceptance records are unchanged; this is additive post-M9 verification.
+
+## Later resolution (2026-10-17)
+
+The first three items under "Things worth knowing" no longer hold. Model calls are streamed and run to their end, so a call settles at its usage rather than holding its reservation as uncertain, and a call left in flight by a stopped service is marked and listed at the next start; model requests run concurrently; and the playground Agent runs on Claude Sonnet 5.5 (`evidence/post-m9/streaming/CLOSEOUT.md`, `evidence/post-m9/agent-models/`). A model that reasons is still not started with under a minute of its deadline left, and is still never the default selection.

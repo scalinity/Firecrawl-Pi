@@ -1,0 +1,13 @@
+### ledger since cutover
+claude-haiku-5-5 extract SETTLED 2122 61 
+claude-sonnet-5-5 extract SETTLED 1286293 4840 
+claude-sonnet-5-5 extract SETTLED 2179923 370800 
+claude-sonnet-5-5 extract SETTLED 1286293 4860 
+claude-sonnet-5-5 extract SETTLED 1286293 4880 
+### llm month
+llm month 0 3368405
+### states this month
+RELEASED 2
+SETTLED 41
+### start log
+{'event': 'store_ready', 'orphaned_model_calls': 0, 'orphaned_reserved_micro_usd': 0, 'build': '0.5.0'}

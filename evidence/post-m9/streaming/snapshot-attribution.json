@@ -1,0 +1,129 @@
+{
+ "schema": "fcpi.snapshot-attribution/v1",
+ "before_utc": "### meta",
+ "after_utc": "### meta",
+ "diff_lines": 30,
+ "unattributed": 0,
+ "lines": [
+  {
+   "line": "- 2026-10-17T17:50:27Z",
+   "attributed_to": "snapshot time"
+  },
+  {
+   "line": "+ 2026-10-17T18:10:27Z",
+   "attributed_to": "snapshot time"
+  },
+  {
+   "line": "+ docker-0e7070b7c4113aa20521587524adb9571ac7db23e6070eb49028cd4544d64b73.scope",
+   "attributed_to": "cgroup scope of a recreated container"
+  },
+  {
+   "line": "- docker-70ef7f7ad427fefb1b6898d9922546f540e27331cf462e089a77ecf189e62050.scope",
+   "attributed_to": "cgroup scope of a recreated container"
+  },
+  {
+   "line": "- docker-7319dad5e9b289b119dbf917b05182388d40e515e84d32b0738ca7b7a48329a2.scope",
+   "attributed_to": "cgroup scope of a recreated container"
+  },
+  {
+   "line": "+ docker-7f780e8f5bcb2baeaaa07a570af41e0a12a88590356e99d96c1a5d45be160a88.scope",
+   "attributed_to": "cgroup scope of a recreated container"
+  },
+  {
+   "line": "- docker-a55b3b14794cd4a4c7665f6f213baabd22dfa7700ef8d977acc853834aa51e02.scope",
+   "attributed_to": "cgroup scope of a recreated container"
+  },
+  {
+   "line": "+ docker-d1c6835ea02e2664a896846d4d9b9d0aa0c658ed6369217cda1dc9452212eb64.scope",
+   "attributed_to": "cgroup scope of a recreated container"
+  },
+  {
+   "line": "- session-186985.scope",
+   "attributed_to": "SSH session scope of the collector"
+  },
+  {
+   "line": "+ session-187161.scope",
+   "attributed_to": "SSH session scope of the collector"
+  },
+  {
+   "line": "+ 0e7070b7c4113aa20521587524adb9571ac7db23e6070eb49028cd4544d64b73 fcpi-retrieval-service-1 ",
+   "attributed_to": "container recreated by the cutover (retrieval, gateway, MCP)"
+  },
+  {
+   "line": "- 70ef7f7ad427fefb1b6898d9922546f540e27331cf462e089a77ecf189e62050 fcpi-access-gateway-1 fcp",
+   "attributed_to": "container recreated by the cutover (retrieval, gateway, MCP)"
+  },
+  {
+   "line": "- 7319dad5e9b289b119dbf917b05182388d40e515e84d32b0738ca7b7a48329a2 fcpi-retrieval-service-1 ",
+   "attributed_to": "container recreated by the cutover (retrieval, gateway, MCP)"
+  },
+  {
+   "line": "+ 7f780e8f5bcb2baeaaa07a570af41e0a12a88590356e99d96c1a5d45be160a88 fcpi-access-gateway-1 fcp",
+   "attributed_to": "container recreated by the cutover (retrieval, gateway, MCP)"
+  },
+  {
+   "line": "- a55b3b14794cd4a4c7665f6f213baabd22dfa7700ef8d977acc853834aa51e02 fcpi-mcp-gateway-1 fcpi/m",
+   "attributed_to": "container recreated by the cutover (retrieval, gateway, MCP)"
+  },
+  {
+   "line": "+ d1c6835ea02e2664a896846d4d9b9d0aa0c658ed6369217cda1dc9452212eb64 fcpi-mcp-gateway-1 fcpi/m",
+   "attributed_to": "container recreated by the cutover (retrieval, gateway, MCP)"
+  },
+  {
+   "line": "- tcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=2422103,fd=8))",
+   "attributed_to": "the MCP loopback publication's docker-proxy restarted with its container"
+  },
+  {
+   "line": "+ tcp 127.0.0.1:3380 users:((\"docker-proxy\",pid=3122999,fd=8))",
+   "attributed_to": "the MCP loopback publication's docker-proxy restarted with its container"
+  },
+  {
+   "line": "+ /run/docker/netns/047f79af2386 nsfs[net:[4026533680]] nsfs rw",
+   "attributed_to": "network namespace of a recreated container"
+  },
+  {
+   "line": "+ /run/docker/netns/34c2eae2bce8 nsfs[net:[4026532852]] nsfs rw",
+   "attributed_to": "network namespace of a recreated container"
+  },
+  {
+   "line": "- /run/docker/netns/960a05d7bfe5 nsfs[net:[4026533421]] nsfs rw",
+   "attributed_to": "network namespace of a recreated container"
+  },
+  {
+   "line": "- /run/docker/netns/9eac37bfe70a nsfs[net:[4026532852]] nsfs rw",
+   "attributed_to": "network namespace of a recreated container"
+  },
+  {
+   "line": "+ /run/docker/netns/a5c0e6b8aa52 nsfs[net:[4026533421]] nsfs rw",
+   "attributed_to": "network namespace of a recreated container"
+  },
+  {
+   "line": "- /run/docker/netns/da07ad5480b8 nsfs[net:[4026533680]] nsfs rw",
+   "attributed_to": "network namespace of a recreated container"
+  },
+  {
+   "line": "+ /var/lib/docker/rootfs/overlayfs/0e7070b7c4113aa20521587524adb9571ac7db23e6070eb49028cd454",
+   "attributed_to": "root filesystem of a recreated container"
+  },
+  {
+   "line": "- /var/lib/docker/rootfs/overlayfs/70ef7f7ad427fefb1b6898d9922546f540e27331cf462e089a77ecf18",
+   "attributed_to": "root filesystem of a recreated container"
+  },
+  {
+   "line": "- /var/lib/docker/rootfs/overlayfs/7319dad5e9b289b119dbf917b05182388d40e515e84d32b0738ca7b7a",
+   "attributed_to": "root filesystem of a recreated container"
+  },
+  {
+   "line": "+ /var/lib/docker/rootfs/overlayfs/7f780e8f5bcb2baeaaa07a570af41e0a12a88590356e99d96c1a5d45b",
+   "attributed_to": "root filesystem of a recreated container"
+  },
+  {
+   "line": "- /var/lib/docker/rootfs/overlayfs/a55b3b14794cd4a4c7665f6f213baabd22dfa7700ef8d977acc853834",
+   "attributed_to": "root filesystem of a recreated container"
+  },
+  {
+   "line": "+ /var/lib/docker/rootfs/overlayfs/d1c6835ea02e2664a896846d4d9b9d0aa0c658ed6369217cda1dc9452",
+   "attributed_to": "root filesystem of a recreated container"
+  }
+ ]
+}

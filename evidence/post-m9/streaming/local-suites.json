@@ -1,0 +1,21 @@
+{
+ "schema": "fcpi.local-suites/v1",
+ "note": "workstation, at the final code (5d91186); the PostgreSQL-backed retrieval tests skip without a database and run on the Pi (raw/pi-suites-final.txt)",
+ "suites": {
+  "retrieval": {
+   "tests": 299,
+   "pass": 268,
+   "skipped": 31,
+   "fail": 0
+  },
+  "access gateway": {
+   "tests": 96,
+   "pass": 96,
+   "fail": 0
+  },
+  "root (timeout chain, playground, firewall, contracts)": {
+   "pass": 58,
+   "fail": 0
+  }
+ }
+}
