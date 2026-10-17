@@ -21,7 +21,7 @@
     "serper": {"kind": "search", "baseUrl": "https://google.serper.dev", "credential": "serper_api_key", "paid": false, "api": "serper-v1"},
     "anthropic": { "kind": "model", "baseUrl": "https://api.anthropic.com", "credential": "anthropic_api_key", "paid": true, "api": "anthropic-messages" },
     "anthropic-agent": { "kind": "model", "baseUrl": "https://api.anthropic.com", "credential": "agent_anthropic_api_key", "paid": true, "api": "anthropic-messages" },
-    "fixture-model": { "kind": "model", "baseUrl": "http://model.fixture.fcpi.test:8080/v1", "credential": null, "paid": false, "maxTokensParam": "max_completion_tokens", "store": false },
+    "fixture-model": { "kind": "model", "baseUrl": "http://model.fixture.fcpi.test:8080/v1", "credential": null, "paid": false, "api": "openai-chat", "maxTokensParam": "max_completion_tokens", "store": false },
     "llamaparse": { "kind": "parser", "baseUrl": "https://api.cloud.llamaindex.ai", "credential": "llamaparse_api_key", "paid": true },
     "fixture-parser": { "kind": "parser", "baseUrl": "http://parser.fixture.fcpi.test:8080", "credential": null, "paid": false },
     "decodo": { "kind": "proxy", "baseUrl": "http://gate.decodo.com:7000", "credential": "decodo_proxy", "paid": true, "session": "decodo",

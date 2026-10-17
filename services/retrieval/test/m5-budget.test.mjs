@@ -121,6 +121,9 @@ test("a model on the Messages API states its effort, and each rule about that pr
     [(j) => { j.models["claude-haiku-5-5"].reasoningEffort = "high"; }, /claude-haiku-5-5\.reasoningEffort must be none/],
     [(j) => { j.models["claude-opus-5-5"].reasoningEffort = "max"; }, /claude-opus-5-5\.reasoningEffort must be high/],
     [(j) => { j.models["claude-opus-5-5"].reasoningEffort = "extreme"; }, /must be none, low, medium, high, xhigh or max/],
+    // The chat API keeps the two settings it was built at: the wider levels are the Messages API's alone.
+    [(j) => { j.models["fcpi-fixture-model"].reasoningEffort = "high"; }, /fcpi-fixture-model\.reasoningEffort must be none or xhigh/],
+    [(j) => { j.models["fcpi-fixture-model"].reasoningEffort = "max"; }, /must be none or xhigh/],
   ]) assert.throws(() => loadBudgetPolicy(mutate(edit)), why);
 });
 

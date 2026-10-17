@@ -102,12 +102,15 @@ export function loadBudgetPolicy(text) {
     for (const [name, m] of Object.entries(map)) {
       exact(m, ["provider", "category"], `${kind} ${name}`, kind === "parser" ? ["tier", "version"] : kind === "model" ? ["reasoningEffort", "maxOutputTokens", "requestTimeoutMs"] : []);
       if (kind === "model") {
-        if (m.reasoningEffort !== undefined && !["none", "low", "medium", "high", "xhigh", "max"].includes(m.reasoningEffort)) throw new Error(`model ${name}.reasoningEffort must be none, low, medium, high, xhigh or max`);
+        // The Messages API takes every level; the chat API was built and tested at none and xhigh only.
+        const messagesApi = p.providers[m.provider]?.api === "anthropic-messages";
+        const efforts = messagesApi ? ["none", "low", "medium", "high", "xhigh", "max"] : ["none", "xhigh"];
+        if (m.reasoningEffort !== undefined && !efforts.includes(m.reasoningEffort)) throw new Error(`model ${name}.reasoningEffort must be ${efforts.slice(0, -1).join(", ")} or ${efforts.at(-1)}`);
         // The two production models keep the settings they are priced and tested at.
         if (name === "claude-haiku-5-5" && m.reasoningEffort !== "none") throw new Error("model claude-haiku-5-5.reasoningEffort must be none");
         if (name === "claude-opus-5-5" && m.reasoningEffort !== "high") throw new Error("model claude-opus-5-5.reasoningEffort must be high");
         // The Messages API defaults to medium effort when none is sent, so a model on it states its setting.
-        if (p.providers[m.provider]?.api === "anthropic-messages" && m.reasoningEffort === undefined) throw new Error(`model ${name}.reasoningEffort must be stated`);
+        if (messagesApi && m.reasoningEffort === undefined) throw new Error(`model ${name}.reasoningEffort must be stated`);
         if (m.maxOutputTokens !== undefined) posInt(m.maxOutputTokens, 100, m.reasoningEffort && m.reasoningEffort !== "none" ? 16000 : 4000, `model ${name}.maxOutputTokens`);
         if (m.requestTimeoutMs !== undefined) posInt(m.requestTimeoutMs, 1000, 90000, `model ${name}.requestTimeoutMs`);
       }
