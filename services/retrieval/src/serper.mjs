@@ -19,11 +19,13 @@ export function makeSerper({ store, getBudget, getPolicy, providersDir, resolveP
       const configuredTimeout = getBudget().searching?.requestTimeoutMs ?? 7000;
       const timeout = AbortSignal.timeout(Math.max(1, Math.min(timeoutMs ?? configuredTimeout, configuredTimeout)));
       const signal = callerSignal ? AbortSignal.any([callerSignal, timeout]) : timeout;
-      const fail = (cls) => new Denied(cls, "Google search through Serper is unavailable");
+      // Every failure says whether the request may have gone out: nothing is sent before the reservation and the dispatch begin.
+      const fail = (cls, extra = { sent: false }) => Object.assign(new Denied(cls, "Google search through Serper is unavailable"), extra);
       if (signal.aborted) throw fail(callerSignal?.aborted ? "CANCELLED" : "SEARCH_PROVIDER_TIMEOUT");
-      let onAbort;
+      let onAbort, dispatching = false;
       const aborted = new Promise((_, reject) => {
-        onAbort = () => reject(fail(callerSignal?.aborted ? "CANCELLED" : "SEARCH_PROVIDER_TIMEOUT"));
+        // The race can end while the work is still closing its reservation: once dispatch has begun the request may have gone out.
+        onAbort = () => reject(fail(callerSignal?.aborted ? "CANCELLED" : "SEARCH_PROVIDER_TIMEOUT", { sent: dispatching, timedOut: !callerSignal?.aborted }));
         signal.addEventListener("abort", onAbort, { once: true });
       });
       // The work may finish admission/DNS after the caller's deadline. Its own cancellation
@@ -49,6 +51,7 @@ export function makeSerper({ store, getBudget, getPolicy, providersDir, resolveP
           reservation = r.reservation;
           if (signal.aborted) throw Object.assign(fail("SEARCH_PROVIDER_TIMEOUT"), { sent: false });
           for (const notice of r.notices ?? []) log({ event: "budget_threshold", ...notice });
+          dispatching = true;
           const response = await request({ baseUrl: p.baseUrl, path: "/search", headers: { "X-API-KEY": key, "content-type": "application/json", accept: "application/json" }, body,
             timeoutMs: Math.min(timeoutMs ?? b.searching.requestTimeoutMs, b.searching.requestTimeoutMs), maxBytes: b.searching.maxResponseBytes,
             getPolicy, resolvePublic, lookupFixture, signal, authorize: () => !signal?.aborted, ...(deadlineAt !== null ? { deadlineAt } : {}) });
@@ -80,8 +83,8 @@ export function makeSerper({ store, getBudget, getPolicy, providersDir, resolveP
             else await store.releaseBudget(reservation.id, "search request not sent");
           }
           const wasSent = !!reservation && (sent || e.sent !== false);
-          if (signal.aborted) throw Object.assign(fail(callerSignal?.aborted ? "CANCELLED" : "SEARCH_PROVIDER_TIMEOUT"), { sent: wasSent, httpStatus });
-          throw Object.assign(fail(e.failureClass ?? e.code ?? "SEARCH_PROVIDER_ERROR"), { sent: wasSent, httpStatus });
+          if (signal.aborted) throw Object.assign(fail(callerSignal?.aborted ? "CANCELLED" : "SEARCH_PROVIDER_TIMEOUT"), { sent: wasSent, httpStatus, timedOut: !callerSignal?.aborted });
+          throw Object.assign(fail(e.failureClass ?? e.code ?? "SEARCH_PROVIDER_ERROR"), { sent: wasSent, httpStatus, timedOut: !!e.timedOut });
         }
       })();
       try { return await Promise.race([work, aborted]); }

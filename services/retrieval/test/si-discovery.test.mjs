@@ -437,6 +437,18 @@ test("a lane that outlives its provider deadline is reported as a timeout and it
   } finally { await h.close(); }
 });
 
+test("a stalled Serper is a timeout that may have been sent, whichever of its own timer and the search's deadline ends it", async () => {
+  const h = await harness({ handlers: { serper: async (q, e) => { await new Promise((r) => setTimeout(r, 3000)); return answers.serper(q, e); } },
+    mutatePolicy: (p) => { p.search.intelligence.providerTimeoutsMs.serper = 1000; } });
+  try {
+    const r = await h.coordinator.search(request(), { signal: new AbortController().signal });
+    const s = r.body.search.providers.serper;
+    assert.deepEqual([s.status, s.reason, s.dispatchState], ["failed", "timeout", "possibly_sent"]);
+    await new Promise((res) => setTimeout(res, 300));
+    assert.equal([...h.store.rows.values()].find((x) => x.provider === "fixture-serper").state, "UNCERTAIN");
+  } finally { await h.close(); }
+});
+
 test("the legacy profile is the rollback: the new route serves the accepted search in the new shape and runs no aggregate lane", async () => {
   const { makeCoordinator } = await import("../src/search-intelligence/coordinator.mjs");
   const h = await harness({ mutateBudget: (b) => { b.searching.profile = "legacy"; } });

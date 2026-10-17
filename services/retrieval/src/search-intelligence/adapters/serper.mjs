@@ -17,6 +17,8 @@ function reasonOf(e) {
   if (cls === "SEARCH_CREDITS_EXHAUSTED") return ["quota_exhausted", "local_allocation_exhausted"];
   if (cls === "CANCELLED") return ["cancelled", "cancelled"];
   if (cls === "SEARCH_PROVIDER_TIMEOUT") return ["timeout", "timeout"];
+  // The search's absolute deadline reached the transport: before send (PROVIDER_TIMEOUT) or after it, with no answer.
+  if (cls === "PROVIDER_TIMEOUT" || e.timedOut) return ["timeout", "timeout"];
   if (cls === "SEARCH_PROVIDER_INVALID_RESPONSE") return ["contract_failure", "serper_response_shape"];
   const http = /^SEARCH_PROVIDER_HTTP_(\d{3})$/.exec(cls)?.[1];
   if (http === "429") return ["rate_limited", "http_429"];
@@ -50,7 +52,7 @@ export function makeSerperLane({ serper, limits, permits, availability }) {
       } catch (e) {
         const [reason, detail] = reasonOf(e);
         if (["rate_limited", "auth_failed"].includes(reason)) await availability.observe(provider, ctx.pre.epoch, { reason, providerCode: detail, detail });
-        return outcome({ ...base, status: "failed", reason, detail, queueMs, startedAt, dispatchState: e.sent ? "possibly_sent" : "not_sent",
+        return outcome({ ...base, status: "failed", reason, detail, queueMs, startedAt, dispatchState: e.sent === false ? "not_sent" : "possibly_sent",
           ...(e.httpStatus ? { error: { httpStatus: e.httpStatus, providerCode: null, retryable: reason !== "auth_failed", messageCode: `serper_${reason}` } } : {}) });
       } finally { release(); }
     },
