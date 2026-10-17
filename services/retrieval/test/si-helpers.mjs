@@ -49,6 +49,8 @@ export const answers = {
   tavily: (q) => ({ status: 200, body: { query: q, results: site("tavily", 3).map((url, i) => ({ title: `Tavily ${i + 1}`, url, content: "tavily content", score: 0.9 - i / 10 })), usage: { credits: 2 }, request_id: "tv-req", response_time: 1.2 } }),
 };
 export const HOSTS = { serper: "serper.fixture.fcpi.test", brave: "brave.fixture.fcpi.test", exa: "exa.fixture.fcpi.test", deepseek: "deepseek.fixture.fcpi.test", tavily: "tavily.fixture.fcpi.test" };
+// Documentation and decision fixtures: started only when a test gives their handler.
+export const EXTRA_HOSTS = { context7: "context7.fixture.fcpi.test", ref: "ref.fixture.fcpi.test", openrouter: "openrouter.fixture.fcpi.test" };
 
 // A fixture server for one provider: records every request (method, url, headers, parsed body) and answers through handler.
 export async function providerServer(name, handler = null) {
@@ -64,7 +66,7 @@ export async function providerServer(name, handler = null) {
     if (a === "destroy") return res.destroy();
     json(res, a.status, a.body, a.headers ?? {});
   });
-  return { ...srv, seen, host: HOSTS[name], name };
+  return { ...srv, seen, host: HOSTS[name] ?? EXTRA_HOSTS[name], name };
 }
 
 // The harness: fixture servers for the five general providers (handlers override defaults), a SearXNG backend fixture, the
@@ -72,11 +74,12 @@ export async function providerServer(name, handler = null) {
 export async function harness({ handlers = {}, searxng = null, mutateBudget = () => {}, mutatePolicy = () => {}, perHour = 60, paidDispatch = true, decisions = null } = {}) {
   const servers = {};
   for (const n of Object.keys(HOSTS)) servers[n] = await providerServer(n, handlers[n] ?? null);
+  for (const n of Object.keys(EXTRA_HOSTS)) if (handlers[n]) servers[n] = await providerServer(n, handlers[n]);
   const sx = searxng ? await serve(searxng) : null;
   let budget;
   try {
     budget = budgetFor({ mutate: (b) => {
-      for (const [n, s] of Object.entries(servers)) b.providers[`fixture-${n}`].baseUrl = `http://${HOSTS[n]}:${s.port}`;
+      for (const [n, s] of Object.entries(servers)) b.providers[`fixture-${n}`].baseUrl = `http://${s.host}:${s.port}`;
       mutateBudget(b);
     } });
   } catch (e) {
@@ -85,7 +88,7 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
     await sx?.close();
     throw e;
   }
-  const policy = { ...policyFor(Object.fromEntries(Object.entries(servers).map(([n, s]) => [HOSTS[n], s.port]))), search: structuredClone(egress.search) };
+  const policy = { ...policyFor(Object.fromEntries(Object.values(servers).map((s) => [s.host, s.port]))), search: structuredClone(egress.search) };
   policy.search.perHour = perHour;
   mutatePolicy(policy);
   const dir = providersDir({ fixture_serper: "synthetic-serper-key" });

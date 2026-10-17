@@ -44,7 +44,7 @@ export function makeContext7({ dispatch, limits }) {
     const res = await dispatch.call({ sub: ctx.sub, pre: ctx.pre, kind: "docs_search", callKey: `search:${request.logicalSearchId}:context7:search:${scope.key}:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
       requestHash: sha256(`${CONTEXT7_CONTRACT}\n${path}`), amount: 1, signal: ctx.signal, deadlineAt: ctx.deadlineAt, timeoutMs: L.providerTimeoutsMs.context7, maxBytes: L.responseBytes.context7,
       http: { method: "GET", path, headers: { accept: "application/json", authorization: `Bearer ${ctx.pre.key}` } } });
-    if (!res.ok) return { scope, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState };
+    if (!res.ok) return { scope, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, unanswered: true };
     const { response, close } = res, data = parseJson(response.body);
     const code = str(data?.error, 64, null);
     if (response.status === 404 && code === "no_documentation_found") { await close.settle(1, { usage: { requests: 1 }, detail: "Context7 search: no documentation found" }); return { scope, status: "empty" }; }
@@ -113,7 +113,8 @@ export function makeContext7({ dispatch, limits }) {
         documentation: { scopes: d.scopes, observedVersion: null, programmingLanguages: [...new Set(d.passages.map((p) => p.language).filter(Boolean))] } }));
       const subs = results.map((r) => ({ scope: { libraries: r.scope.libraries, version: r.scope.version }, status: r.status, reason: r.reason ?? null, detail: r.detail ?? null }));
       const ok = results.filter((r) => r.status === "ok" || r.status === "empty"), bad = results.filter((r) => r.status === "failed" || r.status === "unsupported");
-      for (const r of results.filter((x) => x.status === "failed")) await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, retryAt: r.retryAt ?? null, retryBasis: r.retryAt ? "documented" : null, providerCode: r.providerCode, detail: r.detail });
+      // A scope that got no answer was already judged by dispatch.call: reporting it again only informs availability.
+      for (const r of results.filter((x) => x.status === "failed")) await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, retryAt: r.retryAt ?? null, retryBasis: r.retryAt ? "documented" : null, providerCode: r.providerCode, detail: r.detail }, { answered: !r.unanswered });
       if (ok.length) await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: t0 });
       const base = { provider: "context7", kind: "docs_search", startedAt: new Date(t0).toISOString(), dispatchState: results.some((r) => r.status === "ok" || r.status === "empty") ? "response_received" : "not_sent",
         suboperations: subs, auxiliaryContext: aux, usage: { requests: results.filter((r) => ["ok", "empty"].includes(r.status) || r.dispatchState === "possibly_sent").length }, detail: mismatched ? `${mismatched} passage(s) of a mismatched version left out` : null };

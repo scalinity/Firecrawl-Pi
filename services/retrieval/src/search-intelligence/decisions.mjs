@@ -141,7 +141,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
       const res = await dispatch.call({ sub, pre, kind: "decision", callKey: `search:${request.logicalSearchId}:jev:${purpose}:${sha256(buf).slice(0, 24)}:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
         requestHash: sha256(`${DECISIONS_CONTRACT}\n${buf}`), amount, signal, deadlineAt, timeoutMs: Math.max(1, deadlineAt - clock()), maxBytes: L.responseBytes.jev,
         http: { path: "/api/alpha/decisions", headers: { "content-type": "application/json", accept: "application/json", authorization: `Bearer ${pre.key}` }, body: buf } });
-      if (!res.ok) { await dispatch.report(sub, pre.epoch, { reason: res.reason }); return { ok: false, reason: res.reason, detail: res.detail }; }
+      if (!res.ok) { await dispatch.report(sub, pre.epoch, { reason: res.reason }, { answered: false }); return { ok: false, reason: res.reason, detail: res.detail }; }
       const { response, close } = res, data = parseJson(response.body);
       if (response.status !== 200) {
         const source = str(data?.error?.metadata?.limit_source, 64, null);

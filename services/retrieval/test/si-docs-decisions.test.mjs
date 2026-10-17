@@ -1,0 +1,45 @@
+// SI2 dispatch (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §8.2, §15, §18.2): the documentation and decision adapters go
+// through the same metered dispatch as the general engines, so one failed call is one breaker verdict, against fixture
+// servers that speak Context7's and OpenRouter's documented wire formats.
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { harness, request } from "./si-helpers.mjs";
+import { makeContext7 } from "../src/search-intelligence/adapters/context7.mjs";
+import { makeDecisions } from "../src/search-intelligence/decisions.mjs";
+import { JEV_MODEL } from "../src/budget.mjs";
+
+const limitsOf = (h) => () => h.policy.search.intelligence;
+const docsRequest = (q) => request({ originalQuery: q, intelligence: { documentation: "required", libraries: [{ name: "vue" }] } });
+const jevBody = (q) => ({ model: JEV_MODEL, state: { query: q }, questions: { relevant: { type: "noul", instructions: "Is state.query about software?", criteria: { true: "yes", false: "no" } } } });
+
+test("a Jev call that gets no answer is one breaker verdict: two cut connections leave the breaker closed", async () => {
+  const h = await harness({ handlers: { openrouter: () => "destroy" } });
+  try {
+    const decisions = makeDecisions({ dispatch: h.dispatch, store: h.store, limits: limitsOf(h), permits: h.permits });
+    const { sub, pre } = decisions.preflight("fixture", "fcpi-fixture-jev");
+    assert.equal(pre.eligible, true);
+    for (let i = 0; i < 2; i++) {
+      const req = docsRequest(`jev cut ${i}`);
+      const r = await decisions.decide({ body: jevBody(req.originalQuery), kind: "decision", purpose: "rerank", request: req, sub, pre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+      assert.equal(r.ok, false);
+    }
+    assert.equal(h.servers.openrouter.seen.length, 2);
+    assert.equal(h.dispatch.breakerState("fixture-openrouter"), "closed");
+  } finally { await h.close(); }
+});
+
+test("a Context7 scope that gets no answer is one breaker verdict: two cut connections leave the breaker closed", async () => {
+  const h = await harness({ handlers: { context7: () => "destroy" } });
+  try {
+    const context7 = makeContext7({ dispatch: h.dispatch, limits: limitsOf(h) });
+    const sub = h.dispatch.subject("documentationSearches", "fcpi-fixture-context7");
+    const pre = h.dispatch.preflight(sub, { selection: "fixture" });
+    assert.equal(pre.eligible, true);
+    for (let i = 0; i < 2; i++) {
+      const o = await context7.search(docsRequest(`context7 cut ${i}`), { sub, pre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+      assert.equal(o.status, "failed");
+    }
+    assert.equal(h.servers.context7.seen.length, 2);
+    assert.equal(h.dispatch.breakerState("fixture-context7"), "closed");
+  } finally { await h.close(); }
+});
