@@ -14,7 +14,7 @@ function rig({ core = page, extract, scopes = ["scrape", "extract"], cfg = {} } 
   const calls = { core: [], extract: [] };
   const run = makeJsonScrape({ cfg: { coreTimeoutMs: 20000, ...cfg }, M,
     upstream: { call: async (method, path, opts) => { calls.core.push(opts.body); return core(opts.body); } },
-    extractor: { extract: async (body, timeoutMs) => { calls.extract.push({ body, timeoutMs }); return extract(body); } } });
+    extractor: { extract: async (body, timeoutMs, signal) => { calls.extract.push({ body, timeoutMs, signal }); return extract(body); } } });
   const sent = {};
   const ctx = { id: "req-1", client: { scopes: new Set(scopes) }, send: (status, body, headers = {}) => Object.assign(sent, { status, body, headers }) };
   return { go: async (body = BODY) => { await run(ctx, body, body.formats.find((f) => typeof f === "object")); return sent; }, calls };
@@ -41,6 +41,33 @@ test("a request that names its model gets the extra time for its extraction; eve
   await none.go({ ...BODY, formats: [named] });
   const w = Date.parse(none.calls.extract[0].body.deadline) - t1;
   assert.ok(w <= 32000, `no setting, no extra: ${w} ms`);
+});
+
+test("the gateway aborts a request 15 s past the core timeout, and a request that names its model only after the extra time as well", async (t) => {
+  // The abort timer is the outer bound the MCP service and the Agent are sized against (tests/timeout-chain.test.mjs), so its value is
+  // pinned here on a mocked clock: the extraction's signal must stay live right up to the bound and be cancelled at it.
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"] });
+  const named = { ...BODY.formats[0], model: "claude-opus-5-5", reasoningEffort: "high" };
+  const settle = () => new Promise((resolve) => setImmediate(resolve));
+  for (const [label, body, cfg, abortAt] of [["a request that names its model", { ...BODY, formats: [named] }, { modelExtractExtraMs: 300000 }, 20000 + 15000 + 300000],
+    ["a default request", BODY, { modelExtractExtraMs: 300000 }, 20000 + 15000], ["a named model with no extra configured", { ...BODY, formats: [named] }, {}, 20000 + 15000]]) {
+    const start = Date.now();
+    let release;
+    const r = rig({ cfg, extract: () => new Promise((resolve) => { release = () => resolve(answer()); }) });
+    const done = r.go(body);
+    await settle();
+    assert.equal(r.calls.extract.length, 1, `${label}: the extraction started`);
+    const { signal } = r.calls.extract[0];
+    t.mock.timers.tick(abortAt - 1 - (Date.now() - start));
+    await settle();
+    assert.equal(signal.aborted, false, `${label}: not aborted a millisecond before ${abortAt} ms`);
+    t.mock.timers.tick(1);
+    assert.equal(signal.aborted, true, `${label}: aborted at ${abortAt} ms`);
+    release();
+    const out = await done;
+    assert.equal(out.status, 504, label);
+    assert.equal(out.body.code, "REQUEST_TIMEOUT", label);
+  }
 });
 
 test("the json format needs the 'extract' scope, and nothing is scraped without it (review W7)", async () => {
