@@ -237,8 +237,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       };
       const web = final.map((d) => ({ url: d.displayUrl, title: d.title, description: d.description, fcpi: { search: rowMeta(d) } }));
       const body = { schema: "fcpi.search-response/v1", web, ...(warnings.length ? { warning: warningText(search) } : {}), search };
-      // A complete, fully ranked answer is the only one stored whole; it expires with its oldest input (spec §17).
-      if (complete && ["hybrid", "rrf"].includes(ranking.mode)) {
+      // A complete, fully ranked answer is the only one stored whole; it expires with its oldest input (spec §17). Fully ranked is
+      // hybrid, or the deterministic ranking when no decision layer is configured: nothing is waiting to recover, and the key
+      // carries the decision layer's identity, so configuring one later never serves this entry. A fallback from a configured
+      // layer that failed is degraded and is not stored.
+      const fullyRanked = ranking.mode === "hybrid" || (ranking.mode === "rrf_fallback" && ranking.reason === "jev_not_configured");
+      if (complete && fullyRanked) {
         const expiries = lanes.filter(validated).map((o) => o.cacheExpiresAt ?? clock() + L.cacheSeconds.success * 1000);
         const ttlS = Math.floor((Math.min(...expiries) - clock()) / 1000);
         await cachePut(aggKey, body, ttlS);

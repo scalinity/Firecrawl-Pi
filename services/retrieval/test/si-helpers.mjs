@@ -69,7 +69,7 @@ export async function providerServer(name, handler = null) {
 
 // The harness: fixture servers for the five general providers (handlers override defaults), a SearXNG backend fixture, the
 // fixture roster's budget pointed at them, and the coordinator. selection is "fixture" throughout.
-export async function harness({ handlers = {}, searxng = null, mutateBudget = () => {}, mutatePolicy = () => {}, perHour = 60, paidDispatch = true } = {}) {
+export async function harness({ handlers = {}, searxng = null, mutateBudget = () => {}, mutatePolicy = () => {}, perHour = 60, paidDispatch = true, decisions = null } = {}) {
   const servers = {};
   for (const n of Object.keys(HOSTS)) servers[n] = await providerServer(n, handlers[n] ?? null);
   const sx = searxng ? await serve(searxng) : null;
@@ -101,7 +101,7 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   const general = { serper: makeSerperLane({ serper, limits, permits, availability }), brave: makeBrave({ dispatch, limits }), exa: makeExa({ dispatch, limits }),
     deepseek: makeDeepseek({ dispatch, limits, permits }), tavily: makeTavily({ dispatch, limits }) };
   const backend = sx ? makeSearxngBackend({ getPolicy, getSelection, searchUrl: `http://127.0.0.1:${sx.port}/search` }) : null;
-  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, log });
+  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, decisions, log });
   return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper,
     close: async () => { for (const s of Object.values(servers)) await s.close(); await sx?.close(); } };
 }

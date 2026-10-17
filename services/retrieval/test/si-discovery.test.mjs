@@ -376,15 +376,42 @@ test("the paid-dispatch switch and a missing credential are explicit exclusions,
 test("a complete answer is cached whole and served again without admission or dispatch, labelled reuse", async () => {
   const h = await harness();
   try {
-    const first = await h.coordinator.search(request({ originalQuery: "cache me" }), { signal: new AbortController().signal });
-    // Without Jev configured the ranking is a fallback, so the whole answer is not stored; the provider entries are.
-    assert.equal(first.body.search.ranking.mode, "rrf_fallback");
-    const second = await h.coordinator.search(request({ originalQuery: "cache me" }), { signal: new AbortController().signal });
-    assert.equal(second.body.search.cache.mode, "partial_reuse");
-    assert.equal(h.store.admissions, 2, "a new execution is admitted even when every lane is reused");
-    assert.equal(Object.values(h.servers).reduce((n, s) => n + s.seen.length, 0), 5, "no provider was called twice");
+    const firstReq = request({ originalQuery: "cache me" });
+    const first = await h.coordinator.search(firstReq, { signal: new AbortController().signal });
+    // No decision layer is configured: the deterministic ranking is the full ranking, and the complete answer is stored whole.
+    assert.deepEqual([first.body.search.ranking.mode, first.body.search.ranking.reason], ["rrf_fallback", "jev_not_configured"]);
+    const secondReq = request({ originalQuery: "cache me" });
+    const second = await h.coordinator.search(secondReq, { signal: new AbortController().signal });
+    const s = second.body.search;
+    assert.equal(s.cache.mode, "hit");
+    assert.ok(s.cache.storedAt && s.cache.expiresAt && s.cache.servedAt);
+    assert.equal(h.store.admissions, 1, "a complete aggregate hit precedes admission");
+    assert.equal(Object.values(h.servers).reduce((n, srv) => n + srv.seen.length, 0), 5, "no provider was called again");
+    assert.deepEqual(s.usage, [], "a reused answer spends nothing");
+    assert.equal(s.reuseOf, firstReq.logicalSearchId);
+    assert.equal(s.logicalSearchId, secondReq.logicalSearchId);
+    assert.ok(Object.values(s.providers).every((p) => p.fromCache));
     assert.deepEqual(second.body.web.map((w) => w.url), first.body.web.map((w) => w.url));
-    assert.ok(Object.values(second.body.search.providers).every((p) => p.fromCache));
+    // The legacy facade maps the same reuse to its own cache label.
+    const legacyFirst = await h.coordinator.legacyGet("/searxng/search?q=legacy+cache&format=json", new AbortController().signal);
+    const legacyAgain = await h.coordinator.legacyGet("/searxng/search?q=legacy+cache&format=json", new AbortController().signal);
+    assert.deepEqual([legacyFirst.body.fcpi.cache, legacyAgain.body.fcpi.cache], ["miss", "hit"]);
+  } finally { await h.close(); }
+});
+
+test("an answer whose configured decision layer fell back is degraded and never stored whole", async () => {
+  const decisions = { identity: () => "jev-stub", rerank: async () => ({ ranking: { mode: "rrf_fallback", reason: "jev_timeout" } }) };
+  const h = await harness({ decisions });
+  try {
+    for (let i = 0; i < 2; i++) {
+      const r = await h.coordinator.search(request({ originalQuery: "degraded ranking" }), { signal: new AbortController().signal });
+      assert.equal(r.body.search.ranking.mode, "rrf_fallback");
+      assert.notEqual(r.body.search.cache.mode, "hit");
+      // The second execution reuses every lane from the provider cache: a new execution, no new provider call.
+      if (i === 1) assert.equal(r.body.search.cache.mode, "partial_reuse");
+    }
+    assert.equal(h.store.admissions, 2, "each degraded answer is a new execution");
+    assert.equal(Object.values(h.servers).reduce((n, srv) => n + srv.seen.length, 0), 5);
   } finally { await h.close(); }
 });
 
