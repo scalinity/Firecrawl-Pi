@@ -97,9 +97,10 @@ export function buildPool(lanes, { poolMax, workingSetBytes }) {
         docs.set(c.documentId, d);
       }
       if (!d.originalUrls.includes(c.url)) d.originalUrls.push(c.url);
+      // Each observation keeps the exact URL its provider returned (spec §6.2: a Ref read is sent that URL, not the canonical one).
       const prior = d.observations.find((o) => o.provider === c.provider);
-      if (!prior) d.observations.push({ provider: c.provider, rank: c.rank, rawScore: c.rawScore ?? null, retrievedAt: lane.retrievedAt, fromCache: lane.fromCache, resultId: c.resultId ?? null, fragment: c.fragment });
-      else if (c.rank < prior.rank) Object.assign(prior, { rank: c.rank, rawScore: c.rawScore ?? null, resultId: c.resultId ?? null, fragment: c.fragment });
+      if (!prior) d.observations.push({ provider: c.provider, rank: c.rank, rawScore: c.rawScore ?? null, retrievedAt: lane.retrievedAt, fromCache: lane.fromCache, resultId: c.resultId ?? null, fragment: c.fragment, providerUrl: c.providerUrl ?? c.url });
+      else if (c.rank < prior.rank) Object.assign(prior, { rank: c.rank, rawScore: c.rawScore ?? null, resultId: c.resultId ?? null, fragment: c.fragment, providerUrl: c.providerUrl ?? c.url });
       // Title and description come from the best-ranked observation (ties by provider order, which the lane order fixes).
       if (!d.best || c.rank < d.best.rank) { d.best = { rank: c.rank, provider: c.provider }; d.title = c.title ?? ""; d.description = c.description ?? ""; d.displayUrl = c.url; }
       if (!d.publication && c.publication) d.publication = { ...c.publication, provider: c.provider };

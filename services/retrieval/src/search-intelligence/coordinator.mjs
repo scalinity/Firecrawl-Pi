@@ -5,7 +5,8 @@
 //      that cannot run is skipped with one of the spec's reasons; SearXNG runs at most once, as fallback, augmentation or
 //      (by configuration) alongside;
 //   4. documentation lanes start as soon as activation is known (explicitly at once; otherwise overlapping discovery);
-//   5. normalization, constraints and fusion are deterministic; Jev's advice, when it arrives in time, is blended in;
+//   5. normalization, constraints and fusion are deterministic; then, within the semantic budget, at most two selected Ref reads
+//      and Jev's advice, blended in when it arrives in time;
 //   6. the outcome says what happened: complete, partial or a typed failure (no lane validated) — never an empty success
 //      standing in for a failure; Jev's success is never discovery coverage.
 // Callers asking the same search at once share one execution (reference-counted: one caller's cancellation detaches it,
@@ -24,6 +25,8 @@ const REASON_TEXT = { not_configured: "not configured", temporarily_unavailable:
   platform_restricted: "restricted by this deployment", timeout: "timed out", cancelled: "cancelled", capacity_unavailable: "no capacity in time", internal_failure: "failed internally" };
 const sleep = (ms, signal) => new Promise((r) => { const t = setTimeout(r, ms); signal?.addEventListener("abort", () => { clearTimeout(t); r(); }, { once: true }); });
 const iso = (t) => new Date(t).toISOString();
+// A passage this long is an excerpt worth ranking on; a Ref hit with none is a read candidate (spec §6.2).
+const USEFUL_EXCERPT_CHARS = 200;
 
 export function makeCoordinator({ store, getBudget, getPolicy, getSelection, getConfigHashes = () => ({}), dispatch, general, searxng, docs = {}, documentation = null, decisions = null,
   availability, telemetry = null, legacy = null, log = () => {}, clock = Date.now }) {
@@ -86,10 +89,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     // as timed out; the adapter keeps closing its reservation in the background, tracked, and can send nothing more. The grace
     // stays within half the response margin, so a lane whose deadline is the search's last moment still leaves time to answer.
     const grace = Math.min(250, Math.floor(L.responseMarginMs / 2));
-    const bound = new Promise((resolve) => { timer = setTimeout(() => { child.abort(); resolve(failed(adapter.id, signal.aborted ? "cancelled" : "timeout", "lane_deadline", { kind, dispatchState: "possibly_sent" })); }, Math.max(0, deadlineAt - clock()) + grace); });
-    let o;
+    let o, boundFired = false;
+    const bound = new Promise((resolve) => { timer = setTimeout(() => { boundFired = true; child.abort(); resolve(failed(adapter.id, signal.aborted ? "cancelled" : "timeout", "lane_deadline", { kind, dispatchState: "possibly_sent" })); }, Math.max(0, deadlineAt - clock()) + grace); });
     try { o = await Promise.race([work, bound]); }
     finally { clearTimeout(timer); signal.removeEventListener("abort", onParent); }
+    // A session lease that arrives after the lane was given up has no owner: it is closed when it arrives.
+    if (boundFired) work.then((late) => late?.lease && track(late.lease.close().catch(() => {})));
     o = { ...o, durationMs: clock() - t0, kind };
     if (pkey && ["success_results", "success_empty"].includes(o.status)) {
       const { candidates, upstreamResultCount, status, providerRequestId, usage, constraints, suboperations, auxiliaryContext } = o;
@@ -133,6 +138,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     signal.addEventListener("abort", onCaller, { once: true });
     if (signal.aborted) parent.abort();
     const timings = { admittedAt: iso(tAdmit) };
+    // Ref session leases (spec §6.2): taken as each documentation lane ends, closed when the logical search ends, after any
+    // selected reads; one arriving after that is closed at once. No lease is kept in an outcome, a cache entry or a response.
+    const leases = new Map();
+    let ended = false;
+    const closeLease = (l) => track(l.close().catch(() => {}));
+    const takeLease = (o) => { if (!o?.lease) return o; const l = o.lease; delete o.lease; if (ended) closeLease(l); else leases.set(o.provider, l); return o; };
     try {
       if (!roster) throw new Denied("SEARCH_BACKEND_UNAVAILABLE", "the aggregate profile has no roster for this selection");
       // SearXNG: alongside (additional), or as fallback when a general lane is ineligible now or fails while two seconds remain,
@@ -171,8 +182,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
         const docsAdapters = roster.documentationSubjects.map((name) => adapterFor("documentationSearches", name, docs));
         const admits = await Promise.all(roster.documentationSubjects.map((name, i) => admitLane(docsAdapters[i], "documentationSearches", name, request, selection, parent.signal, discoveryClose)));
         docsTasks = admits.map((a, i) => a.skip ? Promise.resolve(a.skip)
-          : runLane({ adapter: docsAdapters[i], sub: a.sub, pre: a.pre, request, selection, signal: parent.signal, deadlineAt: Math.min(discoveryClose, tDocs + L.providerTimeoutsMs[docsAdapters[i].id]), kind: "docs_search" }));
-      })();
+          : runLane({ adapter: docsAdapters[i], sub: a.sub, pre: a.pre, request, selection, signal: parent.signal, deadlineAt: Math.min(discoveryClose, tDocs + L.providerTimeoutsMs[docsAdapters[i].id]), kind: "docs_search" }).then(takeLease));
+      })().catch((e) => {
+        // A failed activation leaves documentation off for this search; the general lanes are unaffected.
+        log({ event: "si_documentation_failed", error: e?.message?.slice(0, 200) });
+        activation = { active: false, reason: "documentation_failed", classifierVersion: VERSIONS.classifier, uncertainty: null };
+      });
       const generalOutcomes = await Promise.all(generalTasks);
       if (mode === "fallback" && !searxngTask && generalOutcomes.every((o) => o.status === "success_empty" || o.status === "skipped" || o.status === "failed")) launchSearxng("no_general_results");
       await docsReady;
@@ -202,6 +217,8 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       const short = shortlist(pool, { max: L.candidates.shortlistMax, seedPerProvider: L.candidates.seedPerProvider, providers: providersPresent.filter((p) => p !== "searxng").concat(providersPresent.includes("searxng") ? ["searxng"] : []) });
       // 5b. Semantic phase (spec §11.2): Jev's advice within its own budget, never past the request's.
       const semanticClose = Math.min(clock() + L.semanticMs, hardEnd);
+      const enrichment = await refReads({ request, presemantic, docsOutcomes, activation, selection, roster, signal: parent.signal, semanticClose, leases });
+      if (enrichment.attempted) timings.refReadMs = enrichment.elapsedMs;
       let ranking = { mode: "rrf_fallback", reason: decisions ? "semantic_not_run" : "jev_not_configured", version: VERSIONS.ranker, shortlisted: short.length, scored: 0 };
       if (decisions && roster.decisionSubject && semanticClose - clock() > 500) {
         const t = clock();
@@ -229,17 +246,18 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       if (ranking.mode === "rrf_fallback" && decisions) warnings.push(`ranking_${ranking.reason}`);
       if (ranking.mode === "hybrid_partial") warnings.push("ranking_partial_semantic");
       if (auxiliaryContext.length) warnings.push("documentation_auxiliary_context");
+      if (enrichment.limitation) warnings.push(`ref_enrichment_${enrichment.limitation}`);
       const coverage = {
         general: { requested: GENERAL.length, successful: generalOk.length, fromCache: generalOk.filter((o) => o.fromCache).length, missing: generalMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })) },
         documentation: { activated: docsActive, reason: activation.reason, requested: docsActive ? DOCUMENTATION.length : 0, successful: docsOutcomes.filter(validated).length, missing: docsMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })) },
         searxng: { used: !!searxngOutcome, why: searxngWhy, status: searxngOutcome?.status ?? null, reason: searxngOutcome?.reason ?? null },
         decisions: { status: ranking.mode === "rrf_fallback" ? (decisions ? "not_used" : "not_configured") : ranking.mode, reason: ranking.reason },
       };
-      const usage = lanes.filter((o) => o.usage && !o.fromCache).map((o) => ({ provider: o.provider, ...o.usage })).concat(ranking.usage ?? []);
+      const usage = lanes.filter((o) => o.usage && !o.fromCache).map((o) => ({ provider: o.provider, ...o.usage })).concat(enrichment.usage, activation.usage ? [{ provider: "jev", purpose: "docs_detect", ...activation.usage }] : [], ranking.usage ?? []);
       const search = {
         schema: RESPONSE_SCHEMA, logicalSearchId: request.logicalSearchId, requestId: request.requestId, profile: "aggregate", selection,
         outcome: complete ? "complete" : "partial", empty: final.length === 0, ...(final.length === 0 && prepared.some((p) => p.o.filteredEmpty) ? { filteredEmpty: true } : {}),
-        coverage, providers: summary, documentation: { activation, auxiliaryContext: boundAux(auxiliaryContext) },
+        coverage, providers: summary, documentation: { activation, auxiliaryContext: boundAux(auxiliaryContext), ...(enrichment.attempted ? { enrichment: enrichment.record } : {}) },
         ranking: { mode: ranking.mode, reason: ranking.reason, version: VERSIONS.ranker, shortlisted: ranking.shortlisted, scored: ranking.scored, model: ranking.model ?? null },
         cache: { mode: lanes.some((o) => o.fromCache) ? "partial_reuse" : "miss", servedAt: iso(clock()), originalRetrievedAt: oldest(lanes) },
         timings: { ...timings, totalMs: clock() - tAdmit }, pool: { candidates: all.reduce((n, o) => n + o.candidates.length, 0), distinct, pooled: pool.length, shortlisted: short.length, returned: final.length, truncatedPassages },
@@ -261,9 +279,50 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       return { body, pool, final };
     } finally {
       signal.removeEventListener("abort", onCaller);
+      ended = true;
+      for (const l of leases.values()) closeLease(l);
+      leases.clear();
     }
   }
 
+  // Selected Ref reads (spec §6.2): when documentation is required, or results are scraped with evidence on, at most two Ref
+  // documents provisionally within the requested limit that lack an excerpt are read, concurrently, each within refReadMs and
+  // the semantic phase. The discovery's own session is used; a discovery served from cache first opens one fresh session whose
+  // context search is its own metered operation. A failure is an enrichment limitation, never a retry.
+  async function refReads({ request, presemantic, docsOutcomes, activation, selection, roster, signal, semanticClose, leases }) {
+    const none = { attempted: 0, usage: [], limitation: null };
+    const wanted = request.intelligence.documentation === "required" || (request.resultMode === "scrape" && request.intelligence.evidence === "auto");
+    const refOutcome = docsOutcomes.find((o) => o.provider === "ref" && validated(o));
+    if (!activation.active || !wanted || !refOutcome || !docs.ref) return none;
+    const selected = presemantic.slice(0, request.limit).filter((d) => d.observations.some((o) => o.provider === "ref") && !d.passages.some((p) => String(p.text ?? "").trim().length >= USEFUL_EXCERPT_CHARS)).slice(0, 2);
+    if (!selected.length) return none;
+    const t0 = clock(), readClose = Math.min(semanticClose, t0 + limits().refReadMs);
+    const usage = [];
+    let lease = leases.get("ref") ?? null, contextInit = false;
+    if (!lease) {
+      const name = roster.documentationSubjects.find((n) => dispatch.subject("documentationSearches", n)?.prov?.api === docs.ref.api);
+      const sub = name ? dispatch.subject("documentationSearches", name) : null;
+      const pre = sub ? dispatch.preflight(sub, { selection }) : { eligible: false };
+      if (pre.eligible) {
+        lease = await docs.ref.contextLease(request, { sub, pre, signal, deadlineAt: readClose, selection });
+        contextInit = true;
+        if (lease) { leases.set("ref", lease); usage.push({ provider: "ref", operation: "context_init", credits: sub.card.creditsPerOperation, basis: "documented" }); }
+      }
+      if (!lease) return { attempted: selected.length, usage, limitation: "session_unavailable", elapsedMs: clock() - t0, record: { selected: selected.length, read: 0, contextInit, limitation: "session_unavailable" } };
+    }
+    const results = await Promise.all(selected.map((d) => lease.read(d.observations.find((o) => o.provider === "ref").providerUrl, { signal, deadlineAt: readClose })));
+    let read = 0;
+    const failures = [];
+    results.forEach((r, i) => {
+      if (!r.ok) { failures.push(r.reason); return; }
+      const d = selected[i];
+      read++;
+      if (!d.passages.some((p) => p.contentHash === r.passage.contentHash)) d.passages.unshift(r.passage);
+      usage.push({ provider: "ref", operation: "read", ...r.usage });
+    });
+    const limitation = failures.length ? failures[0] : null;
+    return { attempted: selected.length, usage, limitation, elapsedMs: clock() - t0, record: { selected: selected.length, read, contextInit, ...(limitation ? { limitation } : {}) } };
+  }
   // ---- in-flight sharing (spec §14.2, §17) -----------------------------------------------------------------------------------
   async function search(raw, { signal }) {
     const request = validateSearchRequest(raw, clock());
