@@ -3,14 +3,14 @@
 // around it (reservation, settlement, failure classes) is tested through the fixture model in m5-extract.test.mjs.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { messagesHeaders, messagesRequest, readMessages, unions, forGrammar, MAX_UNIONS } from "../src/anthropic.mjs";
+import { messagesHeaders, messagesRequest, readMessages, readStream, unions, forGrammar, MAX_UNIONS } from "../src/anthropic.mjs";
 import { toStrict } from "../src/jsonschema.mjs";
 
 const CHAT = [{ role: "system", content: "Extract." }, { role: "user", content: "Content." }];
 const objectOf = (n, type = "string") => ({ type: "object", properties: Object.fromEntries(Array.from({ length: n }, (_, i) => [`f${i}`, { type }])), required: ["f0"] });
 
 test("headers carry the key as x-api-key and the API version, and no bearer token", () => {
-  assert.deepEqual(messagesHeaders("sk-ant-test"), { "content-type": "application/json", accept: "application/json", "anthropic-version": "2023-06-01", "x-api-key": "sk-ant-test" });
+  assert.deepEqual(messagesHeaders("sk-ant-test"), { "content-type": "application/json", accept: "text/event-stream", "anthropic-version": "2023-06-01", "x-api-key": "sk-ant-test" });
   assert.equal(Object.hasOwn(messagesHeaders(null), "x-api-key"), false);
 });
 
@@ -134,4 +134,29 @@ test("a guided answer loses a code fence around it; a constrained one is returne
   assert.equal(readMessages(fenced, { guided: true }).content, "{\"a\":1}");
   assert.equal(readMessages(fenced).content, "```json\n{\"a\":1}\n```");
   assert.equal(readMessages({ ...fenced, content: [{ type: "text", text: "{\"a\":1}" }] }, { guided: true }).content, "{\"a\":1}");
+});
+
+test("a request is streamed, and a streamed answer reads back as the message a non-streamed call returns", () => {
+  assert.equal(messagesRequest({ model: "claude-haiku-5-5", effort: "none", messages: CHAT, schema: toStrict(objectOf(1)), maxOutputTokens: 4000 }).body.stream, true);
+  const ev = (type, data) => `event: ${type}\r\ndata: ${JSON.stringify({ type, ...data })}\r\n\r\n`;
+  const body = ev("message_start", { message: { id: "m", model: "claude-opus-5-5", content: [], stop_reason: null, usage: { input_tokens: 294, output_tokens: 8 } } })
+    + ev("content_block_start", { index: 0, content_block: { type: "thinking", thinking: "" } }) + ev("content_block_delta", { index: 0, delta: { type: "signature_delta", signature: "s" } })
+    + ev("content_block_stop", { index: 0 }) + ev("ping", {})
+    + ev("content_block_start", { index: 1, content_block: { type: "text", text: "" } })
+    + ev("content_block_delta", { index: 1, delta: { type: "text_delta", text: "{\"f0\":" } }) + ev("content_block_delta", { index: 1, delta: { type: "text_delta", text: "\"x\"}" } })
+    + ev("content_block_stop", { index: 1 }) + ev("some_new_event", {}) + "data: {not json\n\n"
+    + ev("message_delta", { delta: { stop_reason: "end_turn" }, usage: { input_tokens: 294, output_tokens: 20612 } }) + ev("message_stop", {});
+  const { message, complete, error } = readStream(body);
+  assert.equal(complete, true);
+  assert.equal(error, null);
+  const read = readMessages(message);
+  assert.equal(read.content, "{\"f0\":\"x\"}");
+  assert.equal(read.finishReason, "stop");
+  assert.equal(read.resolvedModel, "claude-opus-5-5");
+  assert.deepEqual(read.counts, [294, 20612, 0, 0], "the final, cumulative usage");
+  assert.equal(readStream(body.replace(/event: message_stop[\s\S]*$/, "")).complete, false, "no message_stop: incomplete");
+  const failed = readStream(body.replace(/event: message_stop[\s\S]*$/, "") + ev("error", { error: { type: "overloaded_error" } }) + ev("message_stop", {}));
+  assert.equal(failed.complete, false, "an error event makes it incomplete even if message_stop follows");
+  assert.equal(failed.error.type, "overloaded_error");
+  assert.deepEqual(readStream("").message, null);
 });

@@ -5,8 +5,10 @@
 // The adapter, for each call: the model must be listed (MODEL_NOT_ALLOWED), have a rate card in effect
 // (RATE_CARD_MISSING), be unpaid or have paid dispatch enabled (PAID_DISPATCH_DISABLED), have its
 // credential (BLOCKED_CREDENTIAL) and a closed breaker (PROVIDER_UNAVAILABLE). Then the call's maximum
-// cost is reserved atomically (BUDGET_EXHAUSTED), the provider is called once with no retry, and the reservation is settled from the provider's own usage counts:
-// released when the request never left, kept whole when its outcome is unknown. A call key names each
+// cost is reserved atomically (BUDGET_EXHAUSTED), the provider is called once with no retry, and the
+// reservation is settled from the provider's own usage counts: released when the request never left, kept
+// whole when its outcome is unknown. A call that is sent runs to its end even when the caller stops waiting
+// for it (EXTRACTION_IN_FLIGHT), so its answer is settled and stored. A call key names each
 // call inside its logical unit, so a retried request reuses a settled call's stored answer and never
 // sends one that is still unaccounted for.
 //
@@ -19,7 +21,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { rateCardFor, maxModelCost, modelCost, estimateTokens, periodStarts, Breaker, paidDispatchActive, paidTotalDayCap } from "./budget.mjs";
 import { checkSchema, toStrict, validate, missingRequired, SchemaError } from "./jsonschema.mjs";
 import { providerRequest, readCredential, ProviderError } from "./provider.mjs";
-import { messagesRequest, messagesHeaders, readMessages } from "./anthropic.mjs";
+import { messagesRequest, messagesHeaders, readMessages, readStream } from "./anthropic.mjs";
 
 export class ExtractionFailure extends Error {
   constructor(failureClass, detail, { retryable = false, retryAfter = null } = {}) {
@@ -42,12 +44,14 @@ export function canonical(v) {
 }
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 const MIN_REQUEST_MS = 1000;
-// A model that reasons runs for seconds to minutes and, once sent, is billed whether or not the caller waits; a call the deadline cuts off
-// keeps its whole reservation as uncertain. So it is not started with less than a minute left (or its whole timeout, if shorter).
+// A model that reasons runs for seconds to minutes, and once sent it is billed whether or not the caller waits; one started
+// with less than a minute left (or its whole timeout, if shorter) would end after its caller has gone. So it is not started.
 const REASONING_MIN_START_MS = 60000;
-// The longest an extraction runs (the engine's deadline cap): a reservation still RESERVED within this and
-// one request timeout of its creation may belong to a call still waiting or in flight.
-const LONGEST_EXTRACTION_MS = 900000;
+// A Messages API call is streamed: the API sends a ping every 30 s while the model thinks (measured 2026-10-17), so a
+// stream silent for three of those has failed. A call still streaming is never cut by its caller's wait; this ceiling
+// is the only bound on it, past 128,000 output tokens at the slowest rate measured for Opus 5.5 (105 tokens/s, 20 minutes).
+const STREAM_IDLE_MS = 90000;
+const CALL_CEILING_MS = 1800000;
 
 // The provider's own id for a request (Anthropic's request-id, or the usual x-request-id): not a secret, and what a
 // disputed or uncertain charge is matched by in the provider's console.
@@ -112,8 +116,9 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
           output_cap_tokens: maxOutputTokens, reused: true, cost_micro_usd: Number(r.existing.actual) });
         return { ...r.existing.result, usage: r.existing.usage, cost: Number(r.existing.actual), reused: true, reservationId: r.existing.id };
       }
-      // A call another request is still making: its answer will be stored, so a later retry reuses it (review W13).
-      if (r.existing.state === "RESERVED" && Date.now() - Date.parse(r.existing.created_at) < LONGEST_EXTRACTION_MS + (m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs)) {
+      // A call another request is still making: its answer will be stored, so a later retry reuses it (review W13). A call
+      // runs for at most its ceiling (or its own timeout, if longer) after its reservation; one older came from a service that stopped.
+      if (r.existing.state === "RESERVED" && Date.now() - Date.parse(r.existing.created_at) < Math.max(CALL_CEILING_MS, m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs) + 60000) {
         throw fail("EXTRACTION_IN_FLIGHT", `call ${callKey} is still being made by an earlier request; retry once it has settled`, { retryable: true, retryAfter: 30 });
       }
       throw fail("EXTRACTION_UNCERTAIN", `call ${callKey} was sent before and its outcome is unknown (${r.existing.state}); it is not sent again`);
@@ -137,13 +142,33 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       throw fail("CANCELLED", "the caller cancelled");
     }
     const started = Date.now();
+    // The caller waits for the call up to its own deadline and, for a streamed call, the model's timeout; the call itself is
+    // not cut there. A cut-off call could never be priced (its usage arrives with the end of its answer) and would keep its
+    // whole reservation as uncertain, so it runs to its end, is settled and stored, and a retry of the request reuses it. A
+    // call to the chat API is not streamed and ends at the model's timeout itself.
+    const waitMs = messagesApi ? Math.min(m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs, deadline - Date.now()) : deadline - Date.now();
+    const outcome = finish({ prov, messagesApi, wire, payload, cred, authorize, breaker, res, amount, card, m, model, kind, logicalId, callKey, maxOutputTokens, started });
+    let timer;
+    const waited = await Promise.race([outcome.then((v) => ({ v }), (e) => ({ e })), new Promise((r) => { timer = setTimeout(() => r(null), Math.max(0, waitMs)); })]);
+    clearTimeout(timer);
+    if (waited === null) {
+      throw fail("EXTRACTION_IN_FLIGHT", `the model call is still running after ${Math.round((Date.now() - started) / 1000)} s; it runs to its end and is settled, and a retry of this request reuses its answer`, { retryable: true, retryAfter: 30 });
+    }
+    if (waited.e) throw waited.e;
+    return waited.v;
+  }
+
+  // Sends one reserved call and closes its reservation: released when it never left, kept whole when its outcome is unknown,
+  // settled from the provider's usage when it answered.
+  async function finish({ prov, messagesApi, wire, payload, cred, authorize, breaker, res, amount, card, m, model, kind, logicalId, callKey, maxOutputTokens, started }) {
     let answer;
     try {
       // No cancellation reaches a request once it is out: a caller that left gets its answer settled and stored,
-      // so its retry reuses it instead of paying twice; only the next call is not made.
+      // so its retry reuses it instead of paying twice; only the next call is not made. A streamed call is bounded by
+      // its ceiling and by silence; a call to the chat API, which is not streamed, by the model's timeout.
       answer = await providerRequest({ baseUrl: prov.baseUrl, path: wire.path, body: payload, getPolicy, resolvePublic, lookupFixture, authorize,
         headers: messagesApi ? messagesHeaders(cred) : { "content-type": "application/json", accept: "application/json", ...(cred ? { authorization: `Bearer ${cred}` } : {}) },
-        timeoutMs: Math.min(m.requestTimeoutMs ?? budget.extraction.requestTimeoutMs, deadline - Date.now()) });
+        ...(messagesApi ? { timeoutMs: CALL_CEILING_MS, idleMs: STREAM_IDLE_MS, maxBytes: 16 * 1048576 } : { timeoutMs: m.requestTimeoutMs ?? getBudget().extraction.requestTimeoutMs }) });
     } catch (e) {
       if (!(e instanceof ProviderError)) throw e;
       breaker[["CANCELLED", "PAID_DISPATCH_DISABLED"].includes(e.code) ? "neutral" : "failure"]();
@@ -157,8 +182,19 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       throw fail("PROVIDER_UNCERTAIN", `the request to ${m.provider} may have been processed and no answer came; its reservation of ${amount} micro-USD stays counted`);
     }
     let json = null;
-    try { json = JSON.parse(answer.body.toString("utf8")); } catch { /* classified below */ }
+    const streamed = messagesApi && answer.status === 200 ? readStream(answer.body.toString("utf8")) : null;
+    if (streamed) json = streamed.message;
+    else try { json = JSON.parse(answer.body.toString("utf8")); } catch { /* classified below */ }
     const code = json?.error?.code ?? json?.error?.type ?? null;
+    if (streamed && !streamed.complete) {
+      // The answer began and did not end (an error event, or the stream closed early): what it cost cannot be known, since
+      // thinking is billed but never streamed, so the reservation stays counted.
+      breaker.failure();
+      const why = streamed.error ? `an error event (${String(streamed.error.type).slice(0, 60)})` : "the stream ended before message_stop";
+      await store.markBudgetUncertain(res.id, `streamed answer incomplete: ${why}`);
+      log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: "stream_incomplete", provider_request_id: requestIdOf(answer.headers), reserved_micro_usd: amount, ms: Date.now() - started });
+      throw fail("PROVIDER_UNCERTAIN", `${m.provider}'s streamed answer ended with ${why}; its reservation of ${amount} micro-USD stays counted`);
+    }
     if (answer.status === 502 || answer.status === 504) {
       // A proxy in front of the provider answered after the request was delivered: whether the completion ran
       // is unknown, so the reservation stays counted (spec §28.3; review W11).

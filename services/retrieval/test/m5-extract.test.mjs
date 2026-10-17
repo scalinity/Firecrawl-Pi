@@ -415,8 +415,8 @@ test("no request is started with less than a second of the deadline left (review
 });
 
 test("a model that reasons is not started with less than a minute left (or its whole timeout, when shorter); one that does not reason is", async () => {
-  // A reasoning call that the deadline cuts off keeps its whole reservation as uncertain and is never resent, so the floor is
-  // the cost of starting one that cannot finish. The Messages-API fixture here answers at once; only the floor decides.
+  // A reasoning call runs to its end and is billed whether or not its caller is still waiting, so one that its caller could not
+  // wait for is not started. The Messages-API fixture here answers at once; only the floor decides.
   const deadlineIn = (ms) => new Date(Date.now() + ms).toISOString();
   for (const { timeout, tooShort, enough, floor } of [{ timeout: 90000, tooShort: 20000, enough: 65000, floor: /less than 60 s/ }, { timeout: 30000, tooShort: 20000, enough: 40000, floor: /less than 30 s/ }]) {
     const seen = {};
@@ -581,11 +581,23 @@ const messagesApi = (efforts = {}) => (b) => {
   for (const name of ["fcpi-fixture-model", "fcpi-fixture-race", "fcpi-fixture-stale"]) b.models[name].reasoningEffort = efforts[name] ?? "none";
 };
 const ANSWER = { product: "Fixture Widget", price: null, in_stock: null, feature: null };
-const messagesBody = (over = {}) => JSON.stringify({ id: "msg_fixture", type: "message", role: "assistant", model: "fcpi-fixture-model", stop_reason: "end_turn",
+// The answer as the API streams it: message_start with the message and its usage, each block as a start and a delta, a ping,
+// then message_delta with the stop reason and the cumulative usage, and message_stop. end: false leaves message_stop off.
+const streamOf = ({ content, usage, stop_reason, stop_details, ...head }, { end = true } = {}) => {
+  const ev = (type, data) => `event: ${type}\ndata: ${JSON.stringify({ type, ...data })}\n\n`;
+  return [ev("message_start", { message: { ...head, content: [], stop_reason: null, usage } }),
+    ...content.flatMap((b, index) => b.type === "text"
+      ? [ev("content_block_start", { index, content_block: { type: "text", text: "" } }), ev("content_block_delta", { index, delta: { type: "text_delta", text: b.text } }), ev("content_block_stop", { index })]
+      : [ev("content_block_start", { index, content_block: { ...b } }), ev("content_block_stop", { index })]),
+    ev("ping", {}), ev("message_delta", { delta: { stop_reason, ...(stop_details ? { stop_details } : {}) }, usage }), ...(end ? [ev("message_stop", {})] : [])].join("");
+};
+const messageOf = (over = {}) => ({ id: "msg_fixture", type: "message", role: "assistant", model: "fcpi-fixture-model", stop_reason: "end_turn",
   content: [{ type: "thinking", thinking: "", signature: "sig" }, { type: "text", text: JSON.stringify(ANSWER) }],
   usage: { input_tokens: 60, cache_creation_input_tokens: 30, cache_read_input_tokens: 10, output_tokens: 20 }, ...over });
+const messagesBody = (over, opts) => streamOf(messageOf(over), opts);
 const JSON_HEADERS = { "content-type": "application/json" };
-const answerWith = (over) => (s) => s.writeHead(200, JSON_HEADERS).end(messagesBody(over));
+const SSE_HEADERS = { "content-type": "text/event-stream" };
+const answerWith = (over) => (s) => s.writeHead(200, SSE_HEADERS).end(messagesBody(over));
 // Records what the adapter sent, then lets the test reply.
 const recording = (reply, seen = {}) => async (q, s) => {
   const chunks = []; for await (const c of q) chunks.push(c);
@@ -597,7 +609,7 @@ test("Messages API request: path, key header, top-level system, thinking off, no
   const seen = {};
   const r = await rig({ paidDispatch: true, creds: { anthropic_api_key: "sk-ant-test-not-a-real-key-000000" },
     mutate: (b) => { messagesApi()(b); Object.assign(b.rateCards.find((c) => c.subject === "fcpi-fixture-model"), { inputPerMTok: 100000, cachedInputPerMTok: 10000, cacheWritePerMTok: 125000, outputPerMTok: 500000 }); },
-    handler: recording((s) => s.writeHead(200, { ...JSON_HEADERS, "request-id": "req_fixture_answered" }).end(messagesBody()), seen) });
+    handler: recording((s) => s.writeHead(200, { ...SSE_HEADERS, "request-id": "req_fixture_answered" }).end(messagesBody()), seen) });
   try {
     Object.assign(r.budget.providers["fixture-model"], { paid: true, credential: "anthropic_api_key" });
     r.budget.paidTotal.caps.day = 1000000;
@@ -610,6 +622,7 @@ test("Messages API request: path, key header, top-level system, thinking off, no
     assert.equal(seen.headers["anthropic-version"], "2023-06-01");
     const { sent } = seen;
     assert.equal(sent.max_tokens, 4000);
+    assert.equal(sent.stream, true, "the answer is streamed");
     assert.match(sent.system, /^You extract structured data/);
     assert.deepEqual(sent.messages.map((m) => m.role), ["user"]);
     assert.deepEqual(sent.thinking, { type: "disabled" });
@@ -824,6 +837,49 @@ test("Messages API: a repair after an answer with no text shows the model a plac
       assert.deepEqual(sentBodies[1].messages.map((m) => m.role), ["user", "assistant", "user"]);
       assert.equal(sentBodies[1].messages[1].content, "(no answer)");
       assert.deepEqual(r.store.states(), ["SETTLED", "SETTLED"]);
+    } finally { await r.srv.close(); }
+  }
+});
+
+test("Messages API: a call that outlasts its caller's wait is not cut; it settles at its usage, and a retry reuses its answer", async () => {
+  let calls = 0;
+  const r = await rig({ mutate: (b) => { messagesApi()(b); b.models["fcpi-fixture-model"].requestTimeoutMs = 1000; }, handler: async (q, s) => {
+    for await (const _ of q) { /* drain */ }
+    calls++;
+    s.writeHead(200, SSE_HEADERS);
+    // Pings, then the answer, after the caller's one-second wait has ended.
+    for (let i = 0; i < 4; i++) { s.write("event: ping\ndata: {\"type\":\"ping\"}\n\n"); await new Promise((res) => setTimeout(res, 400)); }
+    s.end(messagesBody());
+  } });
+  try {
+    const q = req();
+    const first = await r.extract(q);
+    assert.equal(first.failure.class, "EXTRACTION_IN_FLIGHT");
+    assert.equal(first.failure.retryable, true);
+    assert.deepEqual(r.store.states(), ["RESERVED"], "still running, still held");
+    await new Promise((res) => setTimeout(res, 1500));
+    const row = [...r.store.rows.values()][0];
+    assert.equal(row.state, "SETTLED", "settled when the answer came, with nobody waiting");
+    assert.deepEqual(row.usage, { promptTokens: 100, completionTokens: 20, cachedTokens: 10, cacheWriteTokens: 30 });
+    assert.ok(row.actual < row.reserved, "at its usage, not its reservation");
+    const again = await r.extract(q);
+    assert.equal(again.ok, true);
+    assert.equal(again.data.product, "Fixture Widget");
+    assert.equal(calls, 1, "the retry reused the stored answer");
+  } finally { await r.srv.close(); }
+});
+
+test("Messages API: a stream that ends before message_stop, or with an error event, keeps its whole reservation as uncertain", async () => {
+  const errorEvent = 'event: error\ndata: {"type":"error","error":{"type":"overloaded_error","message":"Overloaded"}}\n\n';
+  for (const [label, body, detail] of [["no message_stop", messagesBody({}, { end: false }), /before message_stop/],
+    ["an error event", messagesBody({}, { end: false }) + errorEvent, /overloaded_error/]]) {
+    const r = await rig({ mutate: messagesApi(), handler: recording((s) => s.writeHead(200, SSE_HEADERS).end(body)) });
+    try {
+      const out = await r.extract(req());
+      assert.equal(out.failure.class, "PROVIDER_UNCERTAIN", label);
+      assert.match(out.failure.detail, detail, label);
+      assert.deepEqual(r.store.states(), ["UNCERTAIN"], label);
+      assert.equal(r.store.used("fixture"), [...r.store.rows.values()][0].reserved, `${label}: the whole reservation counted`);
     } finally { await r.srv.close(); }
   }
 });

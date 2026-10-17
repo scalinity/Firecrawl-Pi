@@ -7,6 +7,8 @@
 //                reservation is released;
 //   sent: true   the request may have reached the provider and no answer came: the outcome is
 //                unknown and the reservation stays counted (spec §24.2).
+// timeoutMs bounds the whole exchange. idleMs, for a streamed answer, also ends one that sends nothing for that long
+// after the request is written; each chunk received restarts it.
 import http from "node:http";
 import https from "node:https";
 import { readFileSync } from "node:fs";
@@ -24,7 +26,7 @@ export function readCredential(dir, name) {
   try { const v = readFileSync(`${dir}/${name}`, "utf8").trim(); return v || null; } catch { return null; }
 }
 
-export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize }) {
+export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize }) {
   const url = new URL(baseUrl.replace(/\/$/, "") + path);
   const policy = getPolicy();
   if (!policy.localCidrs) throw new ProviderError("NOT_READY", "the host's local-network list is not loaded", { sent: false });
@@ -43,13 +45,19 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
   const length = parts ? parts.reduce((n, p) => n + p.length, 0) : 0;
   return new Promise((resolve, reject) => {
     let written = false, settled = false;
-    const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); fn(v); } };
+    let idle = null;
+    const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); clearTimeout(idle); fn(v); } };
+    const quiet = () => {
+      if (!idleMs || settled) return;
+      clearTimeout(idle);
+      idle = setTimeout(() => { req.destroy(new Error("idle")); done(reject, new ProviderError("PROVIDER_UNCERTAIN", `nothing arrived for ${idleMs} ms`, { sent: true })); }, idleMs);
+    };
     const req = mod.request({ host: target.host, port: target.port, method, path: url.pathname + url.search, agent: false, lookup: pinnedLookup(address),
       servername: target.literal ? undefined : target.host, rejectUnauthorized: true,
       headers: { ...headers, host: url.host, ...(parts ? { "content-length": length } : {}) } }, (res) => {
       const chunks = [];
       let n = 0;
-      res.on("data", (c) => { n += c.length; if (n > maxBytes) { res.destroy(); done(reject, new ProviderError("PROVIDER_RESPONSE_TOO_LARGE", `the provider's answer exceeds ${maxBytes} bytes`, { sent: true, status: res.statusCode })); } else chunks.push(c); });
+      res.on("data", (c) => { quiet(); n += c.length; if (n > maxBytes) { res.destroy(); done(reject, new ProviderError("PROVIDER_RESPONSE_TOO_LARGE", `the provider's answer exceeds ${maxBytes} bytes`, { sent: true, status: res.statusCode })); } else chunks.push(c); });
       res.on("end", () => done(resolve, { status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks) }));
       res.on("error", () => done(reject, new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
       res.on("aborted", () => done(reject, new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
@@ -64,11 +72,12 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
         return;
       }
       written = true;
+      quiet();
       for (const p of parts?.slice(0, -1) ?? []) req.write(p);
       req.end(parts ? parts.at(-1) : undefined);
     };
     req.on("socket", (s) => {
-      // A reasoning model sends nothing until it has finished, for minutes: keep the idle connection alive through NAT.
+      // A non-streamed answer from a model that reasons sends nothing until it has finished: keep the idle connection alive through NAT.
       s.setKeepAlive(true, 30000);
       s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
       if (mod === https) s.once("secureConnect", send);

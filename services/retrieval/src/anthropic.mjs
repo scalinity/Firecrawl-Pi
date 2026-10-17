@@ -9,7 +9,7 @@
 //     report separately, where an OpenAI prompt_tokens count includes them.
 export const ANTHROPIC_VERSION = "2023-06-01";
 
-export const messagesHeaders = (key) => ({ "content-type": "application/json", accept: "application/json", "anthropic-version": ANTHROPIC_VERSION, ...(key ? { "x-api-key": key } : {}) });
+export const messagesHeaders = (key) => ({ "content-type": "application/json", accept: "text/event-stream", "anthropic-version": ANTHROPIC_VERSION, ...(key ? { "x-api-key": key } : {}) });
 
 // The output grammar the API compiles from a schema holds at most 16 union-typed fields (a type array or an
 // anyOf); a schema with more is refused with a 400 (measured 2026-10-17: 16 accepted, 17 refused). toStrict
@@ -54,10 +54,35 @@ export function messagesRequest({ model, effort, messages, schema, maxOutputToke
   const output = { ...(reasons ? { effort } : {}), ...(guided ? {} : { format: { type: "json_schema", schema: forGrammar(schema) } }) };
   return {
     path: "/v1/messages", guided,
-    body: { model, max_tokens: maxOutputTokens, ...(system ? { system } : {}), messages: messages.filter((m) => m.role !== "system"),
+    // Streamed, so the connection is never idle and the exact usage arrives with the end of the answer (readStream).
+    body: { model, max_tokens: maxOutputTokens, stream: true, ...(system ? { system } : {}), messages: messages.filter((m) => m.role !== "system"),
       ...(effort === "none" ? { thinking: { type: "disabled" } } : {}),
       ...(Object.keys(output).length ? { output_config: output } : {}) },
   };
+}
+
+// A streamed answer (server-sent events) rebuilt as the Message object a non-streamed call returns: message_start
+// carries the message with its input usage, each content block arrives as a start and its deltas, message_delta carries
+// the stop reason and the usage, cumulative, and message_stop ends it. Measured 2026-10-17: input usage within about
+// 3 s, a ping every 30 s while the model thinks, and thinking text never streamed, so a stream that ends before
+// message_stop (complete: false), or with an error event, cannot be priced. Unknown event types are ignored.
+export function readStream(body) {
+  let message = null, complete = false, error = null;
+  for (const raw of String(body).split(/\r?\n\r?\n/)) {
+    const data = raw.split(/\r?\n/).filter((l) => l.startsWith("data:")).map((l) => l.slice(5).trimStart()).join("\n");
+    if (!data) continue;
+    let e;
+    try { e = JSON.parse(data); } catch { continue; }
+    if (e?.type === "message_start" && e.message && typeof e.message === "object") message = { ...e.message, content: [] };
+    else if (e?.type === "error") error = e.error ?? { type: "error" };
+    else if (!message) continue;
+    else if (e.type === "content_block_start" && e.content_block) message.content[e.index] = { ...e.content_block };
+    else if (e.type === "content_block_delta" && message.content[e.index] && e.delta?.type === "text_delta") message.content[e.index].text = (message.content[e.index].text ?? "") + e.delta.text;
+    else if (e.type === "message_delta") { Object.assign(message, e.delta ?? {}); if (e.usage) message.usage = { ...message.usage, ...e.usage }; }
+    else if (e.type === "message_stop") complete = true;
+  }
+  if (message) message.content = message.content.filter(Boolean);
+  return { message, complete: complete && !error, error };
 }
 
 // An answer a model fenced as a code block, despite being told to reply with the bare object.
