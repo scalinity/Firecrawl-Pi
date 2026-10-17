@@ -82,7 +82,7 @@ const store = new Store({ ...env.postgres, password: readSecret(env.credentialsD
 let storeReady = false;
 const startedAt = new Date();
 (async function connect() {
-  try { const { orphaned } = await store.ready(env.permits, startedAt); storeReady = true; log({ event: "store_ready", orphaned_model_calls: orphaned }); }
+  try { const { orphaned, orphanedReserved } = await store.ready(env.permits, startedAt); storeReady = true; log({ event: "store_ready", orphaned_model_calls: orphaned, orphaned_reserved_micro_usd: orphanedReserved }); }
   catch (e) { log({ event: "store_unavailable", error: e.code ?? e.message }); setTimeout(connect, 2000); }
 })();
 setInterval(() => store.prune().catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();

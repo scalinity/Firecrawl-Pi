@@ -236,13 +236,13 @@ test("at start, a model call left RESERVED by a stopped service becomes UNCERTAI
     await store.pool.query("UPDATE fcpi_retrieval.budget_reservation SET created_at = now() - interval '1 hour'");
     const startedAt = new Date();
     const live = (await store.reserveBudget(base({ category: "llm", caps, amount: 2000 }))).reservation;
-    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 2 });
+    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 2, orphanedReserved: 8000 });
     const state = async (id) => (await store.pool.query("SELECT state, detail FROM fcpi_retrieval.budget_reservation WHERE id = $1", [id])).rows[0];
     for (const r of [orphan, repair]) assert.deepEqual(await state(r.id), { state: "UNCERTAIN", detail: "the retrieval service stopped while the call was in flight" });
     assert.equal((await state(proxy.id)).state, "RESERVED", "only model calls are swept");
     assert.equal((await state(live.id)).state, "RESERVED", "a call this process made is left alone");
     assert.equal((await state(settled.id)).state, "SETTLED");
     assert.deepEqual(await store.uncertainHolds("2026-09-01"), [{ category: "llm", count: 2, reserved: 8000 }]);
-    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 0 }, "a second start finds nothing more");
+    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 0, orphanedReserved: 0 }, "a second start finds nothing more");
   } finally { await store.close(); }
 });

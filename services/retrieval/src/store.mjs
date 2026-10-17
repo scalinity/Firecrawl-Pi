@@ -60,17 +60,17 @@ export class Store {
   // to a process that no longer exists: they are reclaimed rather than left to expire, so a restart
   // does not stall acquisitions for a lease period (review finding W3). A model call still RESERVED from before this
   // process started was in flight when the last one stopped: its outcome is unknown, so it is marked UNCERTAIN, which
-  // the status lists, rather than held unseen. Returns how many were marked.
+  // the status lists, rather than held unseen. Returns how many were marked and what they hold.
   async ready(permits, startedAt = new Date()) {
     await this.pool.query("SELECT 1");
-    const orphaned = (await this.pool.query(`UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = 'the retrieval service stopped while the call was in flight'
-      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair') AND created_at < $1`, [startedAt])).rowCount;
+    const swept = (await this.pool.query(`UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = 'the retrieval service stopped while the call was in flight'
+      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair') AND created_at < $1 RETURNING reserved::float8 AS reserved`, [startedAt])).rows;
     await this.pool.query("UPDATE fcpi_retrieval.permit SET holder = NULL, lease_until = NULL WHERE holder IS NOT NULL");
     await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE holder IS NOT NULL");
     for (const [kind, n] of Object.entries(permits)) {
       await this.pool.query("INSERT INTO fcpi_retrieval.permit (kind, slot) SELECT $1, g FROM generate_series(0, $2::int - 1) g ON CONFLICT DO NOTHING", [kind, n]);
     }
-    return { orphaned };
+    return { orphaned: swept.length, orphanedReserved: swept.reduce((n, r) => n + r.reserved, 0) };
   }
 
   async #tx(fn) {
