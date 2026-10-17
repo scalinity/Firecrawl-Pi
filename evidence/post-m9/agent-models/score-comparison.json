@@ -1,0 +1,707 @@
+{
+ "arms": {
+  "haiku-high": {
+   "n": 16,
+   "correct": 11,
+   "completed": 2,
+   "completedCorrect": 2,
+   "medianS": 17,
+   "meanUsd": 0.0108,
+   "totalUsd": 0.173,
+   "codes": {
+    "partial": 4,
+    "SCRAPE_FCPI_RETRIEVAL": 6,
+    "UNVERIFIED_FINDING": 4,
+    "completed": 2
+   }
+  },
+  "haiku-none": {
+   "n": 16,
+   "correct": 6,
+   "completed": 2,
+   "completedCorrect": 2,
+   "medianS": 11,
+   "meanUsd": 0.0121,
+   "totalUsd": 0.194,
+   "codes": {
+    "partial": 1,
+    "SCRAPE_FCPI_RETRIEVAL": 3,
+    "UNVERIFIED_FINDING": 9,
+    "completed": 2,
+    "UNSAFE_NEXT_URL": 1
+   }
+  },
+  "opus-high": {
+   "n": 16,
+   "correct": 13,
+   "completed": 5,
+   "completedCorrect": 5,
+   "medianS": 27,
+   "meanUsd": 0.405,
+   "totalUsd": 6.481,
+   "codes": {
+    "partial": 6,
+    "UNVERIFIED_FINDING": 2,
+    "completed": 5,
+    "SCRAPE_FCPI_RETRIEVAL": 3
+   }
+  },
+  "sonnet-high": {
+   "n": 16,
+   "correct": 14,
+   "completed": 4,
+   "completedCorrect": 4,
+   "medianS": 19,
+   "meanUsd": 0.2177,
+   "totalUsd": 3.483,
+   "codes": {
+    "UNSAFE_NEXT_URL": 2,
+    "SCRAPE_FCPI_RETRIEVAL": 4,
+    "partial": 6,
+    "completed": 4
+   }
+  }
+ },
+ "runs": [
+  {
+   "arm": "sonnet-high",
+   "task": "T1-removeprefix",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNSAFE_NEXT_URL",
+   "correct": true,
+   "wallMs": 17889,
+   "costMicroUsd": 275510
+  },
+  {
+   "arm": "opus-high",
+   "task": "T1-removeprefix",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 34040,
+   "costMicroUsd": 633396
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T1-removeprefix",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 20054,
+   "costMicroUsd": 19581
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T1-removeprefix",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 24286,
+   "costMicroUsd": 16339
+  },
+  {
+   "arm": "opus-high",
+   "task": "T2-eiffel",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 30867,
+   "costMicroUsd": 567944
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T2-eiffel",
+   "rep": 1,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": false,
+   "wallMs": 19516,
+   "costMicroUsd": 283782
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T2-eiffel",
+   "rep": 1,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": false,
+   "wallMs": 11841,
+   "costMicroUsd": 14079
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T2-eiffel",
+   "rep": 1,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": false,
+   "wallMs": 21497,
+   "costMicroUsd": 14798
+  },
+  {
+   "arm": "opus-high",
+   "task": "T3-los-alamos",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 63508,
+   "costMicroUsd": 956440
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T3-los-alamos",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 46504,
+   "costMicroUsd": 447914
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T3-los-alamos",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 7543,
+   "costMicroUsd": 2046
+  },
+  {
+   "arm": "opus-high",
+   "task": "T4-rivers",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 28651,
+   "costMicroUsd": 416436
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T3-los-alamos",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 44215,
+   "costMicroUsd": 31710
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T4-rivers",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 25277,
+   "costMicroUsd": 206398
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T4-rivers",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 28123,
+   "costMicroUsd": 10067
+  },
+  {
+   "arm": "opus-high",
+   "task": "T5-sqlite",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 18049,
+   "costMicroUsd": 145564
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T4-rivers",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 29726,
+   "costMicroUsd": 10779
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T5-sqlite",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 5562,
+   "costMicroUsd": 72372
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T5-sqlite",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 4383,
+   "costMicroUsd": 3559
+  },
+  {
+   "arm": "opus-high",
+   "task": "T6-nonexistent",
+   "rep": 1,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 3792,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T6-nonexistent",
+   "rep": 1,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 2124,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T5-sqlite",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 7493,
+   "costMicroUsd": 3970
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T6-nonexistent",
+   "rep": 1,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 2140,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T6-nonexistent",
+   "rep": 1,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 9959,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T7-tallest",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 46796,
+   "costMicroUsd": 414906
+  },
+  {
+   "arm": "opus-high",
+   "task": "T7-tallest",
+   "rep": 1,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 60461,
+   "costMicroUsd": 836232
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T7-tallest",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 21785,
+   "costMicroUsd": 19664
+  },
+  {
+   "arm": "opus-high",
+   "task": "T8-firecrawl-license",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 10819,
+   "costMicroUsd": 79564
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T8-firecrawl-license",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 4957,
+   "costMicroUsd": 39162
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T8-firecrawl-license",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 3184,
+   "costMicroUsd": 1900
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T8-firecrawl-license",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 3842,
+   "costMicroUsd": 1943
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T7-tallest",
+   "rep": 1,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 52690,
+   "costMicroUsd": 22541
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T1-removeprefix",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNSAFE_NEXT_URL",
+   "correct": true,
+   "wallMs": 18048,
+   "costMicroUsd": 275870
+  },
+  {
+   "arm": "opus-high",
+   "task": "T1-removeprefix",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 31816,
+   "costMicroUsd": 634348
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T1-removeprefix",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNSAFE_NEXT_URL",
+   "correct": true,
+   "wallMs": 9987,
+   "costMicroUsd": 13611
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T1-removeprefix",
+   "rep": 2,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 18148,
+   "costMicroUsd": 14150
+  },
+  {
+   "arm": "opus-high",
+   "task": "T2-eiffel",
+   "rep": 2,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": false,
+   "wallMs": 25158,
+   "costMicroUsd": 564104
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T2-eiffel",
+   "rep": 2,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": false,
+   "wallMs": 19474,
+   "costMicroUsd": 285002
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T2-eiffel",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 10348,
+   "costMicroUsd": 14095
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T2-eiffel",
+   "rep": 2,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 15782,
+   "costMicroUsd": 14771
+  },
+  {
+   "arm": "opus-high",
+   "task": "T3-los-alamos",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 25620,
+   "costMicroUsd": 173104
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T3-los-alamos",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 44196,
+   "costMicroUsd": 448394
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T3-los-alamos",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 30607,
+   "costMicroUsd": 30469
+  },
+  {
+   "arm": "opus-high",
+   "task": "T4-rivers",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 32347,
+   "costMicroUsd": 420176
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T4-rivers",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 26396,
+   "costMicroUsd": 209758
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T3-los-alamos",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 66908,
+   "costMicroUsd": 33421
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T4-rivers",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 18996,
+   "costMicroUsd": 10129
+  },
+  {
+   "arm": "opus-high",
+   "task": "T5-sqlite",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 17596,
+   "costMicroUsd": 145624
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T4-rivers",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 34905,
+   "costMicroUsd": 10798
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T5-sqlite",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 5825,
+   "costMicroUsd": 71972
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T5-sqlite",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 4437,
+   "costMicroUsd": 3556
+  },
+  {
+   "arm": "opus-high",
+   "task": "T6-nonexistent",
+   "rep": 2,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 833,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T6-nonexistent",
+   "rep": 2,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 633,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T6-nonexistent",
+   "rep": 2,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 651,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T6-nonexistent",
+   "rep": 2,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 627,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T5-sqlite",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 7573,
+   "costMicroUsd": 3938
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T7-tallest",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 47716,
+   "costMicroUsd": 412596
+  },
+  {
+   "arm": "opus-high",
+   "task": "T7-tallest",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 55568,
+   "costMicroUsd": 829152
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T7-tallest",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 24197,
+   "costMicroUsd": 20011
+  },
+  {
+   "arm": "opus-high",
+   "task": "T8-firecrawl-license",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 8856,
+   "costMicroUsd": 78584
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T8-firecrawl-license",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 8668,
+   "costMicroUsd": 39102
+  },
+  {
+   "arm": "haiku-none",
+   "task": "T8-firecrawl-license",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 3328,
+   "costMicroUsd": 1915
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T7-tallest",
+   "rep": 2,
+   "status": "partial",
+   "code": null,
+   "correct": true,
+   "wallMs": 43170,
+   "costMicroUsd": 21580
+  },
+  {
+   "arm": "haiku-high",
+   "task": "T8-firecrawl-license",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 3967,
+   "costMicroUsd": 1919
+  }
+ ]
+}

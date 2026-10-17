@@ -1,0 +1,180 @@
+{
+ "arms": {
+  "sonnet-high": {
+   "n": 16,
+   "correct": 12,
+   "completed": 10,
+   "completedCorrect": 10,
+   "medianS": 11,
+   "meanUsd": 0.2236,
+   "totalUsd": 3.578,
+   "codes": {
+    "completed": 10,
+    "SCRAPE_FCPI_RETRIEVAL": 3,
+    "UNVERIFIED_FINDING": 3
+   }
+  }
+ },
+ "runs": [
+  {
+   "arm": "sonnet-high",
+   "task": "T1-removeprefix",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 7096,
+   "costMicroUsd": 262384
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T2-eiffel",
+   "rep": 1,
+   "status": "partial",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": false,
+   "wallMs": 11534,
+   "costMicroUsd": 270426
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T4-rivers",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 23233,
+   "costMicroUsd": 202718
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T5-sqlite",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 6597,
+   "costMicroUsd": 72562
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T6-nonexistent",
+   "rep": 1,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 2178,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T3-los-alamos",
+   "rep": 1,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 37108,
+   "costMicroUsd": 572060
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T8-firecrawl-license",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 12189,
+   "costMicroUsd": 39182
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T7-tallest",
+   "rep": 1,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 18124,
+   "costMicroUsd": 371020
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T1-removeprefix",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 8468,
+   "costMicroUsd": 263054
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T2-eiffel",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 6531,
+   "costMicroUsd": 270326
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T4-rivers",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 22398,
+   "costMicroUsd": 202778
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T5-sqlite",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 5151,
+   "costMicroUsd": 71892
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T6-nonexistent",
+   "rep": 2,
+   "status": "failed",
+   "code": "SCRAPE_FCPI_RETRIEVAL",
+   "correct": true,
+   "wallMs": 747,
+   "costMicroUsd": 0
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T3-los-alamos",
+   "rep": 2,
+   "status": "partial",
+   "code": "UNVERIFIED_FINDING",
+   "correct": false,
+   "wallMs": 34411,
+   "costMicroUsd": 570120
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T8-firecrawl-license",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 9786,
+   "costMicroUsd": 39172
+  },
+  {
+   "arm": "sonnet-high",
+   "task": "T7-tallest",
+   "rep": 2,
+   "status": "completed",
+   "code": null,
+   "correct": true,
+   "wallMs": 14181,
+   "costMicroUsd": 370490
+  }
+ ]
+}
