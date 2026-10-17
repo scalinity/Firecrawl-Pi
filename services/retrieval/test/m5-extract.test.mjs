@@ -550,7 +550,7 @@ test("Messages API request: path, key header, top-level system, thinking off, no
   const seen = {};
   const r = await rig({ paidDispatch: true, creds: { anthropic_api_key: "sk-ant-test-not-a-real-key-000000" },
     mutate: (b) => { messagesApi()(b); Object.assign(b.rateCards.find((c) => c.subject === "fcpi-fixture-model"), { inputPerMTok: 100000, cachedInputPerMTok: 10000, cacheWritePerMTok: 125000, outputPerMTok: 500000 }); },
-    handler: recording(answerWith(), seen) });
+    handler: recording((s) => s.writeHead(200, { ...JSON_HEADERS, "request-id": "req_fixture_answered" }).end(messagesBody()), seen) });
   try {
     Object.assign(r.budget.providers["fixture-model"], { paid: true, credential: "anthropic_api_key" });
     r.budget.paidTotal.caps.day = 1000000;
@@ -575,6 +575,7 @@ test("Messages API request: path, key header, top-level system, thinking off, no
     assert.equal(row.actual, 20);
     assert.ok(row.reserved >= row.actual);
     assert.equal(r.logs.find((l) => l.event === "model_call" && l.outcome === "answered").grammar, "schema");
+    assert.equal(r.logs.find((l) => l.event === "model_call" && l.outcome === "answered").provider_request_id, "req_fixture_answered", "the provider's request id is logged to match a charge in its console");
   } finally { await r.srv.close(); }
 });
 
@@ -668,10 +669,11 @@ test("Messages API failures are classified: a refused request is released, a pro
     [400, error("invalid_request_error", "Schemas contains too many parameters with union types (17 parameters with type arrays or anyOf)."), "PROVIDER_REJECTED", "RELEASED", false],
     [502, error("api_error", "Bad gateway"), "PROVIDER_UNCERTAIN", "UNCERTAIN", false],
   ]) {
-    const r = await rig({ mutate: messagesApi(), handler: recording((s) => s.writeHead(status, JSON_HEADERS).end(JSON.stringify(body))) });
+    const r = await rig({ mutate: messagesApi(), handler: recording((s) => s.writeHead(status, { ...JSON_HEADERS, "request-id": `req_fixture_${status}` }).end(JSON.stringify(body))) });
     try {
       const out = await r.extract(req());
       assert.equal(out.failure.class, cls, `${status} ${body.error.type}`);
+      assert.equal(r.logs.find((l) => l.event === "model_call" && l.outcome === `http_${status}`)?.provider_request_id, `req_fixture_${status}`, "refused and uncertain calls carry the id too");
       assert.equal(out.failure.retryable, retryable, `${status} ${body.error.type}`);
       assert.deepEqual(r.store.states(), [state], `${status} ${body.error.type}`);
       if (cls === "PROVIDER_REJECTED") assert.match(out.failure.detail, /union types/, "the provider\x27s reason for refusing the request is kept");

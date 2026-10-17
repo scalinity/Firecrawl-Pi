@@ -65,6 +65,10 @@ export function makeGate() {
   };
 }
 
+// The provider's own id for a request (Anthropic's request-id, or the usual x-request-id): not a secret, and what a
+// disputed or uncertain charge is matched by in the provider's console.
+const requestIdOf = (headers) => { const v = headers?.["request-id"] ?? headers?.["x-request-id"]; return typeof v === "string" ? v.slice(0, 100) : null; };
+
 // The chat-completions answer in the shape the adapter settles (anthropic.mjs reads the Messages API's).
 function readChat(json) {
   const msg = json?.choices?.[0]?.message ?? {};
@@ -182,14 +186,14 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
       // is unknown, so the reservation stays counted (spec §28.3; review W11).
       breaker.failure();
       await store.markBudgetUncertain(res.id, `provider answered ${answer.status}`);
-      log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: `http_${answer.status}`, reserved_micro_usd: amount, ms: Date.now() - started });
+      log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: `http_${answer.status}`, provider_request_id: requestIdOf(answer.headers), reserved_micro_usd: amount, ms: Date.now() - started });
       throw fail("PROVIDER_UNCERTAIN", `${m.provider} answered HTTP ${answer.status}; whether the request ran is unknown, so its reservation of ${amount} micro-USD stays counted`);
     }
     if (answer.status !== 200) {
       const status = answer.status;
       // A provider refusal is an answer, and a refused request is not billed: the reservation is released.
       await store.releaseBudget(res.id, `provider answered ${status}${code ? ` (${code})` : ""}`);
-      log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: `http_${status}`, provider_code: code, ms: Date.now() - started });
+      log({ event: "model_call", logical_id: logicalId, call: callKey, outcome: `http_${status}`, provider_code: code, provider_request_id: requestIdOf(answer.headers), ms: Date.now() - started });
       if (status === 401 || status === 403) { breaker.failure(); throw fail("PROVIDER_AUTH_FAILED", `${m.provider} refused the credential (HTTP ${status})`); }
       // Anthropic reports an empty balance as a 400 whose message names the credit balance.
       if (status === 402 || code === "insufficient_quota" || code === "billing_error" || (messagesApi && /credit balance/i.test(json?.error?.message ?? ""))) { breaker.failure(); throw fail("PROVIDER_BILLING", `${m.provider} refused the account's billing (HTTP ${status}${code ? `, ${code}` : ""})`); }
@@ -207,7 +211,7 @@ export function makeModelAdapter({ store, getBudget, paidDispatch, providersDir,
     // Without the provider's counts the whole reservation is the charge: never less than it could be.
     const cost = usage ? modelCost(card, usage) : amount;
     await store.settleBudget(res.id, cost, { usage, result, detail: usage ? (cost > amount ? `settled above the reservation by ${cost - amount}` : null) : "usage absent from the answer; settled at the reservation" });
-    log({ event: "model_call", logical_id: logicalId, call: callKey, kind, model, outcome: "answered", prompt_tokens: usage?.promptTokens ?? null, completion_tokens: usage?.completionTokens ?? null,
+    log({ event: "model_call", logical_id: logicalId, call: callKey, kind, model, outcome: "answered", provider_request_id: requestIdOf(answer.headers), prompt_tokens: usage?.promptTokens ?? null, completion_tokens: usage?.completionTokens ?? null,
       reasoning_effort: m.reasoningEffort ?? null, output_cap_tokens: maxOutputTokens,
       // A schema over the Messages API's grammar limit is sent as prompt text; the answer is checked either way.
       ...(messagesApi ? { grammar: wire.guided ? "none" : "schema" } : {}),
