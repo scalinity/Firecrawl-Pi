@@ -84,7 +84,9 @@ const INTELLIGENCE = {
   responseBytes: { serper: [65536, 524288], brave: [65536, 524288], deepseek: [65536, 524288], exa: [65536, 1048576], tavily: [65536, 1048576], context7: [65536, 1048576], ref: [65536, 1048576], jev: [65536, 262144] },
   workingSetBytes: [262144, 2097152],
   cacheSeconds: { success: [0, 900], empty: [0, 60], timeSensitive: [0, 90], decision: [0, 900] },
-  evidence: { maxDocuments: [1, 10], maxTextBytes: [1024, 524288], maxBodyBytes: [4096, 786432], maxDocumentBytes: [1024, 49152], maxPassagesPerDocument: [1, 6] },
+  // The core's evidence payload (patch 0011, fcpi.ts) is built to these exact bounds, so they are pinned rather than tunable: a
+  // tighter one here would refuse every payload the core sends.
+  evidence: { maxDocuments: [10, 10], maxTextBytes: [524288, 524288], maxBodyBytes: [786432, 786432], maxDocumentBytes: [49152, 49152], maxPassagesPerDocument: [1, 6] },
   traceMaxBytes: [4096, 65536],
 };
 function checkLimits(obj, spec, where) {

@@ -50,3 +50,13 @@ test("the local-network file must name at least one real network", () => {
   assert.throws(() => loadLocalCidrs("192.168.1.0\n"), /not a network/);
   assert.throws(() => loadLocalCidrs("printer.lan/24\n"), /not a network/);
 });
+
+test("the evidence bounds the core builds its payload to are pinned: a tighter one is refused at load", () => {
+  const raw = JSON.parse(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
+  assert.doesNotThrow(() => loadPolicy(JSON.stringify(raw)), "the deployed values load");
+  for (const [k, v] of [["maxDocumentBytes", 40960], ["maxTextBytes", 262144], ["maxBodyBytes", 524288], ["maxDocuments", 5]]) {
+    const p = structuredClone(raw);
+    p.search.intelligence.evidence[k] = v;
+    assert.throws(() => loadPolicy(JSON.stringify(p)), new RegExp(`evidence\\.${k}`), `${k} = ${v}`);
+  }
+});
