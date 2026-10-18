@@ -173,7 +173,7 @@ index afd6dc5..b1a124d 100644
  
 diff --git a/apps/api/src/search/fcpi.ts b/apps/api/src/search/fcpi.ts
 new file mode 100644
-index 0000000..c49ceb2
+index 0000000..30c225b
 --- /dev/null
 +++ b/apps/api/src/search/fcpi.ts
 @@ -0,0 +1,407 @@
@@ -183,8 +183,8 @@ index 0000000..c49ceb2
 +// authenticated POST /internal/search with the caller's original query and options, the merge that keeps each row's fcpi
 +// metadata through acquisition, and the bounded evidence payload for POST /internal/search/evidence. A call bounded by the
 +// remaining deadline replaces the searxng route's independent 15-second abort for this path; nothing here restarts a clock.
-+// The trusted headers are believed because of where they come from: only the gateway reaches the core's listener, and any
-+// peer on the core's private networks could assert them. That suits a single owner; it is not a signature (spec §20).
++// The trusted headers are believed because of who can send them: the gateway is their only sender, and every other peer
++// that reaches this listener is a project service running no caller-supplied code; they are not a signature (spec §20).
 +import * as undici from "undici";
 +import { createHash, randomUUID } from "crypto";
 +import { config } from "../config";

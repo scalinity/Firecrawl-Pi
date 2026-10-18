@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "c14e90894c50bf7ae939fb7a439ecf5fc7a05e6a",
-  "series_sha256": "681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed37a27",
+  "result_tree": "7a59ba450a0cdadf9b5e8c8dd6ed333714e57ba4",
+  "series_sha256": "91e3d278c12a16da6242fdc5da07808c60d454595676f1bbf9766f5bb8bb584f",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -159,7 +159,7 @@
     },
     {
       "file": "0011-search-intelligence-context.patch",
-      "sha256": "0c956b31f3a3019cf43520f0a8070cbe4e5fb3e594ffd865cc04fce2256451ce",
+      "sha256": "a66a4c3ec17169a0aa053d0401a6590cb89d61980ea243b56a203ddfe450dabc",
       "reason": "The aggregate search needs the caller's original query and options, the gateway's trusted request, logical-search, owner and deadline context, and the caller's cancellation at the retrieval service, but executeSearch compiled domain operators into the query, the searxng route dropped every option and aborted at an independent 15 seconds, and the scrape merge rebuilt result rows without their metadata (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2); evidence annotations for acquired pages need a bounded payload of the actual retrieved text (§12).",
       "symbols": [
         "apps/api/src/search/fcpi.ts (new): fcpiSearchContext, piIntelligentSearch, mergeWithFcpi, renditionOf, queryTerms, selectWindows, windowPriority, evidencePayload, attachFcpiEvidence",
