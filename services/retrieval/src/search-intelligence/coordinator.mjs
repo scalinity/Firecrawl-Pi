@@ -124,24 +124,9 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   // ---- the execution ---------------------------------------------------------------------------------------------------------
   async function execute(request, signal, roster, selection, aggKey) {
     const L = limits(), tAdmit = clock();
-    const cached = await cacheEntry(aggKey);
-    if (cached?.response?.search) {
-      // A stored answer is a run too (spec §21.1): reuse, with nothing spent.
-      telemetry?.runFinished?.({ request, outcome: cached.response.search.outcome, search: { ...cached.response.search, cache: { mode: "hit" }, usage: [] }, selection });
-      return { body: cached.response, aggregateHit: { createdAt: cached.createdAt, expiresAt: cached.expiresAt } };
-    }
-    const adm = await store.admitSearchQuery(getPolicy().search.perHour);
-    if (!adm.admitted) {
-      // A refusal is a run of its own, so refused demand stays visible (spec §21.2); nothing was dispatched.
-      telemetry?.runFinished?.({ request, outcome: "refused", timings: { admittedAt: iso(tAdmit) }, selection });
-      throw new Denied("SEARCH_RATE_LIMITED", `${getPolicy().search.perHour} searches reached the backend in the last hour`, { retryable: true, retryAfter: 60 });
-    }
-    await availability.refresh();
-    telemetry?.runStarted?.({ request, selection, roster, admittedAt: iso(tAdmit), configHashes: getConfigHashes() });
-    // What the run has seen so far, so a run that ends by a throw or a cancellation is still recorded once.
-    const seen = { lanes: [], activation: null, recorded: false };
-    const margin = L.responseMarginMs, hardEnd = request.absoluteDeadlineMs - margin;
-    const discoveryClose = Math.min(tAdmit + L.discoveryMs, hardEnd);
+    // The run's one record, written once in finally whatever the end (spec §21.1): an exit that knows its outcome sets it, and
+    // an end by a throw or a cancellation is recorded with the lanes and activation seen so far.
+    const seen = { lanes: [], activation: null, record: null };
     const parent = new AbortController();
     const onCaller = () => parent.abort();
     signal.addEventListener("abort", onCaller, { once: true });
@@ -154,6 +139,22 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     const closeLease = (l) => track(l.close().catch(() => {}));
     const takeLease = (o) => { if (!o?.lease) return o; const l = o.lease; delete o.lease; if (ended) closeLease(l); else leases.set(o.provider, l); return o; };
     try {
+      const cached = await cacheEntry(aggKey);
+      if (cached?.response?.search) {
+        // A stored answer is a run too (spec §21.1): reuse, with nothing spent.
+        seen.record = { request, outcome: cached.response.search.outcome, search: { ...cached.response.search, cache: { mode: "hit" }, usage: [] }, selection };
+        return { body: cached.response, aggregateHit: { createdAt: cached.createdAt, expiresAt: cached.expiresAt } };
+      }
+      const adm = await store.admitSearchQuery(getPolicy().search.perHour);
+      if (!adm.admitted) {
+        // A refusal is a run of its own, so refused demand stays visible (spec §21.2); nothing was dispatched.
+        seen.record = { request, outcome: "refused", timings, selection };
+        throw new Denied("SEARCH_RATE_LIMITED", `${getPolicy().search.perHour} searches reached the backend in the last hour`, { retryable: true, retryAfter: 60 });
+      }
+      await availability.refresh();
+      telemetry?.runStarted?.({ request, selection, roster, admittedAt: iso(tAdmit), configHashes: getConfigHashes() });
+      const margin = L.responseMarginMs, hardEnd = request.absoluteDeadlineMs - margin;
+      const discoveryClose = Math.min(tAdmit + L.discoveryMs, hardEnd);
       if (!roster) throw new Denied("SEARCH_BACKEND_UNAVAILABLE", "the aggregate profile has no roster for this selection");
       // SearXNG: alongside (additional), or as fallback when a general lane is ineligible now or fails while two seconds remain,
       // or as augmentation when every general answer is empty. At most one orchestration.
@@ -217,8 +218,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       const evidenceLanes = all.filter(validated);
       if (!evidenceLanes.length) {
         const reasons = all.map((o) => `${o.provider}: ${o.reason ?? o.status}`).join(", ");
-        telemetry?.runFinished?.({ request, outcome: "failed", lanes: all, activation, timings, selection });
-        seen.recorded = true;
+        seen.record = { request, outcome: "failed", lanes: all, activation, timings, selection };
         throw new Denied("SEARCH_ENGINES_FAILED", `no search provider answered (${reasons})`, { retryable: true, retryAfter: 60 });
       }
       fuse(pool);
@@ -292,13 +292,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
         // Keyed by the build that ranked it, which the next identical search looks up once that build has answered again.
         await cachePut(aggregateKey(request, roster, selection, rankedBy), body, ttlS);
       }
-      telemetry?.runFinished?.({ request, outcome: search.outcome, search, lanes: all, pool, final, ranking, activation, enrichment, timings: search.timings, selection });
-      seen.recorded = true;
+      seen.record = { request, outcome: search.outcome, search, lanes: all, pool, final, ranking, activation, enrichment, timings: search.timings, selection };
       return { body, pool, final };
     } finally {
       signal.removeEventListener("abort", onCaller);
       // An execution ended by its deadline is a timeout; by its caller (or a stop), a cancellation.
-      if (!seen.recorded) telemetry?.runFinished?.({ request, outcome: parent.signal.aborted ? (clock() >= request.absoluteDeadlineMs ? "timeout" : "cancelled") : "failed", lanes: seen.lanes, activation: seen.activation, timings, selection });
+      telemetry?.runFinished?.(seen.record ?? { request, outcome: parent.signal.aborted ? (clock() >= request.absoluteDeadlineMs ? "timeout" : "cancelled") : "failed", lanes: seen.lanes, activation: seen.activation, timings, selection });
       ended = true;
       for (const l of leases.values()) closeLease(l);
       leases.clear();
