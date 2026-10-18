@@ -6,8 +6,8 @@
     "commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210"
   },
   "apply": "git apply, in order, to a clean checkout of the commit above; each file's SHA-256 is checked first (scripts/m2/prepare-api-source.sh)",
-  "result_tree": "3c18897e9db60c78bf3cf624a8b4b680e2dc4a05",
-  "series_sha256": "8a9c530805344bbf682048c11f4562cd41d0bedf09bf936653c2cc64c964a14d",
+  "result_tree": "c14e90894c50bf7ae939fb7a439ecf5fc7a05e6a",
+  "series_sha256": "681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed37a27",
   "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
   "patches": [
     {
@@ -159,20 +159,20 @@
     },
     {
       "file": "0011-search-intelligence-context.patch",
-      "sha256": "767533459c4b59f15692ecdf8746bef53720d513c6f3243ea8469bd0b8fafc7f",
+      "sha256": "0c956b31f3a3019cf43520f0a8070cbe4e5fb3e594ffd865cc04fce2256451ce",
       "reason": "The aggregate search needs the caller's original query and options, the gateway's trusted request, logical-search, owner and deadline context, and the caller's cancellation at the retrieval service, but executeSearch compiled domain operators into the query, the searxng route dropped every option and aborted at an independent 15 seconds, and the scrape merge rebuilt result rows without their metadata (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2); evidence annotations for acquired pages need a bounded payload of the actual retrieved text (§12).",
       "symbols": [
-        "apps/api/src/search/fcpi.ts (new): fcpiSearchContext, piIntelligentSearch, mergeWithFcpi, renditionOf, selectWindows, evidencePayload, attachFcpiEvidence",
+        "apps/api/src/search/fcpi.ts (new): fcpiSearchContext, piIntelligentSearch, mergeWithFcpi, renditionOf, queryTerms, selectWindows, windowPriority, evidencePayload, attachFcpiEvidence",
         "apps/api/src/controllers/v2/search.ts searchController (context from the x-fcpi-search-* headers, cancellation on close, fcpi.search moved to the top level)",
-        "apps/api/src/controllers/v2/types.ts searchRequestSchema (searchIntelligence)",
+        "apps/api/src/controllers/v2/types.ts searchRequestSchema (searchIntelligence), SearchResponse.fcpi",
         "apps/api/src/search/execute.ts executeSearch (fcpi context to search(), evidence after the scrape merge)",
         "apps/api/src/search/v2/index.ts search (a context goes to piIntelligentSearch)",
         "apps/api/src/search/scrape.ts mergeScrapedContent (mergeWithFcpi)",
         "apps/api/src/lib/entities.ts WebSearchResult.fcpi, SearchV2Response.fcpiSearch"
       ],
       "tests": [
-        "SI3 native chain: REST and MCP search with and without scrape formats carry fcpi.search and row metadata through the merge",
-        "SI3 deadline: an aggregate answer after 15 s but before the request deadline succeeds; a shorter deadline sends nothing late"
+        "SI3 native chain (scripts/si3/native-chain.mjs, the compiled fcpi.js against the retrieval coordinator on fixture providers): the trusted context and a past or distant deadline header, an aggregate search past 15 s within its deadline, a shorter deadline with no late send, row metadata through mergeWithFcpi and the compiled mergeScrapedContent, the compiled searchRequestSchema's strict searchIntelligence, the answer mapping (an untyped refusal, a cancelled body read), the evidence payload's bounds, trim path and deadline, its refusal, cancellation, no-time and failed-acquisition ends, the linear HTML rendition, and the query-term rule shared with the retrieval service",
+        "Not run by the chain: the controller's header parsing and executeSearch's call order, which need the full core; covered by the gateway's and the MCP server's tests of the same fields and by the SI5 live smoke"
       ]
     }
   ],

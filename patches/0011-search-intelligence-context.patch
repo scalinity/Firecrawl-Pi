@@ -2,7 +2,7 @@ fcpi patch 0011: search intelligence carries the caller's original query, option
 Upstream 7666c1f9 with patches 0001-0010: the v2 search controller, executeSearch, search/v2, the scrape merge, the strict search schema and the search entities; one new module, apps/api/src/search/fcpi.ts.
 
 diff --git a/apps/api/src/controllers/v2/search.ts b/apps/api/src/controllers/v2/search.ts
-index 6dc859f..fb4b219 100644
+index 6dc859f..a41684c 100644
 --- a/apps/api/src/controllers/v2/search.ts
 +++ b/apps/api/src/controllers/v2/search.ts
 @@ -37,6 +37,7 @@ import {
@@ -13,11 +13,12 @@ index 6dc859f..fb4b219 100644
  
  export async function searchController(
    req: RequestWithAuth<{}, SearchResponse, SearchRequest>,
-@@ -66,6 +67,11 @@ export async function searchController(
+@@ -66,6 +67,12 @@ export async function searchController(
    let zeroDataRetention = teamForcedKind !== null;
    let reservedKeylessCredits = 0;
    let reconciledKeylessCredits = false;
-+  // fcpi: a caller that goes away cancels the search and its acquisitions' waiting (the coordinator stops its lanes).
++  // fcpi: a caller that goes away cancels the retrieval service's search call and the evidence call (the coordinator then
++  // stops its lanes); acquisitions already queued keep their own lifetime.
 +  const fcpiAbort = new AbortController();
 +  res.on("close", () => {
 +    if (!res.writableFinished) fcpiAbort.abort();
@@ -25,7 +26,7 @@ index 6dc859f..fb4b219 100644
  
    try {
      req.body = searchRequestSchema.parse(req.body);
-@@ -232,6 +238,10 @@ export async function searchController(
+@@ -232,6 +239,10 @@ export async function searchController(
          scrapeOptions: req.body.scrapeOptions,
          highlights: req.body.highlights,
          timeout: req.body.timeout,
@@ -36,7 +37,7 @@ index 6dc859f..fb4b219 100644
        },
        {
          teamId: req.auth.team_id,
-@@ -322,13 +332,17 @@ export async function searchController(
+@@ -322,12 +333,16 @@ export async function searchController(
      // fcpi: a partial result says which engines did not answer.
      const partialWarning = result.response.warning;
      delete result.response.warning;
@@ -49,14 +50,12 @@ index 6dc859f..fb4b219 100644
        data: result.response,
        creditsUsed: result.totalCredits,
        id: jobId,
--    });
 +      ...(fcpiSearch ? { fcpi: { search: fcpiSearch } } : {}),
-+    } as any);
+     });
    } catch (error) {
      if (reservedKeylessCredits > 0 && !reconciledKeylessCredits) {
-       reconciledKeylessCredits = true;
 diff --git a/apps/api/src/controllers/v2/types.ts b/apps/api/src/controllers/v2/types.ts
-index 6903da3..2cb1214 100644
+index 6903da3..e7ec26d 100644
 --- a/apps/api/src/controllers/v2/types.ts
 +++ b/apps/api/src/controllers/v2/types.ts
 @@ -2025,6 +2025,41 @@ export const searchRequestSchema = z
@@ -101,16 +100,23 @@ index 6903da3..2cb1214 100644
    })
    .refine(
      x => !(x.includeDomains?.length && x.excludeDomains?.length),
+@@ -2132,6 +2167,8 @@ export type SearchResponse =
+       data: import("../../lib/entities").SearchV2Response;
+       creditsUsed: number;
+       id: string;
++      // fcpi: the search's own metadata (search intelligence), at the top level beside the native fields.
++      fcpi?: { search?: unknown };
+     }
+   | {
+       success: true;
 diff --git a/apps/api/src/lib/entities.ts b/apps/api/src/lib/entities.ts
-index 4e80e57..4624ee6 100644
+index 4e80e57..7ade081 100644
 --- a/apps/api/src/lib/entities.ts
 +++ b/apps/api/src/lib/entities.ts
-@@ -158,7 +158,10 @@ export interface WebSearchResult {
-   screenshot?: string;
+@@ -159,6 +159,9 @@ export interface WebSearchResult {
    metadata?: Record<string, any>;
    answer?: string;
--  highlights?: string;
-+  highlights?: string[];
+   highlights?: string;
 +  // fcpi: the retrieval service's row metadata (search intelligence: provenance, ranks, versions,
 +  // passages, evidence), carried through the scrape merge into the response's data.web rows.
 +  fcpi?: { search?: unknown; [key: string]: unknown };
@@ -167,19 +173,22 @@ index afd6dc5..b1a124d 100644
  
 diff --git a/apps/api/src/search/fcpi.ts b/apps/api/src/search/fcpi.ts
 new file mode 100644
-index 0000000..6eb764c
+index 0000000..c49ceb2
 --- /dev/null
 +++ b/apps/api/src/search/fcpi.ts
-@@ -0,0 +1,327 @@
+@@ -0,0 +1,407 @@
 +// fcpi: search intelligence in the pi-resilient profile (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2, §12).
 +// The search's trusted context (the gateway's request and logical-search ids, the principal's owner tag and the absolute
 +// deadline, from headers the gateway builds itself and never copies from a client), the call to the retrieval service's
 +// authenticated POST /internal/search with the caller's original query and options, the merge that keeps each row's fcpi
 +// metadata through acquisition, and the bounded evidence payload for POST /internal/search/evidence. A call bounded by the
 +// remaining deadline replaces the searxng route's independent 15-second abort for this path; nothing here restarts a clock.
++// The trusted headers are believed because of where they come from: only the gateway reaches the core's listener, and any
++// peer on the core's private networks could assert them. That suits a single owner; it is not a signature (spec §20).
 +import * as undici from "undici";
 +import { createHash, randomUUID } from "crypto";
 +import { config } from "../config";
++import { logger } from "../lib/logger";
 +import { SearchV2Response, WebSearchResult } from "../lib/entities";
 +import { PiSearchError } from "./v2/searxng";
 +
@@ -231,9 +240,11 @@ index 0000000..6eb764c
 +  const owner = h("x-fcpi-search-owner");
 +  const trusted =
 +    !!rid && REQUEST_ID.test(rid) && !!sid && UUID.test(sid) && !!owner && OWNER.test(owner);
-+  const own = Number(h("x-fcpi-search-deadline-ms"));
++  // The gateway's deadline is taken as given, a past one included (the search then times out at once): replacing a past
++  // deadline with this request's own timeout would restart the clock. Only a missing or implausible value is ignored.
++  const gatewayHeaderMs = Number(h("x-fcpi-search-deadline-ms"));
 +  const gatewayDeadline =
-+    Number.isFinite(own) && own > now && own <= now + 95_000 ? own : Infinity;
++    Number.isFinite(gatewayHeaderMs) && gatewayHeaderMs > 0 && gatewayHeaderMs <= now + 95_000 ? gatewayHeaderMs : Infinity;
 +  const si = body.searchIntelligence ?? {};
 +  const formats = body.scrapeOptions?.formats ?? [];
 +  return {
@@ -309,15 +320,27 @@ index 0000000..6eb764c
 +    }
 +    throw new PiSearchError("SEARCH_BACKEND_UNAVAILABLE", "The retrieval service's search route could not be reached.", 503, true, null);
 +  }
-+  const body = (await res.json().catch(() => null)) as any;
++  const body = (await res.json().catch(error => {
++    // A cancellation or the deadline during the body read is that, not a malformed answer.
++    if (ctx.signal.aborted) throw new PiSearchError("CANCELLED", "The caller cancelled the search.", 499, false, null);
++    if ((error as Error)?.name === "TimeoutError" || Date.now() >= ctx.absoluteDeadlineMs) {
++      throw new PiSearchError("SEARCH_TIMEOUT", "The retrieval service's search did not answer by the search's deadline.", 504, true, null);
++    }
++    return null;
++  })) as any;
 +  if (res.status !== 200) {
 +    const f = body?.failure;
++    // Only a typed failure passes its status through; anything else (a refused core token, an unexpected route answer) is
++    // the backend's fault, never presented to the caller as a failure of its own credentials or request.
++    if (!f?.class) {
++      throw new PiSearchError("SEARCH_BACKEND_ERROR", `The retrieval service answered HTTP ${res.status}.`, 502, true, null);
++    }
 +    throw new PiSearchError(
-+      f?.class ?? "SEARCH_BACKEND_ERROR",
-+      f?.detail ?? `The retrieval service answered HTTP ${res.status}.`,
++      f.class,
++      f.detail ?? `The retrieval service answered HTTP ${res.status}.`,
 +      res.status,
-+      f?.retryable ?? res.status >= 500,
-+      f?.retryAfter ?? null,
++      f.retryable ?? res.status >= 500,
++      f.retryAfter ?? null,
 +    );
 +  }
 +  if (!body || !Array.isArray(body.web) || !body.search || typeof body.search !== "object") {
@@ -348,31 +371,55 @@ index 0000000..6eb764c
 +}
 +
 +// ---- evidence (spec §12) ---------------------------------------------------------------------------------------------------
++// The retrieval service's policy (search.intelligence.evidence) pins these same bounds; it refuses to load other values.
 +const MAX_DOCS = 10;
 +const MAX_TEXT_BYTES = 512 * 1024;
 +const MAX_BODY_BYTES = 768 * 1024;
 +const MAX_DOC_BYTES = 48 * 1024;
++// At most this many windows a document, so the work per document stays bounded whatever its content.
++const MAX_WINDOWS_PER_DOC = 48;
++// HTML read for a derived rendition: the document's opening part; the derivation is linear in it.
++const MAX_HTML_CHARS = 2 * 1024 * 1024;
 +const bytesOf = (s: string) => Buffer.byteLength(s, "utf8");
 +const sha256 = (s: string) => createHash("sha256").update(s).digest("hex");
 +
 +// The text the evaluation reads: the markdown as returned, or plain text derived locally from the HTML when only HTML was
-+// asked for. The caller's own formats are never changed.
++// asked for. The caller's own formats are never changed. Script, style, noscript and template blocks are removed by one
++// forward scan (an unclosed one runs to the end), never by a pattern that rescans the input for each opening tag.
 +export function renditionOf(row: any): { text: string; basis: "markdown" | "text_derived_from_html" } | null {
 +  if (typeof row.markdown === "string" && row.markdown.trim()) {
 +    return { text: row.markdown.replace(/\r\n?/g, "\n"), basis: "markdown" };
 +  }
-+  const html = typeof row.html === "string" ? row.html : typeof row.rawHtml === "string" ? row.rawHtml : null;
-+  if (!html) return null;
-+  const text = html
-+    .replace(/<(script|style|noscript|template)[\s\S]*?<\/\1>/gi, " ")
++  const raw = typeof row.html === "string" ? row.html : typeof row.rawHtml === "string" ? row.rawHtml : null;
++  if (!raw) return null;
++  const html = raw.length > MAX_HTML_CHARS ? raw.slice(0, MAX_HTML_CHARS) : raw;
++  // Each block's own closing tag, searched case-insensitively forward from where the block opens.
++  const closers: Record<string, RegExp> = {};
++  let kept = "";
++  const open = /<(script|style|noscript|template)\b/gi;
++  let at = 0;
++  for (let m: RegExpExecArray | null; (m = open.exec(html)); ) {
++    kept += html.slice(at, m.index) + " ";
++    const tag = m[1].toLowerCase();
++    const closer = (closers[tag] ??= new RegExp(`</${tag}\\s*>`, "gi"));
++    closer.lastIndex = open.lastIndex;
++    const c = closer.exec(html);
++    if (!c) { at = html.length; break; }
++    at = c.index + c[0].length;
++    open.lastIndex = at;
++  }
++  kept += html.slice(at);
++  const text = kept
 +    .replace(/<\/(p|div|section|article|li|h[1-6]|tr|pre|blockquote)>|<br\s*\/?>/gi, "\n\n")
-+    .replace(/<[^>]+>/g, " ")
++    // A tag never spans another "<": one unclosed "<" cannot make the pattern rescan the rest of the text.
++    .replace(/<[^<>]*>/g, " ")
 +    .replace(/&nbsp;/g, " ")
-+    .replace(/&amp;/g, "&")
 +    .replace(/&lt;/g, "<")
 +    .replace(/&gt;/g, ">")
 +    .replace(/&quot;/g, '"')
 +    .replace(/&#39;/g, "'")
++    // Last, so an escaped entity (&amp;lt;) stays the text it encodes (&lt;).
++    .replace(/&amp;/g, "&")
 +    .replace(/[ \t]+/g, " ")
 +    .replace(/\n[ \t]+/g, "\n")
 +    .replace(/\n{3,}/g, "\n\n")
@@ -380,19 +427,32 @@ index 0000000..6eb764c
 +  return text ? { text, basis: "text_derived_from_html" } : null;
 +}
 +
-+const TERMS = (q: string) =>
-+  [...new Set(
-+    (q.match(/"[^"]{2,200}"|[\p{L}\p{N}_.:/()@-]{3,}/gu) ?? []).map(t => t.replace(/^"|"$/g, "").toLowerCase()),
-+  )].slice(0, 32);
++// The query's literal terms, by the retrieval service's own rule (services/retrieval/src/search-intelligence/rank.mjs
++// queryTerms): quoted phrases, identifiers (dots, underscores, colons, slashes, parentheses), version strings and words of
++// three or more letters outside the same stop list; a -negated word is not a term.
++const STOP = new Set("the and for with from that this what how why when where which who are was were does did can could should would will into about over under your you our their there have has had not but use using get set".split(" "));
++export function queryTerms(query: string): string[] {
++  const terms = new Set<string>();
++  for (const m of query.matchAll(/"([^"]{2,200})"/g)) terms.add(m[1].toLowerCase());
++  const bare = query.replace(/"[^"]*"/g, " ");
++  for (const t of bare.split(/\s+/)) {
++    const w = t.replace(/^[^\p{L}\p{N}_.@/:-]+|[^\p{L}\p{N}_)(.@/:-]+$/gu, "").toLowerCase();
++    if (!w || w.startsWith("-")) continue;
++    if (/[._:/()]/.test(w) || /\d/.test(w) || (w.length >= 3 && !STOP.has(w))) terms.add(w.replace(/[.,;:]+$/, ""));
++  }
++  return [...terms].filter(Boolean).slice(0, 32);
++}
 +
 +// Paragraph and heading windows around the query's literal terms and identifiers, with the leading paragraph as context,
-+// within budget bytes. Offsets are UTF-16 positions in the exact rendition; windows are exact substrings, in source order,
-+// never joined into an invented quotation. A paragraph larger than the budget is cut at a code-point boundary.
++// within budget bytes and at most MAX_WINDOWS_PER_DOC. Offsets are UTF-16 positions in the exact rendition; windows are exact
++// substrings, in source order, never joined into an invented quotation. A paragraph larger than the budget is cut at a
++// code-point boundary. Each window's priority (its place in the selection order: 0 first) is kept beside it, unserialized.
++export const windowPriority = new WeakMap<object, number>();
 +export function selectWindows(text: string, query: string, budget: number) {
 +  const paras: { start: number; end: number }[] = [];
 +  const re = /[^\n]+(?:\n(?!\n)[^\n]+)*/g;
 +  for (let m: RegExpExecArray | null; (m = re.exec(text)); ) paras.push({ start: m.index, end: m.index + m[0].length });
-+  const terms = TERMS(query);
++  const terms = queryTerms(query);
 +  const scored = paras.map((p, i) => {
 +    const low = text.slice(p.start, p.end).toLowerCase();
 +    return { ...p, i, score: terms.reduce((n, t) => n + (low.includes(t) ? 1 : 0), 0) };
@@ -402,6 +462,7 @@ index 0000000..6eb764c
 +  let used = 0;
 +  let droppedWindows = 0;
 +  for (const p of order) {
++    if (chosen.length >= MAX_WINDOWS_PER_DOC) { droppedWindows++; continue; }
 +    let end = p.end;
 +    let t = text.slice(p.start, end);
 +    let b = bytesOf(t);
@@ -414,7 +475,9 @@ index 0000000..6eb764c
 +      b = bytesOf(t);
 +      if (!t) { droppedWindows++; continue; }
 +    }
-+    chosen.push({ start: p.start, end, text: t });
++    const win = { start: p.start, end, text: t };
++    windowPriority.set(win, chosen.length);
++    chosen.push(win);
 +    used += b;
 +  }
 +  chosen.sort((a, b) => a.start - b.start);
@@ -423,7 +486,8 @@ index 0000000..6eb764c
 +
 +// The evidence payload for the selected, successfully acquired rows: at most ten documents, 48 KiB of text each, 512 KiB in
 +// all, shared fairly, and a final body under 768 KiB. Rows without metadata or text are reported as not observable.
-+export function evidencePayload(ctx: FcpiSearchContext, web: WebSearchResult[]) {
++// evidenceDeadlineMs is the instant this side gives up on the answer, so the retrieval service can finish before it.
++export function evidencePayload(ctx: FcpiSearchContext, web: WebSearchResult[], evidenceDeadlineMs: number) {
 +  const rows = web
 +    .filter(r => (r.fcpi as any)?.search?.documentId && (r.metadata?.statusCode ?? 0) < 400 && !r.metadata?.error)
 +    .slice(0, MAX_DOCS);
@@ -452,41 +516,62 @@ index 0000000..6eb764c
 +    originalQuery: ctx.originalQuery,
 +    intelligence: ctx.intelligence,
 +    absoluteDeadlineMs: ctx.absoluteDeadlineMs,
++    evidenceDeadlineMs,
 +    documents,
 +  };
-+  // Trim the largest document's last window until the body fits; trimming is counted.
-+  while (bytesOf(JSON.stringify(payload)) > MAX_BODY_BYTES) {
-+    const biggest = documents.filter(d => d.windows.length).sort((a, b) => bytesOf(JSON.stringify(b.windows)) - bytesOf(JSON.stringify(a.windows)))[0];
-+    if (!biggest) break;
-+    const w = biggest.windows.pop()!;
-+    biggest.droppedBytes += bytesOf(w.text);
-+    biggest.droppedWindows++;
++  // Until the body fits: the largest document gives up its lowest-priority window. The body is measured once and each
++  // removal subtracts its window's own size, so the work is linear in the windows (spec §12: lower-priority windows first).
++  const windowBytes = (w: { start: number; end: number; text: string }) => bytesOf(JSON.stringify(w)) + 1;
++  const sizes = documents.map(d => d.windows.reduce((n, w) => n + windowBytes(w), 0));
++  let body = bytesOf(JSON.stringify(payload));
++  while (body > MAX_BODY_BYTES) {
++    let i = -1;
++    for (let k = 0; k < documents.length; k++) if (documents[k].windows.length && (i < 0 || sizes[k] > sizes[i])) i = k;
++    if (i < 0) break;
++    const d = documents[i];
++    let j = 0;
++    d.windows.forEach((w, k) => { if ((windowPriority.get(w) ?? 0) > (windowPriority.get(d.windows[j]) ?? 0)) j = k; });
++    const [w] = d.windows.splice(j, 1);
++    const b = windowBytes(w);
++    sizes[i] -= b;
++    body -= b;
++    d.droppedBytes += bytesOf(w.text);
++    d.droppedWindows++;
 +  }
 +  return payload;
 +}
 +
 +// Asks the retrieval service for evidence annotations on the rows already acquired, within at most four seconds of the
-+// remaining deadline. A failure leaves the rows exactly as acquired, with the limitation recorded; it never fails the search.
++// remaining deadline. A failure leaves the rows exactly as acquired, with the limitation recorded (and the hook's refusal
++// logged by status); it never fails the search.
 +export async function attachFcpiEvidence(ctx: FcpiSearchContext, response: SearchV2Response): Promise<void> {
 +  const web = response.web ?? [];
 +  if (!web.length || ctx.intelligence.evidence === "off") return;
-+  const payload = evidencePayload(ctx, web);
 +  const note = (r: WebSearchResult, evidence: unknown) => {
 +    const f: any = r.fcpi;
 +    if (f?.search && typeof f.search === "object") f.search = { ...f.search, evidence };
 +  };
++  // The time is checked before any payload is built: with too little left, nothing is read or measured.
 +  const remaining = ctx.absoluteDeadlineMs - Date.now() - 250;
-+  if (!payload.documents.length || remaining < 500) {
-+    for (const r of web) note(r, { mode: "not_evaluated", reason: !payload.documents.length ? "no_acquired_text" : "no_time" });
++  if (remaining < 500) {
++    for (const r of web) note(r, { mode: "not_evaluated", reason: "no_time" });
 +    return;
 +  }
++  const budget = Math.min(4_000, remaining);
++  const payload = evidencePayload(ctx, web, Date.now() + budget);
++  if (!payload.documents.length) {
++    for (const r of web) note(r, { mode: "not_evaluated", reason: "no_acquired_text" });
++    return;
++  }
++  let status: number | null = null;
 +  try {
 +    const res = await undici.fetch(`${config.PI_RETRIEVAL_URL}/internal/search/evidence`, {
 +      method: "POST",
 +      headers: { authorization: `Bearer ${config.PI_RETRIEVAL_TOKEN}`, "content-type": "application/json", accept: "application/json" },
 +      body: JSON.stringify(payload),
-+      signal: AbortSignal.any([ctx.signal, AbortSignal.timeout(Math.min(4_000, remaining))]),
++      signal: AbortSignal.any([ctx.signal, AbortSignal.timeout(budget)]),
 +    });
++    status = res.status;
 +    const body = (await res.json().catch(() => null)) as any;
 +    if (res.status !== 200 || !Array.isArray(body?.documents)) throw new Error(`evidence HTTP ${res.status}`);
 +    const byId = new Map<string, unknown>(body.documents.filter((d: any) => typeof d?.documentId === "string").map((d: any) => [d.documentId, d.evidence]));
@@ -494,7 +579,8 @@ index 0000000..6eb764c
 +      const id = (r.fcpi as any)?.search?.documentId;
 +      note(r, byId.get(id) ?? { mode: "not_evaluated", reason: (r.metadata?.statusCode ?? 0) >= 400 || r.metadata?.error ? "acquisition_failed" : "no_acquired_text" });
 +    }
-+  } catch {
++  } catch (error) {
++    if (!ctx.signal.aborted) logger.warn("fcpi evidence unavailable", { status, error: (error as Error)?.name ?? "error", logicalSearchId: ctx.logicalSearchId });
 +    for (const r of web) note(r, { mode: "not_evaluated", reason: ctx.signal.aborted ? "cancelled" : "evidence_unavailable" });
 +  }
 +}

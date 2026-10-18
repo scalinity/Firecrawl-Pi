@@ -15,6 +15,8 @@ cp -R "$r/src" "$r/test" "$r/package.json" "$r/node_modules" "$work/"
 cp -R "$root/deploy/policies" "$work/policy"
 cp -R "$root/tests/fixtures" "$work/fixtures"
 cp "$root/scripts/si3/native-chain.mjs" "$work/"
+# The frozen corpus's queries, for the term rule shared by the core and the retrieval service.
+cp "$root/evidence/search-intelligence/SI0/corpus/corpus-v1.json" "$work/"
 echo "### meta"
 echo "utc=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 echo "repository_commit=$(git -C "$root" rev-parse HEAD) code_dirty=$([ -z "$(git -C "$root" status --porcelain -- . ':(exclude)evidence')" ] && echo false || echo true)"
@@ -22,7 +24,10 @@ echo "image=$image id=$(docker image inspect "$image" --format '{{.Id}}') platfo
 echo "patch_series_sha256=$(jq -r .series_sha256 "$root/patches/series.json")"
 echo "### checks"
 set +e
+# Hardened as the project's other throwaway runs are (CLAUDE.md §33.1): no capabilities, no privilege gain, an unprivileged
+# uid, bounded memory and processes.
 docker run --rm --network none --read-only --tmpfs /tmp:size=64m --label fcpi.transient=si3-native-chain \
+  --cap-drop ALL --security-opt no-new-privileges --user 65534:65534 --memory 1g --pids-limit 256 \
   -v "$work:/si:ro" -w /si --entrypoint node "$image" /si/native-chain.mjs
 status=$?
 set -e
