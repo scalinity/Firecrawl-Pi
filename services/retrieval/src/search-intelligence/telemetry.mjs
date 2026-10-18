@@ -3,8 +3,9 @@
 // availability or circuit transition. They are the inputs a later analytics dashboard needs (§22); nothing here serves one.
 //   - Private by construction: a query is kept as its fingerprint, a URL without its query string or fragment, no page text,
 //     no decision state text; provider detail is our own bounded codes.
-//   - Bounded: a run's candidate trace holds at most 128 documents and 20 duplicate assessments within 64 KiB; the final
-//     selection, version qualifications and every provider outcome survive trimming, which is marked.
+//   - Bounded: a run's candidate trace holds at most 128 documents and 20 duplicate assessments within the policy's
+//     traceMaxBytes (64 KiB as deployed), its truncation marker included; the final selection, version qualifications and
+//     every provider outcome survive trimming, which is marked.
 //   - Best effort: a failed write never touches the search's answer. It is logged (si_telemetry_degraded) and counted, and the
 //     writes in flight are tracked so a stop can drain them. Cost stays in the ledger, which these rows only refer to.
 import { randomUUID } from "node:crypto";
@@ -33,12 +34,20 @@ export function boundedTrace(pool, final, maxBytes = TRACE_BYTES) {
     ...(d.softGroup ? { group: d.softGroup } : {}),
   });
   const documents = ordered.slice(0, TRACE_DOCS).map(entry);
-  const duplicates = pool.flatMap((d) => (d.duplicateOf ?? []).map((x) => ({ a: d.documentId, b: x.documentId, choice: x.assessment?.choice ?? null, confidence: x.assessment?.confidence ?? null }))).slice(0, TRACE_PAIRS);
-  const trace = { v: 1, relevanceBasis: "jev_runtime_advice", final: final.map((d) => d.documentId), documents, duplicates };
-  let dropped = Math.max(0, ordered.length - TRACE_DOCS), truncated = dropped > 0;
-  // Trimmed from the end (the lowest-ranked documents outside the final selection) until it fits.
-  while (utf8Bytes(JSON.stringify(trace)) > maxBytes && trace.documents.length > final.length) { trace.documents.pop(); dropped++; truncated = true; }
-  if (truncated) trace.truncated = { documentsDropped: dropped, poolSize: pool.length };
+  const pairs = pool.flatMap((d) => (d.duplicateOf ?? []).map((x) => ({ a: d.documentId, b: x.documentId, choice: x.assessment?.choice ?? null, confidence: x.assessment?.confidence ?? null })));
+  const trace = { v: 1, relevanceBasis: "jev_runtime_advice", final: final.map((d) => d.documentId), documents, duplicates: pairs.slice(0, TRACE_PAIRS) };
+  let dropped = Math.max(0, ordered.length - TRACE_DOCS);
+  const duplicatesDropped = Math.max(0, pairs.length - TRACE_PAIRS);
+  const marker = (n) => ({ documentsDropped: n, duplicatesDropped, poolSize: pool.length });
+  // Room for the marker is kept once anything is dropped (its largest form: no more can be dropped than the pool holds).
+  const markRoom = utf8Bytes(JSON.stringify({ truncated: marker(pool.length) }));
+  const room = () => (dropped || duplicatesDropped ? markRoom : 0);
+  // Trimmed from the end (the lowest-ranked documents outside the final selection), each entry measured once, until it fits.
+  const sizes = documents.map((d) => utf8Bytes(JSON.stringify(d)) + 1);
+  let bytes = utf8Bytes(JSON.stringify(trace));
+  while (bytes + room() > maxBytes && trace.documents.length > final.length) { trace.documents.pop(); bytes -= sizes[trace.documents.length]; dropped++; }
+  const truncated = dropped > 0 || duplicatesDropped > 0;
+  if (truncated) trace.truncated = marker(dropped);
   return { trace, truncated };
 }
 
@@ -50,7 +59,7 @@ function laneEvents(logicalId, lanes, observedAt) {
     detail: { usage: o.usage ?? null, suboperations: o.suboperations?.length ?? 0, filteredEmpty: !!o.filteredEmpty, providerRequestId: code(o.providerRequestId) } }));
 }
 
-export function makeTelemetry({ store, log = () => {}, clock = Date.now }) {
+export function makeTelemetry({ store, log = () => {}, clock = Date.now, limits = null }) {
   const pending = new Set(), started = new Map();
   let lost = 0, written = 0;
   const write = (what, fn) => {
@@ -80,7 +89,7 @@ export function makeTelemetry({ store, log = () => {}, clock = Date.now }) {
       started.delete(request.logicalSearchId);
       const base = s?.base ?? baseOf(request, { selection: selection ?? search?.selection ?? "unknown", admittedAt: clock() });
       const observedAt = new Date(clock());
-      const { trace, truncated } = pool.length ? boundedTrace(pool, final) : { trace: null, truncated: false };
+      const { trace, truncated } = pool.length ? boundedTrace(pool, final, limits?.().traceMaxBytes ?? TRACE_BYTES) : { trace: null, truncated: false };
       const summary = { coverage: search?.coverage ?? null, providers: search?.providers ?? Object.fromEntries(lanes.map((o) => [o.provider, { status: o.status, reason: o.reason ?? null }])),
         warnings: search?.warnings ?? [], usage: (search?.usage ?? []).slice(0, 40), pool: search?.pool ?? null, timings, cache: search?.cache ?? null,
         ranking: ranking ? { mode: ranking.mode, reason: ranking.reason, model: ranking.model ?? null, scored: ranking.scored ?? 0, batches: ranking.batches ?? 0 } : null };

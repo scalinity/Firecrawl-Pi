@@ -182,7 +182,7 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   const log = (o) => logs.push(o);
   const getBudget = () => budget, getPolicy = () => policy, getSelection = () => ({ search: "fixture" });
   // Operational records wired as server.mjs wires them: availability and breaker transitions, and every run.
-  const telemetry = withTelemetry ? makeTelemetry({ store, log }) : null;
+  const telemetry = withTelemetry ? makeTelemetry({ store, log, limits: () => policy.search.intelligence }) : null;
   const availability = makeAvailability({ store, log, onTransition: (t) => telemetry?.event({ type: "availability", provider: t.provider, status: t.to, reason: t.reason ?? null, retryAt: t.retryAt ? new Date(t.retryAt) : null, detail: { from: t.from } }) });
   const permits = makePermits(policy.search.intelligence);
   const readKey = (name) => { try { return readFileSync(`${dir}/${name}`, "utf8").trim() || null; } catch { return null; } };

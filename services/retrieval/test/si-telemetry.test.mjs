@@ -53,6 +53,26 @@ test("a run's trace keeps the final selection first, at most 128 documents and 6
   assert.equal(safeUrl("https://user:pw@x.example.org/a/b?token=1#f"), "https://x.example.org/a/b", "no credentials, query string or fragment");
 });
 
+test("the trace's byte bound holds with its marker, marks dropped duplicate pairs, and comes from the policy", async () => {
+  // Entries of about 600 bytes (long paths survive safeUrl up to 512 characters), so the bytes, not the count, decide.
+  const pool = Array.from({ length: 120 }, (_, i) => docOf(i, { canonicalUrl: `https://site${i}.example.org/${"p".repeat(480)}`, duplicateOf: i < 30 ? [{ documentId: "d".repeat(24), assessment: { choice: "same", confidence: 0.9 } }] : [] }));
+  const final = [pool[7]];
+  for (const bound of [4096, 9000, 30000, 65536]) {
+    const { trace, truncated } = boundedTrace(pool, final, bound);
+    assert.ok(truncated);
+    assert.ok(trace.documents.length > final.length, `${bound}: documents beyond the final selection fit`);
+    assert.ok(Buffer.byteLength(JSON.stringify(trace)) <= bound, `${bound}: the trace with its marker is within its bound`);
+    assert.ok(Buffer.byteLength(JSON.stringify(trace)) > bound - 700, `${bound}: and no entry more was dropped than needed`);
+    assert.equal(trace.truncated.documentsDropped, 120 - trace.documents.length);
+    assert.equal(trace.truncated.duplicatesDropped, 10, "pairs past 20 are counted as dropped");
+  }
+  const rows = [], store = { searchRunStarted: async () => {}, searchRunFinished: async (r) => { rows.push(r); }, searchEvents: async () => 0 };
+  const t = makeTelemetry({ store, limits: () => ({ traceMaxBytes: 4096 }) });
+  t.runFinished({ request: request(), outcome: "complete", pool, final });
+  await t.drain();
+  assert.ok(Buffer.byteLength(JSON.stringify(rows[0].trace)) <= 4096, "the policy's traceMaxBytes bounds the stored trace");
+});
+
 test("what is kept is private: no query text, no page text, no URL query strings", async () => {
   const rows = [], events = [];
   const store = { searchRunStarted: async (r) => rows.push(r), searchRunFinished: async (r) => rows.push(r), searchEvents: async (e) => events.push(...e) };
