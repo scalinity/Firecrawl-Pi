@@ -127,6 +127,8 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     if (r.exhausted) { br.neutral(); return { ok: false, reason: "platform_restricted", detail: `cap:${r.exhausted.category}/${r.exhausted.period}`, dispatchState: "not_sent", queueMs: Date.now() - t0 }; }
     if (r.existing) { br.neutral(); return { ok: false, reason: "internal_failure", detail: "operation_already_recorded", dispatchState: r.existing.state === "RELEASED" ? "not_sent" : "possibly_sent", queueMs: Date.now() - t0 }; }
     for (const notice of r.notices ?? []) log({ event: "budget_threshold", ...notice });
+    // The lane's reservations by call key, which its operational event records (spec §21.1: a ledger reference).
+    if (pre) (pre.callKeys ??= []).push(callKey);
     return { ok: true, close: closer(r.reservation, sub, pre), t0 };
   }
 

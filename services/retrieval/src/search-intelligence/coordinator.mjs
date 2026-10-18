@@ -94,7 +94,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     finally { clearTimeout(timer); signal.removeEventListener("abort", onParent); }
     // A session lease that arrives after the lane was given up has no owner: it is closed when it arrives.
     if (boundFired) work.then((late) => late?.lease && track(late.lease.close().catch(() => {})));
-    o = { ...o, durationMs: clock() - t0, kind };
+    o = { ...o, durationMs: clock() - t0, kind, callKeys: (pre?.callKeys ?? []).slice(0, 16) };
     if (pkey && ["success_results", "success_empty"].includes(o.status)) {
       const { candidates, upstreamResultCount, status, providerRequestId, usage, constraints, suboperations, auxiliaryContext } = o;
       await cachePut(pkey, { status, candidates, upstreamResultCount, providerRequestId, usage, constraints, suboperations, auxiliaryContext, originalRetrievedAt: o.completedAt }, ttl(o));
@@ -315,12 +315,17 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     if (!activation.active || !wanted) return none;
     for (const adapter of Object.values(docs)) {
       if (typeof adapter.enrich !== "function" || !docsOutcomes.some((o) => o.provider === adapter.id && validated(o))) continue;
+      const pres = [];
       const admit = () => {
         const name = roster.documentationSubjects.find((n) => dispatch.subject("documentationSearches", n)?.prov?.api === adapter.api);
         const sub = name ? dispatch.subject("documentationSearches", name) : null;
-        return sub ? { sub, pre: dispatch.preflight(sub, { selection }), selection } : null;
+        const pre = sub ? dispatch.preflight(sub, { selection }) : null;
+        if (pre) pres.push(pre);
+        return sub ? { sub, pre, selection } : null;
       };
       const r = await adapter.enrich({ request, documents: presemantic.slice(0, request.limit), lease: leases.get(adapter.id) ?? null, admit, signal, semanticClose });
+      // The reads' reservations by call key, for their event (never part of the response).
+      r.callKeys = pres.flatMap((p) => p.callKeys ?? []).slice(0, 16);
       // A fresh session's lease joins the search's leases, closed with the others when the search ends.
       if (r.lease) leases.set(adapter.id, r.lease);
       return r;

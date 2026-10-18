@@ -56,7 +56,7 @@ export function boundedTrace(pool, final, maxBytes = TRACE_BYTES) {
 function laneEvents(logicalId, lanes, observedAt) {
   return lanes.map((o) => ({ eventId: randomUUID(), logicalId, operation: o.kind ?? "search", provider: o.provider, type: "lane", observedAt, startedAt: o.startedAt ?? null, durationMs: o.durationMs ?? null,
     queueMs: o.queueMs ?? null, status: o.status, reason: o.reason ?? null, code: code(o.detail), retryAt: o.retryAt ? new Date(o.retryAt) : null, resultCount: o.upstreamResultCount ?? null,
-    eligibleCount: o.candidates?.length ?? null, cacheOrigin: o.fromCache ? "provider_cache" : null, dispatchState: o.dispatchState ?? null,
+    eligibleCount: o.candidates?.length ?? null, cacheOrigin: o.fromCache ? "provider_cache" : null, dispatchState: o.dispatchState ?? null, callKeys: o.callKeys ?? [],
     detail: { usage: o.usage ?? null, suboperations: o.suboperations?.length ?? 0, filteredEmpty: !!o.filteredEmpty, providerRequestId: code(o.providerRequestId) } }));
 }
 
@@ -105,10 +105,10 @@ export function makeTelemetry({ store, log = () => {}, clock = Date.now, limits 
       if (activation) events.push({ eventId: randomUUID(), logicalId: base.logicalId, operation: "docs_activation", provider: "classifier", type: "docs_activation", observedAt,
         status: activation.active ? "active" : "inactive", reason: activation.reason ?? null, detail: { signals: activation.signals ?? [], uncertainty: activation.uncertainty ?? null, jev: activation.jev ?? null } });
       if (ranking && ranking.reason !== "jev_not_configured") events.push({ eventId: randomUUID(), logicalId: base.logicalId, operation: "rerank", provider: "jev", type: "decision", observedAt,
-        durationMs: timings.semanticMs ?? null, status: ranking.mode, reason: ranking.reason ?? null, detail: { model: ranking.model ?? null, scored: ranking.scored ?? 0, shortlisted: ranking.shortlisted ?? 0,
+        durationMs: timings.semanticMs ?? null, status: ranking.mode, reason: ranking.reason ?? null, callKeys: ranking.callKeys ?? [], detail: { model: ranking.model ?? null, scored: ranking.scored ?? 0, shortlisted: ranking.shortlisted ?? 0,
           batches: ranking.batches ?? 0, duplicatePairs: ranking.duplicatePairs ?? 0, usage: (ranking.usage ?? []).slice(0, 8) } });
       if (enrichment?.attempted) events.push({ eventId: randomUUID(), logicalId: base.logicalId, operation: "ref_read", provider: "ref", type: "ref_read", observedAt, durationMs: enrichment.elapsedMs ?? null,
-        status: enrichment.limitation ? "limited" : "read", reason: enrichment.limitation ?? null, detail: enrichment.record ?? null });
+        status: enrichment.limitation ? "limited" : "read", reason: enrichment.limitation ?? null, callKeys: enrichment.callKeys ?? [], detail: enrichment.record ?? null });
       write("run_finished", async () => {
         await s?.p;
         await store.searchRunFinished({ ...base, completedAt: observedAt, outcome, cacheMode: search?.cache?.mode ?? null, docsActive: activation ? !!activation.active : null, docsReason: activation?.reason ?? null,

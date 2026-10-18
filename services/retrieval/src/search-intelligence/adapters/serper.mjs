@@ -45,9 +45,12 @@ export function makeSerperLane({ serper, limits, permits, availability }) {
       try { release = await permits.api(provider, request.logicalSearchId, { signal: ctx.signal, deadlineAt: ctx.deadlineAt }); }
       catch (e) { return outcome({ ...base, status: "failed", reason: e.capacity ? "capacity_unavailable" : e.code === "CANCELLED" ? "cancelled" : "timeout", detail: e.code, queueMs: Date.now() - t0 }); }
       const queueMs = Date.now() - t0, startedAt = new Date().toISOString();
+      // Serper reserves in its own module; the lane still names the call key its event refers to.
+      const callKey = `search:${request.logicalSearchId}:serper:search:v1`;
+      (ctx.pre.callKeys ??= []).push(callKey);
       try {
         const results = await serper.search(normalizeQueryText(request.originalQuery), request.language, { signal: ctx.signal, timeoutMs: L.providerTimeoutsMs.serper, subject: ctx.sub.name,
-          callKey: `search:${request.logicalSearchId}:serper:search:v1`, logicalId: request.logicalSearchId, deadlineAt: ctx.deadlineAt });
+          callKey, logicalId: request.logicalSearchId, deadlineAt: ctx.deadlineAt });
         await availability.observe(provider, ctx.pre.epoch, { success: true, dispatchedAt: startedAt });
         const candidates = results.slice(0, L.candidates.serper).map((r, i) => ({ url: r.url, title: r.title, description: r.content, rank: i + 1 }));
         return outcome({ ...base, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: results.length, candidates, queueMs, startedAt, dispatchState: "response_received", usage: { credits: 1, basis: "provider_reported" } });

@@ -285,7 +285,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
     // The identity of the ranking: the one build all answered batches agree on, or none when builds were mixed.
     const ranked = builds.size === 1 ? identity([...builds][0]) : null;
     return { ranking: { mode: enough ? (scored === shortlist.length ? "hybrid" : "hybrid_partial") : "rrf_fallback", reason, scored: enough ? scored : 0, model, usage, batches: batches.length, duplicatePairs: pairs.length,
-      identity: ranked, mixedBuilds: builds.size > 1 } };
+      identity: ranked, mixedBuilds: builds.size > 1, callKeys: (pre.callKeys ?? []).slice(0, 16) } };
   }
 
   return { identity, classifyDocs, rerank, decide, preflight };

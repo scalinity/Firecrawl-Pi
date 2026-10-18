@@ -22,6 +22,12 @@ test("a complete search is one run row with an event per lane; a stored answer s
     assert.ok(!JSON.stringify(row).includes("records complete run"), "the query is kept only as its fingerprint");
     const lanes = h.store.events.filter((e) => e.logicalId === row.logicalId && e.type === "lane");
     assert.deepEqual(lanes.map((e) => e.provider).sort(), ["brave", "deepseek", "exa", "serper", "tavily"]);
+    for (const e of lanes) {
+      assert.equal(e.callKeys.length, 1, `${e.provider}: one metered call`);
+      assert.ok(e.callKeys[0].startsWith(`search:${row.logicalId}:${e.provider}:`), `${e.provider}: its call key names the run and the provider`);
+      assert.ok(h.store.rows.has(e.callKeys[0]), `${e.provider}: and is a reservation in the ledger`);
+    }
+    assert.ok(!JSON.stringify(r.body).includes(`search:${row.logicalId}:`), "call keys never reach the response");
     assert.ok(row.trace.final.length === r.body.web.length, "the final selection is in the trace");
     const again = await run(h, q);
     await settle(h);

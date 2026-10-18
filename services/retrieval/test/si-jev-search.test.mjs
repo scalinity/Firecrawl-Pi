@@ -182,3 +182,18 @@ test("two documents with near-identical titles get a duplicate question; the sam
     assert.ok(rows[0].fcpi.search.softGroup && rows[0].fcpi.search.softGroup === rows[1].fcpi.search.softGroup, "and grouped softly as one document");
   } finally { await h.close(); }
 });
+
+test("the rerank's event names the ledger reservation of every batch it sent", async () => {
+  const h = await harness({ telemetry: true, handlers: { openrouter: jev() } });
+  try {
+    const r = await h.coordinator.search(request({ originalQuery: "jev call keys" }), { signal: new AbortController().signal });
+    assert.equal(r.body.search.ranking.mode, "hybrid");
+    await h.telemetry.drain(2000);
+    const id = r.body.search.logicalSearchId;
+    const decision = h.store.events.find((e) => e.logicalId === id && e.type === "decision");
+    assert.ok(decision, "the rerank is recorded");
+    const sent = [...h.store.rows.keys()].filter((k) => k.startsWith(`search:${id}:jev:`) && !k.includes(":docs_detect:"));
+    assert.ok(sent.length >= 1);
+    assert.deepEqual([...decision.callKeys].sort(), sent.sort(), "exactly the rerank's reservations");
+  } finally { await h.close(); }
+});

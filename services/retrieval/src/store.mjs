@@ -508,11 +508,11 @@ export class Store {
   async searchEvents(events) {
     if (!events.length) return 0;
     const cols = ["event_id", "logical_id", "operation", "provider", "event_type", "observed_at", "started_at", "duration_ms", "queue_ms", "status", "reason", "code", "retry_at",
-      "result_count", "eligible_count", "cache_origin", "dispatch_state", "detail"];
+      "result_count", "eligible_count", "cache_origin", "dispatch_state", "detail", "call_keys"];
     const values = [], params = [];
     for (const e of events) {
       const row = [e.eventId, e.logicalId ?? null, e.operation ?? null, e.provider, e.type, e.observedAt, e.startedAt ?? null, e.durationMs ?? null, e.queueMs ?? null, e.status ?? null,
-        e.reason ?? null, e.code ?? null, e.retryAt ?? null, e.resultCount ?? null, e.eligibleCount ?? null, e.cacheOrigin ?? null, e.dispatchState ?? null, e.detail ? JSON.stringify(e.detail) : null];
+        e.reason ?? null, e.code ?? null, e.retryAt ?? null, e.resultCount ?? null, e.eligibleCount ?? null, e.cacheOrigin ?? null, e.dispatchState ?? null, e.detail ? JSON.stringify(e.detail) : null, e.callKeys?.length ? e.callKeys : null];
       values.push(`(${row.map((_, i) => `$${params.length + i + 1}`).join(", ")})`);
       params.push(...row);
     }

@@ -279,6 +279,10 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_event (
 );
 CREATE INDEX IF NOT EXISTS search_event_observed ON fcpi_retrieval.search_event (observed_at);
 CREATE INDEX IF NOT EXISTS search_event_logical ON fcpi_retrieval.search_event (logical_id);
+-- The ledger reservations an event's operation made, by call key (search:<logical id>:<provider>:<operation>:...): a lane's,
+-- a rerank's batches, a Ref read's. A documentation activation's one Jev call is search:<logical id>:jev:docs_detect:...
+-- detail.usage and the run's summary.usage are the responses' own usage observations; settled amounts are the ledger's.
+ALTER TABLE fcpi_retrieval.search_event ADD COLUMN IF NOT EXISTS call_keys text[];
 ALTER TABLE fcpi_retrieval.search_event DROP CONSTRAINT IF EXISTS search_event_event_type_check;
 ALTER TABLE fcpi_retrieval.search_event ADD CONSTRAINT search_event_event_type_check CHECK (event_type IN ('lane', 'decision', 'docs_activation', 'ref_read', 'evidence', 'availability', 'breaker'));
 -- A day's counts, durations (total and a fixed-bucket histogram) and ledger-linked usage, by low-cardinality profile and
