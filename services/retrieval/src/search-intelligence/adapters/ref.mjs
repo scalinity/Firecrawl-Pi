@@ -128,7 +128,11 @@ export function makeRefSessionFactory({ makeFetch, clientInfo = { name: "fcpi-re
     } catch (e) {
       await close();
       // The verdict travels with the error: whether anything was written decides what the failure says about the service.
-      throw Object.assign(new Error(`Ref session did not open: ${String(e?.code ?? e?.message ?? e).slice(0, 120)}`), { verdict: mcpFailure(e, { sent: bridge.wroteAny(), cancelled: !!signal?.aborted }) });
+      // Judged by the request that failed (the latest), and a handshake the client could not accept is the server's contract.
+      const handshake = e?.code === undefined && e?.status === undefined && /protocol version|initialize result/i.test(String(e?.message));
+      const verdict = handshake ? { reason: "contract_failure", detail: "ref_handshake", dispatchState: "response_received", breaker: "neutral" }
+        : mcpFailure(e, { sent: bridge.lastWritten(), cancelled: !!signal?.aborted });
+      throw Object.assign(new Error(`Ref session did not open: ${String(e?.code ?? e?.message ?? e).slice(0, 120)}`), { verdict });
     }
   };
 }

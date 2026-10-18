@@ -67,7 +67,7 @@ const defaultRefTool = (name, args) => name === "ref_search_documentation"
 // open after its result when holdOpen) or as JSON; GET opens a receive stream that stays open; DELETE ends the session.
 // tool may return "destroy" (cut the connection after the request arrived) or { status } (an HTTP refusal). Records everything.
 // "sse_cut" and "json_cut" answer with headers and part of a body, then cut the connection.
-export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false, receiveStream = true, tools = ["ref_search_documentation", "ref_read_url"], initialize = null } = {}) {
+export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false, receiveStream = true, tools = ["ref_search_documentation", "ref_read_url"], initialize = null, notified = null } = {}) {
   const log = [], sessions = new Map(), open = new Set();
   let n = 0;
   // A response's close is its connection's end (a request's close only means its body was read).
@@ -91,9 +91,9 @@ export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false
       const id = `ref-session-${++n}`;
       sessions.set(id, { calls: [] });
       res.writeHead(200, { "content-type": "application/json", "mcp-session-id": id });
-      return res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, result: { protocolVersion: msg.params.protocolVersion, capabilities: { tools: {} }, serverInfo: { name: "ref-fixture", version: "1" } } }));
+      return res.end(JSON.stringify({ jsonrpc: "2.0", id: msg.id, result: { protocolVersion: a?.protocolVersion ?? msg.params.protocolVersion, capabilities: { tools: {} }, serverInfo: { name: "ref-fixture", version: "1" } } }));
     }
-    if (msg.id === undefined) { res.writeHead(202); return res.end(); }
+    if (msg.id === undefined) { notified?.(entry); res.writeHead(202); return res.end(); }
     if (!sessions.has(entry.session)) { res.writeHead(404); return res.end(); }
     let result;
     if (msg.method === "tools/list") {

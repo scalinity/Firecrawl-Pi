@@ -247,6 +247,30 @@ test("a Ref session that cannot open is not metered; a 503 counts once against t
   } finally { await h.close(); }
 });
 
+test("a session open is judged by the request that failed: an unsupported handshake is a contract failure, an unsent listing no failure", async () => {
+  let version = "1999-01-01", held = [], h;
+  const fx = refFixture({ initialize: () => (version ? { protocolVersion: version } : null),
+    // Once the session is initialized, every request permit is taken, so the tool listing that follows is never written.
+    notified: () => { for (let i = 0; i < 4; i++) h.permits.api("fixture-ref", "another-search").then((r) => held.push(r)); } });
+  h = await harness({ handlers: { ref: fx } });
+  try {
+    const bad = await h.docs.ref.search(docsRequest("ref old handshake"), refCtx(h));
+    assert.deepEqual([bad.status, bad.reason], ["failed", "contract_failure"]);
+    version = null;
+    for (let i = 0; i < 3; i++) {
+      const o = await h.docs.ref.search(docsRequest(`ref unsent listing ${i}`), refCtx(h, { deadlineAt: Date.now() + 700 }));
+      assert.equal(o.status, "failed");
+      assert.equal(o.dispatchState, "not_sent");
+      for (const r of held.splice(0)) r();
+      await sleep(20);
+      for (const r of held.splice(0)) r();
+    }
+    assert.equal(fx.log.filter((e) => e.message?.method === "tools/list").length, 0, "the listings were never written");
+    assert.equal(h.dispatch.breakerState("fixture-ref"), "closed", "three opens whose failing request never left are no service failure");
+    assert.equal(rows(h).length, 0);
+  } finally { for (const r of held) r(); await h.close(); }
+});
+
 test("Ref blocks with a usable URL are hits; a session without both tools is a contract failure, never an empty search", async () => {
   const fx = refFixture({ tools: ["ref_search_documentation"], tool: () => refBlocks(["https://ref.example.org/docs/1"]) });
   const h = await harness({ handlers: { ref: fx } });

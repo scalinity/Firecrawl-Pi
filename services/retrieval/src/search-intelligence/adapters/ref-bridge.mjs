@@ -57,10 +57,11 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
   return function makeFetch({ sub, key, searchId, endpoint, signal, deadlineAt }) {
     const session = new AbortController();
     const ops = new Map();
-    let sessionDeadline = deadlineAt, wrote = false;
+    // The latest POST and whether it was written: a session's opening exchanges are sequential, so a failed open failed there.
+    let sessionDeadline = deadlineAt, lastPost = null;
     const authorize = () => !signal?.aborted && !session.signal.aborted && (!sub.prov.paid || paidDispatchActive(getBudget(), paidDispatch));
     const exchange = (method, h, body, { sig, until, onWritten = () => {}, onEnd, auth = authorize }) => request({ baseUrl: endpoint.origin, path: endpoint.pathname, method, headers: h, body, timeoutMs: Math.max(1, until - Date.now()),
-      maxBytes: limits().responseBytes.ref, getPolicy, resolvePublic, lookupFixture, signal: sig, authorize: auth, deadlineAt: until, onWritten: () => { wrote = true; onWritten(); }, onEnd });
+      maxBytes: limits().responseBytes.ref, getPolicy, resolvePublic, lookupFixture, signal: sig, authorize: auth, deadlineAt: until, onWritten, onEnd });
 
     async function fetch(input, init = {}) {
       const u = new URL(String(input?.url ?? input));
@@ -85,12 +86,14 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
         return new Response(res.body, { status: res.status, headers: toHeaders(res.headers) });
       }
       if (method !== "POST" && method !== "DELETE") throw new TypeError(`method ${method} is not used with Ref`);
+      const post = method === "POST" ? { written: false } : null;
+      if (post) lastPost = post;
       const release = await permits.api(sub.provider, searchId, { signal: sig, deadlineAt: until });
       if (op) op.pending.add(mine);
       let res;
       try {
         res = await exchange(method, h, method === "POST" ? Buffer.from(init.body ?? "") : null, { sig, until, auth: goodbye ? () => !session.signal.aborted : authorize,
-          onWritten: () => { if (op) op.written = true; }, onEnd: (err) => { op?.pending.delete(mine); release(); if (err && op) op.reject(err); } });
+          onWritten: () => { if (op) op.written = true; if (post) post.written = true; }, onEnd: (err) => { op?.pending.delete(mine); release(); if (err && op) op.reject(err); } });
       } catch (e) { op?.pending.delete(mine); throw e; }
       const ids = method === "POST" ? requestIds(init.body) : [];
       const sse = /^text\/event-stream\b/i.test(String(res.headers["content-type"] ?? ""));
@@ -118,8 +121,8 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
         };
       },
       closeAll: () => session.abort(),
-      // Whether anything of this session was written (a failed initialize was possibly seen by the provider).
-      wroteAny: () => wrote,
+      // Whether the session's latest POST was written: what a failed open sent, if anything.
+      lastWritten: () => lastPost?.written ?? false,
     };
   };
 }
