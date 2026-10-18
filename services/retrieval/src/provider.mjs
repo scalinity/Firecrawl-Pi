@@ -64,6 +64,31 @@ async function prepare({ baseUrl, path, timeoutMs, getPolicy, resolvePublic, loo
   return { url, target, address, mod, stopAt };
 }
 
+// The connection both requests share: one socket to the pinned address, refused if its peer is any other; the request is
+// written only once the connection (and TLS) is up and the caller's cancellation and the paid-dispatch authority have been
+// rechecked, so credential-bearing headers or a billable body are never buffered across a handshake while a lease can expire.
+// refuse(err) ends the exchange unsent; onWritten() marks it sent; isDone() says it already ended.
+function connection({ mod, target, address, url, method, headers, parts, length, signal, authorize, keepAlive, isDone, refuse, onWritten }, onResponse) {
+  const req = mod.request({ host: target.host, port: target.port, method, path: url.pathname + url.search, agent: false, lookup: pinnedLookup(address),
+    servername: target.literal ? undefined : target.host, rejectUnauthorized: true,
+    headers: { ...headers, host: url.host, ...(parts ? { "content-length": length } : {}) } }, onResponse);
+  const send = () => {
+    if (isDone()) return;
+    if (signal?.aborted) return refuse(new ProviderError("CANCELLED", "the caller cancelled", { sent: false }));
+    if (authorize && !authorize()) return refuse(new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before send", { sent: false }));
+    onWritten();
+    for (const part of parts?.slice(0, -1) ?? []) req.write(part);
+    req.end(parts ? parts.at(-1) : undefined);
+  };
+  req.on("socket", (sock) => {
+    // A non-streamed answer from a model that reasons sends nothing until it has finished: keep the idle connection alive through NAT.
+    if (keepAlive) sock.setKeepAlive(true, 30000);
+    sock.once("connect", () => { if (sock.remoteAddress && sock.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
+    if (mod === https) sock.once("secureConnect", send);
+  });
+  return req;
+}
+
 export async function providerRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes = 4 * 1048576, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt = null }) {
   const { url, target, address, mod, stopAt } = await prepare({ baseUrl, path, timeoutMs, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt });
   // The body is one buffer or a list of buffers written in order (a multipart upload's parts).
@@ -80,9 +105,8 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
       clearTimeout(idle);
       idle = setTimeout(() => { req.destroy(new Error("idle")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${written ? "nothing arrived" : "no connection"} for ${idleMs} ms`, { sent: written })); }, idleMs);
     };
-    const req = mod.request({ host: target.host, port: target.port, method, path: url.pathname + url.search, agent: false, lookup: pinnedLookup(address),
-      servername: target.literal ? undefined : target.host, rejectUnauthorized: true,
-      headers: { ...headers, host: url.host, ...(parts ? { "content-length": length } : {}) } }, (res) => {
+    const req = connection({ mod, target, address, url, method, headers, parts, length, signal, authorize, keepAlive: true, isDone: () => settled,
+      refuse: (e) => { done(reject, e); req.destroy(); }, onWritten: () => { written = true; quiet(); } }, (res) => {
       const chunks = [];
       let n = 0;
       res.on("data", (c) => { quiet(); n += c.length; if (n > maxBytes) { res.destroy(); done(reject, new ProviderError("PROVIDER_RESPONSE_TOO_LARGE", `the provider's answer exceeds ${maxBytes} bytes`, { sent: true, status: res.statusCode })); } else chunks.push(c); });
@@ -91,27 +115,6 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
       res.on("aborted", () => done(reject, new ProviderError("PROVIDER_UNCERTAIN", "the provider's answer was cut off", { sent: true, status: res.statusCode })));
     });
     quiet();
-    // Send only after connection/TLS and the final authorization check. Do not buffer credential-bearing
-    // headers or a billable body across the handshake while a validation lease can expire.
-    const send = () => {
-      if (settled) return;
-      if (signal?.aborted) { done(reject, new ProviderError("CANCELLED", "the caller cancelled", { sent: false })); req.destroy(); return; }
-      if (authorize && !authorize()) {
-        done(reject, new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before send", { sent: false }));
-        req.destroy();
-        return;
-      }
-      written = true;
-      quiet();
-      for (const p of parts?.slice(0, -1) ?? []) req.write(p);
-      req.end(parts ? parts.at(-1) : undefined);
-    };
-    req.on("socket", (s) => {
-      // A non-streamed answer from a model that reasons sends nothing until it has finished: keep the idle connection alive through NAT.
-      s.setKeepAlive(true, 30000);
-      s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
-      if (mod === https) s.once("secureConnect", send);
-    });
     const timer = setTimeout(() => { req.destroy(new Error("timeout")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : stopAt === null ? "PROVIDER_UNREACHABLE" : "PROVIDER_TIMEOUT", `no answer within ${limitMs} ms`, { sent: written, timedOut: stopAt !== null })); }, limitMs);
     req.on("error", (e) => done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${url.host}: ${e.code ?? e.message}`, { sent: written })));
     signal?.addEventListener("abort", onAbort, { once: true });
@@ -154,9 +157,8 @@ export async function providerStreamRequest({ baseUrl, path, method = "POST", he
       clearTimeout(idle);
       idle = setTimeout(() => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${written ? "nothing arrived" : "no connection"} for ${idleMs} ms`, { sent: written })), idleMs);
     };
-    const req = mod.request({ host: target.host, port: target.port, method, path: url.pathname + url.search, agent: false, lookup: pinnedLookup(address),
-      servername: target.literal ? undefined : target.host, rejectUnauthorized: true,
-      headers: { ...headers, host: url.host, ...(payload ? { "content-length": payload.length } : {}) } }, (res) => {
+    const req = connection({ mod, target, address, url, method, headers, parts: payload ? [payload] : null, length: payload?.length ?? 0, signal, authorize, keepAlive: false,
+      isDone: () => finished, refuse: (e) => finish(e), onWritten: () => { written = true; onWritten(); quiet(); } }, (res) => {
       answered = true;
       const stream = new ReadableStream({ start(c) { controller = c; }, cancel() { finish(null, true); } });
       let n = 0;
@@ -173,20 +175,6 @@ export async function providerStreamRequest({ baseUrl, path, method = "POST", he
       resolve({ status: res.statusCode, headers: res.headers, body: stream });
     });
     quiet();
-    // As providerRequest: nothing is written before the connection (and TLS) is up and the final authority check passes.
-    const send = () => {
-      if (finished) return;
-      if (signal?.aborted) { finish(new ProviderError("CANCELLED", "the caller cancelled", { sent: false })); return; }
-      if (authorize && !authorize()) { finish(new ProviderError("PAID_DISPATCH_DISABLED", "the paid dispatch lease expired before send", { sent: false })); return; }
-      written = true;
-      onWritten();
-      quiet();
-      req.end(payload ?? undefined);
-    };
-    req.on("socket", (s) => {
-      s.once("connect", () => { if (s.remoteAddress && s.remoteAddress !== address) req.destroy(new Error("peer changed")); else if (mod === http) send(); });
-      if (mod === https) s.once("secureConnect", send);
-    });
     // The whole exchange, the answer's stream included, ends at the deadline.
     const timer = setTimeout(() => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : stopAt === null ? "PROVIDER_UNREACHABLE" : "PROVIDER_TIMEOUT", `no complete answer within ${limitMs} ms`, { sent: written, timedOut: stopAt !== null })), limitMs);
     req.on("error", (e) => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : "PROVIDER_UNREACHABLE", `${url.host}: ${e.code ?? e.message}`, { sent: written }), false));
