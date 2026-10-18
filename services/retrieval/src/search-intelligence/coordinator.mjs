@@ -67,7 +67,8 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     if (pkey) {
       const hit = await cacheEntry(pkey);
       if (hit?.response?.status && ["success_results", "success_empty"].includes(hit.response.status)) {
-        return { ...outcome({ ...hit.response, provider: adapter.id, fromCache: true, durationMs: clock() - t0, dispatchState: "not_sent", originalRetrievedAt: hit.response.originalRetrievedAt ?? hit.createdAt?.toISOString?.() ?? null }), cacheExpiresAt: hit.expiresAt?.getTime?.() ?? null };
+        // A hit keeps its lane's kind, as a dispatched answer does: a documentation lane's record says docs_search either way.
+        return { ...outcome({ ...hit.response, provider: adapter.id, fromCache: true, durationMs: clock() - t0, dispatchState: "not_sent", originalRetrievedAt: hit.response.originalRetrievedAt ?? hit.createdAt?.toISOString?.() ?? null }), kind, cacheExpiresAt: hit.expiresAt?.getTime?.() ?? null };
       }
     }
     const child = new AbortController();

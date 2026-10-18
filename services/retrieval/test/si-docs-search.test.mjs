@@ -72,13 +72,16 @@ test("links mode with automatic documentation reads nothing: discovery text is e
 
 test("a cached Ref discovery that needs reads opens one fresh session whose context search is metered first", async () => {
   const fx = refFixture();
-  const h = await harness({ handlers: { ...empty, ref: fx } });
+  const h = await harness({ handlers: { ...empty, ref: fx }, telemetry: true });
   try {
     await h.coordinator.search(docsRequest("ref cached discovery", { limit: 5 }), { signal: new AbortController().signal });
     // A different limit is a different answer (no aggregate hit) over the same provider calls (provider cache hits).
     const r = await h.coordinator.search(docsRequest("ref cached discovery", { limit: 4 }), { signal: new AbortController().signal });
     const s = r.body.search;
     assert.equal(s.providers.ref.fromCache, true);
+    // The cached lane's record keeps its kind: a documentation search, as when it was dispatched.
+    await h.telemetry.drain();
+    assert.deepEqual([...new Set(h.store.events.filter((e) => e.type === "lane" && e.provider === "ref").map((e) => e.operation))], ["docs_search"]);
     const sessions = [...new Set(searches(fx).map((e) => e.session))];
     assert.equal(sessions.length, 2, "the second search's reads needed a new session");
     const second = fx.log.filter((e) => e.session === sessions[1] && e.tool);
