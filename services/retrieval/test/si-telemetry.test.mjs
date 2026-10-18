@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 import { randomUUID, createHash } from "node:crypto";
 import pg from "pg";
 import { Store } from "../src/store.mjs";
+import { FakeStore } from "./si-helpers.mjs";
 import { makeTelemetry, boundedTrace, TRACE_BYTES, safeUrl, fingerprint } from "../src/search-intelligence/telemetry.mjs";
 
 const KEY = Buffer.from("si-telemetry-test-fingerprint-key");
@@ -160,6 +161,23 @@ test("run and event rows round-trip; an event written twice is kept once", opts,
     const e = { eventId: randomUUID(), provider: "tavily", type: "availability", observedAt: new Date(), status: "quota_exhausted" };
     assert.equal(await store.searchEvents([e]), 1);
     assert.equal(await store.searchEvents([e]), 0, "an event id seen before is not written again");
+  } finally { await store.close(); }
+});
+
+test("the test harness's store keeps a run as PostgreSQL does: a finish updates only the completion", opts, async () => {
+  const store = await fresh();
+  try {
+    const fake = new FakeStore();
+    const id = randomUUID(), t1 = new Date(Date.now() - 5000), t2 = new Date();
+    const start = { logicalId: id, requestId: "req-start-0001", principalId: "owner", jobId: "job-start-0001", fingerprint: "a".repeat(64), profile: "aggregate", selection: "live", resultMode: "links", acceptedAt: t1, versions: { v: 1 } };
+    const finish = { ...start, requestId: "req-finish-0001", jobId: "job-finish-0001", acceptedAt: t2, versions: { v: 2 }, completedAt: t2, outcome: "complete", cacheMode: "miss" };
+    for (const s of [store, fake]) { await s.searchRunStarted(start); await s.searchRunFinished(finish); }
+    const pg = (await store.pool.query("SELECT request_id, job_id, accepted_at, versions, outcome FROM fcpi_retrieval.search_run WHERE logical_id = $1", [id])).rows[0];
+    const f = fake.runs.get(id);
+    assert.deepEqual([f.requestId, f.jobId, f.acceptedAt.getTime(), f.versions, f.outcome], [pg.request_id, pg.job_id, pg.accepted_at.getTime(), pg.versions, pg.outcome]);
+    assert.deepEqual([pg.job_id, pg.outcome], ["job-start-0001", "complete"], "the start's fields stay, the completion is the finish's");
+    const e = { eventId: randomUUID(), provider: "brave", type: "lane", observedAt: new Date(), status: "success_results" };
+    assert.deepEqual([await store.searchEvents([e, e]), await fake.searchEvents([e, e])], [1, 1], "both count what they wrote");
   } finally { await store.close(); }
 });
 

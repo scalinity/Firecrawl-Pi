@@ -52,8 +52,21 @@ export class FakeStore extends FakeLedger {
   }
   // The operational records (store.mjs has the SQL, tested in si-telemetry.test.mjs against PostgreSQL).
   async searchRunStarted(r) { if (this.failTelemetry) throw new Error("telemetry write failed"); if (!this.runs.has(r.logicalId)) this.runs.set(r.logicalId, structuredClone(r)); }
-  async searchRunFinished(r) { if (this.failTelemetry) throw new Error("telemetry write failed"); this.runs.set(r.logicalId, structuredClone(r)); }
-  async searchEvents(events) { if (this.failTelemetry) throw new Error("telemetry write failed"); for (const e of events) if (!this.events.some((x) => x.eventId === e.eventId)) this.events.push(structuredClone(e)); return events.length; }
+  // As the SQL upsert: a finish onto a started run updates only the completion columns, keeping the start's acceptance time,
+  // versions and job; a finish with no start row is the whole row.
+  async searchRunFinished(r) {
+    if (this.failTelemetry) throw new Error("telemetry write failed");
+    const prior = this.runs.get(r.logicalId);
+    const done = ["completedAt", "outcome", "cacheMode", "docsActive", "docsReason", "rankingMode", "summary", "trace", "traceTruncated"];
+    this.runs.set(r.logicalId, prior ? { ...prior, ...structuredClone(Object.fromEntries(done.map((k) => [k, r[k] ?? null]))) } : structuredClone(r));
+  }
+  // As the SQL: the count of events actually written, a repeated event id not counted.
+  async searchEvents(events) {
+    if (this.failTelemetry) throw new Error("telemetry write failed");
+    let n = 0;
+    for (const e of events) if (!this.events.some((x) => x.eventId === e.eventId)) { this.events.push(structuredClone(e)); n++; }
+    return n;
+  }
 }
 
 // Default answers in each provider's documented shape; each takes the query and returns { status, body, headers? }.
