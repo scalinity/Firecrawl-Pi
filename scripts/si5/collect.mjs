@@ -5,9 +5,12 @@
 //                disposable database's real hourly admission and the providers' own limits, paced to at most --per-hour searches;
 //   B, C, D-C7, D-Ref  the same request through the same coordinator code, fed the provider answers D received. The answers are
 //                held in memory, so no cache lifetime can expire them, and a replay can never dispatch discovery: an answer D did
-//                not get is a failed lane. C and the documentation ablations ask Jev live (its decision cache applies as in
-//                service); D-Ref's Ref reads are live, its Ref search is replayed. Replays dispatch no discovery provider, so they
-//                are not counted by the hourly admission, which governs collection;
+//                not get is a failed lane, counted as a miss. A replay is admitted whatever D's later calls did to a provider's
+//                availability or breaker (it sends nothing), and a lane that still did not take D's answer is recorded as a
+//                divergence. C and the documentation ablations ask Jev live (its decision cache applies as in service). Ref's
+//                enrichment reads belong to a live session the replay does not hold, so a replay never reads: a read D-Ref
+//                would have made is recorded (enrichmentNotReplayed) and its ranking has no read passage. Replays dispatch no
+//                discovery provider, so they are not counted by the hourly admission, which governs collection;
 //   A            the legacy Serper-first selection: Serper's organic order from D's own Serper answer, first ten. The legacy core
 //                sends domain constraints as site: operators, so for such a query A makes its own legacy-shaped Serper request
 //                (recorded as an unmatched baseline acquisition); with no Serper answer the legacy SearXNG fallback is not
@@ -15,9 +18,14 @@
 // Each profile's internal top 20 comes from its pool before public truncation (benchmark instrumentation: the coordinator's own
 // run record, ranked by its scores and selected with its own diversity rule; the public limit stays 10).
 // Writes one private record per query (provider text, kept out of Git) and a sanitized one (URLs, titles, ranks, outcomes,
-// usage; provider text only as hashes). Restartable: a query with both records is skipped. Credentials are handled as in
-// live-smoke.mjs: copied to owner-only files for the run, never printed, and a record holding any value is refused.
-//   FCPI_TEST_PG=127.0.0.1 PGPORT=55432 node scripts/si5/collect.mjs [--fresh] [--only Q001,Q002] [--per-hour 50]
+// usage; provider text only as hashes, except the titles and URLs that identify each document). Restartable: a query with both
+// records is skipped. A restart on a different commit is recorded in frozen.json as a collector revision, and needs
+// --revision-reason; the ranking files must still match the freeze. A trial (--only) writes to eval/trials/, never runs/.
+// The collection has its own database on the disposable server (FCPI_SI5_DB, default fcpi_si5_eval): the retrieval suites
+// that share FCPI_TEST_PG's "postgres" database truncate its tables and drop its schema. Credentials are handled as in
+// live-smoke.mjs: copied to owner-only files for the run, never printed, removed on exit or signal, and a record holding any
+// value is refused.
+//   FCPI_TEST_PG=127.0.0.1 PGPORT=55432 node scripts/si5/collect.mjs [--fresh] [--only Q001,Q002] [--per-hour 50] [--revision-reason "…"]
 import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, chmodSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -39,12 +47,15 @@ const [{ validateSearchRequest, failed, VERSIONS }, { normalizeUrl, sha256 }, { 
 
 const arg = (name, dflt) => { const i = process.argv.indexOf(`--${name}`); return i < 0 ? dflt : process.argv[i + 1]; };
 const FRESH = process.argv.includes("--fresh"), ONLY = arg("only", null)?.split(","), PER_HOUR = Number(arg("per-hour", "50"));
+const REVISION_REASON = arg("revision-reason", null);
 const HOST = process.env.FCPI_TEST_PG;
 if (!HOST) { console.error("FCPI_TEST_PG must name the disposable PostgreSQL"); process.exit(2); }
 if (!(PER_HOUR >= 1 && PER_HOUR <= 60)) { console.error("--per-hour must be 1-60 (the deployed admission is 60 an hour)"); process.exit(2); }
+const DB = process.env.FCPI_SI5_DB ?? "fcpi_si5_eval";
+if (!/^fcpi_si5_[a-z0-9_]{1,40}$/.test(DB)) { console.error("FCPI_SI5_DB must name an fcpi_si5_* database (never the suites' postgres)"); process.exit(2); }
 
 const EVAL = join(root, "evidence/search-intelligence/SI5/eval");
-const OUT = join(EVAL, "runs"), PRIVATE = join(EVAL, "private/runs");
+const OUT = join(EVAL, ONLY ? "trials" : "runs"), PRIVATE = join(EVAL, ONLY ? "private/trials" : "private/runs");
 mkdirSync(OUT, { recursive: true }); mkdirSync(PRIVATE, { recursive: true });
 const corpus = JSON.parse(readFileSync(join(root, "evidence/search-intelligence/SI0/corpus/corpus-v1.json"), "utf8"));
 const git = (...a) => execFileSync("git", ["-C", root, ...a], { encoding: "utf8" }).trim();
@@ -62,6 +73,8 @@ const keysDir = mkdtempSync(join(tmpdir(), "fcpi-si5-keys-"));
 chmodSync(keysDir, 0o700);
 for (const [k, file] of Object.entries(NAMES)) if (env[k]) writeFileSync(join(keysDir, file), env[k], { mode: 0o600 });
 process.on("exit", () => rmSync(keysDir, { recursive: true, force: true }));
+// A signal's default ends the process without its exit handlers: exit instead, so the key files go with it.
+for (const s of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(s, () => process.exit(130));
 
 const policy = loadPolicy(readFileSync(join(root, "deploy/policies/egress.json"), "utf8"));
 const local = new BlockList();
@@ -82,23 +95,40 @@ const frozen = { schema: "fcpi.si5-frozen/v1", repositoryCommit: commit, version
   limits: { candidates: L.candidates, cacheSeconds: L.cacheSeconds, discoveryMs: L.discoveryMs, semanticMs: L.semanticMs },
   files: Object.fromEntries([...tracked, "deploy/policies/egress.json", "deploy/policies/budget.json", "evidence/search-intelligence/SI0/corpus/corpus-v1.json"].map((p) => [p, fileHash(p)])) };
 const frozenPath = join(EVAL, "frozen.json");
+// What runs the collection rather than ranks it. A restart on another commit is a recorded revision, from the next query on.
+const collectorFiles = ["scripts/si5/collect.mjs", "services/retrieval/package-lock.json", "deploy/nuq-postgres/fcpi-retrieval-schema.sql"];
+const nextQuery = corpus.queries.find((q) => !(existsSync(join(OUT, `${q.id}.json`)) && existsSync(join(PRIVATE, `${q.id}.json`))))?.id ?? null;
+const revisionNow = { repositoryCommit: commit, database: DB, files: Object.fromEntries(collectorFiles.map((p) => [p, fileHash(p)])) };
 if (!ONLY) {
   if (existsSync(frozenPath)) {
     const was = JSON.parse(readFileSync(frozenPath, "utf8"));
     const changed = Object.keys({ ...was.files, ...frozen.files }).filter((p) => was.files[p] !== frozen.files[p]);
     if (changed.length || was.searchIntelligence !== frozen.searchIntelligence || was.searching !== frozen.searching) { console.error(`refused: the frozen configuration changed (${changed.slice(0, 5).join(", ") || "policy"})`); process.exit(2); }
-  } else writeFileSync(frozenPath, JSON.stringify({ ...frozen, frozenAt: new Date().toISOString() }, null, 1) + "\n");
+    // The freeze's own collector, from its commit, when the manifest predates revisions (it ran on the suites' database).
+    const revisions = was.collectorRevisions ?? [{ repositoryCommit: was.repositoryCommit, database: "postgres", fromQuery: corpus.queries[0].id, utc: was.frozenAt,
+      files: Object.fromEntries(collectorFiles.map((p) => [p, sha256(execFileSync("git", ["-C", root, "show", `${was.repositoryCommit}:${p}`]))])) }];
+    const last = revisions.at(-1);
+    if (last.repositoryCommit !== commit || last.database !== DB) {
+      if (!REVISION_REASON) { console.error(`refused: the collector changed since ${last.repositoryCommit.slice(0, 7)}; say why with --revision-reason`); process.exit(2); }
+      revisions.push({ ...revisionNow, fromQuery: nextQuery, utc: new Date().toISOString(), reason: REVISION_REASON });
+    }
+    if (!was.collectorRevisions || revisions.length !== was.collectorRevisions.length) writeFileSync(frozenPath, JSON.stringify({ ...was, collectorRevisions: revisions }, null, 1) + "\n");
+  } else writeFileSync(frozenPath, JSON.stringify({ ...frozen, frozenAt: new Date().toISOString(), collectorRevisions: [{ ...revisionNow, fromQuery: nextQuery, utc: new Date().toISOString(), reason: "the freeze" }] }, null, 1) + "\n");
 }
 
 async function openStore() {
-  const c = new pg.Client({ host: HOST, user: "postgres", database: "postgres" });
+  const admin = new pg.Client({ host: HOST, user: "postgres", database: "postgres" });
+  await admin.connect();
+  try { if (!(await admin.query("SELECT 1 FROM pg_database WHERE datname = $1", [DB])).rowCount) await admin.query(`CREATE DATABASE ${DB}`); }
+  finally { await admin.end(); }
+  const c = new pg.Client({ host: HOST, user: "postgres", database: DB });
   await c.connect();
   try {
     await c.query("CREATE SCHEMA IF NOT EXISTS nuq"); await c.query(readFileSync(join(root, "deploy/nuq-postgres/fcpi-retrieval-schema.sql"), "utf8"));
     // A fresh collection starts from a clean slate: no earlier admission, availability, cache or ledger row stands in for it.
     if (FRESH) await c.query("TRUNCATE fcpi_retrieval.search_cache, fcpi_retrieval.search_query, fcpi_retrieval.provider_availability, fcpi_retrieval.budget_usage, fcpi_retrieval.budget_reservation, fcpi_retrieval.search_run, fcpi_retrieval.search_event");
   } finally { await c.end(); }
-  const store = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval" });
+  const store = new Store({ host: HOST, database: DB, user: "fcpi_retrieval" });
   await store.ready({ url: 2, browser: 1 });
   return store;
 }
@@ -138,9 +168,25 @@ function assemble(store) {
   return { dispatch, availability, serper, general, docs, decisions, documentation: makeDocumentation({ decisions, log }) };
 }
 
-// An adapter whose discovery is never dispatched in a replay: a missing answer is a failed lane, counted.
-const misses = [];
-const replayed = (a) => Object.assign(Object.create(a), { search: async (request, ctx) => { misses.push(a.id); return failed(a.id, "internal_failure", "replay_answer_missing", { kind: ctx?.kind ?? "search" }); } });
+// An adapter whose discovery is never dispatched in a replay: a missing answer is a failed lane, counted. Its enrichment runs
+// with no lease and no admission, so it selects what it would read and reads nothing; a selection is recorded, never sent.
+const misses = [], unreadEnrichments = [];
+const replayed = (a) => Object.assign(Object.create(a), { search: async (request, ctx) => { misses.push(a.id); return failed(a.id, "internal_failure", "replay_answer_missing", { kind: ctx?.kind ?? "search" }); },
+  ...(typeof a.enrich === "function" ? { enrich: async (o) => {
+    const r = await a.enrich.call(a, { ...o, lease: null, admit: () => null });
+    if (!r.attempted) return r;
+    unreadEnrichments.push({ provider: a.id, selected: r.attempted });
+    return { ...r, limitation: "replay_not_dispatched", record: r.record ? { ...r.record, limitation: "replay_not_dispatched" } : r.record };
+  } } : {}) });
+// The replays' dispatch: D's later calls may have changed a provider's availability or breaker, but a replayed lane sends
+// nothing, so that live state never refuses it (the answer, or a counted miss, decides). Every other refusal stands.
+const replayDispatch = (base) => Object.assign(Object.create(base), { preflight: (sub, o) => {
+  const p = base.preflight(sub, o);
+  return !p.eligible && (p.reason === "breaker_open" || String(p.detail ?? "").startsWith("availability:")) ? { eligible: true, key: null, epoch: null, probe: false } : p;
+} });
+// A replay lane that did not take D's answer although D's own lane succeeded: an integrity failure, recorded beside the misses.
+const diverged = (p, d) => p.lanes.filter((l) => !(l.reason === "not_configured" && l.detail === "adapter_missing") && !(l.fromCache && /^success_/.test(l.status))
+  && d.lanes.some((x) => x.provider === l.provider && /^success_/.test(x.status))).map((l) => `${l.provider}:${l.status}:${l.reason ?? ""}`);
 
 // ---- the legacy baseline's query (the pinned core's search-query-builder: bare site: operators) ---------------------------------
 const legacyQuery = (q, c) => q + (c.includeDomains?.length ? " " + c.includeDomains.map((d) => `site:${d}`).join(" OR ") : "") + (c.excludeDomains?.length ? " " + c.excludeDomains.map((d) => `-site:${d}`).join(" ") : "");
@@ -171,7 +217,7 @@ const laneOf = (o) => ({ provider: o.provider, kind: o.kind ?? null, status: o.s
   candidates: (o.candidates ?? []).map((c) => ({ url: c.url, rank: c.rank, title: c.title ?? null, description: c.description ?? null, snippets: c.snippets ?? [], publication: c.publication ?? null })) });
 
 async function profile(name, coordinator, request) {
-  const t0 = Date.now(), missBefore = misses.length;
+  const t0 = Date.now(), missBefore = misses.length, unreadBefore = unreadEnrichments.length;
   let body = null, failure = null;
   try { ({ body } = await coordinator.search(request, { signal: new AbortController().signal })); }
   catch (e) { failure = { class: e.failureClass ?? e.code ?? "error", detail: String(e.detail ?? e.message).slice(0, 300) }; }
@@ -180,7 +226,7 @@ async function profile(name, coordinator, request) {
   const s = body?.search;
   const t = top20(run);
   return {
-    profile: name, elapsedMs: Date.now() - t0, failure, replayMisses: misses.slice(missBefore),
+    profile: name, elapsedMs: Date.now() - t0, failure, replayMisses: misses.slice(missBefore), enrichmentNotReplayed: unreadEnrichments.slice(unreadBefore),
     outcome: s?.outcome ?? run?.outcome ?? null, empty: s?.empty ?? null, publicCount: body?.web?.length ?? 0, top20MatchesPublic: t.matchesPublic,
     coverage: s?.coverage ?? null, providers: s?.providers ?? null, warnings: s?.warnings ?? [], timings: s?.timings ?? run?.timings ?? null,
     ranking: s ? { mode: s.ranking.mode, reason: s.ranking.reason, model: s.ranking.model, scored: s.ranking.scored, shortlisted: s.ranking.shortlisted } : null,
@@ -190,21 +236,19 @@ async function profile(name, coordinator, request) {
   };
 }
 
-async function ledgerTotals(store) {
-  const r = await store.pool.query("SELECT provider, kind, unit, state, count(*)::int AS n, coalesce(sum(actual), 0)::float8 AS actual, coalesce(sum(reserved), 0)::float8 AS reserved FROM fcpi_retrieval.budget_reservation GROUP BY 1, 2, 3, 4 ORDER BY 1, 2, 3, 4");
+// The ledger of one query: the reservations made since it started (its D search, the replays' Jev decisions and A's own
+// request), each in its state at the end of the query.
+async function ledgerOf(store, since) {
+  const r = await store.pool.query("SELECT provider, kind, unit, state, count(*)::int AS n, coalesce(sum(actual), 0)::float8 AS actual, coalesce(sum(reserved), 0)::float8 AS reserved FROM fcpi_retrieval.budget_reservation WHERE created_at >= $1 GROUP BY 1, 2, 3, 4 ORDER BY 1, 2, 3, 4", [since]);
   return r.rows;
 }
-function ledgerDelta(before, after) {
-  const k = (r) => `${r.provider}|${r.kind}|${r.unit}|${r.state}`, b = new Map(before.map((r) => [k(r), r]));
-  return after.map((r) => { const p = b.get(k(r)) ?? { n: 0, actual: 0, reserved: 0 }; return { provider: r.provider, kind: r.kind, unit: r.unit, state: r.state, n: r.n - p.n, actual: r.actual - p.actual, reserved: r.reserved - p.reserved }; })
-    .filter((r) => r.n > 0);
-}
+const dbNow = async (store) => (await store.pool.query("SELECT clock_timestamp() AS t")).rows[0].t;
 
 // The sanitized record: identities, titles, ranks, outcomes and usage; provider text only as hashes.
 const sanitizeDoc = (d) => ({ canonicalUrl: d.canonicalUrl, title: d.title, descriptionHash: hash(d.description), providers: d.providers, passages: d.passages.map((p) => ({ kind: p.kind, provider: p.provider, textHash: hash(p.text) })),
   documentation: d.documentation, ranks: d.ranks, score: d.score, semantic: d.semantic });
 const sanitizeProfile = (p) => ({ ...p, lanes: p.lanes.map((l) => ({ ...l, candidates: l.candidates.map((c) => ({ url: c.url, rank: c.rank, title: c.title, descriptionHash: hash(c.description), snippetHashes: c.snippets.map(hash), publication: c.publication })) })),
-  top20: p.top20.map(sanitizeDoc), documentation: p.documentation ? { ...p.documentation, auxiliary: p.documentation.auxiliary.map((a) => ({ ...a, text: undefined, textHash: hash(a.text ?? a.content ?? JSON.stringify(a)) })) } : null });
+  top20: p.top20.map(sanitizeDoc), documentation: p.documentation ? { ...p.documentation, auxiliary: p.documentation.auxiliary.map((a) => ({ provider: a.provider ?? null, kind: a.kind ?? null, textHash: hash(a.text ?? a.content ?? JSON.stringify(a)) })) } : null });
 
 function writeChecked(path, value) {
   const out = JSON.stringify(value, null, 1);
@@ -228,8 +272,8 @@ try {
     const answers = new Map();
     const D = makeCoordinator({ store: liveStore(store, answers), getBudget, getPolicy, getSelection, dispatch: live.dispatch, general: live.general, searxng: null, docs: live.docs,
       documentation: live.documentation, decisions: live.decisions, availability: live.availability, telemetry, log });
-    const before = await ledgerTotals(store);
-    const record = { schema: "fcpi.si5-eval-run/v1", id: q.id, category: q.category, split: q.split, utc: new Date().toISOString(), repositoryCommit: commit, codeDirty, profiles: {} };
+    const since = await dbNow(store);
+    const record = { schema: "fcpi.si5-eval-run/v1", id: q.id, category: q.category, split: q.split, utc: new Date().toISOString(), repositoryCommit: commit, codeDirty, database: DB, profiles: {} };
     // D, under the real admission: a refused admission waits a minute and asks again.
     let d;
     for (let attempt = 0; attempt < 30; attempt++) {
@@ -243,12 +287,13 @@ try {
     // The replays, from D's answers.
     const rs = replayStore(store, answers);
     const g = Object.fromEntries(Object.entries(live.general).map(([k, a]) => [k, replayed(a)]));
-    const coord = (over) => makeCoordinator({ store: rs, getBudget, getPolicy, getSelection, dispatch: live.dispatch, general: g, searxng: null, docs: {}, documentation: null, decisions: null,
+    const coord = (over) => makeCoordinator({ store: rs, getBudget, getPolicy, getSelection, dispatch: replayDispatch(live.dispatch), general: g, searxng: null, docs: {}, documentation: null, decisions: null,
       availability: live.availability, telemetry, log, ...over });
     record.profiles.B = await profile("B", coord({}), requestOf(q));
     record.profiles.C = await profile("C", coord({ decisions: live.decisions }), requestOf(q));
     record.profiles["D-C7"] = await profile("D-C7", coord({ decisions: live.decisions, documentation: live.documentation, docs: { context7: replayed(live.docs.context7) } }), requestOf(q));
     record.profiles["D-Ref"] = await profile("D-Ref", coord({ decisions: live.decisions, documentation: live.documentation, docs: { ref: replayed(live.docs.ref) } }), requestOf(q));
+    for (const p of ["B", "C", "D-C7", "D-Ref"]) record.profiles[p].divergence = diverged(record.profiles[p], d);
     // A: the legacy selection.
     const serperLane = d.lanes.find((l) => l.provider === "serper");
     const c = q.constraints ?? {};
@@ -264,11 +309,13 @@ try {
     } else A = { source: "none", unmatched: `serper ${serperLane?.status ?? "absent"}; legacy SearXNG fallback not available to the benchmark`, results: [] };
     A.top = A.results.slice(0, 10).map((r) => ({ canonicalUrl: normalizeUrl(r.url)?.url ?? null, displayUrl: r.url, title: r.title, description: r.description })).filter((r) => r.canonicalUrl);
     record.profiles.A = A;
-    record.ledger = ledgerDelta(before, await ledgerTotals(store));
+    record.ledgerBasis = "reservations_created_during_query";
+    record.ledger = await ledgerOf(store, since);
     writeChecked(privPath, record);
     writeChecked(pubPath, { ...record, profiles: { ...Object.fromEntries(["D", "B", "C", "D-C7", "D-Ref"].map((p) => [p, sanitizeProfile(record.profiles[p])])),
       A: { ...A, results: A.results.map((r) => ({ url: r.url, rank: r.rank, title: r.title, descriptionHash: hash(r.description) })), top: A.top.map((r) => ({ canonicalUrl: r.canonicalUrl, title: r.title })) } } });
     say({ id: q.id, D: d.outcome, failure: d.failure?.class ?? null, ms: d.elapsedMs, top20: d.top20.length, misses: Object.values(record.profiles).flatMap((p) => p.replayMisses ?? []).length,
+      divergence: Object.values(record.profiles).flatMap((p) => p.divergence ?? []).length, unread: Object.values(record.profiles).flatMap((p) => p.enrichmentNotReplayed ?? []).length,
       ranking: d.ranking?.mode ?? null, docs: d.documentation?.activation?.active ?? null });
   }
 } finally {
