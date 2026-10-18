@@ -32,8 +32,13 @@ test("a Ref result on an SSE stream the server keeps open is used at once, and t
     assert.equal(call.headers["x-fcpi-operation"], undefined, "the operation tag never leaves the host");
     assert.equal(h.permits.snapshot().api.held["provider:fixture-ref"], undefined, "no request permit is left held by the stream the server keeps open");
     assert.deepEqual(rows(h).map((r) => [r.state, r.actual]), [["SETTLED", 1]]);
+    const timeouts = () => process.getActiveResourcesInfo().filter((t) => t === "Timeout").length;
     await o.lease.close();
     assert.ok(fx.log.some((e) => e.method === "DELETE" && e.closed), "the session's goodbye ends the remote session");
+    // A goodbye's fallback timer left pending would fire within the next second, lowering the count.
+    const after = timeouts();
+    await sleep(1100);
+    assert.equal(timeouts(), after, "a quick goodbye leaves no one-second timer pending");
   } finally { await h.close(); }
 });
 

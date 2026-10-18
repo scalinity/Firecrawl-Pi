@@ -117,7 +117,9 @@ export function makeRefSessionFactory({ makeFetch, clientInfo = { name: "fcpi-re
       if (closed) return;
       closed = true;
       // A bounded goodbye: the session's DELETE when the server issued one, then the client and every open stream are ended.
-      await Promise.race([transport.terminateSession?.().catch(() => {}), new Promise((r) => setTimeout(r, 1000))]);
+      let bound;
+      await Promise.race([transport.terminateSession?.().catch(() => {}), new Promise((r) => { bound = setTimeout(r, 1000); })]);
+      clearTimeout(bound);
       await client.close().catch(() => {});
       bridge.closeAll();
     };
