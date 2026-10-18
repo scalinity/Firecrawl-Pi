@@ -429,3 +429,18 @@ test('full tasks reach the model while all generated prompt and search shapes re
     assert.ok(Buffer.byteLength(JSON.stringify(json.schema)) <= 16384);
   }
 });
+
+test('source-less documentation a search returns reaches the model as uncitable reference and the caller whole', async () => {
+  const aux = { provider: 'context7', libraryId: '/vuejs/docs', requestedVersion: '3.5', observedVersion: null, passageId: 'p-aux-1', sourceIdentifier: 'vue-docs:watchers', sourceUrl: null,
+    kind: 'documentation_text', text: 'Watchers run after the component updates by default.' };
+  const search = { status: 200, data: { success: true, data: { web: [{ url: first, title: 'Search result' }] },
+    fcpi: { search: { coverage: { general: { missing: [] } }, ranking: { mode: 'hybrid' }, documentation: { auxiliaryContext: [aux, { omitted: 3 }] } } } } };
+  const f = fixture([search, page(first)]);
+  const output = await runAgent({ prompt: 'How do Vue watchers run?', urls: [], maxPages: 1 }, f);
+  const prompt = f.calls[1].body.formats.find(format => format.type === 'json').prompt;
+  assert.match(prompt, /cannot be cited as source_url/);
+  assert.match(prompt, /Watchers run after the component updates/);
+  assert.ok(prompt.length <= 4000, 'the bounded prompt still fits');
+  assert.deepEqual(output.auxiliaryContext.map(a => [a.provider, a.libraryId, a.requestedVersion, a.sourceIdentifier, a.sourceUrl]), [['context7', '/vuejs/docs', '3.5', 'vue-docs:watchers', null]]);
+  assert.equal(output.auxiliaryContext[0].text, aux.text, 'its contents arrive whole');
+});
