@@ -21,6 +21,9 @@ const read = (p) => JSON.parse(readFileSync(p, "utf8"));
 const corpus = read(join(root, "evidence/search-intelligence/SI0/corpus/corpus-v1.json"));
 const labels = read(join(EVAL, "labels.json"));
 const anchors = existsSync(join(EVAL, "anchors.json")) ? read(join(EVAL, "anchors.json")) : { queries: {} };
+// Each pooled URL's capture through the Pi (eval/captures.json): a profile's selected-page acquisition success is the share of its
+// top 10 captured (spec §23.2).
+const captured = new Map((existsSync(join(EVAL, "captures.json")) ? read(join(EVAL, "captures.json")).captures : []).map((c) => [c.url, c.status === "captured"]));
 const PROFILES = ["A", "B", "C", "D", "D-C7", "D-Ref"], PRIMARY = new Set(["official_docs", "repository", "release_notes", "paper", "standard"]);
 const GENERAL = ["serper", "brave", "exa", "deepseek", "tavily"], DISCOVERY = [...GENERAL, "context7", "ref"];
 const mean = (a) => (a.length ? a.reduce((s, x) => s + x, 0) / a.length : null);
@@ -56,6 +59,7 @@ for (const q of queries) {
       anchorRecall20: anchorUrls.length ? anchorUrls.filter((u) => top20.includes(u)).length / anchorUrls.length : null,
       unjudged10: top10.filter((u) => g(u) === null).length, unjudged20: top20.filter((u) => g(u) === null).length, returned: urls.length,
       coverage: reqs.length ? covered(top10, false).length / reqs.length : null, coveragePage: reqs.length ? covered(top10, true).length / reqs.length : null, covered: covered(top10, false),
+      acquired10: top10.length ? top10.filter((u) => captured.get(u) === true).length / top10.length : null,
       mismatch10: top10.filter((u) => L[u]?.versionStatus === "mismatch").length, versionKnown10: top10.filter((u) => ["match", "mismatch"].includes(L[u]?.versionStatus)).length,
       outcome: p === "A" ? (run.profiles.A.unmatched ? `unmatched: ${run.profiles.A.unmatched}` : "matched") : run.profiles[p].outcome,
     };
@@ -95,7 +99,7 @@ function bootstrap(set, f, n = 10000) {
 }
 const diff = (p1, p0, m) => (id) => (per[id].profiles[p1][m] === null || per[id].profiles[p0][m] === null ? null : per[id].profiles[p1][m] - per[id].profiles[p0][m]);
 const dpos = ids.filter((id) => per[id].docPositive), five = ids.filter((id) => per[id].eligibleFive);
-const metrics = ["ndcg10", "p5", "p10", "primary10", "recall20", "anchorRecall20", "unjudged10", "unjudged20"];
+const metrics = ["ndcg10", "p5", "p10", "primary10", "recall20", "anchorRecall20", "unjudged10", "unjudged20", "acquired10"];
 const table = (set) => Object.fromEntries(PROFILES.map((p) => [p, Object.fromEntries(metrics.map((m) => [m, macro(set, p, m)]))]));
 const byCategory = Object.fromEntries([...new Set(ids.map((id) => per[id].category))].map((c) => [c, table(ids.filter((id) => per[id].category === c))]));
 const nA = macro(ids, "A", "ndcg10"), nD = macro(ids, "D", "ndcg10");
