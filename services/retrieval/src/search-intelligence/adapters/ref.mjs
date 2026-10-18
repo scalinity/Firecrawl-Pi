@@ -6,10 +6,12 @@
 //     session's searches. Its lease goes to the coordinator, which closes it after any selected reads.
 //   - Billable: ref_search_documentation and ref_read_url, one credit each, each its own metered operation. Initialization,
 //     tool listing and session close are bounded protocol exchanges, recorded but not metered.
-//   - Answers: the hosted format is not documented. The legacy text blocks ("overview: …\nurl: …\nmoduleId: …") and the exact
-//     "No results found" sentinel are recognized; known error texts (which arrive without isError) and isError are failures; any
-//     other text is a contract failure, never an empty result. A URL inside an error is never a hit. No JSON results envelope is
-//     assumed. A read is a query-conditioned excerpt, never a full document.
+//   - Answers: the hosted server answers each search result as its own text block, a description (page='…' section='…', or a
+//     breadcrumb) then the result's URL alone on the last line (live contract smoke 2026-10-18,
+//     evidence/search-intelligence/SI5/live-smoke.json); the legacy text blocks ("overview: …\nurl: …\nmoduleId: …") and the exact
+//     "No results found" sentinel are recognized too. Known error texts (which arrive without isError) and isError are failures;
+//     any other text is a contract failure, never an empty result. A URL inside an error is never a hit. No JSON results envelope
+//     is assumed. A read is a query-conditioned excerpt, never a full document.
 //   - Verdicts: each billable call is one (dispatch.meter's fail() for a call without a usable answer, report() for an answer);
 //     a session that fails to open or lacks the tools counts only as an unmetered exchange (dispatch.observe).
 import { outcome } from "../contracts.mjs";
@@ -17,7 +19,7 @@ import { sha256, contentHash, normalizeQueryText, normalizeUrl } from "../normal
 import { mcpFailure } from "./common.mjs";
 import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 
-export const REF_CONTRACT = "ref-mcp-v1/2026-10-17";
+export const REF_CONTRACT = "ref-mcp-v1/2026-10-18";
 export const NO_RESULTS = "No results found";
 // Selected reads (spec §6.2): at most two a logical execution, for documents whose passages hold no excerpt of this length.
 export const MAX_READS = 2, USEFUL_EXCERPT_CHARS = 200;
@@ -53,6 +55,14 @@ function blocksOf(text) {
   }
   return out;
 }
+// The hosted result block: one result per text block, its description first and its URL alone on the last line.
+function hostedBlockOf(text) {
+  const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  if (lines.length < 2 || !/^https?:\/\/\S+$/.test(lines.at(-1))) return null;
+  const head = lines.slice(0, -1).join("\n");
+  const page = /\bpage='([^']*)'/.exec(head)?.[1] ?? null, section = /\bsection='([^']*)'/.exec(head)?.[1] ?? null;
+  return { url: lines.at(-1), overview: page || section ? [page, section].filter(Boolean).join(" — ") : head, moduleId: page ?? "" };
+}
 
 const textsOf = (result) => (Array.isArray(result?.content) ? result.content.filter((c) => c?.type === "text" && typeof c.text === "string").map((c) => c.text) : null);
 function classifyError(text, { auth = AUTH, errors = SEARCH_ERRORS } = {}) {
@@ -73,7 +83,11 @@ export function parseRefSearch(result) {
   // A block that opens with a refusal is an error whatever it quotes; the others are parsed for results.
   const refusals = texts.map((t) => classifyError(t));
   const docs = [];
-  texts.forEach((t, i) => { if (!refusals[i]) for (const b of blocksOf(t)) if (normalizeUrl(b.url)) docs.push({ url: b.url, overview: b.overview.trim().slice(0, 2000), moduleId: b.moduleId.trim().slice(0, 300) }); });
+  texts.forEach((t, i) => {
+    if (refusals[i]) return;
+    const blocks = blocksOf(t);
+    for (const b of blocks.length ? blocks : [hostedBlockOf(t)].filter(Boolean)) if (normalizeUrl(b.url)) docs.push({ url: b.url, overview: b.overview.trim().slice(0, 2000), moduleId: b.moduleId.trim().slice(0, 300) });
+  });
   if (docs.length) return { kind: "results", docs };
   if (texts.length === 1 && texts[0].trim() === NO_RESULTS) return { kind: "empty" };
   return refusals.find(Boolean) ?? { kind: "contract", detail: "ref_unrecognized_text" };

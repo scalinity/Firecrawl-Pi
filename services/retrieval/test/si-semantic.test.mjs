@@ -48,6 +48,16 @@ test("Ref's block reader is linear: a large answer of unterminated overviews par
   assert.deepEqual(multi.docs, [{ url: "https://docs.example.com/m", overview: "First line\nsecond line\nurl: not-a-pair", moduleId: "mod" }]);
 });
 
+test("Ref's hosted results are one block each, a description then the URL alone on the last line; an inline URL is not one", () => {
+  const r = parseRefSearch(text("page='Example Guide | Docs' section='guide > state > declaring'\nhttps://docs.example.org/guide/state#declaring", "guide-state > declaring-state\nhttps://docs.example.org/guide/state.md#declaring"));
+  assert.deepEqual(r, { kind: "results", docs: [
+    { url: "https://docs.example.org/guide/state#declaring", overview: "Example Guide | Docs — guide > state > declaring", moduleId: "Example Guide | Docs" },
+    { url: "https://docs.example.org/guide/state.md#declaring", overview: "guide-state > declaring-state", moduleId: "" }] });
+  assert.equal(parseRefSearch(text("Something failed, see https://status.example.org")).kind, "contract", "a URL inside a sentence is no result");
+  assert.equal(parseRefSearch(text("https://docs.example.org/only-a-url")).kind, "contract", "a URL with no description is no result");
+  assert.equal(parseRefSearch(text("Error during documentation search: upstream\nhttps://docs.example.org/x")).kind, "error", "an error block quoting a URL is still an error");
+});
+
 test("Ref's query carries the caller's library, version and language hints that the query lacks", () => {
   const r = validateSearchRequest(request({ originalQuery: "how do async components work", intelligence: { documentation: "required", libraries: [{ name: "vue", version: "3.5" }], programmingLanguage: "typescript" } }));
   assert.equal(refQuery(r), "how do async components work vue 3.5 typescript");

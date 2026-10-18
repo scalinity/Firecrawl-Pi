@@ -158,6 +158,19 @@ test("a search about authentication errors is a billed success and leaves Ref av
   } finally { await h.close(); }
 });
 
+test("a search answered in the hosted format yields its results, titled from the page", async () => {
+  const hosted = { content: [1, 2].map((i) => ({ type: "text", text: `page='Guide ${i} | Example Docs' section='guide > topic ${i}'\nhttps://docs.example.org/guide/${i}` })) };
+  const fx = refFixture({ tool: (name) => (name === "ref_search_documentation" ? hosted : { content: [{ type: "text", text: "## Topic\n\nThe page." }] }) });
+  const h = await harness({ handlers: { ref: fx } });
+  try {
+    const o = await h.docs.ref.search(docsRequest("ref hosted format"), refCtx(h));
+    assert.equal(o.status, "success_results");
+    assert.deepEqual(o.candidates.map((c) => [c.url, c.title]), [["https://docs.example.org/guide/1", "Guide 1 | Example Docs"], ["https://docs.example.org/guide/2", "Guide 2 | Example Docs"]]);
+    assert.deepEqual(rows(h).map((r) => [r.state, r.actual]), [["SETTLED", 1]]);
+    await o.lease.close();
+  } finally { await h.close(); }
+});
+
 test("a session closed after its search's deadline, or after its cancellation, still says goodbye", async () => {
   const fx = refFixture();
   const h = await harness({ handlers: { ref: fx } });
