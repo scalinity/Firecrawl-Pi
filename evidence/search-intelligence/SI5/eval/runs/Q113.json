@@ -1,0 +1,7527 @@
+{
+ "schema": "fcpi.si5-eval-run/v1",
+ "id": "Q113",
+ "category": "explicit_version_domain_constraints",
+ "split": "tuning",
+ "utc": "2026-10-18T03:55:41.235Z",
+ "repositoryCommit": "fe923a7acee65a64a8103b4ffd3544d6a68f7a19",
+ "codeDirty": false,
+ "database": "fcpi_si5_eval",
+ "profiles": {
+  "D": {
+   "profile": "D",
+   "elapsedMs": 8058,
+   "failure": null,
+   "replayMisses": [],
+   "enrichmentNotReplayed": [],
+   "outcome": "complete",
+   "empty": false,
+   "publicCount": 10,
+   "top20MatchesPublic": true,
+   "coverage": {
+    "general": {
+     "requested": 5,
+     "successful": 5,
+     "fromCache": 0,
+     "missing": []
+    },
+    "documentation": {
+     "activated": true,
+     "reason": "explicit_libraries",
+     "requested": 2,
+     "successful": 2,
+     "missing": []
+    },
+    "searxng": {
+     "used": false,
+     "why": null,
+     "status": null,
+     "reason": null
+    },
+    "decisions": {
+     "status": "hybrid",
+     "reason": "complete"
+    }
+   },
+   "providers": {
+    "serper": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "elapsedMs": 1553,
+     "queueMs": 1,
+     "resultCount": 10,
+     "eligibleCount": 10,
+     "filteredEmpty": false,
+     "dispatchState": "response_received"
+    },
+    "brave": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "elapsedMs": 997,
+     "queueMs": 8,
+     "resultCount": 16,
+     "eligibleCount": 16,
+     "filteredEmpty": false,
+     "dispatchState": "response_received"
+    },
+    "exa": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "elapsedMs": 6357,
+     "queueMs": 10,
+     "resultCount": 20,
+     "eligibleCount": 20,
+     "filteredEmpty": false,
+     "dispatchState": "response_received"
+    },
+    "deepseek": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "elapsedMs": 1029,
+     "queueMs": 10,
+     "resultCount": 14,
+     "eligibleCount": 14,
+     "filteredEmpty": false,
+     "dispatchState": "response_received"
+    },
+    "tavily": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "elapsedMs": 4099,
+     "queueMs": 9,
+     "resultCount": 5,
+     "eligibleCount": 5,
+     "filteredEmpty": false,
+     "dispatchState": "response_received"
+    },
+    "context7": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "elapsedMs": 4498,
+     "queueMs": 0,
+     "resultCount": 8,
+     "eligibleCount": 2,
+     "filteredEmpty": false,
+     "dispatchState": "response_received",
+     "suboperations": [
+      {
+       "scope": {
+        "libraries": [
+         "react"
+        ],
+        "version": null
+       },
+       "status": "ok",
+       "reason": null,
+       "detail": null
+      }
+     ]
+    },
+    "ref": {
+     "status": "success_empty",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "elapsedMs": 2749,
+     "queueMs": 0,
+     "resultCount": 0,
+     "eligibleCount": 0,
+     "filteredEmpty": false,
+     "dispatchState": "response_received"
+    }
+   },
+   "warnings": [],
+   "timings": {
+    "admittedAt": "2026-10-18T03:55:41.235Z",
+    "documentationActivatedMs": 5,
+    "discoveryMs": 6362,
+    "semanticMs": 1692,
+    "totalMs": 8055
+   },
+   "ranking": {
+    "mode": "hybrid",
+    "reason": "complete",
+    "model": "typesafe/jev-1.14-20261014",
+    "scored": 48,
+    "shortlisted": 48
+   },
+   "documentation": {
+    "activation": {
+     "active": true,
+     "reason": "explicit_libraries",
+     "signals": [
+      "explicit_libraries"
+     ]
+    },
+    "enrichment": null,
+    "auxiliary": []
+   },
+   "usage": [
+    {
+     "provider": "serper",
+     "credits": 1,
+     "basis": "provider_reported"
+    },
+    {
+     "provider": "brave",
+     "requests": 1,
+     "money": "unknown"
+    },
+    {
+     "provider": "exa",
+     "microUsd": 17000,
+     "basis": "provider_reported"
+    },
+    {
+     "provider": "deepseek",
+     "microUsd": 750,
+     "basis": "documented"
+    },
+    {
+     "provider": "tavily",
+     "credits": 2,
+     "basis": "provider_reported"
+    },
+    {
+     "provider": "context7",
+     "requests": 1
+    },
+    {
+     "provider": "ref",
+     "credits": 1,
+     "basis": "documented"
+    },
+    {
+     "provider": "jev",
+     "microUsd": 228,
+     "basis": "provider_reported",
+     "inputTokens": 5423
+    },
+    {
+     "provider": "jev",
+     "microUsd": 236,
+     "basis": "provider_reported",
+     "inputTokens": 5615
+    },
+    {
+     "provider": "jev",
+     "microUsd": 234,
+     "basis": "provider_reported",
+     "inputTokens": 5558
+    },
+    {
+     "provider": "jev",
+     "microUsd": 175,
+     "basis": "provider_reported",
+     "inputTokens": 4145
+    },
+    {
+     "provider": "jev",
+     "microUsd": 179,
+     "basis": "provider_reported",
+     "inputTokens": 4261
+    },
+    {
+     "provider": "jev",
+     "microUsd": 168,
+     "basis": "provider_reported",
+     "inputTokens": 3993
+    },
+    {
+     "provider": "jev",
+     "microUsd": 87,
+     "basis": "provider_reported",
+     "inputTokens": 2054
+    },
+    {
+     "provider": "jev",
+     "microUsd": 100,
+     "basis": "provider_reported",
+     "inputTokens": 2370
+    },
+    {
+     "provider": "jev",
+     "microUsd": 93,
+     "basis": "provider_reported",
+     "inputTokens": 2197
+    },
+    {
+     "provider": "jev",
+     "microUsd": 85,
+     "basis": "provider_reported",
+     "inputTokens": 2019
+    },
+    {
+     "provider": "jev",
+     "microUsd": 80,
+     "basis": "provider_reported",
+     "inputTokens": 1894
+    }
+   ],
+   "pool": {
+    "candidates": 67,
+    "distinct": 48,
+    "pooled": 48,
+    "shortlisted": 48,
+    "returned": 10,
+    "truncatedPassages": 0
+   },
+   "lanes": [
+    {
+     "provider": "serper",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "durationMs": 1553,
+     "dispatchState": "response_received",
+     "resultCount": 10,
+     "usage": {
+      "credits": 1,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore",
+       "descriptionHash": "c05a972a84633148",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@dwell_the/understanding-usesyncexternalstore-c06618a32d61",
+       "rank": 2,
+       "title": "Understanding useSyncExternalStore | by dwell_the",
+       "descriptionHash": "e14b29a1efa1d728",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.epicreact.dev/use-sync-external-store-demystified-for-practical-react-development-w5ac0",
+       "rank": 3,
+       "title": "useSyncExternalStore: Demystified for Practical React Development",
+       "descriptionHash": "266d3f5fe72ee263",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://dev.to/saiful7778/usesyncexternalstore-in-react-the-right-way-to-subscribe-to-external-data-p6",
+       "rank": 4,
+       "title": "useSyncExternalStore in React — The Right Way to Subscribe to External ...",
+       "descriptionHash": "995ec62aad476435",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://paths.grasp.study/modules/2ea45933-be33-4f8e-881b-a6a7cf2aa29d/lessons/4fc375f7-f8db-494f-819a-4b993a12e44b",
+       "rank": 5,
+       "title": "Building a `useObservable` Hook with `useSyncExternalStore` - grasp.study",
+       "descriptionHash": "6b84d2c03e73112c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://blog.logrocket.com/exploring-usesyncexternalstore-react-hook/",
+       "rank": 6,
+       "title": "Exploring useSyncExternalStore, a lesser-known React Hook",
+       "descriptionHash": "0adb50f4be562f66",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://stackoverflow.com/questions/76474940/why-does-the-usesyncexternalstore-example-call-getsnapshot-6-times-on-store",
+       "rank": 7,
+       "title": "Why does the `useSyncExternalStore` example call `getSnapshot` 6 times ...",
+       "descriptionHash": "cfab017be08b87ed",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://jser.dev/2023-08-02-usesyncexternalstore/",
+       "rank": 8,
+       "title": "How useSyncExternalStore() works internally in React?",
+       "descriptionHash": "95cf756401e1756c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@ignatovich.dm/usesyncexternalstore-synchronizing-external-state-with-react-components-bc4e2b27338f",
+       "rank": 9,
+       "title": "useSyncExternalStore — synchronizing external state with ...",
+       "descriptionHash": "72e13e385a83e9ca",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.youtube.com/watch?v=Y5Pn1910uiE&xstg=CAMSBhUDzO3xHw%3D%3D",
+       "rank": 10,
+       "title": "useSyncExternalStore in React: Subscribe to External State",
+       "descriptionHash": "e3b0c44298fc1c14",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "brave",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "durationMs": 997,
+     "dispatchState": "response_received",
+     "resultCount": 16,
+     "usage": {
+      "requests": 1,
+      "money": "unknown"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fe6d1a7211c1515d",
+       "snippetHashes": [
+        "3def2a1e3a920908",
+        "6f7dc4e95d6aafc5",
+        "7ce2e091722b5d7d",
+        "fe6d1a7211c1515d"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect",
+       "rank": 2,
+       "title": "You Might Not Need an Effect – React",
+       "descriptionHash": "63edccfa3b703aa7",
+       "snippetHashes": [
+        "b233fd4c1b470feb",
+        "2845df7c988e5c01",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/hooks",
+       "rank": 3,
+       "title": "Built-in React Hooks – React",
+       "descriptionHash": "89c21d69c18840b9",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 4,
+       "title": "Reusing Logic with Custom Hooks – React",
+       "descriptionHash": "dc11991dc97e2ed6",
+       "snippetHashes": [
+        "bf0799d54069c06d",
+        "df82cb24457d9c89",
+        "47b757ea29385d84",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useDebugValue",
+       "rank": 5,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c7b9ecda3dff4001",
+       "snippetHashes": [
+        "d35f62a52a1280d3",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/lifecycle-of-reactive-effects",
+       "rank": 6,
+       "title": "Lifecycle of Reactive Effects – React",
+       "descriptionHash": "db770bd4fe504818",
+       "snippetHashes": [
+        "db770bd4fe504818",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component",
+       "rank": 7,
+       "title": "Component – React",
+       "descriptionHash": "8b53c2339185a4c9",
+       "snippetHashes": [
+        "5959a4831c33e621",
+        "71adeb2627ea101e",
+        "c5003ceea468052e",
+        "1a095626e6a74826"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/29/react-v18",
+       "rank": 8,
+       "title": "React v18.0 – React",
+       "descriptionHash": "93e70e85c5b290b5",
+       "snippetHashes": [
+        "5ea8203cb90fb4a1",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/08/react-18-upgrade-guide",
+       "rank": 9,
+       "title": "How to Upgrade to React 18 – React",
+       "descriptionHash": "88fc8d8f06fa0ea9",
+       "snippetHashes": [
+        "88fc8d8f06fa0ea9",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component.md",
+       "rank": 10,
+       "title": "https://react.dev/reference/react/Component.md",
+       "descriptionHash": "dc471e7dee0ca691",
+       "snippetHashes": [
+        "45441239efdc8ea0",
+        "587b19c5c82c6de8",
+        "2e809ff1394dbc3b",
+        "93422e44614b3561"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect.md",
+       "rank": 11,
+       "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+       "descriptionHash": "89891662c3740d89",
+       "snippetHashes": [
+        "7f506e9144799b97",
+        "73dc0713a2453280"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect",
+       "rank": 12,
+       "title": "useEffect – React",
+       "descriptionHash": "4041582d2c7a5135",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2025/04/23/react-labs-view-transitions-activity-and-more",
+       "rank": 13,
+       "title": "React Labs: View Transitions, Activity, and more – React",
+       "descriptionHash": "e01d01b929a7ddb8",
+       "snippetHashes": [
+        "4691cc41a1dac08a",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/use",
+       "rank": 14,
+       "title": "use – React",
+       "descriptionHash": "9883ad65263d270d",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps",
+       "rank": 15,
+       "title": "exhaustive-deps – React",
+       "descriptionHash": "e6b608c58b9000d6",
+       "snippetHashes": [
+        "e6b608c58b9000d6",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useLayoutEffect",
+       "rank": 16,
+       "title": "useLayoutEffect – React",
+       "descriptionHash": "684b8ea41562bdc3",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "exa",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "durationMs": 6357,
+     "dispatchState": "response_received",
+     "resultCount": 20,
+     "usage": {
+      "microUsd": 17000,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 2,
+       "title": "",
+       "descriptionHash": "be5f7d5d0552d4b4",
+       "snippetHashes": [
+        "be5f7d5d0552d4b4"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://uk.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/escape-hatches",
+       "rank": 5,
+       "title": "",
+       "descriptionHash": "71988b4ab2ceeded",
+       "snippetHashes": [
+        "71988b4ab2ceeded"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/synchronizing-with-effects",
+       "rank": 6,
+       "title": "",
+       "descriptionHash": "060fa375e38b607e",
+       "snippetHashes": [
+        "060fa375e38b607e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://he.react.dev/reference/react/useSyncExternalStore",
+       "rank": 7,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "cef6de11173e90ad",
+       "snippetHashes": [
+        "cef6de11173e90ad"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://de.react.dev/reference/react/useSyncExternalStore",
+       "rank": 8,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/reference/react/useSyncExternalStore",
+       "rank": 9,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "f93bf31e920492d1",
+       "snippetHashes": [
+        "f93bf31e920492d1"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect.md",
+       "rank": 10,
+       "title": "",
+       "descriptionHash": "30fb49ff197bc7b2",
+       "snippetHashes": [
+        "30fb49ff197bc7b2"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pl.react.dev/reference/react/useSyncExternalStore",
+       "rank": 11,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "b80f367a935d1f8f",
+       "snippetHashes": [
+        "b80f367a935d1f8f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ru.react.dev/reference/react/useSyncExternalStore",
+       "rank": 12,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "754aaf1104fa9884",
+       "snippetHashes": [
+        "754aaf1104fa9884"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://az.react.dev/reference/react/useSyncExternalStore",
+       "rank": 13,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "ce13ece5d507a834",
+       "snippetHashes": [
+        "ce13ece5d507a834"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 14,
+       "title": "",
+       "descriptionHash": "9d6f5227afec6b5c",
+       "snippetHashes": [
+        "9d6f5227afec6b5c"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://es.react.dev/reference/react/useSyncExternalStore",
+       "rank": 15,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "63cfd3eb6aea352e",
+       "snippetHashes": [
+        "63cfd3eb6aea352e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 16,
+       "title": "",
+       "descriptionHash": "80483393426a278f",
+       "snippetHashes": [
+        "80483393426a278f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useSyncExternalStore",
+       "rank": 17,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 18,
+       "title": "",
+       "descriptionHash": "59fc53d48d486069",
+       "snippetHashes": [
+        "59fc53d48d486069"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ja.react.dev/reference/react/useSyncExternalStore",
+       "rank": 19,
+       "title": "",
+       "descriptionHash": "c200f6aa4ac5478e",
+       "snippetHashes": [
+        "c200f6aa4ac5478e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/state-as-a-snapshot",
+       "rank": 20,
+       "title": "",
+       "descriptionHash": "dc8b2f97d475920f",
+       "snippetHashes": [
+        "dc8b2f97d475920f"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "deepseek",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "durationMs": 1029,
+     "dispatchState": "response_received",
+     "resultCount": 14,
+     "usage": {
+      "microUsd": 750,
+      "basis": "documented"
+     },
+     "candidates": [
+      {
+       "url": "https://18.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "402b214a60c009ee",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React 中文文档",
+       "descriptionHash": "ac7a3cf499e23909",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "09d16fb8d052c1b0",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "d381d0e357fd922f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://vi.react.dev/community/videos",
+       "rank": 5,
+       "title": "React Videos – React",
+       "descriptionHash": "65d8eefef9b6d8b5",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/community/videos",
+       "rank": 6,
+       "title": "Vidéos React – React",
+       "descriptionHash": "a70bd5a1c1ebd491",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useDebugValue",
+       "rank": 7,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c376fc0b9626d54f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useDebugValue",
+       "rank": 8,
+       "title": "useDebugValue – React 中文文档",
+       "descriptionHash": "442ea91ced59b9d6",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/learn/escape-hatches",
+       "rank": 9,
+       "title": "脱围机制（Escape Hatches） – React 中文文档",
+       "descriptionHash": "b2fa5d099d628baa",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://tr.react.dev/learn/escape-hatches",
+       "rank": 10,
+       "title": "Kaçış Yolları – React",
+       "descriptionHash": "94a41d7f2db4ab89",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-client-rendering-apis",
+       "rank": 11,
+       "title": "Come passare a React 18 – React",
+       "descriptionHash": "2f72fe4b868c44bc",
+       "snippetHashes": [],
+       "publication": {
+        "at": "2022-03-07T16:00:00.000Z",
+        "basis": "provider_estimate",
+        "meaning": "published"
+       }
+      },
+      {
+       "url": "https://fr.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 12,
+       "title": "Vous n’avez pas forcément besoin d’un Effet – React",
+       "descriptionHash": "45a4af0d125a5239",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/escape-hatches",
+       "rank": 13,
+       "title": "Saídas de Emergência – React",
+       "descriptionHash": "7688c5e834ff4982",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 14,
+       "title": "Talvez você não precise de um Effect – React",
+       "descriptionHash": "31e01152a299e164",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "tavily",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "durationMs": 4099,
+     "dispatchState": "response_received",
+     "resultCount": 5,
+     "usage": {
+      "credits": 2,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://vi.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fa31e9c55c62ea06",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "00ee2825d282c8ec",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 3,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "3e4adeb512b3640f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "84a84e0a169a4759",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/cache",
+       "rank": 5,
+       "title": "cache – React",
+       "descriptionHash": "78e095a23f4c9e17",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "context7",
+     "kind": "docs_search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "durationMs": 4498,
+     "dispatchState": "response_received",
+     "resultCount": 8,
+     "usage": {
+      "requests": 1
+     },
+     "candidates": [
+      {
+       "url": "https://github.com/reactjs/react.dev/blob/main/src/content/reference/react/useSyncExternalStore.md",
+       "rank": 1,
+       "title": "Unknown",
+       "descriptionHash": "ec9a2475a9cb0dbc",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore Hook - React Dev Reference",
+       "descriptionHash": "f65cbb5cd76cb9c3",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "ref",
+     "kind": "docs_search",
+     "status": "success_empty",
+     "reason": null,
+     "detail": null,
+     "fromCache": false,
+     "durationMs": 2749,
+     "dispatchState": "response_received",
+     "resultCount": 0,
+     "usage": {
+      "credits": 1,
+      "basis": "documented"
+     },
+     "candidates": []
+    }
+   ],
+   "top20": [
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore",
+     "descriptionHash": "c05a972a84633148",
+     "providers": [
+      [
+       "serper",
+       1
+      ],
+      [
+       "brave",
+       1
+      ],
+      [
+       "exa",
+       1
+      ],
+      [
+       "tavily",
+       3
+      ],
+      [
+       "context7",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "3def2a1e3a920908"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "6f7dc4e95d6aafc5"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7ce2e091722b5d7d"
+      },
+      {
+       "kind": "documentation_code",
+       "provider": "context7",
+       "textHash": "23d76df45ad91fba"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "1e80f0f345a69ba4"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "a20f08ff95634bc2"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "1494ec4e886c7c42"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "dabbe59824a29115"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "bdaaa471cb73cf29"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 1,
+      "semantic": 1
+     },
+     "score": 0.9580099999999999,
+     "semantic": {
+      "relevance": 3.64,
+      "directness": 0.93,
+      "evidence": 0.95
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       3
+      ],
+      [
+       "deepseek",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 3,
+      "semantic": 2
+     },
+     "score": 0.8293902939814815,
+     "semantic": {
+      "relevance": 3.8,
+      "directness": 0.94,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "00ee2825d282c8ec",
+     "providers": [
+      [
+       "exa",
+       18
+      ],
+      [
+       "tavily",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 5,
+      "semantic": 3
+     },
+     "score": 0.7975337662841191,
+     "semantic": {
+      "relevance": 3.75,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://it.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "84a84e0a169a4759",
+     "providers": [
+      [
+       "exa",
+       16
+      ],
+      [
+       "tavily",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 6,
+      "semantic": 4
+     },
+     "score": 0.7747617242324562,
+     "semantic": {
+      "relevance": 3.65,
+      "directness": 0.92,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://uk.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 12,
+      "semantic": 5
+     },
+     "score": 0.70790915625,
+     "semantic": {
+      "relevance": 3.83,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://de.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 23,
+      "semantic": 6
+     },
+     "score": 0.6896700061274511,
+     "semantic": {
+      "relevance": 3.79,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React 中文文档",
+     "descriptionHash": "ac7a3cf499e23909",
+     "providers": [
+      [
+       "exa",
+       14
+      ],
+      [
+       "deepseek",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 4,
+      "semantic": 7
+     },
+     "score": 0.6888952844558267,
+     "semantic": {
+      "relevance": 3.17,
+      "directness": 0.8,
+      "evidence": 0.86
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+     "title": "",
+     "descriptionHash": "be5f7d5d0552d4b4",
+     "providers": [
+      [
+       "brave",
+       4
+      ],
+      [
+       "exa",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "bf0799d54069c06d"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "df82cb24457d9c89"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "47b757ea29385d84"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 2,
+      "semantic": 8
+     },
+     "score": 0.6578128004032259,
+     "semantic": {
+      "relevance": 2.59,
+      "directness": 0.55,
+      "evidence": 0.92
+     }
+    },
+    {
+     "canonicalUrl": "https://ar.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       17
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 46,
+      "semantic": 9
+     },
+     "score": 0.628213445887446,
+     "semantic": {
+      "relevance": 3.6,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect.md",
+     "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+     "descriptionHash": "89891662c3740d89",
+     "providers": [
+      [
+       "brave",
+       11
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7f506e9144799b97"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "73dc0713a2453280"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 33,
+      "semantic": 11
+     },
+     "score": 0.6035012852112676,
+     "semantic": {
+      "relevance": 3.56,
+      "directness": 0.82,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://ja.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "c200f6aa4ac5478e",
+     "providers": [
+      [
+       "exa",
+       19
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 47,
+      "semantic": 12
+     },
+     "score": 0.5740532974683544,
+     "semantic": {
+      "relevance": 3.48,
+      "directness": 0.89,
+      "evidence": 0.88
+     }
+    },
+    {
+     "canonicalUrl": "https://vi.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "fa31e9c55c62ea06",
+     "providers": [
+      [
+       "tavily",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 7,
+      "semantic": 10
+     },
+     "score": 0.6084415000000001,
+     "semantic": {
+      "relevance": 3.44,
+      "directness": 0.87,
+      "evidence": 0.96
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/learn/you-might-not-need-an-effect",
+     "title": "Talvez você não precise de um Effect – React",
+     "descriptionHash": "31e01152a299e164",
+     "providers": [
+      [
+       "deepseek",
+       14
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 41,
+      "semantic": 14
+     },
+     "score": 0.5184154386261262,
+     "semantic": {
+      "relevance": 2.99,
+      "directness": 0.75,
+      "evidence": 0.93
+     }
+    },
+    {
+     "canonicalUrl": "https://18.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "402b214a60c009ee",
+     "providers": [
+      [
+       "deepseek",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 8,
+      "semantic": 13
+     },
+     "score": 0.5547306458333333,
+     "semantic": {
+      "relevance": 3.15,
+      "directness": 0.79,
+      "evidence": 0.83
+     }
+    },
+    {
+     "canonicalUrl": "https://es.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "63cfd3eb6aea352e",
+     "providers": [
+      [
+       "exa",
+       15
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 43,
+      "semantic": 18
+     },
+     "score": 0.4384639027777778,
+     "semantic": {
+      "relevance": 2.65,
+      "directness": 0.55,
+      "evidence": 0.74
+     }
+    },
+    {
+     "canonicalUrl": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "09d16fb8d052c1b0",
+     "providers": [
+      [
+       "deepseek",
+       3
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 11,
+      "semantic": 19
+     },
+     "score": 0.43625291269841265,
+     "semantic": {
+      "relevance": 2.48,
+      "directness": 0.4,
+      "evidence": 0.72
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React 中文文档",
+     "descriptionHash": "442ea91ced59b9d6",
+     "providers": [
+      [
+       "deepseek",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 24,
+      "semantic": 20
+     },
+     "score": 0.4004499411764706,
+     "semantic": {
+      "relevance": 2.26,
+      "directness": 0.26,
+      "evidence": 0.84
+     }
+    },
+    {
+     "canonicalUrl": "https://fr.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "f93bf31e920492d1",
+     "providers": [
+      [
+       "exa",
+       9
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 26,
+      "semantic": 21
+     },
+     "score": 0.3803237807971015,
+     "semantic": {
+      "relevance": 2.17,
+      "directness": 0.27,
+      "evidence": 0.64
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect",
+     "title": "You Might Not Need an Effect – React",
+     "descriptionHash": "63edccfa3b703aa7",
+     "providers": [
+      [
+       "brave",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "b233fd4c1b470feb"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "2845df7c988e5c01"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 9,
+      "semantic": 22
+     },
+     "score": 0.3744142365591398,
+     "semantic": {
+      "relevance": 1.92,
+      "directness": 0.2,
+      "evidence": 0.61
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React",
+     "descriptionHash": "c7b9ecda3dff4001",
+     "providers": [
+      [
+       "brave",
+       5
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "d35f62a52a1280d3"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 13,
+      "semantic": 23
+     },
+     "score": 0.3449500961538462,
+     "semantic": {
+      "relevance": 1.52,
+      "directness": 0.13,
+      "evidence": 0.76
+     }
+    }
+   ]
+  },
+  "B": {
+   "profile": "B",
+   "elapsedMs": 3,
+   "failure": null,
+   "replayMisses": [],
+   "enrichmentNotReplayed": [],
+   "outcome": "complete",
+   "empty": false,
+   "publicCount": 10,
+   "top20MatchesPublic": true,
+   "coverage": {
+    "general": {
+     "requested": 5,
+     "successful": 5,
+     "fromCache": 5,
+     "missing": []
+    },
+    "documentation": {
+     "activated": false,
+     "reason": "documentation_layer_unavailable",
+     "requested": 0,
+     "successful": 0,
+     "missing": []
+    },
+    "searxng": {
+     "used": false,
+     "why": null,
+     "status": null,
+     "reason": null
+    },
+    "decisions": {
+     "status": "not_configured",
+     "reason": "jev_not_configured"
+    }
+   },
+   "providers": {
+    "serper": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 10,
+     "eligibleCount": 10,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "brave": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 16,
+     "eligibleCount": 16,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "exa": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 20,
+     "eligibleCount": 20,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "deepseek": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 14,
+     "eligibleCount": 14,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "tavily": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 5,
+     "eligibleCount": 5,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    }
+   },
+   "warnings": [],
+   "timings": {
+    "admittedAt": "2026-10-18T03:55:49.293Z",
+    "discoveryMs": 2,
+    "totalMs": 3
+   },
+   "ranking": {
+    "mode": "rrf_fallback",
+    "reason": "jev_not_configured",
+    "model": null,
+    "scored": 0,
+    "shortlisted": 48
+   },
+   "documentation": {
+    "activation": {
+     "active": false,
+     "reason": "documentation_layer_unavailable",
+     "signals": null
+    },
+    "enrichment": null,
+    "auxiliary": []
+   },
+   "usage": [],
+   "pool": {
+    "candidates": 65,
+    "distinct": 48,
+    "pooled": 48,
+    "shortlisted": 48,
+    "returned": 10,
+    "truncatedPassages": 0
+   },
+   "lanes": [
+    {
+     "provider": "serper",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 10,
+     "usage": {
+      "credits": 1,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore",
+       "descriptionHash": "c05a972a84633148",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@dwell_the/understanding-usesyncexternalstore-c06618a32d61",
+       "rank": 2,
+       "title": "Understanding useSyncExternalStore | by dwell_the",
+       "descriptionHash": "e14b29a1efa1d728",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.epicreact.dev/use-sync-external-store-demystified-for-practical-react-development-w5ac0",
+       "rank": 3,
+       "title": "useSyncExternalStore: Demystified for Practical React Development",
+       "descriptionHash": "266d3f5fe72ee263",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://dev.to/saiful7778/usesyncexternalstore-in-react-the-right-way-to-subscribe-to-external-data-p6",
+       "rank": 4,
+       "title": "useSyncExternalStore in React — The Right Way to Subscribe to External ...",
+       "descriptionHash": "995ec62aad476435",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://paths.grasp.study/modules/2ea45933-be33-4f8e-881b-a6a7cf2aa29d/lessons/4fc375f7-f8db-494f-819a-4b993a12e44b",
+       "rank": 5,
+       "title": "Building a `useObservable` Hook with `useSyncExternalStore` - grasp.study",
+       "descriptionHash": "6b84d2c03e73112c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://blog.logrocket.com/exploring-usesyncexternalstore-react-hook/",
+       "rank": 6,
+       "title": "Exploring useSyncExternalStore, a lesser-known React Hook",
+       "descriptionHash": "0adb50f4be562f66",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://stackoverflow.com/questions/76474940/why-does-the-usesyncexternalstore-example-call-getsnapshot-6-times-on-store",
+       "rank": 7,
+       "title": "Why does the `useSyncExternalStore` example call `getSnapshot` 6 times ...",
+       "descriptionHash": "cfab017be08b87ed",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://jser.dev/2023-08-02-usesyncexternalstore/",
+       "rank": 8,
+       "title": "How useSyncExternalStore() works internally in React?",
+       "descriptionHash": "95cf756401e1756c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@ignatovich.dm/usesyncexternalstore-synchronizing-external-state-with-react-components-bc4e2b27338f",
+       "rank": 9,
+       "title": "useSyncExternalStore — synchronizing external state with ...",
+       "descriptionHash": "72e13e385a83e9ca",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.youtube.com/watch?v=Y5Pn1910uiE&xstg=CAMSBhUDzO3xHw%3D%3D",
+       "rank": 10,
+       "title": "useSyncExternalStore in React: Subscribe to External State",
+       "descriptionHash": "e3b0c44298fc1c14",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "brave",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 16,
+     "usage": {
+      "requests": 1,
+      "money": "unknown"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fe6d1a7211c1515d",
+       "snippetHashes": [
+        "3def2a1e3a920908",
+        "6f7dc4e95d6aafc5",
+        "7ce2e091722b5d7d",
+        "fe6d1a7211c1515d"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect",
+       "rank": 2,
+       "title": "You Might Not Need an Effect – React",
+       "descriptionHash": "63edccfa3b703aa7",
+       "snippetHashes": [
+        "b233fd4c1b470feb",
+        "2845df7c988e5c01",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/hooks",
+       "rank": 3,
+       "title": "Built-in React Hooks – React",
+       "descriptionHash": "89c21d69c18840b9",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 4,
+       "title": "Reusing Logic with Custom Hooks – React",
+       "descriptionHash": "dc11991dc97e2ed6",
+       "snippetHashes": [
+        "bf0799d54069c06d",
+        "df82cb24457d9c89",
+        "47b757ea29385d84",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useDebugValue",
+       "rank": 5,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c7b9ecda3dff4001",
+       "snippetHashes": [
+        "d35f62a52a1280d3",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/lifecycle-of-reactive-effects",
+       "rank": 6,
+       "title": "Lifecycle of Reactive Effects – React",
+       "descriptionHash": "db770bd4fe504818",
+       "snippetHashes": [
+        "db770bd4fe504818",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component",
+       "rank": 7,
+       "title": "Component – React",
+       "descriptionHash": "8b53c2339185a4c9",
+       "snippetHashes": [
+        "5959a4831c33e621",
+        "71adeb2627ea101e",
+        "c5003ceea468052e",
+        "1a095626e6a74826"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/29/react-v18",
+       "rank": 8,
+       "title": "React v18.0 – React",
+       "descriptionHash": "93e70e85c5b290b5",
+       "snippetHashes": [
+        "5ea8203cb90fb4a1",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/08/react-18-upgrade-guide",
+       "rank": 9,
+       "title": "How to Upgrade to React 18 – React",
+       "descriptionHash": "88fc8d8f06fa0ea9",
+       "snippetHashes": [
+        "88fc8d8f06fa0ea9",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component.md",
+       "rank": 10,
+       "title": "https://react.dev/reference/react/Component.md",
+       "descriptionHash": "dc471e7dee0ca691",
+       "snippetHashes": [
+        "45441239efdc8ea0",
+        "587b19c5c82c6de8",
+        "2e809ff1394dbc3b",
+        "93422e44614b3561"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect.md",
+       "rank": 11,
+       "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+       "descriptionHash": "89891662c3740d89",
+       "snippetHashes": [
+        "7f506e9144799b97",
+        "73dc0713a2453280"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect",
+       "rank": 12,
+       "title": "useEffect – React",
+       "descriptionHash": "4041582d2c7a5135",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2025/04/23/react-labs-view-transitions-activity-and-more",
+       "rank": 13,
+       "title": "React Labs: View Transitions, Activity, and more – React",
+       "descriptionHash": "e01d01b929a7ddb8",
+       "snippetHashes": [
+        "4691cc41a1dac08a",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/use",
+       "rank": 14,
+       "title": "use – React",
+       "descriptionHash": "9883ad65263d270d",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps",
+       "rank": 15,
+       "title": "exhaustive-deps – React",
+       "descriptionHash": "e6b608c58b9000d6",
+       "snippetHashes": [
+        "e6b608c58b9000d6",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useLayoutEffect",
+       "rank": 16,
+       "title": "useLayoutEffect – React",
+       "descriptionHash": "684b8ea41562bdc3",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "exa",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 20,
+     "usage": {
+      "microUsd": 17000,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 2,
+       "title": "",
+       "descriptionHash": "be5f7d5d0552d4b4",
+       "snippetHashes": [
+        "be5f7d5d0552d4b4"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://uk.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/escape-hatches",
+       "rank": 5,
+       "title": "",
+       "descriptionHash": "71988b4ab2ceeded",
+       "snippetHashes": [
+        "71988b4ab2ceeded"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/synchronizing-with-effects",
+       "rank": 6,
+       "title": "",
+       "descriptionHash": "060fa375e38b607e",
+       "snippetHashes": [
+        "060fa375e38b607e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://he.react.dev/reference/react/useSyncExternalStore",
+       "rank": 7,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "cef6de11173e90ad",
+       "snippetHashes": [
+        "cef6de11173e90ad"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://de.react.dev/reference/react/useSyncExternalStore",
+       "rank": 8,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/reference/react/useSyncExternalStore",
+       "rank": 9,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "f93bf31e920492d1",
+       "snippetHashes": [
+        "f93bf31e920492d1"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect.md",
+       "rank": 10,
+       "title": "",
+       "descriptionHash": "30fb49ff197bc7b2",
+       "snippetHashes": [
+        "30fb49ff197bc7b2"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pl.react.dev/reference/react/useSyncExternalStore",
+       "rank": 11,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "b80f367a935d1f8f",
+       "snippetHashes": [
+        "b80f367a935d1f8f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ru.react.dev/reference/react/useSyncExternalStore",
+       "rank": 12,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "754aaf1104fa9884",
+       "snippetHashes": [
+        "754aaf1104fa9884"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://az.react.dev/reference/react/useSyncExternalStore",
+       "rank": 13,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "ce13ece5d507a834",
+       "snippetHashes": [
+        "ce13ece5d507a834"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 14,
+       "title": "",
+       "descriptionHash": "9d6f5227afec6b5c",
+       "snippetHashes": [
+        "9d6f5227afec6b5c"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://es.react.dev/reference/react/useSyncExternalStore",
+       "rank": 15,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "63cfd3eb6aea352e",
+       "snippetHashes": [
+        "63cfd3eb6aea352e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 16,
+       "title": "",
+       "descriptionHash": "80483393426a278f",
+       "snippetHashes": [
+        "80483393426a278f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useSyncExternalStore",
+       "rank": 17,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 18,
+       "title": "",
+       "descriptionHash": "59fc53d48d486069",
+       "snippetHashes": [
+        "59fc53d48d486069"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ja.react.dev/reference/react/useSyncExternalStore",
+       "rank": 19,
+       "title": "",
+       "descriptionHash": "c200f6aa4ac5478e",
+       "snippetHashes": [
+        "c200f6aa4ac5478e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/state-as-a-snapshot",
+       "rank": 20,
+       "title": "",
+       "descriptionHash": "dc8b2f97d475920f",
+       "snippetHashes": [
+        "dc8b2f97d475920f"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "deepseek",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 14,
+     "usage": {
+      "microUsd": 750,
+      "basis": "documented"
+     },
+     "candidates": [
+      {
+       "url": "https://18.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "402b214a60c009ee",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React 中文文档",
+       "descriptionHash": "ac7a3cf499e23909",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "09d16fb8d052c1b0",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "d381d0e357fd922f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://vi.react.dev/community/videos",
+       "rank": 5,
+       "title": "React Videos – React",
+       "descriptionHash": "65d8eefef9b6d8b5",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/community/videos",
+       "rank": 6,
+       "title": "Vidéos React – React",
+       "descriptionHash": "a70bd5a1c1ebd491",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useDebugValue",
+       "rank": 7,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c376fc0b9626d54f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useDebugValue",
+       "rank": 8,
+       "title": "useDebugValue – React 中文文档",
+       "descriptionHash": "442ea91ced59b9d6",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/learn/escape-hatches",
+       "rank": 9,
+       "title": "脱围机制（Escape Hatches） – React 中文文档",
+       "descriptionHash": "b2fa5d099d628baa",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://tr.react.dev/learn/escape-hatches",
+       "rank": 10,
+       "title": "Kaçış Yolları – React",
+       "descriptionHash": "94a41d7f2db4ab89",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-client-rendering-apis",
+       "rank": 11,
+       "title": "Come passare a React 18 – React",
+       "descriptionHash": "2f72fe4b868c44bc",
+       "snippetHashes": [],
+       "publication": {
+        "at": "2022-03-07T16:00:00.000Z",
+        "basis": "provider_estimate",
+        "meaning": "published"
+       }
+      },
+      {
+       "url": "https://fr.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 12,
+       "title": "Vous n’avez pas forcément besoin d’un Effet – React",
+       "descriptionHash": "45a4af0d125a5239",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/escape-hatches",
+       "rank": 13,
+       "title": "Saídas de Emergência – React",
+       "descriptionHash": "7688c5e834ff4982",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 14,
+       "title": "Talvez você não precise de um Effect – React",
+       "descriptionHash": "31e01152a299e164",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "tavily",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 5,
+     "usage": {
+      "credits": 2,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://vi.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fa31e9c55c62ea06",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "00ee2825d282c8ec",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 3,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "3e4adeb512b3640f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "84a84e0a169a4759",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/cache",
+       "rank": 5,
+       "title": "cache – React",
+       "descriptionHash": "78e095a23f4c9e17",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    }
+   ],
+   "top20": [
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore",
+     "descriptionHash": "c05a972a84633148",
+     "providers": [
+      [
+       "serper",
+       1
+      ],
+      [
+       "brave",
+       1
+      ],
+      [
+       "exa",
+       1
+      ],
+      [
+       "tavily",
+       3
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "3def2a1e3a920908"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "6f7dc4e95d6aafc5"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7ce2e091722b5d7d"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 1,
+      "semantic": null
+     },
+     "score": 1,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+     "title": "",
+     "descriptionHash": "be5f7d5d0552d4b4",
+     "providers": [
+      [
+       "brave",
+       4
+      ],
+      [
+       "exa",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "bf0799d54069c06d"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "df82cb24457d9c89"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "47b757ea29385d84"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 2,
+      "semantic": null
+     },
+     "score": 0.6456653225806451,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       3
+      ],
+      [
+       "deepseek",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 3,
+      "semantic": null
+     },
+     "score": 0.640459656084656,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React 中文文档",
+     "descriptionHash": "ac7a3cf499e23909",
+     "providers": [
+      [
+       "exa",
+       14
+      ],
+      [
+       "deepseek",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 4,
+      "semantic": null
+     },
+     "score": 0.6027317640220866,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "00ee2825d282c8ec",
+     "providers": [
+      [
+       "exa",
+       18
+      ],
+      [
+       "tavily",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 5,
+      "semantic": null
+     },
+     "score": 0.5886407499310725,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://it.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "84a84e0a169a4759",
+     "providers": [
+      [
+       "exa",
+       16
+      ],
+      [
+       "tavily",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 6,
+      "semantic": null
+     },
+     "score": 0.5852521929824561,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://vi.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "fa31e9c55c62ea06",
+     "providers": [
+      [
+       "tavily",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 7,
+      "semantic": null
+     },
+     "score": 0.33333333333333337,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://18.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "402b214a60c009ee",
+     "providers": [
+      [
+       "deepseek",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 8,
+      "semantic": null
+     },
+     "score": 0.33333333333333337,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect",
+     "title": "You Might Not Need an Effect – React",
+     "descriptionHash": "63edccfa3b703aa7",
+     "providers": [
+      [
+       "brave",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "b233fd4c1b470feb"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "2845df7c988e5c01"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 9,
+      "semantic": null
+     },
+     "score": 0.3279569892473118,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/hooks",
+     "title": "Built-in React Hooks – React",
+     "descriptionHash": "89c21d69c18840b9",
+     "providers": [
+      [
+       "brave",
+       3
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 10,
+      "semantic": null
+     },
+     "score": 0.32275132275132273,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "09d16fb8d052c1b0",
+     "providers": [
+      [
+       "deepseek",
+       3
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 11,
+      "semantic": null
+     },
+     "score": 0.32275132275132273,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://uk.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 12,
+      "semantic": null
+     },
+     "score": 0.3177083333333333,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React",
+     "descriptionHash": "c7b9ecda3dff4001",
+     "providers": [
+      [
+       "brave",
+       5
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "d35f62a52a1280d3"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 13,
+      "semantic": null
+     },
+     "score": 0.3128205128205128,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://vi.react.dev/community/videos",
+     "title": "React Videos – React",
+     "descriptionHash": "65d8eefef9b6d8b5",
+     "providers": [
+      [
+       "deepseek",
+       5
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 14,
+      "semantic": null
+     },
+     "score": 0.3128205128205128,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/cache",
+     "title": "cache – React",
+     "descriptionHash": "78e095a23f4c9e17",
+     "providers": [
+      [
+       "tavily",
+       5
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 15,
+      "semantic": null
+     },
+     "score": 0.3128205128205128,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/escape-hatches",
+     "title": "",
+     "descriptionHash": "71988b4ab2ceeded",
+     "providers": [
+      [
+       "exa",
+       5
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 16,
+      "semantic": null
+     },
+     "score": 0.3128205128205128,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/synchronizing-with-effects",
+     "title": "",
+     "descriptionHash": "060fa375e38b607e",
+     "providers": [
+      [
+       "exa",
+       6
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 19,
+      "semantic": null
+     },
+     "score": 0.3080808080808081,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://fr.react.dev/community/videos",
+     "title": "Vidéos React – React",
+     "descriptionHash": "a70bd5a1c1ebd491",
+     "providers": [
+      [
+       "deepseek",
+       6
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 18,
+      "semantic": null
+     },
+     "score": 0.3080808080808081,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/lifecycle-of-reactive-effects",
+     "title": "Lifecycle of Reactive Effects – React",
+     "descriptionHash": "db770bd4fe504818",
+     "providers": [
+      [
+       "brave",
+       6
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 17,
+      "semantic": null
+     },
+     "score": 0.3080808080808081,
+     "semantic": null
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/Component",
+     "title": "Component – React",
+     "descriptionHash": "8b53c2339185a4c9",
+     "providers": [
+      [
+       "brave",
+       7
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "5959a4831c33e621"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "71adeb2627ea101e"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "c5003ceea468052e"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "1a095626e6a74826"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 20,
+      "semantic": null
+     },
+     "score": 0.3034825870646766,
+     "semantic": null
+    }
+   ],
+   "divergence": []
+  },
+  "C": {
+   "profile": "C",
+   "elapsedMs": 316,
+   "failure": null,
+   "replayMisses": [],
+   "enrichmentNotReplayed": [],
+   "outcome": "complete",
+   "empty": false,
+   "publicCount": 10,
+   "top20MatchesPublic": true,
+   "coverage": {
+    "general": {
+     "requested": 5,
+     "successful": 5,
+     "fromCache": 5,
+     "missing": []
+    },
+    "documentation": {
+     "activated": false,
+     "reason": "documentation_layer_unavailable",
+     "requested": 0,
+     "successful": 0,
+     "missing": []
+    },
+    "searxng": {
+     "used": false,
+     "why": null,
+     "status": null,
+     "reason": null
+    },
+    "decisions": {
+     "status": "hybrid",
+     "reason": "complete"
+    }
+   },
+   "providers": {
+    "serper": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 10,
+     "eligibleCount": 10,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "brave": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 16,
+     "eligibleCount": 16,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "exa": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 20,
+     "eligibleCount": 20,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "deepseek": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 14,
+     "eligibleCount": 14,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "tavily": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 5,
+     "eligibleCount": 5,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    }
+   },
+   "warnings": [],
+   "timings": {
+    "admittedAt": "2026-10-18T03:55:49.296Z",
+    "discoveryMs": 2,
+    "semanticMs": 314,
+    "totalMs": 316
+   },
+   "ranking": {
+    "mode": "hybrid",
+    "reason": "complete",
+    "model": "typesafe/jev-1.14-20261014",
+    "scored": 48,
+    "shortlisted": 48
+   },
+   "documentation": {
+    "activation": {
+     "active": false,
+     "reason": "documentation_layer_unavailable",
+     "signals": null
+    },
+    "enrichment": null,
+    "auxiliary": []
+   },
+   "usage": [
+    {
+     "provider": "jev",
+     "microUsd": 226,
+     "basis": "provider_reported",
+     "inputTokens": 5373
+    }
+   ],
+   "pool": {
+    "candidates": 65,
+    "distinct": 48,
+    "pooled": 48,
+    "shortlisted": 48,
+    "returned": 10,
+    "truncatedPassages": 0
+   },
+   "lanes": [
+    {
+     "provider": "serper",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 10,
+     "usage": {
+      "credits": 1,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore",
+       "descriptionHash": "c05a972a84633148",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@dwell_the/understanding-usesyncexternalstore-c06618a32d61",
+       "rank": 2,
+       "title": "Understanding useSyncExternalStore | by dwell_the",
+       "descriptionHash": "e14b29a1efa1d728",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.epicreact.dev/use-sync-external-store-demystified-for-practical-react-development-w5ac0",
+       "rank": 3,
+       "title": "useSyncExternalStore: Demystified for Practical React Development",
+       "descriptionHash": "266d3f5fe72ee263",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://dev.to/saiful7778/usesyncexternalstore-in-react-the-right-way-to-subscribe-to-external-data-p6",
+       "rank": 4,
+       "title": "useSyncExternalStore in React — The Right Way to Subscribe to External ...",
+       "descriptionHash": "995ec62aad476435",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://paths.grasp.study/modules/2ea45933-be33-4f8e-881b-a6a7cf2aa29d/lessons/4fc375f7-f8db-494f-819a-4b993a12e44b",
+       "rank": 5,
+       "title": "Building a `useObservable` Hook with `useSyncExternalStore` - grasp.study",
+       "descriptionHash": "6b84d2c03e73112c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://blog.logrocket.com/exploring-usesyncexternalstore-react-hook/",
+       "rank": 6,
+       "title": "Exploring useSyncExternalStore, a lesser-known React Hook",
+       "descriptionHash": "0adb50f4be562f66",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://stackoverflow.com/questions/76474940/why-does-the-usesyncexternalstore-example-call-getsnapshot-6-times-on-store",
+       "rank": 7,
+       "title": "Why does the `useSyncExternalStore` example call `getSnapshot` 6 times ...",
+       "descriptionHash": "cfab017be08b87ed",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://jser.dev/2023-08-02-usesyncexternalstore/",
+       "rank": 8,
+       "title": "How useSyncExternalStore() works internally in React?",
+       "descriptionHash": "95cf756401e1756c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@ignatovich.dm/usesyncexternalstore-synchronizing-external-state-with-react-components-bc4e2b27338f",
+       "rank": 9,
+       "title": "useSyncExternalStore — synchronizing external state with ...",
+       "descriptionHash": "72e13e385a83e9ca",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.youtube.com/watch?v=Y5Pn1910uiE&xstg=CAMSBhUDzO3xHw%3D%3D",
+       "rank": 10,
+       "title": "useSyncExternalStore in React: Subscribe to External State",
+       "descriptionHash": "e3b0c44298fc1c14",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "brave",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 16,
+     "usage": {
+      "requests": 1,
+      "money": "unknown"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fe6d1a7211c1515d",
+       "snippetHashes": [
+        "3def2a1e3a920908",
+        "6f7dc4e95d6aafc5",
+        "7ce2e091722b5d7d",
+        "fe6d1a7211c1515d"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect",
+       "rank": 2,
+       "title": "You Might Not Need an Effect – React",
+       "descriptionHash": "63edccfa3b703aa7",
+       "snippetHashes": [
+        "b233fd4c1b470feb",
+        "2845df7c988e5c01",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/hooks",
+       "rank": 3,
+       "title": "Built-in React Hooks – React",
+       "descriptionHash": "89c21d69c18840b9",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 4,
+       "title": "Reusing Logic with Custom Hooks – React",
+       "descriptionHash": "dc11991dc97e2ed6",
+       "snippetHashes": [
+        "bf0799d54069c06d",
+        "df82cb24457d9c89",
+        "47b757ea29385d84",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useDebugValue",
+       "rank": 5,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c7b9ecda3dff4001",
+       "snippetHashes": [
+        "d35f62a52a1280d3",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/lifecycle-of-reactive-effects",
+       "rank": 6,
+       "title": "Lifecycle of Reactive Effects – React",
+       "descriptionHash": "db770bd4fe504818",
+       "snippetHashes": [
+        "db770bd4fe504818",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component",
+       "rank": 7,
+       "title": "Component – React",
+       "descriptionHash": "8b53c2339185a4c9",
+       "snippetHashes": [
+        "5959a4831c33e621",
+        "71adeb2627ea101e",
+        "c5003ceea468052e",
+        "1a095626e6a74826"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/29/react-v18",
+       "rank": 8,
+       "title": "React v18.0 – React",
+       "descriptionHash": "93e70e85c5b290b5",
+       "snippetHashes": [
+        "5ea8203cb90fb4a1",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/08/react-18-upgrade-guide",
+       "rank": 9,
+       "title": "How to Upgrade to React 18 – React",
+       "descriptionHash": "88fc8d8f06fa0ea9",
+       "snippetHashes": [
+        "88fc8d8f06fa0ea9",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component.md",
+       "rank": 10,
+       "title": "https://react.dev/reference/react/Component.md",
+       "descriptionHash": "dc471e7dee0ca691",
+       "snippetHashes": [
+        "45441239efdc8ea0",
+        "587b19c5c82c6de8",
+        "2e809ff1394dbc3b",
+        "93422e44614b3561"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect.md",
+       "rank": 11,
+       "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+       "descriptionHash": "89891662c3740d89",
+       "snippetHashes": [
+        "7f506e9144799b97",
+        "73dc0713a2453280"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect",
+       "rank": 12,
+       "title": "useEffect – React",
+       "descriptionHash": "4041582d2c7a5135",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2025/04/23/react-labs-view-transitions-activity-and-more",
+       "rank": 13,
+       "title": "React Labs: View Transitions, Activity, and more – React",
+       "descriptionHash": "e01d01b929a7ddb8",
+       "snippetHashes": [
+        "4691cc41a1dac08a",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/use",
+       "rank": 14,
+       "title": "use – React",
+       "descriptionHash": "9883ad65263d270d",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps",
+       "rank": 15,
+       "title": "exhaustive-deps – React",
+       "descriptionHash": "e6b608c58b9000d6",
+       "snippetHashes": [
+        "e6b608c58b9000d6",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useLayoutEffect",
+       "rank": 16,
+       "title": "useLayoutEffect – React",
+       "descriptionHash": "684b8ea41562bdc3",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "exa",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 20,
+     "usage": {
+      "microUsd": 17000,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 2,
+       "title": "",
+       "descriptionHash": "be5f7d5d0552d4b4",
+       "snippetHashes": [
+        "be5f7d5d0552d4b4"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://uk.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/escape-hatches",
+       "rank": 5,
+       "title": "",
+       "descriptionHash": "71988b4ab2ceeded",
+       "snippetHashes": [
+        "71988b4ab2ceeded"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/synchronizing-with-effects",
+       "rank": 6,
+       "title": "",
+       "descriptionHash": "060fa375e38b607e",
+       "snippetHashes": [
+        "060fa375e38b607e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://he.react.dev/reference/react/useSyncExternalStore",
+       "rank": 7,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "cef6de11173e90ad",
+       "snippetHashes": [
+        "cef6de11173e90ad"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://de.react.dev/reference/react/useSyncExternalStore",
+       "rank": 8,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/reference/react/useSyncExternalStore",
+       "rank": 9,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "f93bf31e920492d1",
+       "snippetHashes": [
+        "f93bf31e920492d1"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect.md",
+       "rank": 10,
+       "title": "",
+       "descriptionHash": "30fb49ff197bc7b2",
+       "snippetHashes": [
+        "30fb49ff197bc7b2"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pl.react.dev/reference/react/useSyncExternalStore",
+       "rank": 11,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "b80f367a935d1f8f",
+       "snippetHashes": [
+        "b80f367a935d1f8f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ru.react.dev/reference/react/useSyncExternalStore",
+       "rank": 12,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "754aaf1104fa9884",
+       "snippetHashes": [
+        "754aaf1104fa9884"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://az.react.dev/reference/react/useSyncExternalStore",
+       "rank": 13,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "ce13ece5d507a834",
+       "snippetHashes": [
+        "ce13ece5d507a834"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 14,
+       "title": "",
+       "descriptionHash": "9d6f5227afec6b5c",
+       "snippetHashes": [
+        "9d6f5227afec6b5c"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://es.react.dev/reference/react/useSyncExternalStore",
+       "rank": 15,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "63cfd3eb6aea352e",
+       "snippetHashes": [
+        "63cfd3eb6aea352e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 16,
+       "title": "",
+       "descriptionHash": "80483393426a278f",
+       "snippetHashes": [
+        "80483393426a278f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useSyncExternalStore",
+       "rank": 17,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 18,
+       "title": "",
+       "descriptionHash": "59fc53d48d486069",
+       "snippetHashes": [
+        "59fc53d48d486069"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ja.react.dev/reference/react/useSyncExternalStore",
+       "rank": 19,
+       "title": "",
+       "descriptionHash": "c200f6aa4ac5478e",
+       "snippetHashes": [
+        "c200f6aa4ac5478e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/state-as-a-snapshot",
+       "rank": 20,
+       "title": "",
+       "descriptionHash": "dc8b2f97d475920f",
+       "snippetHashes": [
+        "dc8b2f97d475920f"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "deepseek",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 14,
+     "usage": {
+      "microUsd": 750,
+      "basis": "documented"
+     },
+     "candidates": [
+      {
+       "url": "https://18.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "402b214a60c009ee",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React 中文文档",
+       "descriptionHash": "ac7a3cf499e23909",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "09d16fb8d052c1b0",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "d381d0e357fd922f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://vi.react.dev/community/videos",
+       "rank": 5,
+       "title": "React Videos – React",
+       "descriptionHash": "65d8eefef9b6d8b5",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/community/videos",
+       "rank": 6,
+       "title": "Vidéos React – React",
+       "descriptionHash": "a70bd5a1c1ebd491",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useDebugValue",
+       "rank": 7,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c376fc0b9626d54f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useDebugValue",
+       "rank": 8,
+       "title": "useDebugValue – React 中文文档",
+       "descriptionHash": "442ea91ced59b9d6",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/learn/escape-hatches",
+       "rank": 9,
+       "title": "脱围机制（Escape Hatches） – React 中文文档",
+       "descriptionHash": "b2fa5d099d628baa",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://tr.react.dev/learn/escape-hatches",
+       "rank": 10,
+       "title": "Kaçış Yolları – React",
+       "descriptionHash": "94a41d7f2db4ab89",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-client-rendering-apis",
+       "rank": 11,
+       "title": "Come passare a React 18 – React",
+       "descriptionHash": "2f72fe4b868c44bc",
+       "snippetHashes": [],
+       "publication": {
+        "at": "2022-03-07T16:00:00.000Z",
+        "basis": "provider_estimate",
+        "meaning": "published"
+       }
+      },
+      {
+       "url": "https://fr.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 12,
+       "title": "Vous n’avez pas forcément besoin d’un Effet – React",
+       "descriptionHash": "45a4af0d125a5239",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/escape-hatches",
+       "rank": 13,
+       "title": "Saídas de Emergência – React",
+       "descriptionHash": "7688c5e834ff4982",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 14,
+       "title": "Talvez você não precise de um Effect – React",
+       "descriptionHash": "31e01152a299e164",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "tavily",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 5,
+     "usage": {
+      "credits": 2,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://vi.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fa31e9c55c62ea06",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "00ee2825d282c8ec",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 3,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "3e4adeb512b3640f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "84a84e0a169a4759",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/cache",
+       "rank": 5,
+       "title": "cache – React",
+       "descriptionHash": "78e095a23f4c9e17",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    }
+   ],
+   "top20": [
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore",
+     "descriptionHash": "c05a972a84633148",
+     "providers": [
+      [
+       "serper",
+       1
+      ],
+      [
+       "brave",
+       1
+      ],
+      [
+       "exa",
+       1
+      ],
+      [
+       "tavily",
+       3
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "3def2a1e3a920908"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "6f7dc4e95d6aafc5"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7ce2e091722b5d7d"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 1,
+      "semantic": 1
+     },
+     "score": 0.9672765624999999,
+     "semantic": {
+      "relevance": 3.75,
+      "directness": 0.95,
+      "evidence": 0.95
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       3
+      ],
+      [
+       "deepseek",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 3,
+      "semantic": 2
+     },
+     "score": 0.8258637817460317,
+     "semantic": {
+      "relevance": 3.78,
+      "directness": 0.94,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "00ee2825d282c8ec",
+     "providers": [
+      [
+       "exa",
+       18
+      ],
+      [
+       "tavily",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 5,
+      "semantic": 3
+     },
+     "score": 0.7975337662841191,
+     "semantic": {
+      "relevance": 3.75,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://it.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "84a84e0a169a4759",
+     "providers": [
+      [
+       "exa",
+       16
+      ],
+      [
+       "tavily",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 6,
+      "semantic": 4
+     },
+     "score": 0.7747617242324562,
+     "semantic": {
+      "relevance": 3.65,
+      "directness": 0.92,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://uk.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 12,
+      "semantic": 5
+     },
+     "score": 0.70790915625,
+     "semantic": {
+      "relevance": 3.83,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React 中文文档",
+     "descriptionHash": "ac7a3cf499e23909",
+     "providers": [
+      [
+       "exa",
+       14
+      ],
+      [
+       "deepseek",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 4,
+      "semantic": 6
+     },
+     "score": 0.7060378835912525,
+     "semantic": {
+      "relevance": 3.27,
+      "directness": 0.84,
+      "evidence": 0.87
+     }
+    },
+    {
+     "canonicalUrl": "https://de.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 23,
+      "semantic": 7
+     },
+     "score": 0.6896700061274511,
+     "semantic": {
+      "relevance": 3.79,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+     "title": "",
+     "descriptionHash": "be5f7d5d0552d4b4",
+     "providers": [
+      [
+       "brave",
+       4
+      ],
+      [
+       "exa",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "bf0799d54069c06d"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "df82cb24457d9c89"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "47b757ea29385d84"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 2,
+      "semantic": 8
+     },
+     "score": 0.6569737499999999,
+     "semantic": {
+      "relevance": 2.61,
+      "directness": 0.55,
+      "evidence": 0.9
+     }
+    },
+    {
+     "canonicalUrl": "https://ar.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       17
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 46,
+      "semantic": 9
+     },
+     "score": 0.628213445887446,
+     "semantic": {
+      "relevance": 3.6,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect.md",
+     "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+     "descriptionHash": "89891662c3740d89",
+     "providers": [
+      [
+       "brave",
+       11
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7f506e9144799b97"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "73dc0713a2453280"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 33,
+      "semantic": 11
+     },
+     "score": 0.6035012852112676,
+     "semantic": {
+      "relevance": 3.56,
+      "directness": 0.82,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://ja.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "c200f6aa4ac5478e",
+     "providers": [
+      [
+       "exa",
+       19
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 47,
+      "semantic": 12
+     },
+     "score": 0.5740532974683544,
+     "semantic": {
+      "relevance": 3.48,
+      "directness": 0.89,
+      "evidence": 0.88
+     }
+    },
+    {
+     "canonicalUrl": "https://vi.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "fa31e9c55c62ea06",
+     "providers": [
+      [
+       "tavily",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 7,
+      "semantic": 10
+     },
+     "score": 0.616352,
+     "semantic": {
+      "relevance": 3.48,
+      "directness": 0.87,
+      "evidence": 0.96
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/learn/you-might-not-need-an-effect",
+     "title": "Talvez você não precise de um Effect – React",
+     "descriptionHash": "31e01152a299e164",
+     "providers": [
+      [
+       "deepseek",
+       14
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 41,
+      "semantic": 14
+     },
+     "score": 0.5184154386261262,
+     "semantic": {
+      "relevance": 2.99,
+      "directness": 0.75,
+      "evidence": 0.93
+     }
+    },
+    {
+     "canonicalUrl": "https://18.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "402b214a60c009ee",
+     "providers": [
+      [
+       "deepseek",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 8,
+      "semantic": 13
+     },
+     "score": 0.5424708333333333,
+     "semantic": {
+      "relevance": 3.2,
+      "directness": 0.82,
+      "evidence": 0.82
+     }
+    },
+    {
+     "canonicalUrl": "https://es.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "63cfd3eb6aea352e",
+     "providers": [
+      [
+       "exa",
+       15
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 43,
+      "semantic": 18
+     },
+     "score": 0.4384639027777778,
+     "semantic": {
+      "relevance": 2.65,
+      "directness": 0.55,
+      "evidence": 0.74
+     }
+    },
+    {
+     "canonicalUrl": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "09d16fb8d052c1b0",
+     "providers": [
+      [
+       "deepseek",
+       3
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 11,
+      "semantic": 19
+     },
+     "score": 0.43625291269841265,
+     "semantic": {
+      "relevance": 2.48,
+      "directness": 0.4,
+      "evidence": 0.72
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React 中文文档",
+     "descriptionHash": "442ea91ced59b9d6",
+     "providers": [
+      [
+       "deepseek",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 24,
+      "semantic": 20
+     },
+     "score": 0.4004499411764706,
+     "semantic": {
+      "relevance": 2.26,
+      "directness": 0.26,
+      "evidence": 0.84
+     }
+    },
+    {
+     "canonicalUrl": "https://fr.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "f93bf31e920492d1",
+     "providers": [
+      [
+       "exa",
+       9
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 26,
+      "semantic": 21
+     },
+     "score": 0.3803237807971015,
+     "semantic": {
+      "relevance": 2.17,
+      "directness": 0.27,
+      "evidence": 0.64
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect",
+     "title": "You Might Not Need an Effect – React",
+     "descriptionHash": "63edccfa3b703aa7",
+     "providers": [
+      [
+       "brave",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "b233fd4c1b470feb"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "2845df7c988e5c01"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 9,
+      "semantic": 22
+     },
+     "score": 0.3735524274193548,
+     "semantic": {
+      "relevance": 1.91,
+      "directness": 0.2,
+      "evidence": 0.62
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React",
+     "descriptionHash": "c7b9ecda3dff4001",
+     "providers": [
+      [
+       "brave",
+       5
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "d35f62a52a1280d3"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 13,
+      "semantic": 23
+     },
+     "score": 0.3449500961538462,
+     "semantic": {
+      "relevance": 1.52,
+      "directness": 0.13,
+      "evidence": 0.76
+     }
+    }
+   ],
+   "divergence": []
+  },
+  "D-C7": {
+   "profile": "D-C7",
+   "elapsedMs": 9,
+   "failure": null,
+   "replayMisses": [],
+   "enrichmentNotReplayed": [],
+   "outcome": "partial",
+   "empty": false,
+   "publicCount": 10,
+   "top20MatchesPublic": true,
+   "coverage": {
+    "general": {
+     "requested": 5,
+     "successful": 5,
+     "fromCache": 5,
+     "missing": []
+    },
+    "documentation": {
+     "activated": true,
+     "reason": "explicit_libraries",
+     "requested": 2,
+     "successful": 1,
+     "missing": [
+      {
+       "provider": "ref",
+       "status": "skipped",
+       "reason": "not_configured"
+      }
+     ]
+    },
+    "searxng": {
+     "used": false,
+     "why": null,
+     "status": null,
+     "reason": null
+    },
+    "decisions": {
+     "status": "hybrid",
+     "reason": "complete"
+    }
+   },
+   "providers": {
+    "serper": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 10,
+     "eligibleCount": 10,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "brave": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 16,
+     "eligibleCount": 16,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "exa": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 20,
+     "eligibleCount": 20,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "deepseek": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 14,
+     "eligibleCount": 14,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "tavily": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 5,
+     "eligibleCount": 5,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "context7": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 8,
+     "eligibleCount": 2,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent",
+     "suboperations": [
+      {
+       "scope": {
+        "libraries": [
+         "react"
+        ],
+        "version": null
+       },
+       "status": "ok",
+       "reason": null,
+       "detail": null
+      }
+     ]
+    },
+    "ref": {
+     "status": "skipped",
+     "reason": "not_configured",
+     "detail": "adapter_missing",
+     "fromCache": false,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": null,
+     "eligibleCount": 0,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    }
+   },
+   "warnings": [
+    "ref_not_configured"
+   ],
+   "timings": {
+    "admittedAt": "2026-10-18T03:55:49.612Z",
+    "documentationActivatedMs": 2,
+    "discoveryMs": 2,
+    "semanticMs": 6,
+    "totalMs": 9
+   },
+   "ranking": {
+    "mode": "hybrid",
+    "reason": "complete",
+    "model": "typesafe/jev-1.14-20261014",
+    "scored": 48,
+    "shortlisted": 48
+   },
+   "documentation": {
+    "activation": {
+     "active": true,
+     "reason": "explicit_libraries",
+     "signals": [
+      "explicit_libraries"
+     ]
+    },
+    "enrichment": null,
+    "auxiliary": []
+   },
+   "usage": [],
+   "pool": {
+    "candidates": 67,
+    "distinct": 48,
+    "pooled": 48,
+    "shortlisted": 48,
+    "returned": 10,
+    "truncatedPassages": 0
+   },
+   "lanes": [
+    {
+     "provider": "serper",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 10,
+     "usage": {
+      "credits": 1,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore",
+       "descriptionHash": "c05a972a84633148",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@dwell_the/understanding-usesyncexternalstore-c06618a32d61",
+       "rank": 2,
+       "title": "Understanding useSyncExternalStore | by dwell_the",
+       "descriptionHash": "e14b29a1efa1d728",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.epicreact.dev/use-sync-external-store-demystified-for-practical-react-development-w5ac0",
+       "rank": 3,
+       "title": "useSyncExternalStore: Demystified for Practical React Development",
+       "descriptionHash": "266d3f5fe72ee263",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://dev.to/saiful7778/usesyncexternalstore-in-react-the-right-way-to-subscribe-to-external-data-p6",
+       "rank": 4,
+       "title": "useSyncExternalStore in React — The Right Way to Subscribe to External ...",
+       "descriptionHash": "995ec62aad476435",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://paths.grasp.study/modules/2ea45933-be33-4f8e-881b-a6a7cf2aa29d/lessons/4fc375f7-f8db-494f-819a-4b993a12e44b",
+       "rank": 5,
+       "title": "Building a `useObservable` Hook with `useSyncExternalStore` - grasp.study",
+       "descriptionHash": "6b84d2c03e73112c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://blog.logrocket.com/exploring-usesyncexternalstore-react-hook/",
+       "rank": 6,
+       "title": "Exploring useSyncExternalStore, a lesser-known React Hook",
+       "descriptionHash": "0adb50f4be562f66",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://stackoverflow.com/questions/76474940/why-does-the-usesyncexternalstore-example-call-getsnapshot-6-times-on-store",
+       "rank": 7,
+       "title": "Why does the `useSyncExternalStore` example call `getSnapshot` 6 times ...",
+       "descriptionHash": "cfab017be08b87ed",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://jser.dev/2023-08-02-usesyncexternalstore/",
+       "rank": 8,
+       "title": "How useSyncExternalStore() works internally in React?",
+       "descriptionHash": "95cf756401e1756c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@ignatovich.dm/usesyncexternalstore-synchronizing-external-state-with-react-components-bc4e2b27338f",
+       "rank": 9,
+       "title": "useSyncExternalStore — synchronizing external state with ...",
+       "descriptionHash": "72e13e385a83e9ca",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.youtube.com/watch?v=Y5Pn1910uiE&xstg=CAMSBhUDzO3xHw%3D%3D",
+       "rank": 10,
+       "title": "useSyncExternalStore in React: Subscribe to External State",
+       "descriptionHash": "e3b0c44298fc1c14",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "brave",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 16,
+     "usage": {
+      "requests": 1,
+      "money": "unknown"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fe6d1a7211c1515d",
+       "snippetHashes": [
+        "3def2a1e3a920908",
+        "6f7dc4e95d6aafc5",
+        "7ce2e091722b5d7d",
+        "fe6d1a7211c1515d"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect",
+       "rank": 2,
+       "title": "You Might Not Need an Effect – React",
+       "descriptionHash": "63edccfa3b703aa7",
+       "snippetHashes": [
+        "b233fd4c1b470feb",
+        "2845df7c988e5c01",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/hooks",
+       "rank": 3,
+       "title": "Built-in React Hooks – React",
+       "descriptionHash": "89c21d69c18840b9",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 4,
+       "title": "Reusing Logic with Custom Hooks – React",
+       "descriptionHash": "dc11991dc97e2ed6",
+       "snippetHashes": [
+        "bf0799d54069c06d",
+        "df82cb24457d9c89",
+        "47b757ea29385d84",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useDebugValue",
+       "rank": 5,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c7b9ecda3dff4001",
+       "snippetHashes": [
+        "d35f62a52a1280d3",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/lifecycle-of-reactive-effects",
+       "rank": 6,
+       "title": "Lifecycle of Reactive Effects – React",
+       "descriptionHash": "db770bd4fe504818",
+       "snippetHashes": [
+        "db770bd4fe504818",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component",
+       "rank": 7,
+       "title": "Component – React",
+       "descriptionHash": "8b53c2339185a4c9",
+       "snippetHashes": [
+        "5959a4831c33e621",
+        "71adeb2627ea101e",
+        "c5003ceea468052e",
+        "1a095626e6a74826"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/29/react-v18",
+       "rank": 8,
+       "title": "React v18.0 – React",
+       "descriptionHash": "93e70e85c5b290b5",
+       "snippetHashes": [
+        "5ea8203cb90fb4a1",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/08/react-18-upgrade-guide",
+       "rank": 9,
+       "title": "How to Upgrade to React 18 – React",
+       "descriptionHash": "88fc8d8f06fa0ea9",
+       "snippetHashes": [
+        "88fc8d8f06fa0ea9",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component.md",
+       "rank": 10,
+       "title": "https://react.dev/reference/react/Component.md",
+       "descriptionHash": "dc471e7dee0ca691",
+       "snippetHashes": [
+        "45441239efdc8ea0",
+        "587b19c5c82c6de8",
+        "2e809ff1394dbc3b",
+        "93422e44614b3561"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect.md",
+       "rank": 11,
+       "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+       "descriptionHash": "89891662c3740d89",
+       "snippetHashes": [
+        "7f506e9144799b97",
+        "73dc0713a2453280"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect",
+       "rank": 12,
+       "title": "useEffect – React",
+       "descriptionHash": "4041582d2c7a5135",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2025/04/23/react-labs-view-transitions-activity-and-more",
+       "rank": 13,
+       "title": "React Labs: View Transitions, Activity, and more – React",
+       "descriptionHash": "e01d01b929a7ddb8",
+       "snippetHashes": [
+        "4691cc41a1dac08a",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/use",
+       "rank": 14,
+       "title": "use – React",
+       "descriptionHash": "9883ad65263d270d",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps",
+       "rank": 15,
+       "title": "exhaustive-deps – React",
+       "descriptionHash": "e6b608c58b9000d6",
+       "snippetHashes": [
+        "e6b608c58b9000d6",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useLayoutEffect",
+       "rank": 16,
+       "title": "useLayoutEffect – React",
+       "descriptionHash": "684b8ea41562bdc3",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "exa",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 20,
+     "usage": {
+      "microUsd": 17000,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 2,
+       "title": "",
+       "descriptionHash": "be5f7d5d0552d4b4",
+       "snippetHashes": [
+        "be5f7d5d0552d4b4"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://uk.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/escape-hatches",
+       "rank": 5,
+       "title": "",
+       "descriptionHash": "71988b4ab2ceeded",
+       "snippetHashes": [
+        "71988b4ab2ceeded"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/synchronizing-with-effects",
+       "rank": 6,
+       "title": "",
+       "descriptionHash": "060fa375e38b607e",
+       "snippetHashes": [
+        "060fa375e38b607e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://he.react.dev/reference/react/useSyncExternalStore",
+       "rank": 7,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "cef6de11173e90ad",
+       "snippetHashes": [
+        "cef6de11173e90ad"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://de.react.dev/reference/react/useSyncExternalStore",
+       "rank": 8,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/reference/react/useSyncExternalStore",
+       "rank": 9,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "f93bf31e920492d1",
+       "snippetHashes": [
+        "f93bf31e920492d1"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect.md",
+       "rank": 10,
+       "title": "",
+       "descriptionHash": "30fb49ff197bc7b2",
+       "snippetHashes": [
+        "30fb49ff197bc7b2"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pl.react.dev/reference/react/useSyncExternalStore",
+       "rank": 11,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "b80f367a935d1f8f",
+       "snippetHashes": [
+        "b80f367a935d1f8f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ru.react.dev/reference/react/useSyncExternalStore",
+       "rank": 12,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "754aaf1104fa9884",
+       "snippetHashes": [
+        "754aaf1104fa9884"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://az.react.dev/reference/react/useSyncExternalStore",
+       "rank": 13,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "ce13ece5d507a834",
+       "snippetHashes": [
+        "ce13ece5d507a834"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 14,
+       "title": "",
+       "descriptionHash": "9d6f5227afec6b5c",
+       "snippetHashes": [
+        "9d6f5227afec6b5c"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://es.react.dev/reference/react/useSyncExternalStore",
+       "rank": 15,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "63cfd3eb6aea352e",
+       "snippetHashes": [
+        "63cfd3eb6aea352e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 16,
+       "title": "",
+       "descriptionHash": "80483393426a278f",
+       "snippetHashes": [
+        "80483393426a278f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useSyncExternalStore",
+       "rank": 17,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 18,
+       "title": "",
+       "descriptionHash": "59fc53d48d486069",
+       "snippetHashes": [
+        "59fc53d48d486069"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ja.react.dev/reference/react/useSyncExternalStore",
+       "rank": 19,
+       "title": "",
+       "descriptionHash": "c200f6aa4ac5478e",
+       "snippetHashes": [
+        "c200f6aa4ac5478e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/state-as-a-snapshot",
+       "rank": 20,
+       "title": "",
+       "descriptionHash": "dc8b2f97d475920f",
+       "snippetHashes": [
+        "dc8b2f97d475920f"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "deepseek",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 14,
+     "usage": {
+      "microUsd": 750,
+      "basis": "documented"
+     },
+     "candidates": [
+      {
+       "url": "https://18.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "402b214a60c009ee",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React 中文文档",
+       "descriptionHash": "ac7a3cf499e23909",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "09d16fb8d052c1b0",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "d381d0e357fd922f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://vi.react.dev/community/videos",
+       "rank": 5,
+       "title": "React Videos – React",
+       "descriptionHash": "65d8eefef9b6d8b5",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/community/videos",
+       "rank": 6,
+       "title": "Vidéos React – React",
+       "descriptionHash": "a70bd5a1c1ebd491",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useDebugValue",
+       "rank": 7,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c376fc0b9626d54f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useDebugValue",
+       "rank": 8,
+       "title": "useDebugValue – React 中文文档",
+       "descriptionHash": "442ea91ced59b9d6",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/learn/escape-hatches",
+       "rank": 9,
+       "title": "脱围机制（Escape Hatches） – React 中文文档",
+       "descriptionHash": "b2fa5d099d628baa",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://tr.react.dev/learn/escape-hatches",
+       "rank": 10,
+       "title": "Kaçış Yolları – React",
+       "descriptionHash": "94a41d7f2db4ab89",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-client-rendering-apis",
+       "rank": 11,
+       "title": "Come passare a React 18 – React",
+       "descriptionHash": "2f72fe4b868c44bc",
+       "snippetHashes": [],
+       "publication": {
+        "at": "2022-03-07T16:00:00.000Z",
+        "basis": "provider_estimate",
+        "meaning": "published"
+       }
+      },
+      {
+       "url": "https://fr.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 12,
+       "title": "Vous n’avez pas forcément besoin d’un Effet – React",
+       "descriptionHash": "45a4af0d125a5239",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/escape-hatches",
+       "rank": 13,
+       "title": "Saídas de Emergência – React",
+       "descriptionHash": "7688c5e834ff4982",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 14,
+       "title": "Talvez você não precise de um Effect – React",
+       "descriptionHash": "31e01152a299e164",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "tavily",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 5,
+     "usage": {
+      "credits": 2,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://vi.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fa31e9c55c62ea06",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "00ee2825d282c8ec",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 3,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "3e4adeb512b3640f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "84a84e0a169a4759",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/cache",
+       "rank": 5,
+       "title": "cache – React",
+       "descriptionHash": "78e095a23f4c9e17",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "context7",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 8,
+     "usage": {
+      "requests": 1
+     },
+     "candidates": [
+      {
+       "url": "https://github.com/reactjs/react.dev/blob/main/src/content/reference/react/useSyncExternalStore.md",
+       "rank": 1,
+       "title": "Unknown",
+       "descriptionHash": "ec9a2475a9cb0dbc",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore Hook - React Dev Reference",
+       "descriptionHash": "f65cbb5cd76cb9c3",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "ref",
+     "kind": "search",
+     "status": "skipped",
+     "reason": "not_configured",
+     "detail": "adapter_missing",
+     "fromCache": false,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": null,
+     "usage": null,
+     "candidates": []
+    }
+   ],
+   "top20": [
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore",
+     "descriptionHash": "c05a972a84633148",
+     "providers": [
+      [
+       "serper",
+       1
+      ],
+      [
+       "brave",
+       1
+      ],
+      [
+       "exa",
+       1
+      ],
+      [
+       "tavily",
+       3
+      ],
+      [
+       "context7",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "3def2a1e3a920908"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "6f7dc4e95d6aafc5"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7ce2e091722b5d7d"
+      },
+      {
+       "kind": "documentation_code",
+       "provider": "context7",
+       "textHash": "23d76df45ad91fba"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "1e80f0f345a69ba4"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "a20f08ff95634bc2"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "1494ec4e886c7c42"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "dabbe59824a29115"
+      },
+      {
+       "kind": "documentation_text",
+       "provider": "context7",
+       "textHash": "bdaaa471cb73cf29"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 1,
+      "semantic": 1
+     },
+     "score": 0.9580099999999999,
+     "semantic": {
+      "relevance": 3.64,
+      "directness": 0.93,
+      "evidence": 0.95
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       3
+      ],
+      [
+       "deepseek",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 3,
+      "semantic": 2
+     },
+     "score": 0.8293902939814815,
+     "semantic": {
+      "relevance": 3.8,
+      "directness": 0.94,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "00ee2825d282c8ec",
+     "providers": [
+      [
+       "exa",
+       18
+      ],
+      [
+       "tavily",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 5,
+      "semantic": 3
+     },
+     "score": 0.7975337662841191,
+     "semantic": {
+      "relevance": 3.75,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://it.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "84a84e0a169a4759",
+     "providers": [
+      [
+       "exa",
+       16
+      ],
+      [
+       "tavily",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 6,
+      "semantic": 4
+     },
+     "score": 0.7747617242324562,
+     "semantic": {
+      "relevance": 3.65,
+      "directness": 0.92,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://uk.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 12,
+      "semantic": 5
+     },
+     "score": 0.70790915625,
+     "semantic": {
+      "relevance": 3.83,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://de.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 23,
+      "semantic": 6
+     },
+     "score": 0.6896700061274511,
+     "semantic": {
+      "relevance": 3.79,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React 中文文档",
+     "descriptionHash": "ac7a3cf499e23909",
+     "providers": [
+      [
+       "exa",
+       14
+      ],
+      [
+       "deepseek",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 4,
+      "semantic": 7
+     },
+     "score": 0.6888952844558267,
+     "semantic": {
+      "relevance": 3.17,
+      "directness": 0.8,
+      "evidence": 0.86
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+     "title": "",
+     "descriptionHash": "be5f7d5d0552d4b4",
+     "providers": [
+      [
+       "brave",
+       4
+      ],
+      [
+       "exa",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "bf0799d54069c06d"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "df82cb24457d9c89"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "47b757ea29385d84"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 2,
+      "semantic": 8
+     },
+     "score": 0.6578128004032259,
+     "semantic": {
+      "relevance": 2.59,
+      "directness": 0.55,
+      "evidence": 0.92
+     }
+    },
+    {
+     "canonicalUrl": "https://ar.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       17
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 46,
+      "semantic": 9
+     },
+     "score": 0.628213445887446,
+     "semantic": {
+      "relevance": 3.6,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect.md",
+     "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+     "descriptionHash": "89891662c3740d89",
+     "providers": [
+      [
+       "brave",
+       11
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7f506e9144799b97"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "73dc0713a2453280"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 33,
+      "semantic": 11
+     },
+     "score": 0.6035012852112676,
+     "semantic": {
+      "relevance": 3.56,
+      "directness": 0.82,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://ja.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "c200f6aa4ac5478e",
+     "providers": [
+      [
+       "exa",
+       19
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 47,
+      "semantic": 12
+     },
+     "score": 0.5740532974683544,
+     "semantic": {
+      "relevance": 3.48,
+      "directness": 0.89,
+      "evidence": 0.88
+     }
+    },
+    {
+     "canonicalUrl": "https://vi.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "fa31e9c55c62ea06",
+     "providers": [
+      [
+       "tavily",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 7,
+      "semantic": 10
+     },
+     "score": 0.6084415000000001,
+     "semantic": {
+      "relevance": 3.44,
+      "directness": 0.87,
+      "evidence": 0.96
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/learn/you-might-not-need-an-effect",
+     "title": "Talvez você não precise de um Effect – React",
+     "descriptionHash": "31e01152a299e164",
+     "providers": [
+      [
+       "deepseek",
+       14
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 41,
+      "semantic": 14
+     },
+     "score": 0.5184154386261262,
+     "semantic": {
+      "relevance": 2.99,
+      "directness": 0.75,
+      "evidence": 0.93
+     }
+    },
+    {
+     "canonicalUrl": "https://18.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "402b214a60c009ee",
+     "providers": [
+      [
+       "deepseek",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 8,
+      "semantic": 13
+     },
+     "score": 0.5547306458333333,
+     "semantic": {
+      "relevance": 3.15,
+      "directness": 0.79,
+      "evidence": 0.83
+     }
+    },
+    {
+     "canonicalUrl": "https://es.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "63cfd3eb6aea352e",
+     "providers": [
+      [
+       "exa",
+       15
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 43,
+      "semantic": 18
+     },
+     "score": 0.4384639027777778,
+     "semantic": {
+      "relevance": 2.65,
+      "directness": 0.55,
+      "evidence": 0.74
+     }
+    },
+    {
+     "canonicalUrl": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "09d16fb8d052c1b0",
+     "providers": [
+      [
+       "deepseek",
+       3
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 11,
+      "semantic": 19
+     },
+     "score": 0.43625291269841265,
+     "semantic": {
+      "relevance": 2.48,
+      "directness": 0.4,
+      "evidence": 0.72
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React 中文文档",
+     "descriptionHash": "442ea91ced59b9d6",
+     "providers": [
+      [
+       "deepseek",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 24,
+      "semantic": 20
+     },
+     "score": 0.4004499411764706,
+     "semantic": {
+      "relevance": 2.26,
+      "directness": 0.26,
+      "evidence": 0.84
+     }
+    },
+    {
+     "canonicalUrl": "https://fr.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "f93bf31e920492d1",
+     "providers": [
+      [
+       "exa",
+       9
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 26,
+      "semantic": 21
+     },
+     "score": 0.3803237807971015,
+     "semantic": {
+      "relevance": 2.17,
+      "directness": 0.27,
+      "evidence": 0.64
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect",
+     "title": "You Might Not Need an Effect – React",
+     "descriptionHash": "63edccfa3b703aa7",
+     "providers": [
+      [
+       "brave",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "b233fd4c1b470feb"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "2845df7c988e5c01"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 9,
+      "semantic": 22
+     },
+     "score": 0.3744142365591398,
+     "semantic": {
+      "relevance": 1.92,
+      "directness": 0.2,
+      "evidence": 0.61
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React",
+     "descriptionHash": "c7b9ecda3dff4001",
+     "providers": [
+      [
+       "brave",
+       5
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "d35f62a52a1280d3"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 13,
+      "semantic": 23
+     },
+     "score": 0.3449500961538462,
+     "semantic": {
+      "relevance": 1.52,
+      "directness": 0.13,
+      "evidence": 0.76
+     }
+    }
+   ],
+   "divergence": []
+  },
+  "D-Ref": {
+   "profile": "D-Ref",
+   "elapsedMs": 8,
+   "failure": null,
+   "replayMisses": [],
+   "enrichmentNotReplayed": [],
+   "outcome": "partial",
+   "empty": false,
+   "publicCount": 10,
+   "top20MatchesPublic": true,
+   "coverage": {
+    "general": {
+     "requested": 5,
+     "successful": 5,
+     "fromCache": 5,
+     "missing": []
+    },
+    "documentation": {
+     "activated": true,
+     "reason": "explicit_libraries",
+     "requested": 2,
+     "successful": 1,
+     "missing": [
+      {
+       "provider": "context7",
+       "status": "skipped",
+       "reason": "not_configured"
+      }
+     ]
+    },
+    "searxng": {
+     "used": false,
+     "why": null,
+     "status": null,
+     "reason": null
+    },
+    "decisions": {
+     "status": "hybrid",
+     "reason": "complete"
+    }
+   },
+   "providers": {
+    "serper": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 10,
+     "eligibleCount": 10,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "brave": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 16,
+     "eligibleCount": 16,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "exa": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 20,
+     "eligibleCount": 20,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "deepseek": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 14,
+     "eligibleCount": 14,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "tavily": {
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 5,
+     "eligibleCount": 5,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "context7": {
+     "status": "skipped",
+     "reason": "not_configured",
+     "detail": "adapter_missing",
+     "fromCache": false,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": null,
+     "eligibleCount": 0,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    },
+    "ref": {
+     "status": "success_empty",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "elapsedMs": 0,
+     "queueMs": 0,
+     "resultCount": 0,
+     "eligibleCount": 0,
+     "filteredEmpty": false,
+     "dispatchState": "not_sent"
+    }
+   },
+   "warnings": [
+    "context7_not_configured"
+   ],
+   "timings": {
+    "admittedAt": "2026-10-18T03:55:49.621Z",
+    "documentationActivatedMs": 1,
+    "discoveryMs": 1,
+    "semanticMs": 6,
+    "totalMs": 8
+   },
+   "ranking": {
+    "mode": "hybrid",
+    "reason": "complete",
+    "model": "typesafe/jev-1.14-20261014",
+    "scored": 48,
+    "shortlisted": 48
+   },
+   "documentation": {
+    "activation": {
+     "active": true,
+     "reason": "explicit_libraries",
+     "signals": [
+      "explicit_libraries"
+     ]
+    },
+    "enrichment": null,
+    "auxiliary": []
+   },
+   "usage": [],
+   "pool": {
+    "candidates": 65,
+    "distinct": 48,
+    "pooled": 48,
+    "shortlisted": 48,
+    "returned": 10,
+    "truncatedPassages": 0
+   },
+   "lanes": [
+    {
+     "provider": "serper",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 10,
+     "usage": {
+      "credits": 1,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore",
+       "descriptionHash": "c05a972a84633148",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@dwell_the/understanding-usesyncexternalstore-c06618a32d61",
+       "rank": 2,
+       "title": "Understanding useSyncExternalStore | by dwell_the",
+       "descriptionHash": "e14b29a1efa1d728",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.epicreact.dev/use-sync-external-store-demystified-for-practical-react-development-w5ac0",
+       "rank": 3,
+       "title": "useSyncExternalStore: Demystified for Practical React Development",
+       "descriptionHash": "266d3f5fe72ee263",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://dev.to/saiful7778/usesyncexternalstore-in-react-the-right-way-to-subscribe-to-external-data-p6",
+       "rank": 4,
+       "title": "useSyncExternalStore in React — The Right Way to Subscribe to External ...",
+       "descriptionHash": "995ec62aad476435",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://paths.grasp.study/modules/2ea45933-be33-4f8e-881b-a6a7cf2aa29d/lessons/4fc375f7-f8db-494f-819a-4b993a12e44b",
+       "rank": 5,
+       "title": "Building a `useObservable` Hook with `useSyncExternalStore` - grasp.study",
+       "descriptionHash": "6b84d2c03e73112c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://blog.logrocket.com/exploring-usesyncexternalstore-react-hook/",
+       "rank": 6,
+       "title": "Exploring useSyncExternalStore, a lesser-known React Hook",
+       "descriptionHash": "0adb50f4be562f66",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://stackoverflow.com/questions/76474940/why-does-the-usesyncexternalstore-example-call-getsnapshot-6-times-on-store",
+       "rank": 7,
+       "title": "Why does the `useSyncExternalStore` example call `getSnapshot` 6 times ...",
+       "descriptionHash": "cfab017be08b87ed",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://jser.dev/2023-08-02-usesyncexternalstore/",
+       "rank": 8,
+       "title": "How useSyncExternalStore() works internally in React?",
+       "descriptionHash": "95cf756401e1756c",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://medium.com/@ignatovich.dm/usesyncexternalstore-synchronizing-external-state-with-react-components-bc4e2b27338f",
+       "rank": 9,
+       "title": "useSyncExternalStore — synchronizing external state with ...",
+       "descriptionHash": "72e13e385a83e9ca",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://www.youtube.com/watch?v=Y5Pn1910uiE&xstg=CAMSBhUDzO3xHw%3D%3D",
+       "rank": 10,
+       "title": "useSyncExternalStore in React: Subscribe to External State",
+       "descriptionHash": "e3b0c44298fc1c14",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "brave",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 16,
+     "usage": {
+      "requests": 1,
+      "money": "unknown"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fe6d1a7211c1515d",
+       "snippetHashes": [
+        "3def2a1e3a920908",
+        "6f7dc4e95d6aafc5",
+        "7ce2e091722b5d7d",
+        "fe6d1a7211c1515d"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect",
+       "rank": 2,
+       "title": "You Might Not Need an Effect – React",
+       "descriptionHash": "63edccfa3b703aa7",
+       "snippetHashes": [
+        "b233fd4c1b470feb",
+        "2845df7c988e5c01",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/hooks",
+       "rank": 3,
+       "title": "Built-in React Hooks – React",
+       "descriptionHash": "89c21d69c18840b9",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 4,
+       "title": "Reusing Logic with Custom Hooks – React",
+       "descriptionHash": "dc11991dc97e2ed6",
+       "snippetHashes": [
+        "bf0799d54069c06d",
+        "df82cb24457d9c89",
+        "47b757ea29385d84",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useDebugValue",
+       "rank": 5,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c7b9ecda3dff4001",
+       "snippetHashes": [
+        "d35f62a52a1280d3",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/lifecycle-of-reactive-effects",
+       "rank": 6,
+       "title": "Lifecycle of Reactive Effects – React",
+       "descriptionHash": "db770bd4fe504818",
+       "snippetHashes": [
+        "db770bd4fe504818",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component",
+       "rank": 7,
+       "title": "Component – React",
+       "descriptionHash": "8b53c2339185a4c9",
+       "snippetHashes": [
+        "5959a4831c33e621",
+        "71adeb2627ea101e",
+        "c5003ceea468052e",
+        "1a095626e6a74826"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/29/react-v18",
+       "rank": 8,
+       "title": "React v18.0 – React",
+       "descriptionHash": "93e70e85c5b290b5",
+       "snippetHashes": [
+        "5ea8203cb90fb4a1",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2022/03/08/react-18-upgrade-guide",
+       "rank": 9,
+       "title": "How to Upgrade to React 18 – React",
+       "descriptionHash": "88fc8d8f06fa0ea9",
+       "snippetHashes": [
+        "88fc8d8f06fa0ea9",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/Component.md",
+       "rank": 10,
+       "title": "https://react.dev/reference/react/Component.md",
+       "descriptionHash": "dc471e7dee0ca691",
+       "snippetHashes": [
+        "45441239efdc8ea0",
+        "587b19c5c82c6de8",
+        "2e809ff1394dbc3b",
+        "93422e44614b3561"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/you-might-not-need-an-effect.md",
+       "rank": 11,
+       "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+       "descriptionHash": "89891662c3740d89",
+       "snippetHashes": [
+        "7f506e9144799b97",
+        "73dc0713a2453280"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect",
+       "rank": 12,
+       "title": "useEffect – React",
+       "descriptionHash": "4041582d2c7a5135",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/blog/2025/04/23/react-labs-view-transitions-activity-and-more",
+       "rank": 13,
+       "title": "React Labs: View Transitions, Activity, and more – React",
+       "descriptionHash": "e01d01b929a7ddb8",
+       "snippetHashes": [
+        "4691cc41a1dac08a",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/use",
+       "rank": 14,
+       "title": "use – React",
+       "descriptionHash": "9883ad65263d270d",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps",
+       "rank": 15,
+       "title": "exhaustive-deps – React",
+       "descriptionHash": "e6b608c58b9000d6",
+       "snippetHashes": [
+        "e6b608c58b9000d6",
+        "02d542343f719220"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useLayoutEffect",
+       "rank": 16,
+       "title": "useLayoutEffect – React",
+       "descriptionHash": "684b8ea41562bdc3",
+       "snippetHashes": [
+        "02d542343f719220"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "exa",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 20,
+     "usage": {
+      "microUsd": 17000,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+       "rank": 2,
+       "title": "",
+       "descriptionHash": "be5f7d5d0552d4b4",
+       "snippetHashes": [
+        "be5f7d5d0552d4b4"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://uk.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/escape-hatches",
+       "rank": 5,
+       "title": "",
+       "descriptionHash": "71988b4ab2ceeded",
+       "snippetHashes": [
+        "71988b4ab2ceeded"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/synchronizing-with-effects",
+       "rank": 6,
+       "title": "",
+       "descriptionHash": "060fa375e38b607e",
+       "snippetHashes": [
+        "060fa375e38b607e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://he.react.dev/reference/react/useSyncExternalStore",
+       "rank": 7,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "cef6de11173e90ad",
+       "snippetHashes": [
+        "cef6de11173e90ad"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://de.react.dev/reference/react/useSyncExternalStore",
+       "rank": 8,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/reference/react/useSyncExternalStore",
+       "rank": 9,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "f93bf31e920492d1",
+       "snippetHashes": [
+        "f93bf31e920492d1"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useEffect.md",
+       "rank": 10,
+       "title": "",
+       "descriptionHash": "30fb49ff197bc7b2",
+       "snippetHashes": [
+        "30fb49ff197bc7b2"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pl.react.dev/reference/react/useSyncExternalStore",
+       "rank": 11,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "b80f367a935d1f8f",
+       "snippetHashes": [
+        "b80f367a935d1f8f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ru.react.dev/reference/react/useSyncExternalStore",
+       "rank": 12,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "754aaf1104fa9884",
+       "snippetHashes": [
+        "754aaf1104fa9884"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://az.react.dev/reference/react/useSyncExternalStore",
+       "rank": 13,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "ce13ece5d507a834",
+       "snippetHashes": [
+        "ce13ece5d507a834"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 14,
+       "title": "",
+       "descriptionHash": "9d6f5227afec6b5c",
+       "snippetHashes": [
+        "9d6f5227afec6b5c"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://es.react.dev/reference/react/useSyncExternalStore",
+       "rank": 15,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "63cfd3eb6aea352e",
+       "snippetHashes": [
+        "63cfd3eb6aea352e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 16,
+       "title": "",
+       "descriptionHash": "80483393426a278f",
+       "snippetHashes": [
+        "80483393426a278f"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useSyncExternalStore",
+       "rank": 17,
+       "title": "",
+       "descriptionHash": "94f4a6f5abcfb000",
+       "snippetHashes": [
+        "94f4a6f5abcfb000"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 18,
+       "title": "",
+       "descriptionHash": "59fc53d48d486069",
+       "snippetHashes": [
+        "59fc53d48d486069"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://ja.react.dev/reference/react/useSyncExternalStore",
+       "rank": 19,
+       "title": "",
+       "descriptionHash": "c200f6aa4ac5478e",
+       "snippetHashes": [
+        "c200f6aa4ac5478e"
+       ],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/learn/state-as-a-snapshot",
+       "rank": 20,
+       "title": "",
+       "descriptionHash": "dc8b2f97d475920f",
+       "snippetHashes": [
+        "dc8b2f97d475920f"
+       ],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "deepseek",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 14,
+     "usage": {
+      "microUsd": 750,
+      "basis": "documented"
+     },
+     "candidates": [
+      {
+       "url": "https://18.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "402b214a60c009ee",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React 中文文档",
+       "descriptionHash": "ac7a3cf499e23909",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 3,
+       "title": "",
+       "descriptionHash": "09d16fb8d052c1b0",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore.md",
+       "rank": 4,
+       "title": "",
+       "descriptionHash": "d381d0e357fd922f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://vi.react.dev/community/videos",
+       "rank": 5,
+       "title": "React Videos – React",
+       "descriptionHash": "65d8eefef9b6d8b5",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://fr.react.dev/community/videos",
+       "rank": 6,
+       "title": "Vidéos React – React",
+       "descriptionHash": "a70bd5a1c1ebd491",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://ar.react.dev/reference/react/useDebugValue",
+       "rank": 7,
+       "title": "useDebugValue – React",
+       "descriptionHash": "c376fc0b9626d54f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/reference/react/useDebugValue",
+       "rank": 8,
+       "title": "useDebugValue – React 中文文档",
+       "descriptionHash": "442ea91ced59b9d6",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://zh-hans.react.dev/learn/escape-hatches",
+       "rank": 9,
+       "title": "脱围机制（Escape Hatches） – React 中文文档",
+       "descriptionHash": "b2fa5d099d628baa",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://tr.react.dev/learn/escape-hatches",
+       "rank": 10,
+       "title": "Kaçış Yolları – React",
+       "descriptionHash": "94a41d7f2db4ab89",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-client-rendering-apis",
+       "rank": 11,
+       "title": "Come passare a React 18 – React",
+       "descriptionHash": "2f72fe4b868c44bc",
+       "snippetHashes": [],
+       "publication": {
+        "at": "2022-03-07T16:00:00.000Z",
+        "basis": "provider_estimate",
+        "meaning": "published"
+       }
+      },
+      {
+       "url": "https://fr.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 12,
+       "title": "Vous n’avez pas forcément besoin d’un Effet – React",
+       "descriptionHash": "45a4af0d125a5239",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/escape-hatches",
+       "rank": 13,
+       "title": "Saídas de Emergência – React",
+       "descriptionHash": "7688c5e834ff4982",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/learn/you-might-not-need-an-effect#subscribing-to-an-external-store",
+       "rank": 14,
+       "title": "Talvez você não precise de um Effect – React",
+       "descriptionHash": "31e01152a299e164",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "tavily",
+     "kind": "search",
+     "status": "success_results",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 5,
+     "usage": {
+      "credits": 2,
+      "basis": "provider_reported"
+     },
+     "candidates": [
+      {
+       "url": "https://vi.react.dev/reference/react/useSyncExternalStore",
+       "rank": 1,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "fa31e9c55c62ea06",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+       "rank": 2,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "00ee2825d282c8ec",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/useSyncExternalStore",
+       "rank": 3,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "3e4adeb512b3640f",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+       "rank": 4,
+       "title": "useSyncExternalStore – React",
+       "descriptionHash": "84a84e0a169a4759",
+       "snippetHashes": [],
+       "publication": null
+      },
+      {
+       "url": "https://react.dev/reference/react/cache",
+       "rank": 5,
+       "title": "cache – React",
+       "descriptionHash": "78e095a23f4c9e17",
+       "snippetHashes": [],
+       "publication": null
+      }
+     ]
+    },
+    {
+     "provider": "context7",
+     "kind": "search",
+     "status": "skipped",
+     "reason": "not_configured",
+     "detail": "adapter_missing",
+     "fromCache": false,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": null,
+     "usage": null,
+     "candidates": []
+    },
+    {
+     "provider": "ref",
+     "kind": "search",
+     "status": "success_empty",
+     "reason": null,
+     "detail": null,
+     "fromCache": true,
+     "durationMs": 0,
+     "dispatchState": "not_sent",
+     "resultCount": 0,
+     "usage": {
+      "credits": 1,
+      "basis": "documented"
+     },
+     "candidates": []
+    }
+   ],
+   "top20": [
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore",
+     "descriptionHash": "c05a972a84633148",
+     "providers": [
+      [
+       "serper",
+       1
+      ],
+      [
+       "brave",
+       1
+      ],
+      [
+       "exa",
+       1
+      ],
+      [
+       "tavily",
+       3
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "3def2a1e3a920908"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "6f7dc4e95d6aafc5"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7ce2e091722b5d7d"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 1,
+      "semantic": 1
+     },
+     "score": 0.9672765624999999,
+     "semantic": {
+      "relevance": 3.75,
+      "directness": 0.95,
+      "evidence": 0.95
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       3
+      ],
+      [
+       "deepseek",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 3,
+      "semantic": 2
+     },
+     "score": 0.8258637817460317,
+     "semantic": {
+      "relevance": 3.78,
+      "directness": 0.94,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "00ee2825d282c8ec",
+     "providers": [
+      [
+       "exa",
+       18
+      ],
+      [
+       "tavily",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 5,
+      "semantic": 3
+     },
+     "score": 0.7975337662841191,
+     "semantic": {
+      "relevance": 3.75,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://it.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "84a84e0a169a4759",
+     "providers": [
+      [
+       "exa",
+       16
+      ],
+      [
+       "tavily",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 6,
+      "semantic": 4
+     },
+     "score": 0.7747617242324562,
+     "semantic": {
+      "relevance": 3.65,
+      "directness": 0.92,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://uk.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       4
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 12,
+      "semantic": 5
+     },
+     "score": 0.70790915625,
+     "semantic": {
+      "relevance": 3.83,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React 中文文档",
+     "descriptionHash": "ac7a3cf499e23909",
+     "providers": [
+      [
+       "exa",
+       14
+      ],
+      [
+       "deepseek",
+       2
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 4,
+      "semantic": 6
+     },
+     "score": 0.7060378835912525,
+     "semantic": {
+      "relevance": 3.27,
+      "directness": 0.84,
+      "evidence": 0.87
+     }
+    },
+    {
+     "canonicalUrl": "https://de.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 23,
+      "semantic": 7
+     },
+     "score": 0.6896700061274511,
+     "semantic": {
+      "relevance": 3.79,
+      "directness": 0.93,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/reusing-logic-with-custom-hooks",
+     "title": "",
+     "descriptionHash": "be5f7d5d0552d4b4",
+     "providers": [
+      [
+       "brave",
+       4
+      ],
+      [
+       "exa",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "bf0799d54069c06d"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "df82cb24457d9c89"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "47b757ea29385d84"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 2,
+      "semantic": 8
+     },
+     "score": 0.6569737499999999,
+     "semantic": {
+      "relevance": 2.61,
+      "directness": 0.55,
+      "evidence": 0.9
+     }
+    },
+    {
+     "canonicalUrl": "https://ar.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "94f4a6f5abcfb000",
+     "providers": [
+      [
+       "exa",
+       17
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 46,
+      "semantic": 9
+     },
+     "score": 0.628213445887446,
+     "semantic": {
+      "relevance": 3.6,
+      "directness": 0.95,
+      "evidence": 0.98
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect.md",
+     "title": "--- title: 'You Might Not Need an Effect' --- <Intro>",
+     "descriptionHash": "89891662c3740d89",
+     "providers": [
+      [
+       "brave",
+       11
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "7f506e9144799b97"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "73dc0713a2453280"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 33,
+      "semantic": 11
+     },
+     "score": 0.6035012852112676,
+     "semantic": {
+      "relevance": 3.56,
+      "directness": 0.82,
+      "evidence": 0.97
+     }
+    },
+    {
+     "canonicalUrl": "https://ja.react.dev/reference/react/useSyncExternalStore",
+     "title": "",
+     "descriptionHash": "c200f6aa4ac5478e",
+     "providers": [
+      [
+       "exa",
+       19
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 47,
+      "semantic": 12
+     },
+     "score": 0.5740532974683544,
+     "semantic": {
+      "relevance": 3.48,
+      "directness": 0.89,
+      "evidence": 0.88
+     }
+    },
+    {
+     "canonicalUrl": "https://vi.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "fa31e9c55c62ea06",
+     "providers": [
+      [
+       "tavily",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 7,
+      "semantic": 10
+     },
+     "score": 0.616352,
+     "semantic": {
+      "relevance": 3.48,
+      "directness": 0.87,
+      "evidence": 0.96
+     }
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/learn/you-might-not-need-an-effect",
+     "title": "Talvez você não precise de um Effect – React",
+     "descriptionHash": "31e01152a299e164",
+     "providers": [
+      [
+       "deepseek",
+       14
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 41,
+      "semantic": 14
+     },
+     "score": 0.5184154386261262,
+     "semantic": {
+      "relevance": 2.99,
+      "directness": 0.75,
+      "evidence": 0.93
+     }
+    },
+    {
+     "canonicalUrl": "https://18.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "402b214a60c009ee",
+     "providers": [
+      [
+       "deepseek",
+       1
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 8,
+      "semantic": 13
+     },
+     "score": 0.5424708333333333,
+     "semantic": {
+      "relevance": 3.2,
+      "directness": 0.82,
+      "evidence": 0.82
+     }
+    },
+    {
+     "canonicalUrl": "https://es.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "63cfd3eb6aea352e",
+     "providers": [
+      [
+       "exa",
+       15
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 43,
+      "semantic": 18
+     },
+     "score": 0.4384639027777778,
+     "semantic": {
+      "relevance": 2.65,
+      "directness": 0.55,
+      "evidence": 0.74
+     }
+    },
+    {
+     "canonicalUrl": "https://ko.react.dev/reference/react/useSyncExternalStore.md",
+     "title": "",
+     "descriptionHash": "09d16fb8d052c1b0",
+     "providers": [
+      [
+       "deepseek",
+       3
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 11,
+      "semantic": 19
+     },
+     "score": 0.43625291269841265,
+     "semantic": {
+      "relevance": 2.48,
+      "directness": 0.4,
+      "evidence": 0.72
+     }
+    },
+    {
+     "canonicalUrl": "https://zh-hans.react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React 中文文档",
+     "descriptionHash": "442ea91ced59b9d6",
+     "providers": [
+      [
+       "deepseek",
+       8
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 24,
+      "semantic": 20
+     },
+     "score": 0.4004499411764706,
+     "semantic": {
+      "relevance": 2.26,
+      "directness": 0.26,
+      "evidence": 0.84
+     }
+    },
+    {
+     "canonicalUrl": "https://fr.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore – React",
+     "descriptionHash": "f93bf31e920492d1",
+     "providers": [
+      [
+       "exa",
+       9
+      ]
+     ],
+     "passages": [],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 26,
+      "semantic": 21
+     },
+     "score": 0.3803237807971015,
+     "semantic": {
+      "relevance": 2.17,
+      "directness": 0.27,
+      "evidence": 0.64
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/learn/you-might-not-need-an-effect",
+     "title": "You Might Not Need an Effect – React",
+     "descriptionHash": "63edccfa3b703aa7",
+     "providers": [
+      [
+       "brave",
+       2
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "b233fd4c1b470feb"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "2845df7c988e5c01"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 9,
+      "semantic": 22
+     },
+     "score": 0.3735524274193548,
+     "semantic": {
+      "relevance": 1.91,
+      "directness": 0.2,
+      "evidence": 0.62
+     }
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useDebugValue",
+     "title": "useDebugValue – React",
+     "descriptionHash": "c7b9ecda3dff4001",
+     "providers": [
+      [
+       "brave",
+       5
+      ]
+     ],
+     "passages": [
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "d35f62a52a1280d3"
+      },
+      {
+       "kind": "provider_snippet",
+       "provider": "brave",
+       "textHash": "02d542343f719220"
+      }
+     ],
+     "documentation": null,
+     "ranks": {
+      "presemantic": 13,
+      "semantic": 23
+     },
+     "score": 0.3449500961538462,
+     "semantic": {
+      "relevance": 1.52,
+      "directness": 0.13,
+      "evidence": 0.76
+     }
+    }
+   ],
+   "divergence": []
+  },
+  "A": {
+   "source": "legacy_request",
+   "unmatched": "legacy query carries site: operators",
+   "query": "useSyncExternalStore subscribe getSnapshot site:react.dev",
+   "results": [
+    {
+     "url": "https://react.dev/reference/react/useSyncExternalStore",
+     "rank": 1,
+     "title": "useSyncExternalStore",
+     "descriptionHash": "328eff7cf7ced68d"
+    },
+    {
+     "url": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+     "rank": 2,
+     "title": "useSyncExternalStore",
+     "descriptionHash": "b02e899e5cb29bab"
+    },
+    {
+     "url": "https://vi.react.dev/reference/react/useSyncExternalStore",
+     "rank": 3,
+     "title": "useSyncExternalStore",
+     "descriptionHash": "a053d38b9aafef8d"
+    },
+    {
+     "url": "https://it.react.dev/reference/react/useSyncExternalStore",
+     "rank": 4,
+     "title": "useSyncExternalStore",
+     "descriptionHash": "175f0a0b988419f0"
+    },
+    {
+     "url": "https://react.dev/reference/react/cache",
+     "rank": 5,
+     "title": "cache",
+     "descriptionHash": "5aed76f17828fdcd"
+    }
+   ],
+   "top": [
+    {
+     "canonicalUrl": "https://react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore"
+    },
+    {
+     "canonicalUrl": "https://pt-br.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore"
+    },
+    {
+     "canonicalUrl": "https://vi.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore"
+    },
+    {
+     "canonicalUrl": "https://it.react.dev/reference/react/useSyncExternalStore",
+     "title": "useSyncExternalStore"
+    },
+    {
+     "canonicalUrl": "https://react.dev/reference/react/cache",
+     "title": "cache"
+    }
+   ]
+  }
+ },
+ "ledgerBasis": "reservations_created_during_query",
+ "ledger": [
+  {
+   "provider": "brave",
+   "kind": "search",
+   "unit": "requests",
+   "state": "SETTLED",
+   "n": 1,
+   "actual": 1,
+   "reserved": 1
+  },
+  {
+   "provider": "context7",
+   "kind": "docs_search",
+   "unit": "requests",
+   "state": "SETTLED",
+   "n": 1,
+   "actual": 1,
+   "reserved": 1
+  },
+  {
+   "provider": "deepseek",
+   "kind": "search",
+   "unit": "micro_usd",
+   "state": "SETTLED",
+   "n": 1,
+   "actual": 750,
+   "reserved": 750
+  },
+  {
+   "provider": "exa",
+   "kind": "search",
+   "unit": "micro_usd",
+   "state": "SETTLED",
+   "n": 1,
+   "actual": 17000,
+   "reserved": 37000
+  },
+  {
+   "provider": "openrouter",
+   "kind": "decision",
+   "unit": "micro_usd",
+   "state": "SETTLED",
+   "n": 12,
+   "actual": 1891,
+   "reserved": 7026
+  },
+  {
+   "provider": "ref",
+   "kind": "docs_search",
+   "unit": "credits",
+   "state": "SETTLED",
+   "n": 1,
+   "actual": 1,
+   "reserved": 1
+  },
+  {
+   "provider": "serper",
+   "kind": "search",
+   "unit": "credits",
+   "state": "SETTLED",
+   "n": 2,
+   "actual": 2,
+   "reserved": 2
+  },
+  {
+   "provider": "tavily",
+   "kind": "search",
+   "unit": "credits",
+   "state": "SETTLED",
+   "n": 1,
+   "actual": 2,
+   "reserved": 2
+  }
+ ]
+}

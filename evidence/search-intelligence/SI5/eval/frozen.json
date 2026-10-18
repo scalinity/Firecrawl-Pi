@@ -1,0 +1,123 @@
+{
+ "schema": "fcpi.si5-frozen/v1",
+ "repositoryCommit": "8598be40a3bc51abd634273b2d9923e895f2d6b5",
+ "versions": {
+  "normalizer": "si-normalize/1",
+  "ranker": "si-rank/1",
+  "rubric": "si-rubric/1",
+  "excerpt": "si-excerpt/1",
+  "classifier": "si-docs-detect/1",
+  "evidence": "si-evidence/1"
+ },
+ "weights": {
+  "serper": 1,
+  "brave": 1,
+  "exa": 1,
+  "deepseek": 1,
+  "tavily": 1,
+  "context7": 1,
+  "ref": 1,
+  "searxng": 0.75
+ },
+ "rrfK": 60,
+ "searchIntelligence": "03a21d7436b53bc50eb99f9457a08d4d3208f7e50a7402375de66d0de9cc1bae",
+ "searching": "e33ac03c21f6aa92be647e7ed61f96306c0ee34f37612692e554a7a9ca0a97ba",
+ "jev": {
+  "subject": "jev-1.14",
+  "model": "typesafe/jev-1.14"
+ },
+ "limits": {
+  "candidates": {
+   "serper": 10,
+   "general": 20,
+   "docsPerProvider": 12,
+   "searxng": 10,
+   "poolMax": 128,
+   "shortlistMax": 48,
+   "seedPerProvider": 4
+  },
+  "cacheSeconds": {
+   "success": 900,
+   "empty": 60,
+   "timeSensitive": 90,
+   "decision": 900
+  },
+  "discoveryMs": 12000,
+  "semanticMs": 8000
+ },
+ "files": {
+  "services/retrieval/src/acquire.mjs": "6e9c4c0ad1e2b3a8fcd35f44dffe2897b25de12d1951065beaae01c54b0fe14e",
+  "services/retrieval/src/admission.mjs": "a5b83990ea282148e2be2dcc6f3ab30fd575e0ba3953f084d1c416dfe0e2eaf0",
+  "services/retrieval/src/anthropic.mjs": "55102b634d40e51a6151f7fdbdccead7559b3d4ed5d2d32d7e4f18b2eddffb08",
+  "services/retrieval/src/browser.mjs": "f4c7b53b5263562e39964b8901455dcc4cd453ec5f2264eae26fa15164f56a3b",
+  "services/retrieval/src/budget.mjs": "6dff09e8989c3c7140c93ee779fc5107495e95f86c677fe851fdda75b859bf54",
+  "services/retrieval/src/enhanced.mjs": "9b96e80f312e532dd2ab8fb64a949d520390286a0bc9e3ebba7690558e835eaf",
+  "services/retrieval/src/extract.mjs": "4aa3e53c14c177fa2d8a07ad39072f0162ebc67c725b25ff5296b0e93b27dbbc",
+  "services/retrieval/src/httpfetch.mjs": "68a42f45fde6275fce3c2a99b5b5d87e49100be60c350e06384f39f122963981",
+  "services/retrieval/src/jsonschema.mjs": "3f3b5349c3169445a3acf60b22dfb82f732884f95ba03d0b79709a433f182a94",
+  "services/retrieval/src/parse.mjs": "cfa0c686e2b8b9eb98606a23cc1452b3f8fa1d5ec1750fa426e2745d8028458d",
+  "services/retrieval/src/policy.mjs": "f5420730b8f1e6f5e52a67a90c1dbafe12743a629030633d09b4b42b02e3f9e7",
+  "services/retrieval/src/provider.mjs": "88e52a27604edf7470d5f64ceddca5ff78b127fc2c74f35293fc0f72737ddfb5",
+  "services/retrieval/src/proxy.mjs": "ecac08b2105e1cfad31593b4e1cd57fe6dc346bda32f894e838a0040f506a116",
+  "services/retrieval/src/quality.mjs": "7ff582f1dff4945f6b0d275871bb5594c6c9c1d2230799969523140af6227fe6",
+  "services/retrieval/src/reconcile.mjs": "d3b1f7a5865d54575c4278f8dc5530e9c7c0dd24683d1f9fb7c56e0a24610c05",
+  "services/retrieval/src/residential.mjs": "5972c7b1516303b389b7ab186149ef730108b9c836d217fb7d4df2488a00301f",
+  "services/retrieval/src/resolve.mjs": "68e2894bb4976eff4bc250b19add2835a78292972088b31987fa842db1e239a5",
+  "services/retrieval/src/route.mjs": "6fffb34dacd0aad8cd855e8ae7e3bf82022fddcde07aa3d0d762b4fdc02d41b8",
+  "services/retrieval/src/search-intelligence/adapters/brave.mjs": "80c213ea5bbe1e5eecc618d76a593a70daa2159ca21f7bed07075a2075a41ad9",
+  "services/retrieval/src/search-intelligence/adapters/common.mjs": "218cc5101151dae02fd151ace9b7509fb20b1fe343a297ddbb5c5b6ae48f6083",
+  "services/retrieval/src/search-intelligence/adapters/context7.mjs": "31ab64cb809307a30de7f5909e1e5c94224e7fb717e6352933c834dd2154d0bc",
+  "services/retrieval/src/search-intelligence/adapters/deepseek.mjs": "187297d8625c2b51cc3abcf229410cbc132b016db0bc8134eb836c29468ac141",
+  "services/retrieval/src/search-intelligence/adapters/exa.mjs": "b4798f1b8a1a118dc5aaa7d136ddef282d5cc88e386444609b886e8a92aaf290",
+  "services/retrieval/src/search-intelligence/adapters/ref-bridge.mjs": "4bbadbab6e10560c849ae79519c3e816aa3c031de5a4808c033fa5721c8ec566",
+  "services/retrieval/src/search-intelligence/adapters/ref.mjs": "fa390763808edfa8c5c89c241001a8a8ae9f48250d9c188f3a4afbd2e95597fa",
+  "services/retrieval/src/search-intelligence/adapters/searxng.mjs": "61c646b80ceb16cae805b7e652b03f52f5e4674301f3442fba35fdc6df4828c4",
+  "services/retrieval/src/search-intelligence/adapters/serper.mjs": "9e6e7c648645f5b7accc4dd87f5413141f33875cc82f3e176a3e1ba576da9f06",
+  "services/retrieval/src/search-intelligence/adapters/tavily.mjs": "9e1157520190f7badd6e7627dbf9266b1f576a19afb4b4d8015b8c1980ae1092",
+  "services/retrieval/src/search-intelligence/availability.mjs": "7f302fdf1c81d8175380f80cf6b04a33e737831243bd9e241dbb6b74ed32fd53",
+  "services/retrieval/src/search-intelligence/contracts.mjs": "d7d3329d5fda80bb7d177d1f9b89c0ff758a22a7d970bd3e8445ef41ec775ea7",
+  "services/retrieval/src/search-intelligence/coordinator.mjs": "2b3d3a493f1dbc85219eb5e59b039c45e37a6827c0e16421881e9a12c04fe326",
+  "services/retrieval/src/search-intelligence/decisions.mjs": "dd5e148ea9e84e5137378a01146cf3f1c6dead3d303e59617306382de459cffa",
+  "services/retrieval/src/search-intelligence/documentation.mjs": "80370203d4a46368306eef4dfb5424e0a2d1cb19d06e3b3be7604f17b0c47350",
+  "services/retrieval/src/search-intelligence/evidence.mjs": "368fcc97dec7e4dbdb2aaac8788225a56cd3877a49210254c66c99b9ce3b1a4f",
+  "services/retrieval/src/search-intelligence/normalize.mjs": "827579aa287de9dde04d08bbf4d2d86795fc004a68d3331ff7c4c89c64d068ab",
+  "services/retrieval/src/search-intelligence/permits.mjs": "2b5e2b425afa4f0e9367916db57de88fb6df0f2d4c495785a8ed0c302dc2c82e",
+  "services/retrieval/src/search-intelligence/rank.mjs": "7361361b258d3001f16ba56aa78419e7fc72bbe5b61639a4a1ca65a7aecef1a2",
+  "services/retrieval/src/search-intelligence/telemetry.mjs": "3164a25dfcf199aba2b98dc0262b6346e8e56b84e918af828076606208dc0dbf",
+  "services/retrieval/src/search.mjs": "4841c56995aea7b91f3777659294e169bc29544bd8a18d2d68eea8a7d17bbeee",
+  "services/retrieval/src/serper.mjs": "38df7a3b5f54ed458df966534e98349cee59701c389214954e704312ef738692",
+  "services/retrieval/src/server.mjs": "82bb6888319c87c43b40f2713ef7ebc3301d56febad687ceb6558c1cb2207f94",
+  "services/retrieval/src/ssrf.mjs": "db36da5631248b9696d8487767bc7e7b8a5d0046e252c2ab34d7fde5183f86a2",
+  "services/retrieval/src/store.mjs": "0a33934f4c51aff0fceef8a65247e91c6d5b01ac3598373a85cba3ea35702dab",
+  "services/retrieval/src/webhook.mjs": "b6c0b16d2094de8cc72264f7c8423d22c6195bee5f8a11588f56c1d46d44c3e4",
+  "deploy/policies/egress.json": "d909cca441fa0f652b3262dff22ae2b88fb6b5ea6361970c7e2e442b8a431099",
+  "deploy/policies/budget.json": "39a2b726f7d93ff10f227f63564f7060151c6f6f2b401c6a502862d3d755a559",
+  "evidence/search-intelligence/SI0/corpus/corpus-v1.json": "b4ae2b8f79d9cd8a406dbded7345246985209280fa8c06ac2aa5c55cb913f724"
+ },
+ "frozenAt": "2026-10-18T01:36:04.993Z",
+ "collectorRevisions": [
+  {
+   "repositoryCommit": "8598be40a3bc51abd634273b2d9923e895f2d6b5",
+   "database": "postgres",
+   "fromQuery": "Q001",
+   "utc": "2026-10-18T01:36:04.993Z",
+   "files": {
+    "scripts/si5/collect.mjs": "677ad299584a6ee11c6537efb771cb9f8a640920fc9dea80afb97280ab7a7963",
+    "services/retrieval/package-lock.json": "bebbfe015ecd08fc2dda44a8b7311083de66b4dbe43c704f321481be041874d6",
+    "deploy/nuq-postgres/fcpi-retrieval-schema.sql": "d7f36bf94aa41d943ede3761b1b85677de956b784471b86a06c480c7e22a94e9"
+   }
+  },
+  {
+   "repositoryCommit": "fe923a7acee65a64a8103b4ffd3544d6a68f7a19",
+   "database": "fcpi_si5_eval",
+   "files": {
+    "scripts/si5/collect.mjs": "0f702219ca31698f4f81cc253aceeca7e298f8ec1eb2d746e885db2c72498370",
+    "services/retrieval/package-lock.json": "bebbfe015ecd08fc2dda44a8b7311083de66b4dbe43c704f321481be041874d6",
+    "deploy/nuq-postgres/fcpi-retrieval-schema.sql": "d7f36bf94aa41d943ede3761b1b85677de956b784471b86a06c480c7e22a94e9"
+   },
+   "fromQuery": "Q099",
+   "utc": "2026-10-18T03:38:53.103Z",
+   "reason": "SI5 review (DB1 W7/W8, CA1 C1/W2/W10/W12): replays no longer read through Ref or yield to D's live provider state; the collection moves to its own database, copied from the suites' database after Q098"
+  }
+ ]
+}

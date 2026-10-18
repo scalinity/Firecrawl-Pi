@@ -1,0 +1,873 @@
+{
+ "schema": "fcpi.si5-anchors/v1",
+ "author": {
+  "agent": "si5-anchors",
+  "model": "sonnet (Claude Sonnet 5.5), fresh context, blind to all system results",
+  "method": "independent primary-source identification from knowledge and WebSearch, blind to all system results"
+ },
+ "validation": {
+  "invalidUrls": 0,
+  "constraintViolations": 0,
+  "kept": 134,
+  "missingKeys": 0
+ },
+ "queries": {
+  "Q001": [
+   {
+    "url": "https://nextjs.org/docs/app/api-reference/functions/generate-metadata",
+    "kind": "official_docs",
+    "why": "generateMetadata API reference with async params and searchParams."
+   },
+   {
+    "url": "https://nextjs.org/docs/app/guides/upgrading/version-15",
+    "kind": "official_docs",
+    "why": "Next.js 15 upgrade guide stating params is now a Promise to await."
+   }
+  ],
+  "Q002": [
+   {
+    "url": "https://www.postgresql.org/docs/17/pgstatstatements.html",
+    "kind": "official_docs",
+    "why": "PostgreSQL 17 pg_stat_statements module page with configuration parameters."
+   }
+  ],
+  "Q004": [
+   {
+    "url": "https://docs.pydantic.dev/latest/migration/",
+    "kind": "official_docs",
+    "why": "Official Pydantic V2 migration guide covering validator changes."
+   },
+   {
+    "url": "https://docs.pydantic.dev/latest/concepts/validators/",
+    "kind": "official_docs",
+    "why": "field_validator with mode='before' and ValidationInfo."
+   }
+  ],
+  "Q005": [
+   {
+    "url": "https://docs.docker.com/compose/how-tos/startup-order/",
+    "kind": "official_docs",
+    "why": "Compose startup-order guide with depends_on service_healthy and healthcheck example."
+   },
+   {
+    "url": "https://docs.docker.com/reference/compose-file/services/",
+    "kind": "official_docs",
+    "why": "Compose file reference for long-form depends_on conditions and healthcheck."
+   }
+  ],
+  "Q006": [
+   {
+    "url": "https://docs.sqlalchemy.org/en/20/orm/queryguide/relationships.html",
+    "kind": "official_docs",
+    "why": "SQLAlchemy 2.0 relationship loading techniques including joinedload and unique()."
+   }
+  ],
+  "Q007": [
+   {
+    "url": "https://docs.rs/tokio/latest/tokio/macro.select.html",
+    "kind": "official_docs",
+    "why": "tokio::select! macro docs with the Cancellation safety section."
+   }
+  ],
+  "Q009": [
+   {
+    "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.service.html",
+    "kind": "official_docs",
+    "why": "systemd.service man page documenting Restart= values."
+   },
+   {
+    "url": "https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html",
+    "kind": "official_docs",
+    "why": "systemd.unit man page documenting StartLimitIntervalSec/StartLimitBurst in [Unit]."
+   }
+  ],
+  "Q010": [
+   {
+    "url": "https://v6.vite.dev/guide/migration",
+    "kind": "official_docs",
+    "why": "Vite 6 'Migration from v5' guide."
+   }
+  ],
+  "Q011": [
+   {
+    "url": "https://github.com/ggml-org/llama.cpp",
+    "kind": "repository",
+    "why": "Official llama.cpp repository."
+   }
+  ],
+  "Q012": [
+   {
+    "url": "https://github.com/pgvector/pgvector/blob/master/src/hnswbuild.c",
+    "kind": "repository",
+    "why": "HNSW index build source file in the pgvector repository."
+   }
+  ],
+  "Q014": [
+   {
+    "url": "https://github.com/microsoft/TypeScript/issues/34933",
+    "kind": "issue",
+    "why": "microsoft/TypeScript issue titled with the TS2589 'excessively deep' message."
+   },
+   {
+    "url": "https://github.com/microsoft/TypeScript/issues/53514",
+    "kind": "issue",
+    "why": "microsoft/TypeScript issue reporting TS2589 regression with instantiation-limit discussion."
+   }
+  ],
+  "Q015": [
+   {
+    "url": "https://github.com/modelcontextprotocol/typescript-sdk",
+    "kind": "repository",
+    "why": "Official MCP TypeScript SDK repository."
+   }
+  ],
+  "Q016": [
+   {
+    "url": "https://redis.io/blog/agplv3/",
+    "kind": "announcement",
+    "why": "Redis announcement of the AGPLv3 license option with Redis 8."
+   },
+   {
+    "url": "https://github.com/redis/redis/releases/tag/8.0.0",
+    "kind": "release",
+    "why": "Redis 8.0.0 release page."
+   }
+  ],
+  "Q017": [
+   {
+    "url": "https://github.com/huggingface/transformers/issues/5421",
+    "kind": "issue",
+    "why": "Issue quoting this exact weights-not-used warning with explanation of when it is expected."
+   }
+  ],
+  "Q019": [
+   {
+    "url": "https://docs.rs/grep-searcher/latest/grep_searcher/struct.BinaryDetection.html",
+    "kind": "official_docs",
+    "why": "grep-searcher BinaryDetection modes (quit vs convert, NUL byte)."
+   },
+   {
+    "url": "https://github.com/BurntSushi/ripgrep/blob/master/GUIDE.md",
+    "kind": "repository",
+    "why": "ripgrep guide section on binary data and --text/--binary flags."
+   }
+  ],
+  "Q020": [
+   {
+    "url": "https://github.com/pytorch/pytorch/issues/77764",
+    "kind": "issue",
+    "why": "General MPS op coverage tracking issue in pytorch/pytorch."
+   },
+   {
+    "url": "https://github.com/pytorch/pytorch/issues/141287",
+    "kind": "issue",
+    "why": "Successor MPS operator coverage tracking issue (2.6+)."
+   }
+  ],
+  "Q021": [
+   {
+    "url": "https://www.rfc-editor.org/rfc/rfc9114.html",
+    "kind": "standard",
+    "why": "RFC 9114 HTTP/3 describing per-stream QUIC mapping avoiding TCP head-of-line blocking."
+   },
+   {
+    "url": "https://www.rfc-editor.org/rfc/rfc9000.html",
+    "kind": "standard",
+    "why": "RFC 9000 QUIC transport with independent streams and loss recovery."
+   }
+  ],
+  "Q022": [
+   {
+    "url": "https://nginx.org/en/docs/http/websocket.html",
+    "kind": "official_docs",
+    "why": "nginx WebSocket proxying page with proxy_http_version 1.1 and Upgrade/Connection headers."
+   }
+  ],
+  "Q024": [
+   {
+    "url": "https://nodejs.org/api/dns.html",
+    "kind": "official_docs",
+    "why": "Node.js dns docs including dns.setDefaultResultOrder and verbatim result order."
+   }
+  ],
+  "Q025": [
+   {
+    "url": "https://grpc.io/docs/guides/deadlines/",
+    "kind": "official_docs",
+    "why": "gRPC deadlines guide covering propagation and DEADLINE_EXCEEDED."
+   },
+   {
+    "url": "https://github.com/grpc/grpc/blob/master/doc/PROTOCOL-HTTP2.md",
+    "kind": "standard",
+    "why": "gRPC over HTTP/2 protocol spec defining the grpc-timeout header."
+   }
+  ],
+  "Q026": [
+   {
+    "url": "https://www.rfc-editor.org/rfc/rfc8446.html",
+    "kind": "standard",
+    "why": "RFC 8446 TLS 1.3 with 0-RTT early data replay discussion."
+   },
+   {
+    "url": "https://nginx.org/en/docs/http/ngx_http_ssl_module.html",
+    "kind": "official_docs",
+    "why": "nginx ssl_early_data directive (default off)."
+   }
+  ],
+  "Q027": [
+   {
+    "url": "https://requests.readthedocs.io/en/latest/user/advanced/",
+    "kind": "official_docs",
+    "why": "Requests advanced usage: SSL cert verification, certifi, REQUESTS_CA_BUNDLE."
+   }
+  ],
+  "Q029": [
+   {
+    "url": "https://caddyserver.com/docs/automatic-https",
+    "kind": "official_docs",
+    "why": "Caddy automatic HTTPS documentation."
+   },
+   {
+    "url": "https://doc.traefik.io/traefik/https/acme/",
+    "kind": "official_docs",
+    "why": "Traefik ACME/Let's Encrypt automatic certificate documentation."
+   }
+  ],
+  "Q030": [
+   {
+    "url": "https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/",
+    "kind": "standard",
+    "why": "The OAuth 2.1 Internet-Draft."
+   }
+  ],
+  "Q031": [
+   {
+    "url": "https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/sample_utils.py",
+    "kind": "repository",
+    "why": "make_sampler with temp/top_p in mlx-lm."
+   },
+   {
+    "url": "https://github.com/ml-explore/mlx-lm/releases",
+    "kind": "release",
+    "why": "mlx-lm release notes where the generate API change landed."
+   }
+  ],
+  "Q032": [
+   {
+    "url": "https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/convert.py",
+    "kind": "repository",
+    "why": "mlx_lm.convert CLI flags and defaults (q-bits 4, q-group-size 64)."
+   },
+   {
+    "url": "https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.quantize.html",
+    "kind": "official_docs",
+    "why": "mx.quantize docs on group-wise affine quantization with scales and biases."
+   }
+  ],
+  "Q034": [
+   {
+    "url": "https://ml-explore.github.io/mlx/build/html/python/_autosummary/mlx.core.fast.scaled_dot_product_attention.html",
+    "kind": "official_docs",
+    "why": "mx.fast.scaled_dot_product_attention signature and mask argument."
+   }
+  ],
+  "Q035": [
+   {
+    "url": "https://machinelearning.apple.com/research/exploring-llms-mlx-m5",
+    "kind": "announcement",
+    "why": "Apple ML research post on MLX LLM inference: first token compute-bound, generation bandwidth-bound, M5 bandwidth."
+   }
+  ],
+  "Q036": [
+   {
+    "url": "https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/SERVER.md",
+    "kind": "repository",
+    "why": "mlx_lm.server documentation of endpoints and request fields."
+   },
+   {
+    "url": "https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/server.py",
+    "kind": "repository",
+    "why": "mlx_lm.server implementation of /v1/chat/completions."
+   }
+  ],
+  "Q037": [
+   {
+    "url": "https://github.com/ml-explore/mlx-lm/blob/main/mlx_lm/LEARNED_QUANTS.md",
+    "kind": "repository",
+    "why": "mlx-lm learned quantization doc covering DWQ."
+   }
+  ],
+  "Q039": [
+   {
+    "url": "https://ml-explore.github.io/mlx/build/html/usage/compile.html",
+    "kind": "official_docs",
+    "why": "MLX compile usage guide: recompilation triggers and shapeless=True."
+   }
+  ],
+  "Q040": [
+   {
+    "url": "https://arxiv.org/abs/2511.05502",
+    "kind": "paper",
+    "why": "Comparative benchmark of MLX, llama.cpp and others on Apple Silicon (includes Ollama among runtimes)."
+   }
+  ],
+  "Q041": [
+   {
+    "url": "https://arxiv.org/abs/1706.03762",
+    "kind": "paper",
+    "why": "Attention Is All You Need."
+   }
+  ],
+  "Q042": [
+   {
+    "url": "https://arxiv.org/abs/2205.14135",
+    "kind": "paper",
+    "why": "FlashAttention paper."
+   }
+  ],
+  "Q044": [
+   {
+    "url": "https://arxiv.org/abs/2404.10102",
+    "kind": "paper",
+    "why": "Chinchilla Scaling: A replication attempt."
+   }
+  ],
+  "Q045": [
+   {
+    "url": "https://arxiv.org/abs/2106.09685",
+    "kind": "paper",
+    "why": "LoRA paper."
+   }
+  ],
+  "Q046": [
+   {
+    "url": "https://arxiv.org/abs/2210.17323",
+    "kind": "paper",
+    "why": "GPTQ paper."
+   },
+   {
+    "url": "https://arxiv.org/abs/2306.00978",
+    "kind": "paper",
+    "why": "AWQ paper."
+   }
+  ],
+  "Q047": [
+   {
+    "url": "https://www.science.org/doi/10.1126/science.aac4716",
+    "kind": "paper",
+    "why": "Open Science Collaboration, Science 2015."
+   }
+  ],
+  "Q049": [
+   {
+    "url": "https://arxiv.org/abs/2104.08663",
+    "kind": "paper",
+    "why": "BEIR benchmark paper."
+   }
+  ],
+  "Q050": [
+   {
+    "url": "https://www.usenix.org/conference/atc14/technical-sessions/presentation/ongaro",
+    "kind": "paper",
+    "why": "Raft paper at USENIX ATC 2014."
+   },
+   {
+    "url": "https://raft.github.io/raft.pdf",
+    "kind": "paper",
+    "why": "Raft paper PDF hosted on the official Raft site."
+   }
+  ],
+  "Q051": [
+   {
+    "url": "https://openai.com/index/introducing-gpt-oss/",
+    "kind": "announcement",
+    "why": "OpenAI gpt-oss announcement with license, sizes and release date."
+   },
+   {
+    "url": "https://arxiv.org/abs/2508.10925",
+    "kind": "paper",
+    "why": "gpt-oss-120b and gpt-oss-20b model card."
+   }
+  ],
+  "Q052": [
+   {
+    "url": "https://modelcontextprotocol.io/specification/2025-06-18/changelog",
+    "kind": "official_docs",
+    "why": "MCP 2025-06-18 key changes."
+   }
+  ],
+  "Q054": [
+   {
+    "url": "https://ai.meta.com/blog/llama-4-multimodal-intelligence/",
+    "kind": "announcement",
+    "why": "Meta Llama 4 announcement."
+   }
+  ],
+  "Q055": [
+   {
+    "url": "https://qwenlm.github.io/blog/qwen3/",
+    "kind": "announcement",
+    "why": "Qwen3 release blog with model sizes."
+   },
+   {
+    "url": "https://arxiv.org/abs/2505.09388",
+    "kind": "paper",
+    "why": "Qwen3 technical report."
+   }
+  ],
+  "Q056": [
+   {
+    "url": "https://docs.python.org/3.14/whatsnew/3.14.html",
+    "kind": "official_docs",
+    "why": "What's New In Python 3.14."
+   }
+  ],
+  "Q057": [
+   {
+    "url": "https://openai.com/index/introducing-gpt-5/",
+    "kind": "announcement",
+    "why": "OpenAI GPT-5 launch announcement."
+   },
+   {
+    "url": "https://openai.com/index/introducing-gpt-5-for-developers/",
+    "kind": "announcement",
+    "why": "GPT-5 for developers: API models gpt-5, mini, nano."
+   }
+  ],
+  "Q059": [
+   {
+    "url": "https://modelcontextprotocol.io/specification/2025-11-25/changelog",
+    "kind": "official_docs",
+    "why": "MCP 2025-11-25 key changes."
+   }
+  ],
+  "Q060": [
+   {
+    "url": "https://developers.googleblog.com/gemini-2-5-thinking-model-updates/",
+    "kind": "announcement",
+    "why": "Google announcement of Gemini 2.5 Pro stable general availability."
+   },
+   {
+    "url": "https://ai.google.dev/gemini-api/docs/pricing",
+    "kind": "official_docs",
+    "why": "Gemini API pricing with 200k-token thresholds."
+   }
+  ],
+  "Q061": [
+   {
+    "url": "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases",
+    "kind": "announcement",
+    "why": "Node.js security release pre-announcement dated 2026-10-14 (inside the window); it announces the 2026-10-21 releases."
+   }
+  ],
+  "Q062": [
+   {
+    "url": "https://www.python.org/downloads/release/python-3140/",
+    "kind": "official_docs",
+    "why": "python.org release page for Python 3.14.0, 2025-10-07."
+   },
+   {
+    "url": "https://discuss.python.org/t/python-3-14-0-final-is-here/104210",
+    "kind": "announcement",
+    "why": "Python 3.14.0 (final) release announcement posted 2025-10-07."
+   }
+  ],
+  "Q064": [
+   {
+    "url": "https://chromereleases.googleblog.com/2026/10/stable-channel-update-for-desktop_01886704284.html",
+    "kind": "announcement",
+    "why": "Chrome Releases desktop Stable update to 155.0.8059.84, dated 2026-10-15."
+   }
+  ],
+  "Q065": [
+   {
+    "url": "https://www.postgresql.org/about/news/postgresql-186-1711-1615-1519-1424-and-19-beta-3-released-3365/",
+    "kind": "announcement",
+    "why": "PostgreSQL 18.6/17.11/16.15/15.19/14.24 minor release announcement, 2026-08-13."
+   }
+  ],
+  "Q066": [
+   {
+    "url": "https://aws.amazon.com/message/101925/",
+    "kind": "announcement",
+    "why": "AWS post-event summary of the October 2025 us-east-1 DynamoDB DNS event."
+   }
+  ],
+  "Q067": [
+   {
+    "url": "https://blog.rust-lang.org/2026/10/01/Rust-1.99.0/",
+    "kind": "announcement",
+    "why": "Rust 1.99.0 announcement, 2026-10-01."
+   },
+   {
+    "url": "https://blog.rust-lang.org/2026/08/20/Rust-1.98.0/",
+    "kind": "announcement",
+    "why": "Rust 1.98.0 announcement, 2026-08-20."
+   }
+  ],
+  "Q069": [
+   {
+    "url": "https://github.blog/changelog/2026-10-16-open-source-license-compliance-generally-available/",
+    "kind": "announcement",
+    "why": "GitHub changelog entry dated 2026-10-16."
+   }
+  ],
+  "Q070": [
+   {
+    "url": "https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-schedule-of-reducing-validity-and-data-reuse-periods/",
+    "kind": "standard",
+    "why": "CA/Browser Forum ballot SC-081v3 page."
+   }
+  ],
+  "Q071": [
+   {
+    "url": "https://news.ycombinator.com/",
+    "kind": "official_docs",
+    "why": "Hacker News front page."
+   }
+  ],
+  "Q072": [],
+  "Q074": [
+   {
+    "url": "https://help.kobo.com/hc/en-us/articles/360017677053-Borrow-eBooks-from-the-public-library-using-your-Kobo-eReader",
+    "kind": "official_docs",
+    "why": "Kobo help on built-in OverDrive/Libby borrowing."
+   },
+   {
+    "url": "https://www.amazon.com/gp/help/customer/display.html?nodeId=GUWACXF9HENBXTQP",
+    "kind": "official_docs",
+    "why": "Amazon help on borrowing library books on Kindle."
+   }
+  ],
+  "Q075": [
+   {
+    "url": "https://www.energy.gov/energysaver/air-source-heat-pumps",
+    "kind": "official_docs",
+    "why": "US DOE overview of air-source heat pumps including cold-climate operation."
+   },
+   {
+    "url": "https://nrel.gov/docs/fy24osti/89413.pdf",
+    "kind": "paper",
+    "why": "NREL 2024 lab study of heat pump capacity and COP at cold outdoor temperatures."
+   }
+  ],
+  "Q076": [
+   {
+    "url": "https://tools.usps.com/go/TrackConfirmAction_input",
+    "kind": "official_docs",
+    "why": "Official USPS tracking page."
+   }
+  ],
+  "Q077": [
+   {
+    "url": "https://science.nasa.gov/saturn/moons/",
+    "kind": "official_docs",
+    "why": "NASA Saturn moons page with the confirmed moon count."
+   }
+  ],
+  "Q079": [
+   {
+    "url": "https://telegram.org/faq",
+    "kind": "official_docs",
+    "why": "Telegram FAQ: cloud chats versus end-to-end encrypted secret chats."
+   },
+   {
+    "url": "https://www.whatsapp.com/security/WhatsApp-Security-Whitepaper.pdf",
+    "kind": "official_docs",
+    "why": "WhatsApp security whitepaper describing default end-to-end encryption on the Signal Protocol."
+   }
+  ],
+  "Q080": [
+   {
+    "url": "https://www.nps.gov/state/ut/index.htm",
+    "kind": "official_docs",
+    "why": "NPS Utah parks page."
+   }
+  ],
+  "Q081": [
+   {
+    "url": "https://git-scm.com/docs/git-stash",
+    "kind": "official_docs",
+    "why": "git-stash documentation."
+   }
+  ],
+  "Q082": [
+   {
+    "url": "https://docs.python.org/3/faq/programming.html",
+    "kind": "official_docs",
+    "why": "Python FAQ on shared default argument values."
+   },
+   {
+    "url": "https://docs.python.org/3/tutorial/controlflow.html",
+    "kind": "official_docs",
+    "why": "Python tutorial warning on mutable defaults and the None idiom."
+   }
+  ],
+  "Q084": [
+   {
+    "url": "https://www.postgresql.org/docs/current/transaction-iso.html",
+    "kind": "official_docs",
+    "why": "PostgreSQL transaction isolation: repeatable read vs serializable."
+   },
+   {
+    "url": "https://wiki.postgresql.org/wiki/SSI",
+    "kind": "official_docs",
+    "why": "PostgreSQL Serializable Snapshot Isolation wiki with write skew examples."
+   }
+  ],
+  "Q085": [
+   {
+    "url": "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/FinalizationRegistry",
+    "kind": "official_docs",
+    "why": "MDN FinalizationRegistry with caveat that callbacks are not guaranteed."
+   },
+   {
+    "url": "https://github.com/tc39/proposal-weakrefs",
+    "kind": "repository",
+    "why": "TC39 WeakRefs and FinalizationRegistry proposal."
+   }
+  ],
+  "Q086": [
+   {
+    "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/X-Content-Type-Options",
+    "kind": "official_docs",
+    "why": "MDN X-Content-Type-Options: nosniff."
+   },
+   {
+    "url": "https://fetch.spec.whatwg.org/",
+    "kind": "standard",
+    "why": "Fetch Standard definition of nosniff blocking."
+   }
+  ],
+  "Q087": [],
+  "Q089": [
+   {
+    "url": "https://journals.sagepub.com/doi/10.1177/0956797614532657",
+    "kind": "paper",
+    "why": "Rosenbaum, Gong and Potts 2014, Pre-crastination, Psychological Science."
+   }
+  ],
+  "Q090": [
+   {
+    "url": "https://doc.rust-lang.org/error_codes/E0502.html",
+    "kind": "official_docs",
+    "why": "Rust error index entry for E0502."
+   },
+   {
+    "url": "https://doc.rust-lang.org/book/ch08-01-vectors.html",
+    "kind": "official_docs",
+    "why": "Rust book vectors chapter showing this borrow error when pushing while holding a reference."
+   }
+  ],
+  "Q091": [],
+  "Q092": [
+   {
+    "url": "https://react.dev/reference/react/use",
+    "kind": "official_docs",
+    "why": "React use API reference."
+   },
+   {
+    "url": "https://react.dev/blog/2024/12/05/react-19",
+    "kind": "announcement",
+    "why": "React 19 release post covering use."
+   }
+  ],
+  "Q094": [
+   {
+    "url": "https://doc.rust-lang.org/reference/lifetime-elision.html",
+    "kind": "official_docs",
+    "why": "Rust Reference lifetime elision rules."
+   },
+   {
+    "url": "https://doc.rust-lang.org/nomicon/lifetime-elision.html",
+    "kind": "official_docs",
+    "why": "Rustonomicon lifetime elision."
+   }
+  ],
+  "Q095": [
+   {
+    "url": "https://www.swiftcurrent.ca/about-us",
+    "kind": "official_docs",
+    "why": "City of Swift Current, Saskatchewan official page."
+   },
+   {
+    "url": "https://forums.swift.org/t/announcing-swift-6-4-1/90029",
+    "kind": "announcement",
+    "why": "Official announcement of the current Swift language release 6.4.1."
+   }
+  ],
+  "Q096": [
+   {
+    "url": "https://pkg.go.dev/context",
+    "kind": "official_docs",
+    "why": "Go context package documentation."
+   },
+   {
+    "url": "https://go.dev/blog/context",
+    "kind": "official_docs",
+    "why": "Go blog on context cancellation across goroutines."
+   }
+  ],
+  "Q097": [
+   {
+    "url": "https://guides.rubyonrails.org/active_record_migrations.html",
+    "kind": "official_docs",
+    "why": "Rails Active Record Migrations guide."
+   }
+  ],
+  "Q099": [
+   {
+    "url": "https://penguinrandomhouse.com/books/118718/9781400079278/readers-guide",
+    "kind": "official_docs",
+    "why": "Publisher reader's guide to Murakami's Kafka on the Shore."
+   }
+  ],
+  "Q100": [
+   {
+    "url": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.merge.html",
+    "kind": "official_docs",
+    "why": "DataFrame.merge reference."
+   },
+   {
+    "url": "https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.join.html",
+    "kind": "official_docs",
+    "why": "DataFrame.join reference."
+   }
+  ],
+  "Q101": [
+   {
+    "url": "https://www.openwall.com/lists/oss-security/2024/03/29/4",
+    "kind": "announcement",
+    "why": "Andres Freund's oss-security disclosure of the xz backdoor."
+   },
+   {
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2024-3094",
+    "kind": "official_docs",
+    "why": "NVD record for CVE-2024-3094."
+   }
+  ],
+  "Q102": [
+   {
+    "url": "https://www.crowdstrike.com/wp-content/uploads/2024/08/Channel-File-291-Incident-Root-Cause-Analysis-08.06.2024.pdf",
+    "kind": "announcement",
+    "why": "CrowdStrike Channel File 291 root cause analysis."
+   },
+   {
+    "url": "https://blogs.microsoft.com/blog/2024/07/20/helping-our-customers-through-the-crowdstrike-outage/",
+    "kind": "announcement",
+    "why": "Microsoft post estimating about 8.5 million affected Windows devices."
+   }
+  ],
+  "Q104": [
+   {
+    "url": "https://logging.apache.org/log4j/2.x/security.html",
+    "kind": "official_docs",
+    "why": "Apache Log4j security page for CVE-2021-44228 affected and fixed versions."
+   },
+   {
+    "url": "https://nvd.nist.gov/vuln/detail/CVE-2021-44228",
+    "kind": "official_docs",
+    "why": "NVD record for CVE-2021-44228."
+   }
+  ],
+  "Q105": [
+   {
+    "url": "https://www.gnu.org/software/tar/manual/tar.html",
+    "kind": "official_docs",
+    "why": "GNU tar manual covering -C/--directory."
+   }
+  ],
+  "Q106": [
+   {
+    "url": "https://doc.rust-lang.org/book/ch05-02-example-structs.html",
+    "kind": "official_docs",
+    "why": "Rust book chapter 5.2 on derived Debug and {:#?}."
+   }
+  ],
+  "Q107": [
+   {
+    "url": "https://www.openssl.org/news/secadv/20140407.txt",
+    "kind": "announcement",
+    "why": "OpenSSL security advisory for CVE-2014-0160."
+   },
+   {
+    "url": "https://heartbleed.com/",
+    "kind": "announcement",
+    "why": "Heartbleed vulnerability disclosure site."
+   }
+  ],
+  "Q109": [
+   {
+    "url": "https://requests.readthedocs.io/en/latest/user/quickstart/",
+    "kind": "official_docs",
+    "why": "Requests quickstart with r.json()."
+   }
+  ],
+  "Q110": [
+   {
+    "url": "https://12factor.net/config",
+    "kind": "official_docs",
+    "why": "Twelve-Factor App factor III Config."
+   }
+  ],
+  "Q111": [
+   {
+    "url": "https://docs.djangoproject.com/en/5.2/releases/5.2/",
+    "kind": "official_docs",
+    "why": "Django 5.2 release notes."
+   }
+  ],
+  "Q112": [
+   {
+    "url": "https://docs.python.org/2.7/library/urllib2.html",
+    "kind": "official_docs",
+    "why": "Python 2.7 urllib2 docs with urlopen timeout."
+   }
+  ],
+  "Q114": [
+   {
+    "url": "https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/",
+    "kind": "official_docs",
+    "why": "kubectl rollout restart reference."
+   },
+   {
+    "url": "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/",
+    "kind": "official_docs",
+    "why": "Deployment concept page with rolling update maxUnavailable/maxSurge."
+   }
+  ],
+  "Q115": [
+   {
+    "url": "https://v4.webpack.js.org/plugins/split-chunks-plugin/",
+    "kind": "official_docs",
+    "why": "webpack 4 SplitChunksPlugin docs."
+   }
+  ],
+  "Q116": [
+   {
+    "url": "https://pandas.pydata.org/docs/whatsnew/v2.0.0.html",
+    "kind": "official_docs",
+    "why": "pandas 2.0.0 release notes listing removal of DataFrame.append."
+   },
+   {
+    "url": "https://pandas.pydata.org/docs/whatsnew/v1.4.0.html",
+    "kind": "official_docs",
+    "why": "pandas 1.4.0 release notes with the append deprecation."
+   }
+  ],
+  "Q117": [],
+  "Q119": [],
+  "Q120": [
+   {
+    "url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket_acl",
+    "kind": "official_docs",
+    "why": "aws_s3_bucket_acl resource docs."
+   },
+   {
+    "url": "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/guides/version-4-upgrade",
+    "kind": "official_docs",
+    "why": "AWS provider version 4 upgrade guide describing the S3 bucket refactor."
+   }
+  ]
+ }
+}
