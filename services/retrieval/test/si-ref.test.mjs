@@ -128,6 +128,24 @@ test("a read whose deadline passes while it waits for capacity is never sent lat
   } finally { await h.close(); }
 });
 
+test("a read written and then stalled past its deadline is uncertain, one failure, and never resent", async () => {
+  const fx = refFixture({ tool: async (name, args) => {
+    if (name === "ref_read_url") await sleep(1500);
+    return name === "ref_search_documentation" ? refBlocks(["https://ref.example.org/docs/1", "https://ref.example.org/docs/2"]) : { content: [{ type: "text", text: `Excerpt of ${args.url}` }] };
+  } });
+  const h = await harness({ handlers: { ref: fx } });
+  try {
+    const o = await h.docs.ref.search(docsRequest("ref stalled read"), refCtx(h));
+    const reads = await Promise.all(["https://ref.example.org/docs/1", "https://ref.example.org/docs/2"].map((u) => o.lease.read(u, { signal: new AbortController().signal, deadlineAt: Date.now() + 400 })));
+    assert.deepEqual(reads.map((r) => [r.ok, r.reason, r.dispatchState]), Array(2).fill([false, "timeout", "possibly_sent"]), "the client's own timer fired after the requests were written");
+    assert.deepEqual(rows(h, "docs_read").map((x) => x.state), ["UNCERTAIN", "UNCERTAIN"], "written: held, never released");
+    assert.equal(h.dispatch.breakerState("fixture-ref"), "closed", "two stalls are two failures, below the threshold of three");
+    await sleep(1300);
+    assert.equal(calls(fx, "ref_read_url").length, 2, "each read was seen once: nothing was resent");
+    await o.lease.close();
+  } finally { await h.close(); }
+});
+
 test("a search about authentication errors is a billed success and leaves Ref available", async () => {
   const fx = refFixture({ tool: () => ({ content: [{ type: "text", text: "overview: Handle 401 Unauthorized responses with an interceptor\nurl: https://axios-http.com/docs/interceptors\nmoduleId: axios" }] }) });
   const h = await harness({ handlers: { ref: fx } });

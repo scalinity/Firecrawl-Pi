@@ -74,7 +74,7 @@ export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false
   const hold = (req, res) => { open.add(res); res.on("close", () => open.delete(res)); };
   const raw = async (req, res) => {
     const text = await readBody(req);
-    const entry = { method: req.method, session: req.headers["mcp-session-id"] ?? null, key: req.headers["x-ref-api-key"] ?? null, headers: req.headers, at: Date.now() };
+    const entry = { method: req.method, url: req.url, session: req.headers["mcp-session-id"] ?? null, key: req.headers["x-ref-api-key"] ?? null, headers: req.headers, at: Date.now() };
     log.push(entry);
     if (req.method === "GET") {
       if (!receiveStream) { res.writeHead(405); return res.end(); }
@@ -88,7 +88,7 @@ export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false
     if (msg.method === "initialize") {
       const a = initialize?.(entry);
       if (a?.delayMs) await new Promise((r) => setTimeout(r, a.delayMs));
-      if (a?.status) { res.writeHead(a.status); return res.end(); }
+      if (a?.status) { res.writeHead(a.status, a.headers ?? {}); return res.end(); }
       const id = `ref-session-${++n}`;
       sessions.set(id, { calls: [] });
       res.writeHead(200, { "content-type": "application/json", "mcp-session-id": id });
