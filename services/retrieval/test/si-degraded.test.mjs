@@ -1,10 +1,12 @@
 // SI5's degraded-operation matrix (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §23.3, F02): each general engine, Context7, Ref
 // and Jev made unconfigured, circuit-open, rate-limited, quota-exhausted, refused authentication, cut off, answered in an unknown
-// shape, validly empty, past its deadline, or cancelled, one at a time; then the combinations. Each cell asserts the search's
-// honest outcome, the provider's attributed reason, and that only a service failure can open a breaker.
+// shape, validly empty, past its deadline, or cancelled, one at a time (Serper's quota is its fixed allocation spent, refused by
+// the ledger); then the combinations, among them one validly empty provider with every other discovery provider failed,
+// documentation included. Each cell asserts the search's honest outcome, the provider's attributed reason, and that only a
+// service failure can open a breaker.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { harness, request, answers, json, refFixture } from "./si-helpers.mjs";
+import { harness, request, answers, json, refFixture, defaultRefTool } from "./si-helpers.mjs";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const delayed = (ms, a) => async (...x) => { await sleep(ms); return typeof a === "function" ? a(...x) : a; };
@@ -184,5 +186,68 @@ test("degraded combinations: both docs down, all engines down with and without S
     const asked = Object.fromEntries(Object.entries(h.servers).map(([p, s]) => [p, s.seen.length]));
     await sleep(2000);
     assert.deepEqual(Object.fromEntries(Object.entries(h.servers).map(([p, s]) => [p, s.seen.length])), asked, "no request after the cancellation");
+  } finally { await h.close(); }
+});
+
+test("degraded single cells: each documentation circuit, each lone provider cancelled, Serper's allocation spent, one empty among every failure", async () => {
+  const docs = { intelligence: { documentation: "required" } };
+  const c7ok = () => ({ status: 200, body: { codeSnippets: [{ libraryId: "/x/docs", codeTitle: "t", codeDescription: "d", codeLanguage: "js", codeList: [{ language: "js", code: "x()" }], codeId: "https://docs.example.org/x" }], infoSnippets: [] } });
+  const jevOk = (q, entry) => {
+    const a = {};
+    for (const [k, question] of Object.entries(entry.body.questions)) a[k] = question.type === "score" ? { type: "score", score: 2 } : question.type === "noul" ? { type: "noul", noul: 0.5 } : { type: "choice", choice: Object.keys(question.criteria)[0] };
+    return { status: 200, body: { model: "typesafe/jev-1.14-20261014", answers: a, usage: { input_tokens: 10, output_tokens: 1 } } };
+  };
+  // A circuit a service failure opened is each documentation provider's next exclusion, the other untouched. Every call of the
+  // first search fails, so no later success in it closes the breaker again.
+  for (const p of ["context7", "ref"]) {
+    let down = true;
+    const handlers = p === "context7" ? { context7: (...x) => (down ? "destroy" : c7ok(...x)), ref: refFixture() } : { context7: c7ok, ref: refFixture({ tool: (...x) => (down ? "destroy" : defaultRefTool(...x)) }) };
+    const h = await harness({ mutateBudget: oneFailure, handlers });
+    try {
+      await run(h, { ...docs, originalQuery: `${p} breaker one` });
+      down = false;
+      const s = (await run(h, { ...docs, originalQuery: `${p} breaker two` })).body.search;
+      assert.equal(missing(s, p)?.reason, "breaker_open", `${p}: circuit open`);
+      assert.equal(s.providers[p === "context7" ? "ref" : "context7"].status, "success_results", `${p}: the other documentation provider is unaffected`);
+      assert.equal(s.coverage.general.successful, 5, `${p}: the engines are unaffected`);
+    } finally { await h.close(); }
+  }
+  // The caller cancels while one provider alone is still answering: the search ends cancelled and that provider is asked
+  // nothing more (a Ref session's close is not a question; its tool calls are counted).
+  const ref = refFixture({ tool: delayed(1500, (...x) => defaultRefTool(...x)) });
+  for (const [p, handlers, over, wait, asked] of [
+    ["context7", { context7: delayed(1500, c7ok), ref: refFixture() }, docs, 150, (h) => h.servers.context7.seen.length],
+    ["ref", { context7: c7ok, ref }, docs, 150, () => ref.log.filter((e) => e.tool).length],
+    ["openrouter", { openrouter: delayed(1500, jevOk) }, {}, 500, (h) => h.servers.openrouter.seen.length]]) {
+    const h = await harness({ handlers });
+    try {
+      const ac = new AbortController();
+      const pending = run(h, { ...over, originalQuery: `cancel ${p}` }, ac.signal);
+      await sleep(wait);
+      assert.ok(asked(h) > 0, `${p}: it was asked before the cancellation`);
+      ac.abort();
+      await assert.rejects(pending, (e) => e.failureClass === "CANCELLED", `${p}: cancelled`);
+      const before = asked(h);
+      await sleep(2000);
+      assert.equal(asked(h), before, `${p}: no request after the cancellation`);
+    } finally { await h.close(); }
+  }
+  // Serper's fixed allocation spent (the ledger refuses its reservation): excluded as quota, nothing sent, the others answer.
+  let h = await harness();
+  const reserve = h.store.reserveBudget.bind(h.store);
+  h.store.reserveBudget = async (r) => (r.provider === "fixture-serper" ? { reservation: null } : reserve(r));
+  try {
+    const s = (await run(h, { originalQuery: "serper allocation spent" })).body.search;
+    assert.deepEqual([s.outcome, missing(s, "serper")?.reason, s.coverage.general.successful], ["partial", "quota_exhausted", 4]);
+    assert.equal(h.servers.serper.seen.length, 0, "nothing is sent past a spent allocation");
+    assert.equal(h.dispatch.breakerState("fixture-serper"), "closed");
+  } finally { await h.close(); }
+  // One validly empty engine with every other discovery provider failed, documentation active: an honest partial empty answer.
+  const down = () => "destroy";
+  h = await harness({ handlers: { serper: down, brave: down, exa: down, deepseek: down, tavily: GENERAL.tavily.empty, context7: down, ref: refFixture({ tool: () => "destroy" }) } });
+  try {
+    const s = (await run(h, docs)).body.search;
+    assert.deepEqual([s.outcome, s.empty, s.providers.tavily.status, s.coverage.general.successful, s.coverage.documentation.missing.map((m) => m.provider).sort()],
+      ["partial", true, "success_empty", 1, ["context7", "ref"]]);
   } finally { await h.close(); }
 });

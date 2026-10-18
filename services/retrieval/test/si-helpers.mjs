@@ -84,7 +84,7 @@ export const EXTRA_HOSTS = { context7: "context7.fixture.fcpi.test", ref: "ref.f
 
 // Ref's legacy text blocks (SI0 contract evidence §6) for the given URLs.
 export const refBlocks = (urls) => ({ content: urls.map((url, i) => ({ type: "text", text: `overview: Ref overview ${i + 1}\nurl: ${url}\nmoduleId: module-${i + 1}` })) });
-const defaultRefTool = (name, args) => name === "ref_search_documentation"
+export const defaultRefTool = (name, args) => name === "ref_search_documentation"
   ? refBlocks([1, 2, 3].map((i) => `https://ref.example.org/docs/${i}`))
   : { content: [{ type: "text", text: `Excerpt of ${args.url}: ${"documented behavior and parameters. ".repeat(12)}` }] };
 // A Ref fixture speaking Streamable HTTP MCP in the 2025 era, as the official client's default handshake expects: initialize
