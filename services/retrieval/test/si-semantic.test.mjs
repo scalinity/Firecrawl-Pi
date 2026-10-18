@@ -13,7 +13,7 @@ const text = (...t) => ({ content: t.map((x) => ({ type: "text", text: x })) });
 
 test("Ref: legacy result blocks are hits; the exact no-results sentinel is empty; error texts and unknown text are never hits or empties", () => {
   const ok = parseRefSearch(text("overview: How to stream\nurl: https://docs.example.com/stream#part\nmoduleId: example/docs", "overview: Second\nurl: https://docs.example.com/b\nmoduleId: "));
-  assert.deepEqual(ok, { kind: "results", docs: [{ url: "https://docs.example.com/stream#part", overview: "How to stream", moduleId: "example/docs" }, { url: "https://docs.example.com/b", overview: "Second", moduleId: "" }] });
+  assert.deepEqual(ok, { kind: "results", docs: [{ url: "https://docs.example.com/stream#part", overview: "How to stream", moduleId: "example/docs", title: "example/docs" }, { url: "https://docs.example.com/b", overview: "Second", moduleId: "", title: "Second" }] });
   assert.deepEqual(parseRefSearch(text(NO_RESULTS)), { kind: "empty" });
   assert.equal(parseRefSearch(text("No results found.")).kind, "contract", "only the exact sentinel is empty");
   assert.deepEqual(parseRefSearch(text("Please verify your email at https://ref.tools/dashboard to search documentation")), { kind: "error", reason: "auth_failed", detail: "ref_auth_text" });
@@ -45,17 +45,31 @@ test("Ref's block reader is linear: a large answer of unterminated overviews par
   assert.equal(parseRefSearch(text(big)).kind, "contract");
   assert.ok(performance.now() - t0 < 100, `240k characters took ${Math.round(performance.now() - t0)} ms`);
   const multi = parseRefSearch(text("overview: First line\nsecond line\nurl: not-a-pair\nurl: https://docs.example.com/m\nmoduleId: mod"));
-  assert.deepEqual(multi.docs, [{ url: "https://docs.example.com/m", overview: "First line\nsecond line\nurl: not-a-pair", moduleId: "mod" }]);
+  assert.deepEqual(multi.docs, [{ url: "https://docs.example.com/m", overview: "First line\nsecond line\nurl: not-a-pair", moduleId: "mod", title: "mod" }]);
 });
 
 test("Ref's hosted results are one block each, a description then the URL alone on the last line; an inline URL is not one", () => {
   const r = parseRefSearch(text("page='Example Guide | Docs' section='guide > state > declaring'\nhttps://docs.example.org/guide/state#declaring", "guide-state > declaring-state\nhttps://docs.example.org/guide/state.md#declaring"));
   assert.deepEqual(r, { kind: "results", docs: [
-    { url: "https://docs.example.org/guide/state#declaring", overview: "Example Guide | Docs — guide > state > declaring", moduleId: "Example Guide | Docs" },
-    { url: "https://docs.example.org/guide/state.md#declaring", overview: "guide-state > declaring-state", moduleId: "" }] });
+    { url: "https://docs.example.org/guide/state#declaring", overview: "Example Guide | Docs — guide > state > declaring", moduleId: "Example Guide | Docs", title: "Example Guide | Docs" },
+    { url: "https://docs.example.org/guide/state.md#declaring", overview: "guide-state > declaring-state", moduleId: "", title: "guide-state > declaring-state" }] });
   assert.equal(parseRefSearch(text("Something failed, see https://status.example.org")).kind, "contract", "a URL inside a sentence is no result");
   assert.equal(parseRefSearch(text("https://docs.example.org/only-a-url")).kind, "contract", "a URL with no description is no result");
   assert.equal(parseRefSearch(text("Error during documentation search: upstream\nhttps://docs.example.org/x")).kind, "error", "an error block quoting a URL is still an error");
+});
+
+test("Ref's hosted blocks need their own shape: a notice ending in a link is no result, a breadcrumb naming a refusal word is one", () => {
+  // Ref's hosted quota text is not documented; a two-line notice with a link must not settle as a billed answer.
+  assert.equal(parseRefSearch(text("Your plan has no searches left this month.\nhttps://ref.tools/pricing")).kind, "contract");
+  assert.equal(parseRefSearch(text("You are out of credits. Upgrade here:\nhttps://ref.tools/pricing")).kind, "contract", "an unrecognised refusal with a link fails closed");
+  assert.deepEqual(parseRefSearch(text("Out of credits. Upgrade here:\nhttps://ref.tools/pricing")), { kind: "error", reason: "quota_exhausted", detail: "ref_quota_text" }, "a documented refusal opening is still a refusal");
+  // A result whose breadcrumb starts with a refusal word is documentation, not a refusal of this account.
+  const crumb = parseRefSearch(text("unauthorized-errors > handling\nhttps://docs.example.org/errors#unauthorized"));
+  assert.deepEqual(crumb, { kind: "results", docs: [{ url: "https://docs.example.org/errors#unauthorized", overview: "unauthorized-errors > handling", moduleId: "", title: "unauthorized-errors > handling" }] });
+  // An apostrophe inside page='…' stays in the title, and a breadcrumb title is its whole first line, never cut at a dot.
+  assert.equal(parseRefSearch(text("page='It's a Guide' section='a > b'\nhttps://docs.example.org/g")).docs[0].title, "It's a Guide");
+  assert.equal(parseRefSearch(text("page='It's a Guide' section='a > b'\nhttps://docs.example.org/g")).docs[0].overview, "It's a Guide — a > b");
+  assert.equal(parseRefSearch(text("docs.python.org > tutorial > classes\nhttps://docs.python.org/3/tutorial/classes.html")).docs[0].title, "docs.python.org > tutorial > classes");
 });
 
 test("Ref's query carries the caller's library, version and language hints that the query lacks", () => {

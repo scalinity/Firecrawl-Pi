@@ -27,7 +27,8 @@ export const MAX_READS = 2, USEFUL_EXCERPT_CHARS = 200;
 export const READ_MIN_MS = 500;
 // Ref's refusals are whole messages with fixed openings (SI0 contract evidence §6). They are matched only at the start of a
 // text block that is not a result: a result's overview or a read's page may quote the same words about something else, and
-// provider-relayed documentation is data, never a signal about this account.
+// provider-relayed documentation is data, never a signal about this account. A block is first tried as a result (a hosted
+// block's description has its own shape), so a result whose breadcrumb says "unauthorized" stays a result.
 const AUTH = [/^Ref is not correctly configured\b/i, /^Please verify your email at https:\/\/ref\.tools\b/i, /^(Error:\s*)?(invalid api key|unauthori[sz]ed)\b/i];
 const QUOTA = [/^(Error:\s*)?((out of|no remaining|insufficient|not enough) credits|credit limit (reached|exceeded))\b/i];
 const SEARCH_ERRORS = [/^Error during documentation search:/i, /^Error:/i];
@@ -46,7 +47,8 @@ function blocksOf(text) {
     if (overview === null) continue;
     const u = /^url:[ \t]?(\S+)[ \t]*$/.exec(line);
     if (u && lines[i + 1]?.startsWith("moduleId:")) {
-      out.push({ overview: overview.join("\n"), url: u[1], moduleId: lines[i + 1].slice(9).replace(/^[ \t]/, "") });
+      const ov = overview.join("\n"), moduleId = lines[i + 1].slice(9).replace(/^[ \t]/, "");
+      out.push({ overview: ov, url: u[1], moduleId, title: moduleId.trim() || ov.split(/[.\n]/)[0] });
       overview = null;
       i++;
       continue;
@@ -55,13 +57,18 @@ function blocksOf(text) {
   }
   return out;
 }
-// The hosted result block: one result per text block, its description first and its URL alone on the last line.
+// The hosted result block: one result per text block, its description first and its URL alone on the last line. The
+// description has one of the two shapes Ref's hosted service sends: page='…' and section='…' fields, or a breadcrumb
+// (a > b). Any other text that ends in a URL (a notice with a link) is not a result.
+const HOSTED_SHAPE = /\bpage='|\bsection='|\S > \S/;
 function hostedBlockOf(text) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lines.length < 2 || !/^https?:\/\/\S+$/.test(lines.at(-1))) return null;
   const head = lines.slice(0, -1).join("\n");
-  const page = /\bpage='([^']*)'/.exec(head)?.[1] ?? null, section = /\bsection='([^']*)'/.exec(head)?.[1] ?? null;
-  return { url: lines.at(-1), overview: page || section ? [page, section].filter(Boolean).join(" — ") : head, moduleId: page ?? "" };
+  if (!HOSTED_SHAPE.test(head)) return null;
+  // A field's value runs to its closing quote before the next field or the line's end, so an apostrophe inside it stays.
+  const page = /\bpage='(.*?)'(?=\s+section='|\s*$)/m.exec(head)?.[1] ?? null, section = /\bsection='(.*)'\s*$/m.exec(head)?.[1] ?? null;
+  return { url: lines.at(-1), overview: page || section ? [page, section].filter(Boolean).join(" — ") : head, moduleId: page ?? "", title: page || lines[0] };
 }
 
 const textsOf = (result) => (Array.isArray(result?.content) ? result.content.filter((c) => c?.type === "text" && typeof c.text === "string").map((c) => c.text) : null);
@@ -80,13 +87,13 @@ export function parseRefSearch(result) {
   const texts = textsOf(result);
   if (!texts) return { kind: "contract", detail: "ref_no_content" };
   if (result.isError) return classifyError(texts.join("\n")) ?? { kind: "error", reason: "temporarily_unavailable", detail: "ref_is_error" };
-  // A block that opens with a refusal is an error whatever it quotes; the others are parsed for results.
-  const refusals = texts.map((t) => classifyError(t));
+  // A block is a result when it parses as one; otherwise one that opens with a refusal is an error whatever it quotes.
+  const refusals = texts.map(() => null);
   const docs = [];
   texts.forEach((t, i) => {
-    if (refusals[i]) return;
-    const blocks = blocksOf(t);
-    for (const b of blocks.length ? blocks : [hostedBlockOf(t)].filter(Boolean)) if (normalizeUrl(b.url)) docs.push({ url: b.url, overview: b.overview.trim().slice(0, 2000), moduleId: b.moduleId.trim().slice(0, 300) });
+    const legacy = blocksOf(t), hosted = legacy.length ? null : hostedBlockOf(t);
+    if (!legacy.length && !hosted) { refusals[i] = classifyError(t); return; }
+    for (const b of legacy.length ? legacy : [hosted]) if (normalizeUrl(b.url)) docs.push({ url: b.url, overview: b.overview.trim().slice(0, 2000), moduleId: b.moduleId.trim().slice(0, 300), title: b.title.trim().slice(0, 300) });
   });
   if (docs.length) return { kind: "results", docs };
   if (texts.length === 1 && texts[0].trim() === NO_RESULTS) return { kind: "empty" };
@@ -233,7 +240,7 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
         const retrievedAt = new Date().toISOString();
         const requested = (request.intelligence.libraries ?? []).filter((l) => l.version);
         const candidates = (parsed.kind === "results" ? parsed.docs : []).slice(0, L.candidates.docsPerProvider).map((d, i) => ({
-          url: d.url, providerUrl: d.url, title: (d.moduleId || d.overview.split(/[.\n]/)[0] || d.url).slice(0, 300), description: d.overview.slice(0, 600), rank: i + 1,
+          url: d.url, providerUrl: d.url, title: (d.title || d.url).slice(0, 300), description: d.overview.slice(0, 600), rank: i + 1,
           documentation: { scopes: requested.length ? requested.map((l) => ({ libraryName: l.name, requestedVersion: l.version, observedVersion: null, status: "unknown", basis: "query_hint", provider: "ref" })) : [], moduleId: d.moduleId || null, observedVersion: null },
           retrievedAt }));
         keep = true;
