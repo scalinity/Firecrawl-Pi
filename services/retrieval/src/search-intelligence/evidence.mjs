@@ -14,6 +14,8 @@ import { queryTerms } from "./rank.mjs";
 import { JEV_MODEL } from "../budget.mjs";
 
 const bad = (msg) => new Denied("INVALID_REQUEST", msg);
+// Time kept back from the core's own evidence deadline to build and send the reply.
+const REPLY_MS = 300;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 // The payload's bounds (spec §12): ten documents, 48 KiB of text each and 512 KiB in all; windows are exact substrings at their
@@ -24,6 +26,7 @@ export function validateEvidencePayload(p, limits, now = Date.now()) {
   if (typeof p.principalId !== "string" || !/^[A-Za-z0-9._:@/-]{1,128}$/.test(p.principalId)) throw bad("principalId is required");
   if (typeof p.originalQuery !== "string" || !p.originalQuery.trim() || p.originalQuery.length > 500) throw bad("originalQuery must be 1-500 characters");
   if (!Number.isFinite(p.absoluteDeadlineMs) || p.absoluteDeadlineMs > now + 95000) throw bad("absoluteDeadlineMs is out of range");
+  if (p.evidenceDeadlineMs !== undefined && (!Number.isFinite(p.evidenceDeadlineMs) || p.evidenceDeadlineMs > now + 95000)) throw bad("evidenceDeadlineMs is out of range");
   if (!Array.isArray(p.documents) || p.documents.length > limits.maxDocuments) throw bad(`documents must list at most ${limits.maxDocuments}`);
   let total = 0;
   for (const [i, d] of p.documents.entries()) {
@@ -97,7 +100,9 @@ export function makeEvidence({ decisions, limits, log = () => {} }) {
       const passages = docs.flatMap((x) => x.chosen.map((ps) => ({ x, ps })));
       passages.forEach((a, i) => { a.id = `p${String(i + 1).padStart(2, "0")}`; });
       let mode = "deterministic_fallback", reason = p.intelligence?.evidence === "off" ? "evidence_off" : !decisions || !decisionSubject ? "jev_not_configured" : null, model = null;
-      const deadlineAt = Math.min(Date.now() + L.evidenceMs, p.absoluteDeadlineMs - L.responseMarginMs);
+      // The core gives up at evidenceDeadlineMs: Jev's advice ends early enough that the reply (deterministic passages at least)
+      // reaches it first; the time the core spent sending the payload is already gone from that instant.
+      const deadlineAt = Math.min(Date.now() + L.evidenceMs, p.absoluteDeadlineMs - L.responseMarginMs, (p.evidenceDeadlineMs ?? Infinity) - REPLY_MS);
       if (!reason && passages.length && deadlineAt - Date.now() > 300) {
         const { sub, pre } = decisions.preflight(selection, decisionSubject);
         if (!pre.eligible) reason = `jev_${pre.reason}`;

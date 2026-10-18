@@ -116,3 +116,16 @@ test("an evidence call is recorded with its timing", async () => {
     assert.ok(Number.isInteger(e.durationMs) && e.durationMs >= 0 && e.startedAt instanceof Date, "with when it started and how long it took");
   } finally { await h.close(); }
 });
+
+test("a Jev slower than the core's evidence budget still answers deterministic passages before the core gives up", async () => {
+  const slowJev = (q, entry) => new Promise((r) => setTimeout(() => r(jev(() => 0.9)(q, entry)), 4000));
+  const h = await harness({ handlers: { openrouter: slowJev } });
+  try {
+    const t0 = Date.now(), coreGivesUpAt = t0 + 1500;
+    const r = await run(h, payload([doc(1, PAGE)], { evidenceDeadlineMs: coreGivesUpAt }));
+    assert.ok(Date.now() < coreGivesUpAt, `answered at ${Date.now() - t0} ms, before the core's ${coreGivesUpAt - t0} ms`);
+    assert.equal(r.mode, "deterministic_fallback", "the passages are the deterministic ones, not an unavailable evidence call");
+    assert.ok(r.documents[0].evidence.passages.length > 0);
+    assert.throws(() => validateEvidencePayload(payload([doc(1, PAGE)], { evidenceDeadlineMs: Date.now() + 200000 }), h.policy.search.intelligence.evidence), /evidenceDeadlineMs/);
+  } finally { await h.close(); }
+});
