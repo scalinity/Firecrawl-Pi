@@ -151,6 +151,27 @@ test("a session closed after its search's deadline, or after its cancellation, s
   } finally { await h.close(); }
 });
 
+test("an answer that breaks after its headers fails at once: too large is a contract failure, a cut stream counts against the service", async () => {
+  let mode = "big";
+  const fx = refFixture({ tool: () => (mode === "big" ? { content: [{ type: "text", text: "x".repeat(1200 * 1024) }] } : mode) });
+  const h = await harness({ handlers: { ref: fx } });
+  try {
+    const run = async () => { const t0 = Date.now(); const o = await h.docs.ref.search(docsRequest(`ref broken ${mode}`), refCtx(h, { deadlineAt: Date.now() + 6000 })); return { o, ms: Date.now() - t0 }; };
+    const big = await run();
+    assert.deepEqual([big.o.status, big.o.reason, big.o.dispatchState], ["failed", "contract_failure", "response_received"]);
+    assert.ok(big.ms < 3000, `an oversized answer is judged when it overflows, not at the deadline (${big.ms} ms)`);
+    assert.equal(h.dispatch.breakerState("fixture-ref"), "closed");
+    for (mode of ["sse_cut", "json_cut"]) {
+      const cut = await run();
+      assert.deepEqual([cut.o.status, cut.o.reason, cut.o.dispatchState], ["failed", "temporarily_unavailable", "possibly_sent"], mode);
+      assert.ok(cut.ms < 3000, `${mode}: no wait for the deadline (${cut.ms} ms)`);
+    }
+    assert.equal(h.dispatch.breakerState("fixture-ref"), "closed", "two cut answers are two failures, below the threshold");
+    assert.deepEqual(rows(h).map((r) => r.state), ["UNCERTAIN", "UNCERTAIN", "UNCERTAIN"], "answered or possibly sent: never released");
+    assert.equal(h.permits.snapshot().api.held["provider:fixture-ref"], undefined, "every request permit came back");
+  } finally { await h.close(); }
+});
+
 test("Ref's answered refusals are kept uncertain and inform availability without tripping the breaker", async () => {
   let mode = "auth_text";
   const fx = refFixture({ tool: (name) => mode === "auth_text" ? { content: [{ type: "text", text: "Please verify your email at https://ref.tools/dashboard to search documentation" }] }

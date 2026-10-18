@@ -123,14 +123,15 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
 // a ReadableStream yielding each chunk as it comes, so a result an SSE stream delivers before the server closes the connection
 // is usable at once. The stream stays bounded: maxBytes in all, idleMs of silence (when given) and the deadline end it with an
 // error, as the caller's cancellation does; cancelling the stream closes the connection. onWritten is called when the request's
-// bytes are written, onEnd once however the exchange ends (refused, read to its end, cut off, cancelled), so whatever the caller
-// holds for it (a permit) is returned exactly once.
+// bytes are written, onEnd(err) once however the exchange ends (refused, read to its end, cut off, cancelled), so whatever the
+// caller holds for it (a permit) is returned exactly once and a failure after the headers is known at once; err is null on a
+// complete answer or a cancel by the reader.
 export async function providerStreamRequest({ baseUrl, path, method = "POST", headers = {}, body = null, timeoutMs, idleMs = null, maxBytes, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt = null, onWritten = () => {}, onEnd = () => {} }) {
   let ended = false;
-  const end = () => { if (!ended) { ended = true; onEnd(); } };
+  const end = (err = null) => { if (!ended) { ended = true; onEnd(err); } };
   let prepared;
   try { prepared = await prepare({ baseUrl, path, timeoutMs, getPolicy, resolvePublic, lookupFixture, signal, authorize, deadlineAt }); }
-  catch (e) { end(); throw e; }
+  catch (e) { end(e); throw e; }
   const { url, target, address, mod, stopAt } = prepared;
   const payload = body === null ? null : Buffer.isBuffer(body) ? body : Buffer.from(body);
   const limitMs = stopAt === null ? timeoutMs : Math.max(1, stopAt - Date.now());
@@ -145,7 +146,7 @@ export async function providerStreamRequest({ baseUrl, path, method = "POST", he
       if (!answered) reject(err ?? new ProviderError("PROVIDER_UNCERTAIN", "the exchange ended without an answer", { sent: written }));
       else if (err) { try { controller.error(err); } catch { /* the reader already cancelled */ } }
       else { try { controller.close(); } catch { /* the reader already cancelled */ } }
-      end();
+      end(err);
     };
     const onAbort = () => finish(new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written }));
     const quiet = () => {

@@ -144,7 +144,8 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
     const handle = session.op(callKey, { signal: ctx.signal, deadlineAt });
     const startedAt = Date.now();
     try {
-      const result = await session.client.callTool({ name, arguments: args }, { signal: ctx.signal, timeout: Math.max(1, deadlineAt - Date.now()), maxTotalTimeout: Math.max(1, deadlineAt - Date.now()), headers: handle.header });
+      // Raced against the operation's transport failure, which the client itself would only report, never reject with.
+      const result = await Promise.race([handle.failure, session.client.callTool({ name, arguments: args }, { signal: ctx.signal, timeout: Math.max(1, deadlineAt - Date.now()), maxTotalTimeout: Math.max(1, deadlineAt - Date.now()), headers: handle.header })]);
       return { ok: true, result, close: m.close, startedAt };
     } catch (e) {
       // The client's timeout leaves its request with the transport: withdrawn first, so an unwritten one is never written.

@@ -9,7 +9,7 @@
 // contract failures never trip it (they go to availability.mjs); a probe that ends without a verdict returns its slot.
 import { randomUUID } from "node:crypto";
 import { Breaker, periodStarts, rateCardFor, paidDispatchActive } from "../../budget.mjs";
-import { providerRequest } from "../../provider.mjs";
+import { providerRequest, ProviderError } from "../../provider.mjs";
 import { credentialEpoch } from "../availability.mjs";
 import { outcome } from "../contracts.mjs";
 
@@ -209,7 +209,10 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
 //   unknown   written and no answer: a timeout or a dropped connection counts against its service.
 export function mcpFailure(e, { sent, cancelled = false }) {
   const code = typeof e?.code === "string" ? e.code : null;
-  if (Number.isInteger(e?.status)) {
+  // Our own transport says what happened on the wire; an HTTP status it carries (a 200 cut off midway) is not an answer.
+  if (e instanceof ProviderError) {
+    if (code === "PROVIDER_RESPONSE_TOO_LARGE") return { reason: "contract_failure", detail: "provider_response_too_large", dispatchState: "response_received", breaker: "neutral" };
+  } else if (Number.isInteger(e?.status)) {
     const s = e.status;
     const reason = s === 401 || s === 403 ? "auth_failed" : s === 429 ? "rate_limited" : s === 402 ? "quota_exhausted" : s >= 500 ? "temporarily_unavailable" : "contract_failure";
     return { reason, detail: `http_${s}`, dispatchState: "response_received", breaker: reason === "temporarily_unavailable" ? "failure" : "neutral" };

@@ -10,7 +10,9 @@
 //   DELETE  the session's goodbye, under a request permit and a one-second bound.
 // A billable call tags its POST with its operation (a header removed here before sending). The client's own timeout never stops
 // a request it has handed to the transport, so the caller asks the bridge instead: whether that operation's request was
-// written, and to withdraw it if it was not, so nothing is sent after its reservation was released.
+// written, and to withdraw it if it was not, so nothing is sent after its reservation was released. Nor does the 2025-era
+// client fail a call whose SSE answer breaks after its headers (it only reports the error): the operation's failure carries
+// that transport error at once, so the caller need not wait out its deadline.
 import { providerStreamRequest } from "../../provider.mjs";
 import { paidDispatchActive } from "../../budget.mjs";
 
@@ -88,7 +90,7 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
       let res;
       try {
         res = await exchange(method, h, method === "POST" ? Buffer.from(init.body ?? "") : null, { sig, until, auth: goodbye ? () => !session.signal.aborted : authorize,
-          onWritten: () => { if (op) op.written = true; }, onEnd: () => { op?.pending.delete(mine); release(); } });
+          onWritten: () => { if (op) op.written = true; }, onEnd: (err) => { op?.pending.delete(mine); release(); if (err && op) op.reject(err); } });
       } catch (e) { op?.pending.delete(mine); throw e; }
       const ids = method === "POST" ? requestIds(init.body) : [];
       const sse = /^text\/event-stream\b/i.test(String(res.headers["content-type"] ?? ""));
@@ -102,11 +104,15 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
       op(name, { signal: opSignal = null, deadlineAt: opDeadline }) {
         const ctl = new AbortController();
         const state = { written: false, pending: new Set(), deadlineAt: opDeadline, signal: opSignal ? AbortSignal.any([opSignal, ctl.signal]) : ctl.signal };
+        state.failure = new Promise((_, reject) => { state.reject = reject; });
+        state.failure.catch(() => {});
         ops.set(name, state);
         sessionDeadline = Math.max(sessionDeadline, opDeadline);
         return {
           header: { [OP_HEADER]: name },
           written: () => state.written,
+          // Rejects with the transport error when one of the operation's exchanges ends in failure, even after its headers.
+          failure: state.failure,
           // Ends the operation's requests: one not yet written is never written; one written is cut off (its outcome stays unknown).
           withdraw: () => { ctl.abort(); for (const c of state.pending) c.abort(); },
         };

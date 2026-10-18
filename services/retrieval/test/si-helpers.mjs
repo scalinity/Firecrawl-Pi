@@ -66,6 +66,7 @@ const defaultRefTool = (name, args) => name === "ref_search_documentation"
 // issues a session id, tools/list lists the tools, tools/call answers through tool(name, args, entry) on an SSE stream (held
 // open after its result when holdOpen) or as JSON; GET opens a receive stream that stays open; DELETE ends the session.
 // tool may return "destroy" (cut the connection after the request arrived) or { status } (an HTTP refusal). Records everything.
+// "sse_cut" and "json_cut" answer with headers and part of a body, then cut the connection.
 export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false, receiveStream = true, tools = ["ref_search_documentation", "ref_read_url"], initialize = null } = {}) {
   const log = [], sessions = new Map(), open = new Set();
   let n = 0;
@@ -102,6 +103,12 @@ export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false
       sessions.get(entry.session).calls.push({ tool: entry.tool, args: entry.args });
       result = await tool(msg.params.name, msg.params.arguments, entry);
       if (result === "destroy") return res.destroy();
+      if (result === "sse_cut" || result === "json_cut") {
+        res.writeHead(200, { "content-type": result === "sse_cut" ? "text/event-stream" : "application/json" });
+        res.write(result === "sse_cut" ? ": working\n\n" : "{\"jsonrpc\":\"2.0\",");
+        setTimeout(() => res.destroy(), 20);
+        return;
+      }
       if (result?.status) { res.writeHead(result.status, { "content-type": "text/plain" }); return res.end("refused"); }
     } else {
       res.writeHead(200, { "content-type": "application/json" });
