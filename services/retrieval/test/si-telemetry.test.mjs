@@ -129,6 +129,27 @@ test("writes waiting on a stalled database are bounded: past 256 a write is coun
   assert.equal(c.telemetryLost, 44);
 });
 
+test("drain returns what is still pending at its deadline, and a run whose start was evicted still records", async () => {
+  const never = new Promise(() => {});
+  const t = makeTelemetry({ fingerprintKey: KEY, store: { searchRunStarted: () => never, searchRunFinished: () => never, searchEvents: () => never } });
+  t.event({ type: "breaker", provider: "p", status: "open" });
+  assert.equal(await t.drain(100), 1, "the write still pending is returned, not waited on");
+  // Starts are remembered for at most 1000 runs; the oldest is forgotten first, and its finish is still a whole row.
+  const rows = [], store = { searchRunStarted: async () => {}, searchRunFinished: async (r) => { rows.push(r); }, searchEvents: async () => 0 };
+  let now = 1_000_000;
+  const t2 = makeTelemetry({ fingerprintKey: KEY, store, clock: () => now });
+  const reqs = Array.from({ length: 1001 }, () => request());
+  // In chunks, so the writes settle within the 256-write backlog bound.
+  for (let i = 0; i < reqs.length; i++) { t2.runStarted({ request: reqs[i], selection: "live", admittedAt: 1000 }); if (i % 200 === 199) await t2.drain(); }
+  await t2.drain();
+  now = 2_000_000;
+  t2.runFinished({ request: reqs[0], outcome: "complete" });
+  t2.runFinished({ request: reqs[1000], outcome: "complete" });
+  await t2.drain();
+  assert.deepEqual(rows.map((r) => [r.logicalId, r.acceptedAt.getTime()]), [[reqs[0].logicalSearchId, 2_000_000], [reqs[1000].logicalSearchId, 1000]],
+    "the evicted run is accepted at its finish; a remembered one keeps its admission time");
+});
+
 test("a throw while building a record is counted and logged, never the search's", () => {
   const logs = [], store = { searchRunStarted: async () => {}, searchRunFinished: async () => {}, searchEvents: async () => 0 };
   const t = makeTelemetry({ fingerprintKey: KEY, store, log: (o) => logs.push(o) });
@@ -286,6 +307,29 @@ test("the daily metrics keep reuse apart from executions, count empty answers, k
       "reuse.hit|*|aggregate/live|1",
       "runs.complete|*|aggregate/live|2",
       "runs.empty|*|aggregate/live|1"]);
+  } finally { await store.close(); }
+});
+
+test("a first reduction over empty tables, today kept out, and a watermark day reduced again once its run finishes", opts, async () => {
+  const store = await fresh();
+  try {
+    const iso = (n) => { const d = new Date(); d.setUTCDate(d.getUTCDate() - n); return d.toISOString().slice(0, 10); };
+    const first = await store.reduceSearchDaily();
+    assert.deepEqual([first.from, first.through], [iso(1), iso(1)], "empty tables: yesterday, nothing to count");
+    assert.equal((await store.pool.query("SELECT count(*)::int AS n FROM fcpi_retrieval.search_daily")).rows[0].n, 0);
+    const at = (n) => { const d = new Date(); d.setUTCHours(23, 59, 0, 0); d.setUTCDate(d.getUTCDate() - n); return d; };
+    const base = (n) => ({ logicalId: randomUUID(), requestId: `req-${randomUUID()}`, principalId: "owner", fingerprint: "f".repeat(64), profile: "aggregate", selection: "live", resultMode: "links", acceptedAt: at(n), versions: {} });
+    const late = base(1), today = base(0);
+    await store.searchRunStarted(late);
+    await store.searchRunStarted(today);
+    await store.reduceSearchDaily();
+    const metrics = async () => (await store.pool.query("SELECT day::text, metric, n::int AS n FROM fcpi_retrieval.search_daily WHERE metric LIKE 'runs.%' AND metric NOT LIKE 'runs.cache_%' AND metric NOT LIKE 'runs.docs_%' ORDER BY 1, 2")).rows.map((r) => `${r.day}:${r.metric}:${r.n}`);
+    assert.deepEqual(await metrics(), [`${iso(1)}:runs.unfinished:1`], "yesterday's unfinished run counts; today's waits for its day to end");
+    // Finished after midnight: the watermark's own day is reduced again, and the run moves to its outcome.
+    await store.searchRunFinished({ ...late, completedAt: new Date(), outcome: "complete", cacheMode: "miss", docsActive: false });
+    const again = await store.reduceSearchDaily();
+    assert.equal(again.from, iso(1));
+    assert.deepEqual(await metrics(), [`${iso(1)}:runs.complete:1`]);
   } finally { await store.close(); }
 });
 

@@ -137,7 +137,7 @@ test("a telemetry write that fails is counted and logged, and the search's answe
     await settle(h);
     assert.equal(r.status, 200);
     assert.deepEqual(r.body.web.length, baseline.body.web.length, "the answer is whole");
-    assert.ok(h.telemetry.counters().telemetryLost >= 2, "the run and its events were lost, and counted");
+    assert.equal(h.telemetry.counters().telemetryLost, 3, "the run's start, its finish and its events were lost, and counted");
     assert.ok(h.logs.some((l) => l.event === "si_telemetry_degraded"));
   } finally { await h.close(); }
 });
