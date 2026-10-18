@@ -5,6 +5,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setTimeout as sleep } from "node:timers/promises";
 import { harness, request, refFixture, refBlocks } from "./si-helpers.mjs";
+import { mcpFailure } from "../src/search-intelligence/adapters/common.mjs";
+import { ProviderError } from "../src/provider.mjs";
 
 const docsRequest = (q) => request({ originalQuery: q, intelligence: { documentation: "required" } });
 const refCtx = (h, over = {}) => {
@@ -170,6 +172,19 @@ test("an answer that breaks after its headers fails at once: too large is a cont
     assert.deepEqual(rows(h).map((r) => r.state), ["UNCERTAIN", "UNCERTAIN", "UNCERTAIN"], "answered or possibly sent: never released");
     assert.equal(h.permits.snapshot().api.held["provider:fixture-ref"], undefined, "every request permit came back");
   } finally { await h.close(); }
+});
+
+test("an MCP failure's verdict: the provider's answer, our transport's error, or a request never written", () => {
+  const v = (e, sent) => { const r = mcpFailure(e, { sent }); return [r.reason, r.dispatchState, r.breaker]; };
+  assert.deepEqual(v({ code: -32602, message: "invalid params" }, true), ["contract_failure", "response_received", "neutral"]);
+  assert.deepEqual(v({ code: -32602, message: "invalid outputSchema" }, false), ["contract_failure", "not_sent", "neutral"], "raised by the client before writing: released");
+  assert.deepEqual(v({ status: 401, code: "CLIENT_HTTP_NOT_IMPLEMENTED" }, true), ["auth_failed", "response_received", "neutral"]);
+  assert.deepEqual(v({ status: 503, code: "CLIENT_HTTP_NOT_IMPLEMENTED" }, true), ["temporarily_unavailable", "response_received", "failure"]);
+  assert.deepEqual(v(new ProviderError("PROVIDER_UNCERTAIN", "cut off", { sent: true, status: 200 }), true), ["temporarily_unavailable", "possibly_sent", "failure"], "a 200 cut midway is no answer");
+  assert.deepEqual(v(new ProviderError("PROVIDER_RESPONSE_TOO_LARGE", "big", { sent: true, status: 200 }), true), ["contract_failure", "response_received", "neutral"]);
+  assert.deepEqual(v(new ProviderError("PROVIDER_UNREACHABLE", "dns", { sent: false }), false), ["temporarily_unavailable", "not_sent", "failure"]);
+  assert.deepEqual(v(Object.assign(new ProviderError("PROVIDER_TIMEOUT", "capacity", { sent: false, timedOut: true }), { capacity: true }), false), ["capacity_unavailable", "not_sent", "neutral"]);
+  assert.deepEqual(v({ code: "REQUEST_TIMEOUT" }, true), ["timeout", "possibly_sent", "failure"]);
 });
 
 test("Ref's answered refusals are kept uncertain and inform availability without tripping the breaker", async () => {

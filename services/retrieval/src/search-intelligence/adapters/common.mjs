@@ -217,10 +217,11 @@ export function mcpFailure(e, { sent, cancelled = false }) {
     const reason = s === 401 || s === 403 ? "auth_failed" : s === 429 ? "rate_limited" : s === 402 ? "quota_exhausted" : s >= 500 ? "temporarily_unavailable" : "contract_failure";
     return { reason, detail: `http_${s}`, dispatchState: "response_received", breaker: reason === "temporarily_unavailable" ? "failure" : "neutral" };
   }
-  if (Number.isInteger(e?.code)) return { reason: "contract_failure", detail: `jsonrpc_${e.code}`, dispatchState: "response_received", breaker: "neutral" };
+  // A JSON-RPC error is the server's answer, unless the client raised it before writing anything (an invalid tool schema).
+  if (Number.isInteger(e?.code)) return { reason: "contract_failure", detail: `jsonrpc_${e.code}`, dispatchState: sent ? "response_received" : "not_sent", breaker: "neutral" };
   if (code && /^(INVALID_RESULT|UNSUPPORTED_RESULT_TYPE)$|UNEXPECTED_CONTENT/.test(code)) return { reason: "contract_failure", detail: code.toLowerCase(), dispatchState: "response_received", breaker: "neutral" };
   const reason = cancelled || code === "CANCELLED" ? "cancelled" : e?.capacity ? "capacity_unavailable" : e?.timedOut || code === "REQUEST_TIMEOUT" ? "timeout"
-    : code === "PAID_DISPATCH_DISABLED" ? "platform_restricted" : code === "PROVIDER_RESPONSE_TOO_LARGE" ? "contract_failure" : "temporarily_unavailable";
+    : code === "PAID_DISPATCH_DISABLED" ? "platform_restricted" : "temporarily_unavailable";
   if (!sent) return { reason, detail: code ?? "not_sent", dispatchState: "not_sent", breaker: code === "PROVIDER_UNREACHABLE" ? "failure" : "neutral" };
   return { reason, detail: code ?? "possibly_sent", dispatchState: "possibly_sent", breaker: reason === "timeout" || reason === "temporarily_unavailable" ? "failure" : "neutral" };
 }
