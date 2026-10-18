@@ -19,6 +19,8 @@ import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/cli
 
 export const REF_CONTRACT = "ref-mcp-v1/2026-10-17";
 export const NO_RESULTS = "No results found";
+// Selected reads (spec §6.2): at most two a logical execution, for documents whose passages hold no excerpt of this length.
+export const MAX_READS = 2, USEFUL_EXCERPT_CHARS = 200;
 // Ref's refusals are whole messages with fixed openings (SI0 contract evidence §6). They are matched only at the start of a
 // text block that is not a result: a result's overview or a read's page may quote the same words about something else, and
 // provider-relayed documentation is data, never a signal about this account.
@@ -242,6 +244,40 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
       await closeFor(r.close, parsed, ctx.sub.card.creditsPerOperation);
       if (await judged(ctx, parsed, r.startedAt)) { await session.close().catch(() => {}); return null; }
       return lease(session, request, ctx, epoch);
+    },
+    // Selected reads of this provider's documents among those provisionally returned (spec §6.2), inside the semantic phase:
+    // at most MAX_READS without an excerpt, concurrently, each within refReadMs. The discovery's session is used; without one
+    // (a discovery served from cache) admit() gives the subject for one fresh session, whose context search comes first and is
+    // metered on its own. A failure is an enrichment limitation, never a retry. The fresh lease is returned for the caller to
+    // close with the search.
+    async enrich({ request, documents, lease, admit, signal, semanticClose }) {
+      const selected = documents.filter((d) => d.observations.some((o) => o.provider === "ref") && !d.passages.some((p) => String(p.text ?? "").trim().length >= USEFUL_EXCERPT_CHARS)).slice(0, MAX_READS);
+      if (!selected.length) return { attempted: 0, usage: [], limitation: null };
+      const t0 = Date.now(), readClose = Math.min(semanticClose, t0 + limits().refReadMs);
+      const usage = [];
+      let fresh = null, contextInit = false;
+      if (!lease) {
+        const a = admit();
+        if (a?.pre?.eligible) {
+          fresh = await this.contextLease(request, { sub: a.sub, pre: a.pre, signal, deadlineAt: readClose, selection: a.selection });
+          contextInit = true;
+          if (fresh) usage.push({ provider: "ref", operation: "context_init", credits: a.sub.card.creditsPerOperation, basis: "documented" });
+        }
+        if (!fresh) return { attempted: selected.length, usage, limitation: "session_unavailable", elapsedMs: Date.now() - t0, record: { selected: selected.length, read: 0, contextInit, limitation: "session_unavailable" } };
+        lease = fresh;
+      }
+      const results = await Promise.all(selected.map((d) => lease.read(d.observations.find((o) => o.provider === "ref").providerUrl, { signal, deadlineAt: readClose })));
+      let read = 0;
+      const failures = [];
+      results.forEach((r, i) => {
+        if (!r.ok) { failures.push(r.reason); return; }
+        const d = selected[i];
+        read++;
+        if (!d.passages.some((p) => p.contentHash === r.passage.contentHash)) d.passages.unshift(r.passage);
+        usage.push({ provider: "ref", operation: "read", ...r.usage });
+      });
+      const limitation = failures.length ? failures[0] : null;
+      return { attempted: selected.length, usage, limitation, elapsedMs: Date.now() - t0, record: { selected: selected.length, read, contextInit, ...(limitation ? { limitation } : {}) }, lease: fresh };
     },
   };
 

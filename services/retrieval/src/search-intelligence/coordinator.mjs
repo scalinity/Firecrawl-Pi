@@ -25,8 +25,6 @@ const REASON_TEXT = { not_configured: "not configured", temporarily_unavailable:
   platform_restricted: "restricted by this deployment", timeout: "timed out", cancelled: "cancelled", capacity_unavailable: "no capacity in time", internal_failure: "failed internally" };
 const sleep = (ms, signal) => new Promise((r) => { const t = setTimeout(r, ms); signal?.addEventListener("abort", () => { clearTimeout(t); r(); }, { once: true }); });
 const iso = (t) => new Date(t).toISOString();
-// A passage this long is an excerpt worth ranking on; a Ref hit with none is a read candidate (spec §6.2).
-const USEFUL_EXCERPT_CHARS = 200;
 
 export function makeCoordinator({ store, getBudget, getPolicy, getSelection, getConfigHashes = () => ({}), dispatch, general, searxng, docs = {}, documentation = null, decisions = null,
   availability, telemetry = null, legacy = null, log = () => {}, clock = Date.now }) {
@@ -217,7 +215,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       const short = shortlist(pool, { max: L.candidates.shortlistMax, seedPerProvider: L.candidates.seedPerProvider, providers: providersPresent.filter((p) => p !== "searxng").concat(providersPresent.includes("searxng") ? ["searxng"] : []) });
       // 5b. Semantic phase (spec §11.2): Jev's advice within its own budget, never past the request's.
       const semanticClose = Math.min(clock() + L.semanticMs, hardEnd);
-      const enrichment = await refReads({ request, presemantic, docsOutcomes, activation, selection, roster, signal: parent.signal, semanticClose, leases });
+      const enrichment = await enrichDocs({ request, presemantic, docsOutcomes, activation, selection, roster, signal: parent.signal, semanticClose, leases });
       if (enrichment.attempted) timings.refReadMs = enrichment.elapsedMs;
       let ranking = { mode: "rrf_fallback", reason: decisions ? "semantic_not_run" : "jev_not_configured", version: VERSIONS.ranker, shortlisted: short.length, scored: 0 };
       if (decisions && roster.decisionSubject && semanticClose - clock() > 500) {
@@ -287,43 +285,27 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     }
   }
 
-  // Selected Ref reads (spec §6.2): when documentation is required, or results are scraped with evidence on, at most two Ref
-  // documents provisionally within the requested limit that lack an excerpt are read, concurrently, each within refReadMs and
-  // the semantic phase. The discovery's own session is used; a discovery served from cache first opens one fresh session whose
-  // context search is its own metered operation. A failure is an enrichment limitation, never a retry.
-  async function refReads({ request, presemantic, docsOutcomes, activation, selection, roster, signal, semanticClose, leases }) {
+  // Enrichment of documentation hits (spec §6.2): when documentation is required, or results are scraped with evidence on, an
+  // adapter that can enrich its own documents (Ref's selected reads) does so among those provisionally returned, within the
+  // semantic phase. The coordinator decides when, bounds the time and holds the session leases; the adapter decides what to
+  // read and how.
+  async function enrichDocs({ request, presemantic, docsOutcomes, activation, selection, roster, signal, semanticClose, leases }) {
     const none = { attempted: 0, usage: [], limitation: null };
     const wanted = request.intelligence.documentation === "required" || (request.resultMode === "scrape" && request.intelligence.evidence === "auto");
-    const refOutcome = docsOutcomes.find((o) => o.provider === "ref" && validated(o));
-    if (!activation.active || !wanted || !refOutcome || !docs.ref) return none;
-    const selected = presemantic.slice(0, request.limit).filter((d) => d.observations.some((o) => o.provider === "ref") && !d.passages.some((p) => String(p.text ?? "").trim().length >= USEFUL_EXCERPT_CHARS)).slice(0, 2);
-    if (!selected.length) return none;
-    const t0 = clock(), readClose = Math.min(semanticClose, t0 + limits().refReadMs);
-    const usage = [];
-    let lease = leases.get("ref") ?? null, contextInit = false;
-    if (!lease) {
-      const name = roster.documentationSubjects.find((n) => dispatch.subject("documentationSearches", n)?.prov?.api === docs.ref.api);
-      const sub = name ? dispatch.subject("documentationSearches", name) : null;
-      const pre = sub ? dispatch.preflight(sub, { selection }) : { eligible: false };
-      if (pre.eligible) {
-        lease = await docs.ref.contextLease(request, { sub, pre, signal, deadlineAt: readClose, selection });
-        contextInit = true;
-        if (lease) { leases.set("ref", lease); usage.push({ provider: "ref", operation: "context_init", credits: sub.card.creditsPerOperation, basis: "documented" }); }
-      }
-      if (!lease) return { attempted: selected.length, usage, limitation: "session_unavailable", elapsedMs: clock() - t0, record: { selected: selected.length, read: 0, contextInit, limitation: "session_unavailable" } };
+    if (!activation.active || !wanted) return none;
+    for (const adapter of Object.values(docs)) {
+      if (typeof adapter.enrich !== "function" || !docsOutcomes.some((o) => o.provider === adapter.id && validated(o))) continue;
+      const admit = () => {
+        const name = roster.documentationSubjects.find((n) => dispatch.subject("documentationSearches", n)?.prov?.api === adapter.api);
+        const sub = name ? dispatch.subject("documentationSearches", name) : null;
+        return sub ? { sub, pre: dispatch.preflight(sub, { selection }), selection } : null;
+      };
+      const r = await adapter.enrich({ request, documents: presemantic.slice(0, request.limit), lease: leases.get(adapter.id) ?? null, admit, signal, semanticClose });
+      // A fresh session's lease joins the search's leases, closed with the others when the search ends.
+      if (r.lease) leases.set(adapter.id, r.lease);
+      return r;
     }
-    const results = await Promise.all(selected.map((d) => lease.read(d.observations.find((o) => o.provider === "ref").providerUrl, { signal, deadlineAt: readClose })));
-    let read = 0;
-    const failures = [];
-    results.forEach((r, i) => {
-      if (!r.ok) { failures.push(r.reason); return; }
-      const d = selected[i];
-      read++;
-      if (!d.passages.some((p) => p.contentHash === r.passage.contentHash)) d.passages.unshift(r.passage);
-      usage.push({ provider: "ref", operation: "read", ...r.usage });
-    });
-    const limitation = failures.length ? failures[0] : null;
-    return { attempted: selected.length, usage, limitation, elapsedMs: clock() - t0, record: { selected: selected.length, read, contextInit, ...(limitation ? { limitation } : {}) } };
+    return none;
   }
   // ---- in-flight sharing (spec §14.2, §17) -----------------------------------------------------------------------------------
   async function search(raw, { signal }) {
