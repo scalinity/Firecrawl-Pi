@@ -171,3 +171,21 @@ test("reported dollars become whole micro-USD, rounded up, without the product's
   assert.equal(microUsd(0.017), 17000);
   assert.equal(microUsd(0), 0);
 });
+
+test("a Context7 429 with its monthly allowance spent is quota, held until the reset it reports; otherwise a burst", async () => {
+  const reset = Math.floor(Date.now() / 1000) + 86400;
+  for (const [remaining, expected] of [["0", "quota_exhausted"], ["12", "rate_limited"]]) {
+    const h = await harness({ handlers: { context7: () => ({ status: 429, body: { error: "rate_limited", message: "slow down" },
+      headers: { "ratelimit-limit": "1000", "ratelimit-remaining": remaining, "ratelimit-reset": String(reset), ...(remaining === "0" ? {} : { "retry-after": "5" }) } }) } });
+    try {
+      const context7 = makeContext7({ dispatch: h.dispatch, limits: limitsOf(h) });
+      const sub = h.dispatch.subject("documentationSearches", "fcpi-fixture-context7");
+      const o = await context7.search(docsRequest(`context7 allowance ${remaining}`), { sub, pre: h.dispatch.preflight(sub, { selection: "fixture" }), signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+      assert.equal(o.reason, expected);
+      const pre = h.dispatch.preflight(sub, { selection: "fixture" });
+      assert.equal(pre.reason, expected);
+      if (expected === "quota_exhausted") assert.equal(pre.retryAt, reset * 1000, "held until the reported reset, an absolute epoch");
+      else assert.ok(pre.retryAt <= Date.now() + 6000, "a burst waits for its Retry-After");
+    } finally { await h.close(); }
+  }
+});

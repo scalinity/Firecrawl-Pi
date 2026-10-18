@@ -52,7 +52,13 @@ export function makeContext7({ dispatch, limits }) {
     if (response.status !== 200) {
       let reason = "temporarily_unavailable", retryAt = null;
       if (response.status === 402) reason = "quota_exhausted";
-      else if (response.status === 429) { reason = "rate_limited"; retryAt = parseRetryAfter(response.headers["retry-after"]); }
+      else if (response.status === 429) {
+        // Context7 reports its monthly allowance (RateLimit-Limit/-Remaining, and -Reset as an absolute epoch in seconds: live
+        // contract smoke 2026-10-18): a 429 with nothing remaining is the allowance spent, held until that reset; otherwise a burst.
+        const remaining = Number(response.headers["ratelimit-remaining"]), reset = Number(response.headers["ratelimit-reset"]);
+        if (remaining === 0 && Number.isFinite(reset) && reset * 1000 > Date.now()) { reason = "quota_exhausted"; retryAt = reset * 1000; }
+        else { reason = "rate_limited"; retryAt = parseRetryAfter(response.headers["retry-after"]); }
+      }
       else if (response.status === 401 || response.status === 403) reason = "auth_failed";
       else if (response.status === 400) reason = "unsupported_request";
       else if (response.status === 404) reason = "contract_failure";
