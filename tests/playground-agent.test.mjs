@@ -444,3 +444,32 @@ test('source-less documentation a search returns reaches the model as uncitable 
   assert.deepEqual(output.auxiliaryContext.map(a => [a.provider, a.libraryId, a.requestedVersion, a.sourceIdentifier, a.sourceUrl]), [['context7', '/vuejs/docs', '3.5', 'vue-docs:watchers', null]]);
   assert.equal(output.auxiliaryContext[0].text, aux.text, 'its contents arrive whole');
 });
+
+test('a search\'s documentation reference fills its allowance entry by entry, cuts on code points, and counts what it left out', async () => {
+  const long = (i) => ({ provider: 'context7', libraryId: '/vuejs/docs', requestedVersion: '3.5', observedVersion: null, passageId: `p-long-${i}`, sourceIdentifier: `vue-docs:${i}`, sourceUrl: null,
+    kind: 'documentation_text', text: `${i}`.repeat(179) + '😀' + ' tail beyond the cut' });
+  const search = { status: 200, data: { success: true, data: { web: [{ url: first, title: 'Search result' }] },
+    fcpi: { search: { coverage: { general: { missing: [] } }, ranking: { mode: 'hybrid' }, documentation: { auxiliaryContext: [1, 2, 3, 4].map(long).concat([{ omitted: 3 }]) } } } } };
+  const f = fixture([search, page(first)]);
+  const output = await runAgent({ prompt: 'How do Vue watchers run?', urls: [], maxPages: 1 }, f);
+  const prompt = f.calls[1].body.formats.find(format => format.type === 'json').prompt;
+  for (const i of [1, 2, 3]) assert.ok(prompt.includes(`${i}`.repeat(179) + '😀'), `entry ${i} reaches the model, its last code point whole`);
+  assert.ok(!prompt.includes('4'.repeat(179)), 'the entry past the allowance is left out, not the whole block');
+  assert.ok(!/\\ud8[0-9a-f]{2}/i.test(prompt), 'no surrogate pair is split');
+  assert.equal(output.auxiliaryOmitted, 3, 'the search\'s own omitted count reaches the output');
+  assert.equal(output.auxiliaryContext.length, 4);
+});
+
+test('a search\'s coverage gaps become limitations by provider and reason; an empty search is not a ranking gap', async () => {
+  const meta = (over) => ({ coverage: { general: { missing: [{ provider: 'brave', status: 'skipped', reason: 'rate_limited' }] }, documentation: { activated: true, missing: [{ provider: 'ref', status: 'failed', reason: 'timeout' }] },
+    decisions: { status: 'not_used' } }, ranking: { mode: 'rrf_fallback', reason: 'jev_timeout' }, ...over });
+  const search = (m) => ({ status: 200, data: { success: true, data: { web: [{ url: first, title: 'Search result' }] }, fcpi: { search: m } } });
+  const f = fixture([search(meta({})), page(first)]);
+  const output = await runAgent({ prompt: 'How do Vue watchers run?', urls: [], maxPages: 1 }, f);
+  assert.ok(output.limitations.includes('Search coverage was partial: brave (rate limited) did not contribute.'), JSON.stringify(output.limitations));
+  assert.ok(output.limitations.includes('Requested documentation was partly unavailable: ref (timeout).'));
+  assert.ok(output.limitations.includes('Search results were ranked without semantic advice (jev timeout).'));
+  const g = fixture([search(meta({ coverage: { general: { missing: [] }, decisions: { status: 'not_used' } }, ranking: { mode: 'rrf_fallback', reason: 'no_candidates' } })), page(first)]);
+  const empty = await runAgent({ prompt: 'How do Vue watchers run?', urls: [], maxPages: 1 }, g);
+  assert.ok(!empty.limitations.some(l => /semantic advice/.test(l)), 'nothing to rank is no ranking limitation');
+});
