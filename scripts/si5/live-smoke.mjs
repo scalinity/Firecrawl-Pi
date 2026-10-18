@@ -65,7 +65,8 @@ function shapeOf(v, depth = 0, key = "") {
   return typeof v;
 }
 const RATE = /ratelimit|retry-after|x-ratelimit|request-id|x-request-id/i;
-const pickHeaders = (h) => Object.fromEntries(Object.entries(h ?? {}).filter(([k]) => RATE.test(k) && !/request-id/i.test(k)).map(([k, v]) => [k, String(v).slice(0, 80)]));
+// A rate-limit policy can carry a partition key (Ref: pk=:<base64>:) that identifies the account: never recorded.
+const pickHeaders = (h) => Object.fromEntries(Object.entries(h ?? {}).filter(([k]) => RATE.test(k) && !/request-id/i.test(k)).map(([k, v]) => [k, String(v).replace(/pk=:[^:]*:/g, "pk=:<redacted>:").slice(0, 80)]));
 function capturing(log) {
   return {
     request: async (o) => {
@@ -114,7 +115,10 @@ function assemble(store, keysDir, wire) {
   return { coordinator, dispatch, general, docs, decisions, availability, telemetry, log };
 }
 
-const record = { schema: "fcpi.si5-live-smoke/v1", utc: new Date().toISOString(), node: process.version, configured: Object.keys(env).map((k) => NAMES[k]).sort() };
+const { execFileSync } = await import("node:child_process");
+const git = (...a) => execFileSync("git", ["-C", root, ...a], { encoding: "utf8" }).trim();
+const record = { schema: "fcpi.si5-live-smoke/v1", utc: new Date().toISOString(), node: process.version, repositoryCommit: git("rev-parse", "HEAD"),
+  codeDirty: git("status", "--porcelain", "--", ".", ":(exclude)evidence").length > 0, configured: Object.keys(env).map((k) => NAMES[k]).sort() };
 const store = await freshStore();
 try {
   // 1. One live search reaching every configured integration.
