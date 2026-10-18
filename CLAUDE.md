@@ -379,7 +379,7 @@ A feature that genuinely requires Firecrawl Cloud must remain explicitly unsuppo
 
 Initial paid dispatch is disabled.
 
-The default paid budget is zero.
+The default paid budget is zero, except the search intelligence categories (the search, documentation and decision providers), which are reporting-only, with no monetary cap, and bounded by the 60-searches-an-hour admission (`FIRECRAWL_PI_SPEC.md` §28.3).
 
 Do not infer authorization from:
 
@@ -400,7 +400,7 @@ When paid dispatch is eventually approved:
 - count retries and repair attempts in the same logical budget;
 - enforce concurrent spending limits transactionally;
 - notify at configured thresholds;
-- block at the hard cap;
+- block at the hard cap, where the category has one;
 - never automatically switch to another paid provider;
 - never automatically purchase more capacity.
 
