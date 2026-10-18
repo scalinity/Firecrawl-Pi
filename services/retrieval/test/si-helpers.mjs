@@ -22,6 +22,7 @@ import { makeRef, makeRefSessionFactory } from "../src/search-intelligence/adapt
 import { makeRefBridge } from "../src/search-intelligence/adapters/ref-bridge.mjs";
 import { makeDocumentation } from "../src/search-intelligence/documentation.mjs";
 import { makeDecisions } from "../src/search-intelligence/decisions.mjs";
+import { makeTelemetry } from "../src/search-intelligence/telemetry.mjs";
 
 export { serve, providersDir, budgetFor, lookupFixture };
 export const egress = loadPolicy(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
@@ -35,7 +36,7 @@ export async function waitFor(cond, { timeoutMs = 3000, everyMs = 10 } = {}) {
 }
 
 export class FakeStore extends FakeLedger {
-  constructor() { super(); this.searchCache = new Map(); this.admissions = 0; this.avail = new Map(); this.failCacheWrite = false; this.failReserve = false; }
+  constructor() { super(); this.searchCache = new Map(); this.admissions = 0; this.avail = new Map(); this.failCacheWrite = false; this.failReserve = false; this.runs = new Map(); this.events = []; this.failTelemetry = false; }
   async reserveBudget(r) { if (this.failReserve) throw Object.assign(new Error("db down"), { code: "ECONNREFUSED" }); this.lastReserve = r; return super.reserveBudget(r); }
   async searchCacheEntry(k) { const e = this.searchCache.get(k); return e && e.expiresAt > new Date() ? structuredClone(e) : null; }
   async searchCacheGet(k) { return (await this.searchCacheEntry(k))?.response ?? null; }
@@ -48,6 +49,10 @@ export class FakeStore extends FakeLedger {
     this.avail.set(r.provider, row);
     return row;
   }
+  // The operational records (store.mjs has the SQL, tested in si-telemetry.test.mjs against PostgreSQL).
+  async searchRunStarted(r) { if (this.failTelemetry) throw new Error("telemetry write failed"); if (!this.runs.has(r.logicalId)) this.runs.set(r.logicalId, structuredClone(r)); }
+  async searchRunFinished(r) { if (this.failTelemetry) throw new Error("telemetry write failed"); this.runs.set(r.logicalId, structuredClone(r)); }
+  async searchEvents(events) { if (this.failTelemetry) throw new Error("telemetry write failed"); for (const e of events) if (!this.events.some((x) => x.eventId === e.eventId)) this.events.push(structuredClone(e)); return events.length; }
 }
 
 // Default answers in each provider's documented shape; each takes the query and returns { status, body, headers? }.
@@ -152,7 +157,7 @@ export async function providerServer(name, handler = null) {
 // The harness: fixture servers for the five general providers (handlers override defaults), a SearXNG backend fixture, the
 // fixture roster's budget pointed at them, and the coordinator. selection is "fixture" throughout. A context7 or ref handler adds
 // that documentation lane (and documentation activation); an openrouter handler adds Jev's decisions.
-export async function harness({ handlers = {}, searxng = null, mutateBudget = () => {}, mutatePolicy = () => {}, perHour = 60, paidDispatch = true, decisions = null } = {}) {
+export async function harness({ handlers = {}, searxng = null, mutateBudget = () => {}, mutatePolicy = () => {}, perHour = 60, paidDispatch = true, decisions = null, telemetry: withTelemetry = false } = {}) {
   const servers = {};
   for (const n of Object.keys(HOSTS)) servers[n] = await providerServer(n, handlers[n] ?? null);
   for (const n of Object.keys(EXTRA_HOSTS)) if (handlers[n]) servers[n] = await providerServer(n, handlers[n]);
@@ -176,10 +181,13 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   const store = new FakeStore(), logs = [];
   const log = (o) => logs.push(o);
   const getBudget = () => budget, getPolicy = () => policy, getSelection = () => ({ search: "fixture" });
-  const availability = makeAvailability({ store, log });
+  // Operational records wired as server.mjs wires them: availability and breaker transitions, and every run.
+  const telemetry = withTelemetry ? makeTelemetry({ store, log }) : null;
+  const availability = makeAvailability({ store, log, onTransition: (t) => telemetry?.event({ type: "availability", provider: t.provider, status: t.to, reason: t.reason ?? null, retryAt: t.retryAt ? new Date(t.retryAt) : null, detail: { from: t.from } }) });
   const permits = makePermits(policy.search.intelligence);
   const readKey = (name) => { try { return readFileSync(`${dir}/${name}`, "utf8").trim() || null; } catch { return null; } };
-  const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic: async () => ["127.0.0.1"], lookupFixture, readKey, paidDispatch, permits, availability, log });
+  const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic: async () => ["127.0.0.1"], lookupFixture, readKey, paidDispatch, permits, availability, log,
+    onBreaker: (t) => telemetry?.event({ type: "breaker", provider: t.provider, status: t.to, detail: { from: t.from } }) });
   const limits = () => policy.search.intelligence;
   const serper = makeSerper({ store, getBudget, getPolicy, providersDir: dir, lookupFixture, log });
   const general = { serper: makeSerperLane({ serper, limits, permits, availability }), brave: makeBrave({ dispatch, limits }), exa: makeExa({ dispatch, limits }),
@@ -192,8 +200,8 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   if (servers.ref) docs.ref = makeRef({ dispatch, limits, openSession: makeRefSessionFactory({ makeFetch, log }), log });
   const jev = decisions ?? (servers.openrouter ? makeDecisions({ dispatch, store, limits, permits, log }) : null);
   const documentation = Object.keys(docs).length ? makeDocumentation({ decisions: jev, log }) : null;
-  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, docs, documentation, decisions: jev, log });
-  return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper, general, docs, decisions: jev, makeFetch, getBudget, getPolicy, getSelection,
+  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, docs, documentation, decisions: jev, telemetry, log });
+  return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper, general, docs, decisions: jev, makeFetch, telemetry, getBudget, getPolicy, getSelection,
     close: async () => { for (const s of Object.values(servers)) await s.close(); await sx?.close(); } };
 }
 

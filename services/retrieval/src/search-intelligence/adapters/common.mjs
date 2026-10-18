@@ -15,9 +15,18 @@ import { outcome } from "../contracts.mjs";
 
 const FIXTURE = /\.fixture\.fcpi\.test$/;
 
-export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, lookupFixture, readKey, paidDispatch, permits, availability, request = providerRequest, log = () => {} }) {
+export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, lookupFixture, readKey, paidDispatch, permits, availability, request = providerRequest, log = () => {}, onBreaker = () => {} }) {
   const breakers = new Map();
-  const breakerFor = (provider) => breakers.get(provider) ?? breakers.set(provider, new Breaker(getBudget().breaker)).get(provider);
+  // Each breaker reports the transitions a verdict causes (to open, back to closed) for the operational record (spec §21.1);
+  // its half-open state comes with time, not with a verdict.
+  const watched = (provider, br) => {
+    for (const m of ["success", "failure"]) {
+      const f = br[m].bind(br);
+      br[m] = () => { const from = br.state(); f(); const to = br.state(); if (from !== to) onBreaker({ provider, from, to, retryAfterS: to === "open" ? br.retryAfterS() : null }); };
+    }
+    return br;
+  };
+  const breakerFor = (provider) => breakers.get(provider) ?? breakers.set(provider, watched(provider, new Breaker(getBudget().breaker))).get(provider);
   // Ledger closings that failed (spec §18.2: recorded as an operational accounting failure, never reported as zero cost).
   let accountingFailures = 0;
   // Reservations not yet closed, by the lane that opened them (its preflight object): what an adapter leaves open when it

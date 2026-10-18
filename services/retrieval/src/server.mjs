@@ -57,6 +57,7 @@ import { makeRefBridge } from "./search-intelligence/adapters/ref-bridge.mjs";
 import { makeDocumentation } from "./search-intelligence/documentation.mjs";
 import { makeDecisions } from "./search-intelligence/decisions.mjs";
 import { makeEvidence } from "./search-intelligence/evidence.mjs";
+import { makeTelemetry } from "./search-intelligence/telemetry.mjs";
 import { makeCoordinator } from "./search-intelligence/coordinator.mjs";
 
 const env = loadEnv(process.env);
@@ -101,7 +102,10 @@ const coreTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_core
 const gatewayTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_gateway_token_sha256"), "retrieval_gateway_token_sha256");
 const store = new Store({ ...env.postgres, password: readSecret(env.credentialsDir, "retrieval_postgres_password") });
 // Provider availability (search intelligence, spec §15): read at connect and before each search.
-const availability = makeAvailability({ store, log });
+// Search intelligence's operational records (spec §21.1): runs, operations and transitions, best effort and drained at stop.
+const telemetry = makeTelemetry({ store, log });
+const availability = makeAvailability({ store, log, onTransition: (t) => telemetry.event({ type: "availability", provider: t.provider, status: t.to, reason: t.reason ?? null,
+  retryAt: t.retryAt ? new Date(t.retryAt) : null, detail: { from: t.from, retryBasis: t.retryBasis } }) });
 let storeReady = false;
 const startedAt = new Date();
 (async function connect() {
@@ -113,7 +117,11 @@ const startedAt = new Date();
   catch (e) { log({ event: "store_unavailable", error: e.code ?? e.message }); setTimeout(connect, 2000); }
 })();
 // Serper's credits are a lifetime allocation summed over its rows: those rows are kept whatever their age (spec §18.3).
-setInterval(() => store.prune({ retainCategories: allocationCategories(getBudget()) }).catch((e) => log({ event: "prune_failed", error: e.code ?? e.message })), 3600000).unref();
+// Hourly: the daily reduction of the operational records first, since detailed events are pruned only once reduced.
+setInterval(async () => {
+  await store.reduceSearchDaily().then((r) => log({ event: "search_reduced", ...r })).catch((e) => log({ event: "search_reduction_failed", error: e.code ?? e.message }));
+  await store.prune({ retainCategories: allocationCategories(getBudget()) }).catch((e) => log({ event: "prune_failed", error: e.code ?? e.message }));
+}, 3600000).unref();
 
 const resolvePublic = makePublicResolver({ server: env.resolver });
 // M6: the residential proxy route (spec §10), shared by pages, auxiliary downloads, the browser and search.
@@ -152,7 +160,8 @@ const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.sea
 // dispatch, the five general lanes, SearXNG's backend lane and the coordinator. Credentials are read at each call, as before.
 const intelligenceLimits = () => basePolicy.search.intelligence;
 const permits = makePermits(basePolicy.search.intelligence ?? { apiPermits: { total: 1, perProvider: 1 }, decisionPermits: { total: 1, perSearch: 1 }, refStreams: { total: 1, perSearch: 1 }, deepseekQps: 1 });
-const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic, readKey: (name) => readCredential(env.providersDir, name), paidDispatch: env.paidDispatch, permits, availability, log });
+const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic, readKey: (name) => readCredential(env.providersDir, name), paidDispatch: env.paidDispatch, permits, availability, log,
+  onBreaker: (t) => telemetry.event({ type: "breaker", provider: t.provider, status: t.to, detail: { from: t.from, retryAfterS: t.retryAfterS } }) });
 const general = { serper: makeSerperLane({ serper: google, limits: intelligenceLimits, permits, availability }), brave: makeBrave({ dispatch, limits: intelligenceLimits }),
   exa: makeExa({ dispatch, limits: intelligenceLimits }), deepseek: makeDeepseek({ dispatch, limits: intelligenceLimits, permits }), tavily: makeTavily({ dispatch, limits: intelligenceLimits }) };
 // The co-primary documentation lanes (spec §6): Context7 over the shared dispatch; Ref through the official MCP client over the
@@ -163,7 +172,7 @@ const docs = { context7: makeContext7({ dispatch, limits: intelligenceLimits }),
 const decisions = makeDecisions({ dispatch, store, limits: intelligenceLimits, permits, log });
 const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, getConfigHashes: () => ({ budgetSha256, policySha256 }), dispatch, general,
   searxng: makeSearxngLane({ backend: searxngBackend, limits: intelligenceLimits }), docs, documentation: makeDocumentation({ decisions, log }), decisions,
-  evidence: makeEvidence({ decisions, limits: intelligenceLimits, log }), availability, legacy: search, log });
+  evidence: makeEvidence({ decisions, limits: intelligenceLimits, log }), availability, telemetry, legacy: search, log });
 const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
@@ -250,9 +259,9 @@ async function providerStatus() {
     uncertain,
     caps: Object.fromEntries(Object.entries(budget.categories).map(([k, c]) => [k, { paid: c.paid, unit: c.unit, caps: c.caps }])),
     // Search intelligence (spec §21.2): each provider account's condition apart from its breaker, never a credential fingerprint.
-    searchIntelligence: { profile: budget.searching?.profile ?? "legacy", searxngMode: budget.searching?.searxngMode ?? null, permits: permits.snapshot(), tasks: coordinator.tasks(), counters: coordinator.counters(),
+    searchIntelligence: { profile: budget.searching?.profile ?? "legacy", searxngMode: budget.searching?.searxngMode ?? null, permits: permits.snapshot(), tasks: coordinator.tasks(), counters: { ...coordinator.counters(), ...telemetry.counters() },
       availability: availability.rows().map((r) => ({ provider: r.provider, state: r.state, reason: r.reason, providerCode: r.provider_code, observedAt: r.observed_at ?? null, retryAt: r.retry_at ?? null,
-        retryBasis: r.retry_basis, contractFailures: r.contract_failures, balance: r.balance ?? null })) },
+        retryBasis: r.retry_basis, contractFailures: r.contract_failures, balance: r.balance ?? { basis: "unknown" } })) },
   };
 }
 
@@ -393,7 +402,9 @@ for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, async () => {
   // Search work outlives its response only to close what it reserved: cancelled now, it is given the rest of the stop window
   // to settle or mark its operations uncertain before the pool closes (spec §14.2, §18.3).
   const leftOver = await coordinator.drain(Math.max(1000, until + 8000 - Date.now()));
+  // Then the operational records those runs wrote: a write still pending after this is counted lost, never the search's answer.
+  const telemetryLeft = await telemetry.drain(Math.max(500, until + 10000 - Date.now()));
   // A model call whose caller had already gone is cut here; its row is marked UNCERTAIN at the next start.
-  log({ event: "stopping", requests_in_flight: inflight, model_calls_running: adapter.running(), search_tasks_left: leftOver });
+  log({ event: "stopping", requests_in_flight: inflight, model_calls_running: adapter.running(), search_tasks_left: leftOver, telemetry_pending: telemetryLeft });
   store.close().finally(() => process.exit(0));
 });

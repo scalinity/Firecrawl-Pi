@@ -125,11 +125,17 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   async function execute(request, signal, roster, selection, aggKey) {
     const L = limits(), tAdmit = clock();
     const cached = await cacheEntry(aggKey);
-    if (cached?.response?.search) return { body: cached.response, aggregateHit: { createdAt: cached.createdAt, expiresAt: cached.expiresAt } };
+    if (cached?.response?.search) {
+      // A stored answer is a run too (spec §21.1): reuse, with nothing spent.
+      telemetry?.runFinished?.({ request, outcome: cached.response.search.outcome, search: { ...cached.response.search, cache: { mode: "hit" }, usage: [] }, selection });
+      return { body: cached.response, aggregateHit: { createdAt: cached.createdAt, expiresAt: cached.expiresAt } };
+    }
     const adm = await store.admitSearchQuery(getPolicy().search.perHour);
     if (!adm.admitted) throw new Denied("SEARCH_RATE_LIMITED", `${getPolicy().search.perHour} searches reached the backend in the last hour`, { retryable: true, retryAfter: 60 });
     await availability.refresh();
     telemetry?.runStarted?.({ request, selection, roster, admittedAt: iso(tAdmit), configHashes: getConfigHashes() });
+    // What the run has seen so far, so a run that ends by a throw or a cancellation is still recorded once.
+    const seen = { lanes: [], activation: null, recorded: false };
     const margin = L.responseMarginMs, hardEnd = request.absoluteDeadlineMs - margin;
     const discoveryClose = Math.min(tAdmit + L.discoveryMs, hardEnd);
     const parent = new AbortController();
@@ -197,6 +203,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
 
       // 5. Normalize, constrain, pool, fuse.
       const all = [...generalOutcomes, ...docsOutcomes, ...(searxngOutcome ? [searxngOutcome] : [])];
+      Object.assign(seen, { lanes: all, activation });
       const prepared = all.filter(validated).map((o) => ({ o, ...prepareCandidates(o.provider, o.candidates, request.constraints) }));
       for (const p of prepared) if (p.o.status !== "partial" && p.o.candidates.length && !p.kept.length) p.o.filteredEmpty = true;
       const { pool, distinct, truncatedPassages } = buildPool(prepared.map((p) => ({ provider: p.o.provider, kept: p.kept, retrievedAt: p.o.originalRetrievedAt ?? p.o.completedAt, fromCache: p.o.fromCache })),
@@ -205,7 +212,8 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       const evidenceLanes = all.filter(validated);
       if (!evidenceLanes.length) {
         const reasons = all.map((o) => `${o.provider}: ${o.reason ?? o.status}`).join(", ");
-        telemetry?.runFinished?.({ request, outcome: "failed", lanes: all, timings });
+        telemetry?.runFinished?.({ request, outcome: "failed", lanes: all, activation, timings, selection });
+        seen.recorded = true;
         throw new Denied("SEARCH_ENGINES_FAILED", `no search provider answered (${reasons})`, { retryable: true, retryAfter: 60 });
       }
       fuse(pool);
@@ -279,10 +287,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
         // Keyed by the build that ranked it, which the next identical search looks up once that build has answered again.
         await cachePut(aggregateKey(request, roster, selection, rankedBy), body, ttlS);
       }
-      telemetry?.runFinished?.({ request, outcome: search.outcome, search, lanes: all, pool, final, ranking, timings: search.timings });
+      telemetry?.runFinished?.({ request, outcome: search.outcome, search, lanes: all, pool, final, ranking, activation, enrichment, timings: search.timings, selection });
+      seen.recorded = true;
       return { body, pool, final };
     } finally {
       signal.removeEventListener("abort", onCaller);
+      if (!seen.recorded) telemetry?.runFinished?.({ request, outcome: parent.signal.aborted ? "cancelled" : "failed", lanes: seen.lanes, activation: seen.activation, timings, selection });
       ended = true;
       for (const l of leases.values()) closeLease(l);
       leases.clear();
