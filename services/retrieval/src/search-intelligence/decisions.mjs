@@ -19,6 +19,10 @@ import { JEV_MODEL } from "../budget.mjs";
 export const DECISIONS_CONTRACT = "openrouter-decisions-v1/2026-10-17";
 // The output a reservation allows per question: an answer is one short typed value with optional probabilities, well under this.
 export const OUTPUT_TOKENS_PER_QUESTION = 64;
+// A candidate's excerpt is tried at these lengths (characters), longest first, until its batch fits (spec §7.3).
+export const EXCERPT_STEPS = [1500, 700, 300];
+// Title overlap (Jaccard over words) at which two documents of one version are worth a duplicate question (spec §10).
+export const DUPLICATE_TITLE_OVERLAP = 0.6;
 const FAMILY = /^(typesafe\/)?jev-1\.14($|[-.@:])/;
 export const RELEVANCE_LEVELS = ["Unrelated", "Related topic without useful task-specific detail", "Useful information for part of the task",
   "Directly relevant information with a material missing detail", "Direct answer with the requested task-specific evidence"];
@@ -61,7 +65,7 @@ export function makeBatches(docs, request, { maxCandidates, maxBytes }) {
   let cur = null;
   for (const d of fairOrder(docs)) {
     let placed = false;
-    for (const maxChars of [1500, 700, 300]) {
+    for (const maxChars of EXCERPT_STEPS) {
       const ex = excerptOf(d, maxChars);
       const entry = { title: d.title.slice(0, 300), url: d.canonicalUrl, excerpt: ex.text };
       if (cur && cur.docs.length < maxCandidates) {
@@ -217,7 +221,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
       const va = a.documentation?.scopes?.map((s) => s.observedVersion).join() ?? "", vb = b.documentation?.scopes?.map((s) => s.observedVersion).join() ?? "";
       if (va !== vb) continue;
       const t = jac(tokens(a.title), tokens(b.title));
-      if (t >= 0.6) pairs.push({ a, b, overlap: t });
+      if (t >= DUPLICATE_TITLE_OVERLAP) pairs.push({ a, b, overlap: t });
     }
     return pairs.sort((x, y) => y.overlap - x.overlap || (x.a.documentId + x.b.documentId < y.a.documentId + y.b.documentId ? -1 : 1)).slice(0, maxPairs);
   }

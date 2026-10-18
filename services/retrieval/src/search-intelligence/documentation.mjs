@@ -70,6 +70,9 @@ export function analyzeQuery(query, intelligence = {}) {
   return { decision: "none", signals: [] };
 }
 
+// Jev's probability that documentation would help, at or above which a weak cue activates (spec §13); kept low for recall.
+export const ACTIVATION_THRESHOLD = 0.2;
+
 export function makeDocumentation({ decisions = null, log = () => {} }) {
   return {
     async activate(request, { signal, deadlineAt, selection, decisionSubject }) {
@@ -88,7 +91,7 @@ export function makeDocumentation({ decisions = null, log = () => {} }) {
       // The fallback keeps what the call cost: settled usage when it was answered, an uncertain operation when it may have been.
       const usage = r.usage ?? (r.uncertain ? { uncertain: 1 } : undefined);
       if (!r.ok) { log({ event: "si_docs_classifier_fallback", reason: r.reason }); return { ...base, active: true, reason: `classifier_${r.reason}_possibly_technical`, uncertainty: null, signals: a.signals, jev: { status: "failed", reason: r.reason }, ...(usage ? { usage } : {}) }; }
-      return { ...base, active: r.probability >= 0.2, reason: r.probability >= 0.2 ? "classifier_positive" : "classifier_negative", uncertainty: r.probability, signals: a.signals,
+      return { ...base, active: r.probability >= ACTIVATION_THRESHOLD, reason: r.probability >= ACTIVATION_THRESHOLD ? "classifier_positive" : "classifier_negative", uncertainty: r.probability, signals: a.signals,
         jev: { status: "ok", probability: r.probability, model: r.model }, usage: r.usage };
     },
   };

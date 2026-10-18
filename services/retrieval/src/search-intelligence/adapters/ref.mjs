@@ -295,12 +295,13 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
     let reads = 0, closed = false;
     return {
       async read(providerUrl, { signal, deadlineAt }) {
-        if (closed || reads >= 2) return { ok: false, reason: "platform_restricted", detail: closed ? "session_closed" : "read_slots_used" };
+        if (closed || reads >= MAX_READS) return { ok: false, reason: "platform_restricted", detail: closed ? "session_closed" : "read_slots_used" };
         reads++;
         const rctx = { ...ctx, signal };
         const r = await tool(session, { request, ctx: rctx, kind: "docs_read", op: `read:${epoch}:${sha256(providerUrl).slice(0, 24)}`, name: "ref_read_url", args: { url: providerUrl }, deadlineAt });
         if (!r.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, providerCode: r.detail }, { answered: false }); return r; }
-        const parsed = parseRefRead(r.result, 48 * 1024);
+        // An excerpt is held to the evidence hook's per-document bound (spec §12), so a read can always be evaluated whole.
+        const parsed = parseRefRead(r.result, limits().evidence.maxDocumentBytes);
         await closeFor(r.close, parsed, ctx.sub.card.creditsPerOperation);
         const failure = await judged(rctx, parsed, r.startedAt);
         if (failure) return { ok: false, reason: failure, detail: parsed.detail, dispatchState: "response_received" };
