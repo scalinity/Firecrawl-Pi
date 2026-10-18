@@ -148,3 +148,10 @@ test("documentation activation: explicit modes, deterministic signals, the spec'
   const fb = await down.activate(validateSearchRequest(request({ originalQuery: "latest news about OpenAI", intelligence: { documentation: "auto" } })), ctx);
   assert.deepEqual([fb.active, fb.reason], [true, "classifier_timeout_possibly_technical"]);
 });
+
+test("documentation activation does not fire on everyday words, bare counts or hostnames, and keeps technical queries", () => {
+  for (const q of ["compose 2 emails to my boss", "flask of 2 liters price", "pandas 2 cubs born at the zoo", "rails for 3 stairs", "is www.bbc.co.uk down"])
+    assert.notEqual(analyzeQuery(q).decision, "positive", q);
+  for (const q of ["react 18 useEffect cleanup", "vue 3.5 defineModel", "os.path.join on windows", "docker compose healthcheck options", "pandas read_csv dtype", "rails 7.1 credentials edit", "flask app.config SECRET_KEY"])
+    assert.equal(analyzeQuery(q).decision, "positive", q);
+});

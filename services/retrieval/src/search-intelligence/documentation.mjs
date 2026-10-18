@@ -11,15 +11,16 @@
 // General engines run whatever this decides; documentation helping never means web search stops.
 import { VERSIONS } from "./contracts.mjs";
 
-// Names that mean a technology outright, and names that are also ordinary words (they count only beside technical context).
-const LIBRARIES = new Set(("react vue angular svelte next.js nextjs nuxt remix astro django flask fastapi rails laravel nestjs tokio axum actix serde pandas numpy scipy pytorch torch " +
+// Names that mean a technology outright, and names that are also ordinary words (they count only beside technical context);
+// each word is in one list only.
+const LIBRARIES = new Set(("vue angular svelte next.js nextjs nuxt remix astro django fastapi laravel nestjs tokio axum actix serde numpy scipy pytorch torch " +
   "tensorflow keras jax mlx mlx-lm transformers langchain llamaindex openai anthropic kubernetes k8s docker terraform ansible postgres postgresql mysql sqlite redis kafka rabbitmq nginx " +
   "node.js nodejs deno typescript javascript python golang kotlin java dotnet .net prisma drizzle tailwind tailwindcss vite webpack esbuild babel jest vitest playwright puppeteer " +
   "selenium httpx aiohttp axios graphql grpc protobuf ollama vllm llama.cpp gguf huggingface firecrawl supabase firebase aws gcp azure s3 cloudflare vercel netlify github gitlab npm " +
-  "pnpm yarn pip cargo maven gradle zod three.js d3 opencv sklearn scikit-learn xgboost lightgbm polars duckdb airflow dbt mongodb elasticsearch opensearch sqlalchemy pydantic " +
-  "websocket oauth jwt mcp searxng chromium webassembly wasm cuda metal coreml onnx triton jupyter numba cython uvicorn gunicorn systemd bash zsh powershell linux macos ios android " +
-  "tauri electron flutter dart swiftui jetpack compose expo unity unreal godot").split(/\s+/));
-const COMMON_WORD_LIBRARIES = new Set("react swift rust go spring express node requests celery bun spark lambda helm git flask hugo jekyll ruby rails pip docker compose make".split(" "));
+  "pnpm yarn cargo maven gradle zod three.js d3 opencv sklearn scikit-learn xgboost lightgbm polars duckdb dbt mongodb elasticsearch opensearch sqlalchemy pydantic " +
+  "websocket oauth jwt mcp searxng chromium webassembly wasm cuda coreml onnx triton jupyter numba cython uvicorn gunicorn systemd zsh powershell linux macos ios android " +
+  "tauri flutter swiftui jetpack unreal godot").split(/\s+/));
+const COMMON_WORD_LIBRARIES = new Set("react swift rust go spring express node requests celery bun spark lambda helm git flask hugo jekyll ruby rails pip compose make pandas bash metal unity expo electron dart airflow".split(" "));
 const TECH_WORDS = new Set(("api apis sdk cli library libraries package packages module modules function functions method methods class classes config configure configured configuring " +
   "configuration settings setting install installation installing timeout timeouts error errors exception exceptions bug bugs deprecated deprecation migrate migrating migration " +
   "upgrade upgrading version versions release releases endpoint endpoints parameter parameters param params argument arguments flag flags option options hook hooks component " +
@@ -33,8 +34,13 @@ const CONFIG = /\b(config(ure|ured|uration)?|settings?|env(ironment)? var(iable)
 const PHRASES = /\b(api reference|framework documentation|rest api|graphql api|sdk|cli|endpoint|webhook|middleware|type definitions?|stack trace|error code)\b/i;
 const QUESTION = /\b(how|why|what|where|when|fix|resolve|solve|works?|use|using|implement|handle|avoid|prevent)\b/i;
 const CODE = /```|^\s{4}\S|\bTraceback \(most recent call last\)|^\s*at [\w.$<>]+ \(.+:\d+:\d+\)|Exception in thread|panicked at|\bE\d{4}\b|\berror\[E\d+\]|\bSegmentation fault\b/m;
-const SYMBOL = /\b[A-Za-z_$][\w$]*\.[A-Za-z_$][\w$]*\(|\b\w+::\w+|\b[A-Za-z_$][\w$]*\(\)|@[a-z0-9-]+\/[a-z0-9._-]+|\bimport\s+[\w{]|\bfrom\s+[\w.]+\s+import\b|\brequire\(|#include\b|(^|\s)--[a-z][\w-]+|\b[a-z_]+\.[a-z_]+\.[a-z_]+\b|\b[A-Z][A-Z0-9]*_[A-Z0-9_]{2,}\b|\b[a-z]+[A-Z][a-zA-Z]+\b/;
-const VERSION = /\bv?\d+(\.\d+){0,3}([-.]?(alpha|beta|rc|preview)\.?\d*)?\b/i;
+const SYMBOL = /\b[A-Za-z_$][\w$]*\.[A-Za-z_$][\w$]*\(|\b\w+::\w+|\b[A-Za-z_$][\w$]*\(\)|@[a-z0-9-]+\/[a-z0-9._-]+|\bimport\s+[\w{]|\bfrom\s+[\w.]+\s+import\b|\brequire\(|#include\b|(^|\s)--[a-z][\w-]+|\b[A-Z][A-Z0-9]*_[A-Z0-9_]{2,}\b|\b[a-z]+[A-Z][a-zA-Z]+\b|\b[a-z][a-z0-9]*_[a-z0-9_]+\b/;
+// A version beside a technology: dotted (3.5, 2.11.162) or v-prefixed (v18); a bare number is a count, not a version.
+const VERSION = /\b(v?\d+(\.\d+){1,3}|v\d+)([-.]?(alpha|beta|rc|preview)\.?\d*)?\b/i;
+// A dotted identifier of three labels (os.path.join, torch.nn.functional), never a hostname (www.bbc.co.uk, docs.example.org).
+const DOTTED = /\b([a-z_]+)\.([a-z_]+)\.([a-z_]+)\b/g;
+const SUFFIX = new Set("com org net io co uk de fr jp edu gov dev app ai us au ca info biz me tv".split(" "));
+const dottedSymbol = (text) => [...text.matchAll(DOTTED)].some((m) => m[1] !== "www" && !SUFFIX.has(m[3]));
 const VERB_USE = /\b(react|go|express|spring|swift|rust|node|spark|make|compose|bun)\s+(to|with|for|of|in|on|at|over|away|ahead|back|up|out|forward)\b/gi;
 const WEAK_HOWTO = /\bhow (do|can|to|should) (i |we |you )?(use|set ?up|setup|integrate|connect|run|enable|disable|create|add|remove|update|install|configure)\b/i;
 const WEAK_NAME = /\b[A-Z][a-z]+[A-Z]\w*\b|\b[A-Z]{2,6}\b/;
@@ -50,7 +56,7 @@ export function analyzeQuery(query, intelligence = {}) {
   const signals = [];
   if (EXPLICIT.test(text)) signals.push("explicit_docs_request");
   if (CODE.test(text) && QUESTION.test(text)) signals.push("code_or_trace");
-  if (SYMBOL.test(text)) signals.push("api_symbol");
+  if (SYMBOL.test(text) || dottedSymbol(text)) signals.push("api_symbol");
   if (technology && VERSION.test(text.replace(/\b(19|20)\d{2}\b/g, " "))) signals.push("library_version");
   if (CONFIG.test(text) && (technology || tech.length >= 2)) signals.push("configuration");
   if (MIGRATION.test(text) && technology) signals.push("migration_or_troubleshooting");
