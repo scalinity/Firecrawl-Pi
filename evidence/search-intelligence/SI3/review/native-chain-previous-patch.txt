@@ -1,0 +1,216 @@
+### meta
+utc=2026-10-18T02:44:34Z
+repository_commit=14326c853de541d0d7001c6bdd49061f48aea2bf code_dirty=false
+image=fcpi/firecrawl-api:si3-before id=sha256:b28d840e37fe276c31b7e29e94827e4ec480eddbe449d52a992a2f26cb820e8d platform=linux/arm64
+patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed37a27
+### checks
+2026-10-18 02:45:46 [33mwarn[39m [:]: AUTUMN_SECRET_KEY is not set - add AUTUMN_SECRET_KEY to enable Autumn {}
+{
+  "schema": "fcpi.si3-native-chain/v1",
+  "utc": "2026-10-18T02:45:47.489Z",
+  "node": "v22.23.3",
+  "checks": [
+    {
+      "id": "trusted_context",
+      "result": "PASS",
+      "principalId": 16
+    },
+    {
+      "id": "long_search_succeeds_past_15s",
+      "result": "PASS",
+      "elapsedMs": 17538,
+      "error": null
+    },
+    {
+      "id": "long_search_all_engines_dispatched",
+      "result": "PASS",
+      "dispatched": {
+        "serper": 1,
+        "brave": 1,
+        "exa": 1,
+        "deepseek": 1,
+        "tavily": 1
+      }
+    },
+    {
+      "id": "long_search_ranked_by_jev",
+      "result": "PASS",
+      "ranking": "hybrid_partial",
+      "reason": "partial_semantic",
+      "scored": 16,
+      "shortlisted": 19
+    },
+    {
+      "id": "rows_carry_fcpi_search",
+      "result": "PASS",
+      "rows": 5
+    },
+    {
+      "id": "sourceless_context7_snippet_reaches_core",
+      "result": "PASS",
+      "found": true
+    },
+    {
+      "id": "documentation_both_lanes",
+      "result": "PASS",
+      "context7": "success_results",
+      "ref": "success_results"
+    },
+    {
+      "id": "short_search_answers_by_its_deadline",
+      "result": "PASS",
+      "elapsedMs": 3756,
+      "outcome": "partial",
+      "error": null
+    },
+    {
+      "id": "short_search_positive_send_control",
+      "result": "PASS"
+    },
+    {
+      "id": "short_search_zero_late_sends",
+      "result": "PASS",
+      "late": []
+    },
+    {
+      "id": "incomplete_trusted_headers_are_legacy",
+      "result": "PASS"
+    },
+    {
+      "id": "scrape_merge_keeps_both_namespaces",
+      "result": "PASS"
+    },
+    {
+      "id": "evidence_payload_windows_bounded_and_exact",
+      "result": "FAIL",
+      "bodyBytes": 120355,
+      "perDocBytes": [
+        49092,
+        49092
+      ],
+      "windows": [
+        287,
+        287
+      ],
+      "exact": true
+    },
+    {
+      "id": "evidence_annotates_acquired_rows",
+      "result": "PASS",
+      "modes": [
+        "jev",
+        "jev"
+      ]
+    },
+    {
+      "id": "evidence_payload_carries_the_core_deadline",
+      "result": "FAIL",
+      "headroomMs": null
+    },
+    {
+      "id": "evidence_off_evaluates_nothing",
+      "result": "PASS"
+    },
+    {
+      "id": "evidence_branches",
+      "result": "PASS",
+      "branches": {
+        "refused": [
+          "evidence_unavailable",
+          "evidence_unavailable"
+        ],
+        "cancelled": [
+          "cancelled",
+          "cancelled"
+        ],
+        "noTime": [
+          "no_time",
+          "no_time"
+        ],
+        "acquisitionFailed": [
+          "jev",
+          "acquisition_failed"
+        ]
+      }
+    },
+    {
+      "id": "evidence_trim_fits_and_keeps_priority",
+      "result": "FAIL",
+      "bodyBytes": 784869,
+      "ms": 337,
+      "dropped": [
+        22,
+        22,
+        22,
+        22,
+        22,
+        22,
+        22,
+        22,
+        21,
+        21
+      ],
+      "bestKept": false
+    },
+    {
+      "id": "evidence_hostile_paragraphs_bounded",
+      "result": "FAIL",
+      "ms": 30,
+      "windows": [
+        3590,
+        3590,
+        3590
+      ]
+    },
+    {
+      "id": "html_rendition_linear_and_exact",
+      "result": "FAIL",
+      "unclosedMs": 959,
+      "straysMs": 42300,
+      "text": "a < b\n\nvar x = 1 c & d"
+    },
+    {
+      "id": "query_terms_match_the_retrieval_service",
+      "result": "FAIL",
+      "exported": false,
+      "differ": [
+        "Next.js 15 generateMetadata await params Promise app router",
+        "PostgreSQL 17 documentation pg_stat_statements configuration parameters",
+        "urllib3 Retry backoff_factor status_forcelist allowed_methods mount on requests Session HTTPAdapter"
+      ]
+    },
+    {
+      "id": "trusted_deadline_never_restarts",
+      "result": "FAIL",
+      "pastFailure": "SEARCH_BACKEND_UNAVAILABLE"
+    },
+    {
+      "id": "answer_mapping",
+      "result": "FAIL",
+      "untyped": "SEARCH_BACKEND_ERROR",
+      "stalled": "SEARCH_BACKEND_ERROR"
+    },
+    {
+      "id": "compiled_scrape_merge_keeps_row_metadata",
+      "result": "PASS",
+      "merge": {
+        "search": true,
+        "retrieval": true,
+        "markdown": true
+      }
+    },
+    {
+      "id": "compiled_schema_is_strict",
+      "result": "PASS",
+      "schema": {
+        "valid": true,
+        "unknownRefused": true,
+        "impossibleDateRefused": true
+      }
+    }
+  ],
+  "passed": 17,
+  "failed": 8
+}
+### exit
+status=1

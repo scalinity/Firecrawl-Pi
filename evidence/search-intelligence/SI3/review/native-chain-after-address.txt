@@ -1,0 +1,213 @@
+### meta
+utc=2026-10-18T02:44:05Z
+repository_commit=14326c853de541d0d7001c6bdd49061f48aea2bf code_dirty=false
+image=fcpi/firecrawl-api:m2 id=sha256:b0f561ce743e8a0601d80c676c458c751a8b78df12020358085b23aeb89e8844 platform=linux/arm64
+patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed37a27
+### checks
+2026-10-18 02:44:33 [33mwarn[39m [:]: fcpi evidence unavailable {"status":400,"error":"Error","logicalSearchId":"a3382009-3265-41d7-91e7-7400d6cf4cbd"}
+2026-10-18 02:44:33 [33mwarn[39m [:]: AUTUMN_SECRET_KEY is not set - add AUTUMN_SECRET_KEY to enable Autumn {}
+{
+  "schema": "fcpi.si3-native-chain/v1",
+  "utc": "2026-10-18T02:44:34.335Z",
+  "node": "v22.23.3",
+  "checks": [
+    {
+      "id": "trusted_context",
+      "result": "PASS",
+      "principalId": 16
+    },
+    {
+      "id": "long_search_succeeds_past_15s",
+      "result": "PASS",
+      "elapsedMs": 17543,
+      "error": null
+    },
+    {
+      "id": "long_search_all_engines_dispatched",
+      "result": "PASS",
+      "dispatched": {
+        "serper": 1,
+        "brave": 1,
+        "exa": 1,
+        "deepseek": 1,
+        "tavily": 1
+      }
+    },
+    {
+      "id": "long_search_ranked_by_jev",
+      "result": "PASS",
+      "ranking": "hybrid_partial",
+      "reason": "partial_semantic",
+      "scored": 16,
+      "shortlisted": 19
+    },
+    {
+      "id": "rows_carry_fcpi_search",
+      "result": "PASS",
+      "rows": 5
+    },
+    {
+      "id": "sourceless_context7_snippet_reaches_core",
+      "result": "PASS",
+      "found": true
+    },
+    {
+      "id": "documentation_both_lanes",
+      "result": "PASS",
+      "context7": "success_results",
+      "ref": "success_results"
+    },
+    {
+      "id": "short_search_answers_by_its_deadline",
+      "result": "PASS",
+      "elapsedMs": 3757,
+      "outcome": "partial",
+      "error": null
+    },
+    {
+      "id": "short_search_positive_send_control",
+      "result": "PASS"
+    },
+    {
+      "id": "short_search_zero_late_sends",
+      "result": "PASS",
+      "late": []
+    },
+    {
+      "id": "incomplete_trusted_headers_are_legacy",
+      "result": "PASS"
+    },
+    {
+      "id": "scrape_merge_keeps_both_namespaces",
+      "result": "PASS"
+    },
+    {
+      "id": "evidence_payload_windows_bounded_and_exact",
+      "result": "PASS",
+      "bodyBytes": 20446,
+      "perDocBytes": [
+        8037,
+        8037
+      ],
+      "windows": [
+        48,
+        48
+      ],
+      "exact": true
+    },
+    {
+      "id": "evidence_annotates_acquired_rows",
+      "result": "PASS",
+      "modes": [
+        "jev",
+        "jev"
+      ]
+    },
+    {
+      "id": "evidence_payload_carries_the_core_deadline",
+      "result": "PASS",
+      "headroomMs": 15993
+    },
+    {
+      "id": "evidence_off_evaluates_nothing",
+      "result": "PASS"
+    },
+    {
+      "id": "evidence_branches",
+      "result": "PASS",
+      "branches": {
+        "refused": [
+          "evidence_unavailable",
+          "evidence_unavailable"
+        ],
+        "cancelled": [
+          "cancelled",
+          "cancelled"
+        ],
+        "noTime": [
+          "no_time",
+          "no_time"
+        ],
+        "acquisitionFailed": [
+          "jev",
+          "acquisition_failed"
+        ]
+      }
+    },
+    {
+      "id": "evidence_trim_fits_and_keeps_priority",
+      "result": "PASS",
+      "bodyBytes": 785221,
+      "ms": 5,
+      "dropped": [
+        22,
+        22,
+        22,
+        22,
+        22,
+        22,
+        22,
+        21,
+        21,
+        21
+      ],
+      "bestKept": true
+    },
+    {
+      "id": "evidence_hostile_paragraphs_bounded",
+      "result": "PASS",
+      "ms": 24,
+      "windows": [
+        48,
+        48,
+        48
+      ]
+    },
+    {
+      "id": "html_rendition_linear_and_exact",
+      "result": "PASS",
+      "unclosedMs": 0,
+      "straysMs": 22,
+      "text": "a &lt; b\n\nc & d"
+    },
+    {
+      "id": "query_terms_match_the_retrieval_service",
+      "result": "PASS",
+      "exported": true,
+      "differ": []
+    },
+    {
+      "id": "trusted_deadline_never_restarts",
+      "result": "PASS",
+      "pastFailure": "SEARCH_TIMEOUT"
+    },
+    {
+      "id": "answer_mapping",
+      "result": "PASS",
+      "untyped": "SEARCH_BACKEND_ERROR",
+      "stalled": "CANCELLED"
+    },
+    {
+      "id": "compiled_scrape_merge_keeps_row_metadata",
+      "result": "PASS",
+      "merge": {
+        "search": true,
+        "retrieval": true,
+        "markdown": true
+      }
+    },
+    {
+      "id": "compiled_schema_is_strict",
+      "result": "PASS",
+      "schema": {
+        "valid": true,
+        "unknownRefused": true,
+        "impossibleDateRefused": true
+      }
+    }
+  ],
+  "passed": 25,
+  "failed": 0
+}
+### exit
+status=0
