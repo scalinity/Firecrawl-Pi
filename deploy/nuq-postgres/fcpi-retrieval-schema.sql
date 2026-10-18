@@ -225,7 +225,7 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.proxy_reconciliation (
 
 -- Search intelligence operational records (spec §21.1): one row per logical execution, one per external operation outcome or
 -- availability/circuit transition, and daily reductions behind a watermark. Cost stays in the ledger: these refer to it by
--- logical id and call key and never copy its mutable totals. No raw query or page text: a query is kept as its fingerprint,
+-- logical id and call key and never copy its mutable totals. No raw query or page text: a query is kept as its keyed fingerprint,
 -- a URL without its query string. Retention (store.mjs prune): runs 30 days and their candidate traces 14, events 14 days, a run or
 -- event only once the daily reduction has moved past its day; daily aggregates 90.
 CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_run (

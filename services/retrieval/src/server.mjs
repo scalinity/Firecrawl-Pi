@@ -103,7 +103,9 @@ const gatewayTokenHash = parseSha256(readSecret(env.credentialsDir, "retrieval_g
 const store = new Store({ ...env.postgres, password: readSecret(env.credentialsDir, "retrieval_postgres_password") });
 // Provider availability (search intelligence, spec §15): read at connect and before each search.
 // Search intelligence's operational records (spec §21.1): runs, operations and transitions, best effort and drained at stop.
-const telemetry = makeTelemetry({ store, log, limits: () => basePolicy.search.intelligence });
+// The query fingerprint's key, derived from the browser token under its own label, as the URL HMAC below is.
+const telemetry = makeTelemetry({ store, log, limits: () => basePolicy.search.intelligence,
+  fingerprintKey: createHmac("sha256", readSecret(env.credentialsDir, "retrieval_browser_token")).update("fcpi.search.fingerprint.v1").digest() });
 const availability = makeAvailability({ store, log, onTransition: (t) => telemetry.event({ type: "availability", provider: t.provider, status: t.to, reason: t.reason ?? null,
   retryAt: t.retryAt ? new Date(t.retryAt) : null, detail: { from: t.from, retryBasis: t.retryBasis } }) });
 let storeReady = false;

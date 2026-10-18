@@ -5,10 +5,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { randomUUID } from "node:crypto";
+import { randomUUID, createHash } from "node:crypto";
 import pg from "pg";
 import { Store } from "../src/store.mjs";
-import { makeTelemetry, boundedTrace, TRACE_BYTES, safeUrl } from "../src/search-intelligence/telemetry.mjs";
+import { makeTelemetry, boundedTrace, TRACE_BYTES, safeUrl, fingerprint } from "../src/search-intelligence/telemetry.mjs";
+
+const KEY = Buffer.from("si-telemetry-test-fingerprint-key");
 
 const HOST = process.env.FCPI_TEST_PG;
 const opts = { skip: HOST ? false : "no test database (FCPI_TEST_PG unset)" };
@@ -67,7 +69,7 @@ test("the trace's byte bound holds with its marker, marks dropped duplicate pair
     assert.equal(trace.truncated.duplicatesDropped, 10, "pairs past 20 are counted as dropped");
   }
   const rows = [], store = { searchRunStarted: async () => {}, searchRunFinished: async (r) => { rows.push(r); }, searchEvents: async () => 0 };
-  const t = makeTelemetry({ store, limits: () => ({ traceMaxBytes: 4096 }) });
+  const t = makeTelemetry({ fingerprintKey: KEY, store, limits: () => ({ traceMaxBytes: 4096 }) });
   t.runFinished({ request: request(), outcome: "complete", pool, final });
   await t.drain();
   assert.ok(Buffer.byteLength(JSON.stringify(rows[0].trace)) <= 4096, "the policy's traceMaxBytes bounds the stored trace");
@@ -76,7 +78,7 @@ test("the trace's byte bound holds with its marker, marks dropped duplicate pair
 test("what is kept is private: no query text, no page text, no URL query strings", async () => {
   const rows = [], events = [];
   const store = { searchRunStarted: async (r) => rows.push(r), searchRunFinished: async (r) => rows.push(r), searchEvents: async (e) => events.push(...e) };
-  const t = makeTelemetry({ store });
+  const t = makeTelemetry({ fingerprintKey: KEY, store });
   const req = request();
   t.runStarted({ request: req, selection: "fixture", admittedAt: Date.now(), configHashes: { budgetSha256: "b" } });
   const pool = [docOf(0), docOf(1)];
@@ -94,10 +96,19 @@ test("what is kept is private: no query text, no page text, no URL query strings
   assert.ok(events.some((e) => e.type === "docs_activation" && e.reason === "nontechnical"));
 });
 
+test("the query fingerprint is keyed: the same query under another key, or unkeyed, gives another value", () => {
+  const req = request();
+  assert.equal(fingerprint(req, KEY), fingerprint({ ...req, requestId: "other-request-id" }, KEY), "stable for one query under one key");
+  assert.notEqual(fingerprint(req, KEY), fingerprint(req, Buffer.from("another-key")));
+  const plain = createHash("sha256").update(JSON.stringify({ q: SECRET_QUERY, lang: req.language, c: req.constraints, si: req.intelligence, limit: req.limit, mode: req.resultMode })).digest("hex");
+  assert.notEqual(fingerprint(req, KEY), plain, "a guessed query cannot be checked by hashing it");
+  assert.throws(() => makeTelemetry({ store: {} }), /fingerprint key/);
+});
+
 test("a telemetry write that fails is logged and counted and never reaches the caller", async () => {
   const logs = [];
   const store = { searchRunStarted: async () => { throw Object.assign(new Error("db down"), { code: "ECONNREFUSED" }); }, searchRunFinished: async () => { throw new Error("db down"); }, searchEvents: async () => { throw new Error("db down"); } };
-  const t = makeTelemetry({ store, log: (o) => logs.push(o) });
+  const t = makeTelemetry({ fingerprintKey: KEY, store, log: (o) => logs.push(o) });
   const req = request();
   assert.doesNotThrow(() => t.runStarted({ request: req, selection: "fixture", admittedAt: Date.now() }));
   assert.doesNotThrow(() => t.runFinished({ request: req, outcome: "partial", lanes: [lane("brave")] }));
@@ -110,7 +121,7 @@ test("a telemetry write that fails is logged and counted and never reaches the c
 test("writes waiting on a stalled database are bounded: past 256 a write is counted lost, not queued", async () => {
   const never = new Promise(() => {});
   const store = { searchRunStarted: () => never, searchRunFinished: () => never, searchEvents: () => never };
-  const t = makeTelemetry({ store });
+  const t = makeTelemetry({ fingerprintKey: KEY, store });
   for (let i = 0; i < 300; i++) t.event({ type: "breaker", provider: "p", status: "open" });
   const c = t.counters();
   assert.equal(c.telemetryPending, 256);
@@ -119,7 +130,7 @@ test("writes waiting on a stalled database are bounded: past 256 a write is coun
 
 test("a throw while building a record is counted and logged, never the search's", () => {
   const logs = [], store = { searchRunStarted: async () => {}, searchRunFinished: async () => {}, searchEvents: async () => 0 };
-  const t = makeTelemetry({ store, log: (o) => logs.push(o) });
+  const t = makeTelemetry({ fingerprintKey: KEY, store, log: (o) => logs.push(o) });
   const req = request();
   // A pool document of a shape the trace does not expect, a missing request and a missing event.
   assert.doesNotThrow(() => t.runFinished({ request: req, outcome: "complete", pool: [{ documentId: "x", observations: null }], final: [] }));
@@ -132,7 +143,7 @@ test("a throw while building a record is counted and logged, never the search's"
 test("run and event rows round-trip; an event written twice is kept once", opts, async () => {
   const store = await fresh();
   try {
-    const t = makeTelemetry({ store });
+    const t = makeTelemetry({ fingerprintKey: KEY, store });
     const req = request({ jobId: "job-0123456789" });
     t.runStarted({ request: req, selection: "live", admittedAt: Date.now(), configHashes: { budgetSha256: "b" } });
     t.runFinished({ request: req, outcome: "partial", search: { cache: { mode: "miss" }, coverage: { general: { successful: 4 } }, providers: {}, warnings: ["exa_rate_limited"], usage: [] },

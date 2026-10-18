@@ -1,15 +1,16 @@
 // Search intelligence's operational records (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §21): one search_run row per logical
 // execution and one search_event per external operation outcome, documentation activation, Ref read, evidence call and
 // availability or circuit transition. They are the inputs a later analytics dashboard needs (§22); nothing here serves one.
-//   - Private by construction: a query is kept as its fingerprint, a URL without its query string or fragment, no page text,
-//     no decision state text; provider detail is our own bounded codes.
+//   - Private by construction: a query is kept as its keyed fingerprint (an HMAC under a key the server derives from one of
+//     its own secrets), a URL without its query string or fragment, no page text, no decision state text; provider detail is
+//     our own bounded codes. The fingerprint is pseudonymous: only a holder of the key can test a guessed query against it.
 //   - Bounded: a run's candidate trace holds at most 128 documents and 20 duplicate assessments within the policy's
 //     traceMaxBytes (64 KiB as deployed), its truncation marker included; the final selection, version qualifications and
 //     every provider outcome survive trimming, which is marked.
 //   - Best effort: a failed write never touches the search's answer. It is logged (si_telemetry_degraded) and counted, and the
 //     writes in flight are tracked so a stop can drain them. Cost stays in the ledger, which these rows only refer to.
-import { randomUUID } from "node:crypto";
-import { sha256, normalizeQueryText, utf8Bytes } from "./normalize.mjs";
+import { randomUUID, createHmac } from "node:crypto";
+import { normalizeQueryText, utf8Bytes } from "./normalize.mjs";
 import { VERSIONS } from "./contracts.mjs";
 
 export const TRACE_BYTES = 65536;
@@ -18,7 +19,7 @@ const TRACE_DOCS = 128, TRACE_PAIRS = 20, MAX_STARTED = 1000, MAX_PENDING = 256;
 
 export const safeUrl = (u) => { try { const x = new URL(u); return `${x.origin}${x.pathname}`.slice(0, 512); } catch { return null; } };
 const code = (s) => (typeof s === "string" ? s.slice(0, 120) : null);
-export const fingerprint = (r) => sha256(JSON.stringify({ q: normalizeQueryText(r.originalQuery), lang: r.language, c: r.constraints, si: r.intelligence, limit: r.limit, mode: r.resultMode }));
+export const fingerprint = (r, key) => createHmac("sha256", key).update(JSON.stringify({ q: normalizeQueryText(r.originalQuery), lang: r.language, c: r.constraints, si: r.intelligence, limit: r.limit, mode: r.resultMode })).digest("hex");
 
 // The run's candidate trace: the final selection first, in its order, then the rest of the pool by its deterministic rank.
 // Relevance here is Jev's runtime advice (basis jev_runtime_advice), never a judged label.
@@ -59,7 +60,9 @@ function laneEvents(logicalId, lanes, observedAt) {
     detail: { usage: o.usage ?? null, suboperations: o.suboperations?.length ?? 0, filteredEmpty: !!o.filteredEmpty, providerRequestId: code(o.providerRequestId) } }));
 }
 
-export function makeTelemetry({ store, log = () => {}, clock = Date.now, limits = null }) {
+export function makeTelemetry({ store, log = () => {}, clock = Date.now, limits = null, fingerprintKey }) {
+  // An unkeyed hash of a query whose other fields take a handful of values would let anyone recover a common query.
+  if (!fingerprintKey?.length) throw new Error("telemetry needs a fingerprint key");
   const pending = new Set(), started = new Map();
   let lost = 0, written = 0;
   const write = (what, fn) => {
@@ -73,7 +76,7 @@ export function makeTelemetry({ store, log = () => {}, clock = Date.now, limits 
     return p;
   };
   const baseOf = (request, { selection, admittedAt, configHashes = {} }) => ({ logicalId: request.logicalSearchId, requestId: request.requestId, principalId: request.principalId, jobId: request.jobId ?? null,
-    fingerprint: fingerprint(request), profile: "aggregate", selection, resultMode: request.resultMode, acceptedAt: new Date(admittedAt), versions: { ...VERSIONS, config: configHashes } });
+    fingerprint: fingerprint(request, fingerprintKey), profile: "aggregate", selection, resultMode: request.resultMode, acceptedAt: new Date(admittedAt), versions: { ...VERSIONS, config: configHashes } });
   // The building before a write runs on the search's path: whatever it throws is counted and logged here, never the search's.
   const guard = (what, fn) => (...a) => { try { return fn(...a); } catch (e) { lost++; log({ event: "si_telemetry_degraded", what, error: String(e?.message ?? e).slice(0, 120) }); } };
 
