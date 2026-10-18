@@ -56,6 +56,7 @@ import { makeRef, makeRefSessionFactory } from "./search-intelligence/adapters/r
 import { makeRefBridge } from "./search-intelligence/adapters/ref-bridge.mjs";
 import { makeDocumentation } from "./search-intelligence/documentation.mjs";
 import { makeDecisions } from "./search-intelligence/decisions.mjs";
+import { makeEvidence } from "./search-intelligence/evidence.mjs";
 import { makeCoordinator } from "./search-intelligence/coordinator.mjs";
 
 const env = loadEnv(process.env);
@@ -161,7 +162,8 @@ const refFetch = makeRefBridge({ permits, getPolicy, resolvePublic, getBudget, p
 const docs = { context7: makeContext7({ dispatch, limits: intelligenceLimits }), ref: makeRef({ dispatch, limits: intelligenceLimits, openSession: makeRefSessionFactory({ makeFetch: refFetch, log }), log }) };
 const decisions = makeDecisions({ dispatch, store, limits: intelligenceLimits, permits, log });
 const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, getConfigHashes: () => ({ budgetSha256, policySha256 }), dispatch, general,
-  searxng: makeSearxngLane({ backend: searxngBackend, limits: intelligenceLimits }), docs, documentation: makeDocumentation({ decisions, log }), decisions, availability, legacy: search, log });
+  searxng: makeSearxngLane({ backend: searxngBackend, limits: intelligenceLimits }), docs, documentation: makeDocumentation({ decisions, log }), decisions,
+  evidence: makeEvidence({ decisions, limits: intelligenceLimits, log }), availability, legacy: search, log });
 const adapter = makeModelAdapter(common);
 const extract = makeExtractor({ adapter, getBudget, getSelection, log });
 const parse = makeParser({ ...common, getSelection });
@@ -295,13 +297,18 @@ const server = http.createServer(async (req, res) => {
       const r = await coordinator.legacyGet(req.url, abort.signal);
       return send(res, r.status, r.body);
     }
-    if (!["/internal/acquire", "/internal/fetch", "/internal/parse", "/internal/search"].includes(path)) return send(res, 404, { error: "not_found" });
+    if (!["/internal/acquire", "/internal/fetch", "/internal/parse", "/internal/search", "/internal/search/evidence"].includes(path)) return send(res, 404, { error: "not_found" });
     if (req.method !== "POST") return send(res, 405, { error: "method_not_allowed" });
     if (!authorized(req, coreTokenHash)) return send(res, 401, { error: "unauthorized" });
     if (!storeReady) return notReady(res);
     // Search intelligence: the core's trusted search request (small JSON), answered by the coordinator.
     if (path === "/internal/search") {
       const r = await coordinator.search(await readJson(req, 65536), { signal: abort.signal });
+      return send(res, r.status, r.body);
+    }
+    // Evidence advice on the pages the core acquired for a search (spec §12): bounded by the payload's own body limit.
+    if (path === "/internal/search/evidence") {
+      const r = await coordinator.evaluateEvidence(await readJson(req, intelligenceLimits().evidence.maxBodyBytes), { signal: abort.signal });
       return send(res, r.status, r.body);
     }
     if (path === "/internal/parse") {

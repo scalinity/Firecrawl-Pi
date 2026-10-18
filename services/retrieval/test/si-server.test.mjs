@@ -72,6 +72,26 @@ test("the wired server: credential, validation, an honest partial aggregate sear
     assert.deepEqual(lb.results.map((x) => Object.keys(x).sort()), [["content", "title", "url"]]);
     assert.equal(lb.fcpi.profile, "aggregate");
     assert.equal(lb.fcpi.partial, true);
+    // Evidence advice on acquired pages: the core's credential, its bounded payload, and the deterministic passages when Jev
+    // cannot be reached (the fixture decision host does not resolve here).
+    const evidence = (body, token = coreToken) => fetch(`${base}/internal/search/evidence`, { method: "POST", headers: { "content-type": "application/json", ...(token ? { authorization: `Bearer ${token}` } : {}) },
+      body: typeof body === "string" ? body : JSON.stringify(body) });
+    const page = "# Proxy\n\nThe proxy option forwards requests and accepts a timeout in milliseconds.";
+    const payload = { schema: "fcpi.search-evidence/v1", requestId: `req-${randomUUID()}`, logicalSearchId: randomUUID(), principalId: "test-principal", originalQuery: "vite proxy timeout",
+      intelligence: { documentation: "auto", evidence: "auto" }, absoluteDeadlineMs: Date.now() + 20000,
+      documents: [{ documentId: "a".repeat(24), url: "https://docs.example/proxy", sourceUrl: "https://docs.example/proxy", contentSha256: sha(page), totalLength: page.length, basis: "markdown",
+        windows: [{ start: 0, end: page.length, text: page }], droppedBytes: 0, droppedWindows: 0 }] };
+    assert.equal((await evidence(payload, null)).status, 401);
+    const ev = await evidence(payload);
+    const eb = await ev.json();
+    assert.equal(ev.status, 200, JSON.stringify(eb).slice(0, 400));
+    assert.deepEqual(eb.documents.map((d) => d.documentId), ["a".repeat(24)]);
+    assert.equal(eb.mode, "deterministic_fallback");
+    assert.ok(eb.documents[0].evidence.passages.some((p) => /timeout in milliseconds/.test(p.text)));
+    // A body past the 768 KiB bound is refused as every internal route refuses one: the upload is cut off, not read whole.
+    const over = await evidence("x".repeat(786433)).catch((e) => e);
+    assert.ok(over instanceof Error || over.status === 400, "a body past the bound is refused");
+    assert.equal((await fetch(`${base}/healthz`)).status, 200, "and the server keeps serving");
     child.kill("SIGTERM");
     assert.equal(await exited, 0);
     assert.match(out, /"event":"stopping".*"search_tasks_left":0/);

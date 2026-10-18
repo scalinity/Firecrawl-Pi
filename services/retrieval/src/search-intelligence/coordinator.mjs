@@ -27,7 +27,7 @@ const sleep = (ms, signal) => new Promise((r) => { const t = setTimeout(r, ms); 
 const iso = (t) => new Date(t).toISOString();
 
 export function makeCoordinator({ store, getBudget, getPolicy, getSelection, getConfigHashes = () => ({}), dispatch, general, searxng, docs = {}, documentation = null, decisions = null,
-  availability, telemetry = null, legacy = null, log = () => {}, clock = Date.now }) {
+  availability, telemetry = null, legacy = null, evidence = null, log = () => {}, clock = Date.now }) {
   const tasks = new Set();
   const track = (p) => { tasks.add(p); p.finally(() => tasks.delete(p)).catch(() => {}); return p; };
   const flights = new Map();
@@ -410,7 +410,17 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     while (tasks.size && clock() < until) await sleep(50);
     return tasks.size;
   }
-  return { search, legacyGet, drain, tasks: () => tasks.size, counters: () => ({ accountingFailures: dispatch.counters?.().accountingFailures ?? 0, cacheFailures }), aggregateKey };
+
+  // Evidence advice on pages the core already acquired (spec §12, §19.2): the payload is evaluated with the decision subject of
+  // the current selection's roster, so a fixture selection never reaches the live decision layer.
+  async function evaluateEvidence(raw, { signal }) {
+    if (!evidence) throw new Denied("SEARCH_BACKEND_UNAVAILABLE", "evidence evaluation is not available");
+    const selection = getSelection().search, roster = rosterFor(selection);
+    const r = await evidence.evaluate(raw, { signal, selection, decisionSubject: roster?.decisionSubject ?? null });
+    telemetry?.event?.({ type: "evidence", provider: "jev", logicalId: raw.logicalSearchId, operation: "evidence", status: r.mode, reason: r.reason ?? null, detail: { documents: r.documents.length } });
+    return { status: 200, body: r };
+  }
+  return { search, legacyGet, evaluateEvidence, drain, tasks: () => tasks.size, counters: () => ({ accountingFailures: dispatch.counters?.().accountingFailures ?? 0, cacheFailures }), aggregateKey };
 }
 
 const oldest = (lanes) => {
