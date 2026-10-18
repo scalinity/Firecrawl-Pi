@@ -239,7 +239,7 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_run (
   result_mode      text NOT NULL,
   accepted_at      timestamptz NOT NULL,
   completed_at     timestamptz,
-  outcome          text CHECK (outcome IN ('complete', 'partial', 'failed', 'cancelled')),
+  outcome          text,
   cache_mode       text,
   docs_active      boolean,
   docs_reason      text,
@@ -252,13 +252,17 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_run (
 -- The core's search job, which its selected-result scrapes and extraction share: the join from a run to its acquisitions.
 ALTER TABLE fcpi_retrieval.search_run ADD COLUMN IF NOT EXISTS job_id text;
 CREATE INDEX IF NOT EXISTS search_run_accepted ON fcpi_retrieval.search_run (accepted_at);
+-- The allowed values are replaced whole, so a database created by an earlier version takes new ones (a refused admission,
+-- a deadline's timeout): a CHECK written inside CREATE TABLE IF NOT EXISTS would never reach it.
+ALTER TABLE fcpi_retrieval.search_run DROP CONSTRAINT IF EXISTS search_run_outcome_check;
+ALTER TABLE fcpi_retrieval.search_run ADD CONSTRAINT search_run_outcome_check CHECK (outcome IN ('complete', 'partial', 'failed', 'cancelled', 'timeout', 'refused'));
 CREATE INDEX IF NOT EXISTS search_run_job ON fcpi_retrieval.search_run (job_id) WHERE job_id IS NOT NULL;
 CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_event (
   event_id        uuid PRIMARY KEY,
   logical_id      uuid,
   operation       text,
   provider        text NOT NULL,
-  event_type      text NOT NULL CHECK (event_type IN ('lane', 'decision', 'docs_activation', 'ref_read', 'evidence', 'availability', 'breaker')),
+  event_type      text NOT NULL,
   observed_at     timestamptz NOT NULL,
   started_at      timestamptz,
   duration_ms     integer,
@@ -275,6 +279,8 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_event (
 );
 CREATE INDEX IF NOT EXISTS search_event_observed ON fcpi_retrieval.search_event (observed_at);
 CREATE INDEX IF NOT EXISTS search_event_logical ON fcpi_retrieval.search_event (logical_id);
+ALTER TABLE fcpi_retrieval.search_event DROP CONSTRAINT IF EXISTS search_event_event_type_check;
+ALTER TABLE fcpi_retrieval.search_event ADD CONSTRAINT search_event_event_type_check CHECK (event_type IN ('lane', 'decision', 'docs_activation', 'ref_read', 'evidence', 'availability', 'breaker'));
 -- A day's counts, durations (total and a fixed-bucket histogram) and ledger-linked usage, by low-cardinality profile and
 -- provider ('*' for the run itself). Recomputed whole for the days a reduction covers, so a repeat changes nothing.
 CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_daily (

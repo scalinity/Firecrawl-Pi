@@ -131,7 +131,11 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       return { body: cached.response, aggregateHit: { createdAt: cached.createdAt, expiresAt: cached.expiresAt } };
     }
     const adm = await store.admitSearchQuery(getPolicy().search.perHour);
-    if (!adm.admitted) throw new Denied("SEARCH_RATE_LIMITED", `${getPolicy().search.perHour} searches reached the backend in the last hour`, { retryable: true, retryAfter: 60 });
+    if (!adm.admitted) {
+      // A refusal is a run of its own, so refused demand stays visible (spec §21.2); nothing was dispatched.
+      telemetry?.runFinished?.({ request, outcome: "refused", timings: { admittedAt: iso(tAdmit) }, selection });
+      throw new Denied("SEARCH_RATE_LIMITED", `${getPolicy().search.perHour} searches reached the backend in the last hour`, { retryable: true, retryAfter: 60 });
+    }
     await availability.refresh();
     telemetry?.runStarted?.({ request, selection, roster, admittedAt: iso(tAdmit), configHashes: getConfigHashes() });
     // What the run has seen so far, so a run that ends by a throw or a cancellation is still recorded once.
@@ -293,7 +297,8 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       return { body, pool, final };
     } finally {
       signal.removeEventListener("abort", onCaller);
-      if (!seen.recorded) telemetry?.runFinished?.({ request, outcome: parent.signal.aborted ? "cancelled" : "failed", lanes: seen.lanes, activation: seen.activation, timings, selection });
+      // An execution ended by its deadline is a timeout; by its caller (or a stop), a cancellation.
+      if (!seen.recorded) telemetry?.runFinished?.({ request, outcome: parent.signal.aborted ? (clock() >= request.absoluteDeadlineMs ? "timeout" : "cancelled") : "failed", lanes: seen.lanes, activation: seen.activation, timings, selection });
       ended = true;
       for (const l of leases.values()) closeLease(l);
       leases.clear();
@@ -343,6 +348,9 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
     }
     const f = flight;
     f.subscribers++;
+    // A caller that joined another's execution is a run of its own, with no lanes and no usage: the spend stays with the run
+    // that executed, and the caller's job and evidence call still find a run under its logical id (spec §21.2).
+    const joined = f.logicalSearchId !== request.logicalSearchId;
     const leave = () => { f.subscribers--; if (f.subscribers <= 0 && !f.closed) close(f); };
     let onAbort, timer;
     try {
@@ -353,7 +361,11 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
         if (signal?.aborted) onAbort();
       });
       const r = await Promise.race([f.promise, gone]);
+      if (joined) telemetry?.runFinished?.({ request, outcome: r.body.search.outcome, search: { ...r.body.search, cache: { mode: "coalesced" }, usage: [] }, selection });
       return { status: 200, body: personalize(r, request, f) };
+    } catch (e) {
+      if (joined) telemetry?.runFinished?.({ request, outcome: e.failureClass === "CANCELLED" ? "cancelled" : e.failureClass === "SEARCH_TIMEOUT" ? "timeout" : "failed", selection });
+      throw e;
     } finally {
       clearTimeout(timer); signal?.removeEventListener("abort", onAbort); leave();
     }

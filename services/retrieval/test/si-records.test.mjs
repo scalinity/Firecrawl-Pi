@@ -87,6 +87,41 @@ test("a breaker reports each transition its verdicts cause, once", () => {
   assert.deepEqual(seen, ["closed>open", "half_open>open", "half_open>closed"], "no report for a verdict that changes nothing");
 });
 
+test("a caller that joined another's execution, a refused admission and an expired deadline each leave their run", async () => {
+  const slow = (ms) => () => new Promise((r) => setTimeout(() => r({ status: 200, body: { credits: 1, organic: [{ link: "https://slow.example.org/a", title: "a", snippet: "a" }] } }), ms));
+  const h = await harness({ telemetry: true, perHour: 2, handlers: { serper: slow(300) } });
+  try {
+    const q = { originalQuery: "records joined caller" };
+    const first = request(q), second = request(q);
+    const p1 = h.coordinator.search(first, { signal: new AbortController().signal });
+    await new Promise((r) => setTimeout(r, 50));
+    const [a, b] = await Promise.all([p1, h.coordinator.search(second, { signal: new AbortController().signal })]);
+    assert.equal(b.body.search.coalesced, true);
+    await settle(h);
+    const joinedRun = h.store.runs.get(second.logicalSearchId);
+    assert.ok(joinedRun, "the joined caller has a run under its own logical id");
+    assert.deepEqual([joinedRun.cacheMode, joinedRun.outcome, joinedRun.summary.usage], ["coalesced", a.body.search.outcome, []], "no usage: the spend stays with the run that executed");
+    assert.equal(h.store.events.filter((e) => e.logicalId === second.logicalSearchId).length, 0, "and no lanes of its own");
+    // Two admissions are used; the third distinct search is refused, and recorded.
+    await run(h, { originalQuery: "records second admission" });
+    const refused = request({ originalQuery: "records refused admission" });
+    await assert.rejects(h.coordinator.search(refused, { signal: new AbortController().signal }), (e) => e.failureClass === "SEARCH_RATE_LIMITED");
+    await settle(h);
+    assert.equal(h.store.runs.get(refused.logicalSearchId)?.outcome, "refused");
+  } finally { await h.close(); }
+  // An execution that overruns its deadline (here its admission outlasts it) is closed by the deadline's backstop: a timeout.
+  // Every lane ending at its own bound instead is all-discovery-failed, recorded as failed.
+  const h2 = await harness({ telemetry: true });
+  try {
+    const admit = h2.store.admitSearchQuery.bind(h2.store);
+    h2.store.admitSearchQuery = async (n) => { await new Promise((r) => setTimeout(r, 1700)); return admit(n); };
+    const late = request({ originalQuery: "records deadline", absoluteDeadlineMs: Date.now() + 1500 });
+    await assert.rejects(h2.coordinator.search(late, { signal: new AbortController().signal }));
+    assert.ok(await waitFor(() => h2.store.runs.get(late.logicalSearchId)?.outcome), "the run is recorded");
+    assert.equal(h2.store.runs.get(late.logicalSearchId).outcome, "timeout", "a deadline's end is a timeout, not a cancellation");
+  } finally { await h2.close(); }
+});
+
 test("a telemetry write that fails is counted and logged, and the search's answer is unchanged", async () => {
   const h = await harness({ telemetry: true });
   try {

@@ -227,6 +227,16 @@ test("an unreduced old event is kept, and the schema reapplies over populated op
     assert.equal((await store.pool.query("SELECT count(*)::int AS n FROM fcpi_retrieval.search_event")).rows[0].n, 1, "no reduction has covered its day yet");
     await admin((c) => c.query(readFileSync(SCHEMA, "utf8")));
     assert.equal((await store.pool.query("SELECT count(*)::int AS n FROM fcpi_retrieval.search_event")).rows[0].n, 1, "reapplying the schema keeps the rows");
+    // A database made by the earlier version has the four-value outcome CHECK; reapplying the schema replaces it.
+    await admin(async (c) => {
+      await c.query("ALTER TABLE fcpi_retrieval.search_run DROP CONSTRAINT IF EXISTS search_run_outcome_check");
+      await c.query("ALTER TABLE fcpi_retrieval.search_run ADD CONSTRAINT search_run_outcome_check CHECK (outcome IN ('complete', 'partial', 'failed', 'cancelled'))");
+      await c.query(readFileSync(SCHEMA, "utf8"));
+    });
+    const runOf = (outcome) => ({ logicalId: randomUUID(), requestId: `req-${randomUUID()}`, principalId: "owner", fingerprint: "f".repeat(64), profile: "aggregate", selection: "live", resultMode: "links",
+      acceptedAt: new Date(), versions: {}, completedAt: new Date(), outcome });
+    for (const o of ["refused", "timeout"]) await store.searchRunFinished(runOf(o));
+    await assert.rejects(store.searchRunFinished(runOf("bogus")), /search_run_outcome_check/);
   } finally { await store.close(); }
 });
 
