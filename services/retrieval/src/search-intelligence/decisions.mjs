@@ -17,6 +17,8 @@ import { sha256, utf8Bytes, normalizeQueryText } from "./normalize.mjs";
 import { JEV_MODEL } from "../budget.mjs";
 
 export const DECISIONS_CONTRACT = "openrouter-decisions-v1/2026-10-17";
+// The output a reservation allows per question: an answer is one short typed value with optional probabilities, well under this.
+export const OUTPUT_TOKENS_PER_QUESTION = 64;
 const FAMILY = /^(typesafe\/)?jev-1\.14($|[-.@:])/;
 export const RELEVANCE_LEVELS = ["Unrelated", "Related topic without useful task-specific detail", "Useful information for part of the task",
   "Directly relevant information with a material missing detail", "Direct answer with the requested task-specific evidence"];
@@ -139,8 +141,10 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
     try { release = await permits.decision(request.logicalSearchId, { signal, deadlineAt }); }
     catch (e) { return { ok: false, reason: e.capacity ? "capacity_unavailable" : e.code === "CANCELLED" ? "cancelled" : "timeout", detail: e.code }; }
     try {
-      // Tokens never outnumber bytes, so the body's bytes bound the input; output is free.
-      const amount = Math.max(1, Math.ceil((buf.length * sub.card.inputPerMTok) / 1e6));
+      // Tokens never outnumber bytes, so the body's bytes bound the input; the output is bounded per question, priced at the
+      // card's output rate (zero on Jev's card today).
+      const questions = Object.keys(body.questions ?? {}).length;
+      const amount = Math.max(1, Math.ceil((buf.length * sub.card.inputPerMTok + questions * OUTPUT_TOKENS_PER_QUESTION * (sub.card.outputPerMTok ?? 0)) / 1e6));
       const res = await dispatch.call({ sub, pre, kind: "decision", callKey: `search:${request.logicalSearchId}:jev:${purpose}:${sha256(buf).slice(0, 24)}:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
         requestHash: sha256(`${DECISIONS_CONTRACT}\n${buf}`), amount, signal, deadlineAt, timeoutMs: Math.max(1, deadlineAt - clock()), maxBytes: L.responseBytes.jev,
         http: { path: "/api/alpha/decisions", headers: { "content-type": "application/json", accept: "application/json", authorization: `Bearer ${pre.key}` }, body: buf } });

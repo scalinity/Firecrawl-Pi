@@ -5,7 +5,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { harness, request } from "./si-helpers.mjs";
 import { makeContext7 } from "../src/search-intelligence/adapters/context7.mjs";
-import { makeDecisions } from "../src/search-intelligence/decisions.mjs";
+import { makeDecisions, OUTPUT_TOKENS_PER_QUESTION } from "../src/search-intelligence/decisions.mjs";
 import { JEV_MODEL } from "../src/budget.mjs";
 
 const limitsOf = (h) => () => h.policy.search.intelligence;
@@ -130,5 +130,18 @@ test("a decision body over the 24,000-byte bound by any amount is refused before
     assert.deepEqual([r.ok, r.detail], [false, "batch_over_bound"]);
     assert.equal(h.servers.openrouter.seen.length, 0);
     assert.equal(h.store.rows.size, 0, "nothing reserved");
+  } finally { await h.close(); }
+});
+
+test("Jev's reservation covers its input and a bounded output per question at the card's output price", async () => {
+  const card = (b) => b.rateCards.find((c) => c.subject === "fcpi-fixture-jev");
+  const h = await harness({ mutateBudget: (b) => { card(b).outputPerMTok = 1000000; }, handlers: { openrouter: () => ({ status: 200, body: { model: JEV_MODEL, answers: { relevant: { type: "noul", noul: 1 } }, usage: { input_tokens: 10, output_tokens: 2 } } }) } });
+  try {
+    const decisions = makeDecisions({ dispatch: h.dispatch, store: h.store, limits: limitsOf(h), permits: h.permits });
+    const { sub, pre } = decisions.preflight("fixture", "fcpi-fixture-jev");
+    const body = jevBody("output allowance");
+    await decisions.decide({ body, kind: "decision", purpose: "rerank", request: docsRequest("output allowance"), sub, pre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    const bytes = Buffer.byteLength(JSON.stringify(body));
+    assert.equal(h.store.lastReserve.amount, Math.ceil((bytes * 42000 + 1 * OUTPUT_TOKENS_PER_QUESTION * 1000000) / 1e6), "input bytes at the input rate plus 64 tokens for the one question");
   } finally { await h.close(); }
 });
