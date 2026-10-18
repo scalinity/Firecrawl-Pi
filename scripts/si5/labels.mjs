@@ -14,7 +14,10 @@
 //            original labels, the resolution, verification, source type, version status, the file and capture hashes, and
 //            the verified passages as hashes with their offsets and, for an excerpt, the lanes that delivered it), with
 //            the agreement figures. The judges' free text (reason, questions) stays in eval/private/labels-text.json, and
-//            labels.json carries only its hashes; no credential value may appear in either.
+//            labels.json carries only its hashes; no credential value may appear in either. The passage round's judgments
+//            (judgments/passages/, from packets-passages/) add each document's verified documentation-passage support
+//            (docRequirements, with the lanes that delivered each passage; none when the passages are of a mismatched version),
+//            and mark the document docPassagesJudged.
 // Judgments live in eval/private/judgments/{first,second,adjudication}/<id>.json; eval/judges.json (scripts/si5/judges.mjs)
 // records who judged with which prompt; final refuses when a prompt on disk no longer matches it, a judge was shown other than
 // its prompt, or a judge reached outside its packet without a classified note.
@@ -71,6 +74,25 @@ function excerptSources(sec, keys, url, passage) {
   const hit = spans.filter((s) => s.start < end && at < s.end);
   if (!hit.length) return null;
   return hit.slice(1).reduce((acc, s) => acc.filter((x) => s.sources.includes(x)), [...hit[0].sources]);
+}
+
+// The passage round's support for one document: each requirement's passage located in its file, credited to the lanes of the
+// documentation passage(s) it falls within (common to all of them when it spans several).
+function passageSupport(q, doc, keys, url, judgment) {
+  const t = readFileSync(join(PRIV, "packets-passages", q, "docs", `${doc}.md`), "utf8");
+  if (sha(t) !== keys.passageFiles?.[doc]?.sha256) return { flag: "file_changed", reqs: [] };
+  const sec = flat(t.slice(t.indexOf("\n## Documentation passages\n")));
+  let from = 0;
+  const spans = (keys.docPassages?.[url] ?? []).map((x) => { const f = flat(x.text), at = sec.indexOf(f, from); if (at >= 0) from = at + f.length; return { start: at, end: at + f.length, sources: x.sources }; });
+  const reqs = (judgment.requirements ?? []).map((x) => {
+    if (typeof x.passage !== "string" || flat(x.passage).length < 20) return null;
+    const p = flat(x.passage), at = sec.indexOf(p);
+    if (at < 0) return null;
+    const hit = spans.filter((s) => s.start >= 0 && s.start < at + p.length && at < s.end);
+    if (!hit.length) return null;
+    return { req: x.req, offset: at, passageSha256: sha(p), sources: hit.slice(1).reduce((acc, s) => acc.filter((y) => s.sources.includes(y)), [...hit[0].sources]) };
+  }).filter(Boolean);
+  return { flag: null, reqs };
 }
 
 function writePacket(dir, q, docs, extra = null) {
@@ -135,7 +157,7 @@ if (stage === "second") {
   const adj = new Map(judged("adjudication").flatMap((f) => f.judgments.map((j) => [`${f.query}:${j.id}`, j])));
   const out = { schema: "fcpi.si5-labels/v2", labelsScriptSha256: sha(readFileSync(new URL(import.meta.url))), judges: judges.rounds ? Object.fromEntries(Object.entries(judges.rounds).map(([k, r]) => [k, { model: r.model, template: r.template, templateSha256: r.templateSha256 }])) : null, queries: {} };
   const text = {};
-  const agree = { pairs: 0, exact: 0, relevanceAgree: 0, withinOne: 0, disputes: 0, adjudicated: 0, unverifiedSpans: 0, invalidGrades: 0, versionCapped: 0, fileChanged: 0, unjudgedFirst: 0, missingFirst: 0 };
+  const agree = { pairs: 0, exact: 0, relevanceAgree: 0, withinOne: 0, disputes: 0, adjudicated: 0, unverifiedSpans: 0, invalidGrades: 0, versionCapped: 0, fileChanged: 0, unjudgedFirst: 0, missingFirst: 0, passageDocs: 0, passageDocsUnjudged: 0, passageRequirements: 0, passageUnverified: 0 };
   for (const f of judged("first")) {
     const keys = keysOf(f.query), urls = Object.fromEntries(Object.entries(keys.ids).map(([u, k]) => [k, u]));
     const expected = new Set(read(join(PRIV, "packets", f.query, "index.json")).documents.map((d) => d.slice(0, -3)));
@@ -176,6 +198,26 @@ if (stage === "second") {
         provenance: r ? "independent_model_adjudication" : "independent_model_judgment" };
     }
     for (const id of expected) { agree.missingFirst++; rows[urls[id]] = { doc: id, grade: null, verified: false, flag: "missing", labels: { first: null }, provenance: "independent_model_judgment" }; }
+    // The passage round, where this query has one.
+    const pidx = join(PRIV, "packets-passages", f.query, "index.json");
+    if (existsSync(pidx)) {
+      const pj = existsSync(join(J, "passages", `${f.query}.json`)) ? read(join(J, "passages", `${f.query}.json`)) : { judgments: [] };
+      const byId = new Map((pj.judgments ?? []).map((x) => [idOf(x.id), x]));
+      for (const id of read(pidx).documents.map((d) => d.slice(0, -3))) {
+        const row = rows[urls[id]], x = byId.get(id);
+        if (!row) continue;
+        if (!x) { row.docPassagesJudged = false; agree.passageDocsUnjudged++; continue; }
+        const { flag, reqs } = passageSupport(f.query, id, keys, urls[id], x);
+        const v = VERSION.has(x.versionStatus) ? x.versionStatus : null;
+        row.docPassagesJudged = !flag;
+        row.docVersionStatus = v;
+        row.docRequirements = flag || v === "mismatch" ? [] : reqs;
+        if (flag) { row.docFlag = flag; agree.fileChanged++; } else if (v === "mismatch") row.docFlag = "version_mismatch";
+        agree.passageDocs++;
+        agree.passageRequirements += row.docRequirements.length;
+        agree.passageUnverified += (x.requirements ?? []).length - reqs.length;
+      }
+    }
     out.queries[f.query] = rows;
   }
   agree.disputes = existsSync(join(PRIV, "packets-adjudication")) ? readdirSync(join(PRIV, "packets-adjudication")).reduce((n, q) => n + read(join(PRIV, "packets-adjudication", q, "index.json")).documents.length, 0) : 0;

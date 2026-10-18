@@ -27,6 +27,7 @@ const ROUNDS = {
   first: { prefix: "si5-judge1-", template: "judge-prompt.md", prompt: (n) => `judge-prompts/first-${n}.md` },
   second: { prefix: "si5-judge2-", template: "judge-prompt.md", prompt: (n) => `judge-prompts/second-${n}.md` },
   adjudication: { prefix: "si5-adj-", template: "adjudicate-prompt.md", prompt: (n) => `judge-prompts/adjudicate-${n}.md` },
+  passages: { prefix: "si5-passages-", template: "passages-prompt.md", prompt: (n) => `judge-prompts/passages-${n}.md` },
 };
 const SENSITIVE = /runs\/|pool\.json|packet-keys|captures(\/|\.json)|frozen\.json|anchors\.json|labels(-text)?\.json|second-selection\.json|judges\.json|\.env\b|judging\/|si5-collect|ca1-|db1-|REVIEW\.md|subagents\//g;
 const FETCH_TOOL = /^(WebFetch|WebSearch|mcp__)/, FETCH_CMD = /(^|[;&|]\s*|\$\(\s*|\bxargs\s+)(curl|wget)\s/m;
