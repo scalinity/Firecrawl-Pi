@@ -7,6 +7,8 @@ import { readFileSync } from "node:fs";
 import { createServer } from "node:http";
 import { validateBody, RequestError } from "../src/validate.mjs";
 import { makeUpstream } from "../src/upstream.mjs";
+import { trustedSearchHeaders } from "../src/search-context.mjs";
+import { ownerTag } from "../src/auth.mjs";
 
 const M = JSON.parse(readFileSync(process.env.FCPI_TEST_MANIFEST ?? new URL("../../../deploy/policies/capabilities.json", import.meta.url), "utf8"));
 const refused = (body, re) => assert.throws(() => validateBody("search", body, M), (e) => e instanceof RequestError && e.status === 400 && (!re || re.test(e.message)), JSON.stringify(body));
@@ -57,3 +59,19 @@ test("the core receives the search's trusted context only through the four allow
     assert.deepEqual(Object.keys(h).filter((k) => k.startsWith("x-fcpi")).sort(), ["x-fcpi-search-deadline-ms", "x-fcpi-search-id", "x-fcpi-search-owner", "x-fcpi-search-request-id"]);
   } finally { core.close(); front.close(); }
 });
+
+test("the trusted search headers carry the gateway's request id, a new search id, the owner tag and the caller's deadline, on search alone", () => {
+  const ctx = { id: "req-0123456789abcdef", client: { principal: "owner-principal" } };
+  const now = () => 1_800_000_000_000;
+  const h = trustedSearchHeaders({ id: "search" }, ctx, { query: "q", timeout: 30000 }, now);
+  assert.deepEqual(Object.keys(h).sort(), ["x-fcpi-search-deadline-ms", "x-fcpi-search-id", "x-fcpi-search-owner", "x-fcpi-search-request-id"]);
+  assert.equal(h["x-fcpi-search-request-id"], ctx.id, "the gateway's own request id");
+  assert.match(h["x-fcpi-search-id"], /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/);
+  assert.notEqual(trustedSearchHeaders({ id: "search" }, ctx, { query: "q" }, now)["x-fcpi-search-id"], h["x-fcpi-search-id"], "a new logical search each time");
+  assert.equal(h["x-fcpi-search-owner"], ownerTag("owner-principal"), "the owner tag, never the principal's name");
+  assert.ok(!Object.values(h).some((v) => v.includes("owner-principal")));
+  assert.equal(h["x-fcpi-search-deadline-ms"], String(now() + 30000));
+  assert.equal(trustedSearchHeaders({ id: "search" }, ctx, { query: "q" }, now)["x-fcpi-search-deadline-ms"], String(now() + 60000), "the default timeout is 60 s");
+  for (const id of ["scrape", "crawl.submit", "map", "batch.submit", "extract.submit"]) assert.equal(trustedSearchHeaders({ id }, ctx, { url: "https://x.example/" }, now), null, `${id} carries none`);
+});
+
