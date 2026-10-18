@@ -15,7 +15,7 @@
 import { randomUUID } from "node:crypto";
 import { Denied } from "../ssrf.mjs";
 import { validateSearchRequest, outcome, skipped, failed, validated, GENERAL, DOCUMENTATION, VERSIONS, RESPONSE_SCHEMA } from "./contracts.mjs";
-import { prepareCandidates, buildPool, sha256, normalizeQueryText } from "./normalize.mjs";
+import { prepareCandidates, buildPool, sha256, normalizeQueryText, normalizeUrl, hostMatches } from "./normalize.mjs";
 import { fuse, literalRelevance, shortlist, blend, selectFinal } from "./rank.mjs";
 import { SEARCH_APIS } from "../budget.mjs";
 
@@ -397,18 +397,36 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   // its answer carried in the new response shape.
   async function legacyAsInternal(request, signal) {
     if (!legacy) throw new Denied("SEARCH_BACKEND_UNAVAILABLE", "the legacy profile is not available");
+    const c = request.constraints;
+    // A hard constraint is never dropped (spec §9.1). Publication bounds the legacy engines cannot honor are refused; domain
+    // lists become the bare site: operators the core sent before patch 0011, and the rows are filtered by host as well, since
+    // an engine may ignore an operator. A freshness preference has no legacy form and is said to be ignored.
+    if (c.dateMode === "strict_publication" && (c.publishedAfter || c.publishedBefore)) {
+      throw new Denied("UNSUPPORTED_CAPABILITY", "the legacy search profile cannot honor strict publication dates");
+    }
+    const ops = c.includeDomains.length ? " " + c.includeDomains.map((d) => `site:${d}`).join(" OR ") : c.excludeDomains.length ? " " + c.excludeDomains.map((d) => `-site:${d}`).join(" ") : "";
+    const allowed = (url) => {
+      const host = normalizeUrl(url)?.host;
+      if (!host) return false;
+      if (c.includeDomains.length) return c.includeDomains.some((d) => hostMatches(host, d));
+      return !c.excludeDomains.some((d) => hostMatches(host, d));
+    };
     const u = new URL("http://x/searxng/search");
-    u.searchParams.set("q", request.originalQuery);
+    u.searchParams.set("q", request.originalQuery + ops);
     // The legacy facade takes letters and hyphens, at most 16 (search.mjs); a tag it would refuse, such as es-419, keeps its
     // primary subtag: SearXNG and Serper then search that language without the region, rather than refusing the search.
     const language = request.language === "auto" || /^[A-Za-z-]{1,16}$/.test(request.language) ? request.language : request.language.split("-")[0];
     u.searchParams.set("language", language);
     const r = await legacy(u.pathname + u.search, signal);
     const b = r.body;
-    const web = b.results.slice(0, request.limit).map((x) => ({ url: x.url, title: x.title, description: x.content }));
+    const web = b.results.filter((x) => allowed(x.url)).slice(0, request.limit).map((x) => ({ url: x.url, title: x.title, description: x.content }));
     const partial = (b.unresponsive_engines ?? []).length > 0;
-    return { status: 200, body: { schema: "fcpi.search-response/v1", web, ...(partial ? { warning: `Partial search result: ${b.unresponsive_engines.length} engine(s) did not answer (${b.unresponsive_engines.map((u) => `${u.engine}: ${u.reason || "no reason"}`).join("; ")}).` } : {}),
+    const ignored = c.publishedAfter || c.publishedBefore ? "the legacy search profile ignores the freshness preference" : null;
+    const notes = [...(partial ? [`Partial search result: ${b.unresponsive_engines.length} engine(s) did not answer (${b.unresponsive_engines.map((u) => `${u.engine}: ${u.reason || "no reason"}`).join("; ")}).`] : []),
+      ...(ignored ? [`Note: ${ignored}.`] : [])];
+    return { status: 200, body: { schema: "fcpi.search-response/v1", web, ...(notes.length ? { warning: notes.join(" ") } : {}),
       search: { schema: RESPONSE_SCHEMA, logicalSearchId: request.logicalSearchId, requestId: request.requestId, profile: "legacy", outcome: partial ? "partial" : "complete", empty: web.length === 0,
+        warnings: ignored ? ["legacy_freshness_ignored"] : [],
         legacy: { engines: b.fcpi?.engines ?? [], answered: b.fcpi?.answered ?? [], unresponsive: b.unresponsive_engines ?? [], cache: b.fcpi?.cache ?? null, provider: b.fcpi?.provider ?? null } } } };
   }
 

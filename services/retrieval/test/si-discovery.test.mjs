@@ -794,3 +794,26 @@ test("Brave's live monthly window of limit 0 sets no allowance: a burst 429 is a
   const fine = parseBraveRateHeaders({ "x-ratelimit-limit": "50, 0", "x-ratelimit-policy": "50;w=1, 0;w=2678400", "x-ratelimit-remaining": "49, 0", "x-ratelimit-reset": "1, 1205222" }, now);
   assert.equal(fine.state, null, "nothing is exhausted when only the zero-limit window shows 0 remaining");
 });
+
+test("the legacy profile keeps hard constraints: domain lists become site: operators and filter the rows; strict dates are refused", async () => {
+  const { makeCoordinator } = await import("../src/search-intelligence/coordinator.mjs");
+  const h = await harness({ mutateBudget: (b) => { b.searching.profile = "legacy"; } });
+  const asked = [];
+  const legacy = async (url) => { asked.push(new URL(url, "http://x").searchParams.get("q"));
+    return { status: 200, body: { results: [{ url: "https://vuejs.org/guide/a", title: "A", content: "a" }, { url: "https://evil.example/vuejs.org", title: "B", content: "b" }, { url: "https://docs.vuejs.org/c", title: "C", content: "c" }],
+      unresponsive_engines: [], fcpi: { cache: "miss", engines: ["google (Serper)"], answered: ["google (Serper)"] } } }; };
+  const coordinator = makeCoordinator({ store: h.store, getBudget: () => h.budget, getPolicy: () => h.policy, getSelection: () => ({ search: "fixture" }), dispatch: h.dispatch, general: {}, availability: h.availability, legacy });
+  try {
+    const inc = await coordinator.search(request({ originalQuery: "ref api", constraints: { includeDomains: ["vuejs.org"] } }), { signal: new AbortController().signal });
+    assert.equal(asked[0], "ref api site:vuejs.org");
+    assert.deepEqual(inc.body.web.map((w) => w.url), ["https://vuejs.org/guide/a", "https://docs.vuejs.org/c"], "an off-domain row is never returned");
+    const exc = await coordinator.search(request({ originalQuery: "ref api", constraints: { excludeDomains: ["vuejs.org"] } }), { signal: new AbortController().signal });
+    assert.equal(asked[1], "ref api -site:vuejs.org");
+    assert.deepEqual(exc.body.web.map((w) => w.url), ["https://evil.example/vuejs.org"]);
+    await assert.rejects(coordinator.search(request({ originalQuery: "ref api", constraints: { publishedAfter: "2026-01-01T00:00:00Z", dateMode: "strict_publication" } }), { signal: new AbortController().signal }),
+      (e) => e.failureClass === "UNSUPPORTED_CAPABILITY");
+    const fresh = await coordinator.search(request({ originalQuery: "ref api", constraints: { publishedAfter: "2026-01-01T00:00:00Z" } }), { signal: new AbortController().signal });
+    assert.deepEqual(fresh.body.search.warnings, ["legacy_freshness_ignored"]);
+    assert.match(fresh.body.warning, /ignores the freshness preference/);
+  } finally { await h.close(); }
+});
