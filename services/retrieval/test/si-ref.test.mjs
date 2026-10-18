@@ -209,6 +209,10 @@ test("Ref's answered refusals are kept uncertain and inform availability without
       assert.equal(o.reason, m === "http_401" ? "auth_failed" : "contract_failure");
       assert.deepEqual(rows(h2).map((r) => r.state), ["UNCERTAIN"], `${m}: whether Ref charged is not documented`);
       assert.equal(h2.dispatch.breakerState("fixture-ref"), "closed");
+      if (m === "http_401") {
+        assert.ok(h2.logs.some((l) => l.event === "si_ref_client_error" && l.status === 401), "the client's error is logged by its code and status");
+        assert.ok(!JSON.stringify(h2.logs).includes("refused"), "never with the provider's response body");
+      }
     } finally { await h2.close(); }
   }
 });

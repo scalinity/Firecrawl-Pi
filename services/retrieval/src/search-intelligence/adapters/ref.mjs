@@ -109,7 +109,8 @@ export function makeRefSessionFactory({ makeFetch, clientInfo = { name: "fcpi-re
     const transport = new StreamableHTTPClientTransport(endpoint, { fetch: bridge.fetch,
       reconnectionOptions: { maxRetries: 0, initialReconnectionDelay: 1000, maxReconnectionDelay: 1000, reconnectionDelayGrowFactor: 1 } });
     const client = new Client(clientInfo, { capabilities: {} });
-    client.onerror = (e) => log({ event: "si_ref_client_error", error: String(e?.message ?? e).slice(0, 160) });
+    // Codes only: an HTTP error's message carries the provider's response body (spec §24 keeps provider text out of logs).
+    client.onerror = (e) => log({ event: "si_ref_client_error", code: typeof e?.code === "string" || Number.isInteger(e?.code) ? e.code : e?.name ?? "error", status: Number.isInteger(e?.status) ? e.status : null });
     const timeout = () => Math.max(1, deadlineAt - Date.now());
     let closed = false;
     const close = async () => {
