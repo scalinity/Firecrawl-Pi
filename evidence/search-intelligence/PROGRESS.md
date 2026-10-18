@@ -30,7 +30,7 @@ Branch `search-intelligence` (from `main` at `2a62513`), pushed to `origin/searc
 
 - Local retrieval suite: `$SCRATCH/bin/rtx.sh [test files]` (copies the container layout); database suites need the disposable PostgreSQL: Colima started (`colima start`, no flags), container `fcpi-si-testpg` (pinned image, label `fcpi.transient=si-db-tests`, `127.0.0.1:55432`), then `FCPI_TEST_PG=127.0.0.1 PGPORT=55432 CONC=1 rtx.sh`. Stop and remove both at session end (Colima was stopped when this session began).
 - Mutation check of a fix's tests: `$SCRATCH/bin/rtx-at.sh HEAD "src/<file> ..." test/<file>` runs the working tree's tests over `HEAD`'s copies of the named source files; a new test must fail there.
-- Last full run: 471 tests, 471 pass, 0 skipped (with PostgreSQL), after the SI3/SI4 remediation at `2ecdc84`; gateway 101, MCP 51, root 61. Node 26.12.0 on the workstation since 2026-10-18 03:01 UTC (a Homebrew upgrade outside this work); the services run Node 22 in their images.
+- Last full run: 470 tests, 470 pass, 0 skipped (with PostgreSQL) at `2abaa09`, the 467 that run at `2ecdc84` (first recorded as 471, a miscount) and three new; gateway 101, MCP 51, root 61. Node 26.12.0 on the workstation since 2026-10-18 03:01 UTC (a Homebrew upgrade outside this work); the services run Node 22 in their images.
 - The evaluation: `scripts/si5/collect.mjs` (detached, log `SI5/eval/private/collect.log`), `scripts/si5/pool.mjs` and `capture.mjs` (a detached loop, `SI5/eval/private/capture-loop.sh`, ends when `SI5/eval/private/capture-done` exists), `packets.mjs`, then the judges, `labels.mjs second|adjudicate|final`, `score.mjs`. Page and provider text stays in `SI5/eval/private/` (ignored).
 ## Next actions
 

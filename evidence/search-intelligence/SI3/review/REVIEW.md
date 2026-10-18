@@ -144,4 +144,4 @@ Filled by `/address`. Each finding is fixed (with its commit), rejected (with ev
 | S11 | Fixed (`14326c8`) | The chain's container runs with `--cap-drop ALL`, `no-new-privileges`, uid 65534, 1 GiB of memory and 256 processes. |
 | S12 | Fixed (`14326c8`) | `own` is renamed `gatewayHeaderMs`. |
 
-After remediation: retrieval 471 of 471 with PostgreSQL (no skips), gateway 101, MCP 51, root 61; the native chain passes 25 of 25 on image `b0f561ce…` at `14326c8`.
+After remediation: retrieval 467 of 467 with PostgreSQL (no skips; first recorded as 471, a miscount that a rerun of `2ecdc84` corrected), gateway 101, MCP 51, root 61; the native chain passes 25 of 25 on image `b0f561ce…` at `14326c8`.
