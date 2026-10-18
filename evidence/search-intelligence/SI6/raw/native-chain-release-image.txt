@@ -1,14 +1,14 @@
 ### meta
-utc=2026-10-18T03:11:55Z
-repository_commit=98603a011e165eefd21b1bea212c6ce765ad4521 code_dirty=false
-image=fcpi/firecrawl-api:m2 id=sha256:79706ad36f68af5b54e0b99a06d62fa7fa0ae1a8afa5b91b125e49fe001c1979 platform=linux/arm64
-patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed37a27
+utc=2026-10-18T04:15:31Z
+repository_commit=f6d045bf6bc5a78290c8684ca66893ff1ae5d579 code_dirty=false
+image=fcpi/firecrawl-api:m2 id=sha256:22d55814facccb9b44ce9ce6f4c4e7015ccc5803e7eba42c8943a54e5977193f platform=linux/arm64
+patch_series_sha256=91e3d278c12a16da6242fdc5da07808c60d454595676f1bbf9766f5bb8bb584f
 ### checks
-2026-10-18 03:12:22 [33mwarn[39m [:]: fcpi evidence unavailable {"status":400,"error":"Error","logicalSearchId":"b0fb03e7-52ab-4d50-8493-4238b9d61fa0"}
-2026-10-18 03:12:23 [33mwarn[39m [:]: AUTUMN_SECRET_KEY is not set - add AUTUMN_SECRET_KEY to enable Autumn {}
+2026-10-18 04:15:59 [33mwarn[39m [:]: fcpi evidence unavailable {"status":400,"error":"Error","logicalSearchId":"ced7858f-d387-4325-8d09-1bf31568992c"}
+2026-10-18 04:16:00 [33mwarn[39m [:]: AUTUMN_SECRET_KEY is not set - add AUTUMN_SECRET_KEY to enable Autumn {}
 {
   "schema": "fcpi.si3-native-chain/v1",
-  "utc": "2026-10-18T03:12:24.190Z",
+  "utc": "2026-10-18T04:16:01.096Z",
   "node": "v22.23.3",
   "checks": [
     {
@@ -19,7 +19,7 @@ patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed3
     {
       "id": "long_search_succeeds_past_15s",
       "result": "PASS",
-      "elapsedMs": 17542,
+      "elapsedMs": 17545,
       "error": null
     },
     {
@@ -60,7 +60,7 @@ patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed3
     {
       "id": "short_search_answers_by_its_deadline",
       "result": "PASS",
-      "elapsedMs": 3760,
+      "elapsedMs": 3761,
       "outcome": "partial",
       "error": null
     },
@@ -106,7 +106,7 @@ patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed3
     {
       "id": "evidence_payload_carries_the_core_deadline",
       "result": "PASS",
-      "headroomMs": 15981
+      "headroomMs": 15988
     },
     {
       "id": "evidence_off_evaluates_nothing",
@@ -138,7 +138,7 @@ patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed3
       "id": "evidence_trim_fits_and_keeps_priority",
       "result": "PASS",
       "bodyBytes": 785221,
-      "ms": 9,
+      "ms": 7,
       "dropped": [
         22,
         22,
@@ -167,7 +167,7 @@ patch_series_sha256=681f37a173d8b6358631c9b5c0e4c7e4521e91db5fa4c354f47079824ed3
       "id": "html_rendition_linear_and_exact",
       "result": "PASS",
       "unclosedMs": 0,
-      "straysMs": 20,
+      "straysMs": 33,
       "text": "a &lt; b\n\nc & d"
     },
     {
