@@ -21,6 +21,8 @@ export const REF_CONTRACT = "ref-mcp-v1/2026-10-17";
 export const NO_RESULTS = "No results found";
 // Selected reads (spec §6.2): at most two a logical execution, for documents whose passages hold no excerpt of this length.
 export const MAX_READS = 2, USEFUL_EXCERPT_CHARS = 200;
+// Less time than this left for a read (the policy's floor for refReadMs) and none is started: it would be written and lost.
+export const READ_MIN_MS = 500;
 // Ref's refusals are whole messages with fixed openings (SI0 contract evidence §6). They are matched only at the start of a
 // text block that is not a result: a result's overview or a read's page may quote the same words about something else, and
 // provider-relayed documentation is data, never a signal about this account.
@@ -253,19 +255,23 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
     async enrich({ request, documents, lease, admit, signal, semanticClose }) {
       const selected = documents.filter((d) => d.observations.some((o) => o.provider === "ref") && !d.passages.some((p) => String(p.text ?? "").trim().length >= USEFUL_EXCERPT_CHARS)).slice(0, MAX_READS);
       if (!selected.length) return { attempted: 0, usage: [], limitation: null };
-      const t0 = Date.now(), readClose = Math.min(semanticClose, t0 + limits().refReadMs);
+      const t0 = Date.now(), L = limits();
       const usage = [];
       let fresh = null, contextInit = false;
       if (!lease) {
         const a = admit();
         if (a?.pre?.eligible) {
-          fresh = await this.contextLease(request, { sub: a.sub, pre: a.pre, signal, deadlineAt: readClose, selection: a.selection });
+          // The fresh session's opening and context search run in the semantic phase, leaving the reads a read's full time.
+          fresh = await this.contextLease(request, { sub: a.sub, pre: a.pre, signal, deadlineAt: Math.max(t0 + READ_MIN_MS, semanticClose - L.refReadMs), selection: a.selection });
           contextInit = true;
           if (fresh) usage.push({ provider: "ref", operation: "context_init", credits: a.sub.card.creditsPerOperation, basis: "documented" });
         }
         if (!fresh) return { attempted: selected.length, usage, limitation: "session_unavailable", elapsedMs: Date.now() - t0, record: { selected: selected.length, read: 0, contextInit, limitation: "session_unavailable" } };
         lease = fresh;
       }
+      // Each read has up to refReadMs from when it can start, within the semantic phase.
+      const readClose = Math.min(semanticClose, Date.now() + L.refReadMs);
+      if (readClose - Date.now() < READ_MIN_MS) return { attempted: selected.length, usage, limitation: "no_time_for_reads", elapsedMs: Date.now() - t0, record: { selected: selected.length, read: 0, contextInit, limitation: "no_time_for_reads" }, lease: fresh };
       const results = await Promise.all(selected.map((d) => lease.read(d.observations.find((o) => o.provider === "ref").providerUrl, { signal, deadlineAt: readClose })));
       let read = 0;
       const failures = [];

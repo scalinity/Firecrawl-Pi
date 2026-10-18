@@ -6,7 +6,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setTimeout as sleep } from "node:timers/promises";
 import { randomUUID } from "node:crypto";
-import { harness, request, refFixture, answers } from "./si-helpers.mjs";
+import { harness, request, refFixture, refBlocks, answers } from "./si-helpers.mjs";
 
 const context7 = () => ({ status: 200, body: {
   codeSnippets: [{ libraryId: "/vuejs/docs", codeTitle: "Declaring reactive state", codeDescription: "Use ref() to declare reactive state.", codeLanguage: "javascript",
@@ -117,6 +117,25 @@ test("a re-executed logical search whose Ref discovery is cached reads in its fr
     const keys = [...h.store.rows.values()].filter((x) => x.provider === "fixture-ref").map((x) => x.call_key);
     assert.equal(keys.length, 6, "discovery and two reads, then a context search and two reads in the new session");
     assert.equal(new Set(keys).size, 6);
+  } finally { await h.close(); }
+});
+
+test("a slow fresh session for a cached discovery leaves its reads their own time", async () => {
+  let slow = false;
+  // A read that takes 300 ms, as one over the network does: it cannot fit what a shared two-second window leaves it.
+  const tool = async (name, args) => {
+    if (name === "ref_read_url" && slow) await sleep(300);
+    return name === "ref_search_documentation" ? refBlocks([1, 2, 3].map((i) => `https://ref.example.org/docs/${i}`)) : { content: [{ type: "text", text: `Excerpt of ${args.url}: ${"documented behavior. ".repeat(20)}` }] };
+  };
+  const fx = refFixture({ tool, initialize: () => (slow ? { delayMs: 1900 } : null) });
+  const h = await harness({ handlers: { ...empty, ref: fx } });
+  try {
+    await h.coordinator.search(docsRequest("ref slow fresh session", { limit: 5 }), { signal: new AbortController().signal });
+    slow = true;
+    const r = await h.coordinator.search(docsRequest("ref slow fresh session", { limit: 4 }), { signal: new AbortController().signal });
+    assert.deepEqual(r.body.search.documentation.enrichment, { selected: 2, read: 2, contextInit: true }, "opening the session did not use up the reads' time");
+    assert.ok(!r.body.search.warnings.some((w) => w.startsWith("ref_enrichment_")));
+    assert.deepEqual([...h.store.rows.values()].filter((x) => x.provider === "fixture-ref").map((x) => x.state), Array(6).fill("SETTLED"), "nothing left uncertain by our own deadline");
   } finally { await h.close(); }
 });
 

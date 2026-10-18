@@ -87,6 +87,7 @@ export function refFixture({ tool = defaultRefTool, sse = true, holdOpen = false
     entry.message = msg;
     if (msg.method === "initialize") {
       const a = initialize?.(entry);
+      if (a?.delayMs) await new Promise((r) => setTimeout(r, a.delayMs));
       if (a?.status) { res.writeHead(a.status); return res.end(); }
       const id = `ref-session-${++n}`;
       sessions.set(id, { calls: [] });
