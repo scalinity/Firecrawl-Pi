@@ -87,11 +87,21 @@ test("a telemetry write that fails is logged and counted and never reaches the c
   assert.ok(logs.every((l) => !JSON.stringify(l).includes("private question")));
 });
 
+test("writes waiting on a stalled database are bounded: past 256 a write is counted lost, not queued", async () => {
+  const never = new Promise(() => {});
+  const store = { searchRunStarted: () => never, searchRunFinished: () => never, searchEvents: () => never };
+  const t = makeTelemetry({ store });
+  for (let i = 0; i < 300; i++) t.event({ type: "breaker", provider: "p", status: "open" });
+  const c = t.counters();
+  assert.equal(c.telemetryPending, 256);
+  assert.equal(c.telemetryLost, 44);
+});
+
 test("run and event rows round-trip; an event written twice is kept once", opts, async () => {
   const store = await fresh();
   try {
     const t = makeTelemetry({ store });
-    const req = request();
+    const req = request({ jobId: "job-0123456789" });
     t.runStarted({ request: req, selection: "live", admittedAt: Date.now(), configHashes: { budgetSha256: "b" } });
     t.runFinished({ request: req, outcome: "partial", search: { cache: { mode: "miss" }, coverage: { general: { successful: 4 } }, providers: {}, warnings: ["exa_rate_limited"], usage: [] },
       lanes: [lane("brave"), lane("exa", { status: "failed", reason: "rate_limited" })], pool: [docOf(0)], final: [docOf(0)], ranking: { mode: "hybrid", reason: "complete", model: "typesafe/jev-1.14-x" },
@@ -99,6 +109,7 @@ test("run and event rows round-trip; an event written twice is kept once", opts,
     assert.equal(await t.drain(), 0);
     const run = (await store.pool.query("SELECT * FROM fcpi_retrieval.search_run WHERE logical_id = $1", [req.logicalSearchId])).rows[0];
     assert.deepEqual([run.outcome, run.cache_mode, run.docs_active, run.ranking_mode, run.selection], ["partial", "miss", true, "hybrid", "live"]);
+    assert.equal(run.job_id, "job-0123456789", "the run joins the core's job, which its acquisitions share");
     assert.equal(run.summary.warnings[0], "exa_rate_limited");
     const evs = (await store.pool.query("SELECT event_type, provider, status FROM fcpi_retrieval.search_event WHERE logical_id = $1 ORDER BY event_type, provider", [req.logicalSearchId])).rows;
     assert.deepEqual(evs.map((e) => `${e.event_type}:${e.provider}:${e.status}`), ["decision:jev:hybrid", "docs_activation:classifier:active", "lane:brave:success_results", "lane:exa:failed"]);

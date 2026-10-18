@@ -491,18 +491,18 @@ export class Store {
   // A logical execution's row: written when it is admitted, completed when it ends. The finish inserts too, so a lost start
   // costs nothing; a repeated finish replaces the same row.
   async searchRunStarted(r) {
-    await this.pool.query(`INSERT INTO fcpi_retrieval.search_run (logical_id, request_id, principal_id, fingerprint, profile, selection, result_mode, accepted_at, versions)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) ON CONFLICT (logical_id) DO NOTHING`,
-    [r.logicalId, r.requestId, r.principalId, r.fingerprint, r.profile, r.selection, r.resultMode, r.acceptedAt, JSON.stringify(r.versions)]);
+    await this.pool.query(`INSERT INTO fcpi_retrieval.search_run (logical_id, request_id, principal_id, job_id, fingerprint, profile, selection, result_mode, accepted_at, versions)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) ON CONFLICT (logical_id) DO NOTHING`,
+    [r.logicalId, r.requestId, r.principalId, r.jobId ?? null, r.fingerprint, r.profile, r.selection, r.resultMode, r.acceptedAt, JSON.stringify(r.versions)]);
   }
   async searchRunFinished(r) {
-    await this.pool.query(`INSERT INTO fcpi_retrieval.search_run (logical_id, request_id, principal_id, fingerprint, profile, selection, result_mode, accepted_at, versions,
+    await this.pool.query(`INSERT INTO fcpi_retrieval.search_run (logical_id, request_id, principal_id, job_id, fingerprint, profile, selection, result_mode, accepted_at, versions,
         completed_at, outcome, cache_mode, docs_active, docs_reason, ranking_mode, summary, trace, trace_truncated)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
+      VALUES ($1, $2, $3, $19, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18)
       ON CONFLICT (logical_id) DO UPDATE SET completed_at = EXCLUDED.completed_at, outcome = EXCLUDED.outcome, cache_mode = EXCLUDED.cache_mode, docs_active = EXCLUDED.docs_active,
         docs_reason = EXCLUDED.docs_reason, ranking_mode = EXCLUDED.ranking_mode, summary = EXCLUDED.summary, trace = EXCLUDED.trace, trace_truncated = EXCLUDED.trace_truncated`,
     [r.logicalId, r.requestId, r.principalId, r.fingerprint, r.profile, r.selection, r.resultMode, r.acceptedAt, JSON.stringify(r.versions), r.completedAt, r.outcome, r.cacheMode ?? null,
-      r.docsActive ?? null, r.docsReason ?? null, r.rankingMode ?? null, r.summary ? JSON.stringify(r.summary) : null, r.trace ? JSON.stringify(r.trace) : null, r.traceTruncated === true]);
+      r.docsActive ?? null, r.docsReason ?? null, r.rankingMode ?? null, r.summary ? JSON.stringify(r.summary) : null, r.trace ? JSON.stringify(r.trace) : null, r.traceTruncated === true, r.jobId ?? null]);
   }
   // Operation outcomes and transitions; an event id seen before is not written again.
   async searchEvents(events) {

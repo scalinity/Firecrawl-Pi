@@ -231,6 +231,7 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_run (
   logical_id       uuid PRIMARY KEY,
   request_id       text NOT NULL,
   principal_id     text NOT NULL,
+  job_id           text,
   fingerprint      text NOT NULL,
   profile          text NOT NULL,
   selection        text NOT NULL,
@@ -247,7 +248,10 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_run (
   trace            jsonb,
   trace_truncated  boolean NOT NULL DEFAULT false
 );
+-- The core's search job, which its selected-result scrapes and extraction share: the join from a run to its acquisitions.
+ALTER TABLE fcpi_retrieval.search_run ADD COLUMN IF NOT EXISTS job_id text;
 CREATE INDEX IF NOT EXISTS search_run_accepted ON fcpi_retrieval.search_run (accepted_at);
+CREATE INDEX IF NOT EXISTS search_run_job ON fcpi_retrieval.search_run (job_id) WHERE job_id IS NOT NULL;
 CREATE TABLE IF NOT EXISTS fcpi_retrieval.search_event (
   event_id        uuid PRIMARY KEY,
   logical_id      uuid,

@@ -12,7 +12,8 @@ import { sha256, normalizeQueryText, utf8Bytes } from "./normalize.mjs";
 import { VERSIONS } from "./contracts.mjs";
 
 export const TRACE_BYTES = 65536;
-const TRACE_DOCS = 128, TRACE_PAIRS = 20, MAX_STARTED = 1000;
+// At most this many writes wait on the database: past it a write is counted lost, so a stalled database cannot grow memory.
+const TRACE_DOCS = 128, TRACE_PAIRS = 20, MAX_STARTED = 1000, MAX_PENDING = 256;
 
 export const safeUrl = (u) => { try { const x = new URL(u); return `${x.origin}${x.pathname}`.slice(0, 512); } catch { return null; } };
 const code = (s) => (typeof s === "string" ? s.slice(0, 120) : null);
@@ -53,6 +54,7 @@ export function makeTelemetry({ store, log = () => {}, clock = Date.now }) {
   const pending = new Set(), started = new Map();
   let lost = 0, written = 0;
   const write = (what, fn) => {
+    if (pending.size >= MAX_PENDING) { lost++; log({ event: "si_telemetry_degraded", what, error: "backlog" }); return Promise.resolve(); }
     const p = (async () => {
       try { await fn(); written++; }
       catch (e) { lost++; log({ event: "si_telemetry_degraded", what, error: String(e?.code ?? e?.message ?? e).slice(0, 120) }); }
@@ -61,7 +63,7 @@ export function makeTelemetry({ store, log = () => {}, clock = Date.now }) {
     p.finally(() => pending.delete(p));
     return p;
   };
-  const baseOf = (request, { selection, admittedAt, configHashes = {} }) => ({ logicalId: request.logicalSearchId, requestId: request.requestId, principalId: request.principalId,
+  const baseOf = (request, { selection, admittedAt, configHashes = {} }) => ({ logicalId: request.logicalSearchId, requestId: request.requestId, principalId: request.principalId, jobId: request.jobId ?? null,
     fingerprint: fingerprint(request), profile: "aggregate", selection, resultMode: request.resultMode, acceptedAt: new Date(admittedAt), versions: { ...VERSIONS, config: configHashes } });
 
   return {
