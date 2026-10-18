@@ -34,11 +34,19 @@ const wanted = [...new Set(ids.flatMap((id) => pool.queries[id].documents.map((d
 const state = existsSync(STATE) ? JSON.parse(readFileSync(STATE, "utf8")) : { submissions: [] };
 say({ wanted: wanted.length, ceiling: CEILING });
 
-// The platform's direct navigations in the last day, as its pacing counts them (store.mjs), read-only.
-const directUsed = () => Number(execFileSync("bash", ["-c", 'source "$1"; ssh -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=8 "$PI_SSH_TARGET" "sudo -n docker exec -i fcpi-nuq-postgres-1 psql -q -U postgres -d postgres -At"',
-  "fcpi-si5-capture", join(root, "scripts/m1/pi-target.conf")], { input: "SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE NOT fixture AND at > now() - interval '1 day';\n", encoding: "utf8", timeout: 30000 }).trim());
+// The platform's direct navigations in the last day, as its pacing counts them (store.mjs), read-only. It fails closed: an
+// unreadable count is no room.
+const directUsed = () => {
+  const out = execFileSync("bash", ["-c", 'source "$1"; ssh -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=8 "$PI_SSH_TARGET" "sudo -n docker exec -i fcpi-nuq-postgres-1 psql -q -U postgres -d postgres -At -v ON_ERROR_STOP=1"',
+    "fcpi-si5-capture", join(root, "scripts/m1/pi-target.conf")], { input: "SELECT count(*) FROM fcpi_retrieval.direct_nav WHERE NOT fixture AND at > now() - interval '1 day';\n", encoding: "utf8", timeout: 30000 }).trim();
+  return /^\d+$/.test(out) ? Number(out) : NaN;
+};
 const forward = sshForward();
 const call = async (req) => { for (let i = 0; ; i++) { try { return await forward(req); } catch (e) { if (i >= 3) throw e; say({ retry: req.path, error: e.message }); await sleep(15000); } } };
+// A page of results, retried while the forwarder or the gateway answers anything but 200.
+const pageOf = async (req) => { for (let i = 0; ; i++) { const r = await call(req); if (r.status === 200) return r; if (i >= 5) throw new Error(`results page ${req.path} answered ${r.status}`); say({ retry: req.path, status: r.status }); await sleep(15000); } };
+// URLs a finished job returned no document and no reason for: retried in a later pass once before being recorded.
+state.unreturned ??= {};
 for (let i = 0; i < wanted.length; i += BATCH) {
   const urls = wanted.slice(i, i + BATCH);
   // Room for the batch with its redirects and rendering: twice its pages, within the ceiling.
@@ -53,16 +61,17 @@ for (let i = 0; i < wanted.length; i += BATCH) {
   if (sub.status !== 200 || !sub.data?.id) { say({ submit: sub.status, code: sub.data?.code ?? null, error: String(sub.data?.error ?? "").slice(0, 200) }); if (sub.status === 429 || sub.status === 503) { await sleep(60e3); i -= BATCH; continue; } break; }
   state.submissions.push({ at: Date.now(), n: urls.length, id: sub.data.id });
   writeFileSync(STATE, JSON.stringify(state) + "\n");
-  // Poll until the job ends (its own deadline is 30 minutes), then read every page of its results.
+  // Poll until the job ends (its own deadline is 30 minutes), then read every page of its results. The next batch waits for
+  // that end, so batches never overlap.
   let st;
-  for (let t = 0; t < 200; t++) {
+  for (;;) {
     await sleep(10000);
-    st = await call({ method: "GET", path: `/v2/batch/scrape/${sub.data.id}?skip=0&limit=1`, timeout: 60 });
+    st = await pageOf({ method: "GET", path: `/v2/batch/scrape/${sub.data.id}?skip=0&limit=1`, timeout: 60 });
     if (["completed", "failed", "cancelled"].includes(st.data?.status)) break;
   }
   const docs = [];
   for (let skip = 0; ; ) {
-    const page = await call({ method: "GET", path: `/v2/batch/scrape/${sub.data.id}?skip=${skip}&limit=5`, timeout: 60 });
+    const page = await pageOf({ method: "GET", path: `/v2/batch/scrape/${sub.data.id}?skip=${skip}&limit=5`, timeout: 60 });
     const data = Array.isArray(page.data?.data) ? page.data.data : [];
     docs.push(...data);
     skip += data.length;
@@ -71,13 +80,15 @@ for (let i = 0; i < wanted.length; i += BATCH) {
   const byUrl = new Map();
   for (const d of docs) for (const u of [d.metadata?.sourceURL, d.metadata?.url]) if (u && !byUrl.has(u)) byUrl.set(u, d);
   // The platform's reason for each page it could not return (its route and refusal, e.g. a bot interstitial).
-  const errs = await call({ method: "GET", path: `/v2/batch/scrape/${sub.data.id}/errors`, timeout: 60 });
+  const errs = await pageOf({ method: "GET", path: `/v2/batch/scrape/${sub.data.id}/errors`, timeout: 60 });
   const errOf = new Map((errs.data?.errors ?? []).map((e) => [e.url, `${e.code ?? "error"}: ${e.error ?? ""}`]));
   for (const u of errs.data?.robotsBlocked ?? []) errOf.set(u, "ROBOTS_BLOCKED");
   const at = new Date().toISOString();
   let ok = 0;
   for (const url of urls) {
     const d = byUrl.get(url) ?? byUrl.get(url.replace(/\/$/, "")) ?? byUrl.get(`${url}/`) ?? null;
+    // Neither a document nor a reason: not definitive. It is left for a later pass, and recorded only the second time.
+    if (!d && !errOf.has(url) && !(state.unreturned[url] >= 1)) { state.unreturned[url] = (state.unreturned[url] ?? 0) + 1; continue; }
     const md = typeof d?.markdown === "string" ? d.markdown : null;
     const m = d?.metadata ?? {};
     const good = !!md && md.trim().length > 0 && !m.error && (m.statusCode ?? 200) < 400;
@@ -86,6 +97,7 @@ for (let i = 0; i < wanted.length; i += BATCH) {
       title: m.title ?? null, contentType: m.contentType ?? null, proxyUsed: m.proxyUsed ?? null, error: good ? null : String(m.error ?? errOf.get(url) ?? (d ? (m.statusCode >= 400 ? `HTTP ${m.statusCode}` : "empty_content") : "not_returned")).slice(0, 300),
       jobState: st?.data?.status ?? null, markdown: md, markdownSha256: md ? sha(md) : null, markdownChars: md?.length ?? 0 }) + "\n");
   }
+  writeFileSync(STATE, JSON.stringify(state) + "\n");
   say({ batch: i / BATCH + 1, of: Math.ceil(wanted.length / BATCH), job: st?.data?.status ?? null, ok, failed: urls.length - ok });
 }
 
