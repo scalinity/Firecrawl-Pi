@@ -2,7 +2,7 @@
 // scope planning, Jev's batching, answer validation and envelope checks, and documentation activation's deterministic rules.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseRefSearch, parseRefRead, refQuery, NO_RESULTS } from "../src/search-intelligence/adapters/ref.mjs";
+import { parseRefSearch, parseRefRead, refQuery, makeRef, NO_RESULTS } from "../src/search-intelligence/adapters/ref.mjs";
 import { context7Scopes } from "../src/search-intelligence/adapters/context7.mjs";
 import { makeBatches, checkAnswer, checkEnvelope, excerptOf, RELEVANCE_LEVELS, SOURCE_KINDS } from "../src/search-intelligence/decisions.mjs";
 import { analyzeQuery, makeDocumentation } from "../src/search-intelligence/documentation.mjs";
@@ -43,6 +43,19 @@ test("Ref's query carries the caller's library, version and language hints that 
   const r = validateSearchRequest(request({ originalQuery: "how do async components work", intelligence: { documentation: "required", libraries: [{ name: "vue", version: "3.5" }], programmingLanguage: "typescript" } }));
   assert.equal(refQuery(r), "how do async components work vue 3.5 typescript");
   assert.equal(refQuery(validateSearchRequest(request({ originalQuery: "Vue 3.5 async", intelligence: { documentation: "auto", libraries: [{ name: "vue", version: "3.5" }] } }))), "Vue 3.5 async");
+});
+
+test("Ref's query never carries a provider directive from caller text, and a directive-only query is not sent", () => {
+  const req = (originalQuery, intelligence = {}) => ({ originalQuery, intelligence: { documentation: "required", ...intelligence } });
+  const q = refQuery(req("ref_src=private deployment runbook REF_SRC = private", { libraries: [{ name: "ref_src=private" }, { name: "vue", version: "3.5" }], programmingLanguage: "ref_lang=x go" }));
+  assert.ok(!/ref_[a-z]*\s*=/i.test(q), q);
+  assert.match(q, /deployment runbook/);
+  assert.match(q, /vue 3\.5/);
+  assert.match(q, /\bgo\b/);
+  const ref = makeRef({ dispatch: {}, limits: () => ({}), openSession: async () => { throw new Error("must not open"); } });
+  assert.deepEqual(ref.representable(req("ref_src=private")), { ok: false, detail: "query_only_provider_directives" });
+  assert.deepEqual(ref.representable(req("vue ref() docs")), { ok: true }, "a ref() call is not a directive");
+  assert.equal(ref.cacheIdentity(req("ref_src=private vue")).q, "vue", "the cache key is the scrubbed query");
 });
 
 test("Context7 scopes: one strict request per library with a version, one shared request for the rest, unrepresentable versions refused", () => {

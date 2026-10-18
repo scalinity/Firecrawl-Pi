@@ -68,9 +68,14 @@ export function parseRefRead(result, maxChars) {
 }
 
 // The query sent to Ref: the original, plus the caller's library and language hints Ref's tool asks for when absent from it.
+// Ref's own query directives (ref_src=private and any other ref_<name>=<value>) are never taken from caller text (spec §6.2):
+// this adapter searches public documentation only. The cache identity is this query, so it carries the scrubbed form too.
+const REF_DIRECTIVE = /(^|\s)ref_[a-z0-9_]*\s*=\s*\S*/gi;
+const scrub = (s) => String(s).replace(REF_DIRECTIVE, " ").replace(/\s+/g, " ").trim();
 export function refQuery(request) {
-  const q = normalizeQueryText(request.originalQuery), low = q.toLowerCase();
-  const hints = [...(request.intelligence.libraries ?? []).map((l) => (l.version ? `${l.name} ${l.version}` : l.name)), request.intelligence.programmingLanguage].filter((h) => h && !low.includes(h.toLowerCase()));
+  const q = scrub(normalizeQueryText(request.originalQuery)), low = q.toLowerCase();
+  const hints = [...(request.intelligence.libraries ?? []).map((l) => scrub(l.version ? `${l.name} ${l.version}` : l.name)), request.intelligence.programmingLanguage ? scrub(request.intelligence.programmingLanguage) : null]
+    .filter((h) => h && !low.includes(h.toLowerCase()));
   return [q, ...hints].join(" ").slice(0, 500);
 }
 
@@ -151,7 +156,7 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
 
   return {
     id: "ref", api: "ref-mcp-v1", contractVersion: REF_CONTRACT,
-    representable: () => ({ ok: true }),
+    representable: (request) => (refQuery(request) ? { ok: true } : { ok: false, detail: "query_only_provider_directives" }),
     cacheIdentity: (request) => ({ q: refQuery(request) }),
     async search(request, ctx) {
       const L = limits(), t0 = Date.now(), base = { provider: "ref", kind: "docs_search", startedAt: new Date(t0).toISOString() };
