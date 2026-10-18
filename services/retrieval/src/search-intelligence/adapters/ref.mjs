@@ -226,6 +226,12 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
     async contextLease(request, ctx) {
       let session;
       try { session = await openSession({ sub: ctx.sub, pre: ctx.pre, request, signal: ctx.signal, deadlineAt: ctx.deadlineAt }); } catch (e) { await openFailed(ctx, e); return null; }
+      // As for a discovery: a session without both tools gets no metered call.
+      if (!session.tools.has("ref_search_documentation") || !session.tools.has("ref_read_url")) {
+        await dispatch.observe(ctx.sub, ctx.pre.epoch, { reason: "contract_failure", detail: "ref_tools_missing", breaker: "neutral" });
+        await session.close().catch(() => {});
+        return null;
+      }
       const r = await tool(session, { request, ctx, kind: "docs_search", op: `context_init:${Date.now().toString(36)}`, name: "ref_search_documentation", args: { query: refQuery(request) }, deadlineAt: ctx.deadlineAt });
       if (!r.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, providerCode: r.detail }, { answered: false }); await session.close().catch(() => {}); return null; }
       const parsed = parseRefSearch(r.result);

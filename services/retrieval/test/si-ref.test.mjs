@@ -279,5 +279,10 @@ test("Ref blocks with a usable URL are hits; a session without both tools is a c
     assert.deepEqual([o.status, o.reason, o.detail], ["failed", "contract_failure", "ref_tools_missing"]);
     assert.equal(calls(fx, "ref_search_documentation").length, 0);
     assert.ok(fx.log.some((e) => e.method === "DELETE"), "the session is closed");
+    // A fresh context session for a cached discovery is held to the same check, before anything is metered.
+    assert.equal(await h.docs.ref.contextLease(docsRequest("ref tools context"), refCtx(h)), null);
+    assert.equal(calls(fx, "ref_search_documentation").length, 0);
+    assert.equal(rows(h).length, 0, "no reservation for a call the session could not take");
+    assert.equal(fx.log.filter((e) => e.method === "DELETE").length, 2);
   } finally { await h.close(); }
 });
