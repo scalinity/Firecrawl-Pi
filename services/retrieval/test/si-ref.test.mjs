@@ -121,6 +121,19 @@ test("a read whose deadline passes while it waits for capacity is never sent lat
   } finally { await h.close(); }
 });
 
+test("a search about authentication errors is a billed success and leaves Ref available", async () => {
+  const fx = refFixture({ tool: () => ({ content: [{ type: "text", text: "overview: Handle 401 Unauthorized responses with an interceptor\nurl: https://axios-http.com/docs/interceptors\nmoduleId: axios" }] }) });
+  const h = await harness({ handlers: { ref: fx } });
+  try {
+    const o = await h.docs.ref.search(docsRequest("axios interceptor refresh token on 401 unauthorized"), refCtx(h));
+    assert.equal(o.status, "success_results");
+    assert.deepEqual(rows(h).map((r) => [r.state, r.actual]), [["SETTLED", 1]]);
+    const again = h.dispatch.preflight(h.dispatch.subject("documentationSearches", "fcpi-fixture-ref"), { selection: "fixture" });
+    assert.equal(again.eligible, true, "the account is not held by a document's words");
+    await o.lease.close();
+  } finally { await h.close(); }
+});
+
 test("Ref's answered refusals are kept uncertain and inform availability without tripping the breaker", async () => {
   let mode = "auth_text";
   const fx = refFixture({ tool: (name) => mode === "auth_text" ? { content: [{ type: "text", text: "Please verify your email at https://ref.tools/dashboard to search documentation" }] }

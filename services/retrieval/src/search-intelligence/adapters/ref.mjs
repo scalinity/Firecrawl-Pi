@@ -19,41 +19,49 @@ import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/cli
 
 export const REF_CONTRACT = "ref-mcp-v1/2026-10-17";
 export const NO_RESULTS = "No results found";
-const AUTH = [/Ref is not correctly configured/i, /Please verify your email/i, /\binvalid api key\b/i, /\bunauthori[sz]ed\b/i];
-const QUOTA = [/\b(out of|no remaining|insufficient|not enough) credits\b/i, /\bcredit limit (reached|exceeded)\b/i];
-const ERRORS = [/^Error during documentation search:/i, /^Error reading URL:/i, /^Error:/i];
+// Ref's refusals are whole messages with fixed openings (SI0 contract evidence §6). They are matched only at the start of a
+// text block that is not a result: a result's overview or a read's page may quote the same words about something else, and
+// provider-relayed documentation is data, never a signal about this account.
+const AUTH = [/^Ref is not correctly configured\b/i, /^Please verify your email at https:\/\/ref\.tools\b/i, /^(Error:\s*)?(invalid api key|unauthori[sz]ed)\b/i];
+const QUOTA = [/^(Error:\s*)?((out of|no remaining|insufficient|not enough) credits|credit limit (reached|exceeded))\b/i];
+const SEARCH_ERRORS = [/^Error during documentation search:/i, /^Error:/i];
+// A read's success is the page itself, which may begin with anything ("Unauthorized" on a target's own 401 page): only Ref's
+// documented read refusals count.
+const READ_AUTH = AUTH.slice(0, 2), READ_ERRORS = [/^Error reading URL:/i];
 const BLOCK = /overview:[ \t]?([\s\S]*?)\r?\nurl:[ \t]?(\S+)[ \t]*\r?\nmoduleId:[ \t]?([^\r\n]*)/g;
 
 const textsOf = (result) => (Array.isArray(result?.content) ? result.content.filter((c) => c?.type === "text" && typeof c.text === "string").map((c) => c.text) : null);
-function classifyError(text) {
-  if (AUTH.some((r) => r.test(text))) return { kind: "error", reason: "auth_failed", detail: "ref_auth_text" };
-  if (QUOTA.some((r) => r.test(text))) return { kind: "error", reason: "quota_exhausted", detail: "ref_quota_text" };
-  if (ERRORS.some((r) => r.test(text.trim()))) return { kind: "error", reason: "temporarily_unavailable", detail: "ref_error_text" };
+function classifyError(text, { auth = AUTH, errors = SEARCH_ERRORS } = {}) {
+  const t = text.trim();
+  if (auth.some((r) => r.test(t))) return { kind: "error", reason: "auth_failed", detail: "ref_auth_text" };
+  if (QUOTA.some((r) => r.test(t))) return { kind: "error", reason: "quota_exhausted", detail: "ref_quota_text" };
+  if (errors.some((r) => r.test(t))) return { kind: "error", reason: "temporarily_unavailable", detail: "ref_error_text" };
   return null;
 }
 
 // A search tool result: { kind: "results", docs: [{ url, overview, moduleId }] } | { kind: "empty" } | { kind: "error", reason, detail } |
-// { kind: "contract", detail }.
+// { kind: "contract", detail }. Results first, then the exact no-results sentinel, then a leading refusal; anything else is a
+// contract failure, never an empty result. A URL inside an error is never a hit.
 export function parseRefSearch(result) {
   const texts = textsOf(result);
   if (!texts) return { kind: "contract", detail: "ref_no_content" };
-  const joined = texts.join("\n");
-  if (result.isError) return classifyError(joined) ?? { kind: "error", reason: "temporarily_unavailable", detail: "ref_is_error" };
-  const err = texts.map((t) => classifyError(t)).find(Boolean);
-  if (err) return err;
-  if (texts.length === 1 && texts[0].trim() === NO_RESULTS) return { kind: "empty" };
+  if (result.isError) return classifyError(texts.join("\n")) ?? { kind: "error", reason: "temporarily_unavailable", detail: "ref_is_error" };
+  // A block that opens with a refusal is an error whatever it quotes; the others are parsed for results.
+  const refusals = texts.map((t) => classifyError(t));
   const docs = [];
-  for (const t of texts) for (const m of t.matchAll(BLOCK)) if (normalizeUrl(m[2])) docs.push({ url: m[2], overview: m[1].trim().slice(0, 2000), moduleId: m[3].trim().slice(0, 300) });
-  if (!docs.length) return { kind: "contract", detail: "ref_unrecognized_text" };
-  return { kind: "results", docs };
+  texts.forEach((t, i) => { if (!refusals[i]) for (const m of t.matchAll(BLOCK)) if (normalizeUrl(m[2])) docs.push({ url: m[2], overview: m[1].trim().slice(0, 2000), moduleId: m[3].trim().slice(0, 300) }); });
+  if (docs.length) return { kind: "results", docs };
+  if (texts.length === 1 && texts[0].trim() === NO_RESULTS) return { kind: "empty" };
+  return refusals.find(Boolean) ?? { kind: "contract", detail: "ref_unrecognized_text" };
 }
-// A read tool result: { kind: "text", text } | { kind: "error", … } | { kind: "contract", … }.
+// A read tool result: { kind: "text", text } | { kind: "error", … } | { kind: "contract", … }. Judged by isError or by its
+// first block opening with one of Ref's read refusals; the rest is the page.
 export function parseRefRead(result, maxChars) {
   const texts = textsOf(result);
   if (!texts) return { kind: "contract", detail: "ref_no_content" };
   const joined = texts.join("\n");
-  if (result.isError) return classifyError(joined) ?? { kind: "error", reason: "temporarily_unavailable", detail: "ref_is_error" };
-  const err = classifyError(joined);
+  if (result.isError) return classifyError(joined, { auth: READ_AUTH, errors: READ_ERRORS }) ?? { kind: "error", reason: "temporarily_unavailable", detail: "ref_is_error" };
+  const err = texts.length ? classifyError(texts[0], { auth: READ_AUTH, errors: READ_ERRORS }) : null;
   if (err) return err;
   if (!joined.trim()) return { kind: "contract", detail: "ref_empty_read" };
   return { kind: "text", text: joined.slice(0, maxChars), truncated: joined.length > maxChars };

@@ -27,6 +27,18 @@ test("Ref: legacy result blocks are hits; the exact no-results sentinel is empty
   assert.equal(parseRefRead(text("Error reading URL: 404"), 100).kind, "error");
 });
 
+test("Ref: documentation that quotes refusal phrases is a result or a page, never a refusal of this account", () => {
+  const hit = (overview) => parseRefSearch(text(`overview: ${overview}\nurl: https://docs.example.com/a\nmoduleId: m`));
+  for (const o of ["Handling 401 Unauthorized responses with interceptors", "Stripe returns an error when an invalid API key is used", "Twilio: insufficient credits error 20003",
+    "Please verify your email before signing in (Supabase auth)"]) assert.equal(hit(o).kind, "results", o);
+  for (const page of ["The request is rejected as Unauthorized (401) when the token expires.", "Setup\n\nPlease verify your email at https://ref.tools/dashboard to read URLs is shown to unverified users.",
+    "Billing\n\nInsufficient credits: top up from the dashboard.", "Unauthorized\n\nThis page explains the 401 status.", "Error: this guide covers error handling."])
+    assert.equal(parseRefRead(text(page), 4000).kind, "text", page.slice(0, 40));
+  // Ref's own refusals, as whole leading messages, still count.
+  assert.equal(parseRefRead(text("Please verify your email at https://ref.tools/dashboard to read URLs"), 100).reason, "auth_failed");
+  assert.equal(parseRefSearch(text("Ref is not correctly configured. Reach out to hello@ref.tools for help.")).reason, "auth_failed");
+});
+
 test("Ref's query carries the caller's library, version and language hints that the query lacks", () => {
   const r = validateSearchRequest(request({ originalQuery: "how do async components work", intelligence: { documentation: "required", libraries: [{ name: "vue", version: "3.5" }], programmingLanguage: "typescript" } }));
   assert.equal(refQuery(r), "how do async components work vue 3.5 typescript");
