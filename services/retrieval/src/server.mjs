@@ -247,6 +247,10 @@ async function providerStatus() {
   const { day, month } = periodStarts();
   const usage = storeReady ? await store.budgetUsage(day, month).catch(() => null) : null;
   const uncertain = storeReady ? await store.uncertainHolds(month).catch(() => null) : null;
+  // Serper's balance, derived from the ledger against its fixed allocation (spec §21.2's local_allocation_remaining).
+  const allocation = budget.searching?.allocationCredits ?? null;
+  const serperUsed = storeReady && allocation !== null ? await Promise.all(allocationCategories(budget).map((c) => store.allocationUsed(c))).catch(() => null) : null;
+  const serperBalance = serperUsed ? { basis: "local_allocation_remaining", allocation, used: serperUsed.reduce((a, b) => a + b, 0), remaining: allocation - serperUsed.reduce((a, b) => a + b, 0) } : { basis: "unknown" };
   return {
     modelCallsRunning: adapter.running(),
     selection: { ...selection, source: selectionSource },
@@ -262,7 +266,7 @@ async function providerStatus() {
     // Search intelligence (spec §21.2): each provider account's condition apart from its breaker, never a credential fingerprint.
     searchIntelligence: { profile: budget.searching?.profile ?? "legacy", searxngMode: budget.searching?.searxngMode ?? null, permits: permits.snapshot(), tasks: coordinator.tasks(), counters: { ...coordinator.counters(), ...telemetry.counters() },
       availability: availability.rows().map((r) => ({ provider: r.provider, state: r.state, reason: r.reason, providerCode: r.provider_code, observedAt: r.observed_at ?? null, retryAt: r.retry_at ?? null,
-        retryBasis: r.retry_basis, contractFailures: r.contract_failures, balance: r.balance ?? { basis: "unknown" } })) },
+        retryBasis: r.retry_basis, contractFailures: r.contract_failures, balance: r.balance ?? { basis: "unknown" } })), serperBalance },
   };
 }
 
@@ -403,7 +407,8 @@ for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, async () => {
   // Search work outlives its response only to close what it reserved: cancelled now, it is given the rest of the stop window
   // to settle or mark its operations uncertain before the pool closes (spec §14.2, §18.3).
   const leftOver = await coordinator.drain(Math.max(1000, until + 8000 - Date.now()));
-  // Then the operational records those runs wrote: a write still pending after this is counted lost, never the search's answer.
+  // Then the operational records those runs wrote: a write still pending after this goes with the process (logged as
+  // telemetry_pending), never the search's answer. The whole window (18 s) stays inside compose's 20 s stop_grace_period.
   const telemetryLeft = await telemetry.drain(Math.max(500, until + 10000 - Date.now()));
   // A model call whose caller had already gone is cut here; its row is marked UNCERTAIN at the next start.
   log({ event: "stopping", requests_in_flight: inflight, model_calls_running: adapter.running(), search_tasks_left: leftOver, telemetry_pending: telemetryLeft });

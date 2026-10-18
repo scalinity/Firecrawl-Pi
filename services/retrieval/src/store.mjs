@@ -48,6 +48,9 @@ export function nextCooldown(previousS, retryAfterS, sinceLastEndS = null) {
 // then the paid total's day.
 export const lockOrder = (rows) => rows.sort((a, b) => (a.category === "_paid_total") - (b.category === "_paid_total") || a.period.localeCompare(b.period));
 
+// What a lifetime allocation has used: settled amounts, and what is still reserved or uncertain.
+const ALLOCATION_USED = `SELECT COALESCE(SUM(CASE WHEN state = 'SETTLED' THEN actual WHEN state IN ('RESERVED', 'UNCERTAIN') THEN reserved ELSE 0 END), 0) AS used FROM fcpi_retrieval.budget_reservation WHERE category = $1`;
+
 export class Store {
   constructor(config) {
     // A database that stops answering fails a request in seconds instead of holding its permit to the
@@ -235,7 +238,7 @@ export class Store {
         if (prior && prior.state !== "RELEASED") return { existing: prior };
         if (prior) await c.query("UPDATE fcpi_retrieval.budget_reservation SET call_key = call_key || '#released-' || id WHERE id = $1", [prior.id]);
         if (r.lifetimeCap !== undefined) {
-          const used = Number((await c.query(`SELECT COALESCE(SUM(CASE WHEN state = 'SETTLED' THEN actual WHEN state IN ('RESERVED', 'UNCERTAIN') THEN reserved ELSE 0 END), 0) AS used FROM fcpi_retrieval.budget_reservation WHERE category = $1`, [r.category])).rows[0].used);
+          const used = Number((await c.query(ALLOCATION_USED, [r.category])).rows[0].used);
           if (used + r.amount > r.lifetimeCap) throw Object.assign(new Error("exhausted"), { [EXHAUSTED]: { category: r.category, period: "allocation", cap: r.lifetimeCap, used } });
         }
         const notices = [];
@@ -369,6 +372,8 @@ export class Store {
   }
   // What calls of uncertain outcome hold in the month's caps, by category: a call sent whose answer never came keeps its whole
   // reservation and nothing settles it, so the status must show what is held.
+  // A lifetime allocation's use (Serper's credits, spec §18.3), as the reservation weighs it: for the status's derived balance.
+  async allocationUsed(category) { return Number((await this.pool.query(ALLOCATION_USED, [category])).rows[0].used); }
   async uncertainHolds(month) {
     return (await this.pool.query("SELECT category, count(*)::int AS count, sum(reserved)::float8 AS reserved FROM fcpi_retrieval.budget_reservation WHERE state = 'UNCERTAIN' AND month_start = $1 GROUP BY category ORDER BY category", [month])).rows;
   }

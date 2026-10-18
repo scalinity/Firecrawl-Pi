@@ -31,7 +31,8 @@ test("the wired server: credential, validation, an honest partial aggregate sear
   for (const d of [creds, providers]) (await import("node:fs")).mkdirSync(d);
   const coreToken = `core-${randomUUID()}-${randomUUID()}`;
   writeFileSync(join(creds, "retrieval_core_token_sha256"), sha(coreToken));
-  writeFileSync(join(creds, "retrieval_gateway_token_sha256"), sha(randomUUID()));
+  const gatewayToken = `gateway-${randomUUID()}-${randomUUID()}`;
+  writeFileSync(join(creds, "retrieval_gateway_token_sha256"), sha(gatewayToken));
   writeFileSync(join(creds, "retrieval_postgres_password"), "unused-trust-auth");
   writeFileSync(join(creds, "retrieval_browser_token"), randomUUID());
   writeFileSync(join(creds, "retrieval_searxng_proxy_sha256"), sha(randomUUID()));
@@ -92,6 +93,11 @@ test("the wired server: credential, validation, an honest partial aggregate sear
     const over = await evidence("x".repeat(786433)).catch((e) => e);
     assert.ok(over instanceof Error || over.status === 400, "a body past the bound is refused");
     assert.equal((await fetch(`${base}/healthz`)).status, 200, "and the server keeps serving");
+    // The status derives Serper's balance from the ledger against its fixed allocation.
+    const st = await (await fetch(`http://127.0.0.1:${extract}/internal/providers`, { headers: { authorization: `Bearer ${gatewayToken}` } })).json();
+    assert.deepEqual(Object.keys(st.searchIntelligence.serperBalance).sort(), ["allocation", "basis", "remaining", "used"]);
+    assert.equal(st.searchIntelligence.serperBalance.basis, "local_allocation_remaining");
+    assert.equal(st.searchIntelligence.serperBalance.remaining, st.searchIntelligence.serperBalance.allocation - st.searchIntelligence.serperBalance.used);
     child.kill("SIGTERM");
     assert.equal(await exited, 0);
     assert.match(out, /"event":"stopping".*"search_tasks_left":0/);
