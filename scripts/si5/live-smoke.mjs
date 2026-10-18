@@ -1,11 +1,16 @@
+#!/usr/bin/env node
 // SI5's bounded live contract smoke (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §24.2, §30.2): one coordinated live search
-// that reaches every configured integration once (the five general engines, Context7, Ref's search and its selected reads,
-// and Jev), then one call per provider with a deliberately invalid key for the hosted refusal shapes (no spend). It runs the
-// retrieval service's own adapters with the deployed budget and egress policies, the live selection, and a ledger in the
-// disposable PostgreSQL (FCPI_TEST_PG). Credentials are copied from the workstation's .env into owner-only files for the run and
-// removed after; no value is ever printed, and the record is refused if any value appears in it. It records shapes only:
+// that reaches every configured integration once (the five general engines, Context7, Ref's search and Jev), one explicit Ref
+// search and read of one of its results (a coordinated search reads only when a Ref result lacks a useful excerpt), then one
+// call per provider with a deliberately invalid key for the hosted refusal shapes (no spend). It runs the
+// retrieval service's own adapters with the deployed budget and egress policies, the live selection, and a ledger in its own
+// database on the disposable PostgreSQL (FCPI_TEST_PG, database fcpi_si5_smoke: the retrieval suites truncate "postgres", and
+// the collection has its own). Credentials are copied from the workstation's .env into owner-only files for the run and
+// removed on exit or signal; no value is ever printed, and the record is refused if any value appears in it. It records shapes only:
 // status, content type, rate-limit headers, the key structure of each JSON body, usage figures and the parsed outcomes; no
-// result text. Never used to exhaust anything: one search, one read pair, a handful of decision requests.
+// result text. Never used to exhaust anything: one search, one explicit Ref search and read, a handful of decision requests.
+// It fails (exit 4, the gaps on stderr, the record still printed) when a configured integration has no settled live exchange
+// or Ref has no settled read: a smoke that cannot fail proves nothing.
 //   node scripts/si5/live-smoke.mjs > evidence/search-intelligence/SI5/live-smoke.json
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -45,6 +50,8 @@ function providersDir(valueOf) {
 }
 const cleanup = () => { for (const d of dirs) rmSync(d, { recursive: true, force: true }); };
 process.on("exit", cleanup);
+// A signal's default ends the process without its exit handlers: exit instead, so the key files go with it.
+for (const s of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(s, () => process.exit(130));
 
 // The policies as deployed, the host's private ranges as local networks, the system resolver.
 const policy = loadPolicy(readFileSync(join(root, "deploy/policies/egress.json"), "utf8"));
@@ -83,15 +90,20 @@ function capturing(log) {
   };
 }
 
+const DB = "fcpi_si5_smoke";
 async function freshStore() {
-  const c = new pg.Client({ host: HOST, user: "postgres", database: "postgres" });
+  const admin = new pg.Client({ host: HOST, user: "postgres", database: "postgres" });
+  await admin.connect();
+  try { if (!(await admin.query("SELECT 1 FROM pg_database WHERE datname = $1", [DB])).rowCount) await admin.query(`CREATE DATABASE ${DB}`); }
+  finally { await admin.end(); }
+  const c = new pg.Client({ host: HOST, user: "postgres", database: DB });
   await c.connect();
   // A clean slate on the disposable database: no cached provider answer, admission count, availability or ledger row from an
   // earlier run may stand in for this run's live calls.
   try { await c.query("CREATE SCHEMA IF NOT EXISTS nuq"); await c.query(readFileSync(join(root, "deploy/nuq-postgres/fcpi-retrieval-schema.sql"), "utf8"));
     await c.query("TRUNCATE fcpi_retrieval.search_cache, fcpi_retrieval.search_query, fcpi_retrieval.provider_availability, fcpi_retrieval.budget_usage, fcpi_retrieval.budget_reservation, fcpi_retrieval.search_run, fcpi_retrieval.search_event"); }
   finally { await c.end(); }
-  const store = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval" });
+  const store = new Store({ host: HOST, database: DB, user: "fcpi_retrieval" });
   await store.ready({ url: 2, browser: 1 });
   return store;
 }
@@ -137,6 +149,22 @@ try {
     ranking: s ? { mode: s.ranking.mode, reason: s.ranking.reason, model: s.ranking.model, scored: s.ranking.scored, shortlisted: s.ranking.shortlisted } : null,
     warnings: s?.warnings ?? [], usage: s?.usage ?? [] };
   record.liveExchanges = liveLog;
+
+  // 1b. One explicit Ref search and a read of its first result, in that search's session (two credits): the read's hosted
+  // answer shape is checked live, which a coordinated search reaches only when a Ref result lacks a useful excerpt.
+  try {
+    const sub = live.dispatch.subject("documentationSearches", "ref-context");
+    const o = await live.docs.ref.search(validateSearchRequest({ ...q, requestId: `si5-smoke-${randomUUID()}`, logicalSearchId: randomUUID(), absoluteDeadlineMs: Date.now() + 60000 }, Date.now()),
+      { sub, pre: live.dispatch.preflight(sub, { selection: "live" }), signal: new AbortController().signal, deadlineAt: Date.now() + 15000, selection: "live", kind: "docs_search" });
+    const first = o.candidates?.[0];
+    let read = null;
+    if (o.lease && first) {
+      const r = await o.lease.read(first.providerUrl, { signal: new AbortController().signal, deadlineAt: Date.now() + 15000 });
+      read = r.ok ? { ok: true, kind: r.passage.kind, chars: r.passage.text.length, truncated: r.passage.truncated, usage: r.usage } : { ok: false, reason: r.reason ?? null, detail: r.detail ?? null };
+    }
+    await o.lease?.close?.();
+    record.refRead = { search: { status: o.status, reason: o.reason ?? null, results: o.candidates?.length ?? 0 }, read };
+  } catch (e) { record.refRead = { threw: String(e?.code ?? e?.message ?? e).slice(0, 160) }; }
   record.ledger = (await store.pool.query("SELECT provider, kind, unit, state, reserved::float8 AS reserved, actual::float8 AS actual FROM fcpi_retrieval.budget_reservation ORDER BY provider, kind, created_at")).rows;
 
   // 2. One call per provider with a deliberately invalid key: the hosted refusal shapes and their classification, no spend.
@@ -181,3 +209,11 @@ const out = JSON.stringify(record, null, 2);
 // The record never carries a credential: refused whole if any value appears in it.
 if (secrets.some((v) => v.length >= 8 && out.includes(v))) { console.error("refused: a credential value appears in the record"); process.exit(3); }
 console.log(out);
+// Every configured integration had a settled live exchange, and Ref a settled read; otherwise the smoke fails, saying what.
+const providerOf = Object.fromEntries(Object.values(budget.providers).filter((p) => p.credential).map((p) => [p.credential, p]));
+const settled = (fn) => (record.ledger ?? []).some((r) => r.state === "SETTLED" && fn(r));
+const gaps = record.configured.filter((file) => { const id = Object.entries(budget.providers).find(([, p]) => p.credential === file)?.[0]; return id && providerOf[file] && !settled((r) => r.provider === id); })
+  .map((file) => `${file}: no settled live exchange`);
+if (record.configured.includes("ref_api_key") && !settled((r) => r.kind === "docs_read")) gaps.push("ref_api_key: no settled read");
+if (record.error) gaps.push(`run: ${record.error}`);
+if (gaps.length) { console.error(`smoke gaps: ${gaps.join("; ")}`); process.exit(4); }
