@@ -151,20 +151,26 @@ export function dropInPageLinks(doc) {
   doc.markdown = doc.markdown.replace(MD_LINK, (whole, text, url) => (url.includes("#") && own.has(url.split("#")[0]) ? text : whole));
 }
 
-// Search intelligence (spec §19.3): a search answer over the tool limit loses its optional detail first — passage text, score
-// detail, auxiliary-context text and per-scope suboperations — each counted, before any result is dropped. Coverage, each
+// Search intelligence (spec §19.3): a search answer over the tool limit loses its optional detail first — passage and evidence
+// passage text, score detail, auxiliary-context text and per-scope suboperations — each counted, before any result is dropped. Coverage, each
 // provider's outcome and reason, every result's original source URL and version qualification, and cache provenance stay.
 export function compactSearchMeta(payload, budget) {
   const cut = {};
   const count = (k) => { cut[k] = (cut[k] ?? 0) + 1; };
   const rows = (Array.isArray(payload.data?.web) ? payload.data.web : []).map((w) => w?.fcpi?.search).filter((s) => s && typeof s === "object");
   const top = payload.fcpi?.search;
+  // A cut is on code points, so no surrogate pair is split; a cut text says how much it kept.
+  const clip = (t, n) => Array.from(t).slice(0, n).join("");
+  const longer = (t, n) => typeof t === "string" && Array.from(t).length > n;
+  const evidencePassages = () => rows.flatMap((s) => (Array.isArray(s.evidence?.passages) ? s.evidence.passages : []));
   const steps = [
-    () => { for (const s of rows) for (const p of s.passages ?? []) if (typeof p.text === "string" && p.text.length > 200) { p.text = p.text.slice(0, 200); p.truncated = true; count("passageText"); } },
+    () => { for (const s of rows) for (const p of s.passages ?? []) if (longer(p.text, 200)) { p.text = clip(p.text, 200); p.truncated = true; count("passageText"); } },
+    () => { for (const p of evidencePassages()) if (longer(p.text, 200)) { p.text = clip(p.text, 200); p.truncated = true; count("evidencePassageText"); } },
     () => { for (const s of rows) if (s.scores) { s.scores = { final: s.scores.final }; count("scoreDetail"); } },
-    () => { for (const a of top?.documentation?.auxiliaryContext ?? []) if (typeof a.text === "string" && a.text.length > 300) { a.text = a.text.slice(0, 300); a.truncated = { ...(a.truncated ?? {}), mcp: true }; count("auxiliaryText"); } },
+    () => { for (const a of top?.documentation?.auxiliaryContext ?? []) if (longer(a.text, 300)) { a.text = clip(a.text, 300); a.truncated = { ...(a.truncated ?? {}), kept: 300, mcp: true }; count("auxiliaryText"); } },
     () => { for (const p of Object.values(top?.providers ?? {})) if (p?.suboperations) { delete p.suboperations; count("suboperations"); } },
     () => { for (const s of rows) if (Array.isArray(s.passages) && s.passages.length) { s.passages = s.passages.map(({ text, ...rest }) => ({ ...rest, text: undefined, omitted: true })); count("passages"); } },
+    () => { for (const s of rows) if (Array.isArray(s.evidence?.passages) && s.evidence.passages.length) { s.evidence.passages = s.evidence.passages.map(({ text, ...rest }) => ({ ...rest, text: undefined, omitted: true })); count("evidencePassages"); } },
   ];
   for (const step of steps) { if (bytes(payload) <= budget) break; step(); }
   return Object.keys(cut).length ? cut : null;
@@ -203,15 +209,22 @@ function shape(kind, tool, r, args, m, omitted) {
         // fcpi metadata is kept; its optional detail is cut before any result (compactSearchMeta).
         const payload = { data: b.data ?? {}, ...(b.warning ? { warning: b.warning } : {}), ...(b.fcpi ? { fcpi: b.fcpi } : {}) };
         const web = Array.isArray(payload.data.web) ? payload.data.web : [];
-        web.forEach(dropInPageLinks);
+        // An evidence passage's locator indexes and hashes the core's markdown: once this answer rewrites a row's markdown
+        // (in-page links reduced, or cut to fit), the row says its locators refer to the core's rendition, not this text.
+        const coreLocators = (w) => { const e = w?.fcpi?.search?.evidence; if (e && Array.isArray(e.passages) && e.passages.length) e.locatorBasis = "core_rendition"; };
+        web.forEach((w) => { const before = w?.markdown; dropInPageLinks(w); if (w?.markdown !== before) coreLocators(w); });
         const total = web.length;
         const metaCuts = bytes(payload) > budget ? compactSearchMeta(payload, budget) : null;
-        if (metaCuts) payload.truncated = { fcpi: metaCuts, note: "Optional search detail (passage text, score detail, auxiliary context text) was shortened to fit the tool payload limit; coverage and sources are complete." };
+        if (metaCuts) payload.truncated = { fcpi: metaCuts, note: "Optional search detail (passage and evidence text, score detail, auxiliary context text) was shortened to fit the tool payload limit; coverage and sources are complete." };
         while (bytes(payload) > budget && payload.data.web?.length > 1) {
           payload.data.web = payload.data.web.slice(0, Math.floor(payload.data.web.length / 2));
           payload.truncated = { ...payload.truncated, results: { originalCount: total, returnedCount: payload.data.web.length }, note: "The results exceeded the tool payload limit; ask for fewer results or fewer scrape formats." };
         }
-        if (bytes(payload) > budget && payload.data.web?.length === 1) payload.truncated = { ...payload.truncated, fields: fitDocument(payload, payload.data.web[0], budget - 512) };
+        if (bytes(payload) > budget && payload.data.web?.length === 1) {
+          const fields = fitDocument(payload, payload.data.web[0], budget - 512);
+          if (fields?.markdown) coreLocators(payload.data.web[0]);
+          payload.truncated = { ...payload.truncated, fields };
+        }
         return { payload };
       }
       const payload = { data: b.data ?? null, ...(b.fcpi ? { fcpi: b.fcpi } : {}) };

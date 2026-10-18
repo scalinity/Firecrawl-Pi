@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { makeTools } from "../src/tools.mjs";
+import { makeTools, compactSearchMeta } from "../src/tools.mjs";
 
 const MANIFEST = JSON.parse(readFileSync(process.env.FCPI_TEST_MANIFEST ?? new URL("../../../deploy/policies/capabilities.json", import.meta.url), "utf8"));
 const tool = () => makeTools(structuredClone(MANIFEST)).find((t) => t.name === "firecrawl_search");
@@ -64,4 +64,39 @@ test("a search answer keeps fcpi.search, and a large one loses optional detail b
     assert.equal(w.fcpi.search.documentation.scopes[0].status, "unknown");
   }
   assert.match(p.warning, /Partial/);
+});
+
+test("evidence passages are optional detail too: cut, then omitted, before any result is dropped, on code points", () => {
+  const evRow = (i) => ({ url: `https://e.example/${i}`, title: "t", description: "d", markdown: "short page",
+    fcpi: { search: { documentId: `e${i}`, canonicalUrl: `https://e.example/${i}`, originalUrls: [`https://e.example/${i}`], observations: [{ provider: "exa", rank: i + 1 }],
+      evidence: { mode: "jev", passages: Array.from({ length: 6 }, (_, k) => ({ passageId: `ev${i}${k}`, locator: { start: 0, end: 600, contentSha256: "a".repeat(64) }, text: "😀".repeat(3000) })) } } } });
+  const web = Array.from({ length: 10 }, (_, i) => evRow(i));
+  const p = tool().shape({ status: 200, json: { success: true, data: { web }, fcpi: { search: searchMeta() } }, headers: {} }, {}).payload;
+  assert.ok(Buffer.byteLength(JSON.stringify(p)) <= LIMIT);
+  assert.equal(p.data.web.length, 10, "every result stays: the evidence detail went first");
+  assert.ok(p.truncated.fcpi.evidencePassageText > 0 || p.truncated.fcpi.evidencePassages > 0, JSON.stringify(p.truncated));
+  assert.equal(p.truncated.results, undefined);
+  for (const w of p.data.web) for (const e of w.fcpi.search.evidence.passages) {
+    if (typeof e.text === "string") { assert.ok(Array.from(e.text).length <= 200); assert.ok(!/[\uD800-\uDBFF]$/.test(e.text), "no pair is split"); }
+    assert.deepEqual(e.locator, { start: 0, end: 600, contentSha256: "a".repeat(64) }, "locators stay");
+  }
+  // Every step, against a tiny budget: auxiliary text says what it kept, on code points.
+  const meta = searchMeta();
+  meta.documentation.auxiliaryContext[0].text = "😀".repeat(400);
+  const tiny = { data: { web: [evRow(0)] }, fcpi: { search: meta } };
+  compactSearchMeta(tiny, 1);
+  const a = tiny.fcpi.search.documentation.auxiliaryContext[0];
+  assert.deepEqual([Array.from(a.text).length, a.truncated.kept, a.truncated.mcp], [300, 300, true]);
+  assert.ok(tiny.data.web[0].fcpi.search.evidence.passages.every((e) => e.omitted === true && e.text === undefined), "and evidence text is omitted last");
+});
+
+test("a row whose markdown this answer rewrote says its evidence locators refer to the core's rendition", () => {
+  const withLink = { url: "https://l.example/a", title: "t", description: "d", markdown: "See [the note](https://l.example/a#note) and [elsewhere](https://other.example/).", metadata: { url: "https://l.example/a" },
+    fcpi: { search: { documentId: "l0", evidence: { mode: "jev", passages: [{ passageId: "x", locator: { start: 0, end: 3, contentSha256: "b".repeat(64) }, text: "See" }] } } } };
+  const plain = { url: "https://l.example/b", title: "t", description: "d", markdown: "No links here.", metadata: { url: "https://l.example/b" },
+    fcpi: { search: { documentId: "l1", evidence: { mode: "jev", passages: [{ passageId: "y", locator: { start: 0, end: 2, contentSha256: "c".repeat(64) }, text: "No" }] } } } };
+  const p = tool().shape({ status: 200, json: { success: true, data: { web: [withLink, plain] }, fcpi: { search: searchMeta() } }, headers: {} }, {}).payload;
+  assert.equal(p.data.web[0].markdown, "See the note and [elsewhere](https://other.example/).");
+  assert.equal(p.data.web[0].fcpi.search.evidence.locatorBasis, "core_rendition");
+  assert.equal(p.data.web[1].fcpi.search.evidence.locatorBasis, undefined, "an untouched row needs no note");
 });
