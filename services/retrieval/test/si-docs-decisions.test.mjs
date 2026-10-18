@@ -7,6 +7,7 @@ import { harness, request } from "./si-helpers.mjs";
 import { makeContext7 } from "../src/search-intelligence/adapters/context7.mjs";
 import { makeDecisions, OUTPUT_TOKENS_PER_QUESTION } from "../src/search-intelligence/decisions.mjs";
 import { JEV_MODEL } from "../src/budget.mjs";
+import { microUsd } from "../src/search-intelligence/adapters/common.mjs";
 
 const limitsOf = (h) => () => h.policy.search.intelligence;
 const docsRequest = (q) => request({ originalQuery: q, intelligence: { documentation: "required", libraries: [{ name: "vue" }] } });
@@ -144,4 +145,29 @@ test("Jev's reservation covers its input and a bounded output per question at th
     const bytes = Buffer.byteLength(JSON.stringify(body));
     assert.equal(h.store.lastReserve.amount, Math.ceil((bytes * 42000 + 1 * OUTPUT_TOKENS_PER_QUESTION * 1000000) / 1e6), "input bytes at the input rate plus 64 tokens for the one question");
   } finally { await h.close(); }
+});
+
+test("a Jev answer settles at its reported cost, else at its tokens at the card's rate", async () => {
+  let usage = { input_tokens: 1000, output_tokens: 10, cost: 0.000123 };
+  const h = await harness({ handlers: { openrouter: () => ({ status: 200, body: { model: JEV_MODEL, answers: { relevant: { type: "noul", noul: 1 } }, usage } }) } });
+  try {
+    const decisions = makeDecisions({ dispatch: h.dispatch, store: h.store, limits: limitsOf(h), permits: h.permits });
+    const { sub, pre } = decisions.preflight("fixture", "fcpi-fixture-jev");
+    const run = (q) => decisions.decide({ body: jevBody(q), kind: "decision", purpose: "rerank", request: docsRequest(q), sub, pre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    const a = await run("settle at cost");
+    assert.deepEqual(a.usage, { microUsd: 123, basis: "provider_reported", inputTokens: 1000 });
+    usage = { input_tokens: 1000, output_tokens: 10 };
+    const b = await run("settle at tokens");
+    assert.deepEqual(b.usage, { microUsd: 42, basis: "tokens_at_rate_card", inputTokens: 1000 }, "1,000 input tokens at 42,000 micro-USD per million; output priced at zero");
+    assert.deepEqual([...h.store.rows.values()].map((x) => [x.state, x.actual]), [["SETTLED", 123], ["SETTLED", 42]]);
+  } finally { await h.close(); }
+});
+
+test("reported dollars become whole micro-USD, rounded up, without the product's float error adding a unit", () => {
+  assert.equal(0.000123 * 1e6 > 123, true, "the float product itself overshoots");
+  assert.equal(microUsd(0.000123), 123);
+  assert.equal(microUsd(0.0000336), 34, "a real fraction of a micro-USD still counts in full");
+  assert.equal(microUsd(0.012), 12000);
+  assert.equal(microUsd(0.017), 17000);
+  assert.equal(microUsd(0), 0);
 });

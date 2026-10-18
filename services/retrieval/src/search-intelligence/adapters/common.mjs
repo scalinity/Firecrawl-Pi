@@ -270,5 +270,8 @@ export async function meteredSearch({ dispatch, ctx, id, base, call, refusal, cl
 
 // A provider's JSON answer, or null when it is not JSON (a contract failure for the caller to name).
 export function parseJson(buf) { try { return JSON.parse(buf.toString("utf8")); } catch { return null; } }
+// A provider's reported dollars as whole micro-USD, rounded up: a real fraction of a micro-USD counts in full, but the float
+// error of the product (0.000123 * 1e6 is 123.00000000000001) never adds a unit, so it is rounded to nano-USD first.
+export const microUsd = (dollars) => Math.ceil(Math.round(dollars * 1e9) / 1e3);
 // A string field bounded to max characters, or the fallback when absent or not a string.
 export const str = (v, max, fallback = "") => (typeof v === "string" ? v.slice(0, max) : fallback);

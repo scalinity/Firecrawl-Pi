@@ -12,7 +12,7 @@
 // Jev's success never counts as discovery coverage, and its failure leaves the deterministic ranking in place.
 import { VERSIONS } from "./contracts.mjs";
 import { parseRetryAfter } from "./availability.mjs";
-import { parseJson, str } from "./adapters/common.mjs";
+import { parseJson, str, microUsd } from "./adapters/common.mjs";
 import { sha256, utf8Bytes, normalizeQueryText } from "./normalize.mjs";
 import { JEV_MODEL } from "../budget.mjs";
 
@@ -173,7 +173,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
         return { ok: false, reason, detail: verdict.detail, uncertain: true };
       }
       // Settled at what was used: the reported cost, else the input tokens at the card's rate (output free).
-      const u = data?.usage, cost = Number.isFinite(u?.cost) && u.cost >= 0 ? Math.ceil(u.cost * 1e6) : null;
+      const u = data?.usage, cost = Number.isFinite(u?.cost) && u.cost >= 0 ? microUsd(u.cost) : null;
       const byTokens = Number.isInteger(u?.input_tokens) ? Math.ceil((u.input_tokens * sub.card.inputPerMTok + (u.output_tokens ?? 0) * sub.card.outputPerMTok) / 1e6) : null;
       await close.settle(cost ?? byTokens ?? amount, { usage: { inputTokens: u?.input_tokens ?? null, outputTokens: u?.output_tokens ?? null, costUsd: u?.cost ?? null, basis: cost !== null ? "provider_reported" : byTokens !== null ? "tokens_at_rate_card" : "reservation_estimate" }, detail: `Jev ${purpose}` });
       const env = checkEnvelope(data);

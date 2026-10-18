@@ -5,13 +5,13 @@
 // comparable score. Each answer's costDollars.total settles the call; without it the reservation's documented maximum
 // settles it, labelled an estimate. Errors are {requestId, error, tag}; an unknown tag is a generic error for its status.
 import { parseRetryAfter } from "../availability.mjs";
-import { meteredSearch, str } from "./common.mjs";
+import { meteredSearch, str, microUsd } from "./common.mjs";
 import { sha256, normalizeQueryText } from "../normalize.mjs";
 
 export const EXA_CONTRACT = "exa-search-v1/2026-10-17";
 const QUOTA_TAGS = new Set(["NO_MORE_CREDITS", "API_KEY_BUDGET_EXCEEDED", "TEAM_BUDGET_EXCEEDED"]);
 // The cost Exa reports for a call in micro-USD, or null when it reports none.
-const reportedCost = (data) => { const total = data?.costDollars?.total; return Number.isFinite(total) && total >= 0 ? Math.ceil(total * 1e6) : null; };
+const reportedCost = (data) => { const total = data?.costDollars?.total; return Number.isFinite(total) && total >= 0 ? microUsd(total) : null; };
 
 export function exaBody(request, numResults) {
   const c = request.constraints;
