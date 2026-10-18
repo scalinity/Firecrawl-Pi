@@ -23,6 +23,7 @@ import { makeRefBridge } from "../src/search-intelligence/adapters/ref-bridge.mj
 import { makeDocumentation } from "../src/search-intelligence/documentation.mjs";
 import { makeDecisions } from "../src/search-intelligence/decisions.mjs";
 import { makeTelemetry, availabilityEvent, breakerEvent } from "../src/search-intelligence/telemetry.mjs";
+import { makeEvidence } from "../src/search-intelligence/evidence.mjs";
 
 export { serve, providersDir, budgetFor, lookupFixture };
 export const egress = loadPolicy(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
@@ -200,7 +201,7 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   if (servers.ref) docs.ref = makeRef({ dispatch, limits, openSession: makeRefSessionFactory({ makeFetch, log }), log });
   const jev = decisions ?? (servers.openrouter ? makeDecisions({ dispatch, store, limits, permits, log }) : null);
   const documentation = Object.keys(docs).length ? makeDocumentation({ decisions: jev, log }) : null;
-  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, docs, documentation, decisions: jev, telemetry, log });
+  const coordinator = makeCoordinator({ store, getBudget, getPolicy, getSelection, dispatch, general, searxng: backend ? makeSearxngLane({ backend, limits }) : null, availability, docs, documentation, decisions: jev, evidence: makeEvidence({ decisions: jev, limits, log }), telemetry, log });
   return { coordinator, store, servers, sx, budget, policy, logs, dispatch, availability, permits, serper, general, docs, decisions: jev, makeFetch, telemetry, getBudget, getPolicy, getSelection,
     close: async () => { for (const s of Object.values(servers)) await s.close(); await sx?.close(); } };
 }

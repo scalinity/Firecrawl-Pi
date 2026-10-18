@@ -444,8 +444,10 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   async function evaluateEvidence(raw, { signal }) {
     if (!evidence) throw new Denied("SEARCH_BACKEND_UNAVAILABLE", "evidence evaluation is not available");
     const selection = getSelection().search, roster = rosterFor(selection);
+    const t0 = clock();
     const r = await evidence.evaluate(raw, { signal, selection, decisionSubject: roster?.decisionSubject ?? null });
-    telemetry?.event?.({ type: "evidence", provider: "jev", logicalId: raw.logicalSearchId, operation: "evidence", status: r.mode, reason: r.reason ?? null, detail: { documents: r.documents.length } });
+    telemetry?.event?.({ type: "evidence", provider: "jev", logicalId: raw.logicalSearchId, operation: "evidence", startedAt: new Date(t0), durationMs: clock() - t0, status: r.mode, reason: r.reason ?? null,
+      detail: { documents: r.documents.length } });
     return { status: 200, body: r };
   }
   return { search, legacyGet, evaluateEvidence, drain, tasks: () => tasks.size, counters: () => ({ accountingFailures: dispatch.counters?.().accountingFailures ?? 0, cacheFailures }), aggregateKey };

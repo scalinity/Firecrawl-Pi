@@ -103,3 +103,16 @@ test("a Jev failure keeps every deterministic passage and says why; nothing beco
     assert.notEqual(r.documents[0].evidence.adequacy, "acquisition_failed");
   } finally { await h.close(); }
 });
+
+test("an evidence call is recorded with its timing", async () => {
+  const h = await harness({ telemetry: true, handlers: { openrouter: jev(() => 0.9) } });
+  try {
+    const raw = payload([doc(1, PAGE)]);
+    const r = await h.coordinator.evaluateEvidence(raw, { signal: new AbortController().signal });
+    assert.equal(r.status, 200);
+    await h.telemetry.drain(2000);
+    const e = h.store.events.find((x) => x.type === "evidence" && x.logicalId === raw.logicalSearchId);
+    assert.ok(e, "the evidence call is an event");
+    assert.ok(Number.isInteger(e.durationMs) && e.durationMs >= 0 && e.startedAt instanceof Date, "with when it started and how long it took");
+  } finally { await h.close(); }
+});
