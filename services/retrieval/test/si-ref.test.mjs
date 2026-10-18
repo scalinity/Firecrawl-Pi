@@ -134,6 +134,23 @@ test("a search about authentication errors is a billed success and leaves Ref av
   } finally { await h.close(); }
 });
 
+test("a session closed after its search's deadline, or after its cancellation, still says goodbye", async () => {
+  const fx = refFixture();
+  const h = await harness({ handlers: { ref: fx } });
+  try {
+    const late = await h.docs.ref.search(docsRequest("ref late goodbye"), refCtx(h, { deadlineAt: Date.now() + 1200 }));
+    const ac = new AbortController();
+    const cancelled = await h.docs.ref.search(docsRequest("ref cancelled goodbye"), refCtx(h, { signal: ac.signal }));
+    await sleep(1300);
+    ac.abort();
+    await late.lease.close();
+    await cancelled.lease.close();
+    const sessions = fx.log.filter((e) => e.tool === "ref_search_documentation").map((e) => e.session);
+    assert.deepEqual(sessions.map((s) => fx.log.some((e) => e.method === "DELETE" && e.session === s && e.closed)), [true, true], "both remote sessions are ended");
+    assert.equal(fx.sessions.size, 0);
+  } finally { await h.close(); }
+});
+
 test("Ref's answered refusals are kept uncertain and inform availability without tripping the breaker", async () => {
   let mode = "auth_text";
   const fx = refFixture({ tool: (name) => mode === "auth_text" ? { content: [{ type: "text", text: "Please verify your email at https://ref.tools/dashboard to search documentation" }] }

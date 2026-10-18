@@ -57,8 +57,8 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
     const ops = new Map();
     let sessionDeadline = deadlineAt, wrote = false;
     const authorize = () => !signal?.aborted && !session.signal.aborted && (!sub.prov.paid || paidDispatchActive(getBudget(), paidDispatch));
-    const exchange = (method, h, body, { sig, until, onWritten = () => {}, onEnd }) => request({ baseUrl: endpoint.origin, path: endpoint.pathname, method, headers: h, body, timeoutMs: Math.max(1, until - Date.now()),
-      maxBytes: limits().responseBytes.ref, getPolicy, resolvePublic, lookupFixture, signal: sig, authorize, deadlineAt: until, onWritten: () => { wrote = true; onWritten(); }, onEnd });
+    const exchange = (method, h, body, { sig, until, onWritten = () => {}, onEnd, auth = authorize }) => request({ baseUrl: endpoint.origin, path: endpoint.pathname, method, headers: h, body, timeoutMs: Math.max(1, until - Date.now()),
+      maxBytes: limits().responseBytes.ref, getPolicy, resolvePublic, lookupFixture, signal: sig, authorize: auth, deadlineAt: until, onWritten: () => { wrote = true; onWritten(); }, onEnd });
 
     async function fetch(input, init = {}) {
       const u = new URL(String(input?.url ?? input));
@@ -68,9 +68,12 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
       const op = h[OP_HEADER] ? ops.get(h[OP_HEADER]) ?? null : null;
       delete h[OP_HEADER]; delete h.host; delete h["content-length"];
       h["x-ref-api-key"] = key;
+      // The goodbye (DELETE) is not billable and is sent when the search ends, often past its deadline or after its
+      // cancellation: it has its own one-second bound, and only the session's local close stops it.
+      const goodbye = method === "DELETE";
       const mine = new AbortController();
-      const sig = AbortSignal.any([session.signal, mine.signal, ...(signal ? [signal] : []), ...(init.signal ? [init.signal] : []), ...(op ? [op.signal] : [])]);
-      const until = op ? op.deadlineAt : sessionDeadline;
+      const sig = AbortSignal.any([session.signal, mine.signal, ...(signal && !goodbye ? [signal] : []), ...(init.signal ? [init.signal] : []), ...(op ? [op.signal] : [])]);
+      const until = op ? op.deadlineAt : goodbye ? Date.now() + 1000 : sessionDeadline;
       if (method === "GET") {
         // Taken only when free now: a full pool answers 405 and the session works without its receive stream.
         let release;
@@ -84,7 +87,7 @@ export function makeRefBridge({ permits, getPolicy, resolvePublic, lookupFixture
       if (op) op.pending.add(mine);
       let res;
       try {
-        res = await exchange(method, h, method === "POST" ? Buffer.from(init.body ?? "") : null, { sig, until: method === "DELETE" ? Math.min(until, Date.now() + 1000) : until,
+        res = await exchange(method, h, method === "POST" ? Buffer.from(init.body ?? "") : null, { sig, until, auth: goodbye ? () => !session.signal.aborted : authorize,
           onWritten: () => { if (op) op.written = true; }, onEnd: () => { op?.pending.delete(mine); release(); } });
       } catch (e) { op?.pending.delete(mine); throw e; }
       const ids = method === "POST" ? requestIds(init.body) : [];
