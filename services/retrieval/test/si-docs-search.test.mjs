@@ -139,6 +139,27 @@ test("a slow fresh session for a cached discovery leaves its reads their own tim
   } finally { await h.close(); }
 });
 
+test("an answer whose Ref reads failed is not stored: the next identical search reads again", async () => {
+  let failReads = true;
+  const fx = refFixture({ tool: (name, args) => name === "ref_search_documentation" ? refBlocks([1, 2, 3].map((i) => `https://ref.example.org/docs/${i}`))
+    : failReads ? { content: [{ type: "text", text: "Error reading URL: upstream 500" }] } : { content: [{ type: "text", text: `Excerpt of ${args.url}: ${"documented behavior. ".repeat(20)}` }] } });
+  // The general engines answer with results and both documentation providers are configured, so the answer is complete,
+  // has a lifetime, and would be stored.
+  const h = await harness({ handlers: { context7, ref: fx } });
+  try {
+    const q = () => docsRequest("ref degraded answer", { limit: 10 });
+    const first = await h.coordinator.search(q(), { signal: new AbortController().signal });
+    assert.equal(first.body.search.documentation.enrichment.limitation, "temporarily_unavailable");
+    failReads = false;
+    const second = await h.coordinator.search(q(), { signal: new AbortController().signal });
+    assert.notEqual(second.body.search.cache.mode, "hit", "the degraded answer was not stored");
+    assert.ok(second.body.search.documentation.enrichment.read > 0, "the next search got its reads");
+    // Positive control: the answer with its reads is stored and served to the next identical search.
+    const third = await h.coordinator.search(q(), { signal: new AbortController().signal });
+    assert.equal(third.body.search.cache.mode, "hit");
+  } finally { await h.close(); }
+});
+
 test("documentation off calls neither documentation provider", async () => {
   const fx = refFixture();
   const h = await harness({ handlers: { context7, ref: fx } });

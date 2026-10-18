@@ -267,8 +267,10 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       // hybrid, or the deterministic ranking when no decision layer is configured: nothing is waiting to recover, and the key
       // carries the decision layer's identity, so configuring one later never serves this entry. A fallback from a configured
       // layer that failed is degraded and is not stored.
+      // Nor is one whose documentation enrichment was cut short (a failed or skipped read), nor one of a cancelled search:
+      // the next identical search should get the reads or the fresh work, not a degraded answer for the cache's lifetime.
       const fullyRanked = ranking.mode === "hybrid" || (ranking.mode === "rrf_fallback" && ranking.reason === "jev_not_configured");
-      if (complete && fullyRanked) {
+      if (complete && fullyRanked && !enrichment.limitation && !parent.signal.aborted) {
         const expiries = lanes.filter(validated).map((o) => o.cacheExpiresAt ?? clock() + L.cacheSeconds.success * 1000);
         const ttlS = Math.floor((Math.min(...expiries) - clock()) / 1000);
         // Keyed now, not at admission: the execution may have learned the decision layer's concrete build, and the next identical
