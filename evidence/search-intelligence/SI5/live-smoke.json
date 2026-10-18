@@ -1,0 +1,2921 @@
+{
+  "schema": "fcpi.si5-live-smoke/v1",
+  "utc": "2026-10-18T01:12:56.494Z",
+  "node": "v26.10.0",
+  "configured": [
+    "brave_api_key",
+    "context7_api_key",
+    "deepseek_api_key",
+    "exa_api_key",
+    "openrouter_api_key",
+    "ref_api_key",
+    "serper_api_key",
+    "tavily_api_key"
+  ],
+  "search": {
+    "elapsedMs": 6022,
+    "failure": null,
+    "outcome": "complete",
+    "empty": false,
+    "returned": 5,
+    "providers": {
+      "serper": {
+        "status": "success_results",
+        "reason": null,
+        "detail": null,
+        "fromCache": false,
+        "resultCount": 10,
+        "eligible": 10,
+        "dispatchState": "response_received",
+        "elapsedMs": 1060
+      },
+      "brave": {
+        "status": "success_results",
+        "reason": null,
+        "detail": null,
+        "fromCache": false,
+        "resultCount": 19,
+        "eligible": 19,
+        "dispatchState": "response_received",
+        "elapsedMs": 722
+      },
+      "exa": {
+        "status": "success_results",
+        "reason": null,
+        "detail": null,
+        "fromCache": false,
+        "resultCount": 20,
+        "eligible": 20,
+        "dispatchState": "response_received",
+        "elapsedMs": 394
+      },
+      "deepseek": {
+        "status": "success_results",
+        "reason": null,
+        "detail": null,
+        "fromCache": false,
+        "resultCount": 20,
+        "eligible": 20,
+        "dispatchState": "response_received",
+        "elapsedMs": 938
+      },
+      "tavily": {
+        "status": "success_results",
+        "reason": null,
+        "detail": null,
+        "fromCache": false,
+        "resultCount": 16,
+        "eligible": 16,
+        "dispatchState": "response_received",
+        "elapsedMs": 3531
+      },
+      "context7": {
+        "status": "success_results",
+        "reason": null,
+        "detail": null,
+        "fromCache": false,
+        "resultCount": 3,
+        "eligible": 3,
+        "dispatchState": "response_received",
+        "elapsedMs": 4307
+      },
+      "ref": {
+        "status": "success_results",
+        "reason": null,
+        "detail": null,
+        "fromCache": false,
+        "resultCount": 5,
+        "eligible": 5,
+        "dispatchState": "response_received",
+        "elapsedMs": 2982
+      }
+    },
+    "documentation": {
+      "activation": "explicit_required",
+      "enrichment": null,
+      "auxiliaryEntries": 0
+    },
+    "ranking": {
+      "mode": "hybrid",
+      "reason": "complete",
+      "model": "typesafe/jev-1.14-20261014",
+      "scored": 48,
+      "shortlisted": 48
+    },
+    "warnings": [],
+    "usage": [
+      {
+        "provider": "serper",
+        "credits": 1,
+        "basis": "provider_reported"
+      },
+      {
+        "provider": "brave",
+        "requests": 1,
+        "money": "unknown"
+      },
+      {
+        "provider": "exa",
+        "microUsd": 17000,
+        "basis": "provider_reported"
+      },
+      {
+        "provider": "deepseek",
+        "microUsd": 750,
+        "basis": "documented"
+      },
+      {
+        "provider": "tavily",
+        "credits": 2,
+        "basis": "provider_reported"
+      },
+      {
+        "provider": "context7",
+        "requests": 1
+      },
+      {
+        "provider": "ref",
+        "credits": 1,
+        "basis": "documented"
+      },
+      {
+        "provider": "jev",
+        "microUsd": 237,
+        "basis": "provider_reported",
+        "inputTokens": 5633
+      },
+      {
+        "provider": "jev",
+        "microUsd": 218,
+        "basis": "provider_reported",
+        "inputTokens": 5171
+      },
+      {
+        "provider": "jev",
+        "microUsd": 197,
+        "basis": "provider_reported",
+        "inputTokens": 4690
+      },
+      {
+        "provider": "jev",
+        "microUsd": 228,
+        "basis": "provider_reported",
+        "inputTokens": 5415
+      },
+      {
+        "provider": "jev",
+        "microUsd": 221,
+        "basis": "provider_reported",
+        "inputTokens": 5251
+      },
+      {
+        "provider": "jev",
+        "microUsd": 238,
+        "basis": "provider_reported",
+        "inputTokens": 5644
+      },
+      {
+        "provider": "jev",
+        "microUsd": 83,
+        "basis": "provider_reported",
+        "inputTokens": 1976
+      },
+      {
+        "provider": "jev",
+        "microUsd": 99,
+        "basis": "provider_reported",
+        "inputTokens": 2345
+      },
+      {
+        "provider": "jev",
+        "microUsd": 98,
+        "basis": "provider_reported",
+        "inputTokens": 2327
+      },
+      {
+        "provider": "jev",
+        "microUsd": 35,
+        "basis": "provider_reported",
+        "inputTokens": 819
+      }
+    ]
+  },
+  "liveExchanges": [
+    {
+      "host": "api.ref.tools",
+      "path": "/mcp",
+      "method": "POST",
+      "status": 200,
+      "ms": 289,
+      "contentType": "application/json",
+      "rateHeaders": {
+        "ratelimit": "\"500-in-1min\"; r=499; t=60",
+        "ratelimit-policy": "\"500-in-1min\"; q=500; w=60; pk=:<redacted>:"
+      },
+      "session": true
+    },
+    {
+      "host": "api.exa.ai",
+      "path": "/search",
+      "method": "POST",
+      "status": 200,
+      "ms": 309,
+      "contentType": "application/json; charset=utf-8",
+      "rateHeaders": {},
+      "body": {
+        "requestId": "string",
+        "resolvedSearchType": "string",
+        "results": {
+          "array": 20,
+          "item": {
+            "id": "string",
+            "title": "string",
+            "url": "string",
+            "highlights": {
+              "array": 1,
+              "item": "string"
+            },
+            "image": "string"
+          }
+        },
+        "searchTime": "number",
+        "costDollars": {
+          "total": 0.017,
+          "search": {
+            "neural": "number"
+          }
+        }
+      }
+    },
+    {
+      "host": "api.ref.tools",
+      "path": "/mcp",
+      "method": "POST",
+      "status": 202,
+      "ms": 245,
+      "contentType": "text/plain; charset=UTF-8",
+      "rateHeaders": {
+        "ratelimit": "\"500-in-1min\"; r=499; t=60",
+        "ratelimit-policy": "\"500-in-1min\"; q=500; w=60; pk=:<redacted>:"
+      },
+      "session": false
+    },
+    {
+      "host": "api.search.brave.com",
+      "path": "/res/v1/web/search",
+      "method": "GET",
+      "status": 200,
+      "ms": 640,
+      "contentType": "application/json",
+      "rateHeaders": {
+        "x-ratelimit-limit": "50, 0",
+        "x-ratelimit-policy": "50;w=1, 0;w=2678400",
+        "x-ratelimit-remaining": "49, 0",
+        "x-ratelimit-reset": "1, 1205222"
+      },
+      "body": {
+        "type": "string",
+        "query": {
+          "original": "string",
+          "show_strict_warning": "boolean",
+          "is_navigational": "boolean",
+          "is_news_breaking": "boolean",
+          "spellcheck_off": "boolean",
+          "country": "string",
+          "bad_results": "boolean",
+          "should_fallback": "boolean",
+          "postal_code": "string",
+          "city": "string",
+          "header_country": "string",
+          "more_results_available": "boolean",
+          "state": "string",
+          "related_queries": {
+            "array": 0
+          }
+        },
+        "mixed": {
+          "type": "string",
+          "main": {
+            "array": 19,
+            "item": {
+              "type": "string",
+              "index": "number",
+              "all": "boolean"
+            }
+          },
+          "top": {
+            "array": 0
+          },
+          "side": {
+            "array": 0
+          }
+        },
+        "web": {
+          "type": "string",
+          "results": {
+            "array": 19,
+            "item": {
+              "title": "string",
+              "url": "string",
+              "is_source_local": "boolean",
+              "is_source_both": "boolean",
+              "description": "string",
+              "profile": "object",
+              "language": "string",
+              "family_friendly": "boolean",
+              "type": "string",
+              "subtype": "string",
+              "is_live": "boolean",
+              "meta_url": "object",
+              "thumbnail": "object",
+              "extra_snippets": {
+                "array": 4
+              }
+            }
+          },
+          "family_friendly": "boolean"
+        }
+      }
+    },
+    {
+      "host": "api.ref.tools",
+      "path": "/mcp",
+      "method": "POST",
+      "status": 200,
+      "ms": 241,
+      "contentType": "application/json",
+      "rateHeaders": {
+        "ratelimit": "\"500-in-1min\"; r=499; t=60",
+        "ratelimit-policy": "\"500-in-1min\"; q=500; w=60; pk=:<redacted>:"
+      },
+      "session": true
+    },
+    {
+      "host": "api.deepseek.com",
+      "path": "/v1/tools/search",
+      "method": "POST",
+      "status": 200,
+      "ms": 872,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "results": {
+          "array": 20,
+          "item": {
+            "title": "string",
+            "site_name": "string",
+            "site_icon": "string",
+            "authority": "number",
+            "rerank_score": "number",
+            "date": "string",
+            "url": "string",
+            "summary": "string",
+            "snippet": "string",
+            "content": "string"
+          }
+        }
+      }
+    },
+    {
+      "host": "api.ref.tools",
+      "path": "/mcp",
+      "method": "GET",
+      "status": 405,
+      "ms": 1245,
+      "contentType": "application/json; charset=utf-8",
+      "rateHeaders": {
+        "ratelimit": "\"500-in-1min\"; r=499; t=60",
+        "ratelimit-policy": "\"500-in-1min\"; q=500; w=60; pk=:<redacted>:"
+      },
+      "session": false
+    },
+    {
+      "host": "api.ref.tools",
+      "path": "/mcp",
+      "method": "POST",
+      "status": 200,
+      "ms": 2113,
+      "contentType": "application/json",
+      "rateHeaders": {
+        "ratelimit": "\"500-in-1min\"; r=499; t=60",
+        "ratelimit-policy": "\"500-in-1min\"; q=500; w=60; pk=:<redacted>:"
+      },
+      "session": true
+    },
+    {
+      "host": "api.tavily.com",
+      "path": "/search",
+      "method": "POST",
+      "status": 200,
+      "ms": 3462,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "query": "string",
+        "follow_up_questions": "null",
+        "answer": "null",
+        "images": {
+          "array": 0
+        },
+        "results": {
+          "array": 16,
+          "item": {
+            "url": "string",
+            "title": "string",
+            "content": "string",
+            "score": "number",
+            "raw_content": "null",
+            "published_date": "null",
+            "id": "string"
+          }
+        },
+        "response_time": "number",
+        "usage": {
+          "credits": 2
+        },
+        "request_id": "string"
+      }
+    },
+    {
+      "host": "context7.com",
+      "path": "/api/v3/search",
+      "method": "GET",
+      "status": 200,
+      "ms": 4238,
+      "contentType": "application/json",
+      "rateHeaders": {
+        "ratelimit-limit": "1000",
+        "ratelimit-remaining": "886",
+        "ratelimit-reset": "1793491200"
+      },
+      "body": {
+        "codeSnippets": {
+          "array": 2,
+          "item": {
+            "codeTitle": "string",
+            "codeDescription": "string",
+            "codeLanguage": "string",
+            "codeTokens": "number",
+            "codeId": "string",
+            "pageTitle": "string",
+            "codeList": {
+              "array": 1,
+              "item": "object"
+            },
+            "generationDate": "string",
+            "isDynamic": "boolean",
+            "sourceFile": "string",
+            "libraryId": "string"
+          }
+        },
+        "infoSnippets": {
+          "array": 1,
+          "item": {
+            "pageId": "string",
+            "breadcrumb": "string",
+            "content": "string",
+            "contentTokens": "number",
+            "libraryId": "string"
+          }
+        },
+        "version": {
+          "requested": "string",
+          "status": "string",
+          "libraries": {
+            "array": 1,
+            "item": {
+              "libraryId": "string",
+              "requested": "string",
+              "served": "string",
+              "status": "string"
+            }
+          }
+        }
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 349,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "c01_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c01_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 5633,
+          "output_tokens": 839,
+          "cost": 0.000236586
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 356,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "c01_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c01_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 5171,
+          "output_tokens": 839,
+          "cost": 0.000217182
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 290,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "c01_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c01_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 5415,
+          "output_tokens": 841,
+          "cost": 0.00022743
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 389,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "c01_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c01_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 4690,
+          "output_tokens": 840,
+          "cost": 0.00019698
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 266,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "c01_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c01_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 5251,
+          "output_tokens": 843,
+          "cost": 0.000220542
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 295,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "c01_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c01_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c01_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c02_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c02_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c03_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c03_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c04_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c04_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c05_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c05_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c06_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c06_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c07_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c07_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_relevance": {
+            "type": "string",
+            "score": "number",
+            "legend": {
+              "0": "string",
+              "1": "string",
+              "2": "string",
+              "3": "string",
+              "4": "string"
+            },
+            "probabilities": {
+              "0": "number",
+              "1": "number",
+              "2": "number",
+              "3": "number",
+              "4": "number"
+            },
+            "confidence": "number"
+          },
+          "c08_directness": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_evidence": {
+            "type": "string",
+            "noul": "number"
+          },
+          "c08_source_kind": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "official_docs": "number",
+              "independent": "number",
+              "unknown": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 5644,
+          "output_tokens": 843,
+          "cost": 0.000237048
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 272,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "p1_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p2_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p3_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p4_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 1976,
+          "output_tokens": 191,
+          "cost": 0.000082992
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 274,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "p1_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p2_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p3_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p4_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 2345,
+          "output_tokens": 194,
+          "cost": 0.00009849
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 262,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "p1_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p2_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p3_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          },
+          "p4_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 2327,
+          "output_tokens": 194,
+          "cost": 0.000097734
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 200,
+      "ms": 234,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "model": "string",
+        "answers": {
+          "p1_duplicate": {
+            "type": "string",
+            "choice": "string",
+            "probabilities": {
+              "same_document": "number",
+              "independent": "number",
+              "insufficient_evidence": "number"
+            },
+            "confidence": "number"
+          }
+        },
+        "usage": {
+          "input_tokens": 819,
+          "output_tokens": 51,
+          "cost": 0.000034398
+        },
+        "id": "string",
+        "provider": "string"
+      }
+    },
+    {
+      "host": "api.ref.tools",
+      "path": "/mcp",
+      "method": "DELETE",
+      "status": 200,
+      "ms": 256,
+      "contentType": "text/html; charset=utf-8",
+      "rateHeaders": {
+        "ratelimit": "\"500-in-1min\"; r=499; t=60",
+        "ratelimit-policy": "\"500-in-1min\"; q=500; w=60; pk=:<redacted>:"
+      },
+      "session": false
+    }
+  ],
+  "ledger": [
+    {
+      "provider": "brave",
+      "kind": "search",
+      "unit": "requests",
+      "state": "SETTLED",
+      "reserved": 1,
+      "actual": 1
+    },
+    {
+      "provider": "context7",
+      "kind": "docs_search",
+      "unit": "requests",
+      "state": "SETTLED",
+      "reserved": 1,
+      "actual": 1
+    },
+    {
+      "provider": "deepseek",
+      "kind": "search",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 750,
+      "actual": 750
+    },
+    {
+      "provider": "exa",
+      "kind": "search",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 37000,
+      "actual": 17000
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 853,
+      "actual": 218
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 927,
+      "actual": 237
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 905,
+      "actual": 228
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 774,
+      "actual": 197
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 865,
+      "actual": 221
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 913,
+      "actual": 238
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 262,
+      "actual": 83
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 338,
+      "actual": 99
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 312,
+      "actual": 98
+    },
+    {
+      "provider": "openrouter",
+      "kind": "decision",
+      "unit": "micro_usd",
+      "state": "SETTLED",
+      "reserved": 92,
+      "actual": 35
+    },
+    {
+      "provider": "ref",
+      "kind": "docs_search",
+      "unit": "credits",
+      "state": "SETTLED",
+      "reserved": 1,
+      "actual": 1
+    },
+    {
+      "provider": "serper",
+      "kind": "search",
+      "unit": "credits",
+      "state": "SETTLED",
+      "reserved": 1,
+      "actual": 1
+    },
+    {
+      "provider": "tavily",
+      "kind": "search",
+      "unit": "credits",
+      "state": "SETTLED",
+      "reserved": 2,
+      "actual": 2
+    }
+  ],
+  "invalidKey": {
+    "brave-web": {
+      "status": "failed",
+      "reason": "auth_failed",
+      "detail": "SUBSCRIPTION_TOKEN_INVALID",
+      "dispatchState": "response_received"
+    },
+    "exa-search": {
+      "status": "failed",
+      "reason": "auth_failed",
+      "detail": "INVALID_API_KEY",
+      "dispatchState": "response_received"
+    },
+    "deepseek-search": {
+      "status": "failed",
+      "reason": "auth_failed",
+      "detail": "invalid_request_error",
+      "dispatchState": "response_received"
+    },
+    "tavily-search": {
+      "status": "failed",
+      "reason": "auth_failed",
+      "detail": "http_401",
+      "dispatchState": "response_received"
+    },
+    "context7-docs": {
+      "status": "failed",
+      "reason": "auth_failed",
+      "detail": "invalid_api_key",
+      "dispatchState": "response_received"
+    },
+    "ref-context": {
+      "status": "failed",
+      "reason": "auth_failed",
+      "detail": "session_open:http_401",
+      "dispatchState": "not_sent"
+    },
+    "serper-google": {
+      "status": "failed",
+      "reason": "auth_failed",
+      "detail": "http_403",
+      "dispatchState": "possibly_sent"
+    },
+    "jev-1.14": {
+      "ok": false,
+      "reason": "auth_failed",
+      "detail": "http_401"
+    }
+  },
+  "invalidKeyExchanges": [
+    {
+      "host": "api.search.brave.com",
+      "path": "/res/v1/web/search",
+      "method": "GET",
+      "status": 422,
+      "ms": 328,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "error": {
+          "code": "string",
+          "detail": "string",
+          "meta": {
+            "component": "string"
+          },
+          "status": "number"
+        },
+        "type": "string"
+      }
+    },
+    {
+      "host": "api.exa.ai",
+      "path": "/search",
+      "method": "POST",
+      "status": 401,
+      "ms": 272,
+      "contentType": "application/json; charset=utf-8",
+      "rateHeaders": {},
+      "body": {
+        "requestId": "string",
+        "error": "string",
+        "tag": "string"
+      }
+    },
+    {
+      "host": "api.deepseek.com",
+      "path": "/v1/tools/search",
+      "method": "POST",
+      "status": 401,
+      "ms": 492,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "error": {
+          "message": "string",
+          "type": "string",
+          "param": "null",
+          "code": "string"
+        }
+      }
+    },
+    {
+      "host": "api.tavily.com",
+      "path": "/search",
+      "method": "POST",
+      "status": 401,
+      "ms": 131,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "detail": {
+          "error": "string"
+        }
+      }
+    },
+    {
+      "host": "context7.com",
+      "path": "/api/v3/search",
+      "method": "GET",
+      "status": 401,
+      "ms": 310,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "error": "string",
+        "message": "string"
+      }
+    },
+    {
+      "host": "api.ref.tools",
+      "path": "/mcp",
+      "method": "POST",
+      "status": 401,
+      "ms": 202,
+      "contentType": "application/json; charset=utf-8",
+      "rateHeaders": {
+        "ratelimit": "\"500-in-1min\"; r=499; t=60",
+        "ratelimit-policy": "\"500-in-1min\"; q=500; w=60; pk=:<redacted>:"
+      },
+      "session": false
+    },
+    {
+      "host": "openrouter.ai",
+      "path": "/api/alpha/decisions",
+      "method": "POST",
+      "status": 401,
+      "ms": 91,
+      "contentType": "application/json",
+      "rateHeaders": {},
+      "body": {
+        "error": {
+          "message": "string",
+          "code": "number"
+        }
+      }
+    }
+  ]
+}
