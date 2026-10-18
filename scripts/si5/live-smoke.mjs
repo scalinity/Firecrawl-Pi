@@ -15,7 +15,7 @@
 import { readFileSync, writeFileSync, mkdtempSync, rmSync, chmodSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomBytes } from "node:crypto";
 import { BlockList } from "node:net";
 import { createRequire } from "node:module";
 // The retrieval package's own dependency, as its store loads it.
@@ -108,11 +108,13 @@ async function freshStore() {
   return store;
 }
 
+const runKey = randomBytes(32);
 // The retrieval service's assembly (server.mjs) around one providers directory and one capture log.
 function assemble(store, keysDir, wire) {
   const log = [];
   const logs = (o) => log.push(o);
-  const telemetry = makeTelemetry({ store, log: logs });
+  // The service keys its fingerprints from its browser token; the smoke has none, so a key of its own for this run only.
+  const telemetry = makeTelemetry({ store, log: logs, limits: () => policy.search.intelligence, fingerprintKey: runKey });
   const availability = makeAvailability({ store, log: logs });
   const limits = () => policy.search.intelligence;
   const permits = makePermits(policy.search.intelligence);
