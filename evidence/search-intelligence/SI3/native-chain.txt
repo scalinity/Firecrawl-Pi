@@ -1,0 +1,109 @@
+### meta
+utc=2026-10-18T00:57:42Z
+repository_commit=d3b991cee618eba50218fd9e1d44b279f9858ba9 code_dirty=false
+image=fcpi/firecrawl-api:m2 id=sha256:b28d840e37fe276c31b7e29e94827e4ec480eddbe449d52a992a2f26cb820e8d platform=linux/arm64
+patch_series_sha256=8a9c530805344bbf682048c11f4562cd41d0bedf09bf936653c2cc64c964a14d
+### checks
+{
+  "schema": "fcpi.si3-native-chain/v1",
+  "utc": "2026-10-18T00:58:10.983Z",
+  "node": "v22.23.3",
+  "checks": [
+    {
+      "id": "trusted_context",
+      "result": "PASS",
+      "principalId": 16
+    },
+    {
+      "id": "long_search_succeeds_past_15s",
+      "result": "PASS",
+      "elapsedMs": 17540,
+      "error": null
+    },
+    {
+      "id": "long_search_all_engines_dispatched",
+      "result": "PASS",
+      "dispatched": {
+        "serper": 1,
+        "brave": 1,
+        "exa": 1,
+        "deepseek": 1,
+        "tavily": 1
+      }
+    },
+    {
+      "id": "long_search_ranked_by_jev",
+      "result": "PASS",
+      "ranking": "hybrid_partial",
+      "reason": "partial_semantic",
+      "scored": 16,
+      "shortlisted": 19
+    },
+    {
+      "id": "rows_carry_fcpi_search",
+      "result": "PASS",
+      "rows": 5
+    },
+    {
+      "id": "sourceless_context7_snippet_reaches_core",
+      "result": "PASS",
+      "found": true
+    },
+    {
+      "id": "documentation_both_lanes",
+      "result": "PASS",
+      "context7": "success_results",
+      "ref": "success_results"
+    },
+    {
+      "id": "short_search_answers_by_its_deadline",
+      "result": "PASS",
+      "elapsedMs": 3757,
+      "outcome": "partial",
+      "error": null
+    },
+    {
+      "id": "short_search_positive_send_control",
+      "result": "PASS"
+    },
+    {
+      "id": "short_search_zero_late_sends",
+      "result": "PASS",
+      "late": []
+    },
+    {
+      "id": "incomplete_trusted_headers_are_legacy",
+      "result": "PASS"
+    },
+    {
+      "id": "scrape_merge_keeps_both_namespaces",
+      "result": "PASS"
+    },
+    {
+      "id": "evidence_payload_bounded_and_exact",
+      "result": "PASS",
+      "bodyBytes": 120355,
+      "perDocBytes": [
+        49092,
+        49092
+      ],
+      "exact": true
+    },
+    {
+      "id": "evidence_annotates_acquired_rows",
+      "result": "PASS",
+      "modes": [
+        "jev",
+        "jev"
+      ]
+    },
+    {
+      "id": "evidence_off_evaluates_nothing",
+      "result": "PASS"
+    }
+  ],
+  "passed": 15,
+  "failed": 0
+}
+### exit
+status=0
