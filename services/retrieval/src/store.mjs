@@ -538,20 +538,28 @@ export class Store {
         (now() AT TIME ZONE 'UTC')::date - 1) AS d)
         SELECT d::text AS from, LEAST(d + 6, (now() AT TIME ZONE 'UTC')::date - 1)::text AS through FROM f`, [w])).rows[0];
       // A duration histogram key is the number of these edges (ms) at or below the duration: 0 is under 100 ms, 9 is 30 s or more.
+  // Metrics: runs.<outcome> for executions (and runs.empty for those that returned nothing), reuse.hit and reuse.coalesced
+  // for answers served from another's work, <event type>.<status>[.<reason>] by provider; 'process' for transitions that
+  // belong to no search, 'unlinked' for a search's event whose run is gone. Event providers name the adapter (jev,
+  // classifier, ref), the ledger the billing provider (openrouter): an event's call_keys join the two exactly.
       const buckets = "ARRAY[100, 250, 500, 1000, 2000, 4000, 8000, 15000, 30000]";
       if (from <= through) {
         await c.query("DELETE FROM fcpi_retrieval.search_daily WHERE day BETWEEN $1 AND $2 AND metric NOT LIKE 'usage.%'", [from, through]);
         // The days as UTC instants, so the time indexes serve the range.
         const inRange = (col) => `${col} >= ($1::date)::timestamp AT TIME ZONE 'UTC' AND ${col} < ($2::date + 1)::timestamp AT TIME ZONE 'UTC'`;
         await c.query(`WITH src AS (
-            SELECT (accepted_at AT TIME ZONE 'UTC')::date AS day, profile || '/' || selection AS profile, '*' AS provider, 'runs.' || COALESCE(outcome, 'unfinished') AS metric,
+            SELECT (accepted_at AT TIME ZONE 'UTC')::date AS day, profile || '/' || selection AS profile, '*' AS provider,
+              CASE WHEN cache_mode IN ('hit', 'coalesced') THEN 'reuse.' || cache_mode ELSE 'runs.' || COALESCE(outcome, 'unfinished') END AS metric,
               (extract(epoch FROM (completed_at - accepted_at)) * 1000)::bigint AS ms
               FROM fcpi_retrieval.search_run WHERE ${inRange("accepted_at")}
+            UNION ALL SELECT (accepted_at AT TIME ZONE 'UTC')::date, profile || '/' || selection, '*', 'runs.empty', NULL
+              FROM fcpi_retrieval.search_run WHERE (summary->'pool'->>'returned') = '0' AND ${inRange("accepted_at")}
             UNION ALL SELECT (accepted_at AT TIME ZONE 'UTC')::date, profile || '/' || selection, '*', 'runs.cache_' || cache_mode, NULL
               FROM fcpi_retrieval.search_run WHERE cache_mode IS NOT NULL AND ${inRange("accepted_at")}
             UNION ALL SELECT (accepted_at AT TIME ZONE 'UTC')::date, profile || '/' || selection, '*', 'runs.docs_' || CASE WHEN docs_active THEN 'active' ELSE 'inactive' END, NULL
               FROM fcpi_retrieval.search_run WHERE docs_active IS NOT NULL AND ${inRange("accepted_at")}
-            UNION ALL SELECT (e.observed_at AT TIME ZONE 'UTC')::date, COALESCE(r.profile || '/' || r.selection, 'process'), e.provider, e.event_type || '.' || COALESCE(e.status, 'unknown'), e.duration_ms::bigint
+            UNION ALL SELECT (e.observed_at AT TIME ZONE 'UTC')::date, CASE WHEN e.logical_id IS NULL THEN 'process' ELSE COALESCE(r.profile || '/' || r.selection, 'unlinked') END, e.provider,
+              e.event_type || '.' || COALESCE(e.status, 'unknown') || CASE WHEN e.event_type = 'lane' AND e.reason IS NOT NULL THEN '.' || e.reason ELSE '' END, e.duration_ms::bigint
               FROM fcpi_retrieval.search_event e LEFT JOIN fcpi_retrieval.search_run r USING (logical_id) WHERE ${inRange("e.observed_at")}
           ), b AS (SELECT *, CASE WHEN ms IS NULL THEN NULL ELSE width_bucket(ms, ${buckets}) END AS bucket FROM src),
           h AS (SELECT day, profile, provider, metric, jsonb_object_agg(bucket::text, n) AS histogram

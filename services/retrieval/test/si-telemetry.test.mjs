@@ -259,6 +259,36 @@ test("an unreduced old event is kept, and the schema reapplies over populated op
   } finally { await store.close(); }
 });
 
+test("the daily metrics keep reuse apart from executions, count empty answers, keep lane reasons, and tell orphans from the process", opts, async () => {
+  const store = await fresh();
+  try {
+    const day = new Date(); day.setUTCHours(12, 0, 0, 0); day.setUTCDate(day.getUTCDate() - 1);
+    const run = async (over) => {
+      const r = { logicalId: randomUUID(), requestId: `req-${randomUUID()}`, principalId: "owner", fingerprint: "f".repeat(64), profile: "aggregate", selection: "live", resultMode: "links", acceptedAt: day, versions: {} };
+      await store.searchRunFinished({ ...r, completedAt: new Date(day.getTime() + 2000), outcome: "complete", cacheMode: "miss", docsActive: false, summary: { pool: { returned: 5 } }, ...over });
+      return r;
+    };
+    const exec = await run({});
+    await run({ cacheMode: "hit", completedAt: new Date(day.getTime() + 5) });
+    await run({ cacheMode: "coalesced" });
+    await run({ summary: { pool: { returned: 0 } } });
+    await store.searchEvents([
+      { eventId: randomUUID(), logicalId: exec.logicalId, provider: "exa", type: "lane", observedAt: day, status: "failed", reason: "rate_limited" },
+      { eventId: randomUUID(), logicalId: randomUUID(), provider: "brave", type: "lane", observedAt: day, status: "success_results" },
+      { eventId: randomUUID(), provider: "ref", type: "breaker", observedAt: day, status: "open" }]);
+    await store.reduceSearchDaily();
+    const rows = (await store.pool.query("SELECT profile, provider, metric, n::int AS n FROM fcpi_retrieval.search_daily WHERE metric NOT LIKE 'usage.%' AND metric NOT LIKE 'runs.cache_%' AND metric NOT LIKE 'runs.docs_%' ORDER BY 3, 2, 1")).rows;
+    assert.deepEqual(rows.map((r) => `${r.metric}|${r.provider}|${r.profile}|${r.n}`), [
+      "breaker.open|ref|process|1",
+      "lane.failed.rate_limited|exa|aggregate/live|1",
+      "lane.success_results|brave|unlinked|1",
+      "reuse.coalesced|*|aggregate/live|1",
+      "reuse.hit|*|aggregate/live|1",
+      "runs.complete|*|aggregate/live|2",
+      "runs.empty|*|aggregate/live|1"]);
+  } finally { await store.close(); }
+});
+
 test("a stalled reduction loses no source: prune keeps what the watermark has not passed, and usage keeps its label", opts, async () => {
   const store = await fresh();
   try {
