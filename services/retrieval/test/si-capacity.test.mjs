@@ -69,9 +69,12 @@ test("three identical contract failures hold the adapter; the hold ends with one
   let now = 1_000_000;
   const rows = new Map();
   const store = { availabilityRows: async () => [...rows.values()], setAvailability: async (r) => { rows.set(r.provider, r); } };
-  const av = makeAvailability({ store, clock: () => now });
+  const moves = [];
+  const av = makeAvailability({ store, clock: () => now, onTransition: (t) => moves.push(`${t.from}>${t.to}`) });
+  await av.reenable("q");
   for (let i = 0; i < 2; i++) await av.observe("p", "e1", { reason: "contract_failure", providerCode: "shape" });
   assert.equal(av.check("p", "e1").eligible, true, "two failures do not hold");
+  assert.deepEqual(moves, [], "a first write that keeps a provider available is no transition");
   // A different wire failure starts the count again; a request-specific refusal never counts.
   await av.observe("p", "e1", { reason: "contract_failure", providerCode: "other_shape" });
   await av.observe("p", "e1", { reason: "unsupported_request" });
@@ -83,6 +86,7 @@ test("three identical contract failures hold the adapter; the hold ends with one
   await av.observe("p", "e1", { success: true });
   assert.deepEqual(av.check("p", "e1"), { eligible: true, probe: false });
   assert.equal(rows.get("p").state, "available", "the cleared state is persisted");
+  assert.deepEqual(moves, ["available>contract_hold", "contract_hold>available"], "only the hold and its end are transitions");
 });
 
 test("a read that started before a refusal's write cannot replace it, nor can a write still in flight", async () => {

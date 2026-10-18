@@ -86,7 +86,8 @@ export function makeAvailability({ store, log = () => {}, clock = Date.now, onTr
       retry_basis: next.retryBasis ?? "unknown", credential_epoch: next.credentialEpoch ?? null, contract_failures: next.contractFailures ?? 0, observed_at: new Date(clock()) });
     lastWrite.set(k, ++writes);
     inFlight.set(k, (inFlight.get(k) ?? 0) + 1);
-    if (prior?.state !== next.state) onTransition({ provider, from: prior?.state ?? "available", to: next.state, reason: next.reason ?? why, retryAt: next.retryAt ?? null, retryBasis: next.retryBasis ?? "unknown" });
+    // A provider with no row is available: a first write that keeps it available is no transition.
+    if ((prior?.state ?? "available") !== next.state) onTransition({ provider, from: prior?.state ?? "available", to: next.state, reason: next.reason ?? why, retryAt: next.retryAt ?? null, retryBasis: next.retryBasis ?? "unknown" });
     try { await store.setAvailability({ ...row, retryAt: next.retryAt ? new Date(next.retryAt) : null }); }
     catch (e) { log({ event: "availability_write_failed", provider, error: e.code ?? e.message }); }
     finally { const n = inFlight.get(k) - 1; if (n) inFlight.set(k, n); else inFlight.delete(k); }
