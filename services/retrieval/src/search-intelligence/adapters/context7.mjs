@@ -16,6 +16,8 @@ import { outcome } from "../contracts.mjs";
 import { parseRetryAfter } from "../availability.mjs";
 import { parseJson, str } from "./common.mjs";
 import { sha256, contentHash, normalizeQueryText, normalizeUrl } from "../normalize.mjs";
+// The longest reset a provider's report is believed for: a monthly window, with a few days' slack.
+export const RESET_MAX_MS = 35 * 86400 * 1000;
 
 export const CONTEXT7_CONTRACT = "context7-v3/2026-10-17";
 const VERSION = /^([Ll][Aa][Tt][Ee][Ss][Tt]|[Vv]?[0-9]+([._][0-9]+){0,2}([-+][a-zA-Z0-9.-]+)?)$/;
@@ -55,8 +57,10 @@ export function makeContext7({ dispatch, limits }) {
       else if (response.status === 429) {
         // Context7 reports its monthly allowance (RateLimit-Limit/-Remaining, and -Reset as an absolute epoch in seconds: live
         // contract smoke 2026-10-18): a 429 with nothing remaining is the allowance spent, held until that reset; otherwise a burst.
-        const remaining = Number(response.headers["ratelimit-remaining"]), reset = Number(response.headers["ratelimit-reset"]);
-        if (remaining === 0 && Number.isFinite(reset) && reset * 1000 > Date.now()) { reason = "quota_exhausted"; retryAt = reset * 1000; }
+        // Only whole numbers count (an empty header is no count), and a reset beyond a monthly window's span is not believed.
+        const whole = (h) => (/^\d+$/.test(String(response.headers[h] ?? "").trim()) ? Number(response.headers[h]) : null);
+        const remaining = whole("ratelimit-remaining"), reset = whole("ratelimit-reset");
+        if (remaining === 0 && reset !== null && reset * 1000 > Date.now() && reset * 1000 <= Date.now() + RESET_MAX_MS) { reason = "quota_exhausted"; retryAt = reset * 1000; }
         else { reason = "rate_limited"; retryAt = parseRetryAfter(response.headers["retry-after"]); }
       }
       else if (response.status === 401 || response.status === 403) reason = "auth_failed";

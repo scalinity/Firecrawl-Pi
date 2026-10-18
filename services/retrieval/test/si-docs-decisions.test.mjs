@@ -8,6 +8,7 @@ import { makeContext7 } from "../src/search-intelligence/adapters/context7.mjs";
 import { makeDecisions, OUTPUT_TOKENS_PER_QUESTION } from "../src/search-intelligence/decisions.mjs";
 import { JEV_MODEL } from "../src/budget.mjs";
 import { microUsd } from "../src/search-intelligence/adapters/common.mjs";
+import { parseBraveRateHeaders } from "../src/search-intelligence/availability.mjs";
 
 const limitsOf = (h) => () => h.policy.search.intelligence;
 const docsRequest = (q) => request({ originalQuery: q, intelligence: { documentation: "required", libraries: [{ name: "vue" }] } });
@@ -173,19 +174,31 @@ test("reported dollars become whole micro-USD, rounded up, without the product's
 });
 
 test("a Context7 429 with its monthly allowance spent is quota, held until the reset it reports; otherwise a burst", async () => {
-  const reset = Math.floor(Date.now() / 1000) + 86400;
-  for (const [remaining, expected] of [["0", "quota_exhausted"], ["12", "rate_limited"]]) {
+  const now = Math.floor(Date.now() / 1000), reset = now + 86400;
+  // [remaining, reset header, expected]: only a whole 0 with a reset ahead and within a monthly span is the allowance spent;
+  // a past or absent reset, an empty count, or a reset in milliseconds (decades ahead read as seconds) is a burst.
+  for (const [remaining, resetHeader, expected] of [["0", String(reset), "quota_exhausted"], ["12", String(reset), "rate_limited"], ["0", String(now - 3600), "rate_limited"],
+    ["0", null, "rate_limited"], ["", String(reset), "rate_limited"], ["0", String(reset * 1000), "rate_limited"]]) {
     const h = await harness({ handlers: { context7: () => ({ status: 429, body: { error: "rate_limited", message: "slow down" },
-      headers: { "ratelimit-limit": "1000", "ratelimit-remaining": remaining, "ratelimit-reset": String(reset), ...(remaining === "0" ? {} : { "retry-after": "5" }) } }) } });
+      headers: { "ratelimit-limit": "1000", "ratelimit-remaining": remaining, ...(resetHeader === null ? {} : { "ratelimit-reset": resetHeader }), ...(expected === "quota_exhausted" ? {} : { "retry-after": "5" }) } }) } });
     try {
       const context7 = makeContext7({ dispatch: h.dispatch, limits: limitsOf(h) });
       const sub = h.dispatch.subject("documentationSearches", "fcpi-fixture-context7");
-      const o = await context7.search(docsRequest(`context7 allowance ${remaining}`), { sub, pre: h.dispatch.preflight(sub, { selection: "fixture" }), signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
-      assert.equal(o.reason, expected);
+      const o = await context7.search(docsRequest(`context7 allowance ${remaining || "empty"} ${resetHeader ?? "none"}`), { sub, pre: h.dispatch.preflight(sub, { selection: "fixture" }), signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+      assert.equal(o.reason, expected, `remaining ${JSON.stringify(remaining)}, reset ${resetHeader}`);
       const pre = h.dispatch.preflight(sub, { selection: "fixture" });
       assert.equal(pre.reason, expected);
       if (expected === "quota_exhausted") assert.equal(pre.retryAt, reset * 1000, "held until the reported reset, an absolute epoch");
       else assert.ok(pre.retryAt <= Date.now() + 6000, "a burst waits for its Retry-After");
     } finally { await h.close(); }
   }
+});
+
+test("a Brave window's reported reset is held to a monthly span: an absurd reset never parks the provider indefinitely", () => {
+  const now = Date.now();
+  const r = parseBraveRateHeaders({ "x-ratelimit-limit": "1, 2000", "x-ratelimit-policy": "1;w=1, 2000;w=2678400", "x-ratelimit-remaining": "1, 0", "x-ratelimit-reset": "1, 999999999" }, now);
+  assert.equal(r.state, "quota_exhausted");
+  assert.equal(r.retryAt, now + 35 * 86400 * 1000);
+  const ok = parseBraveRateHeaders({ "x-ratelimit-limit": "1, 2000", "x-ratelimit-policy": "1;w=1, 2000;w=2678400", "x-ratelimit-remaining": "1, 0", "x-ratelimit-reset": "1, 86400" }, now);
+  assert.equal(ok.retryAt, now + 86400 * 1000, "a reset within the span is taken as reported");
 });

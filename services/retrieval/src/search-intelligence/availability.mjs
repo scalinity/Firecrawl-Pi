@@ -42,7 +42,8 @@ export function parseBraveRateHeaders(headers, now = Date.now()) {
   const exhausted = windows.filter((x) => x.limit > 0 && x.remaining === 0);
   if (!exhausted.length) return { windows, exhausted: [], state: null, retryAt: null };
   const quota = exhausted.some((x) => x.windowS >= 86400);
-  return { windows, exhausted, state: quota ? "quota_exhausted" : "rate_limited", retryAt: now + Math.max(...exhausted.map((x) => x.resetS)) * 1000 };
+  // A reset beyond a monthly window's span (35 days) is held to it, never trusted to park the provider indefinitely.
+  return { windows, exhausted, state: quota ? "quota_exhausted" : "rate_limited", retryAt: now + Math.min(Math.max(...exhausted.map((x) => x.resetS)), 35 * 86400) * 1000 };
 }
 
 // The manager: reads the rows once per search, keeps the last good read if the database read fails (a database outage stops
