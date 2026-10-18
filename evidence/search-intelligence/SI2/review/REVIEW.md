@@ -224,37 +224,43 @@ Paths below are relative to `services/retrieval/src/search-intelligence/` unless
 
 ---
 
+### Found during remediation
+
+- **F1: a reported dollar cost could settle one micro-USD high** (`decisions.mjs`, `adapters/exa.mjs`). Writing W12's settlement test showed that `Math.ceil(dollars * 1e6)` turns float error into a whole unit: `0.000123 * 1e6` is `123.00000000000001`, so Jev's `usage.cost` and Exa's `costDollars.total` could settle above the provider's own figure. Fixed in `e8588ec` with one `microUsd()` that rounds to nano-USD before rounding up.
+- **F2: the session goodbye also inherited the search's cancellation and the paid-dispatch check** (`adapters/ref-bridge.mjs`). W1 named only the deadline, but a cancelled search's session was never ended either. Fixed with W1 in `99ae89b`.
+- **Observation (not a defect):** with only one documentation provider configured, every documentation answer is `partial`, because the fixture roster lists both providers and an unconfigured lane is a named exclusion. No such answer is ever stored whole. This is the honest-coverage rule working as designed. The W5 test configures both providers so that it exercises the storage path.
+
 ### Finding dispositions
 
 Filled by `/address`. Each finding is fixed (with its commit), rejected (with evidence) or deferred (with the later milestone that owns it and why).
 
 | Finding | Outcome | Evidence |
 |---|---|---|
-| C1 | | |
-| C2 | | |
-| W1 | | |
-| W2 | | |
-| W3 | | |
-| W4 | | |
-| W5 | | |
-| W6 | | |
-| W7 | | |
-| W8 | | |
-| W9 | | |
-| W10 | | |
-| W11 | | |
-| W12 | | |
-| S1 | | |
-| S2 | | |
-| S3 | | |
-| S4 | | |
-| S5 | | |
-| S6 | | |
-| S7 | | |
-| S8 | | |
-| S9 | | |
-| S10 | | |
-| S11 | | |
-| S12 | | |
-| S13 | | |
-| S14 | | |
+| C1 | Fixed (`073a85f`) | Refusals match only at the start of a non-result block; reads only Ref's documented read refusals. The new parser and adapter tests fail on the previous parser. |
+| C2 | Fixed (`fbdefd4`) | Every `ref_<name>=` directive is scrubbed from the query, the hints and the cache identity, and a directive-only query is not represented. The test fails on the previous `refQuery`. |
+| W1 | Fixed (`99ae89b`) | The DELETE has its own one-second bound for its permit and send, and also outlives the search's cancellation and the paid check (F2). The test closes leases after their deadline and after cancellation. |
+| W2 | Fixed (`5fdd7ea`, on `0ca99bd`) | The fresh session and its context search get the semantic phase less a read's time. Each read's deadline is taken after that, with under 500 ms left recorded as a limitation. The slow-session test fails after 2 s on the previous code. |
+| W3 | Fixed (`55875b5`) | `onEnd(err)` and the operation's failure race the tool call, and `mcpFailure` judges `ProviderError` codes before status. On the previous code the oversized answer waited 6 s and was judged a timeout. |
+| W4 | Fixed (`9221458`) | Context7's dispatch state comes from its scopes. Context7, Ref and Jev count settled units as usage and report uncertain operations separately. The Context7 tests fail on the previous adapter. |
+| W5 | Fixed (`7c36f66`) | An answer is not stored when enrichment is limited or the search was cancelled. The test has a positive control that the answer with its reads is stored, and fails on the previous coordinator. |
+| W6 | Fixed (`9787136`) | `rerank` reports the one build its batches agree on, and mixed builds are not stored. The identity is the build string, with no epoch. The alternation test fails on the previous code. |
+| W7 | Fixed (`d34ed6c`) | The bridge records whether the latest POST was written, and handshake errors are contract failures. Both halves of the test fail on the previous logic, the second checked by mutation. |
+| W8 | Fixed (`2022a9b`) | A line-by-line block reader replaces the backtracking regex. The scaling test takes 306 ms on the previous parser against a 100 ms bound. |
+| W9 | Fixed (`46bb83e`) | The word lists no longer overlap, versions must be dotted or `v`-prefixed, hostnames are excluded and snake_case counts as a symbol. The five reported queries fail on the previous detector. |
+| W10 | Fixed (`d5a50b3`) | Tests cover another host, path or query string, an unsupported method, a redirect never followed and the paid authority refusing, each with a positive control. The oversized SSE answer is covered by `55875b5`, and the endpoint test fails with the endpoint check removed. |
+| W11 | Fixed (`d5a50b3`) | A read written and then stalled is UNCERTAIN, one failure, and seen once. The test fails when the written flag is forced false. |
+| W12 | Fixed (`e8588ec`, `e1a2a44`) | Settlement is tested at the reported cost and at the token rate, which also exposed F1. The real classifier path through the coordinator is tested too. |
+| S1 | Fixed (`b8b8d03`) | The bound is `maxBytes` exactly, and the test fails on the previous check. |
+| S2 | Fixed (`c0da1fa`) | The reservation adds 64 output tokens per question at the card's output rate. |
+| S3 | Fixed (`e1a2a44`) | Every outcome after settlement carries usage, and an uncertain one reports `uncertain: 1`. The test fails on the previous code. |
+| S4 | Fixed (`a6a929a`) | One `connection()` helper is shared by both requests. All provider, M5, M6 and M7 suites pass, including the PostgreSQL ones. |
+| S5 | Fixed (`0ca99bd`) | `enrich()` is on the Ref adapter. The coordinator decides when, bounds the time and holds the leases. |
+| S6 | Fixed (`9854253`) | The read bound comes from `limits().evidence.maxDocumentBytes`, and the remaining values are named with their spec sections. |
+| S7 | Fixed (`6c5ca9d`) | The log carries the code and status only, and the test asserts that the response body never appears. |
+| S8 | Fixed (`48608bb`) | Tests cover the duplicate-pair question and soft grouping, and the `session_unavailable` limitation. |
+| S9 | Fixed (`f209d8c`) | Positive waits poll, and the never-sent checks use a positive-control ordering, checked by mutation. The remaining sleeps measure time and say so. |
+| S10 | Fixed (`225b72f`) | The timer is cleared. The test fails on the previous code because the pending timeout fires within 1.1 s. |
+| S11 | Fixed (`9a6725a`) | Read keys carry the session's epoch, with the discovery session's fixed. The re-execution test fails on the previous code. |
+| S12 | Fixed (`8a45a0c`) | `contextLease` checks the tools before metering. The test fails on the previous code. |
+| S13 | Fixed (`fb7cb4e`) | A JSON-RPC error that was not sent is `not_sent` and released, and the verdict table is tested. |
+| S14 | Fixed (`9b485e0`) | `no_candidates` gets no warning and counts as fully ranked. The test fails on the previous code. |
