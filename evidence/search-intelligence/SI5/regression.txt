@@ -1,0 +1,47 @@
+### meta
+utc=2026-10-18T04:34:31Z (the last suite's end)
+repository_commit=2abaa09a code_dirty=false (the code tree at the run's start; evidence aside)
+repository_commit_full=2abaa09bc4d09d41abc4c87123ded2d625806a87
+commands=FCPI_TEST_PG=127.0.0.1 PGPORT=55432 CONC=1 rtx.sh (services/retrieval, the container layout, PostgreSQL 17 disposable); node --test test/*.test.mjs in services/access (with FCPI_TEST_PG) and services/mcp; node --test tests/*.test.mjs at the root
+### retrieval
+ℹ tests 470
+ℹ suites 0
+ℹ pass 470
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+retrieval_exit=0
+### access
+ℹ tests 101
+ℹ suites 0
+ℹ pass 101
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+access_exit=0
+### mcp
+ℹ tests 51
+ℹ suites 0
+ℹ pass 51
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+mcp_exit=0
+### root
+ℹ tests 61
+ℹ suites 0
+ℹ pass 61
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+root_exit=0
+### accounting
+retrieval at 2ecdc84 rerun: ℹ tests 467 ℹ pass 467 ℹ fail 0 ℹ skipped 0 
+every test name at 2ecdc84 still runs at HEAD; three are new at HEAD:
+  ✔ a Brave window's reported reset is held to a monthly span: an absurd reset never parks the provider indefinitely
+  ✔ degraded single cells: each documentation circuit, each lone provider cancelled, Serper's allocation spent, one empty among every failure
+  ✔ Ref's hosted blocks need their own shape: a notice ending in a link is no result, a breadcrumb naming a refusal word is one
