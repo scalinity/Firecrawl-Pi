@@ -121,8 +121,11 @@ export function checkEnvelope(data) {
 }
 
 export function makeDecisions({ dispatch, store, limits, permits, log = () => {}, clock = Date.now }) {
-  let concrete = null, epoch = 0;
-  const identity = () => ({ requested: JEV_MODEL, concrete, epoch, rubric: VERSIONS.rubric, excerpt: VERSIONS.excerpt });
+  // The decision layer's identity (spec §7.1, §17): the requested model, a concrete build, and the rubric and excerpt versions.
+  // The build string itself is the identity, so a build's answers are reused whenever that build answers again; without an
+  // argument it is the build last seen answering, which is all a lookup made before any call can know.
+  let concrete = null;
+  const identity = (build = concrete) => ({ requested: JEV_MODEL, concrete: build, rubric: VERSIONS.rubric, excerpt: VERSIONS.excerpt });
 
   // One Decisions request under the search's decision permit and the shared metered dispatch. Returns { ok, data, usage } or
   // { ok: false, reason, detail }.
@@ -170,9 +173,9 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
         return { ok: false, reason: "contract_failure", detail: `jev_${env.why}`, usage: { microUsd: cost ?? byTokens ?? amount } };
       }
       await dispatch.report(sub, pre.epoch, { success: true, dispatchedAt: res.startedAt });
-      // A new concrete build starts a new semantic epoch: decisions made by another build are not reused (spec §17).
-      if (concrete !== data.model) { if (concrete !== null) { epoch++; log({ event: "si_jev_build_changed", from: concrete, to: data.model }); } concrete = data.model; }
-      try { await store.searchCachePut(`si.decision/v1:${sha256(JSON.stringify({ body, identity: identity(), selection }))}`, { model: data.model, answers: data.answers }, L.cacheSeconds.decision); } catch { /* optional */ }
+      // Decisions are kept under the build that made them, so another build's are never reused for this one (spec §17).
+      if (concrete !== data.model) { if (concrete !== null) log({ event: "si_jev_build_changed", from: concrete, to: data.model }); concrete = data.model; }
+      try { await store.searchCachePut(`si.decision/v1:${sha256(JSON.stringify({ body, identity: identity(data.model), selection }))}`, { model: data.model, answers: data.answers }, L.cacheSeconds.decision); } catch { /* optional */ }
       return { ok: true, data, usage: { microUsd: cost ?? byTokens ?? amount, basis: cost !== null ? "provider_reported" : "tokens_at_rate_card", inputTokens: u.input_tokens } };
     } finally { release(); }
   }
@@ -237,11 +240,13 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
       ...pairBodies.map((p) => decide({ body: p.body, kind: "decision", purpose: "duplicates", request, sub, pre, signal, deadlineAt, selection }).then((r) => ({ type: "pairs", p, r }))),
     ]);
     let scored = 0, model = null;
+    const builds = new Set();
     const usage = [], failures = [];
     for (const { type, b, p, r } of results) {
       if (r.usage && !r.cached) usage.push({ provider: "jev", ...r.usage });
       if (!r.ok) { failures.push(r.reason); continue; }
       model = r.data.model;
+      builds.add(r.data.model);
       if (type === "batch") {
         for (const { d, id, truncated } of b.docs) {
           const q = candidateQuestions(id), ans = {};
@@ -264,7 +269,10 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
     const enough = scored * 2 >= shortlist.length && scored > 0;
     const reason = !enough ? (failures.includes("timeout") || failures.includes("cancelled") ? "jev_timeout" : failures.length ? `jev_${failures[0]}` : "insufficient_semantic_coverage") : scored === shortlist.length ? "complete" : "partial_semantic";
     if (!enough) for (const d of shortlist) if (d.semantic) d.semantic.complete = false;
-    return { ranking: { mode: enough ? (scored === shortlist.length ? "hybrid" : "hybrid_partial") : "rrf_fallback", reason, scored: enough ? scored : 0, model, usage, batches: batches.length, duplicatePairs: pairs.length } };
+    // The identity of the ranking: the one build all answered batches agree on, or none when builds were mixed.
+    const ranked = builds.size === 1 ? identity([...builds][0]) : null;
+    return { ranking: { mode: enough ? (scored === shortlist.length ? "hybrid" : "hybrid_partial") : "rrf_fallback", reason, scored: enough ? scored : 0, model, usage, batches: batches.length, duplicatePairs: pairs.length,
+      identity: ranked, mixedBuilds: builds.size > 1 } };
   }
 
   return { identity, classifyDocs, rerank, decide, preflight };

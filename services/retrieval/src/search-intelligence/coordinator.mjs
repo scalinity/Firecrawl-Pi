@@ -45,12 +45,13 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
   };
 
   // ---- cache identities (spec §17): content and configuration, never request ids, deadlines or transient state --------------
-  function aggregateKey(request, roster, selection) {
+  // jev: the decision layer's identity, by default the build last seen; an answer is stored under the build that ranked it.
+  function aggregateKey(request, roster, selection, jev = decisions?.identity?.() ?? null) {
     const r = request;
     // The limits that shape the pool, shortlist and passages are part of the answer's identity: a changed limit is a new answer.
     return `si.aggregate/v1:${sha256(JSON.stringify({ v: VERSIONS, q: normalizeQueryText(r.originalQuery), lang: r.language, limit: r.limit, mode: r.resultMode, c: r.constraints, si: r.intelligence,
       roster, selection, searxng: getBudget().searching.searxngMode, limits: getPolicy().search.intelligence, contracts: Object.fromEntries([...Object.entries(general), ...Object.entries(docs)].map(([k, a]) => [k, a.contractVersion])),
-      jev: decisions?.identity?.() ?? null }))}`;
+      jev }))}`;
   }
   const providerKey = (adapter, request, selection) => `si.provider/v1:${adapter.id}:${sha256(JSON.stringify({ c: adapter.contractVersion, e: adapter.cacheIdentity(request), k: request.constraints, lang: request.language, selection }))}`;
   const timeSensitive = (request) => !!(request.constraints.publishedAfter || request.constraints.publishedBefore);
@@ -270,12 +271,13 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       // Nor is one whose documentation enrichment was cut short (a failed or skipped read), nor one of a cancelled search:
       // the next identical search should get the reads or the fresh work, not a degraded answer for the cache's lifetime.
       const fullyRanked = ranking.mode === "hybrid" || (ranking.mode === "rrf_fallback" && ranking.reason === "jev_not_configured");
-      if (complete && fullyRanked && !enrichment.limitation && !parent.signal.aborted) {
+      // A hybrid answer is stored only under the one build that ranked it; mixed builds are not stored.
+      const rankedBy = ranking.mode === "hybrid" ? ranking.identity ?? null : decisions?.identity?.() ?? null;
+      if (complete && fullyRanked && !enrichment.limitation && !parent.signal.aborted && (ranking.mode !== "hybrid" || rankedBy)) {
         const expiries = lanes.filter(validated).map((o) => o.cacheExpiresAt ?? clock() + L.cacheSeconds.success * 1000);
         const ttlS = Math.floor((Math.min(...expiries) - clock()) / 1000);
-        // Keyed now, not at admission: the execution may have learned the decision layer's concrete build, and the next identical
-        // search looks the answer up under that identity.
-        await cachePut(aggregateKey(request, roster, selection), body, ttlS);
+        // Keyed by the build that ranked it, which the next identical search looks up once that build has answered again.
+        await cachePut(aggregateKey(request, roster, selection, rankedBy), body, ttlS);
       }
       telemetry?.runFinished?.({ request, outcome: search.outcome, search, lanes: all, pool, final, ranking, timings: search.timings });
       return { body, pool, final };
