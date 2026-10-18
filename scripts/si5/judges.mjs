@@ -78,7 +78,9 @@ for (const [round, R] of Object.entries(ROUNDS)) {
       : inline !== null ? (inline.trim() === onDisk.trim() ? "inline_exact" : "inline_differs") : "absent";
     for (const q of ids) {
       const flagged = [...flags].sort().map((flag) => ({ flag, note: noteOf(round, q, flag) }));
-      const rec = { agent: m.name, models: [...seen].sort(), prompt: R.prompt(suffix), promptSha256: onDisk === null ? null : sha(onDisk), promptRead,
+      // Launch messages since the fourth judge found opening another query's output gave the isolation rule explicitly as well.
+      const launch = typeof first === "string" && /Open no file outside your packet director/.test(first) ? "explicit_isolation" : "instruction_file_only";
+      const rec = { agent: m.name, models: [...seen].sort(), prompt: R.prompt(suffix), promptSha256: onDisk === null ? null : sha(onDisk), promptRead, launch,
         started: times[0] ?? null, ended: times.at(-1) ?? null, toolCalls: calls, flags: flagged, contained: flagged.every((x) => x.note) };
       const was = queries[q];
       if (!was) queries[q] = rec;
