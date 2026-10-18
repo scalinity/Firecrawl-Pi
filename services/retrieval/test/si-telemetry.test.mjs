@@ -128,7 +128,7 @@ test("the daily reduction is idempotent, follows late settlement from the ledger
     for (const [ago, outcome] of [[20, "complete"], [20, "partial"], [2, "complete"]]) {
       const r = { logicalId: randomUUID(), requestId: `req-${randomUUID()}`, principalId: "owner", fingerprint: "f".repeat(64), profile: "aggregate", selection: "live", resultMode: "links",
         acceptedAt: day(ago), versions: {} };
-      await store.searchRunFinished({ ...r, completedAt: new Date(day(ago).getTime() + 1500), outcome, cacheMode: "miss", docsActive: false });
+      await store.searchRunFinished({ ...r, completedAt: new Date(day(ago).getTime() + 1500), outcome, cacheMode: "miss", docsActive: false, trace: { v: 1, final: [] } });
       await store.searchEvents([{ eventId: randomUUID(), logicalId: r.logicalId, provider: "brave", type: "lane", observedAt: day(ago), durationMs: 300, status: "success_results" }]);
       runs.push(r);
     }
@@ -136,9 +136,16 @@ test("the daily reduction is idempotent, follows late settlement from the ledger
     const resv = await store.reserveBudget({ id: randomUUID(), callKey: `search:${runs[0].logicalId}:brave:search:v1`, logicalId: runs[0].logicalId, category: "search_brave", caps: {}, reportingPeriods: ["day", "month"],
       paidTotalCap: null, provider: "brave", subject: "brave-web", kind: "search", unit: "requests", rateCard: "brave/web-search@2026-10-17", requestHash: "h", amount: 1, day: iso(day(20)), month: `${iso(day(20)).slice(0, 7)}-01` });
     await store.markBudgetUncertain(resv.reservation.id, "possibly sent");
+    // A backlog is reduced at most seven days a pass, each pass starting at the last one's watermark.
     const first = await store.reduceSearchDaily();
-    assert.equal(first.from, iso(day(20)));
-    assert.equal(first.through, iso(day(1)));
+    assert.deepEqual([first.from, first.through], [iso(day(20)), iso(day(14))]);
+    let pass = first;
+    while (pass.through !== iso(day(1))) {
+      const next = await store.reduceSearchDaily();
+      assert.equal(next.from, pass.through, "a pass starts at the previous watermark");
+      assert.ok(Date.parse(next.through) - Date.parse(next.from) <= 6 * 86400000, "at most seven days a pass");
+      pass = next;
+    }
     const snapshot = async () => (await store.pool.query("SELECT day::text, profile, provider, metric, n, total_ms, histogram, amount::float8 FROM fcpi_retrieval.search_daily ORDER BY 1, 2, 3, 4")).rows;
     const a = await snapshot();
     const get = (rows, d, provider, metric) => rows.find((r) => r.day === iso(d) && r.provider === provider && r.metric === metric);
@@ -147,6 +154,7 @@ test("the daily reduction is idempotent, follows late settlement from the ledger
     assert.equal(get(a, day(20), "*", "runs.complete").total_ms, "1500");
     assert.deepEqual(get(a, day(20), "brave", "lane.success_results").histogram, { 2: 2 }, "two 300 ms lanes under key 2: two edges (100, 250 ms) at or below them");
     assert.equal(get(a, day(20), "brave", "usage.search.requests.uncertain").amount, 1, "an uncertain reservation is held at its reserved amount");
+    assert.equal(get(a, day(20), "brave", "usage.search.requests.uncertain").profile, "search/search_brave", "usage is labelled from its ledger row");
     const again = await store.reduceSearchDaily();
     assert.deepEqual(await snapshot(), a, "a repeated reduction changes nothing");
     assert.equal(again.from, iso(day(1)), "the next reduction starts at its watermark");
@@ -156,12 +164,14 @@ test("the daily reduction is idempotent, follows late settlement from the ledger
     const b = await snapshot();
     assert.equal(get(b, day(20), "brave", "usage.search.requests.settled").amount, 1);
     assert.equal(get(b, day(20), "brave", "usage.search.requests.uncertain"), undefined);
-    // Pruning: the reduced 20-day-old events go; the 2-day-old ones and every daily row stay.
+    // Pruning: the reduced 20-day-old events go; the 2-day-old ones and every daily row stay; a trace goes after 14 days.
     await store.prune();
     const left = (await store.pool.query("SELECT (observed_at AT TIME ZONE 'UTC')::date::text AS d FROM fcpi_retrieval.search_event ORDER BY 1")).rows.map((r) => r.d);
     assert.deepEqual(left, [iso(day(2))]);
     assert.deepEqual(await snapshot(), b, "aggregates outlive the events they were reduced from");
     assert.equal((await store.pool.query("SELECT count(*)::int AS n FROM fcpi_retrieval.budget_reservation")).rows[0].n, 1, "the ledger keeps its own retention");
+    const traces = (await store.pool.query("SELECT (accepted_at AT TIME ZONE 'UTC')::date::text AS d, trace IS NOT NULL AS kept FROM fcpi_retrieval.search_run ORDER BY 1, 2")).rows;
+    assert.deepEqual(traces.map((r) => `${r.d}:${r.kept}`), [`${iso(day(20))}:false`, `${iso(day(20))}:false`, `${iso(day(2))}:true`], "the run stays 30 days, its trace 14");
   } finally { await store.close(); }
 });
 
@@ -174,5 +184,46 @@ test("an unreduced old event is kept, and the schema reapplies over populated op
     assert.equal((await store.pool.query("SELECT count(*)::int AS n FROM fcpi_retrieval.search_event")).rows[0].n, 1, "no reduction has covered its day yet");
     await admin((c) => c.query(readFileSync(SCHEMA, "utf8")));
     assert.equal((await store.pool.query("SELECT count(*)::int AS n FROM fcpi_retrieval.search_event")).rows[0].n, 1, "reapplying the schema keeps the rows");
+  } finally { await store.close(); }
+});
+
+test("a stalled reduction loses no source: prune keeps what the watermark has not passed, and usage keeps its label", opts, async () => {
+  const store = await fresh();
+  try {
+    const day = (n) => { const d = new Date(); d.setUTCHours(12, 0, 0, 0); d.setUTCDate(d.getUTCDate() - n); return d; };
+    const iso = (d) => d.toISOString().slice(0, 10);
+    // The reduction last succeeded 35 days ago and has failed since.
+    await store.pool.query("INSERT INTO fcpi_retrieval.search_reduction (name, reduced_through) VALUES ('daily', $1)", [iso(day(35))]);
+    const runAt = async (ago) => {
+      const r = { logicalId: randomUUID(), requestId: `req-${randomUUID()}`, principalId: "owner", fingerprint: "f".repeat(64), profile: "aggregate", selection: "live", resultMode: "links", acceptedAt: day(ago), versions: {} };
+      await store.searchRunFinished({ ...r, completedAt: new Date(day(ago).getTime() + 900), outcome: "complete", cacheMode: "miss", docsActive: false });
+      await store.searchEvents([{ eventId: randomUUID(), logicalId: r.logicalId, provider: "exa", type: "lane", observedAt: day(ago), durationMs: 900, status: "success_results" }]);
+      return r;
+    };
+    await runAt(36);
+    await runAt(35);
+    const unreduced = await runAt(32);
+    const resv = await store.reserveBudget({ id: randomUUID(), callKey: `search:${unreduced.logicalId}:exa:search:v1`, logicalId: unreduced.logicalId, category: "search_exa", caps: {}, reportingPeriods: ["day", "month"],
+      paidTotalCap: null, provider: "exa", subject: "exa-search", kind: "search", unit: "micro_usd", rateCard: "exa/search@2026-10-17", requestHash: "h", amount: 17000, day: iso(day(32)), month: `${iso(day(32)).slice(0, 7)}-01` });
+    await store.settleBudget(resv.reservation.id, 17000, { usage: { costDollars: 0.017 }, detail: "settled" });
+    await store.prune();
+    const days = async (table, col) => (await store.pool.query(`SELECT (${col} AT TIME ZONE 'UTC')::date::text AS d FROM fcpi_retrieval.${table} ORDER BY 1`)).rows.map((r) => r.d);
+    assert.deepEqual(await days("search_run", "accepted_at"), [iso(day(35)), iso(day(32))], "only the run before the watermark goes; its day and later wait for the reduction");
+    assert.deepEqual(await days("search_event", "observed_at"), [iso(day(35)), iso(day(32))], "events on the watermark's day and after are kept");
+    // The reduction recovers and rebuilds those days from whole sources.
+    const p = await store.reduceSearchDaily();
+    assert.deepEqual([p.from, p.through], [iso(day(35)), iso(day(29))]);
+    const daily = (await store.pool.query("SELECT day::text, profile, provider, metric, n FROM fcpi_retrieval.search_daily ORDER BY 1, 3, 4")).rows;
+    const at = (d, metric) => daily.find((r) => r.day === iso(d) && r.metric === metric);
+    assert.equal(at(day(35), "runs.complete").n, "1");
+    assert.equal(at(day(32), "runs.complete").n, "1");
+    assert.equal(at(day(32), "lane.success_results").n, "1");
+    // Pruned at last, the run takes nothing from its day's usage: the label comes from the ledger row.
+    await store.pool.query("UPDATE fcpi_retrieval.search_reduction SET reduced_through = $1 WHERE name = 'daily'", [iso(day(1))]);
+    await store.prune();
+    assert.deepEqual(await days("search_run", "accepted_at"), [], "past 30 days and reduced, the runs go");
+    await store.reduceSearchDaily();
+    const usage = (await store.pool.query("SELECT profile, amount::float8 AS amount FROM fcpi_retrieval.search_daily WHERE day = $1 AND metric = 'usage.search.micro_usd.settled'", [iso(day(32))])).rows;
+    assert.deepEqual(usage, [{ profile: "search/search_exa", amount: 17000 }]);
   } finally { await store.close(); }
 });

@@ -518,42 +518,49 @@ export class Store {
     }
     return (await this.pool.query(`INSERT INTO fcpi_retrieval.search_event (${cols.join(", ")}) VALUES ${values.join(", ")} ON CONFLICT (event_id) DO NOTHING`, params)).rowCount;
   }
-  // The daily reduction (spec §21.1): activity (runs and events) for the days from the watermark through yesterday, the
-  // watermark's own day again since a run can finish after midnight; ledger-linked usage for the last 90 days, since a
+  // The daily reduction (spec §21.1): activity (runs and events) for the days from the watermark on, the watermark's own day
+  // again since a run can finish after midnight, at most seven days a pass so a backlog is caught up in bounded steps within
+  // the statement timeout; ledger-linked usage for the 89 days the ledger still holds whole (its rows go at 90), since a
   // reservation can settle or be reconciled long after its day. Each covered day is recomputed whole from its sources, so a
-  // repeat changes nothing; usage comes from the ledger only, never from counting results, cache hits or shared callers.
+  // repeat changes nothing; usage comes from the ledger only, never from counting results, cache hits or shared callers, and
+  // its dimension comes from the ledger row too (a search intelligence call key, search:<logical id>:<provider>:..., or
+  // unlinked, with its category), so it does not change when the run it served is pruned.
   async reduceSearchDaily() {
     return this.#tx(async (c) => {
       await c.query("SELECT pg_advisory_xact_lock(hashtext('fcpi.search.reduction'))");
       const w = (await c.query("SELECT reduced_through::text AS w FROM fcpi_retrieval.search_reduction WHERE name = 'daily'")).rows[0]?.w ?? null;
-      const { from, through } = (await c.query(`SELECT COALESCE($1::date, LEAST((SELECT min(accepted_at AT TIME ZONE 'UTC')::date FROM fcpi_retrieval.search_run), (SELECT min(observed_at AT TIME ZONE 'UTC')::date FROM fcpi_retrieval.search_event)),
-        (now() AT TIME ZONE 'UTC')::date - 1)::text AS from, ((now() AT TIME ZONE 'UTC')::date - 1)::text AS through`, [w])).rows[0];
+      const { from, through } = (await c.query(`WITH f AS (SELECT COALESCE($1::date, LEAST((SELECT min(accepted_at AT TIME ZONE 'UTC')::date FROM fcpi_retrieval.search_run), (SELECT min(observed_at AT TIME ZONE 'UTC')::date FROM fcpi_retrieval.search_event)),
+        (now() AT TIME ZONE 'UTC')::date - 1) AS d)
+        SELECT d::text AS from, LEAST(d + 6, (now() AT TIME ZONE 'UTC')::date - 1)::text AS through FROM f`, [w])).rows[0];
       // A duration histogram key is the number of these edges (ms) at or below the duration: 0 is under 100 ms, 9 is 30 s or more.
       const buckets = "ARRAY[100, 250, 500, 1000, 2000, 4000, 8000, 15000, 30000]";
       if (from <= through) {
         await c.query("DELETE FROM fcpi_retrieval.search_daily WHERE day BETWEEN $1 AND $2 AND metric NOT LIKE 'usage.%'", [from, through]);
+        // The days as UTC instants, so the time indexes serve the range.
+        const inRange = (col) => `${col} >= ($1::date)::timestamp AT TIME ZONE 'UTC' AND ${col} < ($2::date + 1)::timestamp AT TIME ZONE 'UTC'`;
         await c.query(`WITH src AS (
             SELECT (accepted_at AT TIME ZONE 'UTC')::date AS day, profile || '/' || selection AS profile, '*' AS provider, 'runs.' || COALESCE(outcome, 'unfinished') AS metric,
               (extract(epoch FROM (completed_at - accepted_at)) * 1000)::bigint AS ms
-              FROM fcpi_retrieval.search_run WHERE (accepted_at AT TIME ZONE 'UTC')::date BETWEEN $1 AND $2
+              FROM fcpi_retrieval.search_run WHERE ${inRange("accepted_at")}
             UNION ALL SELECT (accepted_at AT TIME ZONE 'UTC')::date, profile || '/' || selection, '*', 'runs.cache_' || cache_mode, NULL
-              FROM fcpi_retrieval.search_run WHERE cache_mode IS NOT NULL AND (accepted_at AT TIME ZONE 'UTC')::date BETWEEN $1 AND $2
+              FROM fcpi_retrieval.search_run WHERE cache_mode IS NOT NULL AND ${inRange("accepted_at")}
             UNION ALL SELECT (accepted_at AT TIME ZONE 'UTC')::date, profile || '/' || selection, '*', 'runs.docs_' || CASE WHEN docs_active THEN 'active' ELSE 'inactive' END, NULL
-              FROM fcpi_retrieval.search_run WHERE docs_active IS NOT NULL AND (accepted_at AT TIME ZONE 'UTC')::date BETWEEN $1 AND $2
+              FROM fcpi_retrieval.search_run WHERE docs_active IS NOT NULL AND ${inRange("accepted_at")}
             UNION ALL SELECT (e.observed_at AT TIME ZONE 'UTC')::date, COALESCE(r.profile || '/' || r.selection, 'process'), e.provider, e.event_type || '.' || COALESCE(e.status, 'unknown'), e.duration_ms::bigint
-              FROM fcpi_retrieval.search_event e LEFT JOIN fcpi_retrieval.search_run r USING (logical_id) WHERE (e.observed_at AT TIME ZONE 'UTC')::date BETWEEN $1 AND $2
-          ), b AS (SELECT *, CASE WHEN ms IS NULL THEN NULL ELSE width_bucket(ms, ${buckets}) END AS bucket FROM src)
+              FROM fcpi_retrieval.search_event e LEFT JOIN fcpi_retrieval.search_run r USING (logical_id) WHERE ${inRange("e.observed_at")}
+          ), b AS (SELECT *, CASE WHEN ms IS NULL THEN NULL ELSE width_bucket(ms, ${buckets}) END AS bucket FROM src),
+          h AS (SELECT day, profile, provider, metric, jsonb_object_agg(bucket::text, n) AS histogram
+            FROM (SELECT day, profile, provider, metric, bucket, count(*) AS n FROM b WHERE bucket IS NOT NULL GROUP BY 1, 2, 3, 4, 5) x GROUP BY 1, 2, 3, 4)
           INSERT INTO fcpi_retrieval.search_daily (day, profile, provider, metric, n, total_ms, histogram)
-          SELECT day, profile, provider, metric, count(*), sum(ms), (SELECT jsonb_object_agg(h.bucket::text, h.n) FROM (SELECT x.bucket, count(*) AS n FROM b x
-              WHERE x.day = b.day AND x.profile = b.profile AND x.provider = b.provider AND x.metric = b.metric AND x.bucket IS NOT NULL GROUP BY x.bucket) h)
-            FROM b GROUP BY day, profile, provider, metric`, [from, through]);
+          SELECT g.day, g.profile, g.provider, g.metric, g.n, g.total_ms, h.histogram
+            FROM (SELECT day, profile, provider, metric, count(*) AS n, sum(ms) AS total_ms FROM b GROUP BY 1, 2, 3, 4) g LEFT JOIN h USING (day, profile, provider, metric)`, [from, through]);
       }
-      await c.query("DELETE FROM fcpi_retrieval.search_daily WHERE day >= (now() AT TIME ZONE 'UTC')::date - 90 AND metric LIKE 'usage.%'");
+      await c.query("DELETE FROM fcpi_retrieval.search_daily WHERE day >= (now() AT TIME ZONE 'UTC')::date - 89 AND metric LIKE 'usage.%'");
       await c.query(`INSERT INTO fcpi_retrieval.search_daily (day, profile, provider, metric, n, amount)
-        SELECT b.day_start, COALESCE(r.profile || '/' || r.selection, 'unlinked'), b.provider, 'usage.' || b.kind || '.' || b.unit || '.' || lower(b.state), count(*),
+        SELECT b.day_start, CASE WHEN b.call_key LIKE 'search:%:%:%' THEN 'search' ELSE 'unlinked' END || '/' || b.category, b.provider, 'usage.' || b.kind || '.' || b.unit || '.' || lower(b.state), count(*),
           sum(CASE b.state WHEN 'SETTLED' THEN COALESCE(b.actual, 0) WHEN 'RELEASED' THEN 0 ELSE b.reserved END)
-          FROM fcpi_retrieval.budget_reservation b LEFT JOIN fcpi_retrieval.search_run r ON r.logical_id::text = b.logical_id
-          WHERE b.kind IN ('search', 'docs_search', 'docs_read', 'decision') AND b.day_start >= (now() AT TIME ZONE 'UTC')::date - 90
+          FROM fcpi_retrieval.budget_reservation b
+          WHERE b.kind IN ('search', 'docs_search', 'docs_read', 'decision') AND b.day_start >= (now() AT TIME ZONE 'UTC')::date - 89
           GROUP BY 1, 2, 3, 4`);
       if (from <= through) await c.query(`INSERT INTO fcpi_retrieval.search_reduction (name, reduced_through) VALUES ('daily', $1)
         ON CONFLICT (name) DO UPDATE SET reduced_through = GREATEST(fcpi_retrieval.search_reduction.reduced_through, EXCLUDED.reduced_through), updated_at = now()`, [through]);
@@ -588,11 +595,15 @@ export class Store {
     // A settled call's stored answer (page content) serves only a retry of its logical unit, so it goes after
     // the seven days that job results and parse caches keep; the amounts and usage stay (review W9).
     await this.pool.query("UPDATE fcpi_retrieval.budget_reservation SET result = NULL WHERE result IS NOT NULL AND settled_at < now() - interval '7 days'");
-    // Search intelligence operational records (spec §21.1): runs 30 days, daily aggregates 90; detailed events 14 days and
-    // never before the daily reduction has covered their day. The ledger rows they refer to keep their own retention.
-    await this.pool.query("DELETE FROM fcpi_retrieval.search_run WHERE accepted_at < now() - interval '30 days'");
+    // Search intelligence operational records (spec §21.1): runs 30 days, their candidate traces 14, daily aggregates 90;
+    // detailed events 14 days. A run or event goes only once the daily reduction has moved past its day (strictly: the
+    // watermark's own day is reduced again), so a stalled reduction never loses a source it will still recompute from. The
+    // ledger rows they refer to keep their own retention.
+    await this.pool.query("UPDATE fcpi_retrieval.search_run SET trace = NULL WHERE trace IS NOT NULL AND accepted_at < now() - interval '14 days'");
+    await this.pool.query(`DELETE FROM fcpi_retrieval.search_run WHERE accepted_at < now() - interval '30 days'
+      AND (accepted_at AT TIME ZONE 'UTC')::date < (SELECT reduced_through FROM fcpi_retrieval.search_reduction WHERE name = 'daily')`);
     await this.pool.query(`DELETE FROM fcpi_retrieval.search_event WHERE observed_at < now() - interval '14 days'
-      AND (observed_at AT TIME ZONE 'UTC')::date <= (SELECT reduced_through FROM fcpi_retrieval.search_reduction WHERE name = 'daily')`);
+      AND (observed_at AT TIME ZONE 'UTC')::date < (SELECT reduced_through FROM fcpi_retrieval.search_reduction WHERE name = 'daily')`);
     await this.pool.query("DELETE FROM fcpi_retrieval.search_daily WHERE day < (now() AT TIME ZONE 'UTC')::date - 90");
   }
 
