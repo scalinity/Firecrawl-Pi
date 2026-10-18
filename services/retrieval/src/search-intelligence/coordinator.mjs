@@ -242,7 +242,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
         ...(o.suboperations?.length ? { suboperations: o.suboperations.slice(0, 12) } : {}) }]));
       const warnings = [];
       for (const o of [...generalMissing, ...docsMissing]) warnings.push(`${o.provider}_${o.status === "partial" ? "partial" : o.reason}`);
-      if (ranking.mode === "rrf_fallback" && decisions) warnings.push(`ranking_${ranking.reason}`);
+      if (ranking.mode === "rrf_fallback" && decisions && ranking.reason !== "no_candidates") warnings.push(`ranking_${ranking.reason}`);
       if (ranking.mode === "hybrid_partial") warnings.push("ranking_partial_semantic");
       if (auxiliaryContext.length) warnings.push("documentation_auxiliary_context");
       if (enrichment.limitation) warnings.push(`ref_enrichment_${enrichment.limitation}`);
@@ -270,7 +270,7 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       // layer that failed is degraded and is not stored.
       // Nor is one whose documentation enrichment was cut short (a failed or skipped read), nor one of a cancelled search:
       // the next identical search should get the reads or the fresh work, not a degraded answer for the cache's lifetime.
-      const fullyRanked = ranking.mode === "hybrid" || (ranking.mode === "rrf_fallback" && ranking.reason === "jev_not_configured");
+      const fullyRanked = ranking.mode === "hybrid" || (ranking.mode === "rrf_fallback" && ["jev_not_configured", "no_candidates"].includes(ranking.reason));
       // A hybrid answer is stored only under the one build that ranked it; mixed builds are not stored.
       const rankedBy = ranking.mode === "hybrid" ? ranking.identity ?? null : decisions?.identity?.() ?? null;
       if (complete && fullyRanked && !enrichment.limitation && !parent.signal.aborted && (ranking.mode !== "hybrid" || rankedBy)) {
@@ -444,7 +444,7 @@ function warningText(s) {
   const parts = [];
   const miss = [...s.coverage.general.missing, ...s.coverage.documentation.missing];
   if (miss.length) parts.push(`Partial search coverage: ${miss.map((m) => `${LABEL[m.provider] ?? m.provider} ${m.status === "partial" ? "answered in part" : REASON_TEXT[m.reason] ?? m.reason}`).join("; ")}.`);
-  if (s.ranking.mode === "rrf_fallback" && s.coverage.decisions.status !== "not_configured") parts.push(`Deterministic ranking used (${s.ranking.reason.replaceAll("_", " ")}).`);
+  if (s.ranking.mode === "rrf_fallback" && s.coverage.decisions.status !== "not_configured" && s.ranking.reason !== "no_candidates") parts.push(`Deterministic ranking used (${s.ranking.reason.replaceAll("_", " ")}).`);
   if (s.ranking.mode === "hybrid_partial") parts.push("Semantic ranking covered only part of the candidates.");
   if (s.documentation.auxiliaryContext.length) parts.push("Some documentation had no original source URL and is returned separately as auxiliary context.");
   return parts.join(" ");

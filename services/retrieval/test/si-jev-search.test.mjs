@@ -147,3 +147,17 @@ test("a weak cue asks Jev's one documentation question; its spend is reported wh
     assert.ok(bad.body.search.usage.some((u) => u.provider === "jev" && u.purpose === "docs_detect"), "the settled call's spend is still reported");
   } finally { await h.close(); }
 });
+
+test("a valid empty search has nothing to rank: no Jev call, no ranking warning, a complete empty answer", async () => {
+  const none = (q) => ({ status: 200, body: { query: { original: q }, web: { type: "search", results: [] } } });
+  const h = await harness({ handlers: { openrouter: jev(), serper: () => ({ status: 200, body: { credits: 1, organic: [] } }), brave: none, exa: () => ({ status: 200, body: { requestId: "x", results: [], costDollars: { total: 0.005 } } }),
+    deepseek: () => ({ status: 200, body: { results: [] } }), tavily: (q) => ({ status: 200, body: { query: q, results: [], usage: { credits: 2 }, request_id: "t" } }) } });
+  try {
+    const r = await search(h, { originalQuery: "nothing anywhere" });
+    const s = r.body.search;
+    assert.deepEqual([s.outcome, s.empty, s.ranking.reason], ["complete", true, "no_candidates"]);
+    assert.equal(h.servers.openrouter.seen.length, 0);
+    assert.ok(!s.warnings.some((w) => w.startsWith("ranking_")));
+    assert.equal(r.body.warning, undefined, "a valid empty answer carries no warning");
+  } finally { await h.close(); }
+});

@@ -224,6 +224,8 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
 
   // The semantic phase (spec §11.2): the shortlist's candidate questions in fair batches, and the ambiguous pairs, together.
   async function rerank({ request, shortlist, selection, decisionSubject, signal, deadlineAt }) {
+    // Nothing to rank is not a semantic failure: no call, a reason of its own, and the deterministic order is complete.
+    if (!shortlist.length) return { ranking: { mode: "rrf_fallback", reason: "no_candidates", scored: 0 } };
     const L = limits();
     const { sub, pre } = preflight(selection, decisionSubject);
     if (!pre.eligible) return { ranking: { mode: "rrf_fallback", reason: `jev_${pre.reason}`, scored: 0 } };
