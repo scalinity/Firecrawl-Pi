@@ -6,7 +6,8 @@
 //     provider returned and that no profile ranked in its top 20 (its unique, otherwise unpooled contribution);
 //   - the independent primary-source anchors (eval/anchors.json), when present.
 // Documents are identified by canonical URL (normalize.mjs). Writes eval/pool.json: per query, each URL and why it is pooled;
-// no provider text. Tuning queries are not pooled: no tuning is run, so no tuning label is needed.
+// no provider text. Tuning queries are not pooled: no tuning is run, so no tuning label is needed. A run is pooled only when it
+// comes from a collector commit frozen.json records, with a clean tree; any other is listed as refused, never pooled.
 //   node scripts/si5/pool.mjs
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
@@ -21,6 +22,8 @@ const corpus = JSON.parse(readFileSync(join(root, "evidence/search-intelligence/
 const anchorsPath = join(EVAL, "anchors.json");
 const anchors = existsSync(anchorsPath) ? JSON.parse(readFileSync(anchorsPath, "utf8")) : null;
 const collected = new Set(readdirSync(RUNS).filter((f) => f.endsWith(".json")).map((f) => f.slice(0, -5)));
+const frozen = JSON.parse(readFileSync(join(EVAL, "frozen.json"), "utf8"));
+const commits = new Set([frozen.repositoryCommit, ...(frozen.collectorRevisions ?? []).map((r) => r.repositoryCommit)]);
 const constraintsOf = (q) => validateSearchRequest({ schema: "fcpi.search-request/v1", requestId: "si5-pool-0000", logicalSearchId: "00000000-0000-4000-8000-000000000000", principalId: "si5-pool",
   originalQuery: q.query, limit: 10, language: "en", constraints: q.constraints ?? {}, intelligence: q.searchIntelligence ?? {}, resultMode: "links", absoluteDeadlineMs: Date.now() + 60000 }).constraints;
 
@@ -28,6 +31,7 @@ const out = { schema: "fcpi.si5-pool/v1", rule: { profiles: PROFILES, depth: 20,
 for (const q of corpus.queries.filter((x) => x.split === "heldout")) {
   if (!collected.has(q.id)) { out.queries[q.id] = { collected: false, documents: [] }; continue; }
   const run = JSON.parse(readFileSync(join(RUNS, `${q.id}.json`), "utf8"));
+  if (!commits.has(run.repositoryCommit) || run.codeDirty !== false) { out.queries[q.id] = { collected: false, refused: `run from ${String(run.repositoryCommit).slice(0, 7)}, codeDirty ${run.codeDirty}`, documents: [] }; continue; }
   const docs = new Map();
   const add = (url, why) => { if (!url) return; const d = docs.get(url) ?? docs.set(url, { url, why: [] }).get(url); if (!d.why.includes(why)) d.why.push(why); };
   for (const p of PROFILES) {
@@ -54,7 +58,7 @@ for (const q of corpus.queries.filter((x) => x.split === "heldout")) {
   out.queries[q.id] = { collected: true, documents: [...docs.values()].sort((a, b) => (a.url < b.url ? -1 : 1)) };
 }
 const counts = Object.values(out.queries).map((x) => x.documents.length);
-out.summary = { queries: counts.length, collected: Object.values(out.queries).filter((x) => x.collected).length, documents: counts.reduce((a, b) => a + b, 0),
+out.summary = { queries: counts.length, collected: Object.values(out.queries).filter((x) => x.collected).length, refused: Object.values(out.queries).filter((x) => x.refused).length, documents: counts.reduce((a, b) => a + b, 0),
   distinctUrls: new Set(Object.values(out.queries).flatMap((x) => x.documents.map((d) => d.url))).size };
 writeFileSync(join(EVAL, "pool.json"), JSON.stringify(out, null, 1) + "\n");
 console.log(JSON.stringify(out.summary));
