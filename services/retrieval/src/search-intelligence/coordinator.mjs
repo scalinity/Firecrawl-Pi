@@ -199,11 +199,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       const docsOutcomes = await Promise.all(docsTasks);
       const searxngOutcome = searxngTask ? await searxngTask : null;
       timings.discoveryMs = clock() - tAdmit;
+      // Seen before the cancellation check: a cancelled run still records every lane it dispatched, paid or not.
+      const all = [...generalOutcomes, ...docsOutcomes, ...(searxngOutcome ? [searxngOutcome] : [])];
+      Object.assign(seen, { lanes: all, activation });
       if (parent.signal.aborted && signal.aborted) throw new Denied("CANCELLED", "the caller cancelled");
 
       // 5. Normalize, constrain, pool, fuse.
-      const all = [...generalOutcomes, ...docsOutcomes, ...(searxngOutcome ? [searxngOutcome] : [])];
-      Object.assign(seen, { lanes: all, activation });
       const prepared = all.filter(validated).map((o) => ({ o, ...prepareCandidates(o.provider, o.candidates, request.constraints) }));
       for (const p of prepared) if (p.o.status !== "partial" && p.o.candidates.length && !p.kept.length) p.o.filteredEmpty = true;
       const { pool, distinct, truncatedPassages } = buildPool(prepared.map((p) => ({ provider: p.o.provider, kept: p.kept, retrievedAt: p.o.originalRetrievedAt ?? p.o.completedAt, fromCache: p.o.fromCache })),

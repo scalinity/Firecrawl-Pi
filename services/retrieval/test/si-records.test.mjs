@@ -48,6 +48,11 @@ test("a search no provider answered, and a cancelled one, are each recorded with
     setTimeout(() => ac.abort(), 50);
     await assert.rejects(p);
     assert.ok(await waitFor(() => runsOf(h2).some((x) => x.outcome === "cancelled")), "the cancelled execution is recorded as cancelled");
+    await settle(h2);
+    const c = runsOf(h2).find((x) => x.outcome === "cancelled");
+    const lanes = h2.store.events.filter((e) => e.logicalId === c.logicalId && e.type === "lane");
+    assert.deepEqual(lanes.map((e) => e.provider).sort(), ["brave", "deepseek", "exa", "serper", "tavily"], "every dispatched lane is recorded, the ones that answered too");
+    assert.ok(lanes.some((e) => e.status === "success_results"), "a lane that answered before the cancellation keeps its outcome");
   } finally { await h2.close(); }
 });
 
