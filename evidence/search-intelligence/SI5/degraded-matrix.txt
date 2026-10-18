@@ -1,21 +1,22 @@
 ### meta
-utc=2026-10-18T01:19:57Z
-repository_commit=d1be3dfd3d3dfcbd4088dc79f618b1e517bb4216 code_dirty=false
+utc=2026-10-18T04:01:36Z
+repository_commit=15e66dc8120e36be02f572ebbbf3382fdff30ce4 code_dirty=false
 command=CONC=4 rtx.sh test/si-degraded.test.mjs (fixture providers only; no network beyond loopback)
 ### run
-✔ degraded serper: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2302.4715ms)
-✔ degraded brave: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2282.305125ms)
-✔ degraded exa: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2284.681042ms)
-✔ degraded deepseek: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2309.435542ms)
-✔ degraded tavily: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2274.027417ms)
-✔ degraded documentation: Context7 and Ref each fail on their own without touching the other or the engines (4633.809334ms)
-✔ degraded Jev: every failure leaves the deterministic ranking, full discovery coverage, and no empty answer (1053.634458ms)
-✔ degraded combinations: both docs down, all engines down with and without SearXNG, everything down, one valid empty among failures (2128.449583ms)
-ℹ tests 8
+✔ degraded serper: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2292.725042ms)
+✔ degraded brave: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2278.577833ms)
+✔ degraded exa: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2273.343083ms)
+✔ degraded deepseek: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2285.331334ms)
+✔ degraded tavily: each failure class is attributed, the others still answer, and only a service failure trips its breaker (2291.256417ms)
+✔ degraded documentation: Context7 and Ref each fail on their own without touching the other or the engines (4609.287542ms)
+✔ degraded Jev: every failure leaves the deterministic ranking, full discovery coverage, and no empty answer (1068.590459ms)
+✔ degraded combinations: both docs down, all engines down with and without SearXNG, everything down, one valid empty among failures (2126.671791ms)
+✔ degraded single cells: each documentation circuit, each lone provider cancelled, Serper's allocation spent, one empty among every failure (6870.27775ms)
+ℹ tests 9
 ℹ suites 0
-ℹ pass 8
+ℹ pass 9
 ℹ fail 0
 ℹ cancelled 0
 ℹ skipped 0
 ℹ todo 0
-ℹ duration_ms 19992.021291
+ℹ duration_ms 26229.276875
