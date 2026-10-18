@@ -39,6 +39,15 @@ test("Ref: documentation that quotes refusal phrases is a result or a page, neve
   assert.equal(parseRefSearch(text("Ref is not correctly configured. Reach out to hello@ref.tools for help.")).reason, "auth_failed");
 });
 
+test("Ref's block reader is linear: a large answer of unterminated overviews parses at once, and multi-line overviews stay whole", () => {
+  const big = "overview: x\n".repeat(20000);
+  const t0 = performance.now();
+  assert.equal(parseRefSearch(text(big)).kind, "contract");
+  assert.ok(performance.now() - t0 < 100, `240k characters took ${Math.round(performance.now() - t0)} ms`);
+  const multi = parseRefSearch(text("overview: First line\nsecond line\nurl: not-a-pair\nurl: https://docs.example.com/m\nmoduleId: mod"));
+  assert.deepEqual(multi.docs, [{ url: "https://docs.example.com/m", overview: "First line\nsecond line\nurl: not-a-pair", moduleId: "mod" }]);
+});
+
 test("Ref's query carries the caller's library, version and language hints that the query lacks", () => {
   const r = validateSearchRequest(request({ originalQuery: "how do async components work", intelligence: { documentation: "required", libraries: [{ name: "vue", version: "3.5" }], programmingLanguage: "typescript" } }));
   assert.equal(refQuery(r), "how do async components work vue 3.5 typescript");

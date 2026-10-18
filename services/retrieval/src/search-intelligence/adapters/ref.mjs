@@ -28,7 +28,27 @@ const SEARCH_ERRORS = [/^Error during documentation search:/i, /^Error:/i];
 // A read's success is the page itself, which may begin with anything ("Unauthorized" on a target's own 401 page): only Ref's
 // documented read refusals count.
 const READ_AUTH = AUTH.slice(0, 2), READ_ERRORS = [/^Error reading URL:/i];
-const BLOCK = /overview:[ \t]?([\s\S]*?)\r?\nurl:[ \t]?(\S+)[ \t]*\r?\nmoduleId:[ \t]?([^\r\n]*)/g;
+
+// Ref's legacy result blocks, read line by line in linear time: a line opening "overview:" (the overview may run over several
+// lines), then "url: <url>", then "moduleId:" on the very next line. A url line not followed by moduleId is overview text.
+function blocksOf(text) {
+  const out = [], lines = text.split(/\r?\n/);
+  let overview = null;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith("overview:")) { overview = [line.slice(9).replace(/^[ \t]/, "")]; continue; }
+    if (overview === null) continue;
+    const u = /^url:[ \t]?(\S+)[ \t]*$/.exec(line);
+    if (u && lines[i + 1]?.startsWith("moduleId:")) {
+      out.push({ overview: overview.join("\n"), url: u[1], moduleId: lines[i + 1].slice(9).replace(/^[ \t]/, "") });
+      overview = null;
+      i++;
+      continue;
+    }
+    overview.push(line);
+  }
+  return out;
+}
 
 const textsOf = (result) => (Array.isArray(result?.content) ? result.content.filter((c) => c?.type === "text" && typeof c.text === "string").map((c) => c.text) : null);
 function classifyError(text, { auth = AUTH, errors = SEARCH_ERRORS } = {}) {
@@ -49,7 +69,7 @@ export function parseRefSearch(result) {
   // A block that opens with a refusal is an error whatever it quotes; the others are parsed for results.
   const refusals = texts.map((t) => classifyError(t));
   const docs = [];
-  texts.forEach((t, i) => { if (!refusals[i]) for (const m of t.matchAll(BLOCK)) if (normalizeUrl(m[2])) docs.push({ url: m[2], overview: m[1].trim().slice(0, 2000), moduleId: m[3].trim().slice(0, 300) }); });
+  texts.forEach((t, i) => { if (!refusals[i]) for (const b of blocksOf(t)) if (normalizeUrl(b.url)) docs.push({ url: b.url, overview: b.overview.trim().slice(0, 2000), moduleId: b.moduleId.trim().slice(0, 300) }); });
   if (docs.length) return { kind: "results", docs };
   if (texts.length === 1 && texts[0].trim() === NO_RESULTS) return { kind: "empty" };
   return refusals.find(Boolean) ?? { kind: "contract", detail: "ref_unrecognized_text" };
