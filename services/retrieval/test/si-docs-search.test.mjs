@@ -160,6 +160,20 @@ test("an answer whose Ref reads failed is not stored: the next identical search 
   } finally { await h.close(); }
 });
 
+test("a cached discovery whose fresh session cannot open reads nothing and says so", async () => {
+  let down = false;
+  const fx = refFixture({ initialize: () => (down ? { status: 503 } : null) });
+  const h = await harness({ handlers: { ...empty, ref: fx } });
+  try {
+    await h.coordinator.search(docsRequest("ref session unavailable", { limit: 5 }), { signal: new AbortController().signal });
+    down = true;
+    const r = await h.coordinator.search(docsRequest("ref session unavailable", { limit: 4 }), { signal: new AbortController().signal });
+    assert.deepEqual(r.body.search.documentation.enrichment, { selected: 2, read: 0, contextInit: true, limitation: "session_unavailable" });
+    assert.ok(r.body.search.warnings.includes("ref_enrichment_session_unavailable"));
+    assert.equal(reads(fx).length, 2, "only the first search's reads were sent");
+  } finally { await h.close(); }
+});
+
 test("documentation off calls neither documentation provider", async () => {
   const fx = refFixture();
   const h = await harness({ handlers: { context7, ref: fx } });

@@ -161,3 +161,24 @@ test("a valid empty search has nothing to rank: no Jev call, no ranking warning,
     assert.equal(r.body.warning, undefined, "a valid empty answer carries no warning");
   } finally { await h.close(); }
 });
+
+test("two documents with near-identical titles get a duplicate question; the same document is soft-grouped, never collapsed", async () => {
+  const brave = (q) => ({ status: 200, body: { query: { original: q }, web: { type: "search", results: [
+    { title: "Streaming responses guide for Node", url: "https://guides.example.org/streaming", description: "How to stream responses." },
+    { title: "Streaming responses guide for Node", url: "https://mirror.example.net/copy/streaming", description: "How to stream responses (mirror)." }] } } });
+  // The other engines find nothing, so the pool is the two near-duplicates and both fit the limit.
+  const nothing = { serper: () => ({ status: 200, body: { credits: 1, organic: [] } }), exa: () => ({ status: 200, body: { requestId: "x", results: [], costDollars: { total: 0.005 } } }),
+    deepseek: () => ({ status: 200, body: { results: [] } }), tavily: (q) => ({ status: 200, body: { query: q, results: [], usage: { credits: 2 }, request_id: "t" } }) };
+  const h = await harness({ handlers: { ...nothing, brave, openrouter: jev() } });
+  try {
+    const r = await search(h, { originalQuery: "streaming responses node" });
+    // The pair is asked about in a request of duplicate questions alone; other fixture titles may be paired too.
+    const asked = h.servers.openrouter.seen.filter((e) => Object.keys(e.body.questions).some((k) => k.endsWith("_duplicate"))
+      && Object.values(e.body.state.candidates).some((c) => c.url === "https://guides.example.org/streaming") && Object.values(e.body.state.candidates).some((c) => c.url === "https://mirror.example.net/copy/streaming"));
+    assert.equal(asked.length, 1, "the two near-identical titles are asked about once");
+    assert.ok(Object.keys(asked[0].body.questions).every((k) => k.endsWith("_duplicate")), "in a request of their own, apart from relevance questions");
+    const rows = r.body.web.filter((w) => /streaming/.test(w.url));
+    assert.equal(rows.length, 2, "both documents are kept");
+    assert.ok(rows[0].fcpi.search.softGroup && rows[0].fcpi.search.softGroup === rows[1].fcpi.search.softGroup, "and grouped softly as one document");
+  } finally { await h.close(); }
+});
