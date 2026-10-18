@@ -925,6 +925,8 @@ Only the original user query, explicit nonsecret constraints and bounded public 
 
 Use existing safe identifiers for attribution and a keyed query fingerprint where a suitable existing server secret can provide an HMAC; do not add a secrets-management system solely for hashing. If a plain hash is retained for a legacy path, label it pseudonymous and do not claim it hides low-entropy queries. Redact common credential-bearing URL parameters in events; keep the actual original URL only in the authorized bounded result artifact where needed for retrieval. Raw query/text logging is off by default. Sanitized contract fixtures use synthetic query strings and no user account identifiers.
 
+The core believes the search's trusted headers (request id, logical search id, owner tag, deadline) because of where they come from: only the gateway reaches the core's listener, and the gateway builds them from scratch for a search. Any peer on the core's private networks could assert them, so they suit a single owner on private networks; they are not a signature, and a deployment with untrusted peers there would need a gateway-keyed HMAC header.
+
 Authorization, ownership and result retention remain those of the existing REST/MCP/application path. The evidence hook is internal and authenticated; it does not become a public arbitrary-model endpoint. Existing output HTML sanitization remains in the application. Additive metadata is data, never inserted into the DOM through an unsafe rendering shortcut. [R03,R12,R13]
 
 ## 21. Operational observability
