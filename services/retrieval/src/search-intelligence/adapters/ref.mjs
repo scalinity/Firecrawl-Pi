@@ -216,7 +216,7 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
           retrievedAt }));
         keep = true;
         return { ...outcome({ ...base, status: candidates.length ? "success_results" : "success_empty", upstreamResultCount: parsed.kind === "results" ? parsed.docs.length : 0, candidates, dispatchState: "response_received",
-          usage: { credits: ctx.sub.card.creditsPerOperation, basis: "documented" } }), lease: lease(session, request, ctx) };
+          usage: { credits: ctx.sub.card.creditsPerOperation, basis: "documented" } }), lease: lease(session, request, ctx, "discovery") };
       } finally {
         if (!keep) await session.close().catch(() => {});
       }
@@ -232,23 +232,27 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
         await session.close().catch(() => {});
         return null;
       }
-      const r = await tool(session, { request, ctx, kind: "docs_search", op: `context_init:${Date.now().toString(36)}`, name: "ref_search_documentation", args: { query: refQuery(request) }, deadlineAt: ctx.deadlineAt });
+      const epoch = Date.now().toString(36);
+      const r = await tool(session, { request, ctx, kind: "docs_search", op: `context_init:${epoch}`, name: "ref_search_documentation", args: { query: refQuery(request) }, deadlineAt: ctx.deadlineAt });
       if (!r.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, providerCode: r.detail }, { answered: false }); await session.close().catch(() => {}); return null; }
       const parsed = parseRefSearch(r.result);
       await closeFor(r.close, parsed, ctx.sub.card.creditsPerOperation);
       if (await judged(ctx, parsed, r.startedAt)) { await session.close().catch(() => {}); return null; }
-      return lease(session, request, ctx);
+      return lease(session, request, ctx, epoch);
     },
   };
 
-  function lease(session, request, ctx) {
+  // epoch names the session in its reads' operation keys: a read is conditioned on its session's searches, so the same URL
+  // read in another session is another operation. The discovery session's epoch is fixed, so a re-execution of the logical
+  // search never resends its reads, as no other recorded operation is resent.
+  function lease(session, request, ctx, epoch) {
     let reads = 0, closed = false;
     return {
       async read(providerUrl, { signal, deadlineAt }) {
         if (closed || reads >= 2) return { ok: false, reason: "platform_restricted", detail: closed ? "session_closed" : "read_slots_used" };
         reads++;
         const rctx = { ...ctx, signal };
-        const r = await tool(session, { request, ctx: rctx, kind: "docs_read", op: `read:${sha256(providerUrl).slice(0, 24)}`, name: "ref_read_url", args: { url: providerUrl }, deadlineAt });
+        const r = await tool(session, { request, ctx: rctx, kind: "docs_read", op: `read:${epoch}:${sha256(providerUrl).slice(0, 24)}`, name: "ref_read_url", args: { url: providerUrl }, deadlineAt });
         if (!r.ok) { await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, providerCode: r.detail }, { answered: false }); return r; }
         const parsed = parseRefRead(r.result, 48 * 1024);
         await closeFor(r.close, parsed, ctx.sub.card.creditsPerOperation);

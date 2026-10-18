@@ -5,6 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setTimeout as sleep } from "node:timers/promises";
+import { randomUUID } from "node:crypto";
 import { harness, request, refFixture, answers } from "./si-helpers.mjs";
 
 const context7 = () => ({ status: 200, body: {
@@ -101,6 +102,21 @@ test("a Ref outage leaves Context7 and the general results: the search is partia
     assert.ok(r.body.web.length > 0);
     assert.ok(s.warnings.includes("ref_temporarily_unavailable"));
     assert.match(r.body.warning, /Ref unavailable/);
+  } finally { await h.close(); }
+});
+
+test("a re-executed logical search whose Ref discovery is cached reads in its fresh session, never paying for a context it cannot use", async () => {
+  const fx = refFixture();
+  const h = await harness({ handlers: { ...empty, ref: fx } });
+  try {
+    const logicalSearchId = randomUUID();
+    await h.coordinator.search(docsRequest("ref re-executed search", { logicalSearchId, limit: 5 }), { signal: new AbortController().signal });
+    const r = await h.coordinator.search(docsRequest("ref re-executed search", { logicalSearchId, limit: 4 }), { signal: new AbortController().signal });
+    assert.equal(r.body.search.providers.ref.fromCache, true);
+    assert.deepEqual(r.body.search.documentation.enrichment, { selected: 2, read: 2, contextInit: true }, "the fresh session's reads are its own operations");
+    const keys = [...h.store.rows.values()].filter((x) => x.provider === "fixture-ref").map((x) => x.call_key);
+    assert.equal(keys.length, 6, "discovery and two reads, then a context search and two reads in the new session");
+    assert.equal(new Set(keys).size, 6);
   } finally { await h.close(); }
 });
 
