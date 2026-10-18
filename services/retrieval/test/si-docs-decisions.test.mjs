@@ -117,3 +117,18 @@ test("Context7's quota and rate refusals hold only its account, keep their reser
     } finally { await h.close(); }
   }
 });
+
+test("a decision body over the 24,000-byte bound by any amount is refused before anything is reserved", async () => {
+  const h = await harness({ handlers: { openrouter: () => ({ status: 200, body: {} }) } });
+  try {
+    const decisions = makeDecisions({ dispatch: h.dispatch, store: h.store, limits: limitsOf(h), permits: h.permits });
+    const { sub, pre } = decisions.preflight("fixture", "fcpi-fixture-jev");
+    const max = h.policy.search.intelligence.decisionBatch.maxBytes;
+    const body = (n) => { const b = jevBody("bound"); b.state.pad = ""; const over = n - Buffer.byteLength(JSON.stringify(b)); b.state.pad = "x".repeat(Math.max(0, over)); return b; };
+    assert.equal(Buffer.byteLength(JSON.stringify(body(max + 1))), max + 1);
+    const r = await decisions.decide({ body: body(max + 1), kind: "decision", purpose: "rerank", request: docsRequest("bound"), sub, pre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    assert.deepEqual([r.ok, r.detail], [false, "batch_over_bound"]);
+    assert.equal(h.servers.openrouter.seen.length, 0);
+    assert.equal(h.store.rows.size, 0, "nothing reserved");
+  } finally { await h.close(); }
+});

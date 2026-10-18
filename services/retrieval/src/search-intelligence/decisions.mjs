@@ -132,7 +132,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
   async function decide({ body, kind, purpose, request, sub, pre, signal, deadlineAt, selection }) {
     const L = limits();
     const buf = Buffer.from(JSON.stringify(body));
-    if (buf.length > L.decisionBatch.maxBytes + 2048) return { ok: false, reason: "internal_failure", detail: "batch_over_bound" };
+    if (buf.length > L.decisionBatch.maxBytes) return { ok: false, reason: "internal_failure", detail: "batch_over_bound" };
     const cacheKey = `si.decision/v1:${sha256(JSON.stringify({ body, identity: identity(), selection }))}`;
     try { const hit = await store.searchCacheEntry(cacheKey); if (hit?.response?.answers) return { ok: true, data: hit.response, cached: true }; } catch { /* a cache read failure only means fresh work */ }
     let release;
