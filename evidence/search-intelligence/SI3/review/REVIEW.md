@@ -119,3 +119,29 @@ Filled by `/address`. Each finding is fixed (with its commit), rejected (with ev
 
 | Finding | Outcome | Evidence |
 |---|---|---|
+| C1 | Fixed (`14326c8`) | Windows are capped at 48 a document; terms follow the retrieval service's rule; the trim removes the largest document's lowest-priority window with sizes tracked incrementally, after the time check. The native chain's trim-path and hostile-paragraph checks pass on the new image and fail on the previous patch's (`native-chain-after-address.txt`, `native-chain-previous-patch.txt`). |
+| W1 | Fixed (`87d64d8`, `14326c8`) | The core sends `evidenceDeadlineMs`, and Jev's advice ends 300 ms before it. A retrieval test with Jev four seconds slow returns deterministic passages inside a 1.5 s core budget; the chain checks the core sends the deadline. |
+| W2 | Fixed (`6c2c8a5`) | The legacy profile compiles bare `site:` operators, filters rows by host, refuses strict publication bounds and names an ignored freshness hint. The test fails on the previous coordinator. |
+| W3 | Fixed (`a1ce631`) | Auxiliary entries are added one at a time while the block fits; with four 180-character entries, three reach the prompt. The test fails on the previous Agent. |
+| W4 | Fixed (`14326c8`) | A past trusted deadline is kept, so the search times out unsent; a distant one is ignored for the request's own (chain check `trusted_deadline_never_restarts`, which fails on the previous patch). |
+| W5 | Fixed (`14326c8`, `3a5f87e`) | The chain runs the compiled `mergeScrapedContent` and `searchRequestSchema`, the deadline header cases, the evidence branches, a trim path that can fail, and the server's own failure table (`src/failures.mjs`). `series.json` states what the chain runs and what it does not: the controller's header parsing and `executeSearch` need the full core. |
+| W6 | Fixed (`14326c8`) | The rendition scans forward once for each block's closing tag, strips tags with a pattern that stops at the next `<`, and reads at most 2 MiB. The chain measures 40,000 unclosed `<style>` tags and 200,000 stray `<` well under 500 ms; the check fails on the previous patch. |
+| W7 | Fixed (`bedd364`, `14326c8`) | The policy pins the evidence bounds the core builds to (a tighter value is refused at load, tested), and the core logs a refused evidence call by status. |
+| W8 | Fixed (`14326c8`) | The core's `queryTerms` is the retrieval service's rule; the chain compares the two over the frozen corpus's 120 queries (the core keeps at most 32 terms). |
+| W9 | Fixed (`231afac`) | Evidence passage text is cut after passage text and omitted last, each counted; with ten heavy rows all ten results stay. The tests fail on the previous MCP tools. |
+| W10 | Fixed (`2924231`) | The builder moves to `src/search-context.mjs` and takes the route. The test checks each header's value, the 60 s default, a fresh search id, no principal name, and no headers on scrape, crawl, map, batch or extract. It runs at unit level, since the gateway's server-level suites run on the Pi. |
+| W11 | Fixed (`a1ce631`) | A test with Brave skipped and Ref failed under `rrf_fallback` asserts the three limitation strings. |
+| S1 | Fixed (`14326c8`) | `&amp;` is decoded last; the chain checks `&amp;lt;` stays `&lt;`. |
+| S2 | Fixed (`e961aa3`) | The gateway and the internal contract require an instant to read back as written; four impossible instants are refused and a leap day accepted. Both tests fail on the previous validators. |
+| S3 | Fixed (`231afac`) | A row whose markdown the answer rewrote carries `evidence.locatorBasis: "core_rendition"`; an untouched row does not. |
+| S4 | Fixed (`14326c8`) | A cancelled or expired body read is CANCELLED or SEARCH_TIMEOUT (chain check `answer_mapping`). |
+| S5 | Fixed (`14326c8`) | An answer without a typed failure becomes a 502 SEARCH_BACKEND_ERROR (chain check `answer_mapping`, which fails on the previous patch). |
+| S6 | Fixed (`a1ce631`) | `no_candidates` adds no ranking limitation, and the omitted count reaches the output as `auxiliaryOmitted`. |
+| S7 | Fixed (`14326c8`) | `highlights` is back to upstream's `string`, and the cast is gone: `SearchResponse` declares `fcpi`. The image compiles. |
+| S8 | Fixed (`14326c8`, `2ecdc84`) | The module comment and the feature spec's §20 state that the headers rest on network position, and name the HMAC a deployment with untrusted peers would need. |
+| S9 | Fixed (`231afac`, `a1ce631`) | MCP and the Agent cut on code points; a cut auxiliary text records `kept`. Both are tested with emoji at the cut. |
+| S10 | Fixed (`14326c8`) | The controller's comment now says cancellation reaches the search call and the evidence call, and that queued acquisitions keep their own lifetime. |
+| S11 | Fixed (`14326c8`) | The chain's container runs with `--cap-drop ALL`, `no-new-privileges`, uid 65534, 1 GiB of memory and 256 processes. |
+| S12 | Fixed (`14326c8`) | `own` is renamed `gatewayHeaderMs`. |
+
+After remediation: retrieval 471 of 471 with PostgreSQL (no skips), gateway 101, MCP 51, root 61; the native chain passes 25 of 25 on image `b0f561ce…` at `14326c8`.
