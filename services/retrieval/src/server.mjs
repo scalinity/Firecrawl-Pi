@@ -58,6 +58,7 @@ import { makeDocumentation } from "./search-intelligence/documentation.mjs";
 import { makeDecisions } from "./search-intelligence/decisions.mjs";
 import { makeEvidence } from "./search-intelligence/evidence.mjs";
 import { makeTelemetry, availabilityEvent, breakerEvent } from "./search-intelligence/telemetry.mjs";
+import { STATUS, failureOf } from "./failures.mjs";
 import { makeCoordinator } from "./search-intelligence/coordinator.mjs";
 
 const env = loadEnv(process.env);
@@ -207,26 +208,11 @@ setInterval(async () => {
   }
 }, 3600000).unref();
 
-const STATUS = { SEARCH_UNAVAILABLE: 503, SSRF_DENIED: 403, CLOUD_DENIED: 403, INVALID_URL: 400, INVALID_REQUEST: 400, RATE_LIMITED: 429, PROXY_REQUIRED: 429,
-  DIRECT_LIMIT: 429, RESOURCE_BUSY: 429, TIMEOUT: 504, DEADLINE_EXCEEDED: 504, SIZE_LIMIT: 413, ATTEMPT_BUDGET_EXHAUSTED: 409, RETRIEVAL_NOT_READY: 503,
-  // M5: search
-  SEARCH_BACKEND_UNAVAILABLE: 503, SEARCH_BACKEND_ERROR: 502, SEARCH_TIMEOUT: 504, SEARCH_ENGINES_FAILED: 502, SEARCH_RATE_LIMITED: 429, CANCELLED: 499,
-  // M5: extraction and parsing
-  MODEL_NOT_ALLOWED: 400, PARSER_NOT_ALLOWED: 400, RATE_CARD_MISSING: 503, PAID_DISPATCH_DISABLED: 402, BUDGET_EXHAUSTED: 402, BLOCKED_CREDENTIAL: 503,
-  PARSER_REQUIRED: 422, PROVIDER_UNAVAILABLE: 503, PROVIDER_UNREACHABLE: 503, PROVIDER_UNCERTAIN: 502, PROVIDER_AUTH_FAILED: 502, PROVIDER_BILLING: 502,
-  PROVIDER_RATE_LIMITED: 503, PROVIDER_ERROR: 502, PROVIDER_REJECTED: 502, EXTRACTION_UNCERTAIN: 409, EXTRACTION_IN_FLIGHT: 409, EXTRACTION_STILL_RUNNING: 504, LOGICAL_ID_CONFLICT: 409,
-  SCHEMA_INVALID: 400, SCHEMA_TOO_LARGE: 400, SCHEMA_TOO_DEEP: 400, SCHEMA_UNSUPPORTED: 400, INPUT_TOO_LARGE: 413, NO_CONTENT: 422, RESULT_TOO_LARGE: 413,
-  DOCUMENT_TOO_LARGE: 413, DOCUMENT_TOO_MANY_PAGES: 413, UNSUPPORTED_CONTENT: 415, PARSE_FAILED: 502, PARSE_EMPTY: 502,
-  // M6: proxy reconciliation
-  RECONCILE_IN_FLIGHT: 409, RECONCILE_SCOPE_UNKNOWN: 409,
-  // M7: browser extras
-  UNSUPPORTED_CAPABILITY: 422 };
 const send = (res, status, body, extra = {}) => {
   const buf = Buffer.from(JSON.stringify(body));
   res.writeHead(status, { "content-type": "application/json; charset=utf-8", "content-length": buf.length, "cache-control": "no-store", ...extra });
   res.end(buf);
 };
-const failureOf = (e) => ({ failure: { class: e.failureClass, detail: e.detail, retryable: e.retryable, retryAfter: e.retryAfter } });
 function authorized(req, hash) {
   const m = /^Bearer ([\x21-\x7e]{32,512})$/.exec(req.headers.authorization ?? "");
   return !!m && timingSafeEqual(createHash("sha256").update(m[1]).digest(), hash);
