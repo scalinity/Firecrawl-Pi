@@ -119,7 +119,7 @@ Unless M0 evidence or a deliberate canonical update requires otherwise, preserve
 - No FoundationDB server/init in the selected deployment.
 - One NuQ worker initially.
 - One active Chromium page/context initially.
-- SearXNG for local search.
+- Aggregate search: Serper, Brave Search, Exa, DeepSeek Search and Tavily asked together, with SearXNG as the local fallback; Context7 and Ref for documentation queries; Jev decisions (`typesafe/jev-1.14` through OpenRouter) for reranking (`docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md`).
 - A small Firecrawl retrieval integration patch plus project-owned retrieval/browser services.
 - Private authenticated gateway.
 - Internal data services remain private.
@@ -134,6 +134,7 @@ Selected initial providers are:
 - **LlamaParse** as the bounded complex-document fallback.
 - **Bright Data** is the alternate raw-proxy provider.
 - **ScrapingBee** is the alternate enhanced provider.
+- The aggregate search's providers (Serper, Brave Search, Exa, DeepSeek Search, Tavily, Context7, Ref and Jev), each metered in its own unit under its own category.
 
 Alternates remain disabled unless separately configured and approved.
 
@@ -395,7 +396,7 @@ When paid dispatch is eventually approved:
 - reserve cost atomically before dispatch;
 - settle actual measurable usage afterward;
 - retain conservative reservations for uncertain outcomes;
-- fail closed when price is unknown;
+- fail closed when an applicable spending cap cannot be evaluated because a price is unknown, and never count an unknown price as zero;
 - count retries and repair attempts in the same logical budget;
 - enforce concurrent spending limits transactionally;
 - notify at configured thresholds;
