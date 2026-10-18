@@ -4,7 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { setTimeout as sleep } from "node:timers/promises";
-import { harness, request, refFixture, refBlocks } from "./si-helpers.mjs";
+import { harness, request, refFixture, refBlocks, waitFor } from "./si-helpers.mjs";
 import { mcpFailure } from "../src/search-intelligence/adapters/common.mjs";
 import { ProviderError } from "../src/provider.mjs";
 
@@ -48,14 +48,12 @@ test("four sessions holding receive streams leave every tool call its permit; a 
   try {
     const out = await Promise.all([0, 1, 2, 3, 4].map((i) => h.docs.ref.search(docsRequest(`ref session ${i}`), refCtx(h))));
     assert.deepEqual(out.map((o) => o.status), Array(5).fill("success_results"), "no tool call waited behind an open stream");
-    await sleep(50);
+    assert.ok(await waitFor(() => fx.log.filter((e) => e.method === "GET").length === 4 && h.permits.snapshot().refStreams.held["ref-stream"] === 4), "the receive streams opened");
     assert.equal(fx.log.filter((e) => e.method === "GET").length, 4, "four receive streams opened; the fifth session was answered 405 without a request");
     assert.equal(h.permits.snapshot().refStreams.held["ref-stream"], 4);
     assert.equal(h.permits.snapshot().api.held["provider:fixture-ref"], undefined, "the open streams hold no request permit");
     await Promise.all(out.map((o) => o.lease.close()));
-    await sleep(50);
-    assert.deepEqual(h.permits.snapshot().refStreams.held, {}, "closing the sessions returns their stream slots");
-    assert.equal(fx.open.size, 0, "and ends the streams");
+    assert.ok(await waitFor(() => Object.keys(h.permits.snapshot().refStreams.held).length === 0 && fx.open.size === 0), "closing the sessions returns their stream slots and ends the streams");
   } finally { await h.close(); }
 });
 
@@ -94,19 +92,17 @@ test("a read cancelled while it waits for a permit is never sent, even once capa
     const held = await Promise.all([1, 2, 3, 4].map(() => h.permits.api("fixture-ref", "another-search")));
     const ac = new AbortController();
     const pending = o.lease.read("https://ref.example.org/docs/1", { signal: ac.signal, deadlineAt: Date.now() + 5000 });
-    await sleep(100);
+    assert.ok(await waitFor(() => h.permits.snapshot().api.waiting >= 1), "the read is queued for a permit");
     ac.abort();
     const r = await pending;
     assert.deepEqual([r.ok, r.reason, r.dispatchState], [false, "cancelled", "not_sent"]);
     for (const release of held) release();
-    await sleep(200);
-    assert.equal(calls(fx, "ref_read_url").length, 0, "the withdrawn request never went out");
-    assert.deepEqual(rows(h, "docs_read").map((x) => x.state), ["RELEASED"]);
-    assert.equal(h.dispatch.breakerState("fixture-ref"), "closed");
-    // Positive control: the session's other read slot still reads once capacity is free.
+    // A withdrawn request has left the permit queue: the next read through it, once capacity is free, is the only one sent.
     const r2 = await o.lease.read("https://ref.example.org/docs/2", { signal: new AbortController().signal, deadlineAt: Date.now() + 4000 });
-    assert.equal(r2.ok, true);
-    assert.equal(calls(fx, "ref_read_url").length, 1);
+    assert.equal(r2.ok, true, "positive control: the session's other read slot reads once capacity is free");
+    assert.deepEqual(calls(fx, "ref_read_url").map((e) => e.args.url), ["https://ref.example.org/docs/2"], "the withdrawn request never went out");
+    assert.deepEqual(rows(h, "docs_read").map((x) => x.state).sort(), ["RELEASED", "SETTLED"]);
+    assert.equal(h.dispatch.breakerState("fixture-ref"), "closed");
     await o.lease.close();
   } finally { await h.close(); }
 });
@@ -121,9 +117,11 @@ test("a read whose deadline passes while it waits for capacity is never sent lat
     assert.equal(r.ok, false);
     assert.equal(r.dispatchState, "not_sent");
     for (const release of held) release();
-    await sleep(300);
-    assert.equal(calls(fx, "ref_read_url").length, 0, "zero late sends");
-    assert.deepEqual(rows(h, "docs_read").map((x) => x.state), ["RELEASED"]);
+    // As above: the read granted after capacity frees is the only one sent, so the expired one was never sent late.
+    const r2 = await o.lease.read("https://ref.example.org/docs/2", { signal: new AbortController().signal, deadlineAt: Date.now() + 4000 });
+    assert.equal(r2.ok, true);
+    assert.deepEqual(calls(fx, "ref_read_url").map((e) => e.args.url), ["https://ref.example.org/docs/2"], "zero late sends");
+    assert.deepEqual(rows(h, "docs_read").map((x) => x.state).sort(), ["RELEASED", "SETTLED"]);
     await o.lease.close();
   } finally { await h.close(); }
 });
@@ -140,6 +138,7 @@ test("a read written and then stalled past its deadline is uncertain, one failur
     assert.deepEqual(reads.map((r) => [r.ok, r.reason, r.dispatchState]), Array(2).fill([false, "timeout", "possibly_sent"]), "the client's own timer fired after the requests were written");
     assert.deepEqual(rows(h, "docs_read").map((x) => x.state), ["UNCERTAIN", "UNCERTAIN"], "written: held, never released");
     assert.equal(h.dispatch.breakerState("fixture-ref"), "closed", "two stalls are two failures, below the threshold of three");
+    // Past the stalled handler's 1.5 s answer: a resend would have reached the fixture by now.
     await sleep(1300);
     assert.equal(calls(fx, "ref_read_url").length, 2, "each read was seen once: nothing was resent");
     await o.lease.close();
@@ -166,6 +165,7 @@ test("a session closed after its search's deadline, or after its cancellation, s
     const late = await h.docs.ref.search(docsRequest("ref late goodbye"), refCtx(h, { deadlineAt: Date.now() + 1200 }));
     const ac = new AbortController();
     const cancelled = await h.docs.ref.search(docsRequest("ref cancelled goodbye"), refCtx(h, { signal: ac.signal }));
+    // Real time must pass: the first search's 1.2 s deadline has to be behind it when its lease closes.
     await sleep(1300);
     ac.abort();
     await late.lease.close();
@@ -290,6 +290,7 @@ test("a session open is judged by the request that failed: an unsupported handsh
       assert.equal(o.status, "failed");
       assert.equal(o.dispatchState, "not_sent");
       for (const r of held.splice(0)) r();
+      // The permits taken at the notification are granted asynchronously; let them land before releasing them.
       await sleep(20);
       for (const r of held.splice(0)) r();
     }

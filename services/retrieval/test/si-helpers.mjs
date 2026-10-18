@@ -27,6 +27,12 @@ export { serve, providersDir, budgetFor, lookupFixture };
 export const egress = loadPolicy(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
 export const json = (res, status, body, headers = {}) => { res.writeHead(status, { "content-type": "application/json", ...headers }); res.end(JSON.stringify(body)); };
 export const readBody = async (req) => { let t = ""; for await (const c of req) t += c; return t; };
+// Polls until cond() holds or timeoutMs passes; resolves to whether it held, so a slower host only waits longer.
+export async function waitFor(cond, { timeoutMs = 3000, everyMs = 10 } = {}) {
+  const until = Date.now() + timeoutMs;
+  while (!(await cond())) { if (Date.now() > until) return false; await new Promise((r) => setTimeout(r, everyMs)); }
+  return true;
+}
 
 export class FakeStore extends FakeLedger {
   constructor() { super(); this.searchCache = new Map(); this.admissions = 0; this.avail = new Map(); this.failCacheWrite = false; this.failReserve = false; }
