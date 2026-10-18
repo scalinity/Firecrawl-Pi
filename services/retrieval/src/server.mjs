@@ -114,15 +114,18 @@ const startedAt = new Date();
     const { orphaned, orphanedReserved, orphanedOperations } = await store.ready(env.permits, startedAt); storeReady = true;
     log({ event: "store_ready", orphaned_model_calls: orphaned, orphaned_reserved_micro_usd: orphanedReserved, orphaned_operations: orphanedOperations });
     await availability.refresh();
+    // A first pass a minute after start, so a service restarted more often than hourly still reduces and prunes.
+    setTimeout(maintain, 60000).unref();
   }
   catch (e) { log({ event: "store_unavailable", error: e.code ?? e.message }); setTimeout(connect, 2000); }
 })();
 // Serper's credits are a lifetime allocation summed over its rows: those rows are kept whatever their age (spec §18.3).
-// Hourly: the daily reduction of the operational records first, since detailed events are pruned only once reduced.
-setInterval(async () => {
+// Hourly: the daily reduction of the operational records first; prune keeps whatever the reduction has not yet passed.
+async function maintain() {
   await store.reduceSearchDaily().then((r) => log({ event: "search_reduced", ...r })).catch((e) => log({ event: "search_reduction_failed", error: e.code ?? e.message }));
   await store.prune({ retainCategories: allocationCategories(getBudget()) }).catch((e) => log({ event: "prune_failed", error: e.code ?? e.message }));
-}, 3600000).unref();
+}
+setInterval(maintain, 3600000).unref();
 
 const resolvePublic = makePublicResolver({ server: env.resolver });
 // M6: the residential proxy route (spec §10), shared by pages, auxiliary downloads, the browser and search.
