@@ -44,10 +44,11 @@ export function makeContext7({ dispatch, limits }) {
     const res = await dispatch.call({ sub: ctx.sub, pre: ctx.pre, kind: "docs_search", callKey: `search:${request.logicalSearchId}:context7:search:${scope.key}:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
       requestHash: sha256(`${CONTEXT7_CONTRACT}\n${path}`), amount: 1, signal: ctx.signal, deadlineAt: ctx.deadlineAt, timeoutMs: L.providerTimeoutsMs.context7, maxBytes: L.responseBytes.context7,
       http: { method: "GET", path, headers: { accept: "application/json", authorization: `Bearer ${ctx.pre.key}` } } });
-    if (!res.ok) return { scope, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, unanswered: true };
+    // closing: how this scope's reservation was closed (call() closed an unanswered one: possibly sent is uncertain).
+    if (!res.ok) return { scope, status: "failed", reason: res.reason, detail: res.detail, dispatchState: res.dispatchState, unanswered: true, closing: res.dispatchState === "possibly_sent" ? "uncertain" : "released" };
     const { response, close } = res, data = parseJson(response.body);
     const code = str(data?.error, 64, null);
-    if (response.status === 404 && code === "no_documentation_found") { await close.settle(1, { usage: { requests: 1 }, detail: "Context7 search: no documentation found" }); return { scope, status: "empty" }; }
+    if (response.status === 404 && code === "no_documentation_found") { await close.settle(1, { usage: { requests: 1 }, detail: "Context7 search: no documentation found" }); return { scope, status: "empty", closing: "settled" }; }
     if (response.status !== 200) {
       let reason = "temporarily_unavailable", retryAt = null;
       if (response.status === 402) reason = "quota_exhausted";
@@ -57,11 +58,11 @@ export function makeContext7({ dispatch, limits }) {
       else if (response.status === 404) reason = "contract_failure";
       // Whether a refused call counts against the plan is not documented (SI0 contract evidence §5): uncertain (spec §18.2).
       await close.uncertain(`Context7 answered HTTP ${response.status}${code ? ` ${code}` : ""}; whether the call counted is not documented`);
-      return { scope, status: "failed", reason, detail: code ?? `http_${response.status}`, retryAt, providerCode: code ?? `http_${response.status}` };
+      return { scope, status: "failed", reason, detail: code ?? `http_${response.status}`, retryAt, providerCode: code ?? `http_${response.status}`, closing: "uncertain" };
     }
     await close.settle(1, { usage: { requests: 1 }, detail: "Context7 search" });
-    if (!data || !Array.isArray(data.codeSnippets) || !Array.isArray(data.infoSnippets)) return { scope, status: "failed", reason: "contract_failure", detail: "context7_response_shape", providerCode: "context7_shape" };
-    return { scope, status: "ok", data, requestId: str(response.headers["x-request-id"] ?? response.headers["x-context7-request-id"], 128, null) };
+    if (!data || !Array.isArray(data.codeSnippets) || !Array.isArray(data.infoSnippets)) return { scope, status: "failed", reason: "contract_failure", detail: "context7_response_shape", providerCode: "context7_shape", closing: "settled" };
+    return { scope, status: "ok", closing: "settled", data, requestId: str(response.headers["x-request-id"] ?? response.headers["x-context7-request-id"], 128, null) };
   }
 
   // The version Context7 says it served for a library, as a scope record (spec §9.3): never a confirmed per-page version.
@@ -116,8 +117,13 @@ export function makeContext7({ dispatch, limits }) {
       // A scope that got no answer was already judged by dispatch.call: reporting it again only informs availability.
       for (const r of results.filter((x) => x.status === "failed")) await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, retryAt: r.retryAt ?? null, retryBasis: r.retryAt ? "documented" : null, providerCode: r.providerCode, detail: r.detail }, { answered: !r.unanswered });
       if (ok.length) await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: t0 });
-      const base = { provider: "context7", kind: "docs_search", startedAt: new Date(t0).toISOString(), dispatchState: results.some((r) => r.status === "ok" || r.status === "empty") ? "response_received" : "not_sent",
-        suboperations: subs, auxiliaryContext: aux, usage: { requests: results.filter((r) => ["ok", "empty"].includes(r.status) || r.dispatchState === "possibly_sent").length }, detail: mismatched ? `${mismatched} passage(s) of a mismatched version left out` : null };
+      // What the lane's calls did: any answered (a refusal or a malformed answer included) is a response received, else any
+      // possibly sent, else none was sent. Usage counts settled requests; uncertain ones are counted apart (spec §18.2).
+      const answeredAny = results.some((r) => ["ok", "empty"].includes(r.status) || (r.status === "failed" && !r.unanswered));
+      const dispatchState = answeredAny ? "response_received" : results.some((r) => r.dispatchState === "possibly_sent") ? "possibly_sent" : "not_sent";
+      const uncertain = results.filter((r) => r.closing === "uncertain").length;
+      const base = { provider: "context7", kind: "docs_search", startedAt: new Date(t0).toISOString(), dispatchState,
+        suboperations: subs, auxiliaryContext: aux, usage: { requests: results.filter((r) => r.closing === "settled").length, ...(uncertain ? { uncertain } : {}) }, detail: mismatched ? `${mismatched} passage(s) of a mismatched version left out` : null };
       if (!ok.length) {
         const first = bad.find((r) => r.status === "failed") ?? bad[0];
         return outcome({ ...base, status: "failed", reason: first?.status === "unsupported" ? "unsupported_request" : first?.reason ?? "internal_failure", detail: first?.detail ?? null });

@@ -229,6 +229,7 @@ test("a Ref call cut off after it was written is uncertain and is one failure: t
     for (let i = 0; i < 2; i++) {
       const o = await h.docs.ref.search(docsRequest(`ref cut ${i}`), refCtx(h));
       assert.deepEqual([o.status, o.dispatchState], ["failed", "possibly_sent"]);
+      assert.deepEqual(o.usage, { credits: 0, uncertain: 1 }, "held as possibly charged, never counted as spent");
     }
     assert.equal(h.dispatch.breakerState("fixture-ref"), "closed", "each cut-off call counted once");
     await h.docs.ref.search(docsRequest("ref cut 2"), refCtx(h));

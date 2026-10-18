@@ -38,6 +38,7 @@ test("a Context7 scope that gets no answer is one breaker verdict: two cut conne
     for (let i = 0; i < 2; i++) {
       const o = await context7.search(docsRequest(`context7 cut ${i}`), { sub, pre, signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
       assert.equal(o.status, "failed");
+      assert.deepEqual([o.dispatchState, o.usage], ["possibly_sent", { requests: 0, uncertain: 1 }], "a cut connection was possibly sent and is held, not counted as spent");
     }
     assert.equal(h.servers.context7.seen.length, 2);
     assert.equal(h.dispatch.breakerState("fixture-context7"), "closed");
@@ -107,6 +108,7 @@ test("Context7's quota and rate refusals hold only its account, keep their reser
       const o = await context7.search(docsRequest(`context7 ${mode}`), { sub, pre: h.dispatch.preflight(sub, { selection: "fixture" }), signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
       const reason = mode === "quota" ? "quota_exhausted" : "rate_limited";
       assert.deepEqual([o.status, o.reason], ["failed", reason]);
+      assert.deepEqual([o.dispatchState, o.usage], ["response_received", { requests: 0, uncertain: 1 }], `${mode}: an answered refusal is a response, its charge uncertain`);
       const pre = h.dispatch.preflight(sub, { selection: "fixture" });
       assert.deepEqual([pre.eligible, pre.reason], [false, reason], `${mode}: the account is held`);
       if (mode === "rate") assert.ok(pre.retryAt >= t0 + 29000 && pre.retryAt <= Date.now() + 31000, "Retry-After sets when it may be asked again");

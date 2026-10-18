@@ -144,7 +144,8 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
       const res = await dispatch.call({ sub, pre, kind: "decision", callKey: `search:${request.logicalSearchId}:jev:${purpose}:${sha256(buf).slice(0, 24)}:v1`, logicalId: request.logicalSearchId, searchId: request.logicalSearchId,
         requestHash: sha256(`${DECISIONS_CONTRACT}\n${buf}`), amount, signal, deadlineAt, timeoutMs: Math.max(1, deadlineAt - clock()), maxBytes: L.responseBytes.jev,
         http: { path: "/api/alpha/decisions", headers: { "content-type": "application/json", accept: "application/json", authorization: `Bearer ${pre.key}` }, body: buf } });
-      if (!res.ok) { await dispatch.report(sub, pre.epoch, { reason: res.reason }, { answered: false }); return { ok: false, reason: res.reason, detail: res.detail }; }
+      // uncertain: the reservation is kept whole as possibly charged (never counted as spent, never released).
+      if (!res.ok) { await dispatch.report(sub, pre.epoch, { reason: res.reason }, { answered: false }); return { ok: false, reason: res.reason, detail: res.detail, uncertain: res.dispatchState === "possibly_sent" }; }
       const { response, close } = res, data = parseJson(response.body);
       if (response.status !== 200) {
         const source = str(data?.error?.metadata?.limit_source, 64, null);
@@ -161,7 +162,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
         await close.uncertain(`OpenRouter Decisions answered HTTP ${response.status}${source ? ` (${source})` : ""}; whether it was charged is not documented`);
         const verdict = { reason, retryAt, retryBasis: retryAt ? (retryBasis ?? "documented") : null, providerCode: source ?? `http_${response.status}`, detail: source ?? `http_${response.status}` };
         await dispatch.report(sub, pre.epoch, verdict);
-        return { ok: false, reason, detail: verdict.detail };
+        return { ok: false, reason, detail: verdict.detail, uncertain: true };
       }
       // Settled at what was used: the reported cost, else the input tokens at the card's rate (output free).
       const u = data?.usage, cost = Number.isFinite(u?.cost) && u.cost >= 0 ? Math.ceil(u.cost * 1e6) : null;
@@ -244,6 +245,7 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
     const usage = [], failures = [];
     for (const { type, b, p, r } of results) {
       if (r.usage && !r.cached) usage.push({ provider: "jev", ...r.usage });
+      if (r.uncertain) usage.push({ provider: "jev", uncertain: 1 });
       if (!r.ok) { failures.push(r.reason); continue; }
       model = r.data.model;
       builds.add(r.data.model);

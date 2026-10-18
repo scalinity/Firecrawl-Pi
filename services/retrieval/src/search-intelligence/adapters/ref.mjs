@@ -209,12 +209,13 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
         if (!r.ok) {
           // fail() has judged the breaker: this report only informs availability.
           await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, providerCode: r.detail }, { answered: false });
-          return outcome({ ...base, status: "failed", reason: r.reason, detail: r.detail, dispatchState: r.dispatchState });
+          // Usage counts settled credits; an operation the ledger holds as possibly charged is counted apart.
+          return outcome({ ...base, status: "failed", reason: r.reason, detail: r.detail, dispatchState: r.dispatchState, ...(r.dispatchState !== "not_sent" && r.detail !== "operation_already_recorded" ? { usage: { credits: 0, uncertain: 1 } } : {}) });
         }
         const parsed = parseRefSearch(r.result);
         await closeFor(r.close, parsed, ctx.sub.card.creditsPerOperation);
         const failure = await judged(ctx, parsed, r.startedAt);
-        if (failure) return outcome({ ...base, status: "failed", reason: failure, detail: parsed.detail, dispatchState: "response_received" });
+        if (failure) return outcome({ ...base, status: "failed", reason: failure, detail: parsed.detail, dispatchState: "response_received", usage: { credits: 0, uncertain: 1 } });
         const retrievedAt = new Date().toISOString();
         const requested = (request.intelligence.libraries ?? []).filter((l) => l.version);
         const candidates = (parsed.kind === "results" ? parsed.docs : []).slice(0, L.candidates.docsPerProvider).map((d, i) => ({

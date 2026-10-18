@@ -44,6 +44,7 @@ test("a Jev outage leaves the deterministic ranking, says so, and the degraded a
     assert.match(s.ranking.reason, /^jev_/);
     assert.equal(r.body.web.length, 5, "useful deterministic results remain");
     assert.ok(s.warnings.some((w) => w.startsWith("ranking_")));
+    assert.ok(s.usage.some((u) => u.provider === "jev" && u.uncertain === 1), "a decision call cut off after sending is reported as uncertain");
     assert.match(r.body.warning, /Deterministic ranking used/);
     assert.equal(s.outcome, "complete", "discovery coverage is complete; only the ranking degraded");
     const again = await search(h);
