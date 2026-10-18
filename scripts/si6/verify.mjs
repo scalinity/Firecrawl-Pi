@@ -32,8 +32,8 @@ const chainImage = chain.match(/^image=fcpi\/firecrawl-api:m2 id=(sha256:[0-9a-f
 record("native-chain-on-release-image", "every check PASS against the build of record's image, HEAD's series", chainImage === apiId && chainJson.failed === 0 && chainJson.passed === chainJson.checks.length && chain.includes(`patch_series_sha256=${series.series_sha256}`) && /code_dirty=false/.test(chain),
   { image: chainImage, passed: chainJson.passed, failed: chainJson.failed }, `${RAW}/native-chain-release-image.txt`);
 const rollout = read(`${E}/ROLLOUT.md`);
-record("rollout-names-the-build", "ROLLOUT.md names the image and series of record", !!apiId && rollout.includes(apiId.slice(7, 19)) && rollout.includes(series.series_sha256.slice(0, 8)),
-  { image: apiId?.slice(7, 19), series: series.series_sha256.slice(0, 8) }, `${E}/ROLLOUT.md`);
+record("rollout-names-the-build", "ROLLOUT.md names the image and series of record", !!apiId && rollout.includes(`${apiId.slice(7, 15)}…`) && rollout.includes(`${series.series_sha256.slice(0, 8)}…`),
+  { image: apiId?.slice(7, 15), series: series.series_sha256.slice(0, 8) }, `${E}/ROLLOUT.md`);
 
 // The lock builder on synthetic evidence: HEAD's own pins stand in for the release's, so every chain check it makes can hold.
 const compose = git("show", "HEAD:deploy/compose.yaml");
