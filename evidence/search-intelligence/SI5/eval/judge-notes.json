@@ -1,0 +1,4 @@
+[
+ {"round": "first", "query": "Q110", "flag": "sensitive:.env", "classification": "text_not_access",
+  "note": "The word appears in the judge's own reason for a twelve-factor document ('applying it with a .env approach'), inside the command that wrote its judgments. No tool call read, listed or searched a .env file: no Read, Grep or Glob names one, and no command opens one."}
+]
