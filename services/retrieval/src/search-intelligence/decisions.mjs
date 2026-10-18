@@ -201,7 +201,8 @@ export function makeDecisions({ dispatch, store, limits, permits, log = () => {}
     const r = await decide({ body: { model: JEV_MODEL, state: { query: normalizeQueryText(request.originalQuery) }, questions: { needs_documentation: q } }, kind: "decision", purpose: "docs_detect", request, sub, pre, signal, deadlineAt, selection });
     if (!r.ok) return r;
     const a = checkAnswer(q, r.data.answers.needs_documentation);
-    return a ? { ok: true, probability: a.noul, model: r.data.model, usage: r.usage } : { ok: false, reason: "contract_failure", detail: "jev_answer_invalid" };
+    // A settled call's spend travels with every outcome, an unusable answer's included.
+    return a ? { ok: true, probability: a.noul, model: r.data.model, usage: r.usage } : { ok: false, reason: "contract_failure", detail: "jev_answer_invalid", usage: r.usage };
   }
 
   // Candidate pairs worth asking about (spec §10): different documents whose titles overlap strongly, within one version

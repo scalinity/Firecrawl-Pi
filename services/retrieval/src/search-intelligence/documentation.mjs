@@ -85,7 +85,9 @@ export function makeDocumentation({ decisions = null, log = () => {} }) {
       // Weak cues only: Jev's one question decides; without it, a possibly technical request activates.
       if (!decisions || !decisionSubject) return { ...base, active: true, reason: "classifier_unavailable_possibly_technical", uncertainty: null, signals: a.signals };
       const r = await decisions.classifyDocs(request, { signal, deadlineAt, selection, decisionSubject });
-      if (!r.ok) { log({ event: "si_docs_classifier_fallback", reason: r.reason }); return { ...base, active: true, reason: `classifier_${r.reason}_possibly_technical`, uncertainty: null, signals: a.signals, jev: { status: "failed", reason: r.reason } }; }
+      // The fallback keeps what the call cost: settled usage when it was answered, an uncertain operation when it may have been.
+      const usage = r.usage ?? (r.uncertain ? { uncertain: 1 } : undefined);
+      if (!r.ok) { log({ event: "si_docs_classifier_fallback", reason: r.reason }); return { ...base, active: true, reason: `classifier_${r.reason}_possibly_technical`, uncertainty: null, signals: a.signals, jev: { status: "failed", reason: r.reason }, ...(usage ? { usage } : {}) }; }
       return { ...base, active: r.probability >= 0.2, reason: r.probability >= 0.2 ? "classifier_positive" : "classifier_negative", uncertainty: r.probability, signals: a.signals,
         jev: { status: "ok", probability: r.probability, model: r.model }, usage: r.usage };
     },

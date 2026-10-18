@@ -124,3 +124,26 @@ test("an answer from a model outside Jev 1.14's family invalidates its batch: de
     assert.ok(r.body.web.every((w) => w.fcpi.search.scores.semantic === undefined), "no candidate carries a semantic score from the wrong model");
   } finally { await h.close(); }
 });
+
+test("a weak cue asks Jev's one documentation question; its spend is reported whether the answer is usable or not", async () => {
+  let answer = 0.9;
+  const openrouter = (q, entry) => {
+    if (!entry.body.questions.needs_documentation) return jev()(q, entry);
+    return { status: 200, body: { model: "typesafe/jev-1.14-20261001", answers: { needs_documentation: { type: "noul", noul: answer } }, usage: { input_tokens: 40, output_tokens: 2 } } };
+  };
+  const context7 = () => ({ status: 404, body: { error: "no_documentation_found", message: "none" } });
+  const h = await harness({ handlers: { openrouter, context7 } });
+  try {
+    const weak = (q) => search(h, { originalQuery: q, intelligence: { documentation: "auto" } });
+    const yes = await weak("how do I set up Caddy");
+    const detects = () => h.servers.openrouter.seen.filter((e) => e.body.questions.needs_documentation);
+    assert.equal(detects().length, 1, "one question, in its own request");
+    assert.deepEqual([yes.body.search.documentation.activation.active, yes.body.search.documentation.activation.reason], [true, "classifier_positive"]);
+    assert.ok(yes.body.search.usage.some((u) => u.provider === "jev" && u.purpose === "docs_detect"));
+    assert.equal([...h.store.rows.values()].filter((x) => x.call_key.includes(":jev:docs_detect:")).map((x) => x.state).join(), "SETTLED");
+    answer = 2;
+    const bad = await weak("how do I set up Traefik");
+    assert.equal(bad.body.search.documentation.activation.reason, "classifier_contract_failure_possibly_technical", "an invalid answer activates, possibly technical");
+    assert.ok(bad.body.search.usage.some((u) => u.provider === "jev" && u.purpose === "docs_detect"), "the settled call's spend is still reported");
+  } finally { await h.close(); }
+});
