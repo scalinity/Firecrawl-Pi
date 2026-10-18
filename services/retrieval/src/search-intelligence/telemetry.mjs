@@ -60,6 +60,11 @@ function laneEvents(logicalId, lanes, observedAt) {
     detail: { usage: o.usage ?? null, suboperations: o.suboperations?.length ?? 0, filteredEmpty: !!o.filteredEmpty, providerRequestId: code(o.providerRequestId) } }));
 }
 
+// The two transition records, as the server and the tests both write them: an account's availability and a breaker's state.
+export const availabilityEvent = (t) => ({ type: "availability", provider: t.provider, status: t.to, reason: t.reason ?? null, retryAt: t.retryAt ? new Date(t.retryAt) : null,
+  detail: { from: t.from, retryBasis: t.retryBasis ?? null } });
+export const breakerEvent = (t) => ({ type: "breaker", provider: t.provider, status: t.to, detail: { from: t.from, retryAfterS: t.retryAfterS ?? null } });
+
 export function makeTelemetry({ store, log = () => {}, clock = Date.now, limits = null, fingerprintKey }) {
   // An unkeyed hash of a query whose other fields take a handful of values would let anyone recover a common query.
   if (!fingerprintKey?.length) throw new Error("telemetry needs a fingerprint key");

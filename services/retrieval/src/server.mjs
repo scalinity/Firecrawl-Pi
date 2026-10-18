@@ -57,7 +57,7 @@ import { makeRefBridge } from "./search-intelligence/adapters/ref-bridge.mjs";
 import { makeDocumentation } from "./search-intelligence/documentation.mjs";
 import { makeDecisions } from "./search-intelligence/decisions.mjs";
 import { makeEvidence } from "./search-intelligence/evidence.mjs";
-import { makeTelemetry } from "./search-intelligence/telemetry.mjs";
+import { makeTelemetry, availabilityEvent, breakerEvent } from "./search-intelligence/telemetry.mjs";
 import { makeCoordinator } from "./search-intelligence/coordinator.mjs";
 
 const env = loadEnv(process.env);
@@ -106,8 +106,7 @@ const store = new Store({ ...env.postgres, password: readSecret(env.credentialsD
 // The query fingerprint's key, derived from the browser token under its own label, as the URL HMAC below is.
 const telemetry = makeTelemetry({ store, log, limits: () => basePolicy.search.intelligence,
   fingerprintKey: createHmac("sha256", readSecret(env.credentialsDir, "retrieval_browser_token")).update("fcpi.search.fingerprint.v1").digest() });
-const availability = makeAvailability({ store, log, onTransition: (t) => telemetry.event({ type: "availability", provider: t.provider, status: t.to, reason: t.reason ?? null,
-  retryAt: t.retryAt ? new Date(t.retryAt) : null, detail: { from: t.from, retryBasis: t.retryBasis } }) });
+const availability = makeAvailability({ store, log, onTransition: (t) => telemetry.event(availabilityEvent(t)) });
 let storeReady = false;
 const startedAt = new Date();
 (async function connect() {
@@ -155,7 +154,7 @@ const acquire = makeAcquirer({ store, getPolicy, getLocalReady, permits: env.per
   admission: makeAdmission(env.admissionFile) });
 const fetchOnce = makeFetcher({ store, getPolicy, getLocalReady, permits: env.permits, resolvePublic, urlHmac, log, residential, getBudget });
 const common = { store, getBudget, paidDispatch: env.paidDispatch, providersDir: env.providersDir, getPolicy, resolvePublic, log };
-const google = makeSerper(common);
+const google = makeSerper({ ...common, onBreaker: (t) => telemetry.event(breakerEvent(t)) });
 const searxngBackend = makeSearxngBackend({ getPolicy, getSelection, searchUrl: env.searchUrl });
 const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.searchUrl, log, google, backend: searxngBackend });
 // Search intelligence (spec §5, §8, §15): availability apart from the breakers, the outbound permits, the shared metered
@@ -163,7 +162,7 @@ const search = makeSearcher({ store, getPolicy, getSelection, searchUrl: env.sea
 const intelligenceLimits = () => basePolicy.search.intelligence;
 const permits = makePermits(basePolicy.search.intelligence ?? { apiPermits: { total: 1, perProvider: 1 }, decisionPermits: { total: 1, perSearch: 1 }, refStreams: { total: 1, perSearch: 1 }, deepseekQps: 1 });
 const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic, readKey: (name) => readCredential(env.providersDir, name), paidDispatch: env.paidDispatch, permits, availability, log,
-  onBreaker: (t) => telemetry.event({ type: "breaker", provider: t.provider, status: t.to, detail: { from: t.from, retryAfterS: t.retryAfterS } }) });
+  onBreaker: (t) => telemetry.event(breakerEvent(t)) });
 const general = { serper: makeSerperLane({ serper: google, limits: intelligenceLimits, permits, availability }), brave: makeBrave({ dispatch, limits: intelligenceLimits }),
   exa: makeExa({ dispatch, limits: intelligenceLimits }), deepseek: makeDeepseek({ dispatch, limits: intelligenceLimits, permits }), tavily: makeTavily({ dispatch, limits: intelligenceLimits }) };
 // The co-primary documentation lanes (spec §6): Context7 over the shared dispatch; Ref through the official MCP client over the

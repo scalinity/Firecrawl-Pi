@@ -17,9 +17,10 @@ const isFixture = (provider) => FIXTURE.test(new URL(provider.baseUrl).hostname)
 export const allocationCategories = (budget) => [...new Set(Object.values(budget.searches)
   .filter((s) => budget.providers[s.provider].api === "serper-v1" && !isFixture(budget.providers[s.provider])).map((s) => s.category))];
 
-export function makeSerper({ store, getBudget, getPolicy, providersDir, resolvePublic, lookupFixture, log, request = providerRequest }) {
+// onBreaker hears the breaker's transitions, as the shared dispatch's do (spec §21.1).
+export function makeSerper({ store, getBudget, getPolicy, providersDir, resolvePublic, lookupFixture, log, request = providerRequest, onBreaker = () => {} }) {
   const breakers = new Map();
-  const breakerFor = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker)).get(name);
+  const breakerFor = (name) => breakers.get(name) ?? breakers.set(name, new Breaker(getBudget().breaker, undefined, (t) => onBreaker({ provider: name, ...t }))).get(name);
   return {
     selected: () => getBudget().searching?.defaultSearch ?? null,
     breakerState: (name) => breakerFor(name).state(),

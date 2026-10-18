@@ -4,6 +4,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { harness, request, waitFor } from "./si-helpers.mjs";
+import { Breaker } from "../src/budget.mjs";
 
 const run = (h, over = {}, signal = new AbortController().signal) => h.coordinator.search(request(over), { signal });
 const runsOf = (h) => [...h.store.runs.values()];
@@ -59,14 +60,31 @@ test("a search no provider answered, and a cancelled one, are each recorded with
 test("an account's exhaustion and a breaker opening are recorded as transitions", async () => {
   const h = await harness({ telemetry: true, handlers: {
     tavily: () => ({ status: 432, body: { detail: { error: "This request exceeds your plan's set usage limit." } } }),
-    deepseek: () => "destroy" } });
+    deepseek: () => "destroy", serper: () => "destroy" } });
   try {
     for (let i = 0; i < 3; i++) await run(h, { originalQuery: `records transitions ${i}` });
     await settle(h);
     const t = (type, provider) => h.store.events.filter((e) => e.type === type && e.provider === provider).map((e) => e.status);
     assert.deepEqual(t("availability", "fixture-tavily"), ["quota_exhausted"], "the quota transition, once");
     assert.deepEqual(t("breaker", "fixture-deepseek"), ["open"], "three cut connections open DeepSeek's breaker");
+    assert.deepEqual(t("breaker", "fixture-serper"), ["open"], "Serper's own breaker is recorded the same way");
+    assert.ok(h.store.events.find((e) => e.type === "breaker" && e.provider === "fixture-serper").detail.retryAfterS > 0, "with when it may be tried again");
   } finally { await h.close(); }
+});
+
+test("a breaker reports each transition its verdicts cause, once", () => {
+  let now = 0;
+  const seen = [];
+  const b = new Breaker({ failures: 2, windowMs: 1000, openMs: 5000 }, () => now, (t) => seen.push(`${t.from}>${t.to}`));
+  b.failure(); b.success(); b.failure(); b.failure();
+  now = 6000;
+  assert.equal(b.state(), "half_open");
+  assert.ok(b.admit());
+  b.failure();
+  now = 12000;
+  assert.ok(b.admit());
+  b.success(); b.success();
+  assert.deepEqual(seen, ["closed>open", "half_open>open", "half_open>closed"], "no report for a verdict that changes nothing");
 });
 
 test("a telemetry write that fails is counted and logged, and the search's answer is unchanged", async () => {

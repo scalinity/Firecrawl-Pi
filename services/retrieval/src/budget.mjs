@@ -352,10 +352,13 @@ export function estimateTokens(text) {
 // provider-level failures within `windowMs` open it for `openMs`, after which one probe is let through;
 // its success closes it, its failure opens it again.
 export class Breaker {
-  constructor({ failures, windowMs, openMs }, now = () => Date.now()) {
-    Object.assign(this, { limit: failures, windowMs, openMs, now });
+  // onChange hears each transition a verdict causes ({ from, to, retryAfterS }: to open, back to closed), for the operational
+  // record; the half-open state comes with time, not with a verdict, and is not reported.
+  constructor({ failures, windowMs, openMs }, now = () => Date.now(), onChange = null) {
+    Object.assign(this, { limit: failures, windowMs, openMs, now, onChange });
     this.fails = []; this.openUntil = 0; this.probing = false;
   }
+  #report(from) { const to = this.state(); if (this.onChange && from !== to) this.onChange({ from, to, retryAfterS: to === "open" ? this.retryAfterS() : null }); }
   state() {
     if (this.now() < this.openUntil) return "open";
     return this.openUntil ? "half_open" : "closed";
@@ -367,13 +370,14 @@ export class Breaker {
     if (s === "half_open") { if (this.probing) return false; this.probing = true; }
     return true;
   }
-  success() { this.fails = []; this.openUntil = 0; this.probing = false; }
+  success() { const from = this.state(); this.fails = []; this.openUntil = 0; this.probing = false; this.#report(from); }
   failure() {
-    const t = this.now();
-    if (this.probing) { this.probing = false; this.openUntil = t + this.openMs; this.fails = []; return; }
+    const t = this.now(), from = this.state();
+    if (this.probing) { this.probing = false; this.openUntil = t + this.openMs; this.fails = []; this.#report(from); return; }
     this.fails = this.fails.filter((x) => t - x < this.windowMs);
     this.fails.push(t);
     if (this.fails.length >= this.limit) { this.openUntil = t + this.openMs; this.fails = []; }
+    this.#report(from);
   }
   // The call ended without a provider verdict (the caller's own refusal): a probe slot is returned.
   neutral() { this.probing = false; }

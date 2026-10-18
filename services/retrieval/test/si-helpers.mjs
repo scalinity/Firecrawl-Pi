@@ -22,7 +22,7 @@ import { makeRef, makeRefSessionFactory } from "../src/search-intelligence/adapt
 import { makeRefBridge } from "../src/search-intelligence/adapters/ref-bridge.mjs";
 import { makeDocumentation } from "../src/search-intelligence/documentation.mjs";
 import { makeDecisions } from "../src/search-intelligence/decisions.mjs";
-import { makeTelemetry } from "../src/search-intelligence/telemetry.mjs";
+import { makeTelemetry, availabilityEvent, breakerEvent } from "../src/search-intelligence/telemetry.mjs";
 
 export { serve, providersDir, budgetFor, lookupFixture };
 export const egress = loadPolicy(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
@@ -183,13 +183,13 @@ export async function harness({ handlers = {}, searxng = null, mutateBudget = ()
   const getBudget = () => budget, getPolicy = () => policy, getSelection = () => ({ search: "fixture" });
   // Operational records wired as server.mjs wires them: availability and breaker transitions, and every run.
   const telemetry = withTelemetry ? makeTelemetry({ store, log, limits: () => policy.search.intelligence, fingerprintKey: Buffer.from("si-helpers-fingerprint-key") }) : null;
-  const availability = makeAvailability({ store, log, onTransition: (t) => telemetry?.event({ type: "availability", provider: t.provider, status: t.to, reason: t.reason ?? null, retryAt: t.retryAt ? new Date(t.retryAt) : null, detail: { from: t.from } }) });
+  const availability = makeAvailability({ store, log, onTransition: (t) => telemetry?.event(availabilityEvent(t)) });
   const permits = makePermits(policy.search.intelligence);
   const readKey = (name) => { try { return readFileSync(`${dir}/${name}`, "utf8").trim() || null; } catch { return null; } };
   const dispatch = makeDispatch({ store, getBudget, getPolicy, resolvePublic: async () => ["127.0.0.1"], lookupFixture, readKey, paidDispatch, permits, availability, log,
-    onBreaker: (t) => telemetry?.event({ type: "breaker", provider: t.provider, status: t.to, detail: { from: t.from } }) });
+    onBreaker: (t) => telemetry?.event(breakerEvent(t)) });
   const limits = () => policy.search.intelligence;
-  const serper = makeSerper({ store, getBudget, getPolicy, providersDir: dir, lookupFixture, log });
+  const serper = makeSerper({ store, getBudget, getPolicy, providersDir: dir, lookupFixture, log, onBreaker: (t) => telemetry?.event(breakerEvent(t)) });
   const general = { serper: makeSerperLane({ serper, limits, permits, availability }), brave: makeBrave({ dispatch, limits }), exa: makeExa({ dispatch, limits }),
     deepseek: makeDeepseek({ dispatch, limits, permits }), tavily: makeTavily({ dispatch, limits }) };
   const backend = sx ? makeSearxngBackend({ getPolicy, getSelection, searchUrl: `http://127.0.0.1:${sx.port}/search` }) : null;
