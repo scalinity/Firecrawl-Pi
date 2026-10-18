@@ -785,3 +785,12 @@ test("the legacy rollback forwards a language the legacy facade accepts: es-419 
     for (const l of seen) assert.match(l, /^[A-Za-z-]{1,16}$/, "every forwarded tag passes the legacy facade's own check");
   } finally { await h.close(); }
 });
+
+test("Brave's live monthly window of limit 0 sets no allowance: a burst 429 is a rate limit of one second, not a 14-day quota", () => {
+  // The headers live Brave sent with a successful call (SI5 live contract smoke, 2026-10-18), here on a burst refusal.
+  const now = 1_000_000;
+  const live = parseBraveRateHeaders({ "x-ratelimit-limit": "50, 0", "x-ratelimit-policy": "50;w=1, 0;w=2678400", "x-ratelimit-remaining": "0, 0", "x-ratelimit-reset": "1, 1205222" }, now);
+  assert.deepEqual([live.state, live.retryAt], ["rate_limited", now + 1000]);
+  const fine = parseBraveRateHeaders({ "x-ratelimit-limit": "50, 0", "x-ratelimit-policy": "50;w=1, 0;w=2678400", "x-ratelimit-remaining": "49, 0", "x-ratelimit-reset": "1, 1205222" }, now);
+  assert.equal(fine.state, null, "nothing is exhausted when only the zero-limit window shows 0 remaining");
+});

@@ -37,7 +37,9 @@ export function parseBraveRateHeaders(headers, now = Date.now()) {
     if (!w || !/^\d+$/.test(limit[i]) || !/^\d+$/.test(remaining[i]) || !/^\d+$/.test(reset[i]) || Number(w[1]) !== Number(limit[i])) return null;
     windows.push({ limit: Number(limit[i]), windowS: Number(w[2]), remaining: Number(remaining[i]), resetS: Number(reset[i]) });
   }
-  const exhausted = windows.filter((x) => x.remaining === 0);
+  // A window with a limit of 0 sets no allowance: live Brave reports its monthly window as 0;w=2678400 with 0 remaining on a
+  // successful call (SI5 live contract smoke, 2026-10-18), so it can never be the window a refusal exhausted.
+  const exhausted = windows.filter((x) => x.limit > 0 && x.remaining === 0);
   if (!exhausted.length) return { windows, exhausted: [], state: null, retryAt: null };
   const quota = exhausted.some((x) => x.windowS >= 86400);
   return { windows, exhausted, state: quota ? "quota_exhausted" : "rate_limited", retryAt: now + Math.max(...exhausted.map((x) => x.resetS)) * 1000 };
