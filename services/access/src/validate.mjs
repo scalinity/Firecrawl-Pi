@@ -91,7 +91,9 @@ function checkField(name, spec, v, manifest, path) {
     // Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §9.1): a UTC instant (ISO 8601 ending in Z), and a bounded
     // list of objects each checked against its fieldset.
     case "instant":
-      if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/.test(v) || !Number.isFinite(Date.parse(v))) throw bad(`'${where}' must be an ISO-8601 UTC instant ending in Z`);
+      // An instant that exists: Date.parse rolls 2026-02-30 over to March and reads T24:00 as the next day, which the core's
+      // schema refuses, so the instant must read back as written.
+      if (typeof v !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/.test(v) || !Number.isFinite(Date.parse(v)) || new Date(v).toISOString().slice(0, 19) !== v.slice(0, 19)) throw bad(`'${where}' must be an ISO-8601 UTC instant ending in Z`);
       return v;
     case "objects":
       if (!Array.isArray(v) || v.length > spec.maxItems) throw bad(`'${where}' must be an array of at most ${spec.maxItems} objects`);

@@ -33,7 +33,8 @@ export function normalizeHostname(raw) {
     return /^[a-z0-9.-]+$/.test(h) && h.includes(".") && !h.startsWith(".") && !h.includes("..") ? h : null;
   } catch { return null; }
 }
-export function validInstant(v) { return typeof v === "string" && INSTANT.test(v) && Number.isFinite(Date.parse(v)); }
+// An instant that exists: one that reads back as written (Date.parse rolls 2026-02-30 over to March and T24:00 to the next day).
+export function validInstant(v) { return typeof v === "string" && INSTANT.test(v) && Number.isFinite(Date.parse(v)) && new Date(v).toISOString().slice(0, 19) === v.slice(0, 19); }
 
 // The options a caller may set (spec §9.1), checked again here though the gateway checked them: the core is a hop of its own.
 export function checkIntelligence(si = {}) {

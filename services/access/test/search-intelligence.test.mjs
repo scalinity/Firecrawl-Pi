@@ -75,3 +75,7 @@ test("the trusted search headers carry the gateway's request id, a new search id
   for (const id of ["scrape", "crawl.submit", "map", "batch.submit", "extract.submit"]) assert.equal(trustedSearchHeaders({ id }, ctx, { url: "https://x.example/" }, now), null, `${id} carries none`);
 });
 
+test("an instant that does not exist is refused at the gateway, as the core's schema refuses it", () => {
+  for (const v of ["2026-02-30T00:00:00Z", "2026-04-31T12:00:00Z", "2026-10-17T24:00:00Z", "2026-13-01T00:00:00Z"]) refused({ query: "q", searchIntelligence: { publishedAfter: v } }, /ISO-8601 UTC instant/);
+  assert.equal(validateBody("search", { query: "q", searchIntelligence: { publishedAfter: "2028-02-29T00:00:00Z" } }, M).body.searchIntelligence.publishedAfter, "2028-02-29T00:00:00Z", "a leap day exists");
+});

@@ -817,3 +817,8 @@ test("the legacy profile keeps hard constraints: domain lists become site: opera
     assert.match(fresh.body.warning, /ignores the freshness preference/);
   } finally { await h.close(); }
 });
+
+test("the internal contract refuses an instant that does not exist, as the gateway and the core do", () => {
+  for (const v of ["2026-02-30T00:00:00Z", "2026-10-17T24:00:00Z"]) assert.throws(() => validateSearchRequest(request({ constraints: { publishedAfter: v } }), Date.now()), /publishedAfter must be an ISO-8601/);
+  assert.equal(validateSearchRequest(request({ constraints: { publishedAfter: "2028-02-29T00:00:00Z" } }), Date.now()).constraints.publishedAfter, "2028-02-29T00:00:00.000Z");
+});
