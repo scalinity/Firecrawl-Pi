@@ -66,6 +66,11 @@ if (Object.values(pins).every(Boolean)) {
     detail = { providerFieldsKept, searchKept, noNullApi, paidCapsRecomputed: paidCaps };
   }
   record("build-lock-synthetic", "resolves from consistent evidence and keeps every earlier milestone's lock field", r.status === 0 && kept, { exit: r.status, detail }, "synthetic, from HEAD's pins");
+  // The fast rollback's refresh: policies only, needing no cutover record, every image entry as committed.
+  const po = spawnSync(process.execPath, [resolve(ROOT, "scripts/si6/build-lock.mjs"), "--policy-only"], { cwd: ROOT, encoding: "utf8", env: { ...process.env, FCPI_SI6_RAW: join(tmpdir(), "fcpi-si6-no-evidence"), FCPI_SI6_LOCK_OUT: join(d, "policy-lock.json") } });
+  let imagesKept = false;
+  if (po.status === 0) { const was = JSON.parse(git("show", "HEAD:deploy/versions.lock.json")), now = JSON.parse(readFileSync(join(d, "policy-lock.json"), "utf8")); imagesKept = JSON.stringify(was.images) === JSON.stringify(now.images) && JSON.stringify(was.patches) === JSON.stringify(now.patches); }
+  record("build-lock-policy-only", "refreshes the policy entries with no cutover record and leaves every image entry as committed", po.status === 0 && imagesKept, { exit: po.status, imagesKept }, "synthetic, no evidence directory");
   rmSync(d, { recursive: true, force: true });
   // Each guard of the real run, shown able to refuse.
   for (const [id, mutate, want] of [
@@ -92,9 +97,9 @@ after("retained-images", "retained.txt", "every running image tagged retained-5d
 after("api-on-pi", "api-push.txt", "the Pi holds the API build of record", (t) => t.includes(`pi_image=${apiId} arm64`) || "the Pi does not report the logged image");
 after("service-images", "image-build.txt", "three :si6 images built from the staged release candidate", (t) => (/^end$/m.test(t) && (t.match(/^fcpi\/\S+:si6 id=sha256:[0-9a-f]{64} os=linux arch=arm64 /gm) ?? []).length === 3) || "an incomplete build");
 after("cutover", "cutover.txt", "the end marker reached, every service running and healthy, the release recorded", (t) => (/^end_marker=reached /m.test(t) && (t.match(/ status=running health=healthy$/gm) ?? []).length === 4 && /^### release$/m.test(t)) || "not reached");
-after("functional", "verify-functional.txt", "fcpi verify functional passes after the cutover", (t) => (/\bPASS\b/.test(t) && !/\bFAIL\b/.test(t)) || "a functional check failed");
+after("functional", "verify-functional.txt", "fcpi verify functional passes after the cutover", (t) => /^functional PASS \(/m.test(t) || "the suite did not pass");
 after("host-snapshots", "snapshot-after.txt", "the host snapshot taken after the cutover", () => existsSync(resolve(ROOT, `${RAW}/snapshot-before.txt`)) || "no snapshot before");
-after("redaction", "redaction.json", "the redaction scan passes over the release's evidence", (t) => JSON.parse(t).result === "PASS" || "the scan did not pass");
+after("redaction", "redaction.json", "the redaction scan passes over the release's evidence", (t) => JSON.parse(t).state === "PASS" || "the scan did not pass");
 
 const out = { schema: "fcpi.si6-verification/v1", utc: new Date().toISOString(), source_sha: repo.repository_sha, code_dirty: repo.code_dirty, patch_series_sha256: series.series_sha256,
   config_sha256: { budget: sha256(read("deploy/policies/budget.json")), egress: sha256(read("deploy/policies/egress.json")), capabilities: sha256(read("deploy/policies/capabilities.json")), compose: sha256(read("deploy/compose.yaml")) },
