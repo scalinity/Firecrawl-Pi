@@ -65,15 +65,17 @@ export function makeTelemetry({ store, log = () => {}, clock = Date.now }) {
   };
   const baseOf = (request, { selection, admittedAt, configHashes = {} }) => ({ logicalId: request.logicalSearchId, requestId: request.requestId, principalId: request.principalId, jobId: request.jobId ?? null,
     fingerprint: fingerprint(request), profile: "aggregate", selection, resultMode: request.resultMode, acceptedAt: new Date(admittedAt), versions: { ...VERSIONS, config: configHashes } });
+  // The building before a write runs on the search's path: whatever it throws is counted and logged here, never the search's.
+  const guard = (what, fn) => (...a) => { try { return fn(...a); } catch (e) { lost++; log({ event: "si_telemetry_degraded", what, error: String(e?.message ?? e).slice(0, 120) }); } };
 
   return {
-    runStarted({ request, selection, admittedAt, configHashes }) {
+    runStarted: guard("run_started", ({ request, selection, admittedAt, configHashes }) => {
       const base = baseOf(request, { selection, admittedAt, configHashes });
       if (started.size >= MAX_STARTED) started.delete(started.keys().next().value);
       started.set(request.logicalSearchId, { base, p: write("run_started", () => store.searchRunStarted(base)) });
-    },
+    }),
     // outcome: complete | partial | failed | cancelled. search is the response's metadata when there was one.
-    runFinished({ request, outcome, search = null, lanes = [], pool = [], final = [], ranking = null, activation = null, enrichment = null, timings = {}, selection = null }) {
+    runFinished: guard("run_finished", ({ request, outcome, search = null, lanes = [], pool = [], final = [], ranking = null, activation = null, enrichment = null, timings = {}, selection = null }) => {
       const s = started.get(request.logicalSearchId);
       started.delete(request.logicalSearchId);
       const base = s?.base ?? baseOf(request, { selection: selection ?? search?.selection ?? "unknown", admittedAt: clock() });
@@ -96,9 +98,9 @@ export function makeTelemetry({ store, log = () => {}, clock = Date.now }) {
           rankingMode: ranking?.mode ?? null, summary, trace, traceTruncated: truncated });
       });
       write("events", () => store.searchEvents(events));
-    },
+    }),
     // A transition or an operation outside a run's lanes (availability, a breaker, an evidence call).
-    event(e) { write(`event:${e.type}`, () => store.searchEvents([{ eventId: randomUUID(), observedAt: new Date(clock()), ...e }])); },
+    event: guard("event", (e) => { write(`event:${e.type}`, () => store.searchEvents([{ eventId: randomUUID(), observedAt: new Date(clock()), ...e }])); }),
     counters: () => ({ telemetryLost: lost, telemetryWritten: written, telemetryPending: pending.size }),
     async drain(ms = 2000) {
       const until = clock() + ms;

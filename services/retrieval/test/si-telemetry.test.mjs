@@ -97,6 +97,18 @@ test("writes waiting on a stalled database are bounded: past 256 a write is coun
   assert.equal(c.telemetryLost, 44);
 });
 
+test("a throw while building a record is counted and logged, never the search's", () => {
+  const logs = [], store = { searchRunStarted: async () => {}, searchRunFinished: async () => {}, searchEvents: async () => 0 };
+  const t = makeTelemetry({ store, log: (o) => logs.push(o) });
+  const req = request();
+  // A pool document of a shape the trace does not expect, a missing request and a missing event.
+  assert.doesNotThrow(() => t.runFinished({ request: req, outcome: "complete", pool: [{ documentId: "x", observations: null }], final: [] }));
+  assert.doesNotThrow(() => t.runStarted({ request: null, selection: "live", admittedAt: Date.now() }));
+  assert.doesNotThrow(() => t.event(null));
+  assert.equal(t.counters().telemetryLost, 3);
+  assert.deepEqual(logs.map((l) => `${l.event}:${l.what}`), ["si_telemetry_degraded:run_finished", "si_telemetry_degraded:run_started", "si_telemetry_degraded:event"]);
+});
+
 test("run and event rows round-trip; an event written twice is kept once", opts, async () => {
   const store = await fresh();
   try {
