@@ -7,8 +7,8 @@
 //   node scripts/m7/e2e.mjs fixture > evidence/M7/raw/e2e-fixture.txt
 //   node scripts/m7/e2e.mjs live    > evidence/M7/raw/e2e-live.txt     (held until the review is addressed)
 // fixture: every controlled case against fixture-m7's enhanced provider, targets and receiver (and fixture-m6's proxy,
-// M5's parser), with no public egress: first the production selection (Zyte, whose key is absent, paid dispatch off),
-// then the fixture enhancer, then the fixture proxy and enhancer together. live: the live enhanced request, only with a
+// M5's parser), with no public egress: first the production selection (Zyte with paid dispatch off, its key present or absent),
+// then the fixture enhancer, then the fixture proxy and enhancer together; it refuses to start with paid dispatch on. live: the live enhanced request, only with a
 // Zyte key and an approved budget (otherwise its state is recorded and nothing is sent), and the declared public sample
 // on the tiers this deployment may use. The selection found at the start is restored at the end. Tokens come over SSH
 // into memory; none is printed.
@@ -203,7 +203,7 @@ async function fixturePhase(before) {
     scrape_actions: (st.actions?.items?.anyOf ?? []).map((a) => a.properties?.type?.const), scrape_max_age: st.maxAge?.maximum ?? null,
     crawl_webhook_events: tools.find((t) => t.name === "firecrawl_crawl")?.inputSchema?.properties?.webhook?.properties?.events?.items?.enum ?? null });
 
-  // ---- A: the production selection: Zyte without a key and paid dispatch off. Nothing is sent; ordinary work goes on.
+  // ---- A: the production selection: Zyte with paid dispatch off, its key present or absent. Nothing is sent; ordinary work goes on.
   select("fixture", MODEL, PARSER, "decodo-residential", "zyte-api");
   out("production", { case: "tier_state", readyz: readyz().enhanced, routes: internal("GET", "/internal/routes").json?.enhanced ?? null,
     provider: (await rest("GET", "/platform/v1/status")).json?.providers?.providers?.zyte ?? null });
@@ -544,9 +544,18 @@ async function livePhase(before) {
   out("meta_end", { pi_utc: piNow() });
 }
 
+// The fixture phase promises no provider request, but its production cases select the real providers and rely on the paid-dispatch
+// switch to refuse them: the caps are above zero now, so with the switch on they would send real requests for fixture URLs. It stops
+// before any selection changes unless the service reports the switch off (an unreadable status counts as on).
+async function requireDispatchOff() {
+  const on = (await rest("GET", "/platform/v1/status")).json?.providers?.paidDispatch;
+  if (on !== false) throw new Error(`the fixture phase needs paid dispatch off and the service reports ${on ?? "nothing"}: its production cases would send real provider requests for fixture URLs`);
+}
+
 let exit = 0, before = null;
 try {
   await openTunnel();
+  if (phase === "fixture") await requireDispatchOff();
   before = selection();
   await (phase === "fixture" ? fixturePhase(before) : livePhase(before));
 } catch (e) {

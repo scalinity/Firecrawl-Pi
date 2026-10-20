@@ -8,7 +8,7 @@
 //   node scripts/m5/e2e.mjs fixture > evidence/M5/raw/e2e-fixture.txt
 //   node scripts/m5/e2e.mjs live    > evidence/M5/raw/e2e-live.txt     (held until the review is addressed)
 // fixture: every controlled case, with no live egress (search on the fixture engine, the fixture model and
-// parser, then the production selection's refusals). live: live search egress, and the model and parser
+// parser, then the production selection's refusals; it refuses to start with paid dispatch on). live: live search egress, and the model and parser
 // only where a credential and an approved budget exist. Tokens come over SSH into memory; none is printed.
 import { execFileSync, spawn } from "node:child_process";
 import { request } from "node:http";
@@ -334,8 +334,8 @@ async function fixturePhase() {
   out("ledger", { point: "documents", rows: ledger(d0) });
   out("provider_stats", { point: "after_documents", ...stats() });
 
-  // The production selection: the real model and parser, refused before any request (paid dispatch off,
-  // no credential), and a complex layout keeping its native text.
+  // The production selection: the real model and parser, refused before any request (paid dispatch off, a credential
+  // present or not), and a complex layout keeping its native text.
   select(...PRODUCTION);
   const p0 = stats();
   r = await rest("POST", "/v2/scrape", { url: `${FX5}/extract/product.html`, formats: [{ type: "json", schema: SCHEMA }] });
@@ -432,9 +432,18 @@ async function livePhase() {
   out("meta_end", { pi_utc: piNow(), selection_after: JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show")) });
 }
 
+// The fixture phase promises no provider request, but its production cases select the real providers and rely on the paid-dispatch
+// switch to refuse them: the caps are above zero now, so with the switch on they would send real requests for fixture URLs. It stops
+// before any selection changes unless the service reports the switch off (an unreadable status counts as on).
+async function requireDispatchOff() {
+  const on = (await rest("GET", "/platform/v1/status")).json?.providers?.paidDispatch;
+  if (on !== false) throw new Error(`the fixture phase needs paid dispatch off and the service reports ${on ?? "nothing"}: its production cases would send real provider requests for fixture URLs`);
+}
+
 let exit = 0, before = null;
 try {
   await openTunnel();
+  if (phase === "fixture") await requireDispatchOff();
   before = JSON.parse(pi("bash /opt/firecrawl-pi/scripts/m5/pi-selection.sh show"));
   await (phase === "fixture" ? fixturePhase() : livePhase());
 } catch (e) {
