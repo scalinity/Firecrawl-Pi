@@ -1,0 +1,142 @@
+[
+ {
+  "path": "desktop/src-tauri/src/main.rs",
+  "rule": "url-credentials",
+  "value_sha256": "0fc4f6fa3a5e07ee93c40c805476c7ac1509218afcf67552afb2d5b2bded1c44",
+  "kind": "synthetic_fixture",
+  "reason": "A synthetic URL with placeholder credentials in a test or demo input; no credential"
+ },
+ {
+  "path": "desktop/src-tauri/src/main.rs",
+  "rule": "url-credentials",
+  "value_sha256": "57fb61a50d40c39a8851dcecf71701515a452b7d6f20ac7762a13c5fc2cb2894",
+  "kind": "synthetic_fixture",
+  "reason": "A synthetic URL with placeholder credentials in a test or demo input; no credential"
+ },
+ {
+  "path": "evidence/post-m9/agent-models/harness/eval.mjs",
+  "rule": "local-path",
+  "value_sha256": "0a9365858797175821e6c55d736bfc773e7ba1768a3c51aedb900c6837938e3e",
+  "kind": "functional_owner_path",
+  "reason": "The owner's checkout path in an archived harness script; no credential value"
+ },
+ {
+  "path": "evidence/post-m9/agent-models/harness/eval.mjs",
+  "rule": "tailnet-address",
+  "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+  "kind": "code_construct",
+  "reason": "The carrier-grade NAT subnet 100.64.0.0/10 as an address-filter constant; not a tailnet host"
+ },
+ {
+  "path": "evidence/post-m9/streaming/raw/stream-probes/stream-probe.mjs",
+  "rule": "local-path",
+  "value_sha256": "2634f4722bf12884fdadc06e21fabb5f95a3db7c97564317b44e2f7afe02e374",
+  "kind": "functional_owner_path",
+  "reason": "The owner's checkout path in an archived probe script; no credential value"
+ },
+ {
+  "path": "evidence/search-intelligence/SI5/eval/runs/Q048.json",
+  "rule": "local-path",
+  "value_sha256": "f7aed4ba6e4b2bf3be02fe453caf1a6f3e2369d3b8d0ee0b40e4269aa0eeb068",
+  "kind": "public_text",
+  "reason": "A path segment of a public URL (home/\u2026) in captured provider results; not a local path"
+ },
+ {
+  "path": "evidence/search-intelligence/SI5/eval/runs/Q073.json",
+  "rule": "jwt",
+  "value_sha256": "aa071d7da9b20ea3c4af08c770e36e82c051130d5809bbc08b3fe73b748e2280",
+  "kind": "public_text",
+  "reason": "A base64 pagination cursor in a public shop URL in captured provider results; not a credential"
+ },
+ {
+  "path": "evidence/search-intelligence/SI5/eval/runs/Q093.json",
+  "rule": "local-path",
+  "value_sha256": "8dc6df7232ab851bed30d71b940b165747cb52c8b8d501099d89da9fc3e0b902",
+  "kind": "public_text",
+  "reason": "A path segment of a public URL (home/\u2026) in captured provider results; not a local path"
+ },
+ {
+  "path": "scripts/hosted-mcp/redaction.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "824c5f3b30944e595a7d5c5522f7b34dca87fa6ccf67f8c0031083deedd42fc9",
+  "kind": "code_construct",
+  "reason": "A sed substitution pattern or a synthetic fixture URL that the script uses to test redaction; not a literal credential"
+ },
+ {
+  "path": "scripts/hosted-mcp/redaction.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "b60da2b5f2a259dee088dc87ac6bf5f39c9a80dcad9c37c66855c6e178ac2a50",
+  "kind": "code_construct",
+  "reason": "A sed substitution pattern or a synthetic fixture URL that the script uses to test redaction; not a literal credential"
+ },
+ {
+  "path": "scripts/hosted-mcp/redaction.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "f1bbd12a018c8e321213ae24afe37a413d259f3402c5ae9d38bc9b8d33b5601a",
+  "kind": "code_construct",
+  "reason": "A sed substitution pattern or a synthetic fixture URL that the script uses to test redaction; not a literal credential"
+ },
+ {
+  "path": "scripts/si5/collect.mjs",
+  "rule": "tailnet-address",
+  "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+  "kind": "code_construct",
+  "reason": "The carrier-grade NAT subnet 100.64.0.0/10 as an address-filter constant; not a tailnet host"
+ },
+ {
+  "path": "scripts/si5/live-smoke.mjs",
+  "rule": "tailnet-address",
+  "value_sha256": "4b2228c26597aecab7d5894eb1ec83d915bc2e1a75d758b3b53471ce6aa2c91c",
+  "kind": "code_construct",
+  "reason": "The carrier-grade NAT subnet 100.64.0.0/10 as an address-filter constant; not a tailnet host"
+ },
+ {
+  "path": "services/hosted-mcp/test_ingress.py",
+  "rule": "tailnet-name",
+  "value_sha256": "c8601780e868a1a6412aefcb21778c292505e94da47005de9f55345152d05c4f",
+  "kind": "synthetic_fixture",
+  "reason": "A fixture hostname in a test; not a real tailnet name"
+ },
+ {
+  "path": "services/retrieval/test/m5-extract.test.mjs",
+  "rule": "token",
+  "value_sha256": "6ac71d2480508e4512f65215599ea1c06531d88186ca1640401f71710c1ac3a7",
+  "kind": "synthetic_fixture",
+  "reason": "A placeholder API key string in a test; not a credential"
+ },
+ {
+  "path": "services/retrieval/test/si-discovery.test.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "288a54939d6ba40b4826b0549aa6a2067e121a9d442ab22486ea3611af155091",
+  "kind": "synthetic_fixture",
+  "reason": "A synthetic URL with placeholder credentials in a test or demo input; no credential"
+ },
+ {
+  "path": "services/retrieval/test/si-telemetry.test.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "288a54939d6ba40b4826b0549aa6a2067e121a9d442ab22486ea3611af155091",
+  "kind": "synthetic_fixture",
+  "reason": "A synthetic URL with placeholder credentials in a test or demo input; no credential"
+ },
+ {
+  "path": "tests/playground-agent.test.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "0fc4f6fa3a5e07ee93c40c805476c7ac1509218afcf67552afb2d5b2bded1c44",
+  "kind": "synthetic_fixture",
+  "reason": "A synthetic URL with placeholder credentials in a test or demo input; no credential"
+ },
+ {
+  "path": "tests/playground-agent.test.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "c604d4eecc9010177eb941b7d66cc680b44732bbfee77bce699072713037e370",
+  "kind": "synthetic_fixture",
+  "reason": "A synthetic URL with placeholder credentials in a test or demo input; no credential"
+ },
+ {
+  "path": "tests/playground.test.mjs",
+  "rule": "url-credentials",
+  "value_sha256": "0fc4f6fa3a5e07ee93c40c805476c7ac1509218afcf67552afb2d5b2bded1c44",
+  "kind": "synthetic_fixture",
+  "reason": "A synthetic URL with placeholder credentials in a test or demo input; no credential"
+ }
+]
