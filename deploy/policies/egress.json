@@ -105,8 +105,8 @@
     "deadlineMs": 10000,
     "maxResults": 20,
     "intelligence": {
-      "discoveryMs": 12000,
-      "providerTimeoutsMs": { "serper": 7000, "brave": 6000, "exa": 10000, "deepseek": 8000, "tavily": 10000, "context7": 10000, "ref": 10000, "searxng": 10000 },
+      "discoveryMs": 16000,
+      "providerTimeoutsMs": { "serper": 7000, "brave": 6000, "exa": 10000, "deepseek": 8000, "tavily": 10000, "context7": 15000, "ref": 10000, "searxng": 10000 },
       "classifierMs": 800,
       "semanticMs": 8000,
       "refReadMs": 2000,

@@ -51,6 +51,24 @@ test("the local-network file must name at least one real network", () => {
   assert.throws(() => loadLocalCidrs("printer.lan/24\n"), /not a network/);
 });
 
+test("Context7 may run to 15 s, and the discovery window never clips a documentation lane's budget", () => {
+  const raw = JSON.parse(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
+  const I = raw.search.intelligence;
+  assert.equal(I.providerTimeoutsMs.context7, 15000, "the deployed Context7 budget");
+  assert.equal(I.discoveryMs, 16000, "the deployed discovery window");
+  // A lane's deadline is the earlier of discovery close and its activation plus its budget, and a documentation lane activates after the classifier:
+  // a window shorter than that sum would cut the budget short without anything saying so.
+  for (const id of ["context7", "ref"]) assert.ok(I.providerTimeoutsMs[id] + I.classifierMs <= I.discoveryMs, `${id}'s whole budget fits inside the discovery window after the classifier`);
+  assert.doesNotThrow(() => loadPolicy(JSON.stringify(raw)), "the deployed values load");
+  // The ceilings are what the validator accepts: one past either is refused at load.
+  for (const [set, message] of [[(p) => { p.search.intelligence.providerTimeoutsMs.context7 = 15001; }, /providerTimeoutsMs\.context7 must be an integer in 1000\.\.15000/],
+    [(p) => { p.search.intelligence.discoveryMs = 16001; }, /discoveryMs must be an integer in 1000\.\.16000/]]) {
+    const p = structuredClone(raw);
+    set(p);
+    assert.throws(() => loadPolicy(JSON.stringify(p)), message);
+  }
+});
+
 test("the evidence bounds the core builds its payload to are pinned: a tighter one is refused at load", () => {
   const raw = JSON.parse(readFileSync(new URL("../policy/egress.json", import.meta.url), "utf8"));
   assert.doesNotThrow(() => loadPolicy(JSON.stringify(raw)), "the deployed values load");

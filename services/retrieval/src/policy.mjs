@@ -72,8 +72,8 @@ const int = (v, lo, hi, where) => { if (!Number.isInteger(v) || v < lo || v > hi
 // Search intelligence (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §5, §8, §12, §14, §17, §21): the aggregate profile's limits,
 // each an integer between a floor and the spec's initial value, which may be tightened, never loosened.
 const INTELLIGENCE = {
-  discoveryMs: [1000, 12000],
-  providerTimeoutsMs: { serper: [1000, 8000], brave: [1000, 6000], exa: [1000, 10000], deepseek: [1000, 8000], tavily: [1000, 10000], context7: [1000, 10000], ref: [1000, 10000], searxng: [1000, 10000] },
+  discoveryMs: [1000, 16000],
+  providerTimeoutsMs: { serper: [1000, 8000], brave: [1000, 6000], exa: [1000, 10000], deepseek: [1000, 8000], tavily: [1000, 10000], context7: [1000, 15000], ref: [1000, 10000], searxng: [1000, 10000] },
   classifierMs: [100, 800], semanticMs: [1000, 8000], refReadMs: [500, 2000], evidenceMs: [500, 4000], responseMarginMs: [0, 1000],
   apiPermits: { total: [1, 28], perProvider: [1, 4] },
   decisionPermits: { total: [1, 4], perSearch: [1, 2] },
