@@ -1,0 +1,12 @@
+✔ INFO uses the operator without the password in argv (157.476917ms)
+✔ key scans and fixture writes use the narrowed core user (338.587459ms)
+✔ the preserved pre-M8 deployment remains readable (103.902625ms)
+✔ unexpected users and missing passwords fail closed (108.864167ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 785.213292

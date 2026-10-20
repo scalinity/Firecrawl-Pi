@@ -1,0 +1,27 @@
+m1-gateway.test.mjs | exit 1 | ℹ tests 15 ℹ pass 0 ℹ fail 15 ℹ cancelled 0 ℹ skipped 0 
+m3-gateway.test.mjs | exit 0 | ℹ tests 46 ℹ pass 46 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m4-gateway-mcp.test.mjs | exit 0 | ℹ tests 4 ℹ pass 4 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m4-grammars.test.mjs | exit 0 | ℹ tests 3 ℹ pass 3 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m5-ledger-migration.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m7-gateway-store.test.mjs | exit 0 | ℹ tests 4 ℹ pass 4 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m7-ledger-migration.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m8-admission-copies.test.mjs | exit 0 | ℹ tests 2 ℹ pass 2 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m8-restore-compose.test.mjs | exit 0 | ℹ tests 5 ℹ pass 5 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-client-proof.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-collection.test.mjs | exit 0 | ℹ tests 7 ℹ pass 7 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-corpus-v2.test.mjs | exit 0 | ℹ tests 27 ℹ pass 27 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-evidence-bound.test.mjs | exit 0 | ℹ tests 2 ℹ pass 2 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-foreign.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-incident-hook.test.mjs | exit 0 | ℹ tests 4 ℹ pass 4 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-incident-input.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-live.test.mjs | exit 0 | ℹ tests 5 ℹ pass 5 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-notices.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-redis.test.mjs | exit 0 | ℹ tests 4 ℹ pass 4 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-resource-reuse.test.mjs | exit 0 | ℹ tests 20 ℹ pass 20 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-restore-incidents.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-review-bound.test.mjs | exit 0 | ℹ tests 2 ℹ pass 2 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-root-proof.test.mjs | exit 0 | ℹ tests 1 ℹ pass 1 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+m9-validation-policy.test.mjs | exit 0 | ℹ tests 2 ℹ pass 2 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+paid-dispatch-switch.test.mjs | exit 0 | ℹ tests 3 ℹ pass 3 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+pre-m9-verdicts.test.mjs | exit 0 | ℹ tests 4 ℹ pass 4 ℹ fail 0 ℹ cancelled 0 ℹ skipped 0 
+DONE

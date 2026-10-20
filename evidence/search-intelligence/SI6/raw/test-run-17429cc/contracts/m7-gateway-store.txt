@@ -1,0 +1,12 @@
+✔ a job's webhook events are raised in its transitions, once per type, only those asked for, and never for a job without one (70.348292ms)
+✔ the outbox: a claim leases its events, a failure backs off and dies after its attempts, a delivery ends the event (44.882834ms)
+✔ the cache is read only by its principal, for its request, within the freshness asked; artifacts only by their principal, and not once expired (41.684208ms)
+✔ every content table is counted by the quota and kept by the archive's sweep; expired rows go at retention (41.491417ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 280.643666

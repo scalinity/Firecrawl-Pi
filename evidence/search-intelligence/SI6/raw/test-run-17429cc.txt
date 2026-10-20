@@ -1,0 +1,83 @@
+# SI6 release candidate: test record
+
+One run of every suite at the release candidate commit 17429cc (code tree clean), by the orchestrator, against a disposable PostgreSQL 17.11 (postgres@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f, trust auth, 127.0.0.1:55432, labelled fcpi.transient, removed afterwards). Deterministic fixtures only: no live provider, no Pi, no spend. A skipped test is not a pass; every suite reports 0 skipped and 0 cancelled. The later commits add evidence and the three service-image pins in deploy/compose.yaml, and change no source.
+
+## Suites
+
+retrieval  tests 486  pass 486  fail  0  cancelled 0  skipped 0
+    FCPI_TEST_PG=127.0.0.1 PGPORT=55432 node --test --test-concurrency=1 "test/*.test.mjs" in the image layout
+gateway    tests 101  pass 101  fail  0  cancelled 0  skipped 0
+    cd services/access && FCPI_TEST_PG=127.0.0.1:55432 node --test test/*.test.mjs
+mcp        tests  51  pass  51  fail  0  cancelled 0  skipped 0
+    cd services/mcp && FCPI_TEST_PG=127.0.0.1:55432 node --test test/*.test.mjs
+root       tests  73  pass  73  fail  0  cancelled 0  skipped 0
+    node --test tests/*.test.mjs
+
+## Contract tests (tests/contracts), one file at a time
+
+FCPI_TEST_PG=127.0.0.1:55432 PGPORT=55432 node --test --test-timeout=90000 <file>, killed after 150 s (0 were).
+
+m1-gateway.test.mjs                exit 1   tests  15  pass   0  fail 15  skipped 0
+m3-gateway.test.mjs                exit 0   tests  46  pass  46  fail  0  skipped 0
+m4-gateway-mcp.test.mjs            exit 0   tests   4  pass   4  fail  0  skipped 0
+m4-grammars.test.mjs               exit 0   tests   3  pass   3  fail  0  skipped 0
+m5-ledger-migration.test.mjs       exit 0   tests   1  pass   1  fail  0  skipped 0
+m7-gateway-store.test.mjs          exit 0   tests   4  pass   4  fail  0  skipped 0
+m7-ledger-migration.test.mjs       exit 0   tests   1  pass   1  fail  0  skipped 0
+m8-admission-copies.test.mjs       exit 0   tests   2  pass   2  fail  0  skipped 0
+m8-restore-compose.test.mjs        exit 0   tests   5  pass   5  fail  0  skipped 0
+m9-client-proof.test.mjs           exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-collection.test.mjs             exit 0   tests   7  pass   7  fail  0  skipped 0
+m9-corpus-v2.test.mjs              exit 0   tests  27  pass  27  fail  0  skipped 0
+m9-evidence-bound.test.mjs         exit 0   tests   2  pass   2  fail  0  skipped 0
+m9-foreign.test.mjs                exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-incident-hook.test.mjs          exit 0   tests   4  pass   4  fail  0  skipped 0
+m9-incident-input.test.mjs         exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-live.test.mjs                   exit 0   tests   5  pass   5  fail  0  skipped 0
+m9-notices.test.mjs                exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-redis.test.mjs                  exit 0   tests   4  pass   4  fail  0  skipped 0
+m9-resource-reuse.test.mjs         exit 0   tests  20  pass  20  fail  0  skipped 0
+m9-restore-incidents.test.mjs      exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-review-bound.test.mjs           exit 0   tests   2  pass   2  fail  0  skipped 0
+m9-root-proof.test.mjs             exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-validation-policy.test.mjs      exit 0   tests   2  pass   2  fail  0  skipped 0
+paid-dispatch-switch.test.mjs      exit 0   tests   3  pass   3  fail  0  skipped 0
+pre-m9-verdicts.test.mjs           exit 0   tests   4  pass   4  fail  0  skipped 0
+
+Total: 152 pass, 15 fail, 0 skipped over 26 files. The 15 failures are all tests/contracts/m1-gateway.test.mjs, the M1-era test that passes configuration keys the current gateway rejects; it predates the branch and is unchanged.
+
+## Raw output
+
+Under test-run-17429cc/, with absolute workstation paths rewritten to placeholders (<repo>, <test-layout>, <scratchpad>, <home>) and nothing else changed. sha256 and bytes of each committed file:
+
+b4d7f0c12397c127b5ca99a2239de9ec929f7e227671f42126ebf6d1e86c5320    55889  retrieval.txt
+2879e676f724a8a5e7e041707cf6db60887d73fb9624c90f5e4153613bcc7dcd    10999  gateway.txt
+340d2e6ba5dc8e419036a75b7abdf35fc9d4a9a702c3ccb15a2feaecb5533c51     5476  mcp.txt
+8569e452ab841519967a9ac10918a1a77dde2cc37bf02fcb0ba7542ea83cbf72     8060  root.txt
+9154c70bbc5dae7d8a90a4f87e1c1be78d69e308d533c6ade03409b6f3199759     2630  contracts-by-file.txt
+2f20929cc661af24caceaa9b9e73f420a73ae0f0f4b7e0d498cc636a0b28bf07     7406  contracts/m1-gateway.txt
+2cec84ef3bbcf665d065083b76002ea5ef6e5fa174383b341831c59cd81f05cb     5763  contracts/m3-gateway.txt
+edab7829d2233b3a8b862ee9f2521c740128ab80904d0ad3b374f8fc18d800de      522  contracts/m4-gateway-mcp.txt
+a750669777d5df28f95023588fea411cee1d2cb2dabb812406348dcc486a61de      468  contracts/m4-grammars.txt
+dffd5ec40e5c18c443ba858b9f5a75c3399d2eee8bf8a78c2b6c8c069714a76c      229  contracts/m5-ledger-migration.txt
+bf85e3a5d409886d3fa2c001068786e822eeabb426fe39a9a87fae0f0ce4f740      672  contracts/m7-gateway-store.txt
+059878ea64955e3b17648b821eabcc0fc3f4321304e7592feb66ea4a28ea6c47      244  contracts/m7-ledger-migration.txt
+adf9666ea077f005bfa77807cceec745e9bff81f2d5b081d7853d4686be35c56      306  contracts/m8-admission-copies.txt
+dc3feed310bbb05a3e48f5b10e787a715cd59579cca0185ee6130f92192b34a8      616  contracts/m8-restore-compose.txt
+06cdd4b503c560d5fc1608396642e73f6bc5d4d26a8210f6af4f7541f53402da      201  contracts/m9-client-proof.txt
+d6575c987b1654862b0cf1f8e6077e5e8ff924e7f29d8954c414d2f33fb47f1f      777  contracts/m9-collection.txt
+eecb77e84c752d9123eb5b09293a3ec708b9bab92dfc60d02c9c01fda921acd7     2889  contracts/m9-corpus-v2.txt
+0ecd2143bea50dfb3865c5463215cb6aa5b4fb232c4ed25f4eebd174696c3c07      297  contracts/m9-evidence-bound.txt
+534059a608cb438b612e955df0657f12e19c1998b185983e99c7433b2d567e59      220  contracts/m9-foreign.txt
+0cd67bd1198ac39cbaf1394e7ccf4cb47df88cab2f3ad0d8e021ba8fa4ddda02      464  contracts/m9-incident-hook.txt
+62695c84328747c3a381e3e1aeaa2588e2ba7a02021bd465a74ac428bdd0054b      207  contracts/m9-incident-input.txt
+316e779a31a0e0540bed5c65d7f55d03d1105f6c2534d2d7d3f261e653c2a214      645  contracts/m9-live.txt
+2abf00cc29532dc24932af58404b4224e7c5ea202384fd3bfb9503ff7f26e940      190  contracts/m9-notices.txt
+40a547498a69c4a14cf93c81c5619f3586a8ea21ba4b51bf4e2a8a5d6123aa97      399  contracts/m9-redis.txt
+2c2525dc0dbf659582680f4eefa901b4bc82d72f86dbca3bc3cf2c868c1e1d12     1970  contracts/m9-resource-reuse.txt
+a74c182d4ca5ab24020346333c6b1ed3f95ef59fd2d2e717527e065f1773a312      219  contracts/m9-restore-incidents.txt
+af9c215abb9121a22babfc11e12998fe9fd2d15ae9f7f2872cfd9b904c4b20c9      293  contracts/m9-review-bound.txt
+ecf1cf6b4ec417cd764b5e57de64b0d6ef9f42fa8a7b2e6f80fedb5d729ff259      221  contracts/m9-root-proof.txt
+1a5a0f1d3f03f9abc0862e8b62d62da43ca39235785f0fe521e928ef47c4a993      332  contracts/m9-validation-policy.txt
+4624efcbf7f7c150e85fbf60c21c1bf16fa5a8143672c8b8e32a8d0889d27b6f      503  contracts/paid-dispatch-switch.txt
+94ba931865e2a74adeb04d2e3e53b4cf62f5b87e1c491a9154564f146184ebdf      496  contracts/pre-m9-verdicts.txt

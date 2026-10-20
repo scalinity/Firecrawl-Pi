@@ -1,0 +1,10 @@
+✔ missing, edited, failed or summary-only evidence cannot grant acceptance (1.024792ms)
+✔ incident acceptance requires actual model and every enforced resource bound (0.957958ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 78.622291

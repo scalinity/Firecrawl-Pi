@@ -1,0 +1,15 @@
+✔ actual input identity binds independently of the verifier revision (1.650084ms)
+✔ private producer records cannot be missing, tampered or substituted (0.109334ms)
+✔ soak and counter intervals bind their start and every controlled sample (0.330875ms)
+✔ NUL porcelain rejects both code paths of staged renames and copies (0.127625ms)
+✔ unstamped inputs need receipts; body and immutable image stamps cannot supply identity (0.067083ms)
+✔ real wrapper preserves producer bytes, stdin, relative env and side outputs; failures invalidate receipts (1383.819667ms)
+✔ directory hashes include exact names and bytes and refuse symbolic links (1.289958ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1464.82425

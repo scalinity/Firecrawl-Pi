@@ -1,0 +1,35 @@
+✔ revision requires independent visible body and correctly separated title for both cases (2.565916ms)
+✔ 18 other rows, P19, threshold and attempts cannot change (2.260125ms)
+✔ identity text already present in the source body disproves the premise correction (0.81175ms)
+✔ source title alone, script-only purpose or missing historical body cannot justify correction (0.94625ms)
+✔ matching historical rawHTML hash cannot hide a real lost-body identity regression (0.793917ms)
+✔ source, initial profile and historical Markdown hashes bind justification to measured inputs (0.783459ms)
+✔ new body content AND exact metadata identity are required; metadata never replaces body (0.444458ms)
+✔ recovered success carries no terminal failure while real target failure remains visible (0.219458ms)
+✔ all 20 request bodies pass actual gateway validation; native formats and routing remain selected (0.982625ms)
+✔ 19/20 including the unchanged real-type P19 failure passes; no success is fabricated (0.628042ms)
+✔ 18/20 passes and 17/20 still fails the exact same threshold (1.004041ms)
+✔ old rows, duplicate or mixed acquisition IDs cannot be presented as a complete new run (2.1205ms)
+✔ failed requests cannot borrow an unrelated fresh acquisition with a different target binding (0.894459ms)
+✔ driver correlation handles concurrent other targets and rejects ambiguity or duplicate log events (0.07075ms)
+✔ zero-cost normalization proof requires all20 original IDs bound to the actual target hashes (0.302375ms)
+✔ actual log-scan format binds both zero-Cloud counts to the same running container (0.197333ms)
+✔ absolute monthly caps may not authorize more than the new incremental owner grant (0.265125ms)
+✔ cleanup requires fresh post-close runtime proof and absent validation overlays (0.051708ms)
+✔ fixture gate requires the exact three affected suites, counts, source and file hashes (0.177583ms)
+✔ frozen request plan and all per-page attempt bounds are checked even for failed rows (1.365333ms)
+✔ missing/nonfinite times, reordered dispatch and expired windows fail closed (2.10975ms)
+✔ false public grades, different consent/source or a rescored historical record fail (1.524ms)
+✔ driver requires fresh, exact reviewed/deployed authorization with zero model spending (0.40075ms)
+✔ late dispatch refuses before provider work unless deadline and cleanup margin remain (0.224708ms)
+✔ readable browser option consent is exact and UTC times use the same accepted formats (0.423916ms)
+✔ old gate applicability allows only the exact revision proof files, never runtime/security/routing changes (0.032042ms)
+✔ historical905-file preservation rejects dropped names, altered bytes, commit drift and tracked mutations (2.147583ms)
+ℹ tests 27
+ℹ suites 0
+ℹ pass 27
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 105.738416

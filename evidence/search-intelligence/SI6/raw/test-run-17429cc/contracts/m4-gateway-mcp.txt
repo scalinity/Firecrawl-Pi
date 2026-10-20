@@ -1,0 +1,12 @@
+✔ M9 phone approvals retain Host/Origin checks and never accept URL-only or replayed authority (323.973208ms)
+✔ every refusal on /mcp happens at the gateway: nothing reaches the MCP service (3.649791ms)
+✔ an authenticated request reaches the MCP service with the gateway's identity, never the client's (3.685791ms)
+✔ without PI_MCP_URL, /mcp is no route and the REST routes still serve (4.984917ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 551.066334

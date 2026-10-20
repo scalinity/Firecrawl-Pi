@@ -1,0 +1,11 @@
+✔ every label and principal the registry accepts, the MCP service accepts as the gateway's identity, and no other (0.444708ms)
+✔ every scope list the gateway forwards, however many scopes the manifest grows to, passes the MCP service (0.100875ms)
+✔ the tools accept exactly the job ids and idempotency keys their gateway routes accept (0.126042ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 85.665166

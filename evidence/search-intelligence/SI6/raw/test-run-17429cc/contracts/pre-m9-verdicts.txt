@@ -1,0 +1,12 @@
+✔ positive closure controls pass, absent records never pass (0.442833ms)
+✔ wrong/null invention, cache charges, home browser routing and duplicate Zyte fail their own proofs (0.376708ms)
+✔ an unrelated decoded failure cannot establish challenge rejection (0.114833ms)
+✔ missing image request, missing tunnel, duplicate enhanced strategy and missing accounting fail (0.165ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 77.17575
