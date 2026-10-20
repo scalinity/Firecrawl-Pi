@@ -86,7 +86,9 @@ test("at start, search, documentation and decision operations left RESERVED beco
   } finally { await store.close(); }
   const again = new Store({ host: HOST, database: "postgres", user: "fcpi_retrieval" });
   try {
-    const swept = await again.ready({ url: 2, browser: 1 }, new Date(Date.now() + 1000));
+    // The database's clock, not this process's: created_at comes from it, and the two clocks need not agree (a VM drifts by seconds after a sleep).
+    const startedAt = (await again.pool.query("SELECT clock_timestamp() AS t")).rows[0].t;
+    const swept = await again.ready({ url: 2, browser: 1 }, startedAt);
     assert.equal(swept.orphaned, 0, "no model calls among them");
     assert.deepEqual(Object.values(swept.orphanedOperations).reduce((n, x) => n + x.count, 0), 4);
     const states = (await again.pool.query("SELECT kind, state FROM fcpi_retrieval.budget_reservation ORDER BY kind, state")).rows.map((r) => `${r.kind}:${r.state}`);
