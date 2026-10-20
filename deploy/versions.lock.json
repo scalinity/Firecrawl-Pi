@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-10-20T09:05:50Z",
+  "generated_utc": "2026-10-20T10:48:51Z",
   "generated_by": "scripts/si6/build-lock.mjs (search intelligence SI6), from the lock as committed before the cutover; entries owned by earlier milestones are as they were",
-  "repository_sha": "587e1236822de47925302f095ac2054e1f3537ca",
+  "repository_sha": "4b1c11e555aaa43ad7452f7a125ee6288c27bead",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -571,7 +571,7 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission; since SI6 the search intelligence coordinator (five general engines, Context7 and Ref, Jev decisions), its evidence hook and its operational records",
       "status": "selected",
-      "image_id": "sha256:d13b5a9b0a535d8642daed4906ee7ef5bb573468fd007f87f94d0772e96282b0",
+      "image_id": "sha256:1cb9b68bc4d24a000fdd58e58028c6a06d9a63f448d0b9fe9d494e7a974df3ae",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
@@ -579,7 +579,7 @@
       },
       "evidence": "evidence/search-intelligence/SI6/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "20d972934c7c502ab1311913696026701e903145",
+      "built_from_commit": "5e035b212302a808433009be9f5bee25b8df5ae5",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "bebbfe015ecd08fc2dda44a8b7311083de66b4dbe43c704f321481be041874d6"
@@ -729,10 +729,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work; since SI6 the searchIntelligence options and the search's trusted context headers",
       "status": "selected",
-      "image_id": "sha256:7a39a6561dec89c87b2e51c819f84c0450ff4fb8e2e02fb3f33aefd4f9baae90",
+      "image_id": "sha256:cf06cecdec41d812e6c40e0b6695d7aff1e69fcef971f506e16c1b9a8f3ed843",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "20d972934c7c502ab1311913696026701e903145",
+      "built_from_commit": "5e035b212302a808433009be9f5bee25b8df5ae5",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -804,10 +804,10 @@
     "mcp_gateway": {
       "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tool offers the action subset, the screenshot format and the cache options since M7; since SI6 the search tool's searchIntelligence options and fcpi.search compaction",
       "status": "selected",
-      "image_id": "sha256:7f760fbdc265267ce48db3adba49a2c1557b43b9b1b9ba13d8caa74b85173fda",
+      "image_id": "sha256:13aad4190051316cf65758a8b74136660acb4863a0cce6779c883654ee55f558",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "20d972934c7c502ab1311913696026701e903145",
+      "built_from_commit": "5e035b212302a808433009be9f5bee25b8df5ae5",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
