@@ -11,12 +11,21 @@ const gate = { url: thread, capturedAt: "2026-10-18T02:00:00.000Z", status: "cap
 
 test("a capture whose final URL carries Reddit's challenge parameters is gated; the thread itself and look-alikes are not", () => {
   assert.equal(gated(gate), true);
-  assert.equal(gated({ ...gate, finalUrl: thread, title: "Struggling with systemd : r/linuxadmin" }), false, "the thread's own URL");
-  assert.equal(gated({ ...gate, finalUrl: `${thread}?js_challenge=1` }), false, "one parameter alone");
-  assert.equal(gated({ ...gate, finalUrl: "https://example.org/a?js_challenge=1&jsc_token=t" }), false, "another host");
-  assert.equal(gated({ ...gate, finalUrl: "https://notreddit.com/a?js_challenge=1&jsc_token=t" }), false, "a look-alike host");
-  assert.equal(gated({ ...gate, finalUrl: null }), false, "a capture that kept no final URL");
-  assert.equal(gated({ ...gate, finalUrl: "not a url" }), false, "an unparseable final URL");
+  const plain = { ...gate, title: "Struggling with systemd : r/linuxadmin" };   // a normal title, so only the URL is under test
+  assert.equal(gated({ ...plain, finalUrl: thread }), false, "the thread's own URL");
+  assert.equal(gated({ ...plain, finalUrl: `${thread}?js_challenge=1` }), false, "one parameter alone");
+  assert.equal(gated({ ...plain, finalUrl: "https://example.org/a?js_challenge=1&jsc_token=t" }), false, "another host");
+  assert.equal(gated({ ...plain, finalUrl: "https://notreddit.com/a?js_challenge=1&jsc_token=t" }), false, "a look-alike host");
+  assert.equal(gated({ ...plain, finalUrl: null }), false, "a capture that kept no final URL");
+  assert.equal(gated({ ...plain, finalUrl: "not a url" }), false, "an unparseable final URL");
+});
+
+test("the gate is also its title, and the parameters on the requested URL are no sign (the platform's own rule)", () => {
+  assert.equal(gated({ ...gate, finalUrl: thread }), true, "the title alone, with a clean final URL");
+  assert.equal(gated({ ...gate, finalUrl: thread, title: "  reddit - prove your humanity " }), true, "case and spacing do not matter");
+  assert.equal(gated({ ...gate, finalUrl: thread, title: "Reddit - Prove your humanity : r/x" }), false, "a longer title is not the gate's");
+  assert.equal(gated({ ...gate, finalUrl: thread, title: null }), false, "no title, no parameters");
+  assert.equal(gated({ ...gate, url: gate.finalUrl, title: "Struggling with systemd : r/linuxadmin" }), false, "a pool URL that already carried the parameters was not redirected there");
 });
 
 test("a gated capture becomes blocked with the platform's failure class, keeping every hash, and the input is not changed", () => {

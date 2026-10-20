@@ -7,6 +7,7 @@
 //             access_denied | target_error | binary
 const TEXT_TYPES = /^(text\/|application\/(xhtml\+xml|xml|json|ld\+json|rss\+xml|atom\+xml|javascript)|[^;]*\+(xml|json)\s*(;|$))/i;
 const HTML_TYPES = /^(text\/html|application\/xhtml\+xml)/i;
+const REDDIT_GATE_TITLE = "Reddit - Prove your humanity";
 
 // Recognised public-content bot interstitials. Each marker is structural (a challenge platform's
 // script path, form or element id), not a phrase a normal article could contain.
@@ -17,14 +18,18 @@ const CHALLENGE_MARKERS = [
   // M6: search engines' own CAPTCHA pages (DuckDuckGo's anomaly check, Google's /sorry/ form) and AWS WAF's challenge.
   /\bid=["']anomaly-modal["']/i, /\/anomaly\.js\b/i, /<form\b[^<>]*\baction=["'][^"']*\/sorry\/index\b/i, /\bid=["']captcha-form["']/i, /\bwindow\.gokuProps\b/,
   // Reddit's human-verification gate, by its whole title (the other sign is redditGate's, on the URL).
-  /<title>\s*Reddit - Prove your humanity\s*<\/title>/i,
+  new RegExp(`<title>\\s*${REDDIT_GATE_TITLE}\\s*</title>`, "i"),
 ];
+// The gate's title, whole, as the HTML marker above and a stored capture's title (redditGateTitle) both test it.
+export const redditGateTitle = (title) => typeof title === "string" && title.trim().toLowerCase() === REDDIT_GATE_TITLE.toLowerCase();
 // Reddit's gate returns the browser to the page's own URL with js_challenge and jsc_token added; both together, on
-// reddit.com or a subdomain, mark the gate whatever the page then shows.
+// reddit.com or a subdomain (any case, with or without a trailing dot), mark the gate whatever the page then shows. The
+// caller counts this sign only when a redirect added the parameters (classify compares the requested URL): a URL that was
+// asked for with them is no gate by itself.
 export const redditGate = (url) => {
   try {
     const u = new URL(url);
-    return /(^|\.)reddit\.com$/i.test(u.hostname) && u.searchParams.has("js_challenge") && u.searchParams.has("jsc_token");
+    return /(^|\.)reddit\.com$/i.test(u.hostname.replace(/\.$/, "")) && u.searchParams.has("js_challenge") && u.searchParams.has("jsc_token");
   } catch { return false; }
 };
 // Recognised edge refusals of the connection's address on a public page, read only on a 403: Akamai's "Access
@@ -141,7 +146,7 @@ export function classify({ status, contentType, body, finalUrl, requestedUrl, re
   if (status === 404 || status === 410) return { verdict: "not_found", reasons: [`status ${status}`] };
   const text = typeof body === "string" ? body : "";
   const html = isHtml(contentType) && typeof body === "string";
-  const challenge = (html && CHALLENGE_MARKERS.some((re) => re.test(text))) || redditGate(finalUrl);
+  const challenge = (html && CHALLENGE_MARKERS.some((re) => re.test(text))) || (redditGate(finalUrl) && !redditGate(requestedUrl));
   if (challenge) {
     return { verdict: "challenge", failure: { class: "BLOCKED_PUBLIC_CONTENT", detail: "the target served a bot interstitial", retryable: true, retryAfter: null } };
   }

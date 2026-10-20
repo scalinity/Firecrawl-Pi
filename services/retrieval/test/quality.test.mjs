@@ -48,9 +48,28 @@ test("Reddit's human-verification gate is a bot interstitial, by its title or by
   }
   assert.equal(classify({ ...reddit, finalUrl: thread, body: real }).verdict, "adequate", "a Reddit thread is not the gate");
   assert.equal(classify({ ...reddit, finalUrl: `${thread}?js_challenge=1`, body: real }).verdict, "adequate", "one parameter alone is not the gate");
-  for (const host of ["example.org", "notreddit.com"]) {
+  for (const host of ["example.org", "notreddit.com", "reddit.com.example.org", "reddit.com@example.org"]) {
     assert.equal(classify({ ...page, finalUrl: `https://${host}/a?js_challenge=1&jsc_token=t`, body: real }).verdict, "adequate", `${host} is not Reddit`);
   }
+  // The apex, any subdomain, any case and a trailing dot are Reddit.
+  for (const host of ["reddit.com", "old.reddit.com", "WWW.REDDIT.COM", "www.reddit.com."]) {
+    assert.equal(classify({ ...reddit, finalUrl: `https://${host}/r/nextjs/?js_challenge=1&jsc_token=t`, body: real }).verdict, "challenge", `${host} is Reddit`);
+  }
+});
+
+// The redirect is the sign, not the parameters alone: a requested URL that already carries them (copied from a browser after
+// the gate, or linked from a forum) is no gate by itself, so it does not escalate to a paid tier that cannot succeed and does
+// not teach the domain's route a block. A gate served at such a URL is still caught by its title.
+test("Reddit's gate parameters on the requested URL are no sign: only a redirect that added them, or the gate's own title, is", () => {
+  const thread = "https://www.reddit.com/r/nextjs/comments/abc123/route_params/";
+  const gated = `${thread}?solution=0a1b&js_challenge=1&jsc_token=t0k3n&jsc_orig_r=`;
+  const real = "<html><head><title>Route params : r/nextjs</title></head><body><main><h1>Route params</h1><p>Params are a promise in Next.js 15, so await them before reading a segment.</p></main></body></html>";
+  const byTitle = "<html><head><title>Reddit - Prove your humanity</title></head><body><p>Please wait while we verify.</p></body></html>";
+  const asked = { ...page, requestedUrl: gated, finalUrl: gated };
+  assert.equal(classify({ ...asked, body: real }).verdict, "adequate", "the requested URL carried the parameters and nothing was redirected");
+  const v = classify({ ...asked, body: byTitle });
+  assert.deepEqual([v.verdict, v.failure?.class], ["challenge", "BLOCKED_PUBLIC_CONTENT"], "a gate served there is still the gate");
+  assert.equal(classify({ ...page, requestedUrl: thread, finalUrl: gated, body: real }).verdict, "challenge", "the redirect added them");
 });
 
 test("missing pages and target errors keep the native result; binaries are binaries", () => {
