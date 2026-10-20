@@ -1,0 +1,9 @@
+### meta
+utc=2026-10-20T13:50:35Z source_commit=97520241857d5fe43bc3ef998c823384eb601147
+### firewall_fingerprint
+nft_ruleset_sha256=b8fdb7a519aa70256bcdeb228b61b8eacc73977ed0d43dced597962b0d9c3985
+nft_ruleset_canonical_sha256=895355e8349d84a5405e6666692791bc0f4d382c43ae5096a559c1066b781c34
+order_insensitive_chains=4 ip filter/DOCKER-CT,ip filter/DOCKER-INTERNAL,ip6 filter/ts-input,ip raw/PREROUTING
+guard_table_sha256=f291c0cec99db9c3ae1efdd3e9473deade3b047e3b3ece07d7cfd205b10a3f88
+fingerprint_exit=0
+### end
