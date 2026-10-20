@@ -6,9 +6,9 @@
 import { execFileSync, spawn } from "node:child_process";
 import { request } from "node:http";
 import { readFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+import { pathToFileURL, fileURLToPath } from "node:url";
 
-const REPO = "/Users/danny/Documents/Tools/Firecrawl";
+const REPO = fileURLToPath(new URL("../../../../", import.meta.url)).replace(/\/$/, "");
 const { sshForward } = await import(pathToFileURL(`${REPO}/scripts/playground/server.mjs`).href);
 const forward = sshForward();
 const phase = process.argv[2];

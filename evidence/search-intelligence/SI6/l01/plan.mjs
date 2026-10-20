@@ -6,7 +6,7 @@
 //   activation_repeat the four classifier-dependent queries asked again with another limit, so the answer cache is not served and Jev is asked afresh
 //   concurrent4_live  two rounds of four searches at once, for a live look at four-concurrent
 import { readFileSync, writeFileSync } from "node:fs";
-const corpus = JSON.parse(readFileSync("/Users/danny/Documents/Tools/Firecrawl/evidence/search-intelligence/SI0/corpus/corpus-v1.json", "utf8")).queries;
+const corpus = JSON.parse(readFileSync(new URL("../../SI0/corpus/corpus-v1.json", import.meta.url), "utf8")).queries;
 const bodyOf = (q, over = {}) => { const c = q.constraints ?? {}, si = { ...(q.searchIntelligence ?? {}), ...(over.si ?? {}) };
   if (c.publishedAfter) si.publishedAfter = c.publishedAfter; if (c.publishedBefore) si.publishedBefore = c.publishedBefore;
   return { query: q.query, limit: over.limit ?? 10, ...(c.includeDomains?.length ? { includeDomains: c.includeDomains } : {}), ...(c.excludeDomains?.length ? { excludeDomains: c.excludeDomains } : {}), ...(Object.keys(si).length ? { searchIntelligence: si } : {}) }; };

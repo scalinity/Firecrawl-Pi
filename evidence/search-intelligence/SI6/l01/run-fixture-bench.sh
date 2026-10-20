@@ -1,5 +1,5 @@
 #!/bin/bash
-cd /Users/danny/Documents/Tools/Firecrawl; . scripts/m1/pi-target.conf
+cd "$(dirname "$0")/../../../.."; . scripts/m1/pi-target.conf
 ssh -i "$PI_SSH_KEY" -o IdentitiesOnly=yes -o BatchMode=yes -o ConnectTimeout=15 -o ServerAliveInterval=30 -o ServerAliveCountMax=20 "$PI_SSH_TARGET" 'sudo -n bash -c '"'"'
 mem() { awk "/^MemAvailable:/ {printf \"%d\", \$2/1024}" /proc/meminfo; }
 echo "{\"kind\":\"host\",\"phase\":\"before\",\"memAvailableMiB\":$(mem),\"utc\":\"$(date -u +%FT%TZ)\"}"
