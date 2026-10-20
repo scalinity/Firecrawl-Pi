@@ -173,6 +173,21 @@ test("documentation activation: explicit modes, deterministic signals, the spec'
   assert.deepEqual([fb.active, fb.reason], [true, "classifier_timeout_possibly_technical"]);
 });
 
+// F01 (spec §25): explicit documentation requests activate the documentation providers every time. Only the text rule reaches a query with no
+// mode and no library hint, so each cue word it knows is exercised here, in any case, and none of them consults the classifier.
+test("explicit documentation words activate the documentation providers on their own, whatever the case, with no classifier call", async () => {
+  let calls = 0;
+  const docs = makeDocumentation({ decisions: { classifyDocs: async () => { calls++; return { ok: true, probability: 0 }; } } });
+  const ctx = { signal: new AbortController().signal, deadlineAt: Date.now() + 800, selection: "fixture", decisionSubject: "fcpi-fixture-jev" };
+  const act = (q) => docs.activate(validateSearchRequest(request({ originalQuery: q, intelligence: { documentation: "auto" } })), ctx);
+  for (const q of ["the Rust book chapter on ownership, official docs", "FastAPI documentation dependency injection", "Kubernetes API REFERENCE for Deployment", "Official Docs tokio select macro",
+    "Django release notes 5.2", "tokio README feature flags", "man page for rsync delete", "pip manual dependency resolver", "reference docs for pandas merge", "numpy docs"]) {
+    const a = await act(q);
+    assert.deepEqual([a.active, a.reason], [true, "explicit_docs_request"], q);
+  }
+  assert.equal(calls, 0, "a rule decided each one; Jev was not asked");
+});
+
 test("documentation activation does not fire on everyday words, bare counts or hostnames, and keeps technical queries", () => {
   for (const q of ["compose 2 emails to my boss", "flask of 2 liters price", "pandas 2 cubs born at the zoo", "rails for 3 stairs", "is www.bbc.co.uk down"])
     assert.notEqual(analyzeQuery(q).decision, "positive", q);
