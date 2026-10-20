@@ -1,0 +1,455 @@
+{
+ "searches": 16,
+ "answered": 16,
+ "withRowUrls": 16,
+ "rowsReturned": 160,
+ "byJudgedStatus": {
+  "match": 106,
+  "mismatch": 16,
+  "not_applicable": 1,
+  "unknown": 20,
+  "unlabelled": 17
+ },
+ "judgedMismatchRowsReturnedNow": 16,
+ "judgedMatchRowsReturnedNow": 106,
+ "collectionD": {
+  "mismatches": 20,
+  "versionKnown": 167,
+  "queries": 19
+ },
+ "urlKnownMismatchRowsReturned": 0,
+ "versionRowsTotals": {
+  "returned": 160,
+  "confirmed": 21,
+  "unverified": 139,
+  "excluded": 88
+ },
+ "verdicts": {
+  "confirmed": 11,
+  "unconfirmed": 5
+ },
+ "perQuery": [
+  {
+   "id": "Q001",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 7,
+    "unknown": 3
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 0
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q002",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 3,
+    "mismatch": 2,
+    "unknown": 4,
+    "unlabelled": 1
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 1
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "https://www.postgresql.org/docs/current/pgstatstatements.html",
+    "https://www.postgresql.org/docs/current/runtime-config-statistics.html"
+   ]
+  },
+  {
+   "id": "Q004",
+   "status": 200,
+   "outcome": "partial",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 8,
+    "unlabelled": 2
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 1,
+    "unverified": 9,
+    "excluded": 1
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q006",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 3,
+    "mismatch": 1,
+    "unknown": 1,
+    "unlabelled": 5
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 1,
+    "unverified": 9,
+    "excluded": 0
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "unconfirmed"
+   ],
+   "warnings": [
+    "exact_version_unconfirmed",
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "http://docs.sqlalchemy.org/en/latest/orm/queryguide/relationships.html"
+   ]
+  },
+  {
+   "id": "Q010",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 8,
+    "mismatch": 1,
+    "unknown": 1
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 2,
+    "unverified": 8,
+    "excluded": 3
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md"
+   ]
+  },
+  {
+   "id": "Q024",
+   "status": 200,
+   "outcome": "partial",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 4,
+    "unknown": 6
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 1
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "unconfirmed"
+   ],
+   "warnings": [
+    "exact_version_unconfirmed",
+    "version_rows_unverified"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q052",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 10
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 0
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q056",
+   "status": 200,
+   "outcome": "partial",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 9,
+    "unlabelled": 1
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 1,
+    "unverified": 9,
+    "excluded": 0
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "unconfirmed"
+   ],
+   "warnings": [
+    "exact_version_unconfirmed",
+    "version_rows_unverified"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q059",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 8,
+    "mismatch": 2
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 0
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "https://modelcontextprotocol.io/specification/2025-06-18",
+    "https://workos.com/blog/mcp-2026-spec-agent-authentication"
+   ]
+  },
+  {
+   "id": "Q092",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 9,
+    "unlabelled": 1
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 0
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q111",
+   "status": 200,
+   "outcome": "partial",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 10
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 10,
+    "unverified": 0,
+    "excluded": 27
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "unconfirmed"
+   ],
+   "warnings": [
+    "exact_version_unconfirmed"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q112",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 7,
+    "mismatch": 1,
+    "unknown": 1,
+    "unlabelled": 1
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 1,
+    "unverified": 9,
+    "excluded": 1
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "https://docs.python.org/3/library/urllib.request.html"
+   ]
+  },
+  {
+   "id": "Q115",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 3,
+    "mismatch": 5,
+    "unknown": 1,
+    "unlabelled": 1
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 1,
+    "unverified": 9,
+    "excluded": 0
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "https://webpack.js.org/plugins/split-chunks-plugin/",
+    "https://docs.webpack.js.org/configuration/optimization",
+    "https://docs.webpack.js.org/plugins/split-chunks-plugin",
+    "https://webpack.kr/plugins/split-chunks-plugin",
+    "https://github.com/orgs/webpack/discussions/17056"
+   ]
+  },
+  {
+   "id": "Q116",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 7,
+    "unknown": 3
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 2
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": []
+  },
+  {
+   "id": "Q117",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 4,
+    "mismatch": 1,
+    "not_applicable": 1,
+    "unlabelled": 4
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 0,
+    "unverified": 10,
+    "excluded": 42
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "unconfirmed"
+   ],
+   "warnings": [
+    "exact_version_unconfirmed",
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "https://docs.python.org/zh-cn/2/_sources/whatsnew/index.rst.txt"
+   ]
+  },
+  {
+   "id": "Q120",
+   "status": 200,
+   "outcome": "complete",
+   "returned": 10,
+   "byJudgedStatus": {
+    "match": 6,
+    "mismatch": 3,
+    "unlabelled": 1
+   },
+   "versionRows": {
+    "returned": 10,
+    "confirmed": 4,
+    "unverified": 6,
+    "excluded": 10
+   },
+   "urlKnownMismatchReturned": [],
+   "versions": [
+    "confirmed"
+   ],
+   "warnings": [
+    "version_rows_unverified"
+   ],
+   "mismatchRows": [
+    "https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_bucket",
+    "https://registry.terraform.io/providers/-/aws/4.51.0/docs/resources/s3_bucket",
+    "https://registry.terraform.io/providers/figma/aws-4-49-0/latest/docs/guides/version-4-upgrade"
+   ]
+  }
+ ]
+}

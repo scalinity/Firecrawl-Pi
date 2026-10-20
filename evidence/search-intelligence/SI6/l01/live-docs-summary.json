@@ -1,0 +1,417 @@
+{
+ "target_ms": 23000,
+ "request_deadline_ms": 60000,
+ "label": "live: the deployed platform on the Pi, one search active at a time except the concurrent4_live rounds",
+ "l01": {
+  "cold_docs": {
+   "requested": 30,
+   "answered_200": 30,
+   "not_200": [],
+   "cold": 30,
+   "not_cold": 0,
+   "client_ms": {
+    "n": 30,
+    "p50": 8484,
+    "p95": 13929,
+    "max": 14101
+   },
+   "server_total_ms": {
+    "n": 30,
+    "p50": 8465,
+    "p95": 13912,
+    "max": 14080
+   },
+   "over_target_23s": 0,
+   "over_deadline_60s": 0,
+   "outcomes": {
+    "complete": 21,
+    "partial": 9
+   },
+   "ranking": {
+    "hybrid/complete": 30
+   },
+   "general_successful": {
+    "3": 1,
+    "4": 2,
+    "5": 27
+   },
+   "warnings": {
+    "context7_timeout": 6,
+    "deepseek_unsupported_request": 3,
+    "exa_timeout": 1,
+    "exact_version_unconfirmed": 5,
+    "version_rows_unverified": 15
+   },
+   "admission_waits_before": 0
+  }
+ },
+ "memory": {
+  "samples": 150,
+  "peak_mib_by_container": {
+   "access-gateway": 33,
+   "firecrawl-core": 1758,
+   "retrieval-service": 59,
+   "mcp-gateway": 51,
+   "nuq-postgres": 98,
+   "rabbitmq": 127,
+   "redis": 11,
+   "searxng": 97,
+   "browser-worker": 85
+  },
+  "host_available_mib": {
+   "min": 4730,
+   "max": 4961
+  }
+ },
+ "f03": {
+  "hard_version_queries_in_plan": 16,
+  "answered": 16,
+  "requested_versions": 16,
+  "verdicts": {
+   "confirmed": 11,
+   "unconfirmed": 5
+  },
+  "confirmed_coverage": 0.6875,
+  "unknown_rate": 0.3125,
+  "queries_without_a_report": [],
+  "confirmed_on_expect_no_match": [],
+  "warning_counts": {
+   "exact_version_unconfirmed": 5
+  },
+  "per_query": [
+   {
+    "id": "Q001",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "next@15"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "next",
+      "version": "15",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q002",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "postgresql@17"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "postgresql",
+      "version": "17",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q004",
+    "status": 200,
+    "outcome": "partial",
+    "requested": [
+     "pydantic@2"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "pydantic",
+      "version": "2",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q006",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "sqlalchemy@2.0"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "sqlalchemy",
+      "version": "2.0",
+      "verdict": "unconfirmed"
+     }
+    ],
+    "warnings": [
+     "exact_version_unconfirmed"
+    ]
+   },
+   {
+    "id": "Q010",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "vite@6"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "vite",
+      "version": "6",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q024",
+    "status": 200,
+    "outcome": "partial",
+    "requested": [
+     "node@18"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "node",
+      "version": "18",
+      "verdict": "unconfirmed"
+     }
+    ],
+    "warnings": [
+     "exact_version_unconfirmed"
+    ]
+   },
+   {
+    "id": "Q052",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "Model Context Protocol@2025-06-18"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "Model Context Protocol",
+      "version": "2025-06-18",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q056",
+    "status": 200,
+    "outcome": "partial",
+    "requested": [
+     "python@3.14"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "python",
+      "version": "3.14",
+      "verdict": "unconfirmed"
+     }
+    ],
+    "warnings": [
+     "exact_version_unconfirmed"
+    ]
+   },
+   {
+    "id": "Q059",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "Model Context Protocol@2025-11-25"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "Model Context Protocol",
+      "version": "2025-11-25",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q092",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "react@19"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "react",
+      "version": "19",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q111",
+    "status": 200,
+    "outcome": "partial",
+    "requested": [
+     "django@5.2"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "django",
+      "version": "5.2",
+      "verdict": "unconfirmed"
+     }
+    ],
+    "warnings": [
+     "exact_version_unconfirmed"
+    ]
+   },
+   {
+    "id": "Q112",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "python@2.7"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "python",
+      "version": "2.7",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q115",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "webpack@4"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "webpack",
+      "version": "4",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q116",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "pandas@2.0"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "pandas",
+      "version": "2.0",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   },
+   {
+    "id": "Q117",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "python@4.0"
+    ],
+    "expectNoMatch": true,
+    "verdicts": [
+     {
+      "library": "python",
+      "version": "4.0",
+      "verdict": "unconfirmed"
+     }
+    ],
+    "warnings": [
+     "exact_version_unconfirmed"
+    ]
+   },
+   {
+    "id": "Q120",
+    "status": 200,
+    "outcome": "complete",
+    "requested": [
+     "hashicorp/aws@5"
+    ],
+    "expectNoMatch": false,
+    "verdicts": [
+     {
+      "library": "hashicorp/aws",
+      "version": "5",
+      "verdict": "confirmed"
+     }
+    ],
+    "warnings": []
+   }
+  ]
+ },
+ "f01": {
+  "Q081": {
+   "observations": 1,
+   "active": 1,
+   "inactive": 0,
+   "reasons": {
+    "classifier_positive": 1
+   },
+   "probabilities": [
+    0.85
+   ]
+  },
+  "Q085": {
+   "observations": 1,
+   "active": 1,
+   "inactive": 0,
+   "reasons": {
+    "classifier_positive": 1
+   },
+   "probabilities": [
+    0.72
+   ]
+  },
+  "Q094": {
+   "observations": 1,
+   "active": 1,
+   "inactive": 0,
+   "reasons": {
+    "classifier_positive": 1
+   },
+   "probabilities": [
+    0.73
+   ]
+  },
+  "Q096": {
+   "observations": 1,
+   "active": 1,
+   "inactive": 0,
+   "reasons": {
+    "classifier_positive": 1
+   },
+   "probabilities": [
+    0.95
+   ]
+  }
+ },
+ "s4": {
+  "documentation_searches": 30,
+  "with_enrichment_record": 0,
+  "enrichments": []
+ }
+}
