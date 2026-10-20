@@ -251,3 +251,49 @@ test("degraded single cells: each documentation circuit, each lone provider canc
       ["partial", true, "success_empty", 1, ["context7", "ref"]]);
   } finally { await h.close(); }
 });
+
+// A caller's cancellation says nothing about a provider's health. A request cancelled after it was written ends possibly sent
+// (its reservation stays counted), and the breaker is given no failure for it. One failure opens a breaker here, so a counted
+// cancellation shows at once. The SI6 fixture benchmark found it: two cancelled searches opened Jev's breaker, and the searches
+// that followed ranked without Jev for the breaker's whole open time.
+test("a search cancelled while its providers are answering opens no breaker", async () => {
+  const jevOk = (q, entry) => {
+    const a = {};
+    for (const [k, question] of Object.entries(entry.body.questions)) a[k] = question.type === "score" ? { type: "score", score: 2 } : question.type === "noul" ? { type: "noul", noul: 0.5 } : { type: "choice", choice: Object.keys(question.criteria)[0] };
+    return { status: 200, body: { model: "typesafe/jev-1.14-20261014", answers: a, usage: { input_tokens: 10, output_tokens: 1 } } };
+  };
+  const cancelAfter = async (h, ms, query) => {
+    const ac = new AbortController();
+    const pending = run(h, { originalQuery: query }, ac.signal);
+    await sleep(ms);
+    ac.abort();
+    await assert.rejects(pending, (e) => e.failureClass === "CANCELLED");
+    await sleep(200);
+  };
+  // The engines still answering: every request of the shared dispatch has been written when the caller goes.
+  let h = await harness({ mutateBudget: oneFailure, handlers: { brave: delayed(1500, answers.brave), exa: delayed(1500, answers.exa), deepseek: delayed(1500, answers.deepseek), tavily: delayed(1500, answers.tavily) } });
+  try {
+    await cancelAfter(h, 150, "cancel engines in flight");
+    for (const p of ["brave", "exa", "deepseek", "tavily"]) {
+      assert.ok(h.servers[p].seen.length > 0, `${p}: it was asked before the cancellation`);
+      assert.equal(h.dispatch.breakerState(`fixture-${p}`), "closed", `${p}: a cancelled request is no failure`);
+    }
+  } finally { await h.close(); }
+  // Jev still answering: the engines answered, so the decision requests are the ones in flight.
+  h = await harness({ mutateBudget: oneFailure, handlers: { openrouter: delayed(1500, jevOk) } });
+  try {
+    await cancelAfter(h, 500, "cancel jev in flight");
+    assert.ok(h.servers.openrouter.seen.length > 0, "Jev was asked before the cancellation");
+    assert.equal(h.dispatch.breakerState("fixture-openrouter"), "closed", "a cancelled decision request is no failure");
+    // The next search still ranks with Jev: nothing was left open for it.
+    const s = (await run(h, { originalQuery: "after the cancellation" })).body.search;
+    assert.equal(s.ranking.mode, "hybrid", "the next search ranks with Jev");
+  } finally { await h.close(); }
+  // A timeout is still a failure, so the guard has not become blindness: the same breaker opens when the provider stays silent.
+  h = await harness({ mutateBudget: (b) => { oneFailure(b); }, handlers: { openrouter: delayed(60000, jevOk) } });
+  try {
+    const s = (await run(h, { originalQuery: "jev silent past its timeout" })).body.search;
+    assert.equal(h.dispatch.breakerState("fixture-openrouter"), "open", "a silent provider still opens the breaker");
+    assert.deepEqual([s.ranking.mode, s.ranking.reason], ["rrf_fallback", "jev_timeout"]);
+  } finally { await h.close(); }
+});

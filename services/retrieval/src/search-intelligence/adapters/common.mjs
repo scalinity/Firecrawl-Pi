@@ -97,7 +97,7 @@ export function makeDispatch({ store, getBudget, getPolicy, resolvePublic, looku
     return open.length;
   }
 
-  const reasonOfTransport = (e) => e.code === "CANCELLED" ? "cancelled" : e.capacity ? "capacity_unavailable" : e.timedOut ? "timeout" : e.code === "PAID_DISPATCH_DISABLED" ? "platform_restricted"
+  const reasonOfTransport = (e) => e.code === "CANCELLED" || e.cancelled ? "cancelled" : e.capacity ? "capacity_unavailable" : e.timedOut ? "timeout" : e.code === "PAID_DISPATCH_DISABLED" ? "platform_restricted"
     : e.code === "PROVIDER_RESPONSE_TOO_LARGE" ? "contract_failure" : "temporarily_unavailable";
 
   // Admission and the reservation, shared by call() and meter(): the breaker's admission, the shared monetary cap's valuation

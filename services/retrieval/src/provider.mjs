@@ -21,7 +21,9 @@ import { parseTarget, Denied } from "./ssrf.mjs";
 import { resolveTarget, pinnedLookup } from "./resolve.mjs";
 
 export class ProviderError extends Error {
-  constructor(code, message, { sent, status = null, timedOut = false } = {}) { super(message); this.code = code; this.sent = sent; this.status = status; this.timedOut = timedOut; }
+  // cancelled: the caller's own cancellation ended the exchange, whether or not the request had been written (a written one
+  // is PROVIDER_UNCERTAIN, its charge unknown, but it says nothing about the provider's health).
+  constructor(code, message, { sent, status = null, timedOut = false, cancelled = false } = {}) { super(message); this.code = code; this.sent = sent; this.status = status; this.timedOut = timedOut; this.cancelled = cancelled; }
 }
 
 // The credential file for a provider, read at each call so a key placed later needs no restart; null
@@ -98,7 +100,7 @@ export async function providerRequest({ baseUrl, path, method = "POST", headers 
   return new Promise((resolve, reject) => {
     let written = false, settled = false;
     let idle = null;
-    const onAbort = () => { req.destroy(new Error("cancelled")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written })); };
+    const onAbort = () => { req.destroy(new Error("cancelled")); done(reject, new ProviderError(written ? "PROVIDER_UNCERTAIN" : "CANCELLED", "the caller cancelled", { sent: written, cancelled: true })); };
     const done = (fn, v) => { if (!settled) { settled = true; clearTimeout(timer); clearTimeout(idle); signal?.removeEventListener("abort", onAbort); fn(v); } };
     const quiet = () => {
       if (!idleMs || settled) return;
