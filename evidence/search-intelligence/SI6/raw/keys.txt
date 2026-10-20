@@ -1,0 +1,24 @@
+brave_api_key=present bytes=31
+exa_api_key=present bytes=36
+deepseek_api_key=present bytes=35
+tavily_api_key=present bytes=41
+context7_api_key=present bytes=43
+ref_api_key=present bytes=24
+openrouter_api_key=present bytes=73
+agent_anthropic_api_key=present
+anthropic_api_key=present
+brave_api_key=present
+context7_api_key=present
+decodo_api_key=absent
+decodo_proxy=present
+deepseek_api_key=present
+exa_api_key=present
+fixture_proxy=present
+fixture_serper=absent
+fixture_zyte=present
+llamaparse_api_key=present
+openrouter_api_key=present
+ref_api_key=present
+serper_api_key=present
+tavily_api_key=present
+zyte_api_key=present

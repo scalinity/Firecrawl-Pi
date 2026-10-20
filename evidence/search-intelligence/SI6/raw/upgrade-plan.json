@@ -1,0 +1,58 @@
+{
+  "plan": "upgrade",
+  "from_commit": "5d91186d494159506e224e0242eab3d3c3a12bec",
+  "to_commit": "07eae2b979cc82e1e1c9bd24b9e1d480dbc35a8f",
+  "version_lock_changes": false,
+  "image_changes": [
+    {
+      "service": "access-gateway",
+      "from": "fcpi/access-gateway@sha256:0d6a521895865a1da8161921c3f1e472775b1e51c39ff4d5e5329dd472e59649",
+      "to": "fcpi/access-gateway@sha256:6b9c1ae62837b76d3433d7c764f7133b8033552925f4d437d39109e6a8623f6f"
+    },
+    {
+      "service": "firecrawl-core",
+      "from": "fcpi/firecrawl-api@sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+      "to": "fcpi/firecrawl-api@sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c"
+    },
+    {
+      "service": "mcp-gateway",
+      "from": "fcpi/mcp-gateway@sha256:eebafe80fc3a108490d35ecf834ab3638336e273040d25aad0ecba870b55c172",
+      "to": "fcpi/mcp-gateway@sha256:da485c8256b8f2e13ebebcf2013ae2e75cf580c577cc950e9b9bdc75a2d463b1"
+    },
+    {
+      "service": "retrieval-service",
+      "from": "fcpi/retrieval@sha256:bb2ab368a4ebecf6acc53e2280e31816dbbe22da6724889c7f1641ff6d9c500c",
+      "to": "fcpi/retrieval@sha256:9a68963492add6d6291aa577b6b020560dbe444c6424dca7fef3bf45fec9af12"
+    }
+  ],
+  "data_service_image_changes": [],
+  "ledger_schema": {
+    "database": 3,
+    "candidate_reaches": 3,
+    "migrates": false
+  },
+  "configuration_changes": [],
+  "policy_changes": [
+    "budget.json",
+    "capabilities.json",
+    "egress.json"
+  ],
+  "host_unit_changes": {},
+  "schema_sensitive": false,
+  "last_backup": {
+    "utc": "2026-10-20T07:53:06Z",
+    "snapshot": "1b2ee7f1a073c500b511d7128d3c8965bcfb85c6a3b85f39c4aee4571107185e"
+  },
+  "rollback": "redeploy 5d91186d4941 with scripts/m1/deploy.sh and recreate the changed services; no data restore",
+  "steps": [
+    "review the release and security notes of every image that moves",
+    "resolve every new image to an immutable linux/arm64 digest",
+    "confirm disk and memory headroom (fcpi status)",
+    "fcpi backup, and confirm it with fcpi restore-test",
+    "run the candidate on copied data in an isolated project (the restore test's namespace) with provider dispatch off: contracts, security, MCP, acquisition and migration tests",
+    "pause admissions (fcpi hold upgrade <seconds>) and drain",
+    "cut over: scripts/m1/deploy.sh of the candidate commit, then recreate the changed services",
+    "fcpi verify functional and fcpi status",
+    "accept (fcpi release) or roll back as below"
+  ]
+}
