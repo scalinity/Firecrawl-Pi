@@ -76,6 +76,24 @@ test("--reclassify blocks a captured gate page, leaves every other capture alone
   } finally { t.clean(); }
 });
 
+// A round's own model line says nothing about a query whose judge was never recorded: labels.json says which model judged which queries, and
+// which queries nobody can say about, instead of naming one model for the whole round.
+test("final records which model judged which queries in each round, and the queries whose judge is unrecorded", () => {
+  const t = labelTree({ first: { a: 2 }, second: { a: 3 } });
+  try {
+    t.put(join(t.EVAL, "judges.json"), { schema: "fcpi.si5-judges/v1", rounds: {
+      first: { model: "model-a", queries: { Q002: { models: ["model-a"] }, Q001: { models: ["model-a"] } } },
+      second: { model: "model-b", unrecorded: ["Q003", "Q004"], queries: { Q001: { models: ["model-b"] }, Q005: { models: [] } } } } });
+    const r = run(t.root, "labels.mjs", "final");
+    assert.equal(r.status, 0, r.stderr);
+    const J = t.read(join(t.EVAL, "labels.json")).judges;
+    assert.deepEqual(J.first.queriesByModel, { "model-a": ["Q001", "Q002"] });
+    assert.deepEqual(J.first.unrecorded, [], "a round with every judge recorded lists none");
+    assert.deepEqual(J.second.queriesByModel, { "model-b": ["Q001"], unrecorded: ["Q005"] }, "a judged query with no model in its transcript is not credited to the round's model");
+    assert.deepEqual(J.second.unrecorded, ["Q003", "Q004"]);
+  } finally { t.clean(); }
+});
+
 test("final drops the grade of a document whose capture is blocked, once, with its original labels kept, and says what it matched", () => {
   const t = labelTree({ first: { a: 2, b: 2, c: 4, d: 2 }, second: { a: 3, b: 0, c: 1, d: 2 } });
   try {

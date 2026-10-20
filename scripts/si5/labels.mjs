@@ -43,6 +43,13 @@ let idsFromFileNames = 0;
 const idOf = (x) => { const s = String(x); if (s.endsWith(".md")) { idsFromFileNames++; return s.slice(0, -3); } return s; };
 const judged = (round) => (existsSync(join(J, round)) ? readdirSync(join(J, round)).filter((f) => /^Q\d+\.json$/.test(f)).map((f) => read(join(J, round, f)))
   .map((f) => ({ ...f, judgments: (f.judgments ?? []).map((j) => ({ ...j, id: idOf(j.id) })) })) : []);
+// Which model judged which queries in a round: a round's own model line says nothing about the queries whose judge was never recorded, which
+// are listed apart (judges.mjs: unrecorded), and a judged query whose transcript names no model is not credited to the round's.
+const byModel = (queries = {}) => {
+  const m = {};
+  for (const [q, x] of Object.entries(queries)) for (const model of x.models?.length ? x.models : ["unrecorded"]) (m[model] ??= []).push(q);
+  return Object.fromEntries(Object.entries(m).map(([k, v]) => [k, v.sort()]).sort(([a], [b]) => (a < b ? -1 : 1)));
+};
 const keysOf = (id) => read(join(PRIV, "packet-keys", `${id}.json`));
 // A document whose capture is a bot interstitial (status "blocked", capture.mjs) was shown to its judges as the captured page
 // ("Page capture: captured; shown whole"), so what they graded was a gate presented as the page: a judgment made on a capture
@@ -167,7 +174,7 @@ if (stage === "second") {
   if (changed.length) { console.error(`refused: ${changed.slice(0, 5).join(", ")}`); process.exit(2); }
   const second = new Map(judged("second").flatMap((f) => f.judgments.map((j) => [`${f.query}:${j.id}`, j])));
   const adj = new Map(judged("adjudication").flatMap((f) => f.judgments.map((j) => [`${f.query}:${j.id}`, j])));
-  const out = { schema: "fcpi.si5-labels/v2", labelsScriptSha256: sha(readFileSync(new URL(import.meta.url))), judges: judges.rounds ? Object.fromEntries(Object.entries(judges.rounds).map(([k, r]) => [k, { model: r.model, template: r.template, templateSha256: r.templateSha256 }])) : null,
+  const out = { schema: "fcpi.si5-labels/v2", labelsScriptSha256: sha(readFileSync(new URL(import.meta.url))), judges: judges.rounds ? Object.fromEntries(Object.entries(judges.rounds).map(([k, r]) => [k, { model: r.model, template: r.template, templateSha256: r.templateSha256, queriesByModel: byModel(r.queries), unrecorded: r.unrecorded ?? [] }])) : null,
     inputs: { capturesSha256: existsSync(join(EVAL, "captures.json")) ? sha(readFileSync(join(EVAL, "captures.json"))) : null, gateSha256: sha(readFileSync(new URL("./gate.mjs", import.meta.url))), qualitySha256: sha(readFileSync(new URL("../../services/retrieval/src/quality.mjs", import.meta.url))) }, queries: {} };
   const text = {}, matchedBlocked = new Set();
   const agree = { pairs: 0, exact: 0, relevanceAgree: 0, withinOne: 0, disputes: 0, adjudicated: 0, unverifiedSpans: 0, invalidGrades: 0, versionCapped: 0, fileChanged: 0, captureBlocked: 0, blockedPairs: 0, unjudgedFirst: 0, missingFirst: 0, passageDocs: 0, passageDocsUnjudged: 0, passageRequirements: 0, passageUnverified: 0 };
