@@ -619,3 +619,11 @@ Each is now a test (`si-versions.test.mjs`) that would have failed on the substr
 - The notice phrase list's over- and under-matches.
 - The three record imprecisions above.
 - This update to be committed and the redaction scan rerun after it.
+
+## Owner decision on F03 — 2026-10-20 (not the reviewer's)
+
+The owner decided F03 on the narrower reading, choosing the first of three options put to them: read the criterion as zero version mismatches among the rows an output reports as version-confirmed; check each unverified row's page body for a version (a new feature that still cannot reach zero, since some pages never state one); or withhold the unverified rows (about 87% of the general rows). `docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md` §25 states the criterion that way.
+
+The reviewer's matrix above is unchanged: on the plain reading F03 reads FAIL in every update, and the matrix's counts (9 PASS, 2 FAIL) stand as written. Q03 stays failed by the owner's recorded decision. This section answers the question the updates left open, whether the standing instruction to proceed was an explicit acceptance: the owner has now made it explicitly.
+
+What the narrower reading yields on the sixth release's live run (`SI6/l01/narrow-reading-summary.json`, from `analyze-narrow-reading.mjs`): of 160 returned rows 13 are judged version mismatches; none was confirmed by its URL, and at most one (Q112, a `docs.python.org/3/` page for a Python 2.7 query) could have been confirmed by a documentation scope, which the run's record cannot settle row by row. The earlier figure of 0 on the fifth release (above) was the reviewer's; this one is the bound the sixth release's record supports.
