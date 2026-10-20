@@ -34,6 +34,25 @@ test("interstitials, sign-in gates and refusals are typed failures", () => {
   assert.equal(rl.failure.retryAfter, 7);
 });
 
+// Reddit's human-verification gate: the browser path rendered a page titled "Reddit - Prove your humanity" at the
+// thread's own URL with js_challenge and jsc_token added, and it passed as a rendered 200 (all 92 Reddit pages of the
+// SI5 corpus were this one page). Either sign marks it; the page itself and look-alike URLs do not.
+test("Reddit's human-verification gate is a bot interstitial, by its title or by the parameters its redirect adds", () => {
+  const thread = "https://www.reddit.com/r/nextjs/comments/abc123/route_params/";
+  const gated = `${thread}?solution=0a1b&js_challenge=1&jsc_token=t0k3n&jsc_orig_r=`;
+  const byTitle = "<html><head><title>Reddit - Prove your humanity</title></head><body><p>Please wait while we verify.</p></body></html>";
+  const real = "<html><head><title>Route params : r/nextjs</title></head><body><main><h1>Route params</h1><p>Params are a promise in Next.js 15, so await them before reading a segment.</p></main></body></html>";
+  const reddit = { ...page, requestedUrl: thread };
+  for (const v of [classify({ ...reddit, finalUrl: thread, body: byTitle }), classify({ ...reddit, finalUrl: gated, body: real })]) {
+    assert.deepEqual([v.verdict, v.failure?.class, v.failure?.retryable], ["challenge", "BLOCKED_PUBLIC_CONTENT", true]);
+  }
+  assert.equal(classify({ ...reddit, finalUrl: thread, body: real }).verdict, "adequate", "a Reddit thread is not the gate");
+  assert.equal(classify({ ...reddit, finalUrl: `${thread}?js_challenge=1`, body: real }).verdict, "adequate", "one parameter alone is not the gate");
+  for (const host of ["example.org", "notreddit.com"]) {
+    assert.equal(classify({ ...page, finalUrl: `https://${host}/a?js_challenge=1&jsc_token=t`, body: real }).verdict, "adequate", `${host} is not Reddit`);
+  }
+});
+
 test("missing pages and target errors keep the native result; binaries are binaries", () => {
   assert.equal(classify({ ...page, status: 404, body: "<p>gone</p>" }).verdict, "not_found");
   assert.equal(classify({ ...page, status: 503, body: "<p>down</p>" }).verdict, "target_error");

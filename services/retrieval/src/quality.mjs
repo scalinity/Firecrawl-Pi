@@ -16,7 +16,17 @@ const CHALLENGE_MARKERS = [
   /\bpx-captcha\b/i, /\bddos-guard\b[^<]{0,40}<\/title>/i, /<title>\s*Attention Required! \| Cloudflare\s*<\/title>/i,
   // M6: search engines' own CAPTCHA pages (DuckDuckGo's anomaly check, Google's /sorry/ form) and AWS WAF's challenge.
   /\bid=["']anomaly-modal["']/i, /\/anomaly\.js\b/i, /<form\b[^<>]*\baction=["'][^"']*\/sorry\/index\b/i, /\bid=["']captcha-form["']/i, /\bwindow\.gokuProps\b/,
+  // Reddit's human-verification gate, by its whole title (the other sign is redditGate's, on the URL).
+  /<title>\s*Reddit - Prove your humanity\s*<\/title>/i,
 ];
+// Reddit's gate returns the browser to the page's own URL with js_challenge and jsc_token added; both together, on
+// reddit.com or a subdomain, mark the gate whatever the page then shows.
+const redditGate = (url) => {
+  try {
+    const u = new URL(url);
+    return /(^|\.)reddit\.com$/i.test(u.hostname) && u.searchParams.has("js_challenge") && u.searchParams.has("jsc_token");
+  } catch { return false; }
+};
 // Recognised edge refusals of the connection's address on a public page, read only on a 403: Akamai's "Access
 // Denied" page, whose reference points at its error host (entity-encoded as it serves it), and Cloudflare's
 // "used Cloudflare to restrict access" page (errors 1006-1008, 1020). Each names the edge network, not the site's
@@ -131,7 +141,7 @@ export function classify({ status, contentType, body, finalUrl, requestedUrl, re
   if (status === 404 || status === 410) return { verdict: "not_found", reasons: [`status ${status}`] };
   const text = typeof body === "string" ? body : "";
   const html = isHtml(contentType) && typeof body === "string";
-  const challenge = html && CHALLENGE_MARKERS.some((re) => re.test(text));
+  const challenge = (html && CHALLENGE_MARKERS.some((re) => re.test(text))) || redditGate(finalUrl);
   if (challenge) {
     return { verdict: "challenge", failure: { class: "BLOCKED_PUBLIC_CONTENT", detail: "the target served a bot interstitial", retryable: true, retryAfter: null } };
   }
