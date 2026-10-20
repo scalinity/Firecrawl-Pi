@@ -1,0 +1,56 @@
+# SI5 acceptance: test record
+
+Run by the orchestrator, once, for the independent acceptance review. Deterministic fixtures only: no live provider, no Pi, no spend.
+
+- candidate commit: 273b2e322de3f9b43137be7cfb07cc589d5921fe (code tree clean; this file and its directory are the only additions)
+- workstation: Node 26.12.0, macOS; the services run Node 22 in their images
+- database: postgres@sha256:d74eeac9a635390a49bc21bd49fccd973de707e2a53a76ac49b552b8712ec46f (17.11), disposable, trust auth, 127.0.0.1:55432, labelled fcpi.transient, removed afterwards
+- a skipped test is not a pass; every suite below reports 0 skipped and 0 cancelled
+
+## Suites
+
+retrieval    tests 478  pass 478  fail  0  cancelled 0  skipped 0  todo 0
+    FCPI_TEST_PG=127.0.0.1 PGPORT=55432 node --test --test-concurrency=1 "test/*.test.mjs" in the image layout (rtx.sh)
+gateway      tests 101  pass 101  fail  0  cancelled 0  skipped 0  todo 0
+    cd services/access && FCPI_TEST_PG=127.0.0.1:55432 node --test test/*.test.mjs
+mcp          tests  51  pass  51  fail  0  cancelled 0  skipped 0  todo 0
+    cd services/mcp && FCPI_TEST_PG=127.0.0.1:55432 node --test test/*.test.mjs
+root         tests  72  pass  72  fail  0  cancelled 0  skipped 0  todo 0
+    node --test tests/*.test.mjs
+
+## Contract tests (tests/contracts), one file at a time
+
+Command per file: FCPI_TEST_PG=127.0.0.1:55432 PGPORT=55432 node --test --test-timeout=90000 <file>, killed after 150 s (none was).
+
+m1-gateway.test.mjs                exit 1   tests  15  pass   0  fail 15  skipped 0
+m3-gateway.test.mjs                exit 0   tests  46  pass  46  fail  0  skipped 0
+m4-gateway-mcp.test.mjs            exit 0   tests   4  pass   4  fail  0  skipped 0
+m4-grammars.test.mjs               exit 0   tests   3  pass   3  fail  0  skipped 0
+m5-ledger-migration.test.mjs       exit 0   tests   1  pass   1  fail  0  skipped 0
+m7-gateway-store.test.mjs          exit 0   tests   4  pass   4  fail  0  skipped 0
+m7-ledger-migration.test.mjs       exit 0   tests   1  pass   1  fail  0  skipped 0
+m8-admission-copies.test.mjs       exit 0   tests   2  pass   2  fail  0  skipped 0
+m8-restore-compose.test.mjs        exit 0   tests   5  pass   5  fail  0  skipped 0
+m9-client-proof.test.mjs           exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-collection.test.mjs             exit 0   tests   7  pass   7  fail  0  skipped 0
+m9-corpus-v2.test.mjs              exit 0   tests  27  pass  27  fail  0  skipped 0
+m9-evidence-bound.test.mjs         exit 0   tests   2  pass   2  fail  0  skipped 0
+m9-foreign.test.mjs                exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-incident-hook.test.mjs          exit 0   tests   4  pass   4  fail  0  skipped 0
+m9-incident-input.test.mjs         exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-live.test.mjs                   exit 0   tests   5  pass   5  fail  0  skipped 0
+m9-notices.test.mjs                exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-redis.test.mjs                  exit 0   tests   4  pass   4  fail  0  skipped 0
+m9-resource-reuse.test.mjs         exit 0   tests  20  pass  20  fail  0  skipped 0
+m9-restore-incidents.test.mjs      exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-review-bound.test.mjs           exit 0   tests   2  pass   2  fail  0  skipped 0
+m9-root-proof.test.mjs             exit 0   tests   1  pass   1  fail  0  skipped 0
+m9-validation-policy.test.mjs      exit 0   tests   2  pass   2  fail  0  skipped 0
+paid-dispatch-switch.test.mjs      exit 0   tests   3  pass   3  fail  0  skipped 0
+pre-m9-verdicts.test.mjs           exit 0   tests   4  pass   4  fail  0  skipped 0
+
+Total: 152 pass, 15 fail, 0 skipped over 26 files.
+
+The 15 failures are all tests/contracts/m1-gateway.test.mjs: the M1-era test starts the gateway with configuration keys the current gateway rejects (unknown configuration keys: PI_GATEWAY_TOKEN_HASHES_FILE, PI_PERMITTED_TARGET_ORIGINS), so the gateway exits 1 before any test runs. A known baseline failure of a stale historical test, unrelated to search intelligence.
+
+Running every contract file in one `node --test tests/contracts/*.test.mjs` invocation hung: the files run in parallel and the gateway tests share ports; one invocation was stopped after 41 minutes. Each file passes (or fails as above) alone.
