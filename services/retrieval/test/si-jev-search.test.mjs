@@ -3,7 +3,7 @@
 // decision layer's identity, and candidate text kept as data that can neither instruct Jev nor undo a hard constraint.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { harness, request } from "./si-helpers.mjs";
+import { harness, request, refFixture } from "./si-helpers.mjs";
 
 // An OpenRouter Decisions fixture: every question answered by its type; score(id, state) picks a relevance level.
 const jev = ({ model = "typesafe/jev-1.14-20261001", score = () => 1, fail = null } = {}) => (q, entry) => {
@@ -33,6 +33,31 @@ test("Jev's relevance is blended with fusion: a third-ranked result it judges a 
     assert.equal(s.coverage.general.successful, 5, "Jev's success is not discovery coverage");
     assert.ok(s.usage.some((u) => u.provider === "jev"), "its spend is reported");
   } finally { await h.close(); }
+});
+
+// Spec §24.1: a document only one provider found, and that the semantic layer judges a direct answer, reaches the output position it is
+// independently expected to hold (first), whichever provider found it. The shortlist test proves it is offered to Jev; this proves the
+// whole path, for each of the five engines and both documentation providers.
+test("a document only one provider found, judged a direct answer, comes out first, for every provider", async () => {
+  const targets = { serper: "https://serper.example.org/doc/3", brave: "https://brave.example.org/doc/3", exa: "https://exa.example.org/doc/3", deepseek: "https://deepseek.example.org/doc/3", tavily: "https://tavily.example.org/doc/3" };
+  for (const [provider, target] of Object.entries(targets)) {
+    const h = await harness({ handlers: { openrouter: jev({ score: (id, state) => (state.candidates[id]?.url === target ? 4 : 0) }) } });
+    try {
+      const r = await search(h);
+      assert.equal(r.body.web[0].url, target, `${provider}'s own document rose to the top`);
+      assert.ok(r.body.web[0].fcpi.search.ranks.presemantic > 1, `${provider}'s document was not first before Jev's advice`);
+      assert.deepEqual(r.body.web[0].fcpi.search.observations.map((o) => o.provider), [provider], "and only that provider found it");
+    } finally { await h.close(); }
+  }
+  const docs = { context7: "https://vuejs.org/guide/essentials/reactivity-fundamentals.html", ref: "https://ref.example.org/docs/3" };
+  for (const [provider, target] of Object.entries(docs)) {
+    const h = await harness({ handlers: { openrouter: jev({ score: (id, state) => (state.candidates[id]?.url === target ? 4 : 0) }), ref: refFixture(),
+      context7: () => ({ status: 200, body: { codeSnippets: [{ libraryId: "/vuejs/docs", codeTitle: "ref()", codeDescription: "Declare reactive state", codeLanguage: "javascript", codeList: [{ language: "javascript", code: "const n = ref(0)" }], codeId: docs.context7, pageTitle: "Reactivity" }], infoSnippets: [] } }) } });
+    try {
+      const r = await search(h, { intelligence: { documentation: "required" } });
+      assert.equal(r.body.web[0].url, target, `${provider}'s own document rose to the top`);
+    } finally { await h.close(); }
+  }
 });
 
 test("a Jev outage leaves the deterministic ranking, says so, and the degraded answer is not stored", async () => {
