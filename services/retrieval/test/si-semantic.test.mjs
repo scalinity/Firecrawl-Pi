@@ -51,8 +51,14 @@ test("Ref: a hosted block without a page, section or breadcrumb is a hit when it
   for (const n of ["Ref is undergoing maintenance; follow updates at\nhttps://status.example.org/incident", "Your plan has changed, details are on the billing page\nhttps://billing.example.org/plans/current",
     "Please verify your account to continue searching\nhttps://accounts.example.org/verify/email", "Your trial has ended. Continue at\nhttps://billing.example.org/trial", "Your account has been suspended, see\nhttps://help.example.org/suspended",
     "Search is temporarily degraded, see\nhttps://status.example.org/"]) assert.deepEqual(parseRefSearch(text(n)), notice, n);
-  for (const r of ["Configure rate limits for the API gateway\nhttps://docs.example.org/gateway/limits", "Upgrade guide from Vite 5 to Vite 6\nhttps://docs.example.org/vite/migration", "How to verify a webhook signature\nhttps://docs.example.org/webhooks/verify"])
+  for (const r of ["Configure rate limits for the API gateway\nhttps://docs.example.org/gateway/limits", "Upgrade guide from Vite 5 to Vite 6\nhttps://docs.example.org/vite/migration", "How to verify a webhook signature\nhttps://docs.example.org/webhooks/verify",
+    "Upgrade your app to React 19\nhttps://react.dev/blog/upgrade", "Save a payment method for future payments\nhttps://docs.example.org/payments/save", "Handling 429 Too Many Requests responses\nhttps://docs.example.org/http/429",
+    "Find your API key in the dashboard\nhttps://docs.example.org/keys", "Customer billing portal integration guide\nhttps://docs.example.org/billing/portal", "What to do when the rate limit exceeded error appears\nhttps://docs.example.org/errors/rate",
+    "Retry on failure: please try again with exponential backoff\nhttps://docs.example.org/retry"])
     assert.equal(parseRefSearch(text(r)).kind, "results", r);
+  for (const n of ["Credits depleted. Add more at\nhttps://billing.example.org/credits", "Service unavailable, we are down for maintenance\nhttps://status.example.org/", "You have hit the free plan cap; sign up for Pro\nhttps://example.org/pricing",
+    "Sign up to continue searching\nhttps://example.org/signup", "This API key is invalid or revoked\nhttps://example.org/keys", "Monthly allowance used\nhttps://example.org/usage", "You have exceeded your rate limit, try again in 60 seconds\nhttps://example.org/limits"])
+    assert.deepEqual(parseRefSearch(text(n)), notice, n);
   assert.equal(parseRefSearch(text("Configure rate limit settings\nhttps://docs.example.org/a", "Upgrade guide for plan migrations\nhttps://docs.example.org/b")).kind, "results");
   assert.equal(parseRefSearch(text("acme/billing - rate-limit-plans\nhttps://github.com/acme/billing/blob/main/docs/limits.md")).kind, "results");
   assert.equal(parseRefSearch(text("Virtual field for defining a composite primary key on a model.\nhttps://docs.djangoproject.com/en/dev/ref/models/fields")).kind, "results");

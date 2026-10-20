@@ -69,10 +69,14 @@ const OWN_SITE = /(^|\.)ref\.tools$/i;
 // words ("your trial", "credits remaining", "please verify", "temporarily degraded"): a documentation title that merely mentions a limit, an upgrade or a verification is a result.
 const REPO_FORM = /^[\w.-]+\/[\w.-]+ - \S/;
 const NOTICE = new RegExp([
-  "\\byour (plan|account|trial|subscription|credits?|quota|usage|api key|free tier)\\b", "\\b(credits?|quota|searches|requests) (remaining|exhausted|exceeded|reached|left|used up)\\b", "\\b(out of|no more|no remaining) (credits|searches|requests)\\b",
-  "\\b(plan|quota|limit|trial|subscription) (has )?(ended|expired|exceeded|changed|reached)\\b", "\\bupgrade (your|to (a )?(paid|pro|premium|higher))\\b", "\\b(trial|account|subscription) (has been )?(ended|expired|suspended|disabled|locked|canceled|cancelled)\\b",
-  "\\b(temporarily|currently) (degraded|unavailable|down|disabled)\\b", "\\b(undergoing|under|scheduled) maintenance\\b", "\\bexperiencing (issues|difficulties|an outage)\\b", "\\bplease (verify|upgrade|contact|try again|log ?in|sign ?in|subscribe|add)\\b",
-  "\\btry again (later|in)\\b", "\\btoo many requests\\b", "\\brate limit(ed)? (exceeded|reached)\\b", "\\bbilling (page|portal|details|information)\\b", "\\bpayment (required|failed|method)\\b"].join("|"), "i");
+  // The account: a statement about it, or an instruction addressed to the reader. A title that merely mentions a key, a limit, a payment or an upgrade is a result.
+  "\\byour (plan|account|trial|subscription|credits?|quota|usage|free tier)\\b", "\\byour api key (is|has|was|expired)\\b", "\\bapi key (is )?(invalid|revoked|expired|missing)\\b",
+  "\\b(credits?|quota|searches|requests) (remaining|exhausted|depleted|exceeded|reached|left|used up|used)\\b", "\\b(out of|no more|no remaining) (credits|searches|requests)\\b", "\\b(monthly )?allowance (used|exceeded|reached|exhausted)\\b",
+  "\\b(plan|quota|limit|trial|subscription) has (ended|expired|been (exceeded|reached)|changed)\\b", "\\b(free )?plan cap\\b", "\\bupgrade (your (plan|account|subscription|tier)|to (a )?(paid|pro|premium|higher))\\b",
+  "\\b(trial|account|subscription) (has been )?(ended|expired|suspended|disabled|locked|canceled|cancelled)\\b", "\\byou (have |'ve )?(exceeded|reached|hit) (your|the) (rate )?(limit|quota|allowance)\\b",
+  "\\byou (have |'ve )?(sent|made) too many requests\\b", "\\bsign up (for|to continue)\\b", "\\bplease (verify|upgrade|contact|log ?in|sign ?in|subscribe)\\b", "\\bthe billing (page|portal|details|information)\\b", "\\bpayment (required|failed)\\b",
+  // The service.
+  "\\b(temporarily|currently) (degraded|unavailable|down|disabled)\\b", "\\bservice (is )?unavailable\\b", "\\b(undergoing|under|scheduled|down for) maintenance\\b", "\\bexperiencing (issues|difficulties|an outage)\\b", "\\btry again (later|in \\d)"].join("|"), "i");
 function hostedBlockOf(text) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lines.length < 2 || !/^https?:\/\/\S+$/.test(lines.at(-1))) return null;
