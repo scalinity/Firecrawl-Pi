@@ -40,6 +40,12 @@ const idOf = (x) => { const s = String(x); if (s.endsWith(".md")) { idsFromFileN
 const judged = (round) => (existsSync(join(J, round)) ? readdirSync(join(J, round)).filter((f) => /^Q\d+\.json$/.test(f)).map((f) => read(join(J, round, f)))
   .map((f) => ({ ...f, judgments: (f.judgments ?? []).map((j) => ({ ...j, id: idOf(j.id) })) })) : []);
 const keysOf = (id) => read(join(PRIV, "packet-keys", `${id}.json`));
+// A document whose capture is a bot interstitial (status "blocked", capture.mjs) was judged on no page of its own: it is not
+// adjudicated, and its grade is dropped at final, whatever its packet showed the judge (spec §23.1: inaccessible material is
+// unjudged, not irrelevant).
+const blockedUrls = new Set(existsSync(join(EVAL, "captures.json")) ? read(join(EVAL, "captures.json")).captures.filter((c) => c.status === "blocked").map((c) => c.url) : []);
+const urlMemo = {};
+const urlsOf = (q) => (urlMemo[q] ??= Object.fromEntries(Object.entries(keysOf(q).ids).map(([u, k]) => [k, u])));
 const docFile = (q, doc) => join(PRIV, "packets", q, "docs", `${doc}.md`);
 // The scale (judge-prompt.md): 0-3, or null for unjudged. Anything else is no grade: never coerced into one.
 const GRADES = new Set([0, 1, 2, 3]);
@@ -133,7 +139,7 @@ if (stage === "second") {
   const disputes = {};
   for (const f of judged("second")) for (const j of f.judgments) {
     const a = first.get(`${f.query}:${j.id}`);
-    if (!a) continue;
+    if (!a || blockedUrls.has(urlsOf(f.query)[j.id])) continue;
     const g1 = gradeOf(a.grade) ?? null, g2 = gradeOf(j.grade) ?? null;
     const differs = (g1 === null) !== (g2 === null) || (g1 !== null && (Math.abs(g1 - g2) >= 2 || relevant(g1) !== relevant(g2)));
     if (differs) (disputes[f.query] ??= []).push({ id: j.id, first: { grade: g1, reason: a.reason, passage: a.passage, versionStatus: a.versionStatus }, second: { grade: g2, reason: j.reason, passage: j.passage, versionStatus: j.versionStatus } });
@@ -157,7 +163,7 @@ if (stage === "second") {
   const adj = new Map(judged("adjudication").flatMap((f) => f.judgments.map((j) => [`${f.query}:${j.id}`, j])));
   const out = { schema: "fcpi.si5-labels/v2", labelsScriptSha256: sha(readFileSync(new URL(import.meta.url))), judges: judges.rounds ? Object.fromEntries(Object.entries(judges.rounds).map(([k, r]) => [k, { model: r.model, template: r.template, templateSha256: r.templateSha256 }])) : null, queries: {} };
   const text = {};
-  const agree = { pairs: 0, exact: 0, relevanceAgree: 0, withinOne: 0, disputes: 0, adjudicated: 0, unverifiedSpans: 0, invalidGrades: 0, versionCapped: 0, fileChanged: 0, unjudgedFirst: 0, missingFirst: 0, passageDocs: 0, passageDocsUnjudged: 0, passageRequirements: 0, passageUnverified: 0 };
+  const agree = { pairs: 0, exact: 0, relevanceAgree: 0, withinOne: 0, disputes: 0, adjudicated: 0, unverifiedSpans: 0, invalidGrades: 0, versionCapped: 0, fileChanged: 0, captureBlocked: 0, unjudgedFirst: 0, missingFirst: 0, passageDocs: 0, passageDocsUnjudged: 0, passageRequirements: 0, passageUnverified: 0 };
   for (const f of judged("first")) {
     const keys = keysOf(f.query), urls = Object.fromEntries(Object.entries(keys.ids).map(([u, k]) => [k, u]));
     const expected = new Set(read(join(PRIV, "packets", f.query, "index.json")).documents.map((d) => d.slice(0, -3)));
@@ -173,6 +179,7 @@ if (stage === "second") {
       if (grade === undefined) { grade = null; verified = false; flag = "invalid_grade"; agree.invalidGrades++; }
       // The file the judge read: a different one now (or no recorded hash) leaves the label unverifiable.
       if (!file || sha(sec.text) !== file.sha256) { grade = null; verified = false; flag = "file_changed"; agree.fileChanged++; }
+      else if (blockedUrls.has(urls[j.id])) { grade = null; verified = false; flag = "capture_blocked"; agree.captureBlocked++; }
       const versionStatus = VERSION.has(final.versionStatus) ? final.versionStatus : null;
       if (grade !== null && grade > 1 && versionStatus === "mismatch") { grade = 1; flag = "version_capped"; agree.versionCapped++; }
       const where = locate(sec, final.passage, final.section);

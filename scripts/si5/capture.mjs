@@ -8,12 +8,16 @@
 // a reserve stays for every other use of the platform. Markdown only, main content (the platform's defaults).
 // Captures are private (page text stays out of Git): eval/private/captures/<sha>.json; eval/captures.json lists each URL's
 // outcome and content hash. Restartable: a URL already captured is skipped. Time-sensitive queries go first.
+// A page that is a bot interstitial (Reddit's human-verification gate) is stored as blocked, not captured (gate.mjs);
+// --reclassify applies that to the captures already stored, with no network.
 //   node scripts/si5/capture.mjs [--ceiling 4000] [--max N]
+//   node scripts/si5/capture.mjs --reclassify
 import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
 import { sshForward } from "../playground/server.mjs";
+import { gated, asBlocked } from "./gate.mjs";
 
 const root = new URL("../../", import.meta.url).pathname;
 const EVAL = join(root, "evidence/search-intelligence/SI5/eval"), CAP = join(EVAL, "private/captures"), STATE = join(EVAL, "private/capture-state.json");
@@ -24,6 +28,27 @@ const sha = (s) => createHash("sha256").update(s).digest("hex");
 const fileOf = (url) => join(CAP, `${sha(url).slice(0, 32)}.json`);
 const say = (o) => process.stderr.write(`${new Date().toISOString()} ${JSON.stringify(o)}\n`);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+// The public list: each pooled URL's capture outcome and hash, no text. "failed" counts every capture that is not one
+// (blocked ones included); "blocked" counts the bot interstitials among them.
+function writeList() {
+  const list = readdirSync(CAP).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(join(CAP, f), "utf8")))
+    .map((c) => ({ url: c.url, capturedAt: c.capturedAt, status: c.status, statusCode: c.statusCode, proxyUsed: c.proxyUsed, error: c.error, markdownSha256: c.markdownSha256, markdownChars: c.markdownChars }))
+    .sort((a, b) => (a.url < b.url ? -1 : 1));
+  writeFileSync(join(EVAL, "captures.json"), JSON.stringify({ schema: "fcpi.si5-captures/v1", captured: list.filter((c) => c.status === "captured").length, failed: list.filter((c) => c.status !== "captured").length, blocked: list.filter((c) => c.status === "blocked").length, captures: list }, null, 1) + "\n");
+  return list;
+}
+// No network: a capture stored as captured that is a bot interstitial becomes blocked. Safe to repeat.
+if (process.argv.includes("--reclassify")) {
+  let n = 0;
+  for (const f of readdirSync(CAP).filter((x) => x.endsWith(".json"))) {
+    const c = JSON.parse(readFileSync(join(CAP, f), "utf8"));
+    if (c.status === "captured" && gated(c)) { writeFileSync(join(CAP, f), JSON.stringify(asBlocked(c)) + "\n"); n++; }
+  }
+  const list = writeList();
+  say({ reclassified: n, blocked: list.filter((c) => c.status === "blocked").length, done: list.length });
+  process.exit(0);
+}
 
 const corpus = JSON.parse(readFileSync(join(root, "evidence/search-intelligence/SI0/corpus/corpus-v1.json"), "utf8"));
 const category = Object.fromEntries(corpus.queries.map((q) => [q.id, q.category]));
@@ -92,18 +117,17 @@ for (let i = 0; i < wanted.length; i += BATCH) {
     const md = typeof d?.markdown === "string" ? d.markdown : null;
     const m = d?.metadata ?? {};
     const good = !!md && md.trim().length > 0 && !m.error && (m.statusCode ?? 200) < 400;
-    if (good) ok++;
-    writeFileSync(fileOf(url), JSON.stringify({ url, capturedAt: at, jobId: sub.data.id, status: good ? "captured" : "failed", statusCode: m.statusCode ?? null, finalUrl: m.url ?? null,
+    const rec = { url, capturedAt: at, jobId: sub.data.id, status: good ? "captured" : "failed", statusCode: m.statusCode ?? null, finalUrl: m.url ?? null,
       title: m.title ?? null, contentType: m.contentType ?? null, proxyUsed: m.proxyUsed ?? null, error: good ? null : String(m.error ?? errOf.get(url) ?? (d ? (m.statusCode >= 400 ? `HTTP ${m.statusCode}` : "empty_content") : "not_returned")).slice(0, 300),
-      jobState: st?.data?.status ?? null, markdown: md, markdownSha256: md ? sha(md) : null, markdownChars: md?.length ?? 0 }) + "\n");
+      jobState: st?.data?.status ?? null, markdown: md, markdownSha256: md ? sha(md) : null, markdownChars: md?.length ?? 0 };
+    // A bot interstitial is no capture of the page: stored blocked, with its hashes (gate.mjs).
+    const saved = good && gated(rec) ? asBlocked(rec) : rec;
+    if (saved.status === "captured") ok++;
+    writeFileSync(fileOf(url), JSON.stringify(saved) + "\n");
   }
   writeFileSync(STATE, JSON.stringify(state) + "\n");
   say({ batch: i / BATCH + 1, of: Math.ceil(wanted.length / BATCH), job: st?.data?.status ?? null, ok, failed: urls.length - ok });
 }
 
-// The public list: each pooled URL's capture outcome and hash, no text.
-const list = readdirSync(CAP).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(join(CAP, f), "utf8")))
-  .map((c) => ({ url: c.url, capturedAt: c.capturedAt, status: c.status, statusCode: c.statusCode, proxyUsed: c.proxyUsed, error: c.error, markdownSha256: c.markdownSha256, markdownChars: c.markdownChars }))
-  .sort((a, b) => (a.url < b.url ? -1 : 1));
-writeFileSync(join(EVAL, "captures.json"), JSON.stringify({ schema: "fcpi.si5-captures/v1", captured: list.filter((c) => c.status === "captured").length, failed: list.filter((c) => c.status !== "captured").length, captures: list }, null, 1) + "\n");
+const list = writeList();
 say({ done: list.length });

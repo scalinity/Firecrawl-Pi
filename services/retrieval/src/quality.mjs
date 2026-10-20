@@ -21,7 +21,7 @@ const CHALLENGE_MARKERS = [
 ];
 // Reddit's gate returns the browser to the page's own URL with js_challenge and jsc_token added; both together, on
 // reddit.com or a subdomain, mark the gate whatever the page then shows.
-const redditGate = (url) => {
+export const redditGate = (url) => {
   try {
     const u = new URL(url);
     return /(^|\.)reddit\.com$/i.test(u.hostname) && u.searchParams.has("js_challenge") && u.searchParams.has("jsc_token");
