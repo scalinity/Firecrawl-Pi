@@ -68,6 +68,13 @@ test("under a hard version a general candidate whose URL states another release 
   assert.deepEqual(r.dropped.versionMismatch, ["https://vuejs.org/v2/guide/reactivity"]);
   const status = (c) => c.constraintStatus.filter((s) => s.constraint === "version").map((s) => s.status);
   assert.deepEqual(r.kept.map(status), [["satisfied"], ["unverified"], ["unverified"], []], "a documentation candidate carries no URL verdict");
+  // A documentation candidate whose provider scope does not confirm the version (Ref has no version scope; a Context7 scope can be unknown) is checked by its URL like any other.
+  const docs = (url, scopes) => ({ url, documentation: { scopes } });
+  const d = prepareCandidates("ref", [docs("https://vuejs.org/v2/guide/components", [{ status: "unknown" }]), docs("https://v3.vuejs.org/guide/components", [{ status: "unknown" }]),
+    docs("https://docs.example.org/vue/intro", []), docs("https://vuejs.org/v2/guide/rendering", [{ status: "scope_only" }])], strict, versions);
+  assert.deepEqual(d.kept.map((c) => c.url), ["https://v3.vuejs.org/guide/components", "https://docs.example.org/vue/intro", "https://vuejs.org/v2/guide/rendering"]);
+  assert.deepEqual(d.dropped.versionMismatch, ["https://vuejs.org/v2/guide/components"]);
+  assert.deepEqual(d.kept.map(status), [["satisfied"], ["unverified"], []], "a scope-confirmed candidate keeps the scope's word and carries no URL verdict");
   // No hard version: nothing is checked and no version status is added.
   const plain = prepareCandidates("brave", cands, strict);
   assert.equal(plain.kept.length, 5);

@@ -69,6 +69,26 @@ test("a URL that names the library and states another release is a known mismatc
   assert.equal(urlVersionCheck("https://v7.vite.dev/guide", []).status, "unknown");
 });
 
+// The library tie is structural: the name is a whole host label (or the label with a site affix: djangoproject, nodejs, vuejs), or a whole path segment that comes
+// before the version, or, for owner/name, two consecutive segments. A substring of another product's name or host ties nothing (SI6 acceptance review, second round).
+test("another product's versioned page is not shown to be another release of the requested library", () => {
+  const check = (url, name, version) => urlVersionCheck(url, [{ name, version }]).status;
+  for (const [url, name, version] of [
+    ["https://github.com/brianc/node-postgres/tree/v8.11.0/docs", "node", "18"], ["https://node-postgres.com/8.11/features/pooling", "node", "18"],
+    ["https://docs.celeryq.dev/en/v5.3.6/django/first-steps-with-django.html", "django", "5.2"], ["https://reactrouter.com/6.28.0/start/overview", "react", "19"],
+    ["https://preactjs.com/guide/v10/getting-started", "react", "19"], ["https://docs.python-requests.org/en/2.31.0/", "python", "3.14"], ["https://next-auth.js.org/v3/getting-started/introduction", "next", "15"],
+    ["https://v2.vitest.dev/guide/", "vite", "6"], ["https://geopandas.org/en/v0.14.4/", "pandas", "2.0"], ["https://cloudnative-pg.io/docs/1.29/postgresql_conf/", "postgresql", "17"],
+    ["https://docs.aws.amazon.com/aws/6.0.0/guide/", "hashicorp/aws", "5"], ["https://example.org/hashicorp/other/aws/6.0.0/", "hashicorp/aws", "5"]])
+    assert.equal(check(url, name, version), "unknown", `${url} for ${name}@${version}`);
+  // The forms that do name the library keep working: a library-owned site, the owner/name of a repository or a registry, and a path that names it before the release.
+  for (const [url, name, version, want] of [
+    ["https://github.com/vitejs/vite/blob/v7.0.0/docs/guide/migration.md", "vite", "6", "mismatch"], ["https://github.com/python/cpython/blob/main/Doc/whatsnew/2.6.rst", "python", "2.7", "mismatch"],
+    ["https://docs.python.org/3.4/whatsnew/index.html", "python", "4.0", "mismatch"], ["https://pandas.pydata.org/pandas-docs/version/1.5/reference/api/pandas.DataFrame.append.html", "pandas", "2.0", "mismatch"],
+    ["https://vuejs.org/v2/guide/reactivity", "vue", "3.5", "mismatch"], ["https://v3.vuejs.org/guide/reactivity", "vue", "3.5", "match"], ["https://nextjs.org/docs/14/app", "next", "15", "unknown"],
+    ["https://registry.terraform.io/providers/hashicorp/aws/6.28.0/docs/resources/s3_bucket", "hashicorp/aws", "5", "mismatch"]])
+    assert.equal(check(url, name, version), want, `${url} for ${name}@${version}`);
+});
+
 test("the hard versions of a request are its libraries with a version other than latest", () => {
   assert.deepEqual(hardVersions({ intelligence: { libraries: [lib("python", "4.0"), lib("react"), lib("node", "latest"), lib("vue", "3.5")] } }), [{ name: "python", version: "4.0" }, { name: "vue", version: "3.5" }]);
   assert.deepEqual(hardVersions({ intelligence: {} }), []);

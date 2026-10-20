@@ -65,6 +65,7 @@ export function checkConstraints(doc, constraints) {
 }
 
 const versionKey = (c) => c.documentation?.observedVersion ?? null;
+const scopeConfirms = (c) => (c.documentation?.scopes ?? []).some((s) => s.status === "scope_only" || s.status === "match");
 export const documentIdOf = (url, observedVersion) => sha256(`${url}\n${observedVersion ?? ""}`).slice(0, 24);
 
 // One provider's candidates, normalized and constrained. Returns the kept candidates (each with its document identity) and
@@ -77,10 +78,11 @@ export function prepareCandidates(provider, candidates, constraints, versions = 
     const doc = { ...c, canonicalUrl: n.url, host: n.host, fragment: n.fragment };
     const check = checkConstraints(doc, constraints);
     if (!check.ok) { dropped.constraint[check.why] = (dropped.constraint[check.why] ?? 0) + 1; continue; }
-    // A hard version (spec §11.2): a general candidate whose URL states another release is removed here, before ranking, whatever Jev would say. A
-    // documentation candidate is left to its provider's scope. A kept row says whether its URL confirmed the version, so "unverified" is never silent.
+    // A hard version (spec §11.2): a candidate whose URL states another release is removed here, before ranking, whatever Jev would say. A documentation
+    // candidate whose provider scope confirms the version is left to that scope; one without (Ref has no version scope, a Context7 scope can be unknown) is
+    // checked by its URL like any other. A kept row says whether its URL confirmed the version, so "unverified" is never silent.
     const statuses = [...check.statuses];
-    if (versions.length && !c.documentation) {
+    if (versions.length && !scopeConfirms(c)) {
       const v = urlVersionCheck(n.url, versions);
       if (v.status === "mismatch") { dropped.constraint.version_mismatch = (dropped.constraint.version_mismatch ?? 0) + 1; dropped.versionMismatch.push(n.url); continue; }
       statuses.push(v.status === "match" ? { constraint: "version", status: "satisfied", basis: "url" } : { constraint: "version", status: "unverified" });
