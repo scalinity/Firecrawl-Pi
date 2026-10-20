@@ -3,7 +3,7 @@
 // (a grade outside the scale stays wrong, and is reported, never fixed up), and a long packet is split by document.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseReply, checkJudgments, chunkDocs } from "../scripts/si5/judge-api-lib.mjs";
+import { parseReply, checkJudgments, splitJudgments, chunkDocs } from "../scripts/si5/judge-api-lib.mjs";
 
 const ok = (id, over = {}) => ({ id, grade: 2, basis: "page", passage: "x".repeat(30), section: "page", reason: "supports a part", sourceType: "official_docs", versionStatus: "not_applicable", requirements: [], questions: [], ...over });
 const reply = (q, ids, over = {}) => ({ schema: "fcpi.si5-judgments/v1", query: q, judgments: ids.map((i) => ok(i)), ...over });
@@ -40,6 +40,24 @@ test("the scale is held as written: null is a grade of unjudged, and 4, a numeri
   assert.match(one({ sourceType: "blog" }), /sourceType/);
   assert.match(one({ versionStatus: "maybe" }), /versionStatus/);
   assert.match(one({ reason: "" }), /reason/);
+});
+
+test("a partial reply keeps its valid judgments and names what to ask again: only the documents it left out or got wrong", () => {
+  const ids = ["d1", "d2", "d3"];
+  const all = splitJudgments(reply("Q001", ids), "Q001", ids);
+  assert.deepEqual(all.valid.map((j) => j.id), ids);
+  assert.deepEqual(all.problems, []);
+  const part = splitJudgments(reply("Q001", ["d1"]), "Q001", ids);
+  assert.deepEqual(part.valid.map((j) => j.id), ["d1"], "an early stop keeps the one judgment it gave");
+  const bad = splitJudgments({ ...reply("Q001", []), judgments: [ok("d1"), ok("d2", { grade: 4 }), ok("d3")] }, "Q001", ids);
+  assert.deepEqual(bad.valid.map((j) => j.id), ["d1", "d3"], "a judgment off the scale is left out, not repaired");
+  assert.match(bad.problems.join(" | "), /d2: grade/);
+  const dup = splitJudgments({ ...reply("Q001", []), judgments: [ok("d1", { grade: 1 }), ok("d1", { grade: 3 }), ok("dX")] }, "Q001", ids);
+  assert.deepEqual(dup.valid.map((j) => [j.id, j.grade]), [["d1", 1]], "the first judgment of a document stands");
+  assert.match(dup.problems.join(" | "), /duplicate d1.*unexpected dX|unexpected dX.*duplicate d1/);
+  const other = splitJudgments(reply("Q002", ids), "Q001", ids);
+  assert.deepEqual(other.valid, [], "a reply for another query yields nothing");
+  assert.match(other.problems.join(" | "), /query/);
 });
 
 test("a long packet is split by document into groups under the limit, in order, and a document over it stands alone", () => {

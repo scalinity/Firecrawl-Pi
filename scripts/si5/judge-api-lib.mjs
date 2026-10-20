@@ -14,6 +14,17 @@ export function parseReply(text) {
   try { return JSON.parse(b > a ? s.slice(a, b + 1) : s.slice(a)); } catch (e) { throw new Error(`the reply is not valid JSON: ${e.message}`); }
 }
 
+// What is wrong with one judgment's own fields; nothing when it is well formed.
+function fieldErrors(j) {
+  const id = j.id, errs = [];
+  if (!GRADES.includes(j.grade)) errs.push(`${id}: grade ${j.grade} is not on the scale (0 to 3, or null)`);
+  if (!BASIS.includes(j.basis)) errs.push(`${id}: basis ${j.basis} is not one of ${BASIS.join(", ")}`);
+  if (!SOURCE_TYPES.includes(j.sourceType)) errs.push(`${id}: sourceType ${j.sourceType} is not a known type`);
+  if (!VERSION_STATUS.includes(j.versionStatus)) errs.push(`${id}: versionStatus ${j.versionStatus} is not one of ${VERSION_STATUS.join(", ")}`);
+  if (typeof j.reason !== "string" || !j.reason.trim()) errs.push(`${id}: reason is empty`);
+  return errs;
+}
+
 // The reasons a parsed reply is not the judgment file for packet q whose documents are ids; none when it is.
 export function checkJudgments(r, q, ids) {
   const errs = [];
@@ -26,14 +37,30 @@ export function checkJudgments(r, q, ids) {
     if (!ids.includes(id)) { errs.push(`unexpected ${id}`); continue; }
     if (seen.has(id)) errs.push(`duplicate ${id}`);
     seen.add(id);
-    if (!GRADES.includes(j.grade)) errs.push(`${id}: grade ${j.grade} is not on the scale (0 to 3, or null)`);
-    if (!BASIS.includes(j.basis)) errs.push(`${id}: basis ${j.basis} is not one of ${BASIS.join(", ")}`);
-    if (!SOURCE_TYPES.includes(j.sourceType)) errs.push(`${id}: sourceType ${j.sourceType} is not a known type`);
-    if (!VERSION_STATUS.includes(j.versionStatus)) errs.push(`${id}: versionStatus ${j.versionStatus} is not one of ${VERSION_STATUS.join(", ")}`);
-    if (typeof j.reason !== "string" || !j.reason.trim()) errs.push(`${id}: reason is empty`);
+    errs.push(...fieldErrors(j));
   }
   for (const id of ids) if (!seen.has(id)) errs.push(`missing ${id}`);
   return errs;
+}
+
+// The well-formed judgments of a reply for packet q (the first of a document, none of an unexpected one), and the problems found
+// in the rest. A reply that stopped early or got some documents wrong still yields what it judged correctly; the caller asks
+// again for the documents it did not get. Each document is judged on its own, so asking for fewer changes no judgment.
+export function splitJudgments(r, q, ids) {
+  const problems = [], valid = [], seen = new Set();
+  if (r?.schema !== SCHEMA) problems.push(`schema is not ${SCHEMA}`);
+  if (r?.query !== q) problems.push(`query is ${JSON.stringify(r?.query)}, expected ${q}`);
+  if (!Array.isArray(r?.judgments)) problems.push("judgments is not an array");
+  if (problems.length) return { valid, problems };
+  for (const j of r.judgments) {
+    const id = j?.id;
+    if (!ids.includes(id)) { problems.push(`unexpected ${id}`); continue; }
+    if (seen.has(id)) { problems.push(`duplicate ${id}`); continue; }
+    seen.add(id);
+    const errs = fieldErrors(j);
+    if (errs.length) problems.push(...errs); else valid.push(j);
+  }
+  return { valid, problems };
 }
 
 // Documents ({ name, text }) in groups whose estimated size (four characters to a token) stays under limitTokens, in order; a

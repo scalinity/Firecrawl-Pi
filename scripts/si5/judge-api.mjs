@@ -6,13 +6,13 @@
 // then checks every cited passage against the document file, as for any judge. The exact prompt sent is saved under
 // judge-prompts/ and hashed, and the run's record (model reported, settings, tokens, cost, times) goes to
 // eval/private/judge-runs/second.json, which judges.mjs merges into eval/judges.json. The key is read from .env and never printed.
-// A query already judged is skipped, so the run can be repeated; a reply that fails its checks is retried once with the failed
-// checks shown to the model, and a query that still fails is reported and left unwritten.
+// A query already judged is skipped, so the run can be repeated; documents a reply left out or got wrong are asked for again,
+// in fresh requests, up to three passes, and a query that still lacks a judgment is reported and left unwritten.
 //   node scripts/si5/judge-api.mjs --model <OpenRouter model id> [--only Q001,Q002] [--concurrency 4] [--chunk-tokens 150000] [--dry-run]
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { parseReply, checkJudgments, chunkDocs } from "./judge-api-lib.mjs";
+import { parseReply, checkJudgments, splitJudgments, chunkDocs } from "./judge-api-lib.mjs";
 
 const root = new URL("../../", import.meta.url).pathname;
 const EVAL = join(root, "evidence/search-intelligence/SI5/eval"), PRIV = join(EVAL, "private");
@@ -65,26 +65,30 @@ async function call(messages) {
   }
 }
 
-// One request per document group. A reply that fails its checks is shown to the model with those checks, once.
+// One document group. Each pass asks, in a fresh request, for the documents still without a well-formed judgment: a reply that
+// stopped early or got some documents wrong keeps what it judged correctly (judge-api-lib.mjs), and the rest is asked again.
+// Three passes without a judgment for every document fail the query. A reply that left anything out or wrong is kept (private,
+// like every judgment) with the reason, for the record.
 async function judgeGroup(q, system, task, group, tally) {
-  const ids = group.map((d) => d.name.slice(0, -3));
-  let messages = [{ role: "system", content: system }, { role: "user", content: userMessage(task, q, group) }], failed = "";
-  for (let tries = 1; tries <= 2; tries++) {
-    const r = await call(messages);
+  const ids = group.map((d) => d.name.slice(0, -3)), got = new Map();
+  let pending = group, problems = "";
+  for (let pass = 1; pass <= 3 && pending.length; pass++) {
+    const r = await call([{ role: "system", content: system }, { role: "user", content: userMessage(task, q, pending) }]);
     tally.requests++; tally.promptTokens += r.usage?.prompt_tokens ?? 0; tally.completionTokens += r.usage?.completion_tokens ?? 0; tally.costUsd += Number(r.usage?.cost ?? 0);
     if (r.model) tally.models.add(r.model);
     const text = r.choices?.[0]?.message?.content ?? "";
-    try {
-      const errs = checkJudgments(parseReply(text), q, ids);
-      if (!errs.length) return parseReply(text).judgments;
-      failed = errs.slice(0, 6).join("; ");
-    } catch (e) { failed = e.message; }
-    // A reply that failed its checks is kept (private, like every judgment) with the reason, for the record.
-    mkdirSync(join(PRIV, "judge-runs/failed"), { recursive: true });
-    writeFileSync(join(PRIV, `judge-runs/failed/${q}-${ids[0]}-try${tries}.txt`), `finish_reason=${r.choices?.[0]?.finish_reason ?? null} completion_tokens=${r.usage?.completion_tokens ?? null}\nchecks: ${failed}\n\n${text}\n`);
-    messages = [...messages, { role: "assistant", content: text }, { role: "user", content: `Your reply failed these checks: ${failed}. Reply again with ONLY the corrected JSON object, for the same documents.` }];
+    let found = { valid: [], problems: [] };
+    try { found = splitJudgments(parseReply(text), q, pending.map((d) => d.name.slice(0, -3))); } catch (e) { found.problems.push(e.message); }
+    for (const j of found.valid) got.set(j.id, j);
+    pending = group.filter((d) => !got.has(d.name.slice(0, -3)));
+    if (found.problems.length || pending.length) {
+      problems = found.problems.slice(0, 6).join("; ") || `${pending.length} documents left out`;
+      mkdirSync(join(PRIV, "judge-runs/failed"), { recursive: true });
+      writeFileSync(join(PRIV, `judge-runs/failed/${q}-${ids[0]}-pass${pass}.txt`), `finish_reason=${r.choices?.[0]?.finish_reason ?? null} completion_tokens=${r.usage?.completion_tokens ?? null}\nkept ${found.valid.length}, still pending ${pending.length}\nproblems: ${problems}\n\n${text}\n`);
+    }
   }
-  throw new Error(`${q}: the reply failed its checks twice (${failed})`);
+  if (pending.length) throw new Error(`${q}: ${pending.length} of ${ids.length} documents still unjudged after three passes (${problems})`);
+  return ids.map((id) => got.get(id));
 }
 
 async function judgeQuery(q) {
@@ -94,8 +98,12 @@ async function judgeQuery(q) {
   const tally = { requests: 0, promptTokens: 0, completionTokens: 0, costUsd: 0, models: new Set() };
   const judgments = [];
   for (const group of chunkDocs(p.docs, CHUNK)) judgments.push(...await judgeGroup(q, system, p.task, group, tally));
+  // The assembled file must be the whole packet, once each, before it is written.
+  const file = { schema: "fcpi.si5-judgments/v1", query: q, judgments };
+  const errs = checkJudgments(file, q, p.docs.map((d) => d.name.slice(0, -3)));
+  if (errs.length) throw new Error(`${q}: the assembled judgments failed their final check (${errs.slice(0, 4).join("; ")})`);
   mkdirSync(OUT, { recursive: true });
-  writeFileSync(join(OUT, `${q}.json`), JSON.stringify({ schema: "fcpi.si5-judgments/v1", query: q, judgments }) + "\n");
+  writeFileSync(join(OUT, `${q}.json`), JSON.stringify(file) + "\n");
   const runs = existsSync(RUNS) ? JSON.parse(readFileSync(RUNS, "utf8")) : { schema: "fcpi.si5-judge-runs/v1", round: "second", queries: {} };
   runs.queries[q] = { agent: `openrouter:${MODEL}`, models: [...tally.models].sort(), prompt: promptFile, promptSha256: sha(system), promptRead: "inline_exact", launch: "api_inline", started, ended: new Date().toISOString(),
     toolCalls: 0, flags: [], contained: true, api: { requestedModel: MODEL, requests: tally.requests, promptTokens: tally.promptTokens, completionTokens: tally.completionTokens, costUsd: +tally.costUsd.toFixed(6), temperature: 0, responseFormat: "json_object", maxTokens: MAX_OUT } };
