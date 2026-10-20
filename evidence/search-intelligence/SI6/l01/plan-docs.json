@@ -1,0 +1,571 @@
+{
+ "gapSeconds": 62,
+ "items": [
+  {
+   "scenario": "cold_docs",
+   "id": "Q001",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Next.js 15 generateMetadata await params Promise app router",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "next",
+       "version": "15"
+      }
+     ],
+     "programmingLanguage": "typescript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q002",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "PostgreSQL 17 documentation pg_stat_statements configuration parameters",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "postgresql",
+       "version": "17"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q004",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators. how do I convert a validator that uses pre=True and the values argument",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "pydantic",
+       "version": "2"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q006",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "SQLAlchemy 2.0 docs select() joinedload relationship eager loading example",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "sqlalchemy",
+       "version": "2.0"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q010",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Vite 6 migration guide from v5 breaking changes",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "vite",
+       "version": "6"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q024",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "```\nError: connect ECONNREFUSED ::1:5432\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1555:16)\n```\npg Pool connects with psql but fails from Node 18 using host localhost",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "node",
+       "version": "18"
+      },
+      {
+       "name": "pg"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q052",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Model Context Protocol specification 2025-06-18 changelog structured tool output elicitation",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "Model Context Protocol",
+       "version": "2025-06-18"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q056",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "What's New In Python 3.14 free-threaded build officially supported template strings",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "python",
+       "version": "3.14"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q059",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "what changed in the MCP 2025-11-25 specification compared with 2025-06-18",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "Model Context Protocol",
+       "version": "2025-11-25"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q092",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "React 19 use() hook migrate from useContext",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "react",
+       "version": "19"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q111",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Django 5.2 release notes composite primary keys",
+    "limit": 10,
+    "includeDomains": [
+     "docs.djangoproject.com"
+    ],
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "django",
+       "version": "5.2"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q112",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Python 2.7 urllib2.urlopen timeout parameter",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "python",
+       "version": "2.7"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q115",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "webpack 4 optimization.splitChunks cacheGroups vendors",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "webpack",
+       "version": "4"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q116",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "pandas 2.0 DataFrame.append removed use pd.concat",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "pandas",
+       "version": "2.0"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q117",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "What's New In Python 4.0",
+    "limit": 10,
+    "includeDomains": [
+     "docs.python.org"
+    ],
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "python",
+       "version": "4.0"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q120",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Terraform AWS provider v5 aws_s3_bucket_acl resource replaces acl argument",
+    "limit": 10,
+    "includeDomains": [
+     "registry.terraform.io"
+    ],
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "hashicorp/aws",
+       "version": "5"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q081",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "git command to temporarily shelve uncommitted changes without committing them and bring them back later",
+    "limit": 10
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q085",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "JavaScript run a callback after an object is garbage collected",
+    "limit": 10
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q094",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "rust lifetime elision rules",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q096",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "go context cancel propagate to goroutines",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "go"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q003",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "urllib3 Retry backoff_factor status_forcelist allowed_methods mount on requests Session HTTPAdapter",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "urllib3"
+      },
+      {
+       "name": "requests"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q005",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "docker compose depends_on condition: service_healthy healthcheck example",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "docker compose"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q007",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "tokio::select! cancellation safety which methods are cancel safe documentation",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "tokio"
+      }
+     ],
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q008",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "HorizontalPodAutoscaler autoscaling/v2 behavior scaleDown stabilizationWindowSeconds default",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "kubernetes"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q009",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "systemd Restart=on-failure StartLimitIntervalSec StartLimitBurst which section [Unit] or [Service]",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "systemd"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q031",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "```python\nfrom mlx_lm import load, generate\ntext = generate(model, tokenizer, prompt=prompt, temp=0.7)\n```\nTypeError: generate_step() got an unexpected keyword argument 'temp' in mlx-lm",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx-lm"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q032",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "mlx_lm.convert --q-bits 4 --q-group-size 64 what does group size do to quality and size",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx-lm"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q033",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "MLX lazy evaluation when is the graph actually computed mx.eval",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q034",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "mx.fast.scaled_dot_product_attention mask parameter \"causal\" signature",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q036",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "mlx_lm.server OpenAI-compatible /v1/chat/completions supported request parameters",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx-lm"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  }
+ ]
+}

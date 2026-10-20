@@ -10,6 +10,7 @@ Spec §25's criterion L01: named single-active-search cold link-only Pi scenario
 | Fixture stalls, four at once, cancellation | a throwaway container on the Pi from the same image | second | `d13b5a9b0a53` | `raw/l01-fixture.jsonl` | `fixture-summary.json` |
 | The same fixture scenarios, before the cancellation fix | the first release's image | first (candidate `e83cabd20c77`) | `9a68963492ad` | `raw/release-1/l01-fixture-run1.jsonl`, `run2.jsonl` | the cancellation survivors in them |
 | Ref replay of five queries | the deployed platform | third (candidate `5e035b212302`, deployed `4b1c11e555aa`) | `1cb9b68bc4d2` | `raw/live-ref-replay.jsonl` | below |
+| Live documentation scenario again, 30 cold searches with each row's URL recorded | the deployed platform | fourth (candidate `ad767a743ea9`, deployed `d68ed054dde9`) | `ea6aac99572f` | `raw/l01-live-docs.jsonl` | `live-docs-summary.json`, `f03-live-summary.json` |
 
 The third release differs from the second only in `adapters/ref.mjs` (and its test): `git diff 20d9729 5e035b2 -- services`. The link-only latency, the fixtures and the cancellation behaviour do not depend on it, so they were not repeated on the third release.
 
@@ -22,15 +23,31 @@ One search active at a time except `concurrent4_live`, one search every 62 secon
 | `cold_link_only` (documentation off) | 30 | 30 | 7,357 ms | 8,706 ms | 9,692 ms | 0 | 0 |
 | `cold_docs` (documentation on) | 30 | 30 | 7,456 ms | 11,777 ms | 11,840 ms | 0 | 0 |
 | `concurrent4_live` (two rounds of four at once) | 8 | 8 | 6,126 ms | 7,699 ms | 7,699 ms | 0 | 0 |
-| `activation_repeat` (limit varied) | 16 | 3 | 6,797 ms | 7,369 ms | 7,369 ms | 0 | 0 |
+| `activation_repeat` (limit varied), the 3 cold ones | 16 | 3 | 6,797 ms | 7,369 ms | 7,369 ms | 0 | 0 |
+
+The other 13 `activation_repeat` searches were served in part from cache (the decision and lane caches), so they are not cold timings; over all 16 the p50 is 3,117 ms and the p95 and max 9,176 ms.
 
 L01's named scenario is the first row: p95 8.7 s against the 23 s target. All 84 searches answered HTTP 200. Link-only outcomes: 29 complete, 1 partial (DeepSeek could not represent the query; its warning is attributed). The documentation scenario is slower at its tail because Context7 and Ref are held to a 10-second task budget (spec §694), and 5 Context7 calls ran out of it.
 
 **Memory.** 426 samples of the stack's containers (docker stats) and the host, every 10 seconds, across the run: peak resident firecrawl-core 1,757 MiB, rabbitmq 125, searxng 100, nuq-postgres 97, browser-worker 86, retrieval-service 62, mcp-gateway 54, access-gateway 39, redis 12. The host's available memory never fell below 4,711 MiB.
 
+## The documentation scenario again, on the final release (labelled live)
+
+The acceptance review asked for the 30 cold documentation searches to be rerun on the final image, since the first run met Ref's parser defect in 10 of them. The fourth release adds the exact-version rule for the engines' rows and the lone-notice guard in Ref's parser. Same plan (`plan-docs.json`, the `cold_docs` items of `plan.json`), one search every 62 seconds, no admission wait; every search records its row URLs.
+
+| Scenario | Searches | Cold | p50 | p95 | max | Over 23 s | Outcomes |
+|---|---|---|---|---|---|---|---|
+| `cold_docs`, fourth release | 30 | 30 | 8,016 ms | 12,094 ms | 13,025 ms | 0 | 24 complete, 6 partial |
+
+- **Ref:** `ref_contract_failure` in 0 of the 30 searches (10 of 30 before the fix); one `ref_temporarily_unavailable`. Context7 exceeded its 10 s budget in 2 (5 before), DeepSeek could not represent 3 queries, and `exact_version_unconfirmed` appears on 5 hard-version searches.
+- **Memory:** 150 samples; the host's available memory never fell below 4,674 MiB; peaks core 1,796 MiB, retrieval 67 MiB.
+- **Exact versions (F03), the 16 held-out hard library@version queries, 160 returned rows** (`f03-live-summary.json`). Each returned URL is looked up in the judged labels of the collection: 101 rows judged a match, **17 judged a version mismatch**, 1 not applicable, 17 unknown and 24 never judged (the live providers return pages the judges did not see). The collection's D top 10 held 20 judged mismatches. The search counted 23 of the 160 rows as confirmed (by a scope or by a URL that states the release), 137 as unverified, and removed 91 candidates before ranking; the version verdicts were 11 confirmed and 5 unconfirmed.
+- **What remains in the answers.** The 17 judged-mismatch rows are of two kinds that no URL rule can know: pages whose URL names a moving head (`/docs/current/`, `/en/latest/`, `/docs/devel/`, a `main` branch file; 8 of 17) and pages whose URL states no release the rule accepts (a blog, a mirror, `webpack.js.org/plugins/…` for a webpack 4 request; 9 of 17, two of them under a bare major, `/3/` and `/2/`, which the rule ignores because a lone number is too often an id). Where URLs do state versions the rule bites: Q117 (Python 4.0, a version that does not exist) went from 8 judged mismatches in the collection to 1, with 42 candidates removed. The live sample differs from the collection's, though (four queries that held no judged mismatch then hold one now, on pages the judges rated), so the live rows cannot show a net fall in the mismatch share; the offline measure on the collection's own rows is in `SI5/acceptance/version-rule-measure.json`.
+- **F03 stays failed as the criterion is written** (zero confirmed version mismatches in strict-version outputs): the engines are version-blind, and unverified rows are counted and warned (`version_rows_unverified`), not removed.
+
 ## Fixture (labelled injected failures)
 
-A throwaway container (no network but loopback, read-only root, the service's uid, label `fcpi.transient`), the release's coordinator, adapters and policy timings, loopback provider fixtures. Timings here are fixture timings. The container is removed and the run records no transient container left.
+A throwaway container (no network but loopback, read-only root, the service's uid, label `fcpi.transient`), the release's coordinator, adapters and policy timings, loopback provider fixtures. These exercise the search coordinator, the adapters and the shared dispatch, not the path through the gateway and the core, and "0 reservations left" reads the fixture's in-memory ledger, not PostgreSQL. Timings here are fixture timings. The container is removed and the run records no transient container left.
 
 | Scenario | n | p50 | p95 | max | Notes |
 |---|---|---|---|---|---|
@@ -55,7 +72,7 @@ Ref's lane failed with `ref_contract_failure` in 10 of the 30 documentation sear
 ## Other live observations (not defects of this release)
 
 - **Context7 exceeded its 10 s budget in 5 of the 30 cold documentation searches** (17%), and in 3 of the 5 replayed queries. Each is attributed (`context7_timeout`), none opened its breaker (never three within 60 s), and the answer is partial. The budget is spec §694's; changing it is a spec decision.
-- **Exact versions (F03, spec §6.1).** The 16 held-out hard library@version queries each carry a report in `fcpi.search.coverage.documentation.versions`: 12 versions confirmed (75%), 4 unconfirmed (25%), none confirmed wrongly, no query without a report. Q117 (Python 4.0, expected no match) is unconfirmed, with the `exact_version_unconfirmed` warning, not a clean complete answer. Unconfirmed is Context7 stating no version for the passages it returned or timing out (Q024).
+- **Exact versions (F03, spec §6.1).** The 16 held-out hard library@version queries each carry a report in `fcpi.search.coverage.documentation.versions`: 12 versions confirmed (75%), 4 unconfirmed (25%), no query without a report; the one query that expects no match (Q117) was not confirmed. Whether the 12 confirmed verdicts are right was not checked against the rows, and the records of this run keep no URLs; the final release's run above does. Q117 (Python 4.0, expected no match) is unconfirmed, with the `exact_version_unconfirmed` warning, not a clean complete answer. Unconfirmed is Context7 stating no version for the passages it returned or timing out (Q024).
 - **Documentation activation (F01).** The four queries that depend on the live classifier activated in all 5 observations each, with probabilities 0.94–0.95 (Q096), 0.85–0.86 (Q081), 0.76–0.77 (Q094) and 0.70–0.72 (Q085), against the cutoff of 0.2. Jev's decisions are cached for 900 seconds, so the repeats within that window reuse the first answer; the changing second decimal (0.86 then 0.85) marks the fresh ones.
 - **Ref's bounded read (S4).** It did not fire in any of the 46 documentation searches of the run (0 enrichment records). It fired in the smoke search of each of the three releases (`selected: 1, read: 1`: `raw/release-1/live-smoke.jsonl`, `raw/release-2/live-smoke.jsonl`, `raw/live-smoke.jsonl`).
 - **Spend that day** (`raw/usage-day-after.txt`): Exa $1.36 (80 searches), Jev $0.15 (850 decisions), DeepSeek $0.06; 80 Brave requests, 160 Tavily credits, 34 Context7 requests and 39 Ref credits settled (10 and 5 more held as uncertain after the timeouts and refused answers), 100 Serper credits of the 2,443 allocation.
