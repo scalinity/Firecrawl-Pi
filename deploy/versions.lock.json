@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-10-03T17:50:48.192Z",
-  "generated_by": "scripts/m8/build-lock.mjs (M8), from the lock M7 closed with at 19f047f; entries owned by later milestones are as M7 wrote them",
-  "repository_sha": "6366dd8b5b080c3059203412cabd6b8ad7d7832b",
+  "generated_utc": "2026-10-20T08:15:42Z",
+  "generated_by": "scripts/si6/build-lock.mjs (search intelligence SI6), from the lock as committed before the cutover; entries owned by earlier milestones are as they were",
+  "repository_sha": "b2e356ff2a1e21b2bf83d5b9d0468f6e9d5388fd",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -36,7 +36,7 @@
       "source": "evidence/M0/sources/firecrawl-tags-latest.txt",
       "retrieved_utc": "2026-09-25T04:04:44Z",
       "status": "candidate",
-      "reason": "No post-2026-07-30 Firecrawl advisory affects self-hosted v2.11.162 (evidence/M0/security-review.md \u00a7C); the self-host guide still pins v2.11.162. Not adopted."
+      "reason": "No post-2026-07-30 Firecrawl advisory affects self-hosted v2.11.162 (evidence/M0/security-review.md §C); the self-host guide still pins v2.11.162. Not adopted."
     },
     "known_open_issues_at_pin": [
       "Transitive ip-address@6.4.0 (GHSA-mwp4-54f8-5fhr / CVE-2026-69192): octal/leading-zero IP SSRF forms; deferred upstream at every tag. Handled by the project SSRF layer (M2).",
@@ -51,7 +51,7 @@
       "verified_current_stable_utc": "2026-09-25T03:14:49Z",
       "newer_revision": "none (only the rolling draft)",
       "compatibility_revision": "2025-11-25",
-      "source": "evidence/M0/security-review.md \u00a7A",
+      "source": "evidence/M0/security-review.md §A",
       "observed": "both revisions on the wire in M4 (evidence/M4/raw/e2e-wire.txt, e2e-sdk.txt, e2e-tailnet.txt)"
     },
     "packages": {
@@ -340,7 +340,7 @@
           "platform": "linux/arm64",
           "index_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3.13.7.index.json",
           "arm64_manifest_file": "evidence/M0/registry/registry-1.docker.io_library_rabbitmq_3.13.7.arm64.json",
-          "why": "same major as upstream compose, without the management plugin (spec \u00a722)",
+          "why": "same major as upstream compose, without the management plugin (spec §22)",
           "role": "recorded fallback if 4.x fails for a 4.x-specific reason (D3); not used"
         }
       ],
@@ -419,7 +419,7 @@
           "NUQ_WORKER_COUNT": "1",
           "USE_DB_AUTHENTICATION": "false",
           "SCRAPE_MAX_ATTEMPTS": "1",
-          "ALLOW_LOCAL_WEBHOOKS": "true (the M1 fixture-only exception in spec \u00a729; contained as recorded in evidence/M1/INTERPRETATION.md and checked by V18)",
+          "ALLOW_LOCAL_WEBHOOKS": "true (the M1 fixture-only exception in spec §29; contained as recorded in evidence/M1/INTERPRETATION.md and checked by V18)",
           "DISABLE_WEBHOOK_DELIVERY": "true",
           "USE_GO_MARKDOWN_PARSER": "unset (Go library inert; upstream default)",
           "BULL_AUTH_KEY": "unset",
@@ -497,7 +497,7 @@
       }
     },
     "excluded": {
-      "foundationdb": "foundationdb/foundationdb:7.3.63 server/init excluded by the selected architecture (spec \u00a75); not resolved."
+      "foundationdb": "foundationdb/foundationdb:7.3.63 server/init excluded by the selected architecture (spec §5); not resolved."
     },
     "nuq_postgres": {
       "role": "NuQ PostgreSQL image, built on the Pi from deploy/nuq-postgres (decision D6)",
@@ -550,12 +550,12 @@
       "status": "selected"
     },
     "firecrawl_api_patched": {
-      "role": "The API image the stack runs: the pinned commit with patches/ applied; since M7 patch 0010 carries the enhanced route, screenshots and the action subset, and the principal's owner tag",
+      "role": "The API image the stack runs: the pinned commit with patches/ applied; since SI6 patch 0011 carries the caller's original query, options, trusted context and deadline to the retrieval service's search coordinator, and the bounded evidence payload",
       "status": "selected",
-      "image_id": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+      "image_id": "sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c",
       "platform": "linux/arm64",
       "source_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+      "patch_series_sha256": "91e3d278c12a16da6242fdc5da07808c60d454595676f1bbf9766f5bb8bb584f",
       "runtime_configuration": {
         "NUQ_WORKER_COUNT": "1",
         "USE_DB_AUTHENTICATION": "false",
@@ -569,22 +569,54 @@
       }
     },
     "retrieval": {
-      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission",
+      "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission; since SI6 the search intelligence coordinator (five general engines, Context7 and Ref, Jev decisions), its evidence hook and its operational records",
       "status": "selected",
-      "image_id": "sha256:bb2ab368a4ebecf6acc53e2280e31816dbbe22da6724889c7f1641ff6d9c500c",
+      "image_id": "sha256:9a68963492add6d6291aa577b6b020560dbe444c6424dca7fef3bf45fec9af12",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
         "sha256": "4b7602cc6be6efb33cc65ee33468a8304473c36d899a5f624de31adf2313df6c"
       },
-      "evidence": "evidence/post-m9/streaming/raw/image-build-retrieval.txt",
+      "evidence": "evidence/search-intelligence/SI6/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "285723653a8039bf7a0c25b68ee7b6016e97cc0f",
+      "built_from_commit": "e83cabd20c773d11cd7040cf45025bd063dbca6c",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
-        "sha256": "7cf8a33b4e5ae78faf7708c2e0b2e50c251644d96cbbe46cd02e83ee2e3e2170"
+        "sha256": "bebbfe015ecd08fc2dda44a8b7311083de66b4dbe43c704f321481be041874d6"
       },
       "packages": {
+        "@modelcontextprotocol/client": {
+          "version": "2.1.0",
+          "integrity": "sha512-mDVhoy5WjDb0U+4dQPzLcciC2erSex/GRVQqnoZdiuMoE3YiTZdiS7ezNcFwX4XEOWOaj7jZr0kLYnILnL8orA=="
+        },
+        "@modelcontextprotocol/core": {
+          "version": "2.1.0",
+          "integrity": "sha512-YdFj5gMRHr0gYNAhTbQDgjLHiEJdIAUYxomhKseUNye7ZGlISQmUoLh2sveFFCiQ7j2YMffT1kgSND0FSfIFjQ=="
+        },
+        "cross-spawn": {
+          "version": "7.0.6",
+          "integrity": "sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA=="
+        },
+        "eventsource": {
+          "version": "3.0.7",
+          "integrity": "sha512-CRT1WTyuQoD771GW56XEZFQ/ZoSfWid1alKGDYMmkt2yl8UXrVR4pspqWNEcqKvVIzg6PAltWjxcSSPrboA4iA=="
+        },
+        "eventsource-parser": {
+          "version": "3.1.1",
+          "integrity": "sha512-EKN1vKAMcZ8MlYMpaNuxN6R9yakzH6uajHcHVTqWJzvu5pWw9DyhbP35HH8MVBQ+dZjAfDxk+A8NiR9KWaXiyQ=="
+        },
+        "isexe": {
+          "version": "2.0.0",
+          "integrity": "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="
+        },
+        "jose": {
+          "version": "6.2.12",
+          "integrity": "sha512-9NiFmJEex0sy2Dk58j2UGBSHgUs2ypF9eZSu4L6vjOX3Dp96Sw1F3uL+H+D1sx02jZZdzUT0HgvCy59CuvXcWw=="
+        },
+        "path-key": {
+          "version": "3.1.1",
+          "integrity": "sha512-ojmeN0qd+y0jszEtoY48r0Peq5dwMEkIlCOu6Q5f41lfkswXuKtYrhgoTpLnyIcHm24Uhqx+5Tqm2InSwLhE6Q=="
+        },
         "pg": {
           "version": "8.23.0",
           "integrity": "sha512-Ip2EQCngowJLGOfCwkFhPXU7/ljlhn6Rxlmy4XYfL2Y+vyRM59+8uR2xqRWKdYmbXmxCFOAmKxBuSUCdF34qLg=="
@@ -617,6 +649,10 @@
           "version": "1.0.5",
           "integrity": "sha512-FdW9r/jQZhSeohs1Z3sI1yxFQNFvMcnmfuj4WBMUTxOrAyLMaTcE1aAMBiTlbMNaXvBCQuVi0R7hd8udDSP7ug=="
         },
+        "pkce-challenge": {
+          "version": "5.0.1",
+          "integrity": "sha512-wQ0b/W4Fr01qtpHlqSqspcj3EhBvimsdh0KlHhH8HRZnMsEa0ea2fTULOXOS9ccQr3om+GcGRk4e+isrZWV8qQ=="
+        },
         "postgres-array": {
           "version": "2.0.0",
           "integrity": "sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA=="
@@ -633,6 +669,14 @@
           "version": "1.2.0",
           "integrity": "sha512-9ZhXKM/rw350N1ovuWHbGxnGh/SNJ4cnxHiM0rxE4VN41wsg8P8zWn9hv/buK00RP4WvlOyr/RBDiptyxVbkZQ=="
         },
+        "shebang-command": {
+          "version": "2.0.0",
+          "integrity": "sha512-kHxr2zZpYtdmrN1qDjrrX/Z1rR1kG8Dx+gkpK1G4eXmvXswmcE1hTWBWYUzlraYw1/yZp6YuDY77YtvbN0dmDA=="
+        },
+        "shebang-regex": {
+          "version": "3.0.0",
+          "integrity": "sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A=="
+        },
         "split2": {
           "version": "4.2.0",
           "integrity": "sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg=="
@@ -645,9 +689,17 @@
           "version": "7.4.15",
           "integrity": "sha512-ERuv0p98XgSzmlSLJr8vDNxX+uATGInlN97V3R+JpYWaSqn5IG3ewWgCwczk4bkOpgth/o8Nt5FOi4B4w0n/1A=="
         },
+        "which": {
+          "version": "2.0.2",
+          "integrity": "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA=="
+        },
         "xtend": {
           "version": "4.0.2",
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
+        },
+        "zod": {
+          "version": "4.6.7",
+          "integrity": "sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg=="
         }
       }
     },
@@ -675,12 +727,12 @@
       }
     },
     "access_gateway": {
-      "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work",
+      "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work; since SI6 the searchIntelligence options and the search's trusted context headers",
       "status": "selected",
-      "image_id": "sha256:0d6a521895865a1da8161921c3f1e472775b1e51c39ff4d5e5329dd472e59649",
+      "image_id": "sha256:6b9c1ae62837b76d3433d7c764f7133b8033552925f4d437d39109e6a8623f6f",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "a9ec1f55b944c74c69cf805ca75573432cbbdbee",
+      "built_from_commit": "e83cabd20c773d11cd7040cf45025bd063dbca6c",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -747,15 +799,15 @@
           "integrity": "sha512-LKYU1iAXJXUgAXn9URjiu+MWhyUXHsvfp7mcuYm9dSUKK0/CjtrUwFAxD82/mCWbtLsGjFIad0wIsod4zrTAEQ=="
         }
       },
-      "evidence": "evidence/post-m9/streaming/raw/image-build.txt"
+      "evidence": "evidence/search-intelligence/SI6/raw/image-build.txt"
     },
     "mcp_gateway": {
-      "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tool offers the action subset, the screenshot format and the cache options since M7",
+      "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tool offers the action subset, the screenshot format and the cache options since M7; since SI6 the search tool's searchIntelligence options and fcpi.search compaction",
       "status": "selected",
-      "image_id": "sha256:eebafe80fc3a108490d35ecf834ab3638336e273040d25aad0ecba870b55c172",
+      "image_id": "sha256:da485c8256b8f2e13ebebcf2013ae2e75cf580c577cc950e9b9bdc75a2d463b1",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "a5677a0ae61adb189a7a33812ea6a8e142f5ad02",
+      "built_from_commit": "e83cabd20c773d11cd7040cf45025bd063dbca6c",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
@@ -790,7 +842,7 @@
           "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="
         }
       },
-      "evidence": "evidence/post-m9/retrieval-quality/raw/image-build.txt"
+      "evidence": "evidence/search-intelligence/SI6/raw/image-build.txt"
     },
     "fixture_m6": {
       "role": "M6's controlled residential proxy and targets (tests/fixtures/m6), on the internal fixture network only",
@@ -1527,9 +1579,9 @@
   "patches": {
     "status": "resolved",
     "upstream_commit": "7666c1f9ae8720a6bba271e0f60b6a217f8a5210",
-    "series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
+    "series_sha256": "91e3d278c12a16da6242fdc5da07808c60d454595676f1bbf9766f5bb8bb584f",
     "series_sha256_definition": "SHA-256 of the lines \"<sha256>  <file>\\n\" for each patch in order (a sha256sum listing)",
-    "result_tree": "6c27ad04a656824bdc2c5b39362aa5acd4f9b82e",
+    "result_tree": "7a59ba450a0cdadf9b5e8c8dd6ed333714e57ba4",
     "patches": [
       {
         "file": "0001-nuq-sender-survives-broker-outage.patch",
@@ -1544,12 +1596,12 @@
       {
         "file": "0003-pi-resilient-engine-adapter.patch",
         "sha256": "da924612efbdd8d516d61b41a815144f0ad7baa35989c7fc30d0c5ff98c9a757",
-        "reason": "The engine registration and result translation spec \u00a78.1 requires; every page acquisition goes to the retrieval service."
+        "reason": "The engine registration and result translation spec §8.1 requires; every page acquisition goes to the retrieval service."
       },
       {
         "file": "0004-guarded-auxiliary-downloads.patch",
         "sha256": "776cf0dd6bf9f76da49cd8080b20861ea48470aa4fea27bcb36dc612e927b585",
-        "reason": "File downloads and map's redirect resolution fetched directly with the core's own dispatcher (spec \u00a78.4)."
+        "reason": "File downloads and map's redirect resolution fetched directly with the core's own dispatcher (spec §8.4)."
       },
       {
         "file": "0005-search-without-direct-fallback.patch",
@@ -1564,22 +1616,27 @@
       {
         "file": "0007-typed-search-failures.patch",
         "sha256": "d8ac7472c2b3e29307f527791bea9a12f3daa826438c5b2e57e9746a7f42b47b",
-        "reason": "A search backend failure became an empty result at three layers: searxng_search and search both returned {} on any error, and patch 0005 returned {} when SearXNG had no results (review finding S6, spec \u00a713)."
+        "reason": "A search backend failure became an empty result at three layers: searxng_search and search both returned {} on any error, and patch 0005 returned {} when SearXNG had no results (review finding S6, spec §13)."
       },
       {
         "file": "0008-document-policy-and-parser-fallback.patch",
         "sha256": "4d2dceb7475a98d9629f4f976c0cf887c7845ad5ecb9e0232b00511a4aafbbf9",
-        "reason": "Native PDF parsing returned empty markdown as success for a scan-only document, had no page cap, and fell back to a pdf-parse whose bundled pdf.js 1.10 refuses some valid files; spec \u00a715 asks for native parsing first, typed refusals and a budgeted complex-document fallback."
+        "reason": "Native PDF parsing returned empty markdown as success for a scan-only document, had no page cap, and fell back to a pdf-parse whose bundled pdf.js 1.10 refuses some valid files; spec §15 asks for native parsing first, typed refusals and a budgeted complex-document fallback."
       },
       {
         "file": "0009-residential-route-option.patch",
         "sha256": "ba1e00400742cfb2b0e741aa329c836e442dd643d4f8c367c19942073d0dc5e5",
-        "reason": "The scrape option proxy (auto, basic, stealth) never reached the retrieval service, so a caller could not ask for the residential route and a bulk job's pages could not start on it (spec \u00a710.2); proxyUsed always said basic."
+        "reason": "The scrape option proxy (auto, basic, stealth) never reached the retrieval service, so a caller could not ask for the residential route and a bulk job's pages could not start on it (spec §10.2); proxyUsed always said basic."
       },
       {
         "file": "0010-enhanced-route-browser-extras-and-owner.patch",
         "sha256": "ba5886138f2100b8aeefa75ea4c3b489c1a6c6c815053c3498e53f13be34f800",
-        "reason": "The enhanced proxy option was refused and screenshots and actions were unregistered, so M7 could offer neither (spec \u00a711, \u00a712); an engine result with target status 401, 403 or 429 would start upstream's AddFeatureError retry outside the page's budget; and the parse cache's owner was the core's single team id (M5 review S1)."
+        "reason": "The enhanced proxy option was refused and screenshots and actions were unregistered, so M7 could offer neither (spec §11, §12); an engine result with target status 401, 403 or 429 would start upstream's AddFeatureError retry outside the page's budget; and the parse cache's owner was the core's single team id (M5 review S1)."
+      },
+      {
+        "file": "0011-search-intelligence-context.patch",
+        "sha256": "a66a4c3ec17169a0aa053d0401a6590cb89d61980ea243b56a203ddfe450dabc",
+        "reason": "The aggregate search needs the caller's original query and options, the gateway's trusted request, logical-search, owner and deadline context, and the caller's cancellation at the retrieval service, but executeSearch compiled domain operators into the query, the searxng route dropped every option and aborted at an independent 15 seconds, and the scrape merge rebuilt result rows without their metadata (docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md §19.2); evidence annotations for acquired pages need a bounded payload of the actual retrieved text (§12)."
       }
     ],
     "manifest": "patches/series.json (symbols, tests and the call-site coverage of each traced path)"
@@ -1626,14 +1683,14 @@
       ]
     },
     "firecrawl_api_image_patched": {
-      "image_id": "sha256:ea5e60e213d61ba3bc03b985cc78f633d241ed4b7ab63441ec48b84662d7c4d4",
+      "image_id": "sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c",
       "built_on": "the workstation's Colima VM, natively linux/arm64 (decision D6)",
-      "built_utc": "2026-09-27T04:56:48Z",
-      "repository_commit": "281ee686ce1271438f33fada3d006b46093a2c89",
+      "built_utc": "2026-10-20T03:38:33Z",
+      "repository_commit": "58c781291ba7860c40c38b8d104bf8dbe27f2552",
       "code_dirty": false,
       "no_cache": true,
-      "patch_series_sha256": "1b7eed638d46f45f4da9ef383290472048e7e6dfe7ea822d62090546da64a448",
-      "result_tree": "6c27ad04a656824bdc2c5b39362aa5acd4f9b82e",
+      "patch_series_sha256": "91e3d278c12a16da6242fdc5da07808c60d454595676f1bbf9766f5bb8bb584f",
+      "result_tree": "7a59ba450a0cdadf9b5e8c8dd6ed333714e57ba4",
       "go_version": "go version go1.27.1 linux/arm64",
       "rustc": "rustc 1.98.1 (48a229cea 2026-09-01)",
       "node": "v22.23.3",
@@ -1642,14 +1699,14 @@
       "provenance": false,
       "sbom": false,
       "evidence": "evidence/M2/raw/api-build.log",
-      "build_log": "evidence/M7/raw/api-build.log",
-      "transfer": "evidence/M7/raw/api-push.txt (docker save on the VM, docker load on the Pi, the image id compared)"
+      "build_log": "evidence/search-intelligence/SI6/raw/api-build.log",
+      "transfer": "evidence/search-intelligence/SI6/raw/api-push.txt (docker save on the VM, docker load on the Pi, the image id compared)"
     }
   },
   "gateway": {
     "role": "The REST contract the gateway serves and the ledger it keeps (M3)",
     "capabilities": "deploy/policies/capabilities.json",
-    "capabilities_sha256": "aef77e2747c3f90678918194ea4a51787db242a15d0bd1e860731a165fd8fff4",
+    "capabilities_sha256": "b8f77270e841151da596d0c7a5714be636ba1645d9d9b8f3ce07be778d6accaa",
     "platform_schema": "deploy/nuq-postgres/fcpi-platform-schema.sql",
     "platform_schema_sha256": "4dba7cca5ead9364fcb9f05176dffc3b17b4d6f7b062ddb8733b9e17a4e02630",
     "official_client": "@mendable/firecrawl-js@4.31.1",
@@ -1660,22 +1717,29 @@
   "providers": {
     "budget_policy": {
       "path": "deploy/policies/budget.json",
-      "sha256": "30a12b19146476ac2b29e8015b401c88b3bed52e37a452499b67536dcd08b4f0",
+      "sha256": "a68403b87f6dcf8bf975d3854df56c5d9835c1f86fadb11c52f7ab5e04d24efb",
       "paid_caps": {
         "llm": {
           "month": 20000000
         },
         "parser": {
-          "month": 0
+          "month": 3000
         },
         "proxy": {
           "day": 1000000,
           "month": 2000000
         },
         "enhanced": {
-          "day": 0,
-          "month": 0
-        }
+          "day": 2000000,
+          "month": 10000000
+        },
+        "search_brave": {},
+        "search_exa": {},
+        "search_deepseek": {},
+        "search_tavily": {},
+        "docs_context7": {},
+        "docs_ref": {},
+        "decisions_jev": {}
       },
       "paid_total_caps": {},
       "paid_dispatch": "the owner's host switch /etc/firecrawl-pi/paid-dispatch.env (fcpi paid on|off), the retrieval service's optional env file: on since 2026-10-06; absent, every start runs it off",
@@ -1694,6 +1758,144 @@
         "effectiveTo": null,
         "creditsPerSearch": 1,
         "source": "https://serper.dev: existing trial credits; POST /search, num=10, one credit. Allocation fixed at the 2443-credit account balance observed 2026-10-15; no purchases or reload."
+      },
+      {
+        "id": "brave/web-search@2026-10-17",
+        "subject": "brave-web",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "requests",
+        "microUsdPerRequest": null,
+        "source": "https://api-dashboard.search.brave.com/documentation/guides/rate-limiting, observed 2026-10-17: quota and billing count successful requests; the account plan's price per request is not recorded, so a request is counted and its money left unknown"
+      },
+      {
+        "id": "exa/search-auto-20-highlights@2026-10-17",
+        "subject": "exa-search",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "micro_usd_per_operation",
+        "microUsdPerOperation": 37000,
+        "source": "https://exa.ai/docs/admin/pricing.md, observed 2026-10-17: auto search $7 per 1,000 requests including 10 results, $1 per 1,000 results above 10, contents $1 per 1,000 pages per content type; whether highlights requested on /search are billed at the contents rate is not stated, so the reservation is the larger reading for 20 results with highlights ($0.017 + $0.020); each answer's costDollars.total settles it"
+      },
+      {
+        "id": "deepseek/search@2026-10-17",
+        "subject": "deepseek-search",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "micro_usd_per_operation",
+        "microUsdPerOperation": 750,
+        "emptyFree": true,
+        "source": "https://api-docs.deepseek.com/guides/search/, observed 2026-10-17: $0.00075 per successful search that returns results; an empty or failed search is not charged"
+      },
+      {
+        "id": "tavily/search-advanced@2026-10-17",
+        "subject": "tavily-search",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "credits_per_operation",
+        "creditsPerOperation": 2,
+        "source": "https://docs.tavily.com/documentation/api-credits, observed 2026-10-17: an advanced search costs two credits; each answer's usage.credits settles it"
+      },
+      {
+        "id": "context7/v3-search@2026-10-17",
+        "subject": "context7-docs",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "requests",
+        "microUsdPerRequest": null,
+        "source": "https://context7.com/docs/search-api, observed 2026-10-17: one request per library scope; the plan's price per request is not recorded, so a request is counted and its money left unknown"
+      },
+      {
+        "id": "ref/mcp-tool-call@2026-10-17",
+        "subject": "ref-context",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "credits_per_operation",
+        "creditsPerOperation": 1,
+        "source": "https://docs.ref.tools/usage/credits, observed 2026-10-17: a search and a read each cost one credit from the account's shared pool; no balance API is documented"
+      },
+      {
+        "id": "openrouter/typesafe-jev-1.14@2026-10-17",
+        "subject": "jev-1.14",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "decision_tokens",
+        "inputPerMTok": 42000,
+        "outputPerMTok": 0,
+        "source": "https://openrouter.ai/typesafe/jev-1.14, observed 2026-10-17: $0.042 per million input tokens, output free; an answer's usage.cost, when present, settles it"
+      },
+      {
+        "id": "fixture/fcpi-fixture-serper@2026-10-17",
+        "subject": "fcpi-fixture-serper",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "creditsPerSearch": 1,
+        "source": "fixture: Serper's one credit, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-brave@2026-10-17",
+        "subject": "fcpi-fixture-brave",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "requests",
+        "microUsdPerRequest": null,
+        "source": "fixture: Brave's request count, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-exa@2026-10-17",
+        "subject": "fcpi-fixture-exa",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "micro_usd_per_operation",
+        "microUsdPerOperation": 17000,
+        "source": "fixture: Exa's reservation, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-deepseek@2026-10-17",
+        "subject": "fcpi-fixture-deepseek",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "micro_usd_per_operation",
+        "microUsdPerOperation": 750,
+        "emptyFree": true,
+        "source": "fixture: DeepSeek's price, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-tavily@2026-10-17",
+        "subject": "fcpi-fixture-tavily",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "credits_per_operation",
+        "creditsPerOperation": 2,
+        "source": "fixture: Tavily's two credits, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-context7@2026-10-17",
+        "subject": "fcpi-fixture-context7",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "requests",
+        "microUsdPerRequest": null,
+        "source": "fixture: Context7's request count, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-ref@2026-10-17",
+        "subject": "fcpi-fixture-ref",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "credits_per_operation",
+        "creditsPerOperation": 1,
+        "source": "fixture: Ref's one credit, no money"
+      },
+      {
+        "id": "fixture/fcpi-fixture-jev@2026-10-17",
+        "subject": "fcpi-fixture-jev",
+        "effectiveFrom": "2026-10-17",
+        "effectiveTo": null,
+        "billing": "decision_tokens",
+        "inputPerMTok": 42000,
+        "outputPerMTok": 0,
+        "source": "fixture: Jev's token prices, no money"
       },
       {
         "id": "anthropic/claude-sonnet-5-5@2026-10-17",
@@ -1867,6 +2069,13 @@
     "default_model": "claude-haiku-5-5",
     "default_parser": "llamaparse-cost-effective",
     "providers": {
+      "serper": {
+        "kind": "search",
+        "base_url": "https://google.serper.dev",
+        "paid": false,
+        "credential_file": "serper_api_key",
+        "api": "serper-v1"
+      },
       "anthropic": {
         "kind": "model",
         "base_url": "https://api.anthropic.com",
@@ -1931,6 +2140,111 @@
         "paid": false,
         "credential_file": "fixture_zyte",
         "api": "zyte-v1"
+      },
+      "brave": {
+        "kind": "search",
+        "base_url": "https://api.search.brave.com",
+        "paid": true,
+        "credential_file": "brave_api_key",
+        "api": "brave-web-v1"
+      },
+      "exa": {
+        "kind": "search",
+        "base_url": "https://api.exa.ai",
+        "paid": true,
+        "credential_file": "exa_api_key",
+        "api": "exa-search-v1"
+      },
+      "deepseek": {
+        "kind": "search",
+        "base_url": "https://api.deepseek.com",
+        "paid": true,
+        "credential_file": "deepseek_api_key",
+        "api": "deepseek-search-v1"
+      },
+      "tavily": {
+        "kind": "search",
+        "base_url": "https://api.tavily.com",
+        "paid": true,
+        "credential_file": "tavily_api_key",
+        "api": "tavily-search-v1"
+      },
+      "context7": {
+        "kind": "documentation",
+        "base_url": "https://context7.com",
+        "paid": true,
+        "credential_file": "context7_api_key",
+        "api": "context7-v3"
+      },
+      "ref": {
+        "kind": "documentation",
+        "base_url": "https://api.ref.tools",
+        "paid": true,
+        "credential_file": "ref_api_key",
+        "api": "ref-mcp-v1"
+      },
+      "openrouter": {
+        "kind": "decision",
+        "base_url": "https://openrouter.ai",
+        "paid": true,
+        "credential_file": "openrouter_api_key",
+        "api": "openrouter-decisions-v1"
+      },
+      "fixture-serper": {
+        "kind": "search",
+        "base_url": "http://serper.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": "fixture_serper",
+        "api": "serper-v1"
+      },
+      "fixture-brave": {
+        "kind": "search",
+        "base_url": "http://brave.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null,
+        "api": "brave-web-v1"
+      },
+      "fixture-exa": {
+        "kind": "search",
+        "base_url": "http://exa.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null,
+        "api": "exa-search-v1"
+      },
+      "fixture-deepseek": {
+        "kind": "search",
+        "base_url": "http://deepseek.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null,
+        "api": "deepseek-search-v1"
+      },
+      "fixture-tavily": {
+        "kind": "search",
+        "base_url": "http://tavily.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null,
+        "api": "tavily-search-v1"
+      },
+      "fixture-context7": {
+        "kind": "documentation",
+        "base_url": "http://context7.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null,
+        "api": "context7-v3"
+      },
+      "fixture-ref": {
+        "kind": "documentation",
+        "base_url": "http://ref.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null,
+        "api": "ref-mcp-v1"
+      },
+      "fixture-openrouter": {
+        "kind": "decision",
+        "base_url": "http://openrouter.fixture.fcpi.test:8080",
+        "paid": false,
+        "credential_file": null,
+        "api": "openrouter-decisions-v1"
       }
     },
     "search": {
@@ -1967,6 +2281,63 @@
         "www.bing.com": "direct",
         "search.yahoo.com": "direct",
         "searchr.fixture.fcpi.test": "residential"
+      },
+      "profile": "aggregate",
+      "general": [
+        "serper-google",
+        "brave-web",
+        "exa-search",
+        "deepseek-search",
+        "tavily-search"
+      ],
+      "documentation": [
+        "context7-docs",
+        "ref-context"
+      ],
+      "decision": "jev-1.14",
+      "decision_model": "typesafe/jev-1.14",
+      "searxng_mode": "fallback",
+      "categories": {
+        "search_brave": {
+          "paid": true,
+          "unit": "requests",
+          "caps": {}
+        },
+        "search_exa": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {}
+        },
+        "search_deepseek": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {}
+        },
+        "search_tavily": {
+          "paid": true,
+          "unit": "credits",
+          "caps": {}
+        },
+        "docs_context7": {
+          "paid": true,
+          "unit": "requests",
+          "caps": {}
+        },
+        "docs_ref": {
+          "paid": true,
+          "unit": "credits",
+          "caps": {}
+        },
+        "decisions_jev": {
+          "paid": true,
+          "unit": "micro_usd",
+          "caps": {}
+        }
+      },
+      "serper_allocation": {
+        "category": "serper_trial",
+        "credits": 2443,
+        "renewal": false
       }
     },
     "proxies": {
@@ -2011,7 +2382,7 @@
   },
   "egress": {
     "policy": "deploy/policies/egress.json",
-    "policy_sha256": "07de48fc8bc118828008c9c5c2c6c9ca84238ec07768d12330eba547914b5dc0",
+    "policy_sha256": "d909cca441fa0f652b3262dff22ae2b88fb6b5ea6361970c7e2e442b8a431099",
     "residential": {
       "proxyFirstDomains": [
         "m6hard.fixture.fcpi.test"
@@ -2113,7 +2484,7 @@
       "source": "Debian 13 (trixie) main, arm64, apt with Debian's archive signatures",
       "binary": "/usr/bin/restic",
       "binary_sha256": "80d615c1c49b7ccd8121e9ce4e1944da274d3d2f28c24f8d54ec70d9d8957803",
-      "purpose": "encrypted off-device backups (spec \u00a726); installed by scripts/m8/pi-init-m8.sh",
+      "purpose": "encrypted off-device backups (spec §26); installed by scripts/m8/pi-init-m8.sh",
       "evidence": "evidence/M8/raw/init-m8.txt"
     },
     "claude_code": {
