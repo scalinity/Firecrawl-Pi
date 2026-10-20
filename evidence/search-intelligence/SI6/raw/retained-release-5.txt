@@ -1,0 +1,3 @@
+retained fcpi/retrieval sha256:0b3ab03a26a398a0b1b7803014e0397dd7784c56e2533e855c8de9ffa276d10b
+retained fcpi/access-gateway sha256:7fc4eccd0b746f09d52d95937dff9b28fddd2cebf28be4015383ad723bb49730
+retained fcpi/mcp-gateway sha256:9edf28957f86af2531e3791abee4306ceffb3ec2615829355da398107f100b63
