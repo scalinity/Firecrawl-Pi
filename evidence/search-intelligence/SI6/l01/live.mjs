@@ -57,7 +57,9 @@ if (phase === "smoke" || phase === "mcp") {
   for (const q of hard) {
     const r = await rest(bodyOf(q)); const s = searchOf(r.data);
     out({ check: "version_report", id: q.id, status: r.status, ms: r.ms, outcome: s?.outcome ?? null, rows: rowsOf(r.data).length, versions: s?.coverage?.documentation?.versions ?? null, warnings: s?.warnings ?? null, activation: s?.documentation?.activation?.reason ?? null,
-      expectNoMatch: q.expectNoMatch === true, requested: (q.searchIntelligence.libraries ?? []).map((l) => `${l.name}@${l.version ?? ""}`) });
+      expectNoMatch: q.expectNoMatch === true, requested: (q.searchIntelligence.libraries ?? []).map((l) => `${l.name}@${l.version ?? ""}`),
+      versionRows: s?.coverage?.documentation?.versionRows ?? null, urls: rowsOf(r.data).slice(0, 10).map((w) => w?.url ?? null),
+      rowVersion: rowsOf(r.data).slice(0, 10).map((w) => (w?.fcpi?.search?.constraintStatus ?? []).filter((c) => c.constraint === "version").map((c) => c.status)[0] ?? null) });
   }
 } else if (phase === "f01") {
   const ids = ["Q081", "Q085", "Q094", "Q096"]; const reps = Number(process.argv[3] ?? 5);

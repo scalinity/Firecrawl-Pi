@@ -52,7 +52,10 @@ def record(item, status, ms, j, size):
             "outcome": s.get("outcome"), "cache": (s.get("cache") or {}).get("mode"), "ranking": (s.get("ranking") or {}).get("mode"), "rankingReason": (s.get("ranking") or {}).get("reason"),
             "rows": len(web) if isinstance(web, list) else None, "bytes": size, "warnings": s.get("warnings"), "activation": {"active": act.get("active"), "reason": act.get("reason"), "probability": act.get("uncertainty")},
             "docsRequested": (cov.get("documentation") or {}).get("requested"), "versions": (cov.get("documentation") or {}).get("versions"), "enrichment": ((s.get("documentation") or {}).get("enrichment")),
-            "generalSuccessful": (cov.get("general") or {}).get("successful"), "error": (j or {}).get("code") if isinstance(j, dict) else None}
+            "generalSuccessful": (cov.get("general") or {}).get("successful"), "error": (j or {}).get("code") if isinstance(j, dict) else None,
+            # The public URLs of the rows (no page text), so a live answer can be checked against the judged labels; and what the search said about the requested versions.
+            "urls": [w.get("url") for w in web[:10] if isinstance(w, dict)] if isinstance(web, list) else None,
+            "versionRows": (cov.get("documentation") or {}).get("versionRows")}
 
 
 def sampler(stop):
