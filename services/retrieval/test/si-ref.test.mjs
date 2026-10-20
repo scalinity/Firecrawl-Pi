@@ -253,6 +253,20 @@ test("Ref's answered refusals are kept uncertain and inform availability without
   }
 });
 
+test("a lone notice from Ref is a neutral, uncertain failure: repeating it never holds the adapter or opens the breaker", async () => {
+  const fx = refFixture({ tool: () => ({ content: [{ type: "text", text: "Your trial has ended. Continue at\nhttps://billing.example.org/trial" }] }) });
+  const h = await harness({ handlers: { ref: fx } });
+  try {
+    for (let i = 0; i < 4; i++) {
+      const o = await h.docs.ref.search(docsRequest(`ref lone notice ${i}`), refCtx(h));
+      assert.deepEqual([o.status, o.reason, o.detail], ["failed", "temporarily_unavailable", "ref_unrecognized_notice"]);
+    }
+    assert.ok(rows(h).every((r) => r.state === "UNCERTAIN"), "whether Ref charged for a notice is not documented");
+    assert.equal(refCtx(h).pre.eligible, true, "four identical notices are no contract failure, so no hold");
+    assert.equal(h.dispatch.breakerState("fixture-ref"), "closed");
+  } finally { await h.close(); }
+});
+
 test("a Ref call cut off after it was written is uncertain and is one failure: two leave the breaker closed, a third opens it", async () => {
   const fx = refFixture({ tool: () => "destroy" });
   const h = await harness({ handlers: { ref: fx } });

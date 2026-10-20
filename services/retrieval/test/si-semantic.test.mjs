@@ -44,10 +44,15 @@ test("Ref: a hosted block without a page, section or breadcrumb is a hit when it
   assert.equal(parseRefSearch(text("Handling it in the browser\njavascript:alert(1)")).kind, "contract");
   assert.equal(parseRefSearch(text("A description with no link at all")).kind, "contract");
   assert.equal(parseRefSearch(text("A description\nand a second line\nthat never reaches a URL")).kind, "contract");
-  // A notice is one block, so a lone unmarked block that reads like one (plan, credit, quota, limit, upgrade, billing, maintenance, verify …) fails closed whatever it links to;
-  // the observed owner/repo form and an answer of several result-shaped blocks are results with or without those words, and a lone prose block without them is a result.
-  for (const notice of ["Ref is undergoing maintenance; follow updates at\nhttps://status.example.org/incident", "Your plan has changed, details are on the billing page\nhttps://billing.example.org/plans/current",
-    "Please verify your account to continue searching\nhttps://accounts.example.org/verify/email"]) assert.equal(parseRefSearch(text(notice)).kind, "contract", notice);
+  // A notice is one block, so a lone unmarked block that says something about the account or the service (a phrase, not a single word) is not a result, whatever it links to:
+  // it is a neutral failure, no unrecognised wire shape, so repeating it never holds the adapter. The owner/repo form, marked blocks and answers of several result-shaped blocks are
+  // results with or without such phrases, and a lone block that merely mentions a word like limit, upgrade or verify is a result.
+  const notice = { kind: "error", reason: "temporarily_unavailable", detail: "ref_unrecognized_notice" };
+  for (const n of ["Ref is undergoing maintenance; follow updates at\nhttps://status.example.org/incident", "Your plan has changed, details are on the billing page\nhttps://billing.example.org/plans/current",
+    "Please verify your account to continue searching\nhttps://accounts.example.org/verify/email", "Your trial has ended. Continue at\nhttps://billing.example.org/trial", "Your account has been suspended, see\nhttps://help.example.org/suspended",
+    "Search is temporarily degraded, see\nhttps://status.example.org/"]) assert.deepEqual(parseRefSearch(text(n)), notice, n);
+  for (const r of ["Configure rate limits for the API gateway\nhttps://docs.example.org/gateway/limits", "Upgrade guide from Vite 5 to Vite 6\nhttps://docs.example.org/vite/migration", "How to verify a webhook signature\nhttps://docs.example.org/webhooks/verify"])
+    assert.equal(parseRefSearch(text(r)).kind, "results", r);
   assert.equal(parseRefSearch(text("Configure rate limit settings\nhttps://docs.example.org/a", "Upgrade guide for plan migrations\nhttps://docs.example.org/b")).kind, "results");
   assert.equal(parseRefSearch(text("acme/billing - rate-limit-plans\nhttps://github.com/acme/billing/blob/main/docs/limits.md")).kind, "results");
   assert.equal(parseRefSearch(text("Virtual field for defining a composite primary key on a model.\nhttps://docs.djangoproject.com/en/dev/ref/models/fields")).kind, "results");

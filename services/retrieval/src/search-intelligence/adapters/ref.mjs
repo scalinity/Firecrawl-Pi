@@ -65,9 +65,14 @@ function blocksOf(text) {
 const HOSTED_SHAPE = /\bpage='|\bsection='|\S > \S/;
 const OWN_SITE = /(^|\.)ref\.tools$/i;
 // The repository form Ref sends for a file ("owner/repo - slug") is a result by its shape. A block with no shape at all is read as a result only when it is one of
-// several: a notice is a single block, so a lone unmarked block that reads like one (a plan, credit, quota, limit, billing or maintenance message) is not a result.
+// several: a notice is a single block, so a lone unmarked block that says something about the account or the service is not a result. NOTICE matches phrases, not
+// words ("your trial", "credits remaining", "please verify", "temporarily degraded"): a documentation title that merely mentions a limit, an upgrade or a verification is a result.
 const REPO_FORM = /^[\w.-]+\/[\w.-]+ - \S/;
-const NOTICE = /\b(plans?|credits?|quota|limits?|limited|upgrade|billing|payments?|subscri\w*|maintenance|outage|downtime|unavailable|verify|try again|rate)\b/i;
+const NOTICE = new RegExp([
+  "\\byour (plan|account|trial|subscription|credits?|quota|usage|api key|free tier)\\b", "\\b(credits?|quota|searches|requests) (remaining|exhausted|exceeded|reached|left|used up)\\b", "\\b(out of|no more|no remaining) (credits|searches|requests)\\b",
+  "\\b(plan|quota|limit|trial|subscription) (has )?(ended|expired|exceeded|changed|reached)\\b", "\\bupgrade (your|to (a )?(paid|pro|premium|higher))\\b", "\\b(trial|account|subscription) (has been )?(ended|expired|suspended|disabled|locked|canceled|cancelled)\\b",
+  "\\b(temporarily|currently) (degraded|unavailable|down|disabled)\\b", "\\b(undergoing|under|scheduled) maintenance\\b", "\\bexperiencing (issues|difficulties|an outage)\\b", "\\bplease (verify|upgrade|contact|try again|log ?in|sign ?in|subscribe|add)\\b",
+  "\\btry again (later|in)\\b", "\\btoo many requests\\b", "\\brate limit(ed)? (exceeded|reached)\\b", "\\bbilling (page|portal|details|information)\\b", "\\bpayment (required|failed|method)\\b"].join("|"), "i");
 function hostedBlockOf(text) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lines.length < 2 || !/^https?:\/\/\S+$/.test(lines.at(-1))) return null;
@@ -111,6 +116,9 @@ export function parseRefSearch(result) {
   // A lone unmarked block that reads like a notice is not a result list (see REPO_FORM).
   const loneNotice = texts.length === 1 && docs.length === 1 && plain.length === 1 && NOTICE.test(plain[0]);
   if (docs.length && !loneNotice) return { kind: "results", docs };
+  // A notice is no wire shape the adapter failed to read, so it is not a contract failure (three in a row would hold the adapter for 15 minutes); the answer is not a result,
+  // the reservation stays uncertain like any answer that is not one, and availability learns nothing from it.
+  if (loneNotice) return { kind: "error", reason: "temporarily_unavailable", detail: "ref_unrecognized_notice" };
   if (texts.length === 1 && texts[0].trim() === NO_RESULTS) return { kind: "empty" };
   return refusals.find(Boolean) ?? { kind: "contract", detail: "ref_unrecognized_text" };
 }
@@ -211,7 +219,8 @@ export function makeRef({ dispatch, limits, openSession, log = () => {} }) {
   async function judged(ctx, parsed, startedAt) {
     if (["results", "empty", "text"].includes(parsed.kind)) { await dispatch.report(ctx.sub, ctx.pre.epoch, { success: true, dispatchedAt: startedAt }); return null; }
     const reason = parsed.kind === "contract" ? "contract_failure" : parsed.reason;
-    await dispatch.report(ctx.sub, ctx.pre.epoch, { reason, providerCode: parsed.detail, detail: parsed.detail });
+    // A lone notice fails this search's lane, but it is no verdict on the service or on the wire: the breaker and availability are told nothing they would count.
+    await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: parsed.detail === "ref_unrecognized_notice" ? "unrecognized_notice" : reason, providerCode: parsed.detail, detail: parsed.detail });
     return reason;
   }
   // A session that did not open: an unmetered exchange's verdict.
