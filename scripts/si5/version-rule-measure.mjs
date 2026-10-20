@@ -5,6 +5,7 @@
 //   - Reproduction first: the macro nDCG@10 of profiles A, B, C and D is recomputed from the stored runs and labels as score.mjs computes it, and must equal
 //     the published scores.json before anything else is reported.
 //   - The rule against the labels: for the held-out queries with a hard library@version, each of D's top-10 rows by its judged version status and the rule's verdict.
+//   - The same rule over the whole judged pool: every general-delivered document of those queries that the judges labelled, and what the rule would remove.
 //   - The effect on the gated measures if the rule is applied to the aggregate profiles' stored top-20 lists (B, C and D share the normalizer; A does not),
 //     removing the flagged rows and letting the next-ranked rows move up. That is an approximation of a rerun: fusion and the shortlist would be recomputed
 //     without the removed rows. It is exact for the order of the rows that remain, and every row that moves up is in the labelled pool (top 20).
@@ -31,11 +32,14 @@ for (const q of corpus.queries.filter((x) => x.split === "heldout")) {
   const idcg = judged.slice(0, 10).reduce((s, x, i) => s + (2 ** x - 1) / Math.log2(i + 2), 0);
   const hard = hardVersions({ intelligence: q.searchIntelligence ?? {} });
   const aMissing = run.profiles.A.source === "none" || !!run.profiles.A.failure;
-  const rows = (p) => (p === "A" ? run.profiles.A.top : run.profiles[p].top20).map((d) => ({ url: d.canonicalUrl, providers: (d.providers ?? []).map((x) => x[0]) }));
-  const flagged = (d) => hard.length > 0 && d.providers.length > 0 && !d.providers.some((p) => DOCS.has(p)) && urlVersionCheck(normalizeUrl(d.url)?.url ?? d.url, hard).status === "mismatch";
+  const rows = (p) => (p === "A" ? run.profiles.A.top : run.profiles[p].top20).map((d) => ({ url: d.canonicalUrl, providers: (d.providers ?? []).map((x) => x[0]), scopes: d.documentation?.scopes ?? [] }));
+  // As prepareCandidates applies it: a candidate is checked by its URL unless its own documentation scope confirms the version; a row stays when any lane's candidate stays.
+  const confirmed = (d) => d.scopes.some((s) => s.status === "scope_only" || s.status === "match");
+  const verdict = (d) => (hard.length === 0 || d.providers.length === 0 ? "unknown" : confirmed(d) ? "scope_confirmed" : urlVersionCheck(normalizeUrl(d.url)?.url ?? d.url, hard).status);
+  const flagged = (d) => verdict(d) === "mismatch";
   const ndcg = (list) => (idcg > 0 ? [...new Set(list)].slice(0, 10).reduce((s, u, i) => s + (2 ** (g(u) ?? 0) - 1) / Math.log2(i + 2), 0) / idcg : 0);
   const profile = (p, withRule) => ndcg(rows(p).filter((d) => !(withRule && p !== "A" && flagged(d))).map((d) => d.url));
-  per[q.id] = { q, hard, aMissing, L, rows, flagged, plain: Object.fromEntries(["A", "B", "C", "D"].map((p) => [p, profile(p, false)])), ruled: Object.fromEntries(["A", "B", "C", "D"].map((p) => [p, profile(p, true)])) };
+  per[q.id] = { q, hard, aMissing, L, rows, flagged, verdict, run, plain: Object.fromEntries(["A", "B", "C", "D"].map((p) => [p, profile(p, false)])), ruled: Object.fromEntries(["A", "B", "C", "D"].map((p) => [p, profile(p, true)])) };
 }
 const ids = Object.keys(per), withA = ids.filter((id) => !per[id].aMissing);
 const macro = (set, which, p) => mean(set.map((id) => per[id][which][p]));
@@ -52,11 +56,24 @@ for (const id of hardIds) {
   const r = per[id];
   for (const d of r.rows("D").slice(0, 10)) {
     const label = r.L[d.url]?.versionStatus ?? "unlabelled";
-    const rule = !d.providers.some((p) => DOCS.has(p)) ? urlVersionCheck(normalizeUrl(d.url)?.url ?? d.url, r.hard).status : "documentation_row";
+    const rule = r.verdict(d);
     table[`${label} | ${rule}`] = (table[`${label} | ${rule}`] ?? 0) + 1;
   }
 }
 const sum = (pred) => Object.entries(table).filter(([k]) => pred(k)).reduce((s, [, v]) => s + v, 0);
+
+// 2b. The same rule over the whole judged pool: every document a general lane delivered for these queries that the judges labelled.
+const pool = { generalDeliveredLabelled: 0, removed: 0, removedJudgedMismatch: 0, removedNotMismatch: 0, removedRelevant: 0, removedNotMismatchExamples: [] };
+for (const id of hardIds) {
+  const r = per[id], seen = new Set();
+  for (const lane of r.run.profiles.D.lanes.filter((l) => ["serper", "brave", "exa", "deepseek", "tavily"].includes(l.provider))) for (const c of lane.candidates ?? []) {
+    const u = normalizeUrl(c.url)?.url; if (!u || seen.has(u) || !r.L[u]) continue; seen.add(u);
+    pool.generalDeliveredLabelled++;
+    if (urlVersionCheck(u, r.hard).status !== "mismatch") continue;
+    pool.removed++;
+    if (r.L[u].versionStatus === "mismatch") pool.removedJudgedMismatch++; else { pool.removedNotMismatch++; if ((r.L[u].grade ?? 0) >= 2) pool.removedRelevant++; if (pool.removedNotMismatchExamples.length < 12) pool.removedNotMismatchExamples.push(`${id} grade ${r.L[u].grade ?? "none"} ${r.L[u].versionStatus ?? "unlabelled"} ${u.slice(0, 90)}`); }
+  }
+}
 
 // 3. The effect on the gated measures.
 const q01 = (which) => { const a = macro(withA, which, "A"), d = macro(withA, which, "D"); return { ndcgA: round(a), ndcgD: round(d), relativeImprovement: round(d / a - 1) }; };
@@ -70,6 +87,7 @@ console.log(JSON.stringify({
     judgedMismatchRows: sum((k) => k.startsWith("mismatch")), caughtByRule: sum((k) => k === "mismatch | mismatch"), missedByRule: sum((k) => k.startsWith("mismatch") && !k.endsWith("| mismatch")),
     judgedMatchOrNotApplicableRowsFlagged: sum((k) => /^(match|not_applicable|unknown|unlabelled) \| mismatch$/.test(k)), flaggedRowsJudgedMatch: sum((k) => k === "match | mismatch"),
     rowsAgreeingWithRuleMatch: sum((k) => k === "match | match") },
+  wholePool: pool,
   effectOnGatedMeasures: { Q01_DoverA: { without: q01("plain"), withRule: q01("ruled") }, Q02_CoverB: { without: q02("plain"), withRule: q02("ruled") } },
   perHardVersionQuery: perQuery,
 }, null, 1));
