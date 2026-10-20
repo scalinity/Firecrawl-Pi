@@ -727,7 +727,7 @@ Keep four separate concepts: account availability, circuit health, individual op
 | Authentication/access failure | Suppress until credential/config change or explicit retry | Neutral | Existing key reload with new credential epoch; never expose value |
 | Unsupported request | Skip this request only | Neutral | Another representable request |
 | Systemic contract failure | Current call fails; temporary adapter hold after repeated identical schema failures | Separate contract counter, not quota | Verified contract fix/fixture or bounded operator revalidation |
-| Parent cancellation/pre-send denial | Stop this task | Neutral | No provider-health judgment |
+| Parent cancellation (before or after the request is written) / pre-send denial | Stop this task; a request already written keeps its reservation as uncertain | Neutral | No provider-health judgment |
 
 Persist a small availability row per provider/account profile, with state/reason, sanitized provider code, observedAt, retryAt/resetAt when known, credential/config epoch, and source of a balance observation. Reuse existing breaker logic per provider; add event history for transitions. Do not mark a quota exit as `breaker.success()` either: that would erase genuine prior health failures. Use the existing neutral transition. A malformed request-specific 400 must not globally disable an otherwise healthy provider; distinguish bad input/unsupported representation from repeated vendor schema drift. [R08,R11]
 
