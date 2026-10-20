@@ -1,0 +1,12 @@
+### meta
+utc=2026-10-20T08:09:48Z deployed_commit=07eae2b979cc82e1e1c9bd24b9e1d480dbc35a8f mode=cutover services=firecrawl-core retrieval-service access-gateway mcp-gateway
+### hold
+hold=cutover seconds=1800
+### quiet
+call_ceiling_minutes=90
+in_flight_jobs=0 live_reserved_rows=0 drain_rounds=1
+reserved_by_kind=proxy|1|2026-10-06 12:30:20.410329+00
+### pins
+
+Error response from daemon: page not found
+end_marker=refused reason=pin_unresolved service=firecrawl-core

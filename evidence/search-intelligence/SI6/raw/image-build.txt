@@ -1,0 +1,256 @@
+### meta
+utc=2026-10-20T08:49:00Z
+source_commit=20d972934c7c502ab1311913696026701e903145 tree=/opt/firecrawl-pi-candidate/20d972934c7c
+builder=github.com/docker/buildx v0.37.1 0b265a9f62db554fa9aba6dd19e1bd5704bc7d8a
+mem_available_mib_before=5088
+### build_retrieval
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 759B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.5s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 710.57kB 0.0s done
+#4 DONE 0.1s
+
+#5 [1/5] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.0s done
+#5 DONE 0.1s
+
+#6 [2/5] WORKDIR /srv/retrieval
+#6 CACHED
+
+#7 [3/5] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/5] RUN npm ci --omit=dev --ignore-scripts --no-audit && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 2.264 
+#8 2.264 added 29 packages in 2s
+#8 2.264 
+#8 2.264 2 packages are looking for funding
+#8 2.264   run `npm fund` for details
+#8 2.266 npm notice
+#8 2.266 npm notice New major version of npm available! 10.9.9 -> 12.2.0
+#8 2.266 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#8 2.266 npm notice To update run: npm install -g npm@12.2.0
+#8 2.266 npm notice
+#8 2.406 npm warn using --force Recommended protections disabled.
+#8 2.607 v22.23.3
+#8 3.000 fcpi-retrieval@0.5.0 /srv/retrieval
+#8 3.000 +-- @modelcontextprotocol/client@2.1.0
+#8 3.000 | +-- @modelcontextprotocol/core@2.1.0
+#8 3.000 | | `-- zod@4.6.7 deduped
+#8 3.000 | +-- cross-spawn@7.0.6
+#8 3.000 | | +-- path-key@3.1.1
+#8 3.000 | | +-- shebang-command@2.0.0
+#8 3.000 | | | `-- shebang-regex@3.0.0
+#8 3.000 | | `-- which@2.0.2
+#8 3.000 | |   `-- isexe@2.0.0
+#8 3.000 | +-- eventsource-parser@3.1.1
+#8 3.000 | +-- eventsource@3.0.7
+#8 3.000 | | `-- eventsource-parser@3.1.1 deduped
+#8 3.000 | +-- jose@6.2.12
+#8 3.000 | +-- pkce-challenge@5.0.1
+#8 3.000 | `-- zod@4.6.7
+#8 3.000 +-- pg@8.23.0
+#8 3.000 | +-- pg-cloudflare@1.4.0
+#8 3.000 | +-- pg-connection-string@2.14.0
+#8 3.000 | +-- UNMET OPTIONAL DEPENDENCY pg-native@>=3.0.1
+#8 3.000 | +-- pg-pool@3.14.0
+#8 3.000 | | `-- pg@8.23.0 deduped
+#8 3.000 | +-- pg-protocol@1.16.0
+#8 3.000 | +-- pg-types@2.2.0
+#8 3.000 | | +-- pg-int8@1.0.1
+#8 3.000 | | +-- postgres-array@2.0.0
+#8 3.000 | | +-- postgres-bytea@1.0.1
+#8 3.000 | | +-- postgres-date@1.0.7
+#8 3.000 | | `-- postgres-interval@1.2.0
+#8 3.000 | |   `-- xtend@4.0.2
+#8 3.000 | `-- pgpass@1.0.5
+#8 3.000 |   `-- split2@4.2.0
+#8 3.000 `-- tldts@7.4.15
+#8 3.000   `-- tldts-core@7.4.15
+#8 3.000 
+#8 DONE 11.4s
+
+#9 [5/5] COPY src ./src
+#9 DONE 0.2s
+
+#10 exporting to image
+#10 exporting layers
+#10 exporting layers 1.3s done
+#10 exporting manifest sha256:d13b5a9b0a535d8642daed4906ee7ef5bb573468fd007f87f94d0772e96282b0 0.1s done
+#10 exporting config sha256:546971887ac07d00c26512b704a3af19cb3a4aeab3f58f555415a8f1fdfe51a4
+#10 exporting config sha256:546971887ac07d00c26512b704a3af19cb3a4aeab3f58f555415a8f1fdfe51a4 0.2s done
+#10 naming to docker.io/fcpi/retrieval:si6
+#10 naming to docker.io/fcpi/retrieval:si6 0.8s done
+#10 unpacking to docker.io/fcpi/retrieval:si6
+#10 unpacking to docker.io/fcpi/retrieval:si6 1.0s done
+#10 DONE 3.4s
+build_exit=0 image=fcpi/retrieval:si6 elapsed_s=17 mem_available_mib=4890
+### build_access-gateway
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 816B done
+#1 DONE 0.0s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.0s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+
+#4 [internal] load build context
+#4 transferring context: 208.22kB done
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.0s done
+#5 DONE 0.1s
+
+#6 [2/6] WORKDIR /srv/access
+#6 CACHED
+
+#7 [3/6] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/6] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 1.091 
+#8 1.091 added 14 packages, and audited 15 packages in 816ms
+#8 1.092 
+#8 1.092 found 0 vulnerabilities
+#8 1.093 npm notice
+#8 1.093 npm notice New major version of npm available! 10.9.9 -> 12.2.0
+#8 1.093 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#8 1.093 npm notice To update run: npm install -g npm@12.2.0
+#8 1.093 npm notice
+#8 1.224 npm warn using --force Recommended protections disabled.
+#8 1.405 v22.23.3
+#8 1.750 fcpi-access-gateway@0.3.0 /srv/access
+#8 1.750 `-- pg@8.23.0
+#8 1.750   +-- pg-cloudflare@1.4.0
+#8 1.750   +-- pg-connection-string@2.14.0
+#8 1.750   +-- UNMET OPTIONAL DEPENDENCY pg-native@>=3.0.1
+#8 1.750   +-- pg-pool@3.14.0
+#8 1.750   | `-- pg@8.23.0 deduped
+#8 1.750   +-- pg-protocol@1.16.0
+#8 1.750   +-- pg-types@2.2.0
+#8 1.750   | +-- pg-int8@1.0.1
+#8 1.750   | +-- postgres-array@2.0.0
+#8 1.750   | +-- postgres-bytea@1.0.1
+#8 1.750   | +-- postgres-date@1.0.7
+#8 1.750   | `-- postgres-interval@1.2.0
+#8 1.750   |   `-- xtend@4.0.2
+#8 1.750   `-- pgpass@1.0.5
+#8 1.750     `-- split2@4.2.0
+#8 1.750 
+#8 DONE 4.7s
+
+#9 [5/6] COPY server.mjs ./
+#9 DONE 0.5s
+
+#10 [6/6] COPY src ./src
+#10 DONE 0.2s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 0.8s done
+#11 exporting manifest sha256:7a39a6561dec89c87b2e51c819f84c0450ff4fb8e2e02fb3f33aefd4f9baae90 0.0s done
+#11 exporting config sha256:0f25e75c90592b7d545108ed0a26c79b2480b55ab4418ba0ca125147f6a7902b 0.0s done
+#11 naming to docker.io/fcpi/access-gateway:si6 done
+#11 unpacking to docker.io/fcpi/access-gateway:si6
+#11 unpacking to docker.io/fcpi/access-gateway:si6 0.2s done
+#11 DONE 1.1s
+build_exit=0 image=fcpi/access-gateway:si6 elapsed_s=7 mem_available_mib=4871
+### build_mcp-gateway
+#0 building with "default" instance using docker driver
+
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 832B done
+#1 DONE 0.1s
+
+#2 [internal] load metadata for docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#2 DONE 0.1s
+
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 1.2s
+
+#4 [internal] load build context
+#4 transferring context: 53.06kB done
+#4 DONE 0.0s
+
+#5 [1/6] FROM docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e
+#5 resolve docker.io/library/node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e 0.1s done
+#5 DONE 0.1s
+
+#6 [2/6] WORKDIR /srv/mcp
+#6 CACHED
+
+#7 [3/6] COPY package.json package-lock.json ./
+#7 CACHED
+
+#8 [4/6] RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force && node --version && npm ls --omit=dev --all
+#8 2.017 
+#8 2.017 added 6 packages, and audited 7 packages in 2s
+#8 2.017 
+#8 2.017 1 package is looking for funding
+#8 2.017   run `npm fund` for details
+#8 2.018 
+#8 2.018 found 0 vulnerabilities
+#8 2.019 npm notice
+#8 2.019 npm notice New major version of npm available! 10.9.9 -> 12.2.0
+#8 2.019 npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+#8 2.019 npm notice To update run: npm install -g npm@12.2.0
+#8 2.019 npm notice
+#8 2.153 npm warn using --force Recommended protections disabled.
+#8 2.331 v22.23.3
+#8 3.825 fcpi-mcp-gateway@0.4.0 /srv/mcp
+#8 3.825 +-- @modelcontextprotocol/core@2.1.0
+#8 3.825 | `-- zod@4.6.5
+#8 3.825 +-- @modelcontextprotocol/node@2.1.0
+#8 3.825 | +-- @hono/node-server@1.19.17
+#8 3.825 | | `-- hono@4.13.9 deduped
+#8 3.825 | +-- @modelcontextprotocol/server@2.1.0 deduped
+#8 3.825 | `-- hono@4.13.9 deduped
+#8 3.825 +-- @modelcontextprotocol/server@2.1.0
+#8 3.825 | +-- @modelcontextprotocol/core@2.1.0 deduped
+#8 3.825 | `-- zod@4.6.5 deduped
+#8 3.825 `-- hono@4.13.9
+#8 3.825 
+#8 DONE 5.4s
+
+#9 [5/6] COPY server.mjs ./
+#9 DONE 0.4s
+
+#10 [6/6] COPY src ./src
+#10 DONE 0.2s
+
+#11 exporting to image
+#11 exporting layers
+#11 exporting layers 1.5s done
+#11 exporting manifest sha256:7f760fbdc265267ce48db3adba49a2c1557b43b9b1b9ba13d8caa74b85173fda 0.0s done
+#11 exporting config sha256:1da50f47fc961e88400d34ae31f5fecb4af80eee58cc1b20fd437174f542ef91 0.0s done
+#11 naming to docker.io/fcpi/mcp-gateway:si6 done
+#11 unpacking to docker.io/fcpi/mcp-gateway:si6
+#11 unpacking to docker.io/fcpi/mcp-gateway:si6 0.4s done
+#11 DONE 2.0s
+build_exit=0 image=fcpi/mcp-gateway:si6 elapsed_s=10 mem_available_mib=4934
+### images
+fcpi/retrieval:si6 id=sha256:d13b5a9b0a535d8642daed4906ee7ef5bb573468fd007f87f94d0772e96282b0 os=linux arch=arm64 size=376859196 user=3310:3310
+fcpi/retrieval:si6 FCPI_SOURCE_COMMIT=20d972934c7c502ab1311913696026701e903145
+fcpi/access-gateway:si6 id=sha256:7a39a6561dec89c87b2e51c819f84c0450ff4fb8e2e02fb3f33aefd4f9baae90 os=linux arch=arm64 size=350625731 user=3380:3380
+fcpi/access-gateway:si6 FCPI_SOURCE_COMMIT=20d972934c7c502ab1311913696026701e903145
+fcpi/mcp-gateway:si6 id=sha256:7f760fbdc265267ce48db3adba49a2c1557b43b9b1b9ba13d8caa74b85173fda os=linux arch=arm64 size=373369925 user=3400:3400
+fcpi/mcp-gateway:si6 FCPI_SOURCE_COMMIT=20d972934c7c502ab1311913696026701e903145
+end
