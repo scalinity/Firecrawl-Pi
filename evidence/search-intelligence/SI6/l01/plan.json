@@ -1,0 +1,1157 @@
+{
+ "gapSeconds": 62,
+ "items": [
+  {
+   "scenario": "cold_link_only",
+   "id": "Q011",
+   "body": {
+    "query": "llama.cpp github",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q012",
+   "body": {
+    "query": "pgvector HNSW index build source code hnswbuild.c",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q013",
+   "body": {
+    "query": "astral-sh/uv latest release changelog",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q014",
+   "body": {
+    "query": "microsoft/TypeScript issue \"Type instantiation is excessively deep and possibly infinite\" TS2589",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q015",
+   "body": {
+    "query": "official Model Context Protocol TypeScript SDK repository",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q016",
+   "body": {
+    "query": "redis/redis AGPLv3 license Redis 8 open source again",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q017",
+   "body": {
+    "query": "huggingface/transformers \"Some weights of the model checkpoint at\" \"were not used when initializing\" expected or bug",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q019",
+   "body": {
+    "query": "how does ripgrep decide a file is binary implementation in BurntSushi/ripgrep grep-searcher",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q020",
+   "body": {
+    "query": "pytorch/pytorch MPS \"is not currently implemented for the MPS device\" PYTORCH_ENABLE_MPS_FALLBACK=1 tracking issue",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q021",
+   "body": {
+    "query": "HTTP/2 head-of-line blocking over TCP vs HTTP/3 QUIC independent streams",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q023",
+   "body": {
+    "query": "Redis Streams vs Kafka vs RabbitMQ Streams for a small self-hosted event log",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q025",
+   "body": {
+    "query": "gRPC deadline propagation grpc-timeout header across service hops",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q026",
+   "body": {
+    "query": "TLS 1.3 0-RTT early data replay attacks which servers disable it by default",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q027",
+   "body": {
+    "query": "curl works but python requests SSL: CERTIFICATE_VERIFY_FAILED unable to get local issuer certificate macOS",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q028",
+   "body": {
+    "query": "PgBouncer transaction mode error: prepared statement \"S_1\" already exists, fix with max_prepared_statements?",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q029",
+   "body": {
+    "query": "Caddy vs Traefik vs nginx automatic HTTPS reverse proxy for docker compose -kubernetes",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q030",
+   "body": {
+    "query": "OAuth 2.1 changes from OAuth 2.0 PKCE required implicit grant removed",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q035",
+   "body": {
+    "query": "why is prompt processing compute-bound but token generation memory-bandwidth-bound on Apple Silicon with MLX",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q037",
+   "body": {
+    "query": "MLX DWQ vs 4-bit vs 8-bit quantized model perplexity comparison",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q040",
+   "body": {
+    "query": "llama.cpp Metal vs MLX tokens per second same model same Mac benchmark without Ollama",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q041",
+   "body": {
+    "query": "Attention Is All You Need Vaswani 2017 arXiv",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q042",
+   "body": {
+    "query": "FlashAttention tiling and recomputation how it reduces HBM reads",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q043",
+   "body": {
+    "query": "limitations of BLEU for machine translation evaluation Callison-Burch re-evaluating",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q044",
+   "body": {
+    "query": "Chinchilla scaling laws replication attempt Besiroglu 2024 Epoch AI approach 3 discrepancy",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q045",
+   "body": {
+    "query": "the paper that introduced freezing pretrained weights and training small rank-decomposition matrices injected into each Transformer layer",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q046",
+   "body": {
+    "query": "GPTQ vs AWQ weight quantization methods differences activation-aware",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q047",
+   "body": {
+    "query": "Open Science Collaboration 2015 Estimating the reproducibility of psychological science replication rate",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q048",
+   "body": {
+    "query": "HNSW original paper Malkov Yashunin hierarchical navigable small world graphs",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q049",
+   "body": {
+    "query": "BM25 vs dense retrieval zero-shot generalization BEIR benchmark results limitations",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_link_only",
+   "id": "Q050",
+   "body": {
+    "query": "Raft paper In Search of an Understandable Consensus Algorithm Ongaro Ousterhout",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "off"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q001",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Next.js 15 generateMetadata await params Promise app router",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "next",
+       "version": "15"
+      }
+     ],
+     "programmingLanguage": "typescript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q002",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "PostgreSQL 17 documentation pg_stat_statements configuration parameters",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "postgresql",
+       "version": "17"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q004",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "PydanticDeprecatedSince20: Pydantic V1 style `@validator` validators are deprecated. You should migrate to Pydantic V2 style `@field_validator` validators. how do I convert a validator that uses pre=True and the values argument",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "pydantic",
+       "version": "2"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q006",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "SQLAlchemy 2.0 docs select() joinedload relationship eager loading example",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "sqlalchemy",
+       "version": "2.0"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q010",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Vite 6 migration guide from v5 breaking changes",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "vite",
+       "version": "6"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q024",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "```\nError: connect ECONNREFUSED ::1:5432\n    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1555:16)\n```\npg Pool connects with psql but fails from Node 18 using host localhost",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "node",
+       "version": "18"
+      },
+      {
+       "name": "pg"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q052",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Model Context Protocol specification 2025-06-18 changelog structured tool output elicitation",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "Model Context Protocol",
+       "version": "2025-06-18"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q056",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "What's New In Python 3.14 free-threaded build officially supported template strings",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "python",
+       "version": "3.14"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q059",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "what changed in the MCP 2025-11-25 specification compared with 2025-06-18",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "Model Context Protocol",
+       "version": "2025-11-25"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q092",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "React 19 use() hook migrate from useContext",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "react",
+       "version": "19"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q111",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Django 5.2 release notes composite primary keys",
+    "limit": 10,
+    "includeDomains": [
+     "docs.djangoproject.com"
+    ],
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "django",
+       "version": "5.2"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q112",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Python 2.7 urllib2.urlopen timeout parameter",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "python",
+       "version": "2.7"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q115",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "webpack 4 optimization.splitChunks cacheGroups vendors",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "webpack",
+       "version": "4"
+      }
+     ],
+     "programmingLanguage": "javascript"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q116",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "pandas 2.0 DataFrame.append removed use pd.concat",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "pandas",
+       "version": "2.0"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q117",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "What's New In Python 4.0",
+    "limit": 10,
+    "includeDomains": [
+     "docs.python.org"
+    ],
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "python",
+       "version": "4.0"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q120",
+   "hardVersion": true,
+   "classifierDependent": false,
+   "body": {
+    "query": "Terraform AWS provider v5 aws_s3_bucket_acl resource replaces acl argument",
+    "limit": 10,
+    "includeDomains": [
+     "registry.terraform.io"
+    ],
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "hashicorp/aws",
+       "version": "5"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q081",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "git command to temporarily shelve uncommitted changes without committing them and bring them back later",
+    "limit": 10
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q085",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "JavaScript run a callback after an object is garbage collected",
+    "limit": 10
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q094",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "rust lifetime elision rules",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q096",
+   "hardVersion": false,
+   "classifierDependent": true,
+   "body": {
+    "query": "go context cancel propagate to goroutines",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "go"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q003",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "urllib3 Retry backoff_factor status_forcelist allowed_methods mount on requests Session HTTPAdapter",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "urllib3"
+      },
+      {
+       "name": "requests"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q005",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "docker compose depends_on condition: service_healthy healthcheck example",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "docker compose"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q007",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "tokio::select! cancellation safety which methods are cancel safe documentation",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "required",
+     "libraries": [
+      {
+       "name": "tokio"
+      }
+     ],
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q008",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "HorizontalPodAutoscaler autoscaling/v2 behavior scaleDown stabilizationWindowSeconds default",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "kubernetes"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q009",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "systemd Restart=on-failure StartLimitIntervalSec StartLimitBurst which section [Unit] or [Service]",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "systemd"
+      }
+     ]
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q031",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "```python\nfrom mlx_lm import load, generate\ntext = generate(model, tokenizer, prompt=prompt, temp=0.7)\n```\nTypeError: generate_step() got an unexpected keyword argument 'temp' in mlx-lm",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx-lm"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q032",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "mlx_lm.convert --q-bits 4 --q-group-size 64 what does group size do to quality and size",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx-lm"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q033",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "MLX lazy evaluation when is the graph actually computed mx.eval",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q034",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "mx.fast.scaled_dot_product_attention mask parameter \"causal\" signature",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "cold_docs",
+   "id": "Q036",
+   "hardVersion": false,
+   "classifierDependent": false,
+   "body": {
+    "query": "mlx_lm.server OpenAI-compatible /v1/chat/completions supported request parameters",
+    "limit": 10,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "libraries": [
+      {
+       "name": "mlx-lm"
+      }
+     ],
+     "programmingLanguage": "python"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q081@6",
+   "body": {
+    "query": "git command to temporarily shelve uncommitted changes without committing them and bring them back later",
+    "limit": 6,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q085@6",
+   "body": {
+    "query": "JavaScript run a callback after an object is garbage collected",
+    "limit": 6,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q094@6",
+   "body": {
+    "query": "rust lifetime elision rules",
+    "limit": 6,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q096@6",
+   "body": {
+    "query": "go context cancel propagate to goroutines",
+    "limit": 6,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "go"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q081@7",
+   "body": {
+    "query": "git command to temporarily shelve uncommitted changes without committing them and bring them back later",
+    "limit": 7,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q085@7",
+   "body": {
+    "query": "JavaScript run a callback after an object is garbage collected",
+    "limit": 7,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q094@7",
+   "body": {
+    "query": "rust lifetime elision rules",
+    "limit": 7,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q096@7",
+   "body": {
+    "query": "go context cancel propagate to goroutines",
+    "limit": 7,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "go"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q081@8",
+   "body": {
+    "query": "git command to temporarily shelve uncommitted changes without committing them and bring them back later",
+    "limit": 8,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q085@8",
+   "body": {
+    "query": "JavaScript run a callback after an object is garbage collected",
+    "limit": 8,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q094@8",
+   "body": {
+    "query": "rust lifetime elision rules",
+    "limit": 8,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q096@8",
+   "body": {
+    "query": "go context cancel propagate to goroutines",
+    "limit": 8,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "go"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q081@9",
+   "body": {
+    "query": "git command to temporarily shelve uncommitted changes without committing them and bring them back later",
+    "limit": 9,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q085@9",
+   "body": {
+    "query": "JavaScript run a callback after an object is garbage collected",
+    "limit": 9,
+    "searchIntelligence": {
+     "documentation": "auto"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q094@9",
+   "body": {
+    "query": "rust lifetime elision rules",
+    "limit": 9,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "rust"
+    }
+   }
+  },
+  {
+   "scenario": "activation_repeat",
+   "id": "Q096@9",
+   "body": {
+    "query": "go context cancel propagate to goroutines",
+    "limit": 9,
+    "searchIntelligence": {
+     "documentation": "auto",
+     "programmingLanguage": "go"
+    }
+   }
+  },
+  {
+   "scenario": "concurrent4_live",
+   "id": "g1",
+   "group": [
+    {
+     "query": "gpt-oss-120b model card license active parameters",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off"
+     }
+    },
+    {
+     "query": "Claude Sonnet 4.5 release date Anthropic announcement",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off"
+     }
+    },
+    {
+     "query": "Llama 4 Scout and Maverick active parameters experts context window Meta announcement",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off"
+     }
+    },
+    {
+     "query": "Qwen3 release model sizes Qwen3-235B-A22B Qwen3-30B-A3B -Qwen2.5",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off"
+     }
+    }
+   ]
+  },
+  {
+   "scenario": "concurrent4_live",
+   "id": "g2",
+   "group": [
+    {
+     "query": "OpenAI GPT-5 launch date and the API models gpt-5 gpt-5-mini gpt-5-nano",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off"
+     }
+    },
+    {
+     "query": "Gemini 2.5 Pro general availability date and per-million-token pricing above 200k context",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off"
+     }
+    },
+    {
+     "query": "Node.js security releases in the last 30 days",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off",
+      "publishedAfter": "2026-09-17T00:00:00Z",
+      "publishedBefore": "2026-10-17T00:00:00Z"
+     }
+    },
+    {
+     "query": "Python 3.14.0 release date October 2025",
+     "limit": 10,
+     "searchIntelligence": {
+      "documentation": "off",
+      "publishedAfter": "2025-10-01T00:00:00Z",
+      "publishedBefore": "2025-11-01T00:00:00Z"
+     }
+    }
+   ]
+  }
+ ]
+}
