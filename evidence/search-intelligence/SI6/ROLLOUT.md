@@ -6,7 +6,7 @@ The release takes the Pi from the deployed `5d91186` (an ancestor of the release
 
 | Part | Change | How it arrives |
 |---|---|---|
-| Core (`firecrawl-core`) | Patch 0011: the caller's original query, options, trusted context and deadline reach the coordinator; the bounded evidence payload (series `91e3d278…`, result tree `7a59ba45…`, image `22d55814…`) | Built on the Colima VM (D6, `raw/api-build.log`), carried to the Pi |
+| Core (`firecrawl-core`) | Patch 0011: the caller's original query, options, trusted context and deadline reach the coordinator; the bounded evidence payload (series `91e3d278…`, result tree `7a59ba45…`, image `c2585732…`) | Built on the Colima VM (D6, `raw/api-build.log`), carried to the Pi |
 | Retrieval service | The coordinator, the seven provider adapters, Jev decisions, the evidence hook, the operational records | Built on the Pi from the staged release candidate (`fcpi/retrieval:si6`) |
 | Access gateway | `searchIntelligence` validation; the search's trusted headers | Built on the Pi from the candidate (`fcpi/access-gateway:si6`) |
 | MCP gateway | The search tool's options; `fcpi.search` compaction | Built on the Pi from the candidate (`fcpi/mcp-gateway:si6`) |
