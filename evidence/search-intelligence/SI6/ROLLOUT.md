@@ -146,6 +146,20 @@ node scripts/si6/verify.mjs
 - **An hourly `proxy_reconcile_failed` line is expected.** Once paid dispatch is on and the usage report's credential is present, the retrieval service's hourly loop reconciles the selected proxy's last closed UTC day against that report. Decodo's budget-policy entry has `usageDedicated: false` (its report covers the whole account, not only this deployment), so `reconcileDay` refuses it with `RECONCILE_SCOPE_UNKNOWN` and the loop logs that code each hour. No Decodo day is reconciled automatically, and the line is not a fault; the Decodo dashboard is the check on its spend.
 - **A proxy row that a stopped service left behind** is marked UNCERTAIN at the next start: it stays counted in full, in the usage of the day and month it was reserved in, is listed under `uncertain` in the providers status, and no longer holds its day open to reconciliation. The loop reconciles only the last closed day and no command reconciles an older one, so reconciliation never settles such a row afterwards.
 
+## A patch release after the cutover
+
+A defect found once the release is live is fixed by repeating the build, pin, deploy and cutover, never by editing the running stack. It was done once, for `20d9729` (a request its caller cancelled after it was written counted against the provider's breaker). The order matters because the lock builder and the verifier read one release's records:
+
+1. Fix and test on the workstation; push. A regression test comes first and is run against the unfixed code.
+2. Move the earlier release's `image-build.txt`, `cutover.txt`, `verify-functional.txt` and live records into `raw/release-1/`, so the files the verifier and the lock builder read are the final release's.
+3. Take `fcpi backup`, and tag the three running service images `retained-<commit>` before the build moves `:si6`: a pin resolves only through a name in its repository, and the tag keeps the earlier release one pin away.
+4. Stage the fix commit and build the three images from it (step 5 above), pin them, commit the pins, then commit the records so far.
+5. Stage HEAD, take `fcpi upgrade --plan` (a patch reports image changes only: no schema, policy or host-unit change), deploy, and run the cutover for all four services; the lock builder and the verifier expect four healthy services in the record. The keys and policies are already installed.
+6. `fcpi verify functional`, the live smoke, and the fixture benchmark on the new image.
+7. `node scripts/si6/build-lock.mjs` with nothing committed since the cutover (it refuses a HEAD that is not the deployed commit), then commit the lock, then the remaining evidence.
+
+From the start of the build to the cutover's end marker the patch took under five minutes (builds 7 to 17 seconds each; the cutover 41 seconds, with new work held at the gateway for that time). The rollback is the same cutover with the earlier pins: the `retained-e83cabd` tags name the first release's three service images.
+
 ## Rollback
 
 **Fast, keeping the release's code:** the legacy profile is the tested rollback, Serper first with the SearXNG fallback, keeping domain constraints since `6c2c8a5`. It recreates only the retrieval service, under the same hold and drain, and records the release.
