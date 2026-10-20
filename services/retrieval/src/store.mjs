@@ -67,9 +67,11 @@ export class Store {
   async ready(permits, startedAt = new Date()) {
     await this.pool.query("SELECT 1");
     // Search intelligence (spec §18.3): a search, documentation or decision operation still RESERVED was possibly sent by the
-    // process that stopped; it is marked UNCERTAIN like a model call, never replayed or refunded.
+    // process that stopped; it is marked UNCERTAIN like a model call, never replayed or refunded. A proxy tunnel's reservation
+    // is swept the same way: left RESERVED it would hold its day open to reconciliation for good, since reconcileDay refuses
+    // a day with a proxy row in flight, while its bytes (if any were sent) stay counted as the whole reservation.
     const swept = (await this.pool.query(`UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = 'the retrieval service stopped while the call was in flight'
-      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair', 'search', 'docs_search', 'docs_read', 'decision') AND created_at < $1 RETURNING kind, unit, reserved::float8 AS reserved`, [startedAt])).rows;
+      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair', 'search', 'docs_search', 'docs_read', 'decision', 'proxy') AND created_at < $1 RETURNING kind, unit, reserved::float8 AS reserved`, [startedAt])).rows;
     await this.pool.query("UPDATE fcpi_retrieval.permit SET holder = NULL, lease_until = NULL WHERE holder IS NOT NULL");
     await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE holder IS NOT NULL");
     for (const [kind, n] of Object.entries(permits)) {

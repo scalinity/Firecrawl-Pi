@@ -224,7 +224,7 @@ test("search admission holds its hourly cap under concurrent queries; the cache 
   } finally { await store.close(); }
 });
 
-test("at start, a model call left RESERVED by a stopped service becomes UNCERTAIN and is listed; later and other rows are not touched", opts, async () => {
+test("at start, a model call or a proxy tunnel left RESERVED by a stopped service becomes UNCERTAIN and is listed; later and settled rows are not touched", opts, async () => {
   const store = await fresh();
   try {
     const caps = { month: 10000000 };
@@ -234,15 +234,33 @@ test("at start, a model call left RESERVED by a stopped service becomes UNCERTAI
     const settled = (await store.reserveBudget(base({ category: "llm", caps, amount: 100 }))).reservation;
     await store.settleBudget(settled.id, 50, {});
     await store.pool.query("UPDATE fcpi_retrieval.budget_reservation SET created_at = now() - interval '1 hour'");
-    const startedAt = new Date();
+    // The database's clock, not this process's: created_at comes from it, and the two clocks need not agree to the millisecond.
+    const startedAt = (await store.pool.query("SELECT clock_timestamp() AS t")).rows[0].t;
     const live = (await store.reserveBudget(base({ category: "llm", caps, amount: 2000 }))).reservation;
-    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 2, orphanedReserved: 8000, orphanedOperations: {} });
+    assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 2, orphanedReserved: 8000, orphanedOperations: { "proxy:micro_usd": { count: 1, reserved: 700 } } });
     const state = async (id) => (await store.pool.query("SELECT state, detail FROM fcpi_retrieval.budget_reservation WHERE id = $1", [id])).rows[0];
-    for (const r of [orphan, repair]) assert.deepEqual(await state(r.id), { state: "UNCERTAIN", detail: "the retrieval service stopped while the call was in flight" });
-    assert.equal((await state(proxy.id)).state, "RESERVED", "only model calls are swept");
+    for (const r of [orphan, repair, proxy]) assert.deepEqual(await state(r.id), { state: "UNCERTAIN", detail: "the retrieval service stopped while the call was in flight" });
     assert.equal((await state(live.id)).state, "RESERVED", "a call this process made is left alone");
     assert.equal((await state(settled.id)).state, "SETTLED");
-    assert.deepEqual(await store.uncertainHolds("2026-09-01"), [{ category: "llm", count: 2, reserved: 8000 }]);
+    assert.deepEqual(await store.uncertainHolds("2026-09-01"), [{ category: "llm", count: 2, reserved: 8000 }, { category: "proxy", count: 1, reserved: 700 }]);
     assert.deepEqual(await store.ready({ url: 2, browser: 1 }, startedAt), { orphaned: 0, orphanedReserved: 0, orphanedOperations: {} }, "a second start finds nothing more");
+  } finally { await store.close(); }
+});
+
+// A search tunnel's reservation left RESERVED by a stopped service stayed in flight for good (one from 2026-10-06 held
+// its 8,000 micro-USD for two weeks), and reconcileDay refuses a day while any proxy row of it is in flight, so that
+// day could never be reconciled. The next start marks it UNCERTAIN: still counted, no longer holding the day open.
+test("a proxy tunnel left RESERVED holds its day open to reconciliation until the next start marks it UNCERTAIN", opts, async () => {
+  const store = await fresh();
+  try {
+    const day = "2026-10-06";
+    const tunnel = (await store.reserveBudget(base({ category: "proxy", provider: "decodo", kind: "proxy", caps: { month: 2000000 }, amount: 8000, day, month: "2026-10-01" }))).reservation;
+    await store.pool.query("UPDATE fcpi_retrieval.budget_reservation SET created_at = now() - interval '1 hour'");
+    assert.deepEqual(await store.proxyDay("decodo", day), { settledBytes: 0, uncertainBytes: 0, adjustedBytes: 0, uncertain: 0, reserved: 1 }, "in flight, so the day cannot be reconciled");
+    await store.ready({ url: 2, browser: 1 }, new Date());
+    assert.deepEqual(await store.proxyDay("decodo", day), { settledBytes: 0, uncertainBytes: 0, adjustedBytes: 0, uncertain: 1, reserved: 0 }, "uncertain, so the day can be reconciled");
+    assert.deepEqual(await store.uncertainHolds("2026-10-01"), [{ category: "proxy", count: 1, reserved: 8000 }], "its whole reservation stays counted");
+    assert.equal((await store.settleUncertainProxy("decodo", day, () => 0)), 1, "and reconciliation can settle it");
+    assert.equal((await store.pool.query("SELECT state FROM fcpi_retrieval.budget_reservation WHERE id = $1", [tunnel.id])).rows[0].state, "SETTLED");
   } finally { await store.close(); }
 });
