@@ -87,14 +87,47 @@ test("Context7's version scope: another served version is left out and said so; 
     const mismatch = await run("vue reactivity mismatch");
     assert.equal(mismatch.status, "success_empty", "nothing of another version is presented as 3.5");
     assert.match(mismatch.detail, /mismatched version left out/);
+    assert.equal(mismatch.suboperations[0].versionVerdict, "no_match", "only another version came back, so the scope says there is no match");
     assert.equal(new URL(h.servers.context7.seen[0].url, "http://x").searchParams.get("version"), "3.5", "one library with a version is a strict scope");
     const verified = await run("vue reactivity verified");
     const scope = verified.candidates[0].documentation.scopes[0];
     assert.deepEqual([scope.requestedVersion, scope.observedVersion, scope.status, scope.basis], ["3.5", "3.5.2", "scope_only", "provider_scope"]);
+    assert.equal(verified.suboperations[0].versionVerdict, "confirmed");
     const unknown = await run("vue reactivity unknown");
     const u = unknown.candidates[0].documentation.scopes[0];
     assert.deepEqual([u.requestedVersion, u.observedVersion, u.status], ["3.5", null, "unknown"], "a requested version is never reported as observed");
     assert.equal(unknown.candidates[0].passages[0].observedVersion, null);
+    assert.equal(unknown.suboperations[0].versionVerdict, "unconfirmed", "nothing said which version it is, so it is not claimed");
+  } finally { await h.close(); }
+});
+
+// A library id that names a version says which version its documents are for when the answer carries no scope record of its own: Context7
+// answered a request for Python 4.0, which does not exist, with pages from /websites/python_3_10 and said nothing else.
+const idAnswer = (libraryId) => ({ status: 200, body: { codeSnippets: [{ libraryId, codeTitle: "What's new", codeDescription: "Release notes", codeLanguage: "python", codeList: [{ language: "python", code: "print(1)" }],
+  codeId: "https://docs.python.org/3.10/whatsnew/3.10.html", pageTitle: "What's New In Python 3.10" }], infoSnippets: [] } });
+const pyRequest = (q, version) => request({ originalQuery: q, intelligence: { documentation: "required", libraries: [{ name: "python", ...(version ? { version } : {}) }] } });
+
+test("Context7's library id names a version: another one is left out and the scope says no match, the requested one confirms it, a plain id and a documented no-match say so", async () => {
+  const h = await harness({ handlers: { context7: (q, e) => { const t = queryOf(e);
+    return /plain/.test(t) ? idAnswer("/python/cpython") : /gone/.test(t) ? { status: 404, body: { error: "no_documentation_found" } } : idAnswer("/websites/python_3_10"); } } });
+  try {
+    const context7 = makeContext7({ dispatch: h.dispatch, limits: limitsOf(h) });
+    const sub = h.dispatch.subject("documentationSearches", "fcpi-fixture-context7");
+    const run = async (q, version) => context7.search(pyRequest(q, version), { sub, pre: h.dispatch.preflight(sub, { selection: "fixture" }), signal: new AbortController().signal, deadlineAt: Date.now() + 5000, selection: "fixture" });
+    const other = await run("python whats new", "4.0");
+    assert.equal(other.status, "success_empty", "pages of 3.10 are not presented as 4.0");
+    assert.match(other.detail, /mismatched version left out/);
+    assert.equal(other.suboperations[0].versionVerdict, "no_match");
+    const same = await run("python whats new", "3.10");
+    const scope = same.candidates[0].documentation.scopes[0];
+    assert.deepEqual([scope.requestedVersion, scope.observedVersion, scope.status, scope.basis], ["3.10", "3.10", "scope_only", "library_id"]);
+    assert.equal(same.suboperations[0].versionVerdict, "confirmed");
+    const plain = await run("python plain", "4.0");
+    assert.deepEqual([plain.candidates[0].documentation.scopes[0].status, plain.suboperations[0].versionVerdict], ["unknown", "unconfirmed"]);
+    const gone = await run("python gone", "4.0");
+    assert.deepEqual([gone.status, gone.suboperations[0].versionVerdict], ["success_empty", "no_match"], "the documented no-match is a no-match for the version asked");
+    const unscoped = await run("python whats new");
+    assert.equal("versionVerdict" in unscoped.suboperations[0], false, "a request with no version has no version to confirm");
   } finally { await h.close(); }
 });
 

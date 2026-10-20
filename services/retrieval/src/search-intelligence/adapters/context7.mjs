@@ -19,8 +19,30 @@ import { sha256, contentHash, normalizeQueryText, normalizeUrl } from "../normal
 // The longest reset a provider's report is believed for: a monthly window, with a few days' slack.
 export const RESET_MAX_MS = 35 * 86400 * 1000;
 
-export const CONTEXT7_CONTRACT = "context7-v3/2026-10-17";
+// 2026-10-20: a scope reports a version verdict, and a library id that names a version is evidence of it (a changed answer shape is a new identity).
+export const CONTEXT7_CONTRACT = "context7-v3/2026-10-20";
 const VERSION = /^([Ll][Aa][Tt][Ee][Ss][Tt]|[Vv]?[0-9]+([._][0-9]+){0,2}([-+][a-zA-Z0-9.-]+)?)$/;
+
+// The version a library id names, when it names one: a version segment after org/project ("/vercel/next.js/v14.3.0", "/django/django/5.2") or a
+// trailing underscore version in the last segment ("/websites/python_3_10"). Years, bare numbers, one underscore number, words and a library whose
+// own name looks like a version (/v8/v8) name none: a wrong guess would drop good passages.
+export function versionOfLibraryId(id) {
+  if (typeof id !== "string") return null;
+  const parts = id.split("/"), last = parts.at(-1);
+  if (parts.length >= 4) {
+    const m = /^v?(\d+(?:\.\d+){1,3})(?:[-+][\w.]+)?$/i.exec(last) ?? /^v(\d+)(?:[-+][\w.]+)?$/i.exec(last);
+    if (m) return m[1];
+  }
+  const u = /(?<=[A-Za-z])_(\d{1,3}(?:_\d{1,3}){1,2})$/.exec(last);
+  return u ? u[1].replaceAll("_", ".") : null;
+}
+// Two versions agree when one is a prefix of the other on a dot boundary ("3.10" and "3.10.4"), never on a different number.
+export function sameVersion(a, b) {
+  const seg = (v) => String(v).replace(/^v/i, "").split(".");
+  const x = seg(a), y = seg(b);
+  for (let i = 0; i < Math.min(x.length, y.length); i++) if (x[i] !== y[i]) return false;
+  return true;
+}
 
 // The scopes one search asks: [{ libraries: [name...], version: string|null, key }]. A version Context7's pattern cannot
 // express is not sent as a version; its scope is reported unsupported rather than silently widened to latest.
@@ -83,6 +105,9 @@ export function makeContext7({ dispatch, limits }) {
     if (!requested) return { libraryId, requestedVersion: null, observedVersion: null, status: "not_applicable", basis: "none", provider: "context7" };
     if (served && served.replace(/^v/i, "") !== requested.replace(/^v/i, "") && status !== "verified") return { libraryId, requestedVersion: requested, observedVersion: served, status: "mismatch", basis: "provider_scope", provider: "context7", retrievedAt };
     if (status === "verified" || status === "prerelease") return { libraryId, requestedVersion: requested, observedVersion: served, status: "scope_only", basis: "provider_scope", provider: "context7", note: status };
+    // Without a scope record of its own, a library id that names a version says which version its documents are for.
+    const named = versionOfLibraryId(libraryId);
+    if (named) return { libraryId, requestedVersion: requested, observedVersion: named, status: sameVersion(requested, named) ? "scope_only" : "mismatch", basis: "library_id", provider: "context7", ...(sameVersion(requested, named) ? {} : { retrievedAt }) };
     return { libraryId, requestedVersion: requested, observedVersion: null, status: "unknown", basis: "query_hint", provider: "context7" };
   }
 
@@ -96,6 +121,7 @@ export function makeContext7({ dispatch, limits }) {
       const retrievedAt = new Date().toISOString();
       const byUrl = new Map(), aux = [];
       let mismatched = 0;
+      const seen = new Map(results.map((r) => [r, { confirmed: 0, mismatched: 0, kept: 0 }]));
       for (const r of results.filter((x) => x.status === "ok")) {
         const snippets = [...r.data.codeSnippets.map((s) => ({ s, kind: "documentation_code" })), ...r.data.infoSnippets.map((s) => ({ s, kind: "documentation_text" }))];
         for (const { s, kind } of snippets) {
@@ -106,7 +132,10 @@ export function makeContext7({ dispatch, limits }) {
           if (!text.trim()) continue;
           const sourceId = kind === "documentation_code" ? str(s.codeId, 2048, null) : str(s.pageId, 2048, null);
           const scope = scopeRecord(r, s.libraryId, retrievedAt);
-          if (scope.status === "mismatch") { mismatched++; continue; }
+          const st = seen.get(r);
+          if (scope.status === "mismatch") { mismatched++; st.mismatched++; continue; }
+          st.kept++;
+          if (scope.status === "scope_only" || scope.status === "match") st.confirmed++;
           const sourceUrl = httpUrl(sourceId);
           const passage = { passageId: sha256(`context7\n${sourceId ?? ""}\n${contentHash(text)}`).slice(0, 24), sourceUrl, sourceIdentifier: sourceId, provider: "context7", kind, text, contentHash: contentHash(text), retrievedAt,
             libraryId: s.libraryId, requestedVersion: scope.requestedVersion, observedVersion: scope.observedVersion, versionStatus: scope.status, language: kind === "documentation_code" ? str(s.codeLanguage, 40, null) : null,
@@ -122,7 +151,10 @@ export function makeContext7({ dispatch, limits }) {
       const docs = [...byUrl.values()].slice(0, L.candidates.docsPerProvider);
       const candidates = docs.map((d, i) => ({ url: d.url, title: d.title, description: d.passages[0].text.slice(0, 600), rank: i + 1, passages: d.passages.slice(0, 6),
         documentation: { scopes: d.scopes, observedVersion: null, programmingLanguages: [...new Set(d.passages.map((p) => p.language).filter(Boolean))] } }));
-      const subs = results.map((r) => ({ scope: { libraries: r.scope.libraries, version: r.scope.version }, status: r.status, reason: r.reason ?? null, detail: r.detail ?? null }));
+      // What a version-scoped request got (spec §6.1): confirmed by a passage whose scope names the version, no match when the provider had
+      // nothing for it or only other versions, unconfirmed when nothing says (failed, unsupported, or passages of no stated version).
+      const verdictOf = (r) => { const st = seen.get(r); return st.confirmed ? "confirmed" : r.status === "empty" || (st.mismatched && !st.kept) ? "no_match" : "unconfirmed"; };
+      const subs = results.map((r) => ({ scope: { libraries: r.scope.libraries, version: r.scope.version }, status: r.status, reason: r.reason ?? null, detail: r.detail ?? null, ...(r.scope.version ? { versionVerdict: verdictOf(r) } : {}) }));
       const ok = results.filter((r) => r.status === "ok" || r.status === "empty"), bad = results.filter((r) => r.status === "failed" || r.status === "unsupported");
       // A scope that got no answer was already judged by dispatch.call: reporting it again only informs availability.
       for (const r of results.filter((x) => x.status === "failed")) await dispatch.report(ctx.sub, ctx.pre.epoch, { reason: r.reason, retryAt: r.retryAt ?? null, retryBasis: r.retryAt ? "documented" : null, providerCode: r.providerCode, detail: r.detail }, { answered: !r.unanswered });

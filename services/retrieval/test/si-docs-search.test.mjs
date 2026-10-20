@@ -177,6 +177,36 @@ test("a cached discovery whose fresh session cannot open reads nothing and says 
   } finally { await h.close(); }
 });
 
+// A hard version with no evidence for it is reported, never silently answered with other versions (spec §6.1): the discovery engines return what
+// they return, and the response says whether any documentation confirmed the version asked for.
+const versionedAnswer = (libraryId) => () => ({ status: 200, body: { codeSnippets: [{ libraryId, codeTitle: "Declaring reactive state", codeDescription: "Use ref() to declare reactive state.", codeLanguage: "javascript",
+  codeList: [{ language: "javascript", code: "const count = ref(0)" }], codeId: "https://vuejs.org/guide/essentials/reactivity-fundamentals.html", pageTitle: "Reactivity Fundamentals" }], infoSnippets: [] } });
+const vueAt = (version) => docsRequest("vue reactive state ref", { intelligence: { documentation: "required", libraries: [{ name: "vue", ...(version ? { version } : {}) }] } });
+const exact = (s) => s.warnings.filter((w) => w.startsWith("exact_version_"));
+
+test("a requested version that only other versions answer is reported as no match, and a confirmed one is not; the search stays complete", async () => {
+  for (const [libraryId, verdict, warnings] of [["/vuejs/docs/v3.4.0", "no_match", ["exact_version_no_match"]], ["/vuejs/docs/v3.5.2", "confirmed", []], ["/vuejs/docs", "unconfirmed", ["exact_version_unconfirmed"]]]) {
+    const h = await harness({ handlers: { context7: versionedAnswer(libraryId), ref: refFixture() } });
+    try {
+      const r = await h.coordinator.search(vueAt("3.5"), { signal: new AbortController().signal });
+      const s = r.body.search;
+      assert.equal(s.outcome, "complete", `${libraryId}: a version report is not a provider failure`);
+      assert.deepEqual(s.coverage.documentation.versions, [{ library: "vue", version: "3.5", verdict }], libraryId);
+      assert.deepEqual(exact(s), warnings, libraryId);
+      if (warnings.length) assert.match(r.body.warning, /vue 3\.5/, "the human-readable warning names the library and version");
+      else assert.doesNotMatch(r.body.warning ?? "", /version/i);
+    } finally { await h.close(); }
+  }
+});
+
+test("a search that asks for no version carries no version report", async () => {
+  const h = await harness({ handlers: { context7: versionedAnswer("/vuejs/docs/v3.4.0"), ref: refFixture() } });
+  try {
+    const s = (await h.coordinator.search(vueAt(null), { signal: new AbortController().signal })).body.search;
+    assert.deepEqual([s.coverage.documentation.versions, exact(s)], [[], []]);
+  } finally { await h.close(); }
+});
+
 test("documentation off calls neither documentation provider", async () => {
   const fx = refFixture();
   const h = await harness({ handlers: { context7, ref: fx } });

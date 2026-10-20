@@ -15,6 +15,7 @@
 import { randomUUID } from "node:crypto";
 import { Denied } from "../ssrf.mjs";
 import { validateSearchRequest, outcome, skipped, failed, validated, GENERAL, DOCUMENTATION, VERSIONS, RESPONSE_SCHEMA } from "./contracts.mjs";
+import { exactVersionReport } from "./versions.mjs";
 import { prepareCandidates, buildPool, sha256, normalizeQueryText, normalizeUrl, hostMatches } from "./normalize.mjs";
 import { fuse, literalRelevance, shortlist, blend, selectFinal } from "./rank.mjs";
 import { SEARCH_APIS } from "../budget.mjs";
@@ -260,9 +261,12 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       if (ranking.mode === "hybrid_partial") warnings.push("ranking_partial_semantic");
       if (auxiliaryContext.length) warnings.push("documentation_auxiliary_context");
       if (enrichment.limitation) warnings.push(`ref_enrichment_${enrichment.limitation}`);
+      // A requested version that no documentation confirmed is said so, never answered silently with other versions (spec §6.1).
+      const versions = exactVersionReport(request, docsOutcomes);
+      for (const v of versions) if (v.verdict !== "confirmed" && !warnings.includes(`exact_version_${v.verdict}`)) warnings.push(`exact_version_${v.verdict}`);
       const coverage = {
         general: { requested: GENERAL.length, successful: generalOk.length, fromCache: generalOk.filter((o) => o.fromCache).length, missing: generalMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })) },
-        documentation: { activated: docsActive, reason: activation.reason, requested: docsActive ? DOCUMENTATION.length : 0, successful: docsOutcomes.filter(validated).length, missing: docsMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })) },
+        documentation: { activated: docsActive, reason: activation.reason, requested: docsActive ? DOCUMENTATION.length : 0, successful: docsOutcomes.filter(validated).length, missing: docsMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })), versions },
         searxng: { used: !!searxngOutcome, why: searxngWhy, status: searxngOutcome?.status ?? null, reason: searxngOutcome?.reason ?? null },
         decisions: { status: ranking.mode === "rrf_fallback" ? (decisions ? "not_used" : "not_configured") : ranking.mode, reason: ranking.reason },
       };
@@ -505,5 +509,9 @@ function warningText(s) {
   if (s.ranking.mode === "rrf_fallback" && s.coverage.decisions.status !== "not_configured" && s.ranking.reason !== "no_candidates") parts.push(`Deterministic ranking used (${s.ranking.reason.replaceAll("_", " ")}).`);
   if (s.ranking.mode === "hybrid_partial") parts.push("Semantic ranking covered only part of the candidates.");
   if (s.documentation.auxiliaryContext.length) parts.push("Some documentation had no original source URL and is returned separately as auxiliary context.");
+  for (const v of s.coverage.documentation.versions ?? []) {
+    if (v.verdict === "no_match") parts.push(`No documentation was found for ${v.library} ${v.version}; results may be for other versions.`);
+    else if (v.verdict === "unconfirmed") parts.push(`${v.library} ${v.version} could not be confirmed: no documentation source stated which version it covers.`);
+  }
   return parts.join(" ");
 }
