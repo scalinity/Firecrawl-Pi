@@ -1,0 +1,40 @@
+{
+ "urlUnverifiedRows": 288,
+ "byTitleVerdict_judged_top20": {
+  "unknown | unknown": 42,
+  "unknown | match": 141,
+  "confirmed | match": 71,
+  "unknown | mismatch": 25,
+  "mismatch | mismatch": 2,
+  "confirmed | unknown": 2,
+  "mismatch | match": 4,
+  "mismatch | not_applicable": 1
+ },
+ "top10Rows": 143,
+ "byTitleVerdict_judged_top10": {
+  "unknown | unknown": 20,
+  "unknown | match": 68,
+  "confirmed | match": 42,
+  "unknown | mismatch": 9,
+  "confirmed | unknown": 2,
+  "mismatch | match": 2
+ }
+}
+--- title mismatches (any rank) ---
+Q002 17 mismatch g=1 ["postgresql:15!=17"] | PostgreSQL 15 Documentation · F.32. pg_stat_statements
+Q006 17 mismatch g=1 ["sqlalchemy:2.1!=2.0"] | Relationship Loading Techniques — SQLAlchemy 2.1 ...
+Q010 2 match g=3 ["vite:5!=6"] | Migración desde Vite 5 | Vite
+Q010 17 match g=1 ["vite:5.4.21!=6"] | vite 5.4.21 → 6.0.0: 383 public API changes | CoderSays
+Q024 5 match g=2 ["node:17!=18"] | Node v17 ECONNREFUSED · Issue #2643 · brianc/node-postgres · GitHub
+Q117 12 not_applicable g=1 ["python:3.15.0!=4.0"] | Changelog — Python 3.15.0 documentation
+Q117 14 match g=3 ["python:3.15.0!=4.0"] | Nouveautés de Python — Documentation Python 3.15.0
+--- judged mismatches with title unknown (the residual), top 10 ---
+Q002 1 g=1 https://www.postgresql.org/docs/current/pgstatstatements.html | F.32. pg_stat_statements — track statistics of SQL planning ...
+Q010 4 g=1 https://vitejs.de/guide/migration | Migration von v6 | Vite
+Q010 6 g=1 https://c.vazirweb.ir/docs/docs-data/vite/pages/guide/migration.html | Migration from v6
+Q115 3 g=1 https://webpack.js.org/plugins/split-chunks-plugin/ | SplitChunksPlugin
+Q115 7 g=1 https://docs.webpack.js.org/plugins/split-chunks-plugin | 
+Q115 9 g=1 https://angular.love/webpack-an-in-depth-introduction-to-splitchunksplugin | Webpack: An in-depth introduction to SplitChunksPlugin
+Q115 10 g=1 https://github.com/orgs/webpack/discussions/17056 | Confusion about `cacheGroup` and `priority` · webpack · Discussion #17
+Q120 1 g=1 https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/s3_b | aws_s3_bucket | Resources | hashicorp/aws | Terraform
+Q120 6 g=1 https://registry.terraform.io/providers/figma/aws-4-49-0/latest/docs/guides/vers | Terraform AWS Provider Version 4 Upgrade Guide | Guides | figma/aws-4-
