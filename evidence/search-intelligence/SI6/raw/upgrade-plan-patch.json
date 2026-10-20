@@ -1,0 +1,49 @@
+{
+  "plan": "upgrade",
+  "from_commit": "4489b879e50d8bb8a875faa7addf77c292c4e009",
+  "to_commit": "54bb6b1dbebaa468462d8e79a677f683351c2a55",
+  "version_lock_changes": false,
+  "image_changes": [
+    {
+      "service": "access-gateway",
+      "from": "fcpi/access-gateway@sha256:60406db3cab777a6483f275bdc925fd56431ec98c740466045a8b3ce12519a64",
+      "to": "fcpi/access-gateway@sha256:7fc4eccd0b746f09d52d95937dff9b28fddd2cebf28be4015383ad723bb49730"
+    },
+    {
+      "service": "mcp-gateway",
+      "from": "fcpi/mcp-gateway@sha256:acc756117318cb79630d4e11a3168c974a34d850556e1d7d4dd789709079fa36",
+      "to": "fcpi/mcp-gateway@sha256:9edf28957f86af2531e3791abee4306ceffb3ec2615829355da398107f100b63"
+    },
+    {
+      "service": "retrieval-service",
+      "from": "fcpi/retrieval@sha256:ea6aac99572f737b410ef3d2d4f872be14527b1831f1cd9996ecf59e3d0eb576",
+      "to": "fcpi/retrieval@sha256:0b3ab03a26a398a0b1b7803014e0397dd7784c56e2533e855c8de9ffa276d10b"
+    }
+  ],
+  "data_service_image_changes": [],
+  "ledger_schema": {
+    "database": 3,
+    "candidate_reaches": 3,
+    "migrates": false
+  },
+  "configuration_changes": [],
+  "policy_changes": [],
+  "host_unit_changes": {},
+  "schema_sensitive": false,
+  "last_backup": {
+    "utc": "2026-10-20T13:04:02Z",
+    "snapshot": "f2688ab8764fd6f4542007b7836a190c7b50a35462d98ff260eae10624ee41a5"
+  },
+  "rollback": "redeploy 4489b879e50d with scripts/m1/deploy.sh and recreate the changed services; no data restore",
+  "steps": [
+    "review the release and security notes of every image that moves",
+    "resolve every new image to an immutable linux/arm64 digest",
+    "confirm disk and memory headroom (fcpi status)",
+    "fcpi backup, and confirm it with fcpi restore-test",
+    "run the candidate on copied data in an isolated project (the restore test's namespace) with provider dispatch off: contracts, security, MCP, acquisition and migration tests",
+    "pause admissions (fcpi hold upgrade <seconds>) and drain",
+    "cut over: scripts/m1/deploy.sh of the candidate commit, then recreate the changed services",
+    "fcpi verify functional and fcpi status",
+    "accept (fcpi release) or roll back as below"
+  ]
+}
