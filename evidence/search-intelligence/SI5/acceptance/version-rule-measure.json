@@ -14,23 +14,40 @@
  "queriesWithAHardVersion": 16,
  "ruleAgainstLabels": {
   "rowsByLabelAndRule": {
-   "unknown | documentation_row": 2,
-   "match | unknown": 86,
-   "match | documentation_row": 12,
-   "unknown | unknown": 20,
-   "mismatch | unknown": 8,
+   "unknown | unknown": 21,
+   "match | unknown": 94,
+   "mismatch | unknown": 9,
    "mismatch | mismatch": 11,
-   "match | match": 17,
-   "mismatch | documentation_row": 1,
+   "match | match": 18,
+   "match | scope_confirmed": 3,
+   "unknown | mismatch": 1,
    "match | mismatch": 2,
    "not_applicable | mismatch": 1
   },
   "judgedMismatchRows": 20,
   "caughtByRule": 11,
   "missedByRule": 9,
-  "judgedMatchOrNotApplicableRowsFlagged": 3,
+  "judgedMatchOrNotApplicableRowsFlagged": 4,
   "flaggedRowsJudgedMatch": 2,
-  "rowsAgreeingWithRuleMatch": 17
+  "rowsAgreeingWithRuleMatch": 18
+ },
+ "wholePool": {
+  "generalDeliveredLabelled": 617,
+  "removed": 43,
+  "removedJudgedMismatch": 34,
+  "removedNotMismatch": 9,
+  "removedRelevant": 7,
+  "removedNotMismatchExamples": [
+   "Q111 grade 1 unknown https://docs.djangoproject.com/en/3.2/search/?q=models&release=4.2&page=29",
+   "Q116 grade 2 match https://pandas.pydata.org/pandas-docs/version/1.5/reference/api/pandas.DataFrame.append.ht",
+   "Q117 grade 2 not_applicable https://docs.python.org/3.14/whatsnew/",
+   "Q117 grade 3 not_applicable https://docs.python.org/3/whatsnew/3.15.html",
+   "Q117 grade 2 not_applicable https://docs.python.org/sv/3.13/whatsnew/index.html",
+   "Q117 grade 2 not_applicable https://docs.python.org/ru/3.13/whatsnew/index.html",
+   "Q117 grade none unknown https://docs.python.org/3.16/whatsnew/changelog.html",
+   "Q120 grade 2 match https://registry.terraform.io/providers/hashicorp/aws/6.5.0/docs/guides/version-4-upgrade?",
+   "Q120 grade 2 match https://registry.terraform.io/providers/hashicorp/aws/6.28.0/docs/guides/version-4-upgrade"
+  ]
  },
  "effectOnGatedMeasures": {
   "Q01_DoverA": {
@@ -41,8 +58,8 @@
    },
    "withRule": {
     "ndcgA": 0.5,
-    "ndcgD": 0.7389,
-    "relativeImprovement": 0.4778
+    "ndcgD": 0.7387,
+    "relativeImprovement": 0.4774
    }
   },
   "Q02_CoverB": {
@@ -69,7 +86,7 @@
   {
    "id": "Q002",
    "hard": "postgresql@17",
-   "rowsFlaggedInD": 2,
+   "rowsFlaggedInD": 1,
    "ndcgD": 0.4558,
    "ndcgDWithRule": 0.4876
   },
@@ -97,7 +114,7 @@
   {
    "id": "Q024",
    "hard": "node@18",
-   "rowsFlaggedInD": 0,
+   "rowsFlaggedInD": 1,
    "ndcgD": 0.6318,
    "ndcgDWithRule": 0.6318
   },
@@ -139,9 +156,9 @@
   {
    "id": "Q112",
    "hard": "python@2.7",
-   "rowsFlaggedInD": 0,
+   "rowsFlaggedInD": 1,
    "ndcgD": 0.5366,
-   "ndcgDWithRule": 0.5366
+   "ndcgDWithRule": 0.5346
   },
   {
    "id": "Q115",
@@ -160,14 +177,14 @@
   {
    "id": "Q117",
    "hard": "python@4.0",
-   "rowsFlaggedInD": 15,
+   "rowsFlaggedInD": 17,
    "ndcgD": 0.3958,
-   "ndcgDWithRule": 0.4547
+   "ndcgDWithRule": 0.4378
   },
   {
    "id": "Q120",
    "hard": "hashicorp/aws@5",
-   "rowsFlaggedInD": 3,
+   "rowsFlaggedInD": 2,
    "ndcgD": 0.5641,
    "ndcgDWithRule": 0.6019
   }
