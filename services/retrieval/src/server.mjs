@@ -132,7 +132,7 @@ const resolvePublic = makePublicResolver({ server: env.resolver });
 // M6: the residential proxy route (spec §10), shared by pages, auxiliary downloads, the browser and search.
 const residential = makeResidential({ getBudget, getPolicy, getSelection, providersDir: env.providersDir, paidDispatch: env.paidDispatch, store, resolvePublic, log });
 const sessions = new ProxySessions();
-startProxy({ listen: env.proxyListen, sessions, getPolicy, resolvePublic, log });
+const proxyServer = startProxy({ listen: env.proxyListen, sessions, getPolicy, resolvePublic, log });
 // The URL-hash key, derived under its own label from the browser credential, whose plaintext only
 // this service holds (the worker keeps its SHA-256): stable across restarts, changed only with that
 // credential, and no further secret to keep.
@@ -148,7 +148,7 @@ searchSessions.fixed("searxng", parseSha256(readSecret(env.credentialsDir, "retr
   allow: (t) => (selection.search === "fixture" ? !!t.fixture : !t.fixture && basePolicy.search.engineHosts.live.some((h) => hostMatches(t.host, h))),
   upstreamFor: searchUpstream,
 });
-startProxy({ listen: env.searchProxyListen, sessions: searchSessions, getPolicy, resolvePublic, log });
+const searchProxyServer = startProxy({ listen: env.searchProxyListen, sessions: searchSessions, getPolicy, resolvePublic, log });
 const browser = makeBrowserClient({ url: env.browserUrl, token: readSecret(env.credentialsDir, "retrieval_browser_token"),
   proxyServer: `http://${env.proxyListen.host}:${env.proxyListen.port}`, sessions, getPolicy });
 
@@ -384,13 +384,15 @@ extractServer.requestTimeout = 0; // an extraction runs for minutes; its own dea
 server.listen(env.listen.port, env.listen.host, () => log({ event: "listening", listen: `${env.listen.host}:${env.listen.port}`, proxy: `${env.proxyListen.host}:${env.proxyListen.port}`,
   search_proxy: `${env.searchProxyListen.host}:${env.searchProxyListen.port}`, extract: `${env.extractListen.host}:${env.extractListen.port}` }));
 extractServer.listen(env.extractListen.port, env.extractListen.host);
-// On stop: take no new request, cancel the ones in flight (their callers see CANCELLED) and wait up
-// to 8 s for them to release what they hold, then close the pool (review finding W3).
+// On stop: take no new request or tunnel, cancel the ones in flight (their callers see CANCELLED) and wait up
+// to 8 s for them to release what they hold, then close the pool (review finding W3). The two proxy listeners close
+// with the others: a tunnel that reserved its bytes after the stop began would lose the pool before it settled.
+const listeners = [server, extractServer, proxyServer, searchProxyServer];
 let stopping = false;
 for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, async () => {
   if (stopping) return;
   stopping = true;
-  for (const s of [server, extractServer]) { s.close(); s.closeAllConnections?.(); }
+  for (const s of listeners) { s.close(); s.closeAllConnections?.(); }
   const until = Date.now() + 8000;
   while (inflight > 0 && Date.now() < until) await new Promise((r) => setTimeout(r, 100));
   // Search work outlives its response only to close what it reserved: cancelled now, it is given the rest of the stop window
@@ -400,6 +402,6 @@ for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, async () => {
   // telemetry_pending), never the search's answer. The whole window (18 s) stays inside compose's 20 s stop_grace_period.
   const telemetryLeft = await telemetry.drain(Math.max(500, until + 10000 - Date.now()));
   // A model call whose caller had already gone is cut here; its row is marked UNCERTAIN at the next start.
-  log({ event: "stopping", requests_in_flight: inflight, model_calls_running: adapter.running(), search_tasks_left: leftOver, telemetry_pending: telemetryLeft });
+  log({ event: "stopping", listeners_open: listeners.filter((s) => s.listening).length, requests_in_flight: inflight, model_calls_running: adapter.running(), search_tasks_left: leftOver, telemetry_pending: telemetryLeft });
   store.close().finally(() => process.exit(0));
 });

@@ -101,6 +101,9 @@ test("the wired server: credential, validation, an honest partial aggregate sear
     child.kill("SIGTERM");
     assert.equal(await exited, 0);
     assert.match(out, /"event":"stopping".*"search_tasks_left":0/);
+    // The stop takes no new connection on any of the four listeners, the two proxy ones included: a tunnel reserved after the stop began would lose the pool.
+    const stopped = JSON.parse(out.split("\n").find((l) => l.includes("\"event\":\"stopping\"")));
+    assert.equal(stopped.listeners_open, 0);
   } finally {
     if (child.exitCode === null) { child.kill("SIGKILL"); await exited; }
     await sx.close();
