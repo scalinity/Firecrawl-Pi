@@ -1,0 +1,33 @@
+### meta
+utc=2026-10-20T14:48:16Z deployed_commit=352fad56db01
+### ledger_search_categories_last_3h
+brave|search|requests|SETTLED|96|96
+context7|docs_search|requests|RELEASED|1|0
+context7|docs_search|requests|SETTLED|90|90
+context7|docs_search|requests|UNCERTAIN|8|0
+deepseek|search|micro_usd|SETTLED|87|65250
+exa|search|micro_usd|SETTLED|95|1615000
+exa|search|micro_usd|UNCERTAIN|1|0
+openrouter|decision|micro_usd|RELEASED|2|0
+openrouter|decision|micro_usd|SETTLED|957|167595
+openrouter|decision|micro_usd|UNCERTAIN|1|0
+ref|docs_read|credits|SETTLED|1|1
+ref|docs_search|credits|SETTLED|93|93
+ref|docs_search|credits|UNCERTAIN|2|0
+serper|search|credits|SETTLED|95|95
+serper|search|credits|UNCERTAIN|2|0
+tavily|search|credits|SETTLED|96|192
+reserved_rows_left=0
+### operational_records_last_3h
+search_run_rows=99
+search_event_rows=885
+search_event_by_type=decision:97,docs_activation:97,lane:690,ref_read:1
+provider_availability=ref:available
+### legacy_route
+{"status":200,"keys":"fcpi,results,unresponsive_engines","results":10}
+### map
+http=200 links=0
+### crawl
+submit_http=200 id_present=yes
+status_http=200 status=completed pages=1 completed=1
+### end
