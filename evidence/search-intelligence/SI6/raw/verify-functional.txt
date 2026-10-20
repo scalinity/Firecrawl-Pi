@@ -1,0 +1,5 @@
+functional PASS (352fad56db01)
+  PASS  probe_ran_now  a probe begun at or after 2026-10-20T14:17:28Z
+  PASS  rest_fixture_scrape  {"ok":true,"status":200,"ms":221,"code":null}
+  PASS  mcp_tools_list  {"ok":true,"status":200,"ms":63}
+  PASS  platform_status  {"core_live":true,"ledger_ok":true}
