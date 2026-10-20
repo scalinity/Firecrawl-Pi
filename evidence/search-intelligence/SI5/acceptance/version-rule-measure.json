@@ -14,20 +14,19 @@
  "queriesWithAHardVersion": 16,
  "ruleAgainstLabels": {
   "rowsByLabelAndRule": {
-   "unknown | unknown": 21,
+   "unknown | unknown": 22,
    "match | unknown": 94,
    "mismatch | unknown": 9,
    "mismatch | mismatch": 11,
    "match | match": 18,
    "match | scope_confirmed": 3,
-   "unknown | mismatch": 1,
    "match | mismatch": 2,
    "not_applicable | mismatch": 1
   },
   "judgedMismatchRows": 20,
   "caughtByRule": 11,
   "missedByRule": 9,
-  "judgedMatchOrNotApplicableRowsFlagged": 4,
+  "judgedMatchOrNotApplicableRowsFlagged": 3,
   "flaggedRowsJudgedMatch": 2,
   "rowsAgreeingWithRuleMatch": 18
  },
@@ -156,9 +155,9 @@
   {
    "id": "Q112",
    "hard": "python@2.7",
-   "rowsFlaggedInD": 1,
+   "rowsFlaggedInD": 0,
    "ndcgD": 0.5366,
-   "ndcgDWithRule": 0.5346
+   "ndcgDWithRule": 0.5366
   },
   {
    "id": "Q115",
