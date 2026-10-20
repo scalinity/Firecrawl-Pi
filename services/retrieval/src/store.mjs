@@ -61,17 +61,19 @@ export class Store {
 
   // One retrieval service runs per deployment, so at its start every lease and domain hold belongs
   // to a process that no longer exists: they are reclaimed rather than left to expire, so a restart
-  // does not stall acquisitions for a lease period (review finding W3). A model call still RESERVED from before this
-  // process started was in flight when the last one stopped: its outcome is unknown, so it is marked UNCERTAIN, which
-  // the status lists, rather than held unseen. Returns how many were marked and what they hold.
+  // does not stall acquisitions for a lease period (review finding W3). A reservation of any kind (model call, search or
+  // documentation operation, proxy tunnel, enhanced dispatch, parse job) still RESERVED from before this process started
+  // was in flight when the last one stopped: its outcome is unknown, so it is marked UNCERTAIN, never replayed or refunded
+  // (spec §18.3), and the status lists it instead of holding it unseen. The whole reservation stays counted either way. Left
+  // RESERVED, a proxy row would also make reconcileDay refuse its day while it was "in flight" (for an account whose usage
+  // report is dedicated to this deployment), and an enhanced or parse row would tell a retry that its call is still running.
+  // Every kind is swept, not a list of them: a reservation that outlives its process is one whatever its kind, and a kind added
+  // later must not leak this way (reconcile rows are inserted SETTLED, so they are never in the way). Returns how many model
+  // calls were marked and what they hold, and the other operations by kind and unit.
   async ready(permits, startedAt = new Date()) {
     await this.pool.query("SELECT 1");
-    // Search intelligence (spec §18.3): a search, documentation or decision operation still RESERVED was possibly sent by the
-    // process that stopped; it is marked UNCERTAIN like a model call, never replayed or refunded. A proxy tunnel's reservation
-    // is swept the same way: left RESERVED it would hold its day open to reconciliation for good, since reconcileDay refuses
-    // a day with a proxy row in flight, while its bytes (if any were sent) stay counted as the whole reservation.
     const swept = (await this.pool.query(`UPDATE fcpi_retrieval.budget_reservation SET state = 'UNCERTAIN', detail = 'the retrieval service stopped while the call was in flight'
-      WHERE state = 'RESERVED' AND kind IN ('extract', 'repair', 'search', 'docs_search', 'docs_read', 'decision', 'proxy') AND created_at < $1 RETURNING kind, unit, reserved::float8 AS reserved`, [startedAt])).rows;
+      WHERE state = 'RESERVED' AND created_at < $1 RETURNING kind, unit, reserved::float8 AS reserved`, [startedAt])).rows;
     await this.pool.query("UPDATE fcpi_retrieval.permit SET holder = NULL, lease_until = NULL WHERE holder IS NOT NULL");
     await this.pool.query("UPDATE fcpi_retrieval.domain_state SET holder = NULL, hold_until = NULL WHERE holder IS NOT NULL");
     for (const [kind, n] of Object.entries(permits)) {
@@ -360,7 +362,11 @@ export class Store {
     for (const r of rows) {
       const cost = costOf(Number(r.bytes ?? 0), r.subject);
       if (cost === null) continue;
-      if (await this.settleBudget(r.id, Math.min(cost, Number(r.reserved)), { usage: { bytes: Number(r.bytes ?? 0), reconciled: true }, detail: "settled at its measured bytes by reconciliation" })) n++;
+      // A row with no measured bytes (one a stopped service left in flight) is settled at 0 and says so: the provider's report
+      // carries its real charge as the day's adjustment, and the record must not read as a measurement of 0 bytes.
+      const measured = r.bytes !== null;
+      if (await this.settleBudget(r.id, Math.min(cost, Number(r.reserved)), { usage: { bytes: Number(r.bytes ?? 0), reconciled: true, ...(measured ? {} : { measured: false }) },
+        detail: measured ? "settled at its measured bytes by reconciliation" : "settled at no measured bytes by reconciliation; the provider's report carries its charge" })) n++;
     }
     return n;
   }
