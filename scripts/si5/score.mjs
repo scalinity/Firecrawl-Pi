@@ -97,6 +97,7 @@ for (const { q, run } of queries) {
       p5: urls.slice(0, 5).filter(rel).length / 5, p10: top10.filter(rel).length / 10,
       primary10: top10.some((u) => rel(u) && PRIMARY.has(L[u]?.sourceType)) ? 1 : 0,
       recall20: relevantSet.size ? top20.filter((u) => relevantSet.has(u)).length / relevantSet.size : 0,
+      recall10: relevantSet.size ? top10.filter((u) => relevantSet.has(u)).length / relevantSet.size : 0,
       anchorRecall20: anchorUrls.length ? anchorUrls.filter((u) => top20.includes(u)).length / anchorUrls.length : null,
       unjudged10: top10.filter((u) => g(u) === null).length, unjudged20: top20.filter((u) => g(u) === null).length, returned: urls.length,
       coverage: reqs.length ? covered(top10, false).length / reqs.length : null, coveragePage: reqs.length ? covered(top10, true).length / reqs.length : null, covered: covered(top10, false),
@@ -149,7 +150,7 @@ function bootstrap(set, stat, n = 10000) {
 const diff = (p1, p0, m) => (sample) => mean(sample.map((id) => (val(id, p1, m) === null || val(id, p0, m) === null ? null : val(id, p1, m) - val(id, p0, m))).filter((x) => x !== null));
 const relative = (p1, p0, m) => (sample) => { const a = mean(sample.map((id) => val(id, p0, m)).filter((x) => x !== null)), b = mean(sample.map((id) => val(id, p1, m)).filter((x) => x !== null)); return a > 0 ? b / a - 1 : null; };
 const dpos = ids.filter((id) => per[id].docPositive), five = ids.filter((id) => per[id].eligibleFive);
-const metrics = ["ndcg10", "ndcg10Condensed", "p5", "p10", "primary10", "recall20", "anchorRecall20", "unjudged10", "unjudged20", "acquired10"];
+const metrics = ["ndcg10", "ndcg10Condensed", "p5", "p10", "primary10", "recall20", "recall10", "anchorRecall20", "unjudged10", "unjudged20", "acquired10"];
 const table = (set) => Object.fromEntries(PROFILES.map((p) => [p, Object.fromEntries(metrics.map((m) => [m, macro(set, p, m)]))]));
 const byCategory = Object.fromEntries([...new Set(ids.map((id) => per[id].category))].map((c) => [c, table(ids.filter((id) => per[id].category === c))]));
 // What keeps a gate from being measured: an unscored held-out query, or a replay that did not take D's answers.
@@ -177,7 +178,9 @@ const out = {
     return [prov, { coverage: macro(dpos, P, "coverage"), coveragePage: macro(dpos, P, "coveragePage"), uniqueRequirementsOverC: dpos.reduce((n, id) => n + val(id, P, "covered").filter((r) => !val(id, "C", "covered").includes(r)).length, 0) }]; })),
   gates: {
     Q01: { status: verdict(q01Why, nA > 0 && (nDa - nA) / nA >= 0.10 && recallGainA >= 0.10), notMeasured: q01Why, queries: withA.length, ndcgA: nA, ndcgD: nDa, relativeImprovement: nA > 0 ? (nDa - nA) / nA : null, baselineZero: !(nA > 0),
-      relativeImprovementCI: bootstrap(withA, relative("D", "A", "ndcg10")), ndcgDiff: bootstrap(withA, diff("D", "A", "ndcg10")), recallGain: recallGainA, recallDiff: bootstrap(withA, diff("D", "A", "recall20")) },
+      relativeImprovementCI: bootstrap(withA, relative("D", "A", "ndcg10")), ndcgDiff: bootstrap(withA, diff("D", "A", "ndcg10")), recallGain: recallGainA, recallDiff: bootstrap(withA, diff("D", "A", "recall20")),
+      // The legacy A supplies at most ten documents, so its recall@20 is its recall@10: the gain at equal depth is reported beside the gate's own.
+      recall10Gain: macro(withA, "D", "recall10") - macro(withA, "A", "recall10") },
     Q02: { status: verdict(q02Why, macro(ids, "C", "ndcg10") - macro(ids, "B", "ndcg10") >= 0.02), notMeasured: q02Why, ndcgDiff: bootstrap(ids, diff("C", "B", "ndcg10")) },
     Q03: { status: verdict(q03Why, macro(dpos, "D", "coverage") - macro(dpos, "C", "coverage") >= 0.10), notMeasured: q03Why, coverageDiff: bootstrap(dpos, diff("D", "C", "coverage")), pageOnlyDiff: bootstrap(dpos, diff("D", "C", "coveragePage")) },
   },
@@ -185,6 +188,8 @@ const out = {
     label: "workstation, live providers, one search at a time; not a Pi measurement" },
   perQuery: per,
 };
+// Last, so the seeded resampling stream every earlier interval used is untouched by it.
+out.gates.Q01.recall10Diff = bootstrap(withA, diff("D", "A", "recall10"));
 writeFileSync(join(EVAL, "scores.json"), JSON.stringify(out, null, 1) + "\n");
 const f = (x) => (x === null || x === undefined ? "n/a" : Number(x).toFixed(4));
 console.log(`held-out ${heldout.length}, scored ${ids.length}, excluded ${Object.keys(excluded).length}, A missing ${out.aMissing.length}; nDCG@10 A ${f(nA)} B ${f(macro(ids, "B", "ndcg10"))} C ${f(macro(ids, "C", "ndcg10"))} D ${f(macro(ids, "D", "ndcg10"))}; recall@20 A ${f(macro(withA, "A", "recall20"))} D ${f(macro(ids, "D", "recall20"))}`);
