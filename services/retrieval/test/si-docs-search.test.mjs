@@ -194,9 +194,36 @@ test("a requested version that only other versions answer is reported as no matc
       assert.deepEqual(s.coverage.documentation.versions, [{ library: "vue", version: "3.5", verdict }], libraryId);
       assert.deepEqual(exact(s), warnings, libraryId);
       if (warnings.length) assert.match(r.body.warning, /vue 3\.5/, "the human-readable warning names the library and version");
-      else assert.doesNotMatch(r.body.warning ?? "", /version/i);
+      else assert.doesNotMatch(r.body.warning ?? "", /could not be confirmed|No documentation was found/, "a confirmed version raises no verdict warning");
     } finally { await h.close(); }
   }
+});
+
+test("a strict-version search leaves out general rows whose URL states another release, counts what is left, and says when rows cannot be checked", async () => {
+  // The engines are blind to versions; a URL that states a release is the one thing a search can check without reading the page (spec §11.2).
+  const brave = (q) => ({ status: 200, body: { query: { original: q }, web: { type: "search", results: [
+    { title: "Vue 2 guide", url: "https://vuejs.org/v2/guide/reactivity", description: "d", extra_snippets: [] },
+    { title: "Vue 3 guide", url: "https://v3.vuejs.org/guide/reactivity", description: "d", extra_snippets: [] },
+    { title: "Vue notes", url: "https://blog.example.org/vue-notes", description: "d", extra_snippets: [] }] } } });
+  const h = await harness({ handlers: { brave, context7: versionedAnswer("/vuejs/docs/v3.5.2"), ref: refFixture() } });
+  try {
+    const r = await h.coordinator.search(docsRequest("vue reactive state ref", { limit: 10, intelligence: { documentation: "required", libraries: [{ name: "vue", version: "3.5" }] } }), { signal: new AbortController().signal });
+    const s = r.body.search, rows = s.coverage.documentation.versionRows;
+    assert.ok(r.body.web.every((w) => !/\/v2\//.test(w.url)), "the engine's first result, which states release 2, is not returned");
+    assert.equal(rows.excluded, 1);
+    assert.equal(rows.returned, r.body.web.length);
+    assert.equal(rows.confirmed + rows.unverified, rows.returned);
+    assert.ok(rows.confirmed >= 1, "the Context7 row whose scope names 3.5 and the v3 URL count as confirmed");
+    assert.ok(rows.unverified >= 1, "the engines' other rows state no release");
+    assert.ok(s.warnings.includes("version_rows_unverified"));
+    assert.match(r.body.warning, new RegExp(`${rows.unverified} of ${rows.returned} results`));
+    const status = (w) => w.fcpi.search.constraintStatus.filter((c) => c.constraint === "version").map((c) => c.status);
+    const v3 = r.body.web.find((w) => w.url === "https://v3.vuejs.org/guide/reactivity");
+    assert.ok(v3, "the engine's second result, a URL that states release 3, is returned");
+    assert.deepEqual(status(v3), ["satisfied"]);
+    // Every returned row that carries a version status is either satisfied or unverified; those the URL could not check say so.
+    for (const w of r.body.web.filter((x) => x.url === "https://blog.example.org/vue-notes")) assert.deepEqual(status(w), ["unverified"]);
+  } finally { await h.close(); }
 });
 
 test("a search that asks for no version carries no version report", async () => {
@@ -204,6 +231,7 @@ test("a search that asks for no version carries no version report", async () => 
   try {
     const s = (await h.coordinator.search(vueAt(null), { signal: new AbortController().signal })).body.search;
     assert.deepEqual([s.coverage.documentation.versions, exact(s)], [[], []]);
+    assert.deepEqual([s.coverage.documentation.versionRows, s.warnings.includes("version_rows_unverified")], [undefined, false]);
   } finally { await h.close(); }
 });
 

@@ -7,7 +7,7 @@ import { Denied } from "../ssrf.mjs";
 export const REQUEST_SCHEMA = "fcpi.search-request/v1";
 export const RESPONSE_SCHEMA = "fcpi.search/v1";
 // Versions that enter cache keys and durable records: a change to any of them is a new identity, never a silent reuse.
-export const VERSIONS = Object.freeze({ normalizer: "si-normalize/1", ranker: "si-rank/1", rubric: "si-rubric/1", excerpt: "si-excerpt/1", classifier: "si-docs-detect/1", evidence: "si-evidence/1" });
+export const VERSIONS = Object.freeze({ normalizer: "si-normalize/2", ranker: "si-rank/1", rubric: "si-rubric/1", excerpt: "si-excerpt/1", classifier: "si-docs-detect/1", evidence: "si-evidence/1" });
 
 export const GENERAL = ["serper", "brave", "exa", "deepseek", "tavily"];
 export const DOCUMENTATION = ["context7", "ref"];

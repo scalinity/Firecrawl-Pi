@@ -5,7 +5,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { versionOfLibraryId, sameVersion } from "../src/search-intelligence/adapters/context7.mjs";
-import { exactVersionReport } from "../src/search-intelligence/versions.mjs";
+import { exactVersionReport, hardVersions, urlVersionCheck, versionRowReport } from "../src/search-intelligence/versions.mjs";
 
 test("a library id names its version in a trailing version segment or a trailing underscore version, and nothing else does", () => {
   for (const [id, want] of [["/websites/python_3_10", "3.10"], ["/websites/django_5_2_3", "5.2.3"], ["/vercel/next.js/v14.3.0-canary.87", "14.3.0"], ["/org/proj/v5", "5"],
@@ -34,4 +34,51 @@ test("the report names each requested version's verdict, leaves unversioned and 
   assert.deepEqual(exactVersionReport(request, [c7(sub("python", "4.0"))]).map((x) => x.verdict), ["unconfirmed", "unconfirmed"]);
   assert.deepEqual(exactVersionReport({ intelligence: { libraries: [lib("react")] } }, [c7()]), []);
   assert.deepEqual(exactVersionReport({ intelligence: {} }, []), []);
+});
+
+// A discovery engine is blind to versions, but a URL often states the release it documents (/en/6.1/, v7.vite.dev, whatsnew/3.14.html). Spec §11.2:
+// exact known version violations are removed by code before ranking. Only what a URL itself says counts, and only when the URL also names the library.
+test("a URL that names the library and states another release is a known mismatch; the same release line matches; anything else says nothing", () => {
+  const check = (url, name, version) => urlVersionCheck(url, [{ name, version }]).status;
+  for (const [url, name, version, want] of [
+    ["https://docs.djangoproject.com/en/5.2/topics/db/", "django", "5.2", "match"],
+    ["https://docs.djangoproject.com/en/6.1/topics/db/", "django", "5.2", "mismatch"],
+    ["https://docs.djangoproject.com/en/5.2.3/releases/", "django", "5.2", "match"],
+    ["https://v6.vite.dev/guide/migration", "vite", "6", "match"],
+    ["https://v7.vite.dev/guide/migration", "vite", "6", "mismatch"],
+    ["https://docs.python.org/3/whatsnew/3.14.html", "python", "3.14", "match"],
+    ["https://docs.python.org/3/whatsnew/3.11.html", "python", "4.0", "mismatch"],
+    ["https://nodejs.org/docs/latest-v20.x/api/fs.html", "node", "18", "mismatch"],
+    ["https://registry.terraform.io/providers/hashicorp/aws/5.83.0/docs/resources/s3_bucket", "hashicorp/aws", "5", "match"],
+    ["https://registry.terraform.io/providers/hashicorp/aws/6.28.0/docs/resources/s3_bucket", "hashicorp/aws", "5", "mismatch"],
+    // A URL that states both a release line and the requested one (release notes of 5.2 kept in the 6.1 tree) is not shown to be another release.
+    ["https://docs.djangoproject.com/en/6.1/releases/5.2/", "django", "5.2", "match"],
+    // Nothing stated: latest, stable, current and dev name no release; years, dates, ids and a bare number are not versions; another library's page says nothing.
+    ["https://docs.djangoproject.com/en/dev/topics/db/", "django", "5.2", "unknown"],
+    ["https://www.postgresql.org/docs/current/pgstatstatements.html", "postgresql", "17", "unknown"],
+    ["https://docs.python.org/3/library/asyncio.html", "python", "3.14", "unknown"],
+    ["https://blog.example.org/django/2024/05/12/post", "django", "5.2", "unknown"],
+    ["https://blog.example.org/django/posts/12345/", "django", "5.2", "unknown"],
+    ["https://blog.example.org/tips/6.1/", "django", "5.2", "unknown"],
+    ["https://example.org/go/1.22/", "go", "1.21", "unknown"],
+    ["not a url", "django", "5.2", "unknown"], ["", "django", "5.2", "unknown"]]) assert.equal(check(url, name, version), want, `${url} for ${name}@${version}`);
+  // Each requested library decides for the URLs that name it; a request with no hard version asks nothing.
+  const both = [{ name: "vite", version: "6" }, { name: "django", version: "5.2" }];
+  assert.equal(urlVersionCheck("https://docs.djangoproject.com/en/6.1/", both).status, "mismatch");
+  assert.equal(urlVersionCheck("https://v6.vite.dev/guide", both).status, "match");
+  assert.equal(urlVersionCheck("https://v7.vite.dev/guide", []).status, "unknown");
+});
+
+test("the hard versions of a request are its libraries with a version other than latest", () => {
+  assert.deepEqual(hardVersions({ intelligence: { libraries: [lib("python", "4.0"), lib("react"), lib("node", "latest"), lib("vue", "3.5")] } }), [{ name: "python", version: "4.0" }, { name: "vue", version: "3.5" }]);
+  assert.deepEqual(hardVersions({ intelligence: {} }), []);
+});
+
+test("the row report counts the rows a scope or a URL confirmed, the rows nothing says anything about, and the rows left out; a request with no hard version has none", () => {
+  const req = { intelligence: { libraries: [lib("vue", "3.5")] } };
+  const rows = [{ constraintStatus: [{ constraint: "version", status: "satisfied", basis: "url" }] }, { constraintStatus: [{ constraint: "version", status: "unverified" }] },
+    { constraintStatus: [], documentation: { scopes: [{ status: "scope_only" }] } }, { constraintStatus: [], documentation: { scopes: [{ status: "unknown" }] } }, { constraintStatus: [] }];
+  assert.deepEqual(versionRowReport(req, rows, 2), { returned: 5, confirmed: 2, unverified: 3, excluded: 2 });
+  assert.deepEqual(versionRowReport(req, [], 0), { returned: 0, confirmed: 0, unverified: 0, excluded: 0 });
+  assert.equal(versionRowReport({ intelligence: { libraries: [lib("vue")] } }, rows, 0), null);
 });

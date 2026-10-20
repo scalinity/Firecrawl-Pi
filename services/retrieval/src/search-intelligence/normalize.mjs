@@ -9,6 +9,7 @@
 //   - a provider contributes one observation per document, at its best rank.
 import { createHash } from "node:crypto";
 import { getDomain } from "tldts";
+import { urlVersionCheck } from "./versions.mjs";
 
 export const TRACKING_PARAMS = Object.freeze(["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content", "gclid", "fbclid"]);
 export const sha256 = (s) => createHash("sha256").update(s).digest("hex");
@@ -68,15 +69,23 @@ export const documentIdOf = (url, observedVersion) => sha256(`${url}\n${observed
 
 // One provider's candidates, normalized and constrained. Returns the kept candidates (each with its document identity) and
 // what was dropped, so an empty lane can say whether the provider found nothing or everything was filtered.
-export function prepareCandidates(provider, candidates, constraints) {
-  const kept = [], dropped = { invalid: 0, constraint: {} };
+export function prepareCandidates(provider, candidates, constraints, versions = []) {
+  const kept = [], dropped = { invalid: 0, constraint: {}, versionMismatch: [] };
   for (const c of candidates) {
     const n = normalizeUrl(c.url);
     if (!n) { dropped.invalid++; continue; }
     const doc = { ...c, canonicalUrl: n.url, host: n.host, fragment: n.fragment };
     const check = checkConstraints(doc, constraints);
     if (!check.ok) { dropped.constraint[check.why] = (dropped.constraint[check.why] ?? 0) + 1; continue; }
-    kept.push({ ...doc, provider, documentId: documentIdOf(n.url, versionKey(c)), constraintStatus: check.statuses });
+    // A hard version (spec §11.2): a general candidate whose URL states another release is removed here, before ranking, whatever Jev would say. A
+    // documentation candidate is left to its provider's scope. A kept row says whether its URL confirmed the version, so "unverified" is never silent.
+    const statuses = [...check.statuses];
+    if (versions.length && !c.documentation) {
+      const v = urlVersionCheck(n.url, versions);
+      if (v.status === "mismatch") { dropped.constraint.version_mismatch = (dropped.constraint.version_mismatch ?? 0) + 1; dropped.versionMismatch.push(n.url); continue; }
+      statuses.push(v.status === "match" ? { constraint: "version", status: "satisfied", basis: "url" } : { constraint: "version", status: "unverified" });
+    }
+    kept.push({ ...doc, provider, documentId: documentIdOf(n.url, versionKey(c)), constraintStatus: statuses });
   }
   return { kept, dropped };
 }

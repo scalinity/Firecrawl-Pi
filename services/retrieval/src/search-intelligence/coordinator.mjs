@@ -15,7 +15,7 @@
 import { randomUUID } from "node:crypto";
 import { Denied } from "../ssrf.mjs";
 import { validateSearchRequest, outcome, skipped, failed, validated, GENERAL, DOCUMENTATION, VERSIONS, RESPONSE_SCHEMA } from "./contracts.mjs";
-import { exactVersionReport } from "./versions.mjs";
+import { exactVersionReport, hardVersions, versionRowReport } from "./versions.mjs";
 import { prepareCandidates, buildPool, sha256, normalizeQueryText, normalizeUrl, hostMatches } from "./normalize.mjs";
 import { fuse, literalRelevance, shortlist, blend, selectFinal } from "./rank.mjs";
 import { SEARCH_APIS } from "../budget.mjs";
@@ -212,7 +212,8 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       if (parent.signal.aborted && signal.aborted) throw new Denied("CANCELLED", "the caller cancelled");
 
       // 5. Normalize, constrain, pool, fuse.
-      const prepared = all.filter(validated).map((o) => ({ o, ...prepareCandidates(o.provider, o.candidates, request.constraints) }));
+      const hard = hardVersions(request);
+      const prepared = all.filter(validated).map((o) => ({ o, ...prepareCandidates(o.provider, o.candidates, request.constraints, hard) }));
       for (const p of prepared) if (p.o.status !== "partial" && p.o.candidates.length && !p.kept.length) p.o.filteredEmpty = true;
       const { pool, distinct, truncatedPassages } = buildPool(prepared.map((p) => ({ provider: p.o.provider, kept: p.kept, retrievedAt: p.o.originalRetrievedAt ?? p.o.completedAt, fromCache: p.o.fromCache })),
         { poolMax: L.candidates.poolMax, workingSetBytes: L.workingSetBytes });
@@ -264,9 +265,13 @@ export function makeCoordinator({ store, getBudget, getPolicy, getSelection, get
       // A requested version that no documentation confirmed is said so, never answered silently with other versions (spec §6.1).
       const versions = exactVersionReport(request, docsOutcomes);
       for (const v of versions) if (v.verdict !== "confirmed" && !warnings.includes(`exact_version_${v.verdict}`)) warnings.push(`exact_version_${v.verdict}`);
+      // The engines cannot confirm a version, so the rows are counted by what said something about them: a documentation scope or a URL that states the release
+      // confirmed them, a URL that states another release removed them (before ranking), and the rest are said to be unchecked rather than left looking confirmed.
+      const versionRows = versionRowReport(request, final, new Set(prepared.flatMap((p) => p.dropped.versionMismatch)).size);
+      if (versionRows?.unverified) warnings.push("version_rows_unverified");
       const coverage = {
         general: { requested: GENERAL.length, successful: generalOk.length, fromCache: generalOk.filter((o) => o.fromCache).length, missing: generalMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })) },
-        documentation: { activated: docsActive, reason: activation.reason, requested: docsActive ? DOCUMENTATION.length : 0, successful: docsOutcomes.filter(validated).length, missing: docsMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })), versions },
+        documentation: { activated: docsActive, reason: activation.reason, requested: docsActive ? DOCUMENTATION.length : 0, successful: docsOutcomes.filter(validated).length, missing: docsMissing.map((o) => ({ provider: o.provider, status: o.status, reason: o.reason })), versions, ...(versionRows ? { versionRows } : {}) },
         searxng: { used: !!searxngOutcome, why: searxngWhy, status: searxngOutcome?.status ?? null, reason: searxngOutcome?.reason ?? null },
         decisions: { status: ranking.mode === "rrf_fallback" ? (decisions ? "not_used" : "not_configured") : ranking.mode, reason: ranking.reason },
       };
@@ -513,5 +518,7 @@ function warningText(s) {
     if (v.verdict === "no_match") parts.push(`No documentation was found for ${v.library} ${v.version}; results may be for other versions.`);
     else if (v.verdict === "unconfirmed") parts.push(`${v.library} ${v.version} could not be confirmed: no documentation source stated which version it covers.`);
   }
+  const rows = s.coverage.documentation.versionRows;
+  if (rows?.unverified) parts.push(`${rows.unverified} of ${rows.returned} results state no release the requested version could be checked against; they may be for other versions.`);
   return parts.join(" ");
 }

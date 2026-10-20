@@ -57,6 +57,23 @@ test("strict publication needs a timestamp identified as publication; freshness 
 });
 
 // ---- fusion and selection -----------------------------------------------------------------------------------------------------
+test("under a hard version a general candidate whose URL states another release is dropped, and the rest say whether a URL confirmed the version; documentation candidates are left to their scope", () => {
+  const strict = { includeDomains: [], excludeDomains: [], publishedAfter: null, publishedBefore: null, dateMode: "freshness" };
+  const versions = [{ name: "vue", version: "3.5" }];
+  const cands = [{ url: "https://vuejs.org/v2/guide/reactivity" }, { url: "https://v3.vuejs.org/guide/reactivity" }, { url: "https://vuejs.org/guide/essentials/reactivity-fundamentals" }, { url: "https://blog.example.org/vue-notes" },
+    { url: "https://vuejs.org/v2/guide/components", documentation: { scopes: [{ status: "scope_only" }] } }];
+  const r = prepareCandidates("brave", cands, strict, versions);
+  assert.deepEqual(r.kept.map((c) => c.url), ["https://v3.vuejs.org/guide/reactivity", "https://vuejs.org/guide/essentials/reactivity-fundamentals", "https://blog.example.org/vue-notes", "https://vuejs.org/v2/guide/components"]);
+  assert.deepEqual(r.dropped.constraint, { version_mismatch: 1 });
+  assert.deepEqual(r.dropped.versionMismatch, ["https://vuejs.org/v2/guide/reactivity"]);
+  const status = (c) => c.constraintStatus.filter((s) => s.constraint === "version").map((s) => s.status);
+  assert.deepEqual(r.kept.map(status), [["satisfied"], ["unverified"], ["unverified"], []], "a documentation candidate carries no URL verdict");
+  // No hard version: nothing is checked and no version status is added.
+  const plain = prepareCandidates("brave", cands, strict);
+  assert.equal(plain.kept.length, 5);
+  assert.ok(plain.kept.every((c) => !c.constraintStatus.some((s) => s.constraint === "version")));
+});
+
 test("RRF: one vote per provider at its best rank, SearXNG at 0.75, three rank-one votes normalize to 1", () => {
   const lane = (provider, urls) => ({ provider, retrievedAt: "t", fromCache: false, kept: prepareCandidates(provider, urls.map((url, i) => ({ url, title: url, rank: i + 1 })), { includeDomains: [], excludeDomains: [] }).kept });
   const { pool } = buildPool([lane("serper", ["https://a.example/x", "https://a.example/x?utm_source=dup"]), lane("brave", ["https://a.example/x"]), lane("exa", ["https://a.example/x"]), lane("searxng", ["https://b.example/y"])],

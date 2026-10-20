@@ -16,6 +16,8 @@ import { outcome } from "../contracts.mjs";
 import { parseRetryAfter } from "../availability.mjs";
 import { parseJson, str } from "./common.mjs";
 import { sha256, contentHash, normalizeQueryText, normalizeUrl } from "../normalize.mjs";
+import { sameVersion } from "../versions.mjs";
+export { sameVersion };
 // The longest reset a provider's report is believed for: a monthly window, with a few days' slack.
 export const RESET_MAX_MS = 35 * 86400 * 1000;
 
@@ -35,13 +37,6 @@ export function versionOfLibraryId(id) {
   }
   const u = /(?<=[A-Za-z])_(\d{1,3}(?:_\d{1,3}){1,2})$/.exec(last);
   return u ? u[1].replaceAll("_", ".") : null;
-}
-// Two versions agree when one is a prefix of the other on a dot boundary ("3.10" and "3.10.4"), never on a different number.
-export function sameVersion(a, b) {
-  const seg = (v) => String(v).replace(/^v/i, "").split(".");
-  const x = seg(a), y = seg(b);
-  for (let i = 0; i < Math.min(x.length, y.length); i++) if (x[i] !== y[i]) return false;
-  return true;
 }
 
 // The scopes one search asks: [{ libraries: [name...], version: string|null, key }]. A version Context7's pattern cannot
