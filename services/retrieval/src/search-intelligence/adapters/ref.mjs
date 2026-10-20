@@ -64,18 +64,24 @@ function blocksOf(text) {
 // refusals or its link is Ref's own site, where an unrecognised notice (a plan, a quota) would send the reader.
 const HOSTED_SHAPE = /\bpage='|\bsection='|\S > \S/;
 const OWN_SITE = /(^|\.)ref\.tools$/i;
+// The repository form Ref sends for a file ("owner/repo - slug") is a result by its shape. A block with no shape at all is read as a result only when it is one of
+// several: a notice is a single block, so a lone unmarked block that reads like one (a plan, credit, quota, limit, billing or maintenance message) is not a result.
+const REPO_FORM = /^[\w.-]+\/[\w.-]+ - \S/;
+const NOTICE = /\b(plans?|credits?|quota|limits?|limited|upgrade|billing|payments?|subscri\w*|maintenance|outage|downtime|unavailable|verify|try again|rate)\b/i;
 function hostedBlockOf(text) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lines.length < 2 || !/^https?:\/\/\S+$/.test(lines.at(-1))) return null;
   const head = lines.slice(0, -1).join("\n");
+  let plain = false;
   if (!HOSTED_SHAPE.test(head)) {
     let host = null;
     try { host = new URL(lines.at(-1)).hostname; } catch { return null; }
     if (OWN_SITE.test(host) || classifyError(head)) return null;
+    plain = !REPO_FORM.test(head);
   }
   // A field's value runs to its closing quote before the next field or the line's end, so an apostrophe inside it stays.
   const page = /\bpage='(.*?)'(?=\s+section='|\s*$)/m.exec(head)?.[1] ?? null, section = /\bsection='(.*)'\s*$/m.exec(head)?.[1] ?? null;
-  return { url: lines.at(-1), overview: page || section ? [page, section].filter(Boolean).join(" — ") : head, moduleId: page ?? "", title: page || lines[0] };
+  return { url: lines.at(-1), overview: page || section ? [page, section].filter(Boolean).join(" — ") : head, moduleId: page ?? "", title: page || lines[0], plain };
 }
 
 const textsOf = (result) => (Array.isArray(result?.content) ? result.content.filter((c) => c?.type === "text" && typeof c.text === "string").map((c) => c.text) : null);
@@ -96,13 +102,15 @@ export function parseRefSearch(result) {
   if (result.isError) return classifyError(texts.join("\n")) ?? { kind: "error", reason: "temporarily_unavailable", detail: "ref_is_error" };
   // A block is a result when it parses as one; otherwise one that opens with a refusal is an error whatever it quotes.
   const refusals = texts.map(() => null);
-  const docs = [];
+  const docs = [], plain = [];
   texts.forEach((t, i) => {
     const legacy = blocksOf(t), hosted = legacy.length ? null : hostedBlockOf(t);
     if (!legacy.length && !hosted) { refusals[i] = classifyError(t); return; }
-    for (const b of legacy.length ? legacy : [hosted]) if (normalizeUrl(b.url)) docs.push({ url: b.url, overview: b.overview.trim().slice(0, 2000), moduleId: b.moduleId.trim().slice(0, 300), title: b.title.trim().slice(0, 300) });
+    for (const b of legacy.length ? legacy : [hosted]) if (normalizeUrl(b.url)) { docs.push({ url: b.url, overview: b.overview.trim().slice(0, 2000), moduleId: b.moduleId.trim().slice(0, 300), title: b.title.trim().slice(0, 300) }); if (b.plain) plain.push(b.overview); }
   });
-  if (docs.length) return { kind: "results", docs };
+  // A lone unmarked block that reads like a notice is not a result list (see REPO_FORM).
+  const loneNotice = texts.length === 1 && docs.length === 1 && plain.length === 1 && NOTICE.test(plain[0]);
+  if (docs.length && !loneNotice) return { kind: "results", docs };
   if (texts.length === 1 && texts[0].trim() === NO_RESULTS) return { kind: "empty" };
   return refusals.find(Boolean) ?? { kind: "contract", detail: "ref_unrecognized_text" };
 }

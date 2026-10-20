@@ -44,6 +44,13 @@ test("Ref: a hosted block without a page, section or breadcrumb is a hit when it
   assert.equal(parseRefSearch(text("Handling it in the browser\njavascript:alert(1)")).kind, "contract");
   assert.equal(parseRefSearch(text("A description with no link at all")).kind, "contract");
   assert.equal(parseRefSearch(text("A description\nand a second line\nthat never reaches a URL")).kind, "contract");
+  // A notice is one block, so a lone unmarked block that reads like one (plan, credit, quota, limit, upgrade, billing, maintenance, verify …) fails closed whatever it links to;
+  // the observed owner/repo form and an answer of several result-shaped blocks are results with or without those words, and a lone prose block without them is a result.
+  for (const notice of ["Ref is undergoing maintenance; follow updates at\nhttps://status.example.org/incident", "Your plan has changed, details are on the billing page\nhttps://billing.example.org/plans/current",
+    "Please verify your account to continue searching\nhttps://accounts.example.org/verify/email"]) assert.equal(parseRefSearch(text(notice)).kind, "contract", notice);
+  assert.equal(parseRefSearch(text("Configure rate limit settings\nhttps://docs.example.org/a", "Upgrade guide for plan migrations\nhttps://docs.example.org/b")).kind, "results");
+  assert.equal(parseRefSearch(text("acme/billing - rate-limit-plans\nhttps://github.com/acme/billing/blob/main/docs/limits.md")).kind, "results");
+  assert.equal(parseRefSearch(text("Virtual field for defining a composite primary key on a model.\nhttps://docs.djangoproject.com/en/dev/ref/models/fields")).kind, "results");
 });
 
 test("Ref: documentation that quotes refusal phrases is a result or a page, never a refusal of this account", () => {
