@@ -140,6 +140,11 @@ node scripts/m9/redaction.mjs --out $R/redaction.json
 node scripts/si6/verify.mjs
 ```
 
+## What the proxy ledger shows after the cutover
+
+- **An hourly `proxy_reconcile_failed` line is expected.** Once paid dispatch is on and the usage report's credential is present, the retrieval service's hourly loop reconciles the selected proxy's last closed UTC day against that report. Decodo's budget-policy entry has `usageDedicated: false` (its report covers the whole account, not only this deployment), so `reconcileDay` refuses it with `RECONCILE_SCOPE_UNKNOWN` and the loop logs that code each hour. No Decodo day is reconciled automatically, and the line is not a fault; the Decodo dashboard is the check on its spend.
+- **A proxy row that a stopped service left behind** is marked UNCERTAIN at the next start: it stays counted in full, in the usage of the day and month it was reserved in, is listed under `uncertain` in the providers status, and no longer holds its day open to reconciliation. The loop reconciles only the last closed day and no command reconciles an older one, so reconciliation never settles such a row afterwards.
+
 ## Rollback
 
 **Fast, keeping the release's code:** the legacy profile is the tested rollback, Serper first with the SearXNG fallback, keeping domain constraints since `6c2c8a5`. It recreates only the retrieval service, under the same hold and drain, and records the release.
