@@ -63,3 +63,32 @@ None. Both reviewers constructed the failure traces and found none that corrupts
 [ ] ❌ Request Changes (critical issues)
 [x] ⚠️ Approve with Suggestions
 [ ] ✅ Approve
+
+### Finding dispositions
+
+Nothing ran against the Pi beyond read-only probes: the cutover remains the one boundary, waiting on the owner's launch authorization, and the Pi still runs the previous release. The retrieval suite (478 tests) ran against a disposable PostgreSQL and passed, as did the 72 root tests and the contract tests that touch the ledger, the paid switch and the pre-M9 verdicts.
+
+| Finding | Outcome | Evidence |
+|---|---|---|
+| W1 | Fixed (`0c87f94`) | The sweep's kind filter is gone: every RESERVED row older than the process start becomes UNCERTAIN. The sweep test now holds enhanced and parse rows. |
+| W2 | Fixed (`0ed378d`) | The URL sign counts only when the redirect added the parameters (`redditGate(finalUrl) && !redditGate(requestedUrl)`) in `quality.mjs` and `gate.mjs`; a requested URL already carrying them has a test. |
+| W3 | Fixed (`0c87f94`, `049fe8f`) | The sweep tests assert `budget_usage` is unchanged and that a swept row settles at actual 0. `FCPI_SI5_ROOT` lets `tests/si5-labels.test.mjs` drive `capture.mjs --reclassify` and `labels.mjs final` and `adjudicate` over a fixture tree (a mutation check showed the adjudicate test can fail); `labels.json` reports `blockedCaptures` and `blockedUnmatched`. |
+| W4 | Fixed (`62716a4`) | An enhanced-tier challenge sets `domain_route.blocked_until` for the routing TTL; an auto page or download on the domain then fails at once as BLOCKED_PUBLIC_CONTENT with no attempt, tunnel or dispatch, and the time left as its retry-after. A deliberate basic, stealth or enhanced request still tests it, an adequate enhanced answer lifts it, and a page whose dispatch was already made keeps its answer. Tests cover the pure rules, the stored column, the acquirer and the download path; removing the download guard or the made-priority rule makes its test fail. Spec 9.5 states the rule. |
+| W5 | Fixed (`049fe8f`) | The code comments and `gate-reclassification.md` give the rule actually applied (a judgment made on a capture the packet misrepresented as captured is void), the results are reported before and after the exclusion, and `labels.json` records the hashes of `captures.json`, `gate.mjs` and `quality.mjs`. |
+| W6 | Fixed (`91c9c45`) | Both fixture phases stop unless the service reports `paidDispatch` false, before any selection changes; a missing status counts as on. The guard's logic ran against stubbed statuses; the drivers themselves need the Pi and were not run. The live phases are real-provider runs by design and are unchanged. |
+| S1 | Fixed (`0ed378d`) | `gate.mjs` also matches the capture's title through `redditGateTitle`, and its header states both halves of the platform's test. |
+| S2 | Fixed (`0ed378d`) | Classifier edge cases are in `quality.test.mjs` and `tests/si5-gate.test.mjs`. |
+| S3 | Fixed (`0c87f94`) | The comments say the sweep's effect on the deployed, not usage-dedicated, Decodo is visibility; a swept row settled by reconciliation records `measured: false` instead of passing for a measurement of 0 bytes. |
+| S4 | Fixed (`049fe8f`) | Blocked pairs are left out of the agreement figures and counted (`blockedPairs`), one flag applies by precedence, `urlsOf` is reused, and the header names `capture_blocked`. |
+| S5 | Fixed (`b6c2bcb`) | The test names the exact seven reporting-only paid categories and shows by a control that its assertion fails when a cap is added. |
+| S6 | Fixed (`049fe8f`) | A reclassified capture carries `previousStatus` and `reclassifiedAt`, backfilled onto the 92 records and listed in `captures.json`. |
+| S7 | Fixed (`865ec6e`) | `ROLLOUT.md` says Decodo's `usageDedicated: false` makes the hourly loop log `RECONCILE_SCOPE_UNKNOWN`, and that a swept proxy row older than the last closed day is never reconciled. |
+| S8 | Rejected | `startedAt` is taken once at module load and compared with `created_at` from PostgreSQL, which runs as a Compose service on the same Pi (`deploy/compose.yaml`, `nuq-postgres`), so both read one kernel clock. The cross-clock risk exists only where PostgreSQL is on another machine, as in the workstation tests, which P2 and `m5-store` now take from the database. |
+| S9 | Fixed (`81fa12a`) | The four stale sentences in `ORCHESTRATION.html` now state the policy's figures, the footer's $0.50 a day proxy figure included. The three data blocks are byte-identical; checked in light and dark at 1280 px and 390 px. |
+| P1 | Fixed (`4ac1f85`) | The stop closes all four listeners; the `stopping` line reports `listeners_open`, which the spawned-service test asserts is 0 (it read 2 before the change). A tunnel already upgraded by CONNECT is not closed by `closeAllConnections()` (checked on Node 26) and ends with the process; the next start's sweep marks any that were still reserved. |
+| P2 | Fixed (`876c3f9`) | `si-store` takes the sweep's start time from the database; under a 5 s skew of the process clock the old form fails and the new one passes. |
+
+**Observed while addressing these, not raised by the review:**
+
+- The accepted milestone gates that assert every paid cap is zero read a policy that no longer says so. `scripts/m5/verify.mjs` B01 reads `deploy/policies/budget.json` from the working tree and would report FAIL if rerun now; `scripts/m9/entry.mjs` reads the Pi's deployed policy and, with `m9/collect.mjs` and `pre-m9/posture.mjs`, would report FAIL once the cutover deploys the new caps. They were milestone-close gates, their accepted records are untouched, and none was changed here.
+- The hourly proxy reconciliation will log `proxy_reconcile_failed` with `RECONCILE_SCOPE_UNKNOWN` for Decodo after the cutover; this is expected and now stated in `ROLLOUT.md`.
