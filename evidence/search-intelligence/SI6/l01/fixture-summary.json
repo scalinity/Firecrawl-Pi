@@ -1,0 +1,162 @@
+{
+ "target_ms": 23000,
+ "request_deadline_ms": 60000,
+ "live": {},
+ "fixture": {
+  "fixture_baseline": {
+   "n": 30,
+   "p50": 198,
+   "p95": 204,
+   "max": 208,
+   "min": 35,
+   "outcomes": {
+    "complete": 30
+   },
+   "ranking": {
+    "hybrid/complete": 30
+   },
+   "deadline_breaches": 0,
+   "over_target": 0
+  },
+  "fixture_discovery_stalled": {
+   "n": 30,
+   "p50": 199,
+   "p95": 10015,
+   "max": 10015,
+   "min": 19,
+   "outcomes": {
+    "partial": 30
+   },
+   "ranking": {
+    "hybrid/complete": 30
+   },
+   "deadline_breaches": 0,
+   "over_target": 0
+  },
+  "fixture_jev_stalled": {
+   "n": 30,
+   "p50": 200,
+   "p95": 8012,
+   "max": 8013,
+   "min": 7,
+   "outcomes": {
+    "complete": 30
+   },
+   "ranking": {
+    "rrf_fallback/jev_timeout": 2,
+    "rrf_fallback/jev_breaker_open": 28
+   },
+   "deadline_breaches": 0,
+   "over_target": 0
+  },
+  "fixture_discovery_stalled_each": {
+   "n": 30,
+   "p50": 10014,
+   "p95": 10018,
+   "max": 10021,
+   "min": 10010,
+   "outcomes": {
+    "partial": 30
+   },
+   "ranking": {
+    "hybrid/complete": 30
+   },
+   "deadline_breaches": 0,
+   "over_target": 0
+  },
+  "fixture_jev_stalled_each": {
+   "n": 30,
+   "p50": 8010,
+   "p95": 8012,
+   "max": 8013,
+   "min": 8007,
+   "outcomes": {
+    "complete": 30
+   },
+   "ranking": {
+    "rrf_fallback/jev_timeout": 30
+   },
+   "deadline_breaches": 0,
+   "over_target": 0
+  },
+  "fixture_concurrent4": {
+   "n": 32,
+   "p50": 400,
+   "p95": 802,
+   "max": 803,
+   "min": 29,
+   "outcomes": {
+    "complete": 32
+   },
+   "ranking": {
+    "hybrid/complete": 32
+   },
+   "deadline_breaches": 0,
+   "over_target": 0
+  },
+  "fixture_cancel": {
+   "rounds": [
+    {
+     "round": 1,
+     "cancelledOutcomes": [
+      "threw:CANCELLED: the caller cancelled",
+      "threw:CANCELLED: the caller cancelled"
+     ],
+     "survivorOutcomes": [
+      "complete",
+      "complete"
+     ],
+     "reservedRowsLeft": 0
+    },
+    {
+     "round": 2,
+     "cancelledOutcomes": [
+      "threw:CANCELLED: the caller cancelled",
+      "threw:CANCELLED: the caller cancelled"
+     ],
+     "survivorOutcomes": [
+      "complete",
+      "complete"
+     ],
+     "reservedRowsLeft": 0
+    },
+    {
+     "round": 3,
+     "cancelledOutcomes": [
+      "threw:CANCELLED: the caller cancelled",
+      "threw:CANCELLED: the caller cancelled"
+     ],
+     "survivorOutcomes": [
+      "complete",
+      "complete"
+     ],
+     "reservedRowsLeft": 0
+    },
+    {
+     "round": 4,
+     "cancelledOutcomes": [
+      "threw:CANCELLED: the caller cancelled",
+      "threw:CANCELLED: the caller cancelled"
+     ],
+     "survivorOutcomes": [
+      "complete",
+      "complete"
+     ],
+     "reservedRowsLeft": 0
+    }
+   ],
+   "reserved_rows_left": 0
+  }
+ },
+ "memory": {
+  "fixture_process": {
+   "peak_rss_mib": 110,
+   "cgroup_peak_bytes": 76742656
+  },
+  "host_available_mib_during_fixture": {
+   "min": 4875,
+   "max": 5055,
+   "samples": 67
+  }
+ }
+}

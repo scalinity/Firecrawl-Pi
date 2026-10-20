@@ -1,0 +1,42 @@
+usage over day (to 2026-10-20T10:49:45Z)
+jobs        none
+acquisitions 152, attempts 153
+  direct_browser rendered: 1 attempts, 1415622 bytes
+  direct_http adequate: 145 attempts, 521346 bytes
+  direct_http js_shell: 5 attempts, 50393 bytes
+  direct_http TIMEOUT: 1 attempts, 0 bytes
+  residential_http PROVIDER_AUTH_FAILED: 1 attempts, 655 bytes
+provider calls
+  decisions_jev/openrouter SETTLED: 850 calls, reserved 565326, settled 151820
+  docs_context7/context7 SETTLED: 34 calls, reserved 34, settled 34
+  docs_context7/context7 UNCERTAIN: 10 calls, reserved 10, settled 0
+  docs_ref/ref SETTLED: 39 calls, reserved 39, settled 39
+  docs_ref/ref UNCERTAIN: 5 calls, reserved 5, settled 0
+  proxy/decodo SETTLED: 1 calls, reserved 40000, settled 3
+  search_brave/brave SETTLED: 80 calls, reserved 80, settled 80
+  search_deepseek/deepseek SETTLED: 76 calls, reserved 57000, settled 57000
+  search_exa/exa SETTLED: 80 calls, reserved 2960000, settled 1360000
+  search_tavily/tavily SETTLED: 80 calls, reserved 160, settled 160
+  serper_trial/serper SETTLED: 100 calls, reserved 100, settled 100
+  serper_trial/serper UNCERTAIN: 1 calls, reserved 1, settled 0
+budget periods (reserved/settled of cap)
+  decisions_jev day 2026-10-20: 0/151820 of - micro_usd (paid)
+  decisions_jev month 2026-10-01: 0/151820 of - micro_usd (paid)
+  docs_context7 day 2026-10-20: 10/34 of - requests (paid)
+  docs_context7 month 2026-10-01: 10/34 of - requests (paid)
+  docs_ref day 2026-10-20: 5/39 of - credits (paid)
+  docs_ref month 2026-10-01: 5/39 of - credits (paid)
+  enhanced month 2026-10-01: 0/6350 of 10000000 micro_usd (paid)
+  llm month 2026-10-01: 0/3378195 of 20000000 micro_usd (paid)
+  parser month 2026-10-01: 0/15 of 3000 credits (paid)
+  proxy day 2026-10-20: 0/3 of 1000000 micro_usd (paid)
+  proxy month 2026-10-01: 24000/200289 of 2000000 micro_usd (paid)
+  search_brave day 2026-10-20: 0/80 of - requests (paid)
+  search_brave month 2026-10-01: 0/80 of - requests (paid)
+  search_deepseek day 2026-10-20: 0/57000 of - micro_usd (paid)
+  search_deepseek month 2026-10-01: 0/57000 of - micro_usd (paid)
+  search_exa day 2026-10-20: 0/1360000 of - micro_usd (paid)
+  search_exa month 2026-10-01: 0/1360000 of - micro_usd (paid)
+  search_tavily day 2026-10-20: 0/160 of - credits (paid)
+  search_tavily month 2026-10-01: 0/160 of - credits (paid)
+  serper_trial month 2026-10-01: 1/193 of 2443 credits

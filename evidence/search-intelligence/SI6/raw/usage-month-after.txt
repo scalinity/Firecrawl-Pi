@@ -1,0 +1,126 @@
+usage over month (to 2026-10-20T10:49:46Z)
+jobs        batch/EXPIRED 121, batch/PARTIAL 153, batch/SUCCEEDED 12, crawl/EXPIRED 278, crawl/SUCCEEDED 1, extract/EXPIRED 54
+acquisitions 20471, attempts 21136
+  direct_browser ACCESS_DENIED: 13 attempts, 1451 bytes
+  direct_browser ACTION_FAILED: 6 attempts, 2970 bytes
+  direct_browser AUTH_REQUIRED: 2 attempts, 392 bytes
+  direct_browser BLOCKED_PUBLIC_CONTENT: 23 attempts, 5775530 bytes
+  direct_browser BROWSER_CRASHED: 10 attempts, 6273 bytes
+  direct_browser BROWSER_ERROR: 3 attempts, 0 bytes
+  direct_browser BROWSER_UNAVAILABLE: 31 attempts, 0 bytes
+  direct_browser CLOUD_DENIED: 12 attempts, 2976 bytes
+  direct_browser DEADLINE_EXCEEDED: 1 attempts, 0 bytes
+  direct_browser NAVIGATION_FAILED: 15 attempts, 1210215 bytes
+  direct_browser rendered: 1284 attempts, 908139747 bytes
+  direct_browser RENDERER_CRASHED: 1 attempts, 25442282 bytes
+  direct_browser RENDER_INCOMPLETE: 18 attempts, 1487615 bytes
+  direct_browser RESOURCE_LIMIT: 30 attempts, 97914965 bytes
+  direct_browser SIZE_LIMIT: 9 attempts, 7866 bytes
+  direct_browser SSRF_DENIED: 46 attempts, 2976 bytes
+  direct_browser TIMEOUT: 13 attempts, 1893447 bytes
+  direct_http ACCESS_DENIED: 32 attempts, 79680 bytes
+  direct_http adequate: 16536 attempts, 200180288 bytes
+  direct_http AUTH_REQUIRED: 30 attempts, 24570 bytes
+  direct_http binary: 404 attempts, 120200882 bytes
+  direct_http BLOCKED_PUBLIC_CONTENT: 405 attempts, 9576963 bytes
+  direct_http CANCELLED: 15 attempts, 0 bytes
+  direct_http CLOUD_DENIED: 4 attempts, 0 bytes
+  direct_http DEADLINE_EXCEEDED: 3 attempts, 0 bytes
+  direct_http DNS_FAILURE: 29 attempts, 0 bytes
+  direct_http fetched: 306 attempts, 52792 bytes
+  direct_http js_shell: 537 attempts, 5600904 bytes
+  direct_http not_found: 165 attempts, 1108884 bytes
+  direct_http PROXY_REQUIRED: 64 attempts, 0 bytes
+  direct_http RATE_LIMITED: 66 attempts, 633791 bytes
+  direct_http SIZE_LIMIT: 27 attempts, 0 bytes
+  direct_http SSRF_DENIED: 35 attempts, 0 bytes
+  direct_http target_error: 84 attempts, 341882 bytes
+  direct_http TARGET_UNREACHABLE: 23 attempts, 0 bytes
+  direct_http TIMEOUT: 30 attempts, 0 bytes
+  direct_http TLS_FAILURE: 18 attempts, 0 bytes
+  direct_http TOO_MANY_REDIRECTS: 9 attempts, 0 bytes
+  enhanced adequate: 45 attempts, 19767 bytes
+  enhanced AUTH_REQUIRED: 6 attempts, 948 bytes
+  enhanced BLOCKED_PUBLIC_CONTENT: 20 attempts, 3672 bytes
+  enhanced CLOUD_DENIED: 6 attempts, 0 bytes
+  enhanced ENHANCED_UNCERTAIN: 5 attempts, 0 bytes
+  enhanced not_found: 6 attempts, 906 bytes
+  enhanced PROVIDER_AUTH_FAILED: 5 attempts, 0 bytes
+  enhanced PROVIDER_RATE_LIMITED: 5 attempts, 0 bytes
+  enhanced RATE_LIMITED: 6 attempts, 984 bytes
+  residential_browser BLOCKED_PUBLIC_CONTENT: 15 attempts, 16060639 bytes
+  residential_browser PROVIDER_AUTH_FAILED: 2 attempts, 1286 bytes
+  residential_browser PROVIDER_UNREACHABLE: 1 attempts, 254 bytes
+  residential_browser rendered: 24 attempts, 17412776 bytes
+  residential_browser TIMEOUT: 1 attempts, 1997389 bytes
+  residential_http ACCESS_DENIED: 1 attempts, 9410 bytes
+  residential_http adequate: 239 attempts, 467397 bytes
+  residential_http binary: 4 attempts, 2291553 bytes
+  residential_http BLOCKED_PUBLIC_CONTENT: 310 attempts, 11126917 bytes
+  residential_http js_shell: 13 attempts, 444093 bytes
+  residential_http not_found: 9 attempts, 102201 bytes
+  residential_http PROVIDER_AUTH_FAILED: 35 attempts, 21763 bytes
+  residential_http PROVIDER_BILLING: 4 attempts, 1444 bytes
+  residential_http PROVIDER_ERROR: 7 attempts, 3808 bytes
+  residential_http PROVIDER_UNAVAILABLE: 1 attempts, 0 bytes
+  residential_http PROVIDER_UNREACHABLE: 19 attempts, 1272 bytes
+  residential_http RATE_LIMITED: 4 attempts, 0 bytes
+  residential_http SIZE_LIMIT: 4 attempts, 40124158 bytes
+provider calls
+  decisions_jev/openrouter SETTLED: 850 calls, reserved 565326, settled 151820
+  docs_context7/context7 SETTLED: 34 calls, reserved 34, settled 34
+  docs_context7/context7 UNCERTAIN: 10 calls, reserved 10, settled 0
+  docs_ref/ref SETTLED: 39 calls, reserved 39, settled 39
+  docs_ref/ref UNCERTAIN: 5 calls, reserved 5, settled 0
+  enhanced/zyte RELEASED: 2 calls, reserved 2540, settled 0
+  enhanced/zyte SETTLED: 5 calls, reserved 6350, settled 6350
+  fixture/fixture-model RELEASED: 25 calls, reserved 171480, settled 0
+  fixture/fixture-model SETTLED: 288 calls, reserved 2708802, settled 208960
+  fixture/fixture-model UNCERTAIN: 10 calls, reserved 68520, settled 0
+  fixture_enhanced/fixture-zyte RELEASED: 15 calls, reserved 19050, settled 0
+  fixture_enhanced/fixture-zyte SETTLED: 77 calls, reserved 275510, settled 275510
+  fixture_enhanced/fixture-zyte UNCERTAIN: 5 calls, reserved 6350, settled 0
+  fixture_enhanced_small/fixture-zyte RELEASED: 75 calls, reserved 95250, settled 0
+  fixture_parser/fixture-parser RELEASED: 10 calls, reserved 30, settled 0
+  fixture_parser/fixture-parser SETTLED: 30 calls, reserved 90, settled 90
+  fixture_parser/fixture-parser UNCERTAIN: 10 calls, reserved 30, settled 0
+  fixture_proxy/fixture-proxy RELEASED: 19 calls, reserved 760000, settled 0
+  fixture_proxy/fixture-proxy SETTLED: 350 calls, reserved 11816356, settled 162866
+  fixture_proxy_race/fixture-proxy RELEASED: 12 calls, reserved 480000, settled 0
+  fixture_race/fixture-model SETTLED: 30 calls, reserved 473940, settled 69891
+  llm/anthropic SETTLED: 6 calls, reserved 12733, settled 345
+  llm/anthropic-agent RELEASED: 2 calls, reserved 344850, settled 0
+  llm/anthropic-agent SETTLED: 18 calls, reserved 21182443, settled 3327590
+  llm/openai SETTLED: 19 calls, reserved 650096, settled 50260
+  parser/llamaparse SETTLED: 5 calls, reserved 15, settled 15
+  proxy/decodo RELEASED: 1 calls, reserved 40000, settled 0
+  proxy/decodo SETTLED: 400 calls, reserved 15712000, settled 200289
+  proxy/decodo UNCERTAIN: 3 calls, reserved 24000, settled 0
+  search_brave/brave SETTLED: 80 calls, reserved 80, settled 80
+  search_deepseek/deepseek SETTLED: 76 calls, reserved 57000, settled 57000
+  search_exa/exa SETTLED: 80 calls, reserved 2960000, settled 1360000
+  search_tavily/tavily SETTLED: 80 calls, reserved 160, settled 160
+  serper_trial/serper RELEASED: 1 calls, reserved 1, settled 0
+  serper_trial/serper SETTLED: 193 calls, reserved 193, settled 193
+  serper_trial/serper UNCERTAIN: 1 calls, reserved 1, settled 0
+budget periods (reserved/settled of cap)
+  decisions_jev day 2026-10-20: 0/151820 of - micro_usd (paid)
+  decisions_jev month 2026-10-01: 0/151820 of - micro_usd (paid)
+  docs_context7 day 2026-10-20: 10/34 of - requests (paid)
+  docs_context7 month 2026-10-01: 10/34 of - requests (paid)
+  docs_ref day 2026-10-20: 5/39 of - credits (paid)
+  docs_ref month 2026-10-01: 5/39 of - credits (paid)
+  enhanced month 2026-10-01: 0/6350 of 10000000 micro_usd (paid)
+  llm month 2026-10-01: 0/3378195 of 20000000 micro_usd (paid)
+  parser month 2026-10-01: 0/15 of 3000 credits (paid)
+  proxy day 2026-10-20: 0/3 of 1000000 micro_usd (paid)
+  proxy month 2026-10-01: 24000/200289 of 2000000 micro_usd (paid)
+  search_brave day 2026-10-20: 0/80 of - requests (paid)
+  search_brave month 2026-10-01: 0/80 of - requests (paid)
+  search_deepseek day 2026-10-20: 0/57000 of - micro_usd (paid)
+  search_deepseek month 2026-10-01: 0/57000 of - micro_usd (paid)
+  search_exa day 2026-10-20: 0/1360000 of - micro_usd (paid)
+  search_exa month 2026-10-01: 0/1360000 of - micro_usd (paid)
+  search_tavily day 2026-10-20: 0/160 of - credits (paid)
+  search_tavily month 2026-10-01: 0/160 of - credits (paid)
+  serper_trial month 2026-10-01: 1/193 of 2443 credits
