@@ -19,7 +19,7 @@ test("an absolute validation lease expires even with the paid switch still on an
   for (const v of [null, "2026-02-30T02:00:00Z", "2026-10-03", "bad"]) assert.throws(() => loadBudgetPolicy(mutate((p) => { p.validationExpiresAt = v; })), /validationExpiresAt/);
 });
 
-test("the deployed budget policy loads: approved proxy, LLM, enhanced and parser caps, other paid caps zero, paid defaults and unpaid fixtures", () => {
+test("the deployed budget policy loads: approved proxy, LLM, enhanced and parser caps, the search, documentation and decision categories reporting-only, paid defaults and unpaid fixtures", () => {
   const b = loadBudgetPolicy(RAW);
   // Proxy $1/day and $2/month; LLM $20/month; no shared daily cap across the paid categories (removed 2026-10-17);
   // enhanced retrieval $2/day and $10/month and the parser 3,000 credits/month (2026-10-19).
@@ -28,7 +28,13 @@ test("the deployed budget policy loads: approved proxy, LLM, enhanced and parser
   assert.deepEqual(b.categories.enhanced.caps, { day: 2000000, month: 10000000 });
   assert.deepEqual(b.categories.parser.caps, { month: 3000 });
   assert.equal(paidTotalDayCap(b), null);
-  for (const [name, c] of Object.entries(b.categories).filter(([n, c]) => c.paid && !["proxy", "llm", "enhanced", "parser"].includes(n))) for (const v of Object.values(c.caps)) assert.equal(v, 0, name);
+  // The other paid categories are the search intelligence ones, reporting-only with no cap in any period (spec §28.3). Naming the
+  // exact set makes a paid category added later, or a cap set on one of these, fail here instead of passing an empty loop.
+  const others = (policy) => Object.entries(policy.categories).filter(([n, c]) => c.paid && !["proxy", "llm", "enhanced", "parser"].includes(n));
+  assert.deepEqual(others(b).map(([n]) => n).sort(), ["decisions_jev", "docs_context7", "docs_ref", "search_brave", "search_deepseek", "search_exa", "search_tavily"]);
+  for (const [name, c] of others(b)) assert.deepEqual(c.caps, {}, name);
+  const capped = loadBudgetPolicy(mutate((p) => { p.categories.search_brave.caps.day = 1; }));
+  assert.throws(() => { for (const [name, c] of others(capped)) assert.deepEqual(c.caps, {}, name); }, /search_brave/, "the same check fails when a cap is set");
   assert.equal(b.providers[b.models[b.extraction.defaultModel].provider].paid, true);
   assert.equal(b.providers[b.parsers[b.parsing.defaultParser].provider].paid, true);
   assert.equal(b.extraction.maxInputTokens, 32000);
