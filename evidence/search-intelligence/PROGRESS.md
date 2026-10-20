@@ -25,6 +25,7 @@ Branch `search-intelligence` (from `main` at `2a62513`), pushed to `origin/searc
 - A complete answer is stored whole when hybrid-ranked or ranked deterministically because no decision layer is configured; its key carries the decision identity and the policy's search-intelligence limits. A joining caller reports `usage: []` with `usageOf`.
 - The rate token is taken after the outbound permit, so queued tokens cannot burst past a provider's documented QPS on the wire.
 - `prune({ retainCategories })` keeps every row of live Serper's lifetime-allocation categories (computed from the current budget at each prune); the fixture Serper is neither capped by the allocation nor retained.
+- A judge can infer which provider returned a document from how many search-result excerpts it carries and from Context7's library-id titles (the SI5 review's S14, rejected there, kept open by the acceptance review). No judging round is planned; before any new one, normalize both in `scripts/si5/packets.mjs`, so that provenance cannot bias a grade.
 
 ## Commands
 
