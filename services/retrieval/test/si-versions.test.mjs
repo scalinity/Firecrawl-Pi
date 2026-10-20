@@ -82,10 +82,28 @@ test("another product's versioned page is not shown to be another release of the
     assert.equal(check(url, name, version), "unknown", `${url} for ${name}@${version}`);
   // The forms that do name the library keep working: a library-owned site, the owner/name of a repository or a registry, and a path that names it before the release.
   for (const [url, name, version, want] of [
-    ["https://github.com/vitejs/vite/blob/v7.0.0/docs/guide/migration.md", "vite", "6", "mismatch"], ["https://github.com/python/cpython/blob/main/Doc/whatsnew/2.6.rst", "python", "2.7", "mismatch"],
+    ["https://github.com/vitejs/vite/blob/v7.0.0/docs/guide/migration.md", "vite", "6", "mismatch"], ["https://github.com/python/cpython/blob/main/Doc/whatsnew/2.6.rst", "python", "2.7", "unknown"],
     ["https://docs.python.org/3.4/whatsnew/index.html", "python", "4.0", "mismatch"], ["https://pandas.pydata.org/pandas-docs/version/1.5/reference/api/pandas.DataFrame.append.html", "pandas", "2.0", "mismatch"],
     ["https://vuejs.org/v2/guide/reactivity", "vue", "3.5", "mismatch"], ["https://v3.vuejs.org/guide/reactivity", "vue", "3.5", "match"], ["https://nextjs.org/docs/14/app", "next", "15", "unknown"],
     ["https://registry.terraform.io/providers/hashicorp/aws/6.28.0/docs/resources/s3_bucket", "hashicorp/aws", "5", "mismatch"]])
+    assert.equal(check(url, name, version), want, `${url} for ${name}@${version}`);
+});
+
+// Another product of the same organisation, a sub-product on the library's own site, and a package that shares the library's name are not the library (second round of the
+// acceptance review): on a code host the name must be the repository, on a package registry a package's version is the package's, and on the library's own site a version label
+// counts only when it is next to the library's label.
+test("a sub-product, a same-named organisation and a same-named package do not state the requested library's release", () => {
+  const check = (url, name, version) => urlVersionCheck(url, [{ name, version }]).status;
+  for (const [url, name, version] of [
+    ["https://v3.router.vuejs.org/guide/", "vue", "3.5"], ["https://v3.router.vuejs.org/guide/", "vue", "2.7"],
+    ["https://github.com/redis/redis-py/tree/v5.0.1", "redis", "7.2"], ["https://github.com/django/channels/tree/4.0.0", "django", "5.2"], ["https://github.com/django/channels/tree/4.0.0", "django", "4.0"],
+    ["https://github.com/python/mypy/tree/v1.8.0", "python", "3.14"], ["https://github.com/webpack/webpack-dev-server/tree/v4.15.1", "webpack", "4"], ["https://github.com/webpack/webpack-cli/releases/tag/v4.10.0", "webpack", "4"],
+    ["https://pypi.org/project/redis/5.0.1/", "redis", "7.2"], ["https://pkg.go.dev/github.com/redis/go-redis/v9", "redis", "7.2"], ["https://rubygems.org/gems/redis/versions/5.0.8", "redis", "7.2"],
+    ["https://www.npmjs.com/package/mongodb/v/6.3.0", "mongodb", "7.0"]]) assert.equal(check(url, name, version), "unknown", `${url} for ${name}@${version}`);
+  // The library's own repository, and its own site's version labels, still count.
+  for (const [url, name, version, want] of [
+    ["https://github.com/vitejs/vite/blob/v7.0.0/docs/guide/migration.md", "vite", "6", "mismatch"], ["https://github.com/django/django/blob/5.2/docs/releases/5.2.txt", "django", "5.2", "match"],
+    ["https://github.com/webpack/webpack/tree/v4.46.0", "webpack", "4", "match"], ["https://v2.vuejs.org/v2/guide/", "vue", "3.5", "mismatch"], ["https://v3.vuejs.org/guide/", "vue", "3.5", "match"]])
     assert.equal(check(url, name, version), want, `${url} for ${name}@${version}`);
 });
 
