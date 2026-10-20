@@ -2,7 +2,7 @@
 
 ## What the corpus held
 
-All 92 Reddit captures were one page: Reddit's human-verification gate ("Reddit - Prove your humanity", 165 characters), reached by a redirect to the thread's own URL carrying `solution`, `js_challenge`, `jsc_token` and `jsc_orig_r`. Each was stored as `captured` (HTTP 200, `proxyUsed=basic`), so the judge packets told the judge `Page capture: captured; shown whole`, then gave it the search-result excerpts and the gate page. The 92 documents were graded 0:4, 1:41, 2:16, 3:1, unjudged:30. The 58 positive grades rest on the excerpts, since the page was the gate; that is not a weaker standard in itself, because the 893 failed captures were also judged on their excerpts where those sufficed and their grades stand. The difference is what the judges were told: a failed capture's packet said the page was not available, and these packets said it was captured and shown whole. Reddit held a top-10 slot in 25 of 120 queries for profile B, 9 for D and 10 each for C, D-C7 and D-Ref.
+All 92 Reddit captures were one page: Reddit's human-verification gate ("Reddit - Prove your humanity", 165 characters), reached by a redirect to the thread's own URL carrying `solution`, `js_challenge`, `jsc_token` and `jsc_orig_r`. Each was stored as `captured` (HTTP 200, `proxyUsed=basic`), so the judge packets told the judge `Page capture: captured; shown whole`, then gave it the search-result excerpts and the gate page. The 92 documents were graded 0:4, 1:41, 2:16, 3:1, unjudged:30. The 58 positive grades rest on the excerpts, since the page was the gate; that is not a weaker standard in itself, because the 893 failed captures were also judged on their excerpts where those sufficed and their grades stand. The difference is what the judges were told: a failed capture's packet said the page was not available, and these packets said it was captured and shown whole. Reddit held a top-10 slot in 25 of 120 queries for profile B, 9 for D and 10 each for C, D-C7 and D-Ref. Profile A, the baseline of Q01, ranks a Reddit page in its top 10 on 71 of the 120 queries (61 of the 96 held-out, in 67 slots), and D does on 5 of the 96.
 
 ## The rule
 
@@ -12,7 +12,7 @@ A capture is a gate when its final URL carries `js_challenge` and `jsc_token` on
 
 ## When it was decided
 
-The exclusion was decided after provisional scores existed: the label and score files had been produced once before it. It is therefore reported both ways. The table below gives the scores before and after; the gate statuses are the same either way; the original grades stay in `labels.json` beside every dropped one; and the exclusion lowers the baseline profile B more than D, so it widens D's lead over B (it does not favour D by removing a weakness of D's).
+The exclusion was decided after provisional scores existed: the label and score files had been produced once before it. It is therefore reported both ways. The table below gives the scores before and after; the gate statuses are the same either way; the original grades stay in `labels.json` beside every dropped one; and the exclusion costs the baselines more than D: A ranks a Reddit page in its top 10 on 61 of the 96 held-out queries against D's 5, and B on 21, so it widens D's lead over both. It removes no weakness of D's, but it is not neutral between the profiles, which is why the final labels are also reported with the dropped grades restored (below).
 
 ## Commands and results
 
@@ -27,7 +27,21 @@ The exclusion was decided after provisional scores existed: the label and score 
 |---|---|---|
 | Q01 nDCG@10, A / D | 0.5041 / 0.7332 | 0.4925 / 0.7314 |
 | Q01 relative improvement (95% interval low) | +45.4% (0.380) | +48.5% (0.408) |
-| Q02 nDCG@10 difference, D over B | +0.1011 | +0.1043 |
+| Q02 nDCG@10 difference, C over B | +0.1011 | +0.1043 |
 | Q03 coverage difference, D over C (95% interval) | +1.9 points (-0.8, +5.4) | unchanged |
 
 Gate statuses are unchanged (Q01 PASS, Q02 PASS, Q03 FAIL). Q03 requires at least 10 points on 43 documentation-positive queries and does not depend on Reddit.
+
+## On the final labels, with and without the exclusion
+
+The table above was computed on provisional labels. On the final labels (after adjudication), the project's scorer gives the following with the dropped grades as recorded and with the first judge's grades put back on the blocked documents (62 of the 92 had one; the other 30 were unjudged):
+
+| | Excluded (as recorded) | Grades restored |
+|---|---|---|
+| nDCG@10 A / B / C / D | 0.5000 / 0.6271 / 0.7330 / 0.7370 | 0.5116 / 0.6324 / 0.7351 / 0.7388 |
+| Q01 relative improvement, D over A | +47.4% | +44.4% |
+| Q01 recall@20 gain, D over A | +39.2 points | +39.0 points |
+| Q02 nDCG@10 difference, C over B | +0.1059 | +0.1027 |
+| Q03 coverage difference, D over C | +1.94 points | +1.94 points |
+
+No gate status changes either way. The exclusion moves Q01 by about three points in D's favour, because the baseline A is the profile that ranks Reddit pages most.
