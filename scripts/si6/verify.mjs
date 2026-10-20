@@ -99,8 +99,10 @@ after("service-images", "image-build.txt", "three :si6 images built from the sta
 after("cutover", "cutover.txt", "the end marker reached, every service running and healthy, the release recorded", (t) => (/^end_marker=reached /m.test(t) && (t.match(/ status=running health=healthy$/gm) ?? []).length === 4 && /^### release$/m.test(t)) || "not reached");
 after("functional", "verify-functional.txt", "fcpi verify functional passes after the cutover", (t) => /^functional PASS \(/m.test(t) || "the suite did not pass");
 after("host-snapshots", "snapshot-after.txt", "the host snapshot taken after the cutover", () => existsSync(resolve(ROOT, `${RAW}/snapshot-before.txt`)) || "no snapshot before");
-after("redaction", "redaction.json", "the redaction scan passes over the release's evidence, run by the scanner now at HEAD on committed code", (t) => { const r = JSON.parse(t);
-  return (r.state === "PASS" && r.code_dirty === false && r.scanner_sha256 === sha256(readFileSync(resolve(ROOT, "scripts/m9/redaction.mjs")))) || `not a passing scan by this scanner on committed code (state ${r.state}, code_dirty ${r.code_dirty})`; });
+after("redaction", "redaction.json", "the redaction scan passes over the release's evidence, run by the scanner now at HEAD on committed code with the exceptions committed at HEAD", (t) => { const r = JSON.parse(t);
+  // code_dirty leaves evidence/ out, and the exceptions file lives there: its hash in the record must be the committed file's, so an edited, uncommitted list cannot verify.
+  const exceptions = r.also === null || (() => { try { return r.also.sha256 === sha256(execFileSync("git", ["-C", ROOT, "show", `HEAD:${r.also.path}`])); } catch { return false; } })();
+  return (r.state === "PASS" && r.code_dirty === false && r.scanner_sha256 === sha256(readFileSync(resolve(ROOT, "scripts/m9/redaction.mjs"))) && exceptions) || `not a passing scan by this scanner on committed code with committed exceptions (state ${r.state}, code_dirty ${r.code_dirty}, exceptions committed ${exceptions})`; });
 
 const out = { schema: "fcpi.si6-verification/v1", utc: new Date().toISOString(), source_sha: repo.repository_sha, code_dirty: repo.code_dirty, patch_series_sha256: series.series_sha256,
   config_sha256: { budget: sha256(read("deploy/policies/budget.json")), egress: sha256(read("deploy/policies/egress.json")), capabilities: sha256(read("deploy/policies/capabilities.json")), compose: sha256(read("deploy/compose.yaml")) },
