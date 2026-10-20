@@ -1,0 +1,4856 @@
+{
+ "schema": "fcpi.si5-judges/v1",
+ "generatedUtc": "2026-10-20T05:23:25.270Z",
+ "rule": "a judge reads only its packet and prompt and writes only its output; every reference that could unblind or bias it is flagged and must be classified in judge-notes.json",
+ "rounds": {
+  "adjudication": {
+   "template": "adjudicate-prompt.md",
+   "templateSha256": "8ef324930c737d973315a7becb2288c000771771e180a903b39ace1aa3117a1d",
+   "model": "claude-opus-5-5",
+   "agents": 15,
+   "uncontained": [],
+   "promptNotExact": [],
+   "unrecorded": [],
+   "queries": {
+    "Q001": {
+     "agent": "si5-adj-Q001-Q002-Q004-Q005-Q006-Q007",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q001-Q002-Q004-Q005-Q006-Q007.md",
+     "promptSha256": "3a33af695bd18217c5e8bf9fd8985bb39cc6ffaee31d184cd0c23cc19438f4f7",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.511Z",
+     "ended": "2026-10-20T04:40:51.659Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q002": {
+     "agent": "si5-adj-Q001-Q002-Q004-Q005-Q006-Q007",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q001-Q002-Q004-Q005-Q006-Q007.md",
+     "promptSha256": "3a33af695bd18217c5e8bf9fd8985bb39cc6ffaee31d184cd0c23cc19438f4f7",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.511Z",
+     "ended": "2026-10-20T04:40:51.659Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q004": {
+     "agent": "si5-adj-Q001-Q002-Q004-Q005-Q006-Q007",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q001-Q002-Q004-Q005-Q006-Q007.md",
+     "promptSha256": "3a33af695bd18217c5e8bf9fd8985bb39cc6ffaee31d184cd0c23cc19438f4f7",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.511Z",
+     "ended": "2026-10-20T04:40:51.659Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q005": {
+     "agent": "si5-adj-Q001-Q002-Q004-Q005-Q006-Q007",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q001-Q002-Q004-Q005-Q006-Q007.md",
+     "promptSha256": "3a33af695bd18217c5e8bf9fd8985bb39cc6ffaee31d184cd0c23cc19438f4f7",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.511Z",
+     "ended": "2026-10-20T04:40:51.659Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q006": {
+     "agent": "si5-adj-Q001-Q002-Q004-Q005-Q006-Q007",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q001-Q002-Q004-Q005-Q006-Q007.md",
+     "promptSha256": "3a33af695bd18217c5e8bf9fd8985bb39cc6ffaee31d184cd0c23cc19438f4f7",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.511Z",
+     "ended": "2026-10-20T04:40:51.659Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q007": {
+     "agent": "si5-adj-Q001-Q002-Q004-Q005-Q006-Q007",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q001-Q002-Q004-Q005-Q006-Q007.md",
+     "promptSha256": "3a33af695bd18217c5e8bf9fd8985bb39cc6ffaee31d184cd0c23cc19438f4f7",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.511Z",
+     "ended": "2026-10-20T04:40:51.659Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q009": {
+     "agent": "si5-adj-Q009-Q010-Q011-Q012-Q014-Q015",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q009-Q010-Q011-Q012-Q014-Q015.md",
+     "promptSha256": "e4d67f9cebec4a6b6a53d7863dea5b94456fb38c702bff0120c69272985fdb9a",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.542Z",
+     "ended": "2026-10-20T04:42:16.274Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q010": {
+     "agent": "si5-adj-Q009-Q010-Q011-Q012-Q014-Q015",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q009-Q010-Q011-Q012-Q014-Q015.md",
+     "promptSha256": "e4d67f9cebec4a6b6a53d7863dea5b94456fb38c702bff0120c69272985fdb9a",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.542Z",
+     "ended": "2026-10-20T04:42:16.274Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q011": {
+     "agent": "si5-adj-Q009-Q010-Q011-Q012-Q014-Q015",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q009-Q010-Q011-Q012-Q014-Q015.md",
+     "promptSha256": "e4d67f9cebec4a6b6a53d7863dea5b94456fb38c702bff0120c69272985fdb9a",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.542Z",
+     "ended": "2026-10-20T04:42:16.274Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q012": {
+     "agent": "si5-adj-Q009-Q010-Q011-Q012-Q014-Q015",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q009-Q010-Q011-Q012-Q014-Q015.md",
+     "promptSha256": "e4d67f9cebec4a6b6a53d7863dea5b94456fb38c702bff0120c69272985fdb9a",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.542Z",
+     "ended": "2026-10-20T04:42:16.274Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q014": {
+     "agent": "si5-adj-Q009-Q010-Q011-Q012-Q014-Q015",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q009-Q010-Q011-Q012-Q014-Q015.md",
+     "promptSha256": "e4d67f9cebec4a6b6a53d7863dea5b94456fb38c702bff0120c69272985fdb9a",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.542Z",
+     "ended": "2026-10-20T04:42:16.274Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q015": {
+     "agent": "si5-adj-Q009-Q010-Q011-Q012-Q014-Q015",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q009-Q010-Q011-Q012-Q014-Q015.md",
+     "promptSha256": "e4d67f9cebec4a6b6a53d7863dea5b94456fb38c702bff0120c69272985fdb9a",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.542Z",
+     "ended": "2026-10-20T04:42:16.274Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q016": {
+     "agent": "si5-adj-Q016-Q017-Q019-Q020-Q021-Q022",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q016-Q017-Q019-Q020-Q021-Q022.md",
+     "promptSha256": "3e52d3ec05aa3da9f4c7fdf0654f500a8668357071bbcf1c680f64fdae9936ec",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.798Z",
+     "ended": "2026-10-20T04:42:21.872Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q017": {
+     "agent": "si5-adj-Q016-Q017-Q019-Q020-Q021-Q022",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q016-Q017-Q019-Q020-Q021-Q022.md",
+     "promptSha256": "3e52d3ec05aa3da9f4c7fdf0654f500a8668357071bbcf1c680f64fdae9936ec",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.798Z",
+     "ended": "2026-10-20T04:42:21.872Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q019": {
+     "agent": "si5-adj-Q016-Q017-Q019-Q020-Q021-Q022",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q016-Q017-Q019-Q020-Q021-Q022.md",
+     "promptSha256": "3e52d3ec05aa3da9f4c7fdf0654f500a8668357071bbcf1c680f64fdae9936ec",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.798Z",
+     "ended": "2026-10-20T04:42:21.872Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q020": {
+     "agent": "si5-adj-Q016-Q017-Q019-Q020-Q021-Q022",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q016-Q017-Q019-Q020-Q021-Q022.md",
+     "promptSha256": "3e52d3ec05aa3da9f4c7fdf0654f500a8668357071bbcf1c680f64fdae9936ec",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.798Z",
+     "ended": "2026-10-20T04:42:21.872Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q021": {
+     "agent": "si5-adj-Q016-Q017-Q019-Q020-Q021-Q022",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q016-Q017-Q019-Q020-Q021-Q022.md",
+     "promptSha256": "3e52d3ec05aa3da9f4c7fdf0654f500a8668357071bbcf1c680f64fdae9936ec",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.798Z",
+     "ended": "2026-10-20T04:42:21.872Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q022": {
+     "agent": "si5-adj-Q016-Q017-Q019-Q020-Q021-Q022",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q016-Q017-Q019-Q020-Q021-Q022.md",
+     "promptSha256": "3e52d3ec05aa3da9f4c7fdf0654f500a8668357071bbcf1c680f64fdae9936ec",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.798Z",
+     "ended": "2026-10-20T04:42:21.872Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q024": {
+     "agent": "si5-adj-Q024-Q025-Q026-Q027-Q031-Q032",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q024-Q025-Q026-Q027-Q031-Q032.md",
+     "promptSha256": "15134314468335e60bc88d90c4f42c1fb231a8fececf88f08ea706e94f60b278",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.242Z",
+     "ended": "2026-10-20T04:39:38.731Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q025": {
+     "agent": "si5-adj-Q024-Q025-Q026-Q027-Q031-Q032",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q024-Q025-Q026-Q027-Q031-Q032.md",
+     "promptSha256": "15134314468335e60bc88d90c4f42c1fb231a8fececf88f08ea706e94f60b278",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.242Z",
+     "ended": "2026-10-20T04:39:38.731Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q026": {
+     "agent": "si5-adj-Q024-Q025-Q026-Q027-Q031-Q032",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q024-Q025-Q026-Q027-Q031-Q032.md",
+     "promptSha256": "15134314468335e60bc88d90c4f42c1fb231a8fececf88f08ea706e94f60b278",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.242Z",
+     "ended": "2026-10-20T04:39:38.731Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q027": {
+     "agent": "si5-adj-Q024-Q025-Q026-Q027-Q031-Q032",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q024-Q025-Q026-Q027-Q031-Q032.md",
+     "promptSha256": "15134314468335e60bc88d90c4f42c1fb231a8fececf88f08ea706e94f60b278",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.242Z",
+     "ended": "2026-10-20T04:39:38.731Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q031": {
+     "agent": "si5-adj-Q024-Q025-Q026-Q027-Q031-Q032",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q024-Q025-Q026-Q027-Q031-Q032.md",
+     "promptSha256": "15134314468335e60bc88d90c4f42c1fb231a8fececf88f08ea706e94f60b278",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.242Z",
+     "ended": "2026-10-20T04:39:38.731Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q032": {
+     "agent": "si5-adj-Q024-Q025-Q026-Q027-Q031-Q032",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q024-Q025-Q026-Q027-Q031-Q032.md",
+     "promptSha256": "15134314468335e60bc88d90c4f42c1fb231a8fececf88f08ea706e94f60b278",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.242Z",
+     "ended": "2026-10-20T04:39:38.731Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q034": {
+     "agent": "si5-adj-Q034-Q036-Q037-Q039-Q040-Q041",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q034-Q036-Q037-Q039-Q040-Q041.md",
+     "promptSha256": "cfb6711994bc5f0a8806eae8bbd088e12cb610ef02f35c2897d091437f4b55c5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.696Z",
+     "ended": "2026-10-20T04:43:02.118Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q036": {
+     "agent": "si5-adj-Q034-Q036-Q037-Q039-Q040-Q041",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q034-Q036-Q037-Q039-Q040-Q041.md",
+     "promptSha256": "cfb6711994bc5f0a8806eae8bbd088e12cb610ef02f35c2897d091437f4b55c5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.696Z",
+     "ended": "2026-10-20T04:43:02.118Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q037": {
+     "agent": "si5-adj-Q034-Q036-Q037-Q039-Q040-Q041",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q034-Q036-Q037-Q039-Q040-Q041.md",
+     "promptSha256": "cfb6711994bc5f0a8806eae8bbd088e12cb610ef02f35c2897d091437f4b55c5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.696Z",
+     "ended": "2026-10-20T04:43:02.118Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q039": {
+     "agent": "si5-adj-Q034-Q036-Q037-Q039-Q040-Q041",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q034-Q036-Q037-Q039-Q040-Q041.md",
+     "promptSha256": "cfb6711994bc5f0a8806eae8bbd088e12cb610ef02f35c2897d091437f4b55c5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.696Z",
+     "ended": "2026-10-20T04:43:02.118Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q040": {
+     "agent": "si5-adj-Q034-Q036-Q037-Q039-Q040-Q041",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q034-Q036-Q037-Q039-Q040-Q041.md",
+     "promptSha256": "cfb6711994bc5f0a8806eae8bbd088e12cb610ef02f35c2897d091437f4b55c5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.696Z",
+     "ended": "2026-10-20T04:43:02.118Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q041": {
+     "agent": "si5-adj-Q034-Q036-Q037-Q039-Q040-Q041",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q034-Q036-Q037-Q039-Q040-Q041.md",
+     "promptSha256": "cfb6711994bc5f0a8806eae8bbd088e12cb610ef02f35c2897d091437f4b55c5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.696Z",
+     "ended": "2026-10-20T04:43:02.118Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q042": {
+     "agent": "si5-adj-Q042-Q044-Q045-Q046-Q047-Q049",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q042-Q044-Q045-Q046-Q047-Q049.md",
+     "promptSha256": "a190580587d783ad7b3249e19e3532dd8f5f361f8c7fa41dd28d408183e3df8e",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.904Z",
+     "ended": "2026-10-20T04:46:44.959Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q044": {
+     "agent": "si5-adj-Q042-Q044-Q045-Q046-Q047-Q049",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q042-Q044-Q045-Q046-Q047-Q049.md",
+     "promptSha256": "a190580587d783ad7b3249e19e3532dd8f5f361f8c7fa41dd28d408183e3df8e",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.904Z",
+     "ended": "2026-10-20T04:46:44.959Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q045": {
+     "agent": "si5-adj-Q042-Q044-Q045-Q046-Q047-Q049",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q042-Q044-Q045-Q046-Q047-Q049.md",
+     "promptSha256": "a190580587d783ad7b3249e19e3532dd8f5f361f8c7fa41dd28d408183e3df8e",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.904Z",
+     "ended": "2026-10-20T04:46:44.959Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q046": {
+     "agent": "si5-adj-Q042-Q044-Q045-Q046-Q047-Q049",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q042-Q044-Q045-Q046-Q047-Q049.md",
+     "promptSha256": "a190580587d783ad7b3249e19e3532dd8f5f361f8c7fa41dd28d408183e3df8e",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.904Z",
+     "ended": "2026-10-20T04:46:44.959Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q047": {
+     "agent": "si5-adj-Q042-Q044-Q045-Q046-Q047-Q049",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q042-Q044-Q045-Q046-Q047-Q049.md",
+     "promptSha256": "a190580587d783ad7b3249e19e3532dd8f5f361f8c7fa41dd28d408183e3df8e",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.904Z",
+     "ended": "2026-10-20T04:46:44.959Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q049": {
+     "agent": "si5-adj-Q042-Q044-Q045-Q046-Q047-Q049",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q042-Q044-Q045-Q046-Q047-Q049.md",
+     "promptSha256": "a190580587d783ad7b3249e19e3532dd8f5f361f8c7fa41dd28d408183e3df8e",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.904Z",
+     "ended": "2026-10-20T04:46:44.959Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q050": {
+     "agent": "si5-adj-Q050-Q051-Q052-Q054-Q055-Q056",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q050-Q051-Q052-Q054-Q055-Q056.md",
+     "promptSha256": "e433ee6d50ee54af94fe9589dcab461fee412ff54ad2d24b7f8ca74008cc0da5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.624Z",
+     "ended": "2026-10-20T04:40:40.273Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q051": {
+     "agent": "si5-adj-Q050-Q051-Q052-Q054-Q055-Q056",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q050-Q051-Q052-Q054-Q055-Q056.md",
+     "promptSha256": "e433ee6d50ee54af94fe9589dcab461fee412ff54ad2d24b7f8ca74008cc0da5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.624Z",
+     "ended": "2026-10-20T04:40:40.273Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q052": {
+     "agent": "si5-adj-Q050-Q051-Q052-Q054-Q055-Q056",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q050-Q051-Q052-Q054-Q055-Q056.md",
+     "promptSha256": "e433ee6d50ee54af94fe9589dcab461fee412ff54ad2d24b7f8ca74008cc0da5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.624Z",
+     "ended": "2026-10-20T04:40:40.273Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q054": {
+     "agent": "si5-adj-Q050-Q051-Q052-Q054-Q055-Q056",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q050-Q051-Q052-Q054-Q055-Q056.md",
+     "promptSha256": "e433ee6d50ee54af94fe9589dcab461fee412ff54ad2d24b7f8ca74008cc0da5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.624Z",
+     "ended": "2026-10-20T04:40:40.273Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q055": {
+     "agent": "si5-adj-Q050-Q051-Q052-Q054-Q055-Q056",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q050-Q051-Q052-Q054-Q055-Q056.md",
+     "promptSha256": "e433ee6d50ee54af94fe9589dcab461fee412ff54ad2d24b7f8ca74008cc0da5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.624Z",
+     "ended": "2026-10-20T04:40:40.273Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q056": {
+     "agent": "si5-adj-Q050-Q051-Q052-Q054-Q055-Q056",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q050-Q051-Q052-Q054-Q055-Q056.md",
+     "promptSha256": "e433ee6d50ee54af94fe9589dcab461fee412ff54ad2d24b7f8ca74008cc0da5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.624Z",
+     "ended": "2026-10-20T04:40:40.273Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q057": {
+     "agent": "si5-adj-Q057-Q059-Q060-Q061-Q062-Q064",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q057-Q059-Q060-Q061-Q062-Q064.md",
+     "promptSha256": "7913b11eede025739b3957c769bbd86a6fefdfe6416274ede4eff41e4255e7b5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.604Z",
+     "ended": "2026-10-20T04:42:26.020Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q059": {
+     "agent": "si5-adj-Q057-Q059-Q060-Q061-Q062-Q064",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q057-Q059-Q060-Q061-Q062-Q064.md",
+     "promptSha256": "7913b11eede025739b3957c769bbd86a6fefdfe6416274ede4eff41e4255e7b5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.604Z",
+     "ended": "2026-10-20T04:42:26.020Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q060": {
+     "agent": "si5-adj-Q057-Q059-Q060-Q061-Q062-Q064",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q057-Q059-Q060-Q061-Q062-Q064.md",
+     "promptSha256": "7913b11eede025739b3957c769bbd86a6fefdfe6416274ede4eff41e4255e7b5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.604Z",
+     "ended": "2026-10-20T04:42:26.020Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q061": {
+     "agent": "si5-adj-Q057-Q059-Q060-Q061-Q062-Q064",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q057-Q059-Q060-Q061-Q062-Q064.md",
+     "promptSha256": "7913b11eede025739b3957c769bbd86a6fefdfe6416274ede4eff41e4255e7b5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.604Z",
+     "ended": "2026-10-20T04:42:26.020Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q062": {
+     "agent": "si5-adj-Q057-Q059-Q060-Q061-Q062-Q064",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q057-Q059-Q060-Q061-Q062-Q064.md",
+     "promptSha256": "7913b11eede025739b3957c769bbd86a6fefdfe6416274ede4eff41e4255e7b5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.604Z",
+     "ended": "2026-10-20T04:42:26.020Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q064": {
+     "agent": "si5-adj-Q057-Q059-Q060-Q061-Q062-Q064",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q057-Q059-Q060-Q061-Q062-Q064.md",
+     "promptSha256": "7913b11eede025739b3957c769bbd86a6fefdfe6416274ede4eff41e4255e7b5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:43.604Z",
+     "ended": "2026-10-20T04:42:26.020Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q065": {
+     "agent": "si5-adj-Q065-Q066-Q067-Q069-Q070-Q071",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q065-Q066-Q067-Q069-Q070-Q071.md",
+     "promptSha256": "d09e72167ab4635259d021f3e1584dd760a517384c270a97ddeac68edc8d2c74",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.107Z",
+     "ended": "2026-10-20T04:43:06.658Z",
+     "toolCalls": 49,
+     "flags": [],
+     "contained": true
+    },
+    "Q066": {
+     "agent": "si5-adj-Q065-Q066-Q067-Q069-Q070-Q071",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q065-Q066-Q067-Q069-Q070-Q071.md",
+     "promptSha256": "d09e72167ab4635259d021f3e1584dd760a517384c270a97ddeac68edc8d2c74",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.107Z",
+     "ended": "2026-10-20T04:43:06.658Z",
+     "toolCalls": 49,
+     "flags": [],
+     "contained": true
+    },
+    "Q067": {
+     "agent": "si5-adj-Q065-Q066-Q067-Q069-Q070-Q071",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q065-Q066-Q067-Q069-Q070-Q071.md",
+     "promptSha256": "d09e72167ab4635259d021f3e1584dd760a517384c270a97ddeac68edc8d2c74",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.107Z",
+     "ended": "2026-10-20T04:43:06.658Z",
+     "toolCalls": 49,
+     "flags": [],
+     "contained": true
+    },
+    "Q069": {
+     "agent": "si5-adj-Q065-Q066-Q067-Q069-Q070-Q071",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q065-Q066-Q067-Q069-Q070-Q071.md",
+     "promptSha256": "d09e72167ab4635259d021f3e1584dd760a517384c270a97ddeac68edc8d2c74",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.107Z",
+     "ended": "2026-10-20T04:43:06.658Z",
+     "toolCalls": 49,
+     "flags": [],
+     "contained": true
+    },
+    "Q070": {
+     "agent": "si5-adj-Q065-Q066-Q067-Q069-Q070-Q071",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q065-Q066-Q067-Q069-Q070-Q071.md",
+     "promptSha256": "d09e72167ab4635259d021f3e1584dd760a517384c270a97ddeac68edc8d2c74",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.107Z",
+     "ended": "2026-10-20T04:43:06.658Z",
+     "toolCalls": 49,
+     "flags": [],
+     "contained": true
+    },
+    "Q071": {
+     "agent": "si5-adj-Q065-Q066-Q067-Q069-Q070-Q071",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q065-Q066-Q067-Q069-Q070-Q071.md",
+     "promptSha256": "d09e72167ab4635259d021f3e1584dd760a517384c270a97ddeac68edc8d2c74",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.107Z",
+     "ended": "2026-10-20T04:43:06.658Z",
+     "toolCalls": 49,
+     "flags": [],
+     "contained": true
+    },
+    "Q072": {
+     "agent": "si5-adj-Q072-Q074-Q075-Q076-Q077-Q079",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q072-Q074-Q075-Q076-Q077-Q079.md",
+     "promptSha256": "ec481f5fb73b217f92b82f2c002b03a3decb847986775038e0b54f525550cd85",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.616Z",
+     "ended": "2026-10-20T04:45:07.182Z",
+     "toolCalls": 65,
+     "flags": [],
+     "contained": true
+    },
+    "Q074": {
+     "agent": "si5-adj-Q072-Q074-Q075-Q076-Q077-Q079",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q072-Q074-Q075-Q076-Q077-Q079.md",
+     "promptSha256": "ec481f5fb73b217f92b82f2c002b03a3decb847986775038e0b54f525550cd85",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.616Z",
+     "ended": "2026-10-20T04:45:07.182Z",
+     "toolCalls": 65,
+     "flags": [],
+     "contained": true
+    },
+    "Q075": {
+     "agent": "si5-adj-Q072-Q074-Q075-Q076-Q077-Q079",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q072-Q074-Q075-Q076-Q077-Q079.md",
+     "promptSha256": "ec481f5fb73b217f92b82f2c002b03a3decb847986775038e0b54f525550cd85",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.616Z",
+     "ended": "2026-10-20T04:45:07.182Z",
+     "toolCalls": 65,
+     "flags": [],
+     "contained": true
+    },
+    "Q076": {
+     "agent": "si5-adj-Q072-Q074-Q075-Q076-Q077-Q079",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q072-Q074-Q075-Q076-Q077-Q079.md",
+     "promptSha256": "ec481f5fb73b217f92b82f2c002b03a3decb847986775038e0b54f525550cd85",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.616Z",
+     "ended": "2026-10-20T04:45:07.182Z",
+     "toolCalls": 65,
+     "flags": [],
+     "contained": true
+    },
+    "Q077": {
+     "agent": "si5-adj-Q072-Q074-Q075-Q076-Q077-Q079",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q072-Q074-Q075-Q076-Q077-Q079.md",
+     "promptSha256": "ec481f5fb73b217f92b82f2c002b03a3decb847986775038e0b54f525550cd85",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.616Z",
+     "ended": "2026-10-20T04:45:07.182Z",
+     "toolCalls": 65,
+     "flags": [],
+     "contained": true
+    },
+    "Q079": {
+     "agent": "si5-adj-Q072-Q074-Q075-Q076-Q077-Q079",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q072-Q074-Q075-Q076-Q077-Q079.md",
+     "promptSha256": "ec481f5fb73b217f92b82f2c002b03a3decb847986775038e0b54f525550cd85",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.616Z",
+     "ended": "2026-10-20T04:45:07.182Z",
+     "toolCalls": 65,
+     "flags": [],
+     "contained": true
+    },
+    "Q080": {
+     "agent": "si5-adj-Q080-Q081-Q082-Q085-Q086-Q087",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q080-Q081-Q082-Q085-Q086-Q087.md",
+     "promptSha256": "dcf6257bf138640d6ba09fa7470defe4659c921c25f949a6946178217f131f19",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.275Z",
+     "ended": "2026-10-20T04:40:15.217Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q081": {
+     "agent": "si5-adj-Q080-Q081-Q082-Q085-Q086-Q087",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q080-Q081-Q082-Q085-Q086-Q087.md",
+     "promptSha256": "dcf6257bf138640d6ba09fa7470defe4659c921c25f949a6946178217f131f19",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.275Z",
+     "ended": "2026-10-20T04:40:15.217Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q082": {
+     "agent": "si5-adj-Q080-Q081-Q082-Q085-Q086-Q087",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q080-Q081-Q082-Q085-Q086-Q087.md",
+     "promptSha256": "dcf6257bf138640d6ba09fa7470defe4659c921c25f949a6946178217f131f19",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.275Z",
+     "ended": "2026-10-20T04:40:15.217Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q085": {
+     "agent": "si5-adj-Q080-Q081-Q082-Q085-Q086-Q087",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q080-Q081-Q082-Q085-Q086-Q087.md",
+     "promptSha256": "dcf6257bf138640d6ba09fa7470defe4659c921c25f949a6946178217f131f19",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.275Z",
+     "ended": "2026-10-20T04:40:15.217Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q086": {
+     "agent": "si5-adj-Q080-Q081-Q082-Q085-Q086-Q087",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q080-Q081-Q082-Q085-Q086-Q087.md",
+     "promptSha256": "dcf6257bf138640d6ba09fa7470defe4659c921c25f949a6946178217f131f19",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.275Z",
+     "ended": "2026-10-20T04:40:15.217Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q087": {
+     "agent": "si5-adj-Q080-Q081-Q082-Q085-Q086-Q087",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q080-Q081-Q082-Q085-Q086-Q087.md",
+     "promptSha256": "dcf6257bf138640d6ba09fa7470defe4659c921c25f949a6946178217f131f19",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.275Z",
+     "ended": "2026-10-20T04:40:15.217Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q090": {
+     "agent": "si5-adj-Q090-Q091-Q092-Q094-Q095-Q096",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q090-Q091-Q092-Q094-Q095-Q096.md",
+     "promptSha256": "4adf937669730ec88bc1f90f2adf853498b954acf9d35e59bcba508e5b873d9f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.334Z",
+     "ended": "2026-10-20T04:40:48.713Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q091": {
+     "agent": "si5-adj-Q090-Q091-Q092-Q094-Q095-Q096",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q090-Q091-Q092-Q094-Q095-Q096.md",
+     "promptSha256": "4adf937669730ec88bc1f90f2adf853498b954acf9d35e59bcba508e5b873d9f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.334Z",
+     "ended": "2026-10-20T04:40:48.713Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q092": {
+     "agent": "si5-adj-Q090-Q091-Q092-Q094-Q095-Q096",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q090-Q091-Q092-Q094-Q095-Q096.md",
+     "promptSha256": "4adf937669730ec88bc1f90f2adf853498b954acf9d35e59bcba508e5b873d9f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.334Z",
+     "ended": "2026-10-20T04:40:48.713Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q094": {
+     "agent": "si5-adj-Q090-Q091-Q092-Q094-Q095-Q096",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q090-Q091-Q092-Q094-Q095-Q096.md",
+     "promptSha256": "4adf937669730ec88bc1f90f2adf853498b954acf9d35e59bcba508e5b873d9f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.334Z",
+     "ended": "2026-10-20T04:40:48.713Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q095": {
+     "agent": "si5-adj-Q090-Q091-Q092-Q094-Q095-Q096",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q090-Q091-Q092-Q094-Q095-Q096.md",
+     "promptSha256": "4adf937669730ec88bc1f90f2adf853498b954acf9d35e59bcba508e5b873d9f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.334Z",
+     "ended": "2026-10-20T04:40:48.713Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q096": {
+     "agent": "si5-adj-Q090-Q091-Q092-Q094-Q095-Q096",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q090-Q091-Q092-Q094-Q095-Q096.md",
+     "promptSha256": "4adf937669730ec88bc1f90f2adf853498b954acf9d35e59bcba508e5b873d9f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.334Z",
+     "ended": "2026-10-20T04:40:48.713Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q097": {
+     "agent": "si5-adj-Q097-Q099-Q100-Q102-Q104-Q105",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q097-Q099-Q100-Q102-Q104-Q105.md",
+     "promptSha256": "46c52d446c1d3d9db1b6094d3c533bc528aafb6b6707efc06da72fc762c2e823",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.005Z",
+     "ended": "2026-10-20T04:41:01.198Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q099": {
+     "agent": "si5-adj-Q097-Q099-Q100-Q102-Q104-Q105",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q097-Q099-Q100-Q102-Q104-Q105.md",
+     "promptSha256": "46c52d446c1d3d9db1b6094d3c533bc528aafb6b6707efc06da72fc762c2e823",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.005Z",
+     "ended": "2026-10-20T04:41:01.198Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q100": {
+     "agent": "si5-adj-Q097-Q099-Q100-Q102-Q104-Q105",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q097-Q099-Q100-Q102-Q104-Q105.md",
+     "promptSha256": "46c52d446c1d3d9db1b6094d3c533bc528aafb6b6707efc06da72fc762c2e823",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.005Z",
+     "ended": "2026-10-20T04:41:01.198Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q102": {
+     "agent": "si5-adj-Q097-Q099-Q100-Q102-Q104-Q105",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q097-Q099-Q100-Q102-Q104-Q105.md",
+     "promptSha256": "46c52d446c1d3d9db1b6094d3c533bc528aafb6b6707efc06da72fc762c2e823",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.005Z",
+     "ended": "2026-10-20T04:41:01.198Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q104": {
+     "agent": "si5-adj-Q097-Q099-Q100-Q102-Q104-Q105",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q097-Q099-Q100-Q102-Q104-Q105.md",
+     "promptSha256": "46c52d446c1d3d9db1b6094d3c533bc528aafb6b6707efc06da72fc762c2e823",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.005Z",
+     "ended": "2026-10-20T04:41:01.198Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q105": {
+     "agent": "si5-adj-Q097-Q099-Q100-Q102-Q104-Q105",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q097-Q099-Q100-Q102-Q104-Q105.md",
+     "promptSha256": "46c52d446c1d3d9db1b6094d3c533bc528aafb6b6707efc06da72fc762c2e823",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:35.005Z",
+     "ended": "2026-10-20T04:41:01.198Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q106": {
+     "agent": "si5-adj-Q106-Q109-Q110-Q111-Q112-Q114",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q106-Q109-Q110-Q111-Q112-Q114.md",
+     "promptSha256": "8eca09a9a6657fa1cbfa38b3d9aa9a47e34c50027a8dee716864ed6bce65867b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.303Z",
+     "ended": "2026-10-20T04:42:29.890Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q109": {
+     "agent": "si5-adj-Q106-Q109-Q110-Q111-Q112-Q114",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q106-Q109-Q110-Q111-Q112-Q114.md",
+     "promptSha256": "8eca09a9a6657fa1cbfa38b3d9aa9a47e34c50027a8dee716864ed6bce65867b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.303Z",
+     "ended": "2026-10-20T04:42:29.890Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q110": {
+     "agent": "si5-adj-Q106-Q109-Q110-Q111-Q112-Q114",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q106-Q109-Q110-Q111-Q112-Q114.md",
+     "promptSha256": "8eca09a9a6657fa1cbfa38b3d9aa9a47e34c50027a8dee716864ed6bce65867b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.303Z",
+     "ended": "2026-10-20T04:42:29.890Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q111": {
+     "agent": "si5-adj-Q106-Q109-Q110-Q111-Q112-Q114",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q106-Q109-Q110-Q111-Q112-Q114.md",
+     "promptSha256": "8eca09a9a6657fa1cbfa38b3d9aa9a47e34c50027a8dee716864ed6bce65867b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.303Z",
+     "ended": "2026-10-20T04:42:29.890Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q112": {
+     "agent": "si5-adj-Q106-Q109-Q110-Q111-Q112-Q114",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q106-Q109-Q110-Q111-Q112-Q114.md",
+     "promptSha256": "8eca09a9a6657fa1cbfa38b3d9aa9a47e34c50027a8dee716864ed6bce65867b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.303Z",
+     "ended": "2026-10-20T04:42:29.890Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q114": {
+     "agent": "si5-adj-Q106-Q109-Q110-Q111-Q112-Q114",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q106-Q109-Q110-Q111-Q112-Q114.md",
+     "promptSha256": "8eca09a9a6657fa1cbfa38b3d9aa9a47e34c50027a8dee716864ed6bce65867b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:50.303Z",
+     "ended": "2026-10-20T04:42:29.890Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q115": {
+     "agent": "si5-adj-Q115-Q116-Q117-Q119-Q120",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q115-Q116-Q117-Q119-Q120.md",
+     "promptSha256": "7f5f0793b60f5b6210e6031b2c83f54f830adacf2b9b7bcf7890e6f6c565b595",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.572Z",
+     "ended": "2026-10-20T04:43:51.941Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q116": {
+     "agent": "si5-adj-Q115-Q116-Q117-Q119-Q120",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q115-Q116-Q117-Q119-Q120.md",
+     "promptSha256": "7f5f0793b60f5b6210e6031b2c83f54f830adacf2b9b7bcf7890e6f6c565b595",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.572Z",
+     "ended": "2026-10-20T04:43:51.941Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q117": {
+     "agent": "si5-adj-Q115-Q116-Q117-Q119-Q120",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q115-Q116-Q117-Q119-Q120.md",
+     "promptSha256": "7f5f0793b60f5b6210e6031b2c83f54f830adacf2b9b7bcf7890e6f6c565b595",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.572Z",
+     "ended": "2026-10-20T04:43:51.941Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q119": {
+     "agent": "si5-adj-Q115-Q116-Q117-Q119-Q120",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q115-Q116-Q117-Q119-Q120.md",
+     "promptSha256": "7f5f0793b60f5b6210e6031b2c83f54f830adacf2b9b7bcf7890e6f6c565b595",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.572Z",
+     "ended": "2026-10-20T04:43:51.941Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q120": {
+     "agent": "si5-adj-Q115-Q116-Q117-Q119-Q120",
+     "models": [
+      "claude-opus-5-5"
+     ],
+     "prompt": "judge-prompts/adjudicate-Q115-Q116-Q117-Q119-Q120.md",
+     "promptSha256": "7f5f0793b60f5b6210e6031b2c83f54f830adacf2b9b7bcf7890e6f6c565b595",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-20T04:34:34.572Z",
+     "ended": "2026-10-20T04:43:51.941Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    }
+   }
+  },
+  "first": {
+   "template": "judge-prompt.md",
+   "templateSha256": "0196b00852eedb761b2d2129d1f2d2526736a9e9e71b8bf9216010a71da35e04",
+   "model": "claude-sonnet-5-5",
+   "agents": 101,
+   "uncontained": [],
+   "promptNotExact": [],
+   "queries": {
+    "Q001": {
+     "agent": "si5-judge1-Q001",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q001.md",
+     "promptSha256": "f7b8cccdfb7a86b9fdfbedebec32253f6a100a0645830bf3598901ab2f20b243",
+     "promptRead": "inline_exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:57:52.215Z",
+     "ended": "2026-10-18T03:05:56.522Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q002": {
+     "agent": "si5-judge1-Q002",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q002.md",
+     "promptSha256": "8e551cccfb8138c177b0366a78ca107ddbc81c59e266d2685deaee3ab66e052e",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:58:39.091Z",
+     "ended": "2026-10-18T03:06:03.892Z",
+     "toolCalls": 46,
+     "flags": [],
+     "contained": true
+    },
+    "Q004": {
+     "agent": "si5-judge1-Q004",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q004.md",
+     "promptSha256": "dc1156921e578a29d54e9fe7958b9c9104884201e0cf3f4df1be2646f04956c5",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:58:39.365Z",
+     "ended": "2026-10-18T03:04:56.982Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q005": {
+     "agent": "si5-judge1-Q005",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q005.md",
+     "promptSha256": "aa63f628f7090217098d1387c3e8ec5c8e9d61db8ee1c05d86684d6c130c74df",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:58:39.116Z",
+     "ended": "2026-10-18T03:09:17.709Z",
+     "toolCalls": 63,
+     "flags": [],
+     "contained": true
+    },
+    "Q006": {
+     "agent": "si5-judge1-Q006",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q006.md",
+     "promptSha256": "d355bc5568412d27db3ee46b93bb43f3d23fdcfb8911811dfec775cc905d0bb1",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:58:39.266Z",
+     "ended": "2026-10-18T03:07:08.664Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q007": {
+     "agent": "si5-judge1-Q007",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q007.md",
+     "promptSha256": "54728ca2685fc8e45edea71fcd4bab78a1f124742374ac2048fdde48865de65c",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:58:39.465Z",
+     "ended": "2026-10-18T03:07:01.883Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q009": {
+     "agent": "si5-judge1-Q009",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q009.md",
+     "promptSha256": "2ecf2b40471dbdbc1c793cb96932cf045cd0cae45ef5e02910b6ca85c85ec090",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:58:39.136Z",
+     "ended": "2026-10-18T03:09:04.761Z",
+     "toolCalls": 42,
+     "flags": [],
+     "contained": true
+    },
+    "Q010": {
+     "agent": "si5-judge1-Q010",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q010.md",
+     "promptSha256": "7175eafb26813304e1ad2c17bbe91f06c396c74960ee340dfdb67e414c2cb753",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T02:58:39.177Z",
+     "ended": "2026-10-18T03:06:30.378Z",
+     "toolCalls": 43,
+     "flags": [],
+     "contained": true
+    },
+    "Q011": {
+     "agent": "si5-judge1-Q011",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q011.md",
+     "promptSha256": "fcdbdb90dd3d0b1d9659980bf089abc665d9e73bc6f24a2e60a089770d46d508",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:05:34.377Z",
+     "ended": "2026-10-18T03:10:00.174Z",
+     "toolCalls": 26,
+     "flags": [],
+     "contained": true
+    },
+    "Q012": {
+     "agent": "si5-judge1-Q012",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q012.md",
+     "promptSha256": "c62b78cc260c0e75c84ae31468490c4a0c1cc9ba200d9eae8b948325a1b2e4df",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:05:34.406Z",
+     "ended": "2026-10-18T03:12:17.840Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q014": {
+     "agent": "si5-judge1-Q014",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q014.md",
+     "promptSha256": "2c73d6fc196ad2985d5ab8623f21fbac8e67d77b19bf0e5d4ef2481d644ed250",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:08:15.058Z",
+     "ended": "2026-10-18T03:15:50.114Z",
+     "toolCalls": 60,
+     "flags": [],
+     "contained": true
+    },
+    "Q015": {
+     "agent": "si5-judge1-Q015",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q015.md",
+     "promptSha256": "f9e5f220a1156ac919a96dc37bb2df197eb3070b8d43ddfb59090a5f432fdf3e",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:08:15.103Z",
+     "ended": "2026-10-18T03:15:34.880Z",
+     "toolCalls": 47,
+     "flags": [],
+     "contained": true
+    },
+    "Q016": {
+     "agent": "si5-judge1-Q016",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q016.md",
+     "promptSha256": "c439d48d9dd8c3e7fc5e1c87aeca3b4cca98fe04478c14bbb4b35f072c6f5842",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:08:15.083Z",
+     "ended": "2026-10-18T03:14:24.976Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q017": {
+     "agent": "si5-judge1-Q017",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q017.md",
+     "promptSha256": "f7841daf403c9559c3ad26b7462b4f56cafa449d7c0d288bde497276c7e36170",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:08:15.226Z",
+     "ended": "2026-10-18T03:15:21.531Z",
+     "toolCalls": 29,
+     "flags": [],
+     "contained": true
+    },
+    "Q019": {
+     "agent": "si5-judge1-Q019",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q019.md",
+     "promptSha256": "9d2c641d6a67ca5341ce09b7075cdf3df14a6ab9a89825d2b75ad59549a7b915",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:08:15.144Z",
+     "ended": "2026-10-18T03:14:54.931Z",
+     "toolCalls": 48,
+     "flags": [],
+     "contained": true
+    },
+    "Q020": {
+     "agent": "si5-judge1-Q020",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q020.md",
+     "promptSha256": "bbfe45173d726eb62567188d38821c10fdc1be7d126608e9f30ba10d3f7e6040",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:09:11.213Z",
+     "ended": "2026-10-18T03:17:45.646Z",
+     "toolCalls": 53,
+     "flags": [],
+     "contained": true
+    },
+    "Q021": {
+     "agent": "si5-judge1-Q021",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q021.md",
+     "promptSha256": "ab80d451ae4883d2f4644f9d786faf6c882bfa9954e1f2647547ecbffe964925",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:09:11.237Z",
+     "ended": "2026-10-18T03:17:45.807Z",
+     "toolCalls": 49,
+     "flags": [],
+     "contained": true
+    },
+    "Q022": {
+     "agent": "si5-judge1-Q022",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q022.md",
+     "promptSha256": "d68bdbcfaf9889a56aeb4f1c14fb38c60aba13b35ca490d88593edf7947885e7",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:10:18.878Z",
+     "ended": "2026-10-18T03:18:32.331Z",
+     "toolCalls": 48,
+     "flags": [],
+     "contained": true
+    },
+    "Q024": {
+     "agent": "si5-judge1-Q024",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q024.md",
+     "promptSha256": "02d0d17e792bf6a4caf36aa79b9d04f0ef5d953f6f75549a40d82a99358d7483",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:11:27.678Z",
+     "ended": "2026-10-18T03:17:07.817Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q025": {
+     "agent": "si5-judge1-Q025",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q025.md",
+     "promptSha256": "85499d815266fc50ff2433f7d969808e2f4c05ecbe14547f6f2f5551df157d0f",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:11:27.704Z",
+     "ended": "2026-10-18T03:18:12.805Z",
+     "toolCalls": 47,
+     "flags": [],
+     "contained": true
+    },
+    "Q026": {
+     "agent": "si5-judge1-Q026",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q026.md",
+     "promptSha256": "81e35f30a5d9fe1d1f59f8c65b6ad5a5394307f15c12bc5d13c51b24815a74da",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:11:27.765Z",
+     "ended": "2026-10-18T03:17:44.196Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q027": {
+     "agent": "si5-judge1-Q027",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q027.md",
+     "promptSha256": "5b91f63ee11f6d6b116171ce6efc60ea918e9116fc6a74edbac7ea8dbba9774c",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:11:27.724Z",
+     "ended": "2026-10-18T03:20:03.371Z",
+     "toolCalls": 58,
+     "flags": [],
+     "contained": true
+    },
+    "Q029": {
+     "agent": "si5-judge1-Q029",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q029.md",
+     "promptSha256": "9b957fd05433bb8cf0136c57c5339cdfbc6c17381d2ada6240cdcf53fb8a3704",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:13:15.996Z",
+     "ended": "2026-10-18T03:20:34.215Z",
+     "toolCalls": 67,
+     "flags": [],
+     "contained": true
+    },
+    "Q030": {
+     "agent": "si5-judge1-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q030.md",
+     "promptSha256": "6c9cd4ab36f9f65202e64d764bbfe9a20e53734bc869e88886d7476125544aab",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:13:16.228Z",
+     "ended": "2026-10-18T03:25:25.603Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q031": {
+     "agent": "si5-judge1-Q031",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q031.md",
+     "promptSha256": "9dcc7998f9a3cc1fa9446dbcea94264a6dcd4ac2317cd912eccd4a1eded0179c",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:13:16.084Z",
+     "ended": "2026-10-18T03:19:32.587Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q032": {
+     "agent": "si5-judge1-Q032",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q032.md",
+     "promptSha256": "e76fdd7375e86ddbd23b4e11444ad5828c02d29b896494dcdf1be4684d9abb13",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:13:16.022Z",
+     "ended": "2026-10-18T03:21:06.591Z",
+     "toolCalls": 33,
+     "flags": [],
+     "contained": true
+    },
+    "Q034": {
+     "agent": "si5-judge1-Q034",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q034.md",
+     "promptSha256": "216da97d91f5a785ee3be85dd84a3aadcb19a5a6e5b3cf52f11b7a43540e540d",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:13:16.043Z",
+     "ended": "2026-10-18T03:20:56.286Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q035": {
+     "agent": "si5-judge1-Q035",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q035.md",
+     "promptSha256": "084d7d4d1cdaff91f9a84de1cbef101c75f65b5002ed06d6e0cedf78304105f8",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:13:16.278Z",
+     "ended": "2026-10-18T03:22:20.917Z",
+     "toolCalls": 66,
+     "flags": [],
+     "contained": true
+    },
+    "Q036": {
+     "agent": "si5-judge1-Q036",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q036.md",
+     "promptSha256": "688cf835d009559aaa5cdb4b93b40d32d7c99b08ebd1034da15604906770538a",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:40:33.425Z",
+     "ended": "2026-10-18T03:49:14.366Z",
+     "toolCalls": 58,
+     "flags": [],
+     "contained": true
+    },
+    "Q037": {
+     "agent": "si5-judge1-Q037",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q037.md",
+     "promptSha256": "c9cbc221539836e4f9e12c6207119c6801499b6121167690ec35b9d6050811e0",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:40:33.613Z",
+     "ended": "2026-10-18T03:45:50.215Z",
+     "toolCalls": 24,
+     "flags": [],
+     "contained": true
+    },
+    "Q039": {
+     "agent": "si5-judge1-Q039",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q039.md",
+     "promptSha256": "e6b782c5f420b545a1c590da0cb940fd945fe09f0d46d34f4d17690f79430670",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:40:33.459Z",
+     "ended": "2026-10-18T03:48:20.564Z",
+     "toolCalls": 60,
+     "flags": [],
+     "contained": true
+    },
+    "Q040": {
+     "agent": "si5-judge1-Q040",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q040.md",
+     "promptSha256": "9ae877ccbf4b14cd18b42c6e2d4061a0f29bb83a1e7d8027a060d858334c3f43",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:59:28.064Z",
+     "ended": "2026-10-18T04:11:07.310Z",
+     "toolCalls": 71,
+     "flags": [],
+     "contained": true
+    },
+    "Q041": {
+     "agent": "si5-judge1-Q041",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q041.md",
+     "promptSha256": "88d3cca5b3cc04fbc469f46d6e1574d11f35ed570657770abc112fb25b74dd34",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:59:28.336Z",
+     "ended": "2026-10-18T04:08:27.688Z",
+     "toolCalls": 32,
+     "flags": [],
+     "contained": true
+    },
+    "Q042": {
+     "agent": "si5-judge1-Q042",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q042.md",
+     "promptSha256": "9bfbc6f3f7e59e2194c5b54610049c82065f42973232bc18320e8854e8d54783",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:59:28.438Z",
+     "ended": "2026-10-18T04:08:22.772Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q044": {
+     "agent": "si5-judge1-Q044",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q044.md",
+     "promptSha256": "a5d4f0766d53dd42135ba8bd75c3d2efd4d140c68ef1d248589fcc02645a003a",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:59:28.109Z",
+     "ended": "2026-10-18T04:07:35.259Z",
+     "toolCalls": 22,
+     "flags": [],
+     "contained": true
+    },
+    "Q045": {
+     "agent": "si5-judge1-Q045",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q045.md",
+     "promptSha256": "78df7421cb83fdcba6c888408c6274aba56e306a36be97176fd7755f98fa1d5e",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:59:28.089Z",
+     "ended": "2026-10-18T04:07:53.610Z",
+     "toolCalls": 47,
+     "flags": [],
+     "contained": true
+    },
+    "Q046": {
+     "agent": "si5-judge1-Q046",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q046.md",
+     "promptSha256": "6650fb35ddb78dbd1e224f9180c3a590ae524e20003b020b63c6e4a53fa6febe",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:59:28.150Z",
+     "ended": "2026-10-18T04:07:42.457Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q047": {
+     "agent": "si5-judge1-Q047",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q047.md",
+     "promptSha256": "2fab597d8d295f14c29b52a24611994480ba5c3d42c21d21465ca4186040d90f",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:59:28.236Z",
+     "ended": "2026-10-18T04:08:04.843Z",
+     "toolCalls": 27,
+     "flags": [],
+     "contained": true
+    },
+    "Q049": {
+     "agent": "si5-judge1-Q049",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q049.md",
+     "promptSha256": "b4c0e78a159748b99ac14df0ae288bb8b5db1b9086ce53c2bc975038beb6b198",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:08:21.288Z",
+     "ended": "2026-10-18T04:14:17.227Z",
+     "toolCalls": 32,
+     "flags": [],
+     "contained": true
+    },
+    "Q050": {
+     "agent": "si5-judge1-Q050-r2",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q050-r2.md",
+     "promptSha256": "079e4d5d0ca5cf155cef332f295e5afae0463f51833632ef20a3803f49dff834",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:25:28.765Z",
+     "ended": "2026-10-18T04:31:09.635Z",
+     "toolCalls": 29,
+     "flags": [],
+     "contained": true,
+     "superseded": [
+      {
+       "agent": "si5-judge1-Q050",
+       "started": "2026-10-18T04:08:21.376Z",
+       "flags": [
+        {
+         "flag": "query:Q001",
+         "note": null
+        }
+       ],
+       "promptRead": "exact"
+      }
+     ]
+    },
+    "Q051": {
+     "agent": "si5-judge1-Q051",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q051.md",
+     "promptSha256": "058f0e6ca310b7e8f1dd28f0041bfe0ed5f72b34302f0c5e4ee63a0a947ced18",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:08:21.314Z",
+     "ended": "2026-10-18T04:13:49.949Z",
+     "toolCalls": 25,
+     "flags": [],
+     "contained": true
+    },
+    "Q052": {
+     "agent": "si5-judge1-Q052",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q052.md",
+     "promptSha256": "3f3d841004197ac4836086946ce3284a33271b6ad2b7be837956a35e153b5515",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:08:21.334Z",
+     "ended": "2026-10-18T04:13:23.244Z",
+     "toolCalls": 30,
+     "flags": [],
+     "contained": true
+    },
+    "Q054": {
+     "agent": "si5-judge1-Q054",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q054.md",
+     "promptSha256": "4d7c90ea7ac500519c750515f8e968791fb0832abefc203e8624ecc1293ad6af",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:24:45.494Z",
+     "ended": "2026-10-18T04:34:42.396Z",
+     "toolCalls": 55,
+     "flags": [],
+     "contained": true
+    },
+    "Q055": {
+     "agent": "si5-judge1-Q055-r2",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q055-r2.md",
+     "promptSha256": "120289f285ae5ed35f7e41fa8128378efebe5e5c457a757097c5cc91269b2d56",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:36:34.248Z",
+     "ended": "2026-10-18T04:46:17.993Z",
+     "toolCalls": 41,
+     "flags": [],
+     "contained": true,
+     "superseded": [
+      {
+       "agent": "si5-judge1-Q055",
+       "started": "2026-10-18T04:24:45.959Z",
+       "flags": [
+        {
+         "flag": "query:Q001",
+         "note": null
+        }
+       ],
+       "promptRead": "exact"
+      }
+     ]
+    },
+    "Q056": {
+     "agent": "si5-judge1-Q056",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q056.md",
+     "promptSha256": "ab32cd7f2b0cbbc3aad76b329ed688e6cefbbd4e09a0c1e39735ad93650099f4",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:24:45.512Z",
+     "ended": "2026-10-18T04:30:14.435Z",
+     "toolCalls": 29,
+     "flags": [],
+     "contained": true
+    },
+    "Q057": {
+     "agent": "si5-judge1-Q057",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q057.md",
+     "promptSha256": "0212490dcd7a64390894c7cd6ae17f70bf4d3570e5f430478bdf7d8ea31b383a",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:24:45.859Z",
+     "ended": "2026-10-18T04:34:06.204Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q059": {
+     "agent": "si5-judge1-Q059",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q059.md",
+     "promptSha256": "be05210137fed872adaec9f532e39518c021e68608728823fef4999bbb5f2808",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:24:45.757Z",
+     "ended": "2026-10-18T04:33:31.127Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q060": {
+     "agent": "si5-judge1-Q060",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q060.md",
+     "promptSha256": "17063e921d2c3c10994abcbf3f5846faa990b2d7f8f47d61fd37fdc7f1c32649",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:24:45.667Z",
+     "ended": "2026-10-18T04:32:25.230Z",
+     "toolCalls": 27,
+     "flags": [],
+     "contained": true
+    },
+    "Q061": {
+     "agent": "si5-judge1-Q061-r2",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q061-r2.md",
+     "promptSha256": "4625d26b9b46b643e5d8601fd0d0274a5755e08a974d8c5a652d06c287a1f2bf",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:46:49.625Z",
+     "ended": "2026-10-18T03:53:17.352Z",
+     "toolCalls": 24,
+     "flags": [],
+     "contained": true,
+     "superseded": [
+      {
+       "agent": "si5-judge1-Q061",
+       "started": "2026-10-18T03:15:56.478Z",
+       "flags": [
+        {
+         "flag": "query:Q001",
+         "note": null
+        }
+       ],
+       "promptRead": "exact"
+      }
+     ]
+    },
+    "Q062": {
+     "agent": "si5-judge1-Q062",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q062.md",
+     "promptSha256": "985224e8095fe8edbedb42147f0ff59915fc5d0e3504d4953b1595952e809e2a",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:17:58.418Z",
+     "ended": "2026-10-18T03:23:27.603Z",
+     "toolCalls": 32,
+     "flags": [],
+     "contained": true
+    },
+    "Q064": {
+     "agent": "si5-judge1-Q064-r2",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q064-r2.md",
+     "promptSha256": "952f3b0e80d49c1f40ac4b720a55d490dbdb53b52ce93b04401061e4b8056334",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:46:49.629Z",
+     "ended": "2026-10-18T03:55:19.186Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true,
+     "superseded": [
+      {
+       "agent": "si5-judge1-Q064",
+       "started": "2026-10-18T03:20:17.226Z",
+       "flags": [
+        {
+         "flag": "query:Q001",
+         "note": null
+        }
+       ],
+       "promptRead": "exact"
+      }
+     ]
+    },
+    "Q065": {
+     "agent": "si5-judge1-Q065",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q065.md",
+     "promptSha256": "fe9eb28e0baa4c945e7dee969623b3da4ce7beb32ba1dba64f65c2d8dc10fc38",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:22:36.321Z",
+     "ended": "2026-10-18T03:27:43.749Z",
+     "toolCalls": 31,
+     "flags": [],
+     "contained": true
+    },
+    "Q066": {
+     "agent": "si5-judge1-Q066",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q066.md",
+     "promptSha256": "991529df321aa74f4c9e472d4cc597d7fc68d25cb26e11f20285c4693d7deae4",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:25:49.458Z",
+     "ended": "2026-10-18T03:32:33.664Z",
+     "toolCalls": 35,
+     "flags": [],
+     "contained": true
+    },
+    "Q067": {
+     "agent": "si5-judge1-Q067-r2",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q067-r2.md",
+     "promptSha256": "aeb49fd75a8959ec1e76c29d4995c8445aa7295eefef09961ce3b33cdb659707",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:25:28.772Z",
+     "ended": "2026-10-18T04:30:54.496Z",
+     "toolCalls": 20,
+     "flags": [],
+     "contained": true,
+     "superseded": [
+      {
+       "agent": "si5-judge1-Q067",
+       "started": "2026-10-18T03:40:33.478Z",
+       "flags": [
+        {
+         "flag": "query:Q001",
+         "note": null
+        }
+       ],
+       "promptRead": "exact"
+      }
+     ]
+    },
+    "Q069": {
+     "agent": "si5-judge1-Q069",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q069.md",
+     "promptSha256": "d2e203d3ce88364af9e727df3373d2b1657b892268a68555598d3e9527f4282b",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:40:33.718Z",
+     "ended": "2026-10-18T03:44:39.240Z",
+     "toolCalls": 12,
+     "flags": [],
+     "contained": true
+    },
+    "Q070": {
+     "agent": "si5-judge1-Q070",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q070.md",
+     "promptSha256": "3ff2ae6b647c7660d9a5234948ea324d3436b743a44b9663ff2c56ebbdc19b59",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T03:40:33.527Z",
+     "ended": "2026-10-18T03:47:25.249Z",
+     "toolCalls": 40,
+     "flags": [],
+     "contained": true
+    },
+    "Q071": {
+     "agent": "si5-judge1-Q071",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q071.md",
+     "promptSha256": "eace70f8b681fd57b89aae093e340679053e668af82a09f66e0ac4c57a7e12cb",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:24:45.533Z",
+     "ended": "2026-10-18T04:28:34.881Z",
+     "toolCalls": 23,
+     "flags": [],
+     "contained": true
+    },
+    "Q072": {
+     "agent": "si5-judge1-Q072",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q072.md",
+     "promptSha256": "0c153632c239ed82659a4aa5a6d91adfa4271daf92e5543e46d56f553df83250",
+     "promptRead": "exact",
+     "launch": "instruction_file_only",
+     "started": "2026-10-18T04:24:45.574Z",
+     "ended": "2026-10-18T04:30:22.493Z",
+     "toolCalls": 17,
+     "flags": [],
+     "contained": true
+    },
+    "Q074": {
+     "agent": "si5-judge1-Q074",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q074.md",
+     "promptSha256": "fcb71b69016ef212888cba369a1884e767420f703cb4634f05fa5b6cf7d08458",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:29:40.338Z",
+     "ended": "2026-10-18T04:37:54.586Z",
+     "toolCalls": 48,
+     "flags": [],
+     "contained": true
+    },
+    "Q075": {
+     "agent": "si5-judge1-Q075",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q075.md",
+     "promptSha256": "85839e1368ba26748f623d4f465793e5cb594dfe9f5253ca655bb4ad0fb0dc12",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:29:40.355Z",
+     "ended": "2026-10-18T04:36:14.356Z",
+     "toolCalls": 39,
+     "flags": [],
+     "contained": true
+    },
+    "Q076": {
+     "agent": "si5-judge1-Q076",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q076.md",
+     "promptSha256": "ed2be808f56925658bce13ba1c369a0dc4d0ac56b20ed50f018e71af9fbd84e5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:33:48.781Z",
+     "ended": "2026-10-18T04:38:37.935Z",
+     "toolCalls": 23,
+     "flags": [],
+     "contained": true
+    },
+    "Q077": {
+     "agent": "si5-judge1-Q077",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q077.md",
+     "promptSha256": "298e8a882591f1cb1c35ceb0f9b8adb86c89a9a2545f4159f56606b29e75340e",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:36:04.969Z",
+     "ended": "2026-10-18T04:40:37.930Z",
+     "toolCalls": 23,
+     "flags": [],
+     "contained": true
+    },
+    "Q079": {
+     "agent": "si5-judge1-Q079",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q079.md",
+     "promptSha256": "85136e4ad88d2905102d70ca5bd30f69090b2f42eee6e865387db33fc8be8409",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:01.451Z",
+     "ended": "2026-10-18T04:47:07.668Z",
+     "toolCalls": 62,
+     "flags": [],
+     "contained": true
+    },
+    "Q080": {
+     "agent": "si5-judge1-Q080",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q080.md",
+     "promptSha256": "62d452d3f94cabdda86ac812c607a5db92c391c627d15c315d31a730cb5e401b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:01.475Z",
+     "ended": "2026-10-18T04:44:51.998Z",
+     "toolCalls": 38,
+     "flags": [],
+     "contained": true
+    },
+    "Q081": {
+     "agent": "si5-judge1-Q081",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q081.md",
+     "promptSha256": "01439c0349c516935fff2ff27e11db73bbc8db050055d85df085d5c9fe5b4143",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:44:12.215Z",
+     "ended": "2026-10-18T04:50:04.797Z",
+     "toolCalls": 29,
+     "flags": [],
+     "contained": true
+    },
+    "Q082": {
+     "agent": "si5-judge1-Q082",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q082.md",
+     "promptSha256": "b4f9355e165328b4251089eb17b8fc8f4d20ff58b4426604d5917d9fdbaa7f9f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:46:55.561Z",
+     "ended": "2026-10-18T04:53:36.689Z",
+     "toolCalls": 45,
+     "flags": [],
+     "contained": true
+    },
+    "Q084": {
+     "agent": "si5-judge1-Q084",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q084.md",
+     "promptSha256": "f8ee0a2b7c6b6a27ad5c15a5ae1a60f5623d463f81922fd484348d05506a28cc",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:50:00.922Z",
+     "ended": "2026-10-18T04:58:45.630Z",
+     "toolCalls": 69,
+     "flags": [],
+     "contained": true
+    },
+    "Q085": {
+     "agent": "si5-judge1-Q085",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q085.md",
+     "promptSha256": "a122da3d27f7721918c84c6980794a82366782ac0bf3dfa08c5703d49b6bb5f2",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:51:32.410Z",
+     "ended": "2026-10-18T04:58:57.717Z",
+     "toolCalls": 54,
+     "flags": [],
+     "contained": true
+    },
+    "Q086": {
+     "agent": "si5-judge1-Q086",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q086.md",
+     "promptSha256": "94f71e34a61ebb6d155b1fdc7f24f07919f100849d43c45900df2d6887a0bd5f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:51:32.441Z",
+     "ended": "2026-10-18T04:59:28.682Z",
+     "toolCalls": 50,
+     "flags": [],
+     "contained": true
+    },
+    "Q087": {
+     "agent": "si5-judge1-Q087",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q087.md",
+     "promptSha256": "179b53c8960ebff13d097964db95ec2b193da75798b3397d33250045c1e0e278",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:54:32.375Z",
+     "ended": "2026-10-18T05:01:40.661Z",
+     "toolCalls": 28,
+     "flags": [],
+     "contained": true
+    },
+    "Q089": {
+     "agent": "si5-judge1-Q089",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q089.md",
+     "promptSha256": "3151d08553433ce938d5764d430b7f1b09a283c8d4da0be84800139c47dbc80d",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:54:32.412Z",
+     "ended": "2026-10-18T05:02:07.746Z",
+     "toolCalls": 29,
+     "flags": [],
+     "contained": true
+    },
+    "Q090": {
+     "agent": "si5-judge1-Q090",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q090.md",
+     "promptSha256": "c5b0a6d81f7f3e50293b1e84cbdd7f081080f0410b584a27bd192dbe95e82eea",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:57:26.772Z",
+     "ended": "2026-10-18T05:03:47.195Z",
+     "toolCalls": 40,
+     "flags": [],
+     "contained": true
+    },
+    "Q091": {
+     "agent": "si5-judge1-Q091",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q091.md",
+     "promptSha256": "59f6abfd5c914d9426c5b87656b1234dfb4ef79ee42cebce03e30e30e8260496",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:00:26.566Z",
+     "ended": "2026-10-18T05:04:28.918Z",
+     "toolCalls": 28,
+     "flags": [],
+     "contained": true
+    },
+    "Q092": {
+     "agent": "si5-judge1-Q092",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q092.md",
+     "promptSha256": "03de15fd7d113bf506e26bfc643b0d9254ca178b3ac005915aa033465e7a5977",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:01:57.634Z",
+     "ended": "2026-10-18T05:07:52.296Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q094": {
+     "agent": "si5-judge1-Q094",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q094.md",
+     "promptSha256": "d2c9b2bf246361cd770d2556637e8bb3da3702eb8fb89fe1a451eadf90f6d6f0",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:04:58.781Z",
+     "ended": "2026-10-18T05:14:12.374Z",
+     "toolCalls": 60,
+     "flags": [],
+     "contained": true
+    },
+    "Q095": {
+     "agent": "si5-judge1-Q095",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q095.md",
+     "promptSha256": "fe32ac10de0132a03a9d0925a768d0459b9605622640fcaaae46ab5e475a6aea",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:07:58.354Z",
+     "ended": "2026-10-18T05:11:41.126Z",
+     "toolCalls": 19,
+     "flags": [],
+     "contained": true
+    },
+    "Q096": {
+     "agent": "si5-judge1-Q096",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q096.md",
+     "promptSha256": "034b3ffa104b8e92c3297202b64e1373463ed294ef48c0dd2e05c0889f19790b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:09:36.785Z",
+     "ended": "2026-10-18T05:15:53.694Z",
+     "toolCalls": 44,
+     "flags": [],
+     "contained": true
+    },
+    "Q097": {
+     "agent": "si5-judge1-Q097",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q097.md",
+     "promptSha256": "861062525907a97801b550ab611d6633dfd9a0b2a841b46d5d846e20606f6882",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:11:04.443Z",
+     "ended": "2026-10-18T05:17:04.081Z",
+     "toolCalls": 32,
+     "flags": [],
+     "contained": true
+    },
+    "Q099": {
+     "agent": "si5-judge1-Q099",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q099.md",
+     "promptSha256": "8990d0d3c046955114119e7882fba90cc7d0ab28e6a13b05a0cbcd588375986d",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:14:09.233Z",
+     "ended": "2026-10-18T05:20:10.880Z",
+     "toolCalls": 43,
+     "flags": [],
+     "contained": true
+    },
+    "Q100": {
+     "agent": "si5-judge1-Q100",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q100.md",
+     "promptSha256": "98ef0ead0cf4c9a44d5570187120fd1b2c9e723000125880d7998dd762cc6110",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:14:09.273Z",
+     "ended": "2026-10-18T05:23:48.846Z",
+     "toolCalls": 36,
+     "flags": [],
+     "contained": true
+    },
+    "Q101": {
+     "agent": "si5-judge1-Q101",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q101.md",
+     "promptSha256": "f0b91e50d21abd99cc083da441f58304e06ebdae13e87472b5696a9a5df37186",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:17:08.516Z",
+     "ended": "2026-10-18T05:25:04.158Z",
+     "toolCalls": 42,
+     "flags": [],
+     "contained": true
+    },
+    "Q102": {
+     "agent": "si5-judge1-Q102",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q102.md",
+     "promptSha256": "4488156b23e229290d7dd8fa12fb5d93e5089c7ee5f3e4091baf58bb3aca9f34",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:17:08.563Z",
+     "ended": "2026-10-18T05:23:27.003Z",
+     "toolCalls": 21,
+     "flags": [],
+     "contained": true
+    },
+    "Q104": {
+     "agent": "si5-judge1-Q104",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q104.md",
+     "promptSha256": "356257e6d5313ae3c5642c8172ff64dc6add4fa9c5637d377f3a221863ee81f6",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:20:04.406Z",
+     "ended": "2026-10-18T05:28:25.369Z",
+     "toolCalls": 30,
+     "flags": [],
+     "contained": true
+    },
+    "Q105": {
+     "agent": "si5-judge1-Q105",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q105.md",
+     "promptSha256": "6d9e581c4089980dfca4fcc28cc920a656414f94d3917017f45708d55081c5cf",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:24:34.733Z",
+     "ended": "2026-10-18T05:29:31.588Z",
+     "toolCalls": 24,
+     "flags": [],
+     "contained": true
+    },
+    "Q106": {
+     "agent": "si5-judge1-Q106",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q106.md",
+     "promptSha256": "f68447674ad6a89f46139c71a42684fccf8acbbc276700dcf7e7601a14b566da",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:27:39.620Z",
+     "ended": "2026-10-18T05:34:01.141Z",
+     "toolCalls": 29,
+     "flags": [],
+     "contained": true
+    },
+    "Q107": {
+     "agent": "si5-judge1-Q107",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q107.md",
+     "promptSha256": "89bcd06407069efb720111a6325858441722592ad8f479b55343605b87b6b36f",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:27:39.660Z",
+     "ended": "2026-10-18T05:35:31.477Z",
+     "toolCalls": 27,
+     "flags": [],
+     "contained": true
+    },
+    "Q109": {
+     "agent": "si5-judge1-Q109",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q109.md",
+     "promptSha256": "bd4b9fb44207247a6172b9d216ac16b2899958d481ed5e52b24e06fc622df37b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:30:34.540Z",
+     "ended": "2026-10-18T05:37:16.241Z",
+     "toolCalls": 34,
+     "flags": [],
+     "contained": true
+    },
+    "Q110": {
+     "agent": "si5-judge1-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q110.md",
+     "promptSha256": "3c3310c0a6604e31c164ea43a387816a93c2737c76ed2bccf0c9e6c455da29df",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:32:05.199Z",
+     "ended": "2026-10-18T05:38:16.345Z",
+     "toolCalls": 36,
+     "flags": [
+      {
+       "flag": "sensitive:.env",
+       "note": {
+        "round": "first",
+        "query": "Q110",
+        "flag": "sensitive:.env",
+        "classification": "text_not_access",
+        "note": "The word appears in the judge's own reason for a twelve-factor document ('applying it with a .env approach'), inside the command that wrote its judgments. No tool call read, listed or searched a .env file: no Read, Grep or Glob names one, and no command opens one."
+       }
+      }
+     ],
+     "contained": true
+    },
+    "Q111": {
+     "agent": "si5-judge1-Q111",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q111.md",
+     "promptSha256": "ad0e37caf25984fc6dcb5aeb6001cbaecccc71ceb6d2a7388ade2a7d26e3a24d",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:35:04.735Z",
+     "ended": "2026-10-18T05:41:16.379Z",
+     "toolCalls": 26,
+     "flags": [],
+     "contained": true
+    },
+    "Q112": {
+     "agent": "si5-judge1-Q112",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q112.md",
+     "promptSha256": "8b070eb18aa3062c9aa1063d9880d34811896f2f16789edab2e3e1f8b97011bb",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:36:37.220Z",
+     "ended": "2026-10-18T05:45:15.816Z",
+     "toolCalls": 28,
+     "flags": [],
+     "contained": true
+    },
+    "Q114": {
+     "agent": "si5-judge1-Q114",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q114.md",
+     "promptSha256": "72df3ef12a8558285079933701329de084b29a1c85573993ee10c8d120b5a694",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:38:05.564Z",
+     "ended": "2026-10-18T05:45:36.139Z",
+     "toolCalls": 36,
+     "flags": [],
+     "contained": true
+    },
+    "Q115": {
+     "agent": "si5-judge1-Q115",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q115.md",
+     "promptSha256": "763340c7695a629e4ae556d3473636222b2df272c9e1347fcf75d489b3b6399b",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:07.270Z",
+     "ended": "2026-10-18T05:46:46.000Z",
+     "toolCalls": 41,
+     "flags": [],
+     "contained": true
+    },
+    "Q116": {
+     "agent": "si5-judge1-Q116",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q116.md",
+     "promptSha256": "8db12b245252b5244558d6648c8c82b103a86029ab8926a32d5cf5b2bcba4ff5",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:44:14.493Z",
+     "ended": "2026-10-18T05:54:35.482Z",
+     "toolCalls": 37,
+     "flags": [],
+     "contained": true
+    },
+    "Q117": {
+     "agent": "si5-judge1-Q117",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q117.md",
+     "promptSha256": "b0219ba6f473925ede98eea380a3c262eb9eb65c5dfa2711470f3761835dc588",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:47:14.074Z",
+     "ended": "2026-10-18T05:52:16.508Z",
+     "toolCalls": 23,
+     "flags": [],
+     "contained": true
+    },
+    "Q119": {
+     "agent": "si5-judge1-Q119",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q119.md",
+     "promptSha256": "e25570cd149645fe80bba81b448d94af47bbf95410af8bba479f3b660d0010ba",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:56:17.475Z",
+     "ended": "2026-10-18T05:56:59.449Z",
+     "toolCalls": 7,
+     "flags": [],
+     "contained": true
+    },
+    "Q120": {
+     "agent": "si5-judge1-Q120",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/first-Q120.md",
+     "promptSha256": "e235fc46bb67ca7993c20e0e203e6443f555de70f994e7e722aa492b725b30a9",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T06:15:18.111Z",
+     "ended": "2026-10-18T06:20:18.290Z",
+     "toolCalls": 22,
+     "flags": [],
+     "contained": true
+    }
+   },
+   "unrecorded": []
+  },
+  "second": {
+   "template": "judge-prompt.md",
+   "templateSha256": "0196b00852eedb761b2d2129d1f2d2526736a9e9e71b8bf9216010a71da35e04",
+   "model": "meta/muse-spark-1.3-contributor",
+   "agents": 1,
+   "uncontained": [],
+   "promptNotExact": [],
+   "unrecorded": [
+    "Q001",
+    "Q002",
+    "Q004",
+    "Q005",
+    "Q006",
+    "Q007",
+    "Q009",
+    "Q010",
+    "Q011",
+    "Q012",
+    "Q014",
+    "Q015",
+    "Q016",
+    "Q017",
+    "Q019",
+    "Q020",
+    "Q021",
+    "Q022",
+    "Q025",
+    "Q026",
+    "Q027",
+    "Q029",
+    "Q030",
+    "Q031",
+    "Q032",
+    "Q034",
+    "Q035",
+    "Q036",
+    "Q037",
+    "Q039",
+    "Q051",
+    "Q054",
+    "Q056"
+   ],
+   "queries": {
+    "Q024": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q024.md",
+     "promptSha256": "b86e1eabe02888834ed0539115380e43c684055b3bcf057212ae42f35bfa0542",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:08:26.350Z",
+     "ended": "2026-10-20T04:09:37.999Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 87263,
+      "completionTokens": 11148,
+      "costUsd": 0.010956,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q040": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q040.md",
+     "promptSha256": "22345db6298334742c691e21dc1d46f639797cd6ba78965f60868141ac9f03a5",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:08:26.362Z",
+     "ended": "2026-10-20T04:10:19.760Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 218450,
+      "completionTokens": 16778,
+      "costUsd": 0.025201,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q041": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q041.md",
+     "promptSha256": "98d6d1ab1c21778d4816fffe1381b7dea1afba67a2af6ca5cba9d41cc7bdce55",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:08:26.365Z",
+     "ended": "2026-10-20T04:09:25.920Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 71201,
+      "completionTokens": 9655,
+      "costUsd": 0.009051,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q042": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q042.md",
+     "promptSha256": "c6a8d2fc4185c81fe05cc05cf06ce48cc6d5ef5d1a06ce1a5f13168ffccc57bb",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:10:38.310Z",
+     "ended": "2026-10-20T04:15:10.375Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 337369,
+      "completionTokens": 70948,
+      "costUsd": 0.047926,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q044": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q044.md",
+     "promptSha256": "52abc168ebada9dda5a5fa08885e9f938666a45de7c8aaf16888af06120dc8a6",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:29:58.162Z",
+     "ended": "2026-10-20T04:31:28.609Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 80597,
+      "completionTokens": 8903,
+      "costUsd": 0.00984,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q045": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q045.md",
+     "promptSha256": "cab9dd54a85d5efa5a83389a0539773dd1760de0a7ecfc0009d38db85b11b94b",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:10:41.804Z",
+     "ended": "2026-10-20T04:11:58.623Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 154642,
+      "completionTokens": 11305,
+      "costUsd": 0.017725,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q046": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q046.md",
+     "promptSha256": "4cdffcbf06902aee4d4bf8709d0f55ec8ff6e768d1f2537955f15cae202df70a",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:08:26.367Z",
+     "ended": "2026-10-20T04:10:41.804Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 226509,
+      "completionTokens": 20441,
+      "costUsd": 0.026739,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q047": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q047.md",
+     "promptSha256": "a2b9729e6a6020bfb74b62db9fe6a104356700b6ef5e4df78b993e5d881f7ff4",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:11:05.043Z",
+     "ended": "2026-10-20T04:11:53.265Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 77681,
+      "completionTokens": 9011,
+      "costUsd": 0.00957,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q049": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q049.md",
+     "promptSha256": "44171236e8e446b7393ffca76ecf8863a7320b063bb9ae50893ccf35fc0dce43",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:10:19.761Z",
+     "ended": "2026-10-20T04:11:40.859Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 135297,
+      "completionTokens": 13462,
+      "costUsd": 0.016222,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q050": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q050.md",
+     "promptSha256": "6a37975f3b7d286621c869ab9025b3bc6819a098441dd99f367f15945741f8bf",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:09:25.920Z",
+     "ended": "2026-10-20T04:10:38.310Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 117378,
+      "completionTokens": 10102,
+      "costUsd": 0.013758,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q052": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q052.md",
+     "promptSha256": "474bde0c4943b0a61778fbf7f43a7c3c7e342ee3a4c6690830ad4d83b3ad6a70",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:11:58.623Z",
+     "ended": "2026-10-20T04:12:44.388Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 103695,
+      "completionTokens": 8005,
+      "costUsd": 0.011971,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q055": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q055.md",
+     "promptSha256": "acf79e5d8cbcc31ac3974e30a594b3f756739a699bc049663239605d29efd784",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:12:48.196Z",
+     "ended": "2026-10-20T04:14:16.792Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 353808,
+      "completionTokens": 16714,
+      "costUsd": 0.038724,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q057": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q057.md",
+     "promptSha256": "a32680a5d86801e165e9a4a7f812761e87304c9f5ae766601d0c085781c0f378",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:11:53.265Z",
+     "ended": "2026-10-20T04:13:59.215Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 193297,
+      "completionTokens": 20855,
+      "costUsd": 0.023501,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q059": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q059.md",
+     "promptSha256": "4ef75bde219a0f80b6ae517750615068969a98189b08a762ceab13f48f4bf9e8",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:11:40.859Z",
+     "ended": "2026-10-20T04:12:48.196Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 81439,
+      "completionTokens": 11616,
+      "costUsd": 0.010467,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q060": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q060.md",
+     "promptSha256": "7f74ce9e5b250d37efb70c5cc805e26ece3124bbf46666ab01d406ef84e66e16",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:12:44.388Z",
+     "ended": "2026-10-20T04:13:47.228Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 125193,
+      "completionTokens": 9354,
+      "costUsd": 0.01439,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q061": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q061.md",
+     "promptSha256": "fe2ee978d8b265b133a20900f57e6df6d8aed0a98aa83afff6dc2b945ee883ac",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:14:43.289Z",
+     "ended": "2026-10-20T04:15:57.363Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 104192,
+      "completionTokens": 10840,
+      "costUsd": 0.012587,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q062": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q062.md",
+     "promptSha256": "3736083f816c2c2ae64d2d745e19aef2790612c00be12831b7e4cfecd408b853",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:15:22.616Z",
+     "ended": "2026-10-20T04:16:12.980Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 95398,
+      "completionTokens": 7521,
+      "costUsd": 0.011044,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q064": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q064.md",
+     "promptSha256": "7fc6841949b76fa98f5b9ea2e22261a4fc552b7929cee1d15dc04a1d7c0e21af",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:14:16.793Z",
+     "ended": "2026-10-20T04:15:16.798Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 48592,
+      "completionTokens": 8670,
+      "costUsd": 0.006593,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q065": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q065.md",
+     "promptSha256": "7e79336bdb1a3b247b754b9c907aef534897aa15438a1c92e92acbda47875990",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:13:59.216Z",
+     "ended": "2026-10-20T04:14:43.289Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 145047,
+      "completionTokens": 8244,
+      "costUsd": 0.016154,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q066": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q066.md",
+     "promptSha256": "a1bf50dc06250b937ba89d30aead2adef69d1ac16bca5eddf83b0a57c524d4a0",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:13:47.228Z",
+     "ended": "2026-10-20T04:15:22.615Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 89768,
+      "completionTokens": 14568,
+      "costUsd": 0.01189,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q067": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q067.md",
+     "promptSha256": "77f905658718e4850eb1000670c8b466b37ed1b81d1e0fe2554376ac24582dbd",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:15:10.375Z",
+     "ended": "2026-10-20T04:16:14.234Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 99095,
+      "completionTokens": 10301,
+      "costUsd": 0.01197,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q069": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q069.md",
+     "promptSha256": "b54901fa93f6d703e22d8a0e07cedfffdcd11fc8bc8be75853f9ded690eca21d",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:07:14.405Z",
+     "ended": "2026-10-20T04:08:10.325Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 24267,
+      "completionTokens": 7343,
+      "costUsd": 0.003895,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q070": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q070.md",
+     "promptSha256": "917c2dc9b1a2d227f5b80a59b4cfe9017da76df07de7e8ac44b698bb4ed09e85",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:15:16.799Z",
+     "ended": "2026-10-20T04:16:13.671Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 88555,
+      "completionTokens": 10914,
+      "costUsd": 0.011038,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q071": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q071.md",
+     "promptSha256": "383058437732212130fed1217c2c34e4e9a452f8a617b49f68b6f163ed1aa3ec",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:16:13.672Z",
+     "ended": "2026-10-20T04:17:13.770Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 118067,
+      "completionTokens": 9955,
+      "costUsd": 0.013798,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q072": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q072.md",
+     "promptSha256": "eef12be47dc9793d2086232c5f0ea91591da36b8204d605a34efc6233131197d",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:15:57.364Z",
+     "ended": "2026-10-20T04:16:52.642Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 60622,
+      "completionTokens": 8595,
+      "costUsd": 0.007781,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q074": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q074.md",
+     "promptSha256": "b3507f4ce9ce0c7c480607ea59b60b2c486c88448409717614e46adaec1490d4",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:16:12.981Z",
+     "ended": "2026-10-20T04:18:37.534Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 3,
+      "promptTokens": 370001,
+      "completionTokens": 24276,
+      "costUsd": 0.041855,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q075": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q075.md",
+     "promptSha256": "8415b7043a5cdb4e073614044630a19c25014218531266e684acaceb5e8cd5ae",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:17:13.770Z",
+     "ended": "2026-10-20T04:18:04.058Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 47366,
+      "completionTokens": 6626,
+      "costUsd": 0.006062,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q076": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q076.md",
+     "promptSha256": "97ee35a3b734cacd5af9eaddd4fdf5f73504283d250fe9b9c2b78300d69265db",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:18:04.059Z",
+     "ended": "2026-10-20T04:19:03.441Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 43720,
+      "completionTokens": 8864,
+      "costUsd": 0.006145,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q077": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q077.md",
+     "promptSha256": "a19875b820bc781b320eb962bcd45ea705130848a52e74e6b12414a2bdba7426",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:16:14.235Z",
+     "ended": "2026-10-20T04:17:05.985Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 113002,
+      "completionTokens": 8159,
+      "costUsd": 0.012932,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q079": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q079.md",
+     "promptSha256": "960476dd64a5021133891b54f60ce4a461b90b31307eb38f430bd53ed71a3729",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:16:52.643Z",
+     "ended": "2026-10-20T04:18:26.636Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 132481,
+      "completionTokens": 15612,
+      "costUsd": 0.01637,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q080": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q080.md",
+     "promptSha256": "f4df899a0ebb76fe4715f24f23ab20a5f0c9897a8c0920f79de5f167d8739e12",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:17:05.986Z",
+     "ended": "2026-10-20T04:18:44.071Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 111204,
+      "completionTokens": 13935,
+      "costUsd": 0.013907,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q081": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q081.md",
+     "promptSha256": "a8b9d4d2abee5fbe6646793c8347b7fa0134066c8f469f2c7ee86bc01cf9fc8b",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:19:21.047Z",
+     "ended": "2026-10-20T04:20:21.156Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 138877,
+      "completionTokens": 8967,
+      "costUsd": 0.015681,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q082": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q082.md",
+     "promptSha256": "4fcc6878041e7d6f8df17c3eee7281c87a0ff26d9f8b73273337ed3367d06304",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:20:03.063Z",
+     "ended": "2026-10-20T04:21:19.839Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 118759,
+      "completionTokens": 12938,
+      "costUsd": 0.014464,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q084": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q084.md",
+     "promptSha256": "12a5c48cbfc0cb0f78c66308e9e6134897638587630ca297df4510214c110cfc",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:18:37.534Z",
+     "ended": "2026-10-20T04:20:03.062Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 134076,
+      "completionTokens": 16643,
+      "costUsd": 0.016736,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q085": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q085.md",
+     "promptSha256": "c462c2cd7ab30cf0396bacc6ee2e65db0a9487c478461514aacc79c0942ebe28",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:18:44.072Z",
+     "ended": "2026-10-20T04:20:07.425Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 92767,
+      "completionTokens": 14586,
+      "costUsd": 0.012194,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q086": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q086.md",
+     "promptSha256": "067a2f26fa4fdb915e81401c42347a41e9bd300e8f4fcf3e68514cf630591cad",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:19:03.441Z",
+     "ended": "2026-10-20T04:20:25.254Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 53143,
+      "completionTokens": 12699,
+      "costUsd": 0.007854,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q087": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q087.md",
+     "promptSha256": "3dcb2e77daa5ff933146ce26e74d1edc29005521d7483c3ba4a3c204f0b13355",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:18:26.636Z",
+     "ended": "2026-10-20T04:19:21.047Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 72291,
+      "completionTokens": 9830,
+      "costUsd": 0.009195,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q089": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q089.md",
+     "promptSha256": "ff7be1596f2f50015a7d98e5c7d061c214754eab47e1990e0f16b1924d17327a",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:20:07.425Z",
+     "ended": "2026-10-20T04:21:04.153Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 118860,
+      "completionTokens": 10794,
+      "costUsd": 0.014045,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q090": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q090.md",
+     "promptSha256": "05d85d8d5792493e6d38ca629898bb0516ae36c0827263401f41c9308b04d2dd",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:20:21.157Z",
+     "ended": "2026-10-20T04:21:12.685Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 60670,
+      "completionTokens": 6694,
+      "costUsd": 0.007406,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q091": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q091.md",
+     "promptSha256": "1cd55d4bb7c9dbb934899684c78de2e0443828d767ed6461e214a1ca48533cbf",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:21:19.839Z",
+     "ended": "2026-10-20T04:22:16.158Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 72304,
+      "completionTokens": 8360,
+      "costUsd": 0.008902,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q092": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q092.md",
+     "promptSha256": "09bf831e6c8cb3bd008d452b8e8ea7e3c9ae7276bcc3ee240d1041e42bbb8072",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:22:16.158Z",
+     "ended": "2026-10-20T04:23:18.725Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 65570,
+      "completionTokens": 11411,
+      "costUsd": 0.008839,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q094": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q094.md",
+     "promptSha256": "3130d99bcd9018178bea9781ef8538cf8509fdad65974ad42a29abe258054370",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:21:12.685Z",
+     "ended": "2026-10-20T04:22:52.217Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 109147,
+      "completionTokens": 13920,
+      "costUsd": 0.013699,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q095": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q095.md",
+     "promptSha256": "c89eeb8ce6e7549ae25fc60d05b820481bdbcbb2a24f2194dadaf9ff8f94e5fd",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:21:15.110Z",
+     "ended": "2026-10-20T04:21:58.334Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 80804,
+      "completionTokens": 7470,
+      "costUsd": 0.009574,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q096": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q096.md",
+     "promptSha256": "24ffe7af0bde6aa69c014f586e308ab96891a43f5dfd16c9761a1c0eec1057bb",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:21:58.334Z",
+     "ended": "2026-10-20T04:23:37.712Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 109713,
+      "completionTokens": 15093,
+      "costUsd": 0.01399,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q097": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q097.md",
+     "promptSha256": "31577045e5ac423e236af95fd24f8a8afaca6a3927b3f5f42690aae15107035a",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:21:04.153Z",
+     "ended": "2026-10-20T04:22:55.378Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 242449,
+      "completionTokens": 14567,
+      "costUsd": 0.027158,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q099": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q099.md",
+     "promptSha256": "c35b4475b3e103988573898ecf76063398f7c5897b6ceb26c97fd8abd3fcfc93",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:20:25.254Z",
+     "ended": "2026-10-20T04:21:15.109Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 102264,
+      "completionTokens": 9477,
+      "costUsd": 0.012122,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q100": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q100.md",
+     "promptSha256": "147e56323c187effd0c8c8e35d8178cfde57866fc5e8fd92a354313ce700def0",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:22:52.217Z",
+     "ended": "2026-10-20T04:24:05.984Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 116273,
+      "completionTokens": 14697,
+      "costUsd": 0.014567,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q101": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q101.md",
+     "promptSha256": "692bdc27ec22e5a59cd45102158f5d2a843af8c2550982729435ec0b5c7e24fc",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:24:41.670Z",
+     "ended": "2026-10-20T04:26:45.681Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 126565,
+      "completionTokens": 20611,
+      "costUsd": 0.016779,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q102": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q102.md",
+     "promptSha256": "e32d10179c6f40631137cede433c1da6ea7f76b72c139ce98b50888de7e4aa93",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:23:18.725Z",
+     "ended": "2026-10-20T04:24:27.744Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 91489,
+      "completionTokens": 12879,
+      "costUsd": 0.011725,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q104": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q104.md",
+     "promptSha256": "2e888151ce14b15cbf81432b06f07868ccdd0c8f19f6dd1c1d226eea0b690b04",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:24:30.814Z",
+     "ended": "2026-10-20T04:26:05.845Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 155984,
+      "completionTokens": 17988,
+      "costUsd": 0.019196,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q105": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q105.md",
+     "promptSha256": "3646722cd15cb75bb2f4b94d16e466b9148ab051c716aeeaf26d4dc5dbf10a40",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:24:05.984Z",
+     "ended": "2026-10-20T04:24:58.362Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 75316,
+      "completionTokens": 8942,
+      "costUsd": 0.00932,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q106": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q106.md",
+     "promptSha256": "c4bbd52c103dbe3660eae79c3cac7b71dadc72b407f6a20b3811a8c61b564bc0",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:23:37.712Z",
+     "ended": "2026-10-20T04:24:30.814Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 93122,
+      "completionTokens": 8994,
+      "costUsd": 0.011111,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q107": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q107.md",
+     "promptSha256": "1ee5bd61475725e812a259e3035edefe7b27b039550b1cceaf22fa29352e4405",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:24:27.744Z",
+     "ended": "2026-10-20T04:26:30.637Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 207759,
+      "completionTokens": 23492,
+      "costUsd": 0.025474,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q109": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q109.md",
+     "promptSha256": "02b3c1c51fc6c885866c22d55af4b4668ca2646ff6ac2b56f69c2cf7bdbcc587",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:23:56.629Z",
+     "ended": "2026-10-20T04:24:41.670Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 76188,
+      "completionTokens": 8122,
+      "costUsd": 0.009243,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q110": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q110.md",
+     "promptSha256": "30bbb27a27700765d5f97ea092d70523cb74991f50b66d0f72ed22c4cfad28ae",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:22:55.379Z",
+     "ended": "2026-10-20T04:23:56.629Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 51043,
+      "completionTokens": 11209,
+      "costUsd": 0.007346,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q111": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q111.md",
+     "promptSha256": "23d1377a5e6e59809a061baf7a400216e585da98b608573730dac131c0ad2261",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:26:05.845Z",
+     "ended": "2026-10-20T04:27:04.940Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 136704,
+      "completionTokens": 9334,
+      "costUsd": 0.015537,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q112": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q112.md",
+     "promptSha256": "f210c223214bd9ce2feef394397987fffd584c42bb3116a57d35ddc67bdcce5d",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:27:28.473Z",
+     "ended": "2026-10-20T04:29:22.991Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 208353,
+      "completionTokens": 17668,
+      "costUsd": 0.024369,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q114": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q114.md",
+     "promptSha256": "ab431dc07b213395844043f49dcbff4dc733ac9a7552589ca94d5f433c6b445c",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:26:30.638Z",
+     "ended": "2026-10-20T04:27:28.472Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 112203,
+      "completionTokens": 8824,
+      "costUsd": 0.012985,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q115": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q115.md",
+     "promptSha256": "8146bab77ae14b5a054d7906cc89155ebeeb0fb774cbace1348e4564331eb914",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:26:57.954Z",
+     "ended": "2026-10-20T04:29:02.565Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 165527,
+      "completionTokens": 17491,
+      "costUsd": 0.020051,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q116": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q116.md",
+     "promptSha256": "07ba2496514e6df5f36bc03dc0249627d1323a488c7f6aeb92e6432584bb6346",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:26:45.682Z",
+     "ended": "2026-10-20T04:28:55.356Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 191976,
+      "completionTokens": 18738,
+      "costUsd": 0.022945,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q117": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q117.md",
+     "promptSha256": "9037113780aa0e19bdcf267cf117091b4fa7ce0aaef7d263bb376cee63126b4c",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:27:36.573Z",
+     "ended": "2026-10-20T04:29:48.959Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 3,
+      "promptTokens": 446029,
+      "completionTokens": 18555,
+      "costUsd": 0.048314,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q119": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q119.md",
+     "promptSha256": "a12382b7501656b23e481730132a3ce696a0ce009f67df8e44da47f2a0e6fe8c",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:27:04.940Z",
+     "ended": "2026-10-20T04:27:36.573Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 1,
+      "promptTokens": 31746,
+      "completionTokens": 3877,
+      "costUsd": 0.00395,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    },
+    "Q120": {
+     "agent": "openrouter:meta/muse-spark-1.3-contributor",
+     "models": [
+      "meta/muse-spark-1.3-contributor"
+     ],
+     "prompt": "judge-prompts/second-api-Q120.md",
+     "promptSha256": "667748b2878d8cf329bc9bb730a1624f966f0aadc17cbf0b3efe9f7a0959c024",
+     "promptRead": "inline_exact",
+     "launch": "api_inline",
+     "started": "2026-10-20T04:24:58.362Z",
+     "ended": "2026-10-20T04:26:57.954Z",
+     "toolCalls": 0,
+     "flags": [],
+     "contained": true,
+     "api": {
+      "requestedModel": "meta/muse-spark-1.3-contributor",
+      "requests": 2,
+      "promptTokens": 194809,
+      "completionTokens": 16558,
+      "costUsd": 0.022793,
+      "temperature": 0,
+      "responseFormat": "json_object",
+      "maxTokens": 64000
+     }
+    }
+   }
+  },
+  "passages": {
+   "template": "passages-prompt.md",
+   "templateSha256": "62a1ef4201a4c3a4d000b24eab7d192c489620deecda99010a9160df576f1622",
+   "model": "claude-sonnet-5-5",
+   "agents": 3,
+   "uncontained": [],
+   "promptNotExact": [],
+   "queries": {
+    "Q001": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q002": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q004": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q006": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q009": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q010": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q014": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q020": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q022": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q030": {
+     "agent": "si5-passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q001-Q002-Q004-Q006-Q009-Q010-Q014-Q020-Q022-Q030.md",
+     "promptSha256": "c907f3c0ef522b346d38f1c34ed542a79513d040b0cddd5e350d50333b69e9a3",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T04:38:46.195Z",
+     "ended": "2026-10-18T04:40:01.281Z",
+     "toolCalls": 6,
+     "flags": [],
+     "contained": true
+    },
+    "Q036": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q059": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q081": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q085": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q094": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q096": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q105": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q106": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q109": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q110": {
+     "agent": "si5-passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q036-Q059-Q081-Q085-Q094-Q096-Q105-Q106-Q109-Q110.md",
+     "promptSha256": "5bcd78123b6e462526defd26d5061f43d970a1e68ff4657c0ed0aeabc4175146",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T05:40:42.403Z",
+     "ended": "2026-10-18T05:42:31.514Z",
+     "toolCalls": 9,
+     "flags": [],
+     "contained": true
+    },
+    "Q111": {
+     "agent": "si5-passages-Q111-Q112-Q116",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q111-Q112-Q116.md",
+     "promptSha256": "8ee494c6e84e731121248254149ad2963bf66fba230b9eb6eeeee53f0da43385",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T06:15:42.365Z",
+     "ended": "2026-10-18T06:16:29.390Z",
+     "toolCalls": 5,
+     "flags": [],
+     "contained": true
+    },
+    "Q112": {
+     "agent": "si5-passages-Q111-Q112-Q116",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q111-Q112-Q116.md",
+     "promptSha256": "8ee494c6e84e731121248254149ad2963bf66fba230b9eb6eeeee53f0da43385",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T06:15:42.365Z",
+     "ended": "2026-10-18T06:16:29.390Z",
+     "toolCalls": 5,
+     "flags": [],
+     "contained": true
+    },
+    "Q116": {
+     "agent": "si5-passages-Q111-Q112-Q116",
+     "models": [
+      "claude-sonnet-5-5"
+     ],
+     "prompt": "judge-prompts/passages-Q111-Q112-Q116.md",
+     "promptSha256": "8ee494c6e84e731121248254149ad2963bf66fba230b9eb6eeeee53f0da43385",
+     "promptRead": "exact",
+     "launch": "explicit_isolation",
+     "started": "2026-10-18T06:15:42.365Z",
+     "ended": "2026-10-18T06:16:29.390Z",
+     "toolCalls": 5,
+     "flags": [],
+     "contained": true
+    }
+   },
+   "unrecorded": []
+  }
+ }
+}
