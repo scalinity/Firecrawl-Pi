@@ -2,7 +2,7 @@
 // F03, F01 and S4 items). Run from the workstation after the cutover: REST through the playground's SSH forwarder, MCP through an SSH forward
 // of the gateway's loopback publication. Prints one JSON line per observation; carries no secret and no page text. Kept outside the repository
 // until the version lock is written (the lock builder refuses a HEAD that moved), then archived with the evidence.
-//   node live.mjs smoke|versions|f01|ref
+//   node live.mjs smoke|versions|f01|ref|refreplay
 import { execFileSync, spawn } from "node:child_process";
 import { request } from "node:http";
 import { readFileSync } from "node:fs";
@@ -68,4 +68,12 @@ if (phase === "smoke" || phase === "mcp") {
   const docs = corpus.filter((q) => q.documentationRelevance === "positive" && q.documentationExplicit).slice(0, 6); let seen = 0;
   for (const q of docs) { const r = await rest({ ...bodyOf(q), searchIntelligence: { ...(q.searchIntelligence ?? {}), documentation: "required" } }); const e = searchOf(r.data)?.documentation?.enrichment ?? null;
     out({ check: "ref_enrichment", id: q.id, status: r.status, ms: r.ms, attempted: !!e, enrichment: e }); if (e) { seen++; if (seen >= 2) break; } }
-} else { console.error("usage: live.mjs smoke|versions|f01|ref"); process.exit(2); }
+} else if (phase === "refreplay") {
+  // The queries whose Ref answers the L01 live run's parser refused (ref_unrecognized_text), asked again one a minute apart, with Ref's lane reported.
+  const ids = (process.argv[3] ?? "Q111,Q112,Q007,Q008,Q009").split(",");
+  for (const [n, id] of ids.entries()) {
+    if (n) await new Promise((res) => setTimeout(res, 62000));
+    const q = corpus.find((x) => x.id === id), r = await rest(bodyOf(q)), s = searchOf(r.data);
+    out({ check: "ref_replay", id, status: r.status, ms: r.ms, outcome: s?.outcome ?? null, ref: s?.providers?.ref ?? null, context7: s?.providers?.context7?.status ?? null, warnings: s?.warnings ?? null, rows: rowsOf(r.data).length });
+  }
+} else { console.error("usage: live.mjs smoke|versions|f01|ref|refreplay"); process.exit(2); }

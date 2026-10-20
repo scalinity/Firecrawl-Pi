@@ -1,0 +1,102 @@
+### meta
+utc=2026-10-20T10:41:40Z deployed_commit=4b1c11e555aaa43ad7452f7a125ee6288c27bead mode=cutover services=firecrawl-core retrieval-service access-gateway mcp-gateway
+### hold
+hold=cutover seconds=1800
+### quiet
+call_ceiling_minutes=90
+in_flight_jobs=0 live_reserved_rows=0 drain_rounds=1
+### pins
+firecrawl-core pin=fcpi/firecrawl-api@sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c resolves
+retrieval-service pin=fcpi/retrieval@sha256:1cb9b68bc4d24a000fdd58e58028c6a06d9a63f448d0b9fe9d494e7a974df3ae resolves
+access-gateway pin=fcpi/access-gateway@sha256:cf06cecdec41d812e6c40e0b6695d7aff1e69fcef971f506e16c1b9a8f3ed843 resolves
+mcp-gateway pin=fcpi/mcp-gateway@sha256:13aad4190051316cf65758a8b74136660acb4863a0cce6779c883654ee55f558 resolves
+### schema
+NOTICE:  schema "fcpi_retrieval" already exists, skipping
+NOTICE:  relation "acquisition" already exists, skipping
+NOTICE:  relation "acquisition_updated_at" already exists, skipping
+NOTICE:  relation "attempt" already exists, skipping
+NOTICE:  relation "attempt_started_at" already exists, skipping
+NOTICE:  relation "permit" already exists, skipping
+NOTICE:  relation "domain_state" already exists, skipping
+NOTICE:  relation "direct_nav" already exists, skipping
+NOTICE:  relation "direct_nav_domain_at" already exists, skipping
+NOTICE:  relation "direct_nav_at" already exists, skipping
+NOTICE:  relation "budget_usage" already exists, skipping
+NOTICE:  relation "budget_reservation" already exists, skipping
+NOTICE:  relation "budget_reservation_logical" already exists, skipping
+NOTICE:  relation "budget_reservation_created" already exists, skipping
+NOTICE:  relation "budget_reservation_category" already exists, skipping
+NOTICE:  column "periods" of relation "budget_reservation" already exists, skipping
+NOTICE:  column "paid_total_rate" of relation "budget_reservation" already exists, skipping
+NOTICE:  relation "search_cache" already exists, skipping
+NOTICE:  relation "search_cache_expires" already exists, skipping
+NOTICE:  relation "search_query" already exists, skipping
+NOTICE:  relation "search_query_at" already exists, skipping
+NOTICE:  relation "parse_cache" already exists, skipping
+NOTICE:  relation "parse_cache_expires" already exists, skipping
+NOTICE:  relation "provider_availability" already exists, skipping
+NOTICE:  relation "domain_route" already exists, skipping
+NOTICE:  relation "domain_route_updated_at" already exists, skipping
+NOTICE:  column "blocked_until" of relation "domain_route" already exists, skipping
+NOTICE:  relation "route_hold" already exists, skipping
+NOTICE:  relation "budget_reservation_proxy_day" already exists, skipping
+NOTICE:  relation "proxy_reconciliation" already exists, skipping
+NOTICE:  relation "search_run" already exists, skipping
+NOTICE:  column "job_id" of relation "search_run" already exists, skipping
+NOTICE:  relation "search_run_accepted" already exists, skipping
+NOTICE:  relation "search_run_job" already exists, skipping
+NOTICE:  relation "search_event" already exists, skipping
+NOTICE:  relation "search_event_observed" already exists, skipping
+NOTICE:  relation "search_event_logical" already exists, skipping
+NOTICE:  column "call_keys" of relation "search_event" already exists, skipping
+NOTICE:  relation "search_daily" already exists, skipping
+NOTICE:  relation "search_reduction" already exists, skipping
+### retrieval_db_meta
+utc=2026-10-20T10:41:41Z
+source_commit=4b1c11e555aaa43ad7452f7a125ee6288c27bead
+### retrieval_db_schema
+applied=yes
+### retrieval_db_rights
+role=fcpi_retrieval super=false createrole=false createdb=false replication=false bypassrls=false has_password=true
+schema_owner=postgres
+owned_objects=0
+tables=18 tables_with_dml=18 tables_with_other_rights=0
+schema_create=false nuq_usage=false
+end
+### recreate
+ Container fcpi-mcp-gateway-1 Recreate 
+ Container fcpi-retrieval-service-1 Recreate 
+ Container fcpi-mcp-gateway-1 Recreated 
+ Container fcpi-retrieval-service-1 Recreated 
+ Container fcpi-firecrawl-core-1 Recreate 
+ Container fcpi-firecrawl-core-1 Recreated 
+ Container fcpi-access-gateway-1 Recreate 
+ Container fcpi-access-gateway-1 Recreated 
+ Container fcpi-retrieval-service-1 Starting 
+ Container fcpi-mcp-gateway-1 Starting 
+ Container fcpi-retrieval-service-1 Started 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-mcp-gateway-1 Started 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-firecrawl-core-1 Starting 
+ Container fcpi-firecrawl-core-1 Started 
+ Container fcpi-access-gateway-1 Starting 
+ Container fcpi-access-gateway-1 Started 
+ Container fcpi-access-gateway-1 Waiting 
+ Container fcpi-mcp-gateway-1 Waiting 
+ Container fcpi-firecrawl-core-1 Waiting 
+ Container fcpi-retrieval-service-1 Waiting 
+ Container fcpi-mcp-gateway-1 Healthy 
+ Container fcpi-retrieval-service-1 Healthy 
+ Container fcpi-access-gateway-1 Healthy 
+ Container fcpi-firecrawl-core-1 Healthy 
+compose_exit=0
+### state
+firecrawl-core image=sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c status=running health=healthy
+retrieval-service image=sha256:1cb9b68bc4d24a000fdd58e58028c6a06d9a63f448d0b9fe9d494e7a974df3ae status=running health=healthy
+access-gateway image=sha256:cf06cecdec41d812e6c40e0b6695d7aff1e69fcef971f506e16c1b9a8f3ed843 status=running health=healthy
+mcp-gateway image=sha256:13aad4190051316cf65758a8b74136660acb4863a0cce6779c883654ee55f558 status=running health=healthy
+search_profile=aggregate
+### release
+/var/lib/firecrawl-pi/releases/20261020T104220Z-4b1c11e555aa.json
+end_marker=reached utc=2026-10-20T10:42:20Z
