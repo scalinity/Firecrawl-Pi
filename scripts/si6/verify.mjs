@@ -101,7 +101,9 @@ after("functional", "verify-functional.txt", "fcpi verify functional passes afte
 after("host-snapshots", "snapshot-after.txt", "the host snapshot taken after the cutover", () => existsSync(resolve(ROOT, `${RAW}/snapshot-before.txt`)) || "no snapshot before");
 after("redaction", "redaction.json", "the redaction scan passes over the release's evidence, run by the scanner now at HEAD on committed code with the exceptions committed at HEAD", (t) => { const r = JSON.parse(t);
   // code_dirty leaves evidence/ out, and the exceptions file lives there: its hash in the record must be the committed file's, so an edited, uncommitted list cannot verify.
-  const exceptions = r.also === null || (() => { try { return r.also.sha256 === sha256(execFileSync("git", ["-C", ROOT, "show", `HEAD:${r.also.path}`])); } catch { return false; } })();
+  // The exceptions are SI6's own file, at its own path, as committed at HEAD: another committed list would not do.
+  const SI6_EXCEPTIONS = "evidence/search-intelligence/SI6/redaction-classifications.json";
+  const exceptions = r.also?.path === SI6_EXCEPTIONS && (() => { try { return r.also.sha256 === sha256(execFileSync("git", ["-C", ROOT, "show", `HEAD:${SI6_EXCEPTIONS}`])); } catch { return false; } })();
   return (r.state === "PASS" && r.code_dirty === false && r.scanner_sha256 === sha256(readFileSync(resolve(ROOT, "scripts/m9/redaction.mjs"))) && exceptions) || `not a passing scan by this scanner on committed code with committed exceptions (state ${r.state}, code_dirty ${r.code_dirty}, exceptions committed ${exceptions})`; });
 
 const out = { schema: "fcpi.si6-verification/v1", utc: new Date().toISOString(), source_sha: repo.repository_sha, code_dirty: repo.code_dirty, patch_series_sha256: series.series_sha256,
