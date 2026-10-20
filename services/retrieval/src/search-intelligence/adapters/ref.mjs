@@ -57,15 +57,22 @@ function blocksOf(text) {
   }
   return out;
 }
-// The hosted result block: one result per text block, its description first and its URL alone on the last line. The
-// description has one of the two shapes Ref's hosted service sends: page='…' and section='…' fields, or a breadcrumb
-// (a > b). Any other text that ends in a URL (a notice with a link) is not a result.
+// The hosted result block: one result per text block, its description first and its URL alone on the last line. A description
+// with page='…' and section='…' fields or a breadcrumb (a > b) is a result by its shape. The hosted service also sends repository
+// files as "owner/repo - slug" and pages it summarizes as prose (live 2026-10-20: one search in five came back with no marked block
+// and failed as a contract failure), so a description with no such shape is a result too, unless it opens with one of Ref's
+// refusals or its link is Ref's own site, where an unrecognised notice (a plan, a quota) would send the reader.
 const HOSTED_SHAPE = /\bpage='|\bsection='|\S > \S/;
+const OWN_SITE = /(^|\.)ref\.tools$/i;
 function hostedBlockOf(text) {
   const lines = text.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
   if (lines.length < 2 || !/^https?:\/\/\S+$/.test(lines.at(-1))) return null;
   const head = lines.slice(0, -1).join("\n");
-  if (!HOSTED_SHAPE.test(head)) return null;
+  if (!HOSTED_SHAPE.test(head)) {
+    let host = null;
+    try { host = new URL(lines.at(-1)).hostname; } catch { return null; }
+    if (OWN_SITE.test(host) || classifyError(head)) return null;
+  }
   // A field's value runs to its closing quote before the next field or the line's end, so an apostrophe inside it stays.
   const page = /\bpage='(.*?)'(?=\s+section='|\s*$)/m.exec(head)?.[1] ?? null, section = /\bsection='(.*)'\s*$/m.exec(head)?.[1] ?? null;
   return { url: lines.at(-1), overview: page || section ? [page, section].filter(Boolean).join(" — ") : head, moduleId: page ?? "", title: page || lines[0] };

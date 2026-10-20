@@ -27,6 +27,25 @@ test("Ref: legacy result blocks are hits; the exact no-results sentinel is empty
   assert.equal(parseRefRead(text("Error reading URL: 404"), 100).kind, "error");
 });
 
+test("Ref: a hosted block without a page, section or breadcrumb is a hit when it has the result's form; a notice that ends in a link is not", () => {
+  // Live 2026-10-20: Ref sends repository files as "owner/repo - slug" and pages it summarizes as prose, each then the URL alone on the last line.
+  const repo = "django/django - entire-document\nhttps://github.com/django/django/blob/main/docs/topics/composite-primary-key.txt?plain=1#L1#entire-document";
+  const prose = "Virtual field for defining a composite primary key on a model.\nhttps://docs.djangoproject.com/en/6.1/ref/models/fields#django.db.models.CompositePrimaryKey";
+  const marked = "kubernetes/website - configurable-scaling-behavior > stabilization-window\nhttps://github.com/kubernetes/website/blob/main/content/en/docs/tasks/run-application/horizontal-pod-autoscale.md?plain=1#L467";
+  const plain = parseRefSearch(text(repo, prose));
+  assert.equal(plain.kind, "results", "an answer of blocks with no marker is a result list, not a contract failure");
+  assert.deepEqual(plain.docs.map((d) => d.url), ["https://github.com/django/django/blob/main/docs/topics/composite-primary-key.txt?plain=1#L1#entire-document", "https://docs.djangoproject.com/en/6.1/ref/models/fields#django.db.models.CompositePrimaryKey"]);
+  assert.deepEqual([plain.docs[0].title, plain.docs[0].overview, plain.docs[1].title], ["django/django - entire-document", "django/django - entire-document", "Virtual field for defining a composite primary key on a model."]);
+  assert.equal(parseRefSearch(text(marked, repo, prose)).docs.length, 3, "a block beside a marked one is not dropped");
+  // Still not results: a notice whose link is Ref's own site, a refusal opening a block whatever follows it, a URL that is not http(s), and text with no URL line.
+  assert.equal(parseRefSearch(text("Your plan has changed, see the details here:\nhttps://ref.tools/dashboard")).kind, "contract");
+  assert.equal(parseRefSearch(text("Your plan has changed, see the details here:\nhttps://www.ref.tools/pricing")).kind, "contract");
+  assert.deepEqual(parseRefSearch(text("Error: the search service is busy\nhttps://status.example.org/incident")), { kind: "error", reason: "temporarily_unavailable", detail: "ref_error_text" });
+  assert.equal(parseRefSearch(text("Handling it in the browser\njavascript:alert(1)")).kind, "contract");
+  assert.equal(parseRefSearch(text("A description with no link at all")).kind, "contract");
+  assert.equal(parseRefSearch(text("A description\nand a second line\nthat never reaches a URL")).kind, "contract");
+});
+
 test("Ref: documentation that quotes refusal phrases is a result or a page, never a refusal of this account", () => {
   const hit = (overview) => parseRefSearch(text(`overview: ${overview}\nurl: https://docs.example.com/a\nmoduleId: m`));
   for (const o of ["Handling 401 Unauthorized responses with interceptors", "Stripe returns an error when an invalid API key is used", "Twilio: insufficient credits error 20003",
