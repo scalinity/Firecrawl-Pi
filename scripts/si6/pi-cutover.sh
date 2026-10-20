@@ -55,7 +55,10 @@ fi
 
 sec pins
 for s in "${services[@]}"; do
-  ref=$("${C[@]}" config --images "$s" </dev/null)
+  # The service's own image: `config --images <service>` also lists the images of everything it depends on (five lines for the core), which is
+  # no reference at all to `docker image inspect`.
+  ref=$("${C[@]}" config --format json </dev/null | jq -r --arg s "$s" '.services[$s].image // empty')
+  [ -n "$ref" ] && [ "$(printf '%s' "$ref" | grep -c "")" = 1 ] || { echo "end_marker=refused reason=no_single_image service=$s"; exit 2; }
   if ! sudo -n docker image inspect -f "$s pin=$ref resolves" "$ref" </dev/null; then echo "end_marker=refused reason=pin_unresolved service=$s"; exit 2; fi
 done
 
