@@ -9,7 +9,7 @@
 | Ran | Its own read-only scripts (not committed) and `node --test tests/*.test.mjs` from the repository root: 72 of 72 pass, 0 skipped (Node 26.12.0). |
 | Contract | `docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md` §23 and §25; `CLAUDE.md` §5 and §25–§27. |
 
-**Updated twice on 2026-10-20: the final verdicts are in "Second update — 2026-10-20, the final release" at the end of this file.** The first update ("Update — 2026-10-20, after the cutover") is kept as written at `9a7a45a`, and everything above it as written at `7009d2a`.
+**Updated three times on 2026-10-20: the final verdicts are in "Third update — 2026-10-20, the fifth release" at the end of this file.** The earlier updates are kept as written: the first at `9a7a45a`, the second at `e9e9d08`, and everything above them at `7009d2a`.
 
 Spec §25 separates six kinds of evidence, and none stands in for another. This file names the kind behind every verdict: **source** (source inspection), **fixture** (deterministic fixtures, some against a disposable PostgreSQL 17.11), **live** (live provider API calls), **model-judged** (independent source-backed model judgments), **human**, and **Pi** (measurements on the Raspberry Pi). No human judgment and no Pi measurement exists for this feature.
 
@@ -521,3 +521,101 @@ The record now names what produced it, and the verifier checks it.
 - The Ref guard's single-word vocabulary.
 - The verifier's unchecked exceptions hash.
 - This file to be committed, and the redaction scan to run after it.
+
+## Third update — 2026-10-20, the fifth release
+
+| | |
+|---|---|
+| Written | 2026-10-20T14:05Z (UTC), by the same reviewer (Opus 5.5; no sub-agents; no Pi, Docker, SSH or network access; no evidence-writing script) |
+| Candidate | HEAD `bbfec85f3902e1b627dfc3927dac38c41deb4d76`, code tree clean; the second update is committed in `bcb9565` |
+| Deployed | The fifth release: retrieval `0b3ab03a…`, access gateway `7fc4eccd…`, MCP gateway `9edf2895…` built from `2c9b629`, with the API image `c2585732…`; cutover at deployed commit `54bb6b1dbeba`, end marker 13:09:25Z (`SI6/raw/cutover.txt`); the same ids in `deploy/versions.lock.json` and `deploy/compose.yaml` |
+| Ran | `node --test tests/*.test.mjs`: 74 of 74, 0 skipped. `scripts/si5/version-rule-measure.mjs`: output identical to the committed `SI5/acceptance/version-rule-measure.json`. Probes of the shipped `urlVersionCheck`, `prepareCandidates` and `parseRefSearch`, and recomputations from `SI6/raw/l01-live-docs.jsonl` and `SI6/raw/release-4/`. |
+
+The code reviewed is `git diff 4489b87..HEAD -- services scripts tests deploy docs/FIRECRAWL_PI_SEARCH_INTELLIGENCE_SPEC.md`:
+- `versions.mjs`: the library tie, now structural;
+- `normalize.mjs`: a documentation candidate is exempt from the URL check only when its own scope confirms the version;
+- `adapters/ref.mjs`: phrase-level notice patterns, and a lone notice that is neutral;
+- `scripts/si6/verify.mjs`: the exceptions file's hash checked against HEAD;
+- `scripts/si5/version-rule-measure.mjs`, the tests, the spec sentence in §6.1, and the image pins.
+
+**A correction to my second update:** of the 11 non-mismatch documents the substring rule would have removed, 7 were graded relevant (≥2), not 6. My own list there names seven.
+
+### Final verdicts
+
+| Criterion | Verdict | Kind of evidence | Change since the second update |
+|---|---|---|---|
+| F01 | **PASS** | fixture; live (SI5); Pi-live | none |
+| F02 | **PASS** | fixture (with PostgreSQL); Pi-live | final code's record: retrieval 495/495, root 74, gateway 101, MCP 51, 0 skipped (`SI6/raw/test-run-669a39e.txt`, clean tree; no source change since) |
+| F03 | **FAIL** | model-judged (labels joined to live row URLs); Pi-live; source; fixture | Fails on the plain reading; the narrower reading's live count is now 0 (below) |
+| F04 | **PASS** | fixture (with PostgreSQL); Pi-fixture; Pi-live | A lone Ref notice keeps its reservation uncertain, which I agree with (below) |
+| F05 | **PASS** | fixture; Pi-live | the fifth release's live smoke and functional check |
+| Q01 | **PASS** | model-judged | unchanged; +47.7% with the structural rule applied offline |
+| Q02 | **PASS** | model-judged | unchanged; +0.1053 offline |
+| Q03 | **FAIL** | model-judged | unchanged; failed by the owner's recorded decision |
+| L01 | **PASS** | Pi-live; Pi-fixture | The fifth release's documentation scenario: p50 8,484, p95 13,929, max 14,101 ms (none over 23 s), host floor 4,730 MiB, retrieval peak 59 MiB (recomputed) |
+| O01 | **PASS** | fixture; Pi-live | none |
+| V01 | **PASS** | live; source; this review | the redaction record and verifier now pin the exceptions file too (below) |
+
+**Overall: 9 PASS, 2 FAIL (F03, Q03), 0 BLOCKED. The feature is not accepted as a whole.**
+
+### What changed, and whether it moves a verdict
+
+**F03 (question e, recomputed).** All figures were recomputed from `SI6/raw/l01-live-docs.jsonl`, the fifth release's run, and they agree with `SI6/l01/f03-live-summary.json`.
+- **Rows:** 160, of which 106 are judged a match, **16 judged a version mismatch**, 1 not applicable, 20 unknown and 17 never judged.
+- **The system's count:** 21 confirmed (13.1%), 139 unverified (86.9%), 88 candidates removed.
+- **Verdicts:** 11 `confirmed`, 5 `unconfirmed`.
+- **Rows the shipped rule itself calls another release's page that still reached an answer:** 0 on the fifth release, against 1 on the fourth (`release-4/`: Q117's `/3.4/` page, the case of my W1).
+- **Rows a URL confirmed that are judged mismatches:** 0.
+
+The whole-pool measure reproduces: 617 general-delivered labelled documents, 43 removed (34 judged mismatches, 9 not, 7 of those relevant). D's top 10 still loses 11 of 20 judged mismatches, and 4 non-mismatch rows are flagged.
+
+On the plain reading (mismatches confirmed by the independent, source-backed judgments), 16 of 160 rows remain, so **F03 stays FAIL**. On the narrower reading (mismatches the system's own evidence confirms), the fifth release's live answers now hold none, and the reporting clause is met (13.1% confirmed, 86.9% unknown, unknowns not counted as confirmed). The rule can still confirm a wrong-version row (Warning 1 below), though none was observed live or in the pool.
+
+I keep the plain reading I have applied since the first review. Choosing the narrower one would be a change of the bar that belongs to the owner or the spec, not to the reviewer. The records state this accurately: `SI6/l01/README.md`, `PROGRESS.md` and the milestones section say "F03 fails as written", with the live figures. The milestones section also says that no separate owner decision is recorded beyond the standing instruction of 2026-10-20 to proceed until everything is merged. That is sufficient as a record; whether it is ROLLOUT gate 2's "accepted" is the owner's call.
+
+**The structural tie (question a).** Every substring case from my W2 now comes out `unknown` through the shipped function:
+- node-postgres (both forms), Celery's Django page, React Router, Preact, python-requests, next-auth, vitest, geopandas, CloudNativePG;
+- an `aws` substring.
+
+Each is now a test (`si-versions.test.mjs`) that would have failed on the substring rule. The structural tie still has two false paths, shown with inputs:
+- **A host label with the library's site affix ties every version label of that host, including a sub-product's.** `https://v3.router.vuejs.org/guide/` (Vue Router 3, the router for Vue 2) is a **match** for `vue@3.5` and a mismatch for `vue@2.7`.
+- **A path segment equal to the name ties every version after it, so a GitHub organisation or registry named like the library ties its other products.**
+  - **Mismatches, removed before ranking:** `github.com/redis/redis-py/tree/v5.0.1`, `github.com/django/channels/tree/4.0.0` and `github.com/python/mypy/tree/v1.8.0` for `redis@7.2`, `django@5.2` and `python@3.14`; `pypi.org/project/redis/5.0.1/`, `pkg.go.dev/github.com/redis/go-redis/v9` and `rubygems.org/gems/redis/versions/5.0.8` for `redis@7.2`; `npmjs.com/package/mongodb/v/6.3.0` for `mongodb@7.0`.
+  - **Matches, so false confirmations:** `github.com/django/channels/tree/4.0.0` for `django@4.0`, and `github.com/webpack/webpack-dev-server/tree/v4.15.1` and `github.com/webpack/webpack-cli/releases/tag/v4.10.0` for `webpack@4`.
+  - None of these occurs in the corpus pool or the live run, whose 9 pool non-mismatches are all pages whose subject is another release. That cost is now stated in spec §6.1.
+- **The `owner/name` form needs the two segments consecutive** (`/hashicorp/other/aws/6.0.0/` is `unknown`), and I found no false path in it. **The affix tie also covers AngularJS for `angular`** (`code.angularjs.org/1.8.2/` removed for `angular@17`), which I count as a correct removal.
+
+**Documentation candidates (question b).** Through `prepareCandidates`, a Ref candidate with no scope and a Context7 candidate with an `unknown` scope are checked by URL and removed when it states another release. A `scope_only` candidate is kept and carries no URL verdict. The fifth release's 0 confirms it live.
+
+**The Ref notice guard (question c).**
+- **Both directions now parse as intended.** My three titles parse as results ("Configure rate limits …", "Upgrade guide from Vite 5 to Vite 6", "How to verify a webhook signature"), and my three notices return `{kind: "error", reason: "temporarily_unavailable", detail: "ref_unrecognized_notice"}`.
+- **A lone notice reaches neither counter.** `judged()` reports the reason `unrecognized_notice`. `report()` gives the breaker `neutral()` for any reason other than `timeout` and `temporarily_unavailable`, and calls `availability.observe()` only for quota, rate, auth and contract reasons (`adapters/common.mjs:61-68`). So a lone notice reaches neither the breaker nor the contract counter, and no downstream code re-reports the lane's `temporarily_unavailable`. `si-ref.test.mjs` checks four in a row: Ref stays eligible, its breaker closed, its rows UNCERTAIN.
+- **I agree with keeping the reservation uncertain.** Ref answered, and whether it charges for a notice is not documented. Spec §18.2 releases only an unsent request or a documented non-billable refusal, and the project already keeps Ref's answered failures uncertain.
+- **The phrase list still over-matches.** Genuine documentation titles that fail as notices:
+  - "Upgrade your app to React 19";
+  - "Save a payment method for future payments";
+  - "Handling 429 Too Many Requests responses";
+  - "Find your API key in the dashboard";
+  - "Customer billing portal integration guide";
+  - "What to do when the rate limit exceeded error appears";
+  - "Retry on failure: please try again with exponential backoff".
+- **It still misses some notices,** which pass as results with an external link: "Credits depleted …", "Service unavailable, we are down for maintenance", "You have hit the free plan cap; sign up for Pro", "Sign up to continue searching", "This API key is invalid or revoked", "Monthly allowance used".
+- **Both costs are now bounded to one search's Ref lane:** no hold and no breaker verdict. The lane is labelled `temporarily_unavailable`, which tells the caller less than `ref_unrecognized_notice` does. A notice sent as a second text beside a real result is still not detected, as the disposition says.
+
+**The verifier (question d).** `scripts/si6/verify.mjs` now accepts the redaction record only when `also.sha256` equals `git show HEAD:<also.path>`; a different hash fails the check (`exceptions committed false`). The current record names `9752024` and `code_dirty: false`, and its scanner and exceptions hashes match HEAD. It passes over 2,863 inputs, and only `verification.json` changed after it. The verifier (18 PASS) does not pin `also.path` itself, so a different committed exceptions file would also verify; the path is in the record for a reader to see.
+
+**The records (question f).**
+- **The third-round table holds against the files,** with three exceptions:
+  - W4 says the milestones section gives "the 4 non-mismatch rows flagged in D's top 10"; it gives the pool figures instead (9 not mismatches, 7 relevant).
+  - The post-freeze note still says one of the 9 misses "is a documentation row that a scope judges"; under the new rule all 9 are URL-`unknown`, and the rerun table has no `documentation_row` entry.
+  - The note and the W2 row call Q116's page "a pandas 1.5 migration page"; it is the 1.5 API reference for `DataFrame.append`.
+- **The note discloses one more thing honestly:** the library tie was tightened after the rule had been measured on the held-out labels. So the rule's offline figures are on data that informed its revision, which spec §23.1 treats as regression data, not blind confirmation. Q01–Q03 themselves are unaffected, since they are measured on the frozen D outputs.
+- **The milestones bullets match the files:** the second release's link-only run with its own floor (4,711 MiB) and peak (62 MiB), the fifth release's documentation run, five releases, the final images, and F03's figures.
+
+### Still open
+
+- F03 (failed as written; no explicit owner acceptance beyond the standing instruction).
+- The tie's sub-product and organisation paths.
+- The notice phrase list's over- and under-matches.
+- The three record imprecisions above.
+- This update to be committed and the redaction scan rerun after it.
