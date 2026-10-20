@@ -438,7 +438,7 @@ export class Store {
   // Applies one observation (route.mjs observe) and the outcome counters in one transaction. The table holds at
   // most routing.maxRecords rows: a new row past the limit removes the least recently updated ones. last_reason
   // keeps the reason of the last change to what the record decides (the preference, the challenge count, the browser
-  // start); an extension of an existing preference leaves it, so the record still says why the preference exists.
+  // start, the all-tiers block); an extension of an existing preference leaves it, so the record still says why the preference exists.
   async learnRoute(domain, obs, routing, { success = null, failureClass = null } = {}) {
     return this.#tx(async (c) => {
       // The row exists before it is locked, so concurrent first observations of a domain queue on it instead of each
@@ -453,20 +453,22 @@ export class Store {
       if (success === false) { next.failures = Number(next.failures) + 1; next.last_failure_at = new Date(); next.last_failure_class = failureClass; }
       const row = (await c.query(
         `INSERT INTO fcpi_retrieval.domain_route (domain, preferred, set_at, expires_at, probe_at, challenges, js_count, prefer_browser, browser_expires_at,
-           successes, failures, last_success_at, last_failure_at, last_failure_class, last_reason, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, now())
+           successes, failures, last_success_at, last_failure_at, last_failure_class, last_reason, blocked_until, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, now())
          ON CONFLICT (domain) DO UPDATE SET preferred = EXCLUDED.preferred, set_at = EXCLUDED.set_at, expires_at = EXCLUDED.expires_at, probe_at = EXCLUDED.probe_at,
            challenges = EXCLUDED.challenges, js_count = EXCLUDED.js_count, prefer_browser = EXCLUDED.prefer_browser, browser_expires_at = EXCLUDED.browser_expires_at,
            successes = EXCLUDED.successes, failures = EXCLUDED.failures, last_success_at = EXCLUDED.last_success_at, last_failure_at = EXCLUDED.last_failure_at,
-           last_failure_class = EXCLUDED.last_failure_class, last_reason = COALESCE(EXCLUDED.last_reason, fcpi_retrieval.domain_route.last_reason), updated_at = now()
+           last_failure_class = EXCLUDED.last_failure_class, last_reason = COALESCE(EXCLUDED.last_reason, fcpi_retrieval.domain_route.last_reason),
+           blocked_until = EXCLUDED.blocked_until, updated_at = now()
          RETURNING *`,
         [domain, next.preferred ?? null, next.set_at ?? null, next.expires_at ?? null, next.probe_at ?? null, next.challenges ?? 0, next.js_count ?? 0, next.prefer_browser === true,
           next.browser_expires_at ?? null, next.successes ?? 0, next.failures ?? 0, next.last_success_at ?? null, next.last_failure_at ?? null, next.last_failure_class ?? null,
-          change && ["preferred", "challenges", "prefer_browser", "js_count"].some((k) => k in change) ? change.reason : null])).rows[0];
+          change && ["preferred", "challenges", "prefer_browser", "js_count", "blocked_until"].some((k) => k in change) ? change.reason : null,
+          next.blocked_until ?? null])).rows[0];
       // Past the bound, rows that decide nothing go first, the least recently updated of them; a learned preference is
       // evicted only when preferences alone fill the table (review S5).
       if (created) await c.query(`DELETE FROM fcpi_retrieval.domain_route WHERE domain IN (SELECT domain FROM fcpi_retrieval.domain_route
-        ORDER BY (preferred IS NOT NULL OR prefer_browser) DESC, updated_at DESC OFFSET $1)`, [routing.maxRecords]);
+        ORDER BY (preferred IS NOT NULL OR prefer_browser OR blocked_until IS NOT NULL) DESC, updated_at DESC OFFSET $1)`, [routing.maxRecords]);
       return { row, change };
     });
   }

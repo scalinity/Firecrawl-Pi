@@ -26,6 +26,9 @@ export function startTier({ route, record, held, proxyFirst, now = Date.now(), r
   if (route === "basic") return { tier: "direct", reason: "local_only" };
   if (route === "stealth") return { tier: "residential", reason: "requested" };
   if (route === "enhanced") return { tier: "enhanced", reason: "requested" };
+  // Every tier failed on this domain (the enhanced provider answered the gate too): an auto page pays nothing until the block
+  // expires, whatever a hold, a listing or a residential preference would have chosen. Deliberate routes (above) still go.
+  if (record?.blocked_until && t(record.blocked_until) > now) return { tier: "blocked", reason: "learned_all_tiers_blocked", until: new Date(record.blocked_until) };
   if (held) return { tier: "residential", reason: "bulk_hold" };
   if (proxyFirst) return { tier: "residential", reason: "proxy_first_domain" };
   if (record?.preferred === "residential") {
@@ -69,6 +72,11 @@ export function observe(record, { tier, mode = "http", outcome, probe = false },
     // A success on the preferred route extends it by one TTL, never past maxTtlDays from when it was set.
     const until = Math.min(now + ttl, t(r.set_at) + cap);
     if (until > t(r.expires_at)) add({ expires_at: new Date(until), reason: "extended" });
+  }
+  // The last rung: a challenge on the enhanced tier blocks the domain for one TTL; an adequate enhanced answer lifts a block.
+  if (tier === "enhanced") {
+    if (outcome === "challenge") add({ blocked_until: new Date(now + ttl), reason: "enhanced_challenge" });
+    else if (outcome === "adequate" && r.blocked_until) add({ blocked_until: null, reason: "block_cleared" });
   }
   if (outcome === "js_rendered") {
     const n = (r.js_count ?? 0) + 1;

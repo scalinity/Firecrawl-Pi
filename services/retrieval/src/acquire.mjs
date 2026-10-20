@@ -58,6 +58,11 @@ export function refuseRetryStatus(result) {
 export const RESIDENTIAL_SKIPPABLE = new Set(["NO_PROXY_SELECTED", "BLOCKED_CREDENTIAL", "PAID_DISPATCH_DISABLED", "PROVIDER_UNAVAILABLE"]);
 export const proxyRequired = (st, why) => ({ class: "PROXY_REQUIRED", detail: `${why} needs the residential route, which is unavailable (${st.reason})`,
   retryable: RETRYABLE_ROUTE.has(st.reason), retryAfter: st.retryAfter ?? null, route: { residential: st.reason } });
+// A domain every tier failed on (route.mjs, blocked_until): an auto page or download fails at once, with no attempt, tunnel or
+// dispatch, until the block expires. retryAfter is the time left; a deliberate route tests the domain sooner.
+export const allTiersBlocked = (start, now = Date.now()) => ({ class: "BLOCKED_PUBLIC_CONTENT", retryable: false,
+  detail: `every tier met the target's bot interstitial or refusal, so no tier is tried again until ${start.until.toISOString()} (a deliberate route still tests the domain)`,
+  retryAfter: Math.max(1, Math.ceil((start.until.getTime() - now) / 1000)) });
 
 export function validateAcquireRequest(b) {
   const bad = (why) => { throw new Denied("INVALID_REQUEST", why); };
@@ -305,6 +310,9 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
       // A page whose one enhanced dispatch was already made goes straight to its outcome: a kept answer is the page's without
       // another attempt or another request to the target, and an uncertain one ends the page (review W3).
       const made = !hooks && (req.route === "auto" || req.route === "enhanced") ? await enhanced.prior(req.logicalAcquisitionId) : null;
+      // A domain every tier failed on costs nothing more until the block expires; a dispatch already made for this page still
+      // gives its outcome, which is the page's own.
+      if (start.tier === "blocked" && !made) return fail(allTiersBlocked(start));
       // A route that needs the residential proxy is refused before any attempt when the proxy cannot be had.
       if (start.tier === "residential" && !made) {
         const st = await residential.availability();
@@ -575,12 +583,19 @@ export function makeAcquirer({ store, getPolicy, getLocalReady, permits, resolve
         await finishAttempt({ outcome: verdict.failure?.class ?? verdict.verdict, targetStatus: a.status, bytes });
         Object.assign(result, { finalUrl: a.finalUrl, targetStatus: a.status, contentType: ct ?? null, bytes, redirects: [], quality: { verdict: verdict.verdict, reasons: verdict.reasons ?? [] } });
         if (verdict.verdict === "rate_limited") { try { await store.coolDown(domainOf(parseTarget(a.finalUrl, policy)), verdict.failure.retryAfter); } catch { /* refused above */ } }
-        if (verdict.verdict === "challenge") return { fail: { ...verdict.failure, retryable: false, detail: "the enhanced provider's answer was itself a bot interstitial or an edge refusal; nothing further is tried" } };
+        if (verdict.verdict === "challenge") {
+          // The last rung met the gate too, so every tier has failed on this domain: it is blocked for one TTL, and its later auto
+          // pages stop before the ladder instead of paying it again (spec §9.5). A read-back outcome was learned when it was made.
+          if (!reuse) await learn(answering(a.finalUrl), { tier: "enhanced", mode: zmode, outcome: "challenge" }, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
+          return { fail: { ...verdict.failure, retryable: false, detail: "the enhanced provider's answer was itself a bot interstitial or an edge refusal; nothing further is tried" } };
+        }
         if (verdict.failure) return { fail: verdict.failure };
         // A script shell the provider returned unrendered needed a browser; one dispatch is all a page gets.
         if (verdict.verdict === "js_shell" && page && (zmode === "http" || verdict.structural === true)) {
           return { fail: { class: "RENDER_INCOMPLETE", detail: `the enhanced ${zmode} answer was a script shell (${(verdict.reasons ?? []).join("; ")})` } };
         }
+        // A deliberate enhanced request that the domain's block did not stop, and that the provider answered, lifts the block.
+        if (!reuse && record?.blocked_until) await learn(answering(a.finalUrl), { tier: "enhanced", mode: zmode, outcome: "adequate" }, { success: true });
         return { done: finish({ ok: true, ...(text !== null ? { body: text } : { bodyBase64: buf.toString("base64") }), quality: { verdict: verdict.verdict === "js_shell" ? "adequate" : verdict.verdict, reasons: verdict.reasons ?? [] } }) };
       }
 
@@ -716,6 +731,7 @@ export function makeFetcher({ store, getPolicy, getLocalReady, permits, resolveP
     const domain = domainOf(target);
     const [record, held] = await Promise.all([store.routeRecord(domain), store.routeHeld(domain)]);
     const start = startTier({ route: "auto", record, held, proxyFirst: policy.residential.proxyFirstDomains.includes(domain), routing: policy.routing });
+    if (start.tier === "blocked") { const f = allTiersBlocked(start); throw new Denied(f.class, f.detail, f); }
     let tier = start.probe ? "residential" : start.tier;
     if (tier === "residential") {
       const st = await residential.availability();

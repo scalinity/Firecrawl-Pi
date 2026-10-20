@@ -198,6 +198,10 @@ CREATE TABLE IF NOT EXISTS fcpi_retrieval.domain_route (
   updated_at          timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS domain_route_updated_at ON fcpi_retrieval.domain_route (updated_at);
+-- The domain is blocked on every tier until this time: the enhanced provider, the last rung, also answered its bot interstitial
+-- (spec §9.5). While it holds, an auto page on the domain fails at once, with no attempt, tunnel or dispatch; a deliberate route
+-- still tests the domain, and an adequate enhanced answer clears it.
+ALTER TABLE fcpi_retrieval.domain_route ADD COLUMN IF NOT EXISTS blocked_until timestamptz;
 -- M6: a job's explicit, finite route hold (spec §10.2): while it lasts, the domain's acquisitions need the
 -- residential route. Placed and released by the gateway for bulk jobs.
 CREATE TABLE IF NOT EXISTS fcpi_retrieval.route_hold (

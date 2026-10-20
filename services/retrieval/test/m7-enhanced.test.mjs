@@ -309,6 +309,48 @@ test("an exhausted cap stops the next page's dispatch before it is sent, and con
   } finally { await fx.close(); }
 });
 
+test("a domain whose gate the enhanced provider also answered is blocked for the TTL: later auto pages fail at once with no attempt or dispatch, and a deliberate enhanced request tests it again", async () => {
+  const fx = await startM7();
+  try {
+    const { acquire, store } = rig(fx);
+    const first = await acquire(req(at(fx, "/never")));
+    assert.deepEqual([first.failure.class, first.strategies], ["BLOCKED_PUBLIC_CONTENT", ["direct_http", "enhanced"]], "the first page pays the ladder once");
+    const calls = fx.state.calls.length, spent = rows(store).length;
+    const again = await acquire(req(at(fx, "/never")));
+    assert.equal(again.failure.class, "BLOCKED_PUBLIC_CONTENT");
+    assert.match(again.failure.detail, /no tier is tried again until/);
+    assert.deepEqual([again.strategies, again.attemptsUsed, again.route.start, again.route.reason], [[], 0, "blocked", "learned_all_tiers_blocked"]);
+    assert.ok(again.failure.retryAfter > 0 && again.failure.retryAfter <= 24 * 3600, "it says when the domain is tried again");
+    assert.equal(again.failure.retryable, false);
+    assert.equal(fx.state.calls.length, calls, "no request reached the provider");
+    assert.equal(rows(store).length, spent, "and nothing was reserved");
+    // A page that is not the gate is still reachable on a deliberate route, and an adequate enhanced answer clears the block.
+    const ok = await acquire(req(at(fx, "/article"), { route: "enhanced" }));
+    assert.equal(ok.ok, true);
+    const after = await acquire(req(at(fx, "/article")));
+    assert.deepEqual([after.ok, after.route.start], [true, "direct"], "the domain starts at the bottom of the ladder again");
+  } finally { await fx.close(); }
+});
+
+// The kept answer is the page's own: what another page of the domain learns afterwards must not take it back or charge again.
+test("a page whose enhanced dispatch was already made keeps its answer when the domain becomes blocked afterwards", async () => {
+  const fx = await startM7();
+  try {
+    const { acquire } = rig(fx);
+    const page = req(at(fx, "/tough"));
+    const first = await acquire(page);
+    assert.equal(first.ok, true, JSON.stringify(first.failure));
+    const never = await acquire(req(at(fx, "/never")));
+    assert.equal(never.route.start, "direct", "the block is learned by this page, so it was not yet in force");
+    assert.equal((await acquire(req(at(fx, "/never")))).route.start, "blocked", "and now it is");
+    const calls = fx.state.calls.length;
+    const again = await acquire({ ...page, requestId: "r-again" });
+    assert.equal(again.ok, true, JSON.stringify(again.failure));
+    assert.deepEqual(again.route.escalations, ["enhanced_reused"]);
+    assert.equal(fx.state.calls.length, calls, "the page's dispatch is read back, never sent again");
+  } finally { await fx.close(); }
+});
+
 test("the waterfall: a direct challenge with no residential route goes straight to one enhanced dispatch; the provider's 200 is judged by the target's page", async () => {
   const fx = await startM7();
   try {

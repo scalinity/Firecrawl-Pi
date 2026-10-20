@@ -41,6 +41,23 @@ test("two consistent challenges on the direct route set a 24-hour residential pr
   assert.equal(observe(null, { tier: "residential", outcome: "challenge" }, routing, NOW), null);
 });
 
+// The last rung: when the enhanced provider answers a domain's bot interstitial too, every tier has failed there. Without
+// learning it, each later page of the domain pays the whole ladder again (a residential tunnel, then a dispatch).
+test("an enhanced-tier challenge blocks the domain for the TTL: auto pages start blocked, deliberate routes still test it, an adequate enhanced answer clears it", () => {
+  const blocked = observe(null, { tier: "enhanced", outcome: "challenge" }, routing, NOW);
+  assert.equal(blocked.reason, "enhanced_challenge");
+  assert.equal(+blocked.blocked_until - NOW, 24 * H, "for the routing TTL");
+  const rec = { preferred: null, challenges: 0, blocked_until: new Date(NOW + H) };
+  const s = (o) => startTier({ route: "auto", record: rec, held: false, proxyFirst: false, routing, now: NOW, ...o });
+  assert.deepEqual(s({}), { tier: "blocked", reason: "learned_all_tiers_blocked", until: rec.blocked_until });
+  assert.equal(s({ held: true, proxyFirst: true, record: { ...rec, preferred: "residential", expires_at: new Date(NOW + H) } }).tier, "blocked", "no residential preference, hold or listing is worth a paid leg once every tier failed");
+  for (const route of ["basic", "stealth", "enhanced"]) assert.notEqual(s({ route }).tier, "blocked", `${route} is a deliberate request`);
+  assert.deepEqual(s({ record: { ...rec, blocked_until: new Date(NOW - 1) } }), { tier: "direct", reason: "default" }, "after the TTL the ladder runs again");
+  assert.deepEqual(observe(rec, { tier: "enhanced", outcome: "adequate" }, routing, NOW), { blocked_until: null, reason: "block_cleared" });
+  assert.equal(observe({ preferred: null, challenges: 0 }, { tier: "enhanced", outcome: "adequate" }, routing, NOW), null, "nothing to clear, so no write");
+  assert.equal(observe(rec, { tier: "residential", outcome: "challenge" }, routing, NOW), null, "the other tiers' challenges do not touch it");
+});
+
 test("the probe confirms a block at once, or clears the preference", () => {
   const expired = pref({ expires_at: new Date(NOW - 1), probe_at: new Date(NOW - 1000) });
   const confirmed = observe(expired, { tier: "direct", outcome: "challenge", probe: true }, routing, NOW);

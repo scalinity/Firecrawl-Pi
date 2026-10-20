@@ -24,6 +24,21 @@ async function fresh() {
 }
 const sql = async (q, a = []) => { const c = new pg.Client({ host: HOST, user: "postgres", database: "postgres" }); await c.connect(); try { return (await c.query(q, a)).rows; } finally { await c.end(); } };
 
+test("an enhanced-tier challenge is stored as a block with its expiry and the reason, and an adequate enhanced answer clears it", opts, async () => {
+  const store = await fresh();
+  try {
+    const before = Date.now();
+    const r = await store.learnRoute("gate.example", { tier: "enhanced", mode: "http", outcome: "challenge" }, routing, { success: false, failureClass: "BLOCKED_PUBLIC_CONTENT" });
+    assert.equal(r.change.reason, "enhanced_challenge");
+    const rec = await store.routeRecord("gate.example");
+    assert.ok(+rec.blocked_until >= before + routing.ttlHours * 3600e3 - 5000 && +rec.blocked_until <= Date.now() + routing.ttlHours * 3600e3 + 5000, "blocked for the routing TTL");
+    assert.deepEqual([rec.last_reason, rec.preferred, Number(rec.failures)], ["enhanced_challenge", null, 1], "the reason is kept, and no residential preference is invented");
+    await store.learnRoute("gate.example", { tier: "enhanced", mode: "http", outcome: "adequate" }, routing, { success: true });
+    const cleared = await store.routeRecord("gate.example");
+    assert.deepEqual([cleared.blocked_until, cleared.last_reason, Number(cleared.successes)], [null, "block_cleared", 1]);
+  } finally { await store.close(); }
+});
+
 test("routing records: two challenges set a preference; auth outcomes only count; the table stays within its bound", opts, async () => {
   const store = await fresh();
   try {

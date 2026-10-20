@@ -61,6 +61,26 @@ test("a download's final URL is one a response header can carry (review finding 
   } finally { f.s.close(); }
 });
 
+// A domain every tier failed on (blocked_until) stops a download before any attempt, as it stops an auto page: without the
+// guard the "blocked" start falls into the residential branch and opens a tunnel for a sitemap.
+test("a download from a domain every tier failed on is refused before any attempt, request or tunnel", async () => {
+  const f = await serve((req, res) => res.writeHead(200, { "content-type": "application/xml" }).end("<urlset/>"));
+  try {
+    const store = new FakeStore(), policy = policyFor([["f.fixture.fcpi.test", f.port, "fixture"]]);
+    const fetchOnce = makeFetcher({ store, getPolicy: () => policy, getLocalReady: () => true, permits: { url: 2, browser: 1 }, resolvePublic: async () => [], lookupFixture: async () => ["127.0.0.1"], urlHmac, log: () => {} });
+    const req = (n) => ({ requestId: `r-blocked-${n}`, url: `http://f.fixture.fcpi.test:${f.port}/sitemap.xml`, purpose: "sitemap", deadline: new Date(Date.now() + 5000).toISOString() });
+    store.routes.set("f.fixture.fcpi.test", { preferred: null, challenges: 0, blocked_until: new Date(Date.now() + 3600e3) });
+    await assert.rejects(fetchOnce(req(1)), (e) => e.failureClass === "BLOCKED_PUBLIC_CONTENT" && /no tier is tried again until/.test(e.detail) && e.retryable === false);
+    assert.equal(store.attempts.length, 0);
+    assert.equal(f.hits.length, 0);
+    assert.equal(store.permits.size, 0);
+    // The block lapses with its time: the download goes through again.
+    store.routes.get("f.fixture.fcpi.test").blocked_until = new Date(Date.now() - 1);
+    assert.equal((await fetchOnce(req(2))).status, 200);
+    assert.equal(f.hits.length, 1);
+  } finally { f.s.close(); }
+});
+
 test("a caller that leaves during a retry's back-off gets CANCELLED and no further attempt (review finding W2)", async () => {
   const t = await serve((req, res) => res.writeHead(503, { "content-type": "text/html" }).end("<p>down</p>"));
   try {
