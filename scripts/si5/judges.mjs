@@ -95,6 +95,25 @@ for (const [round, R] of Object.entries(ROUNDS)) {
     agents: metas.length, uncontained: Object.entries(queries).filter(([, x]) => !x.contained).map(([q]) => q).sort(),
     promptNotExact: Object.entries(queries).filter(([, x]) => !["exact", "inline_exact"].includes(x.promptRead)).map(([q]) => q).sort(), queries: Object.fromEntries(Object.entries(queries).sort()) };
 }
+// A round is not rebuilt from this directory alone: the round recorded earlier is kept (its transcripts may no longer exist),
+// the queries of this directory's transcripts replace their own earlier records, and a round run through an API
+// (judge-api.mjs writes private/judge-runs/<round>.json in the same per-query shape) is merged in. A query that has a
+// judgment file but no record from any source is listed under `unrecorded`: its judge is unknown, and the file says so.
+const prior = existsSync(join(EVAL, "judges.json")) ? JSON.parse(readFileSync(join(EVAL, "judges.json"), "utf8")).rounds ?? {} : {};
+for (const [round, R] of Object.entries(ROUNDS)) {
+  const ext = join(PRIV, "judge-runs", `${round}.json`);
+  const external = existsSync(ext) ? JSON.parse(readFileSync(ext, "utf8")).queries ?? {} : {};
+  if (!rounds[round] && !prior[round] && !Object.keys(external).length) continue;
+  const base = rounds[round] ?? prior[round] ?? { template: R.template, templateSha256: sha(readFileSync(join(root, "scripts/si5", R.template))) };
+  const queries = Object.fromEntries(Object.entries({ ...(prior[round]?.queries ?? {}), ...(rounds[round]?.queries ?? {}), ...external }).sort());
+  const dirJ = join(PRIV, "judgments", round), judged = existsSync(dirJ) ? readdirSync(dirJ).filter((f) => /^Q\d+\.json$/.test(f)).map((f) => f.slice(0, -5)) : [];
+  const unrecorded = judged.filter((q) => !queries[q]).sort();
+  // A round with no new transcripts and no API run keeps every recorded value as it was.
+  rounds[round] = !rounds[round] && !Object.keys(external).length ? { ...prior[round], unrecorded }
+    : { template: base.template, templateSha256: base.templateSha256, model: [...new Set(Object.values(queries).flatMap((x) => x.models ?? []))].sort().join(","),
+      agents: new Set(Object.values(queries).map((x) => x.agent)).size, uncontained: Object.entries(queries).filter(([, x]) => !x.contained).map(([q]) => q).sort(),
+      promptNotExact: Object.entries(queries).filter(([, x]) => !["exact", "inline_exact"].includes(x.promptRead)).map(([q]) => q).sort(), unrecorded, queries };
+}
 writeFileSync(join(EVAL, "judges.json"), JSON.stringify({ schema: "fcpi.si5-judges/v1", generatedUtc: new Date().toISOString(),
   rule: "a judge reads only its packet and prompt and writes only its output; every reference that could unblind or bias it is flagged and must be classified in judge-notes.json", rounds }, null, 1) + "\n");
 console.log(JSON.stringify(Object.fromEntries(Object.entries(rounds).map(([k, r]) => [k, { agents: r.agents, model: r.model, uncontained: r.uncontained, promptNotExact: r.promptNotExact,
