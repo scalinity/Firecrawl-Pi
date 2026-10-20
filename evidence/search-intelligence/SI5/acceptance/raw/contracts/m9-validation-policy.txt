@@ -1,0 +1,10 @@
+✔ the actual M9 window policy generator satisfies the production validator and owner bounds (8.150209ms)
+✔ the actual consent predicate rejects wrong, over-budget, expired and period-crossing grants (32.007708ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 116.38975

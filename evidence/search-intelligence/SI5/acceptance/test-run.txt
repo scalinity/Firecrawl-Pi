@@ -54,3 +54,39 @@ Total: 152 pass, 15 fail, 0 skipped over 26 files.
 The 15 failures are all tests/contracts/m1-gateway.test.mjs: the M1-era test starts the gateway with configuration keys the current gateway rejects (unknown configuration keys: PI_GATEWAY_TOKEN_HASHES_FILE, PI_PERMITTED_TARGET_ORIGINS), so the gateway exits 1 before any test runs. A known baseline failure of a stale historical test, unrelated to search intelligence.
 
 Running every contract file in one `node --test tests/contracts/*.test.mjs` invocation hung: the files run in parallel and the gateway tests share ports; one invocation was stopped after 41 minutes. Each file passes (or fails as above) alone.
+
+## Raw output
+
+The output of each run above, as committed under raw/, so the totals can be checked against it. Absolute workstation paths in stack traces are rewritten (1 files): the repository root to <repo>, the test layout to <test-layout>, the scratch directory to <scratchpad>, the home directory to <home>. Nothing else is changed. sha256 of each committed file, then bytes:
+
+c3fc623fb81177f9ee9f87ba8009144184c83bdf3f6b5d22ba68732fef15abee    54813  retrieval.txt
+8c6584ff076cf3352fe762cda6902723bcf4f1458ef7fdf3c1a8f8d4234e668d    11024  gateway.txt
+6d1b8071de72fc09a8c4d679c3d8437e44e65ef3608f3b83ea22c24ec36387ee     5471  mcp.txt
+603bb7fe18935f3153164accbf14715d40773e1b3befdb214b466d10ea1a32c7     7961  root.txt
+9154c70bbc5dae7d8a90a4f87e1c1be78d69e308d533c6ade03409b6f3199759     2630  contracts-by-file.txt
+8ada2e9705f2cd873030649f4451e2fd7578be6e0b9f5e5cc46a8e201085c18b     7420  contracts/m1-gateway.txt
+f06655a455c1222f488f3a049e8fcb4470997ac2f4fb64687b28352b3ca85965     5758  contracts/m3-gateway.txt
+d6a7286364b44a36dc4ca23a618b4c2f2dffaeab1af9b801671e67d2a45529d5      520  contracts/m4-gateway-mcp.txt
+9df9b118471fc0c178d7ec25a8ebdf73b0367ccbc47e9488d3ba6a89dd94ff3d      466  contracts/m4-grammars.txt
+186088df3d9bb1c82f04b09ad9f5c6825803d294fe7a42fd6ebc52841584398c      229  contracts/m5-ledger-migration.txt
+8ce2bf363fc23661f3da39b6b6af318e79c9cc5d9f59c1c277c7e138ccbee5c9      671  contracts/m7-gateway-store.txt
+114c08b1719976c66df5cb0fe9cb994d41d1dd165435a003da11af3afff30baa      244  contracts/m7-ledger-migration.txt
+86f27aebbe15f6966cb98b20d8e5c292d6e42af842142381b563ea109991bc46      311  contracts/m8-admission-copies.txt
+a350ba0aec25a6b0696dcdb9c5be4b57e146c36e9ec9488c96baae2668181ba7      616  contracts/m8-restore-compose.txt
+0ce5111c16497e617b63af88eb001f10a9280b91a7b784792032b28d335871a4      202  contracts/m9-client-proof.txt
+8e3237b08b05b5079d21104ac629d9182fe1438298634adb7e802cd97f708762      776  contracts/m9-collection.txt
+1675c3adea196e86a127551c0084f504dbec2d7803cfca63538345e610e3596d     2883  contracts/m9-corpus-v2.txt
+6fc03c266a970567857eeba8d64028da0d788b99c188e89bdada65f89f0d4a63      297  contracts/m9-evidence-bound.txt
+2418b6c26eafe3196cd04b454254734a81f74e5c0389d1d70ddb69557b514c08      219  contracts/m9-foreign.txt
+c06e1b64452fa3fd8cf04596088c4436ba5c74810fbd6fd2081a2f81de7e725f      465  contracts/m9-incident-hook.txt
+190d7bed60caca7e0f4a5287171dbe673af2bc023ab73b4bd26e71f69a3746ce      209  contracts/m9-incident-input.txt
+e3dc041d11e7af4b11619f4367a78ecd12c95730df4db71d9f67b7285b6e4ed3      640  contracts/m9-live.txt
+2f9eafa954bf5dd100bd2e123afdaeca0ffa297c70a9c0252849433bd3c00802      194  contracts/m9-notices.txt
+3b707b3ab7c0d94a00d977632624e2fbb255fb9bb852a008fae99a0a9fa82520      397  contracts/m9-redis.txt
+e070c173473400f7c46ea32e164a8bac7b8873ac3e9f33bc91707ab6eef13653     1978  contracts/m9-resource-reuse.txt
+6ad981e6bf25e91f55c6d5d5300f555b9c8e77dd3326a34d20a0191893374edf      220  contracts/m9-restore-incidents.txt
+8c3076eb6ee690d385069da4a48edf30193e5c8ae47ba7402fff866a4b57ef86      293  contracts/m9-review-bound.txt
+a45f0ff5fb348086d40221eae418a7d5a704098df3d7847d910f4617b93ff948      221  contracts/m9-root-proof.txt
+4e257eda7ccb9c203f56e102550f666d7d3d38ca2f8ef0d19a1881e897f7b1c2      331  contracts/m9-validation-policy.txt
+170527d4c914de00564d031db7cd5d2fa5bbb4bb1e52d1918bd00d8c56d875e8      507  contracts/paid-dispatch-switch.txt
+89c3d4fd0f13a170c6d42351ab11c75d373fb057b6a5ebd929ec0bc91585f3a8      497  contracts/pre-m9-verdicts.txt

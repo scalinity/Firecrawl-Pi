@@ -1,0 +1,12 @@
+✔ incident file guard permits bounded reads and a proposed source fix (1475.343458ms)
+✔ only the native schema serialization tool may emit this incident handle (146.908375ms)
+✔ secrets, security changes, runtime hooks and execution tools are denied (1269.603875ms)
+✔ a symlink cannot expose an outside file or redirect a write (37.762666ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 3697.282834

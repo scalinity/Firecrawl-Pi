@@ -1,0 +1,11 @@
+✔ the retrieval service takes the switch from the optional host file alone; no other service or setting names it (4.813916ms)
+✔ the restore test's copy runs with paid dispatch off, its env file moved under the copy, even when the rendered file carries the switch on (30.338917ms)
+✔ restore and rollback move the switch aside before anything starts, and say when it returns (0.630792ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 113.245209

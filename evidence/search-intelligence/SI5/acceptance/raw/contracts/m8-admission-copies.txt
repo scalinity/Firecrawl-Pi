@@ -1,0 +1,10 @@
+✔ the gateway's and the retrieval service's admission readers are the same code below their headers (0.639875ms)
+✔ the services' staleness bound is the operations scripts' STALE_S (0.854041ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 84.328541

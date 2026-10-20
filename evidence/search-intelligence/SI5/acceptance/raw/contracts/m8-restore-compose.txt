@@ -1,0 +1,13 @@
+✔ the positive control: production's file names host paths outside the copy, publishes a port, restarts its services and has the egress network (3.44975ms)
+✔ every host path the copy names is under its directory (14.71675ms)
+✔ the copy runs only the kept services, publishes nothing and reaches no egress network (0.150125ms)
+✔ every network is internal, isolated, renamed and moved off production's addresses (0.1475ms)
+✔ webhook delivery and paid dispatch are off in the copy (0.300334ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 119.160125

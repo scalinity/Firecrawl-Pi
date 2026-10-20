@@ -1,0 +1,28 @@
+✔ immutable accepted bytes plus bounded concurrent measurements pass (31.242042ms)
+✔ tampered historical evidence never passes (25.34025ms)
+✔ assessment decision, provenance, complete path coverage and hash are mandatory (281.292666ms)
+✔ lock or runtime changes, missing bound receipts, wrong source and wrong incident fail (135.354208ms)
+✔ duplicate frames, non-JSON sample, large gaps and short runs are rejected (109.063833ms)
+✔ boot or container restart and wrong service names fail even if health recovers (64.673458ms)
+✔ incident must overlap real successful traffic with memory headroom and no swap (90.236083ms)
+✔ OOM, caps, queue, swap, paid dispatch, throttling and unsafe host memory fail (179.798542ms)
+✔ timestamps, sustained request bins, required classes and window alignment matter (66.285208ms)
+✔ every latency must be finite and satisfy the canonical bound (66.922959ms)
+✔ Redis denials, wrong principal and measurements outside the run fail (89.106167ms)
+✔ source equivalence covers only three pure evaluators and refuses rename deletions (0.127791ms)
+✔ runtime sources never import evidence-only helper or verifier (81.224791ms)
+✔ compose equality allows only exact reviewed mounts and changed images (15.3625ms)
+✔ the immutable old failed Cloud probe is explained without changing its FAIL (3.824833ms)
+✔ Redis memory headroom and zero eviction/error counters are measured (89.255291ms)
+✔ live Cloud audit covers the completed authorized window and actual paid container (0.315125ms)
+✔ AC16 uses p95 latency while keeping successful startup outliers visible (68.14425ms)
+✔ live driver changes invalidate corpus/research proof while preserving independent unchanged executions (0.089125ms)
+✔ unpaid rechecks preserve the complete frozen corpus, first failure and paid-window attribution (5.917959ms)
+ℹ tests 20
+ℹ suites 0
+ℹ pass 20
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1536.340292

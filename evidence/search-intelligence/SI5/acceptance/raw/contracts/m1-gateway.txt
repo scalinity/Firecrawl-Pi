@@ -1,0 +1,142 @@
+file://<repo>/services/access/src/config.mjs:40
+  if (unknown.length) throw new Error(`unknown configuration keys: ${unknown.join(", ")}`);
+                            ^
+
+Error: unknown configuration keys: PI_GATEWAY_TOKEN_HASHES_FILE, PI_PERMITTED_TARGET_ORIGINS
+    at loadConfig (file://<repo>/services/access/src/config.mjs:40:29)
+    at file://<repo>/services/access/server.mjs:51:13
+    at ModuleJobSync.run (node:internal/modules/esm/module_job:679:46)
+    at node:internal/modules/run_main:199:19
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:105:5)
+
+Node.js v26.12.0
+✖ missing token: 401 with the gateway's own challenge, nothing forwarded (101.911708ms)
+✖ wrong token and malformed schemes: 401, never the upstream challenge (0.355833ms)
+✖ authenticated fixture scrape is forwarded without the client's token or extra headers (0.071042ms)
+✖ /admin/* is never routed, even authenticated (0.018875ms)
+✖ routes outside the allowlist are 404 and not forwarded (0.030083ms)
+✖ non-fixture targets are refused before forwarding (0.016166ms)
+✖ bodies over 1 MiB are refused with 413 (0.013208ms)
+✖ a chunked body over 1 MiB (no Content-Length) gets a 413 response, not a reset (0.017084ms)
+✖ an upstream that dies after its headers ends the client response instead of hanging it (0.02725ms)
+✖ an unreachable upstream gets the gateway's own 502 (0.029ms)
+✖ a silent upstream gets 504 once the upstream timeout passes (0.013875ms)
+✖ a query string is never forwarded upstream (0.021459ms)
+✖ an absolute-form request target is not routed (0.02325ms)
+✖ Content-Length together with Transfer-Encoding is rejected and never forwarded (0.010084ms)
+✖ unknown PI_* configuration keys stop startup (0.010208ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 0
+ℹ fail 15
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 208.459667
+
+✖ failing tests:
+
+test at tests/contracts/m1-gateway.test.mjs:78:1
+✖ missing token: 401 with the gateway's own challenge, nothing forwarded (101.911708ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:87:1
+✖ wrong token and malformed schemes: 401, never the upstream challenge (0.355833ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:95:1
+✖ authenticated fixture scrape is forwarded without the client's token or extra headers (0.071042ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:108:1
+✖ /admin/* is never routed, even authenticated (0.018875ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:117:1
+✖ routes outside the allowlist are 404 and not forwarded (0.030083ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:126:1
+✖ non-fixture targets are refused before forwarding (0.016166ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:136:1
+✖ bodies over 1 MiB are refused with 413 (0.013208ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:143:1
+✖ a chunked body over 1 MiB (no Content-Length) gets a 413 response, not a reset (0.017084ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:161:1
+✖ an upstream that dies after its headers ends the client response instead of hanging it (0.02725ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:192:1
+✖ an unreachable upstream gets the gateway's own 502 (0.029ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:202:1
+✖ a silent upstream gets 504 once the upstream timeout passes (0.013875ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:212:1
+✖ a query string is never forwarded upstream (0.021459ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:220:1
+✖ an absolute-form request target is not routed (0.02325ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:228:1
+✖ Content-Length together with Transfer-Encoding is rejected and never forwarded (0.010084ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)
+
+test at tests/contracts/m1-gateway.test.mjs:237:1
+✖ unknown PI_* configuration keys stop startup (0.010208ms)
+  Error: gateway exited 1
+      at ChildProcess.<anonymous> (file://<repo>/tests/contracts/m1-gateway.test.mjs:73:58)
+      at ChildProcess.emit (node:events:514:20)
+      at ChildProcess._handle.onexit (node:internal/child_process:323:12)

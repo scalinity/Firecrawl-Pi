@@ -1,0 +1,13 @@
+✔ every generated corpus and research request is admitted by the actual gateway contract (1.334292ms)
+✔ the two original rejected request fields fail fixture admission before any dispatch (0.746208ms)
+✔ stale review, dirty or mismatched source/contracts, closed/expired/oversized consent block dispatch (0.1975ms)
+✔ live responses are tied to the exact audited window and bounded timestamps (0.144334ms)
+✔ 400 responses, missing polls, failed jobs, empty results and incomplete corpus cannot report success (0.15ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 81.313458
