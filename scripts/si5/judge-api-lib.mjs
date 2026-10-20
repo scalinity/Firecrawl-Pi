@@ -7,6 +7,12 @@ const BASIS = ["page", "excerpt", "both", "none"];
 const SOURCE_TYPES = ["official_docs", "repository", "release_notes", "paper", "standard", "vendor_blog", "news", "forum", "q_and_a", "tutorial", "aggregator", "mirror", "other"];
 const VERSION_STATUS = ["match", "mismatch", "unknown", "not_applicable"];
 
+// The code a run record came from (SI5 acceptance review W6): each script's hash as read, the repository commit, and whether any
+// code outside evidence/ differs from it, asked the way collect.mjs asks. A record without it cannot be tied to a commit.
+export function scriptIdentity({ files, read, git, sha }) {
+  return { files: Object.fromEntries(files.map((f) => [f, sha(read(f))])), commit: git("rev-parse", "HEAD"), codeDirty: git("status", "--porcelain", "--", ".", ":(exclude)evidence").length > 0 };
+}
+
 // The object between the reply's first "{" and last "}": a model may wrap it in a code fence or a sentence.
 export function parseReply(text) {
   const s = String(text ?? ""), a = s.indexOf("{"), b = s.lastIndexOf("}");

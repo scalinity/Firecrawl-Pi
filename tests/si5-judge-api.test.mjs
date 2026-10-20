@@ -3,7 +3,7 @@
 // (a grade outside the scale stays wrong, and is reported, never fixed up), and a long packet is split by document.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { parseReply, checkJudgments, splitJudgments, chunkDocs } from "../scripts/si5/judge-api-lib.mjs";
+import { parseReply, checkJudgments, splitJudgments, chunkDocs, scriptIdentity } from "../scripts/si5/judge-api-lib.mjs";
 
 const ok = (id, over = {}) => ({ id, grade: 2, basis: "page", passage: "x".repeat(30), section: "page", reason: "supports a part", sourceType: "official_docs", versionStatus: "not_applicable", requirements: [], questions: [], ...over });
 const reply = (q, ids, over = {}) => ({ schema: "fcpi.si5-judgments/v1", query: q, judgments: ids.map((i) => ok(i)), ...over });
@@ -67,4 +67,14 @@ test("a long packet is split by document into groups under the limit, in order, 
   assert.deepEqual(chunkDocs(docs.slice(0, 2), 1000).map((g) => g.length), [2], "a packet under the limit is one request");
   assert.deepEqual(chunkDocs([], 100), []);
   assert.ok(chunkDocs(docs, 100).every((g) => g.length > 0), "no empty group");
+});
+
+test("a run record carries the identity of the code that made it: each script's hash, the commit, and whether code differed from it", () => {
+  const files = { "scripts/si5/judge-api.mjs": "A", "scripts/si5/judge-api-lib.mjs": "B" }, asked = [];
+  const git = (dirty) => (...a) => { asked.push(a.join(" ")); return a[0] === "rev-parse" ? "c0ffee" : dirty ? " M scripts/si5/judge-api.mjs" : ""; };
+  const identity = (dirty) => scriptIdentity({ files: Object.keys(files), read: (f) => files[f], git: git(dirty), sha: (s) => `sha(${s})` });
+  assert.deepEqual(identity(true), { files: { "scripts/si5/judge-api.mjs": "sha(A)", "scripts/si5/judge-api-lib.mjs": "sha(B)" }, commit: "c0ffee", codeDirty: true });
+  assert.equal(identity(false).codeDirty, false, "a clean tree is recorded as clean");
+  // Evidence is not code: collect.mjs and live-smoke.mjs ask the same question the same way.
+  assert.ok(asked.includes("status --porcelain -- . :(exclude)evidence"), "the dirty check leaves evidence out");
 });

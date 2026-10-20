@@ -12,7 +12,8 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { createHash } from "node:crypto";
-import { parseReply, checkJudgments, splitJudgments, chunkDocs } from "./judge-api-lib.mjs";
+import { execFileSync } from "node:child_process";
+import { parseReply, checkJudgments, splitJudgments, chunkDocs, scriptIdentity } from "./judge-api-lib.mjs";
 
 const root = new URL("../../", import.meta.url).pathname;
 const EVAL = join(root, "evidence/search-intelligence/SI5/eval"), PRIV = join(EVAL, "private");
@@ -22,6 +23,9 @@ const MODEL = arg("model", null), ONLY = arg("only", null)?.split(","), CONCURRE
 const MAX_OUT = 64000;
 if (!MODEL) { console.error("usage: judge-api.mjs --model <OpenRouter model id> [--only Q001,Q002] [--concurrency 4] [--chunk-tokens 150000] [--dry-run]"); process.exit(2); }
 const sha = (s) => createHash("sha256").update(s).digest("hex");
+// Read once, when the run starts: the record of every query it judges names the code that judged it.
+const SCRIPT = scriptIdentity({ files: ["scripts/si5/judge-api.mjs", "scripts/si5/judge-api-lib.mjs"], read: (f) => readFileSync(join(root, f)),
+  git: (...a) => execFileSync("git", ["-C", root, ...a], { encoding: "utf8" }).trim(), sha });
 const say = (o) => process.stderr.write(`${new Date().toISOString()} ${JSON.stringify(o)}\n`);
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -105,7 +109,7 @@ async function judgeQuery(q) {
   mkdirSync(OUT, { recursive: true });
   writeFileSync(join(OUT, `${q}.json`), JSON.stringify(file) + "\n");
   const runs = existsSync(RUNS) ? JSON.parse(readFileSync(RUNS, "utf8")) : { schema: "fcpi.si5-judge-runs/v1", round: "second", queries: {} };
-  runs.queries[q] = { agent: `openrouter:${MODEL}`, models: [...tally.models].sort(), prompt: promptFile, promptSha256: sha(system), promptRead: "inline_exact", launch: "api_inline", started, ended: new Date().toISOString(),
+  runs.queries[q] = { agent: `openrouter:${MODEL}`, models: [...tally.models].sort(), prompt: promptFile, promptSha256: sha(system), promptRead: "inline_exact", launch: "api_inline", script: SCRIPT, started, ended: new Date().toISOString(),
     toolCalls: 0, flags: [], contained: true, api: { requestedModel: MODEL, requests: tally.requests, promptTokens: tally.promptTokens, completionTokens: tally.completionTokens, costUsd: +tally.costUsd.toFixed(6), temperature: 0, responseFormat: "json_object", maxTokens: MAX_OUT } };
   mkdirSync(join(PRIV, "judge-runs"), { recursive: true });
   writeFileSync(RUNS, JSON.stringify(runs, null, 1) + "\n");
