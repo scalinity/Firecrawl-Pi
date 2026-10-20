@@ -102,8 +102,8 @@ test("the budget policy validates the enhanced provider, its subjects and per-re
   const b = JSON.parse(readFileSync(new URL("../policy/budget.json", import.meta.url), "utf8"));
   const load = (f) => { const c = structuredClone(b); f(c); return loadBudgetPolicy(JSON.stringify(c)); };
   assert.equal(load(() => {}).enhancing.defaultEnhancer, "zyte-api");
-  // The committed paid category is closed: zero caps until the owner approves one.
-  assert.deepEqual(load(() => {}).categories.enhanced.caps, { day: 0, month: 0 });
+  // The committed paid category carries the owner's approved caps (2026-10-19): $2 a day and $10 a month.
+  assert.deepEqual(load(() => {}).categories.enhanced.caps, { day: 2000000, month: 10000000 });
   assert.throws(() => load((c) => { c.providers.zyte.baseUrl = "http://api.zyte.com"; }), /baseUrl is an origin/);
   assert.throws(() => load((c) => { c.providers["fixture-zyte"].paid = true; }), /paid enhanced provider is a public service/);
   assert.throws(() => load((c) => { c.providers.zyte.api = "scrapingbee"; }), /api must be zyte-v1/);
@@ -285,8 +285,8 @@ test("the tier's refusals come before any reservation: no credential, a paid pro
     assert.equal((await rig(fx, { enhancer: null }).enhanced.availability()).reason, "NO_ENHANCER_SELECTED");
     const paid = rig(fx, { enhancer: "zyte-api", mutate: (b) => { b.providers.zyte.credential = "fixture_zyte"; } });
     assert.equal((await paid.enhanced.availability()).reason, "PAID_DISPATCH_DISABLED");
-    // Paid dispatch on, the committed caps are zero: nothing fits.
-    const zero = rig(fx, { enhancer: "zyte-api", paidDispatch: true, mutate: (b) => { b.providers.zyte.credential = "fixture_zyte"; } });
+    // Paid dispatch on and a zero cap (set here, whatever the committed policy approves): nothing fits.
+    const zero = rig(fx, { enhancer: "zyte-api", paidDispatch: true, mutate: (b) => { b.providers.zyte.credential = "fixture_zyte"; b.categories.enhanced.caps = { day: 0, month: 0 }; } });
     assert.equal((await zero.enhanced.availability("http")).reason, "BUDGET_EXHAUSTED");
     const r = await zero.acquire(req(at(fx, "/article"), { route: "enhanced" }));
     assert.equal(r.failure.class, "ENHANCED_REQUIRED");

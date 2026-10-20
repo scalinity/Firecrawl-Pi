@@ -86,7 +86,8 @@ test("without its credential the complex-document parser answers PARSER_REQUIRED
   // With the credential but paid dispatch off, and with both but a zero credit allowance: refused before any upload.
   const p = await rig({ parser: "llamaparse-cost-effective", creds: { llamaparse_api_key: "llx-test-0000000000000000" } });
   try { await assert.rejects(p.parse(req(docs.scanPdfBytes())), (e) => e.failureClass === "PAID_DISPATCH_DISABLED"); } finally { await p.srv.close(); }
-  const z = await rig({ parser: "llamaparse-cost-effective", paidDispatch: true, creds: { llamaparse_api_key: "llx-test-0000000000000000" } });
+  // The zero is set here, whatever the committed policy approves.
+  const z = await rig({ parser: "llamaparse-cost-effective", paidDispatch: true, creds: { llamaparse_api_key: "llx-test-0000000000000000" }, mutate: (b) => { b.categories.parser.caps = { month: 0 }; } });
   try { await assert.rejects(z.parse(req(docs.scanPdfBytes())), (e) => e.failureClass === "BUDGET_EXHAUSTED" && /0 of 0 credits/.test(e.detail)); } finally { await z.srv.close(); }
 });
 

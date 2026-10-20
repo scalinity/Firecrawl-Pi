@@ -19,13 +19,16 @@ test("an absolute validation lease expires even with the paid switch still on an
   for (const v of [null, "2026-02-30T02:00:00Z", "2026-10-03", "bad"]) assert.throws(() => loadBudgetPolicy(mutate((p) => { p.validationExpiresAt = v; })), /validationExpiresAt/);
 });
 
-test("the deployed budget policy loads: approved proxy and monthly LLM caps, other paid caps zero, paid defaults and unpaid fixtures", () => {
+test("the deployed budget policy loads: approved proxy, LLM, enhanced and parser caps, other paid caps zero, paid defaults and unpaid fixtures", () => {
   const b = loadBudgetPolicy(RAW);
-  // Proxy $1/day and $2/month; LLM $20/month; no shared daily cap across the paid categories (removed 2026-10-17).
+  // Proxy $1/day and $2/month; LLM $20/month; no shared daily cap across the paid categories (removed 2026-10-17);
+  // enhanced retrieval $2/day and $10/month and the parser 3,000 credits/month (2026-10-19).
   assert.deepEqual(b.categories.proxy.caps, { day: 1000000, month: 2000000 });
   assert.deepEqual(b.categories.llm.caps, { month: 20000000 });
+  assert.deepEqual(b.categories.enhanced.caps, { day: 2000000, month: 10000000 });
+  assert.deepEqual(b.categories.parser.caps, { month: 3000 });
   assert.equal(paidTotalDayCap(b), null);
-  for (const [name, c] of Object.entries(b.categories).filter(([n, c]) => c.paid && !["proxy", "llm"].includes(n))) for (const v of Object.values(c.caps)) assert.equal(v, 0, name);
+  for (const [name, c] of Object.entries(b.categories).filter(([n, c]) => c.paid && !["proxy", "llm", "enhanced", "parser"].includes(n))) for (const v of Object.values(c.caps)) assert.equal(v, 0, name);
   assert.equal(b.providers[b.models[b.extraction.defaultModel].provider].paid, true);
   assert.equal(b.providers[b.parsers[b.parsing.defaultParser].provider].paid, true);
   assert.equal(b.extraction.maxInputTokens, 32000);
