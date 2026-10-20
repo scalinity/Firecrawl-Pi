@@ -6,11 +6,14 @@
 //            judge raised a question about — and write those as separate packets (packets-second/), recording the hash of
 //            every first-judgment file the choice was made from;
 //   adjudicate  after the second judge: every disagreement that matters (grades two or more apart, opposite sides of the
-//            relevance line at 2, or judged against unjudged) becomes an adjudication packet showing both labels;
+//            relevance line at 2, or judged against unjudged) becomes an adjudication packet showing both labels; a document
+//            whose capture is blocked (capture.mjs: a bot interstitial) is not adjudicated, since its grade is dropped at final;
 //   final    merge: the first label stands unless adjudicated. A grade outside the scale (0-3 or null) is no grade, and a
-//            version mismatch is held to the scale's cap of 1. Every cited passage is checked against the document file,
-//            which must be the file its judge read (its hash in the packet keys); a grade of 1 or more whose passage is not
-//            in the file becomes unjudged (unverified_span). Writes eval/labels.json (per query and canonical URL: grade, the
+//            version mismatch is held to the scale's cap of 1. A document whose capture is blocked is unjudged
+//            (capture_blocked), with its original labels kept beside the dropped grade. Every cited passage is checked against
+//            the document file, which must be the file its judge read (its hash in the packet keys); a grade of 1 or more
+//            whose passage is not in the file becomes unjudged (unverified_span). A document carries one flag, the first that
+//            applies (capture_blocked, file_changed, invalid_grade). Writes eval/labels.json (per query and canonical URL: grade, the
 //            original labels, the resolution, verification, source type, version status, the file and capture hashes, and
 //            the verified passages as hashes with their offsets and, for an excerpt, the lanes that delivered it), with
 //            the agreement figures. The judges' free text (reason, questions) stays in eval/private/labels-text.json, and
@@ -26,7 +29,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, readdirSync, rmSync
 import { join } from "node:path";
 import { createHash } from "node:crypto";
 
-const root = new URL("../../", import.meta.url).pathname;
+// FCPI_SI5_ROOT points the evaluation at another tree (tests/si5-labels.test.mjs drives the stages over a fixture one).
+const root = process.env.FCPI_SI5_ROOT ?? new URL("../../", import.meta.url).pathname;
 const EVAL = join(root, "evidence/search-intelligence/SI5/eval"), PRIV = join(EVAL, "private"), J = join(PRIV, "judgments");
 const sha = (s) => createHash("sha256").update(s).digest("hex");
 const read = (p) => JSON.parse(readFileSync(p, "utf8"));
@@ -40,9 +44,11 @@ const idOf = (x) => { const s = String(x); if (s.endsWith(".md")) { idsFromFileN
 const judged = (round) => (existsSync(join(J, round)) ? readdirSync(join(J, round)).filter((f) => /^Q\d+\.json$/.test(f)).map((f) => read(join(J, round, f)))
   .map((f) => ({ ...f, judgments: (f.judgments ?? []).map((j) => ({ ...j, id: idOf(j.id) })) })) : []);
 const keysOf = (id) => read(join(PRIV, "packet-keys", `${id}.json`));
-// A document whose capture is a bot interstitial (status "blocked", capture.mjs) was judged on no page of its own: it is not
-// adjudicated, and its grade is dropped at final, whatever its packet showed the judge (spec §23.1: inaccessible material is
-// unjudged, not irrelevant).
+// A document whose capture is a bot interstitial (status "blocked", capture.mjs) was shown to its judges as the captured page
+// ("Page capture: captured; shown whole"), so what they graded was a gate presented as the page: a judgment made on a capture
+// the packet misrepresented is void, whatever the judge then did with the excerpts, and its grade is dropped at final (spec
+// §23.1: inaccessible material is unjudged, not irrelevant). It is not adjudicated either. A failed capture is different: its
+// packet said the page was not available, so its judges knew, and their grades stand. The original labels stay in labels.json.
 const blockedUrls = new Set(existsSync(join(EVAL, "captures.json")) ? read(join(EVAL, "captures.json")).captures.filter((c) => c.status === "blocked").map((c) => c.url) : []);
 const urlMemo = {};
 const urlsOf = (q) => (urlMemo[q] ??= Object.fromEntries(Object.entries(keysOf(q).ids).map(([u, k]) => [k, u])));
@@ -161,11 +167,12 @@ if (stage === "second") {
   if (changed.length) { console.error(`refused: ${changed.slice(0, 5).join(", ")}`); process.exit(2); }
   const second = new Map(judged("second").flatMap((f) => f.judgments.map((j) => [`${f.query}:${j.id}`, j])));
   const adj = new Map(judged("adjudication").flatMap((f) => f.judgments.map((j) => [`${f.query}:${j.id}`, j])));
-  const out = { schema: "fcpi.si5-labels/v2", labelsScriptSha256: sha(readFileSync(new URL(import.meta.url))), judges: judges.rounds ? Object.fromEntries(Object.entries(judges.rounds).map(([k, r]) => [k, { model: r.model, template: r.template, templateSha256: r.templateSha256 }])) : null, queries: {} };
-  const text = {};
-  const agree = { pairs: 0, exact: 0, relevanceAgree: 0, withinOne: 0, disputes: 0, adjudicated: 0, unverifiedSpans: 0, invalidGrades: 0, versionCapped: 0, fileChanged: 0, captureBlocked: 0, unjudgedFirst: 0, missingFirst: 0, passageDocs: 0, passageDocsUnjudged: 0, passageRequirements: 0, passageUnverified: 0 };
+  const out = { schema: "fcpi.si5-labels/v2", labelsScriptSha256: sha(readFileSync(new URL(import.meta.url))), judges: judges.rounds ? Object.fromEntries(Object.entries(judges.rounds).map(([k, r]) => [k, { model: r.model, template: r.template, templateSha256: r.templateSha256 }])) : null,
+    inputs: { capturesSha256: existsSync(join(EVAL, "captures.json")) ? sha(readFileSync(join(EVAL, "captures.json"))) : null, gateSha256: sha(readFileSync(new URL("./gate.mjs", import.meta.url))), qualitySha256: sha(readFileSync(new URL("../../services/retrieval/src/quality.mjs", import.meta.url))) }, queries: {} };
+  const text = {}, matchedBlocked = new Set();
+  const agree = { pairs: 0, exact: 0, relevanceAgree: 0, withinOne: 0, disputes: 0, adjudicated: 0, unverifiedSpans: 0, invalidGrades: 0, versionCapped: 0, fileChanged: 0, captureBlocked: 0, blockedPairs: 0, unjudgedFirst: 0, missingFirst: 0, passageDocs: 0, passageDocsUnjudged: 0, passageRequirements: 0, passageUnverified: 0 };
   for (const f of judged("first")) {
-    const keys = keysOf(f.query), urls = Object.fromEntries(Object.entries(keys.ids).map(([u, k]) => [k, u]));
+    const keys = keysOf(f.query), urls = urlsOf(f.query);
     const expected = new Set(read(join(PRIV, "packets", f.query, "index.json")).documents.map((d) => d.slice(0, -3)));
     const rows = {};
     for (const j of f.judgments) {
@@ -175,17 +182,20 @@ if (stage === "second") {
       const sec = sections(f.query, j.id), file = keys.files?.[j.id] ?? null;
       const final = r ?? j;
       const g1 = gradeOf(j.grade), g2 = s ? gradeOf(s.grade) : null;
+      const blocked = blockedUrls.has(urls[j.id]);
       let grade = gradeOf(final.grade), verified = true, flag = null;
-      if (grade === undefined) { grade = null; verified = false; flag = "invalid_grade"; agree.invalidGrades++; }
-      // The file the judge read: a different one now (or no recorded hash) leaves the label unverifiable.
-      if (!file || sha(sec.text) !== file.sha256) { grade = null; verified = false; flag = "file_changed"; agree.fileChanged++; }
-      else if (blockedUrls.has(urls[j.id])) { grade = null; verified = false; flag = "capture_blocked"; agree.captureBlocked++; }
+      // One flag, the first that applies: a blocked capture voids the judgment whatever else is wrong with it; then the file the
+      // judge read (a different one now, or no recorded hash, leaves the label unverifiable); then a grade off the scale.
+      if (blocked) { grade = null; verified = false; flag = "capture_blocked"; agree.captureBlocked++; matchedBlocked.add(urls[j.id]); }
+      else if (!file || sha(sec.text) !== file.sha256) { grade = null; verified = false; flag = "file_changed"; agree.fileChanged++; }
+      else if (grade === undefined) { grade = null; verified = false; flag = "invalid_grade"; agree.invalidGrades++; }
       const versionStatus = VERSION.has(final.versionStatus) ? final.versionStatus : null;
       if (grade !== null && grade > 1 && versionStatus === "mismatch") { grade = 1; flag = "version_capped"; agree.versionCapped++; }
       const where = locate(sec, final.passage, final.section);
       if (grade !== null && grade >= 1 && !where) { grade = null; verified = false; flag = "unverified_span"; agree.unverifiedSpans++; }
       if (g1 === null) agree.unjudgedFirst++;
-      if (s) {
+      if (s && blocked) agree.blockedPairs++;
+      else if (s) {
         const a = g1 ?? null, b = g2 ?? null;
         agree.pairs++;
         if (a === b) agree.exact++;
@@ -227,6 +237,11 @@ if (stage === "second") {
     }
     out.queries[f.query] = rows;
   }
+  // The blocked captures and how many matched a judged document: a URL form that drifted apart between a capture and a packet
+  // would otherwise leave every gate grade standing behind a captureBlocked of 0.
+  agree.blockedCaptures = blockedUrls.size;
+  agree.blockedUnmatched = blockedUrls.size - matchedBlocked.size;
+  if (agree.blockedUnmatched) console.error(`warning: ${agree.blockedUnmatched} blocked capture(s) match no judged document (a URL form that differs between captures.json and the packets, or a document not judged)`);
   agree.disputes = existsSync(join(PRIV, "packets-adjudication")) ? readdirSync(join(PRIV, "packets-adjudication")).reduce((n, q) => n + read(join(PRIV, "packets-adjudication", q, "index.json")).documents.length, 0) : 0;
   out.agreement = { ...agree, idsFromFileNames, exactRate: agree.pairs ? agree.exact / agree.pairs : null, relevanceRate: agree.pairs ? agree.relevanceAgree / agree.pairs : null };
   // No credential value in either record: the judges read untrusted pages, and labels.json is committed.

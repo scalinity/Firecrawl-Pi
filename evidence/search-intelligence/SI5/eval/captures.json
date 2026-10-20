@@ -36032,7 +36032,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/AskScienceDiscussion/comments/1c1kjlm/is_there_a_replication_crisis_in_psychology_how/",
@@ -36042,7 +36044,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/ClaudeAI/comments/1jlu8ii/is_gemini_25_with_a_1m_token_limit_just_insane/",
@@ -36052,7 +36056,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/CyberSecurityAdvice/comments/1lzj22k/whatsapp_vs_telegram_vs_signal/",
@@ -36062,7 +36068,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/GithubCopilot/comments/1qgif1q/email_notification_of_github_changelog_posts/",
@@ -36072,7 +36080,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLM/comments/1iax8sj/deepseekr1distillllama70b_learnings_with_mlx/",
@@ -36082,7 +36092,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/17fuqr7/a_detailed_comparison_between_gptq_awq_exl2_q4_k/",
@@ -36092,7 +36104,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1ech0vr/when_is_gpu_compute_the_bottleneck_and_memory/",
@@ -36102,7 +36116,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1khb7rs/the_new_mlx_dwq_quant_is_underrated_it_feels_like",
@@ -36112,7 +36128,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1khb7rs/the_new_mlx_dwq_quant_is_underrated_it_feels_like/",
@@ -36122,7 +36140,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1l7yrni/everything_you_wanted_to_know_about_apples_mlx/",
@@ -36132,7 +36152,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1mg26g0/how_are_people_running_an_mlxcompatible_openai/",
@@ -36142,7 +36164,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1mh7yud/mlx_4bit_dwq_vs_8bit_eval/",
@@ -36152,7 +36176,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1nmgrbd/link_a_git_repo_to_llamacpp_server/",
@@ -36162,7 +36188,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1pgcx6b/m4_max_mac_expert_needed_to_fix_mlxlm",
@@ -36172,7 +36200,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/LocalLLaMA/comments/1rs059a/mlx_is_not_faster_i_benchmarked_mlx_vs_llamacpp/",
@@ -36182,7 +36212,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/MachineLearning/comments/6gwqiw/r_170603762_attention_is_all_you_need_sota_nmt/",
@@ -36192,7 +36224,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/OpenAI/comments/1mnf43m/gpt5_benchmarks_how_gpt5_mini_and_nano_perform_in/",
@@ -36202,7 +36236,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/Poetry/comments/1cf6b8/first_poem_ive_ever_posted_publicly_autumn_leaves/",
@@ -36212,7 +36248,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/PostgreSQL/comments/1vszgos/make_sure_to_upgrade_your_postgresql_to_the/",
@@ -36222,7 +36260,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/Python/comments/10gt7tv/today_i_relearned_python_function_default/",
@@ -36232,7 +36272,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/Python/comments/18xrc1y/pydantic_has_too_much_deprecation_making_it/",
@@ -36242,7 +36284,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/Python/comments/1lvjrgj/freethreaded_multicore_parallel_python_will_be/",
@@ -36252,7 +36296,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/Python/comments/opb7hm/do_not_use_mutable_objects_as_default_arguments/",
@@ -36262,7 +36308,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/SQLAlchemy/comments/138f248/joinedload_vs_selectinload/",
@@ -36272,7 +36320,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/Tidra/comments/1v3s13b/nodejs_prealert_high_severity_security_releases/",
@@ -36282,7 +36332,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/askscience/comments/125nly5/since_water_boils_at_lower_temperatures_at_high",
@@ -36292,7 +36344,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/askscience/comments/125nly5/since_water_boils_at_lower_temperatures_at_high/",
@@ -36302,7 +36356,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/aws/comments/1obd3lx/dynamodb_down_useast1/",
@@ -36312,7 +36368,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/chromeos/comments/1i3cp0/chrome_releases_stable_channel_update_for_chrome/",
@@ -36322,7 +36380,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/commandline/comments/1luqnrd/how_to_use_ripgrep_in_place_of_findfd_to_find",
@@ -36332,7 +36392,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/cybersecurity/comments/1nbigkx/telegram_vs_signal/",
@@ -36342,7 +36404,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/cybersecurity/comments/rdfbht/zeroday_rce_vulnerability_cve202144228_aka",
@@ -36352,7 +36416,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/cybersecurity/comments/rdfbht/zeroday_rce_vulnerability_cve202144228_aka/",
@@ -36362,7 +36428,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/datasets/comments/nmfz3q/is_it_merge_concat_or_join_how_to_do_that_in/",
@@ -36372,7 +36440,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/docker/comments/z6kzi6/cannot_use_depends_on_healthcheck_condition/",
@@ -36382,7 +36452,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/ereader/comments/1hhmn0u/which_ereader_its_better_the_kobo_clara_bw_or_a/",
@@ -36392,7 +36464,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/ereader/comments/1hqqjup/kobo_clara_bw_or_new_kindle_paperwhite/",
@@ -36402,7 +36476,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/git/comments/1twnvbe/get_back_to_current_uncommitted_state_after_git/",
@@ -36412,7 +36488,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/git/comments/jo0hqt/is_it_possible_to_stash_or_otherwise_temporarily/",
@@ -36422,7 +36500,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/golang/comments/121b3n8/question_about_context_propagation_through_the/",
@@ -36432,7 +36512,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/golang/comments/1cqxe3f/understanding_context_cancellation_and_goroutine/",
@@ -36442,7 +36524,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/golang/comments/1q0deea/practical_patterns_for_managing_context/",
@@ -36452,7 +36536,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/hackernews",
@@ -36462,7 +36548,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/hackernews/",
@@ -36472,7 +36560,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/hvacadvice/comments/zgpb3d/if_heat_pumps_are_so_incredible_why_are_they_not/",
@@ -36482,7 +36572,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/kobo/comments/1en2bb6/what_to_buy_kindle_paperwhite_11_vs_kobo_clara_bw/",
@@ -36492,7 +36584,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/kubernetes/comments/143ckxn/stop_k_rollout_restart_deploy_from_restarting/",
@@ -36502,7 +36596,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnjavascript/comments/1dhfj7y/javascript_garbage_collector/",
@@ -36512,7 +36608,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnpython/comments/15dzkfu/upgrading_pandas_to_20_append_concat/",
@@ -36522,7 +36620,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnpython/comments/1c8z6ft/ssl_certificate_error_while_using_a_python/",
@@ -36532,7 +36632,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnpython/comments/1co6egc/pandas_append_got_depreciated_my_codebased_used/",
@@ -36542,7 +36644,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnpython/comments/4n6nqx/urllib2_timeout_setting",
@@ -36552,7 +36656,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnpython/comments/4n6nqx/urllib2_timeout_setting/",
@@ -36562,7 +36668,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnpython/comments/za5ia9/futurewarning_the_frameappend_method_is/",
@@ -36572,7 +36680,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnrust/comments/1imgfnn/i_despair_at_the_error_cannot_borrow_as_immutable/",
@@ -36582,7 +36692,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnrust/comments/fgkagq/rust_book_chapter_5_structs",
@@ -36592,7 +36704,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/learnrust/comments/gsxax7/help_with_errore0502_cannot_borrow_table_as/",
@@ -36602,7 +36716,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/linuxadmin/comments/1j417bx/struggling_with_forcing_systemd_to_keep",
@@ -36612,7 +36728,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/linuxadmin/comments/1j417bx/struggling_with_forcing_systemd_to_keep/",
@@ -36622,7 +36740,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/mcp/comments/1hg7i8r/typescript_client_implementation_with_openai_mcp/",
@@ -36632,7 +36752,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/mlscaling/comments/1c6m2bp/the_chinchilla_scaling_law_was_likely_wrongly",
@@ -36642,7 +36764,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/mlscaling/comments/1c6m2bp/the_chinchilla_scaling_law_was_likely_wrongly/",
@@ -36652,7 +36776,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/murakami/comments/137iu1j/what_does_this_theme_in_kafka_on_the_shore_mean/",
@@ -36662,7 +36788,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/nextjs/comments/1jjigxs/nextjs_generatemetadata_is_rendering_outside_of",
@@ -36672,7 +36800,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/nextjs/comments/1jjigxs/nextjs_generatemetadata_is_rendering_outside_of/",
@@ -36682,7 +36812,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/nginx/comments/eodrjc/nginx_stripping_websocket_upgrade_headers/",
@@ -36692,7 +36824,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/node/comments/i5re81/halp_error_connect_econnrefused/",
@@ -36702,7 +36836,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/openssl/comments/1nic06u/help_tls_13_0rtt_early_data_rejected_with_openssl/",
@@ -36712,7 +36848,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/programming/comments/1kl0wkn/redis_is_open_source_again_but_is_it_too_late",
@@ -36722,7 +36860,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/programming/comments/1kl0wkn/redis_is_open_source_again_but_is_it_too_late/",
@@ -36732,7 +36872,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/programming/comments/1o0ik5m/python_release_python_3140/",
@@ -36742,7 +36884,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/programming/comments/1oca1a9/aws_useast1_outage_oct_2025_what_happened_and/",
@@ -36752,7 +36896,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/pytorch/comments/1335lwu/pytorch_enable_mps_fallback_help/",
@@ -36762,7 +36908,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/pytorch/comments/1c3kwwg/how_do_i_fix_the_mps_notimplemented_error_for_m1/",
@@ -36772,7 +36920,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/rails/comments/14x9ivg/rails_generate_migration_everything_you_need_to",
@@ -36782,7 +36932,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/rails/comments/14x9ivg/rails_generate_migration_everything_you_need_to/",
@@ -36792,7 +36944,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/reactjs/comments/1h4reok/how_to_use_use_a_guide_on_react_19s_use_hook/",
@@ -36802,7 +36956,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/reactjs/comments/1h9qmr8/react_19_is_usecontext_obsolete_what_are_the/",
@@ -36812,7 +36968,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/rust/comments/105vr8l/why_should_one_not_derive_debug/",
@@ -36822,7 +36980,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/rust/comments/1bju207/how_to_find_out_the_latest_stable_rust_version/",
@@ -36832,7 +36992,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/rust/comments/1e019tc/tutorial_rust_async_in_practice_tokioselect/",
@@ -36842,7 +37004,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/rust/comments/1ee3t1a/lifetime_elision/",
@@ -36852,7 +37016,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/rust/comments/1uik9an/how_to_search_very_large_files_efficiently_for/",
@@ -36862,7 +37028,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/selfhosted/comments/uw50ua/caddydockerproxy_vs_traefik_vs_nginxproxymanager/",
@@ -36872,7 +37040,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/softwaredevelopment/comments/1mwv19n/why_adding_more_developers_doesnt_always_shorten/",
@@ -36882,7 +37052,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/space/comments/1j90pvw/saturn_has_128_new_moons_more_than_the_rest_of/",
@@ -36892,7 +37064,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/sysadmin/comments/1qjo7nk/crowdstrike_case_study_analyzing_the_channel_file/",
@@ -36902,7 +37076,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/travel/comments/1m31y7i/utah_five_national_parks/",
@@ -36912,7 +37088,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/typescript/comments/1j9ht25/why_tsgo_cant_find_type_instantiate_simple_types/",
@@ -36922,7 +37100,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/vuejs/comments/17ww9de/announcing_vite_5/",
@@ -36932,7 +37112,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.reddit.com/r/webpack/comments/j40mzg/splitchunks_not_splitting_some_vendors/",
@@ -36942,7 +37124,9 @@
    "proxyUsed": "basic",
    "error": "BLOCKED_PUBLIC_CONTENT: the target served a bot interstitial (Reddit's human-verification gate)",
    "markdownSha256": "6b016cb3c96c70b1bf5e9c2eaaae7307b2bb05b69301ebfc50a7f513c8d5fa05",
-   "markdownChars": 165
+   "markdownChars": 165,
+   "previousStatus": "captured",
+   "reclassifiedAt": "2026-10-20T03:34:29.515Z"
   },
   {
    "url": "https://www.redhat.com/en/blog/12-factor-app",

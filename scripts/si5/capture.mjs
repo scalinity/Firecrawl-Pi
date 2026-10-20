@@ -19,7 +19,8 @@ import { execFileSync } from "node:child_process";
 import { sshForward } from "../playground/server.mjs";
 import { gated, asBlocked } from "./gate.mjs";
 
-const root = new URL("../../", import.meta.url).pathname;
+// FCPI_SI5_ROOT points the evaluation at another tree (tests/si5-labels.test.mjs drives --reclassify over a fixture one).
+const root = process.env.FCPI_SI5_ROOT ?? new URL("../../", import.meta.url).pathname;
 const EVAL = join(root, "evidence/search-intelligence/SI5/eval"), CAP = join(EVAL, "private/captures"), STATE = join(EVAL, "private/capture-state.json");
 mkdirSync(CAP, { recursive: true });
 const arg = (name, dflt) => { const i = process.argv.indexOf(`--${name}`); return i < 0 ? dflt : process.argv[i + 1]; };
@@ -33,17 +34,18 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 // (blocked ones included); "blocked" counts the bot interstitials among them.
 function writeList() {
   const list = readdirSync(CAP).filter((f) => f.endsWith(".json")).map((f) => JSON.parse(readFileSync(join(CAP, f), "utf8")))
-    .map((c) => ({ url: c.url, capturedAt: c.capturedAt, status: c.status, statusCode: c.statusCode, proxyUsed: c.proxyUsed, error: c.error, markdownSha256: c.markdownSha256, markdownChars: c.markdownChars }))
+    .map((c) => ({ url: c.url, capturedAt: c.capturedAt, status: c.status, statusCode: c.statusCode, proxyUsed: c.proxyUsed, error: c.error, markdownSha256: c.markdownSha256, markdownChars: c.markdownChars, previousStatus: c.previousStatus, reclassifiedAt: c.reclassifiedAt }))
     .sort((a, b) => (a.url < b.url ? -1 : 1));
   writeFileSync(join(EVAL, "captures.json"), JSON.stringify({ schema: "fcpi.si5-captures/v1", captured: list.filter((c) => c.status === "captured").length, failed: list.filter((c) => c.status !== "captured").length, blocked: list.filter((c) => c.status === "blocked").length, captures: list }, null, 1) + "\n");
   return list;
 }
-// No network: a capture stored as captured that is a bot interstitial becomes blocked. Safe to repeat.
+// No network: a capture stored as captured that is a bot interstitial becomes blocked, with what it was and when (previousStatus,
+// reclassifiedAt) so it is not mistaken for one blocked at capture time. Safe to repeat: a blocked capture is not rewritten.
 if (process.argv.includes("--reclassify")) {
   let n = 0;
   for (const f of readdirSync(CAP).filter((x) => x.endsWith(".json"))) {
     const c = JSON.parse(readFileSync(join(CAP, f), "utf8"));
-    if (c.status === "captured" && gated(c)) { writeFileSync(join(CAP, f), JSON.stringify(asBlocked(c)) + "\n"); n++; }
+    if (c.status === "captured" && gated(c)) { writeFileSync(join(CAP, f), JSON.stringify(asBlocked({ ...c, previousStatus: c.status, reclassifiedAt: new Date().toISOString() })) + "\n"); n++; }
   }
   const list = writeList();
   say({ reclassified: n, blocked: list.filter((c) => c.status === "blocked").length, done: list.length });
