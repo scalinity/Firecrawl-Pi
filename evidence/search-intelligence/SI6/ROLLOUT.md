@@ -148,17 +148,17 @@ node scripts/si6/verify.mjs
 
 ## A patch release after the cutover
 
-A defect found once the release is live is fixed by repeating the build, pin, deploy and cutover, never by editing the running stack. It was done once, for `20d9729` (a request its caller cancelled after it was written counted against the provider's breaker). The order matters because the lock builder and the verifier read one release's records:
+A defect found once the release is live is fixed by repeating the build, pin, deploy and cutover, never by editing the running stack. It was done twice after the first cutover (`e83cabd`): for `20d9729` (a request its caller cancelled after it was written counted against the provider's breaker, found by the fixture benchmark's cancellation scenario) and for `5e035b2` (Ref's result blocks with no page, section or breadcrumb were refused as an unrecognised text, found by the live run's documentation scenario). The order matters because the lock builder and the verifier read one release's records, and each earlier release's move to `raw/release-N/`:
 
 1. Fix and test on the workstation; push. A regression test comes first and is run against the unfixed code.
-2. Move the earlier release's `image-build.txt`, `cutover.txt`, `verify-functional.txt` and live records into `raw/release-1/`, so the files the verifier and the lock builder read are the final release's.
+2. Move the earlier release's `image-build.txt`, `cutover.txt`, `verify-functional.txt`, upgrade plan, backup and live smoke into `raw/release-N/` (`git mv` for the committed ones), so the files the verifier and the lock builder read are the final release's. Measurements that a later patch does not touch (the L01 runs) stay in `raw/`, labelled with the image they ran on.
 3. Take `fcpi backup`, and tag the three running service images `retained-<commit>` before the build moves `:si6`: a pin resolves only through a name in its repository, and the tag keeps the earlier release one pin away.
 4. Stage the fix commit and build the three images from it (step 5 above), pin them, commit the pins, then commit the records so far.
 5. Stage HEAD, take `fcpi upgrade --plan` (a patch reports image changes only: no schema, policy or host-unit change), deploy, and run the cutover for all four services; the lock builder and the verifier expect four healthy services in the record. The keys and policies are already installed.
 6. `fcpi verify functional`, the live smoke, and the fixture benchmark on the new image.
 7. `node scripts/si6/build-lock.mjs` with nothing committed since the cutover (it refuses a HEAD that is not the deployed commit), then commit the lock, then the remaining evidence.
 
-From the start of the build to the cutover's end marker the patch took under five minutes (builds 7 to 17 seconds each; the cutover 41 seconds, with new work held at the gateway for that time). The rollback is the same cutover with the earlier pins: the `retained-e83cabd` tags name the first release's three service images.
+From the start of the build to the cutover's end marker the patch took under five minutes (builds 7 to 17 seconds each; the cutover 41 seconds, with new work held at the gateway for that time). The rollback is the same cutover with the earlier pins: the `retained-e83cabd` and `retained-20d9729` tags name the first and second releases' three service images (`raw/retained-release-1.txt`, `raw/retained-release-2.txt`).
 
 ## Rollback
 
