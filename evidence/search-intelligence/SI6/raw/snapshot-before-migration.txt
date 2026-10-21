@@ -1,0 +1,355 @@
+### meta
+2026-10-20T17:52:25Z
+boot_id_sha256=3e74999ee7d1d9db6c68a6da5d88578c10d7f05295c1f10b516fd6340170c9c4
+### systemd_running
+NetworkManager.service
+airdb.service
+airlogger.service
+airmonitor.service
+avahi-daemon.service
+avahi-daemon.socket
+containerd.service
+cron.service
+dbus.service
+dbus.socket
+dnscrypt-proxy.service
+dnscrypt-proxy.socket
+docker-12ad2550805e4b04986d5c755f80220708f4cad1f7ed8d3beb5349d510841934.scope
+docker-2b21778b3544189209855ee983646cedc5dd340a40066c3f30db3a7a8d97ac20.scope
+docker-30f0254c83086429a0eb1950533b39d97b9d38f05a078800a96d6adbba8fec6a.scope
+docker-4035d58c6c0d96d6bba5c7e6b493663b128506e520d657626cc90f9a6cb554d5.scope
+docker-4f6e863b35cf7f348cf249a299627c9d32ef2a2d616de226099f79b43f6f2246.scope
+docker-6cce5249015fa4f06bf69d5cc4982ea3573b1743da01006f8e7bca9ef9fe2c62.scope
+docker-71f5757f15468de06493aef48d47f44c72146c7b7f54ab2632868c2c2f2dd6fa.scope
+docker-80569179634fd491aff33e9ba51661b502688b841a09111a384870e3893fd61f.scope
+docker-9f6e893322aa05d7ee1f04200f76d4eda094bcd32d93ccd1a4370f017ace00cf.scope
+docker-c0313c98957a57b3df0dfc96befb316332335082f9d61a45eb2da359b5c9ba79.scope
+docker-df82694a1599c7441dd016de7f66d2e57bdf980356218ec90b0bf928432e9c40.scope
+docker-e32a06be5676852465510edd2513dfed5fecf6dad764ea7a01d2e16a06ae9e50.scope
+docker-e6a2bacade18eab683a04b768f3ebc5a1575e9137debf66d91923bff19bc19ae.scope
+docker-f7ca0498fbaa9f87349d1c811182d27b35711b602242663dd4ecef5a9d5380af.scope
+docker-fa41f19a571357c7ac299a78c671b29ec3a69b2fa65c289d12fcd525ef52a9e3.scope
+docker.service
+docker.socket
+fail2ban.service
+fcpi-hosted-mcp.service
+fcpi-openai-tunnel.service
+getty@tty1.service
+init.scope
+mosquitto.service
+pihole-FTL.service
+proc-sys-fs-binfmt_misc.automount
+session-2630.scope
+ssh.service
+systemd-journald-dev-log.socket
+systemd-journald.service
+systemd-journald.socket
+systemd-logind.service
+systemd-timesyncd.service
+systemd-udevd-control.socket
+systemd-udevd-kernel.socket
+systemd-udevd.service
+tailscaled.service
+user@1000.service
+wpa_supplicant.service
+### systemd_enabled
+NetworkManager-dispatcher.service
+NetworkManager.service
+airdb.service
+airlogger.service
+airmonitor.service
+apparmor.service
+apt-daily-upgrade.timer
+apt-daily.timer
+avahi-daemon.service
+avahi-daemon.socket
+containerd.service
+cron.service
+dnscrypt-proxy.service
+dnscrypt-proxy.socket
+docker.service
+docker.socket
+dpkg-db-backup.timer
+fail2ban.service
+fcpi-backup-check.timer
+fcpi-backup.timer
+fcpi-boot-record.service
+fcpi-heartbeat.timer
+fcpi-hosted-mcp.service
+fcpi-incident.timer
+fcpi-openai-tunnel.service
+fcpi-probe.timer
+fcpi-restore-test.timer
+fcpi-stack.service
+fcpi-tick.timer
+fstrim.timer
+getty@.service
+logrotate.timer
+mosquitto.service
+net-watchdog.timer
+pihole-FTL.service
+pihost-backup.timer
+remote-fs.target
+rpi-eeprom-update.service
+ssh.service
+systemd-pstore.service
+systemd-timesyncd.service
+tailscaled.service
+wpa_supplicant.service
+### docker_activation
+docker.service=active
+docker.socket=active
+containerd.service=active
+### docker_ps
+12ad2550805e4b04986d5c755f80220708f4cad1f7ed8d3beb5349d510841934	fcpi-nuq-postgres-1	fcpi/nuq-postgres@sha256:ef257b914120c04cc7250d6120123c42e7fae75ce314e2a67a37f3a31de4c180	running
+2b21778b3544189209855ee983646cedc5dd340a40066c3f30db3a7a8d97ac20	fcpi-fixture-m5-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running
+30f0254c83086429a0eb1950533b39d97b9d38f05a078800a96d6adbba8fec6a	fcpi-fixture-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running
+4035d58c6c0d96d6bba5c7e6b493663b128506e520d657626cc90f9a6cb554d5	fcpi-firecrawl-core-1	fcpi/firecrawl-api@sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c	running
+4f6e863b35cf7f348cf249a299627c9d32ef2a2d616de226099f79b43f6f2246	fcpi-redis-1	redis@sha256:41a10b18bd238fa7837b1615b2b5b113edff1654233238ac82d87e6fb5531f44	running
+6cce5249015fa4f06bf69d5cc4982ea3573b1743da01006f8e7bca9ef9fe2c62	fcpi-retrieval-service-1	fcpi/retrieval@sha256:62e06882e33375525d3fcfa827b12fdd19013f9f3b8669c2895c516242cf2de1	running
+71f5757f15468de06493aef48d47f44c72146c7b7f54ab2632868c2c2f2dd6fa	fcpi-rabbitmq-1	rabbitmq@sha256:1a4b64d98915c38f496d1047f427baecdf0f5f73a773c8f2f7a515ce9763b5f8	running
+80569179634fd491aff33e9ba51661b502688b841a09111a384870e3893fd61f	fcpi-fixture-m6-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running
+9f6e893322aa05d7ee1f04200f76d4eda094bcd32d93ccd1a4370f017ace00cf	fcpi-fixture-m7-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running
+c0313c98957a57b3df0dfc96befb316332335082f9d61a45eb2da359b5c9ba79	fcpi-searxng-1	searxng/searxng@sha256:d9ca82c19f98a684db92af79f5647028e39aaaa90d10611633260139f65b0c19	running
+df82694a1599c7441dd016de7f66d2e57bdf980356218ec90b0bf928432e9c40	fcpi-browser-worker-1	fcpi/browser@sha256:4d729d6ad77e455ef012744cd9a880a10e74da36f9cb90d94b03fc9e911313c3	running
+e32a06be5676852465510edd2513dfed5fecf6dad764ea7a01d2e16a06ae9e50	fcpi-access-gateway-1	fcpi/access-gateway@sha256:e189de75c328cb4c890371760e5990e369537b6e50dae0ae6891543220b6272a	running
+e6a2bacade18eab683a04b768f3ebc5a1575e9137debf66d91923bff19bc19ae	fcpi-fixture-m2-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running
+f7ca0498fbaa9f87349d1c811182d27b35711b602242663dd4ecef5a9d5380af	fcpi-mcp-gateway-1	fcpi/mcp-gateway@sha256:b4f9277b40977974365de244785f593a9152b05e2a70c0a2be163529e94e31b9	running
+fa41f19a571357c7ac299a78c671b29ec3a69b2fa65c289d12fcd525ef52a9e3	fcpi-fixture-m3-1	node@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e	running
+### lsmod
+aes_ce_blk 49152
+aes_ce_cipher 49152
+backlight 49152
+binfmt_misc 49152
+brcmfmac 393216
+brcmfmac_cyw 49152
+brcmutil 49152
+bridge 344064
+cec 65536
+cfg80211 1114112
+ch341 49152
+drm 737280
+drm_client_lib 49152
+drm_display_helper 49152
+drm_dma_helper 49152
+drm_exec 49152
+drm_kms_helper 245760
+drm_panel_orientation_quirks 65536
+drm_shmem_helper 49152
+fuse 229376
+gf128mul 49152
+ghash_ce 49152
+gpio_keys 49152
+gpu_sched 98304
+i2c_brcmstb 49152
+inet_diag 49152
+ip_set 65536
+ipv6 622592
+libsha1 65536
+llc 49152
+lz4_compress 49152
+mc 81920
+nf_conntrack 180224
+nf_conntrack_netlink 81920
+nf_defrag_ipv4 49152
+nf_defrag_ipv6 49152
+nf_nat 98304
+nf_tables 327680
+nfnetlink 49152
+nft_chain_nat 49152
+nft_compat 49152
+nft_ct 49152
+nvmem_rmem 49152
+overlay 180224
+pisp_be 49152
+pwm_fan 49152
+raspberrypi_gpiomem 49152
+raspberrypi_hwmon 49152
+rfkill 49152
+rp1_adc 49152
+rp1_fw 49152
+rp1_mailbox 49152
+rp1_pio 81920
+rpi_hevc_dec 65536
+sch_fq_codel 49152
+snd 163840
+snd_compress 49152
+snd_pcm 180224
+snd_pcm_dmaengine 49152
+snd_soc_core 327680
+snd_soc_hdmi_codec 49152
+snd_timer 81920
+stp 49152
+tcp_diag 49152
+tun 98304
+usbserial 81920
+v3d 212992
+v4l2_mem2mem 65536
+vc4 442368
+veth 81920
+videobuf2_common 98304
+videobuf2_dma_contig 49152
+videobuf2_memops 49152
+videobuf2_v4l2 49152
+videodev 360448
+x_tables 65536
+xfrm_algo 49152
+xfrm_user 65536
+xt_MASQUERADE 49152
+xt_addrtype 49152
+xt_connmark 49152
+xt_conntrack 49152
+xt_mark 49152
+xt_nat 49152
+xt_set 49152
+xt_tcpudp 49152
+zram 65536
+### ss_listen
+tcp 0.0.0.0:1884 users:(("mosquitto",pid=1163,fd=6))
+tcp 0.0.0.0:22 users:(("sshd",pid=1183,fd=6))
+tcp 0.0.0.0:443 users:(("pihole-FTL",pid=1174,fd=36))
+tcp 0.0.0.0:53 users:(("pihole-FTL",pid=1174,fd=22))
+tcp 0.0.0.0:80 users:(("pihole-FTL",pid=1174,fd=35))
+tcp 0.0.0.0:8080 users:(("python",pid=1185,fd=3))
+tcp 0.0.0.0:9001 users:(("mosquitto",pid=1163,fd=11))
+tcp <tailnet-address>:35237 users:(("tailscaled",pid=1146,fd=26))
+tcp <tailnet-address>:8443 users:(("tailscaled",pid=1146,fd=24))
+tcp 127.0.0.1:1883 users:(("mosquitto",pid=1163,fd=5))
+tcp 127.0.0.1:3380 users:(("docker-proxy",pid=1521051,fd=8))
+tcp 127.0.0.1:3381 users:(("python3",pid=4567,fd=6))
+tcp 127.0.0.1:3382 users:(("tunnel-client",pid=4568,fd=3))
+tcp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=1135,fd=7),("systemd",pid=1,fd=155))
+tcp [::]:1884 users:(("mosquitto",pid=1163,fd=7))
+tcp [::]:22 users:(("sshd",pid=1183,fd=7))
+tcp [::]:443 users:(("pihole-FTL",pid=1174,fd=38))
+tcp [::]:53 users:(("pihole-FTL",pid=1174,fd=24))
+tcp [::]:80 users:(("pihole-FTL",pid=1174,fd=37))
+tcp [::]:9001 users:(("mosquitto",pid=1163,fd=12))
+tcp [<tailnet-address-v6>]:49128 users:(("tailscaled",pid=1146,fd=27))
+tcp [<tailnet-address-v6>]:8443 users:(("tailscaled",pid=1146,fd=23))
+udp *:123 users:(("pihole-FTL",pid=1174,fd=42))
+udp *:41641 users:(("tailscaled",pid=1146,fd=19))
+udp *:53 users:(("pihole-FTL",pid=1174,fd=23))
+udp *:5353 users:(("avahi-daemon",pid=604,fd=13))
+udp *:57324 users:(("avahi-daemon",pid=604,fd=15))
+udp 0.0.0.0:123 users:(("pihole-FTL",pid=1174,fd=41))
+udp 0.0.0.0:41641 users:(("tailscaled",pid=1146,fd=20))
+udp 0.0.0.0:53 users:(("pihole-FTL",pid=1174,fd=21))
+udp 0.0.0.0:5353 users:(("avahi-daemon",pid=604,fd=12))
+udp 0.0.0.0:54319 users:(("avahi-daemon",pid=604,fd=14))
+udp 127.0.0.1:5053 users:(("dnscrypt-proxy",pid=1135,fd=8),("systemd",pid=1,fd=156))
+### findmnt
+/ /dev/mmcblk0p2 ext4 rw,noatime
+/boot/firmware /dev/mmcblk0p1 vfat rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,errors=remount-ro
+/dev udev devtmpfs rw,nosuid,relatime,size=4088240k,nr_inodes=255515,mode=755
+/dev/mqueue mqueue mqueue rw,nosuid,nodev,noexec,relatime
+/dev/pts devpts devpts rw,nosuid,noexec,relatime,gid=5,mode=600,ptmxmode=000
+/dev/shm tmpfs tmpfs rw,nosuid,nodev
+/proc proc proc rw,relatime
+/proc/sys/fs/binfmt_misc binfmt_misc binfmt_misc rw,nosuid,nodev,noexec,relatime
+/proc/sys/fs/binfmt_misc systemd-1 autofs rw,relatime,fd=37,pgrp=1,timeout=0,minproto=5,maxproto=5,direct,pipe_ino=3765
+/run tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=1651168k,mode=755
+/run/credentials/fcpi-openai-tunnel.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
+/run/credentials/getty@tty1.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
+/run/credentials/systemd-journald.service tmpfs tmpfs ro,nosuid,nodev,noexec,relatime,nosymfollow,size=1024k,nr_inodes=1024,mode=700,noswap
+/run/docker/netns/080acdb985ec nsfs[net:[4026533202]] nsfs rw
+/run/docker/netns/15f2361bdcfa nsfs[net:[4026532759]] nsfs rw
+/run/docker/netns/47de4a904599 nsfs[net:[4026532838]] nsfs rw
+/run/docker/netns/49b333f2cf1a nsfs[net:[4026532610]] nsfs rw
+/run/docker/netns/4c1888304547 nsfs[net:[4026533023]] nsfs rw
+/run/docker/netns/528b4cc4dd9a nsfs[net:[4026532917]] nsfs rw
+/run/docker/netns/5becca48f3ed nsfs[net:[4026533669]] nsfs rw
+/run/docker/netns/62a9e0dd810d nsfs[net:[4026533167]] nsfs rw
+/run/docker/netns/98b948d5008e nsfs[net:[4026533008]] nsfs rw
+/run/docker/netns/9c13e73afebe nsfs[net:[4026533287]] nsfs rw
+/run/docker/netns/a3978ff7788f nsfs[net:[4026533584]] nsfs rw
+/run/docker/netns/bcb5c79c9ab4 nsfs[net:[4026532680]] nsfs rw
+/run/docker/netns/c6af3e06ab19 nsfs[net:[4026533503]] nsfs rw
+/run/docker/netns/efa1881b9926 nsfs[net:[4026532514]] nsfs rw
+/run/docker/netns/f3ff4f0b792e nsfs[net:[4026533410]] nsfs rw
+/run/lock tmpfs tmpfs rw,nosuid,nodev,noexec,relatime,size=5120k
+/run/user/1000 tmpfs tmpfs rw,nosuid,nodev,relatime,size=825568k,nr_inodes=206392,mode=700,uid=1000,gid=1000
+/sys sysfs sysfs rw,nosuid,nodev,noexec,relatime
+/sys/fs/bpf bpf bpf rw,nosuid,nodev,noexec,relatime,mode=700
+/sys/fs/cgroup cgroup2 cgroup2 rw,nosuid,nodev,noexec,relatime,nsdelegate,memory_recursiveprot
+/sys/fs/fuse/connections fusectl fusectl rw,nosuid,nodev,noexec,relatime
+/sys/fs/pstore none pstore rw,nosuid,nodev,noexec,relatime
+/sys/kernel/config configfs configfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/debug debugfs debugfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/security securityfs securityfs rw,nosuid,nodev,noexec,relatime
+/sys/kernel/tracing tracefs tracefs rw,nosuid,nodev,noexec,relatime
+/tmp tmpfs tmpfs rw,nosuid,nodev,size=4127920k,nr_inodes=1048576
+/var/lib/docker/rootfs/overlayfs/12ad2550805e4b04986d5c755f80220708f4cad1f7ed8d3beb5349d510841934 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4472/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/64/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/63/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/62/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/45/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/44/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/43/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/42/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/41/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/40/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/39/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/38/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/37/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/36/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/35/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/34/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/33/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/32/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4483/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4483/work
+/var/lib/docker/rootfs/overlayfs/2b21778b3544189209855ee983646cedc5dd340a40066c3f30db3a7a8d97ac20 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4463/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4474/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4474/work
+/var/lib/docker/rootfs/overlayfs/30f0254c83086429a0eb1950533b39d97b9d38f05a078800a96d6adbba8fec6a overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4464/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4475/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4475/work
+/var/lib/docker/rootfs/overlayfs/4035d58c6c0d96d6bba5c7e6b493663b128506e520d657626cc90f9a6cb554d5 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4983/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4780/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4779/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4778/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4777/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4776/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4775/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4774/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4773/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4772/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4771/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4984/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4984/work
+/var/lib/docker/rootfs/overlayfs/4f6e863b35cf7f348cf249a299627c9d32ef2a2d616de226099f79b43f6f2246 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4470/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/22/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/21/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/20/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/19/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/18/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/17/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/16/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4481/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4481/work
+/var/lib/docker/rootfs/overlayfs/6cce5249015fa4f06bf69d5cc4982ea3573b1743da01006f8e7bca9ef9fe2c62 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4980/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4960/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4959/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4788/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/288/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4982/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4982/work
+/var/lib/docker/rootfs/overlayfs/71f5757f15468de06493aef48d47f44c72146c7b7f54ab2632868c2c2f2dd6fa overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4471/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/31/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/30/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/29/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/28/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/27/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/26/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/25/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/24/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/23/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4482/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4482/work
+/var/lib/docker/rootfs/overlayfs/80569179634fd491aff33e9ba51661b502688b841a09111a384870e3893fd61f overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4468/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4479/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4479/work
+/var/lib/docker/rootfs/overlayfs/9f6e893322aa05d7ee1f04200f76d4eda094bcd32d93ccd1a4370f017ace00cf overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4488/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4489/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4489/work
+/var/lib/docker/rootfs/overlayfs/c0313c98957a57b3df0dfc96befb316332335082f9d61a45eb2da359b5c9ba79 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4469/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1088/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1087/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1086/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1085/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1084/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4480/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4480/work
+/var/lib/docker/rootfs/overlayfs/df82694a1599c7441dd016de7f66d2e57bdf980356218ec90b0bf928432e9c40 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4467/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3972/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/3971/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/1848/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/304/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/237/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/236/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/235/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/234/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/233/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/232/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/231/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4478/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4478/work
+/var/lib/docker/rootfs/overlayfs/e32a06be5676852465510edd2513dfed5fecf6dad764ea7a01d2e16a06ae9e50 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4985/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4969/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4968/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4967/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/502/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/501/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4986/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4986/work
+/var/lib/docker/rootfs/overlayfs/e6a2bacade18eab683a04b768f3ebc5a1575e9137debf66d91923bff19bc19ae overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4465/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4476/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4476/work
+/var/lib/docker/rootfs/overlayfs/f7ca0498fbaa9f87349d1c811182d27b35711b602242663dd4ecef5a9d5380af overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4979/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4978/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4977/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4976/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/763/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/762/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4981/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4981/work
+/var/lib/docker/rootfs/overlayfs/fa41f19a571357c7ac299a78c671b29ec3a69b2fa65c289d12fcd525ef52a9e3 overlay overlay rw,relatime,lowerdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4462/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/50/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/49/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/48/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/47/fs:/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/46/fs,upperdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4473/fs,workdir=/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/snapshots/4473/work
+### firewall
+nft_ruleset_sha256=b8fdb7a519aa70256bcdeb228b61b8eacc73977ed0d43dced597962b0d9c3985
+iptables_legacy_sha256=SKIPPED ip_tables module not loaded or iptables-legacy-save absent
+### swap_zram
+swap /dev/zram0 partition 2097136 100
+zram zram0 disksize=2147483648 algo=lzo-rle lzo lz4 [zstd] 
+end
+### nft_tables
+table inet fcpi_guard
+table ip filter
+table ip mangle
+table ip nat
+table ip raw
+table ip6 filter
+table ip6 mangle
+table ip6 nat
+### nft_chains
+inet fcpi_guard forward hook=forward prio=-10 policy=accept
+inet fcpi_guard input hook=input prio=-10 policy=accept
+ip filter DOCKER hook=- prio=- policy=-
+ip filter DOCKER-BRIDGE hook=- prio=- policy=-
+ip filter DOCKER-CT hook=- prio=- policy=-
+ip filter DOCKER-FORWARD hook=- prio=- policy=-
+ip filter DOCKER-INTERNAL hook=- prio=- policy=-
+ip filter DOCKER-USER hook=- prio=- policy=-
+ip filter FORWARD hook=forward prio=0 policy=drop
+ip filter INPUT hook=input prio=0 policy=accept
+ip filter ts-forward hook=- prio=- policy=-
+ip filter ts-input hook=- prio=- policy=-
+ip mangle OUTPUT hook=output prio=-150 policy=accept
+ip mangle PREROUTING hook=prerouting prio=-150 policy=accept
+ip nat DOCKER hook=- prio=- policy=-
+ip nat OUTPUT hook=output prio=-100 policy=accept
+ip nat POSTROUTING hook=postrouting prio=100 policy=accept
+ip nat PREROUTING hook=prerouting prio=-100 policy=accept
+ip nat ts-postrouting hook=- prio=- policy=-
+ip raw PREROUTING hook=prerouting prio=-300 policy=accept
+ip6 filter DOCKER hook=- prio=- policy=-
+ip6 filter DOCKER-BRIDGE hook=- prio=- policy=-
+ip6 filter DOCKER-CT hook=- prio=- policy=-
+ip6 filter DOCKER-FORWARD hook=- prio=- policy=-
+ip6 filter DOCKER-INTERNAL hook=- prio=- policy=-
+ip6 filter DOCKER-USER hook=- prio=- policy=-
+ip6 filter FORWARD hook=forward prio=0 policy=accept
+ip6 filter INPUT hook=input prio=0 policy=accept
+ip6 filter ts-forward hook=- prio=- policy=-
+ip6 filter ts-input hook=- prio=- policy=-
+ip6 mangle OUTPUT hook=output prio=-150 policy=accept
+ip6 mangle PREROUTING hook=prerouting prio=-150 policy=accept
+ip6 nat DOCKER hook=- prio=- policy=-
+ip6 nat OUTPUT hook=output prio=-100 policy=accept
+ip6 nat POSTROUTING hook=postrouting prio=100 policy=accept
+ip6 nat PREROUTING hook=prerouting prio=-100 policy=accept
+ip6 nat ts-postrouting hook=- prio=- policy=-
+### forwarding
+/proc/sys/net/ipv4/ip_forward=1
+/proc/sys/net/ipv6/conf/all/forwarding=0
+/proc/sys/net/ipv6/conf/default/forwarding=0
+end

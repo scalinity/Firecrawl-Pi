@@ -1,0 +1,26 @@
+fcpi 2026-10-20T17:52:27Z  commit 2f55fee45906  lock 2e53fe4b6122
+core      api ok  worker ok  heartbeat 2026-10-20T13:52:00.181906473-04:00
+rest      ok (HTTP 200, 34 ms)  ledger ok
+mcp       ok (HTTP 200, 13 tools, 2026-07-28)
+queue     queued 0, oldest 0 s, active 0, open jobs 0
+host      available 4834 MiB, swap used 7 MiB, 44.1 C, throttled 0x0, disk free 38.7 %  (sample 37 s old)
+admission dispatch open, browser open 
+backup    last 2026-10-20T14:12:00Z (3.6 h, off-device yes); last attempt PASS; restore test PASS
+probe     2026-10-20T17:48:53Z ok
+incidents none
+services
+  access-gateway      running healthy  restarts 0  36/160 MiB  swap denied
+  firecrawl-core      running healthy  restarts 0  1774/2560 MiB  swap denied
+  retrieval-service   running healthy  restarts 0  55/448 MiB  swap denied
+  mcp-gateway         running healthy  restarts 0  45/192 MiB  swap denied
+  fixture-m7          running healthy  restarts 0  26/96 MiB  swap denied
+  nuq-postgres        running healthy  restarts 0  145/640 MiB  swap denied
+  rabbitmq            running healthy  restarts 0  141/512 MiB  swap denied
+  redis               running healthy  restarts 0  9/320 MiB  swap denied
+  searxng             running healthy  restarts 0  93/320 MiB  swap denied
+  fixture-m6          running healthy  restarts 0  23/96 MiB  swap denied
+  browser-worker      running healthy  restarts 0  73/1536 MiB  swap denied
+  fixture-m2          running healthy  restarts 0  27/192 MiB  swap denied
+  fixture             running healthy  restarts 0  28/96 MiB  swap denied
+  fixture-m3          running healthy  restarts 0  27/96 MiB  swap denied
+  fixture-m5          running healthy  restarts 0  29/128 MiB  swap denied
