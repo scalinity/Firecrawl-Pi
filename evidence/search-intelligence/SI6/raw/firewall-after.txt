@@ -1,0 +1,9 @@
+### meta
+utc=2026-10-21T01:21:19Z source_commit=d4f04648c4f733a86a66be9b982a94c5b7a3ae55
+### firewall_fingerprint
+nft_ruleset_sha256=057aeb8f28ae1343f1d0ad754382a72e2d44c7e2e38648d4854cde8b44c852e5
+nft_ruleset_canonical_sha256=057aeb8f28ae1343f1d0ad754382a72e2d44c7e2e38648d4854cde8b44c852e5
+order_insensitive_chains=0 
+guard_table_sha256=057aeb8f28ae1343f1d0ad754382a72e2d44c7e2e38648d4854cde8b44c852e5
+fingerprint_exit=0
+### end

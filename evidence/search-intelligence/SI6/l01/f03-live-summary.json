@@ -5,12 +5,12 @@
  "rowsReturned": 160,
  "byJudgedStatus": {
   "match": 99,
-  "mismatch": 13,
+  "mismatch": 14,
   "not_applicable": 1,
-  "unknown": 19,
-  "unlabelled": 28
+  "unknown": 17,
+  "unlabelled": 29
  },
- "judgedMismatchRowsReturnedNow": 13,
+ "judgedMismatchRowsReturnedNow": 14,
  "judgedMatchRowsReturnedNow": 99,
  "collectionD": {
   "mismatches": 20,
@@ -20,9 +20,9 @@
  "urlKnownMismatchRowsReturned": 0,
  "versionRowsTotals": {
   "returned": 160,
-  "confirmed": 21,
-  "unverified": 139,
-  "excluded": 90
+  "confirmed": 23,
+  "unverified": 137,
+  "excluded": 95
  },
  "verdicts": {
   "confirmed": 12,
@@ -35,9 +35,8 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 4,
-    "unknown": 2,
-    "unlabelled": 4
+    "match": 7,
+    "unknown": 3
    },
    "versionRows": {
     "returned": 10,
@@ -61,9 +60,9 @@
    "returned": 10,
    "byJudgedStatus": {
     "match": 3,
-    "mismatch": 1,
-    "unknown": 5,
-    "unlabelled": 1
+    "mismatch": 2,
+    "unknown": 2,
+    "unlabelled": 3
    },
    "versionRows": {
     "returned": 10,
@@ -79,7 +78,8 @@
     "version_rows_unverified"
    ],
    "mismatchRows": [
-    "https://www.postgresql.org/docs/current/pgstatstatements.html"
+    "https://www.postgresql.org/docs/current/pgstatstatements.html",
+    "https://docs.yugabyte.com/v2.20/launch-and-manage/monitor-and-alert/query-tuning/pg-stat-statements/"
    ]
   },
   {
@@ -88,13 +88,13 @@
    "outcome": "partial",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 7,
-    "unlabelled": 3
+    "match": 9,
+    "unlabelled": 1
    },
    "versionRows": {
     "returned": 10,
-    "confirmed": 2,
-    "unverified": 8,
+    "confirmed": 0,
+    "unverified": 10,
     "excluded": 1
    },
    "urlKnownMismatchReturned": [],
@@ -109,17 +109,18 @@
   {
    "id": "Q006",
    "status": 200,
-   "outcome": "partial",
+   "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 4,
-    "unknown": 2,
-    "unlabelled": 4
+    "match": 3,
+    "mismatch": 1,
+    "unknown": 1,
+    "unlabelled": 5
    },
    "versionRows": {
     "returned": 10,
-    "confirmed": 0,
-    "unverified": 10,
+    "confirmed": 1,
+    "unverified": 9,
     "excluded": 0
    },
    "urlKnownMismatchReturned": [],
@@ -130,7 +131,9 @@
     "exact_version_unconfirmed",
     "version_rows_unverified"
    ],
-   "mismatchRows": []
+   "mismatchRows": [
+    "http://docs.sqlalchemy.org/en/latest/orm/queryguide/relationships.html"
+   ]
   },
   {
    "id": "Q010",
@@ -138,16 +141,15 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 7,
-    "mismatch": 1,
-    "unknown": 1,
+    "match": 6,
+    "mismatch": 3,
     "unlabelled": 1
    },
    "versionRows": {
     "returned": 10,
     "confirmed": 2,
     "unverified": 8,
-    "excluded": 3
+    "excluded": 4
    },
    "urlKnownMismatchReturned": [],
    "versions": [
@@ -157,7 +159,9 @@
     "version_rows_unverified"
    ],
    "mismatchRows": [
-    "https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md"
+    "https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md",
+    "https://c.vazirweb.ir/docs/docs-data/vite/pages/guide/migration.html",
+    "https://vitejs.de/guide/migration"
    ]
   },
   {
@@ -166,15 +170,14 @@
    "outcome": "partial",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 3,
-    "unknown": 5,
-    "unlabelled": 2
+    "match": 4,
+    "unknown": 6
    },
    "versionRows": {
     "returned": 10,
     "confirmed": 0,
     "unverified": 10,
-    "excluded": 3
+    "excluded": 2
    },
    "urlKnownMismatchReturned": [],
    "versions": [
@@ -215,7 +218,8 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 10
+    "match": 9,
+    "unlabelled": 1
    },
    "versionRows": {
     "returned": 10,
@@ -239,8 +243,8 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 8,
-    "unlabelled": 2
+    "match": 9,
+    "unlabelled": 1
    },
    "versionRows": {
     "returned": 10,
@@ -287,14 +291,14 @@
    "outcome": "partial",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 8,
-    "unlabelled": 2
+    "match": 5,
+    "unlabelled": 5
    },
    "versionRows": {
     "returned": 10,
     "confirmed": 10,
     "unverified": 0,
-    "excluded": 27
+    "excluded": 24
    },
    "urlKnownMismatchReturned": [],
    "versions": [
@@ -310,15 +314,14 @@
    "returned": 10,
    "byJudgedStatus": {
     "match": 7,
-    "mismatch": 1,
     "unknown": 1,
-    "unlabelled": 1
+    "unlabelled": 2
    },
    "versionRows": {
     "returned": 10,
-    "confirmed": 1,
-    "unverified": 9,
-    "excluded": 1
+    "confirmed": 3,
+    "unverified": 7,
+    "excluded": 2
    },
    "urlKnownMismatchReturned": [],
    "versions": [
@@ -327,9 +330,7 @@
    "warnings": [
     "version_rows_unverified"
    ],
-   "mismatchRows": [
-    "https://docs.python.org/3/library/urllib.request.html"
-   ]
+   "mismatchRows": []
   },
   {
    "id": "Q115",
@@ -337,9 +338,10 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 3,
-    "mismatch": 6,
-    "unknown": 1
+    "match": 4,
+    "mismatch": 4,
+    "unknown": 1,
+    "unlabelled": 1
    },
    "versionRows": {
     "returned": 10,
@@ -356,11 +358,9 @@
    ],
    "mismatchRows": [
     "https://webpack.js.org/plugins/split-chunks-plugin/",
-    "https://github.com/orgs/webpack/discussions/17056",
     "https://docs.webpack.js.org/configuration/optimization",
-    "https://angular.love/webpack-an-in-depth-introduction-to-splitchunksplugin",
-    "https://webpack.kr/plugins/split-chunks-plugin",
-    "https://webpack.js.org/plugins/split-chunks-plugin"
+    "https://github.com/orgs/webpack/discussions/17056",
+    "https://angular.love/webpack-an-in-depth-introduction-to-splitchunksplugin"
    ]
   },
   {
@@ -369,13 +369,14 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 8,
-    "unknown": 2
+    "match": 6,
+    "unknown": 3,
+    "unlabelled": 1
    },
    "versionRows": {
     "returned": 10,
-    "confirmed": 0,
-    "unverified": 10,
+    "confirmed": 1,
+    "unverified": 9,
     "excluded": 2
    },
    "urlKnownMismatchReturned": [],
@@ -393,16 +394,16 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 4,
+    "match": 5,
     "mismatch": 1,
     "not_applicable": 1,
-    "unlabelled": 4
+    "unlabelled": 3
    },
    "versionRows": {
     "returned": 10,
     "confirmed": 0,
     "unverified": 10,
-    "excluded": 42
+    "excluded": 43
    },
    "urlKnownMismatchReturned": [],
    "versions": [
@@ -422,15 +423,15 @@
    "outcome": "complete",
    "returned": 10,
    "byJudgedStatus": {
-    "match": 5,
+    "match": 4,
     "mismatch": 3,
-    "unlabelled": 2
+    "unlabelled": 3
    },
    "versionRows": {
     "returned": 10,
     "confirmed": 4,
     "unverified": 6,
-    "excluded": 10
+    "excluded": 16
    },
    "urlKnownMismatchReturned": [],
    "versions": [

@@ -1,0 +1,9 @@
+### meta
+utc=2026-10-21T00:47:46Z deployed_commit=d4f04648c4f7 domain=codex-resets.com
+### request
+http=500 success= markdown_chars=0 error=Retrieval failed: BLOCKED_PUBLIC_CONTENT. the enhanced provider's answer was itself a bot interstitial or an edge refusa
+### attempts_since_the_request
+1|direct_http|BLOCKED_PUBLIC_CONTENT|200
+2|residential_http|BLOCKED_PUBLIC_CONTENT|200
+3|enhanced|BLOCKED_PUBLIC_CONTENT|200
+### end

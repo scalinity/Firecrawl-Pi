@@ -55,7 +55,9 @@ def record(item, status, ms, j, size):
             "generalSuccessful": (cov.get("general") or {}).get("successful"), "error": (j or {}).get("code") if isinstance(j, dict) else None,
             # The public URLs of the rows (no page text), so a live answer can be checked against the judged labels; and what the search said about the requested versions.
             "urls": [w.get("url") for w in web[:10] if isinstance(w, dict)] if isinstance(web, list) else None,
-            "versionRows": (cov.get("documentation") or {}).get("versionRows")}
+            "versionRows": (cov.get("documentation") or {}).get("versionRows"),
+            # Each returned row's own version constraint status (satisfied: a documentation scope or its URL confirmed the requested release; unverified: nothing could be checked), in the order of `urls`.
+            "rowVersion": [next((c.get("status") for c in (((w.get("fcpi") or {}).get("search") or {}).get("constraintStatus") or []) if isinstance(c, dict) and c.get("constraint") == "version"), None) for w in web[:10] if isinstance(w, dict)] if isinstance(web, list) else None}
 
 
 def sampler(stop):

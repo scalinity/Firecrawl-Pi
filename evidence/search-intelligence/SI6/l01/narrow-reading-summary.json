@@ -1,57 +1,45 @@
 {
  "queries": 16,
  "rowsReturned": 160,
- "judgedMismatchRows": 13,
- "judgedMismatchConfirmedByUrl": 0,
- "judgedMismatchAtMostConfirmedByScope": 1,
+ "judgedMismatchRows": 14,
+ "exact": true,
+ "agreesWithVersionRowsPerQuery": true,
+ "rowsReportedVersionConfirmed": 23,
+ "reportedConfirmedByJudgedStatus": {
+  "unlabelled": 10,
+  "match": 13
+ },
+ "judgedMismatchReportedConfirmed": 0,
  "detail": [
   {
    "id": "Q002",
+   "judgedMismatch": 2,
+   "reportedConfirmed": 0
+  },
+  {
+   "id": "Q006",
    "judgedMismatch": 1,
-   "confirmedByUrl": 0,
-   "rowsAScopeConfirmed": 0,
-   "judgedMismatchWithoutUrlConfirmation": 1,
-   "couldBeScopeConfirmed": 0
+   "reportedConfirmed": 0
   },
   {
    "id": "Q010",
-   "judgedMismatch": 1,
-   "confirmedByUrl": 0,
-   "rowsAScopeConfirmed": 0,
-   "judgedMismatchWithoutUrlConfirmation": 1,
-   "couldBeScopeConfirmed": 0
-  },
-  {
-   "id": "Q112",
-   "judgedMismatch": 1,
-   "confirmedByUrl": 0,
-   "rowsAScopeConfirmed": 1,
-   "judgedMismatchWithoutUrlConfirmation": 1,
-   "couldBeScopeConfirmed": 1
+   "judgedMismatch": 3,
+   "reportedConfirmed": 0
   },
   {
    "id": "Q115",
-   "judgedMismatch": 6,
-   "confirmedByUrl": 0,
-   "rowsAScopeConfirmed": 0,
-   "judgedMismatchWithoutUrlConfirmation": 6,
-   "couldBeScopeConfirmed": 0
+   "judgedMismatch": 4,
+   "reportedConfirmed": 0
   },
   {
    "id": "Q117",
    "judgedMismatch": 1,
-   "confirmedByUrl": 0,
-   "rowsAScopeConfirmed": 0,
-   "judgedMismatchWithoutUrlConfirmation": 1,
-   "couldBeScopeConfirmed": 0
+   "reportedConfirmed": 0
   },
   {
    "id": "Q120",
    "judgedMismatch": 3,
-   "confirmedByUrl": 0,
-   "rowsAScopeConfirmed": 0,
-   "judgedMismatchWithoutUrlConfirmation": 3,
-   "couldBeScopeConfirmed": 0
+   "reportedConfirmed": 0
   }
  ]
 }

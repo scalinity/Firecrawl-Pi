@@ -11,34 +11,35 @@
    "not_cold": 0,
    "client_ms": {
     "n": 30,
-    "p50": 8021,
-    "p95": 12371,
-    "max": 12525
+    "p50": 7595,
+    "p95": 12073,
+    "max": 12416
    },
    "server_total_ms": {
     "n": 30,
-    "p50": 8003,
-    "p95": 12347,
-    "max": 12507
+    "p50": 7571,
+    "p95": 12053,
+    "max": 12396
    },
    "over_target_23s": 0,
    "over_deadline_60s": 0,
    "outcomes": {
-    "complete": 24,
-    "partial": 6
+    "complete": 26,
+    "partial": 4
    },
    "ranking": {
     "hybrid/complete": 30
    },
    "general_successful": {
-    "4": 3,
+    "3": 1,
+    "4": 2,
     "5": 27
    },
    "warnings": {
-    "context7_timeout": 1,
     "deepseek_unsupported_request": 3,
     "exact_version_unconfirmed": 4,
-    "ref_timeout": 2,
+    "ref_timeout": 1,
+    "serper_timeout": 1,
     "version_rows_unverified": 15
    },
    "admission_waits_before": 0
@@ -48,18 +49,18 @@
   "samples": 149,
   "peak_mib_by_container": {
    "access-gateway": 33,
-   "firecrawl-core": 1903,
-   "retrieval-service": 71,
-   "mcp-gateway": 51,
-   "nuq-postgres": 98,
+   "firecrawl-core": 1738,
+   "retrieval-service": 57,
+   "mcp-gateway": 52,
+   "nuq-postgres": 101,
    "rabbitmq": 124,
-   "redis": 11,
-   "searxng": 91,
-   "browser-worker": 84
+   "redis": 10,
+   "searxng": 93,
+   "browser-worker": 74
   },
   "host_available_mib": {
-   "min": 4747,
-   "max": 4968
+   "min": 4734,
+   "max": 4852
   }
  },
  "f03": {
@@ -132,7 +133,7 @@
    {
     "id": "Q006",
     "status": 200,
-    "outcome": "partial",
+    "outcome": "complete",
     "requested": [
      "sqlalchemy@2.0"
     ],
@@ -380,7 +381,7 @@
     "classifier_positive": 1
    },
    "probabilities": [
-    0.71
+    0.75
    ]
   },
   "Q094": {
@@ -391,7 +392,7 @@
     "classifier_positive": 1
    },
    "probabilities": [
-    0.75
+    0.76
    ]
   },
   "Q096": {
