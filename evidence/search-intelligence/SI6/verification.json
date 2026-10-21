@@ -1,14 +1,14 @@
 {
  "schema": "fcpi.si6-verification/v1",
- "utc": "2026-10-20T14:57:30.756Z",
- "source_sha": "2f55fee459065abf7cecc1c15e708df2b1c4c894",
+ "utc": "2026-10-21T01:27:23.764Z",
+ "source_sha": "dd01ed6e9d5b3beafc22719666c8501951774e43",
  "code_dirty": false,
  "patch_series_sha256": "91e3d278c12a16da6242fdc5da07808c60d454595676f1bbf9766f5bb8bb584f",
  "config_sha256": {
   "budget": "a68403b87f6dcf8bf975d3854df56c5d9835c1f86fadb11c52f7ab5e04d24efb",
-  "egress": "d909cca441fa0f652b3262dff22ae2b88fb6b5ea6361970c7e2e442b8a431099",
+  "egress": "1facf39fa90676291d276803abd0a408b1c93f7d5a08e67de4be9432a0703907",
   "capabilities": "b8f77270e841151da596d0c7a5714be636ba1645d9d9b8f3ce07be778d6accaa",
-  "compose": "d8d9684fb2cf0906b80141bb09a420e870f4981097907e092e8e925d7aa35816"
+  "compose": "4d095ab69add152999e6e0cf3569f950b5bd677421aefa1db292c5539caa1b72"
  },
  "summary": {
   "PASS": 18,
@@ -18,7 +18,7 @@
  "results": [
   {
    "id": "api-build-of-record",
-   "utc": "2026-10-20T14:57:29.140Z",
+   "utc": "2026-10-21T01:27:22.129Z",
    "expected": "a clean tree, no_cache=1, HEAD's series hash, an arm64 image id",
    "actual": {
     "image": "sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c",
@@ -32,7 +32,7 @@
   },
   {
    "id": "native-chain-on-release-image",
-   "utc": "2026-10-20T14:57:29.141Z",
+   "utc": "2026-10-21T01:27:22.129Z",
    "expected": "every check PASS against the build of record's image, HEAD's series",
    "actual": {
     "image": "sha256:c2585732a072873583fc36c5d16a4c945bb6eee8c0252e0b05da54a2ed886a5c",
@@ -44,7 +44,7 @@
   },
   {
    "id": "rollout-names-the-build",
-   "utc": "2026-10-20T14:57:29.141Z",
+   "utc": "2026-10-21T01:27:22.129Z",
    "expected": "ROLLOUT.md names the image and series of record",
    "actual": {
     "image": "c2585732",
@@ -55,7 +55,7 @@
   },
   {
    "id": "build-lock-synthetic",
-   "utc": "2026-10-20T14:57:29.580Z",
+   "utc": "2026-10-21T01:27:22.528Z",
    "expected": "resolves from consistent evidence and keeps every earlier milestone's lock field",
    "actual": {
     "exit": 0,
@@ -71,7 +71,7 @@
   },
   {
    "id": "build-lock-policy-only",
-   "utc": "2026-10-20T14:57:29.794Z",
+   "utc": "2026-10-21T01:27:22.760Z",
    "expected": "refreshes the policy entries with no cutover record and leaves every image entry as committed",
    "actual": {
     "exit": 0,
@@ -82,7 +82,7 @@
   },
   {
    "id": "build-lock-refuses-unhealthy",
-   "utc": "2026-10-20T14:57:29.951Z",
+   "utc": "2026-10-21T01:27:22.921Z",
    "expected": "refuses, naming the failed guard",
    "actual": {
     "exit": 1,
@@ -93,7 +93,7 @@
   },
   {
    "id": "build-lock-refuses-another-commit",
-   "utc": "2026-10-20T14:57:30.081Z",
+   "utc": "2026-10-21T01:27:23.058Z",
    "expected": "refuses, naming the failed guard",
    "actual": {
     "exit": 1,
@@ -104,7 +104,7 @@
   },
   {
    "id": "build-lock-refuses-no-end-marker",
-   "utc": "2026-10-20T14:57:30.212Z",
+   "utc": "2026-10-21T01:27:23.195Z",
    "expected": "refuses, naming the failed guard",
    "actual": {
     "exit": 1,
@@ -115,7 +115,7 @@
   },
   {
    "id": "build-lock-refuses-partial-image-build",
-   "utc": "2026-10-20T14:57:30.361Z",
+   "utc": "2026-10-21T01:27:23.355Z",
    "expected": "refuses, naming the failed guard",
    "actual": {
     "exit": 1,
@@ -126,7 +126,7 @@
   },
   {
    "id": "build-lock-refuses-dirty-build",
-   "utc": "2026-10-20T14:57:30.509Z",
+   "utc": "2026-10-21T01:27:23.511Z",
    "expected": "refuses, naming the failed guard",
    "actual": {
     "exit": 1,
@@ -137,7 +137,7 @@
   },
   {
    "id": "build-lock-refuses-pin-not-running",
-   "utc": "2026-10-20T14:57:30.742Z",
+   "utc": "2026-10-21T01:27:23.751Z",
    "expected": "refuses, naming the failed guard",
    "actual": {
     "exit": 1,
@@ -148,7 +148,7 @@
   },
   {
    "id": "retained-images",
-   "utc": "2026-10-20T14:57:30.742Z",
+   "utc": "2026-10-21T01:27:23.751Z",
    "expected": "every running image tagged retained-5d91186 before any tag moves",
    "actual": "as expected",
    "state": "PASS",
@@ -156,7 +156,7 @@
   },
   {
    "id": "api-on-pi",
-   "utc": "2026-10-20T14:57:30.742Z",
+   "utc": "2026-10-21T01:27:23.751Z",
    "expected": "the Pi holds the API build of record",
    "actual": "as expected",
    "state": "PASS",
@@ -164,7 +164,7 @@
   },
   {
    "id": "service-images",
-   "utc": "2026-10-20T14:57:30.742Z",
+   "utc": "2026-10-21T01:27:23.751Z",
    "expected": "three :si6 images built from the staged release candidate",
    "actual": "as expected",
    "state": "PASS",
@@ -172,7 +172,7 @@
   },
   {
    "id": "cutover",
-   "utc": "2026-10-20T14:57:30.743Z",
+   "utc": "2026-10-21T01:27:23.751Z",
    "expected": "the end marker reached, every service running and healthy, the release recorded",
    "actual": "as expected",
    "state": "PASS",
@@ -180,7 +180,7 @@
   },
   {
    "id": "functional",
-   "utc": "2026-10-20T14:57:30.743Z",
+   "utc": "2026-10-21T01:27:23.751Z",
    "expected": "fcpi verify functional passes after the cutover",
    "actual": "as expected",
    "state": "PASS",
@@ -188,7 +188,7 @@
   },
   {
    "id": "host-snapshots",
-   "utc": "2026-10-20T14:57:30.743Z",
+   "utc": "2026-10-21T01:27:23.751Z",
    "expected": "the host snapshot taken after the cutover",
    "actual": "as expected",
    "state": "PASS",
@@ -196,7 +196,7 @@
   },
   {
    "id": "redaction",
-   "utc": "2026-10-20T14:57:30.756Z",
+   "utc": "2026-10-21T01:27:23.764Z",
    "expected": "the redaction scan passes over the release's evidence, run by the scanner now at HEAD on committed code with the exceptions committed at HEAD",
    "actual": "as expected",
    "state": "PASS",
