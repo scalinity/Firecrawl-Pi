@@ -1,7 +1,7 @@
 {
   "schema": "fcpi.m9-redaction/v1",
-  "utc": "2026-10-21T01:27:16.966Z",
-  "source_commit": "dd01ed6e9d5b3beafc22719666c8501951774e43",
+  "utc": "2026-10-21T01:30:43.536Z",
+  "source_commit": "523844dd2bfafa300f2bce82209fccca8646a72c",
   "code_dirty": false,
   "scanner_sha256": "0acc589633a3c06411253117aad1f9407be4bfc22b2c004da6e4fb7c8c4bfcd3",
   "also": {
@@ -11601,7 +11601,7 @@
     },
     {
       "path": "evidence/search-intelligence/SI6/raw/snapshot-after-attribution.md",
-      "sha256": "4519251d1f9b09cce8e42fa95ec8239d07db73e9bd754725203fa1f4072e9458"
+      "sha256": "10590a8926815e5997499b9eb15acbdd7d318c67a9661aaf7da44b932d21ffb4"
     },
     {
       "path": "evidence/search-intelligence/SI6/raw/snapshot-after.txt",
@@ -11809,7 +11809,7 @@
     },
     {
       "path": "evidence/search-intelligence/SI6/verification.json",
-      "sha256": "59c6a72f6556a85846c5bec16ef942e2a4022d6f8b36dc305822df2d2bf1fd42"
+      "sha256": "8b226c19178515e909f4bcc13a2efe807adc29ab937b6e504fe013049578e4af"
     },
     {
       "path": "patches/0001-nuq-sender-survives-broker-outage.patch",
