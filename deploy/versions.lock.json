@@ -1,8 +1,8 @@
 {
   "schema": "fcpi.versions-lock/v1",
-  "generated_utc": "2026-10-20T14:17:48Z",
+  "generated_utc": "2026-10-21T01:21:01Z",
   "generated_by": "scripts/si6/build-lock.mjs (search intelligence SI6), from the lock as committed before the cutover; entries owned by earlier milestones are as they were",
-  "repository_sha": "352fad56db015c9afba48c4110f99eda5a191a1a",
+  "repository_sha": "d4f04648c4f733a86a66be9b982a94c5b7a3ae55",
   "worktree_dirty": true,
   "repository_sha_note": "The commit checked out when this file was generated. The commit that stores it is a later one on main.",
   "note": "Implementation artifact, not a canonical document. 'selected' entries are the M0 baseline; 'candidate' entries await the decision named in evidence/M0/INTERPRETATION.md and change nothing until that decision is recorded.",
@@ -571,7 +571,7 @@
     "retrieval": {
       "role": "The retrieval-service image (built on the Pi, natively linux/arm64): acquisition, the search, model and parser adapters, the residential route, the enhanced provider, the browser extras and webhook delivery, and since M8 the browser tier's host admission; since SI6 the search intelligence coordinator (five general engines, Context7 and Ref, Jev decisions), its evidence hook and its operational records",
       "status": "selected",
-      "image_id": "sha256:62e06882e33375525d3fcfa827b12fdd19013f9f3b8669c2895c516242cf2de1",
+      "image_id": "sha256:b8599a517da58424de515e22b8e832237d2fb782d27992a218e2f601de91ff35",
       "platform": "linux/arm64",
       "dockerfile": {
         "path": "services/retrieval/Dockerfile",
@@ -579,7 +579,7 @@
       },
       "evidence": "evidence/search-intelligence/SI6/raw/image-build.txt",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "ecb8733335d23c7f105563908264f84f99aa2d55",
+      "built_from_commit": "e98fc5d5bcc320f42fba56e823a78e70e6c1e8e6",
       "lockfile": {
         "path": "services/retrieval/package-lock.json",
         "sha256": "bebbfe015ecd08fc2dda44a8b7311083de66b4dbe43c704f321481be041874d6"
@@ -729,10 +729,10 @@
     "access_gateway": {
       "role": "The access gateway image (built on the Pi, natively linux/arm64), with artifacts, the scrape cache, change detection, the webhook outbox, and since M8 the host admission of new work; since SI6 the searchIntelligence options and the search's trusted context headers",
       "status": "selected",
-      "image_id": "sha256:e189de75c328cb4c890371760e5990e369537b6e50dae0ae6891543220b6272a",
+      "image_id": "sha256:469849c043fc5f65181b30db1a65789cef5af9440920d95911d6017626d8b0ab",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "ecb8733335d23c7f105563908264f84f99aa2d55",
+      "built_from_commit": "e98fc5d5bcc320f42fba56e823a78e70e6c1e8e6",
       "dockerfile": {
         "path": "services/access/Dockerfile",
         "sha256": "8b88473d91d04c70481927e9a56a6a2921ef3f84ea2ecf18994d9b995e0815f5"
@@ -804,10 +804,10 @@
     "mcp_gateway": {
       "role": "The MCP service image (built on the Pi, natively linux/arm64), whose scrape tool offers the action subset, the screenshot format and the cache options since M7; since SI6 the search tool's searchIntelligence options and fcpi.search compaction",
       "status": "selected",
-      "image_id": "sha256:b4f9277b40977974365de244785f593a9152b05e2a70c0a2be163529e94e31b9",
+      "image_id": "sha256:a20242023b0dc0ed8b42d098d36c16bb8a897a563f2e602d9b0ec182bb518a5e",
       "platform": "linux/arm64",
       "base": "node:22.23.3-bookworm-slim@sha256:a0ddbc73510e98f5e824fd64266ffe1c2c343ba9cf260d95ca2985ad632a3f3e",
-      "built_from_commit": "ecb8733335d23c7f105563908264f84f99aa2d55",
+      "built_from_commit": "e98fc5d5bcc320f42fba56e823a78e70e6c1e8e6",
       "dockerfile": {
         "path": "services/mcp/Dockerfile",
         "sha256": "233b7e2356ccbe1e0ab8f2ed562debd45b7da862f5f8499d1d513de99c9bf3de"
@@ -2382,7 +2382,7 @@
   },
   "egress": {
     "policy": "deploy/policies/egress.json",
-    "policy_sha256": "d909cca441fa0f652b3262dff22ae2b88fb6b5ea6361970c7e2e442b8a431099",
+    "policy_sha256": "1facf39fa90676291d276803abd0a408b1c93f7d5a08e67de4be9432a0703907",
     "residential": {
       "proxyFirstDomains": [
         "m6hard.fixture.fcpi.test"
